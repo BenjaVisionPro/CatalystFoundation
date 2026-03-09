@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFMagritteBuilderUtility',
+	#name : 'CFMaBuilderUtility',
 	#superclass : 'Object',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'elements' }
-CFMagritteBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescription [
+CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescription [
 	| aText labelAptitude |
 	aText := aDescription label asRopedText.
 
@@ -34,7 +34,7 @@ CFMagritteBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aD
 ]
 
 { #category : 'elements' }
-CFMagritteBuilderUtility class >> newFormContainerFor: aMemento [
+CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 	^ BrVerticalPane new
 		in: [ :aPane | 
 			aPane magritte

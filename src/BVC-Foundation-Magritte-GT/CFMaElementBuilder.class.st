@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFMagritteElementBuilder',
+	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'elements' }
-CFMagritteElementBuilder >> addFieldElement: aFieldElement using: aDescription [
+CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel |
 	aLabel := self builderUtilityClass
 			newFieldLabelWithSpace: self defaultSpacing
@@ -22,6 +22,6 @@ CFMagritteElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 ]
 
 { #category : 'defaults' }
-CFMagritteElementBuilder >> builderUtilityClass [
-	^ CFMagritteBuilderUtility
+CFMaElementBuilder >> builderUtilityClass [
+	^ CFMaBuilderUtility
 ]

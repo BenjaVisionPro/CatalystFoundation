@@ -3,5 +3,12 @@ Extension { #name : 'CFObject' }
 { #category : '*bvc-foundation-magritte-gt' }
 CFObject >> asGtMagritteViewModel [
 	"Hijack GT's Margritte"
-  ^ CFMagritteViewModel forObject: self
+  ^ CFMaViewModel forObject: self
+]
+
+{ #category : '*bvc-foundation-magritte-gt' }
+CFObject >> magritteDescription [
+	^ super magritteDescription
+		blocElementContainerStencil: [ :aMemento | CFMaFormStencilBuilder new memento: aMemento ];
+		yourself
 ]

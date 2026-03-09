@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFMagritteViewModel',
+	#name : 'CFMaViewModel',
 	#superclass : 'GtMagritteViewModel',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'initialization' }
-CFMagritteViewModel >> initializeForm: theFrame forMemento: aMemento [
+CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	| aContainer aStencil |
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
 
@@ -22,7 +22,7 @@ CFMagritteViewModel >> initializeForm: theFrame forMemento: aMemento [
 	theFrame addChild: aContainer.
 	aContainer requestStyle.
 
-	CFMagritteElementBuilder new
+	CFMaElementBuilder new
 		includeImplicitActions: includeImplicitActions;
 		form: theFrame;
 		memento: aMemento;
