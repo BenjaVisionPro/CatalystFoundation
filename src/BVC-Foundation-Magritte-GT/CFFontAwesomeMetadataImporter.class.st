@@ -245,15 +245,29 @@ CFFontAwesomeMetadataImporter class >> normalizedPathsFrom: rawPathData [
 	self error: 'Unsupported path payload type: ', rawPathData class name
 ]
 
+
 { #category : 'private - parsing raw svg' }
 CFFontAwesomeMetadataImporter class >> pathClassesFromRawSvg: rawSvg [
-	| matches matcher |
-	matches := OrderedCollection new.
-	matcher := RxMatcher forString: '<path[^>]*class="([^"]+)"[^>]*/?>'.
-	matcher matchesIn: rawSvg do: [ :each |
-		matches add: (each subexpression: 1) ].
-	^ matches
+	| classes searchStart pathStart tagEnd tag classStart valueStart valueEnd |
+	classes := OrderedCollection new.
+	searchStart := 1.
+	[ (pathStart := rawSvg findString: '<path' startingAt: searchStart) > 0 ] whileTrue: [
+		tagEnd := rawSvg findString: '>' startingAt: pathStart.
+		tagEnd = 0 ifTrue: [ ^ classes ].
+		tag := rawSvg copyFrom: pathStart to: tagEnd.
+		classStart := tag findString: 'class="' startingAt: 1.
+		classStart = 0
+			ifTrue: [ classes add: nil ]
+			ifFalse: [
+				valueStart := classStart + 'class="' size.
+				valueEnd := tag findString: '"' startingAt: valueStart.
+				valueEnd = 0
+					ifTrue: [ classes add: nil ]
+					ifFalse: [ classes add: (tag copyFrom: valueStart to: valueEnd - 1) ] ].
+		searchStart := tagEnd + 1 ].
+	^ classes
 ]
+
 
 { #category : 'private - parsing raw svg' }
 CFFontAwesomeMetadataImporter class >> pathOpacitiesFromRawSvg: rawSvg [
