@@ -93,6 +93,17 @@ CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWid
 ]
 
 { #category : 'styles' }
+CFFontAwesomeIcons class >> loadFromDisc [
+	CFFontAwesomeMetadataImporter
+		importFromIconsJsonFile: '/Users/jupiter/Downloads/fontawesome-pro-5.15.4-desktop/metadata/icons.json'
+				asFileReference
+		baseClass: CFFontAwesomeIcons
+		packageName: 'BVC-FontAwesome'
+		familyName: 'Font Awesome Pro'
+		version: '5.15.4'
+]
+
+{ #category : 'styles' }
 CFFontAwesomeIcons class >> style: aStyleName [
 	^ Smalltalk
 		at: (CFFontAwesomeMetadataImporter styleClassNameFor: aStyleName) asSymbol
