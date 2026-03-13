@@ -1,6 +1,4 @@
-Extension {
-	#name : 'BlSvgPathBuilder'
-}
+Extension { #name : 'BlSvgPathBuilder' }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 BlSvgPathBuilder >> ellipticalArc: r xrot: xrot large: large sweep: sweep to: pt [

@@ -57,63 +57,53 @@ BlSvgPathEllipticalArcSegment >> centerParametersFrom: aStartPoint to: anEndPoin
 	sinPhi := phi sin.
 	dx2 := ((aStartPoint x - anEndPoint x) / 2.0) asFloat.
 	dy2 := ((aStartPoint y - anEndPoint y) / 2.0) asFloat.
-	x1Prime := (cosPhi * dx2) + (sinPhi * dy2).
-	y1Prime := (sinPhi negated * dx2) + (cosPhi * dy2).
-	lambda := ((x1Prime squared / (rx squared)) + (y1Prime squared / (ry squared))) asFloat.
-	lambda > 1.0 ifTrue: [
-		scale := lambda sqrt.
-		rx := rx * scale.
-		ry := ry * scale ].
+	x1Prime := cosPhi * dx2 + (sinPhi * dy2).
+	y1Prime := sinPhi negated * dx2 + (cosPhi * dy2).
+	lambda := (x1Prime squared / rx squared + (y1Prime squared / ry squared))
+			asFloat.
+	lambda > 1.0
+		ifTrue: [ scale := lambda sqrt.
+			rx := rx * scale.
+			ry := ry * scale ].
 	rx2 := rx squared.
 	ry2 := ry squared.
 	x1Prime2 := x1Prime squared.
 	y1Prime2 := y1Prime squared.
-	numerator := ((rx2 * ry2) - (rx2 * y1Prime2) - (ry2 * x1Prime2)) max: 0.0.
-	denominator := ((rx2 * y1Prime2) + (ry2 * x1Prime2)) max: Float epsilon.
-	sign := self largeArcFlag = self sweepFlag
-		ifTrue: [ -1.0 ]
-		ifFalse: [ 1.0 ].
-	coefficient := sign * ((numerator / denominator) sqrt).
-	cxPrime := coefficient * ((rx * y1Prime) / ry).
-	cyPrime := coefficient * (((ry * x1Prime) / rx) negated).
-	cx := ((cosPhi * cxPrime) - (sinPhi * cyPrime)) + ((aStartPoint x + anEndPoint x) / 2.0).
-	cy := ((sinPhi * cxPrime) + (cosPhi * cyPrime)) + ((aStartPoint y + anEndPoint y) / 2.0).
+	numerator := rx2 * ry2 - (rx2 * y1Prime2) - (ry2 * x1Prime2) max: 0.0.
+	denominator := rx2 * y1Prime2 + (ry2 * x1Prime2) max: Float machineEpsilon.
+	sign := self largeArcFlag = self sweepFlag ifTrue: [ -1.0 ] ifFalse: [ 1.0 ].
+	coefficient := sign * (numerator / denominator) sqrt.
+	cxPrime := coefficient * (rx * y1Prime / ry).
+	cyPrime := coefficient * (ry * x1Prime / rx) negated.
+	cx := cosPhi * cxPrime - (sinPhi * cyPrime)
+			+ ((aStartPoint x + anEndPoint x) / 2.0).
+	cy := sinPhi * cxPrime + (cosPhi * cyPrime)
+			+ ((aStartPoint y + anEndPoint y) / 2.0).
 	ux := (x1Prime - cxPrime) / rx.
 	uy := (y1Prime - cyPrime) / ry.
 	vx := (x1Prime negated - cxPrime) / rx.
 	vy := (y1Prime negated - cyPrime) / ry.
-	theta1 := self vectorAngleFromX: 1.0 y: 0.0 toX: ux y: uy.
-	deltaTheta := self vectorAngleFromX: ux y: uy toX: vx y: vy.
-	(self sweepFlag not and: [ deltaTheta > 0.0 ]) ifTrue: [
-		deltaTheta := deltaTheta - (Float pi * 2.0) ].
-	(self sweepFlag and: [ deltaTheta < 0.0 ]) ifTrue: [
-		deltaTheta := deltaTheta + (Float pi * 2.0) ].
-	^ {
-		#center -> (cx @ cy).
+	theta1 := self
+			vectorAngleFromX: 1.0
+			y: 0.0
+			toX: ux
+			y: uy.
+	deltaTheta := self
+			vectorAngleFromX: ux
+			y: uy
+			toX: vx
+			y: vy.
+	(self sweepFlag not and: [ deltaTheta > 0.0 ])
+		ifTrue: [ deltaTheta := deltaTheta - (Float pi * 2.0) ].
+	(self sweepFlag and: [ deltaTheta < 0.0 ])
+		ifTrue: [ deltaTheta := deltaTheta + (Float pi * 2.0) ].
+	^ {#center -> (cx @ cy).
 		#rx -> rx.
 		#ry -> ry.
 		#cosPhi -> cosPhi.
 		#sinPhi -> sinPhi.
 		#theta1 -> theta1.
-		#deltaTheta -> deltaTheta } asDictionary
-]
-
-{ #category : 'executing' }
-BlSvgPathEllipticalArcSegment >> executeOn: aBuilder [
-	| aStartPoint anEndPoint |
-	aStartPoint := aBuilder currentPoint.
-	anEndPoint := self isAbsolute
-		ifTrue: [ self arcTo ]
-		ifFalse: [ aStartPoint + self arcTo ].
-
-	aStartPoint = anEndPoint ifTrue: [ ^ self ].
-	((self rx = 0) or: [ self ry = 0 ]) ifTrue: [
-		self isAbsolute
-			ifTrue: [ aBuilder lineTo: anEndPoint ]
-			ifFalse: [ aBuilder lineTo: self arcTo ].
-		^ self ].
-
-	self executeBezierApproximationFrom: aStartPoint to: anEndPoint on: aBuilder
+		#deltaTheta -> deltaTheta} asDictionary
 ]
 
 { #category : 'private - geometry' }
@@ -179,6 +169,24 @@ BlSvgPathEllipticalArcSegment >> executeBezierApproximationFrom: aStartPoint to:
 					curveVia: firstControlPointAbsolute - startPointAbsolute
 					and: secondControlPointAbsolute - startPointAbsolute
 					to: endPointAbsolute - startPointAbsolute ] ]
+]
+
+{ #category : 'executing' }
+BlSvgPathEllipticalArcSegment >> executeOn: aBuilder [
+	| aStartPoint anEndPoint |
+	aStartPoint := aBuilder currentPoint.
+	anEndPoint := self isAbsolute
+		ifTrue: [ self arcTo ]
+		ifFalse: [ aStartPoint + self arcTo ].
+
+	aStartPoint = anEndPoint ifTrue: [ ^ self ].
+	((self rx = 0) or: [ self ry = 0 ]) ifTrue: [
+		self isAbsolute
+			ifTrue: [ aBuilder lineTo: anEndPoint ]
+			ifFalse: [ aBuilder lineTo: self arcTo ].
+		^ self ].
+
+	self executeBezierApproximationFrom: aStartPoint to: anEndPoint on: aBuilder
 ]
 
 { #category : 'comparing' }

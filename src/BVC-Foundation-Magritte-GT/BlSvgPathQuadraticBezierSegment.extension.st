@@ -1,6 +1,4 @@
-Extension {
-	#name : 'BlSvgPathQuadraticBezierSegment'
-}
+Extension { #name : 'BlSvgPathQuadraticBezierSegment' }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 BlSvgPathQuadraticBezierSegment >> isQuadraticBezier [

@@ -291,6 +291,31 @@ CFFontAwesomeMetadataImporter class >> roleForClassName: aString [
 	^ #primary
 ]
 
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> secondaryOpacityFromRawSvg: rawSvg [
+	| document opacity |
+	rawSvg ifEmpty: [ ^ 0.4 ].
+	document := self xmlDocumentFromRawSvg: rawSvg.
+	opacity := 0.4.
+	document root ifNil: [ ^ opacity ].
+	document root
+		allElementsDo: [ :each | 
+			((each isNamed: 'style')
+				and: [ each contentString includesSubstring: '.fa-secondary{opacity:' ])
+				ifTrue: [ | styleText marker start finish numberText |
+					styleText := each contentString.
+					marker := '.fa-secondary{opacity:'.
+					start := styleText findString: marker startingAt: 1.
+					start > 0
+						ifTrue: [ start := start + marker size.
+							finish := styleText findString: '}' startingAt: start.
+							finish > 0
+								ifTrue: [ numberText := (styleText copyFrom: start to: finish - 1) trimBoth.
+									(numberText beginsWith: '.') ifTrue: [ numberText := '0' , numberText ].
+									opacity := numberText asNumber ] ] ] ].
+	^ opacity
+]
+
 { #category : 'private - name conversion' }
 CFFontAwesomeMetadataImporter class >> selectorForIconName: anIconName [
 	| selectorName |
@@ -300,28 +325,6 @@ CFFontAwesomeMetadataImporter class >> selectorForIconName: anIconName [
 	(self reservedSelectorNames includes: selectorName)
 		ifTrue: [ selectorName := selectorName, 'Icon' ].
 	^ selectorName asSymbol
-]
-
-{ #category : 'private - parsing raw svg' }
-CFFontAwesomeMetadataImporter class >> secondaryOpacityFromRawSvg: rawSvg [
-	| document opacity |
-	rawSvg ifEmpty: [ ^ 0.4 ].
-	document := self xmlDocumentFromRawSvg: rawSvg.
-	opacity := 0.4.
-	document root ifNil: [ ^ opacity ].
-	document root allElementsDo: [ :each |
-		((each isNamed: 'style') and: [ each contentString includesSubstring: '.fa-secondary{opacity:' ]) ifTrue: [
-			| styleText marker start finish numberText |
-			styleText := each contentString.
-			marker := '.fa-secondary{opacity:'.
-			start := styleText findString: marker startingAt: 1.
-			start > 0 ifTrue: [
-				start := start + marker size.
-				finish := styleText findString: '}' startingAt: start.
-				finish > 0 ifTrue: [
-					numberText := styleText copyFrom: start to: finish - 1.
-					opacity := numberText asNumber ] ] ] ].
-	^ opacity
 ]
 
 { #category : 'private - source generation' }

@@ -24,16 +24,15 @@ Class {
 { #category : 'styling' }
 CFFontAwesomeIcon >> applyColors [
 	1 to: pathElements size do: [ :index |
-		| element role color background paint |
+		| element role color alpha actualColor background |
 		element := pathElements at: index.
 		role := pathRoles at: index.
 		color := role = #secondary
 			ifTrue: [ secondaryColor ]
 			ifFalse: [ primaryColor ].
-		paint := BlColorPaint color: color.
-		(pathOpacities at: index ifAbsent: [ 1.0 ]) = 1.0
-			ifFalse: [ paint := paint opacity: (pathOpacities at: index) ].
-		background := BlBackground paint: paint.
+		alpha := pathOpacities at: index ifAbsent: [ 1.0 ].
+		actualColor := color alpha: alpha.
+		background := BlBackground paint: (BlColorPaint color: actualColor).
 		element background: background ]
 ]
 
@@ -82,19 +81,18 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 	pathRoles := OrderedCollection new.
 	pathOpacities := OrderedCollection new.
 
-	pathSpecs do: [ :eachSpec |
-		| element role opacity |
-		role := eachSpec at: #role ifAbsent: [ #primary ].
-		opacity := eachSpec at: #opacity ifAbsent: [ 1.0 ].
-		element := BlElement new
-			geometry: (BlSvgPath new
-				svg: (eachSpec at: #path);
-				viewbox: aRectangle);
-			yourself.
-		self addChild: element.
-		pathElements add: element.
-		pathRoles add: role.
-		pathOpacities add: opacity ].
+	pathSpecs
+		do: [ :eachSpec | 
+			| element role opacity |
+			role := eachSpec at: #role ifAbsent: [ #primary ].
+			opacity := eachSpec at: #opacity ifAbsent: [ 1.0 ].
+			element := BlElement new
+					geometry: (BlSvgPath new svg: (eachSpec at: #path) viewbox: aRectangle);
+					yourself.
+			self addChild: element.
+			pathElements add: element.
+			pathRoles add: role.
+			pathOpacities add: opacity ].
 
 	primaryColor := Color black.
 	secondaryColor := Color black.
