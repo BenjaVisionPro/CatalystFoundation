@@ -153,10 +153,47 @@ CFFontAwesomeMetadataImporter class >> hasClassSideSelector: aSelector on: aClas
 CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference [
 	^ self
 		importFromIconsJsonFile: aFileReference
-		baseClass: CFFontAwesomeIcons
 		packageName: 'BVC-Foundation-Magritte-GT'
-		familyName: 'Font Awesome'
-		version: 'unknown'
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference packageName: aPackageName [
+	^ self
+		importFromIconsJsonFile: aFileReference
+		baseClass: CFFontAwesomeIcons
+		packageName: aPackageName
+		familyName: 'Font Awesome Pro'
+		version: (self requiredVersionForIconsJsonFile: aFileReference)
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference packageName: aPackageName familyName: aFamilyName [
+	^ self
+		importFromIconsJsonFile: aFileReference
+		baseClass: CFFontAwesomeIcons
+		packageName: aPackageName
+		familyName: aFamilyName
+		version: (self requiredVersionForIconsJsonFile: aFileReference)
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference packageName: aPackageName version: aVersionString [
+	^ self
+		importFromIconsJsonFile: aFileReference
+		baseClass: CFFontAwesomeIcons
+		packageName: aPackageName
+		familyName: 'Font Awesome Pro'
+		version: aVersionString
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName [
+	^ self
+		importFromIconsJsonFile: aFileReference
+		baseClass: aBaseClass
+		packageName: aPackageName
+		familyName: aFamilyName
+		version: (self requiredVersionForIconsJsonFile: aFileReference)
 ]
 
 { #category : 'importing' }
@@ -182,6 +219,38 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 { #category : 'importing' }
 CFFontAwesomeMetadataImporter class >> importFromIconsJsonPath: aPathString [
 	^ self importFromIconsJsonFile: aPathString asFileReference
+]
+
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> inferredVersionForIconsJsonFile: aFileReference [
+	| pathString separators tokens |
+	pathString := self pathStringFor: aFileReference.
+	separators := '/\\-_ '.
+	tokens := pathString findTokens: separators.
+	^ tokens
+		detect: [ :each | self isSemanticVersionString: each ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> isSemanticVersionString: aString [
+	| parts |
+	parts := aString findTokens: '.'.
+	parts size = 3 ifFalse: [ ^ false ].
+	^ parts allSatisfy: [ :each | each notEmpty and: [ each allSatisfy: #isDigit ] ]
+]
+
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> pathStringFor: aFileReference [
+	(aFileReference respondsTo: #pathString) ifTrue: [ ^ aFileReference pathString ].
+	(aFileReference respondsTo: #fullName) ifTrue: [ ^ aFileReference fullName ].
+	^ aFileReference asString
+]
+
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> requiredVersionForIconsJsonFile: aFileReference [
+	^ self inferredVersionForIconsJsonFile: aFileReference
+		ifNil: [ self error: 'Font Awesome version was not provided and could not be inferred from the metadata file path' ]
 ]
 
 { #category : 'private - importing' }
