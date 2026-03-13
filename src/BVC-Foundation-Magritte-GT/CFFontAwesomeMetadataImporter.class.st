@@ -1,6 +1,7 @@
 "
 I import Font Awesome metadata from metadata/icons.json using NeoJSON.
 I create a style subclass of CFFontAwesomeIcons for each discovered style and compile one class-side method per icon onto the matching style class.
+I use XMLDOMParser to read the raw SVG for duotone role and opacity information.
 "
 Class {
 	#name : 'CFFontAwesomeMetadataImporter',
@@ -225,16 +226,20 @@ CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
 
 { #category : 'private - normalizing' }
 CFFontAwesomeMetadataImporter class >> normalizePathSpecsFromSvgData: svgData [
-	| paths classes opacities |
+	| paths rawSvg pathElements secondaryOpacity |
 	paths := self normalizedPathsFrom: (svgData at: 'path').
-	classes := self pathClassesFromRawSvg: (svgData at: 'raw' ifAbsent: [ '' ]).
-	opacities := self pathOpacitiesFromRawSvg: (svgData at: 'raw' ifAbsent: [ '' ]).
+	rawSvg := svgData at: 'raw' ifAbsent: [ '' ].
+	pathElements := self pathElementsFromRawSvg: rawSvg.
+	secondaryOpacity := self secondaryOpacityFromRawSvg: rawSvg.
 
 	^ (1 to: paths size) collect: [ :index |
+		| pathElement className |
+		pathElement := pathElements at: index ifAbsent: [ nil ].
+		className := self pathClassNameFromElement: pathElement.
 		Dictionary new
 			at: #path put: (paths at: index);
-			at: #role put: (self roleForClassName: (classes at: index ifAbsent: [ nil ]));
-			at: #opacity put: (opacities at: index ifAbsent: [ 1.0 ]);
+			at: #role put: (self roleForClassName: className);
+			at: #opacity put: (self opacityForClassName: className secondaryOpacity: secondaryOpacity);
 			yourself ]
 ]
 
@@ -245,41 +250,29 @@ CFFontAwesomeMetadataImporter class >> normalizedPathsFrom: rawPathData [
 	self error: 'Unsupported path payload type: ', rawPathData class name
 ]
 
-
 { #category : 'private - parsing raw svg' }
-CFFontAwesomeMetadataImporter class >> pathClassesFromRawSvg: rawSvg [
-	| classes searchStart pathStart tagEnd tag classStart valueStart valueEnd |
-	classes := OrderedCollection new.
-	searchStart := 1.
-	[ (pathStart := rawSvg findString: '<path' startingAt: searchStart) > 0 ] whileTrue: [
-		tagEnd := rawSvg findString: '>' startingAt: pathStart.
-		tagEnd = 0 ifTrue: [ ^ classes ].
-		tag := rawSvg copyFrom: pathStart to: tagEnd.
-		classStart := tag findString: 'class="' startingAt: 1.
-		classStart = 0
-			ifTrue: [ classes add: nil ]
-			ifFalse: [
-				valueStart := classStart + 'class="' size.
-				valueEnd := tag findString: '"' startingAt: valueStart.
-				valueEnd = 0
-					ifTrue: [ classes add: nil ]
-					ifFalse: [ classes add: (tag copyFrom: valueStart to: valueEnd - 1) ] ].
-		searchStart := tagEnd + 1 ].
-	^ classes
+CFFontAwesomeMetadataImporter class >> opacityForClassName: aString secondaryOpacity: aNumber [
+	(aString notNil and: [ aString includesSubstring: 'fa-secondary' ])
+		ifTrue: [ ^ aNumber ].
+	^ 1.0
 ]
 
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> pathClassNameFromElement: anElement [
+	anElement ifNil: [ ^ nil ].
+	^ anElement attributeAt: 'class' ifAbsent: [ nil ]
+]
 
 { #category : 'private - parsing raw svg' }
-CFFontAwesomeMetadataImporter class >> pathOpacitiesFromRawSvg: rawSvg [
-	| secondaryOpacity opacities classes |
-	secondaryOpacity := self secondaryOpacityFromRawSvg: rawSvg.
-	classes := self pathClassesFromRawSvg: rawSvg.
-	opacities := OrderedCollection new.
-	1 to: classes size do: [ :index |
-		opacities add: ((classes at: index) = 'fa-secondary'
-			ifTrue: [ secondaryOpacity ]
-			ifFalse: [ 1.0 ]) ].
-	^ opacities
+CFFontAwesomeMetadataImporter class >> pathElementsFromRawSvg: rawSvg [
+	| document elements |
+	rawSvg ifEmpty: [ ^ #() ].
+	document := self xmlDocumentFromRawSvg: rawSvg.
+	elements := OrderedCollection new.
+	document root ifNil: [ ^ elements ].
+	document root allElementsDo: [ :each |
+		(each isNamed: 'path') ifTrue: [ elements add: each ] ].
+	^ elements
 ]
 
 { #category : 'private - reading' }
@@ -294,7 +287,7 @@ CFFontAwesomeMetadataImporter class >> reservedSelectorNames [
 
 { #category : 'private - normalizing' }
 CFFontAwesomeMetadataImporter class >> roleForClassName: aString [
-	aString = 'fa-secondary' ifTrue: [ ^ #secondary ].
+	(aString notNil and: [ aString includesSubstring: 'fa-secondary' ]) ifTrue: [ ^ #secondary ].
 	^ #primary
 ]
 
@@ -311,14 +304,24 @@ CFFontAwesomeMetadataImporter class >> selectorForIconName: anIconName [
 
 { #category : 'private - parsing raw svg' }
 CFFontAwesomeMetadataImporter class >> secondaryOpacityFromRawSvg: rawSvg [
-	| styleStart opacityStart opacityEnd opacityText |
-	styleStart := rawSvg findString: '.fa-secondary{opacity:' startingAt: 1.
-	styleStart = 0 ifTrue: [ ^ 0.4 ].
-	opacityStart := styleStart + '.fa-secondary{opacity:' size.
-	opacityEnd := rawSvg findString: '}' startingAt: opacityStart.
-	opacityEnd = 0 ifTrue: [ ^ 0.4 ].
-	opacityText := (rawSvg copyFrom: opacityStart to: opacityEnd - 1) withBlanksTrimmed.
-	^ opacityText asNumber
+	| document opacity |
+	rawSvg ifEmpty: [ ^ 0.4 ].
+	document := self xmlDocumentFromRawSvg: rawSvg.
+	opacity := 0.4.
+	document root ifNil: [ ^ opacity ].
+	document root allElementsDo: [ :each |
+		((each isNamed: 'style') and: [ each contentString includesSubstring: '.fa-secondary{opacity:' ]) ifTrue: [
+			| styleText marker start finish numberText |
+			styleText := each contentString.
+			marker := '.fa-secondary{opacity:'.
+			start := styleText findString: marker startingAt: 1.
+			start > 0 ifTrue: [
+				start := start + marker size.
+				finish := styleText findString: '}' startingAt: start.
+				finish > 0 ifTrue: [
+					numberText := styleText copyFrom: start to: finish - 1.
+					opacity := numberText asNumber ] ] ] ].
+	^ opacity
 ]
 
 { #category : 'private - source generation' }
@@ -367,4 +370,9 @@ CFFontAwesomeMetadataImporter class >> styleSelectorFor: aStyleName [
 	(self reservedSelectorNames includes: selectorName)
 		ifTrue: [ selectorName := selectorName, 'Style' ].
 	^ selectorName asSymbol
+]
+
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> xmlDocumentFromRawSvg: rawSvg [
+	^ XMLDOMParser parse: rawSvg
 ]
