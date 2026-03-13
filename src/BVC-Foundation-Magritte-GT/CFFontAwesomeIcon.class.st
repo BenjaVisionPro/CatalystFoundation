@@ -1,12 +1,11 @@
 "
-I wrap one or more Font Awesome SVG paths in a Bloc element and provide a small runtime API for color and size changes.
+I am a Bloc element that renders one or more Font Awesome SVG paths directly.
 I am intended to be produced by CFFontAwesomeIcons class-side factory methods and by the metadata importer.
 "
 Class {
 	#name : 'CFFontAwesomeIcon',
-	#superclass : 'Object',
+	#superclass : 'BlElement',
 	#instVars : [
-		'rootElement',
 		'pathElements',
 		'iconName',
 		'styleKey',
@@ -20,12 +19,12 @@ Class {
 
 { #category : 'converting' }
 CFFontAwesomeIcon >> asElement [
-	^ rootElement
+	^ self
 ]
 
 { #category : 'converting' }
 CFFontAwesomeIcon >> asStencil [
-	^ [ self asElement ] asStencil
+	^ [ self ] asStencil
 ]
 
 { #category : 'accessing' }
@@ -44,8 +43,7 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 	label := aLabelString.
 	viewBox := aRectangle.
 
-	rootElement := BlElement new.
-	rootElement size: aRectangle extent.
+	self size: aRectangle extent.
 
 	pathElements := pathCollection collect: [ :eachPath |
 		BlElement new
@@ -54,7 +52,7 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 				viewbox: aRectangle);
 			yourself ].
 
-	pathElements do: [ :each | rootElement addChild: each ].
+	pathElements do: [ :each | self addChild: each ].
 	self color: Color black.
 	^ self
 ]
@@ -67,12 +65,6 @@ CFFontAwesomeIcon >> iconName [
 { #category : 'accessing' }
 CFFontAwesomeIcon >> label [
 	^ label
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeIcon >> size: anExtent [
-	rootElement size: anExtent.
-	^ self
 ]
 
 { #category : 'accessing' }

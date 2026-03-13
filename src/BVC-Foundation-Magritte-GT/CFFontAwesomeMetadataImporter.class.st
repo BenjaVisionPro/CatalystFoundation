@@ -20,14 +20,26 @@ CFFontAwesomeMetadataImporter class >> camelCaseFromDashed: aString [
 { #category : 'private - compiling' }
 CFFontAwesomeMetadataImporter class >> compileAvailableIconsMethodsFrom: selectorsByStyle baseClass: aBaseClass [
 	selectorsByStyle keysAndValuesDo: [ :styleName :selectors |
-		| styleClass source |
+		| styleClass source orderedSelectors |
 		styleClass := aBaseClass perform: (self styleSelectorFor: styleName).
+		orderedSelectors := selectors asSet asSortedCollection asArray.
 		source := String streamContents: [ :stream |
 			stream
 				nextPutAll: 'availableIcons';
 				cr;
-				tab; nextPutAll: '^ ';
-				nextPutAll: ((selectors asSet asSortedCollection asArray) storeString) ].
+				tab; nextPutAll: '^ {';
+				cr.
+			orderedSelectors
+				do: [ :each |
+					stream
+						tab; tab;
+						store: each;
+						nextPutAll: ' -> [ self perform: #';
+						nextPutAll: each asString;
+						nextPutAll: ' ]'.
+					each == orderedSelectors last ifFalse: [ stream nextPutAll: '.' ].
+					stream cr ].
+			stream tab; nextPutAll: '}' ].
 		styleClass class compile: source classified: 'metadata' ]
 ]
 
