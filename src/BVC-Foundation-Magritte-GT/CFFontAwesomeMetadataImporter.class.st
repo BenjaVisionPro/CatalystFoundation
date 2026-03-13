@@ -286,7 +286,7 @@ CFFontAwesomeMetadataImporter class >> readMetadataFrom: aFileReference [
 
 { #category : 'private - name conversion' }
 CFFontAwesomeMetadataImporter class >> reservedSelectorNames [
-	^ #('self' 'super' 'thisContext' 'nil' 'true' 'false' 'class' 'new' 'basicNew' 'initialize' 'yourself')
+	^ #('comment' 'self' 'super' 'thisContext' 'nil' 'true' 'false' 'class' 'new' 'basicNew' 'initialize' 'yourself')
 ]
 
 { #category : 'private - normalizing' }
