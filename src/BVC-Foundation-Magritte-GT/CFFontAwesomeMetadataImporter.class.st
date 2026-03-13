@@ -82,10 +82,11 @@ CFFontAwesomeMetadataImporter class >> compileIconSelector: aSelector iconName: 
 ]
 
 { #category : 'private - compiling' }
-CFFontAwesomeMetadataImporter class >> compileStyleAccessorFor: aStyleName on: aBaseClass toReturn: aStyleClass [
-	| selector source |
+CFFontAwesomeMetadataImporter class >> compileStyleAccessorFor: aStyleName on: aBaseClass toReturn: aStyleClass packageName: aPackageName [
+	| selector source protocol |
 	selector := self styleSelectorFor: aStyleName.
 	(aBaseClass class includesSelector: selector) ifTrue: [ ^ self ].
+	protocol := '*' , aPackageName asLowercase.
 
 	source := String streamContents: [ :stream |
 		stream
@@ -94,7 +95,7 @@ CFFontAwesomeMetadataImporter class >> compileStyleAccessorFor: aStyleName on: a
 			tab; nextPutAll: '^ ';
 			nextPutAll: aStyleClass name asString ].
 
-	aBaseClass class compile: source classified: 'styles'
+	aBaseClass class compile: source classified: protocol
 ]
 
 { #category : 'private - compiling' }
@@ -134,7 +135,11 @@ CFFontAwesomeMetadataImporter class >> ensureStyleClassFor: aStyleName baseClass
 				classVariableNames: ''
 				package: aPackageName ].
 
-	self compileStyleAccessorFor: aStyleName on: aBaseClass toReturn: styleClass.
+	self
+		compileStyleAccessorFor: aStyleName
+		on: aBaseClass
+		toReturn: styleClass
+		packageName: aPackageName.
 	self compileStyleMetadataOn: styleClass familyName: aFamilyName version: aVersionString styleName: aStyleName.
 	^ styleClass
 ]
@@ -171,7 +176,6 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 			selectorsByStyle: selectorsByStyle ].
 
 	self compileAvailableIconsMethodsFrom: selectorsByStyle baseClass: aBaseClass.
-	self compileAvailableStylesMethodOn: aBaseClass.
 	^ aBaseClass
 ]
 
