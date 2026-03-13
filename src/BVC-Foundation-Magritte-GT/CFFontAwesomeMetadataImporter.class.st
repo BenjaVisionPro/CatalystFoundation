@@ -297,11 +297,14 @@ CFFontAwesomeMetadataImporter class >> selectorForIconName: anIconName [
 
 { #category : 'private - parsing raw svg' }
 CFFontAwesomeMetadataImporter class >> secondaryOpacityFromRawSvg: rawSvg [
-	| matcher |
-	matcher := RxMatcher forString: '\.fa-secondary\{opacity:([0-9.]+)\}'.
-	(matcher search: rawSvg)
-		ifTrue: [ ^ (matcher subexpression: 1) asNumber ].
-	^ 0.4
+	| styleStart opacityStart opacityEnd opacityText |
+	styleStart := rawSvg findString: '.fa-secondary{opacity:' startingAt: 1.
+	styleStart = 0 ifTrue: [ ^ 0.4 ].
+	opacityStart := styleStart + '.fa-secondary{opacity:' size.
+	opacityEnd := rawSvg findString: '}' startingAt: opacityStart.
+	opacityEnd = 0 ifTrue: [ ^ 0.4 ].
+	opacityText := (rawSvg copyFrom: opacityStart to: opacityEnd - 1) withBlanksTrimmed.
+	^ opacityText asNumber
 ]
 
 { #category : 'private - source generation' }
