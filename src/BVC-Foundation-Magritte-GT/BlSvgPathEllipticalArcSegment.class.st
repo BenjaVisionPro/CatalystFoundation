@@ -1,8 +1,9 @@
 "
 I represent an SVG elliptical arc path segment.
-I store the original SVG endpoint-parameterized arc data and, when executed,
-I approximate the arc with one or more cubic Bézier curves using the SVG
-implementation notes conversion.
+
+I store the original endpoint-parameterized SVG arc data. When executed I
+convert the arc into one or more cubic Bézier segments, while preserving the
+absolute/relative semantics expected by the downstream path builder.
 "
 Class {
 	#name : 'BlSvgPathEllipticalArcSegment',
@@ -20,10 +21,8 @@ Class {
 
 { #category : 'comparing' }
 BlSvgPathEllipticalArcSegment >> = anotherObject [
-	self == anotherObject
-		ifTrue: [ ^ true ].
-	(anotherObject isKindOf: self class)
-		ifFalse: [ ^ false ].
+	self == anotherObject ifTrue: [ ^ true ].
+	(anotherObject isKindOf: self class) ifFalse: [ ^ false ].
 
 	^ anotherObject isAbsolute = self isAbsolute
 		and: [ anotherObject arcTo = self arcTo
@@ -35,8 +34,6 @@ BlSvgPathEllipticalArcSegment >> = anotherObject [
 
 { #category : 'accessing' }
 BlSvgPathEllipticalArcSegment >> arcTo [
-	<return: #Point>
-
 	^ arcTo
 ]
 
@@ -58,19 +55,15 @@ BlSvgPathEllipticalArcSegment >> centerParametersFrom: aStartPoint to: anEndPoin
 	phi := self xAxisRotationInRadians.
 	cosPhi := phi cos.
 	sinPhi := phi sin.
-
-	(dx2 := (aStartPoint x - anEndPoint x) / 2.0) asFloat.
-	(dy2 := (aStartPoint y - anEndPoint y) / 2.0) asFloat.
-
+	dx2 := ((aStartPoint x - anEndPoint x) / 2.0) asFloat.
+	dy2 := ((aStartPoint y - anEndPoint y) / 2.0) asFloat.
 	x1Prime := (cosPhi * dx2) + (sinPhi * dy2).
 	y1Prime := (sinPhi negated * dx2) + (cosPhi * dy2).
-
 	lambda := ((x1Prime squared / (rx squared)) + (y1Prime squared / (ry squared))) asFloat.
 	lambda > 1.0 ifTrue: [
 		scale := lambda sqrt.
 		rx := rx * scale.
 		ry := ry * scale ].
-
 	rx2 := rx squared.
 	ry2 := ry squared.
 	x1Prime2 := x1Prime squared.
@@ -81,26 +74,20 @@ BlSvgPathEllipticalArcSegment >> centerParametersFrom: aStartPoint to: anEndPoin
 		ifTrue: [ -1.0 ]
 		ifFalse: [ 1.0 ].
 	coefficient := sign * ((numerator / denominator) sqrt).
-
 	cxPrime := coefficient * ((rx * y1Prime) / ry).
 	cyPrime := coefficient * (((ry * x1Prime) / rx) negated).
-
 	cx := ((cosPhi * cxPrime) - (sinPhi * cyPrime)) + ((aStartPoint x + anEndPoint x) / 2.0).
 	cy := ((sinPhi * cxPrime) + (cosPhi * cyPrime)) + ((aStartPoint y + anEndPoint y) / 2.0).
-
 	ux := (x1Prime - cxPrime) / rx.
 	uy := (y1Prime - cyPrime) / ry.
 	vx := (x1Prime negated - cxPrime) / rx.
 	vy := (y1Prime negated - cyPrime) / ry.
-
 	theta1 := self vectorAngleFromX: 1.0 y: 0.0 toX: ux y: uy.
 	deltaTheta := self vectorAngleFromX: ux y: uy toX: vx y: vy.
-
 	(self sweepFlag not and: [ deltaTheta > 0.0 ]) ifTrue: [
 		deltaTheta := deltaTheta - (Float pi * 2.0) ].
 	(self sweepFlag and: [ deltaTheta < 0.0 ]) ifTrue: [
 		deltaTheta := deltaTheta + (Float pi * 2.0) ].
-
 	^ {
 		#center -> (cx @ cy).
 		#rx -> rx.
@@ -113,21 +100,20 @@ BlSvgPathEllipticalArcSegment >> centerParametersFrom: aStartPoint to: anEndPoin
 
 { #category : 'executing' }
 BlSvgPathEllipticalArcSegment >> executeOn: aBuilder [
-	| startPoint endPoint |
-	startPoint := aBuilder currentPoint.
-	endPoint := self isAbsolute
+	| aStartPoint anEndPoint |
+	aStartPoint := aBuilder currentPoint.
+	anEndPoint := self isAbsolute
 		ifTrue: [ self arcTo ]
-		ifFalse: [ startPoint + self arcTo ].
+		ifFalse: [ aStartPoint + self arcTo ].
 
-	startPoint = endPoint ifTrue: [ ^ self ].
+	aStartPoint = anEndPoint ifTrue: [ ^ self ].
 	((self rx = 0) or: [ self ry = 0 ]) ifTrue: [
-		aBuilder lineTo: endPoint.
+		self isAbsolute
+			ifTrue: [ aBuilder lineTo: anEndPoint ]
+			ifFalse: [ aBuilder lineTo: self arcTo ].
 		^ self ].
 
-	self
-		executeBezierApproximationFrom: startPoint
-		to: endPoint
-		on: aBuilder
+	self executeBezierApproximationFrom: aStartPoint to: anEndPoint on: aBuilder
 ]
 
 { #category : 'private - geometry' }
@@ -141,21 +127,40 @@ BlSvgPathEllipticalArcSegment >> executeBezierApproximationFrom: aStartPoint to:
 	sinPhi := parameters at: #sinPhi.
 	theta1 := parameters at: #theta1.
 	deltaTheta := parameters at: #deltaTheta.
-
 	segmentCount := (((deltaTheta abs) / (Float pi / 2.0)) ceiling) max: 1.
 	angleStep := deltaTheta / segmentCount.
 
-	1 to: segmentCount do: [ :index |
-		| startAngle endAngle alpha p1 p2 c1 c2 endPoint |
-		startAngle := theta1 + ((index - 1) * angleStep).
+	1 to: segmentCount do: [ :anIndex |
+		| startAngle endAngle alpha p1 p2 c1 c2 startPointAbsolute firstControlPointAbsolute secondControlPointAbsolute endPointAbsolute |
+		startAngle := theta1 + ((anIndex - 1) * angleStep).
 		endAngle := startAngle + angleStep.
 		alpha := self bezierControlFactorForAngle: angleStep.
-
 		p1 := startAngle cos @ startAngle sin.
 		p2 := endAngle cos @ endAngle sin.
-		c1 := ((p1 x - (alpha * startAngle sin)) @ (p1 y + (alpha * startAngle cos))).
-		c2 := ((p2 x + (alpha * endAngle sin)) @ (p2 y - (alpha * endAngle cos))).
-		endPoint := self
+		c1 := (p1 x - (alpha * startAngle sin)) @ (p1 y + (alpha * startAngle cos)).
+		c2 := (p2 x + (alpha * endAngle sin)) @ (p2 y - (alpha * endAngle cos)).
+		startPointAbsolute := self
+			mapUnitPoint: p1
+			center: center
+			rx: rx
+			ry: ry
+			cosPhi: cosPhi
+			sinPhi: sinPhi.
+		firstControlPointAbsolute := self
+			mapUnitPoint: c1
+			center: center
+			rx: rx
+			ry: ry
+			cosPhi: cosPhi
+			sinPhi: sinPhi.
+		secondControlPointAbsolute := self
+			mapUnitPoint: c2
+			center: center
+			rx: rx
+			ry: ry
+			cosPhi: cosPhi
+			sinPhi: sinPhi.
+		endPointAbsolute := self
 			mapUnitPoint: p2
 			center: center
 			rx: rx
@@ -163,22 +168,17 @@ BlSvgPathEllipticalArcSegment >> executeBezierApproximationFrom: aStartPoint to:
 			cosPhi: cosPhi
 			sinPhi: sinPhi.
 
-		aBuilder
-			curveVia: (self
-				mapUnitPoint: c1
-				center: center
-				rx: rx
-				ry: ry
-				cosPhi: cosPhi
-				sinPhi: sinPhi)
-			and: (self
-				mapUnitPoint: c2
-				center: center
-				rx: rx
-				ry: ry
-				cosPhi: cosPhi
-				sinPhi: sinPhi)
-			to: endPoint ]
+		self isAbsolute
+			ifTrue: [
+				aBuilder
+					curveVia: firstControlPointAbsolute
+					and: secondControlPointAbsolute
+					to: endPointAbsolute ]
+			ifFalse: [
+				aBuilder
+					curveVia: firstControlPointAbsolute - startPointAbsolute
+					and: secondControlPointAbsolute - startPointAbsolute
+					to: endPointAbsolute - startPointAbsolute ] ]
 ]
 
 { #category : 'comparing' }
@@ -206,7 +206,7 @@ BlSvgPathEllipticalArcSegment >> isEllipticalArc [
 	^ true
 ]
 
-{ #category : 'testing' }
+{ #category : 'accessing' }
 BlSvgPathEllipticalArcSegment >> largeArcFlag [
 	^ largeArcFlag
 ]
@@ -244,8 +244,6 @@ BlSvgPathEllipticalArcSegment >> printOn: aStream [
 
 { #category : 'accessing' }
 BlSvgPathEllipticalArcSegment >> radii [
-	<return: #Point>
-
 	^ radii
 ]
 
@@ -264,7 +262,7 @@ BlSvgPathEllipticalArcSegment >> ry [
 	^ self radii y
 ]
 
-{ #category : 'testing' }
+{ #category : 'accessing' }
 BlSvgPathEllipticalArcSegment >> sweepFlag [
 	^ sweepFlag
 ]

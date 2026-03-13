@@ -2,7 +2,7 @@ Extension {
 	#name : 'BlSvgPathBuilder'
 }
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 BlSvgPathBuilder >> ellipticalArc: r xrot: xrot large: large sweep: sweep to: pt [
 	self addSegment: ((BlSvgPathEllipticalArcSegment absolute: absolute)
 		radii: r;
@@ -13,19 +13,21 @@ BlSvgPathBuilder >> ellipticalArc: r xrot: xrot large: large sweep: sweep to: pt
 		yourself)
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 BlSvgPathBuilder >> reflectedCurveTo: aPoint [
-	| aPreviousSegment |
-
-	aPreviousSegment := segments
+	| aPreviousQuadraticBezierSegment |
+	aPreviousQuadraticBezierSegment := segments
 		ifEmpty: [ nil ]
-		ifNotEmpty: [ segments last ].
-
-	(aPreviousSegment respondsTo: #lastControlPointForCurrentPoint:)
-		ifFalse: [ aPreviousSegment := nil ].
+		ifNotEmpty: [ :theSegments |
+			| aLastSegment |
+			aLastSegment := theSegments last.
+			((aLastSegment isKindOf: BlSvgPathQuadraticBezierSegment)
+				or: [ aLastSegment isKindOf: BlSvgPathReflectedQuadraticBezierSegment ])
+				ifTrue: [ aLastSegment ]
+				ifFalse: [ nil ] ].
 
 	self addSegment: ((BlSvgPathReflectedQuadraticBezierSegment absolute: absolute)
-		previousQuadraticBezierSegment: aPreviousSegment;
+		previousQuadraticBezierSegment: aPreviousQuadraticBezierSegment;
 		curveTo: aPoint;
 		yourself)
 ]

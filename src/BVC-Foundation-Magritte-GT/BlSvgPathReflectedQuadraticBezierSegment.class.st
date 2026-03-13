@@ -12,10 +12,8 @@ Class {
 
 { #category : 'comparing' }
 BlSvgPathReflectedQuadraticBezierSegment >> = anObject [
-	self == anObject
-		ifTrue: [ ^ true ].
-	self class = anObject class
-		ifFalse: [ ^ false ].
+	self == anObject ifTrue: [ ^ true ].
+	self class = anObject class ifFalse: [ ^ false ].
 
 	^ curveTo = anObject curveTo
 		and: [ isAbsolute = anObject isAbsolute
@@ -34,32 +32,30 @@ BlSvgPathReflectedQuadraticBezierSegment >> curveTo: anObject [
 
 { #category : 'executing' }
 BlSvgPathReflectedQuadraticBezierSegment >> executeOn: aBuilder [
-	| aViaPoint aPreviousRelativeControlPoint |
-
-	aViaPoint := self previousQuadraticBezierSegment
+	| aControlPoint aPreviousAbsoluteControlPoint aPreviousRelativeControlPoint |
+	aControlPoint := self previousQuadraticBezierSegment
 		ifNil: [
 			self isAbsolute
 				ifTrue: [ aBuilder currentPoint ]
 				ifFalse: [ 0 @ 0 ] ]
 		ifNotNil: [ :aPreviousQuadraticBezierSegment |
-			aPreviousRelativeControlPoint := aBuilder currentPoint
-				- (aPreviousQuadraticBezierSegment
-					lastControlPointForCurrentPoint: aBuilder currentPoint).
+			aPreviousAbsoluteControlPoint := aPreviousQuadraticBezierSegment
+				lastControlPointForFollowingCurrentPoint: aBuilder currentPoint.
+			aPreviousRelativeControlPoint := aBuilder currentPoint - aPreviousAbsoluteControlPoint.
 			self isAbsolute
 				ifTrue: [ aBuilder currentPoint + aPreviousRelativeControlPoint ]
 				ifFalse: [ aPreviousRelativeControlPoint ] ].
 
 	lastControlPoint := self isAbsolute
-		ifTrue: [ aViaPoint ]
-		ifFalse: [ aBuilder currentPoint + aViaPoint ].
+		ifTrue: [ aControlPoint ]
+		ifFalse: [ aBuilder currentPoint + aControlPoint ].
 
-	aBuilder curveVia: aViaPoint to: self curveTo
+	aBuilder curveVia: aControlPoint to: self curveTo
 ]
 
 { #category : 'comparing' }
 BlSvgPathReflectedQuadraticBezierSegment >> hash [
-	^ curveTo hash
-		bitXor: (isAbsolute hash bitXor: previousQuadraticBezierSegment hash)
+	^ curveTo hash bitXor: (isAbsolute hash bitXor: previousQuadraticBezierSegment hash)
 ]
 
 { #category : 'testing' }
@@ -73,17 +69,8 @@ BlSvgPathReflectedQuadraticBezierSegment >> lastControlPoint [
 ]
 
 { #category : 'accessing' }
-BlSvgPathReflectedQuadraticBezierSegment >> lastControlPointForCurrentPoint: aCurrentPoint [
-	^ lastControlPoint ifNil: [ aCurrentPoint ]
-]
-
-{ #category : 'printing' }
-BlSvgPathReflectedQuadraticBezierSegment >> printOn: aStream [
-	aStream
-		nextPutAll: 'Reflected quadratic bezier ';
-		nextPutAll: self printAbsolute;
-		nextPutAll: ' to ';
-		print: self curveTo
+BlSvgPathReflectedQuadraticBezierSegment >> lastControlPointForFollowingCurrentPoint: aCurrentPoint [
+	^ lastControlPoint
 ]
 
 { #category : 'accessing' }
@@ -94,4 +81,13 @@ BlSvgPathReflectedQuadraticBezierSegment >> previousQuadraticBezierSegment [
 { #category : 'accessing' }
 BlSvgPathReflectedQuadraticBezierSegment >> previousQuadraticBezierSegment: anObject [
 	previousQuadraticBezierSegment := anObject
+]
+
+{ #category : 'printing' }
+BlSvgPathReflectedQuadraticBezierSegment >> printOn: aStream [
+	aStream
+		nextPutAll: 'Reflected quadratic bezier ';
+		nextPutAll: self printAbsolute;
+		nextPutAll: ' to ';
+		print: self curveTo
 ]
