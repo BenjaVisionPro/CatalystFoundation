@@ -34,9 +34,9 @@ CFFontAwesomeMetadataImporter class >> compileAvailableIconsMethodsFrom: selecto
 					stream
 						tab; tab;
 						store: each;
-						nextPutAll: ' -> [ self perform: #';
+						nextPutAll: ' -> (self perform: #';
 						nextPutAll: each asString;
-						nextPutAll: ' ]'.
+						nextPutAll: ')'.
 					each == orderedSelectors last ifFalse: [ stream nextPutAll: '.' ].
 					stream cr ].
 			stream tab; nextPutAll: '}' ].
