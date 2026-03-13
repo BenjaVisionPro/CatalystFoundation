@@ -1,6 +1,9 @@
 Class {
 	#name : 'CFMaFormStencilBuilder',
 	#superclass : 'GtMagritteFormStencilBuilder',
+	#instVars : [
+		'headerElement'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -9,12 +12,16 @@ Class {
 CFMaFormStencilBuilder >> buildDefault [
 	| aContainer background |
 	aContainer := BrVerticalPane new.
+	headerElement := CFMaFormHeaderElement new
+			fieldViewModel: (GtMagritteFieldViewModel new
+					memento: memento;
+					description: memento magritteDescription).
 
 	aContainer magritte
 		beLabelContainer;
 		beFieldContainer;
 		beToolbarContainer.
-		
+
 	background := Color black alpha: 0.02.
 
 	aContainer
@@ -26,5 +33,6 @@ CFMaFormStencilBuilder >> buildDefault [
 		hFitContentLimited;
 		vFitContent.
 
+	aContainer addChild: headerElement as: #header.
 	^ aContainer
 ]
