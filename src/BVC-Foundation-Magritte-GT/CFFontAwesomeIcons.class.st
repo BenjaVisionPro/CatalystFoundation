@@ -94,6 +94,8 @@ CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWid
 
 { #category : 'styles' }
 CFFontAwesomeIcons class >> loadFromDisc [
+	"Point this to your licensed download of the font awesome metadata"
+
 	CFFontAwesomeMetadataImporter
 		importFromIconsJsonFile: '/Users/jupiter/Downloads/fontawesome-pro-5.15.4-desktop/metadata/icons.json'
 				asFileReference
