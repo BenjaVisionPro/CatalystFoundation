@@ -62,10 +62,10 @@ CFFontAwesomeMetadataImporter class >> compileAvailableStylesMethodOn: aBaseClas
 
 { #category : 'private - compiling' }
 CFFontAwesomeMetadataImporter class >> compileIconSelector: aSelector iconName: anIconName styleName: aStyleName unicode: aUnicodeString label: aLabelString svgData: svgData into: aStyleClass [
-	| width height paths source |
+	| width height pathSpecs source |
 	width := svgData at: 'width'.
 	height := svgData at: 'height'.
-	paths := self normalizedPathsFrom: (svgData at: 'path').
+	pathSpecs := self normalizePathSpecsFromSvgData: svgData.
 
 	source := self
 		sourceForIconSelector: aSelector
@@ -73,7 +73,7 @@ CFFontAwesomeMetadataImporter class >> compileIconSelector: aSelector iconName: 
 		styleName: aStyleName
 		width: width
 		height: height
-		paths: paths
+		pathSpecs: pathSpecs
 		unicode: aUnicodeString
 		label: aLabelString.
 
@@ -224,10 +224,48 @@ CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
 ]
 
 { #category : 'private - normalizing' }
+CFFontAwesomeMetadataImporter class >> normalizePathSpecsFromSvgData: svgData [
+	| paths classes opacities |
+	paths := self normalizedPathsFrom: (svgData at: 'path').
+	classes := self pathClassesFromRawSvg: (svgData at: 'raw' ifAbsent: [ '' ]).
+	opacities := self pathOpacitiesFromRawSvg: (svgData at: 'raw' ifAbsent: [ '' ]).
+
+	^ (1 to: paths size) collect: [ :index |
+		Dictionary new
+			at: #path put: (paths at: index);
+			at: #role put: (self roleForClassName: (classes at: index ifAbsent: [ nil ]));
+			at: #opacity put: (opacities at: index ifAbsent: [ 1.0 ]);
+			yourself ]
+]
+
+{ #category : 'private - normalizing' }
 CFFontAwesomeMetadataImporter class >> normalizedPathsFrom: rawPathData [
 	rawPathData isString ifTrue: [ ^ Array with: rawPathData ].
 	rawPathData isArray ifTrue: [ ^ rawPathData ].
 	self error: 'Unsupported path payload type: ', rawPathData class name
+]
+
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> pathClassesFromRawSvg: rawSvg [
+	| matches matcher |
+	matches := OrderedCollection new.
+	matcher := RxMatcher forString: '<path[^>]*class="([^"]+)"[^>]*/?>'.
+	matcher matchesIn: rawSvg do: [ :each |
+		matches add: (each subexpression: 1) ].
+	^ matches
+]
+
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> pathOpacitiesFromRawSvg: rawSvg [
+	| secondaryOpacity opacities classes |
+	secondaryOpacity := self secondaryOpacityFromRawSvg: rawSvg.
+	classes := self pathClassesFromRawSvg: rawSvg.
+	opacities := OrderedCollection new.
+	1 to: classes size do: [ :index |
+		opacities add: ((classes at: index) = 'fa-secondary'
+			ifTrue: [ secondaryOpacity ]
+			ifFalse: [ 1.0 ]) ].
+	^ opacities
 ]
 
 { #category : 'private - reading' }
@@ -238,6 +276,12 @@ CFFontAwesomeMetadataImporter class >> readMetadataFrom: aFileReference [
 { #category : 'private - name conversion' }
 CFFontAwesomeMetadataImporter class >> reservedSelectorNames [
 	^ #('self' 'super' 'thisContext' 'nil' 'true' 'false' 'class' 'new' 'basicNew' 'initialize' 'yourself')
+]
+
+{ #category : 'private - normalizing' }
+CFFontAwesomeMetadataImporter class >> roleForClassName: aString [
+	aString = 'fa-secondary' ifTrue: [ ^ #secondary ].
+	^ #primary
 ]
 
 { #category : 'private - name conversion' }
@@ -251,8 +295,17 @@ CFFontAwesomeMetadataImporter class >> selectorForIconName: anIconName [
 	^ selectorName asSymbol
 ]
 
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> secondaryOpacityFromRawSvg: rawSvg [
+	| matcher |
+	matcher := RxMatcher forString: '\.fa-secondary\{opacity:([0-9.]+)\}'.
+	(matcher search: rawSvg)
+		ifTrue: [ ^ (matcher subexpression: 1) asNumber ].
+	^ 0.4
+]
+
 { #category : 'private - source generation' }
-CFFontAwesomeMetadataImporter class >> sourceForIconSelector: aSelector iconName: anIconName styleName: aStyleName width: aWidth height: aHeight paths: pathCollection unicode: aUnicodeString label: aLabelString [
+CFFontAwesomeMetadataImporter class >> sourceForIconSelector: aSelector iconName: anIconName styleName: aStyleName width: aWidth height: aHeight pathSpecs: pathSpecs unicode: aUnicodeString label: aLabelString [
 	^ String streamContents: [ :stream |
 		stream
 			nextPutAll: aSelector asString;
@@ -275,8 +328,8 @@ CFFontAwesomeMetadataImporter class >> sourceForIconSelector: aSelector iconName
 			tab; tab; nextPutAll: 'height: ';
 			nextPutAll: aHeight asString;
 			cr;
-			tab; tab; nextPutAll: 'paths: ';
-			nextPutAll: pathCollection storeString;
+			tab; tab; nextPutAll: 'pathSpecs: ';
+			nextPutAll: pathSpecs storeString;
 			cr;
 			tab; tab; nextPutAll: 'unicode: ';
 			nextPutAll: aUnicodeString storeString;

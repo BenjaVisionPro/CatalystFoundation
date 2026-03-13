@@ -82,14 +82,14 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol size: aSize color: aColor [
 ]
 
 { #category : 'instance creation' }
-CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWidth height: aHeight paths: pathCollection unicode: aUnicodeString label: aLabelString [
+CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWidth height: aHeight pathSpecs: pathSpecs unicode: aUnicodeString label: aLabelString [
 	^ CFFontAwesomeIcon new
 		initializeName: aSelector
 		styleKey: aStyleKey
 		unicode: aUnicodeString
 		label: aLabelString
 		viewBox: (0 @ 0 extent: aWidth @ aHeight)
-		paths: pathCollection
+		pathSpecs: pathSpecs
 ]
 
 { #category : 'styles' }
