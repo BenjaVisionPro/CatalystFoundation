@@ -47,9 +47,17 @@ CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescrip
 CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescription [
 	| anIconLibrary |
 	anIconLibrary := aDescription iconLibraryClass style: aDescription styleName.
-	^ [ (anIconLibrary icon: aSelectorSymbol) asElement asScalableElement size: aDescription iconSize ]
+	^ [ ((anIconLibrary icon: aSelectorSymbol) asElement asScalableElement size: aDescription iconSize) ]
 		on: Error
 		do: [ self newChooseIconAffordanceFor: aDescription ]
+]
+
+{ #category : 'icons' }
+CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata size: aSize [
+	^ [ ((anIconMetadata iconLibraryClass style: anIconMetadata preferredStyleName)
+		icon: anIconMetadata selectorSymbol) asElement asScalableElement size: aSize ]
+		on: Error
+		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
 ]
 
 { #category : 'icons' }

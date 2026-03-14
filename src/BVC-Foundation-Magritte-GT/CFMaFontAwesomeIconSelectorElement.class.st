@@ -1,10 +1,13 @@
 Class {
 	#name : 'CFMaFontAwesomeIconSelectorElement',
-	#superclass : 'BrSimpleList',
+	#superclass : 'BlElement',
 	#traits : 'TGtMagritteWithFieldViewModel',
 	#classTraits : 'TGtMagritteWithFieldViewModel classTrait',
 	#instVars : [
-		'dropdownAnchor'
+		'dropdownAnchor',
+		'searchEditor',
+		'sizeEditor',
+		'list'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -19,19 +22,26 @@ CFMaFontAwesomeIconSelectorElement >> buildItemStencil [
 			constraintsDo: [ :c |
 				c horizontal matchParent.
 				c vertical fitContent ];
-			addChild: (BlElement new size: self description iconSize) as: #icon;
-			addChild: (BrLabel new
+			addChild: (BrFrame new fitContent) as: #icon;
+			addChild: (BlElement new
+				layout: BlLinearLayout vertical;
+				constraintsDo: [ :c |
+					c horizontal matchParent.
+					c vertical fitContent ];
+				addChild: (BrLabel new
 					aptitude: BrLabelAptitude new;
-					constraintsDo: [ :c | c linear vertical alignCenter ];
-					padding: (BlInsets left: 10 right: 3)) as: #label ]
+					padding: (BlInsets left: 10 right: 3)) as: #title;
+				addChild: (BrLabel new
+					aptitude: BrLabelAptitude new;
+					padding: (BlInsets left: 10 right: 3)) as: #selector) as: #labels ]
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> configureList [
-	self
+	list
 		itemStencil: self buildItemStencil;
-		itemDataBinder: self itemDataBinderBlock;
-		items: self description availableIconAssociations
+		itemDataBinder: self itemDataBinderBlock.
+	self refreshList
 ]
 
 { #category : 'accessing' }
@@ -44,6 +54,11 @@ CFMaFontAwesomeIconSelectorElement >> dropdownAnchor: anElement [
 	dropdownAnchor := anElement
 ]
 
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
+	^ self description iconLibraryClass metadata searchIconsMatching: self searchText
+]
+
 { #category : 'actions' }
 CFMaFontAwesomeIconSelectorElement >> hideDropdown [
 	dropdownAnchor ifNotNil: [ dropdownAnchor fireEvent: BrDropdownHideWish new ]
@@ -53,21 +68,84 @@ CFMaFontAwesomeIconSelectorElement >> hideDropdown [
 CFMaFontAwesomeIconSelectorElement >> initialize [
 	super initialize.
 	self
-		hFitContent;
-		vFitContent;
-		padding: (BlInsets all: 4).
-	self when: BrSelectionChanged do: [ :anEvent | self onSelectionChanged: anEvent ]
+		layout: BlLinearLayout vertical;
+		padding: (BlInsets all: 4);
+		cellSpacing: 4;
+		hMatchParent;
+		vMatchParent.
+
+	searchEditor := self newSearchEditor.
+	sizeEditor := self newSizeEditor.
+	list := self newList.
+
+	self addChildren: { self newControlsRow. list }
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
-	^ [ :anElement :anAssociation :anIndex |
-		anElement
-			replaceChild: (anElement childNamed: #icon)
-			with: (CFMaBuilderUtility newFontAwesomeIconFor: anAssociation key using: self description)
-			as: #icon.
-		(anElement childNamed: #label) text: anAssociation key asString.
+	^ [ :anElement :anMetadata :anIndex |
+		| labels iconHolder size |
+		size := self previewSize.
+		iconHolder := anElement childNamed: #icon.
+		iconHolder
+			removeChildren;
+			addChild: (CFMaBuilderUtility newFontAwesomeIconForMetadata: anMetadata size: size).
+		labels := anElement childNamed: #labels.
+		(labels childNamed: #title) text: (anMetadata label ifNil: [ anMetadata selectorSymbol asString ]).
+		(labels childNamed: #selector) text: anMetadata selectorSymbol asString.
 		anElement ]
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newControlsRow [
+	^ BlElement new
+		layout: BlLinearLayout horizontal;
+		cellSpacing: 6;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		addChildren: {
+			(BrLabel new aptitude: BrLabelAptitude new; text: 'Search'; fitContent; yourself).
+			searchEditor.
+			(BrLabel new aptitude: BrLabelAptitude new; text: 'Size'; fitContent; yourself).
+			sizeEditor };
+		yourself
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newList [
+	| aList |
+	aList := BrSimpleList new
+		hMatchParent;
+		vMatchParent;
+		yourself.
+	aList when: BrSelectionChanged do: [ :anEvent | self onSelectionChanged: anEvent ].
+	^ aList
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newSearchEditor [
+	| editor |
+	editor := BrEditor new
+		hMatchParent;
+		vFitContent;
+		yourself.
+	editor aptitude: BrEditorAptitude new.
+	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
+	^ editor
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newSizeEditor [
+	| editor |
+	editor := BrEditor new
+		hExact: 50;
+		vFitContent;
+		yourself.
+	editor aptitude: BrEditorAptitude new.
+	editor editor text: '32'.
+	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
+	^ editor
 ]
 
 { #category : 'api - field view model' }
@@ -80,12 +158,31 @@ CFMaFontAwesomeIconSelectorElement >> onSelectionChanged: anEvent [
 	| aWidgetElement |
 	aWidgetElement := anEvent currentTarget.
 	anEvent selectedDo: [ :anInterval |
-		| selectedAssociation |
-		selectedAssociation := aWidgetElement viewModel itemAt: anInterval first.
+		| selectedMetadata |
+		selectedMetadata := aWidgetElement viewModel itemAt: anInterval first.
 		GtMagritteBuilderUtility
-			write: selectedAssociation key
+			write: selectedMetadata selectorSymbol
 			using: self description
 			memento: self memento
 			element: self.
 		self hideDropdown ]
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> previewSize [
+	| text number |
+	text := sizeEditor editor text asString trimBoth.
+	text isEmpty ifTrue: [ ^ 32 @ 32 ].
+	number := [ text asNumber ] on: Error do: [ 32 ].
+	^ number @ number
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshList [
+	list items: self filteredMetadata
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> searchText [
+	^ searchEditor editor text asString trimBoth
 ]

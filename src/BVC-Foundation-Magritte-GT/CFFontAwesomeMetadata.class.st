@@ -33,11 +33,25 @@ CFFontAwesomeMetadata >> familyName: aString [
 
 { #category : 'searching' }
 CFFontAwesomeMetadata >> filterIconsMatching: aString [
-	| query |
-	query := aString trimBoth asLowercase.
-	query isEmpty ifTrue: [ ^ self allIconMetadata ].
-	^ self allIconMetadata
-		select: [ :each | each matchesSearchText: query ]
+	^ self searchIconsMatching: aString
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeMetadata >> gtSearchForFontAwesomeIconsFor: aSearch [
+	<gtSearch>
+	^ aSearch list
+		title: 'Font Awesome Icons';
+		priority: 5;
+		items: [ self allIconMetadata ];
+		itemsLimit: Float infinity;
+		itemName: [ :each | each searchableText ];
+		send: [ :each :step :search | each ];
+		filterBySubstringsWith: [ :aSearchFilter :aSpotterContext |
+			aSearchFilter
+				withCharacterSplitter;
+				beCaseInsensitive ];
+		wantsToDisplayOnEmptyQuery: false;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -55,6 +69,28 @@ CFFontAwesomeMetadata >> initialize [
 	super initialize.
 	styles := #().
 	iconsBySelector := Dictionary new
+]
+
+{ #category : 'searching' }
+CFFontAwesomeMetadata >> queryTermsFor: aString [
+	^ ((aString ifNil: [ '' ]) asLowercase findTokens: Character space asString)
+		reject: [ :each | each isEmpty ]
+]
+
+{ #category : 'searching' }
+CFFontAwesomeMetadata >> searchIconsMatching: aString [
+	| terms |
+	terms := self queryTermsFor: aString.
+	terms isEmpty ifTrue: [ ^ self allIconMetadata ].
+	^ (self allIconMetadata
+		select: [ :each | each matchesAllSearchTerms: terms ])
+		asSortedCollection: [ :a :b |
+			| sa sb |
+			sa := a scoreForSearchTerms: terms.
+			sb := b scoreForSearchTerms: terms.
+			sa = sb
+				ifTrue: [ a selectorSymbol asString <= b selectorSymbol asString ]
+				ifFalse: [ sa > sb ] ]
 ]
 
 { #category : 'accessing' }

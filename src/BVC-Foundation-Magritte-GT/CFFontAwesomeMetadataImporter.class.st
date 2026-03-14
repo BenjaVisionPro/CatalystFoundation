@@ -246,7 +246,8 @@ CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: ico
 		newIconMetadataForIconName: anIconName
 		iconData: iconData
 		selector: selector
-		categories: categories.
+		categories: categories
+		iconLibraryClass: aBaseClass.
 	fontAwesomeMetadata addIconMetadata: iconMetadata.
 
 	styles do: [ :styleName |
@@ -315,7 +316,7 @@ CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
 ]
 
 { #category : 'private - metadata' }
-CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector categories: categories [
+CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector categories: categories iconLibraryClass: anIconLibraryClass [
 	| searchData terms label |
 	searchData := iconData at: 'search' ifAbsent: [ Dictionary new ].
 	terms := searchData at: 'terms' ifAbsent: [ #() ].
@@ -328,6 +329,7 @@ CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName ic
 		searchTerms: terms;
 		styles: (iconData at: 'styles' ifAbsent: [ #() ]);
 		categories: categories;
+		iconLibraryClass: anIconLibraryClass;
 		yourself
 ]
 
