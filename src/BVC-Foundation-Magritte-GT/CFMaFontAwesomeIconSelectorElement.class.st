@@ -7,7 +7,10 @@ Class {
 		'dropdownAnchor',
 		'searchEditor',
 		'sizeEditor',
-		'list'
+		'list',
+		'infoSummaryLabel',
+		'versionLabel',
+		'logoContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -41,6 +44,7 @@ CFMaFontAwesomeIconSelectorElement >> configureList [
 	list
 		itemStencil: self buildItemStencil;
 		itemDataBinder: self itemDataBinderBlock.
+	self refreshInfoBar.
 	self refreshList
 ]
 
@@ -56,7 +60,7 @@ CFMaFontAwesomeIconSelectorElement >> dropdownAnchor: anElement [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
-	^ self description iconLibraryClass metadata searchIconsMatching: self searchText
+	^ self metadata searchIconsMatching: self searchText
 ]
 
 { #category : 'actions' }
@@ -78,7 +82,7 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	sizeEditor := self newSizeEditor.
 	list := self newList.
 
-	self addChildren: { self newControlsRow. list }
+	self addChildren: { self newControlsRow. list. self newInfoBar }
 ]
 
 { #category : 'private' }
@@ -94,6 +98,11 @@ CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
 		(labels childNamed: #title) text: (anMetadata label ifNil: [ anMetadata selectorSymbol asString ]).
 		(labels childNamed: #selector) text: anMetadata selectorSymbol asString.
 		anElement ]
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> metadata [
+	^ self description iconLibraryClass metadata
 ]
 
 { #category : 'private' }
@@ -129,6 +138,52 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 ]
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newInfoBar [
+	| row spacer rightPane |
+	row := BrHorizontalPane new
+		cellSpacing: 6;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		margin: (BlInsets top: 6);
+		yourself.
+
+	infoSummaryLabel := BrLabel new
+		aptitude: BrLabelAptitude new;
+		fitContent;
+		yourself.
+
+	spacer := BlElement new
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		yourself.
+
+	rightPane := BrVerticalPane new
+		cellSpacing: 2;
+		constraintsDo: [ :c |
+			c horizontal fitContent.
+			c vertical fitContent ];
+		yourself.
+
+	versionLabel := BrLabel new
+		aptitude: BrLabelAptitude new;
+		opacity: 0.5;
+		fitContent;
+		constraintsDo: [ :c | c linear horizontal alignRight ];
+		yourself.
+
+	logoContainer := BrFrame new
+		fitContent;
+		constraintsDo: [ :c | c linear horizontal alignRight ];
+		yourself.
+
+	rightPane addChildren: { versionLabel. logoContainer }.
+	row addChildren: { infoSummaryLabel. spacer. rightPane }.
+	^ row
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newList [
 	| aList |
 	aList := BrSimpleList new
@@ -138,6 +193,24 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 		yourself.
 	aList when: BrSelectionChanged do: [ :anEvent | self onSelectionChanged: anEvent ].
 	^ aList
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newLogoElement [
+	^ [ ((((self description iconLibraryClass style: 'brands')
+		icon: #fontAwesomeLogoFull)
+		asElement)
+		asScalableElement
+		size: 96 @ 18)
+		opacity: 0.5;
+		yourself ]
+		on: Error
+		do: [ BrLabel new
+			aptitude: BrLabelAptitude new;
+			text: self metadata familyName;
+			opacity: 0.5;
+			fitContent;
+			yourself ]
 ]
 
 { #category : 'private' }
@@ -190,10 +263,24 @@ CFMaFontAwesomeIconSelectorElement >> onSelectionChanged: anEvent [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> previewSize [
 	| text number |
-	text := sizeEditor editor text asString trimBoth.
+	text := sizeEditor text asString trimBoth.
 	text isEmpty ifTrue: [ ^ 32 @ 32 ].
 	number := [ text asNumber ] on: Error do: [ 32 ].
 	^ number @ number
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
+	| metadata |
+	metadata := self metadata.
+	infoSummaryLabel ifNotNil: [
+		infoSummaryLabel text: metadata allIconMetadata size asString, ' icons  ', metadata styles size asString, ' styles' ].
+	versionLabel ifNotNil: [
+		versionLabel text: 'v', metadata version ].
+	logoContainer ifNotNil: [
+		logoContainer
+			removeChildren;
+			addChild: self newLogoElement ]
 ]
 
 { #category : 'private' }
@@ -203,5 +290,5 @@ CFMaFontAwesomeIconSelectorElement >> refreshList [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> searchText [
-	^ searchEditor editor text asString trimBoth
+	^ searchEditor text asString trimBoth
 ]
