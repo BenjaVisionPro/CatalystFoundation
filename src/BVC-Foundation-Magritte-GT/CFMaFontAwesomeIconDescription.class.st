@@ -7,7 +7,7 @@ Class {
 
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> availableIconAssociations [
-	^ self availableIcons associations
+	^ self availableIcons 
 		asSortedCollection: [ :a :b | a key asString < b key asString ]
 ]
 

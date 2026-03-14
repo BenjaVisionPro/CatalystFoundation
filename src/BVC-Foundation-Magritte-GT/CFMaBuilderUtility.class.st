@@ -82,16 +82,24 @@ CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 
 { #category : 'icons' }
 CFMaBuilderUtility class >> newWritableFontAwesomeIconMemento: aMemento using: aDescription [
-	| anAnchor |
-	anAnchor := BrLabel new
-		beFocusable;
-		aptitude: BrLabelAptitude new;
-		fitContent;
-		yourself.
+	| anAnchor aViewer |
+	anAnchor := BrFrame new
+			beFocusable;
+			fitContent;
+			yourself.
 
-	anAnchor addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-		handle: (self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription)
-		content: (self newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription)).
+	aViewer := self
+			newWritableFontAwesomeIconViewerMemento: aMemento
+			using: aDescription.
+	anAnchor addChild: aViewer.
+
+	anAnchor
+		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+				handle: aViewer
+				content: (self
+						newFontAwesomeIconSelectorFor: anAnchor
+						memento: aMemento
+						description: aDescription)).
 
 	^ anAnchor
 ]
@@ -102,20 +110,18 @@ CFMaBuilderUtility class >> newWritableFontAwesomeIconViewerMemento: aMemento us
 	aFrame := BrFrame new.
 	aFrame
 		fitContent;
-		constraintsDo: [ :c |
+		constraintsDo: [ :c | 
 			c grid vertical alignCenter.
 			c grid horizontal alignLeft ];
-		withAsyncSinkDo: [ :anElementSink |
+		withAsyncSinkDo: [ :anElementSink | 
 			anElementSink
 				sink: AsyncPeekSink new;
-				whenUpdate: [ :aContainer :aSink |
+				whenUpdate: [ :aContainer :aSink | 
 					| aValue anIcon |
 					aValue := aSink value currentValue.
-					anIcon := aDescription blocStencil
-						model: aValue;
-						description: aDescription;
-						memento: aMemento;
-						asElement.
+					anIcon := aValue
+							ifNil: [ self newChooseIconAffordanceFor: aDescription ]
+							ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
 					aContainer
 						removeChildren;
 						addChild: anIcon ].
