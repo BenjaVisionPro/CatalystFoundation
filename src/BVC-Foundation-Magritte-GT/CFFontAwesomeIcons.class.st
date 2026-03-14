@@ -5,6 +5,9 @@ Each discovered Font Awesome style is represented by a subclass created on deman
 Class {
 	#name : 'CFFontAwesomeIcons',
 	#superclass : 'Object',
+	#classVars : [
+		'Metadata'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -90,6 +93,18 @@ CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWid
 		label: aLabelString
 		viewBox: (0 @ 0 extent: aWidth @ aHeight)
 		pathSpecs: pathSpecs
+]
+
+
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> metadata [
+	^ Metadata ifNil: [ Metadata := CFFontAwesomeMetadata new ]
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> metadata: aMetadata [
+	Metadata := aMetadata
 ]
 
 { #category : 'styles' }

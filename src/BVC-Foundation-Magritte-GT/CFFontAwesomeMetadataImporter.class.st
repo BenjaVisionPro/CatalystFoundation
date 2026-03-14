@@ -168,11 +168,14 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 
 { #category : 'importing' }
 CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString [
-	| metadata selectorsByStyle |
-	metadata := self readMetadataFrom: aFileReference.
+	| rawMetadata selectorsByStyle fontAwesomeMetadata |
+	rawMetadata := self readMetadataFrom: aFileReference.
 	selectorsByStyle := Dictionary new.
+	fontAwesomeMetadata := self
+		newMetadataForFamilyName: aFamilyName
+		version: aVersionString.
 
-	metadata keysAndValuesDo: [ :iconName :iconData |
+	rawMetadata keysAndValuesDo: [ :iconName :iconData |
 		self
 			importIconNamed: iconName
 			metadata: iconData
@@ -180,9 +183,15 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 			packageName: aPackageName
 			familyName: aFamilyName
 			version: aVersionString
-			selectorsByStyle: selectorsByStyle ].
+			selectorsByStyle: selectorsByStyle
+			fontAwesomeMetadata: fontAwesomeMetadata ].
 
 	self compileAvailableIconsMethodsFrom: selectorsByStyle baseClass: aBaseClass.
+	self compileAvailableStylesMethodOn: aBaseClass.
+
+	fontAwesomeMetadata styles: selectorsByStyle keys asSortedCollection asArray.
+	aBaseClass class metadata: fontAwesomeMetadata.
+
 	^ aBaseClass
 ]
 
@@ -222,13 +231,19 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonPath: aPathString [
 ]
 
 { #category : 'private - importing' }
-CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: iconData baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString selectorsByStyle: selectorsByStyle [
-	| styles selector unicode label svgByStyle |
+CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: iconData baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString selectorsByStyle: selectorsByStyle fontAwesomeMetadata: fontAwesomeMetadata [
+	| styles selector unicode label svgByStyle iconMetadata |
 	styles := iconData at: 'styles' ifAbsent: [ #() ].
 	selector := self selectorForIconName: anIconName.
 	unicode := iconData at: 'unicode' ifAbsent: [ '' ].
 	label := iconData at: 'label' ifAbsent: [ anIconName ].
 	svgByStyle := iconData at: 'svg' ifAbsent: [ Dictionary new ].
+
+	iconMetadata := self
+		newIconMetadataForIconName: anIconName
+		iconData: iconData
+		selector: selector.
+	fontAwesomeMetadata addIconMetadata: iconMetadata.
 
 	styles do: [ :styleName |
 		| styleClass svgData |
@@ -252,6 +267,32 @@ CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: ico
 
 			(selectorsByStyle at: styleName ifAbsentPut: [ OrderedCollection new ])
 				add: selector ] ]
+]
+
+{ #category : 'private - metadata' }
+CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector [
+	| searchData terms categories label |
+	searchData := iconData at: 'search' ifAbsent: [ Dictionary new ].
+	terms := searchData at: 'terms' ifAbsent: [ #() ].
+	categories := searchData at: 'categories' ifAbsent: [ #() ].
+	label := iconData at: 'label' ifAbsent: [ anIconName ].
+
+	^ CFFontAwesomeIconMetadata new
+		selectorSymbol: aSelector;
+		fontAwesomeName: anIconName;
+		label: label;
+		searchTerms: terms;
+		styles: (iconData at: 'styles' ifAbsent: [ #() ]);
+		categories: categories;
+		yourself
+]
+
+{ #category : 'private - metadata' }
+CFFontAwesomeMetadataImporter class >> newMetadataForFamilyName: aFamilyName version: aVersionString [
+	^ CFFontAwesomeMetadata new
+		familyName: aFamilyName;
+		version: aVersionString;
+		yourself
 ]
 
 { #category : 'private - versioning' }
