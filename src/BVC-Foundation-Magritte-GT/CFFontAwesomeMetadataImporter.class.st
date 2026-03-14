@@ -170,11 +170,11 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString [
 	| rawMetadata selectorsByStyle fontAwesomeMetadata categoryMap |
 	rawMetadata := self readMetadataFrom: aFileReference.
+	categoryMap := self readCategoryMapFromIconsJsonFile: aFileReference.
 	selectorsByStyle := Dictionary new.
 	fontAwesomeMetadata := self
 		newMetadataForFamilyName: aFamilyName
 		version: aVersionString.
-	categoryMap := self readCategoryMapFromIconsJsonFile: aFileReference.
 
 	rawMetadata keysAndValuesDo: [ :iconName :iconData |
 		self
@@ -234,18 +234,19 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonPath: aPathString [
 
 { #category : 'private - importing' }
 CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: iconData categoryMap: categoryMap baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString selectorsByStyle: selectorsByStyle fontAwesomeMetadata: fontAwesomeMetadata [
-	| styles selector unicode label svgByStyle iconMetadata |
+	| styles selector unicode label svgByStyle iconMetadata categories |
 	styles := iconData at: 'styles' ifAbsent: [ #() ].
 	selector := self selectorForIconName: anIconName.
 	unicode := iconData at: 'unicode' ifAbsent: [ '' ].
 	label := iconData at: 'label' ifAbsent: [ anIconName ].
 	svgByStyle := iconData at: 'svg' ifAbsent: [ Dictionary new ].
+	categories := categoryMap at: anIconName ifAbsent: [ #() ].
 
 	iconMetadata := self
 		newIconMetadataForIconName: anIconName
 		iconData: iconData
 		selector: selector
-		categories: (categoryMap at: anIconName ifAbsent: [ #() ]).
+		categories: categories.
 	fontAwesomeMetadata addIconMetadata: iconMetadata.
 
 	styles do: [ :styleName |
@@ -314,7 +315,7 @@ CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
 ]
 
 { #category : 'private - metadata' }
-CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector categories: categoryNames [
+CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector categories: categories [
 	| searchData terms label |
 	searchData := iconData at: 'search' ifAbsent: [ Dictionary new ].
 	terms := searchData at: 'terms' ifAbsent: [ #() ].
@@ -326,7 +327,7 @@ CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName ic
 		label: label;
 		searchTerms: terms;
 		styles: (iconData at: 'styles' ifAbsent: [ #() ]);
-		categories: categoryNames;
+		categories: categories;
 		yourself
 ]
 
@@ -502,19 +503,13 @@ CFFontAwesomeMetadataImporter class >> styleSelectorFor: aStyleName [
 	^ selectorName asSymbol
 ]
 
-
-
-{ #category : 'private - categories' }
-CFFontAwesomeMetadataImporter class >> categoriesYamlFileForIconsJsonFile: aFileReference [
-	^ aFileReference parent / 'categories.yml'
-]
-
 { #category : 'private - categories' }
 CFFontAwesomeMetadataImporter class >> readCategoryMapFromIconsJsonFile: aFileReference [
-	| yamlFile |
-	yamlFile := self categoriesYamlFileForIconsJsonFile: aFileReference.
-	(yamlFile exists and: [ yamlFile isFile ]) ifFalse: [ ^ Dictionary new ].
-	^ self readCategoryMapFromYamlFile: yamlFile
+	| categoriesFile |
+	categoriesFile := aFileReference parent / 'categories.yml'.
+	(categoriesFile exists and: [ categoriesFile isFile ])
+		ifFalse: [ ^ Dictionary new ].
+	^ self readCategoryMapFromYamlFile: categoriesFile
 ]
 
 { #category : 'private - categories' }
@@ -530,8 +525,9 @@ CFFontAwesomeMetadataImporter class >> readCategoryMapFromYamlFile: aFileReferen
 		| line trimmed indent iconName categories |
 		line := rawLine copyUpTo: $#.
 		trimmed := line trimBoth.
-		trimmed isEmpty ifTrue: [ insideIcons := false. ] ifFalse: [
-			indent := line size - (line withBlanksTrimmedLeft size).
+		trimmed isEmpty ifTrue: [
+			insideIcons := false ] ifFalse: [
+			indent := line size - line trimLeft size.
 			(indent = 0 and: [ trimmed last = $: ]) ifTrue: [
 				currentCategoryKey := trimmed allButLast.
 				currentCategoryLabel := currentCategoryKey.
@@ -543,7 +539,8 @@ CFFontAwesomeMetadataImporter class >> readCategoryMapFromYamlFile: aFileReferen
 						(insideIcons and: [ indent >= 4 and: [ trimmed beginsWith: '- ' ] ]) ifTrue: [
 							iconName := self yamlScalarValueFrom: (trimmed allButFirst: 2).
 							categories := categoryMap at: iconName ifAbsentPut: [ OrderedCollection new ].
-							(categories includes: currentCategoryLabel) ifFalse: [ categories add: currentCategoryLabel ] ] ] ] ] ] ] ].
+							(categories includes: currentCategoryLabel) ifFalse: [
+								categories add: currentCategoryLabel ] ] ] ] ] ] ].
 
 	categoryMap keysAndValuesDo: [ :key :value |
 		categoryMap at: key put: value asArray ].
