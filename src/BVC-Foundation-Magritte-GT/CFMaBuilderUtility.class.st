@@ -86,28 +86,31 @@ CFMaBuilderUtility class >> newWritableFontAwesomeIconMemento: aMemento using: a
 	anAnchor := BrFrame new
 			beFocusable;
 			fitContent;
+			padding: (BlInsets all: 2);
 			yourself.
 
-	anAnchor addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-			handle: [ self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription ]
-			content: [ self
-				newFontAwesomeIconSelectorFor: anAnchor
-				memento: aMemento
-				description: aDescription ]).
+	anAnchor
+		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+				handle: [ self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription ]
+				content: [ self
+						newFontAwesomeIconSelectorFor: anAnchor
+						memento: aMemento
+						description: aDescription ]).
 
-	anAnchor withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :aContainer :aSink |
-				| aValue anIcon |
-				aValue := aSink value currentValue.
-				anIcon := aValue
-					ifNil: [ self newChooseIconAffordanceFor: aDescription ]
-					ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
-				aContainer
-					removeChildren;
-					addChild: anIcon ].
-		(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
+	anAnchor
+		withAsyncSinkDo: [ :anElementSink | 
+			anElementSink
+				sink: AsyncPeekSink new;
+				whenUpdate: [ :aContainer :aSink | 
+					| aValue anIcon |
+					aValue := aSink value currentValue.
+					anIcon := aValue
+							ifNil: [ self newChooseIconAffordanceFor: aDescription ]
+							ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
+					aContainer
+						removeChildren;
+						addChild: anIcon ].
+			(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 
 	^ anAnchor
 ]
@@ -118,6 +121,7 @@ CFMaBuilderUtility class >> newWritableFontAwesomeIconViewerMemento: aMemento us
 	aFrame := BrFrame new.
 	aFrame
 		fitContent;
+		padding: (BlInsets all: 2);
 		constraintsDo: [ :c | 
 			c grid vertical alignCenter.
 			c grid horizontal alignLeft ];
