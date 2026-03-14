@@ -95,18 +95,6 @@ CFFontAwesomeIcons class >> iconNamed: aSelector styleKey: aStyleKey width: aWid
 		pathSpecs: pathSpecs
 ]
 
-
-
-{ #category : 'metadata' }
-CFFontAwesomeIcons class >> metadata [
-	^ Metadata ifNil: [ Metadata := CFFontAwesomeMetadata new ]
-]
-
-{ #category : 'metadata' }
-CFFontAwesomeIcons class >> metadata: aMetadata [
-	Metadata := aMetadata
-]
-
 { #category : 'styles' }
 CFFontAwesomeIcons class >> loadFromDisc [
 	"Point this to your licensed download of the font awesome metadata"
@@ -116,6 +104,16 @@ CFFontAwesomeIcons class >> loadFromDisc [
 				asFileReference
 		packageName: 'BVC-FontAwesome'
 		version: '5.15.4'
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> metadata [
+	^ Metadata ifNil: [ Metadata := CFFontAwesomeMetadata new ]
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> metadata: aMetadata [
+	Metadata := aMetadata
 ]
 
 { #category : 'styles' }

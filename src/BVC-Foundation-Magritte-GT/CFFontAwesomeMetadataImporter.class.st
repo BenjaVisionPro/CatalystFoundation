@@ -190,7 +190,7 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 	self compileAvailableStylesMethodOn: aBaseClass.
 
 	fontAwesomeMetadata styles: selectorsByStyle keys asSortedCollection asArray.
-	aBaseClass class metadata: fontAwesomeMetadata.
+	aBaseClass  metadata: fontAwesomeMetadata.
 
 	^ aBaseClass
 ]
@@ -269,6 +269,47 @@ CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: ico
 				add: selector ] ]
 ]
 
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> inferredVersionForIconsJsonFile: aFileReference [
+	| pathString separators tokens |
+	pathString := self pathStringFor: aFileReference.
+	separators := '/\\-_ '.
+	tokens := pathString findTokens: separators.
+	^ tokens
+		detect: [ :each | self isSemanticVersionString: each ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - versioning' }
+CFFontAwesomeMetadataImporter class >> isSemanticVersionString: aString [
+	| parts |
+	parts := aString findTokens: '.'.
+	parts size = 3 ifFalse: [ ^ false ].
+	^ parts allSatisfy: [ :each | each notEmpty and: [ each allSatisfy: #isDigit ] ]
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> loadFromDisc [
+	^ self
+		importFromIconsJsonFile: '/Users/jupiter/Downloads/fontawesome-pro-5.15.4-desktop/metadata/icons.json'
+				asFileReference
+		baseClass: CFFontAwesomeIcons
+		packageName: 'BVC-FontAwesome'
+		familyName: 'Font Awesome Pro'
+		version: '5.15.4'
+]
+
+{ #category : 'private - name conversion' }
+CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
+	| parts |
+	parts := aString findTokens: '-'.
+	parts isEmpty ifTrue: [ ^ '' ].
+
+	^ String streamContents: [ :stream |
+		stream nextPutAll: parts first.
+		parts allButFirst do: [ :each | stream nextPutAll: each capitalized ] ]
+]
+
 { #category : 'private - metadata' }
 CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector [
 	| searchData terms categories label |
@@ -293,36 +334,6 @@ CFFontAwesomeMetadataImporter class >> newMetadataForFamilyName: aFamilyName ver
 		familyName: aFamilyName;
 		version: aVersionString;
 		yourself
-]
-
-{ #category : 'private - versioning' }
-CFFontAwesomeMetadataImporter class >> inferredVersionForIconsJsonFile: aFileReference [
-	| pathString separators tokens |
-	pathString := self pathStringFor: aFileReference.
-	separators := '/\\-_ '.
-	tokens := pathString findTokens: separators.
-	^ tokens
-		detect: [ :each | self isSemanticVersionString: each ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'private - versioning' }
-CFFontAwesomeMetadataImporter class >> isSemanticVersionString: aString [
-	| parts |
-	parts := aString findTokens: '.'.
-	parts size = 3 ifFalse: [ ^ false ].
-	^ parts allSatisfy: [ :each | each notEmpty and: [ each allSatisfy: #isDigit ] ]
-]
-
-{ #category : 'private - name conversion' }
-CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
-	| parts |
-	parts := aString findTokens: '-'.
-	parts isEmpty ifTrue: [ ^ '' ].
-
-	^ String streamContents: [ :stream |
-		stream nextPutAll: parts first.
-		parts allButFirst do: [ :each | stream nextPutAll: each capitalized ] ]
 ]
 
 { #category : 'private - normalizing' }

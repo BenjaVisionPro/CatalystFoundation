@@ -21,15 +21,6 @@ CFFontAwesomeMetadata >> allIconMetadata [
 	^ iconsBySelector values asArray
 ]
 
-{ #category : 'searching' }
-CFFontAwesomeMetadata >> filterIconsMatching: aString [
-	| query |
-	query := aString trimBoth asLowercase.
-	query isEmpty ifTrue: [ ^ self allIconMetadata ].
-	^ self allIconMetadata
-		select: [ :each | each matchesSearchText: query ]
-]
-
 { #category : 'accessing' }
 CFFontAwesomeMetadata >> familyName [
 	^ familyName
@@ -38,6 +29,15 @@ CFFontAwesomeMetadata >> familyName [
 { #category : 'accessing' }
 CFFontAwesomeMetadata >> familyName: aString [
 	familyName := aString
+]
+
+{ #category : 'searching' }
+CFFontAwesomeMetadata >> filterIconsMatching: aString [
+	| query |
+	query := aString trimBoth asLowercase.
+	query isEmpty ifTrue: [ ^ self allIconMetadata ].
+	^ self allIconMetadata
+		select: [ :each | each matchesSearchText: query ]
 ]
 
 { #category : 'accessing' }
