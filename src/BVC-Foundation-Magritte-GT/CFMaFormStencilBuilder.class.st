@@ -12,10 +12,10 @@ Class {
 CFMaFormStencilBuilder >> buildDefault [
 	| aContainer background |
 	aContainer := BrVerticalPane new.
-	headerElement := CFMaFormHeaderElement new
+	"headerElement := CFMaFormHeaderElement new
 			fieldViewModel: (GtMagritteFieldViewModel new
 					memento: memento;
-					description: memento magritteDescription).
+					description: memento magritteDescription)."
 
 	aContainer magritte
 		beLabelContainer;
@@ -33,6 +33,6 @@ CFMaFormStencilBuilder >> buildDefault [
 		hFitContentLimited;
 		vFitContent.
 
-	aContainer addChild: headerElement as: #header.
+	"aContainer addChild: headerElement as: #header."
 	^ aContainer
 ]

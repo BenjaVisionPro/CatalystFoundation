@@ -52,6 +52,19 @@ CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescr
 		do: [ self newChooseIconAffordanceFor: aDescription ]
 ]
 
+{ #category : 'icons' }
+CFMaBuilderUtility class >> newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription [
+	^ CFMaFontAwesomeIconSelectorElement new
+		fieldViewModel: (GtMagritteFieldViewModel new
+				memento: aMemento;
+				description: aDescription;
+				yourself);
+		dropdownAnchor: anAnchor;
+		hExact: aDescription selectorExtent x;
+		vExact: aDescription selectorExtent y;
+		yourself
+]
+
 { #category : 'elements' }
 CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 	^ BrVerticalPane new
@@ -108,17 +121,4 @@ CFMaBuilderUtility class >> newWritableFontAwesomeIconViewerMemento: aMemento us
 						addChild: anIcon ].
 			(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 	^ aFrame
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription [
-	^ CFMaFontAwesomeIconSelectorElement new
-		fieldViewModel: (GtMagritteFieldViewModel new
-				memento: aMemento;
-				description: aDescription;
-				yourself);
-		dropdownAnchor: anAnchor;
-		hExact: aDescription selectorExtent x;
-		vExact: aDescription selectorExtent y;
-		yourself
 ]
