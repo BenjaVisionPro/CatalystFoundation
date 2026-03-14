@@ -70,8 +70,9 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	self
 		layout: BlLinearLayout vertical;
 		padding: (BlInsets all: 4);
-		hMatchParent;
-		vMatchParent.
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ].
 
 	searchEditor := self newSearchEditor.
 	sizeEditor := self newSizeEditor.
@@ -131,8 +132,9 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 CFMaFontAwesomeIconSelectorElement >> newList [
 	| aList |
 	aList := BrSimpleList new
-		hMatchParent;
-		vMatchParent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
 		yourself.
 	aList when: BrSelectionChanged do: [ :anEvent | self onSelectionChanged: anEvent ].
 	^ aList
@@ -142,8 +144,9 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 CFMaFontAwesomeIconSelectorElement >> newSearchEditor [
 	| editor |
 	editor := BrEditor new
-		hMatchParent;
-		vFitContent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
 		yourself.
 	editor aptitude: BrEditorAptitude new.
 	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
@@ -154,8 +157,9 @@ CFMaFontAwesomeIconSelectorElement >> newSearchEditor [
 CFMaFontAwesomeIconSelectorElement >> newSizeEditor [
 	| editor |
 	editor := BrEditor new
-		hExact: 50;
-		vFitContent;
+		constraintsDo: [ :c |
+			c horizontal exact: 50.
+			c vertical fitContent ];
 		yourself.
 	editor aptitude: BrEditorAptitude new.
 	editor editor text: '32'.
