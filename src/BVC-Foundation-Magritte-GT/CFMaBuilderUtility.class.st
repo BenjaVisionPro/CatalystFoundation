@@ -82,24 +82,32 @@ CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 
 { #category : 'icons' }
 CFMaBuilderUtility class >> newWritableFontAwesomeIconMemento: aMemento using: aDescription [
-	| anAnchor aViewer |
+	| anAnchor |
 	anAnchor := BrFrame new
 			beFocusable;
 			fitContent;
 			yourself.
 
-	aViewer := self
-			newWritableFontAwesomeIconViewerMemento: aMemento
-			using: aDescription.
-	anAnchor addChild: aViewer.
+	anAnchor addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+			handle: [ self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription ]
+			content: [ self
+				newFontAwesomeIconSelectorFor: anAnchor
+				memento: aMemento
+				description: aDescription ]).
 
-	anAnchor
-		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-				handle: aViewer
-				content: (self
-						newFontAwesomeIconSelectorFor: anAnchor
-						memento: aMemento
-						description: aDescription)).
+	anAnchor withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :aContainer :aSink |
+				| aValue anIcon |
+				aValue := aSink value currentValue.
+				anIcon := aValue
+					ifNil: [ self newChooseIconAffordanceFor: aDescription ]
+					ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
+				aContainer
+					removeChildren;
+					addChild: anIcon ].
+		(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 
 	^ anAnchor
 ]
