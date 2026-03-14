@@ -399,6 +399,50 @@ CFFontAwesomeMetadataImporter class >> pathStringFor: aFileReference [
 	^ aFileReference asString
 ]
 
+{ #category : 'private - categories' }
+CFFontAwesomeMetadataImporter class >> readCategoryMapFromIconsJsonFile: aFileReference [
+	| categoriesFile |
+	categoriesFile := aFileReference parent / 'categories.yml'.
+	(categoriesFile exists and: [ categoriesFile isFile ])
+		ifFalse: [ ^ Dictionary new ].
+	^ self readCategoryMapFromYamlFile: categoriesFile
+]
+
+{ #category : 'private - categories' }
+CFFontAwesomeMetadataImporter class >> readCategoryMapFromYamlFile: aFileReference [
+	| categoryMap lines currentCategoryKey currentCategoryLabel insideIcons |
+	categoryMap := Dictionary new.
+	lines := aFileReference contents lines.
+	currentCategoryKey := nil.
+	currentCategoryLabel := nil.
+	insideIcons := false.
+
+	lines do: [ :rawLine |
+		| line trimmed indent iconName categories |
+		line := rawLine copyUpTo: $#.
+		trimmed := line trimBoth.
+		trimmed isEmpty ifTrue: [
+			insideIcons := false ] ifFalse: [
+			indent := line size - line trimLeft size.
+			(indent = 0 and: [ trimmed last = $: ]) ifTrue: [
+				currentCategoryKey := trimmed allButLast.
+				currentCategoryLabel := currentCategoryKey.
+				insideIcons := false ] ifFalse: [
+				(indent = 2 and: [ trimmed beginsWith: 'label:' ]) ifTrue: [
+					currentCategoryLabel := self yamlScalarValueFrom: (trimmed allButFirst: 'label:' size) ] ifFalse: [
+					(indent = 2 and: [ trimmed = 'icons:' ]) ifTrue: [
+						insideIcons := true ] ifFalse: [
+						(insideIcons and: [ indent >= 4 and: [ trimmed beginsWith: '- ' ] ]) ifTrue: [
+							iconName := self yamlScalarValueFrom: (trimmed allButFirst: 2).
+							categories := categoryMap at: iconName ifAbsentPut: [ OrderedCollection new ].
+							(categories includes: currentCategoryLabel) ifFalse: [
+								categories add: currentCategoryLabel ] ] ] ] ] ] ].
+
+	categoryMap keysAndValuesDo: [ :key :value |
+		categoryMap at: key put: value asArray ].
+	^ categoryMap
+]
+
 { #category : 'private - reading' }
 CFFontAwesomeMetadataImporter class >> readMetadataFrom: aFileReference [
 	^ NeoJSONReader fromString: aFileReference contents
@@ -505,48 +549,9 @@ CFFontAwesomeMetadataImporter class >> styleSelectorFor: aStyleName [
 	^ selectorName asSymbol
 ]
 
-{ #category : 'private - categories' }
-CFFontAwesomeMetadataImporter class >> readCategoryMapFromIconsJsonFile: aFileReference [
-	| categoriesFile |
-	categoriesFile := aFileReference parent / 'categories.yml'.
-	(categoriesFile exists and: [ categoriesFile isFile ])
-		ifFalse: [ ^ Dictionary new ].
-	^ self readCategoryMapFromYamlFile: categoriesFile
-]
-
-{ #category : 'private - categories' }
-CFFontAwesomeMetadataImporter class >> readCategoryMapFromYamlFile: aFileReference [
-	| categoryMap lines currentCategoryKey currentCategoryLabel insideIcons |
-	categoryMap := Dictionary new.
-	lines := aFileReference contents lines.
-	currentCategoryKey := nil.
-	currentCategoryLabel := nil.
-	insideIcons := false.
-
-	lines do: [ :rawLine |
-		| line trimmed indent iconName categories |
-		line := rawLine copyUpTo: $#.
-		trimmed := line trimBoth.
-		trimmed isEmpty ifTrue: [
-			insideIcons := false ] ifFalse: [
-			indent := line size - line trimLeft size.
-			(indent = 0 and: [ trimmed last = $: ]) ifTrue: [
-				currentCategoryKey := trimmed allButLast.
-				currentCategoryLabel := currentCategoryKey.
-				insideIcons := false ] ifFalse: [
-				(indent = 2 and: [ trimmed beginsWith: 'label:' ]) ifTrue: [
-					currentCategoryLabel := self yamlScalarValueFrom: (trimmed allButFirst: 'label:' size) ] ifFalse: [
-					(indent = 2 and: [ trimmed = 'icons:' ]) ifTrue: [
-						insideIcons := true ] ifFalse: [
-						(insideIcons and: [ indent >= 4 and: [ trimmed beginsWith: '- ' ] ]) ifTrue: [
-							iconName := self yamlScalarValueFrom: (trimmed allButFirst: 2).
-							categories := categoryMap at: iconName ifAbsentPut: [ OrderedCollection new ].
-							(categories includes: currentCategoryLabel) ifFalse: [
-								categories add: currentCategoryLabel ] ] ] ] ] ] ].
-
-	categoryMap keysAndValuesDo: [ :key :value |
-		categoryMap at: key put: value asArray ].
-	^ categoryMap
+{ #category : 'private - parsing raw svg' }
+CFFontAwesomeMetadataImporter class >> xmlDocumentFromRawSvg: rawSvg [
+	^ XMLDOMParser parse: rawSvg
 ]
 
 { #category : 'private - categories' }
@@ -558,9 +563,4 @@ CFFontAwesomeMetadataImporter class >> yamlScalarValueFrom: aString [
 	((value beginsWith: '"') and: [ value endsWith: '"' ])
 		ifTrue: [ ^ value copyFrom: 2 to: value size - 1 ].
 	^ value
-]
-
-{ #category : 'private - parsing raw svg' }
-CFFontAwesomeMetadataImporter class >> xmlDocumentFromRawSvg: rawSvg [
-	^ XMLDOMParser parse: rawSvg
 ]

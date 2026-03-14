@@ -14,9 +14,7 @@ Class {
 
 { #category : 'styles' }
 CFFontAwesomeIcons class >> availableStyles [
-	^ (self subclasses
-		collect: [ :each | each styleName ])
-		asSortedCollection asArray
+	^ #('brands' 'duotone' 'light' 'regular' 'solid')
 ]
 
 { #category : 'gt extensions' }

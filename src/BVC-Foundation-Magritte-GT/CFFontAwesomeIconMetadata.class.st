@@ -50,6 +50,11 @@ CFFontAwesomeIconMetadata >> gtDetailsFor: aView [
 		column: 'Value' text: [ :each | each second ]
 ]
 
+{ #category : 'accessing' }
+CFFontAwesomeIconMetadata >> gtDisplayText [
+	^ self label ifNil: [ self selectorSymbol asString ]
+]
+
 { #category : 'gt extensions' }
 CFFontAwesomeIconMetadata >> gtLiveFor: aView [
 	<gtView>
@@ -63,11 +68,6 @@ CFFontAwesomeIconMetadata >> gtLiveFor: aView [
 					size: 64 @ 64
 					color: Color black) asElement);
 				clipChildren: false ]
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeIconMetadata >> gtDisplayText [
-	^ self label ifNil: [ self selectorSymbol asString ]
 ]
 
 { #category : 'accessing' }
@@ -130,11 +130,24 @@ CFFontAwesomeIconMetadata >> scoreForSearchTerms: aCollection [
 		(selector beginsWith: term) ifTrue: [ score := score + 300 ].
 		(title beginsWith: term) ifTrue: [ score := score + 200 ].
 		((selector includesSubstring: term)
-			or: [ name includesSubstring: term ]
-			or: [ title includesSubstring: term ]) ifTrue: [ score := score + 50 ].
-		(self searchTerms anySatisfy: [ :each | each asString asLowercase includesSubstring: term ]) ifTrue: [ score := score + 20 ].
-		(self categories anySatisfy: [ :each | each asString asLowercase includesSubstring: term ]) ifTrue: [ score := score + 10 ] ].
+			or: [ (name includesSubstring: term)
+				or: [ title includesSubstring: term ] ])
+			ifTrue: [ score := score + 50 ].
+		(self searchTerms anySatisfy: [ :each | each asString asLowercase includesSubstring: term ])
+			ifTrue: [ score := score + 20 ].
+		(self categories anySatisfy: [ :each | each asString asLowercase includesSubstring: term ])
+			ifTrue: [ score := score + 10 ] ].
 	^ score
+]
+
+{ #category : 'accessing' }
+CFFontAwesomeIconMetadata >> searchTerms [
+	^ searchTerms
+]
+
+{ #category : 'accessing' }
+CFFontAwesomeIconMetadata >> searchTerms: aCollection [
+	searchTerms := aCollection asArray
 ]
 
 { #category : 'searching' }
@@ -150,16 +163,6 @@ CFFontAwesomeIconMetadata >> searchableStrings [
 { #category : 'searching' }
 CFFontAwesomeIconMetadata >> searchableText [
 	^ ' ' join: self searchableStrings
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeIconMetadata >> searchTerms [
-	^ searchTerms
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeIconMetadata >> searchTerms: aCollection [
-	searchTerms := aCollection asArray
 ]
 
 { #category : 'accessing' }
