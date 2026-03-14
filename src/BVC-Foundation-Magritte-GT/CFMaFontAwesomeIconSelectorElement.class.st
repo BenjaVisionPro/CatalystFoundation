@@ -70,7 +70,6 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	self
 		layout: BlLinearLayout vertical;
 		padding: (BlInsets all: 4);
-		cellSpacing: 4;
 		hMatchParent;
 		vMatchParent.
 
@@ -98,18 +97,34 @@ CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newControlsRow [
-	^ BlElement new
-		layout: BlLinearLayout horizontal;
+	| row searchLabel sizeLabel |
+	row := BrHorizontalPane new
 		cellSpacing: 6;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
-		addChildren: {
-			(BrLabel new aptitude: BrLabelAptitude new; text: 'Search'; fitContent; yourself).
-			searchEditor.
-			(BrLabel new aptitude: BrLabelAptitude new; text: 'Size'; fitContent; yourself).
-			sizeEditor };
-		yourself
+		margin: (BlInsets bottom: 6);
+		yourself.
+
+	searchLabel := BrLabel new
+		aptitude: BrLabelAptitude new;
+		text: 'Search';
+		fitContent;
+		yourself.
+
+	sizeLabel := BrLabel new
+		aptitude: BrLabelAptitude new;
+		text: 'Size';
+		fitContent;
+		yourself.
+
+	row addChildren: {
+		searchLabel.
+		searchEditor.
+		sizeLabel.
+		sizeEditor }.
+
+	^ row
 ]
 
 { #category : 'private' }
