@@ -168,17 +168,19 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 
 { #category : 'importing' }
 CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString [
-	| rawMetadata selectorsByStyle fontAwesomeMetadata |
+	| rawMetadata selectorsByStyle fontAwesomeMetadata categoriesByIconName |
 	rawMetadata := self readMetadataFrom: aFileReference.
 	selectorsByStyle := Dictionary new.
 	fontAwesomeMetadata := self
 		newMetadataForFamilyName: aFamilyName
 		version: aVersionString.
+	categoriesByIconName := self readCategoriesByIconNameFromIconsJsonFile: aFileReference.
 
 	rawMetadata keysAndValuesDo: [ :iconName :iconData |
 		self
 			importIconNamed: iconName
 			metadata: iconData
+			categoriesByIconName: categoriesByIconName
 			baseClass: aBaseClass
 			packageName: aPackageName
 			familyName: aFamilyName
@@ -231,7 +233,7 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonPath: aPathString [
 ]
 
 { #category : 'private - importing' }
-CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: iconData baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString selectorsByStyle: selectorsByStyle fontAwesomeMetadata: fontAwesomeMetadata [
+CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: iconData categoriesByIconName: categoriesByIconName baseClass: aBaseClass packageName: aPackageName familyName: aFamilyName version: aVersionString selectorsByStyle: selectorsByStyle fontAwesomeMetadata: fontAwesomeMetadata [
 	| styles selector unicode label svgByStyle iconMetadata |
 	styles := iconData at: 'styles' ifAbsent: [ #() ].
 	selector := self selectorForIconName: anIconName.
@@ -242,7 +244,8 @@ CFFontAwesomeMetadataImporter class >> importIconNamed: anIconName metadata: ico
 	iconMetadata := self
 		newIconMetadataForIconName: anIconName
 		iconData: iconData
-		selector: selector.
+		selector: selector
+		categories: (categoriesByIconName at: anIconName ifAbsent: [ #() ]).
 	fontAwesomeMetadata addIconMetadata: iconMetadata.
 
 	styles do: [ :styleName |
@@ -311,11 +314,10 @@ CFFontAwesomeMetadataImporter class >> lowerCamelCaseFromDashed: aString [
 ]
 
 { #category : 'private - metadata' }
-CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector [
-	| searchData terms categories label |
+CFFontAwesomeMetadataImporter class >> newIconMetadataForIconName: anIconName iconData: iconData selector: aSelector categories: categories [
+	| searchData terms label |
 	searchData := iconData at: 'search' ifAbsent: [ Dictionary new ].
 	terms := searchData at: 'terms' ifAbsent: [ #() ].
-	categories := searchData at: 'categories' ifAbsent: [ #() ].
 	label := iconData at: 'label' ifAbsent: [ anIconName ].
 
 	^ CFFontAwesomeIconMetadata new
@@ -392,6 +394,60 @@ CFFontAwesomeMetadataImporter class >> pathStringFor: aFileReference [
 	(aFileReference respondsTo: #pathString) ifTrue: [ ^ aFileReference pathString ].
 	(aFileReference respondsTo: #fullName) ifTrue: [ ^ aFileReference fullName ].
 	^ aFileReference asString
+]
+
+
+{ #category : 'private - reading' }
+CFFontAwesomeMetadataImporter class >> readCategoriesByIconNameFromIconsJsonFile: aFileReference [
+	| categoriesFileReference |
+	categoriesFileReference := aFileReference parent / 'categories.yml'.
+	(categoriesFileReference exists and: [ categoriesFileReference isFile ])
+		ifFalse: [ ^ Dictionary new ].
+	^ self readCategoriesByIconNameFromCategoriesYamlFile: categoriesFileReference
+]
+
+{ #category : 'private - reading' }
+CFFontAwesomeMetadataImporter class >> readCategoriesByIconNameFromCategoriesYamlFile: aFileReference [
+	| categoriesByIconName currentCategoryLabel inIcons |
+	categoriesByIconName := Dictionary new.
+	currentCategoryLabel := nil.
+	inIcons := false.
+
+	aFileReference contents linesDo: [ :rawLine |
+		| trimmed |
+		trimmed := rawLine trimBoth.
+		trimmed isEmpty ifTrue: [
+			inIcons := false ] ifFalse: [
+			(trimmed beginsWith: '#') ifFalse: [
+				(rawLine notEmpty and: [ rawLine first isSeparator not ]) ifTrue: [
+					inIcons := false ].
+
+				(trimmed beginsWith: 'label:')
+					ifTrue: [ currentCategoryLabel := self yamlScalarValueFrom: (trimmed allButFirst: 'label:' size) ]
+					ifFalse: [
+						trimmed = 'icons:'
+							ifTrue: [ inIcons := true ]
+							ifFalse: [
+								(inIcons and: [ trimmed beginsWith: '- ' ]) ifTrue: [
+									| iconName categories |
+									iconName := self yamlScalarValueFrom: (trimmed allButFirst: 2).
+									categories := categoriesByIconName at: iconName ifAbsentPut: [ OrderedCollection new ].
+									currentCategoryLabel ifNotNil: [ categories add: currentCategoryLabel ] ] ] ] ] ] ].
+
+	categoriesByIconName keysAndValuesDo: [ :iconName :categories |
+		categoriesByIconName at: iconName put: categories asArray ].
+	^ categoriesByIconName
+]
+
+{ #category : 'private - reading' }
+CFFontAwesomeMetadataImporter class >> yamlScalarValueFrom: aString [
+	| value |
+	value := aString trimBoth.
+	((value beginsWith: "'") and: [ value endsWith: "'" ]) ifTrue: [
+		^ value copyFrom: 2 to: value size - 1 ].
+	((value beginsWith: '"') and: [ value endsWith: '"' ]) ifTrue: [
+		^ value copyFrom: 2 to: value size - 1 ].
+	^ value
 ]
 
 { #category : 'private - reading' }
