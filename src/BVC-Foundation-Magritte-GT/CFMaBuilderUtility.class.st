@@ -68,8 +68,9 @@ CFMaBuilderUtility class >> newFontAwesomeIconSelectorFor: anAnchor memento: aMe
 				description: aDescription;
 				yourself);
 		dropdownAnchor: anAnchor;
-		hExact: aDescription selectorExtent x;
-		vExact: aDescription selectorExtent y;
+		constraintsDo: [ :c |
+			c horizontal exact: aDescription selectorExtent x.
+			c vertical exact: aDescription selectorExtent y ];
 		yourself
 ]
 

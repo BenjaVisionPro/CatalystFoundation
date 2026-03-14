@@ -162,7 +162,7 @@ CFMaFontAwesomeIconSelectorElement >> newSizeEditor [
 			c vertical fitContent ];
 		yourself.
 	editor aptitude: BrEditorAptitude new.
-	editor editor text: '32'.
+	editor text: '32'.
 	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
 	^ editor
 ]
