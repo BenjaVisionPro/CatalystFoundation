@@ -90,8 +90,8 @@ CFMaBuilderUtility class >> newWritableFontAwesomeIconMemento: aMemento using: a
 		yourself.
 
 	anAnchor addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-		handle: [ self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription ]
-		content: [ [ self newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription ] ]).
+		handle: (self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription)
+		content: (self newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription)).
 
 	^ anAnchor
 ]
