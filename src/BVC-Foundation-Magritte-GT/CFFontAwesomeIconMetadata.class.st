@@ -62,9 +62,10 @@ CFFontAwesomeIconMetadata >> gtLiveFor: aView [
 		title: 'Live';
 		priority: 0;
 		stencil: [ | icon |
-			icon := (self iconLibraryClass style: self preferredStyleName)
+			icon := self iconLibraryClass
 				icon: self selectorSymbol
-				color: Color black.
+				styleName: self preferredStyleName.
+			icon color: Color black.
 			GtInspectorElementLiveViewContainer new
 				element: (icon asScalableElementSized: (icon extentForHeight: 64));
 				clipChildren: false ]
@@ -113,8 +114,10 @@ CFFontAwesomeIconMetadata >> matchesSearchText: aString [
 
 { #category : 'accessing' }
 CFFontAwesomeIconMetadata >> preferredStyleName [
+	(styles includes: self iconLibraryClass defaultStyleName) ifTrue: [
+		^ self iconLibraryClass defaultStyleName ].
 	(styles includes: 'regular') ifTrue: [ ^ 'regular' ].
-	styles isEmpty ifTrue: [ ^ 'regular' ].
+	styles isEmpty ifTrue: [ ^ self iconLibraryClass defaultStyleName ].
 	^ styles first
 ]
 

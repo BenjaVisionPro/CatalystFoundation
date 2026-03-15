@@ -6,7 +6,8 @@ Class {
 	#name : 'CFFontAwesomeIcons',
 	#superclass : 'Object',
 	#classVars : [
-		'Metadata'
+		'Metadata',
+		'DefaultStyleName'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -15,6 +16,32 @@ Class {
 { #category : 'styles' }
 CFFontAwesomeIcons class >> availableStyles [
 	^ #('brands' 'duotone' 'light' 'regular' 'solid')
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> availableIcons [
+	^ self defaultStyle availableIcons
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> availableIconsForStyleNamed: aStyleName [
+	^ (self styleOrDefaultNamed: aStyleName) availableIcons
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> defaultStyle [
+	^ self style: self defaultStyleName
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> defaultStyleName [
+	^ DefaultStyleName
+		ifNil: [ self error: 'No default Font Awesome style has been configured' ]
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> defaultStyleName: aStyleName [
+	DefaultStyleName := aStyleName
 ]
 
 { #category : 'gt extensions' }
@@ -63,7 +90,13 @@ CFFontAwesomeIcons class >> gtSpotterForVectorIconFor: aSearch [
 
 { #category : 'instance creation' }
 CFFontAwesomeIcons class >> icon: aSelectorSymbol [
+	self styleName ifNil: [ ^ self defaultStyle perform: aSelectorSymbol asSymbol ].
 	^ self perform: aSelectorSymbol asSymbol
+]
+
+{ #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol styleName: aStyleName [
+	^ (self styleOrDefaultNamed: aStyleName) icon: aSelectorSymbol
 ]
 
 { #category : 'instance creation' }
@@ -140,8 +173,25 @@ CFFontAwesomeIcons class >> metadata: aMetadata [
 ]
 
 { #category : 'styles' }
+CFFontAwesomeIcons class >> styleName [
+	^ nil
+]
+
+{ #category : 'styles' }
 CFFontAwesomeIcons class >> style: aStyleName [
 	^ Smalltalk
 		at: (CFFontAwesomeMetadataImporter styleClassNameFor: aStyleName) asSymbol
 		ifAbsent: [ self error: 'No imported Font Awesome style named ', aStyleName printString ]
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> styleNameOrDefault: aStyleName [
+	^ aStyleName ifNil: [ self defaultStyleName ]
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> styleOrDefaultNamed: aStyleName [
+	^ aStyleName
+		ifNil: [ self defaultStyle ]
+		ifNotNil: [ self style: aStyleName ]
 ]

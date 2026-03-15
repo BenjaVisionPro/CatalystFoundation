@@ -13,7 +13,7 @@ CFMaFontAwesomeIconDescription >> availableIconAssociations [
 
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> availableIcons [
-	^ (self iconLibraryClass style: self styleName) availableIcons
+	^ self iconLibraryClass availableIconsForStyleNamed: self styleName
 ]
 
 { #category : 'accessing' }
@@ -39,11 +39,6 @@ CFMaFontAwesomeIconDescription >> defaultIconHeight [
 { #category : 'accessing-defaults' }
 CFMaFontAwesomeIconDescription >> defaultSelectorExtent [
 	^ 420 @ 320
-]
-
-{ #category : 'accessing-defaults' }
-CFMaFontAwesomeIconDescription >> defaultStyleName [
-	^ 'regular'
 ]
 
 { #category : 'accessing' }
@@ -170,7 +165,7 @@ CFMaFontAwesomeIconDescription >> selectorExtent: anExtent [
 
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> styleName [
-	^ self propertyAt: #styleName ifAbsent: [ self defaultStyleName ]
+	^ self propertyAt: #styleName ifAbsent: [ nil ]
 ]
 
 { #category : 'accessing' }

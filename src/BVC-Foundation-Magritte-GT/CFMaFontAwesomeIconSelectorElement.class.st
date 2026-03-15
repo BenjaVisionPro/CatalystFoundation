@@ -20,9 +20,15 @@ Class {
 }
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> activeStyleName [
+	^ self description iconLibraryClass
+		styleNameOrDefault: self description styleName
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> availableMetadata [
 	^ self metadata allIconMetadata
-		select: [ :each | each supportsStyleNamed: self description styleName ]
+		select: [ :each | each supportsStyleNamed: self activeStyleName ]
 ]
 
 { #category : 'private' }
@@ -55,7 +61,7 @@ CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
 	searchText := self searchText.
 	searchText isEmpty ifTrue: [ ^ self availableMetadata ].
 	^ (self metadata searchIconsMatching: searchText)
-		select: [ :each | each supportsStyleNamed: self description styleName ]
+		select: [ :each | each supportsStyleNamed: self activeStyleName ]
 ]
 
 { #category : 'private' }
@@ -246,7 +252,7 @@ CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 	tileExtent := self tileExtentForPreviewHeight: previewHeight.
 	iconElement := CFMaBuilderUtility
 		newFontAwesomeIconForMetadata: anMetadata
-		styleName: self description styleName
+		styleName: self activeStyleName
 		fitInto: previewHeight @ previewHeight.
 	iconElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.

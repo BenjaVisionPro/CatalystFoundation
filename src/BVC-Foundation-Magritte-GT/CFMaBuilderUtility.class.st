@@ -47,7 +47,9 @@ CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescrip
 CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescription [
 	| icon |
 	^ [
-		icon := (aDescription iconLibraryClass style: aDescription styleName) icon: aSelectorSymbol.
+		icon := aDescription iconLibraryClass
+			icon: aSelectorSymbol
+			styleName: aDescription styleName.
 		icon color: Color black.
 		aDescription scaledElementForIcon: icon ]
 		on: Error
@@ -65,8 +67,9 @@ CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height
 { #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName fitInto: anExtent [
 	^ [ | icon |
-		icon := (anIconMetadata iconLibraryClass style: aStyleName)
-			icon: anIconMetadata selectorSymbol.
+		icon := anIconMetadata iconLibraryClass
+			icon: anIconMetadata selectorSymbol
+			styleName: aStyleName.
 		icon color: Color black.
 		icon asScalableElementSized: (icon extentFittingInto: anExtent) ]
 		on: Error
@@ -76,8 +79,9 @@ CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleN
 { #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName height: aNumber [
 	^ [ | icon |
-		icon := (anIconMetadata iconLibraryClass style: aStyleName)
-			icon: anIconMetadata selectorSymbol.
+		icon := anIconMetadata iconLibraryClass
+			icon: anIconMetadata selectorSymbol
+			styleName: aStyleName.
 		icon color: Color black.
 		icon asScalableElementSized: (icon extentForHeight: aNumber) ]
 		on: Error
