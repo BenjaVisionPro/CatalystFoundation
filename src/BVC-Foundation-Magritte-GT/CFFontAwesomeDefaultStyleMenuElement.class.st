@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'iconLibraryClass',
 		'dropdown',
-		'target'
+		'toolbarElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -20,11 +20,11 @@ CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anI
 		label: anIconLibraryClass defaultStyleName;
 		icon: (self iconStencilFor: anIconLibraryClass);
 		priority: 5;
-		content: [ :aDropdown :aTarget |
+		content: [ :aDropdown :aToolbarElement |
 			self new
 				iconLibraryClass: anIconLibraryClass;
 				dropdown: aDropdown;
-				target: aTarget;
+				toolbarElement: aToolbarElement;
 				initializeItems;
 				yourself ]
 ]
@@ -72,31 +72,18 @@ CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshInCoderToolbar: aToolbarElement [
-	| aBehaviorCoderElement |
-	aBehaviorCoderElement := aToolbarElement
+CFFontAwesomeDefaultStyleMenuElement >> behaviorCoderElement [
+	^ toolbarElement
 		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
 		ifFound: [ :anElement | anElement ]
-		ifNone: [ ^ self ].
-	aBehaviorCoderElement enqueueTask: (BlTaskAction new
-		action: [
-			aToolbarElement updateCustomButtons.
-			self refreshSelectedClassViewIn: aBehaviorCoderElement ])
+		ifNone: [ nil ]
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshInTabFor: anElement [
-	anElement
-		allParentsDetect: [ :aParent | aParent isKindOf: BrTab ]
-		ifFound: [ :aTab |
-			aTab enqueueTask: (BlTaskAction new
-				action: [ aTab viewContentElement phlow update ]) ]
-		ifNone: [ ]
-]
-
-{ #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassViewIn: aBehaviorCoderElement [
-	| aTabGroup |
+CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassView [
+	| aBehaviorCoderElement aTabGroup |
+	aBehaviorCoderElement := self behaviorCoderElement.
+	aBehaviorCoderElement ifNil: [ ^ self ].
 	aTabGroup := aBehaviorCoderElement
 		allChildrenBreadthFirstDetect: [ :anElement | anElement isKindOf: BrTabGroup ]
 		ifFound: [ :anElement | anElement ]
@@ -106,10 +93,12 @@ CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassViewIn: aBehaviorCod
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshTarget [
-	(target isKindOf: GtCoderToolbarElement)
-		ifTrue: [ ^ self refreshInCoderToolbar: target ].
-	self refreshInTabFor: target
+CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarAndClassView [
+	toolbarElement ifNil: [ ^ self ].
+	toolbarElement enqueueTask: (BlTaskAction new
+		action: [
+			toolbarElement updateCustomButtons.
+			self refreshSelectedClassView ])
 ]
 
 { #category : 'actions' }
@@ -118,10 +107,10 @@ CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 		iconLibraryClass defaultStyleName: aStyleName ].
 	dropdown fireEvent: BrDropdownHideWish new.
 	self fireEvent: BrContextMenuHideWish new.
-	self refreshTarget
+	self refreshToolbarAndClassView
 ]
 
 { #category : 'accessing' }
-CFFontAwesomeDefaultStyleMenuElement >> target: anElement [
-	target := anElement
+CFFontAwesomeDefaultStyleMenuElement >> toolbarElement: anElement [
+	toolbarElement := anElement
 ]
