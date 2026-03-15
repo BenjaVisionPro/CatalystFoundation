@@ -42,6 +42,11 @@ CFFontAwesomeIcon >> asElement [
 ]
 
 { #category : 'converting' }
+CFFontAwesomeIcon >> asScalableElementSized: anExtent [
+	^ self asElement asScalableElement size: anExtent
+]
+
+{ #category : 'converting' }
 CFFontAwesomeIcon >> asStencil [
 	^ [ self ] asStencil
 ]
@@ -127,36 +132,51 @@ CFFontAwesomeIcon >> intrinsicExtent [
 ]
 
 { #category : 'sizing' }
-CFFontAwesomeIcon >> height: aNumber [
+CFFontAwesomeIcon >> extentFittingInto: anExtent [
+	| intrinsic xScale yScale scale |
+	intrinsic := self intrinsicExtent.
+	((intrinsic x isZero) or: [ intrinsic y isZero ] or: [ anExtent isNil ]) ifTrue: [ ^ intrinsic ].
+	xScale := anExtent x asFloat / intrinsic x asFloat.
+	yScale := anExtent y asFloat / intrinsic y asFloat.
+	scale := xScale min: yScale.
+	^ (intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> extentForHeight: aNumber [
 	| intrinsic scale newWidth |
 	intrinsic := self intrinsicExtent.
-	(intrinsic y isZero or: [ aNumber isNil ]) ifTrue: [ ^ self ].
+	(intrinsic y isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
 	scale := aNumber asFloat / intrinsic y asFloat.
 	newWidth := intrinsic x asFloat * scale.
-	self resizeTo: newWidth @ aNumber.
+	^ newWidth @ aNumber
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> extentForWidth: aNumber [
+	| intrinsic scale newHeight |
+	intrinsic := self intrinsicExtent.
+	(intrinsic x isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
+	scale := aNumber asFloat / intrinsic x asFloat.
+	newHeight := intrinsic y asFloat * scale.
+	^ aNumber @ newHeight
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> height: aNumber [
+	self resizeTo: (self extentForHeight: aNumber).
 	^ self
 ]
 
 { #category : 'sizing' }
 CFFontAwesomeIcon >> width: aNumber [
-	| intrinsic scale newHeight |
-	intrinsic := self intrinsicExtent.
-	(intrinsic x isZero or: [ aNumber isNil ]) ifTrue: [ ^ self ].
-	scale := aNumber asFloat / intrinsic x asFloat.
-	newHeight := intrinsic y asFloat * scale.
-	self resizeTo: aNumber @ newHeight.
+	self resizeTo: (self extentForWidth: aNumber).
 	^ self
 ]
 
 { #category : 'sizing' }
 CFFontAwesomeIcon >> fitInto: anExtent [
-	| intrinsic xScale yScale scale |
-	intrinsic := self intrinsicExtent.
-	((intrinsic x isZero) or: [ intrinsic y isZero ] or: [ anExtent isNil ]) ifTrue: [ ^ self ].
-	xScale := anExtent x asFloat / intrinsic x asFloat.
-	yScale := anExtent y asFloat / intrinsic y asFloat.
-	scale := xScale min: yScale.
-	self resizeTo: ((intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)).
+	self resizeTo: (self extentFittingInto: anExtent).
 	^ self
 ]
 

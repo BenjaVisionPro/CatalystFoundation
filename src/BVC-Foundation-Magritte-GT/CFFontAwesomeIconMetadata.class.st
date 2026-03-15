@@ -61,13 +61,12 @@ CFFontAwesomeIconMetadata >> gtLiveFor: aView [
 	^ aView explicit
 		title: 'Live';
 		priority: 0;
-		stencil: [
+		stencil: [ | icon |
+			icon := (self iconLibraryClass style: self preferredStyleName)
+				icon: self selectorSymbol
+				color: Color black.
 			GtInspectorElementLiveViewContainer new
-				element: ((((self iconLibraryClass style: self preferredStyleName)
-					icon: self selectorSymbol
-					color: Color black) asElement)
-					height: 64;
-					yourself);
+				element: (icon asScalableElementSized: (icon extentForHeight: 64));
 				clipChildren: false ]
 ]
 

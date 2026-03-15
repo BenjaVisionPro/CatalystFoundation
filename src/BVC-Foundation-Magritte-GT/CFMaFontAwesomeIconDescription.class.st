@@ -103,6 +103,34 @@ CFMaFontAwesomeIconDescription >> applySizingToIconElement: anElement [
 	^ anElement height: self defaultIconHeight
 ]
 
+{ #category : 'icons' }
+CFMaFontAwesomeIconDescription >> displayExtentForIntrinsicExtent: anExtent [
+	| width height xScale yScale scale |
+	width := self explicitIconWidth.
+	height := self explicitIconHeight.
+
+	(width notNil and: [ height notNil ]) ifTrue: [
+		((anExtent x isZero) or: [ anExtent y isZero ]) ifTrue: [ ^ width @ height ].
+		xScale := width asFloat / anExtent x asFloat.
+		yScale := height asFloat / anExtent y asFloat.
+		scale := xScale min: yScale.
+		^ (anExtent x asFloat * scale) @ (anExtent y asFloat * scale) ].
+	width notNil ifTrue: [
+		(anExtent x isZero) ifTrue: [ ^ anExtent ].
+		^ width @ (anExtent y asFloat * (width asFloat / anExtent x asFloat)) ].
+	height notNil ifTrue: [
+		(anExtent y isZero) ifTrue: [ ^ anExtent ].
+		^ (anExtent x asFloat * (height asFloat / anExtent y asFloat)) @ height ].
+	(anExtent y isZero) ifTrue: [ ^ anExtent ].
+	^ (anExtent x asFloat * (self defaultIconHeight asFloat / anExtent y asFloat)) @ self defaultIconHeight
+]
+
+{ #category : 'icons' }
+CFMaFontAwesomeIconDescription >> scaledElementForIcon: aFontAwesomeIcon [
+	^ aFontAwesomeIcon
+		asScalableElementSized: (self displayExtentForIntrinsicExtent: aFontAwesomeIcon intrinsicExtent)
+]
+
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> iconSize [
 	| width height |

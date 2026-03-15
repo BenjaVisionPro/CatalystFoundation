@@ -142,12 +142,10 @@ CFMaFontAwesomeIconSelectorElement >> newControlIconContainer [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newControlIconNamed: aSelectorSymbol [
 	^ [ | icon |
-		icon := (((self description iconLibraryClass style: 'solid')
-			icon: aSelectorSymbol) asElement).
-		icon
-			height: 14;
-			constraintsDo: [ :c | c linear vertical alignCenter ].
-		icon ]
+		icon := (self description iconLibraryClass style: 'solid')
+			icon: aSelectorSymbol.
+		(icon asScalableElementSized: (icon extentForHeight: 14))
+			constraintsDo: [ :c | c linear vertical alignCenter ] ]
 		on: Error
 		do: [ BrLabel new
 				aptitude: BrLabelAptitude new;
@@ -226,11 +224,11 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newLogoElement [
 	^ [ | icon |
-		icon := ((self description iconLibraryClass style: 'brands')
-			icon: #fontAwesomeLogoFull) asElement.
-		icon fitInto: 200 @ 30.
-		icon opacity: 0.8.
-		icon ]
+		icon := (self description iconLibraryClass style: 'brands')
+			icon: #fontAwesomeLogoFull.
+		(icon asScalableElementSized: (icon extentFittingInto: 200 @ 30))
+			opacity: 0.8;
+			yourself ]
 		on: Error
 		do: [ BrLabel new
 				aptitude: BrLabelAptitude new;

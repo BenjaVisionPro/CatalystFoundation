@@ -40,7 +40,7 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 		itemDataBinder: [ :anElement :anIcon :anIndex |
 			anElement
 				replaceChild: (anElement childNamed: #icon)
-				with: ((anIcon value asElement) fitInto: 64 @ 64; yourself)
+				with: (anIcon value asElement asScalableElement size: 64 @ 64)
 				as: #icon.
 			(anElement childNamed: #label) text: anIcon key asString.
 			anElement ];
@@ -86,7 +86,7 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol height: aNumber color: aColor 
 	icon := (self icon: aSelectorSymbol)
 		color: aColor;
 		yourself.
-	^ [ icon asElement height: aNumber; yourself ] asStencil
+	^ [ icon asScalableElementSized: (icon extentForHeight: aNumber) ] asStencil
 ]
 
 { #category : 'instance creation' }
@@ -95,7 +95,7 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol width: aNumber color: aColor [
 	icon := (self icon: aSelectorSymbol)
 		color: aColor;
 		yourself.
-	^ [ icon asElement width: aNumber; yourself ] asStencil
+	^ [ icon asScalableElementSized: (icon extentForWidth: aNumber) ] asStencil
 ]
 
 { #category : 'instance creation' }
@@ -104,7 +104,7 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol fitInto: anExtent color: aColo
 	icon := (self icon: aSelectorSymbol)
 		color: aColor;
 		yourself.
-	^ [ icon asElement fitInto: anExtent; yourself ] asStencil
+	^ [ icon asScalableElementSized: (icon extentFittingInto: anExtent) ] asStencil
 ]
 
 { #category : 'instance creation' }
