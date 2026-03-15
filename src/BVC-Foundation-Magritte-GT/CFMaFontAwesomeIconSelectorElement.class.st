@@ -12,7 +12,8 @@ Class {
 		'sizeIconContainer',
 		'infoSummaryLabel',
 		'versionLabel',
-		'logoContainer'
+		'logoContainer',
+		'currentColumnCount'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -26,25 +27,22 @@ CFMaFontAwesomeIconSelectorElement >> availableMetadata [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> buildItemStencil [
-	^ [ :anMetadata :anIndex :aList |
-		self newIconTileFor: anMetadata ]
+	^ [ BrHorizontalPane new
+			cellSpacing: self gridCellSpacing;
+			margin: (BlInsets bottom: self gridCellSpacing);
+			constraintsDo: [ :c |
+				c horizontal matchParent.
+				c vertical fitContent ];
+			yourself ]
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> configureList [
-	self configureGridColumns.
 	list
-		stencil: self buildItemStencil.
+		itemStencil: self buildItemStencil;
+		itemDataBinder: self itemDataBinderBlock.
 	self refreshInfoBar.
-	self refreshList
-]
-
-{ #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> configureGridColumns [
-	list aptitudeDo: [ :anAptitude |
-		anAptitude columnCount: self gridColumnCount.
-		anAptitude listElement layoutDo: [ :aLayout |
-			aLayout cellSpacing: self gridCellSpacing ] ]
+	self refreshGrid
 ]
 
 { #category : 'accessing' }
@@ -64,6 +62,19 @@ CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
 	searchText isEmpty ifTrue: [ ^ self availableMetadata ].
 	^ (self metadata searchIconsMatching: searchText)
 		select: [ :each | each supportsStyleNamed: self description styleName ]
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> filteredMetadataRows [
+	| columns metadata rows |
+	columns := currentColumnCount ifNil: [ self gridColumnCount ].
+	metadata := self filteredMetadata.
+	rows := OrderedCollection new.
+	1 to: metadata size by: columns do: [ :start |
+		rows add: (metadata
+			copyFrom: start
+			to: ((start + columns - 1) min: metadata size)) ].
+	^ rows
 ]
 
 { #category : 'private' }
@@ -105,13 +116,23 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 			c horizontal matchParent.
 			c vertical matchParent ].
 
+	currentColumnCount := nil.
 	searchEditor := self newSearchEditor.
 	sizeEditor := self newSizeEditor.
 	list := self newList.
-	list when: BlElementExtentChangedEvent do: [ :anEvent | self configureGridColumns ].
-	self when: BlElementExtentChangedEvent do: [ :anEvent | self configureGridColumns ].
+	list when: BlElementExtentChangedEvent do: [ :anEvent | self refreshGridForExtentChange ].
+	self when: BlElementExtentChangedEvent do: [ :anEvent | self refreshGridForExtentChange ].
 
 	self addChildren: { self newControlsRow. list. self newInfoBar }
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
+	^ [ :aRowElement :aRowMetadata :anIndex |
+		aRowElement
+			removeChildren;
+			addChildren: (aRowMetadata collect: [ :eachMetadata | self newIconTileFor: eachMetadata ]).
+		aRowElement ]
 ]
 
 { #category : 'private' }
@@ -249,7 +270,7 @@ CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newList [
 	| aList |
-	aList := BrGridList new
+	aList := BrSimpleList new
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent.
@@ -285,7 +306,7 @@ CFMaFontAwesomeIconSelectorElement >> newSearchEditor [
 			c vertical fitContent ];
 		yourself.
 	editor aptitude: BrEditorAptitude new.
-	editor when: BlKeyUpEvent do: [ :evt | self refreshGrid ].
+	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
 	^ editor
 ]
 
@@ -351,13 +372,22 @@ CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshGrid [
-	self configureGridColumns.
+	currentColumnCount := self gridColumnCount.
+	self refreshList
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshGridForExtentChange [
+	| newColumnCount |
+	newColumnCount := self gridColumnCount.
+	currentColumnCount = newColumnCount ifTrue: [ ^ self ].
+	currentColumnCount := newColumnCount.
 	self refreshList
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshList [
-	list items: self filteredMetadata
+	list items: self filteredMetadataRows
 ]
 
 { #category : 'private' }
