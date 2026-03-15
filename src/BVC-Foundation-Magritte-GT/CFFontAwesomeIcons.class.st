@@ -132,7 +132,6 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 { #category : 'gt extensions' }
 CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeInCoderToolbar: aToolbarElement [
 	| aBehaviorCoderElement |
-	aToolbarElement updateCustomButtons.
 	aBehaviorCoderElement := aToolbarElement
 		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
 		ifFound: [ :anElement | anElement ]
