@@ -27,8 +27,10 @@ CFMaFontAwesomeIconSelectorElement >> activeStyleName [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> availableMetadata [
-	^ self metadata allIconMetadata
-		select: [ :each | self shouldShowMetadata: each ]
+	^ (self metadata allIconMetadata
+		select: [ :each | self shouldShowMetadata: each ])
+		asSortedCollection: [ :a :b |
+			a selectorSymbol asString <= b selectorSymbol asString ]
 ]
 
 { #category : 'private' }
