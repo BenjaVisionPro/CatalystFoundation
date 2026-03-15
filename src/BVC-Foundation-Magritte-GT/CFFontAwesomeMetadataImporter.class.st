@@ -44,23 +44,6 @@ CFFontAwesomeMetadataImporter class >> compileAvailableIconsMethodsFrom: selecto
 		styleClass class compile: source classified: 'metadata' ]
 ]
 
-{ #category : 'private - compiling' }
-CFFontAwesomeMetadataImporter class >> compileAvailableStylesMethodOn: aBaseClass [
-	| styleNames source |
-	styleNames := (aBaseClass subclasses
-		collect: [ :each | each styleName ])
-		asSortedCollection asArray.
-
-	source := String streamContents: [ :stream |
-		stream
-			nextPutAll: 'availableStyles';
-			cr;
-			tab; nextPutAll: '^ ';
-			nextPutAll: styleNames storeString ].
-
-	aBaseClass class compile: source classified: 'styles'
-]
-
 { #category : 'importing' }
 CFFontAwesomeMetadataImporter class >> defaultStyleName [
 	^ 'light'
@@ -194,7 +177,6 @@ CFFontAwesomeMetadataImporter class >> importFromIconsJsonFile: aFileReference b
 			fontAwesomeMetadata: fontAwesomeMetadata ].
 
 	self compileAvailableIconsMethodsFrom: selectorsByStyle baseClass: aBaseClass.
-	self compileAvailableStylesMethodOn: aBaseClass.
 
 	fontAwesomeMetadata styles: selectorsByStyle keys asSortedCollection asArray.
 	aBaseClass metadata: fontAwesomeMetadata.

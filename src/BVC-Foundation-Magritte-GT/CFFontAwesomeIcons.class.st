@@ -15,7 +15,14 @@ Class {
 
 { #category : 'styles' }
 CFFontAwesomeIcons class >> availableStyles [
-	^ #('brands' 'duotone' 'light' 'regular' 'solid')
+	| styleBaseClass |
+	styleBaseClass := self styleName
+		ifNil: [ self ]
+		ifNotNil: [ self superclass ].
+	^ (styleBaseClass subclasses
+		collect: [ :each | each styleName ])
+		reject: [ :each | each isNil ])
+		asSortedCollection asArray
 ]
 
 { #category : 'metadata' }
