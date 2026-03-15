@@ -8,6 +8,8 @@ Class {
 		'searchEditor',
 		'sizeEditor',
 		'list',
+		'searchIconContainer',
+		'sizeIconContainer',
 		'infoSummaryLabel',
 		'versionLabel',
 		'logoContainer'
@@ -102,44 +104,56 @@ CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> metadata [
+	self fieldViewModel ifNil: [ ^ CFFontAwesomeMetadata new ].
 	^ self description iconLibraryClass metadata
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newControlsRow [
-	| row searchLabel sizeLabel |
+	| row |
 	row := BrHorizontalPane new
 		cellSpacing: 6;
-		border: (BlBorder paint: Color red width: 1);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
 		margin: (BlInsets bottom: 6);
 		yourself.
 
-	searchLabel := ((((self description iconLibraryClass style: 'solid') icon: #search) asElement)
-		height: 14;
-		border: (BlBorder paint: Color blue width: 1);
-		constraintsDo: [ :c | c linear vertical alignCenter ];
-		yourself).
-
-	searchEditor border: (BlBorder paint: Color green width: 1).
-
-	sizeLabel := ((((self description iconLibraryClass style: 'solid') icon: #expandAlt) asElement)
-		height: 14;
-		border: (BlBorder paint: Color magenta width: 1);
-		constraintsDo: [ :c | c linear vertical alignCenter ];
-		yourself).
-
-	sizeEditor border: (BlBorder paint: Color orange width: 1).
+	searchIconContainer := self newControlIconContainer.
+	sizeIconContainer := self newControlIconContainer.
 
 	row addChildren: {
-		searchLabel.
+		searchIconContainer.
 		searchEditor.
-		sizeLabel.
+		sizeIconContainer.
 		sizeEditor }.
 
 	^ row
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newControlIconContainer [
+	^ BrFrame new
+		fitContent;
+		constraintsDo: [ :c | c linear vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newControlIconNamed: aSelectorSymbol [
+	^ [ | icon |
+		icon := (((self description iconLibraryClass style: 'solid')
+			icon: aSelectorSymbol) asElement).
+		icon
+			height: 14;
+			constraintsDo: [ :c | c linear vertical alignCenter ].
+		icon ]
+		on: Error
+		do: [ BrLabel new
+				aptitude: BrLabelAptitude new;
+				text: '';
+				fitContent;
+				yourself ]
 ]
 
 { #category : 'private' }
@@ -255,7 +269,7 @@ CFMaFontAwesomeIconSelectorElement >> newSizeEditor [
 
 { #category : 'api - field view model' }
 CFMaFontAwesomeIconSelectorElement >> onFieldViewModelChanged [
-	self configureList
+	self inUIProcessDo: [ self refreshContent ]
 ]
 
 { #category : 'events' }
@@ -280,6 +294,22 @@ CFMaFontAwesomeIconSelectorElement >> previewHeight [
 	text isEmpty ifTrue: [ ^ 32 ].
 	number := [ text asNumber ] on: Error do: [ 32 ].
 	^ number
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshContent [
+	self refreshControlIcons.
+	self configureList
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshControlIcons [
+	searchIconContainer
+		removeChildren;
+		addChild: (self newControlIconNamed: #search).
+	sizeIconContainer
+		removeChildren;
+		addChild: (self newControlIconNamed: #expandAlt)
 ]
 
 { #category : 'private' }
