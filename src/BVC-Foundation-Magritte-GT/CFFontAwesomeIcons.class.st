@@ -63,8 +63,8 @@ CFFontAwesomeIcons class >> gtDefaultStyleActionFor: anAction [
 		label: self defaultStyleName;
 		icon: self gtDefaultStyleActionIcon;
 		priority: 5;
-		content: [ :aDropdown |
-			self gtDefaultStyleMenuContentFor: aDropdown ]
+		content: [ :aDropdown :aTarget |
+			self gtDefaultStyleMenuContentFor: aDropdown target: aTarget ]
 ]
 
 { #category : 'gt extensions' }
@@ -75,16 +75,20 @@ CFFontAwesomeIcons class >> gtDefaultStyleActionIcon [
 ]
 
 { #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleMenuContentFor: aDropdown [
+CFFontAwesomeIcons class >> gtDefaultStyleMenuContentFor: aDropdown target: aTarget [
 	^ BrGlamorousSimpleContextMenuContent new
-		items: self gtDefaultStyleMenuItems
+		items: (self gtDefaultStyleMenuItemsFor: aDropdown target: aTarget)
 ]
 
 { #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleMenuItems [
+CFFontAwesomeIcons class >> gtDefaultStyleMenuItemsFor: aDropdown target: aTarget [
 	^ self availableStyles collect: [ :aStyleName |
 		(self gtDefaultStyleMenuLabelFor: aStyleName)
-			-> [ :anElement | self gtSelectDefaultStyleNamed: aStyleName from: anElement ] ]
+			-> [ :anElement |
+				self
+					gtSelectDefaultStyleNamed: aStyleName
+					dropdown: aDropdown
+					target: aTarget ] ]
 ]
 
 { #category : 'gt extensions' }
@@ -126,25 +130,11 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 ]
 
 { #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeFrom: anElement [
-	| aContentElement aViewElement |
-	anElement fireEvent: BrDropdownHideWish new.
-	aContentElement := [ anElement phlow viewContent ]
-		on: Error
-		do: [ nil ].
-	aContentElement ifNotNil: [
-		aContentElement phlow update.
-		^ self ].
-	aViewElement := anElement phlow firstParentWithView.
-	(aViewElement notNil and: [ aViewElement phlow entity respondsTo: #updateContent: ])
-		ifTrue: [ aViewElement phlow update ]
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtSelectDefaultStyleNamed: aStyleName from: anElement [
+CFFontAwesomeIcons class >> gtSelectDefaultStyleNamed: aStyleName dropdown: aDropdown target: aTarget [
 	self defaultStyleName = aStyleName ifFalse: [
 		self defaultStyleName: aStyleName ].
-	self gtRefreshAfterDefaultStyleChangeFrom: anElement
+	aDropdown fireEvent: BrDropdownHideWish new.
+	aTarget viewContentElement phlow update
 ]
 
 { #category : 'gt extensions' }
