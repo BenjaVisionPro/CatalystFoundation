@@ -40,7 +40,7 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 		itemDataBinder: [ :anElement :anIcon :anIndex |
 			anElement
 				replaceChild: (anElement childNamed: #icon)
-				with: ((anIcon value asElement) height: 64; yourself)
+				with: ((anIcon value asElement) fitInto: 64 @ 64; yourself)
 				as: #icon.
 			(anElement childNamed: #label) text: anIcon key asString.
 			anElement ];

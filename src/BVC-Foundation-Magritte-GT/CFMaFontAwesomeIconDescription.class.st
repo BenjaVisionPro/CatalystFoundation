@@ -58,12 +58,21 @@ CFMaFontAwesomeIconDescription >> iconLibraryClass: aClass [
 
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> iconHeight [
-	^ self propertyAt: #iconHeight ifAbsent: [ self defaultIconHeight ]
+	| explicitHeight |
+	explicitHeight := self explicitIconHeight.
+	explicitHeight ifNotNil: [ ^ explicitHeight ].
+	self explicitIconWidth ifNotNil: [ ^ nil ].
+	^ self defaultIconHeight
 ]
 
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> iconHeight: aNumber [
 	self propertyAt: #iconHeight put: aNumber
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconDescription >> explicitIconHeight [
+	^ self propertyAt: #iconHeight ifAbsent: [ nil ]
 ]
 
 { #category : 'accessing' }
@@ -76,13 +85,33 @@ CFMaFontAwesomeIconDescription >> iconWidth: aNumber [
 	self propertyAt: #iconWidth put: aNumber
 ]
 
+{ #category : 'private' }
+CFMaFontAwesomeIconDescription >> explicitIconWidth [
+	^ self propertyAt: #iconWidth ifAbsent: [ nil ]
+]
+
+{ #category : 'icons' }
+CFMaFontAwesomeIconDescription >> applySizingToIconElement: anElement [
+	| width height |
+	width := self explicitIconWidth.
+	height := self explicitIconHeight.
+
+	(width notNil and: [ height notNil ]) ifTrue: [
+		^ anElement fitInto: width @ height ].
+	width notNil ifTrue: [ ^ anElement width: width ].
+	height notNil ifTrue: [ ^ anElement height: height ].
+	^ anElement height: self defaultIconHeight
+]
+
 { #category : 'accessing' }
 CFMaFontAwesomeIconDescription >> iconSize [
 	| width height |
-	width := self iconWidth.
-	height := self iconHeight.
+	width := self explicitIconWidth.
+	height := self explicitIconHeight.
 	(width notNil and: [ height notNil ]) ifTrue: [ ^ width @ height ].
-	^ height
+	width notNil ifTrue: [ ^ width ].
+	height notNil ifTrue: [ ^ height ].
+	^ self defaultIconHeight
 ]
 
 { #category : 'accessing' }

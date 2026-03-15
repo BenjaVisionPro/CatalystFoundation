@@ -45,20 +45,12 @@ CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescrip
 
 { #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescription [
-	| icon width height |
+	| icon |
 	^ [
 		icon := ((aDescription iconLibraryClass style: aDescription styleName) icon: aSelectorSymbol)
 			asElement.
 		icon color: Color black.
-		width := aDescription iconWidth.
-		height := aDescription iconHeight.
-		(width notNil and: [ height notNil ])
-			ifTrue: [ icon fitInto: width @ height ]
-			ifFalse: [
-				width notNil
-					ifTrue: [ icon width: width ]
-					ifFalse: [ height notNil ifTrue: [ icon height: height ] ] ].
-		icon ]
+		aDescription applySizingToIconElement: icon ]
 		on: Error
 		do: [ self newChooseIconAffordanceFor: aDescription ]
 ]
