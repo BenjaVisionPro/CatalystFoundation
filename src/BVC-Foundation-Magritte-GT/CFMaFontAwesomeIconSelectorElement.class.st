@@ -243,9 +243,9 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newLogoElement [
 	^ [ | icon |
-		icon := (self description iconLibraryClass style: 'brands')
-			icon: #fontAwesomeLogoFull.
+		icon := CFFontAwesomeBrandsIcons fontAwesomeLogoFull.
 		(icon asScalableElementSized: (icon extentFittingInto: 200 @ 30))
+			color: Color black;
 			opacity: 0.8;
 			yourself ]
 		on: Error
