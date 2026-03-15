@@ -67,6 +67,51 @@ CFFontAwesomeIcon >> duotoneColorsPrimary: aPrimaryColor secondary: aSecondaryCo
 	^ self
 ]
 
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> extentFittingInto: anExtent [
+	| intrinsic xScale yScale scale |
+	intrinsic := self intrinsicExtent.
+	((intrinsic x isZero)
+		or: [ (intrinsic y isZero)
+			or: [ anExtent isNil ] ]) ifTrue: [ ^ intrinsic ].
+	xScale := anExtent x asFloat / intrinsic x asFloat.
+	yScale := anExtent y asFloat / intrinsic y asFloat.
+	scale := xScale min: yScale.
+	^ (intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> extentForHeight: aNumber [
+	| intrinsic scale newWidth |
+	intrinsic := self intrinsicExtent.
+	(intrinsic y isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
+	scale := aNumber asFloat / intrinsic y asFloat.
+	newWidth := intrinsic x asFloat * scale.
+	^ newWidth @ aNumber
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> extentForWidth: aNumber [
+	| intrinsic scale newHeight |
+	intrinsic := self intrinsicExtent.
+	(intrinsic x isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
+	scale := aNumber asFloat / intrinsic x asFloat.
+	newHeight := intrinsic y asFloat * scale.
+	^ aNumber @ newHeight
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> fitInto: anExtent [
+	self resizeTo: (self extentFittingInto: anExtent).
+	^ self
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> height: aNumber [
+	self resizeTo: (self extentForHeight: aNumber).
+	^ self
+]
+
 { #category : 'accessing' }
 CFFontAwesomeIcon >> iconName [
 	^ iconName
@@ -106,6 +151,11 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 ]
 
 { #category : 'accessing' }
+CFFontAwesomeIcon >> intrinsicExtent [
+	^ viewBox extent
+]
+
+{ #category : 'accessing' }
 CFFontAwesomeIcon >> label [
 	^ label
 ]
@@ -117,75 +167,17 @@ CFFontAwesomeIcon >> primaryColor: aColor [
 	^ self
 ]
 
-{ #category : 'styling' }
-CFFontAwesomeIcon >> secondaryColor: aColor [
-	secondaryColor := aColor.
-	self applyColors.
-	^ self
-]
-
-
-
-{ #category : 'accessing' }
-CFFontAwesomeIcon >> intrinsicExtent [
-	^ viewBox extent
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> extentFittingInto: anExtent [
-	| intrinsic xScale yScale scale |
-	intrinsic := self intrinsicExtent.
-	((intrinsic x isZero)
-		or: [ (intrinsic y isZero)
-			or: [ anExtent isNil ] ]) ifTrue: [ ^ intrinsic ].
-	xScale := anExtent x asFloat / intrinsic x asFloat.
-	yScale := anExtent y asFloat / intrinsic y asFloat.
-	scale := xScale min: yScale.
-	^ (intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> extentForHeight: aNumber [
-	| intrinsic scale newWidth |
-	intrinsic := self intrinsicExtent.
-	(intrinsic y isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
-	scale := aNumber asFloat / intrinsic y asFloat.
-	newWidth := intrinsic x asFloat * scale.
-	^ newWidth @ aNumber
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> extentForWidth: aNumber [
-	| intrinsic scale newHeight |
-	intrinsic := self intrinsicExtent.
-	(intrinsic x isZero or: [ aNumber isNil ]) ifTrue: [ ^ intrinsic ].
-	scale := aNumber asFloat / intrinsic x asFloat.
-	newHeight := intrinsic y asFloat * scale.
-	^ aNumber @ newHeight
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> height: aNumber [
-	self resizeTo: (self extentForHeight: aNumber).
-	^ self
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> width: aNumber [
-	self resizeTo: (self extentForWidth: aNumber).
-	^ self
-]
-
-{ #category : 'sizing' }
-CFFontAwesomeIcon >> fitInto: anExtent [
-	self resizeTo: (self extentFittingInto: anExtent).
-	^ self
-]
-
 { #category : 'private' }
 CFFontAwesomeIcon >> resizeTo: anExtent [
 	self size: anExtent.
 	pathElements do: [ :each | each size: anExtent ].
+	^ self
+]
+
+{ #category : 'styling' }
+CFFontAwesomeIcon >> secondaryColor: aColor [
+	secondaryColor := aColor.
+	self applyColors.
 	^ self
 ]
 
@@ -202,4 +194,10 @@ CFFontAwesomeIcon >> unicode [
 { #category : 'accessing' }
 CFFontAwesomeIcon >> viewBox [
 	^ viewBox
+]
+
+{ #category : 'sizing' }
+CFFontAwesomeIcon >> width: aNumber [
+	self resizeTo: (self extentForWidth: aNumber).
+	^ self
 ]

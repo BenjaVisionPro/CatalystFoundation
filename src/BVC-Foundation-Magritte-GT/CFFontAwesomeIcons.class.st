@@ -6,12 +6,22 @@ Class {
 	#name : 'CFFontAwesomeIcons',
 	#superclass : 'Object',
 	#classVars : [
-		'Metadata',
-		'DefaultStyleName'
+		'DefaultStyleName',
+		'Metadata'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> availableIcons [
+	^ self defaultStyle availableIcons
+]
+
+{ #category : 'metadata' }
+CFFontAwesomeIcons class >> availableIconsForStyleNamed: aStyleName [
+	^ (self styleOrDefaultNamed: aStyleName) availableIcons
+]
 
 { #category : 'styles' }
 CFFontAwesomeIcons class >> availableStyles [
@@ -23,16 +33,6 @@ CFFontAwesomeIcons class >> availableStyles [
 		collect: [ :each | each styleName ])
 		reject: [ :each | each isNil ])
 		asSortedCollection asArray
-]
-
-{ #category : 'metadata' }
-CFFontAwesomeIcons class >> availableIcons [
-	^ self defaultStyle availableIcons
-]
-
-{ #category : 'metadata' }
-CFFontAwesomeIcons class >> availableIconsForStyleNamed: aStyleName [
-	^ (self styleOrDefaultNamed: aStyleName) availableIcons
 ]
 
 { #category : 'styles' }
@@ -199,11 +199,6 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol [
 ]
 
 { #category : 'instance creation' }
-CFFontAwesomeIcons class >> icon: aSelectorSymbol styleName: aStyleName [
-	^ (self styleOrDefaultNamed: aStyleName) icon: aSelectorSymbol
-]
-
-{ #category : 'instance creation' }
 CFFontAwesomeIcons class >> icon: aSelectorSymbol color: aColor [
 	^ (self icon: aSelectorSymbol)
 		color: aColor;
@@ -211,10 +206,12 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol color: aColor [
 ]
 
 { #category : 'instance creation' }
-CFFontAwesomeIcons class >> icon: aSelectorSymbol size: aSize color: aColor [
-	(aSize isPoint or: [ aSize respondsTo: #x ]) ifTrue: [
-		^ self icon: aSelectorSymbol fitInto: aSize color: aColor ].
-	^ self icon: aSelectorSymbol height: aSize color: aColor
+CFFontAwesomeIcons class >> icon: aSelectorSymbol fitInto: anExtent color: aColor [
+	| icon |
+	icon := (self icon: aSelectorSymbol)
+		color: aColor;
+		yourself.
+	^ [ icon asScalableElementSized: (icon extentFittingInto: anExtent) ] asStencil
 ]
 
 { #category : 'instance creation' }
@@ -227,21 +224,24 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol height: aNumber color: aColor 
 ]
 
 { #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol size: aSize color: aColor [
+	(aSize isPoint or: [ aSize respondsTo: #x ]) ifTrue: [
+		^ self icon: aSelectorSymbol fitInto: aSize color: aColor ].
+	^ self icon: aSelectorSymbol height: aSize color: aColor
+]
+
+{ #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol styleName: aStyleName [
+	^ (self styleOrDefaultNamed: aStyleName) icon: aSelectorSymbol
+]
+
+{ #category : 'instance creation' }
 CFFontAwesomeIcons class >> icon: aSelectorSymbol width: aNumber color: aColor [
 	| icon |
 	icon := (self icon: aSelectorSymbol)
 		color: aColor;
 		yourself.
 	^ [ icon asScalableElementSized: (icon extentForWidth: aNumber) ] asStencil
-]
-
-{ #category : 'instance creation' }
-CFFontAwesomeIcons class >> icon: aSelectorSymbol fitInto: anExtent color: aColor [
-	| icon |
-	icon := (self icon: aSelectorSymbol)
-		color: aColor;
-		yourself.
-	^ [ icon asScalableElementSized: (icon extentFittingInto: anExtent) ] asStencil
 ]
 
 { #category : 'instance creation' }
@@ -277,15 +277,15 @@ CFFontAwesomeIcons class >> metadata: aMetadata [
 ]
 
 { #category : 'styles' }
-CFFontAwesomeIcons class >> styleName [
-	^ nil
-]
-
-{ #category : 'styles' }
 CFFontAwesomeIcons class >> style: aStyleName [
 	^ Smalltalk
 		at: (CFFontAwesomeMetadataImporter styleClassNameFor: aStyleName) asSymbol
 		ifAbsent: [ self error: 'No imported Font Awesome style named ', aStyleName printString ]
+]
+
+{ #category : 'styles' }
+CFFontAwesomeIcons class >> styleName [
+	^ nil
 ]
 
 { #category : 'styles' }

@@ -44,11 +44,6 @@ CFFontAwesomeMetadataImporter class >> compileAvailableIconsMethodsFrom: selecto
 		styleClass class compile: source classified: 'metadata' ]
 ]
 
-{ #category : 'importing' }
-CFFontAwesomeMetadataImporter class >> defaultStyleName [
-	^ 'light'
-]
-
 { #category : 'private - compiling' }
 CFFontAwesomeMetadataImporter class >> compileIconSelector: aSelector iconName: anIconName styleName: aStyleName unicode: aUnicodeString label: aLabelString svgData: svgData into: aStyleClass [
 	| width height pathSpecs source |
@@ -108,6 +103,11 @@ CFFontAwesomeMetadataImporter class >> compileStyleMetadataOn: aStyleClass famil
 				compile: 'fontAwesomeVersion
 	^ ', aVersionString storeString
 				classified: 'metadata' ]
+]
+
+{ #category : 'importing' }
+CFFontAwesomeMetadataImporter class >> defaultStyleName [
+	^ 'light'
 ]
 
 { #category : 'private - styles' }

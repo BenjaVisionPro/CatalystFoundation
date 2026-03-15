@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : 'private' }
+CFMaFontAwesomeIconFieldElement >> currentValue [
+	self fieldViewModel ifNil: [ ^ nil ].
+	self observableValue
+		ifSome: [ :aValue | ^ aValue currentValue ].
+	^ nil
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconFieldElement >> iconElementForValue: aValue [
 	self fieldViewModel ifNil: [ ^ self newPlaceholderElement ].
 	^ aValue
@@ -58,14 +66,6 @@ CFMaFontAwesomeIconFieldElement >> newDropdownHandleElement [
 			c grid horizontal alignLeft ];
 			addChild: (self iconElementForValue: self currentValue);
 			yourself
-]
-
-{ #category : 'private' }
-CFMaFontAwesomeIconFieldElement >> currentValue [
-	self fieldViewModel ifNil: [ ^ nil ].
-	self observableValue
-		ifSome: [ :aValue | ^ aValue currentValue ].
-	^ nil
 ]
 
 { #category : 'private' }

@@ -85,9 +85,9 @@ CFMaFontAwesomeIconSelectorElement >> focusSearchEditor [
 		searchEditor inUIProcessDo: [ searchEditor requestFocus ] ]
 ]
 
-{ #category : 'actions' }
-CFMaFontAwesomeIconSelectorElement >> hideDropdown [
-	dropdownAnchor ifNotNil: [ dropdownAnchor fireEvent: BrDropdownHideWish new ]
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> gridCellSpacing [
+	^ 8
 ]
 
 { #category : 'private' }
@@ -103,9 +103,9 @@ CFMaFontAwesomeIconSelectorElement >> gridColumnCount [
 	^ (((availableWidth + spacing) / (tileFootprint + spacing)) floor max: 1)
 ]
 
-{ #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> gridCellSpacing [
-	^ 8
+{ #category : 'actions' }
+CFMaFontAwesomeIconSelectorElement >> hideDropdown [
+	dropdownAnchor ifNotNil: [ dropdownAnchor fireEvent: BrDropdownHideWish new ]
 ]
 
 { #category : 'initialization' }
@@ -135,29 +135,6 @@ CFMaFontAwesomeIconSelectorElement >> metadata [
 ]
 
 { #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> newControlsRow [
-	| row |
-	row := BrHorizontalPane new
-		cellSpacing: 6;
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical fitContent ];
-		margin: (BlInsets bottom: 6);
-		yourself.
-
-	searchIconContainer := self newControlIconContainer.
-	sizeIconContainer := self newControlIconContainer.
-
-	row addChildren: {
-		searchIconContainer.
-		searchEditor.
-		sizeIconContainer.
-		sizeEditor }.
-
-	^ row
-]
-
-{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newControlIconContainer [
 	^ BrFrame new
 		fitContent;
@@ -181,56 +158,24 @@ CFMaFontAwesomeIconSelectorElement >> newControlIconNamed: aSelectorSymbol [
 ]
 
 { #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> newInfoBar [
-	| row spacer leftPane |
+CFMaFontAwesomeIconSelectorElement >> newControlsRow [
+	| row |
 	row := BrHorizontalPane new
-			cellSpacing: 2;
-			constraintsDo: [ :c | 
-				c horizontal matchParent.
-				c vertical fitContent ];
-			margin: (BlInsets top: 2);
-			yourself.
+		cellSpacing: 6;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		margin: (BlInsets bottom: 6);
+		yourself.
 
-	infoSummaryLabel := BrLabel new
-			aptitude: BrLabelAptitude new;
-			fitContent;
-			yourself.
+	searchIconContainer := self newControlIconContainer.
+	sizeIconContainer := self newControlIconContainer.
 
-	versionLabel := BrLabel new
-			aptitude: (BrLabelAptitude new
-					fontSize: 9.0;
-					yourself);
-			opacity: 0.5;
-			fitContent;
-			yourself.
-
-	logoContainer := BrFrame new
-			height: 30;
-			width: 200;
-			constraintsDo: [ :c | c linear horizontal alignRight ];
-			yourself.
-
-	spacer := BlElement new
-			constraintsDo: [ :c | 
-				c horizontal matchParent.
-				c vertical fitContent ];
-			yourself.
-
-	leftPane := BrVerticalPane new
-			cellSpacing: 0;
-			constraintsDo: [ :c | 
-				c horizontal fitContent.
-				c vertical fitContent ];
-			yourself.
-
-	leftPane
-		addChildren: {infoSummaryLabel.
-				versionLabel}.
-
-	row
-		addChildren: {leftPane.
-				spacer.
-				logoContainer}.
+	row addChildren: {
+		searchIconContainer.
+		searchEditor.
+		sizeIconContainer.
+		sizeEditor }.
 
 	^ row
 ]
@@ -273,6 +218,62 @@ CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 ]
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newInfoBar [
+	| row spacer leftPane |
+	row := BrHorizontalPane new
+			cellSpacing: 2;
+			constraintsDo: [ :c | 
+				c horizontal matchParent.
+				c vertical fitContent ];
+			margin: (BlInsets top: 2);
+			yourself.
+
+	infoSummaryLabel := BrLabel new
+			aptitude: BrLabelAptitude new;
+			fitContent;
+			yourself.
+
+	versionLabel := BrLabel new
+			aptitude: (BrLabelAptitude new
+					fontSize: 9.0;
+					yourself);
+			opacity: 0.5;
+			fitContent;
+			yourself.
+
+	logoContainer := BrFrame new
+			height: 30;
+			width: 200;
+			constraintsDo: [ :c | 
+				c linear horizontal alignRight ];
+			yourself.
+
+	spacer := BlElement new
+			constraintsDo: [ :c | 
+				c horizontal matchParent.
+				c vertical fitContent ];
+			yourself.
+
+	leftPane := BrVerticalPane new
+			cellSpacing: 0;
+			constraintsDo: [ :c | 
+				c horizontal fitContent.
+				c vertical fitContent ];
+			yourself.
+
+	leftPane
+		addChildren: {infoSummaryLabel.
+				versionLabel}.
+
+	row
+		addChildren: {leftPane.
+				spacer.
+				logoContainer}.
+
+	^ row
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newList [
 	| aList |
 	aList := BrSimpleList new
@@ -287,12 +288,10 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newLogoElement [
 	^ [ | icon |
-		icon := (self description iconLibraryClass style: 'brands')
-			icon: #fontAwesomeLogoFull.
-		icon color: Color black.
-		(icon asScalableElementSized: (icon extentFittingInto: 200 @ 30))
-			opacity: 0.8;
-			yourself ]
+	icon := (CFFontAwesomeIcons style: 'brands') icon: #fontAwesomeLogoFull.
+	(icon asScalableElementSized: (icon extentFittingInto: 200 @ 30))
+		opacity: 0.8;
+		yourself ]
 		on: Error
 		do: [ BrLabel new
 				aptitude: BrLabelAptitude new;
@@ -362,21 +361,6 @@ CFMaFontAwesomeIconSelectorElement >> refreshControlIcons [
 ]
 
 { #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
-	| metadata availableCount |
-	metadata := self metadata.
-	availableCount := self availableMetadata size.
-	infoSummaryLabel ifNotNil: [
-		infoSummaryLabel text: availableCount asString, ' icons  ', metadata styles size asString, ' styles' ].
-	versionLabel ifNotNil: [
-		versionLabel text: 'v', metadata version ].
-	logoContainer ifNotNil: [
-		logoContainer
-			removeChildren;
-			addChild: self newLogoElement ]
-]
-
-{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshGrid [
 	currentColumnCount := self gridColumnCount.
 	self refreshList
@@ -392,6 +376,21 @@ CFMaFontAwesomeIconSelectorElement >> refreshGridForExtentChange [
 ]
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
+	| metadata availableCount |
+	metadata := self metadata.
+	availableCount := self availableMetadata size.
+	infoSummaryLabel ifNotNil: [
+		infoSummaryLabel text: availableCount asString, ' icons  ', metadata styles size asString, ' styles' ].
+	versionLabel ifNotNil: [
+		versionLabel text: 'v', metadata version ].
+	logoContainer ifNotNil: [
+		logoContainer
+			removeChildren;
+			addChild: self newLogoElement ]
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshList [
 	list items: self filteredMetadataRows
 ]
@@ -402,14 +401,6 @@ CFMaFontAwesomeIconSelectorElement >> searchText [
 ]
 
 { #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> shouldShowMetadata: anIconMetadata [
-	self activeStyleName = 'brands'
-		ifTrue: [ ^ anIconMetadata supportsStyleNamed: 'brands' ].
-	^ (anIconMetadata supportsStyleNamed: self activeStyleName)
-		and: [ (anIconMetadata supportsStyleNamed: 'brands') not ]
-]
-
-{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> selectMetadata: selectedMetadata [
 	GtMagritteBuilderUtility
 		write: selectedMetadata selectorSymbol
@@ -417,6 +408,14 @@ CFMaFontAwesomeIconSelectorElement >> selectMetadata: selectedMetadata [
 		memento: self memento
 		element: self.
 	self hideDropdown
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> shouldShowMetadata: anIconMetadata [
+	self activeStyleName = 'brands'
+		ifTrue: [ ^ anIconMetadata supportsStyleNamed: 'brands' ].
+	^ (anIconMetadata supportsStyleNamed: self activeStyleName)
+		and: [ (anIconMetadata supportsStyleNamed: 'brands') not ]
 ]
 
 { #category : 'private' }
