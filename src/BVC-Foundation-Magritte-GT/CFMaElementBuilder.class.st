@@ -29,7 +29,10 @@ CFMaElementBuilder >> addIconUsing: aDescription [
 
 	anElement := aDescription isReadOnly
 		ifTrue: [ GtMagritteBuilderUtility newIconWithMemento: self memento using: aDescription ]
-		ifFalse: [ self builderUtilityClass newWritableFontAwesomeIconMemento: self memento using: aDescription ].
+		ifFalse: [ CFMaFontAwesomeIconFieldStencilBuilder new
+				memento: self memento;
+				description: aDescription;
+				asElement ].
 
 	self addFieldElement: anElement using: aDescription
 ]

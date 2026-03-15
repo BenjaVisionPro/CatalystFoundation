@@ -75,20 +75,6 @@ CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height
 		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
 ]
 
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconSelectorFor: anAnchor memento: aMemento description: aDescription [
-	^ CFMaFontAwesomeIconSelectorElement new
-		fieldViewModel: (GtMagritteFieldViewModel new
-				memento: aMemento;
-				description: aDescription;
-				yourself);
-		dropdownAnchor: anAnchor;
-		constraintsDo: [ :c |
-			c horizontal exact: aDescription selectorExtent x.
-			c vertical exact: aDescription selectorExtent y ];
-		yourself
-]
-
 { #category : 'elements' }
 CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 	^ BrVerticalPane new
@@ -102,65 +88,4 @@ CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 		cellSpacing: 8;
 		background: (Color black alpha: 0.05);
 		yourself
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newWritableFontAwesomeIconMemento: aMemento using: aDescription [
-	| anAnchor |
-	anAnchor := BrFrame new
-			beFocusable;
-			fitContent;
-			padding: (BlInsets all: 2);
-			yourself.
-
-	anAnchor
-		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-				handle: [ self newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription ]
-				content: [ self
-						newFontAwesomeIconSelectorFor: anAnchor
-						memento: aMemento
-						description: aDescription ]).
-
-	anAnchor
-		withAsyncSinkDo: [ :anElementSink | 
-			anElementSink
-				sink: AsyncPeekSink new;
-				whenUpdate: [ :aContainer :aSink | 
-					| aValue anIcon |
-					aValue := aSink value currentValue.
-					anIcon := aValue
-							ifNil: [ self newChooseIconAffordanceFor: aDescription ]
-							ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
-					aContainer
-						removeChildren;
-						addChild: anIcon ].
-			(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
-
-	^ anAnchor
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newWritableFontAwesomeIconViewerMemento: aMemento using: aDescription [
-	| aFrame |
-	aFrame := BrFrame new.
-	aFrame
-		fitContent;
-		padding: (BlInsets all: 2);
-		constraintsDo: [ :c | 
-			c grid vertical alignCenter.
-			c grid horizontal alignLeft ];
-		withAsyncSinkDo: [ :anElementSink | 
-			anElementSink
-				sink: AsyncPeekSink new;
-				whenUpdate: [ :aContainer :aSink | 
-					| aValue anIcon |
-					aValue := aSink value currentValue.
-					anIcon := aValue
-							ifNil: [ self newChooseIconAffordanceFor: aDescription ]
-							ifNotNil: [ self newFontAwesomeIconFor: aValue using: aDescription ].
-					aContainer
-						removeChildren;
-						addChild: anIcon ].
-			(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
-	^ aFrame
 ]
