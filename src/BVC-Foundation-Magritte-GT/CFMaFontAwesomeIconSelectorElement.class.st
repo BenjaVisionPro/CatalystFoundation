@@ -27,20 +27,14 @@ CFMaFontAwesomeIconSelectorElement >> availableMetadata [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> buildItemStencil [
-	^ [ BrHorizontalPane new
-			cellSpacing: self gridCellSpacing;
-			margin: (BlInsets bottom: self gridCellSpacing);
-			constraintsDo: [ :c |
-				c horizontal matchParent.
-				c vertical fitContent ];
-			yourself ]
+	^ [ :aRowMetadata :anIndex :aList |
+		self newIconRowFor: aRowMetadata ]
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> configureList [
 	list
-		itemStencil: self buildItemStencil;
-		itemDataBinder: self itemDataBinderBlock.
+		stencil: self buildItemStencil.
 	self refreshInfoBar.
 	self refreshGrid
 ]
@@ -124,15 +118,6 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	self when: BlElementExtentChangedEvent do: [ :anEvent | self refreshGridForExtentChange ].
 
 	self addChildren: { self newControlsRow. list. self newInfoBar }
-]
-
-{ #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
-	^ [ :aRowElement :aRowMetadata :anIndex |
-		aRowElement
-			removeChildren;
-			addChildren: (aRowMetadata collect: [ :eachMetadata | self newIconTileFor: eachMetadata ]).
-		aRowElement ]
 ]
 
 { #category : 'private' }
@@ -243,6 +228,18 @@ CFMaFontAwesomeIconSelectorElement >> newInfoBar [
 ]
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newIconRowFor: aRowMetadata [
+	^ BrHorizontalPane new
+		cellSpacing: self gridCellSpacing;
+		margin: (BlInsets bottom: self gridCellSpacing);
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		addChildren: (aRowMetadata collect: [ :eachMetadata | self newIconTileFor: eachMetadata ]);
+		yourself
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 	| iconElement previewHeight tile tileExtent |
 	previewHeight := self previewHeight.
@@ -342,7 +339,8 @@ CFMaFontAwesomeIconSelectorElement >> previewHeight [
 CFMaFontAwesomeIconSelectorElement >> refreshContent [
 	self refreshControlIcons.
 	self configureList.
-	self focusSearchEditor
+	self focusSearchEditor.
+	self enqueueTask: (BlTaskAction new action: [ self refreshGridForExtentChange ])
 ]
 
 { #category : 'private' }
