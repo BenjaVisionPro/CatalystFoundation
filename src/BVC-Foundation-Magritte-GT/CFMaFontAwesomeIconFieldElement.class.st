@@ -33,7 +33,7 @@ CFMaFontAwesomeIconFieldElement >> initialize [
 			anElementSink
 				sink: AsyncPeekSink new;
 				whenUpdate: [ :aContainer :aSink |
-					self updateDisplayedIconFor: aSink value in: aContainer ] ]
+					self updateDisplayedIconFor: aSink value currentValue in: aContainer ] ]
 ]
 
 { #category : 'private' }
