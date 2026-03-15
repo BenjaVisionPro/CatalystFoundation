@@ -28,7 +28,7 @@ CFMaFontAwesomeIconSelectorElement >> activeStyleName [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> availableMetadata [
 	^ self metadata allIconMetadata
-		select: [ :each | each supportsStyleNamed: self activeStyleName ]
+		select: [ :each | self shouldShowMetadata: each ]
 ]
 
 { #category : 'private' }
@@ -61,7 +61,7 @@ CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
 	searchText := self searchText.
 	searchText isEmpty ifTrue: [ ^ self availableMetadata ].
 	^ (self metadata searchIconsMatching: searchText)
-		select: [ :each | each supportsStyleNamed: self activeStyleName ]
+		select: [ :each | self shouldShowMetadata: each ]
 ]
 
 { #category : 'private' }
@@ -397,6 +397,14 @@ CFMaFontAwesomeIconSelectorElement >> refreshList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> searchText [
 	^ searchEditor text asString trimBoth
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> shouldShowMetadata: anIconMetadata [
+	self activeStyleName = 'brands'
+		ifTrue: [ ^ anIconMetadata supportsStyleNamed: 'brands' ].
+	^ (anIconMetadata supportsStyleNamed: self activeStyleName)
+		and: [ (anIconMetadata supportsStyleNamed: 'brands') not ]
 ]
 
 { #category : 'private' }
