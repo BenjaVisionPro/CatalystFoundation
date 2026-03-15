@@ -127,14 +127,17 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 
 { #category : 'gt extensions' }
 CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeFrom: anElement [
-	| aViewElement |
-	aViewElement := anElement phlow firstParentWithView.
+	| aContentElement aViewElement |
 	anElement fireEvent: BrDropdownHideWish new.
-	aViewElement ifNil: [ ^ self ].
-	aViewElement phlow update.
-	(aViewElement isKindOf: GtCoderElement)
-		ifTrue: [ aViewElement viewModel
-				ifNotNil: [ :aViewModel | aViewModel requestUpdateAddOns ] ]
+	aContentElement := [ anElement phlow viewContent ]
+		on: Error
+		do: [ nil ].
+	aContentElement ifNotNil: [
+		aContentElement phlow update.
+		^ self ].
+	aViewElement := anElement phlow firstParentWithView.
+	(aViewElement notNil and: [ aViewElement phlow entity respondsTo: #updateContent: ])
+		ifTrue: [ aViewElement phlow update ]
 ]
 
 { #category : 'gt extensions' }
