@@ -75,6 +75,12 @@ CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
 		select: [ :each | each supportsStyleNamed: self description styleName ]
 ]
 
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> focusSearchEditor [
+	searchEditor ifNotNil: [
+		searchEditor inUIProcessDo: [ searchEditor requestFocus ] ]
+]
+
 { #category : 'actions' }
 CFMaFontAwesomeIconSelectorElement >> hideDropdown [
 	dropdownAnchor ifNotNil: [ dropdownAnchor fireEvent: BrDropdownHideWish new ]
@@ -310,7 +316,8 @@ CFMaFontAwesomeIconSelectorElement >> previewHeight [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshContent [
 	self refreshControlIcons.
-	self configureList
+	self configureList.
+	self focusSearchEditor
 ]
 
 { #category : 'private' }
