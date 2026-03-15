@@ -26,34 +26,23 @@ CFMaFontAwesomeIconSelectorElement >> availableMetadata [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> buildItemStencil [
-	^ [ BlElement new
-			layout: BlLinearLayout horizontal;
-			padding: (BlInsets all: 6);
-			margin: (BlInsets all: 2);
-			constraintsDo: [ :c |
-				c horizontal matchParent.
-				c vertical fitContent ];
-			addChild: (BrFrame new fitContent) as: #icon;
-			addChild: (BlElement new
-				layout: BlLinearLayout vertical;
-				constraintsDo: [ :c |
-					c horizontal matchParent.
-					c vertical fitContent ];
-				addChild: (BrLabel new
-					aptitude: BrLabelAptitude new;
-					padding: (BlInsets left: 10 right: 3)) as: #title;
-				addChild: (BrLabel new
-					aptitude: BrLabelAptitude new;
-					padding: (BlInsets left: 10 right: 3)) as: #selector) as: #labels ]
+	^ [ :anMetadata :anIndex :aList |
+		self newIconTileFor: anMetadata ]
 ]
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> configureList [
+	self configureGridColumns.
 	list
-		itemStencil: self buildItemStencil;
-		itemDataBinder: self itemDataBinderBlock.
+		stencil: self buildItemStencil.
 	self refreshInfoBar.
 	self refreshList
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> configureGridColumns [
+	list aptitudeDo: [ :anAptitude |
+		anAptitude columnCount: self gridColumnCount ]
 ]
 
 { #category : 'accessing' }
@@ -86,6 +75,18 @@ CFMaFontAwesomeIconSelectorElement >> hideDropdown [
 	dropdownAnchor ifNotNil: [ dropdownAnchor fireEvent: BrDropdownHideWish new ]
 ]
 
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> gridColumnCount [
+	| availableWidth tileExtent |
+	availableWidth := list width > 0
+		ifTrue: [ list width ]
+		ifFalse: [ self width > 0
+			ifTrue: [ self width ]
+			ifFalse: [ 600 ] ].
+	tileExtent := self tileExtentForPreviewHeight: self previewHeight.
+	^ ((availableWidth / tileExtent) floor max: 1)
+]
+
 { #category : 'initialization' }
 CFMaFontAwesomeIconSelectorElement >> initialize [
 	super initialize.
@@ -101,24 +102,6 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	list := self newList.
 
 	self addChildren: { self newControlsRow. list. self newInfoBar }
-]
-
-{ #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
-	^ [ :anElement :anMetadata :anIndex |
-		| labels iconHolder previewHeight |
-		previewHeight := self previewHeight.
-		iconHolder := anElement childNamed: #icon.
-		iconHolder
-			removeChildren;
-			addChild: (CFMaBuilderUtility
-					newFontAwesomeIconForMetadata: anMetadata
-					styleName: self description styleName
-					height: previewHeight).
-		labels := anElement childNamed: #labels.
-		(labels childNamed: #title) text: (anMetadata label ifNil: [ anMetadata selectorSymbol asString ]).
-		(labels childNamed: #selector) text: anMetadata selectorSymbol asString.
-		anElement ]
 ]
 
 { #category : 'private' }
@@ -229,14 +212,39 @@ CFMaFontAwesomeIconSelectorElement >> newInfoBar [
 ]
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
+	| iconElement previewHeight tile tileExtent |
+	previewHeight := self previewHeight.
+	tileExtent := self tileExtentForPreviewHeight: previewHeight.
+	iconElement := CFMaBuilderUtility
+		newFontAwesomeIconForMetadata: anMetadata
+		styleName: self description styleName
+		height: previewHeight.
+	iconElement constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+
+	tile := BlElement new
+		layout: BlFrameLayout new;
+		padding: (BlInsets all: 8);
+		margin: (BlInsets all: 4);
+		constraintsDo: [ :c |
+			c horizontal exact: tileExtent.
+			c vertical exact: tileExtent ];
+		yourself.
+	tile addChild: iconElement.
+	tile when: BlClickEvent do: [ :anEvent | self selectMetadata: anMetadata ].
+	^ tile
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newList [
 	| aList |
-	aList := BrSimpleList new
+	aList := BrGridList new
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent ];
 		yourself.
-	aList when: BrSelectionChanged do: [ :anEvent | self onSelectionChanged: anEvent ].
 	^ aList
 ]
 
@@ -290,21 +298,6 @@ CFMaFontAwesomeIconSelectorElement >> onFieldViewModelChanged [
 	self inUIProcessDo: [ self refreshContent ]
 ]
 
-{ #category : 'events' }
-CFMaFontAwesomeIconSelectorElement >> onSelectionChanged: anEvent [
-	| aWidgetElement |
-	aWidgetElement := anEvent currentTarget.
-	anEvent selectedDo: [ :anInterval |
-		| selectedMetadata |
-		selectedMetadata := aWidgetElement viewModel itemAt: anInterval first.
-		GtMagritteBuilderUtility
-			write: selectedMetadata selectorSymbol
-			using: self description
-			memento: self memento
-			element: self.
-		self hideDropdown ]
-]
-
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> previewHeight [
 	| text number |
@@ -354,4 +347,19 @@ CFMaFontAwesomeIconSelectorElement >> refreshList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> searchText [
 	^ searchEditor text asString trimBoth
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> selectMetadata: selectedMetadata [
+	GtMagritteBuilderUtility
+		write: selectedMetadata selectorSymbol
+		using: self description
+		memento: self memento
+		element: self.
+	self hideDropdown
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> tileExtentForPreviewHeight: aNumber [
+	^ (aNumber + 16) max: 44
 ]
