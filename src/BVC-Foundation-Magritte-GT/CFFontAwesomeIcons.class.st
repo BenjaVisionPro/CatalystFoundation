@@ -130,11 +130,48 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 ]
 
 { #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeInCoderToolbar: aToolbarElement [
+	| aBehaviorCoderElement |
+	aToolbarElement updateCustomButtons.
+	aBehaviorCoderElement := aToolbarElement
+		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
+		ifFound: [ :anElement | anElement ]
+		ifNone: [ ^ self ].
+	self gtRefreshSelectedClassViewIn: aBehaviorCoderElement
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeInTabFor: anElement [
+	anElement
+		allParentsDetect: [ :aParent | aParent isKindOf: BrTab ]
+		ifFound: [ :aTab | aTab viewContentElement phlow update ]
+		ifNone: [  ]
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeOn: aTarget [
+	(aTarget isKindOf: GtCoderToolbarElement)
+		ifTrue: [ ^ self gtRefreshAfterDefaultStyleChangeInCoderToolbar: aTarget ].
+	self gtRefreshAfterDefaultStyleChangeInTabFor: aTarget
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtRefreshSelectedClassViewIn: aBehaviorCoderElement [
+	| aTabGroup |
+	aTabGroup := aBehaviorCoderElement
+		allChildrenBreadthFirstDetect: [ :anElement | anElement isKindOf: BrTabGroup ]
+		ifFound: [ :anElement | anElement ]
+		ifNone: [ ^ self ].
+	aTabGroup viewModel
+		selectedTabDo: [ :aTabModel | aTabModel widget viewContentElement phlow update ]
+]
+
+{ #category : 'gt extensions' }
 CFFontAwesomeIcons class >> gtSelectDefaultStyleNamed: aStyleName dropdown: aDropdown target: aTarget [
 	self defaultStyleName = aStyleName ifFalse: [
 		self defaultStyleName: aStyleName ].
 	aDropdown fireEvent: BrDropdownHideWish new.
-	aTarget viewContentElement phlow update
+	self gtRefreshAfterDefaultStyleChangeOn: aTarget
 ]
 
 { #category : 'gt extensions' }
