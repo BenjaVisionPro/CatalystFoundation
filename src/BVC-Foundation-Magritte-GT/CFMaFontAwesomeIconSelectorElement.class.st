@@ -88,12 +88,12 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
 	^ [ :anElement :anMetadata :anIndex |
-		| labels iconHolder size |
-		size := self previewSize.
+		| labels iconHolder previewHeight |
+		previewHeight := self previewHeight.
 		iconHolder := anElement childNamed: #icon.
 		iconHolder
 			removeChildren;
-			addChild: (CFMaBuilderUtility newFontAwesomeIconForMetadata: anMetadata size: size).
+			addChild: (CFMaBuilderUtility newFontAwesomeIconForMetadata: anMetadata height: previewHeight).
 		labels := anElement childNamed: #labels.
 		(labels childNamed: #title) text: (anMetadata label ifNil: [ anMetadata selectorSymbol asString ]).
 		(labels childNamed: #selector) text: anMetadata selectorSymbol asString.
@@ -117,21 +117,19 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 		margin: (BlInsets bottom: 6);
 		yourself.
 
-	searchLabel := BrLabel new
-		aptitude: BrLabelAptitude new;
+	searchLabel := ((((self description iconLibraryClass style: 'solid') icon: #search) asElement)
+		height: 14;
 		border: (BlBorder paint: Color blue width: 1);
-		text: 'Search';
-		fitContent;
-		yourself.
+		constraintsDo: [ :c | c linear vertical alignCenter ];
+		yourself).
 
 	searchEditor border: (BlBorder paint: Color green width: 1).
 
-	sizeLabel := BrLabel new
-		aptitude: BrLabelAptitude new;
+	sizeLabel := ((((self description iconLibraryClass style: 'solid') icon: #expandAlt) asElement)
+		height: 14;
 		border: (BlBorder paint: Color magenta width: 1);
-		text: 'Size';
-		fitContent;
-		yourself.
+		constraintsDo: [ :c | c linear vertical alignCenter ];
+		yourself).
 
 	sizeEditor border: (BlBorder paint: Color orange width: 1).
 
@@ -213,10 +211,12 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newLogoElement [
-	^ [ ((self description iconLibraryClass style: 'brands')
-		icon: #fontAwesomeLogoFull) asElement asScalableElement
-		opacity: 0.8;
-		yourself ]
+	^ [ | icon |
+		icon := ((self description iconLibraryClass style: 'brands')
+			icon: #fontAwesomeLogoFull) asElement.
+		icon height: 30.
+		icon opacity: 0.8.
+		icon ]
 		on: Error
 		do: [ BrLabel new
 				aptitude: BrLabelAptitude new;
@@ -274,12 +274,12 @@ CFMaFontAwesomeIconSelectorElement >> onSelectionChanged: anEvent [
 ]
 
 { #category : 'private' }
-CFMaFontAwesomeIconSelectorElement >> previewSize [
+CFMaFontAwesomeIconSelectorElement >> previewHeight [
 	| text number |
 	text := sizeEditor text asString trimBoth.
-	text isEmpty ifTrue: [ ^ 32 @ 32 ].
+	text isEmpty ifTrue: [ ^ 32 ].
 	number := [ text asNumber ] on: Error do: [ 32 ].
-	^ number @ number
+	^ number
 ]
 
 { #category : 'private' }

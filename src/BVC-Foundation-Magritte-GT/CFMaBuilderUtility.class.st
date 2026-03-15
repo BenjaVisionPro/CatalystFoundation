@@ -45,17 +45,32 @@ CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescrip
 
 { #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescription [
-	| anIconLibrary |
-	anIconLibrary := aDescription iconLibraryClass style: aDescription styleName.
-	^ [ ((anIconLibrary icon: aSelectorSymbol) asElement asScalableElement size: aDescription iconSize) ]
+	| icon width height |
+	^ [
+		icon := ((aDescription iconLibraryClass style: aDescription styleName) icon: aSelectorSymbol)
+			asElement.
+		icon color: Color black.
+		width := aDescription iconWidth.
+		height := aDescription iconHeight.
+		(width notNil and: [ height notNil ])
+			ifTrue: [ icon fitInto: width @ height ]
+			ifFalse: [
+				width notNil
+					ifTrue: [ icon width: width ]
+					ifFalse: [ height notNil ifTrue: [ icon height: height ] ] ].
+		icon ]
 		on: Error
 		do: [ self newChooseIconAffordanceFor: aDescription ]
 ]
 
 { #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata size: aSize [
-	^ [ ((anIconMetadata iconLibraryClass style: anIconMetadata preferredStyleName)
-		icon: anIconMetadata selectorSymbol) asElement asScalableElement size: aSize ]
+CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height: aNumber [
+	^ [ | icon |
+		icon := ((anIconMetadata iconLibraryClass style: anIconMetadata preferredStyleName)
+			icon: anIconMetadata selectorSymbol) asElement.
+		icon color: Color black.
+		icon height: aNumber.
+		icon ]
 		on: Error
 		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
 ]

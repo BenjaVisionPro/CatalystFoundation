@@ -40,7 +40,7 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 		itemDataBinder: [ :anElement :anIcon :anIndex |
 			anElement
 				replaceChild: (anElement childNamed: #icon)
-				with: (anIcon value asElement asScalableElement size: 64 @ 64)
+				with: ((anIcon value asElement) height: 64; yourself)
 				as: #icon.
 			(anElement childNamed: #label) text: anIcon key asString.
 			anElement ];
@@ -75,11 +75,36 @@ CFFontAwesomeIcons class >> icon: aSelectorSymbol color: aColor [
 
 { #category : 'instance creation' }
 CFFontAwesomeIcons class >> icon: aSelectorSymbol size: aSize color: aColor [
+	(aSize isPoint or: [ aSize respondsTo: #x ]) ifTrue: [
+		^ self icon: aSelectorSymbol fitInto: aSize color: aColor ].
+	^ self icon: aSelectorSymbol height: aSize color: aColor
+]
+
+{ #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol height: aNumber color: aColor [
 	| icon |
 	icon := (self icon: aSelectorSymbol)
 		color: aColor;
 		yourself.
-	^ [ icon asElement asScalableElement size: aSize ] asStencil
+	^ [ icon asElement height: aNumber; yourself ] asStencil
+]
+
+{ #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol width: aNumber color: aColor [
+	| icon |
+	icon := (self icon: aSelectorSymbol)
+		color: aColor;
+		yourself.
+	^ [ icon asElement width: aNumber; yourself ] asStencil
+]
+
+{ #category : 'instance creation' }
+CFFontAwesomeIcons class >> icon: aSelectorSymbol fitInto: anExtent color: aColor [
+	| icon |
+	icon := (self icon: aSelectorSymbol)
+		color: aColor;
+		yourself.
+	^ [ icon asElement fitInto: anExtent; yourself ] asStencil
 ]
 
 { #category : 'instance creation' }

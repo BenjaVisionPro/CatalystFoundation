@@ -32,8 +32,8 @@ CFMaFontAwesomeIconDescription >> chooseIconLabel: aString [
 ]
 
 { #category : 'accessing-defaults' }
-CFMaFontAwesomeIconDescription >> defaultIconSize [
-	^ 16 @ 16
+CFMaFontAwesomeIconDescription >> defaultIconHeight [
+	^ 16
 ]
 
 { #category : 'accessing-defaults' }
@@ -57,13 +57,43 @@ CFMaFontAwesomeIconDescription >> iconLibraryClass: aClass [
 ]
 
 { #category : 'accessing' }
-CFMaFontAwesomeIconDescription >> iconSize [
-	^ self propertyAt: #iconSize ifAbsent: [ self defaultIconSize ]
+CFMaFontAwesomeIconDescription >> iconHeight [
+	^ self propertyAt: #iconHeight ifAbsent: [ self defaultIconHeight ]
 ]
 
 { #category : 'accessing' }
-CFMaFontAwesomeIconDescription >> iconSize: anExtent [
-	self propertyAt: #iconSize put: anExtent
+CFMaFontAwesomeIconDescription >> iconHeight: aNumber [
+	self propertyAt: #iconHeight put: aNumber
+]
+
+{ #category : 'accessing' }
+CFMaFontAwesomeIconDescription >> iconWidth [
+	^ self propertyAt: #iconWidth ifAbsent: [ nil ]
+]
+
+{ #category : 'accessing' }
+CFMaFontAwesomeIconDescription >> iconWidth: aNumber [
+	self propertyAt: #iconWidth put: aNumber
+]
+
+{ #category : 'accessing' }
+CFMaFontAwesomeIconDescription >> iconSize [
+	| width height |
+	width := self iconWidth.
+	height := self iconHeight.
+	(width notNil and: [ height notNil ]) ifTrue: [ ^ width @ height ].
+	^ height
+]
+
+{ #category : 'accessing' }
+CFMaFontAwesomeIconDescription >> iconSize: anObject [
+	anObject isPoint
+		ifTrue: [
+			self iconWidth: anObject x.
+			self iconHeight: anObject y ]
+		ifFalse: [
+			self iconWidth: nil.
+			self iconHeight: anObject ]
 ]
 
 { #category : 'testing' }
