@@ -19,7 +19,7 @@ CFFontAwesomeIcons class >> availableStyles [
 	styleBaseClass := self styleName
 		ifNil: [ self ]
 		ifNotNil: [ self superclass ].
-	^ (styleBaseClass subclasses
+	^ ((styleBaseClass subclasses
 		collect: [ :each | each styleName ])
 		reject: [ :each | each isNil ])
 		asSortedCollection asArray
