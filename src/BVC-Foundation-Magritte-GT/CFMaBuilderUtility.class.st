@@ -63,6 +63,17 @@ CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height
 ]
 
 { #category : 'icons' }
+CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName fitInto: anExtent [
+	^ [ | icon |
+		icon := (anIconMetadata iconLibraryClass style: aStyleName)
+			icon: anIconMetadata selectorSymbol.
+		icon color: Color black.
+		icon asScalableElementSized: (icon extentFittingInto: anExtent) ]
+		on: Error
+		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
+]
+
+{ #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName height: aNumber [
 	^ [ | icon |
 		icon := (anIconMetadata iconLibraryClass style: aStyleName)

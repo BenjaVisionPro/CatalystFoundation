@@ -42,7 +42,9 @@ CFMaFontAwesomeIconSelectorElement >> configureList [
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> configureGridColumns [
 	list aptitudeDo: [ :anAptitude |
-		anAptitude columnCount: self gridColumnCount ]
+		anAptitude columnCount: self gridColumnCount.
+		anAptitude listElement layoutDo: [ :aLayout |
+			aLayout cellSpacing: self gridCellSpacing ] ]
 ]
 
 { #category : 'accessing' }
@@ -77,14 +79,20 @@ CFMaFontAwesomeIconSelectorElement >> hideDropdown [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> gridColumnCount [
-	| availableWidth tileExtent |
+	| availableWidth tileFootprint spacing |
 	availableWidth := list width > 0
 		ifTrue: [ list width ]
 		ifFalse: [ self width > 0
 			ifTrue: [ self width ]
 			ifFalse: [ 600 ] ].
-	tileExtent := self tileExtentForPreviewHeight: self previewHeight.
-	^ ((availableWidth / tileExtent) floor max: 1)
+	spacing := self gridCellSpacing.
+	tileFootprint := self tileExtentForPreviewHeight: self previewHeight.
+	^ (((availableWidth + spacing) / (tileFootprint + spacing)) floor max: 1)
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> gridCellSpacing [
+	^ 8
 ]
 
 { #category : 'initialization' }
@@ -100,6 +108,8 @@ CFMaFontAwesomeIconSelectorElement >> initialize [
 	searchEditor := self newSearchEditor.
 	sizeEditor := self newSizeEditor.
 	list := self newList.
+	list when: BlElementExtentChangedEvent do: [ :anEvent | self configureGridColumns ].
+	self when: BlElementExtentChangedEvent do: [ :anEvent | self configureGridColumns ].
 
 	self addChildren: { self newControlsRow. list. self newInfoBar }
 ]
@@ -219,7 +229,7 @@ CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 	iconElement := CFMaBuilderUtility
 		newFontAwesomeIconForMetadata: anMetadata
 		styleName: self description styleName
-		height: previewHeight.
+		fitInto: previewHeight @ previewHeight.
 	iconElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
@@ -227,7 +237,6 @@ CFMaFontAwesomeIconSelectorElement >> newIconTileFor: anMetadata [
 	tile := BlElement new
 		layout: BlFrameLayout new;
 		padding: (BlInsets all: 8);
-		margin: (BlInsets all: 4);
 		constraintsDo: [ :c |
 			c horizontal exact: tileExtent.
 			c vertical exact: tileExtent ];
@@ -243,7 +252,8 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 	aList := BrGridList new
 		constraintsDo: [ :c |
 			c horizontal matchParent.
-			c vertical matchParent ];
+			c vertical matchParent.
+			c linear weight: 1 ];
 		yourself.
 	^ aList
 ]
@@ -275,7 +285,7 @@ CFMaFontAwesomeIconSelectorElement >> newSearchEditor [
 			c vertical fitContent ];
 		yourself.
 	editor aptitude: BrEditorAptitude new.
-	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
+	editor when: BlKeyUpEvent do: [ :evt | self refreshGrid ].
 	^ editor
 ]
 
@@ -289,7 +299,7 @@ CFMaFontAwesomeIconSelectorElement >> newSizeEditor [
 		yourself.
 	editor aptitude: BrEditorAptitude new.
 	editor text: '32'.
-	editor when: BlKeyUpEvent do: [ :evt | self refreshList ].
+	editor when: BlKeyUpEvent do: [ :evt | self refreshGrid ].
 	^ editor
 ]
 
@@ -337,6 +347,12 @@ CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
 		logoContainer
 			removeChildren;
 			addChild: self newLogoElement ]
+]
+
+{ #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> refreshGrid [
+	self configureGridColumns.
+	self refreshList
 ]
 
 { #category : 'private' }
