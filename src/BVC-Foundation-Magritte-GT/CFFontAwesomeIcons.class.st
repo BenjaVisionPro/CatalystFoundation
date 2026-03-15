@@ -133,7 +133,8 @@ CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeFrom: anElement [
 	aViewElement ifNil: [ ^ self ].
 	aViewElement phlow update.
 	(aViewElement isKindOf: GtCoderElement)
-		ifTrue: [ aViewElement viewModel requestUpdateAddOns ]
+		ifTrue: [ aViewElement viewModel
+				ifNotNil: [ :aViewModel | aViewModel requestUpdateAddOns ] ]
 ]
 
 { #category : 'gt extensions' }
