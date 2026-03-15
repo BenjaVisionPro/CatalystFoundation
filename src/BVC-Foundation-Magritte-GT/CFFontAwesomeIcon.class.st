@@ -75,8 +75,6 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 	label := aLabelString.
 	viewBox := aRectangle.
 
-	self size: aRectangle extent.
-
 	pathElements := OrderedCollection new.
 	pathRoles := OrderedCollection new.
 	pathOpacities := OrderedCollection new.
@@ -93,6 +91,8 @@ CFFontAwesomeIcon >> initializeName: aSelector styleKey: aStyleKey unicode: aUni
 			pathElements add: element.
 			pathRoles add: role.
 			pathOpacities add: opacity ].
+
+	self resizeTo: aRectangle extent.
 
 	primaryColor := Color black.
 	secondaryColor := Color black.
@@ -133,7 +133,7 @@ CFFontAwesomeIcon >> height: aNumber [
 	(intrinsic y isZero or: [ aNumber isNil ]) ifTrue: [ ^ self ].
 	scale := aNumber asFloat / intrinsic y asFloat.
 	newWidth := intrinsic x asFloat * scale.
-	self size: newWidth @ aNumber.
+	self resizeTo: newWidth @ aNumber.
 	^ self
 ]
 
@@ -144,7 +144,7 @@ CFFontAwesomeIcon >> width: aNumber [
 	(intrinsic x isZero or: [ aNumber isNil ]) ifTrue: [ ^ self ].
 	scale := aNumber asFloat / intrinsic x asFloat.
 	newHeight := intrinsic y asFloat * scale.
-	self size: aNumber @ newHeight.
+	self resizeTo: aNumber @ newHeight.
 	^ self
 ]
 
@@ -156,7 +156,14 @@ CFFontAwesomeIcon >> fitInto: anExtent [
 	xScale := anExtent x asFloat / intrinsic x asFloat.
 	yScale := anExtent y asFloat / intrinsic y asFloat.
 	scale := xScale min: yScale.
-	self size: ((intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)).
+	self resizeTo: ((intrinsic x asFloat * scale) @ (intrinsic y asFloat * scale)).
+	^ self
+]
+
+{ #category : 'private' }
+CFFontAwesomeIcon >> resizeTo: anExtent [
+	self size: anExtent.
+	pathElements do: [ :each | each size: anExtent ].
 	^ self
 ]
 
