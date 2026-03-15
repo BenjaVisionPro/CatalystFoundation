@@ -135,7 +135,9 @@ CFFontAwesomeIcon >> intrinsicExtent [
 CFFontAwesomeIcon >> extentFittingInto: anExtent [
 	| intrinsic xScale yScale scale |
 	intrinsic := self intrinsicExtent.
-	((intrinsic x isZero) or: [ intrinsic y isZero ] or: [ anExtent isNil ]) ifTrue: [ ^ intrinsic ].
+	((intrinsic x isZero)
+		or: [ (intrinsic y isZero)
+			or: [ anExtent isNil ] ]) ifTrue: [ ^ intrinsic ].
 	xScale := anExtent x asFloat / intrinsic x asFloat.
 	yScale := anExtent y asFloat / intrinsic y asFloat.
 	scale := xScale min: yScale.
