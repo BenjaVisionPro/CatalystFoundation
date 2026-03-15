@@ -52,6 +52,49 @@ CFFontAwesomeIcons class >> defaultStyleName: aStyleName [
 ]
 
 { #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtDefaultStyleActionFor: anAction [
+	<gtAction>
+	<gtClassAction>
+	(self gtShouldShowDefaultStyleAction)
+		ifFalse: [ ^ anAction noAction ].
+
+	^ anAction dropdown
+		tooltip: 'Choose the default Font Awesome style';
+		label: self defaultStyleName;
+		icon: self gtDefaultStyleActionIcon;
+		priority: 5;
+		content: [ :aDropdown |
+			self gtDefaultStyleMenuContentFor: aDropdown ]
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtDefaultStyleActionIcon [
+	| icon |
+	icon := (self style: 'brands') icon: #fontAwesomeFlag.
+	^ [ icon asScalableElementSized: (icon extentForHeight: 16) ] asStencil
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtDefaultStyleMenuContentFor: aDropdown [
+	^ BrGlamorousSimpleContextMenuContent new
+		items: self gtDefaultStyleMenuItems
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtDefaultStyleMenuItems [
+	^ self availableStyles collect: [ :aStyleName |
+		(self gtDefaultStyleMenuLabelFor: aStyleName)
+			-> [ :anElement | self gtSelectDefaultStyleNamed: aStyleName from: anElement ] ]
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtDefaultStyleMenuLabelFor: aStyleName [
+	^ aStyleName = self defaultStyleName
+		ifTrue: [ '* ', aStyleName ]
+		ifFalse: [ '  ', aStyleName ]
+]
+
+{ #category : 'gt extensions' }
 CFFontAwesomeIcons class >> gtIconsFor: aView [
 	<gtView>
 	<gtClassView>
@@ -80,6 +123,30 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 			anElement ];
 		actionUpdateButtonTooltip: 'Update icon list';
 		send: #value
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeFrom: anElement [
+	| aViewElement |
+	aViewElement := anElement phlow firstParentWithView.
+	anElement fireEvent: BrDropdownHideWish new.
+	aViewElement ifNil: [ ^ self ].
+	aViewElement phlow update.
+	(aViewElement isKindOf: GtCoderElement)
+		ifTrue: [ aViewElement viewModel requestUpdateAddOns ]
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtSelectDefaultStyleNamed: aStyleName from: anElement [
+	self defaultStyleName = aStyleName ifFalse: [
+		self defaultStyleName: aStyleName ].
+	self gtRefreshAfterDefaultStyleChangeFrom: anElement
+]
+
+{ #category : 'gt extensions' }
+CFFontAwesomeIcons class >> gtShouldShowDefaultStyleAction [
+	^ self styleName isNil
+		and: [ self availableStyles size > 1 ]
 ]
 
 { #category : 'gt extensions' }
