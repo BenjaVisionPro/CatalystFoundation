@@ -78,14 +78,19 @@ CFFontAwesomeDefaultStyleMenuElement >> refreshInCoderToolbar: aToolbarElement [
 		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
 		ifFound: [ :anElement | anElement ]
 		ifNone: [ ^ self ].
-	self refreshSelectedClassViewIn: aBehaviorCoderElement
+	aBehaviorCoderElement enqueueTask: (BlTaskAction new
+		action: [
+			aToolbarElement updateCustomButtons.
+			self refreshSelectedClassViewIn: aBehaviorCoderElement ])
 ]
 
 { #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> refreshInTabFor: anElement [
 	anElement
 		allParentsDetect: [ :aParent | aParent isKindOf: BrTab ]
-		ifFound: [ :aTab | aTab viewContentElement phlow update ]
+		ifFound: [ :aTab |
+			aTab enqueueTask: (BlTaskAction new
+				action: [ aTab viewContentElement phlow update ]) ]
 		ifNone: [ ]
 ]
 
@@ -112,6 +117,7 @@ CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 	iconLibraryClass defaultStyleName = aStyleName ifFalse: [
 		iconLibraryClass defaultStyleName: aStyleName ].
 	dropdown fireEvent: BrDropdownHideWish new.
+	self fireEvent: BrContextMenuHideWish new.
 	self refreshTarget
 ]
 
