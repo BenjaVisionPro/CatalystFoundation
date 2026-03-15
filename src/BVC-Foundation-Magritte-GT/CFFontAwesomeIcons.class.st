@@ -55,47 +55,9 @@ CFFontAwesomeIcons class >> defaultStyleName: aStyleName [
 CFFontAwesomeIcons class >> gtDefaultStyleActionFor: anAction [
 	<gtAction>
 	<gtClassAction>
-	(self gtShouldShowDefaultStyleAction)
-		ifFalse: [ ^ anAction noAction ].
-
-	^ anAction dropdown
-		tooltip: 'Choose the default Font Awesome style';
-		label: self defaultStyleName;
-		icon: self gtDefaultStyleActionIcon;
-		priority: 5;
-		content: [ :aDropdown :aTarget |
-			self gtDefaultStyleMenuContentFor: aDropdown target: aTarget ]
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleActionIcon [
-	| icon |
-	icon := (self style: 'brands') icon: #fontAwesomeFlag.
-	^ [ icon asScalableElementSized: (icon extentForHeight: 16) ] asStencil
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleMenuContentFor: aDropdown target: aTarget [
-	^ BrGlamorousSimpleContextMenuContent new
-		items: (self gtDefaultStyleMenuItemsFor: aDropdown target: aTarget)
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleMenuItemsFor: aDropdown target: aTarget [
-	^ self availableStyles collect: [ :aStyleName |
-		(self gtDefaultStyleMenuLabelFor: aStyleName)
-			-> [ :anElement |
-				self
-					gtSelectDefaultStyleNamed: aStyleName
-					dropdown: aDropdown
-					target: aTarget ] ]
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtDefaultStyleMenuLabelFor: aStyleName [
-	^ aStyleName = self defaultStyleName
-		ifTrue: [ '* ', aStyleName ]
-		ifFalse: [ '  ', aStyleName ]
+	^ CFFontAwesomeDefaultStyleMenuElement
+		configureAction: anAction
+		for: self
 ]
 
 { #category : 'gt extensions' }
@@ -127,56 +89,6 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 			anElement ];
 		actionUpdateButtonTooltip: 'Update icon list';
 		send: #value
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeInCoderToolbar: aToolbarElement [
-	| aBehaviorCoderElement |
-	aBehaviorCoderElement := aToolbarElement
-		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
-		ifFound: [ :anElement | anElement ]
-		ifNone: [ ^ self ].
-	self gtRefreshSelectedClassViewIn: aBehaviorCoderElement
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeInTabFor: anElement [
-	anElement
-		allParentsDetect: [ :aParent | aParent isKindOf: BrTab ]
-		ifFound: [ :aTab | aTab viewContentElement phlow update ]
-		ifNone: [  ]
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtRefreshAfterDefaultStyleChangeOn: aTarget [
-	(aTarget isKindOf: GtCoderToolbarElement)
-		ifTrue: [ ^ self gtRefreshAfterDefaultStyleChangeInCoderToolbar: aTarget ].
-	self gtRefreshAfterDefaultStyleChangeInTabFor: aTarget
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtRefreshSelectedClassViewIn: aBehaviorCoderElement [
-	| aTabGroup |
-	aTabGroup := aBehaviorCoderElement
-		allChildrenBreadthFirstDetect: [ :anElement | anElement isKindOf: BrTabGroup ]
-		ifFound: [ :anElement | anElement ]
-		ifNone: [ ^ self ].
-	aTabGroup viewModel
-		selectedTabDo: [ :aTabModel | aTabModel widget viewContentElement phlow update ]
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtSelectDefaultStyleNamed: aStyleName dropdown: aDropdown target: aTarget [
-	self defaultStyleName = aStyleName ifFalse: [
-		self defaultStyleName: aStyleName ].
-	aDropdown fireEvent: BrDropdownHideWish new.
-	self gtRefreshAfterDefaultStyleChangeOn: aTarget
-]
-
-{ #category : 'gt extensions' }
-CFFontAwesomeIcons class >> gtShouldShowDefaultStyleAction [
-	^ self styleName isNil
-		and: [ self availableStyles size > 1 ]
 ]
 
 { #category : 'gt extensions' }
