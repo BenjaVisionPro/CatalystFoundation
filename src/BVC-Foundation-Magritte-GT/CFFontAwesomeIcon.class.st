@@ -24,14 +24,14 @@ Class {
 { #category : 'styling' }
 CFFontAwesomeIcon >> applyColors [
 	1 to: pathElements size do: [ :index |
-		| element role color alpha actualColor background |
+		| element role color opacity actualColor background |
 		element := pathElements at: index.
 		role := pathRoles at: index.
 		color := role = #secondary
 			ifTrue: [ secondaryColor ]
 			ifFalse: [ primaryColor ].
-		alpha := pathOpacities at: index ifAbsent: [ 1.0 ].
-		actualColor := color alpha: alpha.
+		opacity := pathOpacities at: index ifAbsent: [ 1.0 ].
+		actualColor := color alpha: (color alpha * opacity).
 		background := BlBackground paint: (BlColorPaint color: actualColor).
 		element background: background ]
 ]
