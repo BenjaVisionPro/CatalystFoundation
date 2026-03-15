@@ -19,6 +19,12 @@ Class {
 }
 
 { #category : 'private' }
+CFMaFontAwesomeIconSelectorElement >> availableMetadata [
+	^ self metadata allIconMetadata
+		select: [ :each | each supportsStyleNamed: self description styleName ]
+]
+
+{ #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> buildItemStencil [
 	^ [ BlElement new
 			layout: BlLinearLayout horizontal;
@@ -62,7 +68,11 @@ CFMaFontAwesomeIconSelectorElement >> dropdownAnchor: anElement [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> filteredMetadata [
-	^ self metadata searchIconsMatching: self searchText
+	| searchText |
+	searchText := self searchText.
+	searchText isEmpty ifTrue: [ ^ self availableMetadata ].
+	^ (self metadata searchIconsMatching: searchText)
+		select: [ :each | each supportsStyleNamed: self description styleName ]
 ]
 
 { #category : 'actions' }
@@ -95,7 +105,10 @@ CFMaFontAwesomeIconSelectorElement >> itemDataBinderBlock [
 		iconHolder := anElement childNamed: #icon.
 		iconHolder
 			removeChildren;
-			addChild: (CFMaBuilderUtility newFontAwesomeIconForMetadata: anMetadata height: previewHeight).
+			addChild: (CFMaBuilderUtility
+					newFontAwesomeIconForMetadata: anMetadata
+					styleName: self description styleName
+					height: previewHeight).
 		labels := anElement childNamed: #labels.
 		(labels childNamed: #title) text: (anMetadata label ifNil: [ anMetadata selectorSymbol asString ]).
 		(labels childNamed: #selector) text: anMetadata selectorSymbol asString.
@@ -312,10 +325,11 @@ CFMaFontAwesomeIconSelectorElement >> refreshControlIcons [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> refreshInfoBar [
-	| metadata |
+	| metadata availableCount |
 	metadata := self metadata.
+	availableCount := self availableMetadata size.
 	infoSummaryLabel ifNotNil: [
-		infoSummaryLabel text: metadata allIconMetadata size asString, ' icons  ', metadata styles size asString, ' styles' ].
+		infoSummaryLabel text: availableCount asString, ' icons  ', metadata styles size asString, ' styles' ].
 	versionLabel ifNotNil: [
 		versionLabel text: 'v', metadata version ].
 	logoContainer ifNotNil: [

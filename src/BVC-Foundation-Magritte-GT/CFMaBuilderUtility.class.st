@@ -56,8 +56,16 @@ CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescr
 
 { #category : 'icons' }
 CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height: aNumber [
+	^ self
+		newFontAwesomeIconForMetadata: anIconMetadata
+		styleName: anIconMetadata preferredStyleName
+		height: aNumber
+]
+
+{ #category : 'icons' }
+CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName height: aNumber [
 	^ [ | icon |
-		icon := (anIconMetadata iconLibraryClass style: anIconMetadata preferredStyleName)
+		icon := (anIconMetadata iconLibraryClass style: aStyleName)
 			icon: anIconMetadata selectorSymbol.
 		icon color: Color black.
 		icon asScalableElementSized: (icon extentForHeight: aNumber) ]

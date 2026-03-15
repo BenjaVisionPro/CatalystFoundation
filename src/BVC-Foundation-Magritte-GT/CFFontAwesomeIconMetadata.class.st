@@ -118,6 +118,11 @@ CFFontAwesomeIconMetadata >> preferredStyleName [
 	^ styles first
 ]
 
+{ #category : 'accessing' }
+CFFontAwesomeIconMetadata >> supportsStyleNamed: aStyleName [
+	^ styles includes: aStyleName
+]
+
 { #category : 'searching' }
 CFFontAwesomeIconMetadata >> scoreForSearchTerms: aCollection [
 	| selector name title score |
