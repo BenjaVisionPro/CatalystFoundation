@@ -110,6 +110,7 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 	| row searchLabel sizeLabel |
 	row := BrHorizontalPane new
 		cellSpacing: 6;
+		border: (BlBorder paint: Color red width: 1);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -118,15 +119,21 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 
 	searchLabel := BrLabel new
 		aptitude: BrLabelAptitude new;
+		border: (BlBorder paint: Color blue width: 1);
 		text: 'Search';
 		fitContent;
 		yourself.
 
+	searchEditor border: (BlBorder paint: Color green width: 1).
+
 	sizeLabel := BrLabel new
 		aptitude: BrLabelAptitude new;
+		border: (BlBorder paint: Color magenta width: 1);
 		text: 'Size';
 		fitContent;
 		yourself.
+
+	sizeEditor border: (BlBorder paint: Color orange width: 1).
 
 	row addChildren: {
 		searchLabel.
@@ -139,47 +146,56 @@ CFMaFontAwesomeIconSelectorElement >> newControlsRow [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newInfoBar [
-	| row spacer rightPane |
+	| row spacer leftPane |
 	row := BrHorizontalPane new
-		cellSpacing: 6;
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical fitContent ];
-		margin: (BlInsets top: 6);
-		yourself.
+			cellSpacing: 2;
+			constraintsDo: [ :c | 
+				c horizontal matchParent.
+				c vertical fitContent ];
+			margin: (BlInsets top: 2);
+			yourself.
 
 	infoSummaryLabel := BrLabel new
-		aptitude: BrLabelAptitude new;
-		fitContent;
-		yourself.
-
-	spacer := BlElement new
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical fitContent ];
-		yourself.
-
-	rightPane := BrVerticalPane new
-		cellSpacing: 2;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent ];
-		yourself.
+			aptitude: BrLabelAptitude new;
+			fitContent;
+			yourself.
 
 	versionLabel := BrLabel new
-		aptitude: BrLabelAptitude new;
-		opacity: 0.5;
-		fitContent;
-		constraintsDo: [ :c | c linear horizontal alignRight ];
-		yourself.
+			aptitude: (BrLabelAptitude new
+					fontSize: 9.0;
+					yourself);
+			opacity: 0.5;
+			fitContent;
+			yourself.
 
 	logoContainer := BrFrame new
-		fitContent;
-		constraintsDo: [ :c | c linear horizontal alignRight ];
-		yourself.
+			height: 30;
+			width: 200;
+			constraintsDo: [ :c | c linear horizontal alignRight ];
+			yourself.
 
-	rightPane addChildren: { versionLabel. logoContainer }.
-	row addChildren: { infoSummaryLabel. spacer. rightPane }.
+	spacer := BlElement new
+			constraintsDo: [ :c | 
+				c horizontal matchParent.
+				c vertical fitContent ];
+			yourself.
+
+	leftPane := BrVerticalPane new
+			cellSpacing: 0;
+			constraintsDo: [ :c | 
+				c horizontal fitContent.
+				c vertical fitContent ];
+			yourself.
+
+	leftPane
+		addChildren: {infoSummaryLabel.
+				versionLabel}.
+
+	row
+		addChildren: {leftPane.
+				spacer.
+				logoContainer}.
+
 	^ row
 ]
 
@@ -197,20 +213,17 @@ CFMaFontAwesomeIconSelectorElement >> newList [
 
 { #category : 'private' }
 CFMaFontAwesomeIconSelectorElement >> newLogoElement [
-	^ [ ((((self description iconLibraryClass style: 'brands')
-		icon: #fontAwesomeLogoFull)
-		asElement)
-		asScalableElement
-		size: 96 @ 18)
-		opacity: 0.5;
+	^ [ ((self description iconLibraryClass style: 'brands')
+		icon: #fontAwesomeLogoFull) asElement asScalableElement
+		opacity: 0.8;
 		yourself ]
 		on: Error
 		do: [ BrLabel new
-			aptitude: BrLabelAptitude new;
-			text: self metadata familyName;
-			opacity: 0.5;
-			fitContent;
-			yourself ]
+				aptitude: BrLabelAptitude new;
+				text: self metadata familyName;
+				opacity: 0.5;
+				fitContent;
+				yourself ]
 ]
 
 { #category : 'private' }
