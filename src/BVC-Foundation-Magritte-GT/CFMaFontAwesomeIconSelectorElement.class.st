@@ -245,8 +245,8 @@ CFMaFontAwesomeIconSelectorElement >> newLogoElement [
 	^ [ | icon |
 		icon := (self description iconLibraryClass style: 'brands')
 			icon: #fontAwesomeLogoFull.
+		icon color: Color black.
 		(icon asScalableElementSized: (icon extentFittingInto: 200 @ 30))
-			color: Color black;
 			opacity: 0.8;
 			yourself ]
 		on: Error
