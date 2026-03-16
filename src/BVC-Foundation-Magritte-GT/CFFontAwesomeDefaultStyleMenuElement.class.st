@@ -47,17 +47,9 @@ CFFontAwesomeDefaultStyleMenuElement class >> menuItemGroup [
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement class >> previewSelectorForStyleNamed: aStyleName in: anIconLibraryClass [
-	| aStyleClass someSelectors preferredSelectors |
-	aStyleClass := anIconLibraryClass style: aStyleName.
-	someSelectors := aStyleClass availableIcons collect: #key.
-	preferredSelectors := aStyleName = 'brands'
-		ifTrue: [ #(fontAwesomeFlag fontAwesomeLogoFull) ]
-		ifFalse: [ #(star heart bookmark circle square flag user) ].
-
-	^ preferredSelectors
-		detect: [ :eachSelector | someSelectors includes: eachSelector ]
-		ifNone: [ someSelectors ifEmpty: [ nil ] ifNotEmpty: [ someSelectors first ] ]
+CFFontAwesomeDefaultStyleMenuElement class >> previewSelectorForStyleNamed: aStyleName [
+	aStyleName = 'brands' ifTrue: [ ^ #fontAwesomeFlag ].
+	^ #star
 ]
 
 { #category : 'private' }
@@ -116,12 +108,13 @@ CFFontAwesomeDefaultStyleMenuElement >> menuModel: aMenuModel [
 { #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> previewIconElementForStyleNamed: aStyleName [
 	| aSelector anIcon |
-	aSelector := self class
-		previewSelectorForStyleNamed: aStyleName
-		in: iconLibraryClass.
+	aSelector := self class previewSelectorForStyleNamed: aStyleName.
 	aSelector ifNil: [ ^ BlElement new size: 16 @ 16 ].
 
-	anIcon := (iconLibraryClass style: aStyleName) icon: aSelector.
+	anIcon := [
+		(iconLibraryClass style: aStyleName) icon: aSelector ]
+			on: Error
+			do: [ :anError | ^ BlElement new size: 16 @ 16 ].
 	^ (anIcon asScalableElementSized: (anIcon extentForHeight: 16))
 		margin: (BlInsets right: 8);
 		yourself
