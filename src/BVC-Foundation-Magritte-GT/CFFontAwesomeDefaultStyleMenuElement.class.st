@@ -11,9 +11,11 @@ Class {
 
 { #category : 'instance creation' }
 CFFontAwesomeDefaultStyleMenuElement class >> menuActionIconFor: anIconLibraryClass [
-	| icon |
-	icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
-	^ icon height: 16
+	^ [
+		| icon |
+		icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
+		icon asScalableElementSized: (icon extentForHeight: 16) ]
+		asStencil
 ]
 
 { #category : 'instance creation' }
@@ -25,11 +27,8 @@ CFFontAwesomeDefaultStyleMenuElement class >> menuContentFor: anIconLibraryClass
 		initializeItems;
 		yourself.
 
-	^ BrFrame new
-		addChild: aMenuElement;
+	^ aMenuElement
 		background: aButton theme default contentBackground;
-		hExact: 240;
-		vFitContentLimited;
 		addAptitude: (BrGlamorousPopoverPinnableAptitude new
 				withAllPinActions;
 				menuModel: anExplicitMenu);

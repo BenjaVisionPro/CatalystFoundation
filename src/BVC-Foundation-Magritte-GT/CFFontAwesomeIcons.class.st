@@ -77,7 +77,7 @@ CFFontAwesomeIcons class >> gtDefaultStyleActionFor: anAction [
 		priority: 45;
 		target: GtCoderClassTarget;
 		icon: (CFFontAwesomeDefaultStyleMenuElement menuActionIconFor: self);
-		label: 'Default style';
+		label: 'Default Style';
 		menuItemPreview: (CFFontAwesomeDefaultStyleMenuElement styleLabelFor: self defaultStyleName);
 		menuItemGroup: CFFontAwesomeDefaultStyleMenuElement menuItemGroup;
 		menuItemPinSubmenu;
