@@ -7,11 +7,25 @@ Class {
 	#superclass : 'Object',
 	#classVars : [
 		'DefaultStyleName',
+		'DefaultStyleAnnouncer',
 		'Metadata'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
+
+{ #category : 'announcing' }
+CFFontAwesomeIcons class >> announceDefaultStyleChanged [
+	self announcer
+		announce: (CFFontAwesomeDefaultStyleChangedAnnouncement
+				iconLibraryClass: self
+				styleName: self defaultStyleName)
+]
+
+{ #category : 'announcing' }
+CFFontAwesomeIcons class >> announcer [
+	^ DefaultStyleAnnouncer ifNil: [ DefaultStyleAnnouncer := Announcer new ]
+]
 
 { #category : 'metadata' }
 CFFontAwesomeIcons class >> availableIcons [
@@ -48,7 +62,9 @@ CFFontAwesomeIcons class >> defaultStyleName [
 
 { #category : 'styles' }
 CFFontAwesomeIcons class >> defaultStyleName: aStyleName [
-	DefaultStyleName := aStyleName
+	DefaultStyleName = aStyleName ifTrue: [ ^ self ].
+	DefaultStyleName := aStyleName.
+	self announceDefaultStyleChanged
 ]
 
 { #category : 'gt extensions' }
@@ -67,7 +83,8 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 	^ aView list
 		title: 'Icons';
 		priority: -10;
-		items: self availableIcons;
+		items: [ self availableIcons ];
+		updateWhen: CFFontAwesomeDefaultStyleChangedAnnouncement in: [ self announcer ];
 		itemStencil: [ BlElement new
 				layout: BlLinearLayout horizontal;
 				margin: (BlInsets all: 3);

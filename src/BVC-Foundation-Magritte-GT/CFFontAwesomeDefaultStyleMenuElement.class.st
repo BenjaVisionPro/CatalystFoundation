@@ -3,9 +3,7 @@ Class {
 	#superclass : 'BrGlamorousSimpleContextMenuContent',
 	#instVars : [
 		'iconLibraryClass',
-		'dropdown',
-		'toolbarElement',
-		'behaviorCoderElement'
+		'dropdown'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -21,11 +19,10 @@ CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anI
 		label: anIconLibraryClass defaultStyleName;
 		icon: (self iconStencilFor: anIconLibraryClass);
 		priority: 5;
-		content: [ :aDropdown :aToolbarElement |
+		content: [ :aDropdown :ignoredToolbarElement |
 			self new
 				iconLibraryClass: anIconLibraryClass;
 				dropdown: aDropdown;
-				toolbarElement: aToolbarElement;
 				initializeItems;
 				yourself ]
 ]
@@ -72,50 +69,10 @@ CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
 		ifFalse: [ '  ', aStyleName ]
 ]
 
-{ #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassView [
-	| aTabGroup |
-	behaviorCoderElement ifNil: [ ^ self ].
-	aTabGroup := behaviorCoderElement
-		allChildrenBreadthFirstDetect: [ :anElement | anElement isKindOf: BrTabGroup ]
-		ifFound: [ :anElement | anElement ]
-		ifNone: [ ^ self ].
-	aTabGroup viewModel
-		selectedTabDo: [ :aTabModel | aTabModel widget viewContentElement phlow update ]
-]
-
-{ #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarAndClassView [
-	toolbarElement ifNil: [ ^ self ].
-	toolbarElement enqueueTask: (BlTaskAction new
-		action: [
-			self refreshToolbarButtons.
-			self refreshSelectedClassView ])
-]
-
-{ #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarButtons [
-	| aBrToolbar |
-	aBrToolbar := toolbarElement toolbarElement.
-	aBrToolbar numberOfItems
-		timesRepeat: [ aBrToolbar removeItemAt: 1 ].
-	toolbarElement addCustomButtons
-]
-
 { #category : 'actions' }
 CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 	iconLibraryClass defaultStyleName = aStyleName ifFalse: [
 		iconLibraryClass defaultStyleName: aStyleName ].
 	dropdown fireEvent: BrDropdownHideWish new.
-	self fireEvent: BrContextMenuHideWish new.
-	self refreshToolbarAndClassView
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeDefaultStyleMenuElement >> toolbarElement: anElement [
-	toolbarElement := anElement.
-	behaviorCoderElement := anElement
-		allParentsDetect: [ :eachElement | eachElement isKindOf: GtPharoBehaviorCoderElement ]
-		ifFound: [ :eachElement | eachElement ]
-		ifNone: [ nil ]
+	self fireEvent: BrContextMenuHideWish new
 ]
