@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'iconLibraryClass',
 		'dropdown',
-		'toolbarElement'
+		'toolbarElement',
+		'behaviorCoderElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -72,19 +73,10 @@ CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> behaviorCoderElement [
-	^ toolbarElement
-		allParentsDetect: [ :anElement | anElement isKindOf: GtPharoBehaviorCoderElement ]
-		ifFound: [ :anElement | anElement ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassView [
-	| aBehaviorCoderElement aTabGroup |
-	aBehaviorCoderElement := self behaviorCoderElement.
-	aBehaviorCoderElement ifNil: [ ^ self ].
-	aTabGroup := aBehaviorCoderElement
+	| aTabGroup |
+	behaviorCoderElement ifNil: [ ^ self ].
+	aTabGroup := behaviorCoderElement
 		allChildrenBreadthFirstDetect: [ :anElement | anElement isKindOf: BrTabGroup ]
 		ifFound: [ :anElement | anElement ]
 		ifNone: [ ^ self ].
@@ -94,8 +86,8 @@ CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassView [
 
 { #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarAndClassView [
-	toolbarElement ifNil: [ ^ self ].
-	toolbarElement enqueueTask: (BlTaskAction new
+	behaviorCoderElement ifNil: [ ^ self ].
+	behaviorCoderElement enqueueTask: (BlTaskAction new
 		action: [
 			toolbarElement updateCustomButtons.
 			self refreshSelectedClassView ])
@@ -112,5 +104,9 @@ CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 
 { #category : 'accessing' }
 CFFontAwesomeDefaultStyleMenuElement >> toolbarElement: anElement [
-	toolbarElement := anElement
+	toolbarElement := anElement.
+	behaviorCoderElement := anElement
+		allParentsDetect: [ :eachElement | eachElement isKindOf: GtPharoBehaviorCoderElement ]
+		ifFound: [ :eachElement | eachElement ]
+		ifNone: [ nil ]
 ]
