@@ -17,7 +17,7 @@ CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anI
 
 	^ anAction dropdown
 		tooltip: 'Choose the default Font Awesome style';
-		label: anIconLibraryClass defaultStyleName;
+		label: (self styleLabelFor: anIconLibraryClass defaultStyleName);
 		icon: (self iconStencilFor: anIconLibraryClass);
 		priority: 5;
 		content: [ :aDropdown :aToolbarElement |
@@ -33,7 +33,17 @@ CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anI
 CFFontAwesomeDefaultStyleMenuElement class >> iconStencilFor: anIconLibraryClass [
 	| icon |
 	icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
-	^ [ icon asScalableElementSized: (icon extentForHeight: 16) ] asStencil
+	^ [
+		| anElement |
+		anElement := icon asScalableElementSized: (icon extentForHeight: 16).
+		anElement margin: (BlInsets right: 6).
+		anElement ]
+		asStencil
+]
+
+{ #category : 'private' }
+CFFontAwesomeDefaultStyleMenuElement class >> styleLabelFor: aStyleName [
+	^ aStyleName asString capitalized
 ]
 
 { #category : 'private' }
@@ -66,9 +76,11 @@ CFFontAwesomeDefaultStyleMenuElement >> menuItems [
 
 { #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
+	| aLabel |
+	aLabel := self class styleLabelFor: aStyleName.
 	^ aStyleName = iconLibraryClass defaultStyleName
-		ifTrue: [ '* ', aStyleName ]
-		ifFalse: [ '  ', aStyleName ]
+		ifTrue: [ '* ', aLabel ]
+		ifFalse: [ '  ', aLabel ]
 ]
 
 { #category : 'private' }
