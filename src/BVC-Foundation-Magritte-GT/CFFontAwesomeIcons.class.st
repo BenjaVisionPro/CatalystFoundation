@@ -98,9 +98,12 @@ CFFontAwesomeIcons class >> gtIconsFor: aView [
 							padding: (BlInsets left: 20 right: 3))
 					as: #label ];
 		itemDataBinder: [ :anElement :anIcon :anIndex |
+			| icon iconElement |
+			icon := self icon: anIcon key.
+			iconElement := icon asScalableElementSized: (icon extentFittingInto: 64 @ 64).
 			anElement
 				replaceChild: (anElement childNamed: #icon)
-				with: (anIcon value asElement asScalableElement size: 64 @ 64)
+				with: iconElement
 				as: #icon.
 			(anElement childNamed: #label) text: anIcon key asString.
 			anElement ];
