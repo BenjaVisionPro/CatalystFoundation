@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrGlamorousSimpleContextMenuContent',
 	#instVars : [
 		'iconLibraryClass',
-		'dropdown'
+		'dropdown',
+		'toolbarElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -19,10 +20,11 @@ CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anI
 		label: anIconLibraryClass defaultStyleName;
 		icon: (self iconStencilFor: anIconLibraryClass);
 		priority: 5;
-		content: [ :aDropdown :ignoredToolbarElement |
+		content: [ :aDropdown :aToolbarElement |
 			self new
 				iconLibraryClass: anIconLibraryClass;
 				dropdown: aDropdown;
+				toolbarElement: aToolbarElement;
 				initializeItems;
 				yourself ]
 ]
@@ -69,10 +71,25 @@ CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
 		ifFalse: [ '  ', aStyleName ]
 ]
 
+{ #category : 'private' }
+CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarButtons [
+	toolbarElement ifNil: [ ^ self ].
+	toolbarElement enqueueTask: (BlTaskAction new
+		action: [
+			toolbarElement toolbarElement removeAllItems.
+			toolbarElement addCustomButtons ])
+]
+
 { #category : 'actions' }
 CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 	iconLibraryClass defaultStyleName = aStyleName ifFalse: [
 		iconLibraryClass defaultStyleName: aStyleName ].
 	dropdown fireEvent: BrDropdownHideWish new.
-	self fireEvent: BrContextMenuHideWish new
+	self fireEvent: BrContextMenuHideWish new.
+	self refreshToolbarButtons
+]
+
+{ #category : 'accessing' }
+CFFontAwesomeDefaultStyleMenuElement >> toolbarElement: anElement [
+	toolbarElement := anElement
 ]
