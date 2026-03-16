@@ -1,44 +1,61 @@
 Class {
 	#name : 'CFFontAwesomeDefaultStyleMenuElement',
-	#superclass : 'BrGlamorousSimpleContextMenuContent',
+	#superclass : 'GtAbstractCoderContextMenuContent',
 	#instVars : [
 		'iconLibraryClass',
-		'dropdown',
-		'toolbarElement'
+		'menuModel'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'instance creation' }
-CFFontAwesomeDefaultStyleMenuElement class >> configureAction: anAction for: anIconLibraryClass [
-	(self shouldShowActionFor: anIconLibraryClass)
-		ifFalse: [ ^ anAction noAction ].
+CFFontAwesomeDefaultStyleMenuElement class >> menuActionIconFor: anIconLibraryClass [
+	| icon |
+	icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
+	^ icon height: 16
+]
 
-	^ anAction dropdown
-		tooltip: 'Choose the default Font Awesome style';
-		label: (self styleLabelFor: anIconLibraryClass defaultStyleName);
-		icon: (self iconStencilFor: anIconLibraryClass);
-		priority: 5;
-		content: [ :aDropdown :aToolbarElement |
-			self new
-				iconLibraryClass: anIconLibraryClass;
-				dropdown: aDropdown;
-				toolbarElement: aToolbarElement;
-				initializeItems;
-				yourself ]
+{ #category : 'instance creation' }
+CFFontAwesomeDefaultStyleMenuElement class >> menuContentFor: anIconLibraryClass button: aButton menuModel: anExplicitMenu [
+	| aMenuElement |
+	aMenuElement := self new
+		iconLibraryClass: anIconLibraryClass;
+		menuModel: anExplicitMenu;
+		initializeItems;
+		yourself.
+
+	^ BrFrame new
+		addChild: aMenuElement;
+		background: aButton theme default contentBackground;
+		hExact: 240;
+		vFitContentLimited;
+		addAptitude: (BrGlamorousPopoverPinnableAptitude new
+				withAllPinActions;
+				menuModel: anExplicitMenu);
+		yourself
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement class >> iconStencilFor: anIconLibraryClass [
-	| icon |
-	icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
-	^ [
-		| anElement |
-		anElement := icon asScalableElementSized: (icon extentForHeight: 16).
-		anElement margin: (BlInsets right: 6).
-		anElement ]
-		asStencil
+CFFontAwesomeDefaultStyleMenuElement class >> menuItemGroup [
+	^ BrMenuItemGroupConfiguration new
+		name: 'Font Awesome';
+		priority: 44;
+		yourself
+]
+
+{ #category : 'private' }
+CFFontAwesomeDefaultStyleMenuElement class >> previewSelectorForStyleNamed: aStyleName in: anIconLibraryClass [
+	| aStyleClass someSelectors preferredSelectors |
+	aStyleClass := anIconLibraryClass style: aStyleName.
+	someSelectors := aStyleClass availableIcons collect: #key.
+	preferredSelectors := aStyleName = 'brands'
+		ifTrue: [ #(fontAwesomeFlag fontAwesomeLogoFull) ]
+		ifFalse: [ #(star heart bookmark circle square flag user) ].
+
+	^ preferredSelectors
+		detect: [ :eachSelector | someSelectors includes: eachSelector ]
+		ifNone: [ someSelectors ifEmpty: [ nil ] ifNotEmpty: [ someSelectors first ] ]
 ]
 
 { #category : 'private' }
@@ -53,55 +70,66 @@ CFFontAwesomeDefaultStyleMenuElement class >> shouldShowActionFor: anIconLibrary
 ]
 
 { #category : 'accessing' }
-CFFontAwesomeDefaultStyleMenuElement >> dropdown: anElement [
-	dropdown := anElement
-]
-
-{ #category : 'accessing' }
 CFFontAwesomeDefaultStyleMenuElement >> iconLibraryClass: aClass [
 	iconLibraryClass := aClass
 ]
 
 { #category : 'initialization' }
 CFFontAwesomeDefaultStyleMenuElement >> initializeItems [
-	self items: self menuItems
+	self items: iconLibraryClass availableStyles
+]
+
+{ #category : 'accessing' }
+CFFontAwesomeDefaultStyleMenuElement >> itemPadding [
+	^ BlInsets top: 4 bottom: 4 left: 2 right: 2
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> menuItems [
-	^ iconLibraryClass availableStyles collect: [ :aStyleName |
-		(self menuLabelForStyleNamed: aStyleName)
-			-> [ :anAnchor | self selectStyleNamed: aStyleName ] ]
+CFFontAwesomeDefaultStyleMenuElement >> menuItemStencil [
+	^ [ :aStyleName :aRowIndex |
+		| anElement |
+		anElement := BrHorizontalPane new
+			hMatchParent;
+			vFitContent;
+			alignCenter;
+			addAptitude: self selectionAptitude;
+			padding: self itemPadding;
+			when: BlClickEvent
+				do: [ :anEvent |
+					anEvent consumed: true.
+					self selectStyleNamed: aStyleName ].
+
+		anElement
+			addChild: (self previewIconElementForStyleNamed: aStyleName);
+			addChild: (self itemLabelFor: (self class styleLabelFor: aStyleName)).
+
+		anElement ]
+]
+
+{ #category : 'accessing' }
+CFFontAwesomeDefaultStyleMenuElement >> menuModel: aMenuModel [
+	menuModel := aMenuModel
 ]
 
 { #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> menuLabelForStyleNamed: aStyleName [
-	| aLabel |
-	aLabel := self class styleLabelFor: aStyleName.
-	^ aStyleName = iconLibraryClass defaultStyleName
-		ifTrue: [ '* ', aLabel ]
-		ifFalse: [ '  ', aLabel ]
-]
+CFFontAwesomeDefaultStyleMenuElement >> previewIconElementForStyleNamed: aStyleName [
+	| aSelector anIcon |
+	aSelector := self class
+		previewSelectorForStyleNamed: aStyleName
+		in: iconLibraryClass.
+	aSelector ifNil: [ ^ BlElement new size: 16 @ 16 ].
 
-{ #category : 'private' }
-CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarButtons [
-	toolbarElement ifNil: [ ^ self ].
-	toolbarElement enqueueTask: (BlTaskAction new
-		action: [
-			toolbarElement toolbarElement removeAllItems.
-			toolbarElement addCustomButtons ])
+	anIcon := (iconLibraryClass style: aStyleName) icon: aSelector.
+	^ (anIcon asScalableElementSized: (anIcon extentForHeight: 16))
+		margin: (BlInsets right: 8);
+		yourself
 ]
 
 { #category : 'actions' }
 CFFontAwesomeDefaultStyleMenuElement >> selectStyleNamed: aStyleName [
 	iconLibraryClass defaultStyleName = aStyleName ifFalse: [
 		iconLibraryClass defaultStyleName: aStyleName ].
-	dropdown fireEvent: BrDropdownHideWish new.
-	self fireEvent: BrContextMenuHideWish new.
-	self refreshToolbarButtons
-]
-
-{ #category : 'accessing' }
-CFFontAwesomeDefaultStyleMenuElement >> toolbarElement: anElement [
-	toolbarElement := anElement
+	menuModel
+		ifNil: [ self fireEvent: BrContextMenuHideWish new ]
+		ifNotNil: [ menuModel hideAll ]
 ]

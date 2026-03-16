@@ -70,10 +70,22 @@ CFFontAwesomeIcons class >> defaultStyleName: aStyleName [
 { #category : 'gt extensions' }
 CFFontAwesomeIcons class >> gtDefaultStyleActionFor: anAction [
 	<gtAction>
-	<gtClassAction>
-	^ CFFontAwesomeDefaultStyleMenuElement
-		configureAction: anAction
-		for: self
+	(CFFontAwesomeDefaultStyleMenuElement shouldShowActionFor: self)
+		ifFalse: [ ^ anAction noAction ].
+
+	^ anAction dropdown
+		priority: 45;
+		target: GtCoderClassTarget;
+		icon: (CFFontAwesomeDefaultStyleMenuElement menuActionIconFor: self);
+		label: 'Default style';
+		menuItemPreview: (CFFontAwesomeDefaultStyleMenuElement styleLabelFor: self defaultStyleName);
+		menuItemGroup: CFFontAwesomeDefaultStyleMenuElement menuItemGroup;
+		menuItemPinSubmenu;
+		content: [ :aButton :aTargetElement :anExplicitMenu |
+			CFFontAwesomeDefaultStyleMenuElement
+				menuContentFor: self
+				button: aButton
+				menuModel: anExplicitMenu ]
 ]
 
 { #category : 'gt extensions' }
