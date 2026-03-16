@@ -14,7 +14,7 @@ CFFontAwesomeDefaultStyleMenuElement class >> menuActionIconFor: anIconLibraryCl
 	^ [
 		| icon |
 		icon := (anIconLibraryClass style: 'brands') icon: #fontAwesomeFlag.
-		icon asScalableElementSized: (icon extentForHeight: 16) ]
+		icon asScalableElementSized: (icon extentForHeight: 14) ]
 		asStencil
 ]
 
