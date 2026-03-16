@@ -86,11 +86,20 @@ CFFontAwesomeDefaultStyleMenuElement >> refreshSelectedClassView [
 
 { #category : 'private' }
 CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarAndClassView [
-	behaviorCoderElement ifNil: [ ^ self ].
-	behaviorCoderElement enqueueTask: (BlTaskAction new
+	toolbarElement ifNil: [ ^ self ].
+	toolbarElement enqueueTask: (BlTaskAction new
 		action: [
-			toolbarElement updateCustomButtons.
+			self refreshToolbarButtons.
 			self refreshSelectedClassView ])
+]
+
+{ #category : 'private' }
+CFFontAwesomeDefaultStyleMenuElement >> refreshToolbarButtons [
+	| aBrToolbar |
+	aBrToolbar := toolbarElement toolbarElement.
+	aBrToolbar numberOfItems
+		timesRepeat: [ aBrToolbar removeItemAt: 1 ].
+	toolbarElement addCustomButtons
 ]
 
 { #category : 'actions' }
