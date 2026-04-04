@@ -1,38 +1,24 @@
 Class {
 	#name : 'CFMaFormStencilBuilder',
 	#superclass : 'GtMagritteFormStencilBuilder',
-	#instVars : [
-		'headerElement'
-	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'api - instantiation' }
 CFMaFormStencilBuilder >> buildDefault [
-	| aContainer background |
-	aContainer := BrVerticalPane new.
-	"headerElement := CFMaFormHeaderElement new
-			fieldViewModel: (GtMagritteFieldViewModel new
-					memento: memento;
-					description: memento magritteDescription)."
+	| aFormElement aHeaderElement aBodyElement aFooterElement |
+	aFormElement := CFMaFormElement new.
+	aHeaderElement := CFMaFormHeaderElement new
+		memento: memento;
+		yourself.
+	aBodyElement := CFMaFormBodyElement new.
+	aFooterElement := CFMaFormFooterElement new.
 
-	aContainer magritte
-		beLabelContainer;
-		beFieldContainer;
-		beToolbarContainer.
+	aFormElement
+		addChild: aHeaderElement as: #header;
+		addChild: aBodyElement as: #body;
+		addChild: aFooterElement as: #footer.
 
-	background := Color black alpha: 0.035.
-
-	aContainer
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10.0);
-		padding: (BlInsets all: 14);
-		margin: (BlInsets all: 6);
-		background: background;
-		cellSpacing: 10;
-		hFitContentLimited;
-		vFitContent.
-
-	"aContainer addChild: headerElement as: #header."
-	^ aContainer
+	^ aFormElement
 ]
