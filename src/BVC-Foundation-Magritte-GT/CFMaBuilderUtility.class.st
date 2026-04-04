@@ -31,9 +31,9 @@ CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescrip
 		aptitude: labelAptitude;
 		fitContent;
 		margin: (BlInsets
-				top: 2
+				top: 0
 				right: (aSpaceNumber ifNil: [ GtMagritteBuilderUtility defaultSpaceNumber ])
-				bottom: (aSpaceNumber ifNil: [ GtMagritteBuilderUtility defaultSpaceNumber ])
+				bottom: 4
 				left: 0);
 		constraintsDo: [ :c | c grid vertical alignTop ];
 		when: BlClickEvent

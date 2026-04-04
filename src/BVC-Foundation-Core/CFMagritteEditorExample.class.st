@@ -12,9 +12,28 @@ Class {
 }
 
 { #category : 'examples' }
+CFMagritteEditorExample class >> exampleArchived [
+	<gtExample>
+	^ self new
+		label: 'Archived example';
+		enabled: false;
+		priority: 10;
+		status: #archived;
+		yourself
+]
+
+{ #category : 'examples' }
 CFMagritteEditorExample class >> exampleDefault [
 	<gtExample>
 	^ self new
+]
+
+{ #category : 'examples' }
+CFMagritteEditorExample class >> exampleInvalidPriority [
+	<gtExample>
+	^ self new
+		priority: 120;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -40,8 +59,9 @@ CFMagritteEditorExample >> enabledDescription [
 { #category : 'initialization' }
 CFMagritteEditorExample >> initialize [
 	super initialize.
-	label ifNil: [ label := 'Example profile' ].
-	summary ifNil: [ summary := 'A reference object for exercising the Foundation Magritte editor pipeline.' ].
+	self identifier: #magritteEditorExample.
+	self label: 'Editor example'.
+	summary ifNil: [ summary := 'A reference object for exercising the Catalyst Foundation Magritte editor pipeline across the common field types.' ].
 	enabled ifNil: [ enabled := true ].
 	priority ifNil: [ priority := 50 ].
 	status ifNil: [ status := #draft ].
@@ -82,7 +102,7 @@ CFMagritteEditorExample >> slug [
 			(nextCharacter = $- and: [ previousWasDash ])
 				ifFalse: [ aStream nextPut: nextCharacter ].
 			previousWasDash := nextCharacter = $- ] ].
-	^ stream
+	^ stream trimBoth: [ :each | each = $- ]
 ]
 
 { #category : 'descriptions' }
