@@ -13,7 +13,7 @@ CFObject >> cfOperationsToolClass [
 
 { #category : '*bvc-foundation-phlow' }
 CFObject >> cfOperationsViewModelClass [
-	^ CFOperationsViewModel
+	^ nil
 ]
 
 { #category : '*bvc-foundation-phlow' }
@@ -27,7 +27,7 @@ CFObject >> gtDefaultInspectorTool [
 
 { #category : '*bvc-foundation-phlow' }
 CFObject >> hasCFOperationsTool [
-	^ false
+	^ self cfOperationsViewModelClass notNil
 ]
 
 { #category : '*bvc-foundation-phlow' }
@@ -43,7 +43,7 @@ CFObject class >> cfOperationsToolClass [
 
 { #category : '*bvc-foundation-phlow' }
 CFObject class >> cfOperationsViewModelClass [
-	^ CFOperationsViewModel
+	^ nil
 ]
 
 { #category : '*bvc-foundation-phlow' }
@@ -57,5 +57,5 @@ CFObject class >> gtDefaultInspectorTool [
 
 { #category : '*bvc-foundation-phlow' }
 CFObject class >> hasCFOperationsTool [
-	^ false
+	^ self cfOperationsViewModelClass notNil
 ]

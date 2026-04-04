@@ -163,15 +163,7 @@ CFMagritteEditorExample >> summaryDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMagritteEditorExample >> hasCFOperationsTool [
-	^ true
-]
 
-{ #category : 'accessing' }
-CFMagritteEditorExample class >> hasCFOperationsTool [
-	^ true
-]
 
 { #category : 'accessing' }
 CFMagritteEditorExample >> cfOperationsViewModelClass [
