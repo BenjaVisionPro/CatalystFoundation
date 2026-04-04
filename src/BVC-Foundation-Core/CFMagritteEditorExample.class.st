@@ -1,0 +1,144 @@
+Class {
+	#name : 'CFMagritteEditorExample',
+	#superclass : 'CFLabelledObject',
+	#instVars : [
+		'summary',
+		'enabled',
+		'priority',
+		'status'
+	],
+	#category : 'BVC-Foundation-Core',
+	#package : 'BVC-Foundation-Core'
+}
+
+{ #category : 'examples' }
+CFMagritteEditorExample class >> exampleDefault [
+	<gtExample>
+	^ self new
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> enabled [
+	^ enabled
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> enabled: aBoolean [
+	enabled := aBoolean
+]
+
+{ #category : 'descriptions' }
+CFMagritteEditorExample >> enabledDescription [
+	<magritteDescription>
+	^ MABooleanDescription new
+		accessor: #enabled;
+		label: 'Enabled';
+		priority: 40;
+		yourself
+]
+
+{ #category : 'initialization' }
+CFMagritteEditorExample >> initialize [
+	super initialize.
+	label ifNil: [ label := 'Example profile' ].
+	summary ifNil: [ summary := 'A reference object for exercising the Foundation Magritte editor pipeline.' ].
+	enabled ifNil: [ enabled := true ].
+	priority ifNil: [ priority := 50 ].
+	status ifNil: [ status := #draft ].
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> priority [
+	^ priority
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> priority: aNumber [
+	priority := aNumber
+]
+
+{ #category : 'descriptions' }
+CFMagritteEditorExample >> priorityDescription [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #priority;
+		label: 'Priority';
+		priority: 50;
+		beRequired;
+		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ] labelled: 'Priority must be between 0 and 100';
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> slug [
+	| stream previousWasDash |
+	stream := String streamContents: [ :aStream |
+		previousWasDash := false.
+		(self label ifNil: [ '' ]) asLowercase do: [ :each |
+			| nextCharacter |
+			nextCharacter := (each isAlphaNumeric or: [ each = $- ])
+				ifTrue: [ each ]
+				ifFalse: [ $- ].
+			(nextCharacter = $- and: [ previousWasDash ])
+				ifFalse: [ aStream nextPut: nextCharacter ].
+			previousWasDash := nextCharacter = $- ] ].
+	^ stream
+]
+
+{ #category : 'descriptions' }
+CFMagritteEditorExample >> slugDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #slug;
+		label: 'Slug';
+		priority: 70;
+		beReadonly;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> status [
+	^ status
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> status: aSymbol [
+	status := aSymbol
+]
+
+{ #category : 'descriptions' }
+CFMagritteEditorExample >> statusDescription [
+	<magritteDescription>
+	^ MASingleOptionDescription new
+		accessor: #status;
+		label: 'Status';
+		priority: 60;
+		options: self statusOptions;
+		beRequired;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> statusOptions [
+	^ #(draft active archived)
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> summary [
+	^ summary
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> summary: aString [
+	summary := aString
+]
+
+{ #category : 'descriptions' }
+CFMagritteEditorExample >> summaryDescription [
+	<magritteDescription>
+	^ MAMemoDescription new
+		accessor: #summary;
+		label: 'Summary';
+		priority: 30;
+		yourself
+]
