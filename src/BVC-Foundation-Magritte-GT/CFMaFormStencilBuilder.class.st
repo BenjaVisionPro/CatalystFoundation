@@ -22,14 +22,14 @@ CFMaFormStencilBuilder >> buildDefault [
 		beFieldContainer;
 		beToolbarContainer.
 
-	background := Color black alpha: 0.03.
+	background := Color black alpha: 0.035.
 
 	aContainer
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 8.0);
-		padding: (BlInsets all: 12);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10.0);
+		padding: (BlInsets all: 14);
 		margin: (BlInsets all: 6);
 		background: background;
-		cellSpacing: 8;
+		cellSpacing: 10;
 		hFitContentLimited;
 		vFitContent.
 
