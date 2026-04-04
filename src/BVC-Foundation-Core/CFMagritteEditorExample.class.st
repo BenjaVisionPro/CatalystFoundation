@@ -162,3 +162,23 @@ CFMagritteEditorExample >> summaryDescription [
 		priority: 30;
 		yourself
 ]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> hasCFOperationsTool [
+	^ true
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample class >> hasCFOperationsTool [
+	^ true
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> cfOperationsViewModelClass [
+	^ CFMagritteEditorExampleOperationsViewModel
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample class >> cfOperationsViewModelClass [
+	^ CFMagritteEditorExampleOperationsViewModel
+]
