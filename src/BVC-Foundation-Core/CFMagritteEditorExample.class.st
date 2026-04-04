@@ -112,7 +112,7 @@ CFMagritteEditorExample >> slugDescription [
 		accessor: #slug;
 		label: 'Slug';
 		priority: 70;
-		beReadonly;
+		beReadOnly;
 		yourself
 ]
 

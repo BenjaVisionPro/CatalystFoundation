@@ -21,7 +21,7 @@ CFObject >> icon: anObject [
 { #category : 'as yet unclassified' }
 CFObject >> iconDescription [
 	<magritteDescription>
-	^ CFMaFontAwesomeIconDescription new
+	^ FontAwesomeIconDescription new
 		accessor: #icon;
 		label: 'Icon';
 		default: #addressCard;
