@@ -166,7 +166,12 @@ CFMagritteEditorExample >> summaryDescription [
 
 
 { #category : 'accessing' }
-CFMagritteEditorExample >> cfOperationsViewModelClass [
+CFMagritteEditorExample >> cfPhlowToolClass [
+	^ CFOperationsTool
+]
+
+{ #category : 'accessing' }
+CFMagritteEditorExample >> cfPhlowViewModelClass [
 	^ CFMagritteEditorExampleOperationsViewModel
 ]
 
