@@ -170,7 +170,3 @@ CFMagritteEditorExample >> cfOperationsViewModelClass [
 	^ CFMagritteEditorExampleOperationsViewModel
 ]
 
-{ #category : 'accessing' }
-CFMagritteEditorExample class >> cfOperationsViewModelClass [
-	^ CFMagritteEditorExampleOperationsViewModel
-]

@@ -29,33 +29,3 @@ CFObject >> gtDefaultInspectorTool [
 CFObject >> hasCFOperationsTool [
 	^ self cfOperationsViewModelClass notNil
 ]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject class >> cfOperationsTool [
-	self hasCFOperationsTool ifFalse: [ ^ nil ].
-	^ self cfOperationsToolClass forSubject: self
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject class >> cfOperationsToolClass [
-	^ CFOperationsTool
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject class >> cfOperationsViewModelClass [
-	^ nil
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject class >> gtDefaultInspectorTool [
-	self hasCFOperationsTool ifFalse: [ ^ super gtDefaultInspectorTool ].
-	^ GtPhlowCompositeTool new
-		addTool: self cfOperationsTool;
-		addTool: super gtDefaultInspectorTool;
-		yourself
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject class >> hasCFOperationsTool [
-	^ self cfOperationsViewModelClass notNil
-]
