@@ -10,10 +10,9 @@ CFObject >> cfInspectorToolSelectors [
 
 { #category : '*bvc-foundation-phlow' }
 CFObject >> gtDefaultInspectorTool [
-	| inspectorTools |
+	| inspectorTools compositeTool |
 	inspectorTools := self gtInspectorTools.
 	inspectorTools ifEmpty: [ ^ super gtDefaultInspectorTool ].
-	| compositeTool |
 	compositeTool := GtPhlowCompositeTool new.
 	inspectorTools do: [ :aTool | compositeTool addTool: aTool ].
 	compositeTool addTool: super gtDefaultInspectorTool.
