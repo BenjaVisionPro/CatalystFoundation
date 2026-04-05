@@ -21,8 +21,23 @@ CFPhlowViewModel >> asElement [
 ]
 
 { #category : 'accessing' }
+CFPhlowViewModel >> contentElement [
+	^ nil
+]
+
+{ #category : 'accessing' }
 CFPhlowViewModel >> elementClass [
 	^ CFPhlowElement
+]
+
+{ #category : 'accessing' }
+CFPhlowViewModel >> footerLines [
+	^ #()
+]
+
+{ #category : 'testing' }
+CFPhlowViewModel >> hasFooter [
+	^ self footerLines notEmpty
 ]
 
 { #category : 'accessing' }
@@ -46,21 +61,6 @@ CFPhlowViewModel >> headerTitleText [
 	^ aTitle asString
 ]
 
-{ #category : 'testing' }
-CFPhlowViewModel >> hasFooter [
-	^ self footerLines notEmpty
-]
-
-{ #category : 'accessing' }
-CFPhlowViewModel >> footerLines [
-	^ #()
-]
-
-{ #category : 'accessing' }
-CFPhlowViewModel >> contentElement [
-	^ nil
-]
-
 { #category : 'accessing' }
 CFPhlowViewModel >> subject [
 	^ subject
@@ -79,4 +79,9 @@ CFPhlowViewModel >> toolIcon [
 { #category : 'api - accessing' }
 CFPhlowViewModel >> toolName [
 	^ 'tool'
+]
+
+{ #category : 'api - accessing' }
+CFPhlowViewModel >> toolPriority [
+	^ 50
 ]

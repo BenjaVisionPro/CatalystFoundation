@@ -1,53 +1,28 @@
 Extension { #name : 'CFObject' }
 
 { #category : '*bvc-foundation-phlow' }
-CFObject >> cfPhlowTool [
-	self hasCFPhlowTool ifFalse: [ ^ nil ].
-	^ self cfPhlowToolClass forSubject: self
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> cfPhlowToolClass [
-	^ CFPhlowTool
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> cfPhlowViewModelClass [
-	^ nil
+CFObject >> cfInspectorToolSelectors [
+	^ ((self class methods
+		select: [ :aMethod |
+			aMethod pragmas anySatisfy: [ :aPragma | aPragma keyword = #cfInspectorTool ] ])
+		collect: [ :aMethod | aMethod selector ]) asSortedCollection
 ]
 
 { #category : '*bvc-foundation-phlow' }
 CFObject >> gtDefaultInspectorTool [
-	self hasCFPhlowTool ifFalse: [ ^ super gtDefaultInspectorTool ].
-	^ GtPhlowCompositeTool new
-		addTool: self cfPhlowTool;
-		addTool: super gtDefaultInspectorTool;
-		yourself
+	| inspectorTools |
+	inspectorTools := self gtInspectorTools.
+	inspectorTools ifEmpty: [ ^ super gtDefaultInspectorTool ].
+	| compositeTool |
+	compositeTool := GtPhlowCompositeTool new.
+	inspectorTools do: [ :aTool | compositeTool addTool: aTool ].
+	compositeTool addTool: super gtDefaultInspectorTool.
+	^ compositeTool
 ]
 
 { #category : '*bvc-foundation-phlow' }
-CFObject >> hasCFPhlowTool [
-	^ self cfPhlowViewModelClass notNil
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> cfOperationsTool [
-	^ self cfPhlowTool
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> cfOperationsToolClass [
-	^ CFOperationsTool
-]
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> cfOperationsViewModelClass [
-	^ self cfPhlowViewModelClass
-]
-
-
-{ #category : '*bvc-foundation-phlow' }
-CFObject >> hasCFOperationsTool [
-	^ self cfPhlowToolClass = self cfOperationsToolClass
-		and: [ self cfOperationsViewModelClass notNil ]
+CFObject >> gtInspectorTools [
+	^ (self cfInspectorToolSelectors
+		collect: [ :aSelector | self perform: aSelector ])
+		reject: [ :aTool | aTool isNil ]
 ]

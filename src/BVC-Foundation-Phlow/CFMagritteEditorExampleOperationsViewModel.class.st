@@ -12,7 +12,7 @@ CFMagritteEditorExampleOperationsViewModel >> elementClass [
 
 { #category : 'accessing' }
 CFMagritteEditorExampleOperationsViewModel >> footerLines [
-	^ #('This object is using a custom operations view model.' 'The embedded editor is still the standard Foundation Magritte editor.')
+	^ #('This object is using a custom operations tool contributed through <cfInspectorTool>.' 'The embedded editor is still the standard Foundation Magritte editor.')
 ]
 
 { #category : 'accessing' }

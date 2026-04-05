@@ -10,7 +10,7 @@ CFMagritteEditorExampleOperationsElement class >> newContentElementForViewModel:
 	^ (super newContentElementForViewModel: aViewModel)
 		addChild: (BrLabel new
 			aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.55));
-			text: 'Custom operations content can now be introduced by specializing the view model and element classes.';
+			text: 'Custom operations content can be introduced by adding another <cfInspectorTool> method for a different tool.';
 			hMatchParent;
 			yourself);
 		yourself

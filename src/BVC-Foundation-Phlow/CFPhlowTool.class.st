@@ -9,25 +9,27 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhlowTool class >> forSubject: aSubject [
-	| aViewModelClass |
-	aViewModelClass := (aSubject respondsTo: #cfPhlowViewModelClass)
-		ifTrue: [ aSubject cfPhlowViewModelClass ]
-		ifFalse: [ nil ].
-	aViewModelClass ifNil: [ aViewModelClass := self defaultViewModelClass ].
-	^ self new
-		viewModel: (aViewModelClass forSubject: aSubject);
-		yourself
-]
-
-{ #category : 'instance creation' }
 CFPhlowTool class >> defaultViewModelClass [
 	^ CFPhlowViewModel
 ]
 
+{ #category : 'instance creation' }
+CFPhlowTool class >> forSubject: anObject [
+	^ self
+		forSubject: anObject
+		viewModelClass: self defaultViewModelClass
+]
+
+{ #category : 'instance creation' }
+CFPhlowTool class >> forSubject: anObject viewModelClass: aViewModelClass [
+	^ self new
+		viewModel: (aViewModelClass forSubject: anObject);
+		yourself
+]
+
 { #category : 'converting' }
-CFPhlowTool >> asElementDo: aOneArgBlock [
-	^ aOneArgBlock cull: self viewModel asElement
+CFPhlowTool >> asElementDo: aBlock [
+	^ aBlock cull: self viewModel asElement
 ]
 
 { #category : 'api - accessing' }
@@ -38,6 +40,11 @@ CFPhlowTool >> icon [
 { #category : 'api - accessing' }
 CFPhlowTool >> name [
 	^ self viewModel toolName
+]
+
+{ #category : 'api - accessing' }
+CFPhlowTool >> priority [
+	^ self viewModel toolPriority
 ]
 
 { #category : 'api - accessing' }
