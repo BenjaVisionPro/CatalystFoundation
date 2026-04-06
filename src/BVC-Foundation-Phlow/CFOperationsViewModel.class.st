@@ -20,7 +20,6 @@ CFOperationsViewModel >> editorSectionTitle [
 	^ 'Editor'
 ]
 
-
 { #category : 'accessing' }
 CFOperationsViewModel >> headerMetadataText [
 	^ 'Operations · ', super headerMetadataText
