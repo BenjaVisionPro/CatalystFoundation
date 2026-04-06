@@ -27,14 +27,17 @@ CFPhlowElement >> buildContentSection [
 
 { #category : 'private - building' }
 CFPhlowElement >> buildContentViewport [
-	| aContent |
+	| aContent aScrollable aViewport |
 	aContent := self buildContentSection.
 	aContent ifNil: [ ^ nil ].
 	aContent hMatchParent.
-	^ aContent asScrollableElement
+	aScrollable := aContent asScrollableElement.
+	aViewport := BrFrame new
 		hMatchParent;
 		vMatchParent;
-		yourself
+		yourself.
+	aViewport addChild: aScrollable.
+	^ aViewport
 ]
 
 { #category : 'private - building' }
@@ -96,12 +99,10 @@ CFPhlowElement >> newSectionContainerWithBackground: aColor [
 
 { #category : 'private - building' }
 CFPhlowElement >> rebuild [
-	| aContentViewport |
 	self removeChildren.
 	viewModel ifNil: [ ^ self ].
 	self addChild: self buildHeaderSection.
-	aContentViewport := self buildContentViewport.
-	aContentViewport ifNotNil: [ self addChild: aContentViewport ].
+	self addSection: self buildContentViewport to: self.
 	self addSection: self buildFooterSection to: self
 ]
 
