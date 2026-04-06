@@ -12,7 +12,7 @@ CFOperationsViewModel >> bodySectionTitle [
 
 { #category : 'accessing' }
 CFOperationsViewModel >> contentElement [
-	^ self elementClass newContentElementForViewModel: self
+	^ CFOperationsElement newContentElementForViewModel: self
 ]
 
 { #category : 'accessing' }
@@ -20,10 +20,6 @@ CFOperationsViewModel >> editorSectionTitle [
 	^ 'Editor'
 ]
 
-{ #category : 'accessing' }
-CFOperationsViewModel >> elementClass [
-	^ CFOperationsElement
-]
 
 { #category : 'accessing' }
 CFOperationsViewModel >> headerMetadataText [
