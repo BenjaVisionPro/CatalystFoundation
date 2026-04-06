@@ -22,5 +22,5 @@ CFMagritteEditorExampleOperationsViewModel >> headerMetadataText [
 
 { #category : 'api - accessing' }
 CFMagritteEditorExampleOperationsViewModel >> toolIcon [
-	^ BrGlamorousVectorIcons settings
+	^ BVCDevKitVectorIcons bvcServer asElement asScalableElement size: 16 @ 16
 ]

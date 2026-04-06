@@ -66,9 +66,9 @@ CFPhlowElement >> initialize [
 	self
 		hMatchParent;
 		vMatchParent;
-		padding: (BlInsets all: 10);
+		padding: (BlInsets all: 8);
 		cellSpacing: 10;
-		background: (Color black alpha: 0.03)
+		background: (Color black alpha: 0.05)
 ]
 
 { #category : 'private - building' }
