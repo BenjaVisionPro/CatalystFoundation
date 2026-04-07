@@ -1,24 +1,40 @@
 Class {
 	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
+	#instVars : [
+		'currentGroup'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'elements' }
 CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
-	| aLabel |
-	aLabel := self builderUtilityClass
-			newFieldLabelWithSpace: self defaultSpacing
-			using: aDescription.
+	| aFieldWrapper |
+	self emitGroupFor: aDescription.
+	aFieldWrapper := CFMaFieldElement
+		description: aDescription
+		memento: self memento
+		editorElement: aFieldElement.
 
 	aDescription hasComment
-		ifTrue: [ GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
+		ifTrue: [ GtMagritteBuilderUtility addCommentTooltip: aFieldWrapper using: aDescription.
 			GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
-	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
-	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
-	^ aLabel
+	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldWrapper ].
+	^ aFieldWrapper
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> emitGroupFor: aDescription [
+	| aGroupName |
+	(aDescription respondsTo: #group) ifFalse: [ ^ self ].
+	aGroupName := aDescription perform: #group.
+	aGroupName ifNil: [ ^ self ].
+	currentGroup = aGroupName ifTrue: [ ^ self ].
+	currentGroup := aGroupName.
+	self fieldContainerDo: [ :aContainer |
+		aContainer addChild: (self builderUtilityClass newGroupLabelUsing: aGroupName) ]
 ]
 
 { #category : 'icons' }

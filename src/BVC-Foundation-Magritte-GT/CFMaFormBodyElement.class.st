@@ -10,13 +10,11 @@ Class {
 CFMaFormBodyElement >> initialize [
 	super initialize.
 
-	self magritte
-		beLabelContainer;
-		beFieldContainer.
+	self magritte beFieldContainer.
 
 	self
-		padding: (BlInsets all: 14);
-		cellSpacing: 8;
+		padding: (BlInsets all: 22);
+		cellSpacing: 14;
 		hMatchParent;
 		vFitContent
 ]
