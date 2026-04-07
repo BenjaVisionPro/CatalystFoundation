@@ -31,7 +31,7 @@ CFMaBuilderUtility class >> newFieldLabelUsing: aDescription [
 		aptitude: labelAptitude;
 		hMatchParent;
 		fitContent;
-		margin: (BlInsets top: 0 right: 0 bottom: 6 left: 28);
+		margin: (BlInsets top: 0 right: 0 bottom: 4 left: 12);
 		when: BlClickEvent
 			do: [ :anEvent |
 				anEvent modifiers isAlt
@@ -111,6 +111,6 @@ CFMaBuilderUtility class >> newGroupLabelUsing: aGroupName [
 		text: aGroupName asString asUppercase;
 		hMatchParent;
 		fitContent;
-		margin: (BlInsets top: 8 right: 0 bottom: 12 left: 8);
+		margin: (BlInsets top: 2 right: 0 bottom: 6 left: 0);
 		yourself
 ]

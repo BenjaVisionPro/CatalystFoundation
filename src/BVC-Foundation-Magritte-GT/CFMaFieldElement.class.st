@@ -25,7 +25,7 @@ CFMaFieldElement >> buildFieldChrome [
 	| aBorderContainer anInnerContainer aStatusIndicator |
 	aBorderContainer := BrVerticalPane new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 18.0);
-		background: (Color black alpha: 0.18);
+		background: (Color black alpha: 0.12);
 		hMatchParent;
 		vFitContent;
 		padding: (BlInsets all: 1);
@@ -33,11 +33,11 @@ CFMaFieldElement >> buildFieldChrome [
 
 	anInnerContainer := BrHorizontalPane new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 17.0);
-		background: (Color white alpha: 0.72);
+		background: (Color white alpha: 0.78);
 		hMatchParent;
 		vFitContent;
 		padding: (self innerPadding);
-		cellSpacing: 10;
+		cellSpacing: 6;
 		yourself.
 
 	editorElement ifNotNil: [
@@ -57,7 +57,7 @@ CFMaFieldElement >> buildInteractionRow [
 	aRow := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 10;
+		cellSpacing: 2;
 		yourself.
 
 	aChrome := self buildFieldChrome.
@@ -101,14 +101,14 @@ CFMaFieldElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 6
+		cellSpacing: 2
 ]
 
 { #category : 'private - building' }
 CFMaFieldElement >> innerPadding [
 	^ (self isMultiLineDescription or: [ self isIconDescription ])
-		ifTrue: [ BlInsets top: 14 right: 12 bottom: 14 left: 18 ]
-		ifFalse: [ BlInsets top: 10 right: 12 bottom: 10 left: 18 ]
+		ifTrue: [ BlInsets top: 10 right: 10 bottom: 10 left: 14 ]
+		ifFalse: [ BlInsets top: 6 right: 10 bottom: 6 left: 14 ]
 ]
 
 { #category : 'testing' }
@@ -180,8 +180,8 @@ CFMaFieldElement >> newRevertAction [
 	^ BrLabel new
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.45));
 		text: '↺';
-		padding: (BlInsets top: 6 right: 4 bottom: 6 left: 4);
-		margin: (BlInsets top: (self isMultiLineDescription ifTrue: [ 8 ] ifFalse: [ 4 ]));
+		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 2);
+		margin: (BlInsets top: (self isMultiLineDescription ifTrue: [ 6 ] ifFalse: [ 0 ]));
 		fitContent;
 		when: BlClickEvent do: [ :anEvent | self revertToModelValue. anEvent consumed: true ];
 		yourself
@@ -195,8 +195,8 @@ CFMaFieldElement >> newStatusIndicator [
 	^ BrFrame new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 8.0);
 		background: aColor;
-		size: 16@16;
-		margin: (BlInsets top: (self isMultiLineDescription ifTrue: [ 4 ] ifFalse: [ 0 ]) bottom: 0 left: 0 right: 2);
+		size: 14@14;
+		margin: (BlInsets top: (self isMultiLineDescription ifTrue: [ 2 ] ifFalse: [ 0 ]) bottom: 0 left: 0 right: 2);
 		yourself
 ]
 
