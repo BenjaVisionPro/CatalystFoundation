@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaBuilderUtility',
-	#superclass : 'Object',
+	#superclass : 'GtMagritteBuilderUtility',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }

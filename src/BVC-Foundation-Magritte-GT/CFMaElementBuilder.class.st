@@ -18,23 +18,11 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		editorElement: aFieldElement.
 
 	aDescription hasComment
-		ifTrue: [ GtMagritteBuilderUtility addCommentTooltip: aFieldWrapper using: aDescription.
-			GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
+		ifTrue: [ CFMaBuilderUtility addCommentTooltip: aFieldWrapper using: aDescription.
+			CFMaBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
 	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldWrapper ].
 	^ aFieldWrapper
-]
-
-{ #category : 'private - building' }
-CFMaElementBuilder >> emitGroupFor: aDescription [
-	| aGroupName |
-	(aDescription respondsTo: #group) ifFalse: [ ^ self ].
-	aGroupName := aDescription perform: #group.
-	aGroupName ifNil: [ ^ self ].
-	currentGroup = aGroupName ifTrue: [ ^ self ].
-	currentGroup := aGroupName.
-	self fieldContainerDo: [ :aContainer |
-		aContainer addChild: (self builderUtilityClass newGroupLabelUsing: aGroupName) ]
 ]
 
 { #category : 'icons' }
@@ -56,4 +44,16 @@ CFMaElementBuilder >> addIconUsing: aDescription [
 { #category : 'defaults' }
 CFMaElementBuilder >> builderUtilityClass [
 	^ CFMaBuilderUtility
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> emitGroupFor: aDescription [
+	| aGroupName |
+	(aDescription respondsTo: #group) ifFalse: [ ^ self ].
+	aGroupName := aDescription perform: #group.
+	aGroupName ifNil: [ ^ self ].
+	currentGroup = aGroupName ifTrue: [ ^ self ].
+	currentGroup := aGroupName.
+	self fieldContainerDo: [ :aContainer |
+		aContainer addChild: (self builderUtilityClass newGroupLabelUsing: aGroupName) ]
 ]

@@ -13,7 +13,7 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	theFrame removeChildren.
 
 	aStencil := aMemento magritteDescription blocElementContainerStencil
-			asStencilBuilder: GtMagritteFormStencilBuilder.
+			asStencilBuilder: CFMaFormStencilBuilder.
 
 	aContainer := aStencil
 			memento: aMemento;

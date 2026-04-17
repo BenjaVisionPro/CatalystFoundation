@@ -26,7 +26,6 @@ CFObject >> iconDescription [
 		label: 'Icon';
 		default: #addressCard;
 		priority: 5;
-		styleName: 'light';
 		iconHeight: 32;
 		yourself
 ]

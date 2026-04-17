@@ -73,6 +73,13 @@ CFMaFieldElement >> buildLabelElement [
 	^ CFMaBuilderUtility newFieldLabelUsing: description
 ]
 
+{ #category : 'private - values' }
+CFMaFieldElement >> currentValue [
+	(memento respondsTo: #readUsing:) ifTrue: [
+		[ ^ memento perform: #readUsing: with: description ] on: Error do: [ ] ].
+	^ self modelValue
+]
+
 { #category : 'accessing' }
 CFMaFieldElement >> description [
 	^ description
@@ -231,13 +238,6 @@ CFMaFieldElement >> selectorAccessor [
 		ifFalse: [ (anAccessor respondsTo: #asSymbol)
 			ifTrue: [ anAccessor asSymbol ]
 			ifFalse: [ nil ] ]
-]
-
-{ #category : 'private - values' }
-CFMaFieldElement >> currentValue [
-	(memento respondsTo: #readUsing:) ifTrue: [
-		[ ^ memento perform: #readUsing: with: description ] on: Error do: [ ] ].
-	^ self modelValue
 ]
 
 { #category : 'private - building' }
