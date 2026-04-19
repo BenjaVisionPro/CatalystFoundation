@@ -1,0 +1,11 @@
+RwSimpleProjectLoadComponentV2 {
+  #name : 'Foundation',
+  #projectNames : [],
+  #componentNames : [],
+  #packageNames : [
+    'BVC-Foundation-Core',
+    'BVC-Foundation-Magritte-Core',
+    'BVC-Foundation-Magritte-Seaside'
+  ],
+  #comment : 'BVC Runtime GemStone load (runtime + examples + tests)'
+}

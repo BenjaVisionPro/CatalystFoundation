@@ -1,0 +1,16 @@
+RwLoadSpecificationV2 {
+  #specName : 'CatalystRuntime',
+  #projectName : 'CatalystRuntime',
+  #gitUrl : 'git@github.com:BenjaVisionPro/CatalystFoundation.git',
+  #revision : 'main',
+  #projectSpecFile : 'rowan/project.ston',
+  #componentNames : [ 'Foundation' ],
+  #platformProperties : {
+    'gemstone' : {
+      'allusers' : {
+        #defaultSymbolDictName : 'Globals'
+      }
+    }
+  },
+  #comment : 'Standard GemStone load for Catalyst Foundation'
+}

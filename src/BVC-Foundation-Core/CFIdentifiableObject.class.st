@@ -34,6 +34,7 @@ CFIdentifiableObject >> identifierDescription [
 		label: 'Identifier';
 		priority: 10;
 		beRequired;
+		cfCategory: #identity;
 		yourself
 ]
 
