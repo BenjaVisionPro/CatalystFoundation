@@ -6,16 +6,6 @@ Class {
 }
 
 { #category : 'elements' }
-CFMaBuilderUtility class >> newChooseIconAffordanceFor: aDescription [
-	^ BrLabel new
-		aptitude: BrLabelAptitude new;
-		text: aDescription chooseIconLabel;
-		padding: (BlInsets all: 4);
-		fitContent;
-		yourself
-]
-
-{ #category : 'elements' }
 CFMaBuilderUtility class >> newFieldLabelUsing: aDescription [
 	| aText labelAptitude |
 	aText := aDescription label asRopedText.
@@ -42,51 +32,6 @@ CFMaBuilderUtility class >> newFieldLabelUsing: aDescription [
 { #category : 'elements' }
 CFMaBuilderUtility class >> newFieldLabelWithSpace: aSpaceNumber using: aDescription [
 	^ self newFieldLabelUsing: aDescription
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconFor: aSelectorSymbol using: aDescription [
-	| icon |
-	^ [
-		icon := aDescription iconLibraryClass
-			icon: aSelectorSymbol
-			styleName: aDescription styleName.
-		icon color: Color black.
-		aDescription scaledElementForIcon: icon ]
-		on: Error
-		do: [ self newChooseIconAffordanceFor: aDescription ]
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata height: aNumber [
-	^ self
-		newFontAwesomeIconForMetadata: anIconMetadata
-		styleName: anIconMetadata preferredStyleName
-		height: aNumber
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName fitInto: anExtent [
-	^ [ | icon |
-		icon := anIconMetadata iconLibraryClass
-			icon: anIconMetadata selectorSymbol
-			styleName: aStyleName.
-		icon color: Color black.
-		icon asScalableElementSized: (icon extentFittingInto: anExtent) ]
-		on: Error
-		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
-]
-
-{ #category : 'icons' }
-CFMaBuilderUtility class >> newFontAwesomeIconForMetadata: anIconMetadata styleName: aStyleName height: aNumber [
-	^ [ | icon |
-		icon := anIconMetadata iconLibraryClass
-			icon: anIconMetadata selectorSymbol
-			styleName: aStyleName.
-		icon color: Color black.
-		icon asScalableElementSized: (icon extentForHeight: aNumber) ]
-		on: Error
-		do: [ BrLabel new aptitude: BrLabelAptitude new; text: anIconMetadata selectorSymbol asString; fitContent; yourself ]
 ]
 
 { #category : 'elements' }
