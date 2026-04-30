@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'identifier'
 	],
-	#category : 'BVC-Foundation-Core-Extensions',
+	#category : 'BVC-Foundation-Core',
 	#package : 'BVC-Foundation-Core',
 	#tag : 'Extensions'
 }
