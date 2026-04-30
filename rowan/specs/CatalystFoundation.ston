@@ -1,6 +1,6 @@
 RwLoadSpecificationV2 {
-  #specName : 'CatalystRuntime',
-  #projectName : 'CatalystRuntime',
+  #specName : 'CatalystFoundation',
+  #projectName : 'CatalystFoundation',
   #gitUrl : 'git@github.com:BenjaVisionPro/CatalystFoundation.git',
   #revision : 'main',
   #projectSpecFile : 'rowan/project.ston',
