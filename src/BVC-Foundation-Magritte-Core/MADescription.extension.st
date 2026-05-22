@@ -14,3 +14,15 @@ MADescription >> cfCategory: aValue [
 MADescription >> cfCategorySymbol [
 	^ #cfCategory
 ]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfSerializable [
+	self
+		propertyAt: self cfSerializableSymbol
+		ifAbsent: [ false ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfSerializableSymbol [
+	^ #cfSerializable
+]
