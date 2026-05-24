@@ -59,3 +59,54 @@ CFMaBuilderUtility class >> newGroupLabelUsing: aGroupName [
 		margin: (BlInsets top: 2 right: 0 bottom: 6 left: 0);
 		yourself
 ]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
+	| aFlowElement |
+	aFlowElement := BrFlowList new.
+	aFlowElement
+		matchParent;
+		stencil: aDescription blocItemStencil;
+		withAsyncSinkDo: [ :anElementSink |
+			anElementSink
+				sink: AsyncPeekSink new;
+				whenUpdate: [ :theFlowElement :aSink |
+					self
+						onFlowList: theFlowElement
+						sinkUpdate: aSink
+						memento: aMemento
+						description: aDescription ].
+			(aMemento readObservableValueUsing: aDescription)
+				observe: anElementSink ].
+
+	^ aFlowElement
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: aMemento description: aDescription [
+	| aModels anExistingViewModels aViewModels |
+	aModels := aSink value currentValue ifNil: [ #() ].
+	anExistingViewModels := aFlowElement items.
+
+	aViewModels := Array
+		new: (aModels size + aDescription cfCanAddItems asBit)
+		streamContents: [ :aStream |
+			self
+				recycleViewModels: anExistingViewModels
+				forModels: aModels
+				into: aStream
+				memento: aMemento
+				description: aDescription.
+
+			aDescription cfCanAddItems
+				ifTrue: [ | anAddViewModel |
+					anAddViewModel := CFMaAddItemViewModel new
+						memento: aMemento;
+						description: aDescription;
+						yourself.
+					aDescription newItemStencil
+						ifNotNil: [ :aStencil | anAddViewModel stencil: aStencil ].
+					aStream nextPut: anAddViewModel ] ].
+
+	^ aFlowElement items: aViewModels
+]
