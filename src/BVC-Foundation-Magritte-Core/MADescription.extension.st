@@ -1,6 +1,11 @@
 Extension { #name : 'MADescription' }
 
 { #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfBeSerializable [
+	^ self propertyAt: self cfSerializableSymbol put: true
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
 MADescription >> cfCategory [
 	self propertyAt: self cfCategorySymbol ifAbsent: [ nil ]
 ]
@@ -17,7 +22,7 @@ MADescription >> cfCategorySymbol [
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> cfSerializable [
-	self
+	^ self
 		propertyAt: self cfSerializableSymbol
 		ifAbsent: [ false ]
 ]
