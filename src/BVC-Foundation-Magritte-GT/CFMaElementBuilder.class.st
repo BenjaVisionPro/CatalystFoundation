@@ -10,19 +10,21 @@ Class {
 
 { #category : 'elements' }
 CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
-	| aFieldWrapper |
+	| aLabel |
 	self emitGroupFor: aDescription.
-	aFieldWrapper := CFMaFieldElement
-		description: aDescription
-		memento: self memento
-		editorElement: aFieldElement.
+
+	aLabel := CFMaBuilderUtility newFieldLabelUsing: aDescription.
 
 	aDescription hasComment
-		ifTrue: [ CFMaBuilderUtility addCommentTooltip: aFieldWrapper using: aDescription.
+		ifTrue: [ CFMaBuilderUtility addCommentTooltip: aLabel using: aDescription.
 			CFMaBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
-	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldWrapper ].
-	^ aFieldWrapper
+	self fieldContainerDo: [ :aContainer |
+		aContainer
+			addChild: aLabel;
+			addChild: aFieldElement ].
+
+	^ aLabel
 ]
 
 { #category : 'icons' }
