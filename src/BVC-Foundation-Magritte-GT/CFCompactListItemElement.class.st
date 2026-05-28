@@ -103,11 +103,11 @@ CFCompactListItemElement >> newIconElementFor: anIconValue [
 	anIcon isNil ifTrue: [ anIcon := #inspect ].
 
 	anIcon isSymbol ifTrue: [
-		^ [ (BrGlamorousVectorIcons classSide includesSelector: anIcon)
+		^ [ ((BrGlamorousVectorIcons classSide includesSelector: anIcon)
 			ifTrue: [ BrGlamorousVectorIcons perform: anIcon ]
-			ifFalse: [ BrGlamorousVectorIcons inspect ] ]
+			ifFalse: [ BrGlamorousVectorIcons inspect ]) asElement ]
 			on: Error
-			do: [ :ignored | BrGlamorousVectorIcons inspect ] ].
+			do: [ :ignored | BrGlamorousVectorIcons inspect asElement ] ].
 
 	^ [ anIcon asElement ]
 		on: Error
