@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'identifier'
 	],
-	#category : 'BVC-Foundation-Core-Extensions',
+	#category : 'BVC-Foundation-Core',
 	#package : 'BVC-Foundation-Core',
 	#tag : 'Extensions'
 }
@@ -41,5 +41,5 @@ CFIdentifiableObject >> identifierDescription [
 { #category : 'as yet unclassified' }
 CFIdentifiableObject >> initialize [
 	super initialize.
-	identifier ifNil: [ identifier := ('c_', UUID new asString36) asSymbol ]
+	identifier ifNil: [ identifier := UUID new ]
 ]
