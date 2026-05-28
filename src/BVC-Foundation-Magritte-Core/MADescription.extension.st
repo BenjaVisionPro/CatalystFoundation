@@ -17,7 +17,7 @@ MADescription >> cfCategorySymbol [
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> cfSerializable [
-	self
+	^ self
 		propertyAt: self cfSerializableSymbol
 		ifAbsent: [ false ]
 ]
