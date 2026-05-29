@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'identifier'
 	],
-	#category : 'BVC-Foundation-Core',
+	#category : 'BVC-Foundation-Core-Extensions',
 	#package : 'BVC-Foundation-Core',
 	#tag : 'Extensions'
 }
@@ -41,5 +41,14 @@ CFIdentifiableObject >> identifierDescription [
 { #category : 'as yet unclassified' }
 CFIdentifiableObject >> initialize [
 	super initialize.
-	identifier ifNil: [ identifier := UUID new ]
+	self initializeIdentifier
+]
+
+{ #category : 'as yet unclassified' }
+CFIdentifiableObject >> initializeIdentifier [
+	identifier := (String
+			streamContents: [ :idString | 
+				idString
+					nextPutAll: 'cf_';
+					nextPutAll: UUID new asString36 ]) asSymbol
 ]
