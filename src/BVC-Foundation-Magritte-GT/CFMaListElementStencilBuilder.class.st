@@ -22,5 +22,7 @@ CFMaListElementStencilBuilder >> buildDefault [
 		memento: self memento
 		description: self description
 		element: aFlowElement;
-		matchParent
+		hMatchParent;
+		vFitContent;
+		yourself
 ]
