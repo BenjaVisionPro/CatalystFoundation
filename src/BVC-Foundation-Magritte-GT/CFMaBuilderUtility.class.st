@@ -65,8 +65,7 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	| aFlowElement |
 	aFlowElement := BrFlowList new.
 	aFlowElement
-		hMatchParent;
-		vFitContent;
+		matchParent;
 		stencil: aDescription blocItemStencil;
 		withAsyncSinkDo: [ :anElementSink |
 			anElementSink
