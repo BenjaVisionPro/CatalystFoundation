@@ -3,6 +3,8 @@ Class {
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
 		'model',
+		'description',
+		'memento',
 		'iconContainer',
 		'titleElement',
 		'commentElement',
@@ -12,30 +14,44 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> compactDescription [
-	| anObject |
-	anObject := self itemObject.
-	(anObject notNil and: [ anObject respondsTo: #compactListItemDescription ])
-		ifTrue: [ ^ anObject compactListItemDescription ].
-	^ Object new compactListItemDescription
+{ #category : 'instance creation' }
+CFCompactListItemElement class >> model: anObject description: aDescription [
+	^ self new
+		model: anObject;
+		description: aDescription;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFCompactListItemElement >> commentDescription [
+	^ self description children third
 ]
 
 { #category : 'private - accessing' }
-CFCompactListItemElement >> descriptionForRole: aRole [
-	| aDescription |
-	aDescription := self compactDescription.
-	(aDescription respondsTo: #children) ifFalse: [ ^ nil ].
-	^ aDescription children
-		detect: [ :each |
-			(each respondsTo: #propertyAt:ifAbsent:)
-				and: [ (each propertyAt: #cfCompactListItemRole ifAbsent: [ nil ]) = aRole ] ]
-		ifNone: [ nil ]
+CFCompactListItemElement >> commentValue [
+	^ self valueUsing: self commentDescription
+]
+
+{ #category : 'accessing' }
+CFCompactListItemElement >> description [
+	^ description
+]
+
+{ #category : 'accessing' }
+CFCompactListItemElement >> description: aDescription [
+	description := aDescription.
+	memento := nil.
+	self updateFromModel
+]
+
+{ #category : 'accessing' }
+CFCompactListItemElement >> iconDescription [
+	^ self description children first
 ]
 
 { #category : 'private - accessing' }
 CFCompactListItemElement >> iconValue [
-	^ self valueForRole: #icon ifAbsent: [ #inspect ]
+	^ self valueUsing: self iconDescription
 ]
 
 { #category : 'initialization' }
@@ -79,10 +95,11 @@ CFCompactListItemElement >> initialize [
 ]
 
 { #category : 'private - accessing' }
-CFCompactListItemElement >> itemObject [
-	model ifNil: [ ^ nil ].
-	(model respondsTo: #object) ifTrue: [ ^ model object ].
-	^ model
+CFCompactListItemElement >> itemMemento [
+	^ memento ifNil: [
+		memento := GtMagritteMemento
+			model: self model
+			description: self description ]
 ]
 
 { #category : 'accessing' }
@@ -93,6 +110,7 @@ CFCompactListItemElement >> model [
 { #category : 'accessing' }
 CFCompactListItemElement >> model: anObject [
 	model := anObject.
+	memento := nil.
 	self updateFromModel
 ]
 
@@ -119,10 +137,20 @@ CFCompactListItemElement >> newIconElementFor: anIconValue [
 				yourself ]
 ]
 
+{ #category : 'accessing' }
+CFCompactListItemElement >> titleDescription [
+	^ self description children second
+]
+
+{ #category : 'private - accessing' }
+CFCompactListItemElement >> titleValue [
+	^ self valueUsing: self titleDescription
+]
+
 { #category : 'private - updating' }
 CFCompactListItemElement >> updateFromModel [
 	| aTitle aComment anIconElement |
-	model ifNil: [ ^ self ].
+	(model isNil or: [ description isNil ]) ifTrue: [ ^ self ].
 
 	aTitle := self titleValue.
 	aComment := self commentValue.
@@ -139,24 +167,6 @@ CFCompactListItemElement >> updateFromModel [
 ]
 
 { #category : 'private - accessing' }
-CFCompactListItemElement >> titleValue [
-	^ self valueForRole: #title ifAbsent: [
-		self itemObject ifNil: [ '' ] ifNotNil: [ :anObject | anObject displayString ] ]
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> commentValue [
-	^ self valueForRole: #comment ifAbsent: [ nil ]
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> valueForRole: aRole ifAbsent: anAbsentBlock [
-	| anObject aDescription |
-	anObject := self itemObject.
-	anObject ifNil: [ ^ anAbsentBlock value ].
-	aDescription := self descriptionForRole: aRole.
-	aDescription ifNil: [ ^ anAbsentBlock value ].
-	^ [ anObject readUsing: aDescription ]
-		on: Error
-		do: [ :ignored | anAbsentBlock value ]
+CFCompactListItemElement >> valueUsing: aDescription [
+	^ self itemMemento readUsing: aDescription
 ]

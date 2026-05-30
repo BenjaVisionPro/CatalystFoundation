@@ -41,12 +41,7 @@ CFToManyRelationDescription >> addItemStencil: aStencil [
 CFToManyRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
-		ifAbsentPut: [ [ :anItemViewModel |
-			(anItemViewModel isKindOf: GtMagritteAddItemViewModel)
-				ifTrue: [ anItemViewModel asElement ]
-				ifFalse: [ CFCompactListItemElement new
-					model: anItemViewModel;
-					yourself ] ] asStencilBuilder: BrListRowStencilBuilder ]
+		ifAbsentPut: [ [ :viewModel | viewModel asElement ] asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
 { #category : 'accessing' }
