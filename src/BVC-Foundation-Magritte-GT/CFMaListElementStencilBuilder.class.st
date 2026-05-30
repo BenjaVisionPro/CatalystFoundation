@@ -15,6 +15,7 @@ CFMaListElementStencilBuilder >> buildDefault [
 	aFlowElement := CFMaBuilderUtility
 		newFlowListMemento: self memento
 		using: self description.
+	aFlowElement constraintsDo: [ :c | c minHeight: 200 ].
 
 	self form ifNotNil: [ :aForm | aForm matchParent ].
 
