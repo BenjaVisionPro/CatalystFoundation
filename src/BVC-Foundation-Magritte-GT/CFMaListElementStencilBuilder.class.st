@@ -18,9 +18,11 @@ CFMaListElementStencilBuilder >> buildDefault [
 
 	self form ifNotNil: [ :aForm | aForm matchParent ].
 
-	^ GtMagritteValidatedFieldElement new
+	^ CFMaValidatedFieldElement new
 		memento: self memento
 		description: self description
 		element: aFlowElement;
-		matchParent
+		hMatchParent;
+		vFitContent;
+		yourself
 ]
