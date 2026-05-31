@@ -35,13 +35,14 @@ CFToManyRelationDescription >> addItemStencil: aStencil [
 	self propertyAt: #addItemStencil put: aStencil asStencil
 ]
 
-
-
 { #category : 'accessing' }
 CFToManyRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
-		ifAbsentPut: [ [ :viewModel | viewModel asElement ] asStencilBuilder: BrListRowStencilBuilder ]
+		ifAbsentPut: [ [ :anItem |
+			anItem asGtMagritteViewModel asElement
+				margin: (BlInsets top: 0 right: 10 bottom: 10 left: 0) ]
+				asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
 { #category : 'accessing' }

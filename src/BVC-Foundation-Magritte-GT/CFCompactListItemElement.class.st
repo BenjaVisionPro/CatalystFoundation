@@ -23,16 +23,6 @@ CFCompactListItemElement class >> model: anObject description: aDescription [
 ]
 
 { #category : 'accessing' }
-CFCompactListItemElement >> commentDescription [
-	^ self description children third
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> commentValue [
-	^ self valueUsing: self commentDescription
-]
-
-{ #category : 'accessing' }
 CFCompactListItemElement >> description [
 	^ description
 ]
@@ -44,14 +34,14 @@ CFCompactListItemElement >> description: aDescription [
 	self updateFromModel
 ]
 
-{ #category : 'accessing' }
+{ #category : 'private - accessing' }
 CFCompactListItemElement >> iconDescription [
-	^ self description children first
+	^ self itemDescriptionAt: 1
 ]
 
 { #category : 'private - accessing' }
 CFCompactListItemElement >> iconValue [
-	^ self valueUsing: self iconDescription
+	^ self valueForDescription: self iconDescription ifAbsent: [ #inspect ]
 ]
 
 { #category : 'initialization' }
@@ -92,6 +82,13 @@ CFCompactListItemElement >> initialize [
 	self
 		addChild: iconContainer;
 		addChild: textContainer
+]
+
+{ #category : 'private - accessing' }
+CFCompactListItemElement >> itemDescriptionAt: anIndex [
+	(description isNil or: [ description children size < anIndex ])
+		ifTrue: [ ^ nil ].
+	^ description children at: anIndex
 ]
 
 { #category : 'private - accessing' }
@@ -137,14 +134,26 @@ CFCompactListItemElement >> newIconElementFor: anIconValue [
 				yourself ]
 ]
 
-{ #category : 'accessing' }
+{ #category : 'private - accessing' }
 CFCompactListItemElement >> titleDescription [
-	^ self description children second
+	^ self itemDescriptionAt: 2
 ]
 
 { #category : 'private - accessing' }
 CFCompactListItemElement >> titleValue [
-	^ self valueUsing: self titleDescription
+	^ self
+		valueForDescription: self titleDescription
+		ifAbsent: [ self model ifNil: [ '' ] ifNotNil: [ :anObject | anObject displayString ] ]
+]
+
+{ #category : 'private - accessing' }
+CFCompactListItemElement >> commentDescription [
+	^ self itemDescriptionAt: 3
+]
+
+{ #category : 'private - accessing' }
+CFCompactListItemElement >> commentValue [
+	^ self valueForDescription: self commentDescription ifAbsent: [ nil ]
 ]
 
 { #category : 'private - updating' }
@@ -167,6 +176,7 @@ CFCompactListItemElement >> updateFromModel [
 ]
 
 { #category : 'private - accessing' }
-CFCompactListItemElement >> valueUsing: aDescription [
+CFCompactListItemElement >> valueForDescription: aDescription ifAbsent: anAbsentBlock [
+	aDescription ifNil: [ ^ anAbsentBlock value ].
 	^ self itemMemento readUsing: aDescription
 ]
