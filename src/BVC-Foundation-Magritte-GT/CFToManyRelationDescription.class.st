@@ -49,7 +49,7 @@ CFToManyRelationDescription >> blocItemStencil [
 CFToManyRelationDescription >> blocListStencil [
 	^ self
 		propertyAt: #blocListStencil
-		ifAbsent: [ CFMaListElementStencilBuilder new ]
+		ifAbsent: [ CFMaSimpleListElementStencilBuilder new ]
 ]
 
 { #category : 'accessing' }

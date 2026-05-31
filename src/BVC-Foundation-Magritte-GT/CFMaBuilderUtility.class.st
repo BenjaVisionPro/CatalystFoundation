@@ -82,6 +82,84 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	^ aFlowElement
 ]
 
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
+	| aListElement aContainer |
+	aListElement := BrSimpleList new.
+	aListElement
+		hMatchParent;
+		vFitContent;
+		itemStencil: [ BrFrame new
+			hMatchParent;
+			vFitContent;
+			yourself ];
+		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
+			| aRowElement |
+			aRowElement := (aDescription blocItemStencil
+				listElement: aListElement;
+				rowValue: anItemViewModel;
+				rowIndex: anItemIndex;
+				build) asElement.
+			anItemElement
+				removeChildren;
+				addChild: aRowElement;
+				yourself ];
+		constraintsDo: [ :c | c minHeight: 200 ];
+		when: BrSelectionDoubleClicked
+		do: [ :anEvent |
+			anEvent selection ifNotEmpty: [ :theIndices |
+				| aList selectedViewModel |
+				aList := anEvent currentTarget.
+				selectedViewModel := aList viewModel itemAt: theIndices first.
+				aList phlow spawnObject: selectedViewModel object ] ];
+		withAsyncSinkDo: [ :anElementSink |
+			anElementSink
+				sink: AsyncPeekSink new;
+				whenUpdate: [ :theListElement :aSink |
+					self
+						onSimpleList: theListElement
+						sinkUpdate: aSink
+						memento: aMemento
+						description: aDescription ].
+			(aMemento readObservableValueUsing: aDescription)
+				observe: anElementSink ].
+
+	aContainer := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 6;
+		addChild: aListElement;
+		yourself.
+
+	aDescription cfCanAddItems
+		ifTrue: [ aContainer addChild: (CFMaAddItemViewModel new
+			memento: aMemento;
+			description: aDescription;
+			yourself) asElement ].
+
+	^ aContainer
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onSimpleList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
+	| aModels anExistingViewModels aViewModels |
+	aModels := aSink value currentValue ifNil: [ #() ].
+	anExistingViewModels := aListElement items.
+
+	aViewModels := Array
+		new: aModels size
+		streamContents: [ :aStream |
+			self
+				recycleViewModels: anExistingViewModels
+				forModels: aModels
+				into: aStream
+				memento: aMemento
+				description: aDescription ].
+
+	^ aListElement items: aViewModels
+]
+
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: aMemento description: aDescription [
 	| aModels anExistingViewModels aViewModels |
