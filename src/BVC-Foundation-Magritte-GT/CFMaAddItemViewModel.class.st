@@ -78,9 +78,12 @@ CFMaAddItemViewModel >> newAddButtonHandle [
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> newChoiceAddElement [
 	^ BrButton new
-		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
-			handle: [ self newAddButtonHandle ]
-			content: [ self newChoicesListElement ]);
+		aptitude: BrGlamorousButtonWithIconCircularAptitude
+			+ (BrGlamorousWithExplicitDropdownAptitude
+				handle: [ self newAddButtonHandle ]
+				content: [ self newChoicesListElement ]);
+		icon: BrGlamorousVectorIcons add;
+		label: 'Add item';
 		constraintsDo: [ :c | c flow vertical alignCenter ];
 		yourself
 ]
