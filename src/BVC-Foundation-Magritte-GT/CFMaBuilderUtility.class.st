@@ -87,24 +87,10 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 	| aListElement aContainer |
 	aListElement := BrSimpleList new.
-	aListElement
+aListElement
 		hMatchParent;
 		vFitContent;
-		itemStencil: [ BrFrame new
-			hMatchParent;
-			vFitContent;
-			yourself ];
-		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
-			| aRowElement |
-			aRowElement := (aDescription blocItemStencil
-				listElement: aListElement;
-				rowValue: anItemViewModel;
-				rowIndex: anItemIndex;
-				build) asElement.
-			anItemElement
-				removeChildren;
-				addChild: aRowElement;
-				yourself ];
+		stencil: aDescription blocItemStencil;
 		constraintsDo: [ :c | c minHeight: 200 ];
 		when: BrSelectionDoubleClicked
 		do: [ :anEvent |
@@ -113,6 +99,16 @@ CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 				aList := anEvent currentTarget.
 				selectedViewModel := aList viewModel itemAt: theIndices first.
 				aList phlow spawnObject: selectedViewModel object ] ];
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove selected item';
+			description: 'Remove the selected item from the list.';
+			combination: BlKeyCombination delete;
+			action: [ :anEvent |
+				self
+					removeSelectedItemsFromSimpleList: aListElement
+					memento: aMemento
+					description: aDescription
+					event: anEvent ]);
 		withAsyncSinkDo: [ :anElementSink |
 			anElementSink
 				sink: AsyncPeekSink new;
@@ -139,6 +135,29 @@ CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 			yourself) asElement ].
 
 	^ aContainer
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> removeSelectedItemsFromSimpleList: aListElement memento: aMemento description: aDescription event: anEvent [
+	| selectedIndices selectedIndexSet existingItems newItems |
+	selectedIndices := aListElement selectedIndices.
+	selectedIndices ifEmpty: [ ^ self ].
+
+	selectedIndexSet := selectedIndices asSet.
+	existingItems := aMemento readUsing: aDescription.
+	newItems := OrderedCollection new.
+
+	existingItems withIndexDo: [ :eachItem :eachIndex |
+		(selectedIndexSet includes: eachIndex)
+			ifFalse: [ newItems add: eachItem ] ].
+
+	GtMagritteBuilderUtility
+		write: newItems
+		using: aDescription
+		memento: aMemento
+		element: aListElement.
+
+	anEvent consumed: true
 ]
 
 { #category : 'private - support' }

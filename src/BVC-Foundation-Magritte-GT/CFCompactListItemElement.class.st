@@ -51,9 +51,9 @@ CFCompactListItemElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
+		addAptitude: BrGlamorousListItemAptitude new;
 		padding: (BlInsets top: 4 right: 8 bottom: 4 left: 8);
-		cellSpacing: 8;
-		addAptitude: BrGlamorousListItemAptitude new.
+		cellSpacing: 8.
 
 	iconContainer := BrFrame new
 		size: 20 @ 20;
