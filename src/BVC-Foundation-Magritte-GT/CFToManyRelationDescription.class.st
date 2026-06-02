@@ -59,13 +59,6 @@ CFToManyRelationDescription >> blocListStencil: aStencil [
 		put: (aStencil asStencilBuilder: CFMaListElementStencilBuilder)
 ]
 
-{ #category : 'testing' }
-CFToManyRelationDescription >> cfCanAddItems [
-	^ self definitive not
-		and: [ self hasAddItemStencil
-			or: [ self newItemStencil isNotNil
-				or: [ self classes notEmpty ] ] ]
-]
 
 { #category : 'instance creation' }
 CFToManyRelationDescription >> createAddItem [
@@ -98,17 +91,14 @@ CFToManyRelationDescription >> createAddItemFromChoice: aChoice [
 	^ aChoice
 ]
 
-{ #category : 'testing' }
-CFToManyRelationDescription >> hasAddItemChoices [
-	^ self addItemChoices notEmpty
+{ #category : 'accessing' }
+CFToManyRelationDescription >> emptyAddItemChoicesTooltip [
+	^ self
+		propertyAt: #emptyAddItemChoicesTooltip
+		ifAbsent: [ 'There are no additional items that can be added.' ]
 ]
 
-{ #category : 'testing' }
-CFToManyRelationDescription >> hasAddItemChoicesStencil [
-	^ self addItemChoicesStencil isNotNil
-]
-
-{ #category : 'testing' }
-CFToManyRelationDescription >> hasAddItemStencil [
-	^ self addItemStencil isNotNil
+{ #category : 'accessing' }
+CFToManyRelationDescription >> emptyAddItemChoicesTooltip: aString [
+	self propertyAt: #emptyAddItemChoicesTooltip put: aString
 ]

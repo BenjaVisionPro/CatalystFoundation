@@ -37,8 +37,11 @@ CFMaAddItemViewModel >> addItem: aNewItem from: anElement [
 CFMaAddItemViewModel >> asElement [
 	self description ifNil: [ ^ super asElement ].
 
-	self description hasAddItemChoices
-		ifTrue: [ ^ self newChoiceAddElement ].
+	self description addItemChoicesStencil isNotNil
+		ifTrue: [
+			self description addItemChoices isEmpty
+				ifTrue: [ ^ self newDisabledChoiceAddElement ].
+			^ self newChoiceAddElement ].
 
 	^ self newImmediateAddButton
 ]
@@ -104,6 +107,19 @@ CFMaAddItemViewModel >> newChoicesListElement [
 		items: self description addItemChoices;
 		hFitContent;
 		vFitContent;
+		yourself
+]
+
+
+{ #category : 'private - instance creation' }
+CFMaAddItemViewModel >> newDisabledChoiceAddElement [
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: BrGlamorousVectorIcons add;
+		label: 'Add item';
+		addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: self description emptyAddItemChoicesTooltip);
+		enabled: false;
+		constraintsDo: [ :c | c flow vertical alignCenter ];
 		yourself
 ]
 
