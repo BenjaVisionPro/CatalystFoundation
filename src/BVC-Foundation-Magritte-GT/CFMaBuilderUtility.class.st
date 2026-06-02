@@ -87,10 +87,15 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 	| aListElement aContainer |
 	aListElement := BrSimpleList new.
-aListElement
+	aListElement
 		hMatchParent;
 		vFitContent;
-		stencil: aDescription blocItemStencil;
+		itemStencil: [ CFCompactListItemElement new ];
+		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
+			anItemElement
+				model: anItemViewModel object;
+				description: anItemViewModel itemDescription;
+				yourself ];
 		constraintsDo: [ :c | c minHeight: 200 ];
 		when: BrSelectionDoubleClicked
 		do: [ :anEvent |
