@@ -93,8 +93,7 @@ CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 		itemStencil: [ CFCompactListItemElement new ];
 		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
 			anItemElement
-				model: anItemViewModel object;
-				description: anItemViewModel itemDescription;
+				viewModel: anItemViewModel;
 				yourself ];
 		constraintsDo: [ :c | c minHeight: 200 ];
 		when: BrSelectionDoubleClicked

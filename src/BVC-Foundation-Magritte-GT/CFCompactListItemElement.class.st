@@ -2,46 +2,46 @@ Class {
 	#name : 'CFCompactListItemElement',
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
-		'model',
-		'description',
-		'memento',
+		'viewModel',
 		'iconContainer',
-		'titleElement',
-		'commentElement',
+		'titleContainer',
+		'commentContainer',
 		'textContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'instance creation' }
-CFCompactListItemElement class >> model: anObject description: aDescription [
-	^ self new
-		model: anObject;
-		description: aDescription;
-		yourself
+{ #category : 'adding' }
+CFCompactListItemElement >> addFieldElement: anElement at: anIndex using: aDescription [
+	anIndex = 1 ifTrue: [ ^ self addIconFieldElement: anElement ].
+	anIndex = 2 ifTrue: [ ^ self addTitleFieldElement: anElement ].
+	anIndex = 3 ifTrue: [ ^ self addCommentFieldElement: anElement ].
+	^ self addCommentFieldElement: anElement
 ]
 
-{ #category : 'accessing' }
-CFCompactListItemElement >> description [
-	^ description
+{ #category : 'adding' }
+CFCompactListItemElement >> addIconFieldElement: anElement [
+	iconContainer
+		removeChildren;
+		addChild: anElement.
+	^ anElement
 ]
 
-{ #category : 'accessing' }
-CFCompactListItemElement >> description: aDescription [
-	description := aDescription.
-	memento := nil.
-	self updateFromModel
+{ #category : 'adding' }
+CFCompactListItemElement >> addTitleFieldElement: anElement [
+	titleContainer
+		removeChildren;
+		addChild: anElement.
+	^ anElement
 ]
 
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> iconDescription [
-	^ self itemDescriptionAt: 1
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> iconValue [
-	^ self valueForDescription: self iconDescription ifAbsent: [ #inspect ]
+{ #category : 'adding' }
+CFCompactListItemElement >> addCommentFieldElement: anElement [
+	commentContainer
+		removeChildren;
+		addChild: anElement.
+	^ anElement
 ]
 
 { #category : 'initialization' }
@@ -52,21 +52,20 @@ CFCompactListItemElement >> initialize [
 		hMatchParent;
 		vFitContent;
 		padding: (BlInsets top: 4 right: 8 bottom: 4 left: 8);
-		cellSpacing: 8.
+		cellSpacing: 8;
+		addAptitude: BrGlamorousListItemAptitude new.
 
 	iconContainer := BrFrame new
 		size: 20 @ 20;
 		margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0);
 		yourself.
 
-	titleElement := BrLabel new
-		aptitude: BrGlamorousLabelAptitude new;
+	titleContainer := BrFrame new
 		hMatchParent;
 		vFitContent;
 		yourself.
 
-	commentElement := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.45));
+	commentContainer := BrFrame new
 		hMatchParent;
 		vFitContent;
 		yourself.
@@ -75,109 +74,56 @@ CFCompactListItemElement >> initialize [
 		hMatchParent;
 		vFitContent;
 		cellSpacing: 1;
-		addChild: titleElement;
-		addChild: commentElement;
+		addChild: titleContainer;
+		addChild: commentContainer;
 		yourself.
 
 	self
-		addAptitude: BrGlamorousListItemAptitude new;
 		addChild: iconContainer;
 		addChild: textContainer
 ]
 
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> itemDescriptionAt: anIndex [
-	(description isNil or: [ description children size < anIndex ])
-		ifTrue: [ ^ nil ].
-	^ description children at: anIndex
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> itemMemento [
-	^ memento ifNil: [
-		memento := GtMagritteMemento
-			model: self model
-			description: self description ]
-]
-
-{ #category : 'accessing' }
-CFCompactListItemElement >> model [
-	^ model
-]
-
-{ #category : 'accessing' }
-CFCompactListItemElement >> model: anObject [
-	model := anObject.
-	memento := nil.
-	self updateFromModel
-]
-
-{ #category : 'private - instance creation' }
-CFCompactListItemElement >> newIconElementFor: anIconValue [
-	| anIcon |
-	anIcon := anIconValue.
-	anIcon isNil ifTrue: [ anIcon := #inspect ].
-
-	anIcon isSymbol ifTrue: [
-		^ [ ((BrGlamorousVectorIcons classSide includesSelector: anIcon)
-			ifTrue: [ BrGlamorousVectorIcons perform: anIcon ]
-			ifFalse: [ BrGlamorousVectorIcons inspect ]) asElement ]
-			on: Error
-			do: [ :ignored | BrGlamorousVectorIcons inspect asElement ] ].
-
-	^ [ anIcon asElement ]
-		on: Error
-		do: [ :ignored |
-			BrLabel new
-				aptitude: BrGlamorousLabelAptitude new;
-				text: '•' asRopedText;
-				fitContent;
-				yourself ]
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> titleDescription [
-	^ self itemDescriptionAt: 2
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> titleValue [
-	^ self
-		valueForDescription: self titleDescription
-		ifAbsent: [ self model ifNil: [ '' ] ifNotNil: [ :anObject | anObject displayString ] ]
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> commentDescription [
-	^ self itemDescriptionAt: 3
-]
-
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> commentValue [
-	^ self valueForDescription: self commentDescription ifAbsent: [ nil ]
-]
-
 { #category : 'private - updating' }
-CFCompactListItemElement >> updateFromModel [
-	| aTitle aComment anIconElement |
-	(model isNil or: [ description isNil ]) ifTrue: [ ^ self ].
-
-	aTitle := self titleValue.
-	aComment := self commentValue.
-	anIconElement := self newIconElementFor: self iconValue.
+CFCompactListItemElement >> initializeForMemento: aMemento [
+	self userData at: viewModel class gtMementoSymbol put: aMemento.
 
 	iconContainer removeChildren.
-	iconContainer addChild: anIconElement.
+	titleContainer removeChildren.
+	commentContainer removeChildren.
 
-	titleElement text: (aTitle ifNil: [ '' ]) asString asRopedText.
-	commentElement text: (aComment ifNil: [ '' ]) asString asRopedText.
-	commentElement visibility: ((aComment isNil or: [ aComment asString isEmpty ])
-		ifTrue: [ BlVisibility gone ]
-		ifFalse: [ BlVisibility visible ])
+	CFMaCompactListItemElementBuilder new
+		includeImplicitActions: false;
+		form: self;
+		memento: aMemento;
+		build.
+
+	self requestStyle.
+	self requestLayout
 ]
 
-{ #category : 'private - accessing' }
-CFCompactListItemElement >> valueForDescription: aDescription ifAbsent: anAbsentBlock [
-	aDescription ifNil: [ ^ anAbsentBlock value ].
-	^ self itemMemento readUsing: aDescription
+{ #category : 'accessing' }
+CFCompactListItemElement >> viewModel [
+	^ viewModel
+]
+
+{ #category : 'accessing' }
+CFCompactListItemElement >> viewModel: aViewModel [
+	viewModel := aViewModel.
+	self withAsyncFutureDo: [ :anElementFuture |
+		anElementFuture
+			whenPending: [ :anElement |
+				iconContainer removeChildren.
+				titleContainer removeChildren.
+				commentContainer removeChildren ];
+			whenError: [ :anElement :anError |
+				anElement userData at: aViewModel class gtMementoSymbol put: anError.
+				iconContainer removeChildren.
+				titleContainer removeChildren.
+				commentContainer
+					removeChildren;
+					addChild: (anError asDebuggableElement hFitContentLimited; vFitContent; yourself) ];
+			whenSuccess: [ :anElement :aMemento |
+				anElement initializeForMemento: aMemento ] ].
+	self asyncFuture executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
+	self asyncFuture future: aViewModel mementoFuture
 ]

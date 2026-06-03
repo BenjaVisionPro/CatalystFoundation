@@ -1,26 +1,23 @@
 Class {
 	#name : 'CFCompactListItemViewModel',
 	#superclass : 'CFMaViewModel',
-	#instVars : [
-		'itemDescription'
-	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'converting' }
+{ #category : 'api - converting' }
 CFCompactListItemViewModel >> asElement [
-	^ CFCompactListItemElement
-		model: self object
-		description: self itemDescription
+	^ CFCompactListItemElement new
+		viewModel: self;
+		yourself
 ]
 
-{ #category : 'accessing' }
-CFCompactListItemViewModel >> itemDescription [
-	^ itemDescription
-]
-
-{ #category : 'accessing' }
-CFCompactListItemViewModel >> itemDescription: aDescription [
-	itemDescription := aDescription
+{ #category : 'api - instance creation' }
+CFCompactListItemViewModel class >> forObject: anObject description: aDescriptionOrBlock [
+	^ super
+		forObject: anObject
+		description: [ | aContainer |
+			aContainer := aDescriptionOrBlock value asContainer.
+			aContainer children do: [ :each | each beReadOnly ].
+			aContainer ]
 ]
