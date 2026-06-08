@@ -82,115 +82,16 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	^ aFlowElement
 ]
 
-
-{ #category : 'api - ui' }
-CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
-	| aListElement aContainer |
-	aListElement := BrSimpleList new.
-	aListElement
-		hMatchParent;
-		vFitContent;
-		itemStencil: [ CFCompactListItemElement new ];
-		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
-			anItemElement
-				viewModel: anItemViewModel;
-				yourself ];
-		constraintsDo: [ :c | c minHeight: 200 ];
-		when: BrSelectionDoubleClicked
-		do: [ :anEvent |
-			anEvent selection ifNotEmpty: [ :theIndices |
-				| aList selectedViewModel |
-				aList := anEvent currentTarget.
-				selectedViewModel := aList viewModel itemAt: theIndices first.
-				aList phlow spawnObject: selectedViewModel object ] ];
-		addShortcut: (BlShortcutWithAction new
-			name: 'Remove selected item';
-			description: 'Remove the selected item from the list.';
-			combination: BlKeyCombination delete;
-			action: [ :anEvent |
-				self
-					removeSelectedItemsFromSimpleList: aListElement
-					memento: aMemento
-					description: aDescription
-					event: anEvent ]);
-		withAsyncSinkDo: [ :anElementSink |
-			anElementSink
-				sink: AsyncPeekSink new;
-				whenUpdate: [ :theListElement :aSink |
-					self
-						onSimpleList: theListElement
-						sinkUpdate: aSink
-						memento: aMemento
-						description: aDescription ].
-			(aMemento readObservableValueUsing: aDescription)
-				observe: anElementSink ].
-
-	aContainer := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 6;
-		addChild: aListElement;
-		yourself.
-
-	(aDescription isDefinitive not and: [ aDescription canCreateAddItem ])
-		ifTrue: [ aContainer addChild: (CFMaAddItemViewModel new
-			memento: aMemento;
-			description: aDescription;
-			yourself) asElement ].
-
-	^ aContainer
-]
-
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> removeSelectedItemsFromSimpleList: aListElement memento: aMemento description: aDescription event: anEvent [
-	| selectedIndices selectedIndexSet existingItems newItems |
-	selectedIndices := aListElement selectedIndices.
-	selectedIndices ifEmpty: [ ^ self ].
-
-	selectedIndexSet := selectedIndices asSet.
-	existingItems := aMemento readUsing: aDescription.
-	newItems := OrderedCollection new.
-
-	existingItems withIndexDo: [ :eachItem :eachIndex |
-		(selectedIndexSet includes: eachIndex)
-			ifFalse: [ newItems add: eachItem ] ].
-
-	GtMagritteBuilderUtility
-		write: newItems
-		using: aDescription
-		memento: aMemento
-		element: aListElement.
-
-	anEvent consumed: true
-]
-
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> onSimpleList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
-	| aModels anExistingViewModels aViewModels |
-	aModels := aSink value currentValue ifNil: [ #() ].
-	anExistingViewModels := aListElement items.
-
-	aViewModels := Array
-		new: aModels size
-		streamContents: [ :aStream |
-			self
-				recycleViewModels: anExistingViewModels
-				forModels: aModels
-				into: aStream
-				memento: aMemento
-				description: aDescription ].
-
-	^ aListElement items: aViewModels
-]
-
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: aMemento description: aDescription [
-	| aModels anExistingViewModels aViewModels |
+	| aModels anExistingViewModels isEditable aViewModels |
 	aModels := aSink value currentValue ifNil: [ #() ].
 	anExistingViewModels := aFlowElement items.
+	isEditable := aDescription definitive not
+		and: [ aDescription newItemStencil isNotNil ].
 
 	aViewModels := Array
-		new: (aModels size + (aDescription isDefinitive not and: [ aDescription canCreateAddItem ]) asBit)
+		new: aModels size + isEditable asBit
 		streamContents: [ :aStream |
 			self
 				recycleViewModels: anExistingViewModels
@@ -199,11 +100,12 @@ CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: 
 				memento: aMemento
 				description: aDescription.
 
-			(aDescription isDefinitive not and: [ aDescription canCreateAddItem ])
+			isEditable
 				ifTrue: [ | anAddViewModel |
 					anAddViewModel := CFMaAddItemViewModel new
 						memento: aMemento;
 						description: aDescription;
+						stencil: aDescription newItemStencil;
 						yourself.
 					aStream nextPut: anAddViewModel ] ].
 
