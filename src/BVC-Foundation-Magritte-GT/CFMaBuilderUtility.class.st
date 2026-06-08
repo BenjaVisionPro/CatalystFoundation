@@ -75,7 +75,10 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	aList := BrSimpleList new.
 	aList
 		matchParent;
-		stencil: aDescription blocItemStencil;
+		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
+			anItemTypeFactory default ];
+		itemStencil: self newPhlowListItemStencil;
+		itemDataBinder: self newPhlowListItemDataBinder;
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
@@ -104,6 +107,27 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 			observe: anElementSink ].
 
 	^ aContainer
+]
+
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> newPhlowListItemDataBinder [
+	^ GtPhlowSimpleListErrorHandlingItemDataBinder new
+		dataBinder: (GtPhlowSimpleListItemComputationDataBinder new
+			dataBinder: GtPhlowListTextDataBinder new;
+			itemComputation: [ :eachItem :eachIndex | eachItem ];
+			yourself);
+		yourself
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> newPhlowListItemStencil [
+	^ GtPhlowListItemElementWithSelectionDecorator new
+		stencilBuilder: (GtPhlowSimpleListErrorHandlingItemElementStencilBuilder new
+			stencilBuilder: GtPhlowListTextElementStencilBuilder new;
+			cellSpacing: (BlInsets left: 10);
+			yourself);
+		yourself
 ]
 
 { #category : 'private - support' }

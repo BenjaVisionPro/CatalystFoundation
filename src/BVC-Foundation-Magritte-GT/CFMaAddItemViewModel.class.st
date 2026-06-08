@@ -7,6 +7,9 @@ Class {
 
 { #category : 'converting' }
 CFMaAddItemViewModel >> asElement [
+	self shouldDisableAddButton
+		ifTrue: [ ^ self newDisabledAddButton ].
+
 	self hasMultipleNewItemClasses
 		ifTrue: [ ^ self newClassChoiceAddElement ].
 
@@ -24,10 +27,37 @@ CFMaAddItemViewModel >> newImmediateAddButton [
 		yourself
 ]
 
+
+{ #category : 'private - instance creation' }
+CFMaAddItemViewModel >> newDisabledAddButton [
+	^ self newImmediateAddButton
+		disable;
+		yourself
+]
+
+{ #category : 'private - testing' }
+CFMaAddItemViewModel >> hasNewItemClasses [
+	^ self newItemClasses notEmpty
+]
+
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> hasMultipleNewItemClasses [
 	self description ifNil: [ ^ false ].
 	^ self newItemClasses size > 1
+]
+
+
+{ #category : 'private - testing' }
+CFMaAddItemViewModel >> shouldDisableAddButton [
+	^ self stencilRequiresNewItemClass and: [ self hasNewItemClasses not ]
+]
+
+{ #category : 'private - testing' }
+CFMaAddItemViewModel >> stencilRequiresNewItemClass [
+	self stencil ifNil: [ ^ false ].
+	(self stencil respondsTo: #valuable)
+		ifFalse: [ ^ false ].
+	^ self stencil valuable numArgs > 0
 ]
 
 { #category : 'private - accessing' }
@@ -118,10 +148,6 @@ CFMaAddItemViewModel >> createItemForClass: aClass [
 
 	aClass ifNil: [ ^ self stencil create ].
 
-	(self stencil respondsTo: #arguments:)
-		ifTrue: [
-			self stencil arguments: { aClass }.
-			^ self stencil create ].
-
+	self stencil arguments: { aClass }.
 	^ self stencil create
 ]
