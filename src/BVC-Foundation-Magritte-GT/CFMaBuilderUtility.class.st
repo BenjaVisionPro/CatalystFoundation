@@ -62,52 +62,54 @@ CFMaBuilderUtility class >> newGroupLabelUsing: aGroupName [
 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
-	| aFlowElement |
-	aFlowElement := BrFlowList new.
-	aFlowElement
-		matchParent;
-		stencil: aDescription blocItemStencil;
-		withAsyncSinkDo: [ :anElementSink |
-			anElementSink
-				sink: AsyncPeekSink new;
-				whenUpdate: [ :theFlowElement :aSink |
-					self
-						onFlowList: theFlowElement
-						sinkUpdate: aSink
-						memento: aMemento
-						description: aDescription ].
-			(aMemento readObservableValueUsing: aDescription)
-				observe: anElementSink ].
-
-	^ aFlowElement
-]
-
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: aMemento description: aDescription [
-	| aModels anExistingViewModels isEditable aViewModels |
-	aModels := aSink value currentValue ifNil: [ #() ].
-	anExistingViewModels := aFlowElement items.
+	| aContainer aList isEditable |
 	isEditable := aDescription definitive not
 		and: [ aDescription newItemStencil isNotNil ].
 
-	aViewModels := Array
-		new: aModels size + isEditable asBit
-		streamContents: [ :aStream |
-			self
-				recycleViewModels: anExistingViewModels
-				forModels: aModels
-				into: aStream
-				memento: aMemento
-				description: aDescription.
+	aContainer := BrVerticalPane new
+		matchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
 
-			isEditable
-				ifTrue: [ | anAddViewModel |
-					anAddViewModel := CFMaAddItemViewModel new
-						memento: aMemento;
-						description: aDescription;
-						stencil: aDescription newItemStencil;
-						yourself.
-					aStream nextPut: anAddViewModel ] ].
+	aList := BrSimpleList new.
+	aList
+		matchParent;
+		stencil: aDescription blocItemStencil;
+		addEventHandler: (GtPhlowListToSelectHandler new
+			transformation: GtPhlowSendTransformation default).
+	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
 
-	^ aFlowElement items: aViewModels
+	aContainer addChild: aList.
+
+	isEditable
+		ifTrue: [ | anAddElement |
+			anAddElement := CFMaAddItemViewModel new
+				memento: aMemento;
+				description: aDescription;
+				stencil: aDescription newItemStencil;
+				asElement.
+			aContainer addChild: anAddElement ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				self
+					onFlowList: aList
+					sinkUpdate: aSink
+					memento: aMemento
+					description: aDescription ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
 ]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
+	| aModels |
+	aModels := aSink value currentValue ifNil: [ #() ].
+	^ aListElement items: aModels
+]
+

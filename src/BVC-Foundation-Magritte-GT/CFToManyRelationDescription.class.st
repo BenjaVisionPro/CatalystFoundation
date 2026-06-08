@@ -5,6 +5,24 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+
+{ #category : 'accessing' }
+CFToManyRelationDescription >> blocItemStencil [
+	^ self
+		propertyAt: #blocItemStencil
+		ifAbsentPut: [ [ :anItem :anIndex :aListElement |
+			GtPhlowUtility newItemLabel
+				text: anItem gtDisplayText;
+				yourself ] asStencilBuilder: BrListRowStencilBuilder ]
+]
+
+{ #category : 'accessing' }
+CFToManyRelationDescription >> blocItemStencil: aStencil [
+	self
+		propertyAt: #blocItemStencil
+		put: (aStencil asStencilBuilder: BrListRowStencilBuilder)
+]
+
 { #category : 'accessing' }
 CFToManyRelationDescription >> blocListStencil [
 	^ self

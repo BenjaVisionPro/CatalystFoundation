@@ -64,10 +64,18 @@ CFMaAddItemViewModel >> newClassChoiceMenu [
 	aMenu := BrMenuItems new.
 	aMenu beListElementType.
 	self newItemClasses do: [ :aClass |
-		aMenu
-			addItemLabel: aClass displayString
-			action: [ :anElement :aButtonModel :anEvent |
-				self addItemForClass: aClass from: anElement ] ].
+		(aClass respondsTo: #icon)
+			ifTrue: [
+				aMenu
+					addItemIcon: aClass icon
+					label: aClass displayString
+					action: [ :anElement :aButtonModel :anEvent |
+						self addItemForClass: aClass from: anElement ] ]
+			ifFalse: [
+				aMenu
+					addItemLabel: aClass displayString
+					action: [ :anElement :aButtonModel :anEvent |
+						self addItemForClass: aClass from: anElement ] ] ].
 	^ aMenu
 ]
 
