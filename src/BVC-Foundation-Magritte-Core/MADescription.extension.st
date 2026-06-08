@@ -26,3 +26,28 @@ MADescription >> cfSerializable [
 MADescription >> cfSerializableSymbol [
 	^ #cfSerializable
 ]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> beCompactComment [
+	self cfCompactSlot: #comment
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> beCompactIcon [
+	self cfCompactSlot: #icon
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> beCompactTitle [
+	self cfCompactSlot: #title
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfCompactSlot [
+	^ self propertyAt: #cfCompactSlot ifAbsent: [ #comment ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfCompactSlot: aSymbol [
+	self propertyAt: #cfCompactSlot put: aSymbol
+]

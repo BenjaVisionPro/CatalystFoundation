@@ -132,7 +132,7 @@ CFMaBuilderUtility class >> newSimpleListMemento: aMemento using: aDescription [
 		addChild: aListElement;
 		yourself.
 
-	aDescription isDefinitive not
+	(aDescription isDefinitive not and: [ aDescription canCreateAddItem ])
 		ifTrue: [ aContainer addChild: (CFMaAddItemViewModel new
 			memento: aMemento;
 			description: aDescription;
@@ -190,7 +190,7 @@ CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: 
 	anExistingViewModels := aFlowElement items.
 
 	aViewModels := Array
-		new: (aModels size + aDescription isDefinitive not asBit)
+		new: (aModels size + (aDescription isDefinitive not and: [ aDescription canCreateAddItem ]) asBit)
 		streamContents: [ :aStream |
 			self
 				recycleViewModels: anExistingViewModels
@@ -199,14 +199,12 @@ CFMaBuilderUtility class >> onFlowList: aFlowElement sinkUpdate: aSink memento: 
 				memento: aMemento
 				description: aDescription.
 
-			aDescription isDefinitive not
+			(aDescription isDefinitive not and: [ aDescription canCreateAddItem ])
 				ifTrue: [ | anAddViewModel |
 					anAddViewModel := CFMaAddItemViewModel new
 						memento: aMemento;
 						description: aDescription;
 						yourself.
-					aDescription newItemStencil
-						ifNotNil: [ :aStencil | anAddViewModel stencil: aStencil ].
 					aStream nextPut: anAddViewModel ] ].
 
 	^ aFlowElement items: aViewModels

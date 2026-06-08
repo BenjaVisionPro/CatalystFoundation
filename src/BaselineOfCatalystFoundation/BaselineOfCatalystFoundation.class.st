@@ -33,7 +33,5 @@ BaselineOfCatalystFoundation >> baseline: spec [
 				package: 'BVC-Foundation-Magritte-Core';
 				package: 'BVC-Foundation-Magritte-GT'
 					with: [ spec requires: #('Gt4FontAwesome') ];
-				package: 'BVC-Foundation-Magritte-Seaside';
-				package: 'BVC-Foundation-Phlow'
-					with: [ spec requires: #('BVC-Foundation-Core' 'BVC-Foundation-Magritte-GT') ] ]
+				package: 'BVC-Foundation-Magritte-Seaside' ]
 ]

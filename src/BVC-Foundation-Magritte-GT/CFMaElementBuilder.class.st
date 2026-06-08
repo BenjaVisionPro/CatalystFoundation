@@ -13,11 +13,11 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel |
 	self emitGroupFor: aDescription.
 
-	aLabel := CFMaBuilderUtility newFieldLabelUsing: aDescription.
+	aLabel := self builderUtilityClass newFieldLabelUsing: aDescription.
 
 	aDescription hasComment
-		ifTrue: [ CFMaBuilderUtility addCommentTooltip: aLabel using: aDescription.
-			CFMaBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
+		ifTrue: [ self builderUtilityClass addCommentTooltip: aLabel using: aDescription.
+			self builderUtilityClass addCommentTooltip: aFieldElement using: aDescription ].
 
 	self fieldContainerDo: [ :aContainer |
 		aContainer
@@ -25,22 +25,6 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 			addChild: aFieldElement ].
 
 	^ aLabel
-]
-
-{ #category : 'icons' }
-CFMaElementBuilder >> addIconUsing: aDescription [
-	| anElement |
-	(aDescription isKindOf: CFMaFontAwesomeIconDescription)
-		ifFalse: [ ^ super addIconUsing: aDescription ].
-
-	anElement := aDescription isReadOnly
-		ifTrue: [ GtMagritteBuilderUtility newIconWithMemento: self memento using: aDescription ]
-		ifFalse: [ CFMaFontAwesomeIconFieldStencilBuilder new
-				memento: self memento;
-				description: aDescription;
-				asElement ].
-
-	self addFieldElement: anElement using: aDescription
 ]
 
 { #category : 'defaults' }

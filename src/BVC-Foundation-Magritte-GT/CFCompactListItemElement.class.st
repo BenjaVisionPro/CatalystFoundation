@@ -13,10 +13,9 @@ Class {
 }
 
 { #category : 'adding' }
-CFCompactListItemElement >> addFieldElement: anElement at: anIndex using: aDescription [
-	anIndex = 1 ifTrue: [ ^ self addIconFieldElement: anElement ].
-	anIndex = 2 ifTrue: [ ^ self addTitleFieldElement: anElement ].
-	anIndex = 3 ifTrue: [ ^ self addCommentFieldElement: anElement ].
+CFCompactListItemElement >> addFieldElement: anElement using: aDescription [
+	aDescription cfCompactSlot = #icon ifTrue: [ ^ self addIconFieldElement: anElement ].
+	aDescription cfCompactSlot = #title ifTrue: [ ^ self addTitleFieldElement: anElement ].
 	^ self addCommentFieldElement: anElement
 ]
 
