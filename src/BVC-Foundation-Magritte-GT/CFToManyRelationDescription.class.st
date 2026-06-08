@@ -19,10 +19,7 @@ CFToManyRelationDescription >> addItemChoiceLabelBlock: aBlock [
 CFToManyRelationDescription >> addItemChoices [
 	^ self
 		propertyAt: #addItemChoices
-		ifAbsent: [
-			self classes size > 1
-				ifTrue: [ self classes ]
-				ifFalse: [ #() ] ]
+		ifAbsent: [ self classes ]
 ]
 
 { #category : 'accessing - add items' }
@@ -86,14 +83,28 @@ CFToManyRelationDescription >> canCreateAddItem [
 { #category : 'instance creation' }
 CFToManyRelationDescription >> createAddItem [
 	self newItemStencil ifNotNil: [ :aStencil | ^ aStencil create ].
-	self addItemFactoryBlock ifNotNil: [ :aBlock | ^ aBlock value ].
+
+	self addItemChoices size = 1
+		ifTrue: [ ^ self createAddItemFromChoice: self addItemChoices first ].
+
+	self addItemFactoryBlock
+		ifNotNil: [ :aBlock |
+			aBlock numArgs = 0
+				ifTrue: [ ^ aBlock value ] ].
+
 	self classes size = 1 ifTrue: [ ^ self classes first new ].
+
 	^ nil
 ]
 
 { #category : 'instance creation' }
 CFToManyRelationDescription >> createAddItemFromChoice: aChoice [
-	self addItemFactoryBlock ifNotNil: [ :aBlock | ^ aBlock value: aChoice ].
+	self addItemFactoryBlock
+		ifNotNil: [ :aBlock |
+			aBlock numArgs = 0
+				ifTrue: [ ^ aBlock value ].
+			^ aBlock value: aChoice ].
+
 	^ (self addItemClassForChoice: aChoice) new
 ]
 
@@ -113,12 +124,19 @@ CFToManyRelationDescription >> emptyAddItemChoicesTooltip: aString [
 CFToManyRelationDescription >> labelForAddItemChoice: aChoice [
 	self addItemChoiceLabelBlock
 		ifNotNil: [ :aBlock | ^ aBlock value: aChoice ].
+
+	(aChoice respondsTo: #displayName)
+		ifTrue: [ ^ aChoice displayName ].
+
+	(aChoice respondsTo: #name)
+		ifTrue: [ ^ aChoice name ].
+
 	^ aChoice asString
 ]
 
 { #category : 'accessing - add items' }
 CFToManyRelationDescription >> requiresAddItemChoice [
-	^ self addItemChoices notEmpty
+	^ self addItemChoices size > 1
 ]
 
 { #category : 'accessing - compact list' }
