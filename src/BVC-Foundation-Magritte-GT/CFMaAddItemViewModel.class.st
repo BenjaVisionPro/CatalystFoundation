@@ -10,7 +10,7 @@ CFMaAddItemViewModel >> asElement [
 	self shouldDisableAddButton
 		ifTrue: [ ^ self newDisabledAddButton ].
 
-	self hasMultipleNewItemClasses
+	self shouldShowNewItemClassChoiceMenu
 		ifTrue: [ ^ self newClassChoiceAddElement ].
 
 	^ self newImmediateAddButton
@@ -94,19 +94,50 @@ CFMaAddItemViewModel >> newClassChoiceMenu [
 	aMenu := BrMenuItems new.
 	aMenu beListElementType.
 	self newItemClasses do: [ :aClass |
-		(aClass respondsTo: #icon)
-			ifTrue: [
-				aMenu
-					addItemIcon: aClass icon
-					label: aClass displayString
-					action: [ :anElement :aButtonModel :anEvent |
-						self addItemForClass: aClass from: anElement ] ]
-			ifFalse: [
-				aMenu
-					addItemLabel: aClass displayString
-					action: [ :anElement :aButtonModel :anEvent |
-						self addItemForClass: aClass from: anElement ] ] ].
+		aMenu addItem: (self newMenuItemForClass: aClass) ].
 	^ aMenu
+]
+
+{ #category : 'private - instance creation' }
+CFMaAddItemViewModel >> newMenuItemForClass: aClass [
+	| aMenuItem aPreviewText |
+	aPreviewText := self disabledReasonForNewItemClass: aClass.
+	aMenuItem := BrMenuActionItem new.
+	(aClass respondsTo: #icon)
+		ifTrue: [
+			aMenuItem
+				icon: aClass icon
+				label: aClass displayString
+				preview: aPreviewText ]
+		ifFalse: [
+			aMenuItem
+				label: aClass displayString
+				preview: aPreviewText ].
+	aMenuItem
+		disableIf: [ aPreviewText isNotNil ];
+		action: [ :anElement :aButtonModel :anEvent |
+			aPreviewText ifNil: [ self addItemForClass: aClass from: anElement ] ].
+	^ aMenuItem
+]
+
+{ #category : 'private - validation' }
+CFMaAddItemViewModel >> disabledReasonForNewItemClass: aClass [
+	| aNewItem anExistingItems aNewItems |
+	self memento ifNil: [ ^ 'No memento is available.' ].
+	self description ifNil: [ ^ 'No description is available.' ].
+
+	aNewItem := self createItemForClass: aClass.
+	aNewItem ifNil: [ ^ 'No item could be created.' ].
+
+	anExistingItems := self memento readUsing: self description.
+	anExistingItems ifNil: [ anExistingItems := #() ].
+	aNewItems := anExistingItems copyWith: aNewItem.
+
+	[ self description validate: aNewItems ]
+		on: Error
+		do: [ :anException | ^ anException messageText ifNil: [ 'Invalid input given' ] ].
+
+	^ nil
 ]
 
 { #category : 'private - event handling' }
