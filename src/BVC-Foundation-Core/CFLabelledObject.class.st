@@ -28,3 +28,14 @@ CFLabelledObject >> labelDescription [
 		beRequired;
 		yourself
 ]
+
+{ #category : 'printing' }
+CFLabelledObject >> gtDisplayOn: aStream [
+	| aLabelString |
+	aLabelString := self label ifNotNil: [ :aLabel | aLabel asString ].
+
+	(aLabelString isNil or: [ aLabelString isEmpty ])
+		ifTrue: [ ^ super gtDisplayOn: aStream ].
+
+	aStream nextPutAll: aLabelString
+]
