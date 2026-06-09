@@ -24,7 +24,7 @@ CFLabelledObject >> labelDescription [
 	^ MAStringDescription new
 		accessor: #label;
 		label: 'Label';
-		priority: 20;
+		priority: 10;
 		beRequired;
 		yourself
 ]
