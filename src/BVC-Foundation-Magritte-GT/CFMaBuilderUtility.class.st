@@ -62,15 +62,11 @@ CFMaBuilderUtility class >> newGroupLabelUsing: aGroupName [
 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
-	| aContainer aList isEditable |
+	| aContainer aList isEditable anAddElement |
 	isEditable := aDescription definitive not
 		and: [ aDescription newItemStencil isNotNil ].
 
-	aContainer := BrVerticalPane new
-		matchParent;
-		vFitContent;
-		cellSpacing: 8;
-		yourself.
+	aContainer := self newRelationEditorContainer.
 
 	aList := BrSimpleList new.
 	aList
@@ -86,13 +82,26 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	aContainer addChild: aList.
 
 	isEditable
-		ifTrue: [ | anAddElement |
+		ifTrue: [
 			anAddElement := CFMaAddItemViewModel new
 				memento: aMemento;
 				description: aDescription;
 				stencil: aDescription newItemStencil;
 				asElement.
 			aContainer addChild: anAddElement ].
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		list: aList
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			self
+				removeSelectedToManyItemFrom: aList
+				memento: aMemento
+				description: aDescription
+				element: anElement ].
 
 	aContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
@@ -144,11 +153,7 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 	isModifiable := true.
 	canAdd := aDescription newItemStencil isNotNil.
 
-	aContainer := BrVerticalPane new
-		matchParent;
-		vFitContent;
-		cellSpacing: 8;
-		yourself.
+	aContainer := self newRelationEditorContainer.
 
 	aList := BrSimpleList new.
 	aList
@@ -182,6 +187,19 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 			anActionContainer addChild: aRemoveButton ].
 
 		aContainer addChild: anActionContainer ].
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		list: aList
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			GtMagritteBuilderUtility
+				write: nil
+				using: aDescription
+				memento: aMemento
+				element: anElement ].
 
 	aContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
@@ -300,4 +318,78 @@ CFMaBuilderUtility class >> updateToOneRemoveButton: aButton sinkUpdate: aSink [
 	anObject
 		ifNil: [ aButton disable ]
 		ifNotNil: [ aButton enable ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationEditorContainer [
+	| aContainer |
+	aContainer := BrVerticalPane new
+		matchParent;
+		vFitContent;
+		cellSpacing: 8;
+		padding: (BlInsets all: 4);
+		border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1);
+		background: Color white;
+		beFocusable;
+		focusability: BlFocusability block;
+		yourself.
+
+	aContainer
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			aContainer border: (BlBorder paint: BrGlamorousColors focusedEditorBorderColor width: 1) ];
+		when: BlFocusOutEvent
+		do: [ :anEvent |
+			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ];
+		when: BlClickEvent
+		do: [ :anEvent |
+			aContainer requestFocus ].
+
+	^ aContainer
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer list: aList addElement: anAddElement memento: aMemento description: aDescription removeAction: aRemoveAction [
+	aContainer
+		addShortcut: (BlShortcutWithAction new
+			name: 'Add relation item';
+			combination: BlKeyCombination primaryN;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				self activateRelationAddElement: anAddElement ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove selected relation item';
+			combination: BlKeyCombination delete;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				aRemoveAction value: aContainer ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove selected relation item';
+			combination: BlKeyCombination builder backspace build;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				aRemoveAction value: aContainer ]).
+	^ aContainer
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> activateRelationAddElement: anAddElement [
+	anAddElement ifNil: [ ^ self ].
+	anAddElement requestFocus.
+	anAddElement dispatchEvent: BlClickEvent new
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: aMemento description: aDescription element: anElement [
+	aListElement selectedItemDo: [ :anItem :anIndex |
+		| anExistingItems aNewItems |
+		anExistingItems := aMemento readUsing: aDescription.
+		anExistingItems ifNil: [ ^ self ].
+		aNewItems := anExistingItems copyWithout: anItem.
+		anExistingItems = aNewItems ifTrue: [ ^ self ].
+		GtMagritteBuilderUtility
+			write: aNewItems
+			using: aDescription
+			memento: aMemento
+			element: anElement ]
 ]
