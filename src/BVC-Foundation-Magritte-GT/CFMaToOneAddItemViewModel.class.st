@@ -21,13 +21,13 @@ CFMaToOneAddItemViewModel >> asElement [
 
 { #category : 'private - instance creation' }
 CFMaToOneAddItemViewModel >> newImmediateAddButton [
-	^ BrButton new
+	^ self installAddButtonEnablementOn: (BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
 		icon: BrGlamorousVectorIcons add;
 		label: 'Add item';
 		action: [ :anElement | self onClick: anElement ];
 		constraintsDo: [ :c | c flow vertical alignCenter ];
-		yourself
+		yourself)
 ]
 
 { #category : 'private - instance creation' }
@@ -35,6 +35,25 @@ CFMaToOneAddItemViewModel >> newDisabledAddButton [
 	^ self newImmediateAddButton
 		disable;
 		yourself
+]
+
+{ #category : 'private - installing' }
+CFMaToOneAddItemViewModel >> installAddButtonEnablementOn: aButton [
+	self memento ifNil: [ ^ aButton disable; yourself ].
+	self description ifNil: [ ^ aButton disable; yourself ].
+
+	aButton
+		withAsyncSinkDo: [ :anElementSink |
+			anElementSink
+				sink: AsyncPeekSink new;
+				whenUpdate: [ :theButton :aSink |
+					(aSink value currentValue isNil and: [ self shouldDisableAddButton not ])
+						ifTrue: [ theButton enable ]
+						ifFalse: [ theButton disable ] ].
+			(self memento readObservableValueUsing: self description)
+				observe: anElementSink ].
+
+	^ aButton
 ]
 
 { #category : 'private - testing' }
@@ -98,7 +117,7 @@ CFMaToOneAddItemViewModel >> singleNewItemClass [
 
 { #category : 'private - instance creation' }
 CFMaToOneAddItemViewModel >> newClassChoiceAddElement [
-	^ BrButton new
+	^ self installAddButtonEnablementOn: (BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude
 			+ (BrGlamorousWithExplicitDropdownAptitude
 				handle: [ self newClassChoiceHandle ]
@@ -106,7 +125,7 @@ CFMaToOneAddItemViewModel >> newClassChoiceAddElement [
 		icon: BrGlamorousVectorIcons add;
 		label: 'Add item';
 		constraintsDo: [ :c | c flow vertical alignCenter ];
-		yourself
+		yourself)
 ]
 
 { #category : 'private - instance creation' }
