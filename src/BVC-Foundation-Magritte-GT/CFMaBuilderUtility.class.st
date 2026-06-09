@@ -141,8 +141,8 @@ CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 	| aContainer aList anActionContainer isModifiable canAdd anAddElement aRemoveButton |
-	isModifiable := aDescription definitive not.
-	canAdd := isModifiable and: [ aDescription newItemStencil isNotNil ].
+	isModifiable := true.
+	canAdd := aDescription newItemStencil isNotNil.
 
 	aContainer := BrVerticalPane new
 		matchParent;
@@ -205,8 +205,8 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescription [
 	| aContainer aFrame anActionContainer isModifiable canAdd anAddElement aRemoveButton |
-	isModifiable := aDescription definitive not.
-	canAdd := isModifiable and: [ aDescription newItemStencil isNotNil ].
+	isModifiable := true.
+	canAdd := aDescription newItemStencil isNotNil.
 
 	aContainer := BrVerticalPane new
 		matchParent;
