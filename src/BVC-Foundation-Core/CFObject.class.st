@@ -18,7 +18,7 @@ CFObject >> defaultIcon [
 { #category : 'accessing' }
 CFObject class >> icon [
 	"Answer an icon stencil, not an icon element."
-	^ [ FontAwesomeIcons defaultStyle icon: self defaultIcon ] asStencil
+	^ [ (FontAwesomeIcons defaultStyle icon: self defaultIcon) height: 16 ] asStencil
 ]
 
 { #category : 'accessing' }
