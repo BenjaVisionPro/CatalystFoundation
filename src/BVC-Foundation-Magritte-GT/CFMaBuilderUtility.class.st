@@ -79,6 +79,8 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 			transformation: GtPhlowSendTransformation default).
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
 
+	self installRelationEditorFocusOn: aContainer list: aList.
+
 	aContainer addChild: aList.
 
 	isEditable
@@ -165,6 +167,8 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+
+	self installRelationEditorFocusOn: aContainer list: aList.
 
 	aContainer addChild: aList.
 
@@ -345,6 +349,16 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 		do: [ :anEvent |
 			aContainer requestFocus ].
 
+	^ aContainer
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer list: aList [
+	aContainer
+		addEventFilterOn: BlClickEvent
+		do: [ :anEvent |
+			aContainer requestFocus.
+			aList requestFocus ].
 	^ aContainer
 ]
 
