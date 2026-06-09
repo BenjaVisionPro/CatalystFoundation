@@ -43,3 +43,22 @@ CFMaElementBuilder >> emitGroupFor: aDescription [
 	self fieldContainerDo: [ :aContainer |
 		aContainer addChild: (self builderUtilityClass newGroupLabelUsing: aGroupName) ]
 ]
+
+{ #category : 'visiting-description' }
+CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
+	self addToOneUsing: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addToOneUsing: aDescription [
+	| aMemento anElement |
+	aMemento := self memento.
+
+	anElement := aDescription blocListStencil
+		memento: aMemento;
+		description: aDescription;
+		form: self form;
+		asElement.
+
+	self addFieldElement: anElement using: aDescription
+]

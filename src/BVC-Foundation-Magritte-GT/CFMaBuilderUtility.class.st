@@ -137,3 +137,167 @@ CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: 
 	^ aListElement items: aModels
 ]
 
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
+	| aContainer aList anActionContainer isModifiable canAdd anAddElement aRemoveButton |
+	isModifiable := aDescription definitive not.
+	canAdd := isModifiable and: [ aDescription newItemStencil isNotNil ].
+
+	aContainer := BrVerticalPane new
+		matchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
+
+	aList := BrSimpleList new.
+	aList
+		matchParent;
+		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
+			anItemTypeFactory default ];
+		itemStencil: self newPhlowListItemStencil;
+		itemDataBinder: self newPhlowListItemDataBinder;
+		addEventHandler: (GtPhlowListToSelectHandler new
+			transformation: GtPhlowSendTransformation default).
+	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+
+	aContainer addChild: aList.
+
+	(isModifiable or: [ canAdd ]) ifTrue: [
+		anActionContainer := BrHorizontalPane new
+			fitContent;
+			cellSpacing: 8;
+			yourself.
+
+		canAdd ifTrue: [
+			anAddElement := CFMaToOneAddItemViewModel new
+				memento: aMemento;
+				description: aDescription;
+				stencil: aDescription newItemStencil;
+				asElement.
+			anActionContainer addChild: anAddElement ].
+
+		isModifiable ifTrue: [
+			aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
+			anActionContainer addChild: aRemoveButton ].
+
+		aContainer addChild: anActionContainer ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				self
+					onToOneList: aList
+					sinkUpdate: aSink
+					memento: aMemento
+					description: aDescription.
+				isModifiable ifTrue: [
+					self
+						updateToOneRemoveButton: aRemoveButton
+						sinkUpdate: aSink ] ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
+]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescription [
+	| aContainer aFrame anActionContainer isModifiable canAdd anAddElement aRemoveButton |
+	isModifiable := aDescription definitive not.
+	canAdd := isModifiable and: [ aDescription newItemStencil isNotNil ].
+
+	aContainer := BrVerticalPane new
+		matchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
+
+	aFrame := BrFrame new
+		hMatchParent;
+		vFitContent;
+		yourself.
+	aContainer addChild: aFrame.
+
+	(isModifiable or: [ canAdd ]) ifTrue: [
+		anActionContainer := BrHorizontalPane new
+			fitContent;
+			cellSpacing: 8;
+			yourself.
+
+		canAdd ifTrue: [
+			anAddElement := CFMaToOneAddItemViewModel new
+				memento: aMemento;
+				description: aDescription;
+				stencil: aDescription newItemStencil;
+				asElement.
+			anActionContainer addChild: anAddElement ].
+
+		isModifiable ifTrue: [
+			aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
+			anActionContainer addChild: aRemoveButton ].
+
+		aContainer addChild: anActionContainer ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				self
+					onEmbeddedToOneFrame: aFrame
+					sinkUpdate: aSink.
+				isModifiable ifTrue: [
+					self
+						updateToOneRemoveButton: aRemoveButton
+						sinkUpdate: aSink ] ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onToOneList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
+	| anObject aModels |
+	anObject := aSink value currentValue.
+	aModels := anObject ifNil: [ #() ] ifNotNil: [ { anObject } ].
+	^ aListElement items: aModels
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onEmbeddedToOneFrame: aFrame sinkUpdate: aSink [
+	| anObject anElement |
+	anObject := aSink value currentValue.
+	aFrame removeChildren.
+	anObject ifNil: [ ^ self ].
+
+	anElement := anObject asGtMagritteViewModel asElement.
+	aFrame addChild: anElement
+]
+
+{ #category : 'private - instance creation' }
+CFMaBuilderUtility class >> newToOneRemoveButtonMemento: aMemento using: aDescription [
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: BrGlamorousVectorIcons remove;
+		label: 'Remove';
+		action: [ :anElement |
+			GtMagritteBuilderUtility
+				write: nil
+				using: aDescription
+				memento: aMemento
+				element: anElement ];
+		disable;
+		constraintsDo: [ :c | c flow vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> updateToOneRemoveButton: aButton sinkUpdate: aSink [
+	| anObject |
+	anObject := aSink value currentValue.
+	anObject
+		ifNil: [ aButton disable ]
+		ifNotNil: [ aButton enable ]
+]
