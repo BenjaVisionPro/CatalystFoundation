@@ -100,34 +100,31 @@ CFMaAddItemViewModel >> newClassChoiceMenu [
 
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> newMenuItemForClass: aClass [
-	| aMenuItem aPreviewText |
-	aPreviewText := self disabledReasonForNewItemClass: aClass.
+	| aMenuItem isDisabled |
+	isDisabled := self shouldDisableNewItemClass: aClass.
 	aMenuItem := BrMenuActionItem new.
 	(aClass respondsTo: #icon)
 		ifTrue: [
 			aMenuItem
 				icon: aClass icon
-				label: aClass displayString
-				preview: aPreviewText ]
+				label: aClass displayString ]
 		ifFalse: [
-			aMenuItem
-				label: aClass displayString
-				preview: aPreviewText ].
+			aMenuItem label: aClass displayString ].
 	aMenuItem
-		disableIf: [ aPreviewText isNotNil ];
+		disableIf: [ isDisabled ];
 		action: [ :anElement :aButtonModel :anEvent |
-			aPreviewText ifNil: [ self addItemForClass: aClass from: anElement ] ].
+			isDisabled ifFalse: [ self addItemForClass: aClass from: anElement ] ].
 	^ aMenuItem
 ]
 
-{ #category : 'private - validation' }
-CFMaAddItemViewModel >> disabledReasonForNewItemClass: aClass [
+{ #category : 'private - testing' }
+CFMaAddItemViewModel >> shouldDisableNewItemClass: aClass [
 	| aNewItem anExistingItems aNewItems |
-	self memento ifNil: [ ^ 'No memento is available.' ].
-	self description ifNil: [ ^ 'No description is available.' ].
+	self memento ifNil: [ ^ true ].
+	self description ifNil: [ ^ true ].
 
 	aNewItem := self createItemForClass: aClass.
-	aNewItem ifNil: [ ^ 'No item could be created.' ].
+	aNewItem ifNil: [ ^ true ].
 
 	anExistingItems := self memento readUsing: self description.
 	anExistingItems ifNil: [ anExistingItems := #() ].
@@ -135,9 +132,9 @@ CFMaAddItemViewModel >> disabledReasonForNewItemClass: aClass [
 
 	[ self description validate: aNewItems ]
 		on: Error
-		do: [ :anException | ^ anException messageText ifNil: [ 'Invalid input given' ] ].
+		do: [ :anException | ^ true ].
 
-	^ nil
+	^ false
 ]
 
 { #category : 'private - event handling' }
