@@ -7,6 +7,9 @@ Class {
 
 { #category : 'converting' }
 CFMaAddItemViewModel >> asElement [
+	self shouldUseCustomAddItemElement
+		ifTrue: [ ^ self newCustomAddItemElement ].
+
 	self shouldDisableAddButton
 		ifTrue: [ ^ self newDisabledAddButton ].
 
@@ -33,6 +36,24 @@ CFMaAddItemViewModel >> newDisabledAddButton [
 	^ self newImmediateAddButton
 		disable;
 		yourself
+]
+
+
+{ #category : 'private - testing' }
+CFMaAddItemViewModel >> shouldUseCustomAddItemElement [
+	self stencil ifNil: [ ^ false ].
+	(self stencil isKindOf: BrValuableStencil)
+		ifTrue: [ ^ false ].
+	^ self stencil respondsTo: #asElement
+]
+
+{ #category : 'private - instance creation' }
+CFMaAddItemViewModel >> newCustomAddItemElement [
+	(self stencil respondsTo: #memento:)
+		ifTrue: [ self stencil memento: self memento ].
+	(self stencil respondsTo: #description:)
+		ifTrue: [ self stencil description: self description ].
+	^ self stencil asElement
 ]
 
 { #category : 'private - testing' }
