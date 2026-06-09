@@ -27,7 +27,14 @@ CFToOneRelationDescription >> isEmbedded [
 
 { #category : 'accessing' }
 CFToOneRelationDescription >> newItemStencil [
-	^ self propertyAt: #newItemStencil ifAbsent: [ nil ]
+	| theClasses |
+	^ self
+		propertyAt: #newItemStencil
+		ifAbsent: [
+			theClasses := self classes ifNil: [ #() ].
+			theClasses isEmpty
+				ifTrue: [ nil ]
+				ifFalse: [ [ :aClass | aClass new ] ] ]
 ]
 
 { #category : 'accessing' }
