@@ -116,7 +116,7 @@ CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
 { #category : 'private - building' }
 CFMaElementBuilder >> emitGroupFor: aDescription [
 	| aGroupName |
-	aGroupName := aDescription cfCategory.
+	aGroupName := aDescription group.
 	aGroupName ifNil: [ ^ self ].
 	currentGroup = aGroupName ifTrue: [ ^ self ].
 	currentGroup := aGroupName.
