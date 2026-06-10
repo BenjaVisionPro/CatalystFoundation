@@ -58,6 +58,10 @@ CFMaElementBuilder >> addFormNavigationShortcutsTo: anElement [
 			combination: (BlKeyCombination tab or: BlKeyCombination enter);
 			overrideChildren: true;
 			action: [ :anEvent |
+				self
+					debugFormNavigationFrom: anEvent
+					direction: BlFocusSearchDirectionForward new
+					label: 'forward'.
 				BlFocusFinder new
 					direction: BlFocusSearchDirectionForward new;
 					root: self formNavigationRoot;
@@ -70,6 +74,10 @@ CFMaElementBuilder >> addFormNavigationShortcutsTo: anElement [
 			combination: BlKeyCombination shiftTab;
 			overrideChildren: true;
 			action: [ :anEvent |
+				self
+					debugFormNavigationFrom: anEvent
+					direction: BlFocusSearchDirectionBackward new
+					label: 'backward'.
 				BlFocusFinder new
 					direction: BlFocusSearchDirectionBackward new;
 					root: self formNavigationRoot;
@@ -111,6 +119,57 @@ CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
 		ifNotNil: [ :aBlockReturningCollection |
 			aBlockReturningCollection value do: [ :aShortcut |
 				anElement addShortcut: aShortcut ] ]
+]
+
+
+{ #category : 'debugging' }
+CFMaElementBuilder >> debugDescriptionForElement: anElement [
+	^ String streamContents: [ :aStream |
+		aStream
+			nextPutAll: anElement class name asString;
+			nextPutAll: ' id=';
+			nextPutAll: anElement id printString;
+			nextPutAll: ' focusability=';
+			nextPutAll: anElement focusability printString;
+			nextPutAll: ' isFocused=';
+			nextPutAll: anElement isFocused printString;
+			nextPutAll: ' hasFocus=';
+			nextPutAll: anElement hasFocus printString;
+			nextPutAll: ' isVisible=';
+			nextPutAll: anElement isVisible printString ]
+]
+
+{ #category : 'debugging' }
+CFMaElementBuilder >> debugFormNavigationFrom: anEvent direction: aDirection label: aLabel [
+	| aRoot theCandidates anIndex |
+	aRoot := self formNavigationRoot.
+	theCandidates := BlFocusFinder new
+		root: aRoot;
+		direction: aDirection;
+		focusableCandidates.
+
+	(String streamContents: [ :aStream |
+		aStream
+			nextPutAll: 'CF form navigation ';
+			nextPutAll: aLabel;
+			nextPutAll: ' target=[';
+			nextPutAll: (self debugDescriptionForElement: anEvent target);
+			nextPutAll: '] currentTarget=[';
+			nextPutAll: (self debugDescriptionForElement: anEvent currentTarget);
+			nextPutAll: '] root=[';
+			nextPutAll: (self debugDescriptionForElement: aRoot);
+			nextPutAll: '] candidateCount=';
+			nextPutAll: theCandidates size printString ]) traceCr.
+
+	anIndex := 0.
+	theCandidates do: [ :eachElement |
+		anIndex := anIndex + 1.
+		(String streamContents: [ :aStream |
+			aStream
+				nextPutAll: '  ';
+				nextPutAll: anIndex printString;
+				nextPutAll: '. ';
+				nextPutAll: (self debugDescriptionForElement: eachElement) ]) traceCr ]
 ]
 
 { #category : 'private - building' }
