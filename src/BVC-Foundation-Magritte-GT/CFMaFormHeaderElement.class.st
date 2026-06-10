@@ -13,33 +13,20 @@ Class {
 
 { #category : 'accessing' }
 CFMaFormHeaderElement >> headerMetadataText [
-	| anObject anIdentifier aMetadata |
+	| anObject |
 	anObject := self inspectedObject.
 	anObject ifNil: [ ^ 'Catalyst Foundation form' ].
 
-	aMetadata := anObject class name.
-	anIdentifier := (anObject respondsTo: #identifier)
-		ifTrue: [ anObject perform: #identifier ]
-		ifFalse: [ nil ].
-	anIdentifier ifNotNil: [
-		aMetadata := aMetadata , ' · ' , anIdentifier asString ].
-
-	^ aMetadata
+	^ anObject class name
 ]
 
 { #category : 'accessing' }
 CFMaFormHeaderElement >> headerTitleText [
-	| anObject aTitle |
+	| anObject |
 	anObject := self inspectedObject.
 	anObject ifNil: [ ^ 'Form' ].
 
-	aTitle := (anObject respondsTo: #label)
-		ifTrue: [ anObject perform: #label ]
-		ifFalse: [ nil ].
-	(aTitle isNil or: [ aTitle asString isEmpty ])
-		ifTrue: [ aTitle := anObject class name ].
-
-	^ aTitle asString
+	^ anObject gtDisplayText asString
 ]
 
 { #category : 'initialization' }
@@ -76,11 +63,7 @@ CFMaFormHeaderElement >> initialize [
 { #category : 'accessing' }
 CFMaFormHeaderElement >> inspectedObject [
 	memento ifNil: [ ^ nil ].
-	(memento respondsTo: #model)
-		ifTrue: [ ^ memento perform: #model ].
-	(memento respondsTo: #object)
-		ifTrue: [ ^ memento perform: #object ].
-	^ nil
+	^ memento model
 ]
 
 { #category : 'accessing' }

@@ -44,15 +44,14 @@ CFMaAddItemViewModel >> shouldUseCustomAddItemElement [
 	self stencil ifNil: [ ^ false ].
 	(self stencil isKindOf: BrValuableStencil)
 		ifTrue: [ ^ false ].
-	^ self stencil respondsTo: #asElement
+	^ self stencil isKindOf: BrStencil
 ]
 
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> newCustomAddItemElement [
-	(self stencil respondsTo: #memento:)
-		ifTrue: [ self stencil memento: self memento ].
-	(self stencil respondsTo: #description:)
-		ifTrue: [ self stencil description: self description ].
+	self stencil
+		memento: self memento;
+		description: self description.
 	^ self stencil asElement
 ]
 
@@ -76,7 +75,7 @@ CFMaAddItemViewModel >> shouldDisableAddButton [
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> stencilRequiresNewItemClass [
 	self stencil ifNil: [ ^ false ].
-	(self stencil respondsTo: #valuable)
+	(self stencil isKindOf: BrValuableStencil)
 		ifFalse: [ ^ false ].
 	^ self stencil valuable numArgs > 0
 ]
@@ -124,13 +123,9 @@ CFMaAddItemViewModel >> newMenuItemForClass: aClass [
 	| aMenuItem isDisabled |
 	isDisabled := self shouldDisableNewItemClass: aClass.
 	aMenuItem := BrMenuActionItem new.
-	(aClass respondsTo: #icon)
-		ifTrue: [
-			aMenuItem
-				icon: aClass icon
-				label: aClass displayString ]
-		ifFalse: [
-			aMenuItem label: aClass displayString ].
+	aMenuItem
+		icon: aClass icon
+		label: aClass displayString.
 	aMenuItem
 		disableIf: [ isDisabled ];
 		action: [ :anElement :aButtonModel :anEvent |

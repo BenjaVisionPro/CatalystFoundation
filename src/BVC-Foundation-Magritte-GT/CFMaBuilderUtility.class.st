@@ -383,7 +383,7 @@ CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer primary
 CFMaBuilderUtility class >> activateRelationAddElement: anAddElement [
 	anAddElement ifNil: [ ^ self ].
 	anAddElement requestFocus.
-	anAddElement dispatchEvent: BlClickEvent new
+	BlSpace simulateClickOn: anAddElement
 ]
 
 { #category : 'private - relation editor' }
