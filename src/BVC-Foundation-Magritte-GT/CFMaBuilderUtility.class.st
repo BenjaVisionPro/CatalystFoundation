@@ -68,18 +68,10 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 
 	aContainer := self newRelationEditorContainer.
 
-	aList := BrSimpleList new.
-	aList
-		matchParent;
-		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
-			anItemTypeFactory default ];
-		itemStencil: self newPhlowListItemStencil;
-		itemDataBinder: self newPhlowListItemDataBinder;
-		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+	aList := self newRelationListUsing: aDescription.
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
 
-	self installRelationEditorFocusOn: aContainer list: aList.
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
 	aContainer addChild: aList.
 
@@ -94,7 +86,7 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 
 	self
 		installRelationEditorShortcutsOn: aContainer
-		list: aList
+		primaryFocusElement: aList
 		addElement: anAddElement
 		memento: aMemento
 		description: aDescription
@@ -121,31 +113,17 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 ]
 
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> newPhlowListItemDataBinder [
-	^ GtPhlowSimpleListErrorHandlingItemDataBinder new
-		dataBinder: (GtPhlowSimpleListItemComputationDataBinder new
-			dataBinder: GtPhlowListTextDataBinder new;
-			itemComputation: [ :eachItem :eachIndex | eachItem ];
-			yourself);
-		yourself
-]
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> newPhlowListItemStencil [
-	^ GtPhlowListItemElementWithSelectionDecorator new
-		stencilBuilder: (GtPhlowSimpleListErrorHandlingItemElementStencilBuilder new
-			stencilBuilder: GtPhlowListTextElementStencilBuilder new;
-			cellSpacing: (BlInsets left: 10);
-			yourself);
-		yourself
-]
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
 	| aModels |
 	aModels := aSink value currentValue ifNil: [ #() ].
-	^ aListElement items: aModels
+	^ aListElement items: (self
+		relationItemViewModelsForModels: aModels
+		existingViewModels: aListElement viewModel items
+		memento: aMemento
+		description: aDescription)
 ]
 
 
@@ -157,18 +135,10 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 
 	aContainer := self newRelationEditorContainer.
 
-	aList := BrSimpleList new.
-	aList
-		matchParent;
-		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
-			anItemTypeFactory default ];
-		itemStencil: self newPhlowListItemStencil;
-		itemDataBinder: self newPhlowListItemDataBinder;
-		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+	aList := self newRelationListUsing: aDescription.
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
 
-	self installRelationEditorFocusOn: aContainer list: aList.
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
 	aContainer addChild: aList.
 
@@ -194,7 +164,7 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 
 	self
 		installRelationEditorShortcutsOn: aContainer
-		list: aList
+		primaryFocusElement: aList
 		addElement: anAddElement
 		memento: aMemento
 		description: aDescription
@@ -230,11 +200,7 @@ CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescriptio
 	isModifiable := true.
 	canAdd := aDescription newItemStencil isNotNil.
 
-	aContainer := BrVerticalPane new
-		matchParent;
-		vFitContent;
-		cellSpacing: 8;
-		yourself.
+	aContainer := self newRelationEditorContainer.
 
 	aFrame := BrFrame new
 		hMatchParent;
@@ -262,13 +228,30 @@ CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescriptio
 
 		aContainer addChild: anActionContainer ].
 
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aFrame.
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		primaryFocusElement: aFrame
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			GtMagritteBuilderUtility
+				write: nil
+				using: aDescription
+				memento: aMemento
+				element: anElement ].
+
 	aContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theContainer :aSink |
 				self
 					onEmbeddedToOneFrame: aFrame
-					sinkUpdate: aSink.
+					sinkUpdate: aSink
+					memento: aMemento
+					description: aDescription.
 				isModifiable ifTrue: [
 					self
 						updateToOneRemoveButton: aRemoveButton
@@ -284,17 +267,30 @@ CFMaBuilderUtility class >> onToOneList: aListElement sinkUpdate: aSink memento:
 	| anObject aModels |
 	anObject := aSink value currentValue.
 	aModels := anObject ifNil: [ #() ] ifNotNil: [ { anObject } ].
-	^ aListElement items: aModels
+	^ aListElement items: (self
+		relationItemViewModelsForModels: aModels
+		existingViewModels: aListElement viewModel items
+		memento: aMemento
+		description: aDescription)
 ]
 
 { #category : 'private - support' }
-CFMaBuilderUtility class >> onEmbeddedToOneFrame: aFrame sinkUpdate: aSink [
-	| anObject anElement |
+CFMaBuilderUtility class >> onEmbeddedToOneFrame: aFrame sinkUpdate: aSink memento: aMemento description: aDescription [
+	| anObject anItemViewModel anElement |
 	anObject := aSink value currentValue.
 	aFrame removeChildren.
 	anObject ifNil: [ ^ self ].
 
-	anElement := anObject asGtMagritteViewModel asElement.
+	anItemViewModel := aDescription blocItemViewModelStencil
+		model: anObject;
+		description: aDescription;
+		memento: aMemento;
+		build.
+	anElement := aDescription blocItemStencil
+		listElement: aFrame;
+		rowValue: anItemViewModel;
+		rowIndex: 1;
+		build.
 	aFrame addChild: anElement
 ]
 
@@ -334,8 +330,6 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 		padding: (BlInsets all: 4);
 		border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1);
 		background: Color white;
-		beFocusable;
-		focusability: BlFocusability block;
 		yourself.
 
 	aContainer
@@ -344,42 +338,41 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 			aContainer border: (BlBorder paint: BrGlamorousColors focusedEditorBorderColor width: 1) ];
 		when: BlFocusOutEvent
 		do: [ :anEvent |
-			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ];
-		when: BlClickEvent
-		do: [ :anEvent |
-			aContainer requestFocus ].
+			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ].
 
 	^ aContainer
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer list: aList [
+CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocusElement: anElement [
 	aContainer
 		addEventFilterOn: BlClickEvent
 		do: [ :anEvent |
-			aContainer requestFocus.
-			aList requestFocus ].
+			anElement requestFocus ].
 	^ aContainer
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer list: aList addElement: anAddElement memento: aMemento description: aDescription removeAction: aRemoveAction [
+CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer primaryFocusElement: aList addElement: anAddElement memento: aMemento description: aDescription removeAction: aRemoveAction [
 	aContainer
 		addShortcut: (BlShortcutWithAction new
 			name: 'Add relation item';
 			combination: BlKeyCombination primaryN;
+			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
 				self activateRelationAddElement: anAddElement ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Remove selected relation item';
 			combination: BlKeyCombination delete;
+			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
 				aRemoveAction value: aContainer ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Remove selected relation item';
 			combination: BlKeyCombination builder backspace build;
+			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
 				aRemoveAction value: aContainer ]).
@@ -395,15 +388,68 @@ CFMaBuilderUtility class >> activateRelationAddElement: anAddElement [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: aMemento description: aDescription element: anElement [
-	aListElement selectedItemDo: [ :anItem :anIndex |
-		| anExistingItems aNewItems |
+	aListElement selectedItemDo: [ :anItemViewModel :anIndex |
+		| anObject anExistingItems aNewItems |
+		anObject := self relationObjectForItem: anItemViewModel.
 		anExistingItems := aMemento readUsing: aDescription.
 		anExistingItems ifNil: [ ^ self ].
-		aNewItems := anExistingItems copyWithout: anItem.
+		aNewItems := anExistingItems copyWithout: anObject.
 		anExistingItems = aNewItems ifTrue: [ ^ self ].
 		GtMagritteBuilderUtility
 			write: aNewItems
 			using: aDescription
 			memento: aMemento
 			element: anElement ]
+]
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationListUsing: aDescription [
+	| aList |
+	aList := BrSimpleList new.
+	aList
+		matchParent;
+		stencil: aDescription blocItemStencil;
+		selectionCallback: [ :theIndices |
+			self relationSelectionFrom: aList indices: theIndices ];
+		addEventHandler: (GtPhlowListToSelectHandler new
+			transformation: GtPhlowSendTransformation default).
+	^ aList
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationItemViewModelsForModels: aCollection existingViewModels: anExistingViewModels memento: aMemento description: aDescription [
+	^ Array streamContents: [ :aStream |
+		aCollection do: [ :aModel |
+			anExistingViewModels
+				detect: [ :eachViewModel |
+					eachViewModel respondsTo: #isForObject:
+						and: [ eachViewModel isForObject: aModel ] ]
+				ifFound: [ :aViewModel |
+					aStream nextPut: aViewModel ]
+				ifNone: [
+					| aViewModel |
+					aViewModel := aDescription blocItemViewModelStencil
+						model: aModel;
+						description: aDescription;
+						memento: aMemento;
+						build.
+					aStream nextPut: aViewModel ] ] ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationObjectForItem: anItem [
+	^ (anItem respondsTo: #object)
+		ifTrue: [ anItem object ]
+		ifFalse: [ anItem ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationSelectionFrom: aListElement indices: theIndices [
+	| theItems |
+	theItems := theIndices collect: [ :anIndex |
+		self relationObjectForItem: (aListElement viewModel itemAt: anIndex) ].
+	^ theItems size = 1
+		ifTrue: [ theItems first ]
+		ifFalse: [ theItems ]
 ]

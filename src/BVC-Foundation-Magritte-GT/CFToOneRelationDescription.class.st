@@ -21,6 +21,34 @@ CFToOneRelationDescription >> beReferenced [
 ]
 
 { #category : 'accessing' }
+CFToOneRelationDescription >> blocStencil [
+	^ self
+		propertyAt: #blocStencil
+		ifAbsent: [ CFMaToOneElementStencilBuilder new ]
+]
+
+{ #category : 'accessing' }
+CFToOneRelationDescription >> blocStencil: aStencil [
+	self
+		propertyAt: #blocStencil
+		put: (aStencil asStencilBuilder: CFMaToOneElementStencilBuilder)
+]
+
+{ #category : 'accessing' }
+CFToOneRelationDescription >> blocItemViewModelStencil [
+	^ self
+		propertyAt: #blocItemViewModelStencil
+		ifAbsent: [ GtMagritteModelStencilBuilder new ]
+]
+
+{ #category : 'accessing' }
+CFToOneRelationDescription >> blocItemViewModelStencil: aStencil [
+	self
+		propertyAt: #blocItemViewModelStencil
+		put: (aStencil asStencilBuilder: GtMagritteModelStencilBuilder)
+]
+
+{ #category : 'accessing' }
 CFToOneRelationDescription >> isEmbedded [
 	^ self propertyAt: #beEmbedded ifAbsent: [ false ]
 ]
@@ -46,10 +74,17 @@ CFToOneRelationDescription >> newItemStencil: aStencil [
 CFToOneRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
-		ifAbsentPut: [ [ :anItem :anIndex :aListElement |
-			GtPhlowUtility newItemLabel
-				text: anItem gtDisplayText;
-				yourself ] asStencilBuilder: BrListRowStencilBuilder ]
+		ifAbsentPut: [ self isEmbedded
+			ifTrue: [ [ :anItemViewModel :anIndex :aListElement |
+				anItemViewModel asElement ] asStencilBuilder: BrListRowStencilBuilder ]
+			ifFalse: [ [ :anItemViewModel :anIndex :aListElement |
+				| anObject |
+				anObject := anItemViewModel respondsTo: #object
+					ifTrue: [ anItemViewModel object ]
+					ifFalse: [ anItemViewModel ].
+				GtPhlowUtility newItemLabel
+					text: anObject gtDisplayText;
+					yourself ] asStencilBuilder: BrListRowStencilBuilder ] ]
 ]
 
 { #category : 'accessing' }
@@ -61,14 +96,10 @@ CFToOneRelationDescription >> blocItemStencil: aStencil [
 
 { #category : 'accessing' }
 CFToOneRelationDescription >> blocListStencil [
-	^ self
-		propertyAt: #blocListStencil
-		ifAbsent: [ CFMaToOneElementStencilBuilder new ]
+	^ self blocStencil
 ]
 
 { #category : 'accessing' }
 CFToOneRelationDescription >> blocListStencil: aStencil [
-	self
-		propertyAt: #blocListStencil
-		put: (aStencil asStencilBuilder: CFMaToOneElementStencilBuilder)
+	self blocStencil: aStencil
 ]

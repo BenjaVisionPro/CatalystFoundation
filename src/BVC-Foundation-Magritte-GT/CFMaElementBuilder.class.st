@@ -54,7 +54,7 @@ CFMaElementBuilder >> addToOneUsing: aDescription [
 	| aMemento anElement |
 	aMemento := self memento.
 
-	anElement := aDescription blocListStencil
+	anElement := aDescription blocStencil
 		memento: aMemento;
 		description: aDescription;
 		form: self form;
