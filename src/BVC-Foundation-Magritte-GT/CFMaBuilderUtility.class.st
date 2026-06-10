@@ -346,7 +346,7 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocusElement: anElement [
 	aContainer
-		addEventFilterOn: BlClickEvent
+		when: BlClickEvent
 		do: [ :anEvent |
 			anElement requestFocus ].
 	^ aContainer
@@ -409,12 +409,47 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 	aList := BrSimpleList new.
 	aList
 		matchParent;
-		stencil: aDescription blocItemStencil;
+		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
+			anItemTypeFactory default ];
+		itemStencil: self newRelationListItemStencil;
+		itemDataBinder: (self newRelationListItemDataBinderUsing: aDescription);
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
 		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+			transformation: (GtPhlowSendTransformation object: [ :anItemViewModel |
+				self relationObjectForItem: anItemViewModel ])).
 	^ aList
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationListItemStencil [
+	^ GtPhlowListItemElementWithSelectionDecorator new
+		stencilBuilder: (GtPhlowSimpleListErrorHandlingItemElementStencilBuilder new
+			stencilBuilder: ([ :anItemType |
+				BlElement new
+					layout: BlFrameLayout new;
+					constraintsDo: [ :c |
+						c horizontal matchParent.
+						c vertical fitContent ];
+					yourself ] asStencilBuilder: BrListItemElementStencilBuilder);
+			cellSpacing: (BlInsets left: 10);
+			yourself);
+		yourself
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
+	^ [ :anItemElement :anItemViewModel :anItemIndex |
+		| anItemStencil anItemContent |
+		anItemElement removeChildren.
+		anItemStencil := aDescription blocItemStencil.
+		anItemContent := anItemStencil
+			listElement: anItemElement;
+			rowValue: anItemViewModel;
+			rowIndex: anItemIndex;
+			build.
+		anItemElement addChild: anItemContent.
+		anItemElement ]
 ]
 
 { #category : 'private - relation editor' }
