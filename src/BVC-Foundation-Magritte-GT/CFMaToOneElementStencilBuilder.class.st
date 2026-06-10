@@ -20,7 +20,11 @@ CFMaToOneElementStencilBuilder >> buildDefault [
 			newToOneListMemento: self memento
 			using: self description ].
 
-	self form ifNotNil: [ :aForm | aForm matchParent ].
+	self form ifNotNil: [ :aForm |
+		aForm matchParent.
+		CFMaBuilderUtility
+			installRelationEditorNavigationShortcutsOn: anElement
+			form: aForm ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento

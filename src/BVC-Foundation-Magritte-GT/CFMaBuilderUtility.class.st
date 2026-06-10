@@ -353,6 +353,34 @@ CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocu
 ]
 
 { #category : 'private - relation editor' }
+CFMaBuilderUtility class >> installRelationEditorNavigationShortcutsOn: anElement form: aForm [
+	anElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to next form item';
+			description: 'Moves to the next form item. If none is found, we cycle back to the first.';
+			combination: (BlKeyCombination tab or: BlKeyCombination enter);
+			overrideChildren: true;
+			action: [ :anEvent |
+				BlFocusFinder new
+					direction: BlFocusSearchDirectionForward new;
+					root: aForm;
+					referenceElement: anEvent target;
+					nextFocusDo: #requestFocus ifNone: [  ] ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to previous form item';
+			description: 'Moves to the previous form item. If none is found, we cycle back to the last.';
+			combination: BlKeyCombination shiftTab;
+			overrideChildren: true;
+			action: [ :anEvent |
+				BlFocusFinder new
+					direction: BlFocusSearchDirectionBackward new;
+					root: aForm;
+					referenceElement: anEvent target;
+					nextFocusDo: #requestFocus ifNone: [  ] ]).
+	^ anElement
+]
+
+{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer primaryFocusElement: aList addElement: anAddElement memento: aMemento description: aDescription removeAction: aRemoveAction [
 	aContainer
 		addShortcut: (BlShortcutWithAction new
