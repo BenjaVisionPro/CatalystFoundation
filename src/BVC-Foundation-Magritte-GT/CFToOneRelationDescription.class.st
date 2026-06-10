@@ -99,3 +99,13 @@ CFToOneRelationDescription >> blocListStencil [
 CFToOneRelationDescription >> blocListStencil: aStencil [
 	self blocStencil: aStencil
 ]
+
+{ #category : 'accessing' }
+CFToOneRelationDescription >> beSetParentOnNewItems [
+	self propertyAt: #setParentOnNewItems put: true
+]
+
+{ #category : 'accessing' }
+CFToOneRelationDescription >> setParentOnNewItems [
+	^ self propertyAt: #setParentOnNewItems ifAbsent: [ false ]
+]

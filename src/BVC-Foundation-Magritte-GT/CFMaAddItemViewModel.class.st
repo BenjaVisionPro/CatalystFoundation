@@ -188,12 +188,16 @@ CFMaAddItemViewModel >> addItemForClass: aClass from: anElement [
 
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> createItemForClass: aClass [
+	| aNewItem |
 	self stencil ifNil: [
 		aClass ifNil: [ ^ nil ].
-		^ aClass new ].
+		^ self configureParentForNewItem: aClass new ].
 
-	aClass ifNil: [ ^ self stencil create ].
+	aClass ifNil: [
+		aNewItem := self stencil create.
+		^ self configureParentForNewItem: aNewItem ].
 
 	self stencil arguments: { aClass }.
-	^ self stencil create
+	aNewItem := self stencil create.
+	^ self configureParentForNewItem: aNewItem
 ]
