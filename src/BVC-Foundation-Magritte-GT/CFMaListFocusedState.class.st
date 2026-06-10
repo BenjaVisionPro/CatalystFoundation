@@ -12,7 +12,9 @@ CFMaListFocusedState >> printOn: aStream [
 
 { #category : 'accessing' }
 CFMaListFocusedState >> priority [
-	^ UserPriority
+	"Use the same precedence as the built-in focused state so composed
+	selected + list-focused styles apply after the standard selected style."
+	^ BlElementState focused priority
 ]
 
 { #category : 'testing' }
