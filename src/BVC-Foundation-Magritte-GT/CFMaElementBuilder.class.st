@@ -32,6 +32,87 @@ CFMaElementBuilder >> builderUtilityClass [
 	^ CFMaBuilderUtility
 ]
 
+
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addFlowListUsing: aDescription [
+	| aMemento aFlowElement |
+	aMemento := self memento.
+	
+	aFlowElement := aDescription blocListStencil
+		memento: aMemento;
+		description: aDescription;
+		form: self form;
+		asElement.
+
+	self addShortcutsTo: aFlowElement using: aDescription.
+	self addFieldElement: aFlowElement using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addFormNavigationShortcutsTo: anElement [
+	anElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to next form item';
+			description: 'Moves to the next form item. If none is found, we cycle back to the first.';
+			combination: (BlKeyCombination tab or: BlKeyCombination enter);
+			overrideChildren: true;
+			action: [ :anEvent |
+				BlFocusFinder new
+					direction: BlFocusSearchDirectionForward new;
+					root: self formNavigationRoot;
+					referenceElement: anEvent target;
+					nextFocusDo: #requestFocus
+					ifNone: [ self requestFirstFormFocus ] ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to previous form item';
+			description: 'Moves to the previous form item. If none is found, we cycle back to the last.';
+			combination: BlKeyCombination shiftTab;
+			overrideChildren: true;
+			action: [ :anEvent |
+				BlFocusFinder new
+					direction: BlFocusSearchDirectionBackward new;
+					root: self formNavigationRoot;
+					referenceElement: anEvent target;
+					nextFocusDo: #requestFocus
+					ifNone: [ self requestLastFormFocus ] ])
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addFormResetShortcutTo: anElement [
+	anElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Discard form contents';
+			description: 'Discards the form contents and resets the form to its original state';
+			combination: BlKeyCombination escape;
+			overrideChildren: true;
+			action: [ :anEvent |
+				| aFuture |
+				aFuture := [ self
+					resetFrom: self form
+					usingModel: self memento model
+					andMemento: self memento ] asAsyncFuture.
+				self builderUtilityClass
+					awaitFuture: aFuture
+					from: anEvent currentTarget ])
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement [
+	self addFormResetShortcutTo: anElement.
+	self addFormNavigationShortcutsTo: anElement
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
+	self addShortcutsTo: anElement.
+
+	aDescription blocShortcuts
+		ifNotNil: [ :aBlockReturningCollection |
+			aBlockReturningCollection value do: [ :aShortcut |
+				anElement addShortcut: aShortcut ] ]
+]
+
 { #category : 'private - building' }
 CFMaElementBuilder >> emitGroupFor: aDescription [
 	| aGroupName |
@@ -60,42 +141,38 @@ CFMaElementBuilder >> addToOneUsing: aDescription [
 		form: self form;
 		asElement.
 
+	self addShortcutsTo: anElement using: aDescription.
 	self addFieldElement: anElement using: aDescription
 ]
 
 
 { #category : 'private - building' }
-CFMaElementBuilder >> addShortcutsTo: anElement [
-	| aNavigationRoot |
-	aNavigationRoot := self form.
-	self fieldContainerDo: [ :aFieldContainer | aNavigationRoot := aFieldContainer ].
-
-	anElement
-		addShortcut: (BlShortcutWithAction new
-			name: 'Discard form contents';
-			description: 'Discards the form contents and resets the form to its original state';
-			combination: BlKeyCombination escape;
-			overrideChildren: true;
-			action: [ :anEvent |
-				| aFuture |
-				aFuture := [ self
-					resetFrom: self form
-					usingModel: self memento model
-					andMemento: self memento ] asAsyncFuture.
-				self builderUtilityClass
-					awaitFuture: aFuture
-					from: anEvent currentTarget ]).
-
-	CFMaBuilderUtility
-		installRelationEditorNavigationShortcutsOn: anElement
-		form: aNavigationRoot
+CFMaElementBuilder >> formNavigationRoot [
+	| aRoot |
+	aRoot := self form.
+	self form magritte fieldContainerDo: [ :aFieldContainer |
+		aRoot := aFieldContainer ].
+	^ aRoot
 ]
 
 { #category : 'private - building' }
-CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
-	self addShortcutsTo: anElement.
+CFMaElementBuilder >> requestFirstFormFocus [
+	| theCandidates |
+	theCandidates := BlFocusFinder new
+		root: self formNavigationRoot;
+		direction: BlFocusSearchDirectionForward new;
+		focusableCandidates.
+	theCandidates isEmpty
+		ifFalse: [ (theCandidates at: 1) requestFocus ]
+]
 
-	aDescription blocShortcuts
-		ifNotNil: [ :aBlockReturningCollection |
-			aBlockReturningCollection value do: [ :aShortcut | anElement addShortcut: aShortcut ] ]
+{ #category : 'private - building' }
+CFMaElementBuilder >> requestLastFormFocus [
+	| theCandidates |
+	theCandidates := BlFocusFinder new
+		root: self formNavigationRoot;
+		direction: BlFocusSearchDirectionBackward new;
+		focusableCandidates.
+	theCandidates isEmpty
+		ifFalse: [ (theCandidates at: theCandidates size) requestFocus ]
 ]
