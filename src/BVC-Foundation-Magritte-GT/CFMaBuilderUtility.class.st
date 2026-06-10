@@ -367,7 +367,8 @@ CFMaBuilderUtility class >> installRelationEditorNavigationShortcutsOn: anElemen
 					direction: BlFocusSearchDirectionForward new;
 					root: aForm;
 					referenceElement: anEvent target;
-					nextFocusDo: #requestFocus ifNone: [  ] ]);
+					nextFocusDo: #requestFocus
+					ifNone: [ self requestFirstFocusIn: aForm ] ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Move to previous form item';
 			description: 'Moves to the previous form item. If none is found, we cycle back to the last.';
@@ -378,8 +379,31 @@ CFMaBuilderUtility class >> installRelationEditorNavigationShortcutsOn: anElemen
 					direction: BlFocusSearchDirectionBackward new;
 					root: aForm;
 					referenceElement: anEvent target;
-					nextFocusDo: #requestFocus ifNone: [  ] ]).
+					nextFocusDo: #requestFocus
+					ifNone: [ self requestLastFocusIn: aForm ] ]).
 	^ anElement
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> requestFirstFocusIn: aForm [
+	| theCandidates |
+	theCandidates := (BlFocusFinder new
+		root: aForm;
+		direction: BlFocusSearchDirectionForward new;
+		focusableCandidates).
+	theCandidates isEmpty
+		ifFalse: [ (theCandidates at: 1) requestFocus ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> requestLastFocusIn: aForm [
+	| theCandidates |
+	theCandidates := (BlFocusFinder new
+		root: aForm;
+		direction: BlFocusSearchDirectionBackward new;
+		focusableCandidates).
+	theCandidates isEmpty
+		ifFalse: [ (theCandidates at: theCandidates size) requestFocus ]
 ]
 
 { #category : 'private - relation editor' }
@@ -452,7 +476,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationListItemStencil [
-	^ GtPhlowListItemElementWithSelectionDecorator new
+	^ CFMaRelationListItemElementWithSelectionDecorator new
 		stencilBuilder: (GtPhlowSimpleListErrorHandlingItemElementStencilBuilder new
 			stencilBuilder: ([ :anItemType |
 				BlElement new
