@@ -206,6 +206,22 @@ CFMaElementBuilder >> addToOneUsing: aDescription [
 
 
 { #category : 'private - building' }
+CFMaElementBuilder >> buildActions [
+	| aToolbar allActions |
+	allActions := self allActions.
+	allActions ifEmpty: [ ^ self ].
+
+	self toolbarContainerDo: [ :aContainer |
+		aToolbar := self builderUtilityClass
+			newToolbarWithActions: allActions
+			memento: self memento.
+
+		self addFormNavigationShortcutsTo: aToolbar.
+
+		aContainer addChild: aToolbar as: #toolbar ]
+]
+
+{ #category : 'private - building' }
 CFMaElementBuilder >> formNavigationRoot [
 	| aRoot |
 	aRoot := self form.
