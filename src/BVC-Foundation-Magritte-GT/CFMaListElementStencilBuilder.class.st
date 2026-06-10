@@ -19,9 +19,10 @@ CFMaListElementStencilBuilder >> buildDefault [
 
 	self form ifNotNil: [ :aForm |
 		aForm matchParent.
-		CFMaBuilderUtility
-			installRelationEditorNavigationShortcutsOn: aFlowElement
-			form: aForm ].
+		aForm magritte fieldContainerDo: [ :aFieldContainer |
+			CFMaBuilderUtility
+				installRelationEditorNavigationShortcutsOn: aFlowElement
+				form: aFieldContainer ] ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento

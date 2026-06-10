@@ -62,3 +62,40 @@ CFMaElementBuilder >> addToOneUsing: aDescription [
 
 	self addFieldElement: anElement using: aDescription
 ]
+
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement [
+	| aNavigationRoot |
+	aNavigationRoot := self form.
+	self fieldContainerDo: [ :aFieldContainer | aNavigationRoot := aFieldContainer ].
+
+	anElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Discard form contents';
+			description: 'Discards the form contents and resets the form to its original state';
+			combination: BlKeyCombination escape;
+			overrideChildren: true;
+			action: [ :anEvent |
+				| aFuture |
+				aFuture := [ self
+					resetFrom: self form
+					usingModel: self memento model
+					andMemento: self memento ] asAsyncFuture.
+				self builderUtilityClass
+					awaitFuture: aFuture
+					from: anEvent currentTarget ]).
+
+	CFMaBuilderUtility
+		installRelationEditorNavigationShortcutsOn: anElement
+		form: aNavigationRoot
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
+	self addShortcutsTo: anElement.
+
+	aDescription blocShortcuts
+		ifNotNil: [ :aBlockReturningCollection |
+			aBlockReturningCollection value do: [ :aShortcut | anElement addShortcut: aShortcut ] ]
+]
