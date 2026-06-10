@@ -118,9 +118,11 @@ CFMaToOneAddItemViewModel >> singleNewItemClass [
 CFMaToOneAddItemViewModel >> newClassChoiceAddElement [
 	^ self installAddButtonEnablementOn: (BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude
-			+ (BrGlamorousWithExplicitDropdownAptitude
+			+ ((BrGlamorousWithExplicitDropdownAptitude
 				handle: [ self newClassChoiceHandle ]
-				menu: [ self newClassChoiceMenu ]);
+				menu: [ self newClassChoiceMenu ])
+					withGainFocusOnShow;
+					yourself);
 		icon: BrGlamorousVectorIcons add;
 		label: 'Add item';
 		constraintsDo: [ :c | c flow vertical alignCenter ];
