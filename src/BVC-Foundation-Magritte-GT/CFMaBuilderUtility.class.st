@@ -62,9 +62,9 @@ CFMaBuilderUtility class >> newGroupLabelUsing: aGroupName [
 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
-	| aContainer aList isEditable anAddElement |
-	isEditable := aDescription definitive not
-		and: [ aDescription newItemStencil isNotNil ].
+	| aContainer aList canModify canAdd anActionContainer anAddElement aRemoveButton |
+	canModify := aDescription definitive not.
+	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	aContainer := self newRelationEditorContainer.
 
@@ -75,14 +75,32 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 
 	aContainer addChild: aList.
 
-	isEditable
-		ifTrue: [
+	canModify ifTrue: [
+		anActionContainer := BrHorizontalPane new
+			fitContent;
+			cellSpacing: 8;
+			yourself.
+
+		canAdd ifTrue: [
 			anAddElement := CFMaAddItemViewModel new
 				memento: aMemento;
 				description: aDescription;
 				stencil: aDescription newItemStencil;
 				asElement.
-			aContainer addChild: anAddElement ].
+			anActionContainer addChild: anAddElement ].
+
+		aRemoveButton := self
+			newToManyRemoveButtonMemento: aMemento
+			using: aDescription
+			list: aList.
+		anActionContainer addChild: aRemoveButton.
+
+		aContainer addChild: anActionContainer.
+
+		aList
+			when: BrSelectionChanged
+			do: [ :anEvent |
+				self updateToManyRemoveButton: aRemoveButton list: aList ] ].
 
 	self
 		installRelationEditorShortcutsOn: aContainer
@@ -105,7 +123,9 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 					onFlowList: aList
 					sinkUpdate: aSink
 					memento: aMemento
-					description: aDescription ].
+					description: aDescription.
+				aRemoveButton ifNotNil: [
+					self updateToManyRemoveButton: aRemoveButton list: aList ] ].
 		(aMemento readObservableValueUsing: aDescription)
 			observe: anElementSink ].
 
@@ -292,6 +312,35 @@ CFMaBuilderUtility class >> onEmbeddedToOneFrame: aFrame sinkUpdate: aSink memen
 		rowIndex: 1;
 		build.
 	aFrame addChild: anElement
+]
+
+{ #category : 'private - instance creation' }
+CFMaBuilderUtility class >> newToManyRemoveButtonMemento: aMemento using: aDescription list: aListElement [
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: BrGlamorousVectorIcons remove;
+		label: 'Remove';
+		action: [ :anElement |
+			self
+				removeSelectedToManyItemFrom: aListElement
+				memento: aMemento
+				description: aDescription
+				element: anElement ];
+		disable;
+		constraintsDo: [ :c | c flow vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> updateToManyRemoveButton: aButton list: aListElement [
+	| hasSelection |
+	hasSelection := false.
+	aListElement selectedIndices do: [ :anIndex |
+		(anIndex between: 1 and: aListElement maxSelectionIndex)
+			ifTrue: [ hasSelection := true ] ].
+	hasSelection
+		ifTrue: [ aButton enable ]
+		ifFalse: [ aButton disable ]
 ]
 
 { #category : 'private - instance creation' }
