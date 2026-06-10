@@ -10,10 +10,10 @@ CFMaRelationListItemAptitude >> initialize [
 	super initialize.
 
 	self
-		when: CFMaRelationEditorActiveState uniqueInstance & BlElementState selected
+		when: CFMaListFocusedState uniqueInstance & BlElementState selected
 		style: [ :aStyle |
 			aStyle background: self theme item selectedColor ];
-		when: CFMaRelationEditorActiveState uniqueInstance not & BlElementState selected
+		when: CFMaListFocusedState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
 			aStyle background: self theme item hoveredColor ]
 ]

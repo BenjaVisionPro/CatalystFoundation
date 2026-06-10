@@ -335,11 +335,9 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 	aContainer
 		when: BlFocusInEvent
 		do: [ :anEvent |
-			aContainer states addState: CFMaRelationEditorActiveState uniqueInstance.
 			aContainer border: (BlBorder paint: BrGlamorousColors focusedEditorBorderColor width: 1) ];
 		when: BlFocusOutEvent
 		do: [ :anEvent |
-			aContainer states removeState: CFMaRelationEditorActiveState uniqueInstance.
 			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ].
 
 	^ aContainer
@@ -419,6 +417,14 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 			self relationSelectionFrom: aList indices: theIndices ];
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
+
+	aList
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			aList states addState: CFMaListFocusedState uniqueInstance ];
+		when: BlFocusOutEvent
+		do: [ :anEvent |
+			aList states removeState: CFMaListFocusedState uniqueInstance ].
 	^ aList
 ]
 

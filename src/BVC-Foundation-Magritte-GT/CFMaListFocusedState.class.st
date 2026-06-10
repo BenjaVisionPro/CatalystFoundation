@@ -1,21 +1,21 @@
 Class {
-	#name : 'CFMaRelationEditorActiveState',
+	#name : 'CFMaListFocusedState',
 	#superclass : 'BlElementUniqueState',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'printing' }
-CFMaRelationEditorActiveState >> printOn: aStream [
-	aStream nextPutAll: 'relationEditorActive'
+CFMaListFocusedState >> printOn: aStream [
+	aStream nextPutAll: 'cfMaListFocused'
 ]
 
 { #category : 'accessing' }
-CFMaRelationEditorActiveState >> priority [
+CFMaListFocusedState >> priority [
 	^ UserPriority
 ]
 
 { #category : 'testing' }
-CFMaRelationEditorActiveState >> shouldPropagateToChildren [
+CFMaListFocusedState >> shouldPropagateToChildren [
 	^ true
 ]
