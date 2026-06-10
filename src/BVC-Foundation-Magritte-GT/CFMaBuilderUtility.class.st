@@ -416,8 +416,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
 		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: (GtPhlowSendTransformation object: [ :anItemViewModel |
-				self relationObjectForItem: anItemViewModel ])).
+			transformation: GtPhlowSendTransformation default).
 	^ aList
 ]
 
