@@ -335,9 +335,11 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 	aContainer
 		when: BlFocusInEvent
 		do: [ :anEvent |
+			aContainer states addState: CFMaRelationEditorActiveState uniqueInstance.
 			aContainer border: (BlBorder paint: BrGlamorousColors focusedEditorBorderColor width: 1) ];
 		when: BlFocusOutEvent
 		do: [ :anEvent |
+			aContainer states removeState: CFMaRelationEditorActiveState uniqueInstance.
 			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ].
 
 	^ aContainer
