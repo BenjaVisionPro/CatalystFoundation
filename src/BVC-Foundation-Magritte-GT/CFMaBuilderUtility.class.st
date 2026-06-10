@@ -422,9 +422,7 @@ CFMaBuilderUtility class >> relationItemViewModelsForModels: aCollection existin
 	^ Array streamContents: [ :aStream |
 		aCollection do: [ :aModel |
 			anExistingViewModels
-				detect: [ :eachViewModel |
-					eachViewModel respondsTo: #isForObject:
-						and: [ eachViewModel isForObject: aModel ] ]
+				detect: [ :eachViewModel | eachViewModel isForObject: aModel ]
 				ifFound: [ :aViewModel |
 					aStream nextPut: aViewModel ]
 				ifNone: [
@@ -438,10 +436,8 @@ CFMaBuilderUtility class >> relationItemViewModelsForModels: aCollection existin
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> relationObjectForItem: anItem [
-	^ (anItem respondsTo: #object)
-		ifTrue: [ anItem object ]
-		ifFalse: [ anItem ]
+CFMaBuilderUtility class >> relationObjectForItem: anItemViewModel [
+	^ anItemViewModel object
 ]
 
 { #category : 'private - relation editor' }

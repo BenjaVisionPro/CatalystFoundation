@@ -26,12 +26,8 @@ CFToManyRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
 		ifAbsentPut: [ [ :anItemViewModel :anIndex :aListElement |
-			| anObject |
-			anObject := anItemViewModel respondsTo: #object
-				ifTrue: [ anItemViewModel object ]
-				ifFalse: [ anItemViewModel ].
 			GtPhlowUtility newItemLabel
-				text: anObject gtDisplayText;
+				text: anItemViewModel object gtDisplayText;
 				yourself ] asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
