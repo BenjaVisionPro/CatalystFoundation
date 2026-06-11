@@ -393,6 +393,13 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 ]
 
 { #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newExpandingRelationEditorContainer [
+	^ self newRelationEditorContainer
+		matchParent;
+		yourself
+]
+
+{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocusElement: anElement [
 	aContainer
 		when: BlClickEvent
@@ -509,9 +516,10 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 	canModify := aDescription definitive not.
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
-	aContainer := self newRelationEditorContainer.
+	aContainer := self newExpandingRelationEditorContainer.
 
 	aList := self newColumnedRelationListUsing: aDescription.
+	aList vMatchParent.
 	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
@@ -560,7 +568,6 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 
 	aContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
-			sink: AsyncPeekSink new;
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theContainer :aSink |
 				self

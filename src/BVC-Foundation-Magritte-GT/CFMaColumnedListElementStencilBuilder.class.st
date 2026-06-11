@@ -23,7 +23,5 @@ CFMaColumnedListElementStencilBuilder >> buildDefault [
 		memento: self memento
 		description: self description
 		element: aFlowElement;
-		hMatchParent;
-		vFitContent;
-		yourself
+		matchParent
 ]
