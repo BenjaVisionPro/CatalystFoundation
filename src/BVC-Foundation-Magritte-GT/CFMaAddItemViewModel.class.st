@@ -5,6 +5,11 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+
+{ #category : 'accessing' }
+CFMaAddItemViewModel >> stencil: aStencil [
+	stencil := aStencil
+]
 { #category : 'converting' }
 CFMaAddItemViewModel >> asElement [
 	self shouldUseCustomAddItemElement
