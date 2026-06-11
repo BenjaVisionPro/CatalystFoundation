@@ -12,8 +12,8 @@ CFMaFocusWithinAptitude >> initializeListeners [
 	self
 		when: BlFocusInEvent
 		do: [ :anEvent |
-			anEvent currentTarget states addState: CFMaFocusWithinState uniqueInstance ];
+			self widget states addState: CFMaFocusWithinState uniqueInstance ];
 		when: BlFocusOutEvent
 		do: [ :anEvent |
-			anEvent currentTarget states removeState: CFMaFocusWithinState uniqueInstance ]
+			self widget states removeState: CFMaFocusWithinState uniqueInstance ]
 ]
