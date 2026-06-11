@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaAddItemViewModel',
-	#superclass : 'GtMagritteAddItemViewModel',
+	#superclass : 'CFMaAbstractAddItemViewModel',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
