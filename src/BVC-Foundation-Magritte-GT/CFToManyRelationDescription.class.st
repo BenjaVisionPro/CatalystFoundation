@@ -49,7 +49,7 @@ CFToManyRelationDescription >> blocListStencil [
 CFToManyRelationDescription >> blocListStencil: aStencil [
 	self
 		propertyAt: #blocListStencil
-		put: (aStencil asStencilBuilder: CFMaListElementStencilBuilder)
+		put: (aStencil asStencilBuilder: GtMagritteListElementStencilBuilder)
 ]
 
 
@@ -66,3 +66,14 @@ CFToManyRelationDescription >> newItemStencil: aStencil [
 		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].
 	self propertyAt: #newItemStencil put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
 ]
+
+{ #category : 'api' }
+CFToManyRelationDescription >> beColumnedList [
+	self blocListStencil: CFMaColumnedListElementStencilBuilder new
+]
+
+{ #category : 'api' }
+CFToManyRelationDescription >> beSimpleList [
+	self blocListStencil: CFMaListElementStencilBuilder new
+]
+

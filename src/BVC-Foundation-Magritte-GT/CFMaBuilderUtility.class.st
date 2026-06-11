@@ -467,19 +467,13 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
-	aList
-		when: BlFocusInEvent
-		do: [ :anEvent |
-			aList states addState: CFMaListFocusedState uniqueInstance ];
-		when: BlFocusOutEvent
-		do: [ :anEvent |
-			aList states removeState: CFMaListFocusedState uniqueInstance ].
+	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
 ]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationListItemStencil [
-	^ CFMaRelationListItemElementWithSelectionDecorator new
+	^ CFMaListItemElementStencilBuilder new
 		stencilBuilder: (GtPhlowSimpleListErrorHandlingItemElementStencilBuilder new
 			stencilBuilder: ([ :anItemType |
 				BlElement new
@@ -507,6 +501,117 @@ CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
 		anItemElement addChild: anItemContent.
 		anItemElement ]
 ]
+
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDescription [
+	| aContainer aList canModify canAdd anActionContainer anAddElement aRemoveButton |
+	canModify := aDescription definitive not.
+	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
+
+	aContainer := self newRelationEditorContainer.
+
+	aList := self newColumnedRelationListUsing: aDescription.
+	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
+
+	aContainer addChild: aList.
+
+	canModify ifTrue: [
+		anActionContainer := BrHorizontalPane new
+			fitContent;
+			cellSpacing: 8;
+			yourself.
+
+		canAdd ifTrue: [
+			anAddElement := CFMaAddItemViewModel new
+				memento: aMemento;
+				description: aDescription;
+				stencil: aDescription newItemStencil;
+				asElement.
+			anActionContainer addChild: anAddElement ].
+
+		aRemoveButton := self
+			newToManyRemoveButtonMemento: aMemento
+			using: aDescription
+			list: aList.
+		anActionContainer addChild: aRemoveButton.
+
+		aContainer addChild: anActionContainer.
+
+		aList
+			when: BrSelectionChanged
+			do: [ :anEvent |
+				self updateToManyRemoveButton: aRemoveButton list: aList ] ].
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		primaryFocusElement: aList
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			self
+				removeSelectedToManyItemFrom: aList
+				memento: aMemento
+				description: aDescription
+				element: anElement ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				self
+					onFlowList: aList
+					sinkUpdate: aSink
+					memento: aMemento
+					description: aDescription.
+				aRemoveButton ifNotNil: [
+					self updateToManyRemoveButton: aRemoveButton list: aList ] ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newColumnedRelationListUsing: aDescription [
+	| aList |
+	aList := BrColumnedList new.
+	aList
+		matchParent;
+		rowStencil: CFMaColumnedListItemElementStencilBuilder new;
+		rowDataBinder: [ :anItemElement :anItemViewModel :anItemIndex | anItemElement ];
+		selectionCallback: [ :theIndices |
+			self relationSelectionFrom: aList indices: theIndices ];
+		addAptitude: CFMaFocusWithinAptitude;
+		addEventHandler: (GtPhlowListToSelectHandler new
+			transformation: GtPhlowSendTransformation default).
+
+	self addReferenceColumnsTo: aList using: aDescription.
+	^ aList
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList using: aDescription [
+	aDescription reference do: [ :eachReferenceDescription |
+		aColumnedList column
+			title: eachReferenceDescription label;
+			matchParent;
+			stencil: [ :anItemViewModel :anItemIndex :aColumnIndex |
+				self
+					newColumnCellFor: (self relationObjectForItem: anItemViewModel)
+					using: eachReferenceDescription ] ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newColumnCellFor: anObject using: aReferenceDescription [
+	^ BrColumnCellLabelStencil new
+		text: (aReferenceDescription readToString: anObject)
+]
+
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationItemViewModelsForModels: aCollection existingViewModels: anExistingViewModels memento: aMemento description: aDescription [

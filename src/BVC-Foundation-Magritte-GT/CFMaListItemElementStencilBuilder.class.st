@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFMaRelationListItemElementWithSelectionDecorator',
+	#name : 'CFMaListItemElementStencilBuilder',
 	#superclass : 'BrListItemElementStencilBuilder',
 	#instVars : [
 		'stencilBuilder'
@@ -9,29 +9,29 @@ Class {
 }
 
 { #category : 'accessing' }
-CFMaRelationListItemElementWithSelectionDecorator class >> stencilProperties [
+CFMaListItemElementStencilBuilder class >> stencilProperties [
 	^ #(stencilBuilder)
 ]
 
 { #category : 'api - instantiation' }
-CFMaRelationListItemElementWithSelectionDecorator >> buildDefault [
+CFMaListItemElementStencilBuilder >> buildDefault [
 	| anElement |
 
 	anElement := stencilBuilder
 		itemType: self itemType;
 		build.
 
-	anElement addAptitude: CFMaRelationListItemAptitude.
+	anElement addAptitude: CFMaFocusAwareListItemAptitude.
 
 	^ anElement
 ]
 
 { #category : 'accessing' }
-CFMaRelationListItemElementWithSelectionDecorator >> stencilBuilder [
+CFMaListItemElementStencilBuilder >> stencilBuilder [
 	^ stencilBuilder
 ]
 
 { #category : 'accessing' }
-CFMaRelationListItemElementWithSelectionDecorator >> stencilBuilder: anObject [
+CFMaListItemElementStencilBuilder >> stencilBuilder: anObject [
 	stencilBuilder := anObject
 ]
