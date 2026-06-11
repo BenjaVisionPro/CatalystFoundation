@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaToOneAddItemViewModel',
-	#superclass : 'CFMaAbstractAddItemViewModel',
+	#superclass : 'GtMagritteAddItemViewModel',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -59,6 +59,8 @@ CFMaToOneAddItemViewModel >> installAddButtonEnablementOn: aButton [
 { #category : 'private - testing' }
 CFMaToOneAddItemViewModel >> shouldUseCustomAddItemElement [
 	self stencil ifNil: [ ^ false ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [ ^ false ].
 	(self stencil isKindOf: BrValuableStencil)
 		ifTrue: [ ^ false ].
 	^ self stencil isKindOf: BrStencil
@@ -84,7 +86,9 @@ CFMaToOneAddItemViewModel >> shouldShowNewItemClassChoiceMenu [
 
 { #category : 'private - testing' }
 CFMaToOneAddItemViewModel >> stencilRequiresNewItemClass [
-	self stencil ifNil: [ ^ false ].
+	self stencil ifNil: [ ^ self hasNewItemClasses ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [ ^ self hasNewItemClasses ].
 	(self stencil isKindOf: BrValuableStencil)
 		ifFalse: [ ^ false ].
 	^ self stencil valuable numArgs > 0
@@ -202,16 +206,22 @@ CFMaToOneAddItemViewModel >> addItemForClass: aClass from: anElement [
 
 { #category : 'private - instance creation' }
 CFMaToOneAddItemViewModel >> createItemForClass: aClass [
-	| aNewItem |
 	self stencil ifNil: [
 		aClass ifNil: [ ^ nil ].
-		^ self configureParentForNewItem: aClass new ].
+		^ aClass new ].
 
-	aClass ifNil: [
-		aNewItem := self stencil create.
-		^ self configureParentForNewItem: aNewItem ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [
+			^ self stencil
+				itemClass: aClass;
+				memento: self memento;
+				description: self description;
+				build ].
 
-	self stencil arguments: { aClass }.
-	aNewItem := self stencil create.
-	^ self configureParentForNewItem: aNewItem
+	(self stencil isKindOf: BrValuableStencil)
+		ifTrue: [
+			self stencil arguments: { aClass. self memento. self description }.
+			^ self stencil create ].
+
+	^ self stencil create
 ]

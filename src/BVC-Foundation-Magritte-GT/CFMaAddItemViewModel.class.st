@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaAddItemViewModel',
-	#superclass : 'CFMaAbstractAddItemViewModel',
+	#superclass : 'GtMagritteAddItemViewModel',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -42,6 +42,8 @@ CFMaAddItemViewModel >> newDisabledAddButton [
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> shouldUseCustomAddItemElement [
 	self stencil ifNil: [ ^ false ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [ ^ false ].
 	(self stencil isKindOf: BrValuableStencil)
 		ifTrue: [ ^ false ].
 	^ self stencil isKindOf: BrStencil
@@ -68,13 +70,20 @@ CFMaAddItemViewModel >> hasMultipleNewItemClasses [
 
 
 { #category : 'private - testing' }
+CFMaAddItemViewModel >> shouldShowNewItemClassChoiceMenu [
+	^ self stencilRequiresNewItemClass and: [ self hasMultipleNewItemClasses ]
+]
+
+{ #category : 'private - testing' }
 CFMaAddItemViewModel >> shouldDisableAddButton [
 	^ self stencilRequiresNewItemClass and: [ self hasNewItemClasses not ]
 ]
 
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> stencilRequiresNewItemClass [
-	self stencil ifNil: [ ^ false ].
+	self stencil ifNil: [ ^ self hasNewItemClasses ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [ ^ self hasNewItemClasses ].
 	(self stencil isKindOf: BrValuableStencil)
 		ifFalse: [ ^ false ].
 	^ self stencil valuable numArgs > 0
@@ -188,16 +197,22 @@ CFMaAddItemViewModel >> addItemForClass: aClass from: anElement [
 
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> createItemForClass: aClass [
-	| aNewItem |
 	self stencil ifNil: [
 		aClass ifNil: [ ^ nil ].
-		^ self configureParentForNewItem: aClass new ].
+		^ aClass new ].
 
-	aClass ifNil: [
-		aNewItem := self stencil create.
-		^ self configureParentForNewItem: aNewItem ].
+	(self stencil isKindOf: CFMaNewItemStencilBuilder)
+		ifTrue: [
+			^ self stencil
+				itemClass: aClass;
+				memento: self memento;
+				description: self description;
+				build ].
 
-	self stencil arguments: { aClass }.
-	aNewItem := self stencil create.
-	^ self configureParentForNewItem: aNewItem
+	(self stencil isKindOf: BrValuableStencil)
+		ifTrue: [
+			self stencil arguments: { aClass. self memento. self description }.
+			^ self stencil create ].
+
+	^ self stencil create
 ]

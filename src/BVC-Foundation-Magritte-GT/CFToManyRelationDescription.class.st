@@ -52,12 +52,17 @@ CFToManyRelationDescription >> blocListStencil: aStencil [
 		put: (aStencil asStencilBuilder: CFMaListElementStencilBuilder)
 ]
 
+
+
+
 { #category : 'accessing' }
-CFToManyRelationDescription >> beSetParentOnNewItems [
-	self propertyAt: #setParentOnNewItems put: true
+CFToManyRelationDescription >> newItemStencil [
+	^ self propertyAt: #newItemStencil ifAbsent: [ nil ]
 ]
 
 { #category : 'accessing' }
-CFToManyRelationDescription >> setParentOnNewItems [
-	^ self propertyAt: #setParentOnNewItems ifAbsent: [ false ]
+CFToManyRelationDescription >> newItemStencil: aStencil [
+	(aStencil isKindOf: BrStencil)
+		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].
+	self propertyAt: #newItemStencil put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
 ]

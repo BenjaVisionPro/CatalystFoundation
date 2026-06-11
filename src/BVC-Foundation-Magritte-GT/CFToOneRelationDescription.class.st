@@ -62,12 +62,14 @@ CFToOneRelationDescription >> newItemStencil [
 			theClasses := self classes ifNil: [ #() ].
 			theClasses isEmpty
 				ifTrue: [ nil ]
-				ifFalse: [ [ :aClass | aClass new ] ] ]
+				ifFalse: [ [ :aClass | aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder ] ]
 ]
 
 { #category : 'accessing' }
 CFToOneRelationDescription >> newItemStencil: aStencil [
-	self propertyAt: #newItemStencil put: aStencil
+	(aStencil isKindOf: BrStencil)
+		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].
+	self propertyAt: #newItemStencil put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
 ]
 
 { #category : 'accessing' }
@@ -100,12 +102,4 @@ CFToOneRelationDescription >> blocListStencil: aStencil [
 	self blocStencil: aStencil
 ]
 
-{ #category : 'accessing' }
-CFToOneRelationDescription >> beSetParentOnNewItems [
-	self propertyAt: #setParentOnNewItems put: true
-]
 
-{ #category : 'accessing' }
-CFToOneRelationDescription >> setParentOnNewItems [
-	^ self propertyAt: #setParentOnNewItems ifAbsent: [ false ]
-]
