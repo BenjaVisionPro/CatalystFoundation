@@ -679,7 +679,7 @@ CFMaBuilderUtility class >> referenceIconHeight [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> referenceIconPadding [
-	^ BlInsets top: 3 bottom: 3
+	^ BlInsets top: 3 right: 0 bottom: 3 left: 4
 ]
 
 { #category : 'private - relation editor' }
