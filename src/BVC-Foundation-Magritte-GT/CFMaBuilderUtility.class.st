@@ -490,6 +490,8 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		itemDataBinder: (self newRelationListItemDataBinderUsing: aDescription);
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
+		addEventFilter: (CFMaListClickToPhlowSelectHandler new
+			transformation: GtPhlowSendTransformation default);
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
@@ -683,6 +685,8 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
 		addAptitude: CFMaFocusWithinAptitude;
+		addEventFilter: (CFMaListClickToPhlowSelectHandler new
+			transformation: GtPhlowSendTransformation default);
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
