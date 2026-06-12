@@ -631,6 +631,7 @@ CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemen
 				aCellChild := self
 					newReadOnlyColumnCellFor: (self relationObjectForItem: anItemViewModel)
 					using: eachReferenceDescription.
+				self alignReferenceColumnCellChild: aCellChild.
 				aCellElement
 					removeChildren;
 					addChild: aCellChild ].
@@ -673,7 +674,7 @@ CFMaBuilderUtility class >> configureReferenceColumn: aColumn description: aDesc
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> referenceIconHeight [
-	^ 24
+	^ 18
 ]
 
 { #category : 'private - relation editor' }
@@ -688,6 +689,13 @@ CFMaBuilderUtility class >> newReferenceColumnCellElementExpanding: aBoolean [
 		yourself
 ]
 
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> alignReferenceColumnCellChild: anElement [
+	anElement constraintsDo: [ :c |
+		c frame horizontal alignLeft.
+		c frame vertical alignCenter ]
+]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject using: aDescription [
