@@ -678,6 +678,11 @@ CFMaBuilderUtility class >> referenceIconHeight [
 ]
 
 { #category : 'private - relation editor' }
+CFMaBuilderUtility class >> referenceIconPadding [
+	^ BlInsets top: 3 bottom: 3
+]
+
+{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newReferenceColumnCellElementExpanding: aBoolean [
 	^ BlElement new
 		layout: BlFrameLayout new;
@@ -718,9 +723,12 @@ CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject using: aDescripti
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject memento: aMemento using: aDescription [
 	(aDescription isKindOf: GtMagritteIconDescription)
-		ifTrue: [ ^ GtMagritteBuilderUtility
-			newIconWithMemento: aMemento
-			using: aDescription ].
+		ifTrue: [
+			^ (GtMagritteBuilderUtility
+				newIconWithMemento: aMemento
+				using: aDescription)
+				padding: self referenceIconPadding;
+				yourself ].
 
 	(aDescription isKindOf: MAStringDescription)
 		ifTrue: [ ^ self
