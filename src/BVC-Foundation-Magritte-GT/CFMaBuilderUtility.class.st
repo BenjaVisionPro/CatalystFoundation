@@ -616,15 +616,78 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemento using: aDescription [
-	aDescription reference do: [ :eachReferenceDescription |
-		aColumnedList column
+	| theReferenceDescriptions anExpandingColumnIndex |
+	theReferenceDescriptions := self referenceDescriptionsFor: aDescription.
+	anExpandingColumnIndex := self expandingReferenceColumnIndexIn: theReferenceDescriptions.
+
+	theReferenceDescriptions withIndexDo: [ :eachReferenceDescription :eachIndex |
+		| aColumn isExpanding |
+		isExpanding := eachIndex = anExpandingColumnIndex.
+		aColumn := aColumnedList column
 			title: eachReferenceDescription label;
-			matchParent;
-			stencil: [ :anItemViewModel :anItemIndex :aColumnIndex |
-				self
+			cellStencil: [ self newReferenceColumnCellElementExpanding: isExpanding ];
+			dataBinder: [ :aCellElement :anItemViewModel :anItemIndex :aRowHolder :aColumnIndex |
+				| aCellChild |
+				aCellChild := self
 					newReadOnlyColumnCellFor: (self relationObjectForItem: anItemViewModel)
-					using: eachReferenceDescription ] ]
+					using: eachReferenceDescription.
+				aCellElement
+					removeChildren;
+					addChild: aCellChild ].
+
+		self
+			configureReferenceColumn: aColumn
+			description: eachReferenceDescription
+			index: eachIndex
+			expandingIndex: anExpandingColumnIndex ]
 ]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> referenceDescriptionsFor: aDescription [
+	^ Array streamContents: [ :aStream |
+		aDescription reference do: [ :eachReferenceDescription |
+			aStream nextPut: eachReferenceDescription ] ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> expandingReferenceColumnIndexIn: aCollectionOfReferenceDescriptions [
+	aCollectionOfReferenceDescriptions withIndexDo: [ :eachReferenceDescription :eachIndex |
+		(self isIconReferenceDescription: eachReferenceDescription)
+			ifFalse: [ ^ eachIndex ] ].
+	^ nil
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> isIconReferenceDescription: aDescription [
+	^ aDescription isKindOf: GtMagritteIconDescription
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> configureReferenceColumn: aColumn description: aDescription index: anIndex expandingIndex: anExpandingIndex [
+	(self isIconReferenceDescription: aDescription)
+		ifTrue: [ ^ aColumn width: self referenceIconColumnWidth ].
+
+	anIndex = anExpandingIndex
+		ifTrue: [ aColumn weight: 1 ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> referenceIconColumnWidth [
+	^ 32
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newReferenceColumnCellElementExpanding: aBoolean [
+	^ BlElement new
+		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c vertical fitContent.
+			aBoolean
+				ifTrue: [ c horizontal matchParent ]
+				ifFalse: [ c horizontal fitContent ] ];
+		yourself
+]
+
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject using: aDescription [
