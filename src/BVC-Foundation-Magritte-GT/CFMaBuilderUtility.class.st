@@ -665,15 +665,15 @@ CFMaBuilderUtility class >> isIconReferenceDescription: aDescription [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> configureReferenceColumn: aColumn description: aDescription index: anIndex expandingIndex: anExpandingIndex [
 	(self isIconReferenceDescription: aDescription)
-		ifTrue: [ ^ aColumn width: self referenceIconColumnWidth ].
+		ifTrue: [ ^ self ].
 
 	anIndex = anExpandingIndex
 		ifTrue: [ aColumn weight: 1 ]
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> referenceIconColumnWidth [
-	^ 32
+CFMaBuilderUtility class >> referenceIconHeight [
+	^ 24
 ]
 
 { #category : 'private - relation editor' }
@@ -695,6 +695,8 @@ CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject using: aDescripti
 	aReadOnlyDescription := aDescription copy
 		beReadOnly;
 		yourself.
+	(self isIconReferenceDescription: aReadOnlyDescription)
+		ifTrue: [ aReadOnlyDescription iconHeight: self referenceIconHeight ].
 	aCellMemento := GtMagritteMemento
 		model: anObject
 		description: aReadOnlyDescription asContainer.
@@ -712,6 +714,11 @@ CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject memento: aMemento
 			newIconWithMemento: aMemento
 			using: aDescription ].
 
+	(aDescription isKindOf: MAStringDescription)
+		ifTrue: [ ^ self
+			newTextColumnCellFor: anObject
+			using: aDescription ].
+
 	aDescription blocStencil
 		ifNotNil: [ :aStencil |
 			^ aStencil
@@ -726,8 +733,8 @@ CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject memento: aMemento
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newTextColumnCellFor: anObject using: aDescription [
-	^ BrColumnCellLabelStencil new
-		text: (aDescription readToString: anObject)
+	^ BrColumnCellLabelStencil
+		fitContent: (aDescription readToString: anObject)
 ]
 
 
