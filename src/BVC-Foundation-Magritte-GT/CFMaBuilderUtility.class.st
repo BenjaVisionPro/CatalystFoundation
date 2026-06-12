@@ -675,7 +675,7 @@ CFMaBuilderUtility class >> configureReferenceColumn: aColumn description: aDesc
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> primaryReferenceColumnWeight [
-	^ 4
+	^ 3
 ]
 
 { #category : 'private - relation editor' }
