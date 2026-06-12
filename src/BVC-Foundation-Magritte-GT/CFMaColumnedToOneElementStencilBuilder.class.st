@@ -16,7 +16,7 @@ CFMaColumnedToOneElementStencilBuilder >> buildDefault [
 		newColumnedToOneListMemento: self memento
 		using: self description.
 
-	self form ifNotNil: [ :aForm | aForm matchParent ].
+	self form ifNotNil: [ :aForm | aForm hMatchParent; vFitContentLimited ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento

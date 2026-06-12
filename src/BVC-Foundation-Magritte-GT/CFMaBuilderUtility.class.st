@@ -531,45 +531,114 @@ CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newColumnedToOneListMemento: aMemento using: aDescription [
-	| aContainer aList anActionContainer canAdd anAddElement aRemoveButton |
+	| canAdd anAddElement |
 	canAdd := aDescription newItemStencil isNotNil.
-
-	aContainer := self newAutoSizingRelationEditorContainer.
-
-	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
-	aList
-		hMatchParent;
-		vFitContentLimited.
-	aList constraintsDo: [ :c |
-		c padding: (BlInsets top: 10 bottom: 10).
-		c maxHeight: self referenceColumnedListMaxHeight ].
-
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
-
-	aContainer addChild: aList.
-
-	anActionContainer := BrHorizontalPane new
-		fitContent;
-		cellSpacing: 8;
-		yourself.
 
 	canAdd ifTrue: [
 		anAddElement := CFMaToOneAddItemViewModel new
 			memento: aMemento;
 			description: aDescription;
 			stencil: aDescription newItemStencil;
-			asElement.
-		anActionContainer addChild: anAddElement ].
+			asElement ].
 
-	aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
-	anActionContainer addChild: aRemoveButton.
+	^ self
+		newColumnedRelationEditorMemento: aMemento
+		using: aDescription
+		addElement: anAddElement
+		removeButtonBuilder: [ :aList |
+			self newToOneRemoveButtonMemento: aMemento using: aDescription ]
+		removeAction: [ :aList :anElement |
+			GtMagritteBuilderUtility
+				write: nil
+				using: aDescription
+				memento: aMemento
+				element: anElement ]
+		sinkUpdate: [ :aList :aSink |
+			self
+				onToOneList: aList
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
+		updateRemoveButton: [ :aButton :aList :aSink |
+			aSink
+				ifNil: [ self updateToOneRemoveButton: aButton list: aList ]
+				ifNotNil: [ self updateToOneRemoveButton: aButton sinkUpdate: aSink ] ]
+]
 
-	aContainer addChild: anActionContainer.
 
-	aList
-		when: BrSelectionChanged
-		do: [ :anEvent |
-			self updateToOneRemoveButton: aRemoveButton list: aList ].
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDescription [
+	| canModify canAdd anAddElement aRemoveButtonBuilder |
+	canModify := aDescription definitive not.
+	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
+
+	canAdd ifTrue: [
+		anAddElement := CFMaAddItemViewModel new
+			memento: aMemento;
+			description: aDescription;
+			stencil: aDescription newItemStencil;
+			asElement ].
+
+	canModify ifTrue: [
+		aRemoveButtonBuilder := [ :aList |
+			self
+				newToManyRemoveButtonMemento: aMemento
+				using: aDescription
+				list: aList ] ].
+
+	^ self
+		newColumnedRelationEditorMemento: aMemento
+		using: aDescription
+		addElement: anAddElement
+		removeButtonBuilder: aRemoveButtonBuilder
+		removeAction: [ :aList :anElement |
+			canModify ifTrue: [
+				self
+					removeSelectedToManyItemFrom: aList
+					memento: aMemento
+					description: aDescription
+					element: anElement ] ]
+		sinkUpdate: [ :aList :aSink |
+			self
+				onFlowList: aList
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
+		updateRemoveButton: [ :aButton :aList :aSink |
+			self updateToManyRemoveButton: aButton list: aList ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aDescription addElement: anAddElement removeButtonBuilder: aRemoveButtonBuilder removeAction: aRemoveAction sinkUpdate: aSinkUpdate updateRemoveButton: anUpdateRemoveButton [
+	| aContainer aList anActionContainer aRemoveButton |
+	aContainer := self newAutoSizingRelationEditorContainer.
+
+	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
+	self configureColumnedRelationList: aList.
+
+	aRemoveButtonBuilder ifNotNil: [
+		aRemoveButton := aRemoveButtonBuilder value: aList ].
+
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
+
+	aContainer addChild: aList.
+
+	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
+		anActionContainer := BrHorizontalPane new
+			fitContent;
+			cellSpacing: 8;
+			yourself.
+
+		anAddElement ifNotNil: [ anActionContainer addChild: anAddElement ].
+		aRemoveButton ifNotNil: [ anActionContainer addChild: aRemoveButton ].
+
+		aContainer addChild: anActionContainer ].
+
+	aRemoveButton ifNotNil: [
+		aList
+			when: BrSelectionChanged
+			do: [ :anEvent |
+				anUpdateRemoveButton value: aRemoveButton value: aList value: nil ] ].
 
 	self
 		installRelationEditorShortcutsOn: aContainer
@@ -577,107 +646,30 @@ CFMaBuilderUtility class >> newColumnedToOneListMemento: aMemento using: aDescri
 		addElement: anAddElement
 		memento: aMemento
 		description: aDescription
-		removeAction: [ :anElement |
-			GtMagritteBuilderUtility
-				write: nil
-				using: aDescription
-				memento: aMemento
-				element: anElement ].
+		removeAction: [ :anElement | aRemoveAction value: aList value: anElement ].
 
 	aContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theContainer :aSink |
-				self
-					onToOneList: aList
-					sinkUpdate: aSink
-					memento: aMemento
-					description: aDescription.
-				self
-					updateToOneRemoveButton: aRemoveButton
-					sinkUpdate: aSink ].
+				aSinkUpdate value: aList value: aSink.
+				aRemoveButton ifNotNil: [
+					anUpdateRemoveButton value: aRemoveButton value: aList value: aSink ] ].
 		(aMemento readObservableValueUsing: aDescription)
 			observe: anElementSink ].
 
 	^ aContainer
 ]
 
-
-{ #category : 'api - ui' }
-CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDescription [
-	| aContainer aList canModify canAdd anActionContainer anAddElement aRemoveButton |
-	canModify := aDescription definitive not.
-	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
-
-	aContainer := self newAutoSizingRelationEditorContainer.
-
-	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> configureColumnedRelationList: aList [
 	aList
 		hMatchParent;
 		vFitContentLimited.
 	aList constraintsDo: [ :c |
 		c padding: (BlInsets top: 10 bottom: 10).
 		c maxHeight: self referenceColumnedListMaxHeight ].
-
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
-
-	aContainer addChild: aList.
-
-	canModify ifTrue: [
-		anActionContainer := BrHorizontalPane new
-			fitContent;
-			cellSpacing: 8;
-			yourself.
-
-		canAdd ifTrue: [
-			anAddElement := CFMaAddItemViewModel new
-				memento: aMemento;
-				description: aDescription;
-				stencil: aDescription newItemStencil;
-				asElement.
-			anActionContainer addChild: anAddElement ].
-
-		aRemoveButton := self
-			newToManyRemoveButtonMemento: aMemento
-			using: aDescription
-			list: aList.
-		anActionContainer addChild: aRemoveButton.
-
-		aContainer addChild: anActionContainer.
-
-		aList
-			when: BrSelectionChanged
-			do: [ :anEvent |
-				self updateToManyRemoveButton: aRemoveButton list: aList ] ].
-
-	self
-		installRelationEditorShortcutsOn: aContainer
-		primaryFocusElement: aList
-		addElement: anAddElement
-		memento: aMemento
-		description: aDescription
-		removeAction: [ :anElement |
-			self
-				removeSelectedToManyItemFrom: aList
-				memento: aMemento
-				description: aDescription
-				element: anElement ].
-
-	aContainer withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :theContainer :aSink |
-				self
-					onFlowList: aList
-					sinkUpdate: aSink
-					memento: aMemento
-					description: aDescription.
-				aRemoveButton ifNotNil: [
-					self updateToManyRemoveButton: aRemoveButton list: aList ] ].
-		(aMemento readObservableValueUsing: aDescription)
-			observe: anElementSink ].
-
-	^ aContainer
+	^ aList
 ]
 
 { #category : 'private - relation editor' }

@@ -103,14 +103,4 @@ CFToOneRelationDescription >> blocItemStencil: aStencil [
 		put: (aStencil asStencilBuilder: BrListRowStencilBuilder)
 ]
 
-{ #category : 'accessing' }
-CFToOneRelationDescription >> blocListStencil [
-	^ self blocStencil
-]
-
-{ #category : 'accessing' }
-CFToOneRelationDescription >> blocListStencil: aStencil [
-	self blocStencil: aStencil
-]
-
 
