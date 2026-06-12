@@ -401,12 +401,6 @@ CFMaBuilderUtility class >> newAutoSizingRelationEditorContainer [
 		yourself
 ]
 
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newExpandingRelationEditorContainer [
-	^ self newRelationEditorContainer
-		matchParent;
-		yourself
-]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocusElement: anElement [
@@ -533,7 +527,7 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 		vFitContentLimited.
 	aList constraintsDo: [ :c |
 		c padding: (BlInsets top: 10 bottom: 10).
-		c maxHeight: 200 ].
+		c maxHeight: self referenceColumnedListMaxHeight ].
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
@@ -681,6 +675,11 @@ CFMaBuilderUtility class >> primaryReferenceColumnWeight [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> secondaryReferenceColumnWeight [
 	^ 1
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> referenceColumnedListMaxHeight [
+	^ 200
 ]
 
 { #category : 'private - relation editor' }

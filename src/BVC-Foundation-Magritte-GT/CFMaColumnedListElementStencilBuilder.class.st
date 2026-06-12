@@ -15,7 +15,7 @@ CFMaColumnedListElementStencilBuilder >> buildDefault [
 	aFlowElement := CFMaBuilderUtility
 		newColumnedRelationListMemento: self memento
 		using: self description.
-	aFlowElement constraintsDo: [ :c | c maxHeight: 200 ].
+	aFlowElement constraintsDo: [ :c | c maxHeight: CFMaBuilderUtility referenceColumnedListMaxHeight ].
 
 	self form ifNotNil: [ :aForm | aForm hMatchParent; vFitContentLimited ].
 
