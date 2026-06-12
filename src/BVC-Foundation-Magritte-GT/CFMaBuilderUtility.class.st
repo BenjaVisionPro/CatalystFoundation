@@ -527,7 +527,7 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 
 	aContainer := self newAutoSizingRelationEditorContainer.
 
-	aList := self newColumnedRelationListUsing: aDescription.
+	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
 	aList
 		hMatchParent;
 		vFitContentLimited.
@@ -597,7 +597,7 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newColumnedRelationListUsing: aDescription [
+CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento using: aDescription [
 	| aList |
 	aList := BrColumnedList new.
 	aList
@@ -610,26 +610,21 @@ CFMaBuilderUtility class >> newColumnedRelationListUsing: aDescription [
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
-	self addReferenceColumnsTo: aList using: aDescription.
+	self addReferenceColumnsTo: aList memento: aMemento using: aDescription.
 	^ aList
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList using: aDescription [
+CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemento using: aDescription [
 	aDescription reference do: [ :eachReferenceDescription |
 		aColumnedList column
 			title: eachReferenceDescription label;
 			matchParent;
 			stencil: [ :anItemViewModel :anItemIndex :aColumnIndex |
-				self
-					newColumnCellFor: (self relationObjectForItem: anItemViewModel)
-					using: eachReferenceDescription ] ]
-]
-
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newColumnCellFor: anObject using: aReferenceDescription [
-	^ BrColumnCellLabelStencil new
-		text: (aReferenceDescription readToString: anObject)
+				CFMaReadOnlyDescriptionElementBuilder
+					model: (self relationObjectForItem: anItemViewModel)
+					memento: aMemento
+					description: eachReferenceDescription ] ]
 ]
 
 
