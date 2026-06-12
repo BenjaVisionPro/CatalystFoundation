@@ -514,6 +514,75 @@ CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
 
 
 { #category : 'api - ui' }
+CFMaBuilderUtility class >> newColumnedToOneListMemento: aMemento using: aDescription [
+	| aContainer aList anActionContainer canAdd anAddElement aRemoveButton |
+	canAdd := aDescription newItemStencil isNotNil.
+
+	aContainer := self newAutoSizingRelationEditorContainer.
+
+	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
+	aList
+		hMatchParent;
+		vFitContentLimited.
+	aList constraintsDo: [ :c |
+		c padding: (BlInsets top: 10 bottom: 10).
+		c maxHeight: self referenceColumnedListMaxHeight ].
+
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
+
+	aContainer addChild: aList.
+
+	anActionContainer := BrHorizontalPane new
+		fitContent;
+		cellSpacing: 8;
+		yourself.
+
+	canAdd ifTrue: [
+		anAddElement := CFMaToOneAddItemViewModel new
+			memento: aMemento;
+			description: aDescription;
+			stencil: aDescription newItemStencil;
+			asElement.
+		anActionContainer addChild: anAddElement ].
+
+	aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
+	anActionContainer addChild: aRemoveButton.
+
+	aContainer addChild: anActionContainer.
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		primaryFocusElement: aList
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			GtMagritteBuilderUtility
+				write: nil
+				using: aDescription
+				memento: aMemento
+				element: anElement ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				self
+					onToOneList: aList
+					sinkUpdate: aSink
+					memento: aMemento
+					description: aDescription.
+				self
+					updateToOneRemoveButton: aRemoveButton
+					sinkUpdate: aSink ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
+]
+
+
+{ #category : 'api - ui' }
 CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDescription [
 	| aContainer aList canModify canAdd anActionContainer anAddElement aRemoveButton |
 	canModify := aDescription definitive not.

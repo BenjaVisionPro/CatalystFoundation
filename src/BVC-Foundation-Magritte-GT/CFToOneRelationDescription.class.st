@@ -20,6 +20,17 @@ CFToOneRelationDescription >> beReferenced [
 	self propertyAt: #beEmbedded put: false
 ]
 
+
+{ #category : 'api' }
+CFToOneRelationDescription >> beColumnedList [
+	self blocStencil: CFMaColumnedToOneElementStencilBuilder new
+]
+
+{ #category : 'api' }
+CFToOneRelationDescription >> beSimpleList [
+	self blocStencil: CFMaToOneElementStencilBuilder new
+]
+
 { #category : 'accessing' }
 CFToOneRelationDescription >> blocStencil [
 	^ self
