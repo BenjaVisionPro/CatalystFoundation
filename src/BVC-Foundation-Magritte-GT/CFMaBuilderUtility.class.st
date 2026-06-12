@@ -178,7 +178,11 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 
 		isModifiable ifTrue: [
 			aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
-			anActionContainer addChild: aRemoveButton ].
+			anActionContainer addChild: aRemoveButton.
+			aList
+				when: BrSelectionChanged
+				do: [ :anEvent |
+					self updateToOneRemoveButton: aRemoveButton list: aList ] ].
 
 		aContainer addChild: anActionContainer ].
 
@@ -333,6 +337,18 @@ CFMaBuilderUtility class >> newToManyRemoveButtonMemento: aMemento using: aDescr
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> updateToManyRemoveButton: aButton list: aListElement [
+	| hasSelection |
+	hasSelection := false.
+	aListElement selectedIndices do: [ :anIndex |
+		(anIndex between: 1 and: aListElement maxSelectionIndex)
+			ifTrue: [ hasSelection := true ] ].
+	hasSelection
+		ifTrue: [ aButton enable ]
+		ifFalse: [ aButton disable ]
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> updateToOneRemoveButton: aButton list: aListElement [
 	| hasSelection |
 	hasSelection := false.
 	aListElement selectedIndices do: [ :anIndex |
@@ -549,6 +565,11 @@ CFMaBuilderUtility class >> newColumnedToOneListMemento: aMemento using: aDescri
 	anActionContainer addChild: aRemoveButton.
 
 	aContainer addChild: anActionContainer.
+
+	aList
+		when: BrSelectionChanged
+		do: [ :anEvent |
+			self updateToOneRemoveButton: aRemoveButton list: aList ].
 
 	self
 		installRelationEditorShortcutsOn: aContainer
