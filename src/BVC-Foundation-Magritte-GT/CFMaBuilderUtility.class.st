@@ -669,7 +669,18 @@ CFMaBuilderUtility class >> configureReferenceColumn: aColumn description: aDesc
 		ifTrue: [ ^ self ].
 
 	anIndex = anExpandingIndex
-		ifTrue: [ aColumn weight: 1 ]
+		ifTrue: [ aColumn weight: self primaryReferenceColumnWeight ]
+		ifFalse: [ aColumn weight: self secondaryReferenceColumnWeight ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> primaryReferenceColumnWeight [
+	^ 4
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> secondaryReferenceColumnWeight [
+	^ 1
 ]
 
 { #category : 'private - relation editor' }
