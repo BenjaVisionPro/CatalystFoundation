@@ -392,6 +392,15 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 	^ aContainer
 ]
 
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newAutoSizingRelationEditorContainer [
+	^ self newRelationEditorContainer
+		hMatchParent;
+		vFitContentLimited;
+		yourself
+]
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newExpandingRelationEditorContainer [
 	^ self newRelationEditorContainer
@@ -516,11 +525,15 @@ CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDes
 	canModify := aDescription definitive not.
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
-	aContainer := self newExpandingRelationEditorContainer.
+	aContainer := self newAutoSizingRelationEditorContainer.
 
 	aList := self newColumnedRelationListUsing: aDescription.
-	aList vMatchParent.
-	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+	aList
+		hMatchParent;
+		vFitContentLimited.
+	aList constraintsDo: [ :c |
+		c padding: (BlInsets top: 10 bottom: 10).
+		c maxHeight: 200 ].
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 

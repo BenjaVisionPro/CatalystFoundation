@@ -15,13 +15,14 @@ CFMaColumnedListElementStencilBuilder >> buildDefault [
 	aFlowElement := CFMaBuilderUtility
 		newColumnedRelationListMemento: self memento
 		using: self description.
-	aFlowElement constraintsDo: [ :c | c minHeight: 200 ].
+	aFlowElement constraintsDo: [ :c | c maxHeight: 200 ].
 
-	self form ifNotNil: [ :aForm | aForm matchParent ].
+	self form ifNotNil: [ :aForm | aForm hMatchParent; vFitContentLimited ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
 		element: aFlowElement;
-		matchParent
+		hMatchParent;
+		vFitContentLimited
 ]
