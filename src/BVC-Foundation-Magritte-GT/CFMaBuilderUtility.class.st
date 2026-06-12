@@ -621,10 +621,50 @@ CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemen
 			title: eachReferenceDescription label;
 			matchParent;
 			stencil: [ :anItemViewModel :anItemIndex :aColumnIndex |
-				CFMaReadOnlyDescriptionElementBuilder
-					model: (self relationObjectForItem: anItemViewModel)
-					memento: aMemento
-					description: eachReferenceDescription ] ]
+				self
+					newReadOnlyColumnCellFor: (self relationObjectForItem: anItemViewModel)
+					using: eachReferenceDescription ] ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject using: aDescription [
+	| aReadOnlyDescription aCellMemento |
+	aReadOnlyDescription := aDescription copy
+		beReadOnly;
+		yourself.
+	aCellMemento := GtMagritteMemento
+		model: anObject
+		description: aReadOnlyDescription asContainer.
+
+	^ self
+		newReadOnlyColumnCellFor: anObject
+		memento: aCellMemento
+		using: aReadOnlyDescription
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject memento: aMemento using: aDescription [
+	(aDescription isKindOf: GtMagritteIconDescription)
+		ifTrue: [ ^ GtMagritteBuilderUtility
+			newIconWithMemento: aMemento
+			using: aDescription ].
+
+	aDescription blocStencil
+		ifNotNil: [ :aStencil |
+			^ aStencil
+				memento: aMemento;
+				description: aDescription;
+				asElement ].
+
+	^ self
+		newTextColumnCellFor: anObject
+		using: aDescription
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newTextColumnCellFor: anObject using: aDescription [
+	^ BrColumnCellLabelStencil new
+		text: (aDescription readToString: anObject)
 ]
 
 
