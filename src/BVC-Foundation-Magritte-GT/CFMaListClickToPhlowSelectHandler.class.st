@@ -1,51 +1,71 @@
 Class {
 	#name : 'CFMaListClickToPhlowSelectHandler',
-	#superclass : 'GtPhlowListHandler',
+	#superclass : 'BrListClickToSelectHandler',
+	#instVars : [
+		'transformation'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'defaults' }
+CFMaListClickToPhlowSelectHandler >> defaultTransformation [
+	^ GtPhlowSendTransformation default
+]
+
+{ #category : 'initialization' }
+CFMaListClickToPhlowSelectHandler >> initialize [
+	super initialize.
+	transformation := self defaultTransformation
+]
+
 { #category : 'api - accessing' }
-CFMaListClickToPhlowSelectHandler >> eventsToHandle [
-	^ { BlClickEvent }
+CFMaListClickToPhlowSelectHandler >> transformation [
+	^ transformation
 ]
 
-{ #category : 'api - event managing' }
-CFMaListClickToPhlowSelectHandler >> handleEvent: anEvent [
-	self clickEvent: anEvent
+{ #category : 'api - accessing' }
+CFMaListClickToPhlowSelectHandler >> transformation: aGtPhlowSendTransformation [
+	transformation := aGtPhlowSendTransformation asPhlowSendTransformation
 ]
 
-{ #category : 'api - event managing' }
-CFMaListClickToPhlowSelectHandler >> clickEvent: anEvent [
-	| aList thePreviousIndices |
-	aList := anEvent currentTarget.
-	anEvent target == aList ifTrue: [ ^ self ].
+{ #category : 'api - accessing' }
+CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
+	| anItemIndex wasAlreadySelected |
 
-	thePreviousIndices := aList selectedIndices.
-	thePreviousIndices isEmpty ifTrue: [ ^ self ].
+	anItemIndex := aBlClickEvent currentTarget constraints infinite holder dataSourcePosition.
+	anItemIndex <= 0
+		ifTrue: [ ^ self ].
 
-	BlUniverse defer: [
-		aList isAttachedToSceneGraph ifTrue: [
-			| theCurrentIndices |
-			theCurrentIndices := aList selectedIndices.
-			theCurrentIndices = thePreviousIndices ifTrue: [
-				self selectIndices: theCurrentIndices from: aList ] ] ]
+	wasAlreadySelected := self
+		isListWidget: self listWidget
+		selectedAt: anItemIndex.
+
+	super clickEvent: aBlClickEvent.
+
+	wasAlreadySelected ifTrue: [
+		self selectCurrentSelectionFrom: self listWidget ]
+]
+
+{ #category : 'private - testing' }
+CFMaListClickToPhlowSelectHandler >> isListWidget: aListWidget selectedAt: anIndex [
+	| isSelected |
+	isSelected := false.
+	aListWidget selectedIndices do: [ :eachIndex |
+		eachIndex = anIndex ifTrue: [ isSelected := true ] ].
+	^ isSelected
 ]
 
 { #category : 'private - selecting' }
-CFMaListClickToPhlowSelectHandler >> selectIndices: theIndices from: aList [
-	| selectedObject |
+CFMaListClickToPhlowSelectHandler >> selectCurrentSelectionFrom: aListWidget [
+	| theIndices selectedObject |
+	theIndices := aListWidget selectedIndices.
 	theIndices isEmpty ifTrue: [ ^ self ].
 
-	selectedObject := aList selectionCallback value: theIndices.
+	selectedObject := aListWidget selectionCallback value: theIndices.
 	self transformation
 		select: selectedObject
 		indices: theIndices
-		from: aList
+		from: aListWidget
 		shouldShowSpace: false
-]
-
-{ #category : 'api - event managing' }
-CFMaListClickToPhlowSelectHandler >> wantsEvent: anEvent [
-	^ anEvent isKindOf: BlClickEvent
 ]

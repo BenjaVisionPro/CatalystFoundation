@@ -490,13 +490,31 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		itemDataBinder: (self newRelationListItemDataBinderUsing: aDescription);
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
-		addEventFilter: (CFMaListClickToPhlowSelectHandler new
-			transformation: GtPhlowSendTransformation default);
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
+	self installListClickToPhlowSelectOn: aList.
 	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
+]
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> installListClickToPhlowSelectOn: aListElement [
+	aListElement
+		when: BrListItemElementAttached
+		do: [ :anEvent |
+			| anItemElement |
+			anItemElement := anEvent itemElement.
+			anItemElement userData
+				at: #cfMaListClickToPhlowSelectHandlerInstalled
+				ifAbsentPut: [
+					anItemElement addEventFilter: (CFMaListClickToPhlowSelectHandler new
+						listWidget: aListElement;
+						transformation: GtPhlowSendTransformation default;
+						yourself).
+					true ] ].
+	^ aListElement
 ]
 
 { #category : 'private - relation editor' }
@@ -685,11 +703,10 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
 		addAptitude: CFMaFocusWithinAptitude;
-		addEventFilter: (CFMaListClickToPhlowSelectHandler new
-			transformation: GtPhlowSendTransformation default);
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
+	self installListClickToPhlowSelectOn: aList.
 	self addReferenceColumnsTo: aList memento: aMemento using: aDescription.
 	^ aList
 ]
