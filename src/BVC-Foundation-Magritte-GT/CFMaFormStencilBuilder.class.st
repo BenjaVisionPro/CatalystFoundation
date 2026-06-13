@@ -20,8 +20,7 @@ CFMaFormStencilBuilder >> buildDefault [
 		addChild: aBodyElement as: #body;
 		addChild: aFooterElement as: #footer.
 
-	CFMaFormLayoutDebugOverlayElement enabled ifTrue: [
-		aFormElement addChild: (CFMaFormLayoutDebugOverlayElement forTarget: aFormElement) ].
+	aFormElement addChild: (CFMaFormLayoutDebugOverlayElement forTarget: aFormElement).
 
 	^ aFormElement
 ]

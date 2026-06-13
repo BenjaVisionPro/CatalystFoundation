@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaFormLayoutDebugOverlayElement',
 	#superclass : 'BlElement',
 	#instVars : [
-		'targetElement'
+		'targetElement',
+		'enabled'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -17,8 +18,20 @@ CFMaFormLayoutDebugOverlayElement class >> forTarget: anElement [
 ]
 
 { #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement class >> enabled [
-	^ true
+CFMaFormLayoutDebugOverlayElement class >> overlayIn: anElement [
+	^ anElement
+		allChildrenBreadthFirstDetect: [ :eachElement |
+			eachElement isKindOf: CFMaFormLayoutDebugOverlayElement ]
+		ifFound: [ :anOverlay | anOverlay ]
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> toggleIn: anElement [
+	^ (self overlayIn: anElement)
+		ifNotNil: [ :anOverlay |
+			anOverlay toggleEnabled.
+			anOverlay isEnabled ]
+		ifNil: [ false ]
 ]
 
 { #category : 'drawing' }
@@ -44,6 +57,7 @@ CFMaFormLayoutDebugOverlayElement >> drawElementDebugBounds: anElement onSpartaC
 CFMaFormLayoutDebugOverlayElement >> drawOnSpartaCanvas: aCanvas [
 	super drawOnSpartaCanvas: aCanvas.
 
+	self isEnabled ifFalse: [ ^ self ].
 	targetElement ifNil: [ ^ self ].
 	targetElement withAllChildrenBreadthFirstDo: [ :eachElement |
 		(eachElement == self or: [ eachElement isKindOf: CFMaFormLayoutDebugOverlayElement ])
@@ -65,6 +79,7 @@ CFMaFormLayoutDebugOverlayElement >> drawRectangle: aRectangle onSpartaCanvas: a
 CFMaFormLayoutDebugOverlayElement >> initialize [
 	super initialize.
 
+	enabled := false.
 	self
 		preventMouseEvents;
 		matchParent;
@@ -81,6 +96,23 @@ CFMaFormLayoutDebugOverlayElement >> localRectangleFor: aRectangle of: anElement
 	anElement localBoundsToGlobal: aBounds.
 	self globalBoundsToLocal: aBounds.
 	^ aBounds asRectangle
+]
+
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> isEnabled [
+	^ enabled ifNil: [ false ]
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
+	enabled := aBoolean.
+	self invalidate
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> toggleEnabled [
+	self enabled: self isEnabled not
 ]
 
 { #category : 'accessing' }
