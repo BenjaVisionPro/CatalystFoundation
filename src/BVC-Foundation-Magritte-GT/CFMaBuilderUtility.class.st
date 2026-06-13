@@ -708,6 +708,7 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 
 	self installListClickToPhlowSelectOn: aList.
 	self addReferenceColumnsTo: aList memento: aMemento using: aDescription.
+	self debugColumnedRelationLayoutElement: aList.
 	^ aList
 ]
 
@@ -729,6 +730,7 @@ CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemen
 					newReadOnlyColumnCellFor: (self relationObjectForItem: anItemViewModel)
 					using: eachReferenceDescription.
 				self alignReferenceColumnCellChild: aCellChild.
+				self debugColumnedRelationLayoutElement: aCellChild.
 				aCellElement
 					removeChildren;
 					addChild: aCellChild ].
@@ -797,14 +799,14 @@ CFMaBuilderUtility class >> referenceIconPadding [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newReferenceColumnCellElementExpanding: aBoolean [
-	^ BlElement new
+	^ self debugColumnedRelationLayoutElement: (BlElement new
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
 			c vertical fitContent.
 			aBoolean
 				ifTrue: [ c horizontal matchParent ]
 				ifFalse: [ c horizontal fitContent ] ];
-		yourself
+		yourself)
 ]
 
 
@@ -866,6 +868,19 @@ CFMaBuilderUtility class >> newTextColumnCellFor: anObject using: aDescription [
 		fitContent: (aDescription readToString: anObject)
 ]
 
+
+
+{ #category : 'private - debugging' }
+CFMaBuilderUtility class >> debugColumnedRelationLayoutEnabled [
+	^ true
+]
+
+{ #category : 'private - debugging' }
+CFMaBuilderUtility class >> debugColumnedRelationLayoutElement: anElement [
+	self debugColumnedRelationLayoutEnabled
+		ifTrue: [ anElement debug: true ].
+	^ anElement
+]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationItemViewModelsForModels: aCollection existingViewModels: anExistingViewModels memento: aMemento description: aDescription [

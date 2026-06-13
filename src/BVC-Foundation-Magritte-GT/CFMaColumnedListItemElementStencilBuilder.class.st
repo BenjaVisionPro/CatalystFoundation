@@ -7,6 +7,9 @@ Class {
 
 { #category : 'api - instantiation' }
 CFMaColumnedListItemElementStencilBuilder >> buildDefault [
-	^ super buildDefault
-		addAptitude: CFMaFocusAwareListItemAptitude
+	| anElement |
+	anElement := super buildDefault
+		addAptitude: CFMaFocusAwareListItemAptitude;
+		yourself.
+	^ CFMaBuilderUtility debugColumnedRelationLayoutElement: anElement
 ]
