@@ -11,5 +11,5 @@ CFMaColumnedListItemElementStencilBuilder >> buildDefault [
 	anElement := super buildDefault
 		addAptitude: CFMaFocusAwareListItemAptitude;
 		yourself.
-	^ CFMaBuilderUtility debugColumnedRelationLayoutElement: anElement
+	^ anElement
 ]
