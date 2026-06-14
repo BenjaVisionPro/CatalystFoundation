@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaFormLayoutDebugOverlayElement',
-	#superclass : 'BlElement',
+	#superclass : 'BlOverlayElement',
 	#instVars : [
 		'targetElement',
 		'enabled'
@@ -14,6 +14,7 @@ Class {
 CFMaFormLayoutDebugOverlayElement class >> forTarget: anElement [
 	^ self new
 		targetElement: anElement;
+		attachTo: anElement;
 		yourself
 ]
 
@@ -23,6 +24,31 @@ CFMaFormLayoutDebugOverlayElement class >> overlayIn: anElement [
 		allChildrenBreadthFirstDetect: [ :eachElement |
 			eachElement isKindOf: CFMaFormLayoutDebugOverlayElement ]
 		ifFound: [ :anOverlay | anOverlay ]
+]
+
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> debugIconOff [
+	^ BrGlamorousVectorIcons debug
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> debugIconOn [
+	^ [ BrGlamorousVectorIcons debug asElement
+		background: Color red;
+		yourself ] asStencil
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> setEnabled: aBoolean in: anElement button: aButton [
+	^ (self overlayIn: anElement)
+		ifNotNil: [ :anOverlay |
+			anOverlay enabled: aBoolean.
+			aButton icon: ((aBoolean
+				ifTrue: [ self debugIconOn ]
+				ifFalse: [ self debugIconOff ]) asElement).
+			anOverlay isEnabled ]
+		ifNil: [ false ]
 ]
 
 { #category : 'accessing' }
@@ -79,14 +105,7 @@ CFMaFormLayoutDebugOverlayElement >> drawRectangle: aRectangle onSpartaCanvas: a
 CFMaFormLayoutDebugOverlayElement >> initialize [
 	super initialize.
 
-	enabled := false.
-	self
-		preventMouseEvents;
-		matchParent;
-		constraintsDo: [ :c |
-			c ignoreByLayout.
-			c ignored horizontal alignLeft.
-			c ignored vertical alignTop ]
+	enabled := false
 ]
 
 { #category : 'geometry' }
@@ -107,7 +126,8 @@ CFMaFormLayoutDebugOverlayElement >> isEnabled [
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
 	enabled := aBoolean.
-	self invalidate
+	self invalidate.
+	targetElement ifNotNil: [ targetElement invalidate ]
 ]
 
 { #category : 'accessing' }

@@ -16,11 +16,19 @@ CFObject >> gtMagritteFor: aView [
 		title: 'Magritte';
 		priority: 49;
 		stencil: [ self asGtMagritteViewModel asElement margin: (BlInsets all: 10) ];
-		actionButtonIcon: BrGlamorousVectorIcons debug
+		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
 			label: 'Layout Debug'
 			tooltip: 'Toggle form layout debug overlay'
-			action: [ :aButton :aTab |
-				CFMaFormLayoutDebugOverlayElement toggleIn: aTab viewContentElement ];
+			activated: [ :aButton :aTab :anEvent |
+				CFMaFormLayoutDebugOverlayElement
+					setEnabled: true
+					in: aTab viewContentElement
+					button: aButton ]
+			deactivated: [ :aButton :aTab :anEvent |
+				CFMaFormLayoutDebugOverlayElement
+					setEnabled: false
+					in: aTab viewContentElement
+					button: aButton ];
 		actionButtonIcon: BrGlamorousVectorIcons inspect
 			label: 'Memento'
 			tooltip: 'Inspect Memento'
