@@ -69,7 +69,7 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	aContainer := self newRelationEditorContainer.
 
 	aList := self newRelationListUsing: aDescription.
-	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+	aList constraintsDo: [ :c | c padding: self relationListPadding ].
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
@@ -156,7 +156,7 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 	aContainer := self newRelationEditorContainer.
 
 	aList := self newRelationListUsing: aDescription.
-	aList constraintsDo: [ :c | c padding: (BlInsets top: 10 bottom: 10) ].
+	aList constraintsDo: [ :c | c padding: self relationListPadding ].
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
@@ -385,14 +385,31 @@ CFMaBuilderUtility class >> updateToOneRemoveButton: aButton sinkUpdate: aSink [
 		ifNotNil: [ aButton enable ]
 ]
 
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationEditorPadding [
+	^ BlInsets top: 0 right: 0 bottom: 0 left: 0
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationEditorCellSpacing [
+	^ 4
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationListPadding [
+	^ BlInsets top: 2 right: 0 bottom: 2 left: 0
+]
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationEditorContainer [
 	| aContainer |
 	aContainer := BrVerticalPane new
 		matchParent;
 		vFitContent;
-		cellSpacing: 8;
-		padding: (BlInsets all: 4);
+		cellSpacing: self relationEditorCellSpacing;
+		padding: self relationEditorPadding;
 		border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1);
 		background: Color white;
 		yourself.
@@ -687,7 +704,7 @@ CFMaBuilderUtility class >> configureColumnedRelationList: aList [
 		hMatchParent;
 		vFitContentLimited.
 	aList constraintsDo: [ :c |
-		c padding: (BlInsets top: 10 bottom: 10).
+		c padding: self relationListPadding.
 		c maxHeight: self referenceColumnedListMaxHeight ].
 	^ aList
 ]
