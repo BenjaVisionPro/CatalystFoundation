@@ -76,10 +76,7 @@ CFMaBuilderUtility class >> newFlowListMemento: aMemento using: aDescription [
 	aContainer addChild: aList.
 
 	canModify ifTrue: [
-		anActionContainer := BrHorizontalPane new
-			fitContent;
-			cellSpacing: 8;
-			yourself.
+		anActionContainer := self newRelationActionContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaAddItemViewModel new
@@ -163,10 +160,7 @@ CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
 	aContainer addChild: aList.
 
 	(isModifiable or: [ canAdd ]) ifTrue: [
-		anActionContainer := BrHorizontalPane new
-			fitContent;
-			cellSpacing: 8;
-			yourself.
+		anActionContainer := self newRelationActionContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaToOneAddItemViewModel new
@@ -233,10 +227,7 @@ CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescriptio
 	aContainer addChild: aFrame.
 
 	(isModifiable or: [ canAdd ]) ifTrue: [
-		anActionContainer := BrHorizontalPane new
-			fitContent;
-			cellSpacing: 8;
-			yourself.
+		anActionContainer := self newRelationActionContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaToOneAddItemViewModel new
@@ -394,12 +385,27 @@ CFMaBuilderUtility class >> relationEditorPadding [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationEditorCellSpacing [
-	^ 4
+	^ 0
 ]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationListPadding [
-	^ BlInsets top: 2 right: 0 bottom: 2 left: 0
+	^ BlInsets top: 0 right: 0 bottom: 0 left: 0
+]
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationActionContainerMargin [
+	^ BlInsets all: 8
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationActionContainer [
+	^ BrHorizontalPane new
+		fitContent;
+		cellSpacing: 8;
+		margin: self relationActionContainerMargin;
+		yourself
 ]
 
 { #category : 'private - relation editor' }
@@ -661,10 +667,7 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 	aContainer addChild: aList.
 
 	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
-		anActionContainer := BrHorizontalPane new
-			fitContent;
-			cellSpacing: 8;
-			yourself.
+		anActionContainer := self newRelationActionContainer.
 
 		anAddElement ifNotNil: [ anActionContainer addChild: anAddElement ].
 		aRemoveButton ifNotNil: [ anActionContainer addChild: aRemoveButton ].
