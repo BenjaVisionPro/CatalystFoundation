@@ -16,5 +16,5 @@ CFMaFormElement >> initialize [
 		margin: (BlInsets all: 6);
 		cellSpacing: 0;
 		hMatchParent;
-		vFitContent
+		vMatchParent
 ]

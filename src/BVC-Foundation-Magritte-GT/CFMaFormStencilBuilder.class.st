@@ -7,17 +7,22 @@ Class {
 
 { #category : 'api - instantiation' }
 CFMaFormStencilBuilder >> buildDefault [
-	| aFormElement aHeaderElement aBodyElement aFooterElement |
+	| aFormElement aHeaderElement aBodyElement aBodyScrollableElement aFooterElement |
 	aFormElement := CFMaFormElement new.
 	aHeaderElement := CFMaFormHeaderElement new
 		memento: memento;
 		yourself.
 	aBodyElement := CFMaFormBodyElement new.
+	aBodyScrollableElement := BlScrollableElement new
+		addChild: aBodyElement;
+		hMatchParent;
+		vMatchParent;
+		yourself.
 	aFooterElement := CFMaFormFooterElement new.
 
 	aFormElement
 		addChild: aHeaderElement as: #header;
-		addChild: aBodyElement as: #body;
+		addChild: aBodyScrollableElement as: #body;
 		addChild: aFooterElement as: #footer.
 
 	aFormElement
