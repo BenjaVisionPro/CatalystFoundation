@@ -15,8 +15,9 @@ CFMaFormStencilBuilder >> buildDefault [
 	aBodyElement := CFMaFormBodyElement new.
 	aBodyScrollableElement := BlScrollableElement new
 		addChild: aBodyElement;
-		hMatchParent;
-		vMatchParent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
 		yourself.
 	aFooterElement := CFMaFormFooterElement new.
 
