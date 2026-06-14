@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BlOverlayElement',
 	#instVars : [
 		'targetElement',
-		'enabled'
+		'enabled',
+		'hoveredElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -84,10 +85,11 @@ CFMaFormLayoutDebugOverlayElement >> drawOnSpartaCanvas: aCanvas [
 	super drawOnSpartaCanvas: aCanvas.
 
 	self isEnabled ifFalse: [ ^ self ].
-	targetElement ifNil: [ ^ self ].
-	targetElement withAllChildrenBreadthFirstDo: [ :eachElement |
-		(eachElement == self or: [ eachElement isKindOf: CFMaFormLayoutDebugOverlayElement ])
-			ifFalse: [ self drawElementDebugBounds: eachElement onSpartaCanvas: aCanvas ] ]
+	hoveredElement ifNil: [ ^ self ].
+	(hoveredElement == self or: [ hoveredElement isKindOf: CFMaFormLayoutDebugOverlayElement ])
+		ifTrue: [ ^ self ].
+
+	self drawElementDebugBounds: hoveredElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'drawing' }
@@ -105,7 +107,8 @@ CFMaFormLayoutDebugOverlayElement >> drawRectangle: aRectangle onSpartaCanvas: a
 CFMaFormLayoutDebugOverlayElement >> initialize [
 	super initialize.
 
-	enabled := false
+	enabled := false.
+	hoveredElement := nil
 ]
 
 { #category : 'geometry' }
@@ -126,6 +129,7 @@ CFMaFormLayoutDebugOverlayElement >> isEnabled [
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
 	enabled := aBoolean.
+	aBoolean ifFalse: [ hoveredElement := nil ].
 	self invalidate.
 	targetElement ifNotNil: [ targetElement invalidate ]
 ]
@@ -142,5 +146,31 @@ CFMaFormLayoutDebugOverlayElement >> targetElement [
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> targetElement: anElement [
-	targetElement := anElement
+	targetElement := anElement.
+	self installHoverDebugHandlersOn: anElement
+]
+
+{ #category : 'private - events' }
+CFMaFormLayoutDebugOverlayElement >> installHoverDebugHandlersOn: anElement [
+	anElement
+		addEventFilterOn: BlMouseMoveEvent
+		do: [ :anEvent | self updateHoveredElementFrom: anEvent ].
+	anElement
+		addEventFilterOn: BlMouseLeaveEvent
+		do: [ :anEvent | self clearHoveredElement ]
+]
+
+{ #category : 'private - events' }
+CFMaFormLayoutDebugOverlayElement >> updateHoveredElementFrom: aMouseEvent [
+	self isEnabled ifFalse: [ ^ self ].
+	hoveredElement == aMouseEvent target ifTrue: [ ^ self ].
+	hoveredElement := aMouseEvent target.
+	self invalidate
+]
+
+{ #category : 'private - events' }
+CFMaFormLayoutDebugOverlayElement >> clearHoveredElement [
+	hoveredElement ifNil: [ ^ self ].
+	hoveredElement := nil.
+	self invalidate
 ]
