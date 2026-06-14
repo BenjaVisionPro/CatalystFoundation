@@ -862,8 +862,9 @@ CFMaBuilderUtility class >> newReadOnlyColumnCellFor: anObject memento: aMemento
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newTextColumnCellFor: anObject using: aDescription [
-	^ BrColumnCellLabelStencil
-		fitContent: (aDescription readToString: anObject)
+	^ BrColumnCellLabelStencil new
+		text: (aDescription readToString: anObject);
+		create
 ]
 
 
