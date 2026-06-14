@@ -6,18 +6,25 @@ Class {
 }
 
 { #category : 'initialization' }
+CFMaViewModel >> formContainerStencilForMemento: aMemento [
+	^ aMemento magritteDescription
+		propertyAt: #blocElementContainerStencil
+		ifPresent: [ :aStencil | aStencil asStencilBuilder: CFMaFormStencilBuilder ]
+		ifAbsent: [ CFMaFormStencilBuilder new ]
+]
+
+{ #category : 'initialization' }
 CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	| aContainer aStencil |
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
 
 	theFrame removeChildren.
 
-	aStencil := aMemento magritteDescription blocElementContainerStencil
-			asStencilBuilder: CFMaFormStencilBuilder.
+	aStencil := self formContainerStencilForMemento: aMemento.
 
 	aContainer := aStencil
-			memento: aMemento;
-			asElement.
+		memento: aMemento;
+		asElement.
 
 	theFrame addChild: aContainer.
 	aContainer requestStyle.
