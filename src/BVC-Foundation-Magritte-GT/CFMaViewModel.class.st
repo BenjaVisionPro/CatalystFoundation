@@ -40,17 +40,21 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 
 { #category : 'api - converting' }
 CFMaViewModel >> asElement [
-	| aFrame |
+	| aFrame aResizerAptitude |
 	aFrame := CFMaFormRootElement new.
+
+	aResizerAptitude := BrLayoutResizerAptitude new.
+	aResizerAptitude hAnyToMatchParent.
+	aResizerAptitude vAny vMatchParent.
+	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
+	aResizerAptitude vAnyToMatchParent: [ aFrame children ].
 
 	aFrame
 		matchParent;
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];
-		addAptitude: (BrLayoutResizerAptitude new
-			hAnyToMatchParent: [ aFrame children ];
-			vAnyToMatchParent: [ aFrame children ]);
+		addAptitude: aResizerAptitude;
 		withAsyncFutureDo: [ :anElementFuture |
 			anElementFuture
 				whenPending: [ :theContainer |
