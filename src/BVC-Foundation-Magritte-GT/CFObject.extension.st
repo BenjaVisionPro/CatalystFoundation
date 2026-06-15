@@ -18,7 +18,6 @@ CFObject >> gtMagritteFor: aView [
 		disableAsync;
 		stencil: [
 			self asGtMagritteViewModel asElement
-				matchParent;
 				margin: (BlInsets all: 10);
 				yourself ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff

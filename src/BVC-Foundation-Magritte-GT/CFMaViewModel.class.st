@@ -37,3 +37,54 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 		build.
 	^ self onElementCreated cull: theFrame
 ]
+
+{ #category : 'api - converting' }
+CFMaViewModel >> asElement [
+	| aFrame aResizerAptitude |
+	aFrame := BrFrame new.
+
+	aResizerAptitude := BrLayoutResizerAptitude new.
+	aResizerAptitude hAnyToMatchParent.
+	aResizerAptitude vAny vMatchParent.
+	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
+	aResizerAptitude vAnyToMatchParent: [ aFrame children ].
+
+	aFrame
+		hMatchParent;
+		vMatchParent;
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		addAptitude: aResizerAptitude;
+		withAsyncFutureDo: [ :anElementFuture |
+			anElementFuture
+				whenPending: [ :theContainer |
+					theContainer
+						addChild: (BrLabel new
+							fitContent;
+							aptitude: (BrGlamorousLabelAptitude new
+								foreground: BrGlamorousColors disabledButtonTextColor);
+							text: 'Preparing...';
+							constraintsDo: [ :c |
+								c frame horizontal alignCenter.
+								c frame vertical alignCenter ]) ];
+				whenError: [ :theContainer :anError |
+					theContainer userData at: self class gtMementoSymbol put: anError.
+
+					theContainer
+						removeChildren;
+						addChild: (anError asDebuggableElement
+							hFitContentLimited;
+							vFitContent;
+							constraintsDo: [ :c |
+								c frame horizontal alignCenter.
+								c frame vertical alignCenter ]) ];
+				whenSuccess: [ :theFrame :aMemento | self initializeForm: theFrame forMemento: aMemento ] ].
+
+	aFrame asyncFuture
+		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
+	aFrame asyncFuture future: self mementoFuture.
+
+	^ aFrame
+]
+
