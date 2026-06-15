@@ -44,6 +44,7 @@ CFMaViewModel >> asElement [
 	aFrame := CFMaFormRootElement new.
 
 	aFrame
+		matchParent;
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];

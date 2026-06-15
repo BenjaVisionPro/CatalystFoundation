@@ -11,12 +11,3 @@ CFMaFormRootElement >> asScrollableElement [
 	Foundation forms own their internal body scroller, so the form root must opt out of that wrapping."
 	^ self
 ]
-
-{ #category : 'initialization' }
-CFMaFormRootElement >> initialize [
-	super initialize.
-
-	self
-		hMatchParent;
-		vMatchParent
-]
