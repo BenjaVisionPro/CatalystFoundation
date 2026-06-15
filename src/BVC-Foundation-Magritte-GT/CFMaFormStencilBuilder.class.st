@@ -99,9 +99,7 @@ CFMaFormStencilBuilder >> newBodyViewportElementWithScrollable: aScrollableEleme
 		hMatchParent;
 		vMatchParent;
 		constraintsDo: [ :c |
-			c linear weight: 1.
-			c frame horizontal weight: 1.
-			c frame vertical weight: 1 ];
+			c linear weight: 1 ];
 		addChild: aScrollableElement as: #bodyScroller;
 		addChild: aTopShadowElement as: #topScrollShadow;
 		addChild: aBottomShadowElement as: #bottomScrollShadow;
