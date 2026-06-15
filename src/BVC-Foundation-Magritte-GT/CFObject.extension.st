@@ -16,8 +16,15 @@ CFObject >> gtMagritteFor: aView [
 		title: 'Magritte';
 		priority: 49;
 		stencil: [
-			self asGtMagritteViewModel asElement
-				matchParent;
+			| anElement |
+			anElement := self asGtMagritteViewModel asElement.
+			anElement
+				hMatchParent;
+				vMatchParent;
+				addAptitude: (BrLayoutResizerAptitude new
+					hFitContentLimited hMatchParent;
+					vFitContentLimited vMatchParent;
+					yourself);
 				margin: (BlInsets all: 10);
 				yourself ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
