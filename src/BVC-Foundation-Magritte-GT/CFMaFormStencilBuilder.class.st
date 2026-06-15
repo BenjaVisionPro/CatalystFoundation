@@ -95,12 +95,13 @@ CFMaFormStencilBuilder >> newBodyScrollShadowElement [
 
 { #category : 'private - scrolling' }
 CFMaFormStencilBuilder >> newBodyViewportElementWithScrollable: aScrollableElement topShadow: aTopShadowElement bottomShadow: aBottomShadowElement [
-	^ BlElement new
-		layout: BlFrameLayout new;
+	^ BrFrame new
+		hMatchParent;
+		vMatchParent;
 		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical matchParent.
-			c linear weight: 1 ];
+			c linear weight: 1.
+			c frame horizontal weight: 1.
+			c frame vertical weight: 1 ];
 		addChild: aScrollableElement as: #bodyScroller;
 		addChild: aTopShadowElement as: #topScrollShadow;
 		addChild: aBottomShadowElement as: #bottomScrollShadow;
