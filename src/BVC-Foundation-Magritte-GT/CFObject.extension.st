@@ -16,15 +16,15 @@ CFObject >> gtMagritteFor: aView [
 		title: 'Magritte';
 		priority: 49;
 		stencil: [
-			| anElement |
+			| anElement aResizerAptitude |
 			anElement := self asGtMagritteViewModel asElement.
+			aResizerAptitude := BrLayoutResizerAptitude new.
+			aResizerAptitude hFitContentLimited hMatchParent.
+			aResizerAptitude vFitContentLimited vMatchParent.
 			anElement
 				hMatchParent;
 				vMatchParent;
-				addAptitude: (BrLayoutResizerAptitude new
-					hFitContentLimited hMatchParent;
-					vFitContentLimited vMatchParent;
-					yourself);
+				addAptitude: aResizerAptitude;
 				margin: (BlInsets all: 10);
 				yourself ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
