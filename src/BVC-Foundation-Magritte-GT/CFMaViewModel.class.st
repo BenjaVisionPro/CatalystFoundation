@@ -5,6 +5,54 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'api - converting' }
+CFMaViewModel >> asElement [
+	| aFrame |
+	aFrame := BrFrame new.
+
+	aFrame
+		hMatchParent;
+		vMatchParent;
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		addAptitude: (BrLayoutResizerAptitude new
+			hAnyToMatchParent: [ aFrame children ];
+			vAnyToMatchParent: [ aFrame children ];
+			yourself);
+		withAsyncFutureDo: [ :anElementFuture |
+			anElementFuture
+				whenPending: [ :theContainer |
+					theContainer
+						addChild: (BrLabel new
+							fitContent;
+							aptitude: (BrGlamorousLabelAptitude new
+								foreground: BrGlamorousColors disabledButtonTextColor);
+							text: 'Preparing...';
+							constraintsDo: [ :c |
+								c frame horizontal alignCenter.
+								c frame vertical alignCenter ]) ];
+				whenError: [ :theContainer :anError |
+					theContainer userData at: self class gtMementoSymbol put: anError.
+
+					theContainer
+						removeChildren;
+						addChild: (anError asDebuggableElement
+							hFitContentLimited;
+							vFitContent;
+							constraintsDo: [ :c |
+								c frame horizontal alignCenter.
+								c frame vertical alignCenter ]) ];
+				whenSuccess: [ :theFrame :aMemento | self initializeForm: theFrame forMemento: aMemento ] ].
+
+	aFrame asyncFuture
+		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
+	aFrame asyncFuture future: self mementoFuture.
+
+	^ aFrame
+]
+
+
 { #category : 'initialization' }
 CFMaViewModel >> formContainerStencilForMemento: aMemento [
 	^ aMemento magritteDescription
