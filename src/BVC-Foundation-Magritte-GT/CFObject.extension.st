@@ -17,10 +17,19 @@ CFObject >> gtMagritteFor: aView [
 		priority: 49;
 		disableAsync;
 		stencil: [
-			self asGtMagritteViewModel asElement
+			| aMagritteElement aScrollableElement |
+			aMagritteElement := self asGtMagritteViewModel asElement
 				matchParent;
 				margin: (BlInsets all: 10);
-				yourself ];
+				yourself.
+
+			aScrollableElement := BlScrollableElement new.
+			aScrollableElement
+				constraintsDo: [ :c |
+					c horizontal matchParent.
+					c vertical matchParent ];
+				addChild: aMagritteElement.
+			aScrollableElement ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
 			label: 'Layout Debug'
 			tooltip: 'Toggle form layout debug overlay'
