@@ -59,13 +59,21 @@ CFSmoothScrollableElementEventHandler >> animateOverscrollBackFor: aScrollableEl
 ]
 
 { #category : 'private - overscroll' }
+CFSmoothScrollableElementEventHandler >> clampedOverscrollOffset: aNumber [
+	^ (aNumber max: self overscrollMaximumOffset negated)
+		min: self overscrollMaximumOffset
+]
+
+{ #category : 'private - overscroll' }
 CFSmoothScrollableElementEventHandler >> applyOverscrollOffset: aNumber to: aScrollableElement [
+	| aClampedOffset |
 	aScrollableElement hasScrolledElement
 		ifFalse: [ ^ self ].
 
+	aClampedOffset := self clampedOverscrollOffset: aNumber.
 	aScrollableElement scrolledElement
 		transformDo: [ :aBuilder |
-			aBuilder translateBy: 0 @ aNumber ]
+			aBuilder translateBy: 0 @ aClampedOffset ]
 ]
 
 { #category : 'testing' }
@@ -130,6 +138,11 @@ CFSmoothScrollableElementEventHandler >> overscrollDeltaFor: dY [
 ]
 
 { #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollMaximumOffset [
+	^ 100.0
+]
+
+{ #category : 'accessing - overscroll' }
 CFSmoothScrollableElementEventHandler >> overscrollResistanceDistance [
 	^ 80.0
 ]
@@ -173,7 +186,8 @@ CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement [
 		overscrollReturnAnimation stopIfRunning.
 		overscrollReturnAnimation := nil ].
 
-	overscrollOffset := overscrollOffset + (self overscrollDeltaFor: dY).
+	overscrollOffset := self clampedOverscrollOffset:
+		overscrollOffset + (self overscrollDeltaFor: dY).
 	self applyOverscrollOffset: overscrollOffset to: aScrollableElement.
 	self animateOverscrollBackFor: aScrollableElement
 ]
