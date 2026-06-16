@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'targetElement',
 		'enabled',
-		'hoveredElement'
+		'hoveredElement',
+		'mouseMoveEventHandler',
+		'mouseLeaveEventHandler'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -81,15 +83,6 @@ CFMaFormLayoutDebugOverlayElement class >> setEnabled: aBoolean in: anElement bu
 	^ false
 ]
 
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement class >> toggleIn: anElement [
-	^ (self overlayIn: anElement)
-		ifNotNil: [ :anOverlay |
-			anOverlay toggleEnabled.
-			anOverlay isEnabled ]
-		ifNil: [ false ]
-]
-
 { #category : 'drawing' }
 CFMaFormLayoutDebugOverlayElement >> drawElementDebugBounds: anElement onSpartaCanvas: aCanvas [
 	self
@@ -164,29 +157,49 @@ CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement >> toggleEnabled [
-	self enabled: self isEnabled not
-]
-
-{ #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> targetElement [
 	^ targetElement
 ]
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> targetElement: anElement [
+	targetElement == anElement ifTrue: [ ^ self ].
+	self uninstallHoverDebugHandlers.
 	targetElement := anElement.
 	self installHoverDebugHandlersOn: anElement
 ]
 
 { #category : 'private - events' }
 CFMaFormLayoutDebugOverlayElement >> installHoverDebugHandlersOn: anElement [
-	anElement
-		addEventFilterOn: BlMouseMoveEvent
+	anElement ifNil: [ ^ self ].
+	mouseMoveEventHandler := BlEventHandler
+		on: BlMouseMoveEvent
 		do: [ :anEvent | self updateHoveredElementFrom: anEvent ].
+	mouseLeaveEventHandler := BlEventHandler
+		on: BlMouseLeaveEvent
+		do: [ :anEvent | self clearHoveredElement ].
 	anElement
-		addEventFilterOn: BlMouseLeaveEvent
-		do: [ :anEvent | self clearHoveredElement ]
+		addEventFilter: mouseMoveEventHandler;
+		addEventFilter: mouseLeaveEventHandler
+]
+
+{ #category : 'private - events' }
+CFMaFormLayoutDebugOverlayElement >> uninstallHoverDebugHandlers [
+	targetElement ifNil: [ ^ self ].
+	mouseMoveEventHandler ifNotNil: [
+		targetElement removeEventFilter: mouseMoveEventHandler.
+		mouseMoveEventHandler := nil ].
+	mouseLeaveEventHandler ifNotNil: [
+		targetElement removeEventFilter: mouseLeaveEventHandler.
+		mouseLeaveEventHandler := nil ].
+	hoveredElement := nil
+]
+
+{ #category : 'api - attaching / detaching' }
+CFMaFormLayoutDebugOverlayElement >> detach [
+	self uninstallHoverDebugHandlers.
+	super detach.
+	targetElement := nil
 ]
 
 { #category : 'private - events' }
