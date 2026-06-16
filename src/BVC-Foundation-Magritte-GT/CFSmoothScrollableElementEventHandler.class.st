@@ -94,21 +94,19 @@ CFSmoothScrollableElementEventHandler >> stopOverscrollReturn [
 ]
 
 { #category : 'private - overscroll' }
-CFSmoothScrollableElementEventHandler >> clampedOverscrollOffset: aNumber [
-	^ (aNumber max: self overscrollMaximumOffset negated)
-		min: self overscrollMaximumOffset
+CFSmoothScrollableElementEventHandler >> log10: aNumber [
+	"Use natural logarithms so this does not depend on a dialect-specific log10 selector."
+	^ aNumber ln / 10.0 ln
 ]
 
 { #category : 'private - overscroll' }
 CFSmoothScrollableElementEventHandler >> applyOverscrollOffset: aNumber to: aScrollableElement [
-	| aClampedOffset |
 	aScrollableElement hasScrolledElement
 		ifFalse: [ ^ self ].
 
-	aClampedOffset := self clampedOverscrollOffset: aNumber.
 	aScrollableElement scrolledElement
 		transformDo: [ :aBuilder |
-			aBuilder translateBy: 0 @ aClampedOffset ]
+			aBuilder translateBy: 0 @ aNumber ]
 ]
 
 { #category : 'testing' }
@@ -169,17 +167,19 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 ]
 
 { #category : 'private - overscroll' }
-CFSmoothScrollableElementEventHandler >> rubberBandOffsetForPullDistance: aDistance [
-	"Apple-style rubber band distance. UIScrollView-style rubber banding is commonly
-	modelled as: b = (1 - (1 / (((x * c) / d) + 1))) * d.
-	x is the real pull distance beyond the edge, c is the rubber-band constant, and
-	d is the asymptotic maximum visible offset. Foundation uses d = 100px so the
-	visual overshoot can never exceed 100px."
-	| x c d |
-	x := aDistance abs.
-	c := self overscrollRubberBandConstant.
-	d := self overscrollMaximumOffset.
-	^ (1.0 - (1.0 / (((x * c) / d) + 1.0))) * d
+CFSmoothScrollableElementEventHandler >> rubberBandOffsetForPullDistance: aDistance extent: anExtent [
+	"Map accumulated pull distance to visible rubber-band offset using the
+	log10 curve used by common Apple rubber-band recreations. The extent is a
+	reference distance for the curve, not a hard visual cap."
+	| sign rawDistance visibleDistance |
+	aDistance isZero
+		ifTrue: [ ^ 0 ].
+
+	sign := aDistance sign.
+	rawDistance := aDistance abs.
+	visibleDistance := anExtent * (self log10: ((rawDistance / anExtent) + 1.0)).
+
+	^ sign * visibleDistance
 ]
 
 { #category : 'private - overscroll' }
@@ -190,18 +190,36 @@ CFSmoothScrollableElementEventHandler >> overscrollDirectionFor: dY [
 ]
 
 { #category : 'accessing - overscroll' }
-CFSmoothScrollableElementEventHandler >> overscrollMaximumOffset [
-	^ 100.0
-]
-
-{ #category : 'accessing - overscroll' }
 CFSmoothScrollableElementEventHandler >> overscrollInputScale [
 	^ 28.0
 ]
 
 { #category : 'accessing - overscroll' }
-CFSmoothScrollableElementEventHandler >> overscrollRubberBandConstant [
-	^ 0.55
+CFSmoothScrollableElementEventHandler >> overscrollMaximumPullDistanceFactor [
+	^ 8.0
+]
+
+{ #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollMaximumRubberBandExtent [
+	^ 140.0
+]
+
+{ #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollMinimumRubberBandExtent [
+	^ 60.0
+]
+
+{ #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollRubberBandExtentFor: aScrollableElement [
+	| anExtent |
+	anExtent := aScrollableElement extent y * self overscrollRubberBandExtentFraction.
+	^ (anExtent max: self overscrollMinimumRubberBandExtent)
+		min: self overscrollMaximumRubberBandExtent
+]
+
+{ #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollRubberBandExtentFraction [
+	^ 0.18
 ]
 
 
@@ -212,12 +230,12 @@ CFSmoothScrollableElementEventHandler >> overscrollReturnDelay [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> overscrollReturnDuration [
-	^ 220 milliSeconds
+	^ 500 milliSeconds
 ]
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> overscrollReturnEasing [
-	^ BlDecelerateInterpolator factor: 1.2
+	^ BlEasing bounceOut
 ]
 
 
@@ -238,11 +256,10 @@ CFSmoothScrollableElementEventHandler >> resetOverscrollFor: aScrollableElement 
 
 { #category : 'private - overscroll' }
 CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement [
-	| aDirection aVisibleDistance |
-	"During active wheel input, accumulate the real pull distance and convert it
-	through the Apple-style rubber-band curve. Do not start the return animation
-	immediately; restart a short delayed return task instead, so repeated wheel
-	events feel like one continuous elastic pull."
+	| aDirection aRubberBandExtent aMaximumPullDistance |
+	"During active wheel input, accumulate raw pull distance and convert it
+	through a log10 rubber-band curve. The curve extent is derived from the
+	scrollable height, so it governs the visible feel instead of a fixed pixel cap."
 	aDirection := self overscrollDirectionFor: dY.
 	overscrollDirection = aDirection
 		ifFalse: [
@@ -251,10 +268,12 @@ CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement [
 
 	self stopOverscrollReturn.
 
-	overscrollPullDistance := overscrollPullDistance
-		+ (dY abs * self overscrollInputScale).
-	aVisibleDistance := self rubberBandOffsetForPullDistance: overscrollPullDistance.
-	overscrollOffset := self clampedOverscrollOffset: aDirection * aVisibleDistance.
+	aRubberBandExtent := self overscrollRubberBandExtentFor: aScrollableElement.
+	aMaximumPullDistance := aRubberBandExtent * self overscrollMaximumPullDistanceFactor.
+	overscrollPullDistance := (overscrollPullDistance + (dY abs * self overscrollInputScale))
+		min: aMaximumPullDistance.
+	overscrollOffset := aDirection *
+		(self rubberBandOffsetForPullDistance: overscrollPullDistance extent: aRubberBandExtent).
 
 	self applyOverscrollOffset: overscrollOffset to: aScrollableElement.
 	self scheduleOverscrollReturnFor: aScrollableElement
