@@ -282,7 +282,7 @@ CFSmoothScrollableElementEventHandler >> isAtTop: aScrollableElement [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> overscrollReturnDelay [
-	^ 100 milliSeconds
+	^ 1 milliSecond
 ]
 
 { #category : 'animation' }
