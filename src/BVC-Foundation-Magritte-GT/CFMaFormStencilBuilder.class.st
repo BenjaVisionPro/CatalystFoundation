@@ -32,12 +32,6 @@ CFMaFormStencilBuilder >> buildDefault [
 		addChild: aBodyViewportElement as: #body;
 		addChild: aFooterElement as: #footer.
 
-	aFormElement
-		addChild: ((CFMaFormLayoutDebugOverlayElement forTarget: aFormElement)
-			zIndex: 1000;
-			yourself)
-		as: #layoutDebugOverlay.
-
 	^ aFormElement
 ]
 

@@ -27,6 +27,17 @@ CFMaFormLayoutDebugOverlayElement class >> overlayIn: anElement [
 		ifFound: [ :anOverlay | anOverlay ]
 ]
 
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> targetFormElementIn: anElement [
+	(anElement isKindOf: CFMaFormElement)
+		ifTrue: [ ^ anElement ].
+
+	^ anElement
+		allChildrenBreadthFirstDetect: [ :eachElement |
+			eachElement isKindOf: CFMaFormElement ]
+		ifFound: [ :aFormElement | aFormElement ]
+]
+
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement class >> debugIconOff [
@@ -42,14 +53,32 @@ CFMaFormLayoutDebugOverlayElement class >> debugIconOn [
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement class >> setEnabled: aBoolean in: anElement button: aButton [
-	^ (self overlayIn: anElement)
-		ifNotNil: [ :anOverlay |
-			anOverlay enabled: aBoolean.
-			aButton icon: ((aBoolean
-				ifTrue: [ self debugIconOn ]
-				ifFalse: [ self debugIconOff ]) asElement).
-			anOverlay isEnabled ]
-		ifNil: [ false ]
+	| anOverlay aTargetElement |
+	aBoolean
+		ifTrue: [
+			aTargetElement := self targetFormElementIn: anElement.
+			aTargetElement ifNil: [
+				aButton icon: self debugIconOff asElement.
+				^ false ].
+
+			anOverlay := self overlayIn: aTargetElement.
+			anOverlay ifNil: [
+				anOverlay := self forTarget: aTargetElement.
+				anOverlay
+				zIndex: 1000;
+				enabled: true.
+				aTargetElement addChild: anOverlay as: #layoutDebugOverlay ].
+
+			anOverlay enabled: true.
+			aButton icon: self debugIconOn asElement.
+			^ true ].
+
+	anOverlay := self overlayIn: anElement.
+	anOverlay ifNotNil: [
+		anOverlay detach.
+		anOverlay removeFromParent ].
+	aButton icon: self debugIconOff asElement.
+	^ false
 ]
 
 { #category : 'accessing' }
