@@ -71,18 +71,46 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
 
 { #category : 'private - scrolling' }
 CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement [
+	| aConsumedDelta anOverscrollDelta |
 	dY isZero
 		ifTrue: [ ^ false ].
+	aScrollableElement hasScrolledElement
+		ifFalse: [ ^ false ].
 
-	((dY > 0 and: [ self isAtTop: aScrollableElement ])
-		or: [ dY < 0 and: [ self isAtBottom: aScrollableElement ] ])
-		ifTrue: [
-			self rubberBand: dY on: aScrollableElement.
+	aConsumedDelta := self
+		consumableVerticalDeltaFor: dY
+		on: aScrollableElement.
+	anOverscrollDelta := dY - aConsumedDelta.
+
+	anOverscrollDelta isZero
+		ifFalse: [
+			"Large/flick deltas can cross an edge in a single event. Consume only the
+			in-range part as real scroll, then send the leftover through the same
+			log10 rubber-band path as direct edge input."
+			self resetOverscrollFor: aScrollableElement.
+			aConsumedDelta isZero
+				ifFalse: [ aScrollableElement scrollVerticallyBy: aConsumedDelta ].
+			self rubberBand: anOverscrollDelta on: aScrollableElement.
 			^ true ].
 
 	self resetOverscrollFor: aScrollableElement.
 	aScrollableElement smoothScrollBy: 0 @ dY.
 	^ true
+]
+
+{ #category : 'private - scrolling' }
+CFSmoothScrollableElementEventHandler >> consumableVerticalDeltaFor: dY on: aScrollableElement [
+	| aCurrentY aMinimumY aMaximumY |
+	aCurrentY := aScrollableElement scrollPosition y.
+	aMinimumY := aScrollableElement scrollMinimum y.
+	aMaximumY := aScrollableElement scrollMaximum y.
+
+	dY > 0
+		ifTrue: [ ^ dY min: aMaximumY - aCurrentY ].
+	dY < 0
+		ifTrue: [ ^ dY max: aMinimumY - aCurrentY ].
+
+	^ 0
 ]
 
 { #category : 'private - overscroll' }
