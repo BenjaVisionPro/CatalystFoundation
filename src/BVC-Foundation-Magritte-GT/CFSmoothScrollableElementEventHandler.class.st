@@ -172,7 +172,7 @@ CFSmoothScrollableElementEventHandler >> gestureScrollScale [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> releaseRubberBandFor: aScrollableElement [
-	| targetY |
+	| targetY realDeltaY |
 	aScrollableElement hasScrolledElement
 		ifFalse: [ ^ self ].
 	logicalScrollY ifNil: [ ^ self ].
@@ -181,9 +181,16 @@ CFSmoothScrollableElementEventHandler >> releaseRubberBandFor: aScrollableElemen
 		rubberBandReturnTask stop.
 		rubberBandReturnTask := nil ].
 
+	"Release must preserve the currently rendered rubber-band transform.
+	Do not call renderLogicalScrollYOn: after clamping logicalScrollY, because
+	that would project an in-bounds value and clear the transform before the
+	return animation can use it as its starting point."
 	targetY := self clampedYFor: logicalScrollY on: aScrollableElement.
+	realDeltaY := targetY - aScrollableElement scrollPosition y.
+	realDeltaY isZero
+		ifFalse: [ aScrollableElement scrollVerticallyBy: realDeltaY ].
+
 	logicalScrollY := targetY.
-	self renderLogicalScrollYOn: aScrollableElement.
 	self animateRubberBandTransformBackFor: aScrollableElement
 ]
 
