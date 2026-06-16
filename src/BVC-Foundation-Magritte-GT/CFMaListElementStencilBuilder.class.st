@@ -17,7 +17,6 @@ CFMaListElementStencilBuilder >> buildDefault [
 		using: self description.
 	aFlowElement constraintsDo: [ :c | c minHeight: 200 ].
 
-	self form ifNotNil: [ :aForm | aForm matchParent ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
