@@ -44,8 +44,6 @@ CFMaViewModel >> asElement [
 	aFrame := CFMaFormRootElement new.
 
 	aResizerAptitude := BrLayoutResizerAptitude new.
-	aResizerAptitude hAnyToMatchParent.
-	aResizerAptitude vAny vMatchParent.
 	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
 	aResizerAptitude vAnyToMatchParent: [ aFrame children ].
 

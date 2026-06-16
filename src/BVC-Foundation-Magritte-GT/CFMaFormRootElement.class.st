@@ -7,7 +7,8 @@ Class {
 
 { #category : 'converting' }
 CFMaFormRootElement >> asScrollableElement [
-	"Phlow wraps ordinary elements in a BlScrollableElement before installing them in an explicit view.
-	Foundation forms own their internal body scroller, so the form root must opt out of that wrapping."
+	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
+	Phlow wraps ordinary elements in a BlScrollableElement before installing them in an explicit view.
+	Foundation forms own their internal body scroller and must fill the available view area, so the host must opt out of that wrapping."
 	^ self
 ]
