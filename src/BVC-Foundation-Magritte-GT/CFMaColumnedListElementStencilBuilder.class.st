@@ -16,7 +16,7 @@ CFMaColumnedListElementStencilBuilder >> buildDefault [
 		newColumnedRelationListMemento: self memento
 		using: self description.
 
-	self form ifNotNil: [ :aForm | aForm hMatchParent; vFitContentLimited ].
+	self form ifNotNil: [ :aForm | aForm matchParent ].
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento

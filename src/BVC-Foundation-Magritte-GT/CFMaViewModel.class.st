@@ -44,13 +44,7 @@ CFMaViewModel >> asElement [
 	aFrame := CFMaFormRootElement new.
 
 	aResizerAptitude := BrLayoutResizerAptitude new.
-	"The root is the Phlow-facing async host. It must stay full-area even if
-	GT/Brick async or Phlow view machinery leaves it with local fit-content-limited
-	resizer state. These rules apply to the host widget itself."
-	aResizerAptitude hAnyToMatchParent.
-	aResizerAptitude vAny vMatchParent.
-
-	"The generated form child should then fill the async host."
+	"The generated Foundation form child should fill the Phlow-facing async host."
 	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
 	aResizerAptitude vAnyToMatchParent: [ aFrame children ].
 
