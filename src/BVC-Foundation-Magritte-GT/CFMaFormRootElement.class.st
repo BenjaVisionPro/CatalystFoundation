@@ -12,3 +12,14 @@ CFMaFormRootElement >> asScrollableElement [
 	Foundation forms own their internal body scroller and must fill the available view area, so the host must opt out of that wrapping."
 	^ self
 ]
+
+{ #category : 'initialization' }
+CFMaFormRootElement >> initialize [
+	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
+	It must provide a full-area container for the generated Foundation form."
+	super initialize.
+
+	self
+		hMatchParent;
+		vMatchParent
+]
