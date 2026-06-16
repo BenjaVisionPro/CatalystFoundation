@@ -3,6 +3,7 @@ Class {
 	#superclass : 'BlScrollableElementEventHandler',
 	#instVars : [
 		'overscrollPullDistance',
+		'overscrollVisibleOffset',
 		'overscrollReturnAnimation',
 		'overscrollReturnTask'
 	],
@@ -15,6 +16,7 @@ CFSmoothScrollableElementEventHandler >> initialize [
 	super initialize.
 
 	overscrollPullDistance := 0.
+	overscrollVisibleOffset := 0.
 	overscrollReturnAnimation := nil.
 	overscrollReturnTask := nil
 ]
@@ -161,20 +163,45 @@ CFSmoothScrollableElementEventHandler >> overscrollCurveScale [
 	^ 32.0
 ]
 
+{ #category : 'accessing - overscroll' }
+CFSmoothScrollableElementEventHandler >> overscrollVisibleDeltaThreshold [
+	"Wheel/trackpad inertial tails can continue after the visible elastic pull has
+	stopped materially changing. Once a wheel overscroll event changes the visible
+	offset by less than this many pixels, treat the elastic peak as reached and
+	return instead of waiting for the wheel stream to go quiet."
+	^ 0.5
+]
+
+{ #category : 'testing' }
+CFSmoothScrollableElementEventHandler >> shouldReturnWheelOverscrollForVisibleDelta: aNumber [
+	^ aNumber abs <= self overscrollVisibleDeltaThreshold
+]
+
 { #category : 'private - overscroll' }
 CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement scheduleReturn: aBoolean [
 	"During active edge input, accumulate the raw attempted scroll distance and
-	map it through a log10 curve. There is intentionally no hard overscroll cap;
-	the curve itself makes extra pull distance produce progressively smaller
-	visual movement."
+	map it through a log10 curve. Wheel/trackpad flick streams can keep sending
+	inertial events after the visible rubber-band offset has effectively reached
+	its peak; in that case, return immediately instead of waiting for the event
+	stream to go completely quiet."
+	| aPreviousVisibleOffset aVisibleDelta |
 	self stopOverscrollReturn.
 
+	aPreviousVisibleOffset := overscrollVisibleOffset.
 	overscrollPullDistance := overscrollPullDistance + dY.
+	overscrollVisibleOffset := self rubberBandOffsetForPullDistance: overscrollPullDistance.
+	aVisibleDelta := overscrollVisibleOffset - aPreviousVisibleOffset.
+
 	self
-		applyOverscrollOffset: (self rubberBandOffsetForPullDistance: overscrollPullDistance)
+		applyOverscrollOffset: overscrollVisibleOffset
 		to: aScrollableElement.
+
 	aBoolean
-		ifTrue: [ self scheduleOverscrollReturnFor: aScrollableElement ]
+		ifFalse: [ ^ self ].
+
+	(self shouldReturnWheelOverscrollForVisibleDelta: aVisibleDelta)
+		ifTrue: [ self returnOverscrollNowFor: aScrollableElement ]
+		ifFalse: [ self scheduleOverscrollReturnFor: aScrollableElement ]
 ]
 
 { #category : 'private - overscroll' }
@@ -185,6 +212,7 @@ CFSmoothScrollableElementEventHandler >> resetOverscrollFor: aScrollableElement 
 	self stopOverscrollReturn.
 
 	overscrollPullDistance := 0.
+	overscrollVisibleOffset := 0.
 	self applyOverscrollOffset: 0 to: aScrollableElement
 ]
 
@@ -218,6 +246,7 @@ CFSmoothScrollableElementEventHandler >> animateOverscrollBackFor: aScrollableEl
 		easing: self overscrollReturnEasing;
 		onFinishedDo: [
 			overscrollPullDistance := 0.
+			overscrollVisibleOffset := 0.
 			overscrollReturnAnimation := nil ].
 
 	overscrollReturnAnimation := anAnimation.
@@ -282,7 +311,7 @@ CFSmoothScrollableElementEventHandler >> isAtTop: aScrollableElement [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> overscrollReturnDelay [
-	^ 1 milliSecond
+	^ 100 milliSeconds
 ]
 
 { #category : 'animation' }
