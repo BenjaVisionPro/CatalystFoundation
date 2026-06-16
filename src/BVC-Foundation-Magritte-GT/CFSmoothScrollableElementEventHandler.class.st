@@ -31,18 +31,26 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEvent: anEvent [
 
 { #category : 'mouse handlers' }
 CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
-	| aScrollableElement aDeltaPoint |
-	"BlScrollableElementEventHandler ignores fake mouse wheel events generated
-	for touch support; keep the same contract."
+	| aScrollableElement dY |
+	"Follow GT's vertical infinite-list wheel handling: ignore horizontal wheel
+	intent and rebuild the delta as a vertical-only smooth scroll."
 	anEvent isTouch
+		ifTrue: [ ^ self ].
+	anEvent vector isZero
+		ifTrue: [ ^ self ].
+	anEvent isPrimarilyHorizontal
 		ifTrue: [ ^ self ].
 
 	aScrollableElement := anEvent currentTarget.
-	aDeltaPoint := (anEvent vector * (20 @ 20 negated)) negated.
+	dY := anEvent isScrollDown
+		ifTrue: [ anEvent vector length ]
+		ifFalse: [
+			anEvent isScrollUp
+				ifTrue: [ anEvent vector length negated ]
+				ifFalse: [ 0 ] ].
+	dY isZero
+		ifTrue: [ ^ self ].
 
-	(self canScroll: aScrollableElement by: aDeltaPoint)
-		ifFalse: [ ^ self ].
-
-	aScrollableElement smoothScrollBy: aDeltaPoint.
+	aScrollableElement smoothScrollBy: 0 @ dY * 10.
 	anEvent consumed: true
 ]
