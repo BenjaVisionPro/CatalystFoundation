@@ -40,8 +40,14 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 				ifTrue: [ anEvent vector length * 10 ]
 				ifFalse: [ 0 ] ].
 
-	(self handleVerticalScrollDelta: dY on: anEvent currentTarget)
-		ifTrue: [ anEvent consumed: true ]
+	(self
+		handleVerticalScrollDelta: dY
+		on: anEvent currentTarget
+		scheduleReturn: true)
+		ifTrue: [
+			anEvent consumed: true.
+			(self isWheelEndEvent: anEvent)
+				ifTrue: [ self returnOverscrollNowFor: anEvent currentTarget ] ]
 ]
 
 { #category : 'mouse handlers' }
@@ -58,19 +64,24 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEvent: anEvent [
 	input."
 	dY := aVector y * 400 negated.
 
-	(self handleVerticalScrollDelta: dY on: anEvent currentTarget)
+	(self
+		handleVerticalScrollDelta: dY
+		on: anEvent currentTarget
+		scheduleReturn: false)
 		ifTrue: [ anEvent consumed: true ]
 ]
 
 { #category : 'mouse handlers' }
 CFSmoothScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
 	"Gesture scrolling has an explicit end event, so return immediately instead
-	of waiting for the wheel-idle fallback delay."
+	of waiting for the wheel-idle fallback delay. This also covers flick-style
+	gesture overscroll: the peak elastic offset is applied during gesture input,
+	then released as soon as the gesture ends."
 	self returnOverscrollNowFor: anEvent currentTarget
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement [
+CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement scheduleReturn: aBoolean [
 	| aConsumedDelta anOverscrollDelta |
 	dY isZero
 		ifTrue: [ ^ false ].
@@ -86,13 +97,19 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 		ifFalse: [
 			"Large/flick deltas can cross an edge in a single event. Consume only the
 			in-range part as real scroll, then send the leftover through the same
-			log10 rubber-band path as direct edge input."
-			self resetOverscrollFor: aScrollableElement.
+			log10 rubber-band path as direct edge input. Do not reset an existing
+			overscroll transform here: active edge input owns that transform, and
+			resetting it before applying the next value causes visible shake."
 			aConsumedDelta isZero
 				ifFalse: [ aScrollableElement scrollVerticallyBy: aConsumedDelta ].
-			self rubberBand: anOverscrollDelta on: aScrollableElement.
+			self
+				rubberBand: anOverscrollDelta
+				on: aScrollableElement
+				scheduleReturn: aBoolean.
 			^ true ].
 
+	"Input has moved back into the valid scroll range. Clear any presentation-only
+	overscroll before handing motion back to the real scroll position."
 	self resetOverscrollFor: aScrollableElement.
 	aScrollableElement smoothScrollBy: 0 @ dY.
 	^ true
@@ -111,6 +128,19 @@ CFSmoothScrollableElementEventHandler >> consumableVerticalDeltaFor: dY on: aScr
 		ifTrue: [ ^ dY max: aMinimumY - aCurrentY ].
 
 	^ 0
+]
+
+{ #category : 'testing' }
+CFSmoothScrollableElementEventHandler >> isWheelEndEvent: anEvent [
+	| aTouchPhaseClass |
+	"Wheel phase is host dependent. Glutin/Winit supplies it, but other hosts may
+	leave it nil. Use it only when the Winit phase class is present; otherwise the
+	wheel-idle fallback remains the safe behaviour."
+	anEvent phase ifNil: [ ^ false ].
+	aTouchPhaseClass := Smalltalk globals
+		at: #WinitEventTouchPhase
+		ifAbsent: [ ^ false ].
+	^ anEvent phase = aTouchPhaseClass Ended
 ]
 
 { #category : 'private - overscroll' }
@@ -132,7 +162,7 @@ CFSmoothScrollableElementEventHandler >> overscrollCurveScale [
 ]
 
 { #category : 'private - overscroll' }
-CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement [
+CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement scheduleReturn: aBoolean [
 	"During active edge input, accumulate the raw attempted scroll distance and
 	map it through a log10 curve. There is intentionally no hard overscroll cap;
 	the curve itself makes extra pull distance produce progressively smaller
@@ -143,7 +173,8 @@ CFSmoothScrollableElementEventHandler >> rubberBand: dY on: aScrollableElement [
 	self
 		applyOverscrollOffset: (self rubberBandOffsetForPullDistance: overscrollPullDistance)
 		to: aScrollableElement.
-	self scheduleOverscrollReturnFor: aScrollableElement
+	aBoolean
+		ifTrue: [ self scheduleOverscrollReturnFor: aScrollableElement ]
 ]
 
 { #category : 'private - overscroll' }
