@@ -172,7 +172,7 @@ CFSmoothScrollableElementEventHandler >> gestureScrollScale [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> releaseRubberBandFor: aScrollableElement [
-	| targetY realDeltaY |
+	| targetY |
 	aScrollableElement hasScrolledElement
 		ifFalse: [ ^ self ].
 	logicalScrollY ifNil: [ ^ self ].
@@ -182,21 +182,8 @@ CFSmoothScrollableElementEventHandler >> releaseRubberBandFor: aScrollableElemen
 		rubberBandReturnTask := nil ].
 
 	targetY := self clampedYFor: logicalScrollY on: aScrollableElement.
-
-	logicalScrollY = targetY
-		ifTrue: [
-			logicalScrollY := nil.
-			self applyRubberBandTransform: 0 to: aScrollableElement.
-			^ self ].
-
-	"The real Bloc scroll position should be at the nearest legal bound. The
-	rubber-band transform remains at its current visual value and is animated back
-	to zero; do not call renderLogicalScrollYOn: here, because that would apply
-	the zero transform immediately and remove the snapback animation."
-	realDeltaY := targetY - aScrollableElement scrollPosition y.
-	realDeltaY isZero
-		ifFalse: [ aScrollableElement scrollVerticallyBy: realDeltaY ].
 	logicalScrollY := targetY.
+	self renderLogicalScrollYOn: aScrollableElement.
 	self animateRubberBandTransformBackFor: aScrollableElement
 ]
 
@@ -285,10 +272,10 @@ CFSmoothScrollableElementEventHandler >> rubberBandWheelReleaseDelay [
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> rubberBandReturnDuration [
-	^ 500 milliSeconds
+	^ 260 milliSeconds
 ]
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> rubberBandReturnEasing [
-	^ BlEasing bounceOut
+	^ BlDecelerateInterpolator factor: 1.2
 ]
