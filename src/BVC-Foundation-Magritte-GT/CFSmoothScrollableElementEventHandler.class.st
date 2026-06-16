@@ -43,10 +43,10 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 
 	aScrollableElement := anEvent currentTarget.
 	dY := anEvent isScrollDown
-		ifTrue: [ anEvent vector length ]
+		ifTrue: [ anEvent vector length negated ]
 		ifFalse: [
 			anEvent isScrollUp
-				ifTrue: [ anEvent vector length negated ]
+				ifTrue: [ anEvent vector length ]
 				ifFalse: [ 0 ] ].
 	dY isZero
 		ifTrue: [ ^ self ].
