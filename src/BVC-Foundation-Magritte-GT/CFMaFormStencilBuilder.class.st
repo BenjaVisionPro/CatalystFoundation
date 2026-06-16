@@ -13,7 +13,7 @@ CFMaFormStencilBuilder >> buildDefault [
 		memento: memento;
 		yourself.
 	aBodyElement := CFMaFormBodyElement new.
-	aBodyScrollableElement := self newBodyScrollableElementFor: aBodyElement.
+	aBodyScrollableElement := self newScrollableElementFor: aBodyElement.
 	aTopShadowElement := self newTopBodyScrollShadowElement.
 	aBottomShadowElement := self newBottomBodyScrollShadowElement.
 	aBodyViewportElement := self
@@ -64,15 +64,31 @@ CFMaFormStencilBuilder >> installScrollShadowUpdatesFor: aScrollableElement cont
 ]
 
 { #category : 'private - scrolling' }
-CFMaFormStencilBuilder >> newBodyScrollableElementFor: aBodyElement [
-	^ BlScrollableElement new
-		addChild: aBodyElement;
+CFMaFormStencilBuilder >> newScrollableElementFor: anElement [
+	| aScrollableElement |
+	aScrollableElement := BlScrollableElement new
+		addChild: anElement;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent.
 			c frame horizontal weight: 1.
 			c frame vertical weight: 1 ];
-		yourself
+		yourself.
+
+	self useSmoothScrollingFor: aScrollableElement.
+
+	^ aScrollableElement
+]
+
+{ #category : 'private - scrolling' }
+CFMaFormStencilBuilder >> useSmoothScrollingFor: aScrollableElement [
+	"BlScrollableElement installs BlScrollableElementEventHandler by default.
+	This form builder owns the body scrollable assembly, so it replaces that
+	default input handler with Foundation's smoother handler at construction time."
+	aScrollableElement
+		removeEventHandlersSuchThat: [ :each |
+			each isKindOf: BlScrollableElementEventHandler ];
+		addEventHandler: CFSmoothScrollableElementEventHandler new
 ]
 
 { #category : 'private - scrolling' }
