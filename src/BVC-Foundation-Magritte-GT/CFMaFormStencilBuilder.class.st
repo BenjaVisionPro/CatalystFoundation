@@ -41,7 +41,7 @@ CFMaFormStencilBuilder >> bottomBodyScrollShadowBackground [
 	^ BlLinearGradientPaint vertical
 		stops: {
 			0 -> Color transparent.
-			1 -> (Color black alpha: 0.12) }
+			1 -> (Color black alpha: self scrollShadowAlpha) }
 ]
 
 { #category : 'private - scrolling' }
@@ -118,6 +118,12 @@ CFMaFormStencilBuilder >> newTopBodyScrollShadowElement [
 		yourself
 ]
 
+
+{ #category : 'private - scrolling' }
+CFMaFormStencilBuilder >> scrollShadowAlpha [
+	^ 0.06
+]
+
 { #category : 'private - scrolling' }
 CFMaFormStencilBuilder >> scrollShadowHeight [
 	^ 10
@@ -127,7 +133,7 @@ CFMaFormStencilBuilder >> scrollShadowHeight [
 CFMaFormStencilBuilder >> topBodyScrollShadowBackground [
 	^ BlLinearGradientPaint vertical
 		stops: {
-			0 -> (Color black alpha: 0.12).
+			0 -> (Color black alpha: self scrollShadowAlpha).
 			1 -> Color transparent }
 ]
 
