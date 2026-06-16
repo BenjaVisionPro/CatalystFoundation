@@ -105,7 +105,7 @@ CFMaFormStencilBuilder >> newBottomBodyScrollShadowElement [
 	^ self newBodyScrollShadowElement
 		background: self bottomBodyScrollShadowBackground;
 		constraintsDo: [ :c |
-			c frame vertical alignBottom ];
+			c ignored vertical alignBottom ];
 		yourself
 ]
 
@@ -114,7 +114,7 @@ CFMaFormStencilBuilder >> newTopBodyScrollShadowElement [
 	^ self newBodyScrollShadowElement
 		background: self topBodyScrollShadowBackground;
 		constraintsDo: [ :c |
-			c frame vertical alignTop ];
+			c ignored vertical alignTop ];
 		yourself
 ]
 
