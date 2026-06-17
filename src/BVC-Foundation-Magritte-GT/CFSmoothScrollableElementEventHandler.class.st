@@ -4,8 +4,7 @@ Class {
 	#instVars : [
 		'logicalScrollY',
 		'rubberBandReturnAnimation',
-		'rubberBandContinuationAnimation',
-		'lastScrollDeltaY'
+		'rubberBandReturnTask'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -17,8 +16,7 @@ CFSmoothScrollableElementEventHandler >> initialize [
 
 	logicalScrollY := nil.
 	rubberBandReturnAnimation := nil.
-	rubberBandContinuationAnimation := nil.
-	lastScrollDeltaY := 0
+	rubberBandReturnTask := nil
 ]
 
 { #category : 'mouse handlers' }
@@ -27,10 +25,9 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 	"Follow GT's vertical infinite-list wheel handling: ignore horizontal wheel
 	intent and rebuild the delta as a vertical-only scroll. Pixel-based wheel
 	events already arrive in pixel units, so do not apply the line-wheel scale to
-	trackpad input. Wheel phase end is used when it is actually delivered, but the
-	overscroll phase no longer depends on a timeout: when overscroll begins, the
-	latest wheel delta supplies the continuation impulse and the continuation
-	animation releases itself when spent."
+	trackpad input. Wheel phase end is used when it is delivered, but the idle
+	release remains as a safety net because native zero-delta end events may not
+	be materialized as BlMouseWheelEvent instances."
 	anEvent isTouch
 		ifTrue: [ ^ self ].
 
@@ -55,7 +52,7 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 	(self
 		handleVerticalScrollDelta: dY
 		on: anEvent currentTarget
-		continueOverscroll: true)
+		scheduleRelease: true)
 		ifTrue: [
 			anEvent consumed: true.
 			(self isWheelEndEvent: anEvent)
@@ -72,27 +69,27 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEvent: anEvent [
 		ifTrue: [ ^ self ].
 
 	"Keep the default BlScrollableElement gesture scale/sign, but constrain it to
-	the vertical axis and send it through the logical-offset projection path. A
-	gesture has an explicit end event, so active gesture movement should not start
-	a synthetic continuation between input events."
+	the vertical axis and send it through the same logical-offset projection path
+	as wheel input."
 	dY := aVector y * self gestureScrollScale negated.
 
 	(self
 		handleVerticalScrollDelta: dY
 		on: anEvent currentTarget
-		continueOverscroll: false)
+		scheduleRelease: false)
 		ifTrue: [ anEvent consumed: true ]
 ]
 
 { #category : 'mouse handlers' }
 CFSmoothScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
-	"Gesture scrolling has an explicit end event. Release immediately instead of
-	waiting for a wheel-idle fallback."
+	"Gesture scrolling has an explicit end event, so release immediately instead
+	of waiting for the wheel-idle fallback delay."
 	self releaseRubberBandFor: anEvent currentTarget
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement continueOverscroll: aBoolean [
+CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement scheduleRelease: aBoolean [
+	| effectiveDelta |
 	dY isZero
 		ifTrue: [ ^ false ].
 	aScrollableElement hasScrolledElement
@@ -102,18 +99,18 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 	flinger so it does not write scrollPosition while the logical projection is
 	also rendering the scrolled element."
 	aScrollableElement scrollFlinger stop.
-	self stopRubberBandAnimations.
+	self stopRubberBandReturn.
 	self ensureLogicalScrollYFor: aScrollableElement.
 
-	lastScrollDeltaY := dY.
-	logicalScrollY := logicalScrollY + dY.
+	effectiveDelta := self effectiveVerticalScrollDelta: dY on: aScrollableElement.
+	effectiveDelta isZero
+		ifTrue: [ ^ false ].
+
+	logicalScrollY := logicalScrollY + effectiveDelta.
 	self renderLogicalScrollYOn: aScrollableElement.
 
-	(self isLogicalScrollYOverscrolledOn: aScrollableElement)
-		ifTrue: [
-			(aBoolean and: [ self isDeltaMovingFurtherIntoOverscroll: dY on: aScrollableElement ])
-				ifTrue: [ self startOverscrollContinuationFromDelta: dY on: aScrollableElement ]
-				ifFalse: [ aBoolean ifTrue: [ self releaseRubberBandFor: aScrollableElement ] ] ].
+	aBoolean
+		ifTrue: [ self scheduleRubberBandReleaseFor: aScrollableElement ].
 
 	^ true
 ]
@@ -124,20 +121,43 @@ CFSmoothScrollableElementEventHandler >> ensureLogicalScrollYFor: aScrollableEle
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> isLogicalScrollYOverscrolledOn: aScrollableElement [
-	logicalScrollY ifNil: [ ^ false ].
-	^ (logicalScrollY > aScrollableElement scrollMaximum y)
-		or: [ logicalScrollY < aScrollableElement scrollMinimum y ]
+CFSmoothScrollableElementEventHandler >> effectiveVerticalScrollDelta: dY on: aScrollableElement [
+	| proposedY minimumY maximumY overscrollDelta limitedOverscrollDelta |
+	minimumY := aScrollableElement scrollMinimum y.
+	maximumY := aScrollableElement scrollMaximum y.
+	proposedY := logicalScrollY + dY.
+
+	(logicalScrollY between: minimumY and: maximumY)
+		ifTrue: [
+			proposedY > maximumY ifTrue: [
+				overscrollDelta := proposedY - maximumY.
+				limitedOverscrollDelta := self limitedOverscrollDelta: overscrollDelta.
+				^ (maximumY - logicalScrollY) + limitedOverscrollDelta ].
+			proposedY < minimumY ifTrue: [
+				overscrollDelta := proposedY - minimumY.
+				limitedOverscrollDelta := self limitedOverscrollDelta: overscrollDelta.
+				^ (minimumY - logicalScrollY) + limitedOverscrollDelta ].
+			^ dY ].
+
+	(logicalScrollY > maximumY and: [ dY > 0 ])
+		ifTrue: [ ^ self limitedOverscrollDelta: dY ].
+	(logicalScrollY < minimumY and: [ dY < 0 ])
+		ifTrue: [ ^ self limitedOverscrollDelta: dY ].
+
+	^ dY
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> isDeltaMovingFurtherIntoOverscroll: dY on: aScrollableElement [
-	logicalScrollY ifNil: [ ^ false ].
-	logicalScrollY > aScrollableElement scrollMaximum y
-		ifTrue: [ ^ dY > 0 ].
-	logicalScrollY < aScrollableElement scrollMinimum y
-		ifTrue: [ ^ dY < 0 ].
-	^ false
+CFSmoothScrollableElementEventHandler >> limitedOverscrollDelta: dY [
+	^ dY sign * (dY abs min: self maximumOverscrollInputDelta)
+]
+
+{ #category : 'accessing - rubber band' }
+CFSmoothScrollableElementEventHandler >> maximumOverscrollInputDelta [
+	"Limit each input event's contribution once it is moving further into
+	overscroll. This contains flick energy without changing the rubber-band
+	projection or making normal edge contact artificially heavy."
+	^ 24.0
 ]
 
 { #category : 'private - scrolling' }
@@ -179,6 +199,7 @@ CFSmoothScrollableElementEventHandler >> projectedYFor: aNumber on: aScrollableE
 
 	^ aNumber
 ]
+
 
 { #category : 'private - scrolling' }
 CFSmoothScrollableElementEventHandler >> rubberBandDimensionFor: aScrollableElement [
@@ -233,74 +254,15 @@ CFSmoothScrollableElementEventHandler >> gestureScrollScale [
 ]
 
 { #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> startOverscrollContinuationFromDelta: dY on: aScrollableElement [
-	| targetY anAnimation startY |
-	aScrollableElement hasScrolledElement
-		ifFalse: [ ^ self ].
-	logicalScrollY ifNil: [ ^ self ].
-
-	rubberBandContinuationAnimation ifNotNil: [
-		rubberBandContinuationAnimation stopIfRunning.
-		rubberBandContinuationAnimation := nil ].
-
-	startY := logicalScrollY.
-	targetY := self overscrollContinuationTargetFromDelta: dY on: aScrollableElement.
-	startY = targetY
-		ifTrue: [ ^ self releaseRubberBandFor: aScrollableElement ].
-
-	anAnimation := BlNumberTransition new
-		onStepDo: [ :eachY |
-			logicalScrollY := eachY.
-			self renderLogicalScrollYOn: aScrollableElement ];
-		from: startY;
-		to: targetY;
-		duration: self overscrollContinuationDuration;
-		easing: self overscrollContinuationEasing;
-		onFinishedDo: [
-			rubberBandContinuationAnimation := nil.
-			self releaseRubberBandFor: aScrollableElement ];
-		yourself.
-
-	rubberBandContinuationAnimation := anAnimation.
-	aScrollableElement scrolledElement addAnimation: anAnimation
-]
-
-{ #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> overscrollContinuationTargetFromDelta: dY on: aScrollableElement [
-	"Treat the latest wheel delta as the overscroll impulse. Once overscroll starts,
-	the phase advances by this computed distance and then releases immediately when
-	that continuation is spent."
-	^ logicalScrollY + (dY * self overscrollContinuationFactor)
-]
-
-{ #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> overscrollContinuationFactor [
-	"How much additional logical overscroll a wheel/flick impulse contributes after
-	the edge has been crossed. The rubber-band projection still controls the visible
-	distance."
-	^ 1.5
-]
-
-{ #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> overscrollContinuationDuration [
-	^ 120 milliSeconds
-]
-
-{ #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> overscrollContinuationEasing [
-	^ BlDecelerateInterpolator factor: 1.4
-]
-
-{ #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> releaseRubberBandFor: aScrollableElement [
 	| targetY realDeltaY |
 	aScrollableElement hasScrolledElement
 		ifFalse: [ ^ self ].
 	logicalScrollY ifNil: [ ^ self ].
 
-	rubberBandContinuationAnimation ifNotNil: [
-		rubberBandContinuationAnimation stopIfRunning.
-		rubberBandContinuationAnimation := nil ].
+	rubberBandReturnTask ifNotNil: [
+		rubberBandReturnTask stop.
+		rubberBandReturnTask := nil ].
 
 	"Release must preserve the currently rendered rubber-band transform.
 	Do not call renderLogicalScrollYOn: after clamping logicalScrollY, because
@@ -341,10 +303,30 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandTransformBackFor: aScr
 ]
 
 { #category : 'animation' }
-CFSmoothScrollableElementEventHandler >> stopRubberBandAnimations [
-	rubberBandContinuationAnimation ifNotNil: [
-		rubberBandContinuationAnimation stopIfRunning.
-		rubberBandContinuationAnimation := nil ].
+CFSmoothScrollableElementEventHandler >> scheduleRubberBandReleaseFor: aScrollableElement [
+	| aTask |
+	aScrollableElement hasScrolledElement
+		ifFalse: [ ^ self ].
+
+	rubberBandReturnTask ifNotNil: [
+		rubberBandReturnTask stop.
+		rubberBandReturnTask := nil ].
+
+	aTask := BlDelayedTaskAction new
+		delay: self rubberBandWheelReleaseDelay;
+		action: [
+			self releaseRubberBandFor: aScrollableElement.
+			rubberBandReturnTask := nil ];
+		yourself.
+	rubberBandReturnTask := aTask.
+	aScrollableElement scrolledElement enqueueTask: aTask
+]
+
+{ #category : 'animation' }
+CFSmoothScrollableElementEventHandler >> stopRubberBandReturn [
+	rubberBandReturnTask ifNotNil: [
+		rubberBandReturnTask stop.
+		rubberBandReturnTask := nil ].
 	rubberBandReturnAnimation ifNotNil: [
 		rubberBandReturnAnimation stopIfRunning.
 		rubberBandReturnAnimation := nil ]
@@ -369,6 +351,11 @@ CFSmoothScrollableElementEventHandler >> isWheelEndEvent: anEvent [
 		ifAbsent: [ ^ false ].
 	^ (anEvent phase = aTouchPhaseClass Ended)
 		or: [ anEvent phase = aTouchPhaseClass Cancelled ]
+]
+
+{ #category : 'animation' }
+CFSmoothScrollableElementEventHandler >> rubberBandWheelReleaseDelay [
+	^ 80 milliSeconds
 ]
 
 { #category : 'animation' }
