@@ -142,7 +142,7 @@ CFSmoothScrollableElementEventHandler >> projectedYFor: aNumber on: aScrollableE
 	| minimumY maximumY dimension overscroll |
 	minimumY := aScrollableElement scrollMinimum y.
 	maximumY := aScrollableElement scrollMaximum y.
-	dimension := aScrollableElement height max: 1.0.
+	dimension := self rubberBandDimensionFor: aScrollableElement.
 
 	aNumber > maximumY
 		ifTrue: [
@@ -155,6 +155,26 @@ CFSmoothScrollableElementEventHandler >> projectedYFor: aNumber on: aScrollableE
 			^ minimumY - (self rubberDistanceFor: overscroll dimension: dimension) ].
 
 	^ aNumber
+]
+
+
+{ #category : 'private - scrolling' }
+CFSmoothScrollableElementEventHandler >> rubberBandDimensionFor: aScrollableElement [
+	"Use an effective rubber-band dimension rather than the full viewport height.
+	The Grant Paul rubber-band formula approaches its dimension asymptotically, so
+	using the whole viewport allows strong flicks to stretch almost a full window.
+	This keeps the normal edge stiffness controlled by rubberBandConstant while
+	containing the maximum visible stretch."
+	^ ((aScrollableElement height max: 1.0) * self rubberBandExtentFraction)
+		max: 1.0
+]
+
+{ #category : 'accessing - rubber band' }
+CFSmoothScrollableElementEventHandler >> rubberBandExtentFraction [
+	"Fraction of the viewport used as the rubber-band formula's effective
+	dimension. Lower values contain strong flick overscroll without making the
+	initial edge contact artificially heavy."
+	^ 0.28
 ]
 
 { #category : 'private - scrolling' }
