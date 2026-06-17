@@ -21,29 +21,40 @@ CFSmoothScrollableElementEventHandler >> initialize [
 
 { #category : 'mouse handlers' }
 CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
-	| dY |
+	| dY shouldUseIdleRelease |
 	"Follow GT's vertical infinite-list wheel handling: ignore horizontal wheel
-	intent and rebuild the delta as a vertical-only scroll. This handler owns a
-	logical scroll position and projects it into Bloc's real clamped scroll
-	position plus a presentation-only rubber-band transform."
+	intent and rebuild the delta as a vertical-only scroll. Pixel-based wheel
+	events already arrive in pixel units, so do not apply the line-wheel scale to
+	trackpad input. When the host supplies a wheel phase, use the phase as the
+	release signal and keep the idle delay only as the fallback for hosts that do
+	not provide one."
 	anEvent isTouch
 		ifTrue: [ ^ self ].
+
+	(self isWheelEndEvent: anEvent) ifTrue: [
+		anEvent vector isZero ifTrue: [
+			self releaseRubberBandFor: anEvent currentTarget.
+			anEvent consumed: true.
+			^ self ] ].
+
 	anEvent vector isZero
 		ifTrue: [ ^ self ].
 	anEvent isPrimarilyHorizontal
 		ifTrue: [ ^ self ].
 
 	dY := anEvent isScrollDown
-		ifTrue: [ anEvent vector length negated * self wheelScrollScale ]
+		ifTrue: [ anEvent vector length negated * (self wheelScrollScaleFor: anEvent) ]
 		ifFalse: [
 			anEvent isScrollUp
-				ifTrue: [ anEvent vector length * self wheelScrollScale ]
+				ifTrue: [ anEvent vector length * (self wheelScrollScaleFor: anEvent) ]
 				ifFalse: [ 0 ] ].
+
+	shouldUseIdleRelease := (self isWheelPhaseKnown: anEvent) not.
 
 	(self
 		handleVerticalScrollDelta: dY
 		on: anEvent currentTarget
-		scheduleRelease: true)
+		scheduleRelease: shouldUseIdleRelease)
 		ifTrue: [
 			anEvent consumed: true.
 			(self isWheelEndEvent: anEvent)
@@ -161,8 +172,17 @@ CFSmoothScrollableElementEventHandler >> rubberBandConstant [
 ]
 
 { #category : 'accessing - scrolling' }
-CFSmoothScrollableElementEventHandler >> wheelScrollScale [
-	^ 10
+CFSmoothScrollableElementEventHandler >> wheelScrollScaleFor: anEvent [
+	"Glutin/Winit pixel wheel events already arrive in pixel units. Keep the
+	legacy scale only for non-pixel / line-based wheel events."
+	anEvent isPixelBased
+		ifTrue: [ ^ 1.0 ].
+	^ self wheelLineScrollScale
+]
+
+{ #category : 'accessing - scrolling' }
+CFSmoothScrollableElementEventHandler >> wheelLineScrollScale [
+	^ 10.0
 ]
 
 { #category : 'accessing - scrolling' }
@@ -260,16 +280,27 @@ CFSmoothScrollableElementEventHandler >> applyRubberBandTransform: aNumber to: a
 ]
 
 { #category : 'testing' }
-CFSmoothScrollableElementEventHandler >> isWheelEndEvent: anEvent [
+CFSmoothScrollableElementEventHandler >> isWheelPhaseKnown: anEvent [
 	| aTouchPhaseClass |
 	"Wheel phase is host dependent. Glutin/Winit supplies it, but other hosts may
-	leave it nil. Use it only when the Winit phase class is present; otherwise the
-	wheel-idle fallback remains the safe behaviour."
+	leave it nil. Treat Winit's Unknown phase the same as absent, so the idle
+	fallback remains active when the host cannot give us a real end signal."
 	anEvent phase ifNil: [ ^ false ].
 	aTouchPhaseClass := Smalltalk globals
 		at: #WinitEventTouchPhase
 		ifAbsent: [ ^ false ].
-	^ anEvent phase = aTouchPhaseClass Ended
+	^ anEvent phase ~= aTouchPhaseClass Unknown
+]
+
+{ #category : 'testing' }
+CFSmoothScrollableElementEventHandler >> isWheelEndEvent: anEvent [
+	| aTouchPhaseClass |
+	anEvent phase ifNil: [ ^ false ].
+	aTouchPhaseClass := Smalltalk globals
+		at: #WinitEventTouchPhase
+		ifAbsent: [ ^ false ].
+	^ (anEvent phase = aTouchPhaseClass Ended)
+		or: [ anEvent phase = aTouchPhaseClass Cancelled ]
 ]
 
 { #category : 'animation' }
