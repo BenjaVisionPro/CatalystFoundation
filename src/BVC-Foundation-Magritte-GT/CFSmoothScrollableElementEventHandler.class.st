@@ -6,7 +6,8 @@ Class {
 		'rubberBandState',
 		'rubberBandOutAnimation',
 		'rubberBandReturnAnimation',
-		'suppressedWheelSequenceActive'
+		'suppressedWheelSequenceActive',
+		'rubberBandTailSuppressionTask'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -20,7 +21,8 @@ CFSmoothScrollableElementEventHandler >> initialize [
 	rubberBandState := #normal.
 	rubberBandOutAnimation := nil.
 	rubberBandReturnAnimation := nil.
-	suppressedWheelSequenceActive := false
+	suppressedWheelSequenceActive := false.
+	rubberBandTailSuppressionTask := nil
 ]
 
 { #category : 'mouse handlers' }
@@ -91,6 +93,13 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 			(self shouldSuppressEventDuringSnapBack: anEvent)
 				ifTrue: [ ^ true ].
 			self interruptRubberBandSnapBackOn: aScrollableElement ].
+
+	self rubberBandState = #suppressingTail
+		ifTrue: [
+			(self shouldSuppressEventDuringTailSuppression: anEvent)
+				ifTrue: [ ^ true ].
+			self stopRubberBandTailSuppression.
+			rubberBandState := #normal ].
 
 	self ensureLogicalScrollYFor: aScrollableElement.
 	oldY := logicalScrollY.
@@ -170,12 +179,33 @@ CFSmoothScrollableElementEventHandler >> shouldSuppressEventDuringSnapBack: anEv
 	^ true
 ]
 
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> shouldSuppressEventDuringTailSuppression: anEvent [
+	"After snap-back has visually returned to the boundary, native trackpad
+	wheel tails can still arrive. Suppress wheel events briefly unless the
+	backend explicitly marks the event as the start of a new wheel sequence.
+	Non-wheel input is treated as fresh user intent."
+	(self isWheelEvent: anEvent)
+		ifFalse: [ ^ false ].
+
+	(self isWheelPhaseStarted: anEvent)
+		ifTrue: [
+			suppressedWheelSequenceActive := false.
+			^ false ].
+
+	(self isWheelEndEvent: anEvent)
+		ifTrue: [ suppressedWheelSequenceActive := false ].
+
+	^ true
+]
+
 { #category : 'private - wheel sequence' }
 CFSmoothScrollableElementEventHandler >> isWheelEvent: anEvent [
-	"Avoid relying on a class-side dependency here. Wheel events in the relevant
-	Bloc hosts expose wheel-specific protocol such as #isPixelBased and #phase."
-	^ (anEvent respondsTo: #isPixelBased)
-		or: [ anEvent respondsTo: #phase ]
+	"Wheel events in the relevant Bloc hosts expose #isPixelBased. Avoid using
+	#phase alone here because other event families may also expose phase-like
+	protocol, but they should not be quarantined as wheel tails."
+	^ anEvent respondsTo: #isPixelBased
 ]
 
 { #category : 'private - wheel sequence' }
@@ -366,8 +396,7 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandTransformBackFor: aScr
 		onFinishedDo: [
 			logicalScrollY := nil.
 			rubberBandReturnAnimation := nil.
-			suppressedWheelSequenceActive := false.
-			rubberBandState := #normal ].
+			self beginRubberBandTailSuppressionOn: aScrollableElement ].
 
 	rubberBandReturnAnimation := anAnimation.
 	aScrolledElement addAnimation: anAnimation
@@ -384,9 +413,36 @@ CFSmoothScrollableElementEventHandler >> stopRubberBandAnimations [
 	rubberBandOutAnimation := nil.
 	aReturnAnimation := rubberBandReturnAnimation.
 	rubberBandReturnAnimation := nil.
+	self stopRubberBandTailSuppression.
 
 	anOutAnimation ifNotNil: [ anOutAnimation stopIfRunning ].
 	aReturnAnimation ifNotNil: [ aReturnAnimation stopIfRunning ]
+]
+
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> beginRubberBandTailSuppressionOn: aScrollableElement [
+	"Snap-back is already complete. Keep wheel-tail events from immediately
+	re-entering rubber-band for a short post-return quarantine. This is not a
+	snap-back delay: the visual return has completed before this state begins."
+	self stopRubberBandTailSuppression.
+	rubberBandState := #suppressingTail.
+
+	rubberBandTailSuppressionTask := BlDelayedTaskAction new
+		delay: self rubberBandTailSuppressionDuration;
+		action: [
+			rubberBandTailSuppressionTask := nil.
+			suppressedWheelSequenceActive := false.
+			self rubberBandState = #suppressingTail
+				ifTrue: [ rubberBandState := #normal ] ];
+		yourself.
+	aScrollableElement enqueueTask: rubberBandTailSuppressionTask
+]
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> stopRubberBandTailSuppression [
+	rubberBandTailSuppressionTask ifNotNil: [ :aTask | aTask stop ].
+	rubberBandTailSuppressionTask := nil
 ]
 
 { #category : 'private - rendering' }
@@ -402,6 +458,12 @@ CFSmoothScrollableElementEventHandler >> applyRubberBandTransform: aNumber to: a
 { #category : 'testing' }
 CFSmoothScrollableElementEventHandler >> rubberBandState [
 	^ rubberBandState
+]
+
+
+{ #category : 'animation' }
+CFSmoothScrollableElementEventHandler >> rubberBandTailSuppressionDuration [
+	^ 120 milliSeconds
 ]
 
 { #category : 'animation' }
