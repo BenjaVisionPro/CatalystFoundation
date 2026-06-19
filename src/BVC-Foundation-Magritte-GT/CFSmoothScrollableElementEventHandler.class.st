@@ -151,10 +151,12 @@ CFSmoothScrollableElementEventHandler >> interruptRubberBandSnapBackOn: aScrolla
 
 { #category : 'private - wheel sequence' }
 CFSmoothScrollableElementEventHandler >> shouldSuppressEventDuringSnapBack: anEvent [
-	"When phase-aware wheel input caused the rubber-band, the remaining events in
-	that wheel sequence are the native inertial tail. Do not let them interrupt the
-	snap-back. A new Started phase is treated as fresh user input."
-	suppressedWheelSequenceActive
+	"During snap-back, wheel input is unsafe to treat as new unless the backend
+	identifies it as the start of a fresh wheel sequence. Native trackpad inertial
+	tails can continue as BlMouseWheelEvent instances after the rubber-band phase
+	has started; allowing those events to interrupt snap-back causes repeated
+	re-entry into rubberBandOut."
+	(self isWheelEvent: anEvent)
 		ifFalse: [ ^ false ].
 
 	(self isWheelPhaseStarted: anEvent)
@@ -162,13 +164,18 @@ CFSmoothScrollableElementEventHandler >> shouldSuppressEventDuringSnapBack: anEv
 			suppressedWheelSequenceActive := false.
 			^ false ].
 
-	(self isWheelPhaseKnown: anEvent)
-		ifFalse: [ ^ false ].
-
 	(self isWheelEndEvent: anEvent)
 		ifTrue: [ suppressedWheelSequenceActive := false ].
 
 	^ true
+]
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> isWheelEvent: anEvent [
+	"Avoid relying on a class-side dependency here. Wheel events in the relevant
+	Bloc hosts expose wheel-specific protocol such as #isPixelBased and #phase."
+	^ (anEvent respondsTo: #isPixelBased)
+		or: [ anEvent respondsTo: #phase ]
 ]
 
 { #category : 'private - wheel sequence' }
