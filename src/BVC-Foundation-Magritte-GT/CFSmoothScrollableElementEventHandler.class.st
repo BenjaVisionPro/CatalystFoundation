@@ -5,7 +5,8 @@ Class {
 		'logicalScrollY',
 		'rubberBandState',
 		'rubberBandOutAnimation',
-		'rubberBandReturnAnimation'
+		'rubberBandReturnAnimation',
+		'suppressedWheelSequenceActive'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -18,7 +19,8 @@ CFSmoothScrollableElementEventHandler >> initialize [
 	logicalScrollY := nil.
 	rubberBandState := #normal.
 	rubberBandOutAnimation := nil.
-	rubberBandReturnAnimation := nil
+	rubberBandReturnAnimation := nil.
+	suppressedWheelSequenceActive := false
 ]
 
 { #category : 'mouse handlers' }
@@ -42,7 +44,7 @@ CFSmoothScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 				ifTrue: [ anEvent vector length * (self wheelScrollScaleFor: anEvent) ]
 				ifFalse: [ 0 ] ].
 
-	(self handleVerticalScrollDelta: dY on: anEvent currentTarget)
+	(self handleVerticalScrollDelta: dY on: anEvent currentTarget event: anEvent)
 		ifTrue: [ anEvent consumed: true ]
 ]
 
@@ -60,7 +62,7 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEvent: anEvent [
 	wheel input."
 	dY := aVector y * self gestureScrollScale negated.
 
-	(self handleVerticalScrollDelta: dY on: anEvent currentTarget)
+	(self handleVerticalScrollDelta: dY on: anEvent currentTarget event: anEvent)
 		ifTrue: [ anEvent consumed: true ]
 ]
 
@@ -74,7 +76,7 @@ CFSmoothScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement [
+CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScrollableElement event: anEvent [
 	| oldY newY |
 	dY isZero
 		ifTrue: [ ^ false ].
@@ -85,7 +87,10 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 		ifTrue: [ ^ true ].
 
 	self rubberBandState = #snapBack
-		ifTrue: [ self interruptRubberBandSnapBackOn: aScrollableElement ].
+		ifTrue: [
+			(self shouldSuppressEventDuringSnapBack: anEvent)
+				ifTrue: [ ^ true ].
+			self interruptRubberBandSnapBackOn: aScrollableElement ].
 
 	self ensureLogicalScrollYFor: aScrollableElement.
 	oldY := logicalScrollY.
@@ -93,7 +98,7 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 
 	(self isOutsideBounds: newY on: aScrollableElement)
 		ifTrue: [
-			self enterRubberBandFrom: oldY to: newY on: aScrollableElement.
+			self enterRubberBandFrom: oldY to: newY on: aScrollableElement event: anEvent.
 			^ true ].
 
 	"Normal in-bounds scroll is still a single logical value projected into the
@@ -106,7 +111,7 @@ CFSmoothScrollableElementEventHandler >> handleVerticalScrollDelta: dY on: aScro
 ]
 
 { #category : 'private - scrolling' }
-CFSmoothScrollableElementEventHandler >> enterRubberBandFrom: oldY to: newY on: aScrollableElement [
+CFSmoothScrollableElementEventHandler >> enterRubberBandFrom: oldY to: newY on: aScrollableElement event: anEvent [
 	| boundaryY overscrollDelta peakRaw peakVisible |
 	"A boundary crossing creates one rubber-band impulse. From this point until
 	the outward rubber-band animation completes, incoming wheel/gesture events are
@@ -114,6 +119,7 @@ CFSmoothScrollableElementEventHandler >> enterRubberBandFrom: oldY to: newY on: 
 	overscroll state."
 	aScrollableElement scrollFlinger stop.
 	self stopRubberBandAnimations.
+	suppressedWheelSequenceActive := self isWheelPhaseKnown: anEvent.
 
 	boundaryY := self boundaryForOutsideY: newY on: aScrollableElement.
 	overscrollDelta := newY - boundaryY.
@@ -135,10 +141,61 @@ CFSmoothScrollableElementEventHandler >> enterRubberBandFrom: oldY to: newY on: 
 CFSmoothScrollableElementEventHandler >> interruptRubberBandSnapBackOn: aScrollableElement [
 	"New user input during snap-back is allowed. Stop the return animation, settle
 	the derived transform, and let the incoming event become the active driver."
+	rubberBandState := #normal.
+	suppressedWheelSequenceActive := false.
 	self stopRubberBandAnimations.
 	self applyRubberBandTransform: 0 to: aScrollableElement.
-	logicalScrollY := aScrollableElement scrollPosition y.
-	rubberBandState := #normal
+	logicalScrollY := aScrollableElement scrollPosition y
+]
+
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> shouldSuppressEventDuringSnapBack: anEvent [
+	"When phase-aware wheel input caused the rubber-band, the remaining events in
+	that wheel sequence are the native inertial tail. Do not let them interrupt the
+	snap-back. A new Started phase is treated as fresh user input."
+	suppressedWheelSequenceActive
+		ifFalse: [ ^ false ].
+
+	(self isWheelPhaseStarted: anEvent)
+		ifTrue: [
+			suppressedWheelSequenceActive := false.
+			^ false ].
+
+	(self isWheelPhaseKnown: anEvent)
+		ifFalse: [ ^ false ].
+
+	(self isWheelEndEvent: anEvent)
+		ifTrue: [ suppressedWheelSequenceActive := false ].
+
+	^ true
+]
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> isWheelPhaseKnown: anEvent [
+	| aPhase |
+	(anEvent respondsTo: #phase)
+		ifFalse: [ ^ false ].
+	aPhase := anEvent phase.
+	aPhase ifNil: [ ^ false ].
+	(Smalltalk globals includesKey: #WinitEventTouchPhase)
+		ifFalse: [ ^ false ].
+	^ aPhase ~= WinitEventTouchPhase Unknown
+]
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> isWheelPhaseStarted: anEvent [
+	(self isWheelPhaseKnown: anEvent)
+		ifFalse: [ ^ false ].
+	^ anEvent phase = WinitEventTouchPhase Started
+]
+
+{ #category : 'private - wheel sequence' }
+CFSmoothScrollableElementEventHandler >> isWheelEndEvent: anEvent [
+	(self isWheelPhaseKnown: anEvent)
+		ifFalse: [ ^ false ].
+	^ (anEvent phase = WinitEventTouchPhase Ended)
+		or: [ anEvent phase = WinitEventTouchPhase Cancelled ]
 ]
 
 { #category : 'private - scrolling' }
@@ -263,10 +320,10 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandOutTo: aNumber on: aSc
 		ifFalse: [ ^ self ].
 	aScrolledElement := aScrollableElement scrolledElement.
 
+	rubberBandOutAnimation ifNotNil: [ :anOldAnimation |
+		rubberBandOutAnimation := nil.
+		anOldAnimation stopIfRunning ].
 	rubberBandState := #rubberBandOut.
-	rubberBandOutAnimation ifNotNil: [
-		rubberBandOutAnimation stopIfRunning.
-		rubberBandOutAnimation := nil ].
 
 	anAnimation := BlTransformAnimation translate: 0 @ aNumber.
 	anAnimation
@@ -289,10 +346,10 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandTransformBackFor: aScr
 		ifFalse: [ ^ self ].
 	aScrolledElement := aScrollableElement scrolledElement.
 
+	rubberBandReturnAnimation ifNotNil: [ :anOldAnimation |
+		rubberBandReturnAnimation := nil.
+		anOldAnimation stopIfRunning ].
 	rubberBandState := #snapBack.
-	rubberBandReturnAnimation ifNotNil: [
-		rubberBandReturnAnimation stopIfRunning.
-		rubberBandReturnAnimation := nil ].
 
 	anAnimation := BlTransformAnimation translate: 0 @ 0.
 	anAnimation
@@ -302,6 +359,7 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandTransformBackFor: aScr
 		onFinishedDo: [
 			logicalScrollY := nil.
 			rubberBandReturnAnimation := nil.
+			suppressedWheelSequenceActive := false.
 			rubberBandState := #normal ].
 
 	rubberBandReturnAnimation := anAnimation.
@@ -310,12 +368,18 @@ CFSmoothScrollableElementEventHandler >> animateRubberBandTransformBackFor: aScr
 
 { #category : 'animation' }
 CFSmoothScrollableElementEventHandler >> stopRubberBandAnimations [
-	rubberBandOutAnimation ifNotNil: [
-		rubberBandOutAnimation stopIfRunning.
-		rubberBandOutAnimation := nil ].
-	rubberBandReturnAnimation ifNotNil: [
-		rubberBandReturnAnimation stopIfRunning.
-		rubberBandReturnAnimation := nil ]
+	| anOutAnimation aReturnAnimation |
+	"Stopping a Bloc animation runs its onFinishedDo: handlers. Move the state out
+	of rubber-band phases before stopping so cancellation cannot advance the state
+	machine as if an animation had naturally completed."
+	rubberBandState := #normal.
+	anOutAnimation := rubberBandOutAnimation.
+	rubberBandOutAnimation := nil.
+	aReturnAnimation := rubberBandReturnAnimation.
+	rubberBandReturnAnimation := nil.
+
+	anOutAnimation ifNotNil: [ anOutAnimation stopIfRunning ].
+	aReturnAnimation ifNotNil: [ aReturnAnimation stopIfRunning ]
 ]
 
 { #category : 'private - rendering' }
