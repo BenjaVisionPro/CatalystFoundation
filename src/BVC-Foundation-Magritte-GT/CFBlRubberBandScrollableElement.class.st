@@ -24,13 +24,26 @@ CFBlRubberBandScrollableElement >> animator: anAnimator [
 { #category : 'private - applying' }
 CFBlRubberBandScrollableElement >> applyProjectedPosition [
 	"Apply the projected motion position to the child element.
-	Keep the inherited scrollPosition aligned with the logical position so existing
+	Keep the inherited scrollPosition aligned with the limited logical position so existing
 	scroll-bar queries continue to report logical scroll state."
 
+	self limitLogicalPosition.
 	scrollPosition := self motion logicalPosition.
 	self scrolledElementDo: [ :anElement |
 		anElement relocate: self motion projectedPosition ].
 	self updateDebugOverlay
+]
+
+
+{ #category : 'private - applying' }
+CFBlRubberBandScrollableElement >> limitLogicalPosition [
+	"Re-apply the current projection limits to the stored logical position.
+	This matters when layout later provides real viewport/content dimensions after
+	a scroll position was set while the element was not yet measured."
+
+	self motion hasProjectionPlane
+		ifTrue: [ self motion moveTo: self motion logicalPosition ].
+	^ self
 ]
 
 { #category : 'scrolling' }

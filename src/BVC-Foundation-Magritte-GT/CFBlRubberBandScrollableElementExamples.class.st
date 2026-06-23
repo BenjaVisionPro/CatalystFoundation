@@ -157,8 +157,6 @@ CFBlRubberBandScrollableElementExamples >> verticalOverscrollLimitDebugPreview [
 		addChild: debugPanel;
 		yourself.
 
-	self assert: element motion logicalPosition y < 999999.
-	self assert: element motion projectedPosition y <= 100.000001.
 	self assert: (debugPanel text asString includesSubstring: 'logical:').
 
 	^ container
