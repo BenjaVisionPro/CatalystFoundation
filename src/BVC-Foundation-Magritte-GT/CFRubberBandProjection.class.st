@@ -5,7 +5,9 @@ Class {
 		'minimum',
 		'maximum',
 		'dimension',
-		'coefficient'
+		'coefficient',
+		'beforeOverscrollLimit',
+		'afterOverscrollLimit'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -111,7 +113,9 @@ CFRubberBandProjection >> initialize [
 	minimum := 0.
 	maximum := 0.
 	dimension := 1.
-	coefficient := self class defaultCoefficient
+	coefficient := self class defaultCoefficient.
+	beforeOverscrollLimit := nil.
+	afterOverscrollLimit := nil
 ]
 
 { #category : 'math' }
@@ -195,16 +199,10 @@ CFRubberBandProjection >> nearestBoundFor: anOffset [
 
 { #category : 'overscroll' }
 CFRubberBandProjection >> overscrollDistanceFor: anOffset [
-	"Answer the unsigned distance outside the valid range.
+	"Answer the unsigned distance outside the valid range after applying any configured overscroll limit.
 	Answer zero when the offset is in bounds."
 
-	self validateBounds.
-
-	anOffset < minimum
-		ifTrue: [ ^ minimum - anOffset ].
-	anOffset > maximum
-		ifTrue: [ ^ anOffset - maximum ].
-	^ 0
+	^ self overscrollDistanceForLimitedOffset: (self limitedOffsetFor: anOffset)
 ]
 
 { #category : 'printing' }
@@ -226,13 +224,7 @@ CFRubberBandProjection >> printOn: aStream [
 CFRubberBandProjection >> project: anOffset [
 	"Answer the visible/projected offset for a logical offset."
 
-	self validateBounds.
-
-	anOffset < minimum
-		ifTrue: [ ^ minimum - (self distanceForOverscroll: minimum - anOffset) ].
-	anOffset > maximum
-		ifTrue: [ ^ maximum + (self distanceForOverscroll: anOffset - maximum) ].
-	^ anOffset
+	^ self projectLimitedOffset: (self limitedOffsetFor: anOffset)
 ]
 
 { #category : 'velocity' }
@@ -252,15 +244,9 @@ CFRubberBandProjection >> projectedOverscrollDistanceFor: anOffset [
 { #category : 'overscroll' }
 CFRubberBandProjection >> signedOverscrollDistanceFor: anOffset [
 	"Answer negative overscroll below minimum, positive overscroll above maximum,
-	or zero when the offset is in bounds."
+	or zero when the offset is in bounds, after applying any configured overscroll limit."
 
-	self validateBounds.
-
-	anOffset < minimum
-		ifTrue: [ ^ anOffset - minimum ].
-	anOffset > maximum
-		ifTrue: [ ^ anOffset - maximum ].
-	^ 0
+	^ self signedOverscrollDistanceForLimitedOffset: (self limitedOffsetFor: anOffset)
 ]
 
 { #category : 'overscroll' }
@@ -291,27 +277,171 @@ CFRubberBandProjection >> velocityScaleAt: anOffset [
 
 { #category : 'copying' }
 CFRubberBandProjection >> withCoefficient: aCoefficient [
-	^ self class
+	^ (self class
 		minimum: minimum
 		maximum: maximum
 		dimension: dimension
-		coefficient: aCoefficient
+		coefficient: aCoefficient)
+		beforeOverscrollLimit: beforeOverscrollLimit;
+		afterOverscrollLimit: afterOverscrollLimit;
+		yourself
 ]
 
 { #category : 'copying' }
 CFRubberBandProjection >> withDimension: aDimension [
-	^ self class
+	^ (self class
 		minimum: minimum
 		maximum: maximum
 		dimension: aDimension
-		coefficient: coefficient
+		coefficient: coefficient)
+		beforeOverscrollLimit: beforeOverscrollLimit;
+		afterOverscrollLimit: afterOverscrollLimit;
+		yourself
 ]
 
 { #category : 'copying' }
 CFRubberBandProjection >> withMinimum: aMinimum maximum: aMaximum [
-	^ self class
+	^ (self class
 		minimum: aMinimum
 		maximum: aMaximum
 		dimension: dimension
-		coefficient: coefficient
+		coefficient: coefficient)
+		beforeOverscrollLimit: beforeOverscrollLimit;
+		afterOverscrollLimit: afterOverscrollLimit;
+		yourself
+]
+
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> afterOverscrollLimit [
+	"Answer the configured overscroll limit after the maximum bound.
+	Nil means unlimited. Values strictly between zero and one are interpreted as a dimension proportion when resolved."
+
+	^ afterOverscrollLimit
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> afterOverscrollLimit: aNumberOrNil [
+	aNumberOrNil ifNotNil: [ self validateOverscrollLimit: aNumberOrNil ].
+	afterOverscrollLimit := aNumberOrNil
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> beforeOverscrollLimit [
+	"Answer the configured overscroll limit before the minimum bound.
+	Nil means unlimited. Values strictly between zero and one are interpreted as a dimension proportion when resolved."
+
+	^ beforeOverscrollLimit
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> beforeOverscrollLimit: aNumberOrNil [
+	aNumberOrNil ifNotNil: [ self validateOverscrollLimit: aNumberOrNil ].
+	beforeOverscrollLimit := aNumberOrNil
+]
+
+{ #category : 'projection' }
+CFRubberBandProjection >> limitedOffsetFor: anOffset [
+	"Answer anOffset constrained to the configured logical overscroll limits.
+	Overscroll limits are configured as maximum visible overscroll distances."
+
+	self validateBounds.
+
+	anOffset < minimum
+		ifTrue: [ ^ minimum - ((minimum - anOffset) min: self maximumBeforeLogicalOverscroll) ].
+	anOffset > maximum
+		ifTrue: [ ^ maximum + ((anOffset - maximum) min: self maximumAfterLogicalOverscroll) ].
+	^ anOffset
+]
+
+{ #category : 'projection' }
+CFRubberBandProjection >> overscrollLimit: aNumberOrNil [
+	"Set the same overscroll limit before and after the bounds.
+	Nil means unlimited.
+	0 means zero pixels.
+	Values strictly between 0 and 1 mean that proportion of the dimension.
+	Values greater than or equal to 1 mean pixels."
+
+	self
+		beforeOverscrollLimit: aNumberOrNil;
+		afterOverscrollLimit: aNumberOrNil
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> maximumAfterLogicalOverscroll [
+	^ self logicalOverscrollLimitFor: afterOverscrollLimit
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> maximumBeforeLogicalOverscroll [
+	^ self logicalOverscrollLimitFor: beforeOverscrollLimit
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> logicalOverscrollLimitFor: anOverscrollLimitOrNil [
+	| resolvedLimit |
+	anOverscrollLimitOrNil ifNil: [ ^ Float infinity ].
+
+	resolvedLimit := self resolvedOverscrollLimitFor: anOverscrollLimitOrNil.
+	resolvedLimit <= 0
+		ifTrue: [ ^ 0 ].
+
+	^ self inverseDistanceForProjectedOverscroll: resolvedLimit
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> maximumRepresentableOverscrollLimit [
+	^ (dimension - self overscrollLimitEpsilon) max: 0
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> overscrollDistanceForLimitedOffset: anOffset [
+	anOffset < minimum
+		ifTrue: [ ^ minimum - anOffset ].
+	anOffset > maximum
+		ifTrue: [ ^ anOffset - maximum ].
+	^ 0
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> overscrollLimitEpsilon [
+	^ 0.000001
+]
+
+{ #category : 'private - projection' }
+CFRubberBandProjection >> projectLimitedOffset: anOffset [
+	self validateBounds.
+
+	anOffset < minimum
+		ifTrue: [ ^ minimum - (self distanceForOverscroll: minimum - anOffset) ].
+	anOffset > maximum
+		ifTrue: [ ^ maximum + (self distanceForOverscroll: anOffset - maximum) ].
+	^ anOffset
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> resolvedOverscrollLimitFor: aNumber [
+	| resolved |
+	self validateOverscrollLimit: aNumber.
+
+	resolved := (aNumber > 0 and: [ aNumber < 1 ])
+		ifTrue: [ dimension * aNumber ]
+		ifFalse: [ aNumber ].
+
+	^ resolved min: self maximumRepresentableOverscrollLimit
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> signedOverscrollDistanceForLimitedOffset: anOffset [
+	anOffset < minimum
+		ifTrue: [ ^ anOffset - minimum ].
+	anOffset > maximum
+		ifTrue: [ ^ anOffset - maximum ].
+	^ 0
+]
+
+{ #category : 'validation' }
+CFRubberBandProjection >> validateOverscrollLimit: aNumber [
+	aNumber < 0
+		ifTrue: [ self error: 'Overscroll limit must not be negative.' ]
 ]

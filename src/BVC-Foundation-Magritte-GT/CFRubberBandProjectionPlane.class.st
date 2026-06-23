@@ -266,3 +266,25 @@ CFRubberBandProjectionPlane >> velocityScaleYAt: aNumber [
 		ifNil: [ 1 ]
 		ifNotNil: [ vertical velocityScaleAt: aNumber ]
 ]
+
+{ #category : 'projection' }
+CFRubberBandProjectionPlane >> limitedPointFor: aPoint [
+	"Answer aPoint constrained to configured axis overscroll limits.
+	Unconfigured axes pass through unchanged."
+
+	^ (self limitedXFor: aPoint x) @ (self limitedYFor: aPoint y)
+]
+
+{ #category : 'private - projection' }
+CFRubberBandProjectionPlane >> limitedXFor: aNumber [
+	^ horizontal
+		ifNil: [ aNumber ]
+		ifNotNil: [ horizontal limitedOffsetFor: aNumber ]
+]
+
+{ #category : 'private - projection' }
+CFRubberBandProjectionPlane >> limitedYFor: aNumber [
+	^ vertical
+		ifNil: [ aNumber ]
+		ifNotNil: [ vertical limitedOffsetFor: aNumber ]
+]

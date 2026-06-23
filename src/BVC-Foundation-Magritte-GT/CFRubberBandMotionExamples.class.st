@@ -318,3 +318,21 @@ CFRubberBandMotionExamples >> verticalOnlyProjectsOnlyY [
 
 	^ motion
 ]
+
+{ #category : 'examples' }
+CFRubberBandMotionExamples >> moveToStoresLimitedLogicalPosition [
+	<gtExample>
+	| motion expectedY |
+	motion := self verticalOnlyMotion.
+	motion vertical overscrollLimit: 100.
+	expectedY := motion vertical limitedOffsetFor: 999999.
+
+	motion moveTo: 999999 @ 999999.
+
+	self assert: motion logicalPosition = (999999 @ expectedY).
+	self assert: motion logicalPosition y < 999999.
+	self assert: motion logicalPosition y > 2000.
+	self assert: (motion projectedPosition y - 2100) abs < 0.000001.
+
+	^ motion
+]

@@ -359,3 +359,34 @@ CFRubberBandProjectionPlaneExamples >> verticalOnlyVelocityMapsOnlyY [
 
 	^ plane
 ]
+
+{ #category : 'examples' }
+CFRubberBandProjectionPlaneExamples >> limitedPointAppliesOnlyConfiguredAxes [
+	<gtExample>
+	| plane limited expectedY |
+	plane := self verticalOnlyPlane.
+	plane vertical overscrollLimit: 100.
+
+	expectedY := plane vertical limitedOffsetFor: 999999.
+	limited := plane limitedPointFor: 999999 @ 999999.
+
+	self assert: limited = (999999 @ expectedY).
+	self assert: limited y < 999999.
+	self assert: limited y > 2000.
+
+	^ plane
+]
+
+{ #category : 'examples' }
+CFRubberBandProjectionPlaneExamples >> limitedPointDoesNotCreateAxes [
+	<gtExample>
+	| plane limited |
+	plane := self newPlaneHasNoAxes.
+	limited := plane limitedPointFor: 999999 @ 999999.
+
+	self assert: limited = (999999 @ 999999).
+	self assert: plane hasHorizontal not.
+	self assert: plane hasVertical not.
+
+	^ plane
+]

@@ -48,7 +48,7 @@ CFRubberBandMotion >> logicalPosition [
 
 { #category : 'accessing' }
 CFRubberBandMotion >> logicalPosition: aPoint [
-	logicalPosition := aPoint
+	self moveTo: aPoint
 ]
 
 { #category : 'accessing' }
@@ -68,7 +68,9 @@ CFRubberBandMotion >> moveBy: aDeltaPoint [
 
 { #category : 'movement' }
 CFRubberBandMotion >> moveTo: aPoint [
-	logicalPosition := aPoint.
+	logicalPosition := projectionPlane
+		ifNil: [ aPoint ]
+		ifNotNil: [ projectionPlane limitedPointFor: aPoint ].
 	^ self
 ]
 
