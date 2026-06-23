@@ -39,3 +39,37 @@ CFBlRubberBandScrollableElementExamples >> elementCanConfigureVerticalProjection
 
 	^ element
 ]
+
+{ #category : 'examples - visual' }
+CFBlRubberBandScrollableElementExamples >> verticalScrollableElementPreview [
+	<gtExample>
+	| element content |
+
+	element := CFBlRubberBandScrollableElement new.
+	element
+		background: Color veryVeryLightGray;
+		border: (BlBorder paint: Color lightGray width: 1);
+		clipChildren: true;
+		constraintsDo: [ :c |
+			c horizontal exact: 320.
+			c vertical exact: 240 ].
+
+	content := BlElement new.
+	content
+		background: (Color blue alpha: 0.12);
+		border: (BlBorder paint: (Color blue alpha: 0.35) width: 1);
+		constraintsDo: [ :c |
+			c horizontal exact: 320.
+			c vertical exact: 900 ].
+
+	element addChild: content.
+	element vertical.
+
+	self assert: element hasScrolledElement.
+	self assert: element motion hasProjectionPlane.
+	self assert: (element motion projectionPlane hasHorizontal) not.
+	self assert: element motion projectionPlane hasVertical.
+
+	^ element
+]
+
