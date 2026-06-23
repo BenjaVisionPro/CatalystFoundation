@@ -330,10 +330,9 @@ CFRubberBandMotionExamples >> moveToStoresLimitedLogicalPosition [
 	motion moveTo: 999999 @ 999999.
 
 	self assert: motion logicalPosition = (999999 @ expectedY).
-	self assert: motion logicalPosition y < 999999.
+	self assert: motion logicalPosition y < 3000.
 	self assert: motion logicalPosition y > 2000.
-	self assert: motion projectedPosition y < 2100.
-	self assert: motion projectedPosition y > 2090.
+	self assert: motion projectedPosition y = 2100.
 
 	^ motion
 ]
