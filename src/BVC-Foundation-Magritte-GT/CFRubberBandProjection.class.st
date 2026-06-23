@@ -67,14 +67,12 @@ CFRubberBandProjection >> coefficient: aNumber [
 { #category : 'math' }
 CFRubberBandProjection >> derivativeForOverscroll: anOverscrollDistance [
 	"Answer the derivative of distanceForOverscroll: at the given raw overscroll distance.
-	This is useful for mapping logical velocity into projected velocity."
+	This uses the default dimension asymptote. Edge-specific projection uses
+	derivativeForOverscroll:usingAsymptote:."
 
-	anOverscrollDistance < 0
-		ifTrue: [ self error: 'Overscroll distance must not be negative.' ].
-
-	^ (dimension * dimension * coefficient)
-		/ ((dimension + (coefficient * anOverscrollDistance))
-			* (dimension + (coefficient * anOverscrollDistance)))
+	^ self
+		derivativeForOverscroll: anOverscrollDistance
+		usingAsymptote: dimension
 ]
 
 { #category : 'accessing' }
@@ -91,20 +89,11 @@ CFRubberBandProjection >> dimension: aNumber [
 
 { #category : 'math' }
 CFRubberBandProjection >> distanceForOverscroll: anOverscrollDistance [
-	"Answer the projected distance for a raw overscroll distance.
+	"Answer the projected distance for a raw overscroll distance using the default dimension asymptote."
 
-	Formula:
-		b = (x * d * c) / (d + c * x)
-
-	x = raw overscroll distance
-	d = projection dimension
-	c = coefficient"
-
-	anOverscrollDistance <= 0
-		ifTrue: [ ^ 0 ].
-
-	^ (anOverscrollDistance * dimension * coefficient)
-		/ (dimension + (coefficient * anOverscrollDistance))
+	^ self
+		distanceForOverscroll: anOverscrollDistance
+		usingAsymptote: dimension
 ]
 
 { #category : 'initialization' }
@@ -120,20 +109,11 @@ CFRubberBandProjection >> initialize [
 
 { #category : 'math' }
 CFRubberBandProjection >> inverseDistanceForProjectedOverscroll: aProjectedOverscrollDistance [
-	"Recover raw overscroll distance from a projected overscroll distance.
+	"Recover raw overscroll distance from a projected overscroll distance using the default dimension asymptote."
 
-	Formula:
-		x = (b * d) / (c * (d - b))
-
-	The projected distance must be smaller than the dimension."
-
-	aProjectedOverscrollDistance < 0
-		ifTrue: [ self error: 'Projected overscroll distance must not be negative.' ].
-	aProjectedOverscrollDistance >= dimension
-		ifTrue: [ self error: 'Projected overscroll distance must be smaller than the dimension.' ].
-
-	^ (aProjectedOverscrollDistance * dimension)
-		/ (coefficient * (dimension - aProjectedOverscrollDistance))
+	^ self
+		inverseDistanceForProjectedOverscroll: aProjectedOverscrollDistance
+		usingAsymptote: dimension
 ]
 
 { #category : 'testing' }
@@ -236,9 +216,19 @@ CFRubberBandProjection >> projectedVelocityFor: aVelocity at: anOffset [
 
 { #category : 'overscroll' }
 CFRubberBandProjection >> projectedOverscrollDistanceFor: anOffset [
-	"Answer the unsigned projected distance from the nearest bound."
+	"Answer the unsigned projected distance from the nearest bound using the relevant edge asymptote."
 
-	^ self distanceForOverscroll: (self overscrollDistanceFor: anOffset)
+	| limitedOffset |
+	limitedOffset := self limitedOffsetFor: anOffset.
+	limitedOffset < minimum
+		ifTrue: [ ^ self
+			distanceForOverscroll: minimum - limitedOffset
+			usingAsymptote: self beforeOverscrollAsymptote ].
+	limitedOffset > maximum
+		ifTrue: [ ^ self
+			distanceForOverscroll: limitedOffset - maximum
+			usingAsymptote: self afterOverscrollAsymptote ].
+	^ 0
 ]
 
 { #category : 'overscroll' }
@@ -251,15 +241,17 @@ CFRubberBandProjection >> signedOverscrollDistanceFor: anOffset [
 
 { #category : 'overscroll' }
 CFRubberBandProjection >> signedProjectedOverscrollDistanceFor: anOffset [
-	| signedDistance projectedDistance |
-	signedDistance := self signedOverscrollDistanceFor: anOffset.
-	signedDistance = 0
-		ifTrue: [ ^ 0 ].
-
-	projectedDistance := self distanceForOverscroll: signedDistance abs.
-	^ signedDistance negative
-		ifTrue: [ projectedDistance negated ]
-		ifFalse: [ projectedDistance ]
+	| limitedOffset |
+	limitedOffset := self limitedOffsetFor: anOffset.
+	limitedOffset < minimum
+		ifTrue: [ ^ (self
+			distanceForOverscroll: minimum - limitedOffset
+			usingAsymptote: self beforeOverscrollAsymptote) negated ].
+	limitedOffset > maximum
+		ifTrue: [ ^ self
+			distanceForOverscroll: limitedOffset - maximum
+			usingAsymptote: self afterOverscrollAsymptote ].
+	^ 0
 ]
 
 { #category : 'validation' }
@@ -272,7 +264,17 @@ CFRubberBandProjection >> validateBounds [
 CFRubberBandProjection >> velocityScaleAt: anOffset [
 	"Answer the multiplier that maps logical velocity to projected velocity at the supplied logical offset."
 
-	^ self derivativeForOverscroll: (self overscrollDistanceFor: anOffset)
+	| limitedOffset |
+	limitedOffset := self limitedOffsetFor: anOffset.
+	limitedOffset < minimum
+		ifTrue: [ ^ self
+			derivativeForOverscroll: minimum - limitedOffset
+			usingAsymptote: self beforeOverscrollAsymptote ].
+	limitedOffset > maximum
+		ifTrue: [ ^ self
+			derivativeForOverscroll: limitedOffset - maximum
+			usingAsymptote: self afterOverscrollAsymptote ].
+	^ self derivativeForOverscroll: 0
 ]
 
 { #category : 'copying' }
@@ -342,8 +344,8 @@ CFRubberBandProjection >> beforeOverscrollLimit: aNumberOrNil [
 
 { #category : 'projection' }
 CFRubberBandProjection >> limitedOffsetFor: anOffset [
-	"Answer anOffset constrained to the configured logical overscroll limits.
-	Overscroll limits are configured as maximum visible overscroll distances."
+	"Answer anOffset constrained to a safety logical limit derived from the configured projected overscroll asymptote.
+	The public limit remains a projected/visible limit; this method only prevents infinite logical runaway."
 
 	self validateBounds.
 
@@ -379,14 +381,17 @@ CFRubberBandProjection >> maximumBeforeLogicalOverscroll [
 
 { #category : 'private - overscroll limits' }
 CFRubberBandProjection >> logicalOverscrollLimitFor: anOverscrollLimitOrNil [
-	| resolvedLimit |
+	| asymptote safetyProjectedLimit |
 	anOverscrollLimitOrNil ifNil: [ ^ Float infinity ].
 
-	resolvedLimit := self resolvedOverscrollLimitFor: anOverscrollLimitOrNil.
-	resolvedLimit <= 0
+	asymptote := self resolvedOverscrollLimitFor: anOverscrollLimitOrNil.
+	asymptote <= 0
 		ifTrue: [ ^ 0 ].
 
-	^ self inverseDistanceForProjectedOverscroll: resolvedLimit
+	safetyProjectedLimit := asymptote * self overscrollLogicalSafetyRatio.
+	^ self
+		inverseDistanceForProjectedOverscroll: safetyProjectedLimit
+		usingAsymptote: asymptote
 ]
 
 { #category : 'private - overscroll limits' }
@@ -413,22 +418,23 @@ CFRubberBandProjection >> projectLimitedOffset: anOffset [
 	self validateBounds.
 
 	anOffset < minimum
-		ifTrue: [ ^ minimum - (self distanceForOverscroll: minimum - anOffset) ].
+		ifTrue: [ ^ minimum - (self
+			distanceForOverscroll: minimum - anOffset
+			usingAsymptote: self beforeOverscrollAsymptote) ].
 	anOffset > maximum
-		ifTrue: [ ^ maximum + (self distanceForOverscroll: anOffset - maximum) ].
+		ifTrue: [ ^ maximum + (self
+			distanceForOverscroll: anOffset - maximum
+			usingAsymptote: self afterOverscrollAsymptote) ].
 	^ anOffset
 ]
 
 { #category : 'private - overscroll limits' }
 CFRubberBandProjection >> resolvedOverscrollLimitFor: aNumber [
-	| resolved |
 	self validateOverscrollLimit: aNumber.
 
-	resolved := (aNumber > 0 and: [ aNumber < 1 ])
+	^ (aNumber > 0 and: [ aNumber < 1 ])
 		ifTrue: [ dimension * aNumber ]
-		ifFalse: [ aNumber ].
-
-	^ resolved min: self maximumRepresentableOverscrollLimit
+		ifFalse: [ aNumber ]
 ]
 
 { #category : 'private - overscroll limits' }
@@ -445,3 +451,115 @@ CFRubberBandProjection >> validateOverscrollLimit: aNumber [
 	aNumber < 0
 		ifTrue: [ self error: 'Overscroll limit must not be negative.' ]
 ]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> afterOverscrollAsymptote [
+	^ afterOverscrollLimit
+		ifNil: [ dimension ]
+		ifNotNil: [ self resolvedOverscrollLimitFor: afterOverscrollLimit ]
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> beforeOverscrollAsymptote [
+	^ beforeOverscrollLimit
+		ifNil: [ dimension ]
+		ifNotNil: [ self resolvedOverscrollLimitFor: beforeOverscrollLimit ]
+]
+
+{ #category : 'private - math' }
+CFRubberBandProjection >> derivativeForOverscroll: anOverscrollDistance usingAsymptote: anAsymptote [
+	anOverscrollDistance < 0
+		ifTrue: [ self error: 'Overscroll distance must not be negative.' ].
+	anAsymptote <= 0
+		ifTrue: [ ^ 0 ].
+
+	^ (anAsymptote * anAsymptote * coefficient)
+		/ ((anAsymptote + (coefficient * anOverscrollDistance))
+			* (anAsymptote + (coefficient * anOverscrollDistance)))
+]
+
+{ #category : 'private - math' }
+CFRubberBandProjection >> distanceForOverscroll: anOverscrollDistance usingAsymptote: anAsymptote [
+	"Answer the projected overscroll distance for a raw overscroll distance and visible asymptote.
+	A configured overscroll limit is this asymptote: the projected distance approaches it smoothly."
+
+	anOverscrollDistance <= 0
+		ifTrue: [ ^ 0 ].
+	anAsymptote <= 0
+		ifTrue: [ ^ 0 ].
+
+	^ (anOverscrollDistance * anAsymptote * coefficient)
+		/ (anAsymptote + (coefficient * anOverscrollDistance))
+]
+
+{ #category : 'private - math' }
+CFRubberBandProjection >> inverseDistanceForProjectedOverscroll: aProjectedOverscrollDistance usingAsymptote: anAsymptote [
+	"Recover raw overscroll distance from projected overscroll distance for the given asymptote."
+
+	aProjectedOverscrollDistance < 0
+		ifTrue: [ self error: 'Projected overscroll distance must not be negative.' ].
+	anAsymptote <= 0
+		ifTrue: [
+			aProjectedOverscrollDistance = 0
+				ifTrue: [ ^ 0 ].
+			self error: 'Projected overscroll distance must be zero when the asymptote is zero.' ].
+	aProjectedOverscrollDistance >= anAsymptote
+		ifTrue: [ self error: 'Projected overscroll distance must be smaller than the asymptote.' ].
+
+	^ (aProjectedOverscrollDistance * anAsymptote)
+		/ (coefficient * (anAsymptote - aProjectedOverscrollDistance))
+]
+
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjection >> overscrollLogicalSafetyRatio [
+	"Use the configured projected limit as the curve asymptote, but cap logical state just below it
+	to prevent infinite logical runaway without turning the visible limit into a hard wall."
+
+	^ 0.995
+]
+
+{ #category : 'movement' }
+CFRubberBandProjection >> offset: anOffset movedBy: aDelta [
+	"Answer the next logical offset for an input delta.
+	When already overscrolled and moving back toward bounds, consume the delta in projected space
+	so the user does not have to repay a huge invisible logical overscroll debt."
+
+	| current raw projected nextProjected |
+	self validateBounds.
+	current := self limitedOffsetFor: anOffset.
+	aDelta = 0
+		ifTrue: [ ^ current ].
+
+	current > maximum
+		ifTrue: [
+			aDelta > 0
+				ifTrue: [ ^ self limitedOffsetFor: current + aDelta ].
+			raw := current - maximum.
+			projected := self
+				distanceForOverscroll: raw
+				usingAsymptote: self afterOverscrollAsymptote.
+			nextProjected := projected + aDelta.
+			nextProjected > 0
+				ifTrue: [ ^ maximum + (self
+					inverseDistanceForProjectedOverscroll: nextProjected
+					usingAsymptote: self afterOverscrollAsymptote) ].
+			^ maximum + nextProjected ].
+
+	current < minimum
+		ifTrue: [
+			aDelta < 0
+				ifTrue: [ ^ self limitedOffsetFor: current + aDelta ].
+			raw := minimum - current.
+			projected := self
+				distanceForOverscroll: raw
+				usingAsymptote: self beforeOverscrollAsymptote.
+			nextProjected := projected - aDelta.
+			nextProjected > 0
+				ifTrue: [ ^ minimum - (self
+					inverseDistanceForProjectedOverscroll: nextProjected
+					usingAsymptote: self beforeOverscrollAsymptote) ].
+			^ minimum - nextProjected ].
+
+	^ self limitedOffsetFor: current + aDelta
+]
+

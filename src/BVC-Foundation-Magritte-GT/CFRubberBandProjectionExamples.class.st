@@ -350,16 +350,18 @@ CFRubberBandProjectionExamples >> validationRejectsInvalidBounds [
 { #category : 'examples' }
 CFRubberBandProjectionExamples >> overscrollLimitInPixelsLimitsProjection [
 	<gtExample>
-	| projection limited projected expectedLogicalLimit |
+	| projection limited projected |
 	projection := self appleLikeProjection.
 	projection overscrollLimit: 100.
 
-	expectedLogicalLimit := 1000 + (projection inverseDistanceForProjectedOverscroll: 100).
 	limited := projection limitedOffsetFor: 999999.
 	projected := projection project: 999999.
 
-	self assert: (limited - expectedLogicalLimit) abs < 0.000001.
-	self assert: (projected - 1100) abs < 0.000001.
+	self assert: limited < 999999.
+	self assert: projected < 1100.
+	self assert: projected > 1090.
+	self assert: (projection projectedOverscrollDistanceFor: 999999) < 100.
+	self assert: (projection projectedOverscrollDistanceFor: 999999) > 90.
 	self assert: (projection overscrollDistanceFor: 999999) = (projection overscrollDistanceFor: limited).
 
 	^ projection
@@ -388,11 +390,13 @@ CFRubberBandProjectionExamples >> overscrollLimitFractionUsesCurrentDimension [
 	projection overscrollLimit: 1 / 4.
 	projected := projection project: 999999.
 
-	self assert: (projected - 1125) abs < 0.000001.
+	self assert: projected < 1125.
+	self assert: projected > 1115.
 
 	projection dimension: 800.
 	projected := projection project: 999999.
-	self assert: (projected - 1200) abs < 0.000001.
+	self assert: projected < 1200.
+	self assert: projected > 1190.
 
 	^ projection
 ]
@@ -409,8 +413,10 @@ CFRubberBandProjectionExamples >> asymmetricOverscrollLimits [
 	beforeProjected := projection project: -999999.
 	afterProjected := projection project: 999999.
 
-	self assert: (beforeProjected + 50) abs < 0.000001.
-	self assert: (afterProjected - 1100) abs < 0.000001.
+	self assert: beforeProjected > -50.
+	self assert: beforeProjected < -45.
+	self assert: afterProjected < 1100.
+	self assert: afterProjected > 1090.
 
 	^ projection
 ]
@@ -430,3 +436,60 @@ CFRubberBandProjectionExamples >> validationRejectsNegativeOverscrollLimit [
 
 	^ projection
 ]
+
+{ #category : 'examples' }
+CFRubberBandProjectionExamples >> overscrollLimitIsProjectionAsymptoteNotHardLogicalClamp [
+	<gtExample>
+	| projection first second third |
+	projection := self appleLikeProjection.
+	projection overscrollLimit: 100.
+
+	first := projection project: 1100.
+	second := projection project: 1300.
+	third := projection project: 1700.
+
+	self assert: first > 1000.
+	self assert: second > first.
+	self assert: third > second.
+	self assert: third < 1100.
+
+	^ projection
+]
+
+{ #category : 'examples' }
+CFRubberBandProjectionExamples >> movingBackFromLimitedOverscrollConsumesProjectedDebt [
+	<gtExample>
+	| projection offset moved projectedBefore projectedAfter |
+	projection := self appleLikeProjection.
+	projection overscrollLimit: 100.
+	offset := projection limitedOffsetFor: 999999.
+	projectedBefore := projection project: offset.
+
+	moved := projection offset: offset movedBy: -50.
+	projectedAfter := projection project: moved.
+
+	self assert: projectedAfter < projectedBefore.
+	self assert: projectedAfter > 1000.
+	self assert: (projectedBefore - projectedAfter) > 40.
+
+	^ projection
+]
+
+{ #category : 'examples' }
+CFRubberBandProjectionExamples >> movingFartherIntoLimitedOverscrollStillMovesGradually [
+	<gtExample>
+	| projection first second third |
+	projection := self appleLikeProjection.
+	projection overscrollLimit: 100.
+
+	first := projection offset: 1000 movedBy: 100.
+	second := projection offset: first movedBy: 100.
+	third := projection offset: second movedBy: 100.
+
+	self assert: (projection project: second) > (projection project: first).
+	self assert: (projection project: third) > (projection project: second).
+	self assert: (projection project: third) < 1100.
+
+	^ projection
+]
+

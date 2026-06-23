@@ -332,7 +332,28 @@ CFRubberBandMotionExamples >> moveToStoresLimitedLogicalPosition [
 	self assert: motion logicalPosition = (999999 @ expectedY).
 	self assert: motion logicalPosition y < 999999.
 	self assert: motion logicalPosition y > 2000.
-	self assert: (motion projectedPosition y - 2100) abs < 0.000001.
+	self assert: motion projectedPosition y < 2100.
+	self assert: motion projectedPosition y > 2090.
 
 	^ motion
 ]
+
+{ #category : 'examples' }
+CFRubberBandMotionExamples >> moveByBackFromLimitedOverscrollReturnsInProjectedSpace [
+	<gtExample>
+	| motion projectedBefore projectedAfter |
+	motion := self verticalOnlyMotion.
+	motion vertical overscrollLimit: 100.
+	motion moveTo: 999999 @ 999999.
+	projectedBefore := motion projectedPosition.
+
+	motion moveBy: 0 @ -50.
+	projectedAfter := motion projectedPosition.
+
+	self assert: projectedAfter y < projectedBefore y.
+	self assert: projectedAfter y > 2000.
+	self assert: (projectedBefore y - projectedAfter y) > 40.
+
+	^ motion
+]
+

@@ -63,7 +63,10 @@ CFRubberBandMotion >> logicalVelocity: aPoint [
 
 { #category : 'movement' }
 CFRubberBandMotion >> moveBy: aDeltaPoint [
-	^ self moveTo: logicalPosition + aDeltaPoint
+	logicalPosition := projectionPlane
+		ifNil: [ logicalPosition + aDeltaPoint ]
+		ifNotNil: [ projectionPlane point: logicalPosition movedBy: aDeltaPoint ].
+	^ self
 ]
 
 { #category : 'movement' }
