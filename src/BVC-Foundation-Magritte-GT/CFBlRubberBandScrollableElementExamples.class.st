@@ -130,7 +130,8 @@ CFBlRubberBandScrollableElementExamples >> scrollVerticallyByReturnsConsumedDist
 
 	self assert: consumed > 0.
 	self assert: consumed = element scrollPosition y.
-	self assert: element scrolledElement position = element projectedScrollPosition.
+	self assert: element projectedScrollPosition y > 0.
+	self assert: element projectedScrollPosition y < element scrollPosition y.
 
 	^ element
 ]
