@@ -76,6 +76,11 @@ CFBlRubberBandScrollableElement >> defaultLayout [
 ]
 
 { #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultSmoothScrollDuration [
+	^ 200 milliSeconds
+]
+
+{ #category : 'defaults' }
 CFBlRubberBandScrollableElement >> defaultOverscrollLimit [
 	"A UI default only. CFRubberBandProjection remains neutral by default."
 
@@ -132,6 +137,20 @@ CFBlRubberBandScrollableElement >> hasProjectionPlane [
 { #category : 'testing' }
 CFBlRubberBandScrollableElement >> hasScrolledElement [
 	^ self children isNotEmpty
+]
+
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> hasUsableScrollExtentFor: aDeltaPoint [
+	"BlScrollFlinger>>smoothScrollBy: computes a duration from the active
+	scroll axis extent. Before layout, that extent can be zero and the
+	flinger duration calculation divides by it. Use a fixed-duration flinger
+	entry point until layout has produced a usable extent."
+
+	(aDeltaPoint x abs > aDeltaPoint y abs)
+		ifTrue: [ ^ self width > 0 ].
+
+	^ self height > 0
 ]
 
 { #category : 'projection configuration' }
@@ -218,7 +237,8 @@ CFBlRubberBandScrollableElement >> onLayout: aBounds context: aBlElementBoundsUp
 
 { #category : 'hooks - scrolling' }
 CFBlRubberBandScrollableElement >> onScrolled: aPoint [
-	super onScrolled: aPoint.
+	"TBlScrollable sends this hook from dispatchOnScrolled:.
+	There is no superclass hook because this element subclasses BlElement directly."
 	self updateDebugOverlay
 ]
 
@@ -387,12 +407,22 @@ CFBlRubberBandScrollableElement >> hideDebugOverlay [
 
 { #category : 'scrolling' }
 CFBlRubberBandScrollableElement >> smoothScrollBy: aPoint [
-	| dX dY |
+	| dX dY delta |
 
 	dX := self canScrollHorizontally ifTrue: [ aPoint x ] ifFalse: [ 0.0 ].
 	dY := self canScrollVertically ifTrue: [ aPoint y ] ifFalse: [ 0.0 ].
-	(dX isZero and: [ dY isZero ])
-		ifFalse: [ scrollFlinger smoothScrollBy: dX @ dY ]
+	delta := dX @ dY.
+
+	delta isZero ifTrue: [ ^ self ].
+
+	(self hasUsableScrollExtentFor: delta)
+		ifTrue: [ scrollFlinger smoothScrollBy: delta ]
+		ifFalse: [
+			scrollFlinger
+				smoothScrollBy: delta
+				during: self defaultSmoothScrollDuration ].
+
+	^ self
 ]
 
 { #category : 'debugging' }
