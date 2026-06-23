@@ -2,7 +2,8 @@ Class {
 	#name : 'CFBlRubberBandScrollableElement',
 	#superclass : 'BlScrollableElement',
 	#instVars : [
-		'animator'
+		'animator',
+		'debugOverlay'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -16,7 +17,8 @@ CFBlRubberBandScrollableElement >> animator [
 { #category : 'accessing' }
 CFBlRubberBandScrollableElement >> animator: anAnimator [
 	animator := anAnimator.
-	scrollPosition := animator motion logicalPosition
+	scrollPosition := animator motion logicalPosition.
+	self updateDebugOverlay
 ]
 
 { #category : 'private - applying' }
@@ -27,7 +29,8 @@ CFBlRubberBandScrollableElement >> applyProjectedPosition [
 
 	scrollPosition := self motion logicalPosition.
 	self scrolledElementDo: [ :anElement |
-		anElement relocate: self motion projectedPosition ]
+		anElement relocate: self motion projectedPosition ].
+	self updateDebugOverlay
 ]
 
 { #category : 'scrolling' }
@@ -36,6 +39,7 @@ CFBlRubberBandScrollableElement >> flingBy: aVelocityPoint [
 		ifFalse: [ ^ self ].
 	self updateProjectionBounds.
 	animator decelerateWithVelocity: aVelocityPoint negated.
+	self updateDebugOverlay.
 	^ self
 ]
 
@@ -48,6 +52,7 @@ CFBlRubberBandScrollableElement >> horizontal [
 CFBlRubberBandScrollableElement >> initialize [
 	super initialize.
 	animator := CFRubberBandAnimator new.
+	debugOverlay := nil.
 	scrollPosition := animator motion logicalPosition
 ]
 
@@ -177,6 +182,7 @@ CFBlRubberBandScrollableElement >> scrollVerticallyBy: aNumber [
 CFBlRubberBandScrollableElement >> settleToBounds [
 	self updateProjectionBounds.
 	animator settleToBounds.
+	self updateDebugOverlay.
 	^ self
 ]
 
@@ -190,6 +196,7 @@ CFBlRubberBandScrollableElement >> stepAnimationBy: deltaSeconds [
 { #category : 'scrolling' }
 CFBlRubberBandScrollableElement >> stopAnimation [
 	animator stop.
+	self updateDebugOverlay.
 	^ self
 ]
 
@@ -231,4 +238,103 @@ CFBlRubberBandScrollableElement >> updateVerticalProjectionBounds [
 { #category : 'projection configuration' }
 CFBlRubberBandScrollableElement >> vertical [
 	^ animator vertical
+]
+
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> debugOverlay [
+	debugOverlay ifNil: [ debugOverlay := self newDebugOverlay ].
+	^ debugOverlay
+]
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> debugValuesString [
+	^ String streamContents: [ :aStream |
+		aStream
+			nextPutAll: 'Rubber band'; cr;
+			nextPutAll: 'mode: '; nextPutAll: animator mode asString; cr;
+			nextPutAll: 'logical: '; nextPutAll: self motion logicalPosition asString; cr;
+			nextPutAll: 'projected: '; nextPutAll: self motion projectedPosition asString; cr;
+			nextPutAll: 'velocity: '; nextPutAll: self motion logicalVelocity asString; cr;
+			nextPutAll: 'projected velocity: '; nextPutAll: self motion projectedVelocity asString; cr;
+			nextPutAll: 'release target: '; nextPutAll: self motion releaseTargetPosition asString; cr;
+			nextPutAll: 'overscroll: '; nextPutAll: self motion overscrollDistance asString; cr;
+			nextPutAll: 'signed overscroll: '; nextPutAll: self motion signedOverscrollDistance asString; cr;
+			nextPutAll: 'projected overscroll: '; nextPutAll: self motion projectedOverscrollDistance asString; cr;
+			nextPutAll: 'velocity scale: '; nextPutAll: self motion velocityScale asString; cr;
+			nextPutAll: 'in bounds: '; nextPutAll: self motion isInBounds asString; cr;
+			nextPutAll: 'has horizontal: '; nextPutAll: self hasHorizontalProjectionForDebug asString; cr;
+			nextPutAll: 'has vertical: '; nextPutAll: self hasVerticalProjectionForDebug asString ]
+]
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> hasDebugOverlay [
+	^ debugOverlay notNil and: [ debugOverlay hasParent ]
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> hasHorizontalProjectionForDebug [
+	^ self motion hasProjectionPlane
+		and: [ self motion projectionPlane hasHorizontal ]
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> hasVerticalProjectionForDebug [
+	^ self motion hasProjectionPlane
+		and: [ self motion projectionPlane hasVertical ]
+]
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> hideDebugOverlay [
+	debugOverlay ifNotNil: [
+		debugOverlay hasParent
+			ifTrue: [ debugOverlay removeFromParent ] ].
+	^ self
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> newDebugOverlay [
+	^ BrLabel new
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.82));
+		background: (Color white alpha: 0.86);
+		border: (BlBorder paint: (Color black alpha: 0.18) width: 1);
+		padding: (BlInsets all: 8);
+		zIndex: 1000;
+		fitContent;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ];
+		yourself
+]
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> showDebugOverlay [
+	self hasScrolledElement
+		ifFalse: [ ^ self ].
+	self debugOverlay hasParent
+		ifFalse: [ self addChild: self debugOverlay as: #rubberBandDebugOverlay ].
+	self updateDebugOverlayLayout.
+	self updateDebugOverlay.
+	^ self
+]
+
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> updateDebugOverlayLayout [
+	debugOverlay ifNil: [ ^ self ].
+	debugOverlay
+		fitContent;
+		zIndex: 1000;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ].
+	^ self
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> updateDebugOverlay [
+	(debugOverlay notNil and: [ debugOverlay hasParent ])
+		ifTrue: [ debugOverlay text: self debugValuesString ].
+	^ self
 ]

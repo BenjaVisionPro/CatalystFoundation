@@ -73,3 +73,34 @@ CFBlRubberBandScrollableElementExamples >> verticalScrollableElementPreview [
 	^ element
 ]
 
+
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> debugOverlayCanBeShown [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element showDebugOverlay.
+
+	self assert: element hasDebugOverlay.
+	self assert: element debugOverlay hasParent.
+	self assert: (element debugValuesString includesSubstring: 'logical:').
+	self assert: element children first ~~ element debugOverlay.
+
+	^ element
+]
+
+{ #category : 'examples - visual' }
+CFBlRubberBandScrollableElementExamples >> verticalScrollableElementDebugPreview [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element showDebugOverlay.
+	element scrollTo: 0 @ 120.
+
+	self assert: element hasDebugOverlay.
+
+	^ element
+]
