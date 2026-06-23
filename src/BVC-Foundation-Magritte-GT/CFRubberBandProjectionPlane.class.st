@@ -289,26 +289,24 @@ CFRubberBandProjectionPlane >> limitedYFor: aNumber [
 		ifNotNil: [ vertical limitedOffsetFor: aNumber ]
 ]
 
-{ #category : 'movement' }
-CFRubberBandProjectionPlane >> point: aPoint movedBy: aDeltaPoint [
-	"Answer the next logical point after a delta, applying configured axis projection movement.
-	Unconfigured axes pass through normal addition."
+{ #category : 'overscroll limits' }
+CFRubberBandProjectionPlane >> logicalOverscrollLimit [
+	"Answer the raw overscroll distance permitted on each configured axis.
+	Unconfigured axes answer zero."
 
-	^ (self x: aPoint x movedBy: aDeltaPoint x)
-		@ (self y: aPoint y movedBy: aDeltaPoint y)
+	^ (self logicalOverscrollLimitX) @ (self logicalOverscrollLimitY)
 ]
 
-{ #category : 'private - movement' }
-CFRubberBandProjectionPlane >> x: aNumber movedBy: aDelta [
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjectionPlane >> logicalOverscrollLimitX [
 	^ horizontal
-		ifNil: [ aNumber + aDelta ]
-		ifNotNil: [ horizontal offset: aNumber movedBy: aDelta ]
+		ifNil: [ 0 ]
+		ifNotNil: [ horizontal logicalOverscrollLimit ]
 ]
 
-{ #category : 'private - movement' }
-CFRubberBandProjectionPlane >> y: aNumber movedBy: aDelta [
+{ #category : 'private - overscroll limits' }
+CFRubberBandProjectionPlane >> logicalOverscrollLimitY [
 	^ vertical
-		ifNil: [ aNumber + aDelta ]
-		ifNotNil: [ vertical offset: aNumber movedBy: aDelta ]
+		ifNil: [ 0 ]
+		ifNotNil: [ vertical logicalOverscrollLimit ]
 ]
-

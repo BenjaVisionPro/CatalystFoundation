@@ -342,8 +342,8 @@ CFRubberBandProjection >> beforeOverscrollLimit: aNumberOrNil [
 
 { #category : 'projection' }
 CFRubberBandProjection >> limitedOffsetFor: anOffset [
-	"Answer anOffset constrained to a finite logical limit derived from the configured
-	projected overscroll cap on the normal dimension-based curve."
+	"Answer anOffset constrained to a safety logical limit derived from the configured projected overscroll asymptote.
+	The public limit remains a projected/visible limit; this method only prevents infinite logical runaway."
 
 	self validateBounds.
 
@@ -460,23 +460,6 @@ CFRubberBandProjection >> validateOverscrollLimit: aNumber [
 	aNumber < 0
 		ifTrue: [ self error: 'Overscroll limit must not be negative.' ]
 ]
-
-{ #category : 'private - overscroll limits' }
-CFRubberBandProjection >> afterOverscrollAsymptote [
-	"The rubber-band curve shape is always based on the axis dimension.
-	Configured overscroll limits cap the projected result instead of replacing this asymptote."
-
-	^ dimension
-]
-
-{ #category : 'private - overscroll limits' }
-CFRubberBandProjection >> beforeOverscrollAsymptote [
-	"The rubber-band curve shape is always based on the axis dimension.
-	Configured overscroll limits cap the projected result instead of replacing this asymptote."
-
-	^ dimension
-]
-
 { #category : 'private - math' }
 CFRubberBandProjection >> derivativeForOverscroll: anOverscrollDistance usingAsymptote: anAsymptote [
 	anOverscrollDistance < 0
@@ -529,40 +512,20 @@ CFRubberBandProjection >> representableProjectedLimitFor: anOverscrollLimit [
 		min: self maximumRepresentableOverscrollLimit
 ]
 
-{ #category : 'movement' }
-CFRubberBandProjection >> offset: anOffset movedBy: aDelta [
-	"Answer the next logical offset for an input delta.
-	The returned value is always constrained by the configured logical safety cap.
-	When already overscrolled and moving back toward bounds, consume the delta in
-	projected space so the user does not have to repay invisible raw overscroll debt."
+{ #category : 'overscroll limits' }
+CFRubberBandProjection >> logicalOverscrollLimit [
+	"Answer the largest raw overscroll distance configured for either side.
+	Nil side limits answer Float infinity."
 
-	| current raw projected nextProjected |
-	self validateBounds.
-	current := self limitedOffsetFor: anOffset.
-	aDelta = 0
-		ifTrue: [ ^ current ].
+	^ self beforeLogicalOverscrollLimit max: self afterLogicalOverscrollLimit
+]
 
-	current > maximum
-		ifTrue: [
-			aDelta > 0
-				ifTrue: [ ^ self limitedOffsetFor: current + aDelta ].
-			raw := current - maximum.
-			projected := self projectedDistanceForOverscroll: raw limit: afterOverscrollLimit.
-			nextProjected := projected + aDelta.
-			nextProjected > 0
-				ifTrue: [ ^ self limitedOffsetFor: maximum + (self inverseDistanceForProjectedOverscroll: nextProjected) ].
-			^ maximum + nextProjected ].
+{ #category : 'overscroll limits' }
+CFRubberBandProjection >> afterLogicalOverscrollLimit [
+	^ self maximumAfterLogicalOverscroll
+]
 
-	current < minimum
-		ifTrue: [
-			aDelta < 0
-				ifTrue: [ ^ self limitedOffsetFor: current + aDelta ].
-			raw := minimum - current.
-			projected := self projectedDistanceForOverscroll: raw limit: beforeOverscrollLimit.
-			nextProjected := projected - aDelta.
-			nextProjected > 0
-				ifTrue: [ ^ self limitedOffsetFor: minimum - (self inverseDistanceForProjectedOverscroll: nextProjected) ].
-			^ minimum - nextProjected ].
-
-	^ self limitedOffsetFor: current + aDelta
+{ #category : 'overscroll limits' }
+CFRubberBandProjection >> beforeLogicalOverscrollLimit [
+	^ self maximumBeforeLogicalOverscroll
 ]
