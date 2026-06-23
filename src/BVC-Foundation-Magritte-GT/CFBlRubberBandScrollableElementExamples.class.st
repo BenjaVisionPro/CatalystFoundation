@@ -94,13 +94,34 @@ CFBlRubberBandScrollableElementExamples >> debugOverlayCanBeShown [
 { #category : 'examples - visual' }
 CFBlRubberBandScrollableElementExamples >> verticalScrollableElementDebugPreview [
 	<gtExample>
-	| element |
+	| container element debugPanel updateDebugPanel |
 
 	element := self verticalScrollableElementPreview.
-	element showDebugOverlay.
 	element scrollTo: 0 @ 120.
 
-	self assert: element hasDebugOverlay.
+	debugPanel := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude;
+		beReadOnlyWithoutSelection;
+		background: (Color white alpha: 0.92);
+		border: (BlBorder paint: (Color black alpha: 0.18) width: 1);
+		padding: (BlInsets all: 8);
+		hExact: 360;
+		vFitContent;
+		yourself.
 
-	^ element
+	updateDebugPanel := [ debugPanel text: element debugValuesString ].
+	updateDebugPanel value.
+	element when: BlElementScrolledEvent do: [ :anEvent | updateDebugPanel value ].
+
+	container := BrHorizontalPane new
+		fitContent;
+		cellSpacing: 12;
+		padding: (BlInsets all: 8);
+		addChild: element;
+		addChild: debugPanel;
+		yourself.
+
+	self assert: (debugPanel text asString includesSubstring: 'logical:').
+
+	^ container
 ]

@@ -75,6 +75,12 @@ CFBlRubberBandScrollableElement >> onLayout: aBounds context: aBlElementBoundsUp
 	self dispatchOnScrolled: self motion projectedPosition - previousProjectedPosition
 ]
 
+{ #category : 'hooks - scrolling' }
+CFBlRubberBandScrollableElement >> onScrolled: aPoint [
+	super onScrolled: aPoint.
+	self updateDebugOverlay
+]
+
 { #category : 'scrolling' }
 CFBlRubberBandScrollableElement >> scrollBy: aPoint [
 	| previousProjectedPosition delta |
@@ -294,14 +300,16 @@ CFBlRubberBandScrollableElement >> hideDebugOverlay [
 
 { #category : 'private - debugging' }
 CFBlRubberBandScrollableElement >> newDebugOverlay [
-	^ BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.82));
-		background: (Color white alpha: 0.86);
+	^ BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude;
+		text: '';
+		beReadOnlyWithoutSelection;
+		background: (Color white alpha: 0.92);
 		border: (BlBorder paint: (Color black alpha: 0.18) width: 1);
 		padding: (BlInsets all: 8);
 		zIndex: 1000;
-		fitContent;
+		hExact: 300;
+		vFitContent;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignTop ];
@@ -335,6 +343,8 @@ CFBlRubberBandScrollableElement >> updateDebugOverlayLayout [
 { #category : 'private - debugging' }
 CFBlRubberBandScrollableElement >> updateDebugOverlay [
 	(debugOverlay notNil and: [ debugOverlay hasParent ])
-		ifTrue: [ debugOverlay text: self debugValuesString ].
+		ifTrue: [
+			debugOverlay text: self debugValuesString.
+			debugOverlay requestLayout ].
 	^ self
 ]
