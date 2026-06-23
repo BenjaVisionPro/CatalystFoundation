@@ -13,10 +13,10 @@ CFRubberBandMotionExamples >> boundsQueriesUseConfiguredAxes [
 
 	motion moveTo: 999999 @ 100.
 	self assert: motion isInBounds.
-	self deny: motion isOutOfBounds.
+	self assert: (motion isOutOfBounds) not.
 
 	motion moveTo: 999999 @ 2200.
-	self deny: motion isInBounds.
+	self assert: (motion isInBounds) not.
 	self assert: motion isOutOfBounds.
 
 	^ motion
@@ -49,7 +49,7 @@ CFRubberBandMotionExamples >> horizontalAccessorCreatesPlaneAndHorizontalAxis [
 
 	self assert: motion hasProjectionPlane.
 	self assert: motion projectionPlane hasHorizontal.
-	self deny: motion projectionPlane hasVertical.
+	self assert: (motion projectionPlane hasVertical) not.
 	self assert: horizontal == motion projectionPlane horizontal.
 
 	^ motion
@@ -67,7 +67,7 @@ CFRubberBandMotionExamples >> horizontalOnlyMotion [
 
 	self assert: motion hasProjectionPlane.
 	self assert: motion projectionPlane hasHorizontal.
-	self deny: motion projectionPlane hasVertical.
+	self assert: (motion projectionPlane hasVertical) not.
 
 	^ motion
 ]
@@ -107,7 +107,7 @@ CFRubberBandMotionExamples >> newMotionIsNeutral [
 	| motion |
 	motion := CFRubberBandMotion new.
 
-	self deny: motion hasProjectionPlane.
+	self assert: (motion hasProjectionPlane) not.
 	self assert: motion logicalPosition = (0 @ 0).
 	self assert: motion logicalVelocity = (0 @ 0).
 	self assert: motion projectedPosition = (0 @ 0).
@@ -118,7 +118,7 @@ CFRubberBandMotionExamples >> newMotionIsNeutral [
 	self assert: motion projectedOverscrollDistance = (0 @ 0).
 	self assert: motion signedProjectedOverscrollDistance = (0 @ 0).
 	self assert: motion isInBounds.
-	self deny: motion isOutOfBounds.
+	self assert: (motion isOutOfBounds) not.
 
 	^ motion
 ]
@@ -148,7 +148,7 @@ CFRubberBandMotionExamples >> projectedPositionDoesNotCreatePlane [
 	motion moveTo: 1200 @ 2200.
 
 	self assert: motion projectedPosition = (1200 @ 2200).
-	self deny: motion hasProjectionPlane.
+	self assert: (motion hasProjectionPlane) not.
 
 	^ motion
 ]
@@ -265,7 +265,7 @@ CFRubberBandMotionExamples >> velocityScalePassesThroughWithoutPlane [
 
 	self assert: motion velocityScale = (1 @ 1).
 	self assert: motion projectedVelocity = (0 @ 0).
-	self deny: motion hasProjectionPlane.
+	self assert: (motion hasProjectionPlane) not.
 
 	^ motion
 ]
@@ -279,7 +279,7 @@ CFRubberBandMotionExamples >> verticalAccessorCreatesPlaneAndVerticalAxis [
 	vertical := motion vertical.
 
 	self assert: motion hasProjectionPlane.
-	self deny: motion projectionPlane hasHorizontal.
+	self assert: (motion projectionPlane hasHorizontal) not.
 	self assert: motion projectionPlane hasVertical.
 	self assert: vertical == motion projectionPlane vertical.
 
@@ -297,7 +297,7 @@ CFRubberBandMotionExamples >> verticalOnlyMotion [
 		dimension: 800.
 
 	self assert: motion hasProjectionPlane.
-	self deny: motion projectionPlane hasHorizontal.
+	self assert: (motion projectionPlane hasHorizontal) not.
 	self assert: motion projectionPlane hasVertical.
 
 	^ motion
