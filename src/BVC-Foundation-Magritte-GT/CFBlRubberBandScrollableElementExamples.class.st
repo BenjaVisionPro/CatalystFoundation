@@ -15,6 +15,9 @@ CFBlRubberBandScrollableElementExamples >> elementCanBeCreated [
 	self assert: element scrollFlinger class = BlScrollFlinger.
 	self assert: element scrollPosition = (0 @ 0).
 	self assert: element scrollState = #idle.
+	self assert: element gestureScrollScale = element defaultGestureScrollScale.
+	self assert: element wheelScrollScale = element defaultWheelScrollScale.
+	self assert: element flingVelocityScale = element defaultFlingVelocityScale.
 	self assert: element hasProjectionPlane not.
 	self assert: element canScrollHorizontally not.
 	self assert: element canScrollVertically not.
@@ -251,4 +254,68 @@ CFBlRubberBandScrollableElementExamples >> repeatedLargeScrollByApproachesButDoe
 	self assert: element projectedScrollPosition y < 120.
 
 	^ element
+]
+
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> inputScalesCanBeConfigured [
+	<gtExample>
+	| element |
+
+	element := self elementCanBeCreated.
+	element
+		gestureScrollScale: 60;
+		wheelScrollScale: 12 @ -12;
+		flingVelocityScale: 0.25.
+
+	self assert: element gestureScrollScale = 60.
+	self assert: element wheelScrollScale = (12 @ -12).
+	self assert: element flingVelocityScale = 0.25.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> invalidGestureScaleIsRejected [
+	<gtExample>
+	| element failed |
+
+	element := self elementCanBeCreated.
+	failed := false.
+	[ element gestureScrollScale: -1 ]
+		on: Error
+		do: [ :anError | failed := true ].
+
+	self assert: failed.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> invalidFlingVelocityScaleIsRejected [
+	<gtExample>
+	| element failed |
+
+	element := self elementCanBeCreated.
+	failed := false.
+	[ element flingVelocityScale: -1 ]
+		on: Error
+		do: [ :anError | failed := true ].
+
+	self assert: failed.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> rubberBandEventHandlerCanBeCreated [
+	<gtExample>
+	| handler |
+
+	handler := CFBlRubberBandScrollableElementEventHandler new.
+
+	self assert: handler class = CFBlRubberBandScrollableElementEventHandler.
+	self assert: (handler isKindOf: BlScrollableElementEventHandler).
+
+	^ handler
 ]

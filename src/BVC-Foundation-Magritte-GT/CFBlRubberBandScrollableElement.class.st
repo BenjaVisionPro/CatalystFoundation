@@ -10,7 +10,10 @@ Class {
 		'horizontalAlignment',
 		'verticalAlignment',
 		'projectionPlane',
-		'debugOverlay'
+		'debugOverlay',
+		'gestureScrollScale',
+		'wheelScrollScale',
+		'flingVelocityScale'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -76,6 +79,22 @@ CFBlRubberBandScrollableElement >> defaultLayout [
 ]
 
 { #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultFlingVelocityScale [
+	^ 0.35
+]
+
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultGestureScrollScale [
+	^ 80.0
+]
+
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultWheelScrollScale [
+	^ 20.0 @ -20.0
+]
+
+
+{ #category : 'defaults' }
 CFBlRubberBandScrollableElement >> defaultSmoothScrollDuration [
 	^ 200 milliSeconds
 ]
@@ -115,13 +134,16 @@ CFBlRubberBandScrollableElement >> debugValuesString [
 			nextPutAll: 'projected overscroll: '; nextPutAll: (self projectionPlaneIfPresent
 				ifNil: [ 0 @ 0 ]
 				ifNotNil: [ :plane | plane projectedOverscrollDistanceFor: scrollPosition ]) asString; cr;
+			nextPutAll: 'gesture scale: '; nextPutAll: gestureScrollScale asString; cr;
+			nextPutAll: 'wheel scale: '; nextPutAll: wheelScrollScale asString; cr;
+			nextPutAll: 'fling scale: '; nextPutAll: flingVelocityScale asString; cr;
 			nextPutAll: 'has horizontal: '; nextPutAll: self canScrollHorizontally asString; cr;
 			nextPutAll: 'has vertical: '; nextPutAll: self canScrollVertically asString ]
 ]
 
 { #category : 'scrolling' }
 CFBlRubberBandScrollableElement >> flingBy: aVelocityPoint [
-	self scrollFlinger flingBy: aVelocityPoint
+	self scrollFlinger flingBy: aVelocityPoint * self flingVelocityScale
 ]
 
 { #category : 'testing' }
@@ -153,6 +175,51 @@ CFBlRubberBandScrollableElement >> hasUsableScrollExtentFor: aDeltaPoint [
 	^ self height > 0
 ]
 
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> flingVelocityScale [
+	^ flingVelocityScale
+]
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> flingVelocityScale: aNumber [
+	aNumber < 0 ifTrue: [ self error: 'Fling velocity scale must not be negative.' ].
+	flingVelocityScale := aNumber.
+	self updateDebugOverlay.
+	^ self
+]
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> gestureScrollScale [
+	^ gestureScrollScale
+]
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> gestureScrollScale: aNumber [
+	aNumber < 0 ifTrue: [ self error: 'Gesture scroll scale must not be negative.' ].
+	gestureScrollScale := aNumber.
+	self updateDebugOverlay.
+	^ self
+]
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> wheelScrollScale [
+	^ wheelScrollScale
+]
+
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> wheelScrollScale: aPointOrNumber [
+	(aPointOrNumber isNumber and: [ aPointOrNumber < 0 ])
+		ifTrue: [ self error: 'Wheel scroll scale must not be negative.' ].
+	((aPointOrNumber respondsTo: #x) and: [
+		(aPointOrNumber respondsTo: #y) and: [
+			aPointOrNumber x isZero and: [ aPointOrNumber y isZero ] ] ])
+		ifTrue: [ self error: 'Wheel scroll scale point must not be zero.' ].
+	wheelScrollScale := aPointOrNumber.
+	self updateDebugOverlay.
+	^ self
+]
+
 { #category : 'projection configuration' }
 CFBlRubberBandScrollableElement >> horizontal [
 	| wasPresent axis |
@@ -178,14 +245,18 @@ CFBlRubberBandScrollableElement >> initialize [
 	super initialize.
 
 	scrollFlinger := BlScrollFlinger on: self.
+	scrollFlinger scroller flywheel: false.
 	scrollPosition := 0.0 @ 0.0.
 	scrollState := #idle.
 	horizontalAlignment := self defaultHorizontalAlignment.
 	verticalAlignment := self defaultVerticalAlignment.
 	projectionPlane := nil.
 	debugOverlay := nil.
+	gestureScrollScale := self defaultGestureScrollScale.
+	wheelScrollScale := self defaultWheelScrollScale.
+	flingVelocityScale := self defaultFlingVelocityScale.
 	self layout: self defaultLayout.
-	self addEventHandler: BlScrollableElementEventHandler new
+	self addEventHandler: CFBlRubberBandScrollableElementEventHandler new
 ]
 
 { #category : 'private - geometry' }
