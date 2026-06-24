@@ -264,13 +264,13 @@ CFBlRubberBandScrollableElementExamples >> inputScalesCanBeConfigured [
 
 	element := self verticalScrollableElementPreview.
 	element
-		gestureScrollScale: 60;
-		wheelScrollScale: 12 @ -12;
-		flingVelocityScale: 0.25.
+		gestureScrollScale: 10;
+		wheelScrollScale: 6 @ -6;
+		flingVelocityScale: 0.01.
 
-	self assert: element gestureScrollScale = 60.
-	self assert: element wheelScrollScale = (12 @ -12).
-	self assert: element flingVelocityScale = 0.25.
+	self assert: element gestureScrollScale = 10.
+	self assert: element wheelScrollScale = (6 @ -6).
+	self assert: element flingVelocityScale = 0.01.
 
 	^ element
 ]

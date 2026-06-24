@@ -80,17 +80,17 @@ CFBlRubberBandScrollableElement >> defaultLayout [
 
 { #category : 'defaults' }
 CFBlRubberBandScrollableElement >> defaultFlingVelocityScale [
-	^ 0.35
+	^ 0.01
 ]
 
 { #category : 'defaults' }
 CFBlRubberBandScrollableElement >> defaultGestureScrollScale [
-	^ 80.0
+	^ 10.0
 ]
 
 { #category : 'defaults' }
 CFBlRubberBandScrollableElement >> defaultWheelScrollScale [
-	^ 20.0 @ -20.0
+	^ 6.0 @ -6.0
 ]
 
 
