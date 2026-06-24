@@ -262,7 +262,7 @@ CFBlRubberBandScrollableElementExamples >> inputScalesCanBeConfigured [
 	<gtExample>
 	| element |
 
-	element := self elementCanBeCreated.
+	element := self verticalScrollableElementPreview.
 	element
 		gestureScrollScale: 60;
 		wheelScrollScale: 12 @ -12;
