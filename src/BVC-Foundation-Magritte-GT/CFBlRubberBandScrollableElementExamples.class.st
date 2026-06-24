@@ -319,3 +319,106 @@ CFBlRubberBandScrollableElementExamples >> rubberBandEventHandlerCanBeCreated [
 
 	^ handler
 ]
+
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackInsideBoundsDoesNothing [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ -100.
+
+	self assert: element isOverscrolled not.
+	self assert: element snapBackIfNeeded not.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackFromTopOverscrollStartsFlinger [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ 100.
+
+	self assert: element isOverscrolled.
+	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMaximum y).
+	self assert: element snapBackIfNeeded.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackFromBottomOverscrollStartsFlinger [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ -760.
+
+	self assert: element isOverscrolled.
+	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMinimum y).
+	self assert: element snapBackIfNeeded.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples - visual' }
+CFBlRubberBandScrollableElementExamples >> verticalSnapBackDebugPreview [
+	<gtExample>
+	| container element debugPanel updateDebugPanel |
+
+	element := self verticalScrollableElementPreview.
+	element vertical overscrollLimit: 120.
+	element scrollTo: 0 @ 100.
+	element snapBackIfNeeded.
+
+	debugPanel := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude;
+		beReadOnlyWithoutSelection;
+		background: (Color white alpha: 0.92);
+		border: (BlBorder paint: (Color black alpha: 0.18) width: 1);
+		padding: (BlInsets all: 8);
+		hExact: 360;
+		vFitContent;
+		yourself.
+
+	updateDebugPanel := [ debugPanel text: element debugValuesString ].
+	updateDebugPanel value.
+	element when: BlElementScrolledEvent do: [ :anEvent | updateDebugPanel value ].
+
+	container := BrHorizontalPane new
+		fitContent;
+		cellSpacing: 12;
+		padding: (BlInsets all: 8);
+		addChild: element;
+		addChild: debugPanel;
+		yourself.
+
+	self assert: element scrollState = #settling.
+	self assert: (debugPanel text asString includesSubstring: 'overscrolled:').
+
+	^ container
+]

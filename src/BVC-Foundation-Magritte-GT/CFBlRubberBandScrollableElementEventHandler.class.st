@@ -28,3 +28,13 @@ CFBlRubberBandScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 		(anEvent vector * aScrollableElement wheelScrollScale).
 	anEvent consumed: aScrollHappened
 ]
+
+
+{ #category : 'mouse handlers' }
+CFBlRubberBandScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
+	| aScrollableElement didStart |
+
+	aScrollableElement := anEvent currentTarget.
+	didStart := aScrollableElement snapBackIfNeeded.
+	anEvent consumed: didStart
+]

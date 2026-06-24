@@ -128,6 +128,7 @@ CFBlRubberBandScrollableElement >> debugValuesString [
 			nextPutAll: 'scroll minimum: '; nextPutAll: self scrollMinimum asString; cr;
 			nextPutAll: 'scroll maximum: '; nextPutAll: self scrollMaximum asString; cr;
 			nextPutAll: 'scroll overshot: '; nextPutAll: self scrollOvershot asString; cr;
+			nextPutAll: 'overscrolled: '; nextPutAll: self isOverscrolled asString; cr;
 			nextPutAll: 'overscroll: '; nextPutAll: (self projectionPlaneIfPresent
 				ifNil: [ 0 @ 0 ]
 				ifNotNil: [ :plane | plane overscrollDistanceFor: scrollPosition ]) asString; cr;
@@ -161,6 +162,57 @@ CFBlRubberBandScrollableElement >> hasScrolledElement [
 	^ self children isNotEmpty
 ]
 
+
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> isOverscrolled [
+	| position minimum maximum |
+
+	position := self scrollPosition.
+	minimum := self scrollMinimum.
+	maximum := self scrollMaximum.
+
+	^ (position x < minimum x)
+		or: [ (position x > maximum x)
+		or: [ (position y < minimum y)
+		or: [ position y > maximum y ] ] ]
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
+	| position minimum maximum |
+
+	position := self scrollPosition.
+	minimum := self scrollMinimum.
+	maximum := self scrollMaximum.
+
+	^ ((position x max: minimum x) min: maximum x)
+		@ ((position y max: minimum y) min: maximum y)
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBack [
+	| didStart |
+
+	self hasScrolledElement ifFalse: [ ^ false ].
+	self updateProjectionBounds.
+	self isOverscrolled ifFalse: [ ^ false ].
+
+	didStart := self scrollFlinger
+		cfSpringBackFrom: self scrollPosition
+		min: self scrollMinimum
+		max: self scrollMaximum.
+	self updateDebugOverlay.
+
+	^ didStart
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBackIfNeeded [
+	^ self isOverscrolled
+		ifTrue: [ self snapBack ]
+		ifFalse: [ false ]
+]
 
 { #category : 'private - scrolling geometry' }
 CFBlRubberBandScrollableElement >> hasUsableScrollExtentFor: aDeltaPoint [
