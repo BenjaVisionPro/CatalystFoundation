@@ -111,3 +111,55 @@ CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPanePreview 
 
 	^ scrollPane
 ]
+
+{ #category : 'examples - visual' }
+CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPaneDebugPreview [
+	<gtExample>
+	| container scrollPane aptitude debugPanel updateDebugPanel |
+
+	aptitude := self aptitudeCanBeCreated.
+	scrollPane := BrScrollPane new
+		aptitude: aptitude;
+		content: self content;
+		background: Color veryVeryLightGray;
+		border: (BlBorder paint: Color lightGray width: 1);
+		constraintsDo: [ :constraints |
+			constraints horizontal exact: 320.
+			constraints vertical exact: 240 ];
+		yourself.
+
+	aptitude scrollable vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	aptitude scrollable scrollTo: 0 @ 100.
+
+	debugPanel := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude;
+		beReadOnlyWithoutSelection;
+		background: (Color white alpha: 0.92);
+		border: (BlBorder paint: (Color black alpha: 0.18) width: 1);
+		padding: (BlInsets all: 8);
+		hExact: 420;
+		vFitContent;
+		yourself.
+
+	updateDebugPanel := [ debugPanel text: aptitude scrollable debugValuesString ].
+	updateDebugPanel value.
+	aptitude scrollable when: BlElementScrolledEvent do: [ :anEvent | updateDebugPanel value ].
+
+	container := BrHorizontalPane new
+		fitContent;
+		cellSpacing: 12;
+		padding: (BlInsets all: 8);
+		addChild: scrollPane;
+		addChild: debugPanel;
+		yourself.
+
+	self assert: (debugPanel text asString includesSubstring: 'logical scroll:').
+	self assert: (debugPanel text asString includesSubstring: 'projected scroll:').
+
+	^ container
+]
+
