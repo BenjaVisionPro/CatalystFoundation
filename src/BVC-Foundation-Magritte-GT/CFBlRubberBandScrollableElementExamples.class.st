@@ -232,3 +232,23 @@ CFBlRubberBandScrollableElementExamples >> verticalScrollableElementDebugPreview
 
 	^ container
 ]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> repeatedLargeScrollByApproachesButDoesNotReachOverscrollLimit [
+	<gtExample>
+	| element |
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	100 timesRepeat: [ element scrollBy: 0 @ -1000 ].
+
+	self assert: element scrollPosition y < 1000.
+	self assert: element projectedScrollPosition y > 0.
+	self assert: element projectedScrollPosition y < 120.
+
+	^ element
+]

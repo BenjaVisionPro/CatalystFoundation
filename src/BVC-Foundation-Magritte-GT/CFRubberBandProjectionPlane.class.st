@@ -310,3 +310,26 @@ CFRubberBandProjectionPlane >> logicalOverscrollLimitY [
 		ifNil: [ 0 ]
 		ifNotNil: [ vertical logicalOverscrollLimit ]
 ]
+
+{ #category : 'movement' }
+CFRubberBandProjectionPlane >> point: aPoint movedBy: aDeltaPoint [
+	"Answer the next logical point after applying aDeltaPoint through each configured axis.
+	Unconfigured axes move raw. Configured axes apply projection-aware overscroll resistance."
+
+	^ (self x: aPoint x movedBy: aDeltaPoint x)
+		@ (self y: aPoint y movedBy: aDeltaPoint y)
+]
+
+{ #category : 'private - movement' }
+CFRubberBandProjectionPlane >> x: aNumber movedBy: aDelta [
+	^ horizontal
+		ifNil: [ aNumber + aDelta ]
+		ifNotNil: [ horizontal offset: aNumber movedBy: aDelta ]
+]
+
+{ #category : 'private - movement' }
+CFRubberBandProjectionPlane >> y: aNumber movedBy: aDelta [
+	^ vertical
+		ifNil: [ aNumber + aDelta ]
+		ifNotNil: [ vertical offset: aNumber movedBy: aDelta ]
+]

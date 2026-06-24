@@ -7,7 +7,9 @@ Class {
 		'dimension',
 		'coefficient',
 		'beforeOverscrollLimit',
-		'afterOverscrollLimit'
+		'afterOverscrollLimit',
+		'overscrollLimitRatio',
+		'movementStep'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -18,6 +20,20 @@ CFRubberBandProjection class >> defaultCoefficient [
 	"Commonly reported UIScrollView-like coefficient."
 
 	^ 0.55
+]
+
+{ #category : 'defaults' }
+CFRubberBandProjection class >> defaultMovementStep [
+	"Maximum input delta integrated at once while moving farther into overscroll."
+
+	^ 16.0
+]
+
+{ #category : 'defaults' }
+CFRubberBandProjection class >> defaultOverscrollLimitRatio [
+	"How close the stored logical value may get to a configured visual overscroll asymptote."
+
+	^ 0.8
 ]
 
 { #category : 'instance creation' }
@@ -104,7 +120,9 @@ CFRubberBandProjection >> initialize [
 	dimension := 1.
 	coefficient := self class defaultCoefficient.
 	beforeOverscrollLimit := nil.
-	afterOverscrollLimit := nil
+	afterOverscrollLimit := nil.
+	overscrollLimitRatio := self class defaultOverscrollLimitRatio.
+	movementStep := self class defaultMovementStep
 ]
 
 { #category : 'math' }
@@ -269,9 +287,13 @@ CFRubberBandProjection >> velocityScaleAt: anOffset [
 	| limitedOffset |
 	limitedOffset := self limitedOffsetFor: anOffset.
 	limitedOffset < minimum
-		ifTrue: [ ^ self derivativeForOverscroll: minimum - limitedOffset ].
+		ifTrue: [ ^ self
+			derivativeForOverscroll: minimum - limitedOffset
+			limit: beforeOverscrollLimit ].
 	limitedOffset > maximum
-		ifTrue: [ ^ self derivativeForOverscroll: limitedOffset - maximum ].
+		ifTrue: [ ^ self
+			derivativeForOverscroll: limitedOffset - maximum
+			limit: afterOverscrollLimit ].
 	^ self derivativeForOverscroll: 0
 ]
 
@@ -284,6 +306,8 @@ CFRubberBandProjection >> withCoefficient: aCoefficient [
 		coefficient: aCoefficient)
 		beforeOverscrollLimit: beforeOverscrollLimit;
 		afterOverscrollLimit: afterOverscrollLimit;
+		overscrollLimitRatio: overscrollLimitRatio;
+		movementStep: movementStep;
 		yourself
 ]
 
@@ -296,6 +320,8 @@ CFRubberBandProjection >> withDimension: aDimension [
 		coefficient: coefficient)
 		beforeOverscrollLimit: beforeOverscrollLimit;
 		afterOverscrollLimit: afterOverscrollLimit;
+		overscrollLimitRatio: overscrollLimitRatio;
+		movementStep: movementStep;
 		yourself
 ]
 
@@ -308,6 +334,8 @@ CFRubberBandProjection >> withMinimum: aMinimum maximum: aMaximum [
 		coefficient: coefficient)
 		beforeOverscrollLimit: beforeOverscrollLimit;
 		afterOverscrollLimit: afterOverscrollLimit;
+		overscrollLimitRatio: overscrollLimitRatio;
+		movementStep: movementStep;
 		yourself
 ]
 
@@ -379,23 +407,24 @@ CFRubberBandProjection >> maximumBeforeLogicalOverscroll [
 
 { #category : 'private - overscroll limits' }
 CFRubberBandProjection >> logicalOverscrollLimitFor: anOverscrollLimitOrNil [
-	"Answer the finite raw overscroll needed to reach the configured visible
-	limit on the normal dimension-based rubber-band curve."
+	"Answer the finite raw overscroll allowed for a configured visible
+	overscroll asymptote. The stored logical value stops at a configurable
+	ratio of the asymptote so it cannot run away, while the projection itself
+	still approaches the configured visible limit asymptotically."
 
-	| projectedLimit |
+	| asymptote projectedLimit |
 	anOverscrollLimitOrNil ifNil: [ ^ Float infinity ].
 
-	projectedLimit := self representableProjectedLimitFor: anOverscrollLimitOrNil.
-	projectedLimit <= 0
+	asymptote := self resolvedOverscrollLimitFor: anOverscrollLimitOrNil.
+	asymptote <= 0
 		ifTrue: [ ^ 0 ].
 
-	^ self inverseDistanceForProjectedOverscroll: projectedLimit
+	projectedLimit := asymptote * overscrollLimitRatio.
+	^ self
+		inverseDistanceForProjectedOverscroll: projectedLimit
+		usingAsymptote: asymptote
 ]
 
-{ #category : 'private - overscroll limits' }
-CFRubberBandProjection >> maximumRepresentableOverscrollLimit [
-	^ (dimension - self overscrollLimitEpsilon) max: 0
-]
 
 { #category : 'private - overscroll limits' }
 CFRubberBandProjection >> overscrollDistanceForLimitedOffset: anOffset [
@@ -406,10 +435,6 @@ CFRubberBandProjection >> overscrollDistanceForLimitedOffset: anOffset [
 	^ 0
 ]
 
-{ #category : 'private - overscroll limits' }
-CFRubberBandProjection >> overscrollLimitEpsilon [
-	^ 0.000001
-]
 
 { #category : 'private - projection' }
 CFRubberBandProjection >> projectLimitedOffset: anOffset [
@@ -429,12 +454,16 @@ CFRubberBandProjection >> projectLimitedOffset: anOffset [
 
 { #category : 'private - projection' }
 CFRubberBandProjection >> projectedDistanceForOverscroll: anOverscrollDistance limit: anOverscrollLimitOrNil [
-	"Answer the dimension-shaped projected distance, capped by an optional visible limit."
+	"Answer the projected distance for a raw overscroll distance.
+	A configured overscroll limit is the visual asymptote for that edge,
+	not a hard min: cap."
 
-	| projected |
-	projected := self distanceForOverscroll: anOverscrollDistance.
-	anOverscrollLimitOrNil ifNil: [ ^ projected ].
-	^ projected min: (self resolvedOverscrollLimitFor: anOverscrollLimitOrNil)
+	anOverscrollLimitOrNil ifNil: [
+		^ self distanceForOverscroll: anOverscrollDistance ].
+
+	^ self
+		distanceForOverscroll: anOverscrollDistance
+		usingAsymptote: (self resolvedOverscrollLimitFor: anOverscrollLimitOrNil)
 ]
 
 { #category : 'private - overscroll limits' }
@@ -503,14 +532,6 @@ CFRubberBandProjection >> inverseDistanceForProjectedOverscroll: aProjectedOvers
 		/ (coefficient * (anAsymptote - aProjectedOverscrollDistance))
 ]
 
-{ #category : 'private - overscroll limits' }
-CFRubberBandProjection >> representableProjectedLimitFor: anOverscrollLimit [
-	"Resolve the configured visible limit and keep it inside the normal
-	dimension-based curve's representable range."
-
-	^ (self resolvedOverscrollLimitFor: anOverscrollLimit)
-		min: self maximumRepresentableOverscrollLimit
-]
 
 { #category : 'overscroll limits' }
 CFRubberBandProjection >> logicalOverscrollLimit [
@@ -528,4 +549,129 @@ CFRubberBandProjection >> afterLogicalOverscrollLimit [
 { #category : 'overscroll limits' }
 CFRubberBandProjection >> beforeLogicalOverscrollLimit [
 	^ self maximumBeforeLogicalOverscroll
+]
+
+
+{ #category : 'movement' }
+CFRubberBandProjection >> offset: anOffset movedBy: aDelta [
+	"Answer the next logical offset after applying aDelta.
+	Movement inside bounds is raw. Movement farther into overscroll is
+	integrated through the projection derivative so it slows progressively
+	instead of jumping directly to the logical cap. Movement back toward the
+	bounds is raw so the user does not have to repay invisible overscroll debt."
+
+	| delta |
+	delta := aDelta asFloat.
+	delta isZero ifTrue: [ ^ self limitedOffsetFor: anOffset ].
+
+	(delta > 0 and: [ anOffset < minimum ])
+		ifTrue: [ ^ self overscrolledOffset: anOffset movedBackBy: delta ].
+	(delta < 0 and: [ anOffset > maximum ])
+		ifTrue: [ ^ self overscrolledOffset: anOffset movedBackBy: delta ].
+
+	(anOffset <= maximum and: [ anOffset >= minimum ])
+		ifTrue: [ ^ self offsetFromBounds: anOffset movedBy: delta ].
+
+	^ self overscrolledOffset: anOffset movedFartherBy: delta
+]
+
+
+
+{ #category : 'private - movement' }
+CFRubberBandProjection >> overscrolledOffset: anOffset movedBackBy: aDelta [
+	| proposed remaining |
+	proposed := anOffset + aDelta.
+	(proposed between: minimum and: maximum)
+		ifTrue: [ ^ proposed ].
+
+	(anOffset < minimum and: [ proposed > maximum ]) ifTrue: [
+		remaining := proposed - maximum.
+		^ self overscrolledOffset: maximum movedFartherBy: remaining ].
+
+	(anOffset > maximum and: [ proposed < minimum ]) ifTrue: [
+		remaining := proposed - minimum.
+		^ self overscrolledOffset: minimum movedFartherBy: remaining ].
+
+	^ self limitedOffsetFor: proposed
+]
+
+{ #category : 'private - movement' }
+CFRubberBandProjection >> offsetFromBounds: anOffset movedBy: aDelta [
+	| proposed remaining |
+	proposed := anOffset + aDelta.
+	(proposed between: minimum and: maximum)
+		ifTrue: [ ^ proposed ].
+
+	proposed < minimum ifTrue: [
+		remaining := proposed - minimum.
+		^ self overscrolledOffset: minimum movedFartherBy: remaining ].
+
+	remaining := proposed - maximum.
+	^ self overscrolledOffset: maximum movedFartherBy: remaining
+]
+
+{ #category : 'private - movement' }
+CFRubberBandProjection >> overscrolledOffset: anOffset movedFartherBy: aDelta [
+	| remaining offset step |
+	remaining := aDelta asFloat.
+	offset := anOffset.
+
+	[ remaining abs > 0 ] whileTrue: [
+		step := remaining abs min: movementStep.
+		step := remaining negative ifTrue: [ step negated ] ifFalse: [ step ].
+		offset := self overscrolledOffset: offset movedFartherOneStepBy: step.
+		remaining := remaining - step ].
+
+	^ self limitedOffsetFor: offset
+]
+
+{ #category : 'private - movement' }
+CFRubberBandProjection >> overscrolledOffset: anOffset movedFartherOneStepBy: aDelta [
+	| overscroll scale next |
+	(anOffset <= minimum and: [ aDelta < 0 ]) ifTrue: [
+		overscroll := minimum - anOffset.
+		scale := self derivativeForOverscroll: overscroll limit: beforeOverscrollLimit.
+		next := anOffset + (aDelta * scale).
+		^ self limitedOffsetFor: next ].
+
+	(anOffset >= maximum and: [ aDelta > 0 ]) ifTrue: [
+		overscroll := anOffset - maximum.
+		scale := self derivativeForOverscroll: overscroll limit: afterOverscrollLimit.
+		next := anOffset + (aDelta * scale).
+		^ self limitedOffsetFor: next ].
+
+	^ self limitedOffsetFor: anOffset + aDelta
+]
+
+{ #category : 'private - projection' }
+CFRubberBandProjection >> derivativeForOverscroll: anOverscrollDistance limit: anOverscrollLimitOrNil [
+	anOverscrollLimitOrNil ifNil: [
+		^ self derivativeForOverscroll: anOverscrollDistance ].
+
+	^ self
+		derivativeForOverscroll: anOverscrollDistance
+		usingAsymptote: (self resolvedOverscrollLimitFor: anOverscrollLimitOrNil)
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> movementStep [
+	^ movementStep
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> movementStep: aNumber [
+	aNumber <= 0 ifTrue: [ self error: 'Movement step must be greater than zero.' ].
+	movementStep := aNumber
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> overscrollLimitRatio [
+	^ overscrollLimitRatio
+]
+
+{ #category : 'accessing' }
+CFRubberBandProjection >> overscrollLimitRatio: aNumber [
+	(aNumber <= 0 or: [ aNumber >= 1 ])
+		ifTrue: [ self error: 'Overscroll limit ratio must be greater than zero and less than one.' ].
+	overscrollLimitRatio := aNumber
 ]

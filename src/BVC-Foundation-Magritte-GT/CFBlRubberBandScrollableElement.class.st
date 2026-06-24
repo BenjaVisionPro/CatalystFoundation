@@ -195,6 +195,15 @@ CFBlRubberBandScrollableElement >> limitedScrollPositionFor: aPoint [
 		ifNotNil: [ :plane | plane limitedPointFor: aPoint ]
 ]
 
+
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> scrollPositionMovedBy: aDeltaPoint [
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition + aDeltaPoint ]
+		ifNotNil: [ :plane | plane point: scrollPosition movedBy: aDeltaPoint ]
+]
+
 { #category : 'private - debugging' }
 CFBlRubberBandScrollableElement >> newDebugOverlay [
 	^ BrEditor new
@@ -308,7 +317,7 @@ CFBlRubberBandScrollableElement >> scrollHorizontallyBy: aNumber [
 
 	self updateProjectionBounds.
 	previous := scrollPosition.
-	next := self limitedScrollPositionFor: (scrollPosition x + aNumber asFloat) @ scrollPosition y.
+	next := self scrollPositionMovedBy: aNumber asFloat @ 0.0.
 	consumed := next x - previous x.
 	consumed isZero ifTrue: [ ^ 0 ].
 
@@ -378,7 +387,7 @@ CFBlRubberBandScrollableElement >> scrollVerticallyBy: aNumber [
 
 	self updateProjectionBounds.
 	previous := scrollPosition.
-	next := self limitedScrollPositionFor: scrollPosition x @ (scrollPosition y + aNumber asFloat).
+	next := self scrollPositionMovedBy: 0.0 @ aNumber asFloat.
 	consumed := next y - previous y.
 	consumed isZero ifTrue: [ ^ 0 ].
 
