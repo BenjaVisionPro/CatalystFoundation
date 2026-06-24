@@ -163,14 +163,30 @@ CFBlRubberBandScrollableElement >> hasScrolledElement [
 ]
 
 
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> snapBackMinimum [
+	^ self projectionPlaneIfPresent
+		ifNil: [ self scrollMinimum ]
+		ifNotNil: [ :plane | plane minimumPointWithFallback: self scrollMinimum ]
+]
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> snapBackMaximum [
+	^ self projectionPlaneIfPresent
+		ifNil: [ self scrollMaximum ]
+		ifNotNil: [ :plane | plane maximumPointWithFallback: self scrollMaximum ]
+]
+
+
 
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> isOverscrolled [
 	| position minimum maximum |
 
+	self updateProjectionBounds.
 	position := self scrollPosition.
-	minimum := self scrollMinimum.
-	maximum := self scrollMaximum.
+	minimum := self snapBackMinimum.
+	maximum := self snapBackMaximum.
 
 	^ (position x < minimum x)
 		or: [ (position x > maximum x)
@@ -182,9 +198,10 @@ CFBlRubberBandScrollableElement >> isOverscrolled [
 CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
 	| position minimum maximum |
 
+	self updateProjectionBounds.
 	position := self scrollPosition.
-	minimum := self scrollMinimum.
-	maximum := self scrollMaximum.
+	minimum := self snapBackMinimum.
+	maximum := self snapBackMaximum.
 
 	^ ((position x max: minimum x) min: maximum x)
 		@ ((position y max: minimum y) min: maximum y)
@@ -200,8 +217,8 @@ CFBlRubberBandScrollableElement >> snapBack [
 
 	didStart := self scrollFlinger
 		cfSpringBackFrom: self scrollPosition
-		min: self scrollMinimum
-		max: self scrollMaximum.
+		min: self snapBackMinimum
+		max: self snapBackMaximum.
 	self updateDebugOverlay.
 
 	^ didStart

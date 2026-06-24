@@ -140,6 +140,55 @@ CFRubberBandProjectionPlane >> overscrollDistanceYFor: aNumber [
 		ifNotNil: [ vertical overscrollDistanceFor: aNumber ]
 ]
 
+
+{ #category : 'bounds' }
+CFRubberBandProjectionPlane >> minimumPointWithFallback: aPoint [
+	"Answer the natural minimum point using configured axis bounds when present.
+	Unconfigured axes use the supplied fallback value. This is intentionally
+	non-creating, so asking for bounds does not create projections."
+
+	^ (self minimumXWithFallback: aPoint x)
+		@ (self minimumYWithFallback: aPoint y)
+]
+
+{ #category : 'private - bounds' }
+CFRubberBandProjectionPlane >> minimumXWithFallback: aNumber [
+	^ horizontal
+		ifNil: [ aNumber ]
+		ifNotNil: [ horizontal minimum ]
+]
+
+{ #category : 'private - bounds' }
+CFRubberBandProjectionPlane >> minimumYWithFallback: aNumber [
+	^ vertical
+		ifNil: [ aNumber ]
+		ifNotNil: [ vertical minimum ]
+]
+
+{ #category : 'bounds' }
+CFRubberBandProjectionPlane >> maximumPointWithFallback: aPoint [
+	"Answer the natural maximum point using configured axis bounds when present.
+	Unconfigured axes use the supplied fallback value. This is intentionally
+	non-creating, so asking for bounds does not create projections."
+
+	^ (self maximumXWithFallback: aPoint x)
+		@ (self maximumYWithFallback: aPoint y)
+]
+
+{ #category : 'private - bounds' }
+CFRubberBandProjectionPlane >> maximumXWithFallback: aNumber [
+	^ horizontal
+		ifNil: [ aNumber ]
+		ifNotNil: [ horizontal maximum ]
+]
+
+{ #category : 'private - bounds' }
+CFRubberBandProjectionPlane >> maximumYWithFallback: aNumber [
+	^ vertical
+		ifNil: [ aNumber ]
+		ifNotNil: [ vertical maximum ]
+]
+
 { #category : 'printing' }
 CFRubberBandProjectionPlane >> printOn: aStream [
 	super printOn: aStream.
