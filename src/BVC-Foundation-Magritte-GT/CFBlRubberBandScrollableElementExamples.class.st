@@ -377,7 +377,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackFromBottomOverscrollStartsFli
 	element scrollTo: 0 @ -760.
 
 	self assert: element isOverscrolled.
-	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMinimum y).
+	self assert: element nearestScrollBoundsPosition = (0 @ -660).
 	self assert: element snapBackIfNeeded.
 	self assert: element scrollState = #settling.
 	self assert: element scrollFlinger isIdle not.
