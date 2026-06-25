@@ -205,29 +205,72 @@ CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
 
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> snapBack [
-	| didStart |
+	"Attempt to start the GT springback animation for an already requested
+	snapback. If the flinger cannot start yet, keep the plane request alive so
+	the next layout / position application can try again."
 
+	^ self tryStartSnapBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBackIfNeeded [
+	self requestSnapBackIfOverscrolled.
+	^ self ensureRequiredSnapBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> requestSnapBackIfOverscrolled [
+	self isOverscrolled ifTrue: [
+		self projectionPlaneIfPresent ifNotNil: [ :plane | plane requestSnapBack ] ].
+	^ self
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> ensureRequiredSnapBack [
+	| plane |
+
+	isSnappingBack ifTrue: [ ^ true ].
+	plane := self projectionPlaneIfPresent.
+	plane ifNil: [ ^ false ].
+	plane wantsSnapBack ifFalse: [ ^ false ].
+	^ self tryStartSnapBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> tryStartSnapBack [
+	| plane didStart |
+
+	isSnappingBack ifTrue: [ ^ true ].
 	self hasScrolledElement ifFalse: [ ^ false ].
 	self updateProjectionBounds.
-	self isOverscrolled ifFalse: [ ^ false ].
+	self isOverscrolled ifFalse: [
+		self projectionPlaneIfPresent ifNotNil: [ :aPlane |
+			aPlane clearSnapBackRequest.
+			aPlane state: #idle ].
+		self updateDebugOverlay.
+		^ false ].
+
+	plane := self projectionPlaneIfPresent.
+	plane ifNil: [ ^ false ].
+	plane requestSnapBack.
 
 	didStart := self scrollFlinger
 		cfSpringBackFrom: self scrollPosition
 		min: self snapBackMinimum
 		max: self snapBackMaximum.
-	didStart ifTrue: [
-		isSnappingBack := true.
-		self projectionPlaneIfPresent ifNotNil: [ :plane | plane state: #snappingBack ] ].
+	didStart
+		ifTrue: [
+			isSnappingBack := true.
+			plane
+				state: #snappingBack;
+				clearSnapBackRequest ]
+		ifFalse: [
+			"Keep the request alive. Public scrolling must not leave the element
+			overscrolled and idle just because the flinger could not be started at
+			this exact moment, for example before the element is fully live."
+			plane requestSnapBack ].
 	self updateDebugOverlay.
-
 	^ didStart
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> snapBackIfNeeded [
-	^ self isOverscrolled
-		ifTrue: [ self snapBack ]
-		ifFalse: [ false ]
 ]
 
 { #category : 'private - scrolling geometry' }
@@ -397,6 +440,7 @@ CFBlRubberBandScrollableElement >> onScrolled: aPoint [
 CFBlRubberBandScrollableElement >> applyProjectedPosition [
 	self scrolledElementDo: [ :anElement |
 		anElement relocate: self projectedScrollPosition ].
+	self ensureRequiredSnapBack.
 	self updateDebugOverlay.
 	^ self
 ]
@@ -519,6 +563,10 @@ CFBlRubberBandScrollableElement >> rawScrollTo: aPoint [
 	self updateProjectionBounds.
 	previousProjectedPosition := self projectedScrollPosition.
 	self projectionPlane jumpTo: aPoint.
+	self projectionPlane
+		clearSnapBackRequest;
+		state: #idle.
+	isSnappingBack := false.
 	scrollPosition := self projectionPlane position.
 	self applyProjectedPosition.
 	self dispatchOnScrolled: self projectedScrollPosition - previousProjectedPosition.
@@ -528,7 +576,8 @@ CFBlRubberBandScrollableElement >> rawScrollTo: aPoint [
 { #category : 'api - scrolling' }
 CFBlRubberBandScrollableElement >> scrollTo: aPoint [
 	self rawScrollTo: aPoint.
-	self snapBackIfNeeded.
+	self requestSnapBackIfOverscrolled.
+	self ensureRequiredSnapBack.
 	^ self
 ]
 
@@ -736,6 +785,5 @@ CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPo
 	plane := self projectionPlaneIfPresent.
 	plane ifNil: [ ^ false ].
 	plane wantsSnapBack ifFalse: [ ^ false ].
-	plane clearSnapBackRequest.
-	^ self snapBack
+	^ self ensureRequiredSnapBack
 ]
