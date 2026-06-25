@@ -124,6 +124,8 @@ CFBlRubberBandScrollableElement >> debugValuesString [
 		aStream
 			nextPutAll: 'Rubber band'; cr;
 			nextPutAll: 'state: '; nextPutAll: scrollState asString; cr;
+			nextPutAll: 'plane state: '; nextPutAll: (self projectionPlaneIfPresent ifNil: [ #none ] ifNotNil: [ :plane | plane state ]) asString; cr;
+			nextPutAll: 'plane wants snapback: '; nextPutAll: (self projectionPlaneIfPresent ifNil: [ false ] ifNotNil: [ :plane | plane wantsSnapBack ]) asString; cr;
 			nextPutAll: 'snapping back: '; nextPutAll: isSnappingBack asString; cr;
 			nextPutAll: 'logical scroll: '; nextPutAll: scrollPosition asString; cr;
 			nextPutAll: 'projected scroll: '; nextPutAll: self projectedScrollPosition asString; cr;
@@ -156,7 +158,7 @@ CFBlRubberBandScrollableElement >> hasDebugOverlay [
 
 { #category : 'testing' }
 CFBlRubberBandScrollableElement >> hasProjectionPlane [
-	^ projectionPlane notNil
+	^ projectionPlane notNil and: [ projectionPlane isEmpty not ]
 ]
 
 { #category : 'testing' }
@@ -183,30 +185,22 @@ CFBlRubberBandScrollableElement >> snapBackMaximum [
 
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> isOverscrolled [
-	| position minimum maximum |
-
 	self updateProjectionBounds.
-	position := self scrollPosition.
-	minimum := self snapBackMinimum.
-	maximum := self snapBackMaximum.
-
-	^ (position x < minimum x)
-		or: [ (position x > maximum x)
-		or: [ (position y < minimum y)
-		or: [ position y > maximum y ] ] ]
+	^ self projectionPlaneIfPresent
+		ifNil: [ false ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane isOverscrolled ]
 ]
 
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
-	| position minimum maximum |
-
 	self updateProjectionBounds.
-	position := self scrollPosition.
-	minimum := self snapBackMinimum.
-	maximum := self snapBackMaximum.
-
-	^ ((position x max: minimum x) min: maximum x)
-		@ ((position y max: minimum y) min: maximum y)
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane nearestBoundsPosition ]
 ]
 
 { #category : 'scrolling - snapback' }
@@ -221,7 +215,9 @@ CFBlRubberBandScrollableElement >> snapBack [
 		cfSpringBackFrom: self scrollPosition
 		min: self snapBackMinimum
 		max: self snapBackMaximum.
-	didStart ifTrue: [ isSnappingBack := true ].
+	didStart ifTrue: [
+		isSnappingBack := true.
+		self projectionPlaneIfPresent ifNotNil: [ :plane | plane state: #snappingBack ] ].
 	self updateDebugOverlay.
 
 	^ didStart
@@ -322,7 +318,7 @@ CFBlRubberBandScrollableElement >> initialize [
 	scrollState := #idle.
 	horizontalAlignment := self defaultHorizontalAlignment.
 	verticalAlignment := self defaultVerticalAlignment.
-	projectionPlane := nil.
+	projectionPlane := CFRubberBandPlane new.
 	debugOverlay := nil.
 	gestureScrollScale := self defaultGestureScrollScale.
 	wheelScrollScale := self defaultWheelScrollScale.
@@ -345,7 +341,9 @@ CFBlRubberBandScrollableElement >> limitedScrollPositionFor: aPoint [
 CFBlRubberBandScrollableElement >> scrollPositionMovedBy: aDeltaPoint [
 	^ self projectionPlaneIfPresent
 		ifNil: [ scrollPosition + aDeltaPoint ]
-		ifNotNil: [ :plane | plane point: scrollPosition movedBy: aDeltaPoint ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane moveByUserInput: aDeltaPoint ]
 ]
 
 { #category : 'private - debugging' }
@@ -405,28 +403,33 @@ CFBlRubberBandScrollableElement >> applyProjectedPosition [
 
 { #category : 'projection configuration' }
 CFBlRubberBandScrollableElement >> projectionPlane [
-	projectionPlane ifNil: [ projectionPlane := CFRubberBandProjectionPlane new ].
+	projectionPlane ifNil: [ projectionPlane := CFRubberBandPlane new ].
 	^ projectionPlane
 ]
 
 { #category : 'projection configuration' }
 CFBlRubberBandScrollableElement >> projectionPlane: aProjectionPlane [
 	projectionPlane := aProjectionPlane.
-	scrollPosition := self limitedScrollPositionFor: scrollPosition.
+	projectionPlane position: scrollPosition.
+	scrollPosition := projectionPlane position.
 	self applyProjectedPosition.
 	^ self
 ]
 
 { #category : 'private - accessing' }
 CFBlRubberBandScrollableElement >> projectionPlaneIfPresent [
-	^ projectionPlane
+	^ self hasProjectionPlane
+		ifTrue: [ projectionPlane ]
+		ifFalse: [ nil ]
 ]
 
 { #category : 'api - scrolling accessing' }
 CFBlRubberBandScrollableElement >> projectedScrollPosition [
 	^ self projectionPlaneIfPresent
 		ifNil: [ scrollPosition ]
-		ifNotNil: [ :plane | plane project: scrollPosition ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane projectedPosition ]
 ]
 
 { #category : 'scrolling' }
@@ -505,16 +508,27 @@ CFBlRubberBandScrollableElement >> scrollPosition [
 	^ scrollPosition
 ]
 
-{ #category : 'api - scrolling' }
-CFBlRubberBandScrollableElement >> scrollTo: aPoint [
-	| previousProjectedPosition |
 
+{ #category : 'api - scrolling' }
+CFBlRubberBandScrollableElement >> rawScrollTo: aPoint [
+	"Set the logical scroll position without starting snapback. This is for
+	debugging and layout repair; public scrollTo: snaps back by default."
+
+	| previousProjectedPosition |
 	self hasScrolledElement ifFalse: [ ^ self ].
 	self updateProjectionBounds.
 	previousProjectedPosition := self projectedScrollPosition.
-	scrollPosition := self limitedScrollPositionFor: aPoint.
+	self projectionPlane jumpTo: aPoint.
+	scrollPosition := self projectionPlane position.
 	self applyProjectedPosition.
 	self dispatchOnScrolled: self projectedScrollPosition - previousProjectedPosition.
+	^ self
+]
+
+{ #category : 'api - scrolling' }
+CFBlRubberBandScrollableElement >> scrollTo: aPoint [
+	self rawScrollTo: aPoint.
+	self snapBackIfNeeded.
 	^ self
 ]
 
@@ -697,34 +711,21 @@ CFBlRubberBandScrollableElement >> isSnappingBack [
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> clearSnapBackIfInBounds [
 	(isSnappingBack and: [ self isOverscrolled not ])
-		ifTrue: [ isSnappingBack := false ].
+		ifTrue: [
+			isSnappingBack := false.
+			self projectionPlaneIfPresent ifNotNil: [ :plane |
+				plane state: #idle.
+				plane clearSnapBackRequest ] ].
 	^ self
 ]
 
 { #category : 'private - scrolling geometry' }
 CFBlRubberBandScrollableElement >> scrollPositionMovedForSnapBackBy: aDeltaPoint [
-	"During springback, Bloc's flinger is already animating the logical
-	position back to the nearest real bound. Do not apply rubber input
-	resistance here; resistance is for user input pushing farther out.
-	Clamp only when the springback step crosses the bound."
-
-	| proposed minimum maximum x y |
-	proposed := scrollPosition + aDeltaPoint.
-	minimum := self snapBackMinimum.
-	maximum := self snapBackMaximum.
-	x := proposed x.
-	y := proposed y.
-
-	(scrollPosition x < minimum x and: [ x > minimum x ])
-		ifTrue: [ x := minimum x ].
-	(scrollPosition x > maximum x and: [ x < maximum x ])
-		ifTrue: [ x := maximum x ].
-	(scrollPosition y < minimum y and: [ y > minimum y ])
-		ifTrue: [ y := minimum y ].
-	(scrollPosition y > maximum y and: [ y < maximum y ])
-		ifTrue: [ y := maximum y ].
-
-	^ self limitedScrollPositionFor: x @ y
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition + aDeltaPoint ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane moveBySnapBack: aDeltaPoint ]
 ]
 
 { #category : 'scrolling - snapback' }
@@ -734,13 +735,7 @@ CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPo
 	isSnappingBack ifTrue: [ ^ false ].
 	plane := self projectionPlaneIfPresent.
 	plane ifNil: [ ^ false ].
-	(self isOverscrolled and: [
-		(plane isAtOverscrollStop: currentPosition)
-			and: [ plane
-				isMovingFartherIntoOverscrollFrom: previousPosition
-				to: currentPosition
-				requestedDelta: deltaPoint ] ])
-		ifFalse: [ ^ false ].
-
+	plane wantsSnapBack ifFalse: [ ^ false ].
+	plane clearSnapBackRequest.
 	^ self snapBack
 ]

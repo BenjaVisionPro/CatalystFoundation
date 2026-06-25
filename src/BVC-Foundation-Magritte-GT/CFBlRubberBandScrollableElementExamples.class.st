@@ -352,7 +352,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackFromTopOverscrollStartsFlinge
 		maximum: 0;
 		dimension: 240;
 		overscrollLimit: 120.
-	element scrollTo: 0 @ 100.
+	element rawScrollTo: 0 @ 100.
 
 	self assert: element isOverscrolled.
 	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMaximum y).
@@ -374,7 +374,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackFromBottomOverscrollStartsFli
 		maximum: 0;
 		dimension: 240;
 		overscrollLimit: 120.
-	element scrollTo: 0 @ -760.
+	element rawScrollTo: 0 @ -760.
 
 	self assert: element isOverscrolled.
 	self assert: element nearestScrollBoundsPosition = (0 @ -660).
@@ -393,7 +393,6 @@ CFBlRubberBandScrollableElementExamples >> verticalSnapBackDebugPreview [
 	element := self verticalScrollableElementPreview.
 	element vertical overscrollLimit: 120.
 	element scrollTo: 0 @ 100.
-	element snapBackIfNeeded.
 
 	debugPanel := BrEditor new
 		aptitude: BrGlamorousRegularEditorAptitude;
@@ -424,7 +423,7 @@ CFBlRubberBandScrollableElementExamples >> verticalSnapBackDebugPreview [
 ]
 
 { #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> programmaticOverscrollDoesNotAutoSnap [
+CFBlRubberBandScrollableElementExamples >> rawScrollToOverscrollDoesNotAutoSnap [
 	<gtExample>
 	| element |
 
@@ -435,7 +434,7 @@ CFBlRubberBandScrollableElementExamples >> programmaticOverscrollDoesNotAutoSnap
 		dimension: 240;
 		overscrollLimit: 120.
 
-	element scrollTo: 0 @ 100.
+	element rawScrollTo: 0 @ 100.
 
 	self assert: element isOverscrolled.
 	self assert: element scrollState = #idle.
@@ -458,7 +457,7 @@ CFBlRubberBandScrollableElementExamples >> reachingTopOverscrollStopStartsSnapBa
 		overscrollLimit: 120.
 	stop := axis afterOverscrollStop.
 
-	element scrollTo: 0 @ (stop - 0.01).
+	element rawScrollTo: 0 @ (stop - 0.01).
 	element scrollVerticallyBy: 100.
 
 	self assert: element isOverscrolled.
@@ -483,7 +482,7 @@ CFBlRubberBandScrollableElementExamples >> reachingBottomOverscrollStopStartsSna
 		overscrollLimit: 120.
 	stop := axis beforeOverscrollStop.
 
-	element scrollTo: 0 @ (stop + 0.01).
+	element rawScrollTo: 0 @ (stop + 0.01).
 	element scrollVerticallyBy: -100.
 
 	self assert: element isOverscrolled.
@@ -508,7 +507,7 @@ CFBlRubberBandScrollableElementExamples >> movingBackTowardBoundsDoesNotStartSna
 		overscrollLimit: 120.
 	stop := axis afterOverscrollStop.
 
-	element scrollTo: 0 @ stop.
+	element rawScrollTo: 0 @ stop.
 	element scrollVerticallyBy: -10.
 
 	self assert: element isOverscrolled.
@@ -530,7 +529,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackStepMovesTowardBottomBoundWit
 		maximum: 0;
 		dimension: 240;
 		overscrollLimit: 120.
-	element scrollTo: 0 @ -760.
+	element rawScrollTo: 0 @ -760.
 
 	self assert: element snapBackIfNeeded.
 	self assert: element isSnappingBack.
@@ -556,7 +555,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackStepClampsWhenCrossingBottomB
 		maximum: 0;
 		dimension: 240;
 		overscrollLimit: 120.
-	element scrollTo: 0 @ -670.
+	element rawScrollTo: 0 @ -670.
 
 	self assert: element snapBackIfNeeded.
 	self assert: element isSnappingBack.
@@ -583,7 +582,7 @@ CFBlRubberBandScrollableElementExamples >> snapBackDoesNotRestartWhileSnappingBa
 		dimension: 240;
 		overscrollLimit: 120.
 	stop := axis beforeOverscrollStop.
-	element scrollTo: 0 @ stop.
+	element rawScrollTo: 0 @ stop.
 
 	self assert: element snapBackIfNeeded.
 	self assert: element isSnappingBack.
