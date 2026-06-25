@@ -518,3 +518,82 @@ CFBlRubberBandScrollableElementExamples >> movingBackTowardBoundsDoesNotStartSna
 
 	^ element
 ]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackStepMovesTowardBottomBoundWithoutResistance [
+	<gtExample>
+	| element previous consumed |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ -760.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	previous := element scrollPosition y.
+	consumed := element scrollVerticallyBy: 20.
+
+	self assert: consumed = 20.
+	self assert: element scrollPosition y = (previous + 20).
+	self assert: element isOverscrolled.
+	self assert: element isSnappingBack.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackStepClampsWhenCrossingBottomBound [
+	<gtExample>
+	| element consumed |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ -670.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	consumed := element scrollVerticallyBy: 20.
+
+	self assert: consumed = 10.
+	self assert: element scrollPosition y = -660.
+	self assert: element isOverscrolled not.
+	self assert: element isSnappingBack not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackDoesNotRestartWhileSnappingBack [
+	<gtExample>
+	| element axis stop restarted |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis beforeOverscrollStop.
+	element scrollTo: 0 @ stop.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	restarted := element
+		snapBackIfStoppedInOverscrollFrom: 0 @ (stop + 1)
+		to: 0 @ stop
+		requestedDelta: 0 @ -100.
+
+	self assert: restarted not.
+	self assert: element isSnappingBack.
+
+	^ element
+]

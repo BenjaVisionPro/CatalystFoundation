@@ -13,7 +13,8 @@ Class {
 		'debugOverlay',
 		'gestureScrollScale',
 		'wheelScrollScale',
-		'flingVelocityScale'
+		'flingVelocityScale',
+		'isSnappingBack'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -123,6 +124,7 @@ CFBlRubberBandScrollableElement >> debugValuesString [
 		aStream
 			nextPutAll: 'Rubber band'; cr;
 			nextPutAll: 'state: '; nextPutAll: scrollState asString; cr;
+			nextPutAll: 'snapping back: '; nextPutAll: isSnappingBack asString; cr;
 			nextPutAll: 'logical scroll: '; nextPutAll: scrollPosition asString; cr;
 			nextPutAll: 'projected scroll: '; nextPutAll: self projectedScrollPosition asString; cr;
 			nextPutAll: 'scroll minimum: '; nextPutAll: self scrollMinimum asString; cr;
@@ -219,6 +221,7 @@ CFBlRubberBandScrollableElement >> snapBack [
 		cfSpringBackFrom: self scrollPosition
 		min: self snapBackMinimum
 		max: self snapBackMaximum.
+	didStart ifTrue: [ isSnappingBack := true ].
 	self updateDebugOverlay.
 
 	^ didStart
@@ -324,6 +327,7 @@ CFBlRubberBandScrollableElement >> initialize [
 	gestureScrollScale := self defaultGestureScrollScale.
 	wheelScrollScale := self defaultWheelScrollScale.
 	flingVelocityScale := self defaultFlingVelocityScale.
+	isSnappingBack := false.
 	self layout: self defaultLayout.
 	self addEventHandler: CFBlRubberBandScrollableElementEventHandler new
 ]
@@ -458,11 +462,14 @@ CFBlRubberBandScrollableElement >> scrollHorizontallyBy: aNumber [
 	self updateProjectionBounds.
 	previous := scrollPosition.
 	delta := aNumber asFloat @ 0.0.
-	next := self scrollPositionMovedBy: delta.
+	next := isSnappingBack
+		ifTrue: [ self scrollPositionMovedForSnapBackBy: delta ]
+		ifFalse: [ self scrollPositionMovedBy: delta ].
 	consumed := next x - previous x.
 
 	scrollPosition := next.
 	self applyProjectedPosition.
+	self clearSnapBackIfInBounds.
 	consumed isZero ifFalse: [ self dispatchOnScrolled: consumed @ 0.0 ].
 	self
 		snapBackIfStoppedInOverscrollFrom: previous
@@ -532,11 +539,14 @@ CFBlRubberBandScrollableElement >> scrollVerticallyBy: aNumber [
 	self updateProjectionBounds.
 	previous := scrollPosition.
 	delta := 0.0 @ aNumber asFloat.
-	next := self scrollPositionMovedBy: delta.
+	next := isSnappingBack
+		ifTrue: [ self scrollPositionMovedForSnapBackBy: delta ]
+		ifFalse: [ self scrollPositionMovedBy: delta ].
 	consumed := next y - previous y.
 
 	scrollPosition := next.
 	self applyProjectedPosition.
+	self clearSnapBackIfInBounds.
 	consumed isZero ifFalse: [ self dispatchOnScrolled: 0.0 @ consumed ].
 	self
 		snapBackIfStoppedInOverscrollFrom: previous
@@ -678,10 +688,50 @@ CFBlRubberBandScrollableElement >> vertical [
 ]
 
 
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> isSnappingBack [
+	^ isSnappingBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> clearSnapBackIfInBounds [
+	(isSnappingBack and: [ self isOverscrolled not ])
+		ifTrue: [ isSnappingBack := false ].
+	^ self
+]
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> scrollPositionMovedForSnapBackBy: aDeltaPoint [
+	"During springback, Bloc's flinger is already animating the logical
+	position back to the nearest real bound. Do not apply rubber input
+	resistance here; resistance is for user input pushing farther out.
+	Clamp only when the springback step crosses the bound."
+
+	| proposed minimum maximum x y |
+	proposed := scrollPosition + aDeltaPoint.
+	minimum := self snapBackMinimum.
+	maximum := self snapBackMaximum.
+	x := proposed x.
+	y := proposed y.
+
+	(scrollPosition x < minimum x and: [ x > minimum x ])
+		ifTrue: [ x := minimum x ].
+	(scrollPosition x > maximum x and: [ x < maximum x ])
+		ifTrue: [ x := maximum x ].
+	(scrollPosition y < minimum y and: [ y > minimum y ])
+		ifTrue: [ y := minimum y ].
+	(scrollPosition y > maximum y and: [ y < maximum y ])
+		ifTrue: [ y := maximum y ].
+
+	^ self limitedScrollPositionFor: x @ y
+]
+
 { #category : 'scrolling - snapback' }
 CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPosition to: currentPosition requestedDelta: deltaPoint [
 	| plane |
 
+	isSnappingBack ifTrue: [ ^ false ].
 	plane := self projectionPlaneIfPresent.
 	plane ifNil: [ ^ false ].
 	(self isOverscrolled and: [
