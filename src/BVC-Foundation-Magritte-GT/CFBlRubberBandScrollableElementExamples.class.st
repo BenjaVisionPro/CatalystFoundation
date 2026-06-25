@@ -231,6 +231,9 @@ CFBlRubberBandScrollableElementExamples >> verticalScrollableElementDebugPreview
 		addChild: debugPanel;
 		yourself.
 
+	self assert: element scrollState = #settling.
+	self assert: element isSnappingBack.
+	self assert: (debugPanel text asString includesSubstring: 'plane state:').
 	self assert: (debugPanel text asString includesSubstring: 'logical scroll:').
 
 	^ container
