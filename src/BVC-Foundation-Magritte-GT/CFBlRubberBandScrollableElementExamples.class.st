@@ -422,3 +422,99 @@ CFBlRubberBandScrollableElementExamples >> verticalSnapBackDebugPreview [
 
 	^ container
 ]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> programmaticOverscrollDoesNotAutoSnap [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	element scrollTo: 0 @ 100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollState = #idle.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> reachingTopOverscrollStopStartsSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis afterOverscrollStop.
+
+	element scrollTo: 0 @ (stop - 0.01).
+	element scrollVerticallyBy: 100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y = stop.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> reachingBottomOverscrollStopStartsSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis beforeOverscrollStop.
+
+	element scrollTo: 0 @ (stop + 0.01).
+	element scrollVerticallyBy: -100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y = stop.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> movingBackTowardBoundsDoesNotStartSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis afterOverscrollStop.
+
+	element scrollTo: 0 @ stop.
+	element scrollVerticallyBy: -10.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y < stop.
+	self assert: element scrollState = #idle.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]

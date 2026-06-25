@@ -450,20 +450,24 @@ CFBlRubberBandScrollableElement >> scrollFlinger [
 
 { #category : 'api - scrolling' }
 CFBlRubberBandScrollableElement >> scrollHorizontallyBy: aNumber [
-	| previous next consumed |
+	| previous next delta consumed |
 
 	(self hasScrolledElement and: [ self canScrollHorizontally ])
 		ifFalse: [ ^ 0 ].
 
 	self updateProjectionBounds.
 	previous := scrollPosition.
-	next := self scrollPositionMovedBy: aNumber asFloat @ 0.0.
+	delta := aNumber asFloat @ 0.0.
+	next := self scrollPositionMovedBy: delta.
 	consumed := next x - previous x.
-	consumed isZero ifTrue: [ ^ 0 ].
 
 	scrollPosition := next.
 	self applyProjectedPosition.
-	self dispatchOnScrolled: consumed @ 0.0.
+	consumed isZero ifFalse: [ self dispatchOnScrolled: consumed @ 0.0 ].
+	self
+		snapBackIfStoppedInOverscrollFrom: previous
+		to: scrollPosition
+		requestedDelta: delta.
 	^ consumed
 ]
 
@@ -520,20 +524,24 @@ CFBlRubberBandScrollableElement >> scrollState: aScrollState [
 
 { #category : 'api - scrolling' }
 CFBlRubberBandScrollableElement >> scrollVerticallyBy: aNumber [
-	| previous next consumed |
+	| previous next delta consumed |
 
 	(self hasScrolledElement and: [ self canScrollVertically ])
 		ifFalse: [ ^ 0 ].
 
 	self updateProjectionBounds.
 	previous := scrollPosition.
-	next := self scrollPositionMovedBy: 0.0 @ aNumber asFloat.
+	delta := 0.0 @ aNumber asFloat.
+	next := self scrollPositionMovedBy: delta.
 	consumed := next y - previous y.
-	consumed isZero ifTrue: [ ^ 0 ].
 
 	scrollPosition := next.
 	self applyProjectedPosition.
-	self dispatchOnScrolled: 0.0 @ consumed.
+	consumed isZero ifFalse: [ self dispatchOnScrolled: 0.0 @ consumed ].
+	self
+		snapBackIfStoppedInOverscrollFrom: previous
+		to: scrollPosition
+		requestedDelta: delta.
 	^ consumed
 ]
 
@@ -667,4 +675,22 @@ CFBlRubberBandScrollableElement >> vertical [
 	axis := self projectionPlane vertical.
 	wasPresent ifFalse: [ axis overscrollLimit: self defaultOverscrollLimit ].
 	^ axis
+]
+
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPosition to: currentPosition requestedDelta: deltaPoint [
+	| plane |
+
+	plane := self projectionPlaneIfPresent.
+	plane ifNil: [ ^ false ].
+	(self isOverscrolled and: [
+		(plane isAtOverscrollStop: currentPosition)
+			and: [ plane
+				isMovingFartherIntoOverscrollFrom: previousPosition
+				to: currentPosition
+				requestedDelta: deltaPoint ] ])
+		ifFalse: [ ^ false ].
+
+	^ self snapBack
 ]

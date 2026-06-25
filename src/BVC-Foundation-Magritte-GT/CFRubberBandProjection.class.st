@@ -675,3 +675,53 @@ CFRubberBandProjection >> overscrollLimitRatio: aNumber [
 		ifTrue: [ self error: 'Overscroll limit ratio must be greater than zero and less than one.' ].
 	overscrollLimitRatio := aNumber
 ]
+
+
+{ #category : 'overscroll limits' }
+CFRubberBandProjection >> beforeOverscrollStop [
+	"Answer the logical offset at the before/minimum overscroll stop.
+	Nil overscroll limits have no finite stop."
+
+	beforeOverscrollLimit ifNil: [ ^ Float negativeInfinity ].
+	^ minimum - self beforeLogicalOverscrollLimit
+]
+
+{ #category : 'overscroll limits' }
+CFRubberBandProjection >> afterOverscrollStop [
+	"Answer the logical offset at the after/maximum overscroll stop.
+	Nil overscroll limits have no finite stop."
+
+	afterOverscrollLimit ifNil: [ ^ Float infinity ].
+	^ maximum + self afterLogicalOverscrollLimit
+]
+
+{ #category : 'testing' }
+CFRubberBandProjection >> isAtBeforeOverscrollStop: anOffset [
+	beforeOverscrollLimit ifNil: [ ^ false ].
+	^ anOffset <= self beforeOverscrollStop
+]
+
+{ #category : 'testing' }
+CFRubberBandProjection >> isAtAfterOverscrollStop: anOffset [
+	afterOverscrollLimit ifNil: [ ^ false ].
+	^ anOffset >= self afterOverscrollStop
+]
+
+{ #category : 'testing' }
+CFRubberBandProjection >> isAtOverscrollStop: anOffset [
+	^ (self isAtBeforeOverscrollStop: anOffset)
+		or: [ self isAtAfterOverscrollStop: anOffset ]
+]
+
+{ #category : 'testing' }
+CFRubberBandProjection >> isMovingFartherIntoOverscrollFrom: previousOffset to: currentOffset requestedDelta: aDelta [
+	"Answer true when the requested movement is still pushing away from the nearest bound
+	at an overscroll stop. This is used to start snapback immediately when momentum
+	reaches the configured stop, while allowing movement back toward bounds."
+
+	(aDelta < 0 and: [ self isAtBeforeOverscrollStop: currentOffset ])
+		ifTrue: [ ^ true ].
+	(aDelta > 0 and: [ self isAtAfterOverscrollStop: currentOffset ])
+		ifTrue: [ ^ true ].
+	^ false
+]

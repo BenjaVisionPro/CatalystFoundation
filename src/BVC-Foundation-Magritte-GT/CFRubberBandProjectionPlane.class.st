@@ -382,3 +382,50 @@ CFRubberBandProjectionPlane >> y: aNumber movedBy: aDelta [
 		ifNil: [ aNumber + aDelta ]
 		ifNotNil: [ vertical offset: aNumber movedBy: aDelta ]
 ]
+
+
+{ #category : 'testing' }
+CFRubberBandProjectionPlane >> isAtOverscrollStop: aPoint [
+	^ (self isXAtOverscrollStop: aPoint x)
+		or: [ self isYAtOverscrollStop: aPoint y ]
+]
+
+{ #category : 'private - testing' }
+CFRubberBandProjectionPlane >> isXAtOverscrollStop: aNumber [
+	^ horizontal
+		ifNil: [ false ]
+		ifNotNil: [ horizontal isAtOverscrollStop: aNumber ]
+]
+
+{ #category : 'private - testing' }
+CFRubberBandProjectionPlane >> isYAtOverscrollStop: aNumber [
+	^ vertical
+		ifNil: [ false ]
+		ifNotNil: [ vertical isAtOverscrollStop: aNumber ]
+]
+
+{ #category : 'testing' }
+CFRubberBandProjectionPlane >> isMovingFartherIntoOverscrollFrom: previousPoint to: currentPoint requestedDelta: deltaPoint [
+	^ (self isXMovingFartherIntoOverscrollFrom: previousPoint x to: currentPoint x requestedDelta: deltaPoint x)
+		or: [ self isYMovingFartherIntoOverscrollFrom: previousPoint y to: currentPoint y requestedDelta: deltaPoint y ]
+]
+
+{ #category : 'private - testing' }
+CFRubberBandProjectionPlane >> isXMovingFartherIntoOverscrollFrom: previousNumber to: currentNumber requestedDelta: deltaNumber [
+	^ horizontal
+		ifNil: [ false ]
+		ifNotNil: [ horizontal
+			isMovingFartherIntoOverscrollFrom: previousNumber
+			to: currentNumber
+			requestedDelta: deltaNumber ]
+]
+
+{ #category : 'private - testing' }
+CFRubberBandProjectionPlane >> isYMovingFartherIntoOverscrollFrom: previousNumber to: currentNumber requestedDelta: deltaNumber [
+	^ vertical
+		ifNil: [ false ]
+		ifNotNil: [ vertical
+			isMovingFartherIntoOverscrollFrom: previousNumber
+			to: currentNumber
+			requestedDelta: deltaNumber ]
+]
