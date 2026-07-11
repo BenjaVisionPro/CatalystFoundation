@@ -91,9 +91,9 @@ CFToOneRelationDescription >> blocItemStencil [
 			ifTrue: [ [ :anItemViewModel :anIndex :aListElement |
 				anItemViewModel asElement ] asStencilBuilder: BrListRowStencilBuilder ]
 			ifFalse: [ [ :anItemViewModel :anIndex :aListElement |
-				GtPhlowUtility newItemLabel
-					text: anItemViewModel object gtDisplayText;
-					yourself ] asStencilBuilder: BrListRowStencilBuilder ] ]
+				CFCompactObjectStencil new
+					object: anItemViewModel object;
+					create ] asStencilBuilder: BrListRowStencilBuilder ] ]
 ]
 
 { #category : 'accessing' }
@@ -102,5 +102,4 @@ CFToOneRelationDescription >> blocItemStencil: aStencil [
 		propertyAt: #blocItemStencil
 		put: (aStencil asStencilBuilder: BrListRowStencilBuilder)
 ]
-
 

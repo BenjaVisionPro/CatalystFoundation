@@ -12,9 +12,9 @@ CFToManyRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
 		ifAbsentPut: [ [ :anItemViewModel :anIndex :aListElement |
-			GtPhlowUtility newItemLabel
-				text: anItemViewModel object gtDisplayText;
-				yourself ] asStencilBuilder: BrListRowStencilBuilder ]
+			CFCompactObjectStencil new
+				object: anItemViewModel object;
+				create ] asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
 { #category : 'accessing' }
@@ -41,9 +41,18 @@ CFToManyRelationDescription >> newItemStencil [
 
 { #category : 'accessing' }
 CFToManyRelationDescription >> newItemStencil: aStencil [
+	aStencil ifNil: [
+		^ self propertyAt: #newItemStencil put: nil ].
 	(aStencil isKindOf: BrStencil)
 		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].
 	self propertyAt: #newItemStencil put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
+]
+
+{ #category : 'api' }
+CFToManyRelationDescription >> beAccordionList [
+	self
+		blocItemViewModelStencil: CFMaAccordionItemViewModelStencilBuilder new;
+		blocListStencil: CFMaAccordionListElementStencilBuilder new
 ]
 
 { #category : 'api' }
@@ -55,4 +64,3 @@ CFToManyRelationDescription >> beColumnedList [
 CFToManyRelationDescription >> beSimpleList [
 	self blocListStencil: CFMaListElementStencilBuilder new
 ]
-

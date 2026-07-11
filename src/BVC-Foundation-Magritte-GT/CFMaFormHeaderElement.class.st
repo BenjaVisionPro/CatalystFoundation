@@ -3,7 +3,7 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'memento',
-		'titleElement',
+		'compactObjectElement',
 		'metadataElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
@@ -33,11 +33,8 @@ CFMaFormHeaderElement >> headerTitleText [
 CFMaFormHeaderElement >> initialize [
 	super initialize.
 
-	titleElement := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.9));
-		margin: (BlInsets bottom: 2);
-		fitContent;
+	compactObjectElement := CFCompactObjectElement new
+		hMatchParent;
 		yourself.
 
 	metadataElement := BrLabel new
@@ -54,7 +51,7 @@ CFMaFormHeaderElement >> initialize [
 		vFitContent.
 
 	self
-		addChild: titleElement as: #title;
+		addChild: compactObjectElement as: #compactObject;
 		addChild: metadataElement as: #metadata.
 
 	self updateFromMemento
@@ -79,7 +76,7 @@ CFMaFormHeaderElement >> memento: aMemento [
 
 { #category : 'updating' }
 CFMaFormHeaderElement >> updateFromMemento [
-	titleElement ifNil: [ ^ self ].
-	titleElement text: self headerTitleText.
+	compactObjectElement ifNil: [ ^ self ].
+	compactObjectElement memento: memento.
 	metadataElement text: self headerMetadataText
 ]
