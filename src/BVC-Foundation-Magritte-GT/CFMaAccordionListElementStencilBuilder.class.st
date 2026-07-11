@@ -16,7 +16,9 @@ CFMaAccordionListElementStencilBuilder >> buildDefault [
 	anAccordionElement := CFMaBuilderUtility
 		newAccordionListMemento: self memento
 		using: self description.
-	anAccordionElement matchParent.
+	anAccordionElement
+		matchParent;
+		background: Color transparent.
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
