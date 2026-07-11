@@ -44,7 +44,9 @@ CFMaExpanderItemElement >> initialize [
 		vFitContent;
 		hMatchParent;
 		margin: (BlInsets all: 4);
-		aptitude: (GtCoderExpanderAptitude new padding: BlInsets empty);
+		aptitude: ((GtCoderExpanderAptitude new padding: BlInsets empty)
+			+ (BrStyleCommonAptitude new
+				default: [ :aStyle | aStyle background: Color transparent ]));
 		beInSingleCompositionLayer.
 
 	self states withExpansion.
