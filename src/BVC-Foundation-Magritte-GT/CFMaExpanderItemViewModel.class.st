@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFMaAccordionItemViewModel',
+	#name : 'CFMaExpanderItemViewModel',
 	#superclass : 'CFMaViewModel',
 	#instVars : [
 		'itemMemento',
@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : 'api - instance creation' }
-CFMaAccordionItemViewModel class >> forObject: anObject [
+CFMaExpanderItemViewModel class >> forObject: anObject [
 	| aMemento |
 	aMemento := GtMagritteMemento model: anObject.
 	^ self new
@@ -21,27 +21,32 @@ CFMaAccordionItemViewModel class >> forObject: anObject [
 ]
 
 { #category : 'accessing' }
-CFMaAccordionItemViewModel >> expanded [
+CFMaExpanderItemViewModel >> elementClass [
+	^ CFMaExpanderItemElement
+]
+
+{ #category : 'accessing' }
+CFMaExpanderItemViewModel >> expanded [
 	^ expanded
 ]
 
 { #category : 'accessing' }
-CFMaAccordionItemViewModel >> expanded: aBoolean [
+CFMaExpanderItemViewModel >> expanded: aBoolean [
 	expanded := aBoolean
 ]
 
 { #category : 'initialization' }
-CFMaAccordionItemViewModel >> initialize [
+CFMaExpanderItemViewModel >> initialize [
 	super initialize.
 	expanded := false
 ]
 
 { #category : 'accessing' }
-CFMaAccordionItemViewModel >> itemMemento [
+CFMaExpanderItemViewModel >> itemMemento [
 	^ itemMemento
 ]
 
 { #category : 'private - accessing' }
-CFMaAccordionItemViewModel >> itemMemento: aMemento [
+CFMaExpanderItemViewModel >> itemMemento: aMemento [
 	itemMemento := aMemento
 ]

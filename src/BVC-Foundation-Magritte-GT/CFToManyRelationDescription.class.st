@@ -51,7 +51,7 @@ CFToManyRelationDescription >> newItemStencil: aStencil [
 { #category : 'api' }
 CFToManyRelationDescription >> beAccordionList [
 	self
-		blocItemViewModelStencil: CFMaAccordionItemViewModelStencilBuilder new;
+		blocItemViewModelStencil: CFMaExpanderItemViewModelStencilBuilder new;
 		blocListStencil: CFMaAccordionListElementStencilBuilder new
 ]
 

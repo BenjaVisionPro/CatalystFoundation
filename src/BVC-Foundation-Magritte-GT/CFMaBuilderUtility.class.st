@@ -545,13 +545,13 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 	aList := BrSimpleList new.
 	aList
 		matchParent;
-		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
-			anItemTypeFactory default ];
-		itemStencil: self newRelationListItemStencil;
+		itemType: [ :anItemTypeFactory :anItemViewModel |
+			anItemViewModel elementClass ];
+		itemStencil: [ :anItemElementClass |
+			anItemElementClass new vFitContentLimited ];
+		itemId: [ :anItemViewModel | anItemViewModel object ];
 		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
-			anItemElement removeChildren.
-			anItemElement addChild: (self newAccordionForItemViewModel: anItemViewModel).
-			anItemElement ];
+			anItemElement expanderItemViewModel: anItemViewModel ];
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
 		addEventHandler: (GtPhlowListToSelectHandler new
@@ -560,62 +560,6 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 	self installListClickToPhlowSelectOn: aList.
 	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
-]
-
-
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newAccordionForItemViewModel: anItemViewModel [
-	| anAccordion |
-	anAccordion := BrAccordion new
-		hMatchParent;
-		vFitContent;
-		aptitude: BrGlamorousAccordionAptitude new;
-		yourself.
-	anAccordion
-		header: [ self
-			newAccordionHeaderFor: anItemViewModel
-			accordion: anAccordion ];
-		content: [ self newAccordionContentFor: anItemViewModel ];
-		when: BrExpandedEvent
-			do: [ :anEvent | anItemViewModel expanded: true ];
-		when: BrCollapsedEvent
-			do: [ :anEvent | anItemViewModel expanded: false ].
-	anItemViewModel expanded
-		ifTrue: [ anAccordion expand ]
-		ifFalse: [ anAccordion collapse ].
-	^ anAccordion
-]
-
-
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newAccordionHeaderFor: anItemViewModel accordion: anAccordion [
-	^ BrButton new
-		hMatchParent;
-		vFitContent;
-		aptitude: BrGlamorousAccordionHeaderAptitude new;
-		label: '';
-		action: [ anAccordion toggleExpanded ];
-		addChild: (CFCompactObjectStencil new
-			memento: anItemViewModel itemMemento;
-			create);
-		yourself
-]
-
-
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newAccordionContentFor: anItemViewModel [
-	^ BrFrame new
-		hMatchParent;
-		vExact: self accordionEditorHeight;
-		padding: (BlInsets top: 0 left: 10 bottom: 10 right: 10);
-		addChild: anItemViewModel asElement;
-		yourself
-]
-
-
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> accordionEditorHeight [
-	^ 320
 ]
 
 

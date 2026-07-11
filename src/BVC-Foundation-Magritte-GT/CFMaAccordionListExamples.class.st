@@ -9,7 +9,7 @@ Class {
 { #category : 'examples' }
 CFMaAccordionListExamples >> accordionItemExpansionSurvivesElementRecreation [
 	<gtExample>
-	| aModel aDescription aViewModel firstAccordion secondAccordion |
+	| aModel aDescription aViewModel firstExpander secondExpander |
 	aModel := CFMaAccordionExampleContainer new.
 	aDescription := aModel descriptionItems.
 	aViewModel := aDescription blocItemViewModelStencil
@@ -17,23 +17,23 @@ CFMaAccordionListExamples >> accordionItemExpansionSurvivesElementRecreation [
 		description: aDescription;
 		memento: nil;
 		build.
-	firstAccordion := CFMaBuilderUtility
-		newAccordionForItemViewModel: aViewModel.
+	firstExpander := CFMaExpanderItemElement new
+		expanderItemViewModel: aViewModel.
 
-	self assert: firstAccordion isExpanded not.
-	firstAccordion expand.
+	self assert: firstExpander isExpanded not.
+	firstExpander expand.
 	self assert: aViewModel expanded.
 
-	secondAccordion := CFMaBuilderUtility
-		newAccordionForItemViewModel: aViewModel.
-	self assert: secondAccordion isExpanded.
-	^ secondAccordion
+	secondExpander := CFMaExpanderItemElement new
+		expanderItemViewModel: aViewModel.
+	self assert: secondExpander isExpanded.
+	^ secondExpander
 ]
 
 { #category : 'examples' }
 CFMaAccordionListExamples >> accordionItemUsesCompactHeader [
 	<gtExample>
-	| aModel aDescription aViewModel anAccordion aHeader aCompactElement |
+	| aModel aDescription aViewModel anExpander aCompactElement |
 	aModel := CFMaAccordionExampleContainer new.
 	aDescription := aModel descriptionItems.
 	aViewModel := aDescription blocItemViewModelStencil
@@ -41,17 +41,13 @@ CFMaAccordionListExamples >> accordionItemUsesCompactHeader [
 		description: aDescription;
 		memento: nil;
 		build.
-	anAccordion := CFMaBuilderUtility
-		newAccordionForItemViewModel: aViewModel.
-	aHeader := CFMaBuilderUtility
-		newAccordionHeaderFor: aViewModel
-		accordion: anAccordion.
-	aCompactElement := aHeader children
-		detect: [ :each | each isKindOf: CFCompactObjectElement ].
+	anExpander := CFMaExpanderItemElement new
+		expanderItemViewModel: aViewModel.
+	aCompactElement := anExpander collapsedElement.
 
 	self assert: aCompactElement memento == aViewModel itemMemento.
 	self assert: aCompactElement titleText equals: 'First item'.
-	^ aHeader
+	^ anExpander
 ]
 
 { #category : 'examples' }
@@ -84,7 +80,8 @@ CFMaAccordionListExamples >> accordionRelationItemViewModel [
 		memento: nil;
 		build.
 
-	self assert: aViewModel class equals: CFMaAccordionItemViewModel.
+	self assert: aViewModel class equals: CFMaExpanderItemViewModel.
+	self assert: aViewModel elementClass equals: CFMaExpanderItemElement.
 	self assert: aViewModel itemMemento model == aModel items first.
 	self assert: aViewModel expanded not.
 	^ aViewModel

@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFMaAccordionItemViewModelStencilBuilder',
+	#name : 'CFMaExpanderItemViewModelStencilBuilder',
 	#superclass : 'GtMagritteModelStencilBuilder',
 	#category : 'BVC-Foundation-Magritte-GT-Stencils',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -7,6 +7,6 @@ Class {
 }
 
 { #category : 'api - instantiation' }
-CFMaAccordionItemViewModelStencilBuilder >> buildDefault [
-	^ CFMaAccordionItemViewModel forObject: self model
+CFMaExpanderItemViewModelStencilBuilder >> buildDefault [
+	^ CFMaExpanderItemViewModel forObject: self model
 ]
