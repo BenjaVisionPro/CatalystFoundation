@@ -16,12 +16,12 @@ CFMaAccordionListElementStencilBuilder >> buildDefault [
 	anAccordionElement := CFMaBuilderUtility
 		newAccordionListMemento: self memento
 		using: self description.
+	anAccordionElement matchParent.
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
 		element: anAccordionElement;
-		hMatchParent;
-		vFitContent;
+		matchParent;
 		yourself
 ]
