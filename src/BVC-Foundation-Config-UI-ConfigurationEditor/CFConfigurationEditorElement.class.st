@@ -147,7 +147,7 @@ CFConfigurationEditorElement >> createLibraryToggleButton [
 		geometry: BlCircleGeometry new;
 		background: (Color white alpha: 0.92);
 		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
-		aptitude: BrShadowAptitude new beSmall;
+		aptitude: BrShadowAptitude new;
 		action: [ :anElement | self toggleLibrarySidebar ];
 		margin: (BlInsets top: 16 left: 316 bottom: 0 right: 0);
 		constraintsDo: [ :c |
@@ -440,14 +440,46 @@ CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: 
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
-	| targetChoices matches |
-	targetChoices := anAssessment targetChoices.
-	targetChoices size = 1 ifTrue: [ ^ targetChoices first ].
-	matches := targetChoices select: [ :each |
-		| fieldElement |
-		fieldElement := self fieldElementForPlacement: each placement.
-		fieldElement notNil and: [
-			((fieldElement bounds inParent: self) asRectangle)
-				containsPoint: aPoint ] ].
-	^ matches size = 1 ifTrue: [ matches first ] ifFalse: [ nil ]
+	| candidates |
+	candidates := anAssessment targetChoices select: [ :each |
+		(self fieldElementForPlacement: each placement) notNil ].
+	candidates ifEmpty: [ ^ nil ].
+	^ candidates
+		inject: candidates first
+		into: [ :closest :each |
+			(self targetChoice: each isCloserTo: aPoint than: closest)
+				ifTrue: [ each ]
+				ifFalse: [ closest ] ]
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> targetChoice: aTargetChoice isCloserTo: aPoint than: anotherTargetChoice [
+	| bounds otherBounds distance otherDistance |
+	bounds := ((self fieldElementForPlacement: aTargetChoice placement)
+		bounds inParent: self) asRectangle.
+	otherBounds := ((self fieldElementForPlacement: anotherTargetChoice placement)
+		bounds inParent: self) asRectangle.
+	distance := self distanceSquaredFrom: aPoint to: bounds.
+	otherDistance := self distanceSquaredFrom: aPoint to: otherBounds.
+	distance = otherDistance ifFalse: [ ^ distance < otherDistance ].
+	^ aPoint squaredDistanceTo: bounds center
+		< (aPoint squaredDistanceTo: otherBounds center)
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> distanceSquaredFrom: aPoint to: aRectangle [
+	| horizontalDistance verticalDistance |
+	horizontalDistance := aPoint x < aRectangle left
+		ifTrue: [ aRectangle left - aPoint x ]
+		ifFalse: [
+			aPoint x > aRectangle right
+				ifTrue: [ aPoint x - aRectangle right ]
+				ifFalse: [ 0 ] ].
+	verticalDistance := aPoint y < aRectangle top
+		ifTrue: [ aRectangle top - aPoint y ]
+		ifFalse: [
+			aPoint y > aRectangle bottom
+				ifTrue: [ aPoint y - aRectangle bottom ]
+				ifFalse: [ 0 ] ].
+	^ horizontalDistance squared + verticalDistance squared
 ]
