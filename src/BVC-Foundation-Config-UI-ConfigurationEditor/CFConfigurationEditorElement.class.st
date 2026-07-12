@@ -12,7 +12,10 @@ Class {
 		'selectedConfiguration',
 		'inspectorElement',
 		'libraryVisible',
-		'libraryToggleButton'
+		'libraryToggleButton',
+		'dragAsset',
+		'dragAssessment',
+		'activeInsertionIndex'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -84,6 +87,9 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
+	activeInsertionIndex := nil.
+	dragAsset := nil.
+	dragAssessment := nil.
 	self detachPlacementPreview
 ]
 
@@ -383,19 +389,27 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
-	| assessment targetChoice fieldElement targetBounds previousTargetChoice |
+	| assessment targetChoice fieldElement targetBounds insertionIndex |
 	configuration ifNil: [ ^ self clearPlacementPreview ].
-	previousTargetChoice := activeTargetChoice.
-	self detachPlacementPreview.
-	assessment := planner assessAsset: anAsset in: configuration.
+	assessment := dragAsset == anAsset
+		ifTrue: [ dragAssessment ]
+		ifFalse: [
+			dragAsset := anAsset.
+			dragAssessment := planner assessAsset: anAsset in: configuration ].
 	targetChoice := self
 		targetChoiceIn: assessment
 		at: aPoint
-		keeping: previousTargetChoice.
+		keeping: activeTargetChoice.
 	targetChoice ifNil: [
 		activeTargetChoice := nil.
-		^ self ].
+		activeInsertionIndex := nil.
+		^ self detachPlacementPreview ].
+	insertionIndex := targetChoice placement insertionIndex.
+	((self sameTargetChoice: targetChoice as: activeTargetChoice)
+		and: [ insertionIndex = activeInsertionIndex ]) ifTrue: [ ^ self ].
+	self detachPlacementPreview.
 	activeTargetChoice := targetChoice.
+	activeInsertionIndex := insertionIndex.
 	(targetChoice placement isAddition and: [
 		self installAdditionPreviewFor: targetChoice asset: anAsset ]) ifTrue: [ ^ self ].
 	fieldElement := self fieldElementForPlacement: targetChoice placement.
@@ -423,31 +437,25 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
-	| relationElement itemsElement compactPresentation children index |
+	| relationElement itemsElement bounds |
 	relationElement := self fieldElementForPlacement: aTargetChoice placement.
 	relationElement ifNil: [ ^ false ].
 	itemsElement := self relationItemsElementIn: relationElement.
 	itemsElement ifNil: [ ^ false ].
-	compactPresentation := CFCompactObjectStencil new
-		object: anAsset;
-		create.
-	compactPresentation
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets top: 8 left: 10 bottom: 8 right: 10);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 8);
-		background: (Color r: 0.12 g: 0.42 b: 0.85 alpha: 0.30);
-		border: (BlBorder paint: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.9) width: 1);
+	aTargetChoice placement insertionIndex ifNil: [ ^ false ].
+	bounds := self
+		insertionPreviewBoundsIn: itemsElement
+		at: aTargetChoice placement insertionIndex.
+	previewElement := BrFrame new
+		hExact: bounds width;
+		vExact: bounds height;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 2);
+		background: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.92);
+		preventMouseEvents;
+		constraintsDo: [ :c | c ignoreByLayout ];
+		relocate: bounds origin;
 		yourself.
-	index := aTargetChoice placement insertionIndex.
-	index ifNil: [ itemsElement addChild: compactPresentation ] ifNotNil: [
-		children := itemsElement children asArray.
-		itemsElement removeChildren.
-		1 to: children size + 1 do: [ :eachIndex |
-			eachIndex = index ifTrue: [ itemsElement addChild: compactPresentation ].
-			eachIndex <= children size ifTrue: [
-				itemsElement addChild: (children at: eachIndex) ] ] ].
-	previewElement := compactPresentation.
+	self addChild: previewElement.
 	^ true
 ]
 
@@ -483,6 +491,24 @@ CFConfigurationEditorElement >> updateInsertionIndexFor: aTargetChoice at: aPoin
 	itemsElement := self relationItemsElementIn: relationElement.
 	itemsElement ifNil: [ ^ self ].
 	placement insertionIndex: (self insertionIndexIn: itemsElement at: aPoint)
+]
+
+{ #category : 'private - geometry' }
+CFConfigurationEditorElement >> insertionPreviewBoundsIn: anItemsElement at: anIndex [
+	| children itemsBounds y |
+	children := anItemsElement children asArray.
+	itemsBounds := (anItemsElement bounds inParent: self) asRectangle.
+	y := children ifEmpty: [ itemsBounds top ] ifNotEmpty: [
+		anIndex <= children size
+			ifTrue: [ ((children at: anIndex) bounds inParent: self) asRectangle top - 3 ]
+			ifFalse: [ ((children last bounds inParent: self) asRectangle bottom) + 3 ] ].
+	^ (itemsBounds left @ y extent: itemsBounds width @ 4)
+]
+
+{ #category : 'private - testing' }
+CFConfigurationEditorElement >> sameTargetChoice: aTargetChoice as: anotherTargetChoice [
+	anotherTargetChoice ifNil: [ ^ false ].
+	^ aTargetChoice placement matches: anotherTargetChoice placement
 ]
 
 { #category : 'private - planning' }
