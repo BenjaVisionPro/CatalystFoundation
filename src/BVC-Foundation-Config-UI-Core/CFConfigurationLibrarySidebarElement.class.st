@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'assetActivatedBlock',
 		'library',
-		'listElement'
+		'listElement',
+		'searchText'
 	],
 	#category : 'BVC-Foundation-Config-UI-Core',
 	#package : 'BVC-Foundation-Config-UI-Core'
@@ -73,13 +74,63 @@ CFConfigurationLibrarySidebarElement >> createContent [
 		yourself.
 	content
 		addChild: heading;
+		addChild: self createSearchElement;
 		addChild: listElement.
 	self addChild: content
+]
+
+{ #category : 'private - building' }
+CFConfigurationLibrarySidebarElement >> createSearchElement [
+	| frame editor |
+	frame := BrFrame new
+		hMatchParent;
+		vExact: 34;
+		layout: BlFrameLayout new;
+		padding: (BlInsets all: 1);
+		margin: (BlInsets bottom: 9);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 17);
+		background: (Color black alpha: 0.30);
+		border: (BlBorder paint: (Color white alpha: 0.18) width: 1);
+		yourself.
+	editor := BrEditor new
+		hMatchParent;
+		vMatchParent;
+		inputFilter: BrTextEditorNoLineBreakInputFilter new;
+		aptitude: (BrGlamorousRegularEditorAptitude new
+			foreground: Color white;
+			yourself);
+		padding: (BlInsets top: 6 left: 10 bottom: 5 right: 10);
+		background: Color transparent;
+		border: BlBorder empty;
+		text: (searchText asRopedText foreground: Color white);
+		yourself.
+	editor editor when: BrTextEditorModifiedEvent do: [ :anEvent |
+		searchText := editor text asString.
+		self refresh ].
+	frame addChild: editor.
+	^ frame
+]
+
+{ #category : 'private - filtering' }
+CFConfigurationLibrarySidebarElement >> filteredAssets [
+	| query |
+	library ifNil: [ ^ #() ].
+	query := searchText ifNil: [ '' ].
+	query := query asString trimBoth asLowercase.
+	query isEmpty ifTrue: [ ^ library assets ].
+	^ library assets select: [ :each |
+		| label className |
+		label := each label asString asLowercase.
+		className := each configurationClass
+			ifNil: [ '' ]
+			ifNotNil: [ :aClass | aClass name asString asLowercase ].
+		(label includesSubstring: query) or: [ className includesSubstring: query ] ]
 ]
 
 { #category : 'initialization' }
 CFConfigurationLibrarySidebarElement >> initialize [
 	super initialize.
+	searchText := ''.
 	self
 		hExact: 300;
 		vMatchParent;
@@ -108,7 +159,7 @@ CFConfigurationLibrarySidebarElement >> refresh [
 	listElement ifNil: [ ^ self ].
 	listElement removeChildren.
 	library ifNil: [ ^ self ].
-	library assets do: [ :each |
+	self filteredAssets do: [ :each |
 		listElement addChild: (self createAssetPresentationFor: each) ]
 ]
 

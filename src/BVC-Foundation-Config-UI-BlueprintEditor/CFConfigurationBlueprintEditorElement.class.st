@@ -12,7 +12,9 @@ Class {
 		'previewItemsElement',
 		'previewEmptyRelationElement',
 		'selectedConfiguration',
-		'inspectorElement'
+		'inspectorElement',
+		'libraryVisible',
+		'libraryToggleButton'
 	],
 	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
 	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
@@ -142,6 +144,39 @@ CFConfigurationBlueprintEditorElement >> createLibrarySidebar [
 ]
 
 { #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> createLibraryToggleButton [
+	| label |
+	libraryToggleButton := BrButton new
+		hExact: 34;
+		vExact: 34;
+		layout: BlFrameLayout new;
+		geometry: BlCircleGeometry new;
+		background: (Color white alpha: 0.92);
+		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
+		aptitude: BrShadowAptitude new beSmall;
+		action: [ :anElement | self toggleLibrarySidebar ];
+		margin: (BlInsets top: 16 left: 316 bottom: 0 right: 0);
+		constraintsDo: [ :c |
+			c frame horizontal alignLeft.
+			c frame vertical alignTop ];
+		yourself.
+	label := BrLabel new
+		fitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFont;
+			fontSize: 16;
+			foreground: (Color black alpha: 0.70);
+			yourself);
+		text: '☰';
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		yourself.
+	libraryToggleButton addChild: label.
+	^ libraryToggleButton
+]
+
+{ #category : 'private - building' }
 CFConfigurationBlueprintEditorElement >> createInspectorElementFor: aConfiguration [
 	| content editorElement |
 	inspectorElement := BrFrame new
@@ -166,8 +201,42 @@ CFConfigurationBlueprintEditorElement >> createInspectorElementFor: aConfigurati
 		margin: (BlInsets all: 8);
 		yourself.
 	content addChild: editorElement.
-	inspectorElement addChild: content.
+	inspectorElement
+		addChild: content;
+		addChild: self createInspectorCloseButton.
 	^ inspectorElement
+]
+
+{ #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> createInspectorCloseButton [
+	| button label |
+	button := BrButton new
+		hExact: 28;
+		vExact: 28;
+		layout: BlFrameLayout new;
+		geometry: BlCircleGeometry new;
+		background: (Color black alpha: 0.08);
+		border: BlBorder empty;
+		action: [ :anElement | self hideConfigurationInspector ];
+		margin: (BlInsets top: 10 left: 0 bottom: 0 right: 10);
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ];
+		yourself.
+	label := BrLabel new
+		fitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFont;
+			fontSize: 16;
+			foreground: (Color black alpha: 0.65);
+			yourself);
+		text: '×';
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		yourself.
+	button addChild: label.
+	^ button
 ]
 
 { #category : 'private - previewing' }
@@ -222,11 +291,19 @@ CFConfigurationBlueprintEditorElement >> hideConfigurationInspector [
 	inspectorElement := nil
 ]
 
+{ #category : 'private - tools' }
+CFConfigurationBlueprintEditorElement >> hideLibrarySidebar [
+	libraryVisible := false.
+	librarySidebarElement ifNotNil: [ :anElement |
+		anElement visibility: BlVisibility gone ]
+]
+
 { #category : 'initialization' }
 CFConfigurationBlueprintEditorElement >> initialize [
 	super initialize.
 	library := CFConfigurationLibrary discovered.
 	planner := CFConfigurationPlanner new.
+	libraryVisible := true.
 	self
 		matchParent;
 		layout: BlFrameLayout new;
@@ -236,6 +313,7 @@ CFConfigurationBlueprintEditorElement >> initialize [
 	self
 		addChild: self createBlueprintContentElement;
 		addChild: self createLibrarySidebar;
+		addChild: self createLibraryToggleButton;
 		addAssetDropHandler
 ]
 
@@ -289,6 +367,13 @@ CFConfigurationBlueprintEditorElement >> refreshConfigurationInspector [
 	self showConfigurationInspectorFor: selectedConfiguration
 ]
 
+{ #category : 'private - tools' }
+CFConfigurationBlueprintEditorElement >> showLibrarySidebar [
+	libraryVisible := true.
+	librarySidebarElement ifNotNil: [ :anElement |
+		anElement visibility: BlVisibility visible ]
+]
+
 { #category : 'private - selection' }
 CFConfigurationBlueprintEditorElement >> selectConfiguration: aConfiguration [
 	selectedConfiguration := aConfiguration.
@@ -324,6 +409,13 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 CFConfigurationBlueprintEditorElement >> showConfigurationInspectorFor: aConfiguration [
 	self hideConfigurationInspector.
 	self addChild: (self createInspectorElementFor: aConfiguration)
+]
+
+{ #category : 'private - tools' }
+CFConfigurationBlueprintEditorElement >> toggleLibrarySidebar [
+	libraryVisible
+		ifTrue: [ self hideLibrarySidebar ]
+		ifFalse: [ self showLibrarySidebar ]
 ]
 
 { #category : 'private - previewing' }

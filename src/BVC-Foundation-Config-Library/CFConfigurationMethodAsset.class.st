@@ -27,7 +27,7 @@ CFConfigurationMethodAsset class >> fromPragma: aPragma [
 		sourceClass: sourceClass;
 		selector: selector;
 		configurationClass: configurationClass;
-		label: sourceClass name asString , ' >> ' , selector asString;
+		label: selector asString;
 		yourself
 ]
 
