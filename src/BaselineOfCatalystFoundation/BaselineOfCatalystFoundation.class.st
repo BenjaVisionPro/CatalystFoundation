@@ -86,4 +86,3 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Config-UI-BlueprintEditor'
 		with: [ spec requires: #('BVC-Foundation-Config-UI-Core') ]
 ]
-]
