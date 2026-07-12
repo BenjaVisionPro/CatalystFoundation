@@ -10,7 +10,9 @@ Class {
 		'planner',
 		'previewElement',
 		'previewItemsElement',
-		'previewEmptyRelationElement'
+		'previewEmptyRelationElement',
+		'selectedConfiguration',
+		'inspectorElement'
 	],
 	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
 	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
@@ -46,6 +48,7 @@ CFConfigurationBlueprintEditorElement >> applyAsset: anAsset at: aPoint [
 		targetChoice: targetChoice
 		planner: planner) apply.
 	self refreshBlueprintContent.
+	self refreshConfigurationInspector.
 	^ assessment
 ]
 
@@ -60,6 +63,7 @@ CFConfigurationBlueprintEditorElement >> applyAssetWhenPlacementIsUnambiguous: a
 		targetChoice: assessment targetChoices first
 		planner: planner) apply.
 	self refreshBlueprintContent.
+	self refreshConfigurationInspector.
 	^ assessment
 ]
 
@@ -71,6 +75,8 @@ CFConfigurationBlueprintEditorElement >> blueprintConfiguration [
 { #category : 'accessing' }
 CFConfigurationBlueprintEditorElement >> blueprintConfiguration: aConfiguration [
 	blueprintConfiguration := aConfiguration.
+	selectedConfiguration := nil.
+	self hideConfigurationInspector.
 	self refreshBlueprintContent
 ]
 
@@ -135,6 +141,35 @@ CFConfigurationBlueprintEditorElement >> createLibrarySidebar [
 	^ librarySidebarElement
 ]
 
+{ #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> createInspectorElementFor: aConfiguration [
+	| content editorElement |
+	inspectorElement := BrFrame new
+		hExact: self inspectorWidth;
+		vMatchParent;
+		layout: BlFrameLayout new;
+		padding: (BlInsets all: 1);
+		margin: (BlInsets all: 12);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 13);
+		background: (Color white alpha: 0.96);
+		border: (BlBorder paint: (Color black alpha: 0.16) width: 1);
+		aptitude: BrShadowAptitude new beLarge;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ];
+		yourself.
+	content := BrFrame new
+		matchParent;
+		layout: BlFrameLayout new;
+		yourself.
+	editorElement := aConfiguration asGtMagritteViewModel asElement
+		margin: (BlInsets all: 8);
+		yourself.
+	content addChild: editorElement.
+	inspectorElement addChild: content.
+	^ inspectorElement
+]
+
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> createPlacementPreviewFor: aTargetChoice asset: anAsset bounds: aRectangle [
 	| preview compactPresentation |
@@ -181,6 +216,12 @@ CFConfigurationBlueprintEditorElement >> fieldElementForPlacement: aPlacement [
 		ifNone: [ nil ]
 ]
 
+{ #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> hideConfigurationInspector [
+	inspectorElement ifNotNil: [ :anElement | anElement removeFromParent ].
+	inspectorElement := nil
+]
+
 { #category : 'initialization' }
 CFConfigurationBlueprintEditorElement >> initialize [
 	super initialize.
@@ -196,6 +237,11 @@ CFConfigurationBlueprintEditorElement >> initialize [
 		addChild: self createBlueprintContentElement;
 		addChild: self createLibrarySidebar;
 		addAssetDropHandler
+]
+
+{ #category : 'private - geometry' }
+CFConfigurationBlueprintEditorElement >> inspectorWidth [
+	^ 360
 ]
 
 { #category : 'accessing' }
@@ -226,12 +272,28 @@ CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
 	visitedConfigurations add: blueprintConfiguration.
 	nodeElement := CFConfigurationBlueprintNodeElement
 		configuration: blueprintConfiguration
-		visited: visitedConfigurations.
+		visited: visitedConfigurations
+		selected: selectedConfiguration
+		whenSelected: [ :aConfiguration |
+			self selectConfiguration: aConfiguration ].
 	nodeElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	surface addChild: nodeElement.
 	blueprintContentElement addChild: surface
+]
+
+{ #category : 'updating' }
+CFConfigurationBlueprintEditorElement >> refreshConfigurationInspector [
+	selectedConfiguration ifNil: [ ^ self hideConfigurationInspector ].
+	self showConfigurationInspectorFor: selectedConfiguration
+]
+
+{ #category : 'private - selection' }
+CFConfigurationBlueprintEditorElement >> selectConfiguration: aConfiguration [
+	selectedConfiguration := aConfiguration.
+	self refreshBlueprintContent.
+	self showConfigurationInspectorFor: aConfiguration
 ]
 
 { #category : 'private - previewing' }
@@ -256,6 +318,12 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 		asset: anAsset
 		bounds: targetBounds.
 	self addChild: previewElement
+]
+
+{ #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> showConfigurationInspectorFor: aConfiguration [
+	self hideConfigurationInspector.
+	self addChild: (self createInspectorElementFor: aConfiguration)
 ]
 
 { #category : 'private - previewing' }

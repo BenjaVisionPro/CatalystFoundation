@@ -3,7 +3,9 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'configuration',
-		'visitedConfigurations'
+		'visitedConfigurations',
+		'selectedConfiguration',
+		'selectionBlock'
 	],
 	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
 	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
@@ -13,6 +15,16 @@ Class {
 CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visited: aSet [
 	^ self new
 		visitedConfigurations: aSet;
+		configuration: aConfiguration;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visited: aSet selected: aSelectedConfiguration whenSelected: aBlock [
+	^ self new
+		visitedConfigurations: aSet;
+		selectedConfiguration: aSelectedConfiguration;
+		whenSelectedDo: aBlock;
 		configuration: aConfiguration;
 		yourself
 ]
@@ -47,8 +59,12 @@ CFConfigurationBlueprintNodeElement >> createHeaderElement [
 		layout: BlFrameLayout new;
 		padding: (BlInsets all: 1);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 11);
-		background: (Color white alpha: 0.98);
-		border: (BlBorder paint: (Color black alpha: 0.14) width: 1);
+		background: (self isSelected
+			ifTrue: [ Color r: 0.16 g: 0.45 b: 0.88 alpha: 0.16 ]
+			ifFalse: [ Color white alpha: 0.98 ]);
+		border: (BlBorder paint: (self isSelected
+			ifTrue: [ Color r: 0.18 g: 0.50 b: 0.96 alpha: 0.95 ]
+			ifFalse: [ Color black alpha: 0.14 ]) width: (self isSelected ifTrue: [ 2 ] ifFalse: [ 1 ]));
 		yourself.
 	compact := CFCompactObjectStencil new
 		object: configuration;
@@ -57,7 +73,11 @@ CFConfigurationBlueprintNodeElement >> createHeaderElement [
 		hMatchParent;
 		padding: (BlInsets top: 10 left: 12 bottom: 10 right: 12);
 		yourself.
-	header addChild: compact.
+	header
+		addChild: compact;
+		when: BlClickEvent do: [ :anEvent |
+			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ].
+			anEvent consumed: true ].
 	^ header
 ]
 
@@ -105,7 +125,9 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 				childVisited add: each.
 				items addChild: (self class
 					configuration: each
-					visited: childVisited) ] ] ].
+					visited: childVisited
+					selected: selectedConfiguration
+					whenSelected: selectionBlock) ] ] ].
 	relationElement
 		addChild: heading;
 		addChild: items.
@@ -123,6 +145,11 @@ CFConfigurationBlueprintNodeElement >> initialize [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 14);
 		background: (Color r: 0.86 g: 0.91 b: 0.98 alpha: 0.42);
 		border: (BlBorder paint: (Color r: 0.26 g: 0.47 b: 0.76 alpha: 0.35) width: 1)
+]
+
+{ #category : 'testing' }
+CFConfigurationBlueprintNodeElement >> isSelected [
+	^ configuration == selectedConfiguration
 ]
 
 { #category : 'private - building' }
@@ -157,6 +184,16 @@ CFConfigurationBlueprintNodeElement >> refresh [
 ]
 
 { #category : 'accessing' }
+CFConfigurationBlueprintNodeElement >> selectedConfiguration: aConfiguration [
+	selectedConfiguration := aConfiguration
+]
+
+{ #category : 'accessing' }
 CFConfigurationBlueprintNodeElement >> visitedConfigurations: aSet [
 	visitedConfigurations := aSet
+]
+
+{ #category : 'events' }
+CFConfigurationBlueprintNodeElement >> whenSelectedDo: aBlock [
+	selectionBlock := aBlock
 ]
