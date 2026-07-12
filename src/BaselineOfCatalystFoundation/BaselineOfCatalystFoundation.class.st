@@ -40,7 +40,7 @@ BaselineOfCatalystFoundation >> defineCommonGroupsOn: spec [
 		'BVC-Foundation-Config-Core'
 		'BVC-Foundation-Config-Validation'
 		'BVC-Foundation-Config-Library'
-		'BVC-Foundation-Config-Serialization'
+		'BVC-Foundation-Config-Planner'
 		'BVC-Foundation-Config-Examples'
 	)
 ]
@@ -56,10 +56,10 @@ BaselineOfCatalystFoundation >> defineCommonPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Config-Core' 'BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-Library'
 		with: [ spec requires: #('BVC-Foundation-Config-Core') ].
-	spec package: 'BVC-Foundation-Config-Serialization'
-		with: [ spec requires: #('BVC-Foundation-Config-Core' 'BVC-Foundation-Magritte-Core') ].
+	spec package: 'BVC-Foundation-Config-Planner'
+		with: [ spec requires: #('BVC-Foundation-Config-Core' 'BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library') ].
 	spec package: 'BVC-Foundation-Config-Examples'
-		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Config-Serialization') ]
+		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Config-Planner') ]
 ]
 
 { #category : 'baseline' }

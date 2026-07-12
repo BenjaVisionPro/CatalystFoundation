@@ -24,6 +24,29 @@ CFConfigurationExamples class >> developmentConfigurationWithoutTypeHint [
 		yourself
 ]
 
+{ #category : 'configurations' }
+CFConfigurationExamples class >> emptyConfigurationGroup [
+	<cfConfiguration>
+	<return: #CFMyConfigurationGroupExample>
+	^ CFMyConfigurationGroupExample new
+		label: 'Empty configuration group';
+		yourself
+]
+
+{ #category : 'configurations' }
+CFConfigurationExamples class >> emptyConfigurationHolder [
+	^ CFMyConfigurationHolderExample new
+		label: 'Empty configuration holder';
+		yourself
+]
+
+{ #category : 'configurations' }
+CFConfigurationExamples class >> invalidConfiguration [
+	^ CFMyConfigExample new
+		label: 'Missing endpoint';
+		yourself
+]
+
 { #category : 'examples' }
 CFConfigurationExamples >> invalidConfigurationHasStructuredIssue [
 	<gtExample>
@@ -57,6 +80,83 @@ CFConfigurationExamples >> methodLibraryDiscoversOptionalTypeHints [
 ]
 
 { #category : 'examples' }
+CFConfigurationExamples >> plannerFindsEmbeddedToManyPlacement [
+	<gtExample>
+	| configuration asset assessment targetChoice |
+	configuration := self class emptyConfigurationGroup.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	self assert: assessment hasSingleTargetChoice.
+	targetChoice := assessment targetChoices first.
+	self assert: targetChoice placement owner == configuration.
+	self assert: targetChoice placement isAddition.
+	self assert: targetChoice willProduceValidConfiguration.
+	self assert: configuration configurations isEmpty.
+	^ assessment
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> plannerFindsNestedPlacements [
+	<gtExample>
+	| configuration nestedConfiguration asset assessment |
+	configuration := self class emptyConfigurationGroup.
+	nestedConfiguration := self class emptyConfigurationGroup.
+	nestedConfiguration
+		label: 'Nested configuration group';
+		parent: configuration.
+	configuration configurations add: nestedConfiguration.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	self assert: assessment targetChoices size equals: 2.
+	self assert: (assessment targetChoices anySatisfy: [ :each |
+		each placement owner == nestedConfiguration ]).
+	self assert: configuration configurations size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> plannerFindsToOneReplacementPlacement [
+	<gtExample>
+	| configuration asset assessment targetChoice |
+	configuration := self class emptyConfigurationHolder.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	self assert: assessment hasSingleTargetChoice.
+	targetChoice := assessment targetChoices first.
+	self assert: targetChoice placement isReplacement.
+	self assert: targetChoice willProduceValidConfiguration.
+	self assert: configuration configuration isNil.
+	^ assessment
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> plannerRejectsPlacementThatAddsValidationErrors [
+	<gtExample>
+	| configuration asset assessment |
+	configuration := self class emptyConfigurationGroup.
+	asset := CFConfigurationMethodAsset new
+		sourceClass: self class;
+		selector: #invalidConfiguration;
+		configurationClass: CFMyConfigExample;
+		yourself.
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	self assert: assessment targetChoices isEmpty.
+	self assert: assessment diagnostics size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples' }
 CFConfigurationExamples >> serializationRoundTrip [
 	<gtExample>
 	| configuration decoded |
@@ -65,6 +165,18 @@ CFConfigurationExamples >> serializationRoundTrip [
 	self assert: decoded class equals: CFMyConfigExample.
 	self assert: decoded label equals: configuration label.
 	self assert: decoded endpoint equals: configuration endpoint.
+	^ decoded
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> serializationRoundTripRestoresConfigurationParents [
+	<gtExample>
+	| configuration decoded child |
+	configuration := self class emptyConfigurationGroup.
+	configuration configurations add: self class developmentConfiguration.
+	decoded := CFConfigurationCodec fromString: (CFConfigurationCodec toStringPretty: configuration).
+	child := decoded configurations first.
+	self assert: child parent == decoded.
 	^ decoded
 ]
 

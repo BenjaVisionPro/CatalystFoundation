@@ -35,6 +35,7 @@ CFIdentifiableObject >> identifierDescription [
 		priority: 10;
 		beRequired;
 		cfCategory: #identity;
+		cfSerializable: true;
 		yourself
 ]
 

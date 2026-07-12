@@ -1,8 +1,8 @@
 Class {
 	#name : 'CFConfigurationCodec',
 	#superclass : 'Object',
-	#category : 'BVC-Foundation-Config-Serialization',
-	#package : 'BVC-Foundation-Config-Serialization'
+	#category : 'BVC-Foundation-Config-Core',
+	#package : 'BVC-Foundation-Config-Core'
 }
 
 { #category : 'decoding' }
@@ -23,10 +23,11 @@ CFConfigurationCodec class >> decodeObject: aDictionary [
 	(aDictionary keys anySatisfy: [ :each | (allowedKeys includes: each) not ])
 		ifTrue: [ self error: 'Encoded configuration contains unknown keys.' ].
 	descriptionsByKey keysAndValuesDo: [ :key :description |
-		(aDictionary includesKey: key) ifTrue: [
-			configuration
-				write: (self decodeValue: (aDictionary at: key))
-				using: description ] ].
+		((aDictionary includesKey: key) and: [ description isReadOnly not ]) ifTrue: [
+			| value |
+			value := self decodeValue: (aDictionary at: key).
+			configuration write: value using: description.
+			self establishParent: configuration forValue: value using: description ] ].
 	^ configuration
 ]
 
@@ -76,6 +77,19 @@ CFConfigurationCodec class >> encodeValue: aValue [
 		at: #kind put: #stonLiteral;
 		at: #value put: (STON toString: aValue);
 		yourself
+]
+
+{ #category : 'decoding' }
+CFConfigurationCodec class >> establishParent: aConfiguration forValue: aValue using: aDescription [
+	((aDescription isKindOf: MARelationDescription) and: [
+		aDescription cfConfigurationEmbedded ]) ifFalse: [ ^ self ].
+	aValue ifNil: [ ^ self ].
+	(aValue isCollection and: [ aValue isString not ]) ifTrue: [
+		aValue do: [ :each |
+			self establishParent: aConfiguration forValue: each using: aDescription ].
+		^ self ].
+	(aValue isKindOf: CFConfiguration) ifTrue: [
+		aValue parent: aConfiguration ]
 ]
 
 { #category : 'decoding' }

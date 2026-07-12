@@ -32,9 +32,50 @@ CFConfigurationValidator >> validate: aConfiguration [
 			subject: nil
 			path: #().
 		^ result ].
-	self validateMagritteOf: aConfiguration on: result.
+	self validateMagritteConfigurationGraphRootedAt: aConfiguration on: result.
 	aConfiguration validateConfigurationGraphOn: result.
 	^ result
+]
+
+{ #category : 'private - validation' }
+CFConfigurationValidator >> validateMagritteConfiguration: aConfiguration visited: visitedConfigurations on: aValidationResult [
+	(visitedConfigurations includes: aConfiguration) ifTrue: [ ^ self ].
+	visitedConfigurations add: aConfiguration.
+	self validateMagritteOf: aConfiguration on: aValidationResult.
+	(aConfiguration magritteDescription
+		select: [ :each |
+			(each isKindOf: MARelationDescription) and: [ each cfConfigurationEmbedded ] ])
+		do: [ :each |
+			self
+				validateMagritteConfigurationsIn: (aConfiguration readUsing: each)
+				visited: visitedConfigurations
+				on: aValidationResult ]
+]
+
+{ #category : 'private - validation' }
+CFConfigurationValidator >> validateMagritteConfigurationGraphRootedAt: aConfiguration on: aValidationResult [
+	self
+		validateMagritteConfiguration: aConfiguration
+		visited: IdentitySet new
+		on: aValidationResult
+]
+
+{ #category : 'private - validation' }
+CFConfigurationValidator >> validateMagritteConfigurationsIn: aValue visited: visitedConfigurations on: aValidationResult [
+	aValue ifNil: [ ^ self ].
+	(aValue isCollection and: [ aValue isString not ])
+		ifTrue: [
+			aValue do: [ :each |
+				self
+					validateMagritteConfigurationsIn: each
+					visited: visitedConfigurations
+					on: aValidationResult ].
+			^ self ].
+	(aValue isKindOf: CFConfiguration) ifTrue: [
+		self
+			validateMagritteConfiguration: aValue
+			visited: visitedConfigurations
+			on: aValidationResult ]
 ]
 
 { #category : 'private - validation' }

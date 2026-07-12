@@ -9,7 +9,7 @@ RwSimpleProjectLoadComponentV2 {
     'BVC-Foundation-Config-Core',
     'BVC-Foundation-Config-Validation',
     'BVC-Foundation-Config-Library',
-    'BVC-Foundation-Config-Serialization',
+    'BVC-Foundation-Config-Planner',
     'BVC-Foundation-Config-Examples'
   ],
   #comment : 'Catalyst Foundation GemStone load (platform-neutral packages)'

@@ -26,6 +26,7 @@ CFLabelledObject >> labelDescription [
 		label: 'Label';
 		priority: 10;
 		beRequired;
+		cfSerializable: true;
 		yourself
 ]
 
