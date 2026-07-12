@@ -91,11 +91,34 @@ CFConfigurationBlueprintEditorElement >> createBlueprintContentElement [
 	blueprintContentElement := BrFrame new
 		matchParent;
 		layout: BlFrameLayout new;
-		background: (Color veryVeryLightGray alpha: 0.82);
+		background: (Color r: 0.93 g: 0.95 b: 0.98 alpha: 0.82);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 14);
 		border: (BlBorder paint: (Color black alpha: 0.14) width: 1);
 		yourself.
 	^ blueprintContentElement
+]
+
+{ #category : 'private - building' }
+CFConfigurationBlueprintEditorElement >> createBlueprintSurfaceElement [
+	^ BrFrame new
+		hExact: self blueprintSurfaceWidth;
+		vMatchParent;
+		layout: BlFrameLayout new;
+		margin: (BlInsets top: 34 left: 0 bottom: 34 right: 0);
+		padding: (BlInsets all: 1);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 16);
+		background: (Color white alpha: 0.96);
+		border: (BlBorder paint: (Color black alpha: 0.14) width: 1);
+		aptitude: BrShadowAptitude new beLarge;
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private - geometry' }
+CFConfigurationBlueprintEditorElement >> blueprintSurfaceWidth [
+	^ 580
 ]
 
 { #category : 'private - building' }
@@ -206,13 +229,17 @@ CFConfigurationBlueprintEditorElement >> librarySidebarElement [
 
 { #category : 'updating' }
 CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
+	| surface editorElement |
 	self clearPlacementPreview.
 	blueprintContentElement ifNil: [ ^ self ].
 	blueprintContentElement removeChildren.
 	blueprintConfiguration ifNil: [ ^ self ].
-	blueprintContentElement addChild: (blueprintConfiguration asGtMagritteViewModel asElement
-		margin: (BlInsets all: 18);
-		yourself)
+	surface := self createBlueprintSurfaceElement.
+	editorElement := blueprintConfiguration asGtMagritteViewModel asElement
+		margin: (BlInsets all: 10);
+		yourself.
+	surface addChild: editorElement.
+	blueprintContentElement addChild: surface
 ]
 
 { #category : 'private - previewing' }
