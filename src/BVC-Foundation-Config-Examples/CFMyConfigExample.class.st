@@ -16,6 +16,7 @@ CFMyConfigExample >> descriptionEndpoint [
 		label: 'Endpoint';
 		priority: 20;
 		beRequired;
+		cfSerializable: true;
 		yourself
 ]
 

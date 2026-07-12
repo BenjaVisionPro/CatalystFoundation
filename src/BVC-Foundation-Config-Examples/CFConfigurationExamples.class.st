@@ -57,6 +57,18 @@ CFConfigurationExamples >> methodLibraryDiscoversOptionalTypeHints [
 ]
 
 { #category : 'examples' }
+CFConfigurationExamples >> serializationRoundTrip [
+	<gtExample>
+	| configuration decoded |
+	configuration := self class developmentConfiguration.
+	decoded := CFConfigurationCodec fromString: (CFConfigurationCodec toStringPretty: configuration).
+	self assert: decoded class equals: CFMyConfigExample.
+	self assert: decoded label equals: configuration label.
+	self assert: decoded endpoint equals: configuration endpoint.
+	^ decoded
+]
+
+{ #category : 'examples' }
 CFConfigurationExamples >> validConfiguration [
 	<gtExample>
 	| configuration result |

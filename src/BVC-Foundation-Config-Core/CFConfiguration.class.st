@@ -15,6 +15,13 @@ CFConfiguration class >> defaultWithParent: aConfiguration [
 		yourself
 ]
 
+{ #category : 'magritte' }
+CFConfiguration >> descriptionLabel: aDescription [
+	<magritteDescription: #labelDescription>
+	aDescription cfSerializable: true.
+	^ aDescription
+]
+
 { #category : 'accessing' }
 CFConfiguration >> ancestorConfigurations [
 	| ancestors configuration |

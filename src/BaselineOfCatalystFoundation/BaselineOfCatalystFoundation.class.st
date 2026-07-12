@@ -40,6 +40,7 @@ BaselineOfCatalystFoundation >> defineCommonGroupsOn: spec [
 		'BVC-Foundation-Config-Core'
 		'BVC-Foundation-Config-Validation'
 		'BVC-Foundation-Config-Library'
+		'BVC-Foundation-Config-Serialization'
 		'BVC-Foundation-Config-Examples'
 	)
 ]
@@ -50,13 +51,15 @@ BaselineOfCatalystFoundation >> defineCommonPackagesOn: spec [
 	spec package: 'BVC-Foundation-Magritte-Core'
 		with: [ spec requires: #('BVC-Foundation-Core') ].
 	spec package: 'BVC-Foundation-Config-Core'
-		with: [ spec requires: #('BVC-Foundation-Core') ].
+		with: [ spec requires: #('BVC-Foundation-Core' 'BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-Validation'
 		with: [ spec requires: #('BVC-Foundation-Config-Core' 'BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-Library'
 		with: [ spec requires: #('BVC-Foundation-Config-Core') ].
+	spec package: 'BVC-Foundation-Config-Serialization'
+		with: [ spec requires: #('BVC-Foundation-Config-Core' 'BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-Examples'
-		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library') ]
+		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Config-Serialization') ]
 ]
 
 { #category : 'baseline' }

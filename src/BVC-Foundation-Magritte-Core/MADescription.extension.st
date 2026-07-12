@@ -23,6 +23,11 @@ MADescription >> cfSerializable [
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
+MADescription >> cfSerializable: aBoolean [
+	^ self propertyAt: self cfSerializableSymbol put: aBoolean
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
 MADescription >> cfSerializableSymbol [
 	^ #cfSerializable
 ]
