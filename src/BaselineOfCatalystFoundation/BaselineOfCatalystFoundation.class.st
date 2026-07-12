@@ -88,7 +88,7 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Magritte-Seaside'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-UI-Core'
-		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Magritte-GT') ].
+		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Config-UI-BlueprintEditor'
-		with: [ spec requires: #('BVC-Foundation-Config-UI-Core') ]
+		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner') ]
 ]

@@ -64,6 +64,14 @@ CFConfigurationPlacement >> isReplacement [
 	^ operationKind = #replace
 ]
 
+{ #category : 'testing' }
+CFConfigurationPlacement >> matches: anotherPlacement [
+	^ owner == anotherPlacement owner
+		and: [ operationKind = anotherPlacement operationKind
+		and: [ description accessor readSelector
+			= anotherPlacement description accessor readSelector ] ]
+]
+
 { #category : 'accessing' }
 CFConfigurationPlacement >> operationKind [
 	^ operationKind

@@ -99,6 +99,26 @@ CFConfigurationExamples >> plannerFindsEmbeddedToManyPlacement [
 ]
 
 { #category : 'examples' }
+CFConfigurationExamples >> plannerAppliesToManyPlan [
+	<gtExample>
+	| configuration asset assessment appliedConfiguration |
+	configuration := self class emptyConfigurationGroup.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	appliedConfiguration := (CFConfigurationPlan
+		asset: asset
+		targetChoice: assessment targetChoices first
+		planner: CFConfigurationPlanner new) apply.
+	self assert: configuration configurations size equals: 1.
+	self assert: configuration configurations first == appliedConfiguration.
+	self assert: appliedConfiguration parent == configuration.
+	^ configuration
+]
+
+{ #category : 'examples' }
 CFConfigurationExamples >> plannerFindsNestedPlacements [
 	<gtExample>
 	| configuration nestedConfiguration asset assessment |
@@ -139,6 +159,24 @@ CFConfigurationExamples >> plannerFindsToOneReplacementPlacement [
 ]
 
 { #category : 'examples' }
+CFConfigurationExamples >> plannerAppliesToOneReplacementPlan [
+	<gtExample>
+	| configuration asset assessment appliedConfiguration planner |
+	configuration := self class emptyConfigurationHolder.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	planner := CFConfigurationPlanner new.
+	assessment := planner assessAsset: asset in: configuration.
+	appliedConfiguration := (CFConfigurationPlan
+		asset: asset
+		targetChoice: assessment targetChoices first
+		planner: planner) apply.
+	self assert: configuration configuration == appliedConfiguration.
+	self assert: appliedConfiguration parent == configuration.
+	^ configuration
+]
+
+{ #category : 'examples' }
 CFConfigurationExamples >> plannerRejectsPlacementThatAddsValidationErrors [
 	<gtExample>
 	| configuration asset assessment |
@@ -154,6 +192,33 @@ CFConfigurationExamples >> plannerRejectsPlacementThatAddsValidationErrors [
 	self assert: assessment targetChoices isEmpty.
 	self assert: assessment diagnostics size equals: 1.
 	^ assessment
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> plannerRejectsStaleNestedPlan [
+	<gtExample>
+	| configuration nestedConfiguration asset assessment targetChoice plan wasRejected |
+	configuration := self class emptyConfigurationGroup.
+	nestedConfiguration := self class emptyConfigurationGroup.
+	nestedConfiguration parent: configuration.
+	configuration configurations add: nestedConfiguration.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	targetChoice := assessment targetChoices
+		detect: [ :each | each placement owner == nestedConfiguration ].
+	plan := CFConfigurationPlan
+		asset: asset
+		targetChoice: targetChoice
+		planner: CFConfigurationPlanner new.
+	configuration configurations remove: nestedConfiguration.
+	wasRejected := false.
+	[ plan apply ] on: Error do: [ :anError | wasRejected := true ].
+	self assert: wasRejected.
+	self assert: configuration configurations isEmpty.
+	^ configuration
 ]
 
 { #category : 'examples' }

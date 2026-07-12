@@ -11,14 +11,18 @@ Class {
 
 { #category : 'planning' }
 CFConfigurationPlanner >> assessAsset: anAsset in: aConfiguration [
-	| assessment assetConfiguration originalValidationResult |
+	^ self assessConfiguration: anAsset materialize in: aConfiguration
+]
+
+{ #category : 'planning' }
+CFConfigurationPlanner >> assessConfiguration: anAssetConfiguration in: aConfiguration [
+	| assessment originalValidationResult |
 	assessment := CFConfigurationPlanningAssessment new.
-	assetConfiguration := anAsset materialize.
 	originalValidationResult := self validator validate: aConfiguration.
-	(self placementsFor: assetConfiguration in: aConfiguration) do: [ :each |
+	(self placementsFor: anAssetConfiguration in: aConfiguration) do: [ :each |
 		self
 			assessPlacement: each
-			with: assetConfiguration
+			with: anAssetConfiguration
 			in: aConfiguration
 			originalValidationResult: originalValidationResult
 			on: assessment ].
@@ -112,6 +116,13 @@ CFConfigurationPlanner >> placementsForConfigurationsIn: aValue asset: anAssetCo
 			inConfiguration: aValue
 			visited: visitedConfigurations
 			into: placements ]
+]
+
+{ #category : 'planning' }
+CFConfigurationPlanner >> targetChoiceForPlacement: aPlacement in: anAssessment [
+	^ anAssessment targetChoices
+		detect: [ :each | each placement matches: aPlacement ]
+		ifNone: [ nil ]
 ]
 
 { #category : 'private - planning' }
