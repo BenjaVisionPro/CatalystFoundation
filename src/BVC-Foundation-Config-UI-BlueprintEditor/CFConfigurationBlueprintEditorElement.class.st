@@ -9,8 +9,8 @@ Class {
 		'librarySidebarElement',
 		'planner',
 		'previewElement',
-		'previewListElement',
-		'previewListItems'
+		'previewItemsElement',
+		'previewEmptyRelationElement'
 	],
 	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
 	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
@@ -77,13 +77,13 @@ CFConfigurationBlueprintEditorElement >> blueprintConfiguration: aConfiguration 
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
-	previewListElement ifNotNil: [ :aListElement |
-		previewListItems ifNotNil: [ :theItems | aListElement items: theItems ] ].
-	previewListElement := nil.
-	previewListItems := nil.
 	previewElement ifNotNil: [ :anElement |
 		anElement removeFromParent ].
+	(previewItemsElement notNil and: [ previewEmptyRelationElement notNil ]) ifTrue: [
+		previewItemsElement addChild: previewEmptyRelationElement ].
 	previewElement := nil
+	previewItemsElement := nil.
+	previewEmptyRelationElement := nil
 ]
 
 { #category : 'private - building' }
@@ -102,7 +102,7 @@ CFConfigurationBlueprintEditorElement >> createBlueprintContentElement [
 CFConfigurationBlueprintEditorElement >> createBlueprintSurfaceElement [
 	^ BrFrame new
 		hExact: self blueprintSurfaceWidth;
-		vMatchParent;
+		vFitContent;
 		layout: BlFrameLayout new;
 		margin: (BlInsets top: 34 left: 0 bottom: 34 right: 0);
 		padding: (BlInsets all: 1);
@@ -170,26 +170,13 @@ CFConfigurationBlueprintEditorElement >> createPlacementPreviewFor: aTargetChoic
 
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> fieldElementForPlacement: aPlacement [
-	| formHost |
-	formHost := self formHostForConfiguration: aPlacement owner.
-	formHost ifNil: [ ^ nil ].
-	^ formHost
-		allChildrenBreadthFirstDetect: [ :each |
-			(each id isKindOf: GtMagritteFieldElementId) and: [
-				each id description accessor readSelector
-					= aPlacement description accessor readSelector ] ]
-		ifFound: [ :each | each ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> formHostForConfiguration: aConfiguration [
-	| mementoSymbol |
-	mementoSymbol := GtMagritteViewModel gtMementoSymbol.
 	^ blueprintContentElement
 		allChildrenBreadthFirstDetect: [ :each |
-			(each userData includesKey: mementoSymbol) and: [
-				(each userData at: mementoSymbol) model == aConfiguration ] ]
+			(each userData includesKey: #cfConfigurationBlueprintOwner) and: [
+				(each userData at: #cfConfigurationBlueprintOwner) == aPlacement owner
+					and: [ (each userData at: #cfConfigurationBlueprintDescription)
+						accessor readSelector
+							= aPlacement description accessor readSelector ] ] ]
 		ifFound: [ :each | each ]
 		ifNone: [ nil ]
 ]
@@ -229,28 +216,22 @@ CFConfigurationBlueprintEditorElement >> librarySidebarElement [
 
 { #category : 'updating' }
 CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
-	| surface editorElement |
+	| surface nodeElement visitedConfigurations |
 	self clearPlacementPreview.
 	blueprintContentElement ifNil: [ ^ self ].
 	blueprintContentElement removeChildren.
 	blueprintConfiguration ifNil: [ ^ self ].
 	surface := self createBlueprintSurfaceElement.
-	editorElement := blueprintConfiguration asGtMagritteViewModel asElement
-		margin: (BlInsets all: 10);
-		yourself.
-	surface addChild: editorElement.
+	visitedConfigurations := IdentitySet new.
+	visitedConfigurations add: blueprintConfiguration.
+	nodeElement := CFConfigurationBlueprintNodeElement
+		configuration: blueprintConfiguration
+		visited: visitedConfigurations.
+	nodeElement constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	surface addChild: nodeElement.
 	blueprintContentElement addChild: surface
-]
-
-{ #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> relationListForPlacement: aPlacement [
-	| fieldElement |
-	fieldElement := self fieldElementForPlacement: aPlacement.
-	fieldElement ifNil: [ ^ nil ].
-	^ fieldElement
-		allChildrenBreadthFirstDetect: [ :each | each isKindOf: BrSimpleList ]
-		ifFound: [ :each | each ]
-		ifNone: [ nil ]
 ]
 
 { #category : 'private - previewing' }
@@ -279,20 +260,35 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
-	| listElement previewConfiguration previewViewModel memento formHost |
-	listElement := self relationListForPlacement: aTargetChoice placement.
-	listElement ifNil: [ ^ false ].
-	formHost := self formHostForConfiguration: aTargetChoice placement owner.
-	memento := formHost userData at: GtMagritteViewModel gtMementoSymbol.
-	previewConfiguration := anAsset materialize.
-	previewViewModel := aTargetChoice placement description blocItemViewModelStencil
-		model: previewConfiguration;
-		description: aTargetChoice placement description;
-		memento: memento;
-		build.
-	previewListElement := listElement.
-	previewListItems := listElement items.
-	listElement items: (previewListItems copyWith: previewViewModel).
+	| relationElement itemsElement compactPresentation emptyElement |
+	relationElement := self fieldElementForPlacement: aTargetChoice placement.
+	relationElement ifNil: [ ^ false ].
+	itemsElement := relationElement
+		allChildrenBreadthFirstDetect: [ :each |
+			(each userData at: #cfConfigurationBlueprintRelationItems ifAbsent: [ false ]) ]
+		ifFound: [ :each | each ]
+		ifNone: [ ^ false ].
+	emptyElement := itemsElement
+		allChildrenBreadthFirstDetect: [ :each |
+			(each userData at: #cfConfigurationBlueprintEmptyRelationItem ifAbsent: [ false ]) ]
+		ifFound: [ :each | each ]
+		ifNone: [ nil ].
+	emptyElement ifNotNil: [ :each | each removeFromParent ].
+	compactPresentation := CFCompactObjectStencil new
+		object: anAsset;
+		create.
+	compactPresentation
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets top: 8 left: 10 bottom: 8 right: 10);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 8);
+		background: (Color r: 0.12 g: 0.42 b: 0.85 alpha: 0.30);
+		border: (BlBorder paint: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.9) width: 1);
+		yourself.
+	itemsElement addChild: compactPresentation.
+	previewElement := compactPresentation.
+	previewItemsElement := itemsElement.
+	previewEmptyRelationElement := emptyElement.
 	^ true
 ]
 
