@@ -9,8 +9,6 @@ Class {
 		'librarySidebarElement',
 		'planner',
 		'previewElement',
-		'previewItemsElement',
-		'previewEmptyRelationElement',
 		'selectedConfiguration',
 		'inspectorElement',
 		'libraryVisible',
@@ -87,11 +85,7 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
 	previewElement ifNotNil: [ :anElement |
 		anElement removeFromParent ].
-	(previewItemsElement notNil and: [ previewEmptyRelationElement notNil ]) ifTrue: [
-		previewItemsElement addChild: previewEmptyRelationElement ].
-	previewElement := nil.
-	previewItemsElement := nil.
-	previewEmptyRelationElement := nil
+	previewElement := nil
 ]
 
 { #category : 'private - building' }
@@ -420,7 +414,7 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
-	| relationElement itemsElement compactPresentation emptyElement |
+	| relationElement itemsElement compactPresentation |
 	relationElement := self fieldElementForPlacement: aTargetChoice placement.
 	relationElement ifNil: [ ^ false ].
 	itemsElement := relationElement
@@ -428,12 +422,6 @@ CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: 
 			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
 		ifFound: [ :each | each ]
 		ifNone: [ ^ false ].
-	emptyElement := itemsElement
-		allChildrenBreadthFirstDetect: [ :each |
-			(each userData at: #cfConfigurationEditorEmptyRelationItem ifAbsent: [ false ]) ]
-		ifFound: [ :each | each ]
-		ifNone: [ nil ].
-	emptyElement ifNotNil: [ :each | each removeFromParent ].
 	compactPresentation := CFCompactObjectStencil new
 		object: anAsset;
 		create.
@@ -447,8 +435,6 @@ CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: 
 		yourself.
 	itemsElement addChild: compactPresentation.
 	previewElement := compactPresentation.
-	previewItemsElement := itemsElement.
-	previewEmptyRelationElement := emptyElement.
 	^ true
 ]
 

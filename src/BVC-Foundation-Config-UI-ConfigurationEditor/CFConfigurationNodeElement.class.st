@@ -116,18 +116,16 @@ CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 		yourself.
 	items userData at: #cfConfigurationEditorRelationItems put: true.
 	children := self configurationChildrenFor: aDescription.
-	children isEmpty
-		ifTrue: [ items addChild: self newEmptyRelationElement ]
-		ifFalse: [ children do: [ :each |
-			(visitedConfigurations includes: each) ifFalse: [
-				| childVisited |
-				childVisited := visitedConfigurations copy.
-				childVisited add: each.
-				items addChild: (self class
-					configuration: each
-					visited: childVisited
-					selected: selectedConfiguration
-					whenSelected: selectionBlock) ] ] ].
+	children do: [ :each |
+		(visitedConfigurations includes: each) ifFalse: [
+			| childVisited |
+			childVisited := visitedConfigurations copy.
+			childVisited add: each.
+			items addChild: (self class
+				configuration: each
+				visited: childVisited
+				selected: selectedConfiguration
+				whenSelected: selectionBlock) ] ].
 	relationElement
 		addChild: heading;
 		addChild: items.
@@ -150,26 +148,6 @@ CFConfigurationNodeElement >> initialize [
 { #category : 'testing' }
 CFConfigurationNodeElement >> isSelected [
 	^ configuration == selectedConfiguration
-]
-
-{ #category : 'private - building' }
-CFConfigurationNodeElement >> newEmptyRelationElement [
-	| element |
-	element := BrLabel new
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets top: 8 left: 10 bottom: 8 right: 10);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
-		background: (Color r: 0.18 g: 0.47 b: 0.90 alpha: 0.09);
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFont;
-			fontSize: 12;
-			foreground: (Color r: 0.13 g: 0.34 b: 0.65 alpha: 0.80);
-			yourself);
-		text: 'Drop a configuration here';
-		yourself.
-	element userData at: #cfConfigurationEditorEmptyRelationItem put: true.
-	^ element
 ]
 
 { #category : 'updating' }
