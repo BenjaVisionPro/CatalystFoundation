@@ -8,6 +8,7 @@ RwSimpleProjectLoadComponentV2 {
     'BVC-Foundation-Magritte-Seaside',
     'BVC-Foundation-Config-Core',
     'BVC-Foundation-Config-Validation',
+    'BVC-Foundation-Config-Library',
     'BVC-Foundation-Config-Examples'
   ],
   #comment : 'Catalyst Foundation GemStone load (platform-neutral packages)'

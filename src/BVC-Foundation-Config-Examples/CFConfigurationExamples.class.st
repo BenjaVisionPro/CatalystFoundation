@@ -15,6 +15,15 @@ CFConfigurationExamples class >> developmentConfiguration [
 		yourself
 ]
 
+{ #category : 'configurations' }
+CFConfigurationExamples class >> developmentConfigurationWithoutTypeHint [
+	<cfConfiguration>
+	^ CFMyConfigExample new
+		label: 'Development endpoint without type hint';
+		endpoint: 'http://localhost:8081';
+		yourself
+]
+
 { #category : 'examples' }
 CFConfigurationExamples >> invalidConfigurationHasStructuredIssue [
 	<gtExample>
@@ -29,6 +38,22 @@ CFConfigurationExamples >> invalidConfigurationHasStructuredIssue [
 	self assert: issue subject == configuration.
 	self assert: issue path equals: #(endpoint).
 	^ result
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> methodLibraryDiscoversOptionalTypeHints [
+	<gtExample>
+	| library hintedAsset unhintedAsset |
+	library := CFConfigurationLibrary discovered.
+	hintedAsset := library assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	unhintedAsset := library assets
+		detect: [ :each | each selector = #developmentConfigurationWithoutTypeHint ].
+	self assert: hintedAsset configurationClass equals: CFMyConfigExample.
+	self assert: unhintedAsset configurationClass isNil.
+	self assert: hintedAsset materialize class equals: CFMyConfigExample.
+	self assert: unhintedAsset materialize class equals: CFMyConfigExample.
+	^ library
 ]
 
 { #category : 'examples' }
