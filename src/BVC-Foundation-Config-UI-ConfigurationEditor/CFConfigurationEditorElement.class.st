@@ -383,7 +383,9 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	targetChoice := self targetChoiceIn: assessment at: aPoint.
 	(activeTargetChoice notNil and: [
 		targetChoice notNil and: [
-			activeTargetChoice placement matches: targetChoice placement ] ]) ifTrue: [ ^ self ].
+			(activeTargetChoice placement matches: targetChoice placement) and: [
+				activeTargetChoice placement insertionIndex
+					= targetChoice placement insertionIndex ] ] ]) ifTrue: [ ^ self ].
 	self clearPlacementPreview.
 	targetChoice ifNil: [ ^ self ].
 	activeTargetChoice := targetChoice.
@@ -414,14 +416,11 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
-	| relationElement itemsElement compactPresentation |
+	| relationElement itemsElement compactPresentation children index |
 	relationElement := self fieldElementForPlacement: aTargetChoice placement.
 	relationElement ifNil: [ ^ false ].
-	itemsElement := relationElement
-		allChildrenBreadthFirstDetect: [ :each |
-			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
-		ifFound: [ :each | each ]
-		ifNone: [ ^ false ].
+	itemsElement := self relationItemsElementIn: relationElement.
+	itemsElement ifNil: [ ^ false ].
 	compactPresentation := CFCompactObjectStencil new
 		object: anAsset;
 		create.
@@ -433,23 +432,66 @@ CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: 
 		background: (Color r: 0.12 g: 0.42 b: 0.85 alpha: 0.30);
 		border: (BlBorder paint: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.9) width: 1);
 		yourself.
-	itemsElement addChild: compactPresentation.
+	index := aTargetChoice placement insertionIndex.
+	index ifNil: [ itemsElement addChild: compactPresentation ] ifNotNil: [
+		children := itemsElement children asArray.
+		itemsElement removeChildren.
+		1 to: children size + 1 do: [ :eachIndex |
+			eachIndex = index ifTrue: [ itemsElement addChild: compactPresentation ].
+			eachIndex <= children size ifTrue: [
+				itemsElement addChild: (children at: eachIndex) ] ] ].
 	previewElement := compactPresentation.
 	^ true
 ]
 
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> insertionIndexIn: anItemsElement at: aPoint [
+	| index |
+	index := 1.
+	anItemsElement children do: [ :each |
+		aPoint y < ((each bounds inParent: self) asRectangle center y)
+			ifTrue: [ ^ index ].
+		index := index + 1 ].
+	^ index
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> relationItemsElementIn: aRelationElement [
+	^ aRelationElement
+		allChildrenBreadthFirstDetect: [ :each |
+			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
+		ifFound: [ :each | each ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> updateInsertionIndexFor: aTargetChoice at: aPoint [
+	| placement relationElement itemsElement |
+	placement := aTargetChoice placement.
+	placement insertionIndex: nil.
+	(placement isAddition and: [ placement description isOrdered ]) ifFalse: [ ^ self ].
+	relationElement := self fieldElementForPlacement: placement.
+	relationElement ifNil: [ ^ self ].
+	itemsElement := self relationItemsElementIn: relationElement.
+	itemsElement ifNil: [ ^ self ].
+	placement insertionIndex: (self insertionIndexIn: itemsElement at: aPoint)
+]
+
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
-	| candidates |
+	| candidates targetChoice |
 	candidates := anAssessment targetChoices select: [ :each |
 		(self fieldElementForPlacement: each placement) notNil ].
 	candidates ifEmpty: [ ^ nil ].
-	^ candidates
+	targetChoice := candidates
 		inject: candidates first
 		into: [ :closest :each |
 			(self targetChoice: each isCloserTo: aPoint than: closest)
 				ifTrue: [ each ]
-				ifFalse: [ closest ] ]
+				ifFalse: [ closest ] ].
+	self updateInsertionIndexFor: targetChoice at: aPoint.
+	^ targetChoice
 ]
 
 { #category : 'private - planning' }

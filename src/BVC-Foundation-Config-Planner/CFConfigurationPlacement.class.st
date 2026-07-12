@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'description',
 		'operationKind',
-		'owner'
+		'owner',
+		'insertionIndex'
 	],
 	#category : 'BVC-Foundation-Config-Planner',
 	#package : 'BVC-Foundation-Config-Planner'
@@ -27,13 +28,24 @@ CFConfigurationPlacement >> apply: aConfiguration to: aConfigurationOwner [
 		ifTrue: [
 			value := aConfigurationOwner readUsing: ownerDescription.
 			aConfigurationOwner
-				write: (value
-					ifNil: [ OrderedCollection with: aConfiguration ]
-					ifNotNil: [ value copyWith: aConfiguration ])
+				write: (self adding: aConfiguration to: value)
 				using: ownerDescription ]
 		ifFalse: [ aConfigurationOwner write: aConfiguration using: ownerDescription ].
 	aConfiguration parent: aConfigurationOwner.
 	^ aConfiguration
+]
+
+
+{ #category : 'private - applying' }
+CFConfigurationPlacement >> adding: aConfiguration to: aCollection [
+	| result |
+	result := aCollection
+		ifNil: [ OrderedCollection new ]
+		ifNotNil: [ aCollection copy ].
+	insertionIndex
+		ifNil: [ result add: aConfiguration ]
+		ifNotNil: [ result add: aConfiguration beforeIndex: insertionIndex ].
+	^ result
 ]
 
 { #category : 'accessing' }
@@ -52,6 +64,17 @@ CFConfigurationPlacement >> descriptionFor: aConfigurationOwner [
 { #category : 'accessing' }
 CFConfigurationPlacement >> description: anObject [
 	description := anObject
+]
+
+
+{ #category : 'accessing' }
+CFConfigurationPlacement >> insertionIndex [
+	^ insertionIndex
+]
+
+{ #category : 'accessing' }
+CFConfigurationPlacement >> insertionIndex: anInteger [
+	insertionIndex := anInteger
 ]
 
 { #category : 'testing' }
