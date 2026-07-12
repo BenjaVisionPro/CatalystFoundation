@@ -8,7 +8,9 @@ Class {
 		'library',
 		'librarySidebarElement',
 		'planner',
-		'previewElement'
+		'previewElement',
+		'previewListElement',
+		'previewListItems'
 	],
 	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
 	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
@@ -75,6 +77,10 @@ CFConfigurationBlueprintEditorElement >> blueprintConfiguration: aConfiguration 
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
+	previewListElement ifNotNil: [ :aListElement |
+		previewListItems ifNotNil: [ :theItems | aListElement items: theItems ] ].
+	previewListElement := nil.
+	previewListItems := nil.
 	previewElement ifNotNil: [ :anElement |
 		anElement removeFromParent ].
 	previewElement := nil
@@ -141,19 +147,26 @@ CFConfigurationBlueprintEditorElement >> createPlacementPreviewFor: aTargetChoic
 
 { #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> fieldElementForPlacement: aPlacement [
-	| mementoSymbol formHost |
-	mementoSymbol := GtMagritteViewModel gtMementoSymbol.
-	formHost := blueprintContentElement
-		allChildrenBreadthFirstDetect: [ :each |
-			(each userData includesKey: mementoSymbol) and: [
-				(each userData at: mementoSymbol) model == aPlacement owner ] ]
-		ifFound: [ :each | each ]
-		ifNone: [ ^ nil ].
+	| formHost |
+	formHost := self formHostForConfiguration: aPlacement owner.
+	formHost ifNil: [ ^ nil ].
 	^ formHost
 		allChildrenBreadthFirstDetect: [ :each |
 			(each id isKindOf: GtMagritteFieldElementId) and: [
 				each id description accessor readSelector
 					= aPlacement description accessor readSelector ] ]
+		ifFound: [ :each | each ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationBlueprintEditorElement >> formHostForConfiguration: aConfiguration [
+	| mementoSymbol |
+	mementoSymbol := GtMagritteViewModel gtMementoSymbol.
+	^ blueprintContentElement
+		allChildrenBreadthFirstDetect: [ :each |
+			(each userData includesKey: mementoSymbol) and: [
+				(each userData at: mementoSymbol) model == aConfiguration ] ]
 		ifFound: [ :each | each ]
 		ifNone: [ nil ]
 ]
@@ -203,6 +216,17 @@ CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
 ]
 
 { #category : 'private - previewing' }
+CFConfigurationBlueprintEditorElement >> relationListForPlacement: aPlacement [
+	| fieldElement |
+	fieldElement := self fieldElementForPlacement: aPlacement.
+	fieldElement ifNil: [ ^ nil ].
+	^ fieldElement
+		allChildrenBreadthFirstDetect: [ :each | each isKindOf: BrSimpleList ]
+		ifFound: [ :each | each ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - previewing' }
 CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	| assessment targetChoice fieldElement targetBounds |
 	blueprintConfiguration ifNil: [ ^ self clearPlacementPreview ].
@@ -214,6 +238,8 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 	self clearPlacementPreview.
 	targetChoice ifNil: [ ^ self ].
 	activeTargetChoice := targetChoice.
+	(targetChoice placement isAddition and: [
+		self installAdditionPreviewFor: targetChoice asset: anAsset ]) ifTrue: [ ^ self ].
 	fieldElement := self fieldElementForPlacement: targetChoice placement.
 	fieldElement ifNil: [ ^ self ].
 	targetBounds := (fieldElement bounds inParent: self) asRectangle.
@@ -222,6 +248,25 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 		asset: anAsset
 		bounds: targetBounds.
 	self addChild: previewElement
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationBlueprintEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
+	| listElement previewConfiguration previewViewModel memento formHost |
+	listElement := self relationListForPlacement: aTargetChoice placement.
+	listElement ifNil: [ ^ false ].
+	formHost := self formHostForConfiguration: aTargetChoice placement owner.
+	memento := formHost userData at: GtMagritteViewModel gtMementoSymbol.
+	previewConfiguration := anAsset materialize.
+	previewViewModel := aTargetChoice placement description blocItemViewModelStencil
+		model: previewConfiguration;
+		description: aTargetChoice placement description;
+		memento: memento;
+		build.
+	previewListElement := listElement.
+	previewListItems := listElement items.
+	listElement items: (previewListItems copyWith: previewViewModel).
+	^ true
 ]
 
 { #category : 'private - planning' }
