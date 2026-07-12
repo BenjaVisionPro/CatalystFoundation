@@ -72,9 +72,13 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
 		background: (Color white alpha: 0.72);
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
-		userData at: #cfConfigurationBlueprintOwner put: configuration;
-		userData at: #cfConfigurationBlueprintDescription put: aDescription;
 		yourself.
+	relationElement userData
+		at: #cfConfigurationBlueprintOwner
+		put: configuration.
+	relationElement userData
+		at: #cfConfigurationBlueprintDescription
+		put: aDescription.
 	heading := BrLabel new
 		hMatchParent;
 		vFitContent;
@@ -89,8 +93,8 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 		hMatchParent;
 		vFitContent;
 		cellSpacing: 5;
-		userData at: #cfConfigurationBlueprintRelationItems put: true;
 		yourself.
+	items userData at: #cfConfigurationBlueprintRelationItems put: true.
 	children := self configurationChildrenFor: aDescription.
 	children isEmpty
 		ifTrue: [ items addChild: self newEmptyRelationElement ]
@@ -123,7 +127,8 @@ CFConfigurationBlueprintNodeElement >> initialize [
 
 { #category : 'private - building' }
 CFConfigurationBlueprintNodeElement >> newEmptyRelationElement [
-	^ BrLabel new
+	| element |
+	element := BrLabel new
 		hMatchParent;
 		vFitContent;
 		padding: (BlInsets top: 8 left: 10 bottom: 8 right: 10);
@@ -134,9 +139,10 @@ CFConfigurationBlueprintNodeElement >> newEmptyRelationElement [
 			fontSize: 12;
 			foreground: (Color r: 0.13 g: 0.34 b: 0.65 alpha: 0.80);
 			yourself);
-		userData at: #cfConfigurationBlueprintEmptyRelationItem put: true;
 		text: 'Drop a configuration here';
-		yourself
+		yourself.
+	element userData at: #cfConfigurationBlueprintEmptyRelationItem put: true.
+	^ element
 ]
 
 { #category : 'updating' }
