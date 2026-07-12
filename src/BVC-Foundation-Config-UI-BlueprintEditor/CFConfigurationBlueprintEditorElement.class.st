@@ -81,7 +81,7 @@ CFConfigurationBlueprintEditorElement >> clearPlacementPreview [
 		anElement removeFromParent ].
 	(previewItemsElement notNil and: [ previewEmptyRelationElement notNil ]) ifTrue: [
 		previewItemsElement addChild: previewEmptyRelationElement ].
-	previewElement := nil
+	previewElement := nil.
 	previewItemsElement := nil.
 	previewEmptyRelationElement := nil
 ]
