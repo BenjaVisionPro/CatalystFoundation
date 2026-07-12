@@ -1,9 +1,9 @@
 Class {
-	#name : 'CFConfigurationBlueprintEditorElement',
+	#name : 'CFConfigurationEditorElement',
 	#superclass : 'BrFrame',
 	#instVars : [
-		'blueprintConfiguration',
-		'blueprintContentElement',
+		'configuration',
+		'configurationContentElement',
 		'activeTargetChoice',
 		'library',
 		'librarySidebarElement',
@@ -16,12 +16,12 @@ Class {
 		'libraryVisible',
 		'libraryToggleButton'
 	],
-	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
-	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
+	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
+	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
 }
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> addAssetDropHandler [
+CFConfigurationEditorElement >> addAssetDropHandler [
 	self addEventHandler: (BlDropHandler new
 		acceptDomainObjectsSuchThat: [ :anObject |
 			anObject isKindOf: CFConfigurationAsset ];
@@ -39,51 +39,51 @@ CFConfigurationBlueprintEditorElement >> addAssetDropHandler [
 ]
 
 { #category : 'private - applying' }
-CFConfigurationBlueprintEditorElement >> applyAsset: anAsset at: aPoint [
+CFConfigurationEditorElement >> applyAsset: anAsset at: aPoint [
 	| assessment targetChoice |
-	blueprintConfiguration ifNil: [ ^ nil ].
-	assessment := planner assessAsset: anAsset in: blueprintConfiguration.
+	configuration ifNil: [ ^ nil ].
+	assessment := planner assessAsset: anAsset in: configuration.
 	targetChoice := self targetChoiceIn: assessment at: aPoint.
 	targetChoice ifNil: [ ^ assessment ].
 	(CFConfigurationPlan
 		asset: anAsset
 		targetChoice: targetChoice
 		planner: planner) apply.
-	self refreshBlueprintContent.
+	self refreshConfigurationContent.
 	self refreshConfigurationInspector.
 	^ assessment
 ]
 
 { #category : 'private - applying' }
-CFConfigurationBlueprintEditorElement >> applyAssetWhenPlacementIsUnambiguous: anAsset [
+CFConfigurationEditorElement >> applyAssetWhenPlacementIsUnambiguous: anAsset [
 	| assessment |
-	blueprintConfiguration ifNil: [ ^ nil ].
-	assessment := planner assessAsset: anAsset in: blueprintConfiguration.
+	configuration ifNil: [ ^ nil ].
+	assessment := planner assessAsset: anAsset in: configuration.
 	assessment hasSingleTargetChoice ifFalse: [ ^ assessment ].
 	(CFConfigurationPlan
 		asset: anAsset
 		targetChoice: assessment targetChoices first
 		planner: planner) apply.
-	self refreshBlueprintContent.
+	self refreshConfigurationContent.
 	self refreshConfigurationInspector.
 	^ assessment
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintEditorElement >> blueprintConfiguration [
-	^ blueprintConfiguration
+CFConfigurationEditorElement >> configuration [
+	^ configuration
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintEditorElement >> blueprintConfiguration: aConfiguration [
-	blueprintConfiguration := aConfiguration.
+CFConfigurationEditorElement >> configuration: aConfiguration [
+	configuration := aConfiguration.
 	selectedConfiguration := nil.
 	self hideConfigurationInspector.
-	self refreshBlueprintContent
+	self refreshConfigurationContent
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> clearPlacementPreview [
+CFConfigurationEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
 	previewElement ifNotNil: [ :anElement |
 		anElement removeFromParent ].
@@ -95,21 +95,21 @@ CFConfigurationBlueprintEditorElement >> clearPlacementPreview [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createBlueprintContentElement [
-	blueprintContentElement := BrFrame new
+CFConfigurationEditorElement >> createConfigurationContentElement [
+	configurationContentElement := BrFrame new
 		matchParent;
 		layout: BlFrameLayout new;
 		background: (Color r: 0.93 g: 0.95 b: 0.98 alpha: 0.82);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 14);
 		border: (BlBorder paint: (Color black alpha: 0.14) width: 1);
 		yourself.
-	^ blueprintContentElement
+	^ configurationContentElement
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createBlueprintSurfaceElement [
+CFConfigurationEditorElement >> createConfigurationSurfaceElement [
 	^ BrFrame new
-		hExact: self blueprintSurfaceWidth;
+		hExact: self configurationSurfaceWidth;
 		vFitContent;
 		layout: BlFrameLayout new;
 		margin: (BlInsets top: 34 left: 0 bottom: 34 right: 0);
@@ -125,12 +125,12 @@ CFConfigurationBlueprintEditorElement >> createBlueprintSurfaceElement [
 ]
 
 { #category : 'private - geometry' }
-CFConfigurationBlueprintEditorElement >> blueprintSurfaceWidth [
+CFConfigurationEditorElement >> configurationSurfaceWidth [
 	^ 580
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createLibrarySidebar [
+CFConfigurationEditorElement >> createLibrarySidebar [
 	librarySidebarElement := CFConfigurationLibrarySidebarElement new
 		library: library;
 		whenAssetActivatedDo: [ :anAsset |
@@ -144,7 +144,7 @@ CFConfigurationBlueprintEditorElement >> createLibrarySidebar [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createLibraryToggleButton [
+CFConfigurationEditorElement >> createLibraryToggleButton [
 	| label |
 	libraryToggleButton := BrButton new
 		hExact: 34;
@@ -177,7 +177,7 @@ CFConfigurationBlueprintEditorElement >> createLibraryToggleButton [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createInspectorElementFor: aConfiguration [
+CFConfigurationEditorElement >> createInspectorElementFor: aConfiguration [
 	| content editorElement |
 	inspectorElement := BrFrame new
 		hExact: self inspectorWidth;
@@ -208,7 +208,7 @@ CFConfigurationBlueprintEditorElement >> createInspectorElementFor: aConfigurati
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> createInspectorCloseButton [
+CFConfigurationEditorElement >> createInspectorCloseButton [
 	| button label |
 	button := BrButton new
 		hExact: 28;
@@ -240,7 +240,7 @@ CFConfigurationBlueprintEditorElement >> createInspectorCloseButton [
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> createPlacementPreviewFor: aTargetChoice asset: anAsset bounds: aRectangle [
+CFConfigurationEditorElement >> createPlacementPreviewFor: aTargetChoice asset: anAsset bounds: aRectangle [
 	| preview compactPresentation |
 	preview := BrFrame new
 		hExact: aRectangle width;
@@ -273,12 +273,12 @@ CFConfigurationBlueprintEditorElement >> createPlacementPreviewFor: aTargetChoic
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> fieldElementForPlacement: aPlacement [
-	^ blueprintContentElement
+CFConfigurationEditorElement >> fieldElementForPlacement: aPlacement [
+	^ configurationContentElement
 		allChildrenBreadthFirstDetect: [ :each |
-			(each userData includesKey: #cfConfigurationBlueprintOwner) and: [
-				(each userData at: #cfConfigurationBlueprintOwner) == aPlacement owner
-					and: [ (each userData at: #cfConfigurationBlueprintDescription)
+			(each userData includesKey: #cfConfigurationEditorOwner) and: [
+				(each userData at: #cfConfigurationEditorOwner) == aPlacement owner
+					and: [ (each userData at: #cfConfigurationEditorDescription)
 						accessor readSelector
 							= aPlacement description accessor readSelector ] ] ]
 		ifFound: [ :each | each ]
@@ -286,20 +286,20 @@ CFConfigurationBlueprintEditorElement >> fieldElementForPlacement: aPlacement [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> hideConfigurationInspector [
+CFConfigurationEditorElement >> hideConfigurationInspector [
 	inspectorElement ifNotNil: [ :anElement | anElement removeFromParent ].
 	inspectorElement := nil
 ]
 
 { #category : 'private - tools' }
-CFConfigurationBlueprintEditorElement >> hideLibrarySidebar [
+CFConfigurationEditorElement >> hideLibrarySidebar [
 	libraryVisible := false.
 	librarySidebarElement ifNotNil: [ :anElement |
 		anElement visibility: BlVisibility gone ]
 ]
 
 { #category : 'initialization' }
-CFConfigurationBlueprintEditorElement >> initialize [
+CFConfigurationEditorElement >> initialize [
 	super initialize.
 	library := CFConfigurationLibrary discovered.
 	planner := CFConfigurationPlanner new.
@@ -311,45 +311,45 @@ CFConfigurationBlueprintEditorElement >> initialize [
 		background: Color transparent;
 		border: BlBorder empty.
 	self
-		addChild: self createBlueprintContentElement;
+		addChild: self createConfigurationContentElement;
 		addChild: self createLibrarySidebar;
 		addChild: self createLibraryToggleButton;
 		addAssetDropHandler
 ]
 
 { #category : 'private - geometry' }
-CFConfigurationBlueprintEditorElement >> inspectorWidth [
+CFConfigurationEditorElement >> inspectorWidth [
 	^ 360
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintEditorElement >> library [
+CFConfigurationEditorElement >> library [
 	^ library
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintEditorElement >> library: aConfigurationLibrary [
+CFConfigurationEditorElement >> library: aConfigurationLibrary [
 	library := aConfigurationLibrary.
 	librarySidebarElement ifNotNil: [ :anElement | anElement library: library ]
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintEditorElement >> librarySidebarElement [
+CFConfigurationEditorElement >> librarySidebarElement [
 	^ librarySidebarElement
 ]
 
 { #category : 'updating' }
-CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
+CFConfigurationEditorElement >> refreshConfigurationContent [
 	| surface nodeElement visitedConfigurations |
 	self clearPlacementPreview.
-	blueprintContentElement ifNil: [ ^ self ].
-	blueprintContentElement removeChildren.
-	blueprintConfiguration ifNil: [ ^ self ].
-	surface := self createBlueprintSurfaceElement.
+	configurationContentElement ifNil: [ ^ self ].
+	configurationContentElement removeChildren.
+	configuration ifNil: [ ^ self ].
+	surface := self createConfigurationSurfaceElement.
 	visitedConfigurations := IdentitySet new.
-	visitedConfigurations add: blueprintConfiguration.
-	nodeElement := CFConfigurationBlueprintNodeElement
-		configuration: blueprintConfiguration
+	visitedConfigurations add: configuration.
+	nodeElement := CFConfigurationNodeElement
+		configuration: configuration
 		visited: visitedConfigurations
 		selected: selectedConfiguration
 		whenSelected: [ :aConfiguration |
@@ -358,34 +358,34 @@ CFConfigurationBlueprintEditorElement >> refreshBlueprintContent [
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	surface addChild: nodeElement.
-	blueprintContentElement addChild: surface
+	configurationContentElement addChild: surface
 ]
 
 { #category : 'updating' }
-CFConfigurationBlueprintEditorElement >> refreshConfigurationInspector [
+CFConfigurationEditorElement >> refreshConfigurationInspector [
 	selectedConfiguration ifNil: [ ^ self hideConfigurationInspector ].
 	self showConfigurationInspectorFor: selectedConfiguration
 ]
 
 { #category : 'private - tools' }
-CFConfigurationBlueprintEditorElement >> showLibrarySidebar [
+CFConfigurationEditorElement >> showLibrarySidebar [
 	libraryVisible := true.
 	librarySidebarElement ifNotNil: [ :anElement |
 		anElement visibility: BlVisibility visible ]
 ]
 
 { #category : 'private - selection' }
-CFConfigurationBlueprintEditorElement >> selectConfiguration: aConfiguration [
+CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 	selectedConfiguration := aConfiguration.
-	self refreshBlueprintContent.
+	self refreshConfigurationContent.
 	self showConfigurationInspectorFor: aConfiguration
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
+CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	| assessment targetChoice fieldElement targetBounds |
-	blueprintConfiguration ifNil: [ ^ self clearPlacementPreview ].
-	assessment := planner assessAsset: anAsset in: blueprintConfiguration.
+	configuration ifNil: [ ^ self clearPlacementPreview ].
+	assessment := planner assessAsset: anAsset in: configuration.
 	targetChoice := self targetChoiceIn: assessment at: aPoint.
 	(activeTargetChoice notNil and: [
 		targetChoice notNil and: [
@@ -406,31 +406,31 @@ CFConfigurationBlueprintEditorElement >> showPlacementPreviewFor: anAsset at: aP
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintEditorElement >> showConfigurationInspectorFor: aConfiguration [
+CFConfigurationEditorElement >> showConfigurationInspectorFor: aConfiguration [
 	self hideConfigurationInspector.
 	self addChild: (self createInspectorElementFor: aConfiguration)
 ]
 
 { #category : 'private - tools' }
-CFConfigurationBlueprintEditorElement >> toggleLibrarySidebar [
+CFConfigurationEditorElement >> toggleLibrarySidebar [
 	libraryVisible
 		ifTrue: [ self hideLibrarySidebar ]
 		ifFalse: [ self showLibrarySidebar ]
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationBlueprintEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
+CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
 	| relationElement itemsElement compactPresentation emptyElement |
 	relationElement := self fieldElementForPlacement: aTargetChoice placement.
 	relationElement ifNil: [ ^ false ].
 	itemsElement := relationElement
 		allChildrenBreadthFirstDetect: [ :each |
-			(each userData at: #cfConfigurationBlueprintRelationItems ifAbsent: [ false ]) ]
+			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
 		ifFound: [ :each | each ]
 		ifNone: [ ^ false ].
 	emptyElement := itemsElement
 		allChildrenBreadthFirstDetect: [ :each |
-			(each userData at: #cfConfigurationBlueprintEmptyRelationItem ifAbsent: [ false ]) ]
+			(each userData at: #cfConfigurationEditorEmptyRelationItem ifAbsent: [ false ]) ]
 		ifFound: [ :each | each ]
 		ifNone: [ nil ].
 	emptyElement ifNotNil: [ :each | each removeFromParent ].
@@ -453,7 +453,7 @@ CFConfigurationBlueprintEditorElement >> installAdditionPreviewFor: aTargetChoic
 ]
 
 { #category : 'private - planning' }
-CFConfigurationBlueprintEditorElement >> targetChoiceIn: anAssessment at: aPoint [
+CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
 	| targetChoices matches |
 	targetChoices := anAssessment targetChoices.
 	targetChoices size = 1 ifTrue: [ ^ targetChoices first ].

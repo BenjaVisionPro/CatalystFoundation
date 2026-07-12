@@ -73,7 +73,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Magritte-GT'
 		'BVC-Foundation-Magritte-Seaside'
 		'BVC-Foundation-Config-UI-Core'
-		'BVC-Foundation-Config-UI-BlueprintEditor'
+		'BVC-Foundation-Config-UI-ConfigurationEditor'
 	).
 	spec group: 'default' with: #('foundation-common' 'ui')
 ]
@@ -89,6 +89,6 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-UI-Core'
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
-	spec package: 'BVC-Foundation-Config-UI-BlueprintEditor'
+	spec package: 'BVC-Foundation-Config-UI-ConfigurationEditor'
 		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner') ]
 ]

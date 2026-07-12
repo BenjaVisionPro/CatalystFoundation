@@ -30,7 +30,7 @@ CFConfigurationPlan >> apply [
 		targetChoiceForPlacement: placement
 		in: assessment.
 	targetChoice ifNil: [
-		self error: 'This configuration plan is no longer applicable to the blueprint.' ].
+		self error: 'This configuration plan is no longer applicable to the configuration editor.' ].
 	^ placement apply: configuration to: placement owner
 ]
 

@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFConfigurationBlueprintNodeElement',
+	#name : 'CFConfigurationNodeElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'configuration',
@@ -7,12 +7,12 @@ Class {
 		'selectedConfiguration',
 		'selectionBlock'
 	],
-	#category : 'BVC-Foundation-Config-UI-BlueprintEditor',
-	#package : 'BVC-Foundation-Config-UI-BlueprintEditor'
+	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
+	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
 }
 
 { #category : 'instance creation' }
-CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visited: aSet [
+CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet [
 	^ self new
 		visitedConfigurations: aSet;
 		configuration: aConfiguration;
@@ -20,7 +20,7 @@ CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visit
 ]
 
 { #category : 'instance creation' }
-CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visited: aSet selected: aSelectedConfiguration whenSelected: aBlock [
+CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet selected: aSelectedConfiguration whenSelected: aBlock [
 	^ self new
 		visitedConfigurations: aSet;
 		selectedConfiguration: aSelectedConfiguration;
@@ -30,7 +30,7 @@ CFConfigurationBlueprintNodeElement class >> configuration: aConfiguration visit
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintNodeElement >> configurationChildrenFor: aDescription [
+CFConfigurationNodeElement >> configurationChildrenFor: aDescription [
 	| value |
 	value := configuration readUsing: aDescription.
 	value ifNil: [ ^ #() ].
@@ -42,7 +42,7 @@ CFConfigurationBlueprintNodeElement >> configurationChildrenFor: aDescription [
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintNodeElement >> configuration: aConfiguration [
+CFConfigurationNodeElement >> configuration: aConfiguration [
 	configuration := aConfiguration.
 	visitedConfigurations ifNil: [
 		visitedConfigurations := IdentitySet new.
@@ -51,7 +51,7 @@ CFConfigurationBlueprintNodeElement >> configuration: aConfiguration [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintNodeElement >> createHeaderElement [
+CFConfigurationNodeElement >> createHeaderElement [
 	| header compact |
 	header := BrFrame new
 		hMatchParent;
@@ -82,7 +82,7 @@ CFConfigurationBlueprintNodeElement >> createHeaderElement [
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
+CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 	| relationElement heading items children |
 	relationElement := BrVerticalPane new
 		hMatchParent;
@@ -94,10 +94,10 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
 		yourself.
 	relationElement userData
-		at: #cfConfigurationBlueprintOwner
+		at: #cfConfigurationEditorOwner
 		put: configuration.
 	relationElement userData
-		at: #cfConfigurationBlueprintDescription
+		at: #cfConfigurationEditorDescription
 		put: aDescription.
 	heading := BrLabel new
 		hMatchParent;
@@ -114,7 +114,7 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 		vFitContent;
 		cellSpacing: 5;
 		yourself.
-	items userData at: #cfConfigurationBlueprintRelationItems put: true.
+	items userData at: #cfConfigurationEditorRelationItems put: true.
 	children := self configurationChildrenFor: aDescription.
 	children isEmpty
 		ifTrue: [ items addChild: self newEmptyRelationElement ]
@@ -135,7 +135,7 @@ CFConfigurationBlueprintNodeElement >> createRelationElementFor: aDescription [
 ]
 
 { #category : 'initialization' }
-CFConfigurationBlueprintNodeElement >> initialize [
+CFConfigurationNodeElement >> initialize [
 	super initialize.
 	self
 		hExact: 430;
@@ -148,12 +148,12 @@ CFConfigurationBlueprintNodeElement >> initialize [
 ]
 
 { #category : 'testing' }
-CFConfigurationBlueprintNodeElement >> isSelected [
+CFConfigurationNodeElement >> isSelected [
 	^ configuration == selectedConfiguration
 ]
 
 { #category : 'private - building' }
-CFConfigurationBlueprintNodeElement >> newEmptyRelationElement [
+CFConfigurationNodeElement >> newEmptyRelationElement [
 	| element |
 	element := BrLabel new
 		hMatchParent;
@@ -168,12 +168,12 @@ CFConfigurationBlueprintNodeElement >> newEmptyRelationElement [
 			yourself);
 		text: 'Drop a configuration here';
 		yourself.
-	element userData at: #cfConfigurationBlueprintEmptyRelationItem put: true.
+	element userData at: #cfConfigurationEditorEmptyRelationItem put: true.
 	^ element
 ]
 
 { #category : 'updating' }
-CFConfigurationBlueprintNodeElement >> refresh [
+CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
 	self removeChildren.
 	self addChild: self createHeaderElement.
@@ -184,16 +184,16 @@ CFConfigurationBlueprintNodeElement >> refresh [
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintNodeElement >> selectedConfiguration: aConfiguration [
+CFConfigurationNodeElement >> selectedConfiguration: aConfiguration [
 	selectedConfiguration := aConfiguration
 ]
 
 { #category : 'accessing' }
-CFConfigurationBlueprintNodeElement >> visitedConfigurations: aSet [
+CFConfigurationNodeElement >> visitedConfigurations: aSet [
 	visitedConfigurations := aSet
 ]
 
 { #category : 'events' }
-CFConfigurationBlueprintNodeElement >> whenSelectedDo: aBlock [
+CFConfigurationNodeElement >> whenSelectedDo: aBlock [
 	selectionBlock := aBlock
 ]
