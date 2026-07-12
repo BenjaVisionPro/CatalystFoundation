@@ -462,8 +462,14 @@ CFConfigurationEditorElement >> targetChoice: aTargetChoice isCloserTo: aPoint t
 	distance := self distanceSquaredFrom: aPoint to: bounds.
 	otherDistance := self distanceSquaredFrom: aPoint to: otherBounds.
 	distance = otherDistance ifFalse: [ ^ distance < otherDistance ].
-	^ aPoint squaredDistanceTo: bounds center
-		< (aPoint squaredDistanceTo: otherBounds center)
+	^ (self distanceSquaredFrom: aPoint toPoint: bounds center)
+		< (self distanceSquaredFrom: aPoint toPoint: otherBounds center)
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> distanceSquaredFrom: aPoint toPoint: anotherPoint [
+	^ (aPoint x - anotherPoint x) squared
+		+ (aPoint y - anotherPoint y) squared
 ]
 
 { #category : 'private - planning' }
