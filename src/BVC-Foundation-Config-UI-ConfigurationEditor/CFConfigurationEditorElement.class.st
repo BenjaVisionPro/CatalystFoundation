@@ -40,6 +40,7 @@ CFConfigurationEditorElement >> addAssetDropHandler [
 CFConfigurationEditorElement >> applyAsset: anAsset at: aPoint [
 	| assessment targetChoice |
 	configuration ifNil: [ ^ nil ].
+	self detachPlacementPreview.
 	assessment := planner assessAsset: anAsset in: configuration.
 	targetChoice := self targetChoiceIn: assessment at: aPoint.
 	targetChoice ifNil: [ ^ assessment ].
@@ -83,6 +84,11 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
+	self detachPlacementPreview
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> detachPlacementPreview [
 	previewElement ifNotNil: [ :anElement |
 		anElement removeFromParent ].
 	previewElement := nil
@@ -377,17 +383,18 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
-	| assessment targetChoice fieldElement targetBounds |
+	| assessment targetChoice fieldElement targetBounds previousTargetChoice |
 	configuration ifNil: [ ^ self clearPlacementPreview ].
+	previousTargetChoice := activeTargetChoice.
+	self detachPlacementPreview.
 	assessment := planner assessAsset: anAsset in: configuration.
-	targetChoice := self targetChoiceIn: assessment at: aPoint.
-	(activeTargetChoice notNil and: [
-		targetChoice notNil and: [
-			(activeTargetChoice placement matches: targetChoice placement) and: [
-				activeTargetChoice placement insertionIndex
-					= targetChoice placement insertionIndex ] ] ]) ifTrue: [ ^ self ].
-	self clearPlacementPreview.
-	targetChoice ifNil: [ ^ self ].
+	targetChoice := self
+		targetChoiceIn: assessment
+		at: aPoint
+		keeping: previousTargetChoice.
+	targetChoice ifNil: [
+		activeTargetChoice := nil.
+		^ self ].
 	activeTargetChoice := targetChoice.
 	(targetChoice placement isAddition and: [
 		self installAdditionPreviewFor: targetChoice asset: anAsset ]) ifTrue: [ ^ self ].
@@ -480,32 +487,51 @@ CFConfigurationEditorElement >> updateInsertionIndexFor: aTargetChoice at: aPoin
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
-	| candidates targetChoice |
+	^ self targetChoiceIn: anAssessment at: aPoint keeping: nil
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint keeping: aTargetChoice [
+	| candidates closest retainedChoice closestDistance retainedDistance |
 	candidates := anAssessment targetChoices select: [ :each |
 		(self fieldElementForPlacement: each placement) notNil ].
 	candidates ifEmpty: [ ^ nil ].
-	targetChoice := candidates
+	closest := candidates
 		inject: candidates first
-		into: [ :closest :each |
-			(self targetChoice: each isCloserTo: aPoint than: closest)
+		into: [ :currentClosest :each |
+			(self targetChoice: each isCloserTo: aPoint than: currentClosest)
 				ifTrue: [ each ]
-				ifFalse: [ closest ] ].
-	self updateInsertionIndexFor: targetChoice at: aPoint.
-	^ targetChoice
+				ifFalse: [ currentClosest ] ].
+	retainedChoice := aTargetChoice ifNotNil: [
+		candidates
+			detect: [ :each | each placement matches: aTargetChoice placement ]
+			ifNone: [ nil ] ].
+	retainedChoice ifNotNil: [
+		closestDistance := self distanceFrom: aPoint toTargetChoice: closest.
+		retainedDistance := self distanceFrom: aPoint toTargetChoice: retainedChoice.
+		closestDistance + self targetSwitchMargin < retainedDistance
+			ifFalse: [ closest := retainedChoice ] ].
+	self updateInsertionIndexFor: closest at: aPoint.
+	^ closest
 ]
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> targetChoice: aTargetChoice isCloserTo: aPoint than: anotherTargetChoice [
-	| bounds otherBounds distance otherDistance |
+	^ (self distanceFrom: aPoint toTargetChoice: aTargetChoice)
+		< (self distanceFrom: aPoint toTargetChoice: anotherTargetChoice)
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> distanceFrom: aPoint toTargetChoice: aTargetChoice [
+	| bounds |
 	bounds := ((self fieldElementForPlacement: aTargetChoice placement)
 		bounds inParent: self) asRectangle.
-	otherBounds := ((self fieldElementForPlacement: anotherTargetChoice placement)
-		bounds inParent: self) asRectangle.
-	distance := self distanceSquaredFrom: aPoint to: bounds.
-	otherDistance := self distanceSquaredFrom: aPoint to: otherBounds.
-	distance = otherDistance ifFalse: [ ^ distance < otherDistance ].
-	^ (self distanceSquaredFrom: aPoint toPoint: bounds center)
-		< (self distanceSquaredFrom: aPoint toPoint: otherBounds center)
+	^ (self distanceSquaredFrom: aPoint toPoint: bounds center) sqrt
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> targetSwitchMargin [
+	^ 14
 ]
 
 { #category : 'private - planning' }
