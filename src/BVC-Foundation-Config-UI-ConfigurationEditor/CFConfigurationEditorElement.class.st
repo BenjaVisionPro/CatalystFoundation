@@ -461,15 +461,15 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 		whenSelected: [ :ignored | ].
 	previewElement
 		opacity: 0;
-		preventMouseEvents.
+		preventMouseEvents;
+		constraintsDo: [ :c | c ignoreByLayout ].
 	previewSlotElement := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		clipChildren: true;
 		background: Color transparent;
 		yourself.
-	previewSlotElement userData at: #cfConfigurationEditorPlacementPreview put: true.
-	previewSlotElement addChild: previewElement
+	previewSlotElement userData at: #cfConfigurationEditorPlacementPreview put: true
 ]
 
 { #category : 'private - previewing' }
@@ -659,7 +659,12 @@ CFConfigurationEditorElement >> preserveCurrentPreviewGap [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
+	| overlayPosition |
 	previewSlotElement ifNil: [ ^ self ].
+	overlayPosition := previewElement position.
+	previewElement removeFromParent.
+	previewElement constraintsDo: [ :c | c accountByLayout ].
+	previewSlotElement addChild: previewElement.
 	previewAxis = #horizontal
 		ifTrue: [
 			previewSlotElement hFitContent; vMatchParent.
@@ -670,7 +675,20 @@ CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
 	previewItemsElement forceLayout.
 	previewSlotElement forceLayout.
 	previewElement forceLayout.
-	previewNaturalExtent := previewElement extent
+	previewNaturalExtent := previewElement extent.
+	previewElement removeFromParent.
+	previewElement
+		hExact: previewNaturalExtent x;
+		vExact: previewNaturalExtent y;
+		constraintsDo: [ :c | c ignoreByLayout ].
+	self addChild: previewElement.
+	previewElement relocate: overlayPosition
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> previewSlotOriginInEditor [
+	previewSlotElement ifNil: [ ^ 0 @ 0 ].
+	^ (previewSlotElement bounds inParent: self) asRectangle origin
 ]
 
 { #category : 'private - previewing' }
@@ -694,7 +712,7 @@ CFConfigurationEditorElement >> previewSlotTargetExtent [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> expandPlacementPreview [
-	| target start closingStarts animation slots |
+	| target start closingStarts animation slots previewStart movingPlacement |
 	previewSlotElement ifNil: [ ^ self ].
 	target := self previewSlotTargetExtent.
 	start := previewAxis = #horizontal
@@ -705,21 +723,35 @@ CFConfigurationEditorElement >> expandPlacementPreview [
 		((each userData at: #cfConfigurationEditorPlacementAxis ifAbsent: [ previewAxis ]) = #horizontal)
 			ifTrue: [ each width ]
 			ifFalse: [ each height ] ].
-	(start = target and: [ slots isEmpty ]) ifTrue: [ ^ self ].
+	previewStart := previewElement position.
+	movingPlacement := previewVisible = true and: [ slots notEmpty ].
+	(start = target and: [ slots isEmpty ]) ifTrue: [
+		previewElement relocate: self previewSlotOriginInEditor.
+		^ self ].
 	animation := BlNumberTransition new
 		from: 0.0;
 		to: 1.0;
 		duration: 140 milliSeconds;
 		easing: (BlDecelerateInterpolator factor: 1);
-		onStepDo: [ :progress |
+		onStepDo: [ :progress | | slotOrigin currentOrigin |
 			self setPreviewSlotExtent: start + ((target - start) * progress).
 			1 to: slots size do: [ :index |
 				self
 					setPlacementSpacer: (slots at: index)
-					extent: (closingStarts at: index) * (1.0 - progress) ] ];
+					extent: (closingStarts at: index) * (1.0 - progress) ].
+			previewItemsElement forceLayout.
+			slotOrigin := self previewSlotOriginInEditor.
+			currentOrigin := movingPlacement
+				ifTrue: [
+					(previewStart x + ((slotOrigin x - previewStart x) * progress))
+						@ (previewStart y + ((slotOrigin y - previewStart y) * progress)) ]
+				ifFalse: [ slotOrigin ].
+			previewElement relocate: currentOrigin ];
 		yourself.
 	animation onFinishedDo: [
 		self setPreviewSlotExtent: target.
+		previewItemsElement forceLayout.
+		previewElement relocate: self previewSlotOriginInEditor.
 		slots do: [ :each |
 			each removeFromParent.
 			closingPreviewSlots remove: each ifAbsent: [ ] ] ].
