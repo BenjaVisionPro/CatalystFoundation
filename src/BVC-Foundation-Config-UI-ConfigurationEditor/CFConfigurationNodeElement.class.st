@@ -83,6 +83,22 @@ CFConfigurationNodeElement >> createHeaderElement [
 	^ header
 ]
 
+
+{ #category : 'private - building' }
+CFConfigurationNodeElement >> createMagritteFormElement [
+	| formDescription formElement |
+	formDescription := (memento magritteDescription
+		select: [ :each | (each isKindOf: MARelationDescription) not ]) asContainer.
+	formElement := (CFMaViewModel
+		forObject: configuration
+		description: [ formDescription ]) asElement.
+	formElement
+		hMatchParent;
+		vFitContent;
+		yourself.
+	^ formElement
+]
+
 { #category : 'private - building' }
 CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 	| relationElement heading items children |
@@ -152,7 +168,9 @@ CFConfigurationNodeElement >> isSelected [
 CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
 	self removeChildren.
-	self addChild: self createHeaderElement.
+	self
+		addChild: self createHeaderElement;
+		addChild: self createMagritteFormElement.
 	(memento magritteDescription
 		select: [ :each | each isKindOf: MARelationDescription ])
 		do: [ :each | self addChild: (self createRelationElementFor: each) ]
