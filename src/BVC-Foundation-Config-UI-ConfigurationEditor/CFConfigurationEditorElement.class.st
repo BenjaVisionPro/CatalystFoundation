@@ -450,8 +450,8 @@ CFConfigurationEditorElement >> animateDisplacementsFor: aCandidate previewExten
 	items ifNil: [ ^ self restoreDisplacedElements ].
 	children := items children asArray.
 	displacement := aCandidate axis = #horizontal
-		ifTrue: [ (anExtent x + items cellSpacing) @ 0 ]
-		ifFalse: [ 0 @ (anExtent y + items cellSpacing) ].
+		ifTrue: [ (anExtent x + items layout cellSpacing) @ 0 ]
+		ifFalse: [ 0 @ (anExtent y + items layout cellSpacing) ].
 	affected := IdentitySet new.
 	1 to: children size do: [ :index |
 		| element target |
