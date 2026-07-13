@@ -136,7 +136,7 @@ CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 CFConfigurationNodeElement >> initialize [
 	super initialize.
 	self
-		hExact: 430;
+		hMatchParent;
 		vFitContent;
 		padding: (BlInsets all: 12);
 		cellSpacing: 10;
