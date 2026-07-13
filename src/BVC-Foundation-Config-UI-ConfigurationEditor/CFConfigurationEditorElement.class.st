@@ -21,14 +21,12 @@ Class {
 		'animations',
 		'activePlacementCandidate',
 		'previewConfiguration',
-		'displacedElements',
 		'dropCompletionToken',
 		'previewVisible',
 		'previewSlotElement',
 		'previewNaturalExtent',
 		'previewItemsElement',
-		'previewAxis',
-		'outgoingPreviewSlots'
+		'previewAxis'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -109,15 +107,12 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 	previewConfiguration := nil.
 	previewVisible := false.
 	animations stopAll.
-	self resetDisplacedElements.
 	self detachPlacementPreview
 ]
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> detachPlacementPreview [
 	previewSlotElement ifNotNil: [ :anElement | anElement removeFromParent ].
-	outgoingPreviewSlots do: [ :anElement | anElement removeFromParent ].
-	outgoingPreviewSlots removeAll.
 	previewElement ifNotNil: [ :anElement | anElement removeFromParent ].
 	previewSlotElement := nil.
 	previewElement := nil.
@@ -311,8 +306,6 @@ CFConfigurationEditorElement >> initialize [
 	placementProvider := self createPlacementProvider.
 	placementHysteresis := CFConfigurationPlacementHysteresis new.
 	animations := CFAnimationCoordinator on: self.
-	displacedElements := IdentitySet new.
-	outgoingPreviewSlots := OrderedCollection new.
 	previewVisible := false.
 	libraryVisible := true.
 	self
@@ -414,18 +407,28 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> hidePlacementPreview [
+	| beforeGeometry preview |
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
 	previewVisible := false.
-	animations stop: #dropPreviewPosition.
-	self restoreDisplacedElements.
-	self collapsePlacementPreview
+	previewSlotElement ifNil: [ ^ self fadeDropPreviewOut ].
+	animations stop: #dropPreviewLayout.
+	beforeGeometry := self capturePreviewLayoutGeometry.
+	self resetPreviewLayoutTransformsIn: beforeGeometry.
+	preview := previewElement.
+	previewSlotElement removeFromParent.
+	previewItemsElement := nil.
+	self forcePreviewLayout.
+	self animatePreviewLayoutFrom: beforeGeometry.
+	self animatePreviewOpacityTo: 0 then: [
+		(previewElement == preview and: [ previewVisible ~= true ])
+			ifTrue: [ self detachPlacementPreview ] ]
 ]
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| relation items insertionIndex wasVisible movingGap |
+	| relation items insertionIndex wasVisible beforeGeometry previewStart |
 	wasVisible := previewVisible = true.
 	previewElement ifNil: [ self createDropPreviewElement ].
 	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
@@ -433,21 +436,26 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	items := self relationItemsElementIn: relation.
 	items ifNil: [ ^ self hidePlacementPreview ].
 	insertionIndex := aCandidate insertionIndex max: 1.
-	movingGap := previewSlotElement parent notNil and: [
-		previewItemsElement ~~ items or: [
-			(self committedInsertionIndexOfPreviewSlotIn: items) ~= insertionIndex ] ].
-	movingGap ifTrue: [
-		animations stop: #dropPreviewExtent.
-		self preserveCurrentPreviewGap ].
-	self
-		placePreviewSlotIn: items
-		at: insertionIndex
-		axis: aCandidate axis.
-	self measurePreviewSlotInItsTarget.
+	animations stop: #dropPreviewLayout.
+	beforeGeometry := self capturePreviewLayoutGeometry.
+	self resetPreviewLayoutTransformsIn: beforeGeometry.
+	previewStart := previewElement position.
+	previewItemsElement := items.
+	previewAxis := aCandidate axis.
+	self measurePreviewForCurrentTarget.
+	self placePreviewSlotIn: items at: insertionIndex axis: previewAxis.
+	self setPreviewSlotToNaturalExtent.
+	self forcePreviewLayout.
 	previewVisible := true.
-	(wasVisible not or: [ movingGap ])
-		ifTrue: [ self setPreviewSlotExtent: 0 ].
-	self expandPlacementPreviewMovingPreview: wasVisible.
+	wasVisible
+		ifTrue: [
+			self
+				animatePreviewLayoutFrom: beforeGeometry
+				previewFrom: previewStart
+				to: self previewSlotOriginInEditor ]
+		ifFalse: [
+			previewElement relocate: self previewSlotOriginInEditor.
+			self animatePreviewLayoutFrom: beforeGeometry ].
 	self fadeDropPreviewIn
 ]
 
@@ -465,13 +473,11 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 		opacity: 0;
 		preventMouseEvents;
 		constraintsDo: [ :c | c ignoreByLayout ].
-	previewSlotElement := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		clipChildren: true;
+	previewSlotElement := BrFrame new
 		background: Color transparent;
 		yourself.
-	previewSlotElement userData at: #cfConfigurationEditorPlacementPreview put: true
+	previewSlotElement userData at: #cfConfigurationEditorPlacementPreview put: true.
+	self addChild: previewElement
 ]
 
 { #category : 'private - previewing' }
@@ -541,33 +547,7 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 			self refreshConfigurationInspector ] ]
 ]
 
-{ #category : 'private - animations' }
-CFConfigurationEditorElement >> animatePreviewTo: aPoint [
-	| start |
-	start := previewElement userData at: #cfAnimatedPosition ifAbsent: [ previewElement position ].
-	animations retarget: [ self pointAnimationFrom: start to: aPoint onStep: [ :each |
-		previewElement relocate: each.
-		previewElement userData at: #cfAnimatedPosition put: each ] ] named: #dropPreviewPosition
-]
 
-{ #category : 'private - animations' }
-CFConfigurationEditorElement >> animateDisplacementsFor: aCandidate previewExtent: anExtent [
-	"The preview slot participates in the target layout, so the layout itself
-	 opens the insertion space. Existing children are not translated."
-	self restoreDisplacedElements
-]
-
-{ #category : 'private - animations' }
-CFConfigurationEditorElement >> animateElement: anElement translationTo: aPoint [
-	| start name |
-	start := anElement userData at: #cfAnimatedTranslation ifAbsent: [ 0 @ 0 ].
-	start = aPoint ifTrue: [ ^ self ].
-	aPoint ~= (0 @ 0) ifTrue: [ displacedElements add: anElement ].
-	name := ('item-', anElement identityHash asString) asSymbol.
-	animations retarget: [ self pointAnimationFrom: start to: aPoint onStep: [ :each |
-		anElement transformDo: [ :builder | builder translateBy: each ].
-		anElement userData at: #cfAnimatedTranslation put: each ] ] named: name
-]
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> pointAnimationFrom: startPoint to: targetPoint onStep: aBlock [
@@ -585,13 +565,7 @@ CFConfigurationEditorElement >> pointAnimationFrom: startPoint to: targetPoint o
 	^ animation
 ]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> restoreDisplacedElements [
-	| elements |
-	elements := displacedElements asArray.
-	displacedElements := IdentitySet new.
-	elements do: [ :each | self animateElement: each translationTo: 0 @ 0 ]
-]
+
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> placePreviewSlotIn: anItemsElement at: anIndex axis: anAxis [
@@ -602,10 +576,7 @@ CFConfigurationEditorElement >> placePreviewSlotIn: anItemsElement at: anIndex a
 	rawIndex := self
 		rawChildIndexForCommittedInsertionIndex: anIndex
 		in: anItemsElement.
-	anItemsElement addChild: previewSlotElement at: rawIndex.
-	previewAxis = #horizontal
-		ifTrue: [ previewElement hFitContent; vMatchParent ]
-		ifFalse: [ previewElement hMatchParent; vFitContent ]
+	anItemsElement addChild: previewSlotElement at: rawIndex
 ]
 
 { #category : 'private - previewing' }
@@ -634,35 +605,11 @@ CFConfigurationEditorElement >> committedInsertionIndexOfPreviewSlotIn: anItemsE
 	^ nil
 ]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> preserveCurrentPreviewGap [
-	| parent rawIndex extent spacer |
-	previewSlotElement ifNil: [ ^ self ].
-	parent := previewSlotElement parent.
-	parent ifNil: [ ^ self ].
-	rawIndex := parent childIndexOf: previewSlotElement.
-	extent := previewAxis = #horizontal
-		ifTrue: [ previewSlotElement width ]
-		ifFalse: [ previewSlotElement height ].
-	extent <= 0 ifTrue: [ ^ self ].
-	spacer := BrFrame new
-		clipChildren: true;
-		background: Color transparent;
-		yourself.
-	spacer userData at: #cfConfigurationEditorPlacementPreview put: true.
-	spacer userData at: #cfConfigurationEditorPlacementAxis put: previewAxis.
-	previewAxis = #horizontal
-		ifTrue: [ spacer hExact: extent; vMatchParent ]
-		ifFalse: [ spacer hMatchParent; vExact: extent ].
-	previewSlotElement removeFromParent.
-	parent addChild: spacer at: rawIndex.
-	outgoingPreviewSlots add: spacer
-]
+
 
 { #category : 'private - previewing' }
-CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
+CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
 	| targetWidth measurementHost measurementElement visited |
-	previewSlotElement ifNil: [ ^ self ].
 	targetWidth := previewItemsElement extent x.
 	targetWidth <= 0 ifTrue: [
 		self error: 'The configuration preview target must have a positive width before measurement.' ].
@@ -687,9 +634,7 @@ CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
 		self error: 'The configuration drop preview measured with a non-positive height.' ].
 	previewElement
 		hExact: previewNaturalExtent x;
-		vExact: previewNaturalExtent y;
-		constraintsDo: [ :c | c ignoreByLayout ].
-	previewElement parent ifNil: [ self addChild: previewElement ]
+		vExact: previewNaturalExtent y
 ]
 
 { #category : 'private - previewing' }
@@ -699,138 +644,29 @@ CFConfigurationEditorElement >> previewSlotOriginInEditor [
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationEditorElement >> setPreviewSlotExtent: aNumber [
-	previewSlotElement ifNil: [ ^ self ].
+CFConfigurationEditorElement >> setPreviewSlotToNaturalExtent [
 	previewAxis = #horizontal
 		ifTrue: [
-			previewSlotElement hExact: aNumber.
+			previewSlotElement hExact: previewNaturalExtent x.
 			previewSlotElement vMatchParent ]
 		ifFalse: [
 			previewSlotElement hMatchParent.
-			previewSlotElement vExact: aNumber ]
+			previewSlotElement vExact: previewNaturalExtent y ]
 ]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> previewSlotTargetExtent [
-	^ previewAxis = #horizontal
-		ifTrue: [ previewNaturalExtent x ]
-		ifFalse: [ previewNaturalExtent y ]
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> expandPlacementPreviewMovingPreview: shouldMovePreview [
-	| target start slots starts sameAxisIndexes sameAxisStart totalStart animation previewStart movingPreview |
-	previewSlotElement ifNil: [ ^ self ].
-	target := self previewSlotTargetExtent.
-	start := self placementSlotExtent: previewSlotElement.
-	slots := outgoingPreviewSlots asArray.
-	starts := slots collect: [ :each | self placementSlotExtent: each ].
-	sameAxisIndexes := (1 to: slots size) select: [ :index |
-		(self placementAxisOf: (slots at: index)) = previewAxis ].
-	sameAxisStart := sameAxisIndexes
-		inject: 0
-		into: [ :sum :index | sum + (starts at: index) ].
-	totalStart := start + sameAxisStart.
-	previewStart := previewElement position.
-	movingPreview := shouldMovePreview and: [ slots notEmpty ].
-	(start = target and: [ slots isEmpty ]) ifTrue: [
-		previewElement relocate: self previewSlotOriginInEditor.
-		^ self ].
-	animation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
-		duration: 140 milliSeconds;
-		easing: (BlDecelerateInterpolator factor: 1);
-		onStepDo: [ :progress | | totalExtent outgoingExtent slotOrigin currentOrigin |
-			totalExtent := totalStart + ((target - totalStart) * progress).
-			outgoingExtent := sameAxisStart * (1.0 - progress).
-			self setPreviewSlotExtent: ((totalExtent - outgoingExtent) max: 0).
-			1 to: slots size do: [ :index |
-				self
-					setPlacementSpacer: (slots at: index)
-					extent: (starts at: index) * (1.0 - progress) ].
-			previewItemsElement forceLayout.
-			slotOrigin := self previewSlotOriginInEditor.
-			currentOrigin := movingPreview
-				ifTrue: [
-					(previewStart x + ((slotOrigin x - previewStart x) * progress))
-						@ (previewStart y + ((slotOrigin y - previewStart y) * progress)) ]
-				ifFalse: [ slotOrigin ].
-			previewElement relocate: currentOrigin ];
-		yourself.
-	animation onFinishedDo: [
-		self setPreviewSlotExtent: target.
-		previewItemsElement forceLayout.
-		previewElement relocate: self previewSlotOriginInEditor.
-		slots do: [ :each |
-			each removeFromParent.
-			outgoingPreviewSlots remove: each ifAbsent: [ ] ] ].
-	animations play: animation named: #dropPreviewExtent
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> placementAxisOf: anElement [
-	^ anElement userData
-		at: #cfConfigurationEditorPlacementAxis
-		ifAbsent: [ previewAxis ]
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> placementSlotExtent: anElement [
-	^ (self placementAxisOf: anElement) = #horizontal
-		ifTrue: [ anElement width ]
-		ifFalse: [ anElement height ]
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> setPlacementSpacer: anElement extent: aNumber [
-	(anElement userData at: #cfConfigurationEditorPlacementAxis ifAbsent: [ previewAxis ]) = #horizontal
-		ifTrue: [ anElement hExact: aNumber; vMatchParent ]
-		ifFalse: [ anElement hMatchParent; vExact: aNumber ]
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> collapsePlacementPreview [
-	| start animation element slots closingStarts |
-	previewSlotElement ifNil: [ ^ self fadeDropPreviewOut ].
-	element := previewSlotElement.
-	start := previewAxis = #horizontal
-		ifTrue: [ element width ]
-		ifFalse: [ element height ].
-	slots := outgoingPreviewSlots asArray.
-	closingStarts := slots collect: [ :each |
-		((each userData at: #cfConfigurationEditorPlacementAxis ifAbsent: [ previewAxis ]) = #horizontal)
-			ifTrue: [ each width ]
-			ifFalse: [ each height ] ].
-	self fadeDropPreviewOut.
-	animation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
-		duration: 120 milliSeconds;
-		easing: (BlDecelerateInterpolator factor: 1);
-		onStepDo: [ :progress |
-			self setPreviewSlotExtent: start * (1.0 - progress).
-			1 to: slots size do: [ :index |
-				self
-					setPlacementSpacer: (slots at: index)
-					extent: (closingStarts at: index) * (1.0 - progress) ] ];
-		yourself.
-	animation onFinishedDo: [
-		slots do: [ :each |
-			each removeFromParent.
-			outgoingPreviewSlots remove: each ifAbsent: [ ] ].
-		(previewSlotElement == element and: [ previewVisible ~= true ])
-			ifTrue: [ self detachPlacementPreview ] ].
-	animations retarget: [ animation ] named: #dropPreviewExtent
-]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> resetDisplacedElements [
-	displacedElements asArray do: [ :each |
-		each transformDo: [ :builder | builder translateBy: 0 @ 0 ].
-		each userData at: #cfAnimatedTranslation put: 0 @ 0 ].
-	displacedElements := IdentitySet new
-]
+
+
+
+
+
+
+
 
 { #category : 'private - building' }
 CFConfigurationEditorElement >> showConfigurationInspectorFor: aConfiguration [
@@ -843,6 +679,93 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 	libraryVisible
 		ifTrue: [ self hideLibrarySidebar ]
 		ifFalse: [ self showLibrarySidebar ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> capturePreviewLayoutGeometry [
+	| geometry |
+	geometry := IdentityDictionary new.
+	configurationContentElement
+		allChildrenBreadthFirstDo: [ :each |
+			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ])
+				ifTrue: [
+					each children do: [ :child |
+						(child userData at: #cfConfigurationEditorPlacementPreview ifAbsent: [ false ])
+							ifFalse: [ geometry at: child put: child bounds inParent bounds ] ] ] ].
+	^ geometry
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> resetPreviewLayoutTransformsIn: aGeometry [
+	aGeometry keysDo: [ :element |
+		element transformDo: [ :builder | ] ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> forcePreviewLayout [
+	configurationContentElement forceLayout.
+	self forceLayout
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry [
+	self
+		animatePreviewLayoutFrom: beforeGeometry
+		previewFrom: nil
+		to: nil
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry previewFrom: previewStart to: previewTarget [
+	| transitions animation |
+	transitions := OrderedCollection new.
+	beforeGeometry keysAndValuesDo: [ :element :oldBounds |
+		element parent ifNotNil: [ | newBounds |
+			newBounds := element position extent: element extent.
+			(oldBounds closeTo: newBounds) ifFalse: [
+				transitions add: { element. oldBounds. newBounds } ] ] ].
+	(transitions isEmpty and: [ previewStart isNil ]) ifTrue: [ ^ self ].
+	animation := BlNumberTransition new
+		from: 0.0;
+		to: 1.0;
+		duration: 140 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1);
+		onStepDo: [ :progress |
+			transitions do: [ :transition |
+				self applyLayoutTransition: transition progress: progress ].
+			previewStart ifNotNil: [
+				previewElement relocate: ((previewStart x + ((previewTarget x - previewStart x) * progress))
+					@ (previewStart y + ((previewTarget y - previewStart y) * progress))) ] ];
+		yourself.
+	animation onFinishedDo: [
+		transitions do: [ :transition |
+			(transition first) transformDo: [ :builder | ] ].
+		previewTarget ifNotNil: [ previewElement relocate: previewTarget ] ].
+	animations retarget: [ animation ] named: #dropPreviewLayout
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> applyLayoutTransition: aTransition progress: progress [
+	| element oldBounds newBounds inverseProgress translation scale |
+	element := aTransition first.
+	oldBounds := aTransition second.
+	newBounds := aTransition third.
+	inverseProgress := 1.0 - progress.
+	translation := ((oldBounds origin x - newBounds origin x) * inverseProgress)
+		@ ((oldBounds origin y - newBounds origin y) * inverseProgress).
+	scale := ((newBounds width = 0)
+		ifTrue: [ 1.0 ]
+		ifFalse: [ oldBounds width / newBounds width ])
+		@ ((newBounds height = 0)
+			ifTrue: [ 1.0 ]
+			ifFalse: [ oldBounds height / newBounds height ]).
+	scale := (1.0 + ((scale x - 1.0) * inverseProgress))
+		@ (1.0 + ((scale y - 1.0) * inverseProgress)).
+	element transformDo: [ :builder |
+		builder
+			topLeftOrigin;
+			translateBy: translation;
+			scaleBy: scale ]
 ]
 
 { #category : 'private - previewing' }
