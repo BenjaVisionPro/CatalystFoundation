@@ -27,7 +27,8 @@ CFLinearConfigurationPlacementProvider >> candidatesFor: anAssessment in: anEdit
 { #category : 'private' }
 CFLinearConfigurationPlacementProvider >> orderedCandidatesFor: aChoice items: itemsElement in: anEditor [
 	| children itemBounds containerBounds axis result count |
-	children := itemsElement children asArray.
+	children := itemsElement children asArray select: [ :each |
+		(each userData at: #cfConfigurationEditorPlacementPreview ifAbsent: [ false ]) not ].
 	itemBounds := children collect: [ :each | (each bounds inParent: anEditor) asRectangle ].
 	containerBounds := (itemsElement bounds inParent: anEditor) asRectangle.
 	axis := self axisFor: itemBounds container: containerBounds.

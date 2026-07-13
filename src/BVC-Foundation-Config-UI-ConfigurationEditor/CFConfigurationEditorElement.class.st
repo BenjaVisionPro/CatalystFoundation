@@ -459,6 +459,7 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 		clipChildren: true;
 		background: Color transparent;
 		yourself.
+	previewSlotElement userData at: #cfConfigurationEditorPlacementPreview put: true.
 	previewSlotElement addChild: previewElement
 ]
 
