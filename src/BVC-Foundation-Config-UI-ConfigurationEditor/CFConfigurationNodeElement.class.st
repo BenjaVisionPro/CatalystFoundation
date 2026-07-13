@@ -91,7 +91,7 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 		select: [ :each | (each isKindOf: MARelationDescription) not ]) asContainer.
 	formElement := (CFMaViewModel
 		forObject: configuration
-		description: [ formDescription ]) asElement.
+		description: [ formDescription ]) asEmbeddedElement.
 	formElement
 		hMatchParent;
 		vFitContent;

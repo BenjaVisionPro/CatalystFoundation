@@ -23,3 +23,10 @@ CFMaFormRootElement >> initialize [
 		hMatchParent;
 		vMatchParent
 ]
+
+{ #category : 'configuration' }
+CFMaFormRootElement >> beEmbedded [
+	self
+		hMatchParent;
+		vFitContent
+]

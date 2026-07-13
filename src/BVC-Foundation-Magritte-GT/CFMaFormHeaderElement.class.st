@@ -1,82 +1,100 @@
 Class {
 	#name : 'CFMaFormHeaderElement',
-	#superclass : 'BrVerticalPane',
+	#superclass : 'BrHorizontalPane',
 	#instVars : [
 		'memento',
-		'compactObjectElement',
-		'metadataElement'
+		'toggleElement',
+		'iconContainer',
+		'primaryFieldsContainer',
+		'classLinkElement',
+		'bodyElement',
+		'expanded'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Widgets'
 }
 
-{ #category : 'accessing' }
-CFMaFormHeaderElement >> headerMetadataText [
-	| anObject |
-	anObject := self inspectedObject.
-	anObject ifNil: [ ^ 'Catalyst Foundation form' ].
+{ #category : 'building' }
+CFMaFormHeaderElement >> addHeaderField: aFieldElement using: aDescription [
+	(aDescription handlesSelector: #defaultIcon)
+		ifTrue: [
+			iconContainer removeChildren.
+			iconContainer addChild: aFieldElement.
+			^ self ].
 
-	^ anObject class name
+	((aDescription handlesSelector: #label)
+		or: [ aDescription handlesSelector: #identifier ])
+		ifTrue: [
+			primaryFieldsContainer addChild: aFieldElement.
+			^ self ]
 ]
 
 { #category : 'accessing' }
-CFMaFormHeaderElement >> headerTitleText [
-	| anObject |
-	anObject := self inspectedObject.
-	anObject ifNil: [ ^ 'Form' ].
-
-	^ anObject gtDisplayText asString
+CFMaFormHeaderElement >> bodyElement: anElement [
+	bodyElement := anElement
 ]
 
 { #category : 'initialization' }
 CFMaFormHeaderElement >> initialize [
 	super initialize.
+	expanded := true.
 
-	compactObjectElement := CFCompactObjectElement new
-		hMatchParent;
-		yourself.
-
-	metadataElement := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.55));
+	toggleElement := BrLabel new
 		fitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.62));
+		text: '▾';
+		when: BlClickEvent do: [ :anEvent |
+			self toggleExpanded.
+			anEvent consumed: true ];
+		yourself.
+
+	iconContainer := BrFrame new
+		hExact: 56;
+		vExact: 56;
+		layout: BlFrameLayout new;
+		yourself.
+
+	primaryFieldsContainer := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 1;
+		yourself.
+
+	classLinkElement := BrLabel new
+		fitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.42));
 		yourself.
 
 	self
-		padding: (BlInsets all: 14);
-		cellSpacing: 2;
-		background: (Color black alpha: 0.02);
 		hMatchParent;
-		vFitContent.
-
-	self
-		addChild: compactObjectElement as: #compactObject;
-		addChild: metadataElement as: #metadata.
-
-	self updateFromMemento
-]
-
-{ #category : 'accessing' }
-CFMaFormHeaderElement >> inspectedObject [
-	memento ifNil: [ ^ nil ].
-	^ memento model
-]
-
-{ #category : 'accessing' }
-CFMaFormHeaderElement >> memento [
-	^ memento
+		vFitContent;
+		cellSpacing: 7;
+		padding: (BlInsets top: 9 right: 11 bottom: 8 left: 8);
+		addChild: toggleElement as: #toggle;
+		addChild: iconContainer as: #icon;
+		addChild: primaryFieldsContainer as: #primaryFields;
+		addChild: classLinkElement as: #classLink
 ]
 
 { #category : 'accessing' }
 CFMaFormHeaderElement >> memento: aMemento [
 	memento := aMemento.
-	self updateFromMemento
+	classLinkElement
+		text: aMemento model class name;
+		when: BlClickEvent do: [ :anEvent |
+			anEvent currentTarget phlow spawnObject: aMemento model class.
+			anEvent consumed: true ]
 ]
 
-{ #category : 'updating' }
-CFMaFormHeaderElement >> updateFromMemento [
-	compactObjectElement ifNil: [ ^ self ].
-	compactObjectElement memento: memento.
-	metadataElement text: self headerMetadataText
+{ #category : 'private' }
+CFMaFormHeaderElement >> toggleExpanded [
+	expanded := expanded not.
+	bodyElement ifNotNil: [
+		bodyElement visibility: (expanded
+			ifTrue: [ BlVisibility visible ]
+			ifFalse: [ BlVisibility gone ]) ].
+	toggleElement text: (expanded ifTrue: [ '▾' ] ifFalse: [ '▸' ])
 ]

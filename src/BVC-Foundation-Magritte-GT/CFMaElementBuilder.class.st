@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
-		'currentGroup'
+		'currentGroup',
+		'currentGroupElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -10,20 +11,29 @@ Class {
 
 { #category : 'elements' }
 CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
-	| aLabel |
-	self emitGroupFor: aDescription.
+	| aLabel aRow |
+	(self isHeaderDescription: aDescription)
+		ifTrue: [
+			self formElement headerElement
+				addHeaderField: aFieldElement
+				using: aDescription.
+			^ aFieldElement ].
 
+	self prepareGroupFor: aDescription.
 	aLabel := self builderUtilityClass newFieldLabelUsing: aDescription.
 
-	aDescription hasComment
-		ifTrue: [ self builderUtilityClass addCommentTooltip: aLabel using: aDescription.
-			self builderUtilityClass addCommentTooltip: aFieldElement using: aDescription ].
+	aDescription hasComment ifTrue: [
+		self builderUtilityClass addCommentTooltip: aLabel using: aDescription.
+		self builderUtilityClass addCommentTooltip: aFieldElement using: aDescription ].
 
-	self fieldContainerDo: [ :aContainer |
-		aContainer
-			addChild: aLabel;
-			addChild: aFieldElement ].
+	aRow := CFMaFieldRowElement new
+		memento: self memento
+		description: aDescription
+		field: aFieldElement
+		label: aLabel;
+		yourself.
 
+	self currentFieldContainer addChild: aRow.
 	^ aLabel
 ]
 
@@ -32,18 +42,50 @@ CFMaElementBuilder >> builderUtilityClass [
 	^ CFMaBuilderUtility
 ]
 
+{ #category : 'private - building' }
+CFMaElementBuilder >> currentFieldContainer [
+	^ currentGroupElement
+		ifNil: [ self formElement bodyElement ]
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> formElement [
+	^ self form children first
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> isHeaderDescription: aDescription [
+	^ (aDescription handlesSelector: #defaultIcon)
+		or: [ (aDescription handlesSelector: #label)
+		or: [ aDescription handlesSelector: #identifier ] ]
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> prepareGroupFor: aDescription [
+	| aGroupName |
+	aGroupName := aDescription group.
+	aGroupName ifNil: [
+		currentGroup := nil.
+		currentGroupElement := nil.
+		^ self ].
+
+	currentGroup = aGroupName ifTrue: [ ^ self ].
+	currentGroup := aGroupName.
+	currentGroupElement := CFMaGroupElement new
+		label: aGroupName;
+		yourself.
+	self formElement bodyElement addChild: currentGroupElement
+]
 
 { #category : 'private - building' }
 CFMaElementBuilder >> addFlowListUsing: aDescription [
 	| aMemento aFlowElement |
 	aMemento := self memento.
-	
 	aFlowElement := aDescription blocListStencil
 		memento: aMemento;
 		description: aDescription;
 		form: self form;
 		asElement.
-
 	self addShortcutsTo: aFlowElement using: aDescription.
 	self addFieldElement: aFlowElement using: aDescription
 ]
@@ -79,21 +121,18 @@ CFMaElementBuilder >> addFormNavigationShortcutsTo: anElement [
 
 { #category : 'private - building' }
 CFMaElementBuilder >> addFormResetShortcutTo: anElement [
-	anElement
-		addShortcut: (BlShortcutWithAction new
-			name: 'Discard form contents';
-			description: 'Discards the form contents and resets the form to its original state';
-			combination: BlKeyCombination escape;
-			overrideChildren: true;
-			action: [ :anEvent |
-				| aFuture |
-				aFuture := [ self
-					resetFrom: self form
-					usingModel: self memento model
-					andMemento: self memento ] asAsyncFuture.
-				self builderUtilityClass
-					awaitFuture: aFuture
-					from: anEvent currentTarget ])
+	anElement addShortcut: (BlShortcutWithAction new
+		name: 'Discard form contents';
+		description: 'Discards the form contents and resets the form to its original state';
+		combination: BlKeyCombination escape;
+		overrideChildren: true;
+		action: [ :anEvent |
+			| aFuture |
+			aFuture := [ self
+				resetFrom: self form
+				usingModel: self memento model
+				andMemento: self memento ] asAsyncFuture.
+			self builderUtilityClass awaitFuture: aFuture from: anEvent currentTarget ])
 ]
 
 { #category : 'private - building' }
@@ -105,23 +144,8 @@ CFMaElementBuilder >> addShortcutsTo: anElement [
 { #category : 'private - building' }
 CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
 	self addShortcutsTo: anElement.
-
-	aDescription blocShortcuts
-		ifNotNil: [ :aBlockReturningCollection |
-			aBlockReturningCollection value do: [ :aShortcut |
-				anElement addShortcut: aShortcut ] ]
-]
-
-
-{ #category : 'private - building' }
-CFMaElementBuilder >> emitGroupFor: aDescription [
-	| aGroupName |
-	aGroupName := aDescription group.
-	aGroupName ifNil: [ ^ self ].
-	currentGroup = aGroupName ifTrue: [ ^ self ].
-	currentGroup := aGroupName.
-	self fieldContainerDo: [ :aContainer |
-		aContainer addChild: (self builderUtilityClass newGroupLabelUsing: aGroupName) ]
+	aDescription blocShortcuts ifNotNil: [ :aBlockReturningCollection |
+		aBlockReturningCollection value do: [ :aShortcut | anElement addShortcut: aShortcut ] ]
 ]
 
 { #category : 'visiting-description' }
@@ -133,41 +157,28 @@ CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
 CFMaElementBuilder >> addToOneUsing: aDescription [
 	| aMemento anElement |
 	aMemento := self memento.
-
 	anElement := aDescription blocStencil
 		memento: aMemento;
 		description: aDescription;
 		form: self form;
 		asElement.
-
 	self addShortcutsTo: anElement using: aDescription.
 	self addFieldElement: anElement using: aDescription
 ]
-
 
 { #category : 'private - building' }
 CFMaElementBuilder >> buildActions [
 	| aToolbar allActions |
 	allActions := self allActions.
 	allActions ifEmpty: [ ^ self ].
-
-	self toolbarContainerDo: [ :aContainer |
-		aToolbar := self builderUtilityClass
-			newToolbarWithActions: allActions
-			memento: self memento.
-
-		self addFormNavigationShortcutsTo: aToolbar.
-
-		aContainer addChild: aToolbar as: #toolbar ]
+	aToolbar := self builderUtilityClass
+		newToolbarWithActions: allActions
+		memento: self memento.
+	self addFormNavigationShortcutsTo: aToolbar.
+	self formElement footerElement addChild: aToolbar as: #toolbar
 ]
 
 { #category : 'private - building' }
 CFMaElementBuilder >> formNavigationRoot [
-	| aRoot |
-	aRoot := self form.
-	self form magritte fieldContainerDo: [ :aFieldContainer |
-		aRoot := aFieldContainer ].
-	^ aRoot
+	^ self formElement bodyElement
 ]
-
-
