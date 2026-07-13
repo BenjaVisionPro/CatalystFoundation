@@ -691,7 +691,7 @@ CFConfigurationEditorElement >> capturePreviewLayoutGeometry [
 				ifTrue: [
 					each children do: [ :child |
 						(child userData at: #cfConfigurationEditorPlacementPreview ifAbsent: [ false ])
-							ifFalse: [ geometry at: child put: child bounds inParent bounds ] ] ] ].
+							ifFalse: [ geometry at: child put: (child bounds inParent: self) asRectangle ] ] ] ].
 	^ geometry
 ]
 
@@ -721,10 +721,17 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry preview
 	transitions := OrderedCollection new.
 	beforeGeometry keysAndValuesDo: [ :element :oldBounds |
 		element parent ifNotNil: [ | newBounds |
-			newBounds := element position extent: element extent.
+			newBounds := (element bounds inParent: self) asRectangle.
 			(oldBounds closeTo: newBounds) ifFalse: [
 				transitions add: { element. oldBounds. newBounds } ] ] ].
 	(transitions isEmpty and: [ previewStart isNil ]) ifTrue: [ ^ self ].
+
+	"Install the inverse presentation synchronously. The destination layout must
+	not become visible for a frame before the transition begins."
+	transitions do: [ :transition |
+		self applyLayoutTransition: transition progress: 0.0 ].
+	previewStart ifNotNil: [ previewElement relocate: previewStart ].
+
 	animation := BlNumberTransition new
 		from: 0.0;
 		to: 1.0;
