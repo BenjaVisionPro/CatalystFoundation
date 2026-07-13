@@ -462,7 +462,9 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 	previewElement
 		opacity: 0;
 		preventMouseEvents.
-	previewSlotElement := BrFrame new
+	previewSlotElement := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
 		clipChildren: true;
 		background: Color transparent;
 		yourself.
@@ -660,11 +662,15 @@ CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
 	previewSlotElement ifNil: [ ^ self ].
 	previewAxis = #horizontal
 		ifTrue: [
-			previewSlotElement hFitContent; vMatchParent ]
+			previewSlotElement hFitContent; vMatchParent.
+			previewElement hFitContent; vMatchParent ]
 		ifFalse: [
-			previewSlotElement hMatchParent; vFitContent ].
+			previewSlotElement hMatchParent; vFitContent.
+			previewElement hMatchParent; vFitContent ].
 	previewItemsElement forceLayout.
-	previewNaturalExtent := previewSlotElement extent
+	previewSlotElement forceLayout.
+	previewElement forceLayout.
+	previewNaturalExtent := previewElement extent
 ]
 
 { #category : 'private - previewing' }
