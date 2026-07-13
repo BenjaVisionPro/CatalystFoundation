@@ -152,6 +152,21 @@ CFConfigurationEditorElement >> createConfigurationSurfaceElement [
 
 
 { #category : 'private - building' }
+CFConfigurationEditorElement >> createEmptyConfigurationSurfaceElement [
+	configurationSurfaceElement := BrFrame new
+		hExact: self configurationSurfaceWidth;
+		vFitContent;
+		layout: BlFrameLayout new;
+		margin: (BlInsets top: 34 left: 0 bottom: 34 right: 0);
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		yourself.
+	^ configurationSurfaceElement
+]
+
+
+{ #category : 'private - building' }
 CFConfigurationEditorElement >> createEmptyConfigurationElement [
 	| emptyElement |
 
@@ -361,7 +376,9 @@ CFConfigurationEditorElement >> refreshConfigurationContent [
 	self clearPlacementPreview.
 	configurationContentElement ifNil: [ ^ self ].
 	configurationContentElement removeChildren.
-	surface := self createConfigurationSurfaceElement.
+	surface := configuration
+		ifNil: [ self createEmptyConfigurationSurfaceElement ]
+		ifNotNil: [ self createConfigurationSurfaceElement ].
 	configuration ifNil: [
 		surface addChild: self createEmptyConfigurationElement.
 		configurationContentElement addChild: surface.
