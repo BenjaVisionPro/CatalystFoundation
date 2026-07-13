@@ -20,37 +20,45 @@ CFLinearConfigurationPlacementProvider >> candidatesFor: anAssessment in: anEdit
 					| bounds |
 					bounds := (field bounds inParent: anEditor) asRectangle.
 					result add: (CFConfigurationPlacementCandidate
-						targetChoice: choice region: (CFConfigurationRectangleRegion rectangle: bounds) insertionIndex: nil axis: nil anchor: bounds center) ] ] ].
+						targetChoice: choice
+						region: (CFConfigurationRectangleRegion rectangle: bounds)
+						insertionIndex: nil
+						axis: nil) ] ] ].
 	^ result
 ]
 
 { #category : 'private' }
 CFLinearConfigurationPlacementProvider >> orderedCandidatesFor: aChoice items: itemsElement in: anEditor [
-	| children itemBounds containerBounds axis result count |
+	| children itemBounds containerBounds axis result |
 	children := itemsElement children asArray select: [ :each |
 		(each userData at: #cfConfigurationEditorPlacementPreview ifAbsent: [ false ]) not ].
 	itemBounds := children collect: [ :each | (each bounds inParent: anEditor) asRectangle ].
 	containerBounds := (itemsElement bounds inParent: anEditor) asRectangle.
-	axis := self axisFor: itemBounds container: containerBounds.
+	axis := self axisOf: itemsElement.
 	result := OrderedCollection new.
-	count := children size + 1.
-	1 to: count do: [ :index |
+	1 to: children size + 1 do: [ :index |
 		| anchor region |
-		anchor := self anchorForIndex: index bounds: itemBounds container: containerBounds axis: axis.
-		region := self regionForIndex: index bounds: itemBounds container: containerBounds axis: axis anchor: anchor.
+		anchor := self
+			anchorForIndex: index
+			bounds: itemBounds
+			container: containerBounds
+			axis: axis.
+		region := itemBounds
+			ifEmpty: [ containerBounds ]
+			ifNotEmpty: [ self regionAt: anchor in: containerBounds axis: axis ].
 		result add: (CFConfigurationPlacementCandidate
-			targetChoice: aChoice region: (CFConfigurationRectangleRegion rectangle: region) insertionIndex: index axis: axis anchor: anchor) ].
+			targetChoice: aChoice
+			region: (CFConfigurationRectangleRegion rectangle: region)
+			insertionIndex: index
+			axis: axis) ].
 	^ result
 ]
 
 { #category : 'private' }
-CFLinearConfigurationPlacementProvider >> axisFor: boundsCollection container: containerBounds [
-	boundsCollection size > 1 ifTrue: [
-		| first last |
-		first := boundsCollection first center.
-		last := boundsCollection last center.
-		^ ((last x - first x) abs > (last y - first y) abs) ifTrue: [ #horizontal ] ifFalse: [ #vertical ] ].
-	^ containerBounds width > containerBounds height ifTrue: [ #horizontal ] ifFalse: [ #vertical ]
+CFLinearConfigurationPlacementProvider >> axisOf: itemsElement [
+	^ itemsElement layout orientation isHorizontal
+		ifTrue: [ #horizontal ]
+		ifFalse: [ #vertical ]
 ]
 
 { #category : 'private' }
@@ -68,10 +76,8 @@ CFLinearConfigurationPlacementProvider >> anchorForIndex: index bounds: boundsCo
 ]
 
 { #category : 'private' }
-CFLinearConfigurationPlacementProvider >> regionForIndex: index bounds: boundsCollection container: containerBounds axis: axis anchor: anchor [
-	| half |
-	half := 14.
-	axis = #horizontal
-		ifTrue: [ ^ ((anchor x - half) @ containerBounds top corner: (anchor x + half) @ containerBounds bottom) ]
-		ifFalse: [ ^ (containerBounds left @ (anchor y - half) corner: containerBounds right @ (anchor y + half)) ]
+CFLinearConfigurationPlacementProvider >> regionAt: anchor in: containerBounds axis: axis [
+	^ axis = #horizontal
+		ifTrue: [ anchor x @ containerBounds top corner: anchor x @ containerBounds bottom ]
+		ifFalse: [ containerBounds left @ anchor y corner: containerBounds right @ anchor y ]
 ]
