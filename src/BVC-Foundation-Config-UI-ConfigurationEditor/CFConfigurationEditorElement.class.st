@@ -24,7 +24,8 @@ Class {
 		'dropCompletionToken',
 		'previewVisible',
 		'previewItemsElement',
-		'previewAxis'
+		'previewAxis',
+		'configurationSurfaceElement'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -132,7 +133,7 @@ CFConfigurationEditorElement >> createConfigurationContentElement [
 
 { #category : 'private - building' }
 CFConfigurationEditorElement >> createConfigurationSurfaceElement [
-	^ BrFrame new
+	configurationSurfaceElement := BrFrame new
 		hExact: self configurationSurfaceWidth;
 		vFitContent;
 		layout: BlFrameLayout new;
@@ -145,6 +146,18 @@ CFConfigurationEditorElement >> createConfigurationSurfaceElement [
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];
+		yourself.
+	^ configurationSurfaceElement
+]
+
+
+{ #category : 'private - building' }
+CFConfigurationEditorElement >> createEmptyConfigurationElement [
+	^ BrFrame new
+		hMatchParent;
+		vExact: 180;
+		layout: BlFrameLayout new;
+		userData at: #cfConfigurationEditorEmptyState put: true;
 		yourself
 ]
 
@@ -314,7 +327,8 @@ CFConfigurationEditorElement >> initialize [
 		addChild: self createConfigurationContentElement;
 		addChild: self createLibrarySidebar;
 		addChild: self createLibraryToggleButton;
-		addAssetDropHandler
+		addAssetDropHandler.
+	self refreshConfigurationContent
 ]
 
 { #category : 'private - geometry' }
@@ -344,8 +358,11 @@ CFConfigurationEditorElement >> refreshConfigurationContent [
 	self clearPlacementPreview.
 	configurationContentElement ifNil: [ ^ self ].
 	configurationContentElement removeChildren.
-	configuration ifNil: [ ^ self ].
 	surface := self createConfigurationSurfaceElement.
+	configuration ifNil: [
+		surface addChild: self createEmptyConfigurationElement.
+		configurationContentElement addChild: surface.
+		^ self ].
 	visitedConfigurations := IdentitySet new.
 	visitedConfigurations add: configuration.
 	nodeElement := CFConfigurationNodeElement
@@ -384,9 +401,9 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	| assessment candidate |
-	configuration ifNil: [ ^ self clearPlacementPreview ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self hidePlacementPreview ].
+	configuration ifNil: [ ^ self showRootPlacementPreviewFor: anAsset at: aPoint ].
 	assessment := dragAsset == anAsset
 		ifTrue: [ dragAssessment ]
 		ifFalse: [
@@ -401,6 +418,32 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	activeInsertionIndex := candidate insertionIndex.
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
 	self showDropPreviewAt: candidate
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> showRootPlacementPreviewFor: anAsset at: aPoint [
+	(self isPointOverConfigurationContent: aPoint)
+		ifFalse: [ ^ self hidePlacementPreview ].
+	dragAsset == anAsset ifFalse: [
+		self detachPlacementPreview.
+		dragAsset := anAsset.
+		dragAssessment := nil.
+		previewConfiguration := anAsset materialize ].
+	previewElement ifNil: [ self createDropPreviewElement ].
+	previewElement parent == configurationSurfaceElement ifFalse: [
+		previewElement removeFromParent.
+		previewElement
+			hMatchParent;
+			vFitContent;
+			constraintsDo: [ :c |
+				c accountByLayout.
+				c frame horizontal alignCenter.
+				c frame vertical alignCenter ].
+		configurationSurfaceElement addChild: previewElement ].
+	previewItemsElement := nil.
+	previewAxis := nil.
+	previewVisible := true.
+	self fadeDropPreviewIn
 ]
 
 { #category : 'private - previewing' }
@@ -574,9 +617,31 @@ CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity then: com
 ]
 
 { #category : 'private - dropping' }
+CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
+	| token rootConfiguration |
+	(self isPointOverVisibleLibrarySidebar: aPoint) ifTrue: [ ^ self clearPlacementPreview ].
+	(self isPointOverConfigurationContent: aPoint) ifFalse: [ ^ self clearPlacementPreview ].
+	dragAsset == anAsset ifFalse: [
+		dragAsset := anAsset.
+		dragAssessment := nil.
+		previewConfiguration := anAsset materialize ].
+	self showRootPlacementPreviewFor: anAsset at: aPoint.
+	rootConfiguration := previewConfiguration.
+	token := Object new.
+	dropCompletionToken := token.
+	self animatePreviewOpacityTo: 1 then: [
+		dropCompletionToken == token ifTrue: [
+			configuration := rootConfiguration.
+			selectedConfiguration := nil.
+			dropCompletionToken := nil.
+			self refreshConfigurationContent.
+			self refreshConfigurationInspector ] ]
+]
+
+{ #category : 'private - dropping' }
 CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	| assessment candidate token |
-	configuration ifNil: [ ^ self clearPlacementPreview ].
+	configuration ifNil: [ ^ self completeRootDropOfAsset: anAsset at: aPoint ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self clearPlacementPreview ].
 	assessment := dragAsset == anAsset
@@ -733,6 +798,12 @@ CFConfigurationEditorElement >> relationItemsElementIn: aRelationElement [
 			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
 		ifFound: [ :each | each ]
 		ifNone: [ nil ]
+]
+
+{ #category : 'private - geometry' }
+CFConfigurationEditorElement >> isPointOverConfigurationContent: aPoint [
+	configurationContentElement ifNil: [ ^ false ].
+	^ ((configurationContentElement bounds inParent: self) asRectangle containsPoint: aPoint)
 ]
 
 { #category : 'private - geometry' }
