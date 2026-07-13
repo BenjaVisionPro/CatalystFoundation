@@ -423,7 +423,7 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 		vExact: previewBounds height;
 		constraintsDo: [ :c | c ignoreByLayout ];
 		relocate: previewBounds origin.
-	self forcePreviewLayout.
+	self forcePreviewLayoutInItems: affectedItems.
 	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
 	self animatePreviewOpacityTo: 0 then: [
 		(previewElement == preview and: [ previewVisible ~= true ])
@@ -448,7 +448,7 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	previewAxis := aCandidate axis.
 	self measurePreviewForCurrentTarget.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
-	self forcePreviewLayout.
+	self forcePreviewLayoutInItems: affectedItems.
 	previewVisible := true.
 	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
 	self fadeDropPreviewIn
@@ -759,6 +759,16 @@ CFConfigurationEditorElement >> boundsOf: anElement inLocalCoordinatesOf: aRefer
 CFConfigurationEditorElement >> forcePreviewLayout [
 	configurationContentElement forceLayout.
 	self forceLayout
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> forcePreviewLayoutInItems: itemElements [
+	configurationContentElement forceLayout.
+	self forceLayout.
+	itemElements do: [ :items |
+		items ifNotNil: [
+			items parent ifNotNil: [ :parent | parent forceLayout ].
+			items forceLayout ] ]
 ]
 
 { #category : 'private - previewing' }
