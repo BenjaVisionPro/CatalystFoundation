@@ -15,7 +15,13 @@ Class {
 		'libraryToggleButton',
 		'dragAsset',
 		'dragAssessment',
-		'activeInsertionIndex'
+		'activeInsertionIndex',
+		'placementProvider',
+		'placementHysteresis',
+		'animations',
+		'activePlacementCandidate',
+		'previewConfiguration',
+		'displacedElements'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -41,15 +47,16 @@ CFConfigurationEditorElement >> addAssetDropHandler [
 
 { #category : 'private - applying' }
 CFConfigurationEditorElement >> applyAsset: anAsset at: aPoint [
-	| assessment targetChoice |
+	| assessment candidate |
 	configuration ifNil: [ ^ nil ].
-	self detachPlacementPreview.
 	assessment := planner assessAsset: anAsset in: configuration.
-	targetChoice := self targetChoiceIn: assessment at: aPoint.
-	targetChoice ifNil: [ ^ assessment ].
+	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
+	candidate ifNil: [ ^ assessment ].
+	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	self clearPlacementPreview.
 	(CFConfigurationPlan
 		asset: anAsset
-		targetChoice: targetChoice
+		targetChoice: candidate targetChoice
 		planner: planner) apply.
 	self refreshConfigurationContent.
 	self refreshConfigurationInspector.
@@ -88,15 +95,18 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 CFConfigurationEditorElement >> clearPlacementPreview [
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
+	activePlacementCandidate := nil.
 	dragAsset := nil.
 	dragAssessment := nil.
+	previewConfiguration := nil.
+	animations stopAll.
+	self resetDisplacedElements.
 	self detachPlacementPreview
 ]
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> detachPlacementPreview [
-	previewElement ifNotNil: [ :anElement |
-		anElement removeFromParent ].
+	previewElement ifNotNil: [ :anElement | anElement removeFromParent ].
 	previewElement := nil
 ]
 
@@ -246,39 +256,6 @@ CFConfigurationEditorElement >> createInspectorCloseButton [
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationEditorElement >> createPlacementPreviewFor: aTargetChoice asset: anAsset bounds: aRectangle [
-	| preview compactPresentation |
-	preview := BrFrame new
-		hExact: aRectangle width;
-		vExact: aRectangle height;
-		layout: BlFrameLayout new;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 8);
-		background: (Color r: 0.15 g: 0.5 b: 0.95 alpha: 0.10);
-		border: (BlBorder paint: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.9) width: 2);
-		preventMouseEvents;
-		constraintsDo: [ :c | c ignoreByLayout ];
-		relocate: aRectangle origin;
-		yourself.
-	aTargetChoice placement isAddition ifTrue: [
-		compactPresentation := CFCompactObjectStencil new
-			object: anAsset;
-			create.
-		compactPresentation
-			hMatchParent;
-			vFitContent;
-			padding: (BlInsets top: 7 left: 10 bottom: 7 right: 10);
-			geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
-			background: (Color r: 0.12 g: 0.42 b: 0.85 alpha: 0.30);
-			border: (BlBorder paint: (Color white alpha: 0.20) width: 1);
-			constraintsDo: [ :c |
-				c frame horizontal alignCenter.
-				c frame vertical alignBottom ];
-			yourself.
-		preview addChild: compactPresentation ].
-	^ preview
-]
-
-{ #category : 'private - previewing' }
 CFConfigurationEditorElement >> fieldElementForPlacement: aPlacement [
 	^ configurationContentElement
 		allChildrenBreadthFirstDetect: [ :each |
@@ -304,11 +281,20 @@ CFConfigurationEditorElement >> hideLibrarySidebar [
 		anElement visibility: BlVisibility gone ]
 ]
 
+{ #category : 'private - building' }
+CFConfigurationEditorElement >> createPlacementProvider [
+	^ CFLinearConfigurationPlacementProvider new
+]
+
 { #category : 'initialization' }
 CFConfigurationEditorElement >> initialize [
 	super initialize.
 	library := CFConfigurationLibrary discovered.
 	planner := CFConfigurationPlanner new.
+	placementProvider := self createPlacementProvider.
+	placementHysteresis := CFConfigurationPlacementHysteresis new.
+	animations := CFAnimationCoordinator on: self.
+	displacedElements := IdentitySet new.
 	libraryVisible := true.
 	self
 		matchParent;
@@ -389,37 +375,137 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
-	| assessment targetChoice fieldElement targetBounds insertionIndex |
+	| assessment candidate |
 	configuration ifNil: [ ^ self clearPlacementPreview ].
 	assessment := dragAsset == anAsset
 		ifTrue: [ dragAssessment ]
 		ifFalse: [
 			dragAsset := anAsset.
+			previewConfiguration := anAsset materialize.
 			dragAssessment := planner assessAsset: anAsset in: configuration ].
-	targetChoice := self
-		targetChoiceIn: assessment
-		at: aPoint
-		keeping: activeTargetChoice.
-	targetChoice ifNil: [
-		activeTargetChoice := nil.
-		activeInsertionIndex := nil.
-		^ self detachPlacementPreview ].
-	insertionIndex := targetChoice placement insertionIndex.
-	((self sameTargetChoice: targetChoice as: activeTargetChoice)
-		and: [ insertionIndex = activeInsertionIndex ]) ifTrue: [ ^ self ].
-	self detachPlacementPreview.
-	activeTargetChoice := targetChoice.
-	activeInsertionIndex := insertionIndex.
-	(targetChoice placement isAddition and: [
-		self installAdditionPreviewFor: targetChoice asset: anAsset ]) ifTrue: [ ^ self ].
-	fieldElement := self fieldElementForPlacement: targetChoice placement.
-	fieldElement ifNil: [ ^ self ].
-	targetBounds := (fieldElement bounds inParent: self) asRectangle.
-	previewElement := self
-		createPlacementPreviewFor: targetChoice
-		asset: anAsset
-		bounds: targetBounds.
+	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
+	candidate ifNil: [ ^ self hidePlacementPreview ].
+	(candidate samePlacementAs: activePlacementCandidate) ifTrue: [ ^ self ].
+	activePlacementCandidate := candidate.
+	activeTargetChoice := candidate targetChoice.
+	activeInsertionIndex := candidate insertionIndex.
+	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	self showDropPreviewAt: candidate
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> hidePlacementPreview [
+	activeTargetChoice := nil.
+	activeInsertionIndex := nil.
+	activePlacementCandidate := nil.
+	animations stopAll.
+	self restoreDisplacedElements.
+	self detachPlacementPreview
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
+	| extent origin |
+	previewElement ifNil: [ self createDropPreviewElement ].
+	previewElement forceLayout.
+	extent := previewElement extent.
+	origin := aCandidate previewOriginForExtent: extent.
+	self animatePreviewTo: origin.
+	self animateDisplacementsFor: aCandidate previewExtent: extent
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> createDropPreviewElement [
+	| visited |
+	visited := IdentitySet new.
+	visited add: previewConfiguration.
+	previewElement := CFConfigurationNodeElement
+		configuration: previewConfiguration
+		visited: visited
+		selected: nil
+		whenSelected: [ :ignored | ].
+	previewElement
+		opacity: 0.58;
+		preventMouseEvents;
+		constraintsDo: [ :c | c ignoreByLayout ];
+		relocate: 0 @ 0.
 	self addChild: previewElement
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animatePreviewTo: aPoint [
+	| start |
+	start := previewElement userData at: #cfAnimatedPosition ifAbsent: [ previewElement position ].
+	animations retarget: [ self pointAnimationFrom: start to: aPoint onStep: [ :each |
+		previewElement relocate: each.
+		previewElement userData at: #cfAnimatedPosition put: each ] ] named: #dropPreviewPosition
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animateDisplacementsFor: aCandidate previewExtent: anExtent [
+	| relation items children displacement affected |
+	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
+	relation ifNil: [ ^ self restoreDisplacedElements ].
+	items := self relationItemsElementIn: relation.
+	items ifNil: [ ^ self restoreDisplacedElements ].
+	children := items children asArray.
+	displacement := aCandidate axis = #horizontal
+		ifTrue: [ (anExtent x + items cellSpacing) @ 0 ]
+		ifFalse: [ 0 @ (anExtent y + items cellSpacing) ].
+	affected := IdentitySet new.
+	1 to: children size do: [ :index |
+		| element target |
+		element := children at: index.
+		target := index >= aCandidate insertionIndex ifTrue: [ displacement ] ifFalse: [ 0 @ 0 ].
+		target ~= (0 @ 0) ifTrue: [ affected add: element ].
+		self animateElement: element translationTo: target ].
+	displacedElements asArray do: [ :each |
+		(affected includes: each) ifFalse: [ self animateElement: each translationTo: 0 @ 0 ] ].
+	displacedElements := affected
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animateElement: anElement translationTo: aPoint [
+	| start name |
+	start := anElement userData at: #cfAnimatedTranslation ifAbsent: [ 0 @ 0 ].
+	start = aPoint ifTrue: [ ^ self ].
+	aPoint ~= (0 @ 0) ifTrue: [ displacedElements add: anElement ].
+	name := ('item-', anElement identityHash asString) asSymbol.
+	animations retarget: [ self pointAnimationFrom: start to: aPoint onStep: [ :each |
+		anElement transformDo: [ :builder | builder translateBy: each ].
+		anElement userData at: #cfAnimatedTranslation put: each ] ] named: name
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> pointAnimationFrom: startPoint to: targetPoint onStep: aBlock [
+	| animation |
+	animation := BlNumberTransition new
+		from: 0.0;
+		to: 1.0;
+		duration: 140 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1);
+		onStepDo: [ :progress |
+			aBlock value: ((startPoint x + ((targetPoint x - startPoint x) * progress))
+				@ (startPoint y + ((targetPoint y - startPoint y) * progress))) ];
+		yourself.
+	animation onFinishedDo: [ aBlock value: targetPoint ].
+	^ animation
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> restoreDisplacedElements [
+	| elements |
+	elements := displacedElements asArray.
+	displacedElements := IdentitySet new.
+	elements do: [ :each | self animateElement: each translationTo: 0 @ 0 ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> resetDisplacedElements [
+	displacedElements asArray do: [ :each |
+		each transformDo: [ :builder | builder translateBy: 0 @ 0 ].
+		each userData at: #cfAnimatedTranslation put: 0 @ 0 ].
+	displacedElements := IdentitySet new
 ]
 
 { #category : 'private - building' }
@@ -436,42 +522,6 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationEditorElement >> installAdditionPreviewFor: aTargetChoice asset: anAsset [
-	| relationElement itemsElement bounds |
-	relationElement := self fieldElementForPlacement: aTargetChoice placement.
-	relationElement ifNil: [ ^ false ].
-	itemsElement := self relationItemsElementIn: relationElement.
-	itemsElement ifNil: [ ^ false ].
-	aTargetChoice placement insertionIndex ifNil: [ ^ false ].
-	bounds := self
-		insertionPreviewBoundsIn: itemsElement
-		at: aTargetChoice placement insertionIndex.
-	previewElement := BrFrame new
-		hExact: bounds width;
-		vExact: bounds height;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 2);
-		background: (Color r: 0.2 g: 0.58 b: 1.0 alpha: 0.92);
-		preventMouseEvents;
-		constraintsDo: [ :c | c ignoreByLayout ];
-		relocate: bounds origin;
-		yourself.
-	self addChild: previewElement.
-	^ true
-]
-
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> insertionIndexIn: anItemsElement at: aPoint [
-	| index |
-	index := 1.
-	anItemsElement children do: [ :each |
-		aPoint y < ((each bounds inParent: self) asRectangle center y)
-			ifTrue: [ ^ index ].
-		index := index + 1 ].
-	^ index
-]
-
-{ #category : 'private - previewing' }
 CFConfigurationEditorElement >> relationItemsElementIn: aRelationElement [
 	^ aRelationElement
 		allChildrenBreadthFirstDetect: [ :each |
@@ -481,105 +531,24 @@ CFConfigurationEditorElement >> relationItemsElementIn: aRelationElement [
 ]
 
 { #category : 'private - planning' }
-CFConfigurationEditorElement >> updateInsertionIndexFor: aTargetChoice at: aPoint [
-	| placement relationElement itemsElement |
-	placement := aTargetChoice placement.
-	placement insertionIndex: nil.
-	(placement isAddition and: [ placement description isOrdered ]) ifFalse: [ ^ self ].
-	relationElement := self fieldElementForPlacement: placement.
-	relationElement ifNil: [ ^ self ].
-	itemsElement := self relationItemsElementIn: relationElement.
-	itemsElement ifNil: [ ^ self ].
-	placement insertionIndex: (self insertionIndexIn: itemsElement at: aPoint)
-]
-
-{ #category : 'private - geometry' }
-CFConfigurationEditorElement >> insertionPreviewBoundsIn: anItemsElement at: anIndex [
-	| children itemsBounds y |
-	children := anItemsElement children asArray.
-	itemsBounds := (anItemsElement bounds inParent: self) asRectangle.
-	y := children ifEmpty: [ itemsBounds top ] ifNotEmpty: [
-		anIndex <= children size
-			ifTrue: [ ((children at: anIndex) bounds inParent: self) asRectangle top - 3 ]
-			ifFalse: [ ((children last bounds inParent: self) asRectangle bottom) + 3 ] ].
-	^ (itemsBounds left @ y extent: itemsBounds width @ 4)
-]
-
-{ #category : 'private - testing' }
-CFConfigurationEditorElement >> sameTargetChoice: aTargetChoice as: anotherTargetChoice [
-	anotherTargetChoice ifNil: [ ^ false ].
-	^ aTargetChoice placement matches: anotherTargetChoice placement
+CFConfigurationEditorElement >> placementCandidateIn: anAssessment at: aPoint keeping: aCandidate [
+	^ placementHysteresis
+		chooseFrom: (placementProvider candidatesFor: anAssessment in: self)
+		at: aPoint
+		keeping: aCandidate
 ]
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
-	^ self targetChoiceIn: anAssessment at: aPoint keeping: nil
+	| candidate |
+	candidate := self placementCandidateIn: anAssessment at: aPoint keeping: nil.
+	candidate ifNil: [ ^ nil ].
+	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	^ candidate targetChoice
 ]
 
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint keeping: aTargetChoice [
-	| candidates closest retainedChoice closestDistance retainedDistance |
-	candidates := anAssessment targetChoices select: [ :each |
-		(self fieldElementForPlacement: each placement) notNil ].
-	candidates ifEmpty: [ ^ nil ].
-	closest := candidates
-		inject: candidates first
-		into: [ :currentClosest :each |
-			(self targetChoice: each isCloserTo: aPoint than: currentClosest)
-				ifTrue: [ each ]
-				ifFalse: [ currentClosest ] ].
-	retainedChoice := aTargetChoice ifNotNil: [
-		candidates
-			detect: [ :each | each placement matches: aTargetChoice placement ]
-			ifNone: [ nil ] ].
-	retainedChoice ifNotNil: [
-		closestDistance := self distanceFrom: aPoint toTargetChoice: closest.
-		retainedDistance := self distanceFrom: aPoint toTargetChoice: retainedChoice.
-		closestDistance + self targetSwitchMargin < retainedDistance
-			ifFalse: [ closest := retainedChoice ] ].
-	self updateInsertionIndexFor: closest at: aPoint.
-	^ closest
-]
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> targetChoice: aTargetChoice isCloserTo: aPoint than: anotherTargetChoice [
-	^ (self distanceFrom: aPoint toTargetChoice: aTargetChoice)
-		< (self distanceFrom: aPoint toTargetChoice: anotherTargetChoice)
-]
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> distanceFrom: aPoint toTargetChoice: aTargetChoice [
-	| bounds |
-	bounds := ((self fieldElementForPlacement: aTargetChoice placement)
-		bounds inParent: self) asRectangle.
-	^ (self distanceSquaredFrom: aPoint toPoint: bounds center) sqrt
-]
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> targetSwitchMargin [
-	^ 14
-]
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> distanceSquaredFrom: aPoint toPoint: anotherPoint [
-	^ (aPoint x - anotherPoint x) squared
-		+ (aPoint y - anotherPoint y) squared
-]
-
-{ #category : 'private - planning' }
-CFConfigurationEditorElement >> distanceSquaredFrom: aPoint to: aRectangle [
-	| horizontalDistance verticalDistance |
-	horizontalDistance := aPoint x < aRectangle left
-		ifTrue: [ aRectangle left - aPoint x ]
-		ifFalse: [
-			aPoint x > aRectangle right
-				ifTrue: [ aPoint x - aRectangle right ]
-				ifFalse: [ 0 ] ].
-	verticalDistance := aPoint y < aRectangle top
-		ifTrue: [ aRectangle top - aPoint y ]
-		ifFalse: [
-			aPoint y > aRectangle bottom
-				ifTrue: [ aPoint y - aRectangle bottom ]
-				ifFalse: [ 0 ] ].
-	^ horizontalDistance squared + verticalDistance squared
+{ #category : 'hooks - scene graph' }
+CFConfigurationEditorElement >> onRemovedFromSceneGraph [
+	super onRemovedFromSceneGraph.
+	animations ifNotNil: [ animations stopAll ]
 ]
