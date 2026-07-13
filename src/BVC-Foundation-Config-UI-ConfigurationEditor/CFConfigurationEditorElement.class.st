@@ -726,8 +726,8 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry [
 ]
 
 { #category : 'private - previewing' }
-CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry previewFrom: previewStart to: previewTarget [
-	| transitions animation |
+CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry previewFrom: previewStart to: ignoredPreviewTarget [
+	| transitions animation previewTarget |
 	transitions := OrderedCollection new.
 	beforeGeometry keysAndValuesDo: [ :element :oldBounds |
 		element parent ifNotNil: [ | newBounds |
@@ -740,7 +740,13 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry preview
 	not become visible for a frame before the transition begins."
 	transitions do: [ :transition |
 		self applyLayoutTransition: transition progress: 0.0 ].
-	previewStart ifNotNil: [ previewElement relocate: previewStart ].
+	previewStart ifNotNil: [
+		previewElement relocate: previewStart.
+		"The preview must move to the slot's presented position after the
+		inverse layout state has been installed. Reading the slot before this
+		point gives its final layout position while its surroundings are still
+		visually inverted."
+		previewTarget := self previewSlotOriginInEditor ].
 
 	animation := BlNumberTransition new
 		from: 0.0;
