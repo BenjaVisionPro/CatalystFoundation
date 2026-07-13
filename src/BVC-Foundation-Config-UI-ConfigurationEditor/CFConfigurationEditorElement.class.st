@@ -659,24 +659,22 @@ CFConfigurationEditorElement >> preserveCurrentPreviewGap [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
-	| overlayPosition |
+	| overlayPosition rawIndex |
 	previewSlotElement ifNil: [ ^ self ].
 	overlayPosition := previewElement position.
+	rawIndex := previewItemsElement childIndexOf: previewSlotElement.
 	previewElement removeFromParent.
+	previewSlotElement removeFromParent.
 	previewElement constraintsDo: [ :c | c accountByLayout ].
-	previewSlotElement addChild: previewElement.
 	previewAxis = #horizontal
-		ifTrue: [
-			previewSlotElement hFitContent; vMatchParent.
-			previewElement hFitContent; vMatchParent ]
-		ifFalse: [
-			previewSlotElement hMatchParent; vFitContent.
-			previewElement hMatchParent; vFitContent ].
+		ifTrue: [ previewElement hFitContent; vMatchParent ]
+		ifFalse: [ previewElement hMatchParent; vFitContent ].
+	previewItemsElement addChild: previewElement at: rawIndex.
 	previewItemsElement forceLayout.
-	previewSlotElement forceLayout.
 	previewElement forceLayout.
 	previewNaturalExtent := previewElement extent.
 	previewElement removeFromParent.
+	previewItemsElement addChild: previewSlotElement at: rawIndex.
 	previewElement
 		hExact: previewNaturalExtent x;
 		vExact: previewNaturalExtent y;
