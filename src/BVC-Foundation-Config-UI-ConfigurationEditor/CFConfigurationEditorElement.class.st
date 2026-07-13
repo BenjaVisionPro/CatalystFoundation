@@ -153,12 +153,15 @@ CFConfigurationEditorElement >> createConfigurationSurfaceElement [
 
 { #category : 'private - building' }
 CFConfigurationEditorElement >> createEmptyConfigurationElement [
-	^ BrFrame new
+	| emptyElement |
+
+	emptyElement := BrFrame new
 		hMatchParent;
 		vExact: 180;
 		layout: BlFrameLayout new;
-		userData at: #cfConfigurationEditorEmptyState put: true;
-		yourself
+		yourself.
+	emptyElement userData at: #cfConfigurationEditorEmptyState put: true.
+	^ emptyElement
 ]
 
 { #category : 'private - geometry' }
