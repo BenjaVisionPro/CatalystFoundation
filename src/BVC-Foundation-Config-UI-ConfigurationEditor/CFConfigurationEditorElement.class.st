@@ -402,13 +402,18 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> hidePlacementPreview [
-	| previewBounds preview |
+	| previewBounds preview beforeGeometry affectedItems |
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
 	previewVisible := false.
 	previewElement ifNil: [ ^ self ].
+	affectedItems := IdentitySet new.
+	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
+	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
 	previewBounds := self boundsOf: previewElement inLocalCoordinatesOf: self.
+	animations stop: #placementLayout.
+	self clearPlacementTransformsInItems: affectedItems.
 	preview := previewElement.
 	previewElement removeFromParent.
 	previewItemsElement := nil.
@@ -419,25 +424,33 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 		constraintsDo: [ :c | c ignoreByLayout ];
 		relocate: previewBounds origin.
 	self forcePreviewLayout.
+	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
 	self animatePreviewOpacityTo: 0 then: [
 		(previewElement == preview and: [ previewVisible ~= true ])
 			ifTrue: [ self detachPlacementPreview ] ]
 ]
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| relation items insertionIndex |
+	| relation items insertionIndex beforeGeometry affectedItems |
 	previewElement ifNil: [ self createDropPreviewElement ].
 	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
 	relation ifNil: [ ^ self hidePlacementPreview ].
 	items := self relationItemsElementIn: relation.
 	items ifNil: [ ^ self hidePlacementPreview ].
 	insertionIndex := aCandidate insertionIndex max: 1.
+	affectedItems := IdentitySet new.
+	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
+	affectedItems add: items.
+	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
+	animations stop: #placementLayout.
+	self clearPlacementTransformsInItems: affectedItems.
 	previewItemsElement := items.
 	previewAxis := aCandidate axis.
 	self measurePreviewForCurrentTarget.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
 	self forcePreviewLayout.
 	previewVisible := true.
+	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
 	self fadeDropPreviewIn
 ]
 { #category : 'private - previewing' }
@@ -469,6 +482,67 @@ CFConfigurationEditorElement >> fadeDropPreviewOut [
 	self animatePreviewOpacityTo: 0 then: [
 		(previewElement == element and: [ previewVisible ~= true ])
 			ifTrue: [ self detachPlacementPreview ] ]
+]
+
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> capturePresentedGeometryInItems: itemElements [
+	| geometry |
+	geometry := IdentityDictionary new.
+	itemElements do: [ :items |
+		items ifNotNil: [
+			items children do: [ :each |
+				geometry at: each put: (self boundsOf: each inLocalCoordinatesOf: self) ] ] ].
+	^ geometry
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> clearPlacementTransformsInItems: itemElements [
+	itemElements do: [ :items |
+		items ifNotNil: [
+			items children do: [ :each |
+				each transformation: BlElementLocalTransformation new ] ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: itemElements [
+	| transitions animation |
+	transitions := OrderedCollection new.
+	itemElements do: [ :items |
+		items ifNotNil: [
+			items children do: [ :each |
+				beforeGeometry
+					at: each
+					ifPresent: [ :oldBounds |
+						| newBounds delta |
+						newBounds := self boundsOf: each inLocalCoordinatesOf: self.
+						delta := oldBounds origin - newBounds origin.
+						delta isZero ifFalse: [ transitions add: each -> delta ] ] ] ] ].
+	transitions ifEmpty: [ ^ self ].
+	self applyPlacementTransitions: transitions progress: 0.0.
+	animation := BlNumberTransition new
+		from: 0.0;
+		to: 1.0;
+		duration: 180 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		onStepDo: [ :progress | self applyPlacementTransitions: transitions progress: progress ];
+		yourself.
+	animation onFinishedDo: [ self clearPlacementTransitionElements: transitions ].
+	animations play: animation named: #placementLayout
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> applyPlacementTransitions: transitions progress: progress [
+	transitions do: [ :association |
+		| remaining |
+		remaining := association value * (1.0 - progress).
+		association key transformDo: [ :builder | builder translateBy: remaining ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> clearPlacementTransitionElements: transitions [
+	transitions do: [ :association |
+		association key transformation: BlElementLocalTransformation new ]
 ]
 
 { #category : 'private - animations' }
