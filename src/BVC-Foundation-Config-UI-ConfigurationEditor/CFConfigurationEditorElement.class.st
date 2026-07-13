@@ -640,7 +640,7 @@ CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> previewSlotOriginInEditor [
 	previewSlotElement ifNil: [ ^ 0 @ 0 ].
-	^ (previewSlotElement bounds inParent: self) asRectangle origin
+	^ self globalPointToLocal: (previewSlotElement localPointToGlobal: 0 @ 0)
 ]
 
 { #category : 'private - previewing' }
@@ -682,6 +682,16 @@ CFConfigurationEditorElement >> toggleLibrarySidebar [
 ]
 
 { #category : 'private - previewing' }
+CFConfigurationEditorElement >> boundsOf: anElement inLocalCoordinatesOf: aReferenceElement [
+	| origin corner |
+	origin := aReferenceElement
+		globalPointToLocal: (anElement localPointToGlobal: 0 @ 0).
+	corner := aReferenceElement
+		globalPointToLocal: (anElement localPointToGlobal: anElement extent).
+	^ origin corner: corner
+]
+
+{ #category : 'private - previewing' }
 CFConfigurationEditorElement >> capturePreviewLayoutGeometry [
 	| geometry |
 	geometry := IdentityDictionary new.
@@ -691,7 +701,7 @@ CFConfigurationEditorElement >> capturePreviewLayoutGeometry [
 				ifTrue: [
 					each children do: [ :child |
 						(child userData at: #cfConfigurationEditorPlacementPreview ifAbsent: [ false ])
-							ifFalse: [ geometry at: child put: (child bounds inParent: self) asRectangle ] ] ] ].
+							ifFalse: [ geometry at: child put: (self boundsOf: child inLocalCoordinatesOf: self) ] ] ] ].
 	^ geometry
 ]
 
@@ -721,7 +731,7 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry preview
 	transitions := OrderedCollection new.
 	beforeGeometry keysAndValuesDo: [ :element :oldBounds |
 		element parent ifNotNil: [ | newBounds |
-			newBounds := (element bounds inParent: self) asRectangle.
+			newBounds := self boundsOf: element inLocalCoordinatesOf: self.
 			(oldBounds closeTo: newBounds) ifFalse: [
 				transitions add: { element. oldBounds. newBounds } ] ] ].
 	(transitions isEmpty and: [ previewStart isNil ]) ifTrue: [ ^ self ].
