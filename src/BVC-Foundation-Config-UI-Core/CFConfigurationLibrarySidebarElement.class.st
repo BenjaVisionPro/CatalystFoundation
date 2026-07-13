@@ -18,7 +18,7 @@ CFConfigurationLibrarySidebarElement >> addAssetInteractionsTo: anElement asset:
 			BlDragItem new
 				sourceElement: aSourceElement;
 				domainObject: anAsset;
-				stencil: [ :aDragItem | self createAssetPresentationFor: aDragItem domainObject ];
+				stencil: [ :aDragItem | self createDragPresentationFor: aDragItem ];
 				yourself ];
 		yourself).
 	anElement when: BlDoubleClickEvent do: [ :anEvent |
@@ -29,14 +29,24 @@ CFConfigurationLibrarySidebarElement >> addAssetInteractionsTo: anElement asset:
 { #category : 'private - building' }
 CFConfigurationLibrarySidebarElement >> createAssetPresentationFor: anAsset [
 	| element |
+	element := self createCompactPresentationFor: anAsset.
+	element
+		hMatchParent;
+		margin: (BlInsets bottom: 4).
+	self addAssetInteractionsTo: element asset: anAsset.
+	^ element
+]
+
+
+{ #category : 'private - building' }
+CFConfigurationLibrarySidebarElement >> createCompactPresentationFor: anAsset [
+	| element |
 	element := CFCompactObjectStencil new
 		object: anAsset;
 		create.
 	element
-		hMatchParent;
 		vFitContent;
 		padding: (BlInsets top: 8 left: 10 bottom: 8 right: 10);
-		margin: (BlInsets bottom: 4);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
 		background: (Color black alpha: 0.24);
 		border: (BlBorder paint: (Color white alpha: 0.14) width: 1).
@@ -45,9 +55,17 @@ CFConfigurationLibrarySidebarElement >> createAssetPresentationFor: anAsset [
 		fontSize: 13;
 		foreground: (Color white alpha: 0.9);
 		yourself).
-	self addAssetInteractionsTo: element asset: anAsset.
 	^ element
 ]
+
+{ #category : 'private - building' }
+CFConfigurationLibrarySidebarElement >> createDragPresentationFor: aDragItem [
+	^ (self createCompactPresentationFor: aDragItem domainObject)
+		hExact: aDragItem sourceElement extent x;
+		margin: BlInsets empty;
+		yourself
+]
+
 
 { #category : 'private - building' }
 CFConfigurationLibrarySidebarElement >> createContent [

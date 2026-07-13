@@ -21,7 +21,8 @@ Class {
 		'animations',
 		'activePlacementCandidate',
 		'previewConfiguration',
-		'displacedElements'
+		'displacedElements',
+		'dropCompletionToken'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -37,11 +38,11 @@ CFConfigurationEditorElement >> addAssetDropHandler [
 				self
 					showPlacementPreviewFor: anEvent items first domainObject
 					at: anEvent position ] ];
-		whenDragLeftDo: [ :anEvent | self clearPlacementPreview ];
+		whenDragLeftDo: [ :anEvent | self hidePlacementPreview ];
 		whenDroppedDo: [ :anEvent |
-			anEvent domainObjects do: [ :each |
-				self applyAsset: each at: anEvent position ].
-			self clearPlacementPreview ];
+			anEvent domainObjects size = 1
+				ifTrue: [ self completeDropOfAsset: anEvent domainObjects first at: anEvent position ]
+				ifFalse: [ self clearPlacementPreview ] ];
 		yourself)
 ]
 
@@ -93,6 +94,7 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> clearPlacementPreview [
+	dropCompletionToken := nil.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
@@ -398,19 +400,25 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
-	animations stopAll.
+	animations stop: #dropPreviewPosition.
 	self restoreDisplacedElements.
-	self detachPlacementPreview
+	self fadeDropPreviewOut
 ]
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| extent origin |
-	previewElement ifNil: [ self createDropPreviewElement ].
+	| extent origin isNew |
+	isNew := previewElement isNil.
+	isNew ifTrue: [ self createDropPreviewElement ].
 	previewElement forceLayout.
 	extent := previewElement extent.
 	origin := aCandidate previewOriginForExtent: extent.
-	self animatePreviewTo: origin.
+	isNew
+		ifTrue: [
+			previewElement relocate: origin.
+			previewElement userData at: #cfAnimatedPosition put: origin ]
+		ifFalse: [ self animatePreviewTo: origin ].
+	self fadeDropPreviewIn.
 	self animateDisplacementsFor: aCandidate previewExtent: extent
 ]
 
@@ -425,11 +433,77 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 		selected: nil
 		whenSelected: [ :ignored | ].
 	previewElement
-		opacity: 0.58;
+		opacity: 0;
 		preventMouseEvents;
-		constraintsDo: [ :c | c ignoreByLayout ];
-		relocate: 0 @ 0.
+		constraintsDo: [ :c | c ignoreByLayout ].
 	self addChild: previewElement
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> fadeDropPreviewIn [
+	previewElement ifNil: [ ^ self ].
+	self animatePreviewOpacityTo: 0.58 then: nil
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> fadeDropPreviewOut [
+	| element |
+	previewElement ifNil: [ ^ self ].
+	element := previewElement.
+	self animatePreviewOpacityTo: 0 then: [
+		(previewElement == element and: [ activePlacementCandidate isNil ])
+			ifTrue: [ self detachPlacementPreview ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity then: completionBlock [
+	| element start animation |
+	previewElement ifNil: [ ^ completionBlock ifNotNil: [ completionBlock value ] ].
+	element := previewElement.
+	start := element opacity.
+	start = targetOpacity ifTrue: [ ^ completionBlock ifNotNil: [ completionBlock value ] ].
+	animation := BlNumberTransition new
+		from: start;
+		to: targetOpacity;
+		duration: 100 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1);
+		onStepDo: [ :each | element opacity: each ];
+		yourself.
+	completionBlock ifNotNil: [
+		animation onFinishedDo: [
+			previewElement == element ifTrue: [ completionBlock value ] ] ].
+	animations retarget: [ animation ] named: #dropPreviewOpacity
+]
+
+{ #category : 'private - dropping' }
+CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
+	| assessment candidate token |
+	configuration ifNil: [ ^ self clearPlacementPreview ].
+	assessment := dragAsset == anAsset
+		ifTrue: [ dragAssessment ]
+		ifFalse: [ planner assessAsset: anAsset in: configuration ].
+	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
+	candidate ifNil: [ ^ self clearPlacementPreview ].
+	dragAsset == anAsset ifFalse: [
+		dragAsset := anAsset.
+		dragAssessment := assessment.
+		previewConfiguration := anAsset materialize ].
+	activePlacementCandidate := candidate.
+	activeTargetChoice := candidate targetChoice.
+	activeInsertionIndex := candidate insertionIndex.
+	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	self showDropPreviewAt: candidate.
+	token := Object new.
+	dropCompletionToken := token.
+	self animatePreviewOpacityTo: 1 then: [
+		dropCompletionToken == token ifTrue: [
+			(CFConfigurationPlan
+				asset: anAsset
+				targetChoice: candidate targetChoice
+				planner: planner) apply.
+			dropCompletionToken := nil.
+			self refreshConfigurationContent.
+			self refreshConfigurationInspector ] ]
 ]
 
 { #category : 'private - animations' }
