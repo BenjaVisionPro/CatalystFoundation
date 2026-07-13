@@ -507,19 +507,70 @@ CFConfigurationEditorElement >> clearPlacementTransformsInItems: itemElements [
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: itemElements [
 	| transitions animation |
+	Transcript
+		cr;
+		show: '[CFPlacementAnimation] begin beforeGeometry=';
+		show: beforeGeometry size printString;
+		show: ' itemContainers=';
+		show: itemElements size printString.
 	transitions := OrderedCollection new.
 	itemElements do: [ :items |
-		items ifNotNil: [
-			items children do: [ :each |
-				beforeGeometry
-					at: each
-					ifPresent: [ :oldBounds |
-						| newBounds delta |
-						newBounds := self boundsOf: each inLocalCoordinatesOf: self.
-						delta := oldBounds origin - newBounds origin.
-						delta isZero ifFalse: [ transitions add: each -> delta ] ] ] ] ].
-	transitions ifEmpty: [ ^ self ].
+		items
+			ifNil: [
+				Transcript
+					cr;
+					show: '[CFPlacementAnimation] skipped nil items container' ]
+			ifNotNil: [
+				Transcript
+					cr;
+					show: '[CFPlacementAnimation] items=';
+					show: items identityHash printString;
+					show: ' children=';
+					show: items children size printString.
+				items children do: [ :each |
+					beforeGeometry
+						at: each
+						ifPresent: [ :oldBounds |
+							| newBounds delta |
+							newBounds := self boundsOf: each inLocalCoordinatesOf: self.
+							delta := oldBounds origin - newBounds origin.
+							Transcript
+								cr;
+								show: '[CFPlacementAnimation] element=';
+								show: each identityHash printString;
+								show: ' class=';
+								show: each class name;
+								show: ' old=';
+								show: oldBounds printString;
+								show: ' new=';
+								show: newBounds printString;
+								show: ' delta=';
+								show: delta printString;
+								show: (delta isZero
+									ifTrue: [ ' excluded-zero-delta' ]
+									ifFalse: [ ' included' ]).
+							delta isZero ifFalse: [ transitions add: each -> delta ] ]
+						ifAbsent: [
+							Transcript
+								cr;
+								show: '[CFPlacementAnimation] element=';
+								show: each identityHash printString;
+								show: ' class=';
+								show: each class name;
+								show: ' excluded-no-before-geometry' ] ] ] ].
+	Transcript
+		cr;
+		show: '[CFPlacementAnimation] transitionCount=';
+		show: transitions size printString.
+	transitions ifEmpty: [
+		Transcript
+			cr;
+			show: '[CFPlacementAnimation] no animation scheduled'.
+		^ self ].
 	self applyPlacementTransitions: transitions progress: 0.0.
+	Transcript
+		cr;
+		show: '[CFPlacementAnimation] initial transforms applied; scheduling 180ms animation'.
 	animation := BlNumberTransition new
 		from: 0.0;
 		to: 1.0;
@@ -527,7 +578,11 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: it
 		easing: (BlDecelerateInterpolator factor: 1.4);
 		onStepDo: [ :progress | self applyPlacementTransitions: transitions progress: progress ];
 		yourself.
-	animation onFinishedDo: [ self clearPlacementTransitionElements: transitions ].
+	animation onFinishedDo: [
+		Transcript
+			cr;
+			show: '[CFPlacementAnimation] animation finished; clearing transforms'.
+		self clearPlacementTransitionElements: transitions ].
 	animations play: animation named: #placementLayout
 ]
 
