@@ -435,6 +435,7 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 		placePreviewSlotIn: items
 		at: insertionIndex
 		axis: aCandidate axis.
+	self measurePreviewSlotInItsTarget.
 	previewVisible := true.
 	wasVisible ifFalse: [ self setPreviewSlotExtent: 0 ].
 	self expandPlacementPreview.
@@ -454,10 +455,6 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 	previewElement
 		opacity: 0;
 		preventMouseEvents.
-	self addChild: previewElement.
-	previewElement forceLayout.
-	previewNaturalExtent := previewElement extent.
-	previewElement removeFromParent.
 	previewSlotElement := BrFrame new
 		clipChildren: true;
 		background: Color transparent;
@@ -599,7 +596,23 @@ CFConfigurationEditorElement >> placePreviewSlotIn: anItemsElement at: anIndex a
 			previewSlotElement removeFromParent.
 			previewItemsElement := anItemsElement.
 			anItemsElement addChild: previewSlotElement at: anIndex ].
-	previewElement matchParent
+	previewAxis = #horizontal
+		ifTrue: [
+			previewElement hFitContent; vMatchParent ]
+		ifFalse: [
+			previewElement hMatchParent; vFitContent ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
+	previewSlotElement ifNil: [ ^ self ].
+	previewAxis = #horizontal
+		ifTrue: [
+			previewSlotElement hFitContent; vMatchParent ]
+		ifFalse: [
+			previewSlotElement hMatchParent; vFitContent ].
+	previewItemsElement forceLayout.
+	previewNaturalExtent := previewSlotElement extent
 ]
 
 { #category : 'private - previewing' }
