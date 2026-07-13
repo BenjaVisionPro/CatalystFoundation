@@ -24,7 +24,8 @@ Class {
 		'dropCompletionToken',
 		'previewVisible',
 		'previewItemsElement',
-		'previewAxis'
+		'previewAxis',
+		'previewLayoutToken'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -114,6 +115,7 @@ CFConfigurationEditorElement >> detachPlacementPreview [
 	previewElement := nil.
 	previewItemsElement := nil.
 	previewAxis := nil.
+	previewLayoutToken := nil.
 	previewVisible := false
 ]
 
@@ -408,9 +410,10 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	activePlacementCandidate := nil.
 	previewVisible := false.
 	previewElement ifNil: [ ^ self ].
-	animations stop: #dropPreviewLayout.
 	beforeGeometry := self capturePreviewLayoutGeometry.
 	previewBounds := self boundsOf: previewElement inLocalCoordinatesOf: self.
+	previewLayoutToken := Object new.
+	animations stop: #dropPreviewLayout.
 	self resetPreviewLayoutTransformsIn: beforeGeometry.
 	preview := previewElement.
 	previewElement removeFromParent.
@@ -436,8 +439,9 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	items := self relationItemsElementIn: relation.
 	items ifNil: [ ^ self hidePlacementPreview ].
 	insertionIndex := aCandidate insertionIndex max: 1.
-	animations stop: #dropPreviewLayout.
 	beforeGeometry := self capturePreviewLayoutGeometry.
+	previewLayoutToken := Object new.
+	animations stop: #dropPreviewLayout.
 	self resetPreviewLayoutTransformsIn: beforeGeometry.
 	previewItemsElement := items.
 	previewAxis := aCandidate axis.
@@ -661,7 +665,7 @@ CFConfigurationEditorElement >> forcePreviewLayout [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry [
-	| transitions animation |
+	| transitions animation token |
 	transitions := OrderedCollection new.
 	beforeGeometry keysAndValuesDo: [ :element :oldBounds |
 		element parent ifNotNil: [ | newBounds |
@@ -669,6 +673,8 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry [
 			(oldBounds closeTo: newBounds) ifFalse: [
 				transitions add: { element. oldBounds. newBounds } ] ] ].
 	transitions isEmpty ifTrue: [ ^ self ].
+	token := Object new.
+	previewLayoutToken := token.
 	transitions do: [ :transition |
 		self applyLayoutTransition: transition progress: 0.0 ].
 	animation := BlNumberTransition new
@@ -677,13 +683,16 @@ CFConfigurationEditorElement >> animatePreviewLayoutFrom: beforeGeometry [
 		duration: 140 milliSeconds;
 		easing: (BlDecelerateInterpolator factor: 1);
 		onStepDo: [ :progress |
-			transitions do: [ :transition |
-				self applyLayoutTransition: transition progress: progress ] ];
+			previewLayoutToken == token ifTrue: [
+				transitions do: [ :transition |
+					self applyLayoutTransition: transition progress: progress ] ] ];
 		yourself.
 	animation onFinishedDo: [
-		transitions do: [ :transition |
-			(transition first) transformDo: [ :builder | ] ] ].
-	animations retarget: [ animation ] named: #dropPreviewLayout
+		previewLayoutToken == token ifTrue: [
+			transitions do: [ :transition |
+				(transition first) transformDo: [ :builder | ] ].
+			previewLayoutToken := nil ] ].
+	animations play: animation named: #dropPreviewLayout
 ]
 
 { #category : 'private - previewing' }
