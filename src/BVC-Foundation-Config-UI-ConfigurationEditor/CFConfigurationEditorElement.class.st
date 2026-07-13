@@ -659,20 +659,28 @@ CFConfigurationEditorElement >> preserveCurrentPreviewGap [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> measurePreviewSlotInItsTarget [
-	| overlayPosition rawIndex |
+	| overlayPosition rawIndex targetExtent targetWidth targetHeight |
 	previewSlotElement ifNil: [ ^ self ].
 	overlayPosition := previewElement position.
 	rawIndex := previewItemsElement childIndexOf: previewSlotElement.
+	targetExtent := previewItemsElement extent.
+	targetWidth := targetExtent x.
+	targetWidth <= 0 ifTrue: [
+		self error: 'The configuration preview target must have a positive width before measurement.' ].
 	previewElement removeFromParent.
 	previewSlotElement removeFromParent.
 	previewElement constraintsDo: [ :c | c accountByLayout ].
 	previewAxis = #horizontal
-		ifTrue: [ previewElement hFitContent; vMatchParent ]
-		ifFalse: [ previewElement hMatchParent; vFitContent ].
+		ifTrue: [ previewElement hFitContent; vExact: targetExtent y ]
+		ifFalse: [ previewElement hExact: targetWidth; vFitContent ].
 	previewItemsElement addChild: previewElement at: rawIndex.
 	previewItemsElement forceLayout.
-	previewElement forceLayout.
-	previewNaturalExtent := previewElement extent.
+	targetHeight := previewElement height.
+	targetHeight <= 0 ifTrue: [
+		self error: 'The configuration drop preview measured with a non-positive height.' ].
+	previewNaturalExtent := previewAxis = #horizontal
+		ifTrue: [ previewElement extent ]
+		ifFalse: [ targetWidth @ targetHeight ].
 	previewElement removeFromParent.
 	previewItemsElement addChild: previewSlotElement at: rawIndex.
 	previewElement
