@@ -80,7 +80,7 @@ CFConfigurationExamples >> methodLibraryDiscoversOptionalTypeHints [
 ]
 
 { #category : 'examples' }
-CFConfigurationExamples >> plannerFindsEmbeddedToManyPlacement [
+CFConfigurationExamples >> plannerFindsToManyPlacement [
 	<gtExample>
 	| configuration asset assessment targetChoice |
 	configuration := self class emptyConfigurationGroup.
@@ -91,7 +91,7 @@ CFConfigurationExamples >> plannerFindsEmbeddedToManyPlacement [
 		in: configuration.
 	self assert: assessment hasSingleTargetChoice.
 	targetChoice := assessment targetChoices first.
-	self assert: targetChoice placement owner == configuration.
+	self assert: targetChoice placement memento model == configuration.
 	self assert: targetChoice placement isAddition.
 	self assert: targetChoice willProduceValidConfiguration.
 	self assert: configuration configurations isEmpty.
@@ -135,7 +135,7 @@ CFConfigurationExamples >> plannerFindsNestedPlacements [
 		in: configuration.
 	self assert: assessment targetChoices size equals: 2.
 	self assert: (assessment targetChoices anySatisfy: [ :each |
-		each placement owner == nestedConfiguration ]).
+		each placement memento model == nestedConfiguration ]).
 	self assert: configuration configurations size equals: 1.
 	^ assessment
 ]
@@ -208,7 +208,7 @@ CFConfigurationExamples >> plannerRejectsStaleNestedPlan [
 		assessAsset: asset
 		in: configuration.
 	targetChoice := assessment targetChoices
-		detect: [ :each | each placement owner == nestedConfiguration ].
+		detect: [ :each | each placement memento model == nestedConfiguration ].
 	plan := CFConfigurationPlan
 		asset: asset
 		targetChoice: targetChoice

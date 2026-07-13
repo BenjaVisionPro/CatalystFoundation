@@ -43,8 +43,7 @@ CFConfigurationValidator >> validateMagritteConfiguration: aConfiguration visite
 	visitedConfigurations add: aConfiguration.
 	self validateMagritteOf: aConfiguration on: aValidationResult.
 	(aConfiguration magritteDescription
-		select: [ :each |
-			(each isKindOf: MARelationDescription) and: [ each cfConfigurationEmbedded ] ])
+		select: [ :each | each isKindOf: MARelationDescription ])
 		do: [ :each |
 			self
 				validateMagritteConfigurationsIn: (aConfiguration readUsing: each)

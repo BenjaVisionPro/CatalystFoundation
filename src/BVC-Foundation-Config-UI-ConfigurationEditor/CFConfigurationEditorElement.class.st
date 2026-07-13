@@ -298,11 +298,9 @@ CFConfigurationEditorElement >> createInspectorCloseButton [
 CFConfigurationEditorElement >> fieldElementForPlacement: aPlacement [
 	^ configurationContentElement
 		allChildrenBreadthFirstDetect: [ :each |
-			(each userData includesKey: #cfConfigurationEditorOwner) and: [
-				(each userData at: #cfConfigurationEditorOwner) == aPlacement owner
-					and: [ (each userData at: #cfConfigurationEditorDescription)
-						accessor readSelector
-							= aPlacement description accessor readSelector ] ] ]
+			(each isKindOf: CFConfigurationRelationElement) and: [
+				each memento model == aPlacement memento model
+					and: [ each description = aPlacement description ] ] ]
 		ifFound: [ :each | each ]
 		ifNone: [ nil ]
 ]
@@ -647,6 +645,11 @@ CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 		previewConfiguration := anAsset materialize ].
 	self showRootPlacementPreviewFor: anAsset at: aPoint.
 	rootConfiguration := previewConfiguration.
+	rootConfiguration initializeInContext: (CFConfigurationContext
+		memento: nil
+		description: nil
+		operationKind: #initializeRoot
+		insertionIndex: nil).
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
@@ -813,11 +816,7 @@ CFConfigurationEditorElement >> forcePreviewLayoutInItems: itemElements [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> relationItemsElementIn: aRelationElement [
-	^ aRelationElement
-		allChildrenBreadthFirstDetect: [ :each |
-			(each userData at: #cfConfigurationEditorRelationItems ifAbsent: [ false ]) ]
-		ifFound: [ :each | each ]
-		ifNone: [ nil ]
+	^ aRelationElement relationItemsElement
 ]
 
 { #category : 'private - geometry' }

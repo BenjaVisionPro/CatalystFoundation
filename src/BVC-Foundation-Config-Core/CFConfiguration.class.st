@@ -59,3 +59,14 @@ CFConfiguration >> rootConfiguration [
 CFConfiguration >> validateConfigurationGraphOn: aValidationResult [
 	^ aValidationResult
 ]
+
+
+{ #category : 'configuration lifecycle' }
+CFConfiguration >> addToRelationInContext: aContext [
+	self parent: aContext model
+]
+
+{ #category : 'configuration lifecycle' }
+CFConfiguration >> removeFromRelationInContext: aContext [
+	self parent == aContext model ifTrue: [ self parent: nil ]
+]

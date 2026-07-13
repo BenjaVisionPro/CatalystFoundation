@@ -40,3 +40,16 @@ CFObject >> iconDescription [
 		cfSerializable: true;
 		yourself
 ]
+
+
+{ #category : 'configuration lifecycle' }
+CFObject >> initializeInContext: aContext [
+]
+
+{ #category : 'configuration lifecycle' }
+CFObject >> addToRelationInContext: aContext [
+]
+
+{ #category : 'configuration lifecycle' }
+CFObject >> removeFromRelationInContext: aContext [
+]

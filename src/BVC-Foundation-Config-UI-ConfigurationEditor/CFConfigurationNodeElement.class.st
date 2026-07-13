@@ -3,6 +3,7 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'configuration',
+		'memento',
 		'visitedConfigurations',
 		'selectedConfiguration',
 		'selectionBlock'
@@ -32,7 +33,7 @@ CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet 
 { #category : 'private - building' }
 CFConfigurationNodeElement >> configurationChildrenFor: aDescription [
 	| value |
-	value := configuration readUsing: aDescription.
+	value := memento readUsing: aDescription.
 	value ifNil: [ ^ #() ].
 	(value isCollection and: [ value isString not ])
 		ifTrue: [ ^ value select: [ :each | each isKindOf: CFConfiguration ] ].
@@ -44,6 +45,7 @@ CFConfigurationNodeElement >> configurationChildrenFor: aDescription [
 { #category : 'accessing' }
 CFConfigurationNodeElement >> configuration: aConfiguration [
 	configuration := aConfiguration.
+	memento := GtMagritteMemento model: aConfiguration.
 	visitedConfigurations ifNil: [
 		visitedConfigurations := IdentitySet new.
 		visitedConfigurations add: aConfiguration ].
@@ -84,7 +86,9 @@ CFConfigurationNodeElement >> createHeaderElement [
 { #category : 'private - building' }
 CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 	| relationElement heading items children |
-	relationElement := BrVerticalPane new
+	relationElement := CFConfigurationRelationElement new
+		memento: memento;
+		description: aDescription;
 		hMatchParent;
 		vFitContent;
 		padding: (BlInsets all: 9);
@@ -93,12 +97,6 @@ CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 		background: (Color white alpha: 0.72);
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
 		yourself.
-	relationElement userData
-		at: #cfConfigurationEditorOwner
-		put: configuration.
-	relationElement userData
-		at: #cfConfigurationEditorDescription
-		put: aDescription.
 	heading := BrLabel new
 		hMatchParent;
 		vFitContent;
@@ -114,7 +112,7 @@ CFConfigurationNodeElement >> createRelationElementFor: aDescription [
 		vFitContent;
 		cellSpacing: 5;
 		yourself.
-	items userData at: #cfConfigurationEditorRelationItems put: true.
+	relationElement relationItemsElement: items.
 	children := self configurationChildrenFor: aDescription.
 	children do: [ :each |
 		(visitedConfigurations includes: each) ifFalse: [
@@ -155,9 +153,8 @@ CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
 	self removeChildren.
 	self addChild: self createHeaderElement.
-	(configuration magritteDescription
-		select: [ :each |
-			(each isKindOf: MARelationDescription) and: [ each cfConfigurationEmbedded ] ])
+	(memento magritteDescription
+		select: [ :each | each isKindOf: MARelationDescription ])
 		do: [ :each | self addChild: (self createRelationElementFor: each) ]
 ]
 

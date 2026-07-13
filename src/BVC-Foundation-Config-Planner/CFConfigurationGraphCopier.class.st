@@ -55,8 +55,7 @@ CFConfigurationGraphCopier >> copyValue: aValue forDescription: aDescription [
 	(aValue isCollection and: [ aValue isString not ]) ifTrue: [
 		^ aValue collect: [ :each |
 			self copyValue: each forDescription: aDescription ] ].
-	((aDescription isKindOf: MARelationDescription) and: [
-		aDescription cfConfigurationEmbedded and: [ aValue isKindOf: CFConfiguration ] ])
+	(aValue isKindOf: CFConfiguration)
 		ifTrue: [ ^ self copyConfiguration: aValue ].
 	^ aValue
 ]

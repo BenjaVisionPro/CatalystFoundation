@@ -31,33 +31,3 @@ MADescription >> cfSerializable: aBoolean [
 MADescription >> cfSerializableSymbol [
 	^ #cfSerializable
 ]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MARelationDescription >> beCFConfigurationEmbedded [
-	self cfConfigurationEmbedded: true
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MARelationDescription >> beCFConfigurationReferenced [
-	self cfConfigurationEmbedded: false
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MARelationDescription >> cfConfigurationEmbedded [
-	"Configuration relationships are structural by default. Mark a relation
-	as referenced when it should not be copied, validated, or targeted as part
-	of the configuration graph."
-	^ self
-		propertyAt: self cfConfigurationEmbeddedSymbol
-		ifAbsent: [ true ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MARelationDescription >> cfConfigurationEmbedded: aBoolean [
-	^ self propertyAt: self cfConfigurationEmbeddedSymbol put: aBoolean
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MARelationDescription >> cfConfigurationEmbeddedSymbol [
-	^ #cfConfigurationEmbedded
-]

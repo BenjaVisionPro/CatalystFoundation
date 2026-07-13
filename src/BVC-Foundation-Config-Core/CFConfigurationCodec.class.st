@@ -27,7 +27,7 @@ CFConfigurationCodec class >> decodeObject: aDictionary [
 			| value |
 			value := self decodeValue: (aDictionary at: key).
 			configuration write: value using: description.
-			self establishParent: configuration forValue: value using: description ] ].
+			self initialize: value afterAddingTo: configuration using: description ] ].
 	^ configuration
 ]
 
@@ -80,16 +80,31 @@ CFConfigurationCodec class >> encodeValue: aValue [
 ]
 
 { #category : 'decoding' }
-CFConfigurationCodec class >> establishParent: aConfiguration forValue: aValue using: aDescription [
-	((aDescription isKindOf: MARelationDescription) and: [
-		aDescription cfConfigurationEmbedded ]) ifFalse: [ ^ self ].
+CFConfigurationCodec class >> initialize: aValue afterAddingTo: aConfiguration using: aDescription [
+	| memento |
 	aValue ifNil: [ ^ self ].
 	(aValue isCollection and: [ aValue isString not ]) ifTrue: [
-		aValue do: [ :each |
-			self establishParent: aConfiguration forValue: each using: aDescription ].
+		aValue withIndexDo: [ :each :index |
+			self
+				initialize: each
+				afterAddingTo: aConfiguration
+				using: aDescription
+				at: index ].
 		^ self ].
-	(aValue isKindOf: CFConfiguration) ifTrue: [
-		aValue parent: aConfiguration ]
+	self initialize: aValue afterAddingTo: aConfiguration using: aDescription at: nil
+]
+
+{ #category : 'decoding' }
+CFConfigurationCodec class >> initialize: anObject afterAddingTo: aConfiguration using: aDescription at: anIndex [
+	| context |
+	(anObject respondsTo: #initializeInContext:) ifFalse: [ ^ self ].
+	context := CFConfigurationContext
+		memento: (MAStraightMemento model: aConfiguration)
+		description: aDescription
+		operationKind: (aDescription isMultiple ifTrue: [ #add ] ifFalse: [ #replace ])
+		insertionIndex: anIndex.
+	anObject initializeInContext: context.
+	anObject addToRelationInContext: context
 ]
 
 { #category : 'decoding' }

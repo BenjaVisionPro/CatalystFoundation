@@ -31,11 +31,16 @@ CFConfigurationPlanner >> assessConfiguration: anAssetConfiguration in: aConfigu
 
 { #category : 'private - planning' }
 CFConfigurationPlanner >> assessPlacement: aPlacement with: anAssetConfiguration in: aConfiguration originalValidationResult: originalValidationResult on: anAssessment [
-	| candidate candidateOwner candidateAsset candidateValidationResult |
+	| candidate candidateMemento candidateAsset candidateValidationResult candidatePlacement |
 	candidate := self graphCopier copy: aConfiguration.
-	candidateOwner := self graphCopier copyOf: aPlacement owner.
+	candidateMemento := MAStraightMemento model: (self graphCopier copyOf: aPlacement memento model).
 	candidateAsset := self graphCopier copyDetached: anAssetConfiguration.
-	aPlacement apply: candidateAsset to: candidateOwner.
+	candidatePlacement := CFConfigurationPlacement
+		memento: candidateMemento
+		description: aPlacement description
+		operationKind: aPlacement operationKind.
+	candidatePlacement insertionIndex: aPlacement insertionIndex.
+	candidatePlacement apply: candidateAsset.
 	candidateValidationResult := self validator validate: candidate.
 	(self introducesErrorsIn: candidateValidationResult comparedTo: originalValidationResult)
 		ifTrue: [
@@ -72,30 +77,30 @@ CFConfigurationPlanner >> placementsFor: anAssetConfiguration in: aConfiguration
 	visitedConfigurations := IdentitySet new.
 	self
 		placementsFor: anAssetConfiguration
-		inConfiguration: aConfiguration
+		inMemento: (MAStraightMemento model: aConfiguration)
 		visited: visitedConfigurations
 		into: placements.
 	^ placements
 ]
 
 { #category : 'private - planning' }
-CFConfigurationPlanner >> placementsFor: anAssetConfiguration inConfiguration: aConfiguration visited: visitedConfigurations into: placements [
-	(visitedConfigurations includes: aConfiguration) ifTrue: [ ^ self ].
-	visitedConfigurations add: aConfiguration.
-	(aConfiguration magritteDescription
-		select: [ :each |
-			(each isKindOf: MARelationDescription) and: [ each cfConfigurationEmbedded ] ])
-		do: [ :each |
+CFConfigurationPlanner >> placementsFor: anAssetConfiguration inMemento: aMemento visited: visitedConfigurations into: placements [
+	| model |
+	model := aMemento model.
+	(visitedConfigurations includes: model) ifTrue: [ ^ self ].
+	visitedConfigurations add: model.
+	aMemento magritteDescription do: [ :each |
+		(each isKindOf: MARelationDescription) ifTrue: [
 			(each classes anySatisfy: [ :aClass | anAssetConfiguration isKindOf: aClass ]) ifTrue: [
 				placements add: (CFConfigurationPlacement
-					owner: aConfiguration
+					memento: aMemento
 					description: each
 					operationKind: (each isMultiple ifTrue: [ #add ] ifFalse: [ #replace ])) ].
 			self
-				placementsForConfigurationsIn: (aConfiguration readUsing: each)
+				placementsForConfigurationsIn: (aMemento readUsing: each)
 				asset: anAssetConfiguration
 				visited: visitedConfigurations
-				into: placements ]
+				into: placements ] ]
 ]
 
 { #category : 'private - planning' }
@@ -113,7 +118,7 @@ CFConfigurationPlanner >> placementsForConfigurationsIn: aValue asset: anAssetCo
 	(aValue isKindOf: CFConfiguration) ifTrue: [
 		self
 			placementsFor: anAssetConfiguration
-			inConfiguration: aValue
+			inMemento: (MAStraightMemento model: aValue)
 			visited: visitedConfigurations
 			into: placements ]
 ]

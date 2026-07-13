@@ -21,17 +21,19 @@ CFConfigurationPlan class >> asset: aConfigurationAsset targetChoice: aTargetCho
 
 { #category : 'applying' }
 CFConfigurationPlan >> apply [
-	| configuration assessment targetChoice |
+	| configuration assessment targetChoice rootConfiguration |
 	configuration := configurationAsset materialize.
+	rootConfiguration := placement memento model rootConfiguration.
 	assessment := planner
 		assessConfiguration: configuration
-		in: placement owner rootConfiguration.
+		in: rootConfiguration.
 	targetChoice := planner
 		targetChoiceForPlacement: placement
 		in: assessment.
 	targetChoice ifNil: [
 		self error: 'This configuration plan is no longer applicable to the configuration editor.' ].
-	^ placement apply: configuration to: placement owner
+	placement initializeObject: configuration.
+	^ placement apply: configuration
 ]
 
 { #category : 'accessing' }
