@@ -22,7 +22,8 @@ Class {
 		'activePlacementCandidate',
 		'previewConfiguration',
 		'displacedElements',
-		'dropCompletionToken'
+		'dropCompletionToken',
+		'previewVisible'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -101,6 +102,7 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 	dragAsset := nil.
 	dragAssessment := nil.
 	previewConfiguration := nil.
+	previewVisible := false.
 	animations stopAll.
 	self resetDisplacedElements.
 	self detachPlacementPreview
@@ -109,7 +111,8 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> detachPlacementPreview [
 	previewElement ifNotNil: [ :anElement | anElement removeFromParent ].
-	previewElement := nil
+	previewElement := nil.
+	previewVisible := false
 ]
 
 { #category : 'private - building' }
@@ -297,6 +300,7 @@ CFConfigurationEditorElement >> initialize [
 	placementHysteresis := CFConfigurationPlacementHysteresis new.
 	animations := CFAnimationCoordinator on: self.
 	displacedElements := IdentitySet new.
+	previewVisible := false.
 	libraryVisible := true.
 	self
 		matchParent;
@@ -400,6 +404,7 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
+	previewVisible := false.
 	animations stop: #dropPreviewPosition.
 	self restoreDisplacedElements.
 	self fadeDropPreviewOut
@@ -407,19 +412,21 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| extent origin isNew |
-	isNew := previewElement isNil.
-	isNew ifTrue: [ self createDropPreviewElement ].
+	| extent origin wasVisible |
+	wasVisible := previewVisible = true.
+	previewElement ifNil: [ self createDropPreviewElement ].
 	previewElement forceLayout.
 	extent := previewElement extent.
 	origin := aCandidate previewOriginForExtent: extent.
-	isNew
-		ifTrue: [
+	wasVisible
+		ifTrue: [ self animatePreviewTo: origin ]
+		ifFalse: [
+			animations stop: #dropPreviewPosition.
 			previewElement relocate: origin.
-			previewElement userData at: #cfAnimatedPosition put: origin ]
-		ifFalse: [ self animatePreviewTo: origin ].
-	self fadeDropPreviewIn.
-	self animateDisplacementsFor: aCandidate previewExtent: extent
+			previewElement userData at: #cfAnimatedPosition put: origin ].
+	previewVisible := true.
+	self animateDisplacementsFor: aCandidate previewExtent: extent.
+	self fadeDropPreviewIn
 ]
 
 { #category : 'private - previewing' }
@@ -451,7 +458,7 @@ CFConfigurationEditorElement >> fadeDropPreviewOut [
 	previewElement ifNil: [ ^ self ].
 	element := previewElement.
 	self animatePreviewOpacityTo: 0 then: [
-		(previewElement == element and: [ activePlacementCandidate isNil ])
+		(previewElement == element and: [ previewVisible ~= true ])
 			ifTrue: [ self detachPlacementPreview ] ]
 ]
 
