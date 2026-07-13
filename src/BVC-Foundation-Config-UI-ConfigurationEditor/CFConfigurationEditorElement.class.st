@@ -423,8 +423,7 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 		vExact: previewBounds height;
 		constraintsDo: [ :c | c ignoreByLayout ];
 		relocate: previewBounds origin.
-	self forcePreviewLayoutInItems: affectedItems.
-	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
+	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
 	self animatePreviewOpacityTo: 0 then: [
 		(previewElement == preview and: [ previewVisible ~= true ])
 			ifTrue: [ self detachPlacementPreview ] ]
@@ -448,9 +447,8 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	previewAxis := aCandidate axis.
 	self measurePreviewForCurrentTarget.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
-	self forcePreviewLayoutInItems: affectedItems.
 	previewVisible := true.
-	self animatePlacementFrom: beforeGeometry inItems: affectedItems.
+	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
 	self fadeDropPreviewIn
 ]
 { #category : 'private - previewing' }
@@ -502,6 +500,13 @@ CFConfigurationEditorElement >> clearPlacementTransformsInItems: itemElements [
 		items ifNotNil: [
 			items children do: [ :each |
 				each transformation: BlElementLocalTransformation new ] ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry inItems: itemElements [
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [
+			self animatePlacementFrom: beforeGeometry inItems: itemElements ] ]
 ]
 
 { #category : 'private - animations' }
