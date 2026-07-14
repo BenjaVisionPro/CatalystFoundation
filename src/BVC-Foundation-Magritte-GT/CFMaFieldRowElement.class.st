@@ -72,7 +72,7 @@ CFMaFieldRowElement >> newRevertButton [
 		fitContent;
 		aptitude: BrGlamorousButtonWithIconAptitude new;
 		icon: BrGlamorousVectorIcons refresh;
-		disabled;
+		disable;
 		action: [ :aButton |
 			| aValue |
 			aValue := (memento readObservableValueUsing: description) valueOrNil.
