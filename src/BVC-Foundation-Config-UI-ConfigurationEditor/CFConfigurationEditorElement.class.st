@@ -28,7 +28,8 @@ Class {
 		'configurationSurfaceElement',
 		'hoverExpandedConfigurationNode',
 		'configurationsToExpandAfterRefresh',
-		'placementAnimationGeneration'
+		'placementAnimationGeneration',
+		'placementAnimationRequestSequence'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -339,6 +340,7 @@ CFConfigurationEditorElement >> initialize [
 	libraryVisible := true.
 	configurationsToExpandAfterRefresh := IdentitySet new.
 	placementAnimationGeneration := 0.
+	placementAnimationRequestSequence := 0.
 	self
 		matchParent;
 		layout: BlFrameLayout new;
@@ -489,7 +491,7 @@ CFConfigurationEditorElement >> hidePlacementPreviewAt: aPoint [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> hidePlacementPreview [
-	| previewBounds preview beforeGeometry affectedItems |
+	| previewBounds preview beforeGeometry affectedItems requestId |
 	self collapseHoverExpandedConfigurationForm.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
@@ -498,10 +500,17 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	previewElement ifNil: [ ^ self ].
 	affectedItems := IdentitySet new.
 	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
-	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
+	requestId := self nextPlacementAnimationRequestId.
+	beforeGeometry := self
+		capturePresentedGeometryInItems: affectedItems
+		requestId: requestId
+		origin: #hidePreview.
 	previewBounds := self boundsOf: previewElement inLocalCoordinatesOf: self.
 	animations stop: #placementLayout.
-	self clearPlacementTransformsInItems: affectedItems.
+	self
+		clearPlacementTransformsInItems: affectedItems
+		requestId: requestId
+		origin: #hidePreview.
 	preview := previewElement.
 	previewElement removeFromParent.
 	previewItemsElement := nil.
@@ -511,14 +520,18 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 		vExact: previewBounds height;
 		constraintsDo: [ :c | c ignoreByLayout ];
 		relocate: previewBounds origin.
-	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
+	self
+		postponePlacementAnimationFrom: beforeGeometry
+		inItems: affectedItems
+		origin: #hidePreview
+		requestId: requestId.
 	self animatePreviewOpacityTo: 0 then: [
 		(previewElement == preview and: [ previewVisible ~= true ])
 			ifTrue: [ self detachPlacementPreview ] ]
 ]
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| relation items insertionIndex beforeGeometry affectedItems |
+	| relation items insertionIndex beforeGeometry affectedItems requestId |
 	previewElement ifNil: [ self createDropPreviewElement ].
 	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
 	relation ifNil: [ ^ self hidePlacementPreview ].
@@ -528,15 +541,26 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	affectedItems := IdentitySet new.
 	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
 	affectedItems add: items.
-	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
+	requestId := self nextPlacementAnimationRequestId.
+	beforeGeometry := self
+		capturePresentedGeometryInItems: affectedItems
+		requestId: requestId
+		origin: #showPreview.
 	animations stop: #placementLayout.
-	self clearPlacementTransformsInItems: affectedItems.
+	self
+		clearPlacementTransformsInItems: affectedItems
+		requestId: requestId
+		origin: #showPreview.
 	previewItemsElement := items.
 	previewAxis := aCandidate axis.
 	self measurePreviewForCurrentTarget.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
 	previewVisible := true.
-	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
+	self
+		postponePlacementAnimationFrom: beforeGeometry
+		inItems: affectedItems
+		origin: #showPreview
+		requestId: requestId.
 	self fadeDropPreviewIn
 ]
 { #category : 'private - previewing' }
@@ -572,37 +596,104 @@ CFConfigurationEditorElement >> fadeDropPreviewOut [
 
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> capturePresentedGeometryInItems: ignoredItemElements [
-	| geometry |
+CFConfigurationEditorElement >> capturePresentedGeometryInItems: affectedItemElements requestId: requestId origin: anOrigin [
+	| geometry elements |
 	geometry := IdentityDictionary new.
-	self placementAnimationElements do: [ :each |
-		geometry at: each put: (self boundsOf: each inLocalCoordinatesOf: self) ].
+	elements := self placementAnimationElements.
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase=capture origin='; show: anOrigin printString;
+		show: ' affectedItems='; show: (self placementAnimationIdentitiesOf: affectedItemElements);
+		show: ' discoveredCount='; show: elements size printString;
+		cr.
+	elements do: [ :each |
+		| bounds |
+		bounds := self boundsOf: each inLocalCoordinatesOf: self.
+		geometry at: each put: bounds.
+		Transcript
+			show: '[CFPlacementAnimation] request='; show: requestId printString;
+			show: ' phase=captured element='; show: (self placementAnimationIdentityOf: each);
+			show: ' configuration='; show: (self placementAnimationConfigurationIdentityOf: each);
+			show: ' role='; show: (self placementAnimationRoleOf: each);
+			show: ' parent='; show: (self placementAnimationIdentityOf: each parent);
+			show: ' parentChain='; show: (self placementAnimationParentChainOf: each);
+			show: ' bounds='; show: bounds printString;
+			show: ' transform='; show: each transformation printString;
+			cr ].
 	^ geometry
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> clearPlacementTransformsInItems: ignoredItemElements [
+CFConfigurationEditorElement >> clearPlacementTransformsInItems: affectedItemElements requestId: requestId origin: anOrigin [
 	self placementAnimationElements do: [ :each |
-		each transformation: BlElementLocalTransformation new ]
+		Transcript
+			show: '[CFPlacementAnimation] request='; show: requestId printString;
+			show: ' phase=clear-transform-before origin='; show: anOrigin printString;
+			show: ' affectedItems='; show: (self placementAnimationIdentitiesOf: affectedItemElements);
+			show: ' element='; show: (self placementAnimationIdentityOf: each);
+			show: ' role='; show: (self placementAnimationRoleOf: each);
+			show: ' transform='; show: each transformation printString;
+			cr.
+		each transformation: BlElementLocalTransformation new.
+		Transcript
+			show: '[CFPlacementAnimation] request='; show: requestId printString;
+			show: ' phase=clear-transform-after element='; show: (self placementAnimationIdentityOf: each);
+			show: ' transform='; show: each transformation printString;
+			cr ]
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> nextPlacementAnimationRequestId [
+	placementAnimationRequestSequence := placementAnimationRequestSequence + 1.
+	^ placementAnimationRequestSequence
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry inItems: ignoredItemElements [
+CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry inItems: affectedItemElements origin: anOrigin requestId: requestId [
 	| generation scheduledPreview |
 	placementAnimationGeneration := placementAnimationGeneration + 1.
 	generation := placementAnimationGeneration.
 	scheduledPreview := previewElement.
+	self
+		tracePlacementAnimationRequest: requestId
+		phase: #scheduled
+		origin: anOrigin
+		generation: generation
+		preview: scheduledPreview
+		items: affectedItemElements
+		geometry: beforeGeometry.
 	self spaceDo: [ :aSpace |
 		aSpace universe postpone: [
-			(generation = placementAnimationGeneration
-				and: [ previewElement == scheduledPreview ]) ifTrue: [
-				self animatePlacementFrom: beforeGeometry inItems: ignoredItemElements ] ] ]
+			| generationMatches previewMatches |
+			generationMatches := generation = placementAnimationGeneration.
+			previewMatches := previewElement == scheduledPreview.
+			self
+				tracePlacementAnimationCallback: requestId
+				phase: #callback
+				origin: anOrigin
+				generation: generation
+				preview: scheduledPreview
+				generationMatches: generationMatches
+				previewMatches: previewMatches.
+			(generationMatches and: [ previewMatches ])
+				ifTrue: [
+					self
+						animatePlacementFrom: beforeGeometry
+						inItems: affectedItemElements
+						origin: anOrigin
+						requestId: requestId ] ] ]
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ignoredItemElements [
+CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: affectedItemElements origin: anOrigin requestId: requestId [
 	| elements globalDeltas transitions animation |
 	elements := self placementAnimationElements.
+	self
+		tracePlacementAnimationExecution: requestId
+		origin: anOrigin
+		items: affectedItemElements
+		beforeGeometry: beforeGeometry
+		elements: elements.
 	globalDeltas := IdentityDictionary new.
 	elements do: [ :each |
 		beforeGeometry
@@ -611,6 +702,12 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ig
 				| newBounds delta |
 				newBounds := self boundsOf: each inLocalCoordinatesOf: self.
 				delta := oldBounds origin - newBounds origin.
+				self
+					tracePlacementAnimationGeometryFor: each
+					requestId: requestId
+					oldBounds: oldBounds
+					newBounds: newBounds
+					delta: delta.
 				delta isZero ifFalse: [ globalDeltas at: each put: delta ] ] ].
 
 	transitions := OrderedCollection new.
@@ -621,10 +718,25 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ig
 			ifNil: [ 0 @ 0 ]
 			ifNotNil: [ globalDeltas at: ancestor ].
 		localDelta := globalDelta - ancestorDelta.
+		self
+			tracePlacementAnimationTransitionFor: each
+			requestId: requestId
+			globalDelta: globalDelta
+			ancestor: ancestor
+			ancestorDelta: ancestorDelta
+			localDelta: localDelta.
 		localDelta isZero ifFalse: [ transitions add: each -> localDelta ] ].
 
-	transitions ifEmpty: [ ^ self ].
+	transitions ifEmpty: [
+		self tracePlacementAnimationRequestId: requestId message: 'no-transitions'.
+		^ self ].
+	self tracePlacementAnimationRequestId: requestId message: 'apply-progress-zero-before'.
 	self applyPlacementTransitions: transitions progress: 0.0.
+	transitions do: [ :association |
+		self
+			tracePlacementAnimationTransformFor: association key
+			requestId: requestId
+			phase: #afterProgressZero ].
 	animation := BlNumberTransition new
 		from: 0.0;
 		to: 1.0;
@@ -632,8 +744,170 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ig
 		easing: (BlDecelerateInterpolator factor: 1.4);
 		onStepDo: [ :progress | self applyPlacementTransitions: transitions progress: progress ];
 		yourself.
-	animation onFinishedDo: [ self clearPlacementTransitionElements: transitions ].
+	animation onFinishedDo: [
+		self tracePlacementAnimationRequestId: requestId message: 'finished-clear-transforms'.
+		self clearPlacementTransitionElements: transitions ].
 	animations play: animation named: #placementLayout
+]
+
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationRequest: requestId phase: aPhase origin: anOrigin generation: generation preview: scheduledPreview items: affectedItemElements geometry: beforeGeometry [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase='; show: aPhase printString;
+		show: ' origin='; show: anOrigin printString;
+		show: ' generation='; show: generation printString;
+		show: ' currentGeneration='; show: placementAnimationGeneration printString;
+		show: ' preview='; show: (self placementAnimationIdentityOf: scheduledPreview);
+		show: ' currentPreview='; show: (self placementAnimationIdentityOf: previewElement);
+		show: ' affectedItems='; show: (self placementAnimationIdentitiesOf: affectedItemElements);
+		show: ' capturedCount='; show: beforeGeometry size printString;
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationCallback: requestId phase: aPhase origin: anOrigin generation: generation preview: scheduledPreview generationMatches: generationMatches previewMatches: previewMatches [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase='; show: aPhase printString;
+		show: ' origin='; show: anOrigin printString;
+		show: ' generation='; show: generation printString;
+		show: ' currentGeneration='; show: placementAnimationGeneration printString;
+		show: ' generationMatches='; show: generationMatches printString;
+		show: ' scheduledPreview='; show: (self placementAnimationIdentityOf: scheduledPreview);
+		show: ' currentPreview='; show: (self placementAnimationIdentityOf: previewElement);
+		show: ' previewMatches='; show: previewMatches printString;
+		show: ' decision='; show: ((generationMatches and: [ previewMatches ]) ifTrue: [ 'apply' ] ifFalse: [ 'exit' ]);
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationExecution: requestId origin: anOrigin items: affectedItemElements beforeGeometry: beforeGeometry elements: elements [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase=execute origin='; show: anOrigin printString;
+		show: ' preview='; show: (self placementAnimationIdentityOf: previewElement);
+		show: ' affectedItems='; show: (self placementAnimationIdentitiesOf: affectedItemElements);
+		show: ' capturedCount='; show: beforeGeometry size printString;
+		show: ' executionCount='; show: elements size printString;
+		cr.
+	elements do: [ :each |
+		Transcript
+			show: '[CFPlacementAnimation] request='; show: requestId printString;
+			show: ' phase=execution-member element='; show: (self placementAnimationIdentityOf: each);
+			show: ' configuration='; show: (self placementAnimationConfigurationIdentityOf: each);
+			show: ' role='; show: (self placementAnimationRoleOf: each);
+			show: ' captured='; show: (beforeGeometry includesKey: each) printString;
+			show: ' parent='; show: (self placementAnimationIdentityOf: each parent);
+			show: ' parentChain='; show: (self placementAnimationParentChainOf: each);
+			show: ' transform='; show: each transformation printString;
+			cr ]
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationGeometryFor: anElement requestId: requestId oldBounds: oldBounds newBounds: newBounds delta: delta [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase=geometry element='; show: (self placementAnimationIdentityOf: anElement);
+		show: ' configuration='; show: (self placementAnimationConfigurationIdentityOf: anElement);
+		show: ' role='; show: (self placementAnimationRoleOf: anElement);
+		show: ' old='; show: oldBounds printString;
+		show: ' new='; show: newBounds printString;
+		show: ' delta='; show: delta printString;
+		show: ' transformBefore='; show: anElement transformation printString;
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationTransitionFor: anElement requestId: requestId globalDelta: globalDelta ancestor: ancestor ancestorDelta: ancestorDelta localDelta: localDelta [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase=transition element='; show: (self placementAnimationIdentityOf: anElement);
+		show: ' role='; show: (self placementAnimationRoleOf: anElement);
+		show: ' globalDelta='; show: globalDelta printString;
+		show: ' ancestor='; show: (self placementAnimationIdentityOf: ancestor);
+		show: ' ancestorDelta='; show: ancestorDelta printString;
+		show: ' localDelta='; show: localDelta printString;
+		show: ' decision='; show: (localDelta isZero ifTrue: [ 'skip' ] ifFalse: [ 'transition' ]);
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationTransformFor: anElement requestId: requestId phase: aPhase [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase='; show: aPhase printString;
+		show: ' element='; show: (self placementAnimationIdentityOf: anElement);
+		show: ' role='; show: (self placementAnimationRoleOf: anElement);
+		show: ' bounds='; show: (self boundsOf: anElement inLocalCoordinatesOf: self) printString;
+		show: ' transform='; show: anElement transformation printString;
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> tracePlacementAnimationRequestId: requestId message: aString [
+	Transcript
+		show: '[CFPlacementAnimation] request='; show: requestId printString;
+		show: ' phase='; show: aString;
+		cr
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationIdentityOf: anObject [
+	anObject ifNil: [ ^ 'nil' ].
+	^ String streamContents: [ :stream |
+		stream
+			nextPutAll: anObject class name;
+			nextPut: $#;
+			print: anObject identityHash ]
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationIdentitiesOf: aCollection [
+	^ String streamContents: [ :stream |
+		stream nextPut: $[.
+		aCollection
+			do: [ :each | stream nextPutAll: (self placementAnimationIdentityOf: each) ]
+			separatedBy: [ stream nextPutAll: ', ' ].
+		stream nextPut: $] ]
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationConfigurationIdentityOf: anElement [
+	(anElement isKindOf: CFConfigurationNodeElement) ifFalse: [ ^ 'n/a' ].
+	^ self placementAnimationIdentityOf: anElement configuration
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationRoleOf: anElement [
+	anElement == previewElement ifTrue: [ ^ 'preview' ].
+	(previewElement notNil and: [ self placementAnimationElement: anElement isAncestorOf: previewElement ])
+		ifTrue: [ ^ 'preview-ancestor' ].
+	(previewElement notNil and: [ self placementAnimationElement: previewElement isAncestorOf: anElement ])
+		ifTrue: [ ^ 'preview-descendant' ].
+	^ 'other'
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationElement: possibleAncestor isAncestorOf: anElement [
+	| ancestor |
+	ancestor := anElement parent.
+	[ ancestor notNil ] whileTrue: [
+		ancestor == possibleAncestor ifTrue: [ ^ true ].
+		ancestor := ancestor parent ].
+	^ false
+]
+
+{ #category : 'private - diagnostics' }
+CFConfigurationEditorElement >> placementAnimationParentChainOf: anElement [
+	| ancestor |
+	^ String streamContents: [ :stream |
+		ancestor := anElement parent.
+		[ ancestor notNil ] whileTrue: [
+			stream nextPutAll: (self placementAnimationIdentityOf: ancestor).
+			ancestor := ancestor parent.
+			ancestor ifNotNil: [ stream nextPutAll: ' <- ' ] ] ]
 ]
 
 { #category : 'private - animations' }
