@@ -451,12 +451,12 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	| assessment candidate |
+	(self isPointOverVisibleLibrarySidebar: aPoint)
+		ifTrue: [ ^ self hidePlacementPreview ].
 	hoverExpansionNode ifNotNil: [
 		hoverExpansionAsset == anAsset ifTrue: [
 			hoverExpansionPoint := aPoint.
 			^ self ] ].
-	(self isPointOverVisibleLibrarySidebar: aPoint)
-		ifTrue: [ ^ self hidePlacementPreview ].
 	configuration ifNil: [ ^ self showRootPlacementPreviewFor: anAsset at: aPoint ].
 	assessment := dragAsset == anAsset
 		ifTrue: [ dragAssessment ]
