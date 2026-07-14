@@ -29,11 +29,12 @@ CFMotionBuilder >> easing: anInterpolator [ easing := anInterpolator ]
 
 { #category : 'playing' }
 CFMotionBuilder >> opacityTo: aNumber [
-	^ (CFMotionPropertyOperation
+	| operation |
+	operation := CFMotionPropertyOperation
 		on: element
-		property: CFOpacityMotionProperty uniqueInstance)
+		property: CFOpacityMotionProperty uniqueInstance.
+	operation
 		duration: duration;
-		easing: easing;
-		retargetTo: aNumber;
-		yourself
+		easing: easing.
+	^ operation retargetTo: aNumber
 ]
