@@ -28,7 +28,10 @@ Class {
 		'configurationSurfaceElement',
 		'hoverExpandedConfigurationNode',
 		'configurationsToExpandAfterRefresh',
-		'placementAnimationGeneration'
+		'placementAnimationGeneration',
+		'hoverExpansionNode',
+		'hoverExpansionAsset',
+		'hoverExpansionPoint'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -427,6 +430,10 @@ CFConfigurationEditorElement >> selectConfiguration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	| assessment candidate |
+	hoverExpansionNode ifNotNil: [
+		hoverExpansionAsset == anAsset ifTrue: [
+			hoverExpansionPoint := aPoint.
+			^ self ] ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self hidePlacementPreview ].
 	configuration ifNil: [ ^ self showRootPlacementPreviewFor: anAsset at: aPoint ].
@@ -607,6 +614,14 @@ CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry i
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: affectedItemElements [
+	self
+		animatePlacementFrom: beforeGeometry
+		inItems: affectedItemElements
+		then: nil
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: affectedItemElements then: completionBlock [
 	| elements globalDeltas transitions animation |
 	elements := self placementAnimationElementsInItems: affectedItemElements.
 	globalDeltas := IdentityDictionary new.
@@ -627,7 +642,9 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: af
 			ifNotNil: [ globalDeltas at: ancestor ].
 		localDelta := globalDelta - ancestorDelta.
 		localDelta isZero ifFalse: [ transitions add: each -> localDelta ] ].
-	transitions ifEmpty: [ ^ self ].
+	transitions ifEmpty: [
+		completionBlock ifNotNil: [ completionBlock value ].
+		^ self ].
 	self applyPlacementTransitions: transitions progress: 0.0.
 	animation := BlNumberTransition new
 		from: 0.0;
@@ -636,7 +653,9 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: af
 		easing: (BlDecelerateInterpolator factor: 1.4);
 		onStepDo: [ :progress | self applyPlacementTransitions: transitions progress: progress ];
 		yourself.
-	animation onFinishedDo: [ self clearPlacementTransitionElements: transitions ].
+	animation onFinishedDo: [
+		self clearPlacementTransitionElements: transitions.
+		completionBlock ifNotNil: [ completionBlock value ] ].
 	animations play: animation named: #placementLayout
 ]
 
@@ -979,22 +998,46 @@ CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: anAssessment asset: anAsset [
-	| node |
+	| node affectedItems beforeGeometry scheduledNode scheduledAsset |
 	node := self collapsedConfigurationNodeAt: aPoint for: anAssessment.
 	node ifNil: [ ^ false ].
 	hoverExpandedConfigurationNode == node ifFalse: [
 		self collapseHoverExpandedConfigurationForm.
 		hoverExpandedConfigurationNode := node ].
+	affectedItems := IdentitySet new.
+	node parent ifNotNil: [ :aParent | affectedItems add: aParent ].
+	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
+	animations stop: #placementLayout.
+	self clearPlacementTransformsInItems: affectedItems.
+	hoverExpansionNode := node.
+	hoverExpansionAsset := anAsset.
+	hoverExpansionPoint := aPoint.
+	scheduledNode := node.
+	scheduledAsset := anAsset.
 	node beExpanded.
 	self spaceDo: [ :aSpace |
 		aSpace universe postpone: [
-			dragAsset == anAsset
-				ifTrue: [ self showPlacementPreviewFor: anAsset at: aPoint ] ] ].
+			(hoverExpansionNode == scheduledNode
+				and: [ hoverExpansionAsset == scheduledAsset ]) ifTrue: [
+				self
+					animatePlacementFrom: beforeGeometry
+					inItems: affectedItems
+					then: [
+						| latestPoint |
+						latestPoint := hoverExpansionPoint.
+						hoverExpansionNode := nil.
+						hoverExpansionAsset := nil.
+						hoverExpansionPoint := nil.
+						dragAsset == scheduledAsset ifTrue: [
+							self showPlacementPreviewFor: scheduledAsset at: latestPoint ] ] ] ] ].
 	^ true
 ]
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
+	hoverExpansionNode := nil.
+	hoverExpansionAsset := nil.
+	hoverExpansionPoint := nil.
 	hoverExpandedConfigurationNode ifNotNil: [ :aNode |
 		aNode parent ifNotNil: [ aNode beCollapsed ] ].
 	hoverExpandedConfigurationNode := nil
@@ -1002,6 +1045,9 @@ CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> preserveHoverExpandedConfigurationForm [
+	hoverExpansionNode := nil.
+	hoverExpansionAsset := nil.
+	hoverExpansionPoint := nil.
 	hoverExpandedConfigurationNode := nil
 ]
 
