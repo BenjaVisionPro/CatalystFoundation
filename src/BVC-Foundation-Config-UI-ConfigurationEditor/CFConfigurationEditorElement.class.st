@@ -1277,14 +1277,13 @@ CFConfigurationEditorElement >> collapsedConfigurationNodeAt: aPoint for: anAsse
 		self
 			collectConfigurationNodeElementsFrom: configurationContentElement
 			into: nodes ].
-	^ nodes
-		detect: [ :each |
-			each formElement notNil
-				and: [ each isExpanded not
+	nodes reverseDo: [ :each |
+		(each formElement notNil
+			and: [ each isExpanded not
 				and: [ (self assessment: anAssessment hasPlacementForConfiguration: each configuration)
-				and: [ (self boundsOf: each formElement headerElement inLocalCoordinatesOf: self)
-					containsPoint: aPoint ] ] ] ]
-		ifNone: [ nil ]
+					and: [ (self boundsOf: each inLocalCoordinatesOf: self)
+						containsPoint: aPoint ] ] ]) ifTrue: [ ^ each ] ].
+	^ nil
 ]
 
 { #category : 'private - planning' }
