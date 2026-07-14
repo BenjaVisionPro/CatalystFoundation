@@ -70,6 +70,17 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 			yourself ].
 	formViewModel formElementDo: [ :aFormElement |
 		formElement := aFormElement.
+		aFormElement debugConfigurationIdentity: configuration identityHash.
+		Transcript
+			show: '[CFFormExpansion] created node=';
+			show: self identityHash printString;
+			show: ' form=';
+			show: aFormElement identityHash printString;
+			show: ' configuration=';
+			show: configuration identityHash printString;
+			show: ' inExpandedSet=';
+			show: (expandedConfigurations includes: configuration) printString;
+			cr.
 		aFormElement selected: self isSelected.
 		(expandedConfigurations includes: configuration)
 			ifTrue: [ aFormElement beExpanded ]
@@ -143,14 +154,60 @@ CFConfigurationNodeElement >> isExpanded [
 
 { #category : 'configuration' }
 CFConfigurationNodeElement >> beExpanded [
+	| oldValue caller |
+	oldValue := self isExpanded.
+	caller := thisContext sender selector.
+	Transcript
+		show: '[CFFormExpansion] nodeExpand node=';
+		show: self identityHash printString;
+		show: ' configuration=';
+		show: configuration identityHash printString;
+		show: ' old=';
+		show: oldValue printString;
+		show: ' requested=true caller=';
+		show: caller printString;
+		show: ' inExpandedSetBefore=';
+		show: (expandedConfigurations includes: configuration) printString;
+		cr.
 	expandedConfigurations add: configuration.
-	formElement ifNotNil: [ :anElement | anElement beExpanded ]
+	formElement ifNotNil: [ :anElement | anElement beExpanded ].
+	Transcript
+		show: '[CFFormExpansion] nodeExpandResult configuration=';
+		show: configuration identityHash printString;
+		show: ' expanded=';
+		show: self isExpanded printString;
+		show: ' inExpandedSetAfter=';
+		show: (expandedConfigurations includes: configuration) printString;
+		cr
 ]
 
 { #category : 'configuration' }
 CFConfigurationNodeElement >> beCollapsed [
+	| oldValue caller |
+	oldValue := self isExpanded.
+	caller := thisContext sender selector.
+	Transcript
+		show: '[CFFormExpansion] nodeCollapse node=';
+		show: self identityHash printString;
+		show: ' configuration=';
+		show: configuration identityHash printString;
+		show: ' old=';
+		show: oldValue printString;
+		show: ' requested=false caller=';
+		show: caller printString;
+		show: ' inExpandedSetBefore=';
+		show: (expandedConfigurations includes: configuration) printString;
+		cr.
 	expandedConfigurations remove: configuration ifAbsent: [ ].
-	formElement ifNotNil: [ :anElement | anElement beCollapsed ]
+	formElement ifNotNil: [ :anElement | anElement beCollapsed ].
+	Transcript
+		show: '[CFFormExpansion] nodeCollapseResult configuration=';
+		show: configuration identityHash printString;
+		show: ' expanded=';
+		show: self isExpanded printString;
+		show: ' inExpandedSetAfter=';
+		show: (expandedConfigurations includes: configuration) printString;
+		cr
 ]
 
 

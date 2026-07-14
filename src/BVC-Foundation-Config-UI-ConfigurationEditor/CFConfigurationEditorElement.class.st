@@ -957,6 +957,18 @@ CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: 
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
+	Transcript
+		show: '[CFFormExpansion] collapseHover caller=';
+		show: thisContext sender selector printString;
+		show: ' node=';
+		show: (hoverExpandedConfigurationNode
+			ifNil: [ 'nil' ]
+			ifNotNil: [ :aNode | aNode identityHash printString ]);
+		show: ' configuration=';
+		show: (hoverExpandedConfigurationNode
+			ifNil: [ 'nil' ]
+			ifNotNil: [ :aNode | aNode configuration identityHash printString ]);
+		cr.
 	hoverExpandedConfigurationNode ifNotNil: [ :aNode |
 		aNode parent ifNotNil: [ aNode beCollapsed ] ].
 	hoverExpandedConfigurationNode := nil
@@ -964,6 +976,18 @@ CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> preserveHoverExpandedConfigurationForm [
+	Transcript
+		show: '[CFFormExpansion] preserveHover caller=';
+		show: thisContext sender selector printString;
+		show: ' node=';
+		show: (hoverExpandedConfigurationNode
+			ifNil: [ 'nil' ]
+			ifNotNil: [ :aNode | aNode identityHash printString ]);
+		show: ' configuration=';
+		show: (hoverExpandedConfigurationNode
+			ifNil: [ 'nil' ]
+			ifNotNil: [ :aNode | aNode configuration identityHash printString ]);
+		cr.
 	hoverExpandedConfigurationNode := nil
 ]
 
