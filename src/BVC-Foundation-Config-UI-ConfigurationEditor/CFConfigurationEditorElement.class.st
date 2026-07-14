@@ -914,7 +914,7 @@ CFConfigurationEditorElement >> collapsedConfigurationNodeAt: aPoint for: anAsse
 		detect: [ :each |
 			each formElement notNil
 				and: [ each isExpanded not
-				and: [ self assessment: anAssessment hasPlacementForConfiguration: each configuration
+				and: [ (self assessment: anAssessment hasPlacementForConfiguration: each configuration)
 				and: [ (self boundsOf: each formElement headerElement inLocalCoordinatesOf: self)
 					containsPoint: aPoint ] ] ] ]
 		ifNone: [ nil ]
