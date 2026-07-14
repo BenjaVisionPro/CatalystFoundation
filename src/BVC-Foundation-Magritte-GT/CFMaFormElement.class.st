@@ -3,6 +3,7 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'headerElement',
+		'contentElement',
 		'bodyElement',
 		'footerElement'
 	],
@@ -14,6 +15,11 @@ Class {
 { #category : 'accessing' }
 CFMaFormElement >> bodyElement [
 	^ bodyElement
+]
+
+{ #category : 'accessing' }
+CFMaFormElement >> contentElement [
+	^ contentElement
 ]
 
 { #category : 'accessing' }
@@ -44,9 +50,17 @@ CFMaFormElement >> header: aHeaderElement body: aBodyElement footer: aFooterElem
 	headerElement := aHeaderElement.
 	bodyElement := aBodyElement.
 	footerElement := aFooterElement.
-	headerElement bodyElement: bodyElement.
+
+	contentElement := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 0;
+		addChild: bodyElement as: #body;
+		addChild: footerElement as: #footer;
+		yourself.
+
+	headerElement contentElement: contentElement.
 	self
 		addChild: headerElement as: #header;
-		addChild: bodyElement as: #body;
-		addChild: footerElement as: #footer
+		addChild: contentElement as: #content
 ]

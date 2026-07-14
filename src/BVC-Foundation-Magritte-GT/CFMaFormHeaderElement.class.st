@@ -7,7 +7,7 @@ Class {
 		'iconContainer',
 		'primaryFieldsContainer',
 		'classLinkElement',
-		'bodyElement',
+		'contentElement',
 		'expanded'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
@@ -31,8 +31,8 @@ CFMaFormHeaderElement >> addHeaderField: aFieldElement using: aDescription [
 ]
 
 { #category : 'accessing' }
-CFMaFormHeaderElement >> bodyElement: anElement [
-	bodyElement := anElement
+CFMaFormHeaderElement >> contentElement: anElement [
+	contentElement := anElement
 ]
 
 { #category : 'initialization' }
@@ -92,8 +92,8 @@ CFMaFormHeaderElement >> memento: aMemento [
 { #category : 'private' }
 CFMaFormHeaderElement >> toggleExpanded [
 	expanded := expanded not.
-	bodyElement ifNotNil: [
-		bodyElement visibility: (expanded
+	contentElement ifNotNil: [
+		contentElement visibility: (expanded
 			ifTrue: [ BlVisibility visible ]
 			ifFalse: [ BlVisibility gone ]) ].
 	toggleElement text: (expanded ifTrue: [ '▾' ] ifFalse: [ '▸' ])
