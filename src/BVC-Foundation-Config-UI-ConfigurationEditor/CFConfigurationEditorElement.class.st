@@ -599,7 +599,7 @@ CFConfigurationEditorElement >> fadeDropPreviewOut [
 CFConfigurationEditorElement >> capturePresentedGeometryInItems: affectedItemElements requestId: requestId origin: anOrigin [
 	| geometry elements |
 	geometry := IdentityDictionary new.
-	elements := self placementAnimationElements.
+	elements := self placementAnimationElementsInItems: affectedItemElements.
 	Transcript
 		show: '[CFPlacementAnimation] request='; show: requestId printString;
 		show: ' phase=capture origin='; show: anOrigin printString;
@@ -625,7 +625,7 @@ CFConfigurationEditorElement >> capturePresentedGeometryInItems: affectedItemEle
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> clearPlacementTransformsInItems: affectedItemElements requestId: requestId origin: anOrigin [
-	self placementAnimationElements do: [ :each |
+	(self placementAnimationElementsInItems: affectedItemElements) do: [ :each |
 		Transcript
 			show: '[CFPlacementAnimation] request='; show: requestId printString;
 			show: ' phase=clear-transform-before origin='; show: anOrigin printString;
@@ -687,7 +687,7 @@ CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry i
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: affectedItemElements origin: anOrigin requestId: requestId [
 	| elements globalDeltas transitions animation |
-	elements := self placementAnimationElements.
+	elements := self placementAnimationElementsInItems: affectedItemElements.
 	self
 		tracePlacementAnimationExecution: requestId
 		origin: anOrigin
@@ -911,17 +911,27 @@ CFConfigurationEditorElement >> placementAnimationParentChainOf: anElement [
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> placementAnimationElements [
+CFConfigurationEditorElement >> placementAnimationElementsInItems: affectedItemElements [
 	| result |
 	result := OrderedCollection new.
-	configurationContentElement ifNotNil: [
+	affectedItemElements do: [ :items |
+		items children do: [ :each |
+			(each isKindOf: CFConfigurationNodeElement) ifTrue: [
+				(result includes: each) ifFalse: [ result add: each ] ] ].
 		self
-			collectConfigurationNodeElementsFrom: configurationContentElement
-			into: result ].
-	previewElement ifNotNil: [
-		(previewElement hasParent and: [ (result includes: previewElement) not ])
-			ifTrue: [ result add: previewElement ] ].
+			addConfigurationNodeAncestorsOf: items
+			toPlacementAnimationElements: result ].
 	^ result
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> addConfigurationNodeAncestorsOf: anElement toPlacementAnimationElements: aCollection [
+	| ancestor |
+	ancestor := anElement parent.
+	[ ancestor notNil and: [ ancestor ~~ self ] ] whileTrue: [
+		(ancestor isKindOf: CFConfigurationNodeElement) ifTrue: [
+			(aCollection includes: ancestor) ifFalse: [ aCollection add: ancestor ] ].
+		ancestor := ancestor parent ]
 ]
 
 { #category : 'private - animations' }
