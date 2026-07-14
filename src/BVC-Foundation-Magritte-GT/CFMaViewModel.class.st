@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaViewModel',
 	#superclass : 'GtMagritteViewModel',
 	#instVars : [
-		'formElementBlock'
+		'formElementBlock',
+		'elementBuilderBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -11,6 +12,11 @@ Class {
 { #category : 'callbacks' }
 CFMaViewModel >> formElementDo: aBlock [
 	formElementBlock := aBlock
+]
+
+{ #category : 'callbacks' }
+CFMaViewModel >> elementBuilderDo: aBlock [
+	elementBuilderBlock := aBlock
 ]
 
 { #category : 'initialization' }
@@ -38,7 +44,9 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	formElementBlock ifNotNil: [ :aBlock | aBlock cull: aContainer ].
 	aContainer requestStyle.
 
-	CFMaElementBuilder new
+	(elementBuilderBlock
+		ifNil: [ CFMaElementBuilder new ]
+		ifNotNil: [ :aBlock | aBlock value ])
 		includeImplicitActions: includeImplicitActions;
 		form: theFrame;
 		memento: aMemento;

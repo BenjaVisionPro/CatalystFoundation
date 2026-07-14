@@ -30,17 +30,6 @@ CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet 
 		yourself
 ]
 
-{ #category : 'private - building' }
-CFConfigurationNodeElement >> configurationChildrenFor: aDescription [
-	| value |
-	value := memento readUsing: aDescription.
-	value ifNil: [ ^ #() ].
-	(value isCollection and: [ value isString not ])
-		ifTrue: [ ^ value select: [ :each | each isKindOf: CFConfiguration ] ].
-	^ (value isKindOf: CFConfiguration)
-		ifTrue: [ { value } ]
-		ifFalse: [ #() ]
-]
 
 { #category : 'accessing' }
 CFConfigurationNodeElement >> configuration: aConfiguration [
@@ -54,12 +43,16 @@ CFConfigurationNodeElement >> configuration: aConfiguration [
 
 { #category : 'private - building' }
 CFConfigurationNodeElement >> createMagritteFormElement [
-	| formDescription formViewModel formRootElement |
-	formDescription := (memento magritteDescription
-		select: [ :each | (each isKindOf: MARelationDescription) not ]) asContainer.
+	| formViewModel formRootElement |
 	formViewModel := CFMaViewModel
 		forObject: configuration
-		description: [ formDescription ].
+		description: [ memento magritteDescription ].
+	formViewModel elementBuilderDo: [
+		CFConfigurationMaElementBuilder new
+			visitedConfigurations: visitedConfigurations;
+			selectedConfiguration: selectedConfiguration;
+			whenSelectedDo: selectionBlock;
+			yourself ].
 	formViewModel formElementDo: [ :aFormElement |
 		aFormElement
 			selected: self isSelected;
@@ -74,52 +67,6 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 	^ formRootElement
 ]
 
-{ #category : 'private - building' }
-CFConfigurationNodeElement >> createRelationElementFor: aDescription [
-	| relationElement heading items children |
-	relationElement := CFConfigurationRelationElement new
-		memento: memento;
-		description: aDescription;
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets all: 9);
-		cellSpacing: 6;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		background: (Color white alpha: 0.72);
-		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
-		yourself.
-	heading := BrLabel new
-		hMatchParent;
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFont;
-			fontSize: 12;
-			foreground: (Color black alpha: 0.56);
-			yourself);
-		text: aDescription label;
-		yourself.
-	items := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 5;
-		yourself.
-	relationElement relationItemsElement: items.
-	children := self configurationChildrenFor: aDescription.
-	children do: [ :each |
-		(visitedConfigurations includes: each) ifFalse: [
-			| childVisited |
-			childVisited := visitedConfigurations copy.
-			childVisited add: each.
-			items addChild: (self class
-				configuration: each
-				visited: childVisited
-				selected: selectedConfiguration
-				whenSelected: selectionBlock) ] ].
-	relationElement
-		addChild: heading;
-		addChild: items.
-	^ relationElement
-]
 
 { #category : 'initialization' }
 CFConfigurationNodeElement >> initialize [
@@ -142,10 +89,7 @@ CFConfigurationNodeElement >> isSelected [
 CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
 	self removeChildren.
-	self addChild: self createMagritteFormElement.
-	(memento magritteDescription
-		select: [ :each | each isKindOf: MARelationDescription ])
-		do: [ :each | self addChild: (self createRelationElementFor: each) ]
+	self addChild: self createMagritteFormElement
 ]
 
 { #category : 'accessing' }
