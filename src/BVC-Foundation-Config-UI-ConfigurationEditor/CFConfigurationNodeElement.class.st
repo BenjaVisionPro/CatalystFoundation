@@ -53,50 +53,23 @@ CFConfigurationNodeElement >> configuration: aConfiguration [
 ]
 
 { #category : 'private - building' }
-CFConfigurationNodeElement >> createHeaderElement [
-	| header compact |
-	header := BrFrame new
-		hMatchParent;
-		vFitContent;
-		layout: BlFrameLayout new;
-		padding: (BlInsets all: 1);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 11);
-		background: (self isSelected
-			ifTrue: [ Color r: 0.16 g: 0.45 b: 0.88 alpha: 0.16 ]
-			ifFalse: [ Color white alpha: 0.98 ]);
-		border: (BlBorder paint: (self isSelected
-			ifTrue: [ Color r: 0.18 g: 0.50 b: 0.96 alpha: 0.95 ]
-			ifFalse: [ Color black alpha: 0.14 ]) width: (self isSelected ifTrue: [ 2 ] ifFalse: [ 1 ]));
-		yourself.
-	compact := CFCompactObjectStencil new
-		object: configuration;
-		create.
-	compact
-		hMatchParent;
-		padding: (BlInsets top: 10 left: 12 bottom: 10 right: 12);
-		yourself.
-	header
-		addChild: compact;
-		when: BlClickEvent do: [ :anEvent |
-			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ].
-			anEvent consumed: true ].
-	^ header
-]
-
-
-{ #category : 'private - building' }
 CFConfigurationNodeElement >> createMagritteFormElement [
-	| formDescription formElement |
+	| formDescription formViewModel formRootElement |
 	formDescription := (memento magritteDescription
 		select: [ :each | (each isKindOf: MARelationDescription) not ]) asContainer.
-	formElement := (CFMaViewModel
+	formViewModel := CFMaViewModel
 		forObject: configuration
-		description: [ formDescription ]) asEmbeddedElement.
-	formElement
+		description: [ formDescription ].
+	formViewModel formElementDo: [ :aFormElement |
+		aFormElement selected: self isSelected.
+		aFormElement headerElement when: BlClickEvent do: [ :anEvent |
+			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ] ].
+	formRootElement := formViewModel asEmbeddedElement.
+	formRootElement
 		hMatchParent;
 		vFitContent;
 		yourself.
-	^ formElement
+	^ formRootElement
 ]
 
 { #category : 'private - building' }
@@ -152,11 +125,10 @@ CFConfigurationNodeElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets all: 12);
+		padding: BlInsets empty;
 		cellSpacing: 10;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 14);
-		background: (Color r: 0.86 g: 0.91 b: 0.98 alpha: 0.42);
-		border: (BlBorder paint: (Color r: 0.26 g: 0.47 b: 0.76 alpha: 0.35) width: 1)
+		background: Color transparent;
+		border: BlBorder empty
 ]
 
 { #category : 'testing' }
@@ -168,9 +140,7 @@ CFConfigurationNodeElement >> isSelected [
 CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
 	self removeChildren.
-	self
-		addChild: self createHeaderElement;
-		addChild: self createMagritteFormElement.
+	self addChild: self createMagritteFormElement.
 	(memento magritteDescription
 		select: [ :each | each isKindOf: MARelationDescription ])
 		do: [ :each | self addChild: (self createRelationElementFor: each) ]

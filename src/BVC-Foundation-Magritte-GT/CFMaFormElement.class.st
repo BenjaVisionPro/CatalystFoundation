@@ -32,6 +32,16 @@ CFMaFormElement >> headerElement [
 	^ headerElement
 ]
 
+
+{ #category : 'accessing' }
+CFMaFormElement >> selected: aBoolean [
+	self border: (BlBorder
+		paint: (aBoolean
+			ifTrue: [ BrGlamorousColors focusedEditorBorderColor ]
+			ifFalse: [ Color black alpha: 0.13 ])
+		width: (aBoolean ifTrue: [ 2 ] ifFalse: [ 1 ]))
+]
+
 { #category : 'initialization' }
 CFMaFormElement >> initialize [
 	super initialize.
