@@ -726,12 +726,12 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	activeTargetChoice := candidate targetChoice.
 	activeInsertionIndex := candidate insertionIndex.
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	self preserveHoverExpandedConfigurationForm.
 	self showDropPreviewAt: candidate.
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
 		dropCompletionToken == token ifTrue: [
-			self preserveHoverExpandedConfigurationForm.
 			committedConfiguration := (CFConfigurationPlan
 				asset: anAsset
 				targetChoice: candidate targetChoice
