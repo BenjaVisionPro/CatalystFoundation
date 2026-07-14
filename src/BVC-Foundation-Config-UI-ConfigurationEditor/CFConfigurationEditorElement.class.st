@@ -31,7 +31,10 @@ Class {
 		'placementAnimationGeneration',
 		'hoverExpansionNode',
 		'hoverExpansionAsset',
-		'hoverExpansionPoint'
+		'hoverExpansionPoint',
+		'previewPreparationElement',
+		'pendingPreviewCandidate',
+		'pendingRootPreview'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -113,6 +116,8 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 	dragAssessment := nil.
 	previewConfiguration := nil.
 	previewVisible := false.
+	pendingPreviewCandidate := nil.
+	pendingRootPreview := false.
 	animations stopAll.
 	self detachPlacementPreview
 ]
@@ -123,7 +128,22 @@ CFConfigurationEditorElement >> detachPlacementPreview [
 	previewElement := nil.
 	previewItemsElement := nil.
 	previewAxis := nil.
-	previewVisible := false
+	previewVisible := false.
+	pendingPreviewCandidate := nil.
+	pendingRootPreview := false
+]
+
+{ #category : 'private - building' }
+CFConfigurationEditorElement >> createPreviewPreparationElement [
+	previewPreparationElement := BrFrame new
+		hExact: self configurationSurfaceWidth;
+		vFitContent;
+		layout: BlFrameLayout new;
+		opacity: 0;
+		preventMouseEvents;
+		constraintsDo: [ :c | c ignoreByLayout ];
+		yourself.
+	^ previewPreparationElement
 ]
 
 { #category : 'private - building' }
@@ -350,6 +370,7 @@ CFConfigurationEditorElement >> initialize [
 		border: BlBorder empty.
 	self
 		addChild: self createConfigurationContentElement;
+		addChild: self createPreviewPreparationElement;
 		addChild: self createLibrarySidebar;
 		addChild: self createLibraryToggleButton;
 		addAssetDropHandler.
@@ -464,7 +485,16 @@ CFConfigurationEditorElement >> showRootPlacementPreviewFor: anAsset at: aPoint 
 		dragAsset := anAsset.
 		dragAssessment := nil.
 		previewConfiguration := anAsset materialize ].
+	pendingRootPreview := true.
+	pendingPreviewCandidate := nil.
 	previewElement ifNil: [ self createDropPreviewElement ].
+	previewElement isFormReady ifTrue: [ self moveRootPreviewIntoTarget ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> moveRootPreviewIntoTarget [
+	pendingRootPreview ifFalse: [ ^ self ].
+	previewElement ifNil: [ ^ self ].
 	previewElement parent == configurationSurfaceElement ifFalse: [
 		previewElement removeFromParent.
 		previewElement
@@ -478,9 +508,9 @@ CFConfigurationEditorElement >> showRootPlacementPreviewFor: anAsset at: aPoint 
 	previewItemsElement := nil.
 	previewAxis := nil.
 	previewVisible := true.
+	pendingRootPreview := false.
 	self fadeDropPreviewIn
 ]
-
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> hidePlacementPreviewAt: aPoint [
@@ -502,7 +532,12 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
 	previewVisible := false.
+	pendingPreviewCandidate := nil.
+	pendingRootPreview := false.
 	previewElement ifNil: [ ^ self ].
+	(previewElement parent == previewPreparationElement
+		or: [ previewElement isFormReady not ]) ifTrue: [
+		^ self detachPlacementPreview ].
 	affectedItems := IdentitySet new.
 	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
 	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
@@ -526,8 +561,65 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
-	| relation items insertionIndex beforeGeometry affectedItems |
+	| relation items |
+	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
+	relation ifNil: [ ^ self hidePlacementPreview ].
+	items := self relationItemsElementIn: relation.
+	items ifNil: [ ^ self hidePlacementPreview ].
+	pendingRootPreview := false.
+	pendingPreviewCandidate := aCandidate.
 	previewElement ifNil: [ self createDropPreviewElement ].
+	self preparePreviewForItems: items axis: aCandidate axis.
+	previewElement isFormReady ifTrue: [
+		self movePreviewIntoTargetAnimating: aCandidate ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> createDropPreviewElement [
+	| visited element |
+	visited := IdentitySet new.
+	visited add: previewConfiguration.
+	element := CFConfigurationNodeElement
+		configuration: previewConfiguration
+		visited: visited
+		selected: nil
+		whenSelected: [ :ignored | ].
+	previewElement := element.
+	element
+		opacity: 0;
+		preventMouseEvents.
+	element userData at: #cfConfigurationEditorPlacementPreview put: true.
+	element whenFormReadyDo: [ :readyElement |
+		previewElement == readyElement ifTrue: [ self previewFormReady ] ].
+	previewPreparationElement addChild: element
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> preparePreviewForItems: anItemsElement axis: anAxis [
+	| targetWidth |
+	targetWidth := self targetWidthForItems: anItemsElement.
+	targetWidth <= 0 ifTrue: [
+		self error: 'The configuration preview target hierarchy must have a positive width before preview layout.' ].
+	previewPreparationElement hExact: targetWidth.
+	anAxis = #horizontal
+		ifTrue: [ previewElement hExact: targetWidth ]
+		ifFalse: [ previewElement hMatchParent ].
+	previewElement vFitContent
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> previewFormReady [
+	pendingRootPreview ifTrue: [ ^ self moveRootPreviewIntoTarget ].
+	pendingPreviewCandidate ifNotNil: [ :aCandidate |
+		self movePreviewIntoTargetAnimating: aCandidate ]
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> movePreviewIntoTargetAnimating: aCandidate [
+	| relation items insertionIndex beforeGeometry affectedItems |
+	previewElement ifNil: [ ^ self ].
+	previewElement isFormReady ifFalse: [ ^ self ].
+	pendingPreviewCandidate := aCandidate.
 	relation := self fieldElementForPlacement: aCandidate targetChoice placement.
 	relation ifNil: [ ^ self hidePlacementPreview ].
 	items := self relationItemsElementIn: relation.
@@ -544,25 +636,11 @@ CFConfigurationEditorElement >> showDropPreviewAt: aCandidate [
 	self measurePreviewForCurrentTarget.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
 	previewVisible := true.
+	pendingPreviewCandidate := nil.
 	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
 	self fadeDropPreviewIn
 ]
 
-{ #category : 'private - previewing' }
-CFConfigurationEditorElement >> createDropPreviewElement [
-	| visited |
-	visited := IdentitySet new.
-	visited add: previewConfiguration.
-	previewElement := CFConfigurationNodeElement
-		configuration: previewConfiguration
-		visited: visited
-		selected: nil
-		whenSelected: [ :ignored | ].
-	previewElement
-		opacity: 0;
-		preventMouseEvents.
-	previewElement userData at: #cfConfigurationEditorPlacementPreview put: true
-]
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> fadeDropPreviewIn [
 	previewElement ifNil: [ ^ self ].
@@ -746,6 +824,14 @@ CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 		dragAssessment := nil.
 		previewConfiguration := anAsset materialize ].
 	self showRootPlacementPreviewFor: anAsset at: aPoint.
+	previewElement ifNotNil: [ :anElement |
+		anElement isFormReady ifFalse: [
+			token := Object new.
+			dropCompletionToken := token.
+			anElement whenFormReadyDo: [ :readyElement |
+				(dropCompletionToken == token and: [ previewElement == readyElement ]) ifTrue: [
+					self completeRootDropOfAsset: anAsset at: aPoint ] ].
+			^ self ] ].
 	rootConfiguration := previewConfiguration.
 	rootConfiguration initializeInContext: (CFConfigurationContext
 		memento: nil
@@ -785,6 +871,14 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
 	self preserveHoverExpandedConfigurationForm.
 	placementAlreadyDisplayed ifFalse: [ self showDropPreviewAt: candidate ].
+	previewElement ifNotNil: [ :anElement |
+		anElement isFormReady ifFalse: [
+			token := Object new.
+			dropCompletionToken := token.
+			anElement whenFormReadyDo: [ :readyElement |
+				(dropCompletionToken == token and: [ previewElement == readyElement ]) ifTrue: [
+					self completeDropOfAsset: anAsset at: aPoint ] ].
+			^ self ] ].
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
@@ -848,7 +942,9 @@ CFConfigurationEditorElement >> clearAdoptedPlacementPreviewState [
 	previewVisible := false.
 	previewElement := nil.
 	previewItemsElement := nil.
-	previewAxis := nil
+	previewAxis := nil.
+	pendingPreviewCandidate := nil.
+	pendingRootPreview := false
 ]
 
 { #category : 'private - animations' }
@@ -912,8 +1008,13 @@ CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> previewTargetWidth [
+	^ self targetWidthForItems: previewItemsElement
+]
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> targetWidthForItems: anItemsElement [
 	| element width |
-	element := previewItemsElement.
+	element := anItemsElement.
 	[ element notNil ] whileTrue: [
 		width := element extent x.
 		width > 0 ifTrue: [ ^ width ].

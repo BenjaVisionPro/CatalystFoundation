@@ -8,7 +8,9 @@ Class {
 		'selectedConfiguration',
 		'selectionBlock',
 		'formElement',
-		'expandedConfigurations'
+		'expandedConfigurations',
+		'formReady',
+		'formReadyBlocks'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -75,7 +77,8 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 			ifTrue: [ aFormElement beExpanded ]
 			ifFalse: [ aFormElement beCollapsed ].
 		aFormElement headerElement when: BlClickEvent do: [ :anEvent |
-			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ] ].
+			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ].
+		self postponeFormReady ].
 	formRootElement := formViewModel asEmbeddedElement.
 	formRootElement
 		hMatchParent;
@@ -89,6 +92,8 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 CFConfigurationNodeElement >> initialize [
 	super initialize.
 	expandedConfigurations := IdentitySet new.
+	formReady := false.
+	formReadyBlocks := OrderedCollection new.
 	self
 		hMatchParent;
 		vFitContent;
@@ -106,6 +111,8 @@ CFConfigurationNodeElement >> isSelected [
 { #category : 'updating' }
 CFConfigurationNodeElement >> refresh [
 	configuration ifNil: [ ^ self ].
+	formReady := false.
+	formElement := nil.
 	self removeChildren.
 	self addChild: self createMagritteFormElement
 ]
@@ -170,3 +177,30 @@ CFConfigurationNodeElement >> commitPreviewWithConfiguration: aConfiguration sel
 	self allowMouseEvents
 ]
 
+{ #category : 'testing' }
+CFConfigurationNodeElement >> isFormReady [
+	^ formReady
+]
+
+{ #category : 'callbacks' }
+CFConfigurationNodeElement >> whenFormReadyDo: aBlock [
+	formReady
+		ifTrue: [ aBlock cull: self ]
+		ifFalse: [ formReadyBlocks add: aBlock ]
+]
+
+{ #category : 'private - callbacks' }
+CFConfigurationNodeElement >> postponeFormReady [
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [ self markFormReady ] ]
+]
+
+{ #category : 'private - callbacks' }
+CFConfigurationNodeElement >> markFormReady [
+	| callbacks |
+	formElement ifNil: [ ^ self ].
+	formReady := true.
+	callbacks := formReadyBlocks copy.
+	formReadyBlocks removeAll.
+	callbacks do: [ :each | each cull: self ]
+]
