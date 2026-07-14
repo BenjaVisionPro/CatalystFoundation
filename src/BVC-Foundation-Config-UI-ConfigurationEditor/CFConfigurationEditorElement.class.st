@@ -793,36 +793,15 @@ CFConfigurationEditorElement >> rawChildIndexForCommittedInsertionIndex: anIndex
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
-	| targetWidth measurementHost measurementElement visited naturalExtent |
+	| targetWidth |
+	previewElement ifNil: [ ^ self ].
 	targetWidth := self previewTargetWidth.
 	targetWidth <= 0 ifTrue: [
-		self error: 'The configuration preview target hierarchy must have a positive width before measurement.' ].
-	visited := IdentitySet new.
-	visited add: previewConfiguration.
-	measurementElement := CFConfigurationNodeElement
-		configuration: previewConfiguration
-		visited: visited
-		selected: nil
-		whenSelected: [ :ignored | ].
-	measurementHost := BrVerticalPane new
-		hExact: targetWidth;
-		vFitContent;
-		yourself.
-	measurementElement
-		hMatchParent;
-		vFitContent.
-	measurementHost addChild: measurementElement.
-	measurementHost forceLayout.
-	naturalExtent := measurementElement measuredExtent.
-	naturalExtent y <= 0 ifTrue: [
-		self error: 'The configuration drop preview measured with a non-positive height.' ].
+		self error: 'The configuration preview target hierarchy must have a positive width before preview layout.' ].
 	previewAxis = #horizontal
-		ifTrue: [
-			previewElement hExact: naturalExtent x.
-			previewElement vMatchParent ]
-		ifFalse: [
-			previewElement hMatchParent.
-			previewElement vExact: naturalExtent y ]
+		ifTrue: [ previewElement hExact: targetWidth ]
+		ifFalse: [ previewElement hMatchParent ].
+	previewElement vFitContent
 ]
 
 
