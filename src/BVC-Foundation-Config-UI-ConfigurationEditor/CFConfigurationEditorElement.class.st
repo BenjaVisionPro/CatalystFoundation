@@ -603,6 +603,19 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ig
 				| newBounds delta |
 				newBounds := self boundsOf: each inLocalCoordinatesOf: self.
 				delta := oldBounds origin - newBounds origin.
+				each == previewElement ifTrue: [
+					Transcript
+						show: '[CFDropCommit] phase=postpulse-geometry preview=';
+						show: each identityHash printString;
+						show: ' old=';
+						show: oldBounds printString;
+						show: ' new=';
+						show: newBounds printString;
+						show: ' delta=';
+						show: delta printString;
+						show: ' transformBefore=';
+						show: each transformation printString;
+						cr ].
 				delta isZero ifFalse: [ globalDeltas at: each put: delta ] ] ].
 
 	transitions := OrderedCollection new.
@@ -616,7 +629,11 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ig
 		localDelta isZero ifFalse: [ transitions add: each -> localDelta ] ].
 
 	transitions ifEmpty: [ ^ self ].
+	(transitions anySatisfy: [ :association | association key == previewElement ]) ifTrue: [
+		self traceDropPreviewPhase: 'before-apply-transition-zero' ].
 	self applyPlacementTransitions: transitions progress: 0.0.
+	(transitions anySatisfy: [ :association | association key == previewElement ]) ifTrue: [
+		self traceDropPreviewPhase: 'after-apply-transition-zero' ].
 	animation := BlNumberTransition new
 		from: 0.0;
 		to: 1.0;
@@ -695,6 +712,38 @@ CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity then: com
 	animations retarget: [ animation ] named: #dropPreviewOpacity
 ]
 
+{ #category : 'private - debugging' }
+CFConfigurationEditorElement >> traceDropPreviewPhase: aString [
+	| bounds parent |
+	previewElement ifNil: [
+		Transcript
+			show: '[CFDropCommit] phase=';
+			show: aString;
+			show: ' preview=nil';
+			cr.
+		^ self ].
+	parent := previewElement parent.
+	bounds := parent
+		ifNil: [ nil ]
+		ifNotNil: [ self boundsOf: previewElement inLocalCoordinatesOf: self ].
+	Transcript
+		show: '[CFDropCommit] phase=';
+		show: aString;
+		show: ' preview=';
+		show: previewElement identityHash printString;
+		show: ' parent=';
+		show: (parent ifNil: [ 'nil' ] ifNotNil: [ parent class name, '#', parent identityHash printString ]);
+		show: ' items=';
+		show: (previewItemsElement ifNil: [ 'nil' ] ifNotNil: [ previewItemsElement identityHash printString ]);
+		show: ' bounds=';
+		show: bounds printString;
+		show: ' transform=';
+		show: previewElement transformation printString;
+		show: ' opacity=';
+		show: previewElement opacity printString;
+		cr
+]
+
 { #category : 'private - dropping' }
 CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 	| token rootConfiguration |
@@ -744,16 +793,20 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
 	self preserveHoverExpandedConfigurationForm.
 	placementAlreadyDisplayed ifFalse: [ self showDropPreviewAt: candidate ].
+	self traceDropPreviewPhase: 'drop-before-opacity'.
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
 		dropCompletionToken == token ifTrue: [
+			self traceDropPreviewPhase: 'drop-before-apply'.
 			committedConfiguration := (CFConfigurationPlan
 				asset: anAsset
 				targetChoice: candidate targetChoice
 				planner: planner)
 				applyConfiguration: previewConfiguration.
+			self traceDropPreviewPhase: 'drop-after-apply'.
 			self adoptPlacementPreviewAs: committedConfiguration.
+			self traceDropPreviewPhase: 'drop-after-adopt'.
 			self refreshConfigurationInspector ] ]
 ]
 
