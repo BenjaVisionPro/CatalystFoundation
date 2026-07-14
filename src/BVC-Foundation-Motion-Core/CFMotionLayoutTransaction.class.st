@@ -62,8 +62,9 @@ CFMotionLayoutTransaction >> captureBeforeSnapshots [
 
 { #category : 'private - snapshots' }
 CFMotionLayoutTransaction >> boundsOf: anElement [
-	^ (coordinateSpace globalBoundsToLocal:
-		(anElement localBoundsToGlobal: anElement bounds inLocal copy)) asRectangle
+	| boundsInSpace |
+	boundsInSpace := BlBounds fromRectangle: anElement bounds inSpace asRectangle.
+	^ (coordinateSpace globalBoundsToLocal: boundsInSpace) asRectangle
 ]
 
 { #category : 'private - playing' }

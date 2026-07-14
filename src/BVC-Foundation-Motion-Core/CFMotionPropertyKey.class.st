@@ -21,7 +21,13 @@ CFMotionPropertyKey >> = another [
 CFMotionPropertyKey >> hash [ ^ element identityHash bitXor: property identityHash ]
 
 { #category : 'accessing' }
+CFMotionPropertyKey >> element [ ^ element ]
+
+{ #category : 'accessing' }
 CFMotionPropertyKey >> element: anElement [ element := anElement ]
+
+{ #category : 'accessing' }
+CFMotionPropertyKey >> property [ ^ property ]
 
 { #category : 'accessing' }
 CFMotionPropertyKey >> property: aProperty [ property := aProperty ]
