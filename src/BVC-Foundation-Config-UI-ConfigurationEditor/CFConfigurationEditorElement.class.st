@@ -703,14 +703,13 @@ CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 		dropCompletionToken == token ifTrue: [
 			configuration := rootConfiguration.
 			selectedConfiguration := nil.
-			dropCompletionToken := nil.
-			self refreshConfigurationContent.
+			self adoptRootPlacementPreviewAs: rootConfiguration.
 			self refreshConfigurationInspector ] ]
 ]
 
 { #category : 'private - dropping' }
 CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
-	| assessment candidate token targetConfiguration |
+	| assessment candidate token committedConfiguration |
 	configuration ifNil: [ ^ self completeRootDropOfAsset: anAsset at: aPoint ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self clearPlacementPreview ].
@@ -727,24 +726,73 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	activeTargetChoice := candidate targetChoice.
 	activeInsertionIndex := candidate insertionIndex.
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
-	targetConfiguration := candidate targetChoice placement memento model.
 	self showDropPreviewAt: candidate.
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
 		dropCompletionToken == token ifTrue: [
 			self preserveHoverExpandedConfigurationForm.
-			(CFConfigurationPlan
+			committedConfiguration := (CFConfigurationPlan
 				asset: anAsset
 				targetChoice: candidate targetChoice
-				planner: planner) apply.
-			dropCompletionToken := nil.
-			configurationsToExpandAfterRefresh add: targetConfiguration.
-			self refreshConfigurationContent.
+				planner: planner)
+				applyConfiguration: previewConfiguration.
+			self adoptPlacementPreviewAs: committedConfiguration.
 			self refreshConfigurationInspector ] ]
 ]
 
 
+
+{ #category : 'private - dropping' }
+CFConfigurationEditorElement >> adoptPlacementPreviewAs: aConfiguration [
+	| adoptedElement |
+	adoptedElement := previewElement.
+	adoptedElement ifNil: [ ^ self ].
+	adoptedElement userData
+		removeKey: #cfConfigurationEditorPlacementPreview
+		ifAbsent: [ ].
+	adoptedElement
+		commitPreviewWithConfiguration: aConfiguration
+		selected: selectedConfiguration
+		whenSelected: [ :aSelectedConfiguration |
+			self selectConfiguration: aSelectedConfiguration ];
+		opacity: 1.
+	self clearAdoptedPlacementPreviewState
+]
+
+{ #category : 'private - dropping' }
+CFConfigurationEditorElement >> adoptRootPlacementPreviewAs: aConfiguration [
+	| adoptedElement |
+	adoptedElement := previewElement.
+	adoptedElement ifNil: [ ^ self ].
+	configurationSurfaceElement children copy do: [ :each |
+		each == adoptedElement ifFalse: [ each removeFromParent ] ].
+	adoptedElement userData
+		removeKey: #cfConfigurationEditorPlacementPreview
+		ifAbsent: [ ].
+	adoptedElement
+		commitPreviewWithConfiguration: aConfiguration
+		selected: selectedConfiguration
+		whenSelected: [ :aSelectedConfiguration |
+			self selectConfiguration: aSelectedConfiguration ];
+		opacity: 1.
+	self clearAdoptedPlacementPreviewState
+]
+
+{ #category : 'private - dropping' }
+CFConfigurationEditorElement >> clearAdoptedPlacementPreviewState [
+	dropCompletionToken := nil.
+	activeTargetChoice := nil.
+	activeInsertionIndex := nil.
+	activePlacementCandidate := nil.
+	dragAsset := nil.
+	dragAssessment := nil.
+	previewConfiguration := nil.
+	previewVisible := false.
+	previewElement := nil.
+	previewItemsElement := nil.
+	previewAxis := nil
+]
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> pointAnimationFrom: startPoint to: targetPoint onStep: aBlock [

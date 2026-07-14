@@ -156,3 +156,15 @@ CFConfigurationNodeElement >> beCollapsed [
 CFConfigurationNodeElement >> expandedConfigurations: anIdentitySet [
 	expandedConfigurations := anIdentitySet
 ]
+
+{ #category : 'committing' }
+CFConfigurationNodeElement >> commitPreviewWithConfiguration: aConfiguration selected: aSelectedConfiguration whenSelected: aBlock [
+	configuration == aConfiguration ifFalse: [
+		self error: 'A placement preview can only commit the configuration it already renders.' ].
+	selectedConfiguration := aSelectedConfiguration.
+	selectionBlock := aBlock.
+	formElement ifNotNil: [ :anElement |
+		anElement selected: self isSelected ].
+	self allowMouseEvents
+]
+
