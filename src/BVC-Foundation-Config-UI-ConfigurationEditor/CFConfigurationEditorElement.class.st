@@ -722,7 +722,7 @@ CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 
 { #category : 'private - dropping' }
 CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
-	| assessment candidate token committedConfiguration |
+	| assessment candidate token committedConfiguration placementAlreadyDisplayed |
 	configuration ifNil: [ ^ self completeRootDropOfAsset: anAsset at: aPoint ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self clearPlacementPreview ].
@@ -731,6 +731,8 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 		ifFalse: [ planner assessAsset: anAsset in: configuration ].
 	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
 	candidate ifNil: [ ^ self clearPlacementPreview ].
+	placementAlreadyDisplayed := dragAsset == anAsset
+		and: [ candidate samePlacementAs: activePlacementCandidate ].
 	dragAsset == anAsset ifFalse: [
 		dragAsset := anAsset.
 		dragAssessment := assessment.
@@ -740,7 +742,7 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	activeInsertionIndex := candidate insertionIndex.
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
 	self preserveHoverExpandedConfigurationForm.
-	self showDropPreviewAt: candidate.
+	placementAlreadyDisplayed ifFalse: [ self showDropPreviewAt: candidate ].
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
