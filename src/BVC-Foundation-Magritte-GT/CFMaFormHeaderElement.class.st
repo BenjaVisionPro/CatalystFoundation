@@ -98,3 +98,19 @@ CFMaFormHeaderElement >> toggleExpanded [
 			ifFalse: [ BlVisibility gone ]) ].
 	toggleElement text: (expanded ifTrue: [ '▾' ] ifFalse: [ '▸' ])
 ]
+
+{ #category : 'accessing' }
+CFMaFormHeaderElement >> expanded [
+	^ expanded
+]
+
+{ #category : 'accessing' }
+CFMaFormHeaderElement >> expanded: aBoolean [
+	expanded = aBoolean ifTrue: [ ^ self ].
+	expanded := aBoolean.
+	contentElement ifNotNil: [
+		contentElement visibility: (expanded
+			ifTrue: [ BlVisibility visible ]
+			ifFalse: [ BlVisibility gone ]) ].
+	toggleElement text: (expanded ifTrue: [ '▾' ] ifFalse: [ '▸' ])
+]

@@ -74,3 +74,23 @@ CFMaFormElement >> header: aHeaderElement body: aBodyElement footer: aFooterElem
 		addChild: headerElement as: #header;
 		addChild: contentElement as: #content
 ]
+
+{ #category : 'accessing' }
+CFMaFormElement >> expanded [
+	^ headerElement expanded
+]
+
+{ #category : 'accessing' }
+CFMaFormElement >> expanded: aBoolean [
+	headerElement expanded: aBoolean
+]
+
+{ #category : 'accessing' }
+CFMaFormElement >> beCollapsed [
+	self expanded: false
+]
+
+{ #category : 'accessing' }
+CFMaFormElement >> beExpanded [
+	self expanded: true
+]

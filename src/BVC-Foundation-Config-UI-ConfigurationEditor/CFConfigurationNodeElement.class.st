@@ -61,7 +61,9 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 		forObject: configuration
 		description: [ formDescription ].
 	formViewModel formElementDo: [ :aFormElement |
-		aFormElement selected: self isSelected.
+		aFormElement
+			selected: self isSelected;
+			beCollapsed.
 		aFormElement headerElement when: BlClickEvent do: [ :anEvent |
 			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ] ].
 	formRootElement := formViewModel asEmbeddedElement.
