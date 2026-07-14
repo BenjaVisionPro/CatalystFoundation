@@ -467,7 +467,7 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 	(self expandCollapsedConfigurationFormAt: aPoint for: assessment asset: anAsset)
 		ifTrue: [ ^ self ].
 	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
-	candidate ifNil: [ ^ self hidePlacementPreview ].
+	candidate ifNil: [ ^ self hidePlacementPreviewAt: aPoint ].
 	(candidate samePlacementAs: activePlacementCandidate) ifTrue: [ ^ self ].
 	activePlacementCandidate := candidate.
 	activeTargetChoice := candidate targetChoice.
@@ -1235,12 +1235,46 @@ CFConfigurationEditorElement >> showPreparedPreviewFor: anAsset at: aPoint inNod
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
+	| node |
 	hoverExpansionNode := nil.
 	hoverExpansionAsset := nil.
 	hoverExpansionPoint := nil.
-	hoverExpandedConfigurationNode ifNotNil: [ :aNode |
-		aNode parent ifNotNil: [ aNode beCollapsed ] ].
-	hoverExpandedConfigurationNode := nil
+	node := hoverExpandedConfigurationNode.
+	hoverExpandedConfigurationNode := nil.
+	node ifNil: [ ^ self ].
+	node parent ifNil: [ ^ self ].
+	self animateHoverCollapseOf: node
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animateHoverCollapseOf: aNode [
+	| expandedHeight animation easing |
+	aNode isExpanded ifFalse: [ ^ aNode beCollapsed ].
+	expandedHeight := aNode extent y.
+	aNode
+		vExact: expandedHeight;
+		clipChildren: true;
+		beCollapsed.
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [
+			aNode parent ifNotNil: [
+				| collapsedHeight |
+				collapsedHeight := aNode naturalFormHeight.
+				collapsedHeight >= expandedHeight
+					ifTrue: [ aNode vFitContent ]
+					ifFalse: [
+						easing := BlDecelerateInterpolator factor: 1.4.
+						animation := BlNumberTransition new
+							from: 0.0;
+							to: 1.0;
+							duration: 180 milliSeconds;
+							easing: easing;
+							onStepDo: [ :progress |
+								aNode vExact: expandedHeight - ((expandedHeight - collapsedHeight) * progress) ];
+							yourself.
+						animation onFinishedDo: [
+							aNode parent ifNotNil: [ aNode vFitContent ] ].
+						animations play: animation named: #hoverFormLayout ] ] ] ]
 ]
 
 { #category : 'private - planning' }
