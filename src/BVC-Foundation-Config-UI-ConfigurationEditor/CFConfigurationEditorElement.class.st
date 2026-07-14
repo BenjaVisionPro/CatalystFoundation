@@ -784,9 +784,9 @@ CFConfigurationEditorElement >> rawChildIndexForCommittedInsertionIndex: anIndex
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
 	| targetWidth measurementHost measurementElement visited naturalExtent |
-	targetWidth := previewItemsElement extent x.
+	targetWidth := self previewTargetWidth.
 	targetWidth <= 0 ifTrue: [
-		self error: 'The configuration preview target must have a positive width before measurement.' ].
+		self error: 'The configuration preview target hierarchy must have a positive width before measurement.' ].
 	visited := IdentitySet new.
 	visited add: previewConfiguration.
 	measurementElement := CFConfigurationNodeElement
@@ -813,6 +813,19 @@ CFConfigurationEditorElement >> measurePreviewForCurrentTarget [
 		ifFalse: [
 			previewElement hMatchParent.
 			previewElement vExact: naturalExtent y ]
+]
+
+
+{ #category : 'private - previewing' }
+CFConfigurationEditorElement >> previewTargetWidth [
+	| element width |
+	element := previewItemsElement.
+	[ element notNil ] whileTrue: [
+		width := element extent x.
+		width > 0 ifTrue: [ ^ width ].
+		element == self ifTrue: [ ^ 0 ].
+		element := element parent ].
+	^ 0
 ]
 
 { #category : 'private - building' }
