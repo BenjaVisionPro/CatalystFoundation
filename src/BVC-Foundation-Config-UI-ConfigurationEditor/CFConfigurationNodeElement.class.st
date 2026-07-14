@@ -143,11 +143,13 @@ CFConfigurationNodeElement >> isExpanded [
 
 { #category : 'configuration' }
 CFConfigurationNodeElement >> beExpanded [
+	expandedConfigurations add: configuration.
 	formElement ifNotNil: [ :anElement | anElement beExpanded ]
 ]
 
 { #category : 'configuration' }
 CFConfigurationNodeElement >> beCollapsed [
+	expandedConfigurations remove: configuration ifAbsent: [ ].
 	formElement ifNotNil: [ :anElement | anElement beCollapsed ]
 ]
 
