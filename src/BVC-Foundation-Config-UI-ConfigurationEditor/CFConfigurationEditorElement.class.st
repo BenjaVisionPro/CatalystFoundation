@@ -637,7 +637,8 @@ CFConfigurationEditorElement >> placementAnimationElements [
 			collectConfigurationNodeElementsFrom: configurationContentElement
 			into: result ].
 	previewElement ifNotNil: [
-		(result includes: previewElement) ifFalse: [ result add: previewElement ] ].
+		(previewElement hasParent and: [ (result includes: previewElement) not ])
+			ifTrue: [ result add: previewElement ] ].
 	^ result
 ]
 
