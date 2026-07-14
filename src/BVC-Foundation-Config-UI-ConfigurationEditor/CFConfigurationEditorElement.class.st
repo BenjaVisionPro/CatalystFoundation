@@ -464,10 +464,16 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 			dragAsset := anAsset.
 			previewConfiguration := anAsset materialize.
 			dragAssessment := planner assessAsset: anAsset in: configuration ].
-	(self expandCollapsedConfigurationFormAt: aPoint for: assessment asset: anAsset)
-		ifTrue: [ ^ self ].
 	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
-	candidate ifNil: [ ^ self hidePlacementPreview ].
+	candidate ifNotNil: [
+		(self
+			expandCollapsedConfigurationFormFor: candidate
+			asset: anAsset
+			at: aPoint) ifTrue: [ ^ self ] ]
+	ifNil: [
+		(self expandCollapsedConfigurationFormAt: aPoint for: assessment asset: anAsset)
+			ifTrue: [ ^ self ].
+		^ self hidePlacementPreview ].
 	(candidate samePlacementAs: activePlacementCandidate) ifTrue: [ ^ self ].
 	activePlacementCandidate := candidate.
 	activeTargetChoice := candidate targetChoice.
@@ -1108,19 +1114,48 @@ CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
 ]
 
 { #category : 'private - planning' }
-CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: anAssessment asset: anAsset [
+CFConfigurationEditorElement >> expandCollapsedConfigurationFormFor: aCandidate asset: anAsset at: aPoint [
 	| node |
-	node := self collapsedConfigurationNodeAt: aPoint for: anAssessment.
-	node ifNil: [ ^ false ].
-	hoverExpandedConfigurationNode == node ifFalse: [
+	node := self configurationNodeContainingPlacementCandidate: aCandidate.
+	(node isNil or: [ node isExpanded ]) ifTrue: [ ^ false ].
+	^ self
+		beginHoverExpansionOf: node
+		asset: anAsset
+		at: aPoint
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> configurationNodeContainingPlacementCandidate: aCandidate [
+	| element |
+	element := self fieldElementForPlacement: aCandidate targetChoice placement.
+	[ element notNil and: [ element ~~ self ] ] whileTrue: [
+		(element isKindOf: CFConfigurationNodeElement) ifTrue: [ ^ element ].
+		element := element parent ].
+	^ nil
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> beginHoverExpansionOf: aNode asset: anAsset at: aPoint [
+	hoverExpandedConfigurationNode == aNode ifFalse: [
 		self collapseHoverExpandedConfigurationForm.
-		hoverExpandedConfigurationNode := node ].
-	hoverExpansionNode := node.
+		hoverExpandedConfigurationNode := aNode ].
+	hoverExpansionNode := aNode.
 	hoverExpansionAsset := anAsset.
 	hoverExpansionPoint := aPoint.
 	previewElement ifNil: [ self createDropPreviewElement ].
 	previewElement isFormReady ifTrue: [ self expandHoverTargetAndShowPreview ].
 	^ true
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: anAssessment asset: anAsset [
+	| node |
+	node := self collapsedConfigurationNodeAt: aPoint for: anAssessment.
+	node ifNil: [ ^ false ].
+	^ self
+		beginHoverExpansionOf: node
+		asset: anAsset
+		at: aPoint
 ]
 
 { #category : 'private - planning' }
