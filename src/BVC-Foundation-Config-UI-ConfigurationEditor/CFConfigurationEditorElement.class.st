@@ -336,6 +336,7 @@ CFConfigurationEditorElement >> initialize [
 	animations := CFAnimationCoordinator on: self.
 	previewVisible := false.
 	libraryVisible := true.
+	configurationsToExpandAfterRefresh := IdentitySet new.
 	self
 		matchParent;
 		layout: BlFrameLayout new;
