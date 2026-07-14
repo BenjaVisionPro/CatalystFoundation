@@ -1125,7 +1125,7 @@ CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: 
 
 { #category : 'private - planning' }
 CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
-	| node asset point assessment affectedItems beforeGeometry |
+	| node asset point assessment affectedItems collapsedHeight |
 	node := hoverExpansionNode.
 	asset := hoverExpansionAsset.
 	point := hoverExpansionPoint.
@@ -1136,11 +1136,13 @@ CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
 		ifTrue: [ dragAssessment ]
 		ifFalse: [ planner assessAsset: asset in: configuration ].
 	affectedItems := self placementAnimationItemsForConfigurationNode: node assessment: assessment.
-	node parent ifNotNil: [ :aParent | affectedItems add: aParent ].
-	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
 	animations stop: #placementLayout.
 	self clearPlacementTransformsInItems: affectedItems.
-	node beExpanded.
+	collapsedHeight := node extent y.
+	node
+		vExact: collapsedHeight;
+		clipChildren: true;
+		beExpanded.
 	self spaceDo: [ :aSpace |
 		aSpace universe postpone: [
 			(hoverExpansionNode == node
@@ -1148,8 +1150,35 @@ CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
 				self
 					showPreparedPreviewFor: asset
 					at: hoverExpansionPoint
-					fromGeometry: beforeGeometry
-					inItems: affectedItems ] ] ]
+					inNode: node
+					fromHeight: collapsedHeight ] ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> animateHoverExpansionOf: aNode fromHeight: collapsedHeight toHeight: expandedHeight [
+	| preview animation easing |
+	preview := previewElement.
+	preview ifNil: [
+		aNode vFitContent.
+		^ self ].
+	expandedHeight <= collapsedHeight ifTrue: [
+		aNode vFitContent.
+		preview opacity: 0.58.
+		^ self ].
+	easing := BlDecelerateInterpolator factor: 1.4.
+	animation := BlNumberTransition new
+		from: 0.0;
+		to: 1.0;
+		duration: 180 milliSeconds;
+		easing: easing;
+		onStepDo: [ :progress |
+			aNode vExact: collapsedHeight + ((expandedHeight - collapsedHeight) * progress).
+			preview opacity: 0.58 * progress ];
+		yourself.
+	animation onFinishedDo: [
+		aNode parent ifNotNil: [ aNode vFitContent ].
+		previewElement == preview ifTrue: [ preview opacity: 0.58 ] ].
+	animations play: animation named: #placementLayout
 ]
 
 { #category : 'private - planning' }
@@ -1167,8 +1196,8 @@ CFConfigurationEditorElement >> placementAnimationItemsForConfigurationNode: aNo
 ]
 
 { #category : 'private - planning' }
-CFConfigurationEditorElement >> showPreparedPreviewFor: anAsset at: aPoint fromGeometry: beforeGeometry inItems: affectedItems [
-	| candidate relation items insertionIndex |
+CFConfigurationEditorElement >> showPreparedPreviewFor: anAsset at: aPoint inNode: aNode fromHeight: collapsedHeight [
+	| candidate relation items insertionIndex scheduledPreview |
 	(hoverExpansionAsset == anAsset and: [ dragAsset == anAsset ]) ifFalse: [ ^ self ].
 	candidate := self placementCandidateIn: dragAssessment at: aPoint keeping: activePlacementCandidate.
 	candidate ifNil: [ ^ self hidePlacementPreview ].
@@ -1176,7 +1205,6 @@ CFConfigurationEditorElement >> showPreparedPreviewFor: anAsset at: aPoint fromG
 	relation ifNil: [ ^ self hidePlacementPreview ].
 	items := self relationItemsElementIn: relation.
 	items ifNil: [ ^ self hidePlacementPreview ].
-	affectedItems add: items.
 	activePlacementCandidate := candidate.
 	activeTargetChoice := candidate targetChoice.
 	activeInsertionIndex := candidate insertionIndex.
@@ -1190,15 +1218,19 @@ CFConfigurationEditorElement >> showPreparedPreviewFor: anAsset at: aPoint fromG
 	insertionIndex := candidate insertionIndex max: 1.
 	self placePreviewIn: items at: insertionIndex axis: previewAxis.
 	previewVisible := true.
-	hoverExpansionNode := nil.
-	hoverExpansionAsset := nil.
-	hoverExpansionPoint := nil.
-	self postponePlacementAnimationFrom: beforeGeometry inItems: affectedItems.
-	self
-		animatePreviewOpacityTo: 0.58
-		duration: 180 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4)
-		then: nil
+	previewElement opacity: 0.
+	scheduledPreview := previewElement.
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [
+			(previewElement == scheduledPreview
+				and: [ hoverExpansionNode == aNode ]) ifTrue: [
+				hoverExpansionNode := nil.
+				hoverExpansionAsset := nil.
+				hoverExpansionPoint := nil.
+				self
+					animateHoverExpansionOf: aNode
+					fromHeight: collapsedHeight
+					toHeight: aNode naturalFormHeight ] ] ]
 ]
 
 { #category : 'private - planning' }

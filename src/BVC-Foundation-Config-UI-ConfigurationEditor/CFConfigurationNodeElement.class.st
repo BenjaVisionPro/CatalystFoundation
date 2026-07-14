@@ -143,6 +143,12 @@ CFConfigurationNodeElement >> formElement [
 	^ formElement
 ]
 
+{ #category : 'geometry' }
+CFConfigurationNodeElement >> naturalFormHeight [
+	formElement ifNil: [ ^ self extent y ].
+	^ formElement extent y
+]
+
 { #category : 'testing' }
 CFConfigurationNodeElement >> isExpanded [
 	^ formElement notNil and: [ formElement expanded ]
