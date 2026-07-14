@@ -25,7 +25,8 @@ Class {
 		'previewVisible',
 		'previewItemsElement',
 		'previewAxis',
-		'configurationSurfaceElement'
+		'configurationSurfaceElement',
+		'hoverExpandedConfigurationNode'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -98,6 +99,7 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> clearPlacementPreview [
+	self collapseHoverExpandedConfigurationForm.
 	dropCompletionToken := nil.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
@@ -469,6 +471,7 @@ CFConfigurationEditorElement >> showRootPlacementPreviewFor: anAsset at: aPoint 
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> hidePlacementPreview [
 	| previewBounds preview beforeGeometry affectedItems |
+	self collapseHoverExpandedConfigurationForm.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
 	activePlacementCandidate := nil.
@@ -703,7 +706,7 @@ CFConfigurationEditorElement >> completeRootDropOfAsset: anAsset at: aPoint [
 
 { #category : 'private - dropping' }
 CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
-	| assessment candidate token |
+	| assessment candidate token targetConfiguration |
 	configuration ifNil: [ ^ self completeRootDropOfAsset: anAsset at: aPoint ].
 	(self isPointOverVisibleLibrarySidebar: aPoint)
 		ifTrue: [ ^ self clearPlacementPreview ].
@@ -720,17 +723,20 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 	activeTargetChoice := candidate targetChoice.
 	activeInsertionIndex := candidate insertionIndex.
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
+	targetConfiguration := candidate targetChoice placement memento model.
 	self showDropPreviewAt: candidate.
 	token := Object new.
 	dropCompletionToken := token.
 	self animatePreviewOpacityTo: 1 then: [
 		dropCompletionToken == token ifTrue: [
+			self preserveHoverExpandedConfigurationForm.
 			(CFConfigurationPlan
 				asset: anAsset
 				targetChoice: candidate targetChoice
 				planner: planner) apply.
 			dropCompletionToken := nil.
 			self refreshConfigurationContent.
+			self expandConfigurationFormForAfterLayout: targetConfiguration.
 			self refreshConfigurationInspector ] ]
 ]
 
@@ -907,12 +913,45 @@ CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: 
 	| node |
 	node := self collapsedConfigurationNodeAt: aPoint for: anAssessment.
 	node ifNil: [ ^ false ].
+	hoverExpandedConfigurationNode == node ifFalse: [
+		self collapseHoverExpandedConfigurationForm.
+		hoverExpandedConfigurationNode := node ].
 	node beExpanded.
 	self spaceDo: [ :aSpace |
 		aSpace universe postpone: [
 			dragAsset == anAsset
 				ifTrue: [ self showPlacementPreviewFor: anAsset at: aPoint ] ] ].
 	^ true
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
+	hoverExpandedConfigurationNode ifNotNil: [ :aNode |
+		aNode parent ifNotNil: [ aNode beCollapsed ] ].
+	hoverExpandedConfigurationNode := nil
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> preserveHoverExpandedConfigurationForm [
+	hoverExpandedConfigurationNode := nil
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> expandConfigurationFormFor: aConfiguration [
+	| nodes node |
+	nodes := OrderedCollection new.
+	configurationContentElement ifNotNil: [
+		self collectConfigurationNodeElementsFrom: configurationContentElement into: nodes ].
+	node := nodes
+		detect: [ :each | each configuration == aConfiguration ]
+		ifNone: [ nil ].
+	node ifNotNil: [ node beExpanded ]
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> expandConfigurationFormForAfterLayout: aConfiguration [
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [ self expandConfigurationFormFor: aConfiguration ] ]
 ]
 
 { #category : 'private - planning' }
