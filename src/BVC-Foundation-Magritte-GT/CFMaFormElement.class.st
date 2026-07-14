@@ -5,8 +5,7 @@ Class {
 		'headerElement',
 		'contentElement',
 		'bodyElement',
-		'footerElement',
-		'debugConfigurationIdentity'
+		'footerElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -83,28 +82,7 @@ CFMaFormElement >> expanded [
 
 { #category : 'accessing' }
 CFMaFormElement >> expanded: aBoolean [
-	| oldValue caller |
-	oldValue := self expanded.
-	caller := thisContext sender selector.
-	Transcript
-		show: '[CFFormExpansion] form=';
-		show: self identityHash printString;
-		show: ' configuration=';
-		show: (debugConfigurationIdentity ifNil: [ 'unknown' ] ifNotNil: [ :anInteger | anInteger printString ]);
-		show: ' old=';
-		show: oldValue printString;
-		show: ' new=';
-		show: aBoolean printString;
-		show: ' caller=';
-		show: caller printString;
-		cr.
 	headerElement expanded: aBoolean
-]
-
-
-{ #category : 'debugging' }
-CFMaFormElement >> debugConfigurationIdentity: anInteger [
-	debugConfigurationIdentity := anInteger
 ]
 
 { #category : 'accessing' }
