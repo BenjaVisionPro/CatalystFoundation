@@ -7,7 +7,8 @@ Class {
 		'visitedConfigurations',
 		'selectedConfiguration',
 		'selectionBlock',
-		'formElement'
+		'formElement',
+		'expandedConfigurations'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -25,6 +26,18 @@ CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet 
 CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet selected: aSelectedConfiguration whenSelected: aBlock [
 	^ self new
 		visitedConfigurations: aSet;
+		selectedConfiguration: aSelectedConfiguration;
+		whenSelectedDo: aBlock;
+		configuration: aConfiguration;
+		yourself
+]
+
+
+{ #category : 'instance creation' }
+CFConfigurationNodeElement class >> configuration: aConfiguration visited: aSet expandedConfigurations: anIdentitySet selected: aSelectedConfiguration whenSelected: aBlock [
+	^ self new
+		visitedConfigurations: aSet;
+		expandedConfigurations: anIdentitySet;
 		selectedConfiguration: aSelectedConfiguration;
 		whenSelectedDo: aBlock;
 		configuration: aConfiguration;
@@ -51,14 +64,16 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 	formViewModel elementBuilderDo: [
 		CFConfigurationMaElementBuilder new
 			visitedConfigurations: visitedConfigurations;
+			expandedConfigurations: expandedConfigurations;
 			selectedConfiguration: selectedConfiguration;
 			whenSelectedDo: selectionBlock;
 			yourself ].
 	formViewModel formElementDo: [ :aFormElement |
 		formElement := aFormElement.
-		aFormElement
-			selected: self isSelected;
-			beCollapsed.
+		aFormElement selected: self isSelected.
+		(expandedConfigurations includes: configuration)
+			ifTrue: [ aFormElement beExpanded ]
+			ifFalse: [ aFormElement beCollapsed ].
 		aFormElement headerElement when: BlClickEvent do: [ :anEvent |
 			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ] ].
 	formRootElement := formViewModel asEmbeddedElement.
@@ -73,6 +88,7 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 { #category : 'initialization' }
 CFConfigurationNodeElement >> initialize [
 	super initialize.
+	expandedConfigurations := IdentitySet new.
 	self
 		hMatchParent;
 		vFitContent;
@@ -133,4 +149,10 @@ CFConfigurationNodeElement >> beExpanded [
 { #category : 'configuration' }
 CFConfigurationNodeElement >> beCollapsed [
 	formElement ifNotNil: [ :anElement | anElement beCollapsed ]
+]
+
+
+{ #category : 'accessing' }
+CFConfigurationNodeElement >> expandedConfigurations: anIdentitySet [
+	expandedConfigurations := anIdentitySet
 ]

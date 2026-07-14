@@ -26,7 +26,8 @@ Class {
 		'previewItemsElement',
 		'previewAxis',
 		'configurationSurfaceElement',
-		'hoverExpandedConfigurationNode'
+		'hoverExpandedConfigurationNode',
+		'configurationsToExpandAfterRefresh'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -388,9 +389,11 @@ CFConfigurationEditorElement >> refreshConfigurationContent [
 	nodeElement := CFConfigurationNodeElement
 		configuration: configuration
 		visited: visitedConfigurations
+		expandedConfigurations: configurationsToExpandAfterRefresh copy
 		selected: selectedConfiguration
 		whenSelected: [ :aConfiguration |
 			self selectConfiguration: aConfiguration ].
+	configurationsToExpandAfterRefresh removeAll.
 	nodeElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
@@ -735,8 +738,8 @@ CFConfigurationEditorElement >> completeDropOfAsset: anAsset at: aPoint [
 				targetChoice: candidate targetChoice
 				planner: planner) apply.
 			dropCompletionToken := nil.
+			configurationsToExpandAfterRefresh add: targetConfiguration.
 			self refreshConfigurationContent.
-			self expandConfigurationFormForAfterLayout: targetConfiguration.
 			self refreshConfigurationInspector ] ]
 ]
 

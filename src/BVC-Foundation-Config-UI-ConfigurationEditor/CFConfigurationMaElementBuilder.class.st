@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'visitedConfigurations',
 		'selectedConfiguration',
-		'selectionBlock'
+		'selectionBlock',
+		'expandedConfigurations'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -45,6 +46,7 @@ CFConfigurationMaElementBuilder >> addConfigurationRelationUsing: aDescription [
 			items addChild: (CFConfigurationNodeElement
 				configuration: each
 				visited: childVisited
+				expandedConfigurations: expandedConfigurations
 				selected: selectedConfiguration
 				whenSelected: selectionBlock) ] ].
 	self addFieldElement: relationElement using: aDescription
@@ -73,4 +75,10 @@ CFConfigurationMaElementBuilder >> visitedConfigurations: aSet [
 { #category : 'events' }
 CFConfigurationMaElementBuilder >> whenSelectedDo: aBlock [
 	selectionBlock := aBlock
+]
+
+
+{ #category : 'accessing' }
+CFConfigurationMaElementBuilder >> expandedConfigurations: anIdentitySet [
+	expandedConfigurations := anIdentitySet
 ]
