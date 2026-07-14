@@ -428,6 +428,8 @@ CFConfigurationEditorElement >> showPlacementPreviewFor: anAsset at: aPoint [
 			dragAsset := anAsset.
 			previewConfiguration := anAsset materialize.
 			dragAssessment := planner assessAsset: anAsset in: configuration ].
+	(self expandCollapsedConfigurationFormAt: aPoint for: assessment asset: anAsset)
+		ifTrue: [ ^ self ].
 	candidate := self placementCandidateIn: assessment at: aPoint keeping: activePlacementCandidate.
 	candidate ifNil: [ ^ self hidePlacementPreview ].
 	(candidate samePlacementAs: activePlacementCandidate) ifTrue: [ ^ self ].
@@ -548,45 +550,51 @@ CFConfigurationEditorElement >> fadeDropPreviewOut [
 
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> capturePresentedGeometryInItems: itemElements [
+CFConfigurationEditorElement >> capturePresentedGeometryInItems: ignoredItemElements [
 	| geometry |
 	geometry := IdentityDictionary new.
-	itemElements do: [ :items |
-		items ifNotNil: [
-			items children do: [ :each |
-				geometry at: each put: (self boundsOf: each inLocalCoordinatesOf: self) ] ] ].
+	self placementAnimationElements do: [ :each |
+		geometry at: each put: (self boundsOf: each inLocalCoordinatesOf: self) ].
 	^ geometry
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> clearPlacementTransformsInItems: itemElements [
-	itemElements do: [ :items |
-		items ifNotNil: [
-			items children do: [ :each |
-				each transformation: BlElementLocalTransformation new ] ] ]
+CFConfigurationEditorElement >> clearPlacementTransformsInItems: ignoredItemElements [
+	self placementAnimationElements do: [ :each |
+		each transformation: BlElementLocalTransformation new ]
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry inItems: itemElements [
+CFConfigurationEditorElement >> postponePlacementAnimationFrom: beforeGeometry inItems: ignoredItemElements [
 	self spaceDo: [ :aSpace |
 		aSpace universe postpone: [
-			self animatePlacementFrom: beforeGeometry inItems: itemElements ] ]
+			self animatePlacementFrom: beforeGeometry inItems: ignoredItemElements ] ]
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: itemElements [
-	| transitions animation |
+CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: ignoredItemElements [
+	| elements globalDeltas transitions animation |
+	elements := self placementAnimationElements.
+	globalDeltas := IdentityDictionary new.
+	elements do: [ :each |
+		beforeGeometry
+			at: each
+			ifPresent: [ :oldBounds |
+				| newBounds delta |
+				newBounds := self boundsOf: each inLocalCoordinatesOf: self.
+				delta := oldBounds origin - newBounds origin.
+				delta isZero ifFalse: [ globalDeltas at: each put: delta ] ] ].
+
 	transitions := OrderedCollection new.
-	itemElements do: [ :items |
-		items ifNotNil: [
-			items children do: [ :each |
-				beforeGeometry
-					at: each
-					ifPresent: [ :oldBounds |
-						| newBounds delta |
-						newBounds := self boundsOf: each inLocalCoordinatesOf: self.
-						delta := oldBounds origin - newBounds origin.
-						delta isZero ifFalse: [ transitions add: each -> delta ] ] ] ] ].
+	globalDeltas keysAndValuesDo: [ :each :globalDelta |
+		| ancestor ancestorDelta localDelta |
+		ancestor := self nearestAnimatedConfigurationAncestorOf: each in: globalDeltas.
+		ancestorDelta := ancestor
+			ifNil: [ 0 @ 0 ]
+			ifNotNil: [ globalDeltas at: ancestor ].
+		localDelta := globalDelta - ancestorDelta.
+		localDelta isZero ifFalse: [ transitions add: each -> localDelta ] ].
+
 	transitions ifEmpty: [ ^ self ].
 	self applyPlacementTransitions: transitions progress: 0.0.
 	animation := BlNumberTransition new
@@ -598,6 +606,38 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: it
 		yourself.
 	animation onFinishedDo: [ self clearPlacementTransitionElements: transitions ].
 	animations play: animation named: #placementLayout
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> placementAnimationElements [
+	| result |
+	result := OrderedCollection new.
+	configurationContentElement ifNotNil: [
+		self
+			collectConfigurationNodeElementsFrom: configurationContentElement
+			into: result ].
+	previewElement ifNotNil: [
+		(result includes: previewElement) ifFalse: [ result add: previewElement ] ].
+	^ result
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> collectConfigurationNodeElementsFrom: anElement into: aCollection [
+	(anElement isKindOf: CFConfigurationNodeElement) ifTrue: [
+		aCollection add: anElement ].
+	anElement children do: [ :each |
+		self collectConfigurationNodeElementsFrom: each into: aCollection ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> nearestAnimatedConfigurationAncestorOf: anElement in: globalDeltas [
+	| ancestor |
+	ancestor := anElement parent.
+	[ ancestor notNil ] whileTrue: [
+		((ancestor isKindOf: CFConfigurationNodeElement)
+			and: [ globalDeltas includesKey: ancestor ]) ifTrue: [ ^ ancestor ].
+		ancestor := ancestor parent ].
+	^ nil
 ]
 
 { #category : 'private - animations' }
@@ -847,6 +887,43 @@ CFConfigurationEditorElement >> targetChoiceIn: anAssessment at: aPoint [
 	candidate ifNil: [ ^ nil ].
 	candidate targetChoice placement insertionIndex: candidate insertionIndex.
 	^ candidate targetChoice
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> expandCollapsedConfigurationFormAt: aPoint for: anAssessment asset: anAsset [
+	| node |
+	node := self collapsedConfigurationNodeAt: aPoint for: anAssessment.
+	node ifNil: [ ^ false ].
+	node beExpanded.
+	self spaceDo: [ :aSpace |
+		aSpace universe postpone: [
+			dragAsset == anAsset
+				ifTrue: [ self showPlacementPreviewFor: anAsset at: aPoint ] ] ].
+	^ true
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> collapsedConfigurationNodeAt: aPoint for: anAssessment [
+	| nodes |
+	nodes := OrderedCollection new.
+	configurationContentElement ifNotNil: [
+		self
+			collectConfigurationNodeElementsFrom: configurationContentElement
+			into: nodes ].
+	^ nodes
+		detect: [ :each |
+			each formElement notNil
+				and: [ each isExpanded not
+				and: [ self assessment: anAssessment hasPlacementForConfiguration: each configuration
+				and: [ (self boundsOf: each formElement headerElement inLocalCoordinatesOf: self)
+					containsPoint: aPoint ] ] ] ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - planning' }
+CFConfigurationEditorElement >> assessment: anAssessment hasPlacementForConfiguration: aConfiguration [
+	^ anAssessment targetChoices anySatisfy: [ :each |
+		each placement memento model == aConfiguration ]
 ]
 
 { #category : 'hooks - scene graph' }

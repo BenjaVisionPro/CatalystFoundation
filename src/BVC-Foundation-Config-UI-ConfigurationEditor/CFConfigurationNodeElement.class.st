@@ -6,7 +6,8 @@ Class {
 		'memento',
 		'visitedConfigurations',
 		'selectedConfiguration',
-		'selectionBlock'
+		'selectionBlock',
+		'formElement'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -54,6 +55,7 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 			whenSelectedDo: selectionBlock;
 			yourself ].
 	formViewModel formElementDo: [ :aFormElement |
+		formElement := aFormElement.
 		aFormElement
 			selected: self isSelected;
 			beCollapsed.
@@ -105,4 +107,30 @@ CFConfigurationNodeElement >> visitedConfigurations: aSet [
 { #category : 'events' }
 CFConfigurationNodeElement >> whenSelectedDo: aBlock [
 	selectionBlock := aBlock
+]
+
+
+{ #category : 'accessing' }
+CFConfigurationNodeElement >> configuration [
+	^ configuration
+]
+
+{ #category : 'accessing' }
+CFConfigurationNodeElement >> formElement [
+	^ formElement
+]
+
+{ #category : 'testing' }
+CFConfigurationNodeElement >> isExpanded [
+	^ formElement notNil and: [ formElement expanded ]
+]
+
+{ #category : 'configuration' }
+CFConfigurationNodeElement >> beExpanded [
+	formElement ifNotNil: [ :anElement | anElement beExpanded ]
+]
+
+{ #category : 'configuration' }
+CFConfigurationNodeElement >> beCollapsed [
+	formElement ifNotNil: [ :anElement | anElement beCollapsed ]
 ]
