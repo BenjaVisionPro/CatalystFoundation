@@ -1,16 +1,27 @@
 Class {
 	#name : 'CFMotionAppearanceOperation',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'element', 'operation', 'kind' ],
+	#instVars : [ 'container', 'element', 'operation', 'kind', 'insertionIndex' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
 
 { #category : 'instance creation' }
 CFMotionAppearanceOperation class >> appear: anElement in: aContainer duration: aDuration easing: anInterpolator [
+	^ self
+		appear: anElement
+		in: aContainer
+		at: nil
+		duration: aDuration
+		easing: anInterpolator
+]
+
+{ #category : 'instance creation' }
+CFMotionAppearanceOperation class >> appear: anElement in: aContainer at: anIndex duration: aDuration easing: anInterpolator [
 	^ self new
 		container: aContainer;
 		element: anElement;
+		insertionIndex: anIndex;
 		kind: #appear;
 		startWithDuration: aDuration easing: anInterpolator;
 		yourself
@@ -56,6 +67,12 @@ CFMotionAppearanceOperation >> isCompleted [ ^ operation isCompleted ]
 CFMotionAppearanceOperation >> isRunning [ ^ operation isRunning ]
 
 { #category : 'accessing' }
+CFMotionAppearanceOperation >> insertionIndex [ ^ insertionIndex ]
+
+{ #category : 'accessing' }
+CFMotionAppearanceOperation >> insertionIndex: anInteger [ insertionIndex := anInteger ]
+
+{ #category : 'accessing' }
 CFMotionAppearanceOperation >> kind [ ^ kind ]
 
 { #category : 'accessing' }
@@ -82,7 +99,9 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 		self error: 'An appearance container must be attached to a BlSpace' ].
 	element hasParent ifTrue: [
 		self error: 'An appearing element must be detached before insertion' ].
-	container addChild: element.
+	insertionIndex
+		ifNil: [ container addChild: element ]
+		ifNotNil: [ container addChild: element at: insertionIndex ].
 	element
 		visibility: BlVisibility visible;
 		opacity: 0.0.

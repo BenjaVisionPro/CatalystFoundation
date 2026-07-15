@@ -92,6 +92,29 @@ CFMotionExamples >> appearInsertsThenFadesIn [
 ]
 
 { #category : 'examples - appearance' }
+CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenFadesIn [
+	<gtExample>
+	| space first second inserted appearance |
+	space := BlSpace new.
+	first := BlElement new size: 120 @ 80; yourself.
+	second := BlElement new size: 120 @ 80; yourself.
+	inserted := BlElement new size: 120 @ 80; yourself.
+	space root addChild: first.
+	space root addChild: second.
+	appearance := space root motion
+		duration: 1 milliSeconds;
+		appear: inserted at: 2.
+	self assert: appearance isRunning.
+	self assert: (space root children at: 1) == first.
+	self assert: (space root children at: 2) == inserted.
+	self assert: (space root children at: 3) == second.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	self assert: inserted opacity equals: 1.0.
+	^ appearance
+]
+
+{ #category : 'examples - appearance' }
 CFMotionExamples >> disappearFadesOutThenRemoves [
 	<gtExample>
 	| space element disappearance |

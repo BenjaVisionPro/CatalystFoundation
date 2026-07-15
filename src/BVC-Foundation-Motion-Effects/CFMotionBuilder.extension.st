@@ -26,6 +26,16 @@ CFMotionBuilder >> appear: anElement [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
+CFMotionBuilder >> appear: anElement at: anIndex [
+	^ CFMotionAppearanceOperation
+		appear: anElement
+		in: element
+		at: anIndex
+		duration: duration
+		easing: easing
+]
+
+{ #category : '*BVC-Foundation-Motion-Effects' }
 CFMotionBuilder >> disappear [
 	^ CFMotionAppearanceOperation
 		disappear: element
