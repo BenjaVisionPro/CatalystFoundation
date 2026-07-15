@@ -64,6 +64,60 @@ CFMotionEffects class >> fadeOut: anElement duration: aDuration easing: anInterp
 		opacity: 0.0
 ]
 
+{ #category : 'translation' }
+CFMotionEffects class >> riseAndFadeIn: anElement [
+	^ self
+		riseAndFadeIn: anElement
+		distance: 12
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4)
+]
+
+{ #category : 'translation' }
+CFMotionEffects class >> riseAndFadeIn: anElement distance: aNumber duration: aDuration easing: anInterpolator [
+	| operation opacity |
+	anElement isAttachedToSceneGraph ifFalse: [
+		self error: 'A rise-and-fade-in effect subject must be attached to a BlSpace' ].
+	opacity := CFOpacityMotionProperty uniqueInstance.
+	operation := CFMotionOperation
+		coordinator: anElement space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: anElement property: opacity target: 1.0.
+			CFMotionTranslationTrack on: anElement from: 0 @ aNumber to: 0 @ 0 }.
+	operation
+		duration: aDuration;
+		easing: anInterpolator;
+		start.
+	^ operation
+]
+
+{ #category : 'translation' }
+CFMotionEffects class >> fallAndFadeOut: anElement [
+	^ self
+		fallAndFadeOut: anElement
+		distance: 12
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4)
+]
+
+{ #category : 'translation' }
+CFMotionEffects class >> fallAndFadeOut: anElement distance: aNumber duration: aDuration easing: anInterpolator [
+	| operation opacity |
+	anElement isAttachedToSceneGraph ifFalse: [
+		self error: 'A fall-and-fade-out effect subject must be attached to a BlSpace' ].
+	opacity := CFOpacityMotionProperty uniqueInstance.
+	operation := CFMotionOperation
+		coordinator: anElement space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: anElement property: opacity target: 0.0.
+			CFMotionTranslationTrack on: anElement from: 0 @ 0 to: 0 @ aNumber }.
+	operation
+		duration: aDuration;
+		easing: anInterpolator;
+		start.
+	^ operation
+]
+
 { #category : 'appearance' }
 CFMotionEffects class >> scaleAndFadeIn: anElement [
 	^ self

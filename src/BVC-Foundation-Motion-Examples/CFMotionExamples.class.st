@@ -325,6 +325,52 @@ CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
 	^ operation
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element
+		opacity: 0.0;
+		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	operation := CFMotionEffects
+		riseAndFadeIn: element
+		distance: 24
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation tracks size equals: 2.
+	self assert: operation tracks second presentation ownsCurrentTransformation.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	self assert: element transformation == applicationTransformation.
+	^ operation
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> fallAndFadeOutCoordinatesOpacityAndTranslation [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	operation := CFMotionEffects
+		fallAndFadeOut: element
+		distance: 24
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation tracks size equals: 2.
+	self assert: operation tracks second presentation ownsCurrentTransformation.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 0.0.
+	self assert: element transformation == applicationTransformation.
+	^ operation
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> disappearScalesAndFadesOutThenRemoves [
 	<gtExample>

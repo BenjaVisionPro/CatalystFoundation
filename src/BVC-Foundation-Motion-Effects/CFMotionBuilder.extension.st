@@ -17,6 +17,24 @@ CFMotionBuilder >> fadeOut [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
+CFMotionBuilder >> riseAndFadeIn [
+	^ CFMotionEffects
+		riseAndFadeIn: element
+		distance: 12
+		duration: duration
+		easing: easing
+]
+
+{ #category : '*BVC-Foundation-Motion-Effects' }
+CFMotionBuilder >> fallAndFadeOut [
+	^ CFMotionEffects
+		fallAndFadeOut: element
+		distance: 12
+		duration: duration
+		easing: easing
+]
+
+{ #category : '*BVC-Foundation-Motion-Effects' }
 CFMotionBuilder >> scaleIn [
 	^ CFMotionEffects
 		scaleIn: element
