@@ -229,6 +229,34 @@ CFMotionExamples >> opacityOperationIsInspectable [
 	^ operation
 ]
 
+{ #category : 'examples - structural motion' }
+CFMotionExamples >> overlayTracksItsReferenceAndCleansUp [
+	<gtExample>
+	| space reference overlay |
+	space := BlSpace new.
+	reference := BlElement new
+		relocate: 40 @ 30;
+		size: 120 @ 80;
+		yourself.
+	overlay := BlOverlayElement on: reference.
+	space root addChild: reference.
+	space root addChild: overlay.
+	space pulse.
+	self assertBounds: (CFMotionGeometrySnapshot of: overlay in: space root) bounds
+		closeTo: (CFMotionGeometrySnapshot of: reference in: space root) bounds.
+	reference
+		relocate: 180 @ 90;
+		size: 240 @ 100.
+	space pulse.
+	self assertBounds: (CFMotionGeometrySnapshot of: overlay in: space root) bounds
+		closeTo: (CFMotionGeometrySnapshot of: reference in: space root) bounds.
+	overlay detach.
+	overlay removeFromParent.
+	self assert: overlay isAttached not.
+	self assert: overlay hasParent not.
+	^ overlay
+]
+
 { #category : 'examples - transform ownership probe' }
 CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
 	<gtExample>
