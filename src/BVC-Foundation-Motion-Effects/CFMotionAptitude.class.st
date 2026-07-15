@@ -12,6 +12,11 @@ CFMotionAptitude >> hoveredEffect: anEffectRecipe [
 	^ self
 ]
 
+{ #category : 'testing' }
+CFMotionAptitude >> hasInstalledHandlers [
+	^ enterHandler notNil and: [ leaveHandler notNil ]
+]
+
 { #category : 'configuration' }
 CFMotionAptitude >> unhoveredEffect: anEffectRecipe [
 	unhoveredEffect := anEffectRecipe.

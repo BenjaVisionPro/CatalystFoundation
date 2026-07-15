@@ -500,6 +500,25 @@ CFMotionExamples >> cancellingAdoptionRestoresThePreviewAndRemovesTheCommittedEl
 	^ adoption
 ]
 
+{ #category : 'examples - aptitude' }
+CFMotionExamples >> motionAptitudeInstallsAndRemovesItsHandlers [
+	<gtExample>
+	| space element aptitude |
+	space := self spaceWithElement.
+	element := space root children first.
+	aptitude := CFMotionAptitude new
+		hoveredEffect: CFMotionEffects riseAndFadeIn;
+		unhoveredEffect: CFMotionEffects fallAndFadeOut;
+		yourself.
+	element addAptitude: aptitude.
+	self assert: aptitude isAttachedToWidget.
+	self assert: aptitude hasInstalledHandlers.
+	element removeAptitude: aptitude.
+	self assert: aptitude isAttachedToWidget not.
+	self assert: aptitude hasInstalledHandlers not.
+	^ aptitude
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	<gtExample>
