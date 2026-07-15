@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionAptitude',
 	#superclass : 'BrAptitude',
-	#instVars : [ 'hoveredEffect', 'unhoveredEffect', 'enterHandler', 'leaveHandler' ],
+	#instVars : [ 'hoveredEffect', 'unhoveredEffect', 'enterHandler', 'leaveHandler', 'activeOperation' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
@@ -11,6 +11,9 @@ CFMotionAptitude >> hoveredEffect: anEffectRecipe [
 	hoveredEffect := anEffectRecipe.
 	^ self
 ]
+
+{ #category : 'accessing' }
+CFMotionAptitude >> activeOperation [ ^ activeOperation ]
 
 { #category : 'testing' }
 CFMotionAptitude >> hasInstalledHandlers [
@@ -38,6 +41,8 @@ CFMotionAptitude >> onInstalledIn: anElement [
 
 { #category : 'lifecycle' }
 CFMotionAptitude >> onUninstalledIn: anElement [
+	activeOperation ifNotNil: [ activeOperation cancelAndRestore ].
+	activeOperation := nil.
 	enterHandler ifNotNil: [ anElement removeEventHandler: enterHandler ].
 	leaveHandler ifNotNil: [ anElement removeEventHandler: leaveHandler ].
 	enterHandler := nil.
@@ -47,8 +52,9 @@ CFMotionAptitude >> onUninstalledIn: anElement [
 
 { #category : 'private - playing' }
 CFMotionAptitude >> play: anEffectRecipe on: anElement [
+	activeOperation ifNotNil: [ activeOperation isRunning ifTrue: [ activeOperation cancelAndRestore ] ].
 	anEffectRecipe ifNotNil: [
-		anEffectRecipe
+		activeOperation := anEffectRecipe
 			playOn: anElement
 			duration: 120 milliSeconds
 			easing: (BlDecelerateInterpolator factor: 1.4) ]

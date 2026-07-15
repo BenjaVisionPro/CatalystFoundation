@@ -519,6 +519,29 @@ CFMotionExamples >> motionAptitudeInstallsAndRemovesItsHandlers [
 	^ aptitude
 ]
 
+{ #category : 'examples - aptitude' }
+CFMotionExamples >> motionAptitudeCancelsThePreviousInteractionEffect [
+	<gtExample>
+	| space element aptitude enterOperation leaveOperation |
+	space := self spaceWithElement.
+	element := space root children first.
+	aptitude := CFMotionAptitude new
+		hoveredEffect: CFMotionEffects riseAndFadeIn;
+		unhoveredEffect: CFMotionEffects fallAndFadeOut;
+		yourself.
+	element addAptitude: aptitude.
+	element dispatchEvent: BlMouseEnterEvent new.
+	enterOperation := aptitude activeOperation.
+	self assert: enterOperation isRunning.
+	element dispatchEvent: BlMouseLeaveEvent new.
+	leaveOperation := aptitude activeOperation.
+	self assert: enterOperation isCancelled.
+	self assert: leaveOperation isRunning.
+	element removeAptitude: aptitude.
+	self assert: leaveOperation isCancelled.
+	^ aptitude
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	<gtExample>
