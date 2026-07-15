@@ -320,6 +320,43 @@ CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
+	<gtExample>
+	| space element transaction presentation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	transaction := (space root motion
+		duration: 1 second;
+		layout)
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 60 @ 20;
+				size: 240 @ 100 ];
+		play.
+	space pulse.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: transaction operation isRunning.
+	presentation := CFMotionGeometrySnapshot of: element in: space root.
+	transaction cancel.
+	self assert: transaction isCancelled.
+	self assert: transaction operation isCancelled.
+	self assert: transaction operation tracks first presentation isActive not.
+	self assert: space cfMotionCoordinator activeOperations isEmpty.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		closeTo: presentation bounds.
+	space pulse.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		closeTo: presentation bounds.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
 	<gtExample>
 	| space first second transaction |
