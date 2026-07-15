@@ -184,6 +184,25 @@ CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
 	^ snapshot
 ]
 
+{ #category : 'examples - geometry snapshots' }
+CFMotionExamples >> layoutComputedEventCapturesAuthoritativeDestinationGeometry [
+	<gtExample>
+	| space element source destination |
+	space := self spaceWithElement.
+	element := space root children first.
+	source := CFMotionGeometrySnapshot of: element in: space root.
+	space root
+		when: BlElementLayoutComputedEvent
+		doOnce: [ :anEvent |
+			destination := CFMotionGeometrySnapshot of: element in: space root ].
+	element size: 240 @ 100.
+	space pulse.
+	self assert: destination isNotNil.
+	self assert: source bounds extent equals: 120 @ 80.
+	self assert: destination bounds extent equals: 240 @ 100.
+	^ destination
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
