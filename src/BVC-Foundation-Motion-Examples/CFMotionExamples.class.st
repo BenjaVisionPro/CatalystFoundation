@@ -143,6 +143,31 @@ CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
 	^ animation
 ]
 
+{ #category : 'examples - transform ownership probe' }
+CFMotionExamples >> transformPresentationReleasesOnlyItsOwnTransformation [
+	<gtExample>
+	| space element applicationTransformation externalTransformation presentation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+
+	presentation := CFMotionTransformPresentation on: element.
+	presentation translation: 40 @ 0.
+	self assert: presentation ownsCurrentTransformation.
+	self assert: element transformation matrix ~= applicationTransformation matrix.
+	presentation release.
+	self assert: element transformation == applicationTransformation.
+
+	presentation translation: 40 @ 0.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 100 @ 0 ].
+	externalTransformation := element transformation.
+	presentation release.
+	self assert: element transformation == externalTransformation.
+	self deny: presentation isActive.
+	^ presentation
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
