@@ -27,6 +27,16 @@ CFMotionBuilder >> duration: aDuration [ duration := aDuration ]
 { #category : 'configuration' }
 CFMotionBuilder >> easing: anInterpolator [ easing := anInterpolator ]
 
+{ #category : 'building' }
+CFMotionBuilder >> layout [
+	element isAttachedToSceneGraph
+		ifFalse: [ self error: 'A layout motion subject must be attached to a BlSpace' ].
+	^ (CFMotionLayoutTransaction on: element)
+		duration: duration;
+		easing: easing;
+		yourself
+]
+
 { #category : 'playing' }
 CFMotionBuilder >> opacity: aNumber [
 	element isAttachedToSceneGraph

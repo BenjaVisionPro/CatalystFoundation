@@ -1,0 +1,154 @@
+Class {
+	#name : 'CFMotionLayoutTransaction',
+	#superclass : 'Object',
+	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'layoutHandler', 'operation', 'phase' ],
+	#category : 'BVC-Foundation-Motion-Core',
+	#package : 'BVC-Foundation-Motion-Core'
+}
+
+{ #category : 'instance creation' }
+CFMotionLayoutTransaction class >> on: anElement [
+	^ self new container: anElement; yourself
+]
+
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> affecting: aCollection [
+	participants := aCollection asArray.
+	^ self
+]
+
+{ #category : 'controlling' }
+CFMotionLayoutTransaction >> cancel [
+	layoutHandler ifNotNil: [
+		container removeEventHandler: layoutHandler.
+		layoutHandler := nil ].
+	operation ifNotNil: [ operation cancel ].
+	phase := #cancelled.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> container [ ^ container ]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> container: anElement [
+	container := anElement.
+	coordinateSpace := anElement
+]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> coordinateSpace [ ^ coordinateSpace ]
+
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> coordinateSpace: anElement [
+	coordinateSpace := anElement.
+	^ self
+]
+
+{ #category : 'private - playing' }
+CFMotionLayoutTransaction >> captureDestinationAndStart [
+	| tracks |
+	phase = #awaitingLayout ifFalse: [ ^ self ].
+	layoutHandler := nil.
+	destinationSnapshots := participants collect: [ :each |
+		CFMotionGeometrySnapshot of: each in: coordinateSpace ].
+	tracks := OrderedCollection new.
+	1 to: participants size do: [ :eachIndex |
+		tracks add: (CFMotionGeometryTrack
+			from: (sourceSnapshots at: eachIndex)
+			to: (destinationSnapshots at: eachIndex)) ].
+	operation := CFMotionOperation
+		coordinator: container space cfMotionCoordinator
+		tracks: tracks.
+	operation
+		duration: duration;
+		easing: easing;
+		start.
+	phase := #running
+]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> destinationSnapshots [ ^ destinationSnapshots ifNil: [ #() ] ]
+
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> duration: aDuration [
+	duration := aDuration.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> easing: anInterpolator [
+	easing := anInterpolator.
+	^ self
+]
+
+{ #category : 'initialization' }
+CFMotionLayoutTransaction >> initialize [
+	super initialize.
+	participants := #().
+	duration := 180 milliSeconds.
+	easing := BlDecelerateInterpolator factor: 1.4.
+	phase := #idle
+]
+
+{ #category : 'testing' }
+CFMotionLayoutTransaction >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
+
+{ #category : 'testing' }
+CFMotionLayoutTransaction >> isCancelled [ ^ phase = #cancelled ]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> mutation: aBlock [
+	mutation := aBlock.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> operation [ ^ operation ]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> participants [ ^ participants ]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> phase [
+	operation ifNotNil: [ ^ operation state ].
+	^ phase
+]
+
+{ #category : 'playing' }
+CFMotionLayoutTransaction >> play [
+	self validateBeforePlaying.
+	sourceSnapshots := participants collect: [ :each |
+		CFMotionGeometrySnapshot of: each in: coordinateSpace ].
+	phase := #awaitingLayout.
+	layoutHandler := BlEventHandler
+		on: BlElementLayoutComputedEvent
+		do: [ :anEvent |
+			container removeEventHandler: layoutHandler.
+			self captureDestinationAndStart ].
+	container addEventHandler: layoutHandler.
+	mutation value.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> sourceSnapshots [ ^ sourceSnapshots ifNil: [ #() ] ]
+
+{ #category : 'private - validation' }
+CFMotionLayoutTransaction >> validateBeforePlaying [
+	phase = #idle ifFalse: [ self error: 'A layout transaction can only play once' ].
+	container isAttachedToSceneGraph ifFalse: [
+		self error: 'A layout transaction container must be attached to a BlSpace' ].
+	coordinateSpace isAttachedToSceneGraph ifFalse: [
+		self error: 'A layout transaction coordinate space must be attached to a BlSpace' ].
+	coordinateSpace space == container space ifFalse: [
+		self error: 'A layout transaction coordinate space must share the container BlSpace' ].
+	participants isEmpty ifTrue: [
+		self error: 'A layout transaction needs explicit participants' ].
+	mutation ifNil: [ self error: 'A layout transaction needs a mutation block' ].
+	participants do: [ :each |
+		each isAttachedToSceneGraph ifFalse: [
+			self error: 'A layout transaction participant must be attached to a BlSpace' ].
+		each space == container space ifFalse: [
+			self error: 'A layout transaction participant must share the container BlSpace' ] ]
+]

@@ -270,6 +270,35 @@ CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
 	^ operation
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
+	<gtExample>
+	| space element transaction |
+	space := self spaceWithElement.
+	element := space root children first.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout).
+	transaction
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 60 @ 20;
+				size: 240 @ 100 ];
+		play.
+	self assert: transaction isAwaitingLayout.
+	self assert: transaction sourceSnapshots first bounds equals: ((0 @ 0) extent: 120 @ 80).
+	space pulse.
+	self assert: transaction operation isRunning.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: transaction sourceSnapshots first bounds.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: transaction destinationSnapshots first bounds.
+	^ transaction
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
