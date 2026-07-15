@@ -120,6 +120,15 @@ CFMotionLayoutTransaction >> isCancelled [
 ]
 
 { #category : 'configuration' }
+CFMotionLayoutTransaction >> insert: anElement into: aDestinationContainer at: anIndex [
+	anElement hasParent ifTrue: [
+		self error: 'An inserted motion element must be detached before insertion' ].
+	(participants includes: anElement) ifTrue: [
+		self error: 'An inserted motion element cannot be a pre-mutation participant' ].
+	^ self mutate: [ aDestinationContainer addChild: anElement at: anIndex ]
+]
+
+{ #category : 'configuration' }
 CFMotionLayoutTransaction >> mutate: aBlock [
 	mutation := aBlock.
 	^ self

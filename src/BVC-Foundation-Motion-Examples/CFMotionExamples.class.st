@@ -916,6 +916,33 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
+	<gtExample>
+	| space first second inserted transaction |
+	space := BlSpace new.
+	first := BlElement new size: 120 @ 80; yourself.
+	second := BlElement new size: 120 @ 80; yourself.
+	inserted := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { first. second }.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { first. second };
+		insert: inserted into: space root at: 2;
+		play.
+	self assert: inserted hasParent not.
+	space pulse.
+	self assert: inserted parent == space root.
+	self assert: (space root children at: 1) == first.
+	self assert: (space root children at: 2) == inserted.
+	self assert: (space root children at: 3) == second.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
 	<gtExample>
 	| space element transaction |
