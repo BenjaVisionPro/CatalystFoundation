@@ -494,6 +494,42 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	^ second
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionUsesNestedContainerCoordinateSpace [
+	<gtExample>
+	| space container element transaction |
+	space := BlSpace new.
+	container := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 120 @ 80; yourself.
+	space root addChild: container.
+	container addChild: element.
+	container relocate: 50 @ 40.
+	element relocate: 20 @ 30.
+	space pulse.
+	transaction := (container motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 120 @ 90;
+				size: 180 @ 60 ];
+		play.
+	self assert: transaction coordinateSpace == container.
+	self assert: transaction sourceSnapshots first bounds equals: ((20 @ 30) extent: 120 @ 80).
+	space pulse.
+	self assert: transaction operation isRunning.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: element in: container) bounds
+		closeTo: transaction sourceSnapshots first bounds.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	self assert: transaction destinationSnapshots first bounds equals: ((120 @ 90) extent: 180 @ 60).
+	self assert: (CFMotionGeometrySnapshot of: element in: container) bounds
+		equals: transaction destinationSnapshots first bounds.
+	^ transaction
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> assertBounds: actualBounds closeTo: expectedBounds [
 	self assert: (actualBounds origin closeTo: expectedBounds origin precision: 0.0001).
