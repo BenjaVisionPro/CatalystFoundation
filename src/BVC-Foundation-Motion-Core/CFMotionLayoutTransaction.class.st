@@ -47,7 +47,7 @@ CFMotionLayoutTransaction >> coordinateSpace: anElement [
 
 { #category : 'private - playing' }
 CFMotionLayoutTransaction >> captureDestinationAndStart [
-	| tracks |
+	| tracks coordinator |
 	phase = #awaitingLayout ifFalse: [ ^ self ].
 	layoutHandler := nil.
 	destinationSnapshots := participants collect: [ :each |
@@ -57,8 +57,10 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 		tracks add: (CFMotionGeometryTrack
 			from: (sourceSnapshots at: eachIndex)
 			to: (destinationSnapshots at: eachIndex)) ].
+	coordinator := container space cfMotionCoordinator.
+	coordinator replaceGeometryOwnersFor: tracks.
 	operation := CFMotionOperation
-		coordinator: container space cfMotionCoordinator
+		coordinator: coordinator
 		tracks: tracks.
 	phase := #running.
 	operation

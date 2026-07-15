@@ -57,6 +57,23 @@ CFMotionCoordinator >> releaseAllFor: anOperation [
 	activeOperations remove: anOperation ifAbsent: [ nil ]
 ]
 
+{ #category : 'ownership' }
+CFMotionCoordinator >> replaceGeometryOwnersFor: geometryTracks [
+	| ownersToReplace |
+	ownersToReplace := OrderedCollection new.
+	geometryTracks do: [ :eachTrack |
+		| owner |
+		owner := self ownerOf: eachTrack propertyKey.
+		(owner notNil and: [ (ownersToReplace includes: owner) not ]) ifTrue: [
+			ownersToReplace add: owner ] ].
+	ownersToReplace do: [ :eachOwner |
+		(eachOwner tracks allSatisfy: [ :eachTrack |
+			eachTrack isKindOf: CFMotionGeometryTrack ]) ifFalse: [
+			self error: 'Geometry retargeting cannot replace a mixed Motion operation' ] ].
+	ownersToReplace do: [ :eachOwner |
+		eachOwner cancelSettlingAtEnd ]
+]
+
 { #category : 'playing' }
 CFMotionCoordinator >> retarget: aTrack duration: aDuration easing: anInterpolator [
 	| owner operation |

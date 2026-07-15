@@ -383,6 +383,50 @@ CFMotionExamples >> geometryOperationComposesWithApplicationTransform [
 	^ operation
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
+	<gtExample>
+	| space element first second |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	first := (space root motion
+		duration: 1 second;
+		layout)
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 60 @ 20;
+				size: 240 @ 100 ];
+		play.
+	space pulse.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	second := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 120 @ 40;
+				size: 180 @ 60 ];
+		play.
+	space pulse.
+	self assert: first operation isCancelled.
+	self assert: second operation isRunning.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: second sourceSnapshots first bounds.
+	self assert: space cfMotionCoordinator activeOperations size equals: 1.
+	space pulse.
+	space time wait: 5 milliSeconds.
+	space pulse.
+	self assert: second operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: second destinationSnapshots first bounds.
+	^ second
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
