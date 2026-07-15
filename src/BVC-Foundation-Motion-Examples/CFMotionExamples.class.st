@@ -279,6 +279,22 @@ CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenScalesAndFadesIn [
 	^ appearance
 ]
 
+{ #category : 'examples - appearance' }
+CFMotionExamples >> appearUsingRiseAndFadeInSelectsTheTranslationRecipe [
+	<gtExample>
+	| space element appearance |
+	space := BlSpace new.
+	element := BlElement new size: 120 @ 80; yourself.
+	appearance := space root motion
+		duration: 1 milliSeconds;
+		appear: element using: CFMotionEffects riseAndFadeIn.
+	self assert: appearance operation tracks second isKindOf: CFMotionTranslationTrack.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ appearance
+]
+
 { #category : 'examples - effects' }
 CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>
@@ -383,6 +399,22 @@ CFMotionExamples >> disappearScalesAndFadesOutThenRemoves [
 	self assert: disappearance isRunning.
 	self assert: element parent == space root.
 	self assert: disappearance operation tracks size equals: 2.
+	self finish: disappearance operation in: space.
+	self assert: disappearance isCompleted.
+	self assert: element hasParent not.
+	^ disappearance
+]
+
+{ #category : 'examples - appearance' }
+CFMotionExamples >> disappearUsingFallAndFadeOutSelectsTheTranslationRecipe [
+	<gtExample>
+	| space element disappearance |
+	space := self spaceWithElement.
+	element := space root children first.
+	disappearance := element motion
+		duration: 1 milliSeconds;
+		disappearUsing: CFMotionEffects fallAndFadeOut.
+	self assert: disappearance operation tracks second isKindOf: CFMotionTranslationTrack.
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
 	self assert: element hasParent not.

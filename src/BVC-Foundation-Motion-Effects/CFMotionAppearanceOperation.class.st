@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionAppearanceOperation',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'element', 'operation', 'kind', 'insertionIndex' ],
+	#instVars : [ 'container', 'element', 'operation', 'kind', 'insertionIndex', 'effect' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
@@ -12,16 +12,34 @@ CFMotionAppearanceOperation class >> appear: anElement in: aContainer duration: 
 		appear: anElement
 		in: aContainer
 		at: nil
+		using: CFMotionEffects scaleAndFadeIn
 		duration: aDuration
 		easing: anInterpolator
 ]
 
 { #category : 'instance creation' }
+CFMotionAppearanceOperation class >> appear: anElement in: aContainer using: anEffect duration: aDuration easing: anInterpolator [
+	^ self appear: anElement in: aContainer at: nil using: anEffect duration: aDuration easing: anInterpolator
+]
+
+{ #category : 'instance creation' }
 CFMotionAppearanceOperation class >> appear: anElement in: aContainer at: anIndex duration: aDuration easing: anInterpolator [
+	^ self
+		appear: anElement
+		in: aContainer
+		at: anIndex
+		using: CFMotionEffects scaleAndFadeIn
+		duration: aDuration
+		easing: anInterpolator
+]
+
+{ #category : 'instance creation' }
+CFMotionAppearanceOperation class >> appear: anElement in: aContainer at: anIndex using: anEffect duration: aDuration easing: anInterpolator [
 	^ self new
 		container: aContainer;
 		element: anElement;
 		insertionIndex: anIndex;
+		effect: anEffect;
 		kind: #appear;
 		startWithDuration: aDuration easing: anInterpolator;
 		yourself
@@ -29,10 +47,16 @@ CFMotionAppearanceOperation class >> appear: anElement in: aContainer at: anInde
 
 { #category : 'instance creation' }
 CFMotionAppearanceOperation class >> disappear: anElement duration: aDuration easing: anInterpolator [
+	^ self disappear: anElement using: CFMotionEffects scaleAndFadeOut duration: aDuration easing: anInterpolator
+]
+
+{ #category : 'instance creation' }
+CFMotionAppearanceOperation class >> disappear: anElement using: anEffect duration: aDuration easing: anInterpolator [
 	anElement hasParent ifFalse: [ self error: 'A disappearing element must have a parent' ].
 	^ self new
 		container: anElement parent;
 		element: anElement;
+		effect: anEffect;
 		kind: #disappear;
 		startWithDuration: aDuration easing: anInterpolator;
 		yourself
@@ -56,6 +80,12 @@ CFMotionAppearanceOperation >> element [ ^ element ]
 
 { #category : 'accessing' }
 CFMotionAppearanceOperation >> element: anElement [ element := anElement ]
+
+{ #category : 'accessing' }
+CFMotionAppearanceOperation >> effect [ ^ effect ]
+
+{ #category : 'accessing' }
+CFMotionAppearanceOperation >> effect: anEffect [ effect := anEffect ]
 
 { #category : 'testing' }
 CFMotionAppearanceOperation >> isCancelled [ ^ operation isCancelled ]
@@ -105,20 +135,12 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 	element
 		visibility: BlVisibility visible;
 		opacity: 0.0.
-	operation := CFMotionEffects
-		scaleAndFadeIn: element
-		from: 0.8 @ 0.8
-		duration: aDuration
-		easing: anInterpolator
+	operation := effect playOn: element duration: aDuration easing: anInterpolator
 ]
 
 { #category : 'private - starting' }
 CFMotionAppearanceOperation >> startDisappearingWithDuration: aDuration easing: anInterpolator [
-	operation := CFMotionEffects
-		scaleAndFadeOut: element
-		to: 0.8 @ 0.8
-		duration: aDuration
-		easing: anInterpolator.
+	operation := effect playOn: element duration: aDuration easing: anInterpolator.
 	operation onTerminalDo: [ :aCompletedOperation |
 		(aCompletedOperation isCompleted and: [ element opacity closeTo: 0.0 ]) ifTrue: [
 			self removeElementIfPresent ] ]
