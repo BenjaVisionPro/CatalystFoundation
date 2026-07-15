@@ -294,6 +294,7 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 		equals: transaction sourceSnapshots first bounds.
 	self finish: transaction operation in: space.
 	self assert: transaction operation isCompleted.
+	self assert: transaction phase == CFMotionOperationState completed.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
 	^ transaction

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionOperation',
 	#superclass : 'Object',
-	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace' ],
+	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -21,7 +21,8 @@ CFMotionOperation >> initialize [
 	easing := BlDecelerateInterpolator factor: 1.4.
 	generation := 0.
 	state := CFMotionOperationState idle.
-	trace := CFMotionTrace new
+	trace := CFMotionTrace new.
+	terminalHandlers := OrderedCollection new
 ]
 
 { #category : 'accessing' }
@@ -54,6 +55,7 @@ CFMotionOperation >> cancelApplying: aBlock [
 	state := CFMotionOperationState cancelled.
 	trace record: #cancelled for: self.
 	self releaseClaims.
+	self notifyTerminalHandlers.
 	^ self
 ]
 
@@ -63,7 +65,8 @@ CFMotionOperation >> complete [
 	tracks do: [ :each | each applyDestination ].
 	state := CFMotionOperationState completed.
 	trace record: #completed for: self.
-	self releaseClaims
+	self releaseClaims.
+	self notifyTerminalHandlers
 ]
 
 { #category : 'accessing' }
@@ -103,6 +106,20 @@ CFMotionOperation >> isCompleted [ ^ state == CFMotionOperationState completed ]
 
 { #category : 'testing' }
 CFMotionOperation >> isRunning [ ^ state == CFMotionOperationState running ]
+
+{ #category : 'private - notifying' }
+CFMotionOperation >> notifyTerminalHandlers [
+	terminalHandlers do: [ :each | each cull: self ].
+	terminalHandlers removeAll
+]
+
+{ #category : 'action handling' }
+CFMotionOperation >> onTerminalDo: aBlock [
+	state isTerminal
+		ifTrue: [ aBlock cull: self ]
+		ifFalse: [ terminalHandlers add: aBlock ].
+	^ self
+]
 
 { #category : 'private - ownership' }
 CFMotionOperation >> claimTracks [

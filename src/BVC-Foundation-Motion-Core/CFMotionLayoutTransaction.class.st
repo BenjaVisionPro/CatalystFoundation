@@ -60,11 +60,12 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 	operation := CFMotionOperation
 		coordinator: container space cfMotionCoordinator
 		tracks: tracks.
+	phase := #running.
 	operation
 		duration: duration;
 		easing: easing;
+		onTerminalDo: [ :anOperation | phase := anOperation state ];
 		start.
-	phase := #running
 ]
 
 { #category : 'accessing' }
@@ -95,7 +96,9 @@ CFMotionLayoutTransaction >> initialize [
 CFMotionLayoutTransaction >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
 
 { #category : 'testing' }
-CFMotionLayoutTransaction >> isCancelled [ ^ phase = #cancelled ]
+CFMotionLayoutTransaction >> isCancelled [
+	^ phase = #cancelled or: [ phase == CFMotionOperationState cancelled ]
+]
 
 { #category : 'configuration' }
 CFMotionLayoutTransaction >> mutate: aBlock [
@@ -111,7 +114,6 @@ CFMotionLayoutTransaction >> participants [ ^ participants ]
 
 { #category : 'accessing' }
 CFMotionLayoutTransaction >> phase [
-	operation ifNotNil: [ ^ operation state ].
 	^ phase
 ]
 
