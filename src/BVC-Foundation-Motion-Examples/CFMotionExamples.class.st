@@ -115,6 +115,34 @@ CFMotionExamples >> opacityOperationIsInspectable [
 	^ operation
 ]
 
+{ #category : 'examples - transform ownership probe' }
+CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
+	<gtExample>
+	| space element animation applicationMatrix externalMatrix |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationMatrix := element transformation matrix.
+
+	animation := BlTransformAnimation translate: 40 @ 0.
+	animation duration: 1 second.
+	element addAnimation: animation.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: element transformation matrix ~= applicationMatrix.
+
+	"An application transform arriving while the relative animation is running
+	 is replaced by the animation's next absolute matrix."
+	element transformDo: [ :aBuilder | aBuilder translateBy: 100 @ 0 ].
+	externalMatrix := element transformation matrix.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: element transformation matrix ~= externalMatrix.
+	^ animation
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
