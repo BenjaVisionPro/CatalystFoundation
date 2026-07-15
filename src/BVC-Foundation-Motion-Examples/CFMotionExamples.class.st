@@ -458,6 +458,48 @@ CFMotionExamples >> disappearUsingFallAndFadeOutSelectsTheTranslationRecipe [
 	^ disappearance
 ]
 
+{ #category : 'examples - adoption' }
+CFMotionExamples >> adoptionReplacesThePreviewAtItsDeclaredIndex [
+	<gtExample>
+	| space first preview last committed adoption |
+	space := BlSpace new.
+	first := BlElement new size: 120 @ 80; yourself.
+	preview := BlElement new size: 120 @ 80; yourself.
+	last := BlElement new size: 120 @ 80; yourself.
+	committed := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { first. preview. last }.
+	adoption := space root motion
+		duration: 1 milliSeconds;
+		adopt: preview as: committed.
+	self assert: adoption isRunning.
+	self assert: adoption previewIndex equals: 2.
+	self assert: committed parent == space root.
+	self finish: adoption operation in: space.
+	self assert: adoption isCompleted.
+	self assert: preview hasParent not.
+	self assert: committed parent == space root.
+	self assert: (space root children at: 2) == committed.
+	^ adoption
+]
+
+{ #category : 'examples - adoption' }
+CFMotionExamples >> cancellingAdoptionRestoresThePreviewAndRemovesTheCommittedElement [
+	<gtExample>
+	| space preview committed adoption |
+	space := self spaceWithElement.
+	preview := space root children first.
+	committed := BlElement new size: 120 @ 80; yourself.
+	adoption := space root motion
+		duration: 1 second;
+		adopt: preview as: committed.
+	adoption cancel.
+	self assert: adoption isCancelled.
+	self assert: preview parent == space root.
+	self assert: committed hasParent not.
+	self assert: preview opacity equals: 1.0.
+	^ adoption
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	<gtExample>
