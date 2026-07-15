@@ -415,6 +415,8 @@ CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
 	space pulse.
 	self assert: first operation isCancelled.
 	self assert: second operation isRunning.
+	self assert: second destinationSnapshots first bounds equals: ((120 @ 40) extent: 180 @ 60).
+	self assert: second operation tracks first presentation ownsCurrentTransformation.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: second sourceSnapshots first bounds.
 	self assert: space cfMotionCoordinator activeOperations size equals: 1.
