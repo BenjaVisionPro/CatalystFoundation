@@ -89,6 +89,44 @@ CFMotionExamples >> scaleRetargetsThroughItsPresentedProperty [
 	^ second
 ]
 
+{ #category : 'examples - property motion' }
+CFMotionExamples >> rotationCompletesAtThePresentedValue [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	applicationTransformation := element transformation.
+	operation := element motion
+		duration: 1 milliSeconds;
+		rotation: 30.
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: operation tracks first presentation rotation equals: 30.
+	self assert: element transformation matrix ~= applicationTransformation matrix.
+	^ operation
+]
+
+{ #category : 'examples - property motion' }
+CFMotionExamples >> rotationComposesWithASettledScale [
+	<gtExample>
+	| space element scaleOperation scaleTransformation rotationOperation |
+	space := self spaceWithElement.
+	element := space root children first.
+	scaleOperation := element motion
+		duration: 1 milliSeconds;
+		scale: 0.5 @ 0.8.
+	self finish: scaleOperation in: space.
+	scaleTransformation := element transformation.
+	rotationOperation := element motion
+		duration: 1 milliSeconds;
+		rotation: 30.
+	self finish: rotationOperation in: space.
+	self assert: rotationOperation isCompleted.
+	self assert: element transformation matrix ~= scaleTransformation matrix.
+	^ rotationOperation
+]
+
 { #category : 'examples - effects' }
 CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 	<gtExample>

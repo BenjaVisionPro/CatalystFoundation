@@ -62,6 +62,17 @@ CFMotionBuilder >> scale: aPoint [
 ]
 
 { #category : 'playing' }
+CFMotionBuilder >> rotation: aNumber [
+	element isAttachedToSceneGraph
+		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
+	^ element space cfMotionCoordinator
+		retarget: ((CFMotionRotationTrack on: element from: 0 to: aNumber)
+			adoptAtDestination)
+		duration: duration
+		easing: easing
+]
+
+{ #category : 'playing' }
 CFMotionBuilder >> translation: aPoint [
 	element isAttachedToSceneGraph
 		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].

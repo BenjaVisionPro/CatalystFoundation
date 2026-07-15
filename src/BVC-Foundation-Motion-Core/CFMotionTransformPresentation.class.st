@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionTransformPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'channel', 'translation', 'scale', 'active' ],
+	#instVars : [ 'element', 'channel', 'translation', 'scale', 'rotation', 'active' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -24,6 +24,7 @@ CFMotionTransformPresentation >> initialize [
 	super initialize.
 	translation := 0 @ 0.
 	scale := 1 @ 1.
+	rotation := 0.
 	active := false
 ]
 
@@ -35,6 +36,12 @@ CFMotionTransformPresentation >> addContributionTo: aCompositeTransformation [
 	scale = (1 @ 1) ifFalse: [
 		motionTransformation addTransformation:
 			((BlScalingTransformation scale: scale) origin: origin) ].
+	rotation isZero ifFalse: [
+		motionTransformation addTransformation:
+			(BlRotationTransformation new
+				angle: rotation;
+				axis: BlVector zAxis;
+				origin: origin) ].
 	translation isZero ifFalse: [
 		motionTransformation addTransformation:
 			((BlTranslationTransformation translation: translation) origin: origin) ].
@@ -53,6 +60,7 @@ CFMotionTransformPresentation >> begin [
 	channel ifNil: [ channel := CFMotionTransformChannel on: element ].
 	translation := 0 @ 0.
 	scale := 1 @ 1.
+	rotation := 0.
 	active := true.
 	(channel register: self) ifFalse: [ self relinquishOwnership ]
 ]
@@ -110,6 +118,17 @@ CFMotionTransformPresentation >> scale: aPoint [
 	active ifFalse: [ self begin ].
 	active ifFalse: [ ^ self ].
 	scale := aPoint.
+	self apply
+]
+
+{ #category : 'accessing' }
+CFMotionTransformPresentation >> rotation [ ^ rotation ]
+
+{ #category : 'controlling' }
+CFMotionTransformPresentation >> rotation: aNumber [
+	active ifFalse: [ self begin ].
+	active ifFalse: [ ^ self ].
+	rotation := aNumber.
 	self apply
 ]
 
