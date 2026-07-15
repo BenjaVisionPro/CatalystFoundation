@@ -34,7 +34,9 @@ Class {
 		'hoverExpansionPoint',
 		'previewPreparationElement',
 		'pendingPreviewCandidate',
-		'pendingRootPreview'
+		'pendingRootPreview',
+		'previewOpacityOperation',
+		'previewOpacityGeneration'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -108,6 +110,7 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> clearPlacementPreview [
 	self collapseHoverExpandedConfigurationForm.
+	self invalidatePreviewOpacityOperation.
 	dropCompletionToken := nil.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
@@ -362,6 +365,7 @@ CFConfigurationEditorElement >> initialize [
 	libraryVisible := true.
 	configurationsToExpandAfterRefresh := IdentitySet new.
 	placementAnimationGeneration := 0.
+	previewOpacityGeneration := 0.
 	self
 		matchParent;
 		layout: BlFrameLayout new;
@@ -806,22 +810,36 @@ CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity then: com
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity duration: aDuration easing: anInterpolator then: completionBlock [
-	| element start animation |
+	| element operation generation |
 	previewElement ifNil: [ ^ completionBlock ifNotNil: [ completionBlock value ] ].
 	element := previewElement.
-	start := element opacity.
-	start = targetOpacity ifTrue: [ ^ completionBlock ifNotNil: [ completionBlock value ] ].
-	animation := BlNumberTransition new
-		from: start;
-		to: targetOpacity;
+	element isAttachedToSceneGraph ifFalse: [
+		element opacity: targetOpacity.
+		^ completionBlock ifNotNil: [ completionBlock value ] ].
+	previewOpacityGeneration := previewOpacityGeneration + 1.
+	generation := previewOpacityGeneration.
+	(previewOpacityOperation notNil
+		and: [ previewOpacityOperation isRunning
+			and: [ previewOpacityOperation tracks first element ~~ element ] ]) ifTrue: [
+		previewOpacityOperation cancel ].
+	operation := element motion
 		duration: aDuration;
 		easing: anInterpolator;
-		onStepDo: [ :each | element opacity: each ];
-		yourself.
+		opacity: targetOpacity.
+	previewOpacityOperation := operation.
 	completionBlock ifNotNil: [
-		animation onFinishedDo: [
-			previewElement == element ifTrue: [ completionBlock value ] ] ].
-	animations retarget: [ animation ] named: #dropPreviewOpacity
+		operation onTerminalDo: [ :aCompletedOperation |
+			(aCompletedOperation isCompleted
+				and: [ previewOpacityGeneration = generation
+					and: [ previewElement == element ] ]) ifTrue: [ completionBlock value ] ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> invalidatePreviewOpacityOperation [
+	previewOpacityGeneration := previewOpacityGeneration + 1.
+	previewOpacityOperation ifNotNil: [ :anOperation |
+		anOperation isRunning ifTrue: [ anOperation cancel ] ].
+	previewOpacityOperation := nil
 ]
 
 { #category : 'private - dropping' }
@@ -942,6 +960,7 @@ CFConfigurationEditorElement >> adoptRootPlacementPreviewAs: aConfiguration [
 
 { #category : 'private - dropping' }
 CFConfigurationEditorElement >> clearAdoptedPlacementPreviewState [
+	self invalidatePreviewOpacityOperation.
 	dropCompletionToken := nil.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
@@ -1329,5 +1348,6 @@ CFConfigurationEditorElement >> assessment: anAssessment hasPlacementForConfigur
 { #category : 'hooks - scene graph' }
 CFConfigurationEditorElement >> onRemovedFromSceneGraph [
 	super onRemovedFromSceneGraph.
+	self invalidatePreviewOpacityOperation.
 	animations ifNotNil: [ animations stopAll ]
 ]
