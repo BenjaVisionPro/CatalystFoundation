@@ -180,7 +180,7 @@ CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsThenFadesIn [
+CFMotionExamples >> appearInsertsThenPopsIn [
 	<gtExample>
 	| space element appearance |
 	space := BlSpace new.
@@ -192,6 +192,8 @@ CFMotionExamples >> appearInsertsThenFadesIn [
 	self assert: element parent == space root.
 	self assert: element visibility isVisible.
 	self assert: element opacity equals: 0.0.
+	self assert: appearance operation tracks size equals: 2.
+	self assert: appearance operation tracks second presentation ownsCurrentTransformation.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	self assert: element parent == space root.
@@ -200,7 +202,7 @@ CFMotionExamples >> appearInsertsThenFadesIn [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenFadesIn [
+CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenPopsIn [
 	<gtExample>
 	| space first second inserted appearance |
 	space := BlSpace new.
@@ -220,6 +222,30 @@ CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenFadesIn [
 	self assert: appearance isCompleted.
 	self assert: inserted opacity equals: 1.0.
 	^ appearance
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> popInCoordinatesOpacityAndScale [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element
+		opacity: 0.0;
+		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	operation := CFMotionEffects
+		popIn: element
+		from: 0.5 @ 0.8
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation tracks size equals: 2.
+	self assert: operation tracks second presentation ownsCurrentTransformation.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	self assert: element transformation == applicationTransformation.
+	^ operation
 ]
 
 { #category : 'examples - appearance' }
