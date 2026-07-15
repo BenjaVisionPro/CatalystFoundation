@@ -101,6 +101,11 @@ CFMotionBuilder >> adopt: aPreview as: aCommittedElement [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
+CFMotionBuilder >> adopt: aPreview as: aCommittedElement from: aSourceContainer [
+	^ CFMotionAdoptionOperation adopt: aPreview as: aCommittedElement from: aSourceContainer to: element duration: duration easing: easing
+]
+
+{ #category : '*BVC-Foundation-Motion-Effects' }
 CFMotionBuilder >> disappear [
 	^ CFMotionAppearanceOperation
 		disappear: element

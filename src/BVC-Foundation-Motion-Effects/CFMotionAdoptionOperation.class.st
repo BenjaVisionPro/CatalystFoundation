@@ -1,15 +1,21 @@
 Class {
 	#name : 'CFMotionAdoptionOperation',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'preview', 'committedElement', 'previewIndex', 'operation' ],
+	#instVars : [ 'container', 'sourceContainer', 'preview', 'committedElement', 'previewIndex', 'operation', 'overlay' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
 
 { #category : 'instance creation' }
 CFMotionAdoptionOperation class >> adopt: aPreview as: aCommittedElement in: aContainer duration: aDuration easing: anInterpolator [
+	^ self adopt: aPreview as: aCommittedElement from: aContainer to: aContainer duration: aDuration easing: anInterpolator
+]
+
+{ #category : 'instance creation' }
+CFMotionAdoptionOperation class >> adopt: aPreview as: aCommittedElement from: aSourceContainer to: aDestinationContainer duration: aDuration easing: anInterpolator [
 	^ self new
-		container: aContainer;
+		container: aDestinationContainer;
+		sourceContainer: aSourceContainer;
 		preview: aPreview;
 		committedElement: aCommittedElement;
 		startWithDuration: aDuration easing: anInterpolator;
@@ -21,6 +27,7 @@ CFMotionAdoptionOperation >> cancel [
 	operation isCompleted ifTrue: [ ^ self ].
 	operation ifNotNil: [ operation cancelAndRestore ].
 	self removeCommittedElementIfPresent.
+	overlay ifNotNil: [ overlay release ].
 	^ self
 ]
 
@@ -49,6 +56,9 @@ CFMotionAdoptionOperation >> isRunning [ ^ operation isRunning ]
 CFMotionAdoptionOperation >> operation [ ^ operation ]
 
 { #category : 'accessing' }
+CFMotionAdoptionOperation >> overlay [ ^ overlay ]
+
+{ #category : 'accessing' }
 CFMotionAdoptionOperation >> preview [ ^ preview ]
 
 { #category : 'accessing' }
@@ -56,6 +66,9 @@ CFMotionAdoptionOperation >> preview: anElement [ preview := anElement ]
 
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> previewIndex [ ^ previewIndex ]
+
+{ #category : 'accessing' }
+CFMotionAdoptionOperation >> sourceContainer: anElement [ sourceContainer := anElement ]
 
 { #category : 'private - controlling' }
 CFMotionAdoptionOperation >> removeCommittedElementIfPresent [
@@ -69,17 +82,23 @@ CFMotionAdoptionOperation >> removePreviewIfPresent [
 
 { #category : 'private - starting' }
 CFMotionAdoptionOperation >> startWithDuration: aDuration easing: anInterpolator [
+	| insertionIndex |
 	self validateBeforeStarting.
-	previewIndex := container children indexOf: preview.
+	previewIndex := sourceContainer children indexOf: preview.
+	sourceContainer == container ifFalse: [ overlay := CFMotionOverlay on: preview in: preview space root ].
+	insertionIndex := sourceContainer == container
+		ifTrue: [ previewIndex ]
+		ifFalse: [ container children size + 1 ].
 	committedElement opacity: 0.0.
-	container addChild: committedElement at: previewIndex.
+	container addChild: committedElement at: insertionIndex.
 	operation := CFMotionEffects
 		crossFadeFrom: preview
 		to: committedElement
 		duration: aDuration
 		easing: anInterpolator.
 	operation onTerminalDo: [ :aCompletedOperation |
-		aCompletedOperation isCompleted ifTrue: [ self removePreviewIfPresent ] ]
+		aCompletedOperation isCompleted ifTrue: [ self removePreviewIfPresent ].
+		overlay ifNotNil: [ overlay release ] ]
 ]
 
 { #category : 'private - validation' }
@@ -88,8 +107,10 @@ CFMotionAdoptionOperation >> validateBeforeStarting [
 		self error: 'An adoption needs distinct preview and committed elements' ].
 	container isAttachedToSceneGraph ifFalse: [
 		self error: 'An adoption container must be attached to a BlSpace' ].
-	preview parent == container ifFalse: [
-		self error: 'An adoption preview must belong to its declared container' ].
+	preview parent == sourceContainer ifFalse: [ self error: 'An adoption preview must belong to its declared source container' ].
+	sourceContainer isAttachedToSceneGraph ifFalse: [
+		self error: 'An adoption source container must be attached to a BlSpace' ].
+	sourceContainer space == container space ifFalse: [ self error: 'An adoption containers must share a BlSpace' ].
 	committedElement hasParent ifTrue: [
 		self error: 'An adoption committed element must be detached before handoff' ]
 ]

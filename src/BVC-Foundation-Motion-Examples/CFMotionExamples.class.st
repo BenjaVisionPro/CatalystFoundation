@@ -500,6 +500,57 @@ CFMotionExamples >> cancellingAdoptionRestoresThePreviewAndRemovesTheCommittedEl
 	^ adoption
 ]
 
+{ #category : 'examples - adoption' }
+CFMotionExamples >> adoptionMovesAcrossParentsAndReleasesItsOverlay [
+	<gtExample>
+	| space source destination preview committed adoption |
+	space := BlSpace new.
+	source := BlElement new size: 240 @ 160; yourself.
+	destination := BlElement new size: 240 @ 160; yourself.
+	preview := BlElement new size: 120 @ 80; yourself.
+	committed := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { source. destination }.
+	source addChild: preview.
+	space pulse.
+	adoption := destination motion
+		duration: 1 milliSeconds;
+		adopt: preview as: committed from: source.
+	self assert: adoption isRunning.
+	self assert: adoption overlay isInstalled.
+	self assert: preview parent == source.
+	self assert: committed parent == destination.
+	self finish: adoption operation in: space.
+	self assert: adoption isCompleted.
+	self assert: preview hasParent not.
+	self assert: committed parent == destination.
+	self assert: adoption overlay isInstalled not.
+	^ adoption
+]
+
+{ #category : 'examples - adoption' }
+CFMotionExamples >> cancellingCrossParentAdoptionRestoresThePreviewAndReleasesItsOverlay [
+	<gtExample>
+	| space source destination preview committed adoption |
+	space := BlSpace new.
+	source := BlElement new size: 240 @ 160; yourself.
+	destination := BlElement new size: 240 @ 160; yourself.
+	preview := BlElement new size: 120 @ 80; yourself.
+	committed := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { source. destination }.
+	source addChild: preview.
+	space pulse.
+	adoption := destination motion
+		duration: 1 second;
+		adopt: preview as: committed from: source.
+	adoption cancel.
+	self assert: adoption isCancelled.
+	self assert: preview parent == source.
+	self assert: preview opacity equals: 1.0.
+	self assert: committed hasParent not.
+	self assert: adoption overlay isInstalled not.
+	^ adoption
+]
+
 { #category : 'examples - aptitude' }
 CFMotionExamples >> motionAptitudeInstallsAndRemovesItsHandlers [
 	<gtExample>
