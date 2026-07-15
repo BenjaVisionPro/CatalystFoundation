@@ -235,7 +235,7 @@ CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsThenPopsIn [
+CFMotionExamples >> appearInsertsThenScalesAndFadesIn [
 	<gtExample>
 	| space element appearance |
 	space := BlSpace new.
@@ -257,7 +257,7 @@ CFMotionExamples >> appearInsertsThenPopsIn [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenPopsIn [
+CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenScalesAndFadesIn [
 	<gtExample>
 	| space first second inserted appearance |
 	space := BlSpace new.
@@ -280,7 +280,7 @@ CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenPopsIn [
 ]
 
 { #category : 'examples - effects' }
-CFMotionExamples >> popInCoordinatesOpacityAndScale [
+CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>
 	| space element applicationTransformation operation |
 	space := self spaceWithElement.
@@ -290,7 +290,7 @@ CFMotionExamples >> popInCoordinatesOpacityAndScale [
 		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
 	operation := CFMotionEffects
-		popIn: element
+		scaleAndFadeIn: element
 		from: 0.5 @ 0.8
 		duration: 1 milliSeconds
 		easing: (BlDecelerateInterpolator factor: 1.4).
@@ -304,7 +304,7 @@ CFMotionExamples >> popInCoordinatesOpacityAndScale [
 ]
 
 { #category : 'examples - effects' }
-CFMotionExamples >> popOutCoordinatesOpacityAndScale [
+CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
 	<gtExample>
 	| space element applicationTransformation operation |
 	space := self spaceWithElement.
@@ -312,7 +312,7 @@ CFMotionExamples >> popOutCoordinatesOpacityAndScale [
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
 	operation := CFMotionEffects
-		popOut: element
+		scaleAndFadeOut: element
 		to: 0.5 @ 0.8
 		duration: 1 milliSeconds
 		easing: (BlDecelerateInterpolator factor: 1.4).
@@ -326,7 +326,7 @@ CFMotionExamples >> popOutCoordinatesOpacityAndScale [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> disappearPopsOutThenRemoves [
+CFMotionExamples >> disappearScalesAndFadesOutThenRemoves [
 	<gtExample>
 	| space element disappearance |
 	space := self spaceWithElement.

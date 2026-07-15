@@ -26,18 +26,18 @@ CFMotionBuilder >> scaleIn [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> popIn [
+CFMotionBuilder >> scaleAndFadeIn [
 	^ CFMotionEffects
-		popIn: element
+		scaleAndFadeIn: element
 		from: 0.8 @ 0.8
 		duration: duration
 		easing: easing
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> popOut [
+CFMotionBuilder >> scaleAndFadeOut [
 	^ CFMotionEffects
-		popOut: element
+		scaleAndFadeOut: element
 		to: 0.8 @ 0.8
 		duration: duration
 		easing: easing

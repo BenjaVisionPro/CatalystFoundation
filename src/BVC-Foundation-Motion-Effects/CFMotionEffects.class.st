@@ -65,19 +65,19 @@ CFMotionEffects class >> fadeOut: anElement duration: aDuration easing: anInterp
 ]
 
 { #category : 'appearance' }
-CFMotionEffects class >> popIn: anElement [
+CFMotionEffects class >> scaleAndFadeIn: anElement [
 	^ self
-		popIn: anElement
+		scaleAndFadeIn: anElement
 		from: 0.8 @ 0.8
 		duration: 180 milliSeconds
 		easing: (BlDecelerateInterpolator factor: 1.4)
 ]
 
 { #category : 'appearance' }
-CFMotionEffects class >> popIn: anElement from: aScale duration: aDuration easing: anInterpolator [
+CFMotionEffects class >> scaleAndFadeIn: anElement from: aScale duration: aDuration easing: anInterpolator [
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
-		self error: 'A pop-in effect subject must be attached to a BlSpace' ].
+		self error: 'A scale-and-fade-in effect subject must be attached to a BlSpace' ].
 	opacity := CFOpacityMotionProperty uniqueInstance.
 	operation := CFMotionOperation
 		coordinator: anElement space cfMotionCoordinator
@@ -92,19 +92,19 @@ CFMotionEffects class >> popIn: anElement from: aScale duration: aDuration easin
 ]
 
 { #category : 'appearance' }
-CFMotionEffects class >> popOut: anElement [
+CFMotionEffects class >> scaleAndFadeOut: anElement [
 	^ self
-		popOut: anElement
+		scaleAndFadeOut: anElement
 		to: 0.8 @ 0.8
 		duration: 180 milliSeconds
 		easing: (BlDecelerateInterpolator factor: 1.4)
 ]
 
 { #category : 'appearance' }
-CFMotionEffects class >> popOut: anElement to: aScale duration: aDuration easing: anInterpolator [
+CFMotionEffects class >> scaleAndFadeOut: anElement to: aScale duration: aDuration easing: anInterpolator [
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
-		self error: 'A pop-out effect subject must be attached to a BlSpace' ].
+		self error: 'A scale-and-fade-out effect subject must be attached to a BlSpace' ].
 	opacity := CFOpacityMotionProperty uniqueInstance.
 	operation := CFMotionOperation
 		coordinator: anElement space cfMotionCoordinator

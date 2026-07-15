@@ -106,7 +106,7 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 		visibility: BlVisibility visible;
 		opacity: 0.0.
 	operation := CFMotionEffects
-		popIn: element
+		scaleAndFadeIn: element
 		from: 0.8 @ 0.8
 		duration: aDuration
 		easing: anInterpolator
@@ -115,7 +115,7 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 { #category : 'private - starting' }
 CFMotionAppearanceOperation >> startDisappearingWithDuration: aDuration easing: anInterpolator [
 	operation := CFMotionEffects
-		popOut: element
+		scaleAndFadeOut: element
 		to: 0.8 @ 0.8
 		duration: aDuration
 		easing: anInterpolator.
