@@ -319,6 +319,43 @@ CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
 	^ transaction
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
+	<gtExample>
+	| space first second transaction |
+	space := BlSpace new.
+	first := BlElement new size: 120 @ 80; yourself.
+	second := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { first. second }.
+	first relocate: 0 @ 0.
+	second relocate: 0 @ 100.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { first. second };
+		mutate: [
+			first
+				relocate: 60 @ 20;
+				size: 240 @ 100.
+			second
+				relocate: 20 @ 150;
+				size: 180 @ 40 ];
+		play.
+	space pulse.
+	self assert: transaction operation tracks size equals: 2.
+	self assert: (CFMotionGeometrySnapshot of: first in: space root) bounds
+		equals: transaction sourceSnapshots first bounds.
+	self assert: (CFMotionGeometrySnapshot of: second in: space root) bounds
+		equals: transaction sourceSnapshots second bounds.
+	self finish: transaction operation in: space.
+	self assert: (CFMotionGeometrySnapshot of: first in: space root) bounds
+		equals: transaction destinationSnapshots first bounds.
+	self assert: (CFMotionGeometrySnapshot of: second in: space root) bounds
+		equals: transaction destinationSnapshots second bounds.
+	^ transaction
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
