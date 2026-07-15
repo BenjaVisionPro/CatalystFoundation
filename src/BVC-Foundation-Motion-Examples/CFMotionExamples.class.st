@@ -199,6 +199,42 @@ CFMotionExamples >> disappearUsingFadeOutSelectsTheFadeRecipe [
 ]
 
 { #category : 'examples - effects' }
+CFMotionExamples >> scaleInRecipeUsesItsConfiguredScale [
+	<gtExample>
+	| space element effect operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	effect := CFMotionEffects scaleIn scale: 0.6 @ 0.7; yourself.
+	operation := effect
+		playOn: element
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: effect name equals: #scaleIn.
+	self assert: operation tracks first sourceScale equals: 0.6 @ 0.7.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	^ operation
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> scaleOutRecipeUsesItsConfiguredScale [
+	<gtExample>
+	| space element effect operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	effect := CFMotionEffects scaleOut scale: 0.6 @ 0.7; yourself.
+	operation := effect
+		playOn: element
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: effect name equals: #scaleOut.
+	self assert: operation tracks first targetScale equals: 0.6 @ 0.7.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	^ operation
+]
+
+{ #category : 'examples - effects' }
 CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	<gtExample>
 	| space outgoing incoming operation |

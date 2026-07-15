@@ -50,6 +50,22 @@ CFMotionEffects class >> scaleAndFadeOut [
 ]
 
 { #category : 'recipes' }
+CFMotionEffects class >> scaleIn [
+	^ (CFMotionEffectRecipe named: #scaleIn start: [ :element :duration :easing :recipe |
+		self scaleIn: element from: recipe scale duration: duration easing: easing ])
+		scale: 0.8 @ 0.8;
+		yourself
+]
+
+{ #category : 'recipes' }
+CFMotionEffects class >> scaleOut [
+	^ (CFMotionEffectRecipe named: #scaleOut start: [ :element :duration :easing :recipe |
+		self scaleOut: element to: recipe scale duration: duration easing: easing ])
+		scale: 0.8 @ 0.8;
+		yourself
+]
+
+{ #category : 'recipes' }
 CFMotionEffects class >> compress [
 	^ CFMotionEffectRecipe named: #compress start: [ :element :duration :easing :recipe |
 		(element motion duration: duration; easing: easing; scale: 0.96 @ 0.96) ]
@@ -245,6 +261,30 @@ CFMotionEffects class >> scaleIn: anElement from: aScale duration: aDuration eas
 	operation := CFMotionOperation
 		coordinator: anElement space cfMotionCoordinator
 		tracks: { CFMotionScaleTrack on: anElement from: aScale to: 1 @ 1 }.
+	operation
+		duration: aDuration;
+		easing: anInterpolator;
+		start.
+	^ operation
+]
+
+{ #category : 'scaling' }
+CFMotionEffects class >> scaleOut: anElement [
+	^ self
+		scaleOut: anElement
+		to: 0.8 @ 0.8
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4)
+]
+
+{ #category : 'scaling' }
+CFMotionEffects class >> scaleOut: anElement to: aScale duration: aDuration easing: anInterpolator [
+	| operation |
+	anElement isAttachedToSceneGraph ifFalse: [
+		self error: 'A scale effect subject must be attached to a BlSpace' ].
+	operation := CFMotionOperation
+		coordinator: anElement space cfMotionCoordinator
+		tracks: { CFMotionScaleTrack on: anElement from: 1 @ 1 to: aScale }.
 	operation
 		duration: aDuration;
 		easing: anInterpolator;
