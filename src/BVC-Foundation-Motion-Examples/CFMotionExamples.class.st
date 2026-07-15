@@ -429,6 +429,69 @@ CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
 	^ second
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPresentation [
+	<gtExample>
+	| space firstElement secondElement first second |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	firstElement := BlElement new size: 120 @ 80; yourself.
+	secondElement := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { firstElement. secondElement }.
+	firstElement relocate: 0 @ 0.
+	secondElement relocate: 0 @ 100.
+	space pulse.
+	first := (space root motion
+		duration: 1 second;
+		layout)
+		affecting: { firstElement. secondElement };
+		mutate: [
+			firstElement
+				relocate: 60 @ 20;
+				size: 240 @ 100.
+			secondElement
+				relocate: 20 @ 150;
+				size: 180 @ 40 ];
+		play.
+	space pulse.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	second := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { firstElement. secondElement };
+		mutate: [
+			firstElement
+				relocate: 120 @ 40;
+				size: 180 @ 60.
+			secondElement
+				relocate: 80 @ 180;
+				size: 100 @ 120 ];
+		play.
+	space pulse.
+	self assert: first operation isCancelled.
+	self assert: second operation isRunning.
+	self assert: second destinationSnapshots first bounds equals: ((120 @ 40) extent: 180 @ 60).
+	self assert: second destinationSnapshots second bounds equals: ((80 @ 180) extent: 100 @ 120).
+	self assert: second operation tracks first presentation ownsCurrentTransformation.
+	self assert: second operation tracks second presentation ownsCurrentTransformation.
+	self assert: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
+		equals: second sourceSnapshots first bounds.
+	self assert: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
+		equals: second sourceSnapshots second bounds.
+	self assert: space cfMotionCoordinator activeOperations size equals: 1.
+	space pulse.
+	space time wait: 5 milliSeconds.
+	space pulse.
+	self assert: second operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
+		equals: second destinationSnapshots first bounds.
+	self assert: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
+		equals: second destinationSnapshots second bounds.
+	^ second
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
