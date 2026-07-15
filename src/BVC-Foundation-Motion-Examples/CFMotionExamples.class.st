@@ -165,6 +165,40 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 ]
 
 { #category : 'examples - effects' }
+CFMotionExamples >> appearUsingFadeInSelectsTheFadeRecipe [
+	<gtExample>
+	| space element appearance |
+	space := self spaceWithElement.
+	element := BlElement new size: 120 @ 80; yourself.
+	appearance := space root motion
+		duration: 1 milliSeconds;
+		appear: element using: CFMotionEffects fadeIn.
+	self assert: appearance effect name equals: #fadeIn.
+	self assert: appearance operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ appearance
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> disappearUsingFadeOutSelectsTheFadeRecipe [
+	<gtExample>
+	| space element disappearance |
+	space := self spaceWithElement.
+	element := space root children first.
+	disappearance := element motion
+		duration: 1 milliSeconds;
+		disappearUsing: CFMotionEffects fadeOut.
+	self assert: disappearance effect name equals: #fadeOut.
+	self assert: disappearance operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self finish: disappearance operation in: space.
+	self assert: disappearance isCompleted.
+	self assert: element hasParent not.
+	^ disappearance
+]
+
+{ #category : 'examples - effects' }
 CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	<gtExample>
 	| space outgoing incoming operation |

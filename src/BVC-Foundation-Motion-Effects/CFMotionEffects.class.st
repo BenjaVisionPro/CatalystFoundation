@@ -6,6 +6,18 @@ Class {
 }
 
 { #category : 'recipes' }
+CFMotionEffects class >> fadeIn [
+	^ CFMotionEffectRecipe named: #fadeIn start: [ :element :duration :easing :recipe |
+		self fadeIn: element duration: duration easing: easing ]
+]
+
+{ #category : 'recipes' }
+CFMotionEffects class >> fadeOut [
+	^ CFMotionEffectRecipe named: #fadeOut start: [ :element :duration :easing :recipe |
+		self fadeOut: element duration: duration easing: easing ]
+]
+
+{ #category : 'recipes' }
 CFMotionEffects class >> riseAndFadeIn [
 	^ (CFMotionEffectRecipe named: #riseAndFadeIn start: [ :element :duration :easing :recipe |
 		self riseAndFadeIn: element distance: recipe distance duration: duration easing: easing ])
