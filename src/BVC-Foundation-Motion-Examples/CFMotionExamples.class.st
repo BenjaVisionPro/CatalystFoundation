@@ -168,6 +168,22 @@ CFMotionExamples >> transformPresentationReleasesOnlyItsOwnTransformation [
 	^ presentation
 ]
 
+{ #category : 'examples - geometry snapshots' }
+CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
+	<gtExample>
+	| space element snapshot expectedBounds |
+	space := self spaceWithElement.
+	element := space root children first.
+	snapshot := CFMotionGeometrySnapshot of: element in: space root.
+	expectedBounds := BlBounds fromRectangle: element boundsInSpace.
+	space root globalBoundsToLocal: expectedBounds.
+	self assert: snapshot isValid.
+	self assert: snapshot coordinateSpace == space root.
+	self assert: snapshot bounds equals: expectedBounds asRectangle.
+	self assert: snapshot parent == space root.
+	^ snapshot
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
