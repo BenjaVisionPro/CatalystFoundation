@@ -559,9 +559,9 @@ CFMotionExamples >> motionAptitudeRunsThePressedAndReleasedEffects [
 	element dispatchEvent: BlMouseUpEvent new.
 	released := aptitude activeOperation.
 	self assert: pressed isCancelled.
-	self assert: released isRunning.
+	self assert: released isCompleted.
 	element removeAptitude: aptitude.
-	self assert: released isCancelled.
+	self assert: released isCompleted.
 	^ aptitude
 ]
 
