@@ -539,6 +539,12 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	pendingPreviewCandidate := nil.
 	pendingRootPreview := false.
 	previewElement ifNil: [ ^ self ].
+	"The sidebar continuously reports drag-over events, whereas leaving the canvas
+	 emits one drag-left event. Once the preview has been moved to me for its
+	 terminal fade, both routes must leave that one fade undisturbed."
+	(previewVisible not
+		and: [ previewItemsElement isNil
+			and: [ previewElement parent == self ] ]) ifTrue: [ ^ self ].
 	(previewElement parent == previewPreparationElement
 		or: [ previewElement isFormReady not ]) ifTrue: [
 		^ self detachPlacementPreview ].
@@ -591,6 +597,10 @@ CFConfigurationEditorElement >> createDropPreviewElement [
 	previewElement := element.
 	element
 		opacity: 0;
+		"Expanded Magritte fields use their own composition layers. Keep the
+		 preview subtree in one buffered layer so this container remains the
+		 single owner of its fade."
+		beInSingleCompositionLayer;
 		preventMouseEvents.
 	element userData at: #cfConfigurationEditorPlacementPreview put: true.
 	element whenFormReadyDo: [ :readyElement |
