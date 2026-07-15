@@ -60,4 +60,13 @@ CFMotionEffectRecipe >> playOn: anElement duration: aDuration easing: anInterpol
 ]
 
 { #category : 'accessing' }
+CFMotionEffectRecipe >> scale [ ^ options at: #scale ]
+
+{ #category : 'configuration' }
+CFMotionEffectRecipe >> scale: aPoint [
+	options at: #scale put: aPoint.
+	^ self
+]
+
+{ #category : 'accessing' }
 CFMotionEffectRecipe >> startBlock: aBlock [ startBlock := aBlock ]

@@ -314,6 +314,24 @@ CFMotionExamples >> configurableRiseAndFadeInRecipeOverridesTheBuilderDuration [
 	^ appearance
 ]
 
+{ #category : 'examples - appearance' }
+CFMotionExamples >> configurableScaleAndFadeInRecipeSelectsItsSourceScale [
+	<gtExample>
+	| space element appearance recipe |
+	space := BlSpace new.
+	element := BlElement new size: 120 @ 80; yourself.
+	recipe := CFMotionEffects scaleAndFadeIn
+		scale: 0.5 @ 0.6;
+		duration: 1 milliSeconds;
+		yourself.
+	appearance := space root motion
+		appear: element using: recipe.
+	self assert: appearance operation tracks second sourceScale equals: 0.5 @ 0.6.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	^ appearance
+]
+
 { #category : 'examples - effects' }
 CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>

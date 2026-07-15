@@ -23,14 +23,18 @@ CFMotionEffects class >> fallAndFadeOut [
 
 { #category : 'recipes' }
 CFMotionEffects class >> scaleAndFadeIn [
-	^ CFMotionEffectRecipe named: #scaleAndFadeIn start: [ :element :duration :easing :recipe |
-		self scaleAndFadeIn: element from: 0.8 @ 0.8 duration: duration easing: easing ]
+	^ (CFMotionEffectRecipe named: #scaleAndFadeIn start: [ :element :duration :easing :recipe |
+		self scaleAndFadeIn: element from: recipe scale duration: duration easing: easing ])
+		scale: 0.8 @ 0.8;
+		yourself
 ]
 
 { #category : 'recipes' }
 CFMotionEffects class >> scaleAndFadeOut [
-	^ CFMotionEffectRecipe named: #scaleAndFadeOut start: [ :element :duration :easing :recipe |
-		self scaleAndFadeOut: element to: 0.8 @ 0.8 duration: duration easing: easing ]
+	^ (CFMotionEffectRecipe named: #scaleAndFadeOut start: [ :element :duration :easing :recipe |
+		self scaleAndFadeOut: element to: recipe scale duration: duration easing: easing ])
+		scale: 0.8 @ 0.8;
+		yourself
 ]
 
 { #category : 'fading' }
