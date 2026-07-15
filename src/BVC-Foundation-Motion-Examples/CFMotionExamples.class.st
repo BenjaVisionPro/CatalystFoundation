@@ -171,7 +171,8 @@ CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 	scaleOperation cancelAndRestore.
 	self assert: scaleOperation isCancelled.
 	self assert: transaction operation tracks first presentation ownsCurrentTransformation.
-	self finish: transaction operation in: space.
+	space time wait: 1 second.
+	space pulse.
 	self assert: transaction operation isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
