@@ -943,6 +943,29 @@ CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionRemovesTheDeclaredElement [
+	<gtExample>
+	| space removed survivor transaction |
+	space := BlSpace new.
+	removed := BlElement new size: 120 @ 80; yourself.
+	survivor := BlElement new size: 120 @ 80; yourself.
+	space root addChildren: { removed. survivor }.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { survivor };
+		remove: removed;
+		play.
+	space pulse.
+	self assert: removed hasParent not.
+	self assert: survivor parent == space root.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
 	<gtExample>
 	| space element transaction |

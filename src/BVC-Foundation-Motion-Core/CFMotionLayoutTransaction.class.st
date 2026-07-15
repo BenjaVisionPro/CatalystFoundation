@@ -135,6 +135,15 @@ CFMotionLayoutTransaction >> mutate: aBlock [
 ]
 
 { #category : 'configuration' }
+CFMotionLayoutTransaction >> remove: anElement [
+	anElement hasParent ifFalse: [
+		self error: 'A removed motion element must belong to a container' ].
+	(participants includes: anElement) ifTrue: [
+		self error: 'A removed motion element cannot be a post-mutation participant' ].
+	^ self mutate: [ anElement parent removeChild: anElement ]
+]
+
+{ #category : 'configuration' }
 CFMotionLayoutTransaction >> move: anElement from: aSourceContainer to: aDestinationContainer [
 	aSourceContainer == aDestinationContainer ifTrue: [
 		self error: 'A motion move needs distinct source and destination containers' ].
