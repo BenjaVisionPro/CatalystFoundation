@@ -50,6 +50,14 @@ CFMotionTransformPresentation >> apply [
 	element transformation: appliedTransformation
 ]
 
+{ #category : 'controlling' }
+CFMotionTransformPresentation >> adoptCurrentPresentation [
+	active ifFalse: [ ^ self ].
+	self ownsCurrentTransformation ifTrue: [
+		baseTransformation := appliedTransformation ].
+	self relinquishOwnership
+]
+
 { #category : 'accessing' }
 CFMotionTransformPresentation >> baseTransformation [ ^ baseTransformation ]
 

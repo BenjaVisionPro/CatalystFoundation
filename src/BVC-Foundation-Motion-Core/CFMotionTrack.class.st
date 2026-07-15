@@ -21,6 +21,9 @@ CFMotionTrack >> captureOrigin [ self subclassResponsibility ]
 CFMotionTrack >> propertyKey [ self subclassResponsibility ]
 
 { #category : 'playing' }
+CFMotionTrack >> preserveCurrentPresentation [ ]
+
+{ #category : 'playing' }
 CFMotionTrack >> prepareFromCurrentPresentation [ self subclassResponsibility ]
 
 { #category : 'playing' }

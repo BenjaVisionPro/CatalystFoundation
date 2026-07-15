@@ -37,7 +37,7 @@ CFMotionOperation >> cancelAndRestore [
 
 { #category : 'controlling' }
 CFMotionOperation >> cancelPreservingCurrentPresentation [
-	^ self cancelApplying: [ :each | ]
+	^ self cancelApplying: [ :each | each preserveCurrentPresentation ]
 ]
 
 { #category : 'controlling' }

@@ -244,6 +244,32 @@ CFMotionExamples >> inverseTransformPresentsSourceBoundsOverMovedAndResizedDesti
 	^ presentation
 ]
 
+{ #category : 'examples - geometry operation' }
+CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
+	<gtExample>
+	| space element source destination track operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	source := CFMotionGeometrySnapshot of: element in: space root.
+	element
+		relocate: 60 @ 20;
+		size: 240 @ 100.
+	space pulse.
+	destination := CFMotionGeometrySnapshot of: element in: space root.
+	track := CFMotionGeometryTrack from: source to: destination.
+	operation := CFMotionOperation
+		coordinator: space cfMotionCoordinator
+		tracks: { track }.
+	operation duration: 1 milliSeconds.
+	operation start.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: source bounds.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: destination bounds.
+	self assert: track presentation isActive not.
+	^ operation
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
