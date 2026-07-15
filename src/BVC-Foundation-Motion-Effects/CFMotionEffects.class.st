@@ -7,25 +7,29 @@ Class {
 
 { #category : 'recipes' }
 CFMotionEffects class >> riseAndFadeIn [
-	^ CFMotionEffectRecipe named: #riseAndFadeIn start: [ :element :duration :easing |
-		self riseAndFadeIn: element distance: 12 duration: duration easing: easing ]
+	^ (CFMotionEffectRecipe named: #riseAndFadeIn start: [ :element :duration :easing :recipe |
+		self riseAndFadeIn: element distance: recipe distance duration: duration easing: easing ])
+		distance: 12;
+		yourself
 ]
 
 { #category : 'recipes' }
 CFMotionEffects class >> fallAndFadeOut [
-	^ CFMotionEffectRecipe named: #fallAndFadeOut start: [ :element :duration :easing |
-		self fallAndFadeOut: element distance: 12 duration: duration easing: easing ]
+	^ (CFMotionEffectRecipe named: #fallAndFadeOut start: [ :element :duration :easing :recipe |
+		self fallAndFadeOut: element distance: recipe distance duration: duration easing: easing ])
+		distance: 12;
+		yourself
 ]
 
 { #category : 'recipes' }
 CFMotionEffects class >> scaleAndFadeIn [
-	^ CFMotionEffectRecipe named: #scaleAndFadeIn start: [ :element :duration :easing |
+	^ CFMotionEffectRecipe named: #scaleAndFadeIn start: [ :element :duration :easing :recipe |
 		self scaleAndFadeIn: element from: 0.8 @ 0.8 duration: duration easing: easing ]
 ]
 
 { #category : 'recipes' }
 CFMotionEffects class >> scaleAndFadeOut [
-	^ CFMotionEffectRecipe named: #scaleAndFadeOut start: [ :element :duration :easing |
+	^ CFMotionEffectRecipe named: #scaleAndFadeOut start: [ :element :duration :easing :recipe |
 		self scaleAndFadeOut: element to: 0.8 @ 0.8 duration: duration easing: easing ]
 ]
 

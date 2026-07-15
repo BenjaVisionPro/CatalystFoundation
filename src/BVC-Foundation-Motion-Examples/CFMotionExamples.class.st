@@ -295,6 +295,25 @@ CFMotionExamples >> appearUsingRiseAndFadeInSelectsTheTranslationRecipe [
 	^ appearance
 ]
 
+{ #category : 'examples - appearance' }
+CFMotionExamples >> configurableRiseAndFadeInRecipeOverridesTheBuilderDuration [
+	<gtExample>
+	| space element appearance recipe |
+	space := BlSpace new.
+	element := BlElement new size: 120 @ 80; yourself.
+	recipe := CFMotionEffects riseAndFadeIn
+		distance: 24;
+		duration: 1 milliSeconds;
+		yourself.
+	appearance := space root motion
+		duration: 1 second;
+		appear: element using: recipe.
+	self assert: appearance operation tracks second sourceTranslation equals: 0 @ 24.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	^ appearance
+]
+
 { #category : 'examples - effects' }
 CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>
