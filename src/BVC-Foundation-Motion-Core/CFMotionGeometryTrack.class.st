@@ -119,3 +119,6 @@ CFMotionGeometryTrack >> sourceSnapshot [ ^ sourceSnapshot ]
 
 { #category : 'accessing' }
 CFMotionGeometryTrack >> sourceSnapshot: aSnapshot [ sourceSnapshot := aSnapshot ]
+
+{ #category : 'accessing' }
+CFMotionGeometryTrack >> startTranslation [ ^ startTranslation ]
