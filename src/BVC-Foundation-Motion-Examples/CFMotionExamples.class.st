@@ -409,6 +409,31 @@ CFMotionExamples >> transformPresentationsDoNotComposeWithoutASharedChannel [
 	^ scalePresentation
 ]
 
+{ #category : 'examples - transform ownership probe' }
+CFMotionExamples >> transformPresentationsComposeThroughASharedChannel [
+	<gtExample>
+	| space element applicationTransformation channel translationPresentation scalePresentation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	channel := CFMotionTransformChannel on: element.
+	translationPresentation := CFMotionTransformPresentation on: element using: channel.
+	translationPresentation translation: 40 @ 20.
+	scalePresentation := CFMotionTransformPresentation on: element using: channel.
+	scalePresentation scale: 0.5 @ 0.8.
+	self assert: translationPresentation ownsCurrentTransformation.
+	self assert: scalePresentation ownsCurrentTransformation.
+	translationPresentation translation: 60 @ 30.
+	self assert: translationPresentation isActive.
+	self assert: scalePresentation ownsCurrentTransformation.
+	scalePresentation release.
+	self assert: translationPresentation ownsCurrentTransformation.
+	translationPresentation release.
+	self assert: element transformation == applicationTransformation.
+	^ channel
+]
+
 { #category : 'examples - geometry snapshots' }
 CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
 	<gtExample>

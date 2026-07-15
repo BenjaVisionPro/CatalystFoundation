@@ -17,6 +17,9 @@ CFMotionTrack >> applyProgress: aProgress [ self subclassResponsibility ]
 { #category : 'playing' }
 CFMotionTrack >> captureOrigin [ self subclassResponsibility ]
 
+{ #category : 'playing' }
+CFMotionTrack >> captureOriginIn: aCoordinator [ self captureOrigin ]
+
 { #category : 'accessing' }
 CFMotionTrack >> propertyKey [ self subclassResponsibility ]
 

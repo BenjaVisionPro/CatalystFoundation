@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionCoordinator',
 	#superclass : 'Object',
-	#instVars : [ 'space', 'owners', 'activeOperations', 'history' ],
+	#instVars : [ 'space', 'owners', 'activeOperations', 'history', 'transformChannels' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -14,7 +14,8 @@ CFMotionCoordinator >> initialize [
 	super initialize.
 	owners := Dictionary new.
 	activeOperations := OrderedCollection new.
-	history := OrderedCollection new
+	history := OrderedCollection new.
+	transformChannels := IdentityDictionary new
 ]
 
 { #category : 'accessing' }
@@ -22,6 +23,16 @@ CFMotionCoordinator >> space: aSpace [ space := aSpace ]
 
 { #category : 'accessing' }
 CFMotionCoordinator >> space [ ^ space ]
+
+{ #category : 'transform channels' }
+CFMotionCoordinator >> transformChannelFor: anElement [
+	^ transformChannels at: anElement ifAbsentPut: [
+		| channel |
+		channel := CFMotionTransformChannel on: anElement.
+		channel whenEmptyDo: [
+			transformChannels removeKey: anElement ifAbsent: [ nil ] ].
+		channel ]
+]
 
 { #category : 'accessing' }
 CFMotionCoordinator >> history [ ^ history asArray ]

@@ -49,6 +49,13 @@ CFMotionGeometryTrack >> captureOrigin [
 	presentation := CFMotionTransformPresentation on: element
 ]
 
+{ #category : 'playing' }
+CFMotionGeometryTrack >> captureOriginIn: aCoordinator [
+	presentation := CFMotionTransformPresentation
+		on: element
+		using: (aCoordinator transformChannelFor: element)
+]
+
 { #category : 'accessing' }
 CFMotionGeometryTrack >> destinationSnapshot [ ^ destinationSnapshot ]
 

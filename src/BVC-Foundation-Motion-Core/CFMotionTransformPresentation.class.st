@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionTransformPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'baseTransformation', 'appliedTransformation', 'translation', 'scale', 'active' ],
+	#instVars : [ 'element', 'channel', 'translation', 'scale', 'active' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -9,6 +9,14 @@ Class {
 { #category : 'instance creation' }
 CFMotionTransformPresentation class >> on: anElement [
 	^ self new element: anElement; yourself
+]
+
+{ #category : 'instance creation' }
+CFMotionTransformPresentation class >> on: anElement using: aTransformChannel [
+	^ self new
+		element: anElement;
+		channel: aTransformChannel;
+		yourself
 ]
 
 { #category : 'initialization' }
@@ -19,23 +27,9 @@ CFMotionTransformPresentation >> initialize [
 	active := false
 ]
 
-{ #category : 'controlling' }
-CFMotionTransformPresentation >> begin [
-	active ifTrue: [
-		self ownsCurrentTransformation ifTrue: [ ^ self ].
-		self relinquishOwnership ].
-	baseTransformation := element transformation.
-	translation := 0 @ 0.
-	scale := 1 @ 1.
-	active := true.
-	self apply
-]
-
 { #category : 'private - applying' }
-CFMotionTransformPresentation >> apply [
-	| composite motionTransformation origin |
-	composite := BlElementCompositeTransformation new.
-	composite add: baseTransformation asElementTransformation.
+CFMotionTransformPresentation >> addContributionTo: aCompositeTransformation [
+	| motionTransformation origin |
 	motionTransformation := BlAffineCompositeTransformation new.
 	origin := BlAffineTransformationTopLeftOrigin new.
 	scale = (1 @ 1) ifFalse: [
@@ -45,21 +39,44 @@ CFMotionTransformPresentation >> apply [
 		motionTransformation addTransformation:
 			((BlTranslationTransformation translation: translation) origin: origin) ].
 	motionTransformation hasTransformations ifTrue: [
-		composite add: (BlElementLocalTransformation with: motionTransformation) ].
-	appliedTransformation := composite asCachedTransformation.
-	element transformation: appliedTransformation
+		aCompositeTransformation add: (BlElementLocalTransformation with: motionTransformation) ]
+]
+
+{ #category : 'private - applying' }
+CFMotionTransformPresentation >> apply [
+	(channel apply) ifFalse: [ self relinquishOwnership ]
+]
+
+{ #category : 'controlling' }
+CFMotionTransformPresentation >> begin [
+	active ifTrue: [ ^ self ].
+	channel ifNil: [ channel := CFMotionTransformChannel on: element ].
+	translation := 0 @ 0.
+	scale := 1 @ 1.
+	active := true.
+	(channel register: self) ifFalse: [ self relinquishOwnership ]
+]
+
+{ #category : 'accessing' }
+CFMotionTransformPresentation >> channel [ ^ channel ]
+
+{ #category : 'accessing' }
+CFMotionTransformPresentation >> channel: aTransformChannel [
+	aTransformChannel element == element ifFalse: [
+		self error: 'A transform presentation must use a channel for its element' ].
+	channel := aTransformChannel
 ]
 
 { #category : 'controlling' }
 CFMotionTransformPresentation >> adoptCurrentPresentation [
 	active ifFalse: [ ^ self ].
-	self ownsCurrentTransformation ifTrue: [
-		baseTransformation := appliedTransformation ].
-	self relinquishOwnership
+	(channel adopt: self) ifTrue: [ self relinquishOwnership ]
 ]
 
 { #category : 'accessing' }
-CFMotionTransformPresentation >> baseTransformation [ ^ baseTransformation ]
+CFMotionTransformPresentation >> baseTransformation [
+	^ channel ifNil: [ nil ] ifNotNil: [ channel baseTransformation ]
+]
 
 { #category : 'accessing' }
 CFMotionTransformPresentation >> element [ ^ element ]
@@ -72,22 +89,18 @@ CFMotionTransformPresentation >> isActive [ ^ active ]
 
 { #category : 'testing' }
 CFMotionTransformPresentation >> ownsCurrentTransformation [
-	^ active and: [ element transformation == appliedTransformation ]
+	^ active and: [ channel ownsCurrentTransformation ]
 ]
 
 { #category : 'controlling' }
 CFMotionTransformPresentation >> release [
 	active ifFalse: [ ^ self ].
-	self ownsCurrentTransformation ifTrue: [
-		element transformation: baseTransformation ].
+	channel release: self.
 	self relinquishOwnership
 ]
 
 { #category : 'private - controlling' }
-CFMotionTransformPresentation >> relinquishOwnership [
-	active := false.
-	appliedTransformation := nil
-]
+CFMotionTransformPresentation >> relinquishOwnership [ active := false ]
 
 { #category : 'accessing' }
 CFMotionTransformPresentation >> scale [ ^ scale ]
@@ -95,9 +108,7 @@ CFMotionTransformPresentation >> scale [ ^ scale ]
 { #category : 'controlling' }
 CFMotionTransformPresentation >> scale: aPoint [
 	active ifFalse: [ self begin ].
-	self ownsCurrentTransformation ifFalse: [
-		self relinquishOwnership.
-		^ self ].
+	active ifFalse: [ ^ self ].
 	scale := aPoint.
 	self apply
 ]
@@ -108,9 +119,7 @@ CFMotionTransformPresentation >> translation [ ^ translation ]
 { #category : 'controlling' }
 CFMotionTransformPresentation >> translation: aPoint [
 	active ifFalse: [ self begin ].
-	self ownsCurrentTransformation ifFalse: [
-		self relinquishOwnership.
-		^ self ].
+	active ifFalse: [ ^ self ].
 	translation := aPoint.
 	self apply
 ]

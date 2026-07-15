@@ -150,7 +150,7 @@ CFMotionOperation >> retarget: aTrack duration: aDuration easing: anInterpolator
 { #category : 'playing' }
 CFMotionOperation >> start [
 	self claimTracks.
-	tracks do: [ :each | each captureOrigin ].
+	tracks do: [ :each | each captureOriginIn: coordinator ].
 	self startFromCurrentPresentation.
 	^ self
 ]
