@@ -257,6 +257,38 @@ CFMotionExamples >> overlayTracksItsReferenceAndCleansUp [
 	^ overlay
 ]
 
+{ #category : 'examples - structural motion' }
+CFMotionExamples >> motionOverlayTracksANestedReferenceAndCleansUp [
+	<gtExample>
+	| space container reference motionOverlay |
+	space := BlSpace new.
+	container := BlElement new
+		relocate: 60 @ 40;
+		size: 300 @ 200;
+		yourself.
+	reference := BlElement new
+		relocate: 40 @ 30;
+		size: 120 @ 80;
+		yourself.
+	space root addChild: container.
+	container addChild: reference.
+	motionOverlay := CFMotionOverlay on: reference in: space root.
+	space pulse.
+	self assert: motionOverlay isInstalled.
+	self assert: motionOverlay overlay parent == space root.
+	self assertBounds: (CFMotionGeometrySnapshot of: motionOverlay overlay in: space root) bounds
+		closeTo: (CFMotionGeometrySnapshot of: reference in: space root) bounds.
+	container relocate: 180 @ 90.
+	reference size: 240 @ 100.
+	space pulse.
+	self assertBounds: (CFMotionGeometrySnapshot of: motionOverlay overlay in: space root) bounds
+		closeTo: (CFMotionGeometrySnapshot of: reference in: space root) bounds.
+	motionOverlay release.
+	self assert: motionOverlay isInstalled not.
+	self assert: motionOverlay overlay isAttached not.
+	^ motionOverlay
+]
+
 { #category : 'examples - transform ownership probe' }
 CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
 	<gtExample>
