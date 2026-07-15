@@ -288,7 +288,7 @@ CFMotionExamples >> appearUsingRiseAndFadeInSelectsTheTranslationRecipe [
 	appearance := space root motion
 		duration: 1 milliSeconds;
 		appear: element using: CFMotionEffects riseAndFadeIn.
-	self assert: appearance operation tracks second isKindOf: CFMotionTranslationTrack.
+	self assert: (appearance operation tracks second isKindOf: CFMotionTranslationTrack).
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	self assert: element opacity equals: 1.0.
@@ -414,7 +414,7 @@ CFMotionExamples >> disappearUsingFallAndFadeOutSelectsTheTranslationRecipe [
 	disappearance := element motion
 		duration: 1 milliSeconds;
 		disappearUsing: CFMotionEffects fallAndFadeOut.
-	self assert: disappearance operation tracks second isKindOf: CFMotionTranslationTrack.
+	self assert: (disappearance operation tracks second isKindOf: CFMotionTranslationTrack).
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
 	self assert: element hasParent not.
