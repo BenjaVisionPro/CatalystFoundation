@@ -34,6 +34,43 @@ CFMotionExamples >> opacityCompletes [
 	^ operation
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion
+		duration: 1 milliSeconds;
+		fadeIn.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self assert: element opacity equals: 1.0.
+	^ operation
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
+	<gtExample>
+	| space element first second |
+	space := self spaceWithElement.
+	element := space root children first.
+	first := element motion
+		duration: 1 second;
+		fadeOut.
+	element opacity: 0.4.
+	second := element motion
+		duration: 1 second;
+		fadeIn.
+	self assert: first == second.
+	self assert: second isRunning.
+	self assert: second tracks first startValue equals: 0.4.
+	self assert: second tracks first targetValue equals: 1.0.
+	^ second
+]
+
 { #category : 'examples - retargeting' }
 CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 	<gtExample>
