@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionAdoptionOperation',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'sourceContainer', 'preview', 'committedElement', 'previewIndex', 'operation', 'overlay' ],
+	#instVars : [ 'container', 'sourceContainer', 'preview', 'committedElement', 'previewIndex', 'sourceSnapshot', 'destinationSnapshot', 'operation', 'overlay' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
@@ -43,6 +43,9 @@ CFMotionAdoptionOperation >> container [ ^ container ]
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> container: anElement [ container := anElement ]
 
+{ #category : 'accessing' }
+CFMotionAdoptionOperation >> destinationSnapshot [ ^ destinationSnapshot ]
+
 { #category : 'testing' }
 CFMotionAdoptionOperation >> isCancelled [ ^ operation isCancelled ]
 
@@ -70,6 +73,9 @@ CFMotionAdoptionOperation >> previewIndex [ ^ previewIndex ]
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> sourceContainer: anElement [ sourceContainer := anElement ]
 
+{ #category : 'accessing' }
+CFMotionAdoptionOperation >> sourceSnapshot [ ^ sourceSnapshot ]
+
 { #category : 'private - controlling' }
 CFMotionAdoptionOperation >> removeCommittedElementIfPresent [
 	committedElement hasParent ifTrue: [ committedElement parent removeChild: committedElement ]
@@ -82,20 +88,32 @@ CFMotionAdoptionOperation >> removePreviewIfPresent [
 
 { #category : 'private - starting' }
 CFMotionAdoptionOperation >> startWithDuration: aDuration easing: anInterpolator [
-	| insertionIndex |
+	| insertionIndex opacity geometryTrack |
 	self validateBeforeStarting.
 	previewIndex := sourceContainer children indexOf: preview.
+	sourceSnapshot := CFMotionGeometrySnapshot of: preview in: preview space root.
 	sourceContainer == container ifFalse: [ overlay := CFMotionOverlay on: preview in: preview space root ].
 	insertionIndex := sourceContainer == container
 		ifTrue: [ previewIndex ]
 		ifFalse: [ container children size + 1 ].
 	committedElement opacity: 0.0.
 	container addChild: committedElement at: insertionIndex.
-	operation := CFMotionEffects
-		crossFadeFrom: preview
-		to: committedElement
-		duration: aDuration
-		easing: anInterpolator.
+	destinationSnapshot := CFMotionGeometrySnapshot of: committedElement in: sourceSnapshot coordinateSpace.
+	opacity := CFOpacityMotionProperty uniqueInstance.
+	geometryTrack := CFMotionGeometryTrack
+		on: committedElement
+		from: sourceSnapshot
+		to: destinationSnapshot.
+	operation := CFMotionOperation
+		coordinator: container space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: preview property: opacity target: 0.0.
+			CFMotionPropertyTrack on: committedElement property: opacity target: 1.0.
+			geometryTrack }.
+	operation
+		duration: aDuration;
+		easing: anInterpolator;
+		start.
 	operation onTerminalDo: [ :aCompletedOperation |
 		aCompletedOperation isCompleted ifTrue: [ self removePreviewIfPresent ].
 		overlay ifNotNil: [ overlay release ] ]

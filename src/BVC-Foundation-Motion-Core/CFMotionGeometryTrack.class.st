@@ -10,10 +10,20 @@ Class {
 CFMotionGeometryTrack class >> from: aSourceSnapshot to: aDestinationSnapshot [
 	aSourceSnapshot element == aDestinationSnapshot element ifFalse: [
 		self error: 'Geometry snapshots must describe the same element' ].
+	^ self
+		on: aDestinationSnapshot element
+		from: aSourceSnapshot
+		to: aDestinationSnapshot
+]
+
+{ #category : 'instance creation' }
+CFMotionGeometryTrack class >> on: anElement from: aSourceSnapshot to: aDestinationSnapshot [
+	aDestinationSnapshot element == anElement ifFalse: [
+		self error: 'A geometry track must present its destination element' ].
 	aSourceSnapshot coordinateSpace == aDestinationSnapshot coordinateSpace ifFalse: [
 		self error: 'Geometry snapshots must use the same coordinate space' ].
 	^ self new
-		element: aSourceSnapshot element;
+		element: anElement;
 		sourceSnapshot: aSourceSnapshot;
 		destinationSnapshot: aDestinationSnapshot;
 		yourself

@@ -575,10 +575,10 @@ CFMotionExamples >> cancellingAdoptionRestoresThePreviewAndRemovesTheCommittedEl
 { #category : 'examples - adoption' }
 CFMotionExamples >> adoptionMovesAcrossParentsAndReleasesItsOverlay [
 	<gtExample>
-	| space source destination preview committed adoption |
+	| space source destination preview committed adoption geometryTrack |
 	space := BlSpace new.
-	source := BlElement new size: 240 @ 160; yourself.
-	destination := BlElement new size: 240 @ 160; yourself.
+	source := BlElement new size: 240 @ 160; relocate: 20 @ 30; yourself.
+	destination := BlElement new size: 240 @ 160; relocate: 260 @ 180; yourself.
 	preview := BlElement new size: 120 @ 80; yourself.
 	committed := BlElement new size: 120 @ 80; yourself.
 	space root addChildren: { source. destination }.
@@ -591,6 +591,10 @@ CFMotionExamples >> adoptionMovesAcrossParentsAndReleasesItsOverlay [
 	self assert: adoption overlay isInstalled.
 	self assert: preview parent == source.
 	self assert: committed parent == destination.
+	geometryTrack := adoption operation tracks detect: [ :each | each isKindOf: CFMotionGeometryTrack ].
+	self assert: geometryTrack sourceSnapshot == adoption sourceSnapshot.
+	self assert: geometryTrack destinationSnapshot == adoption destinationSnapshot.
+	self assert: geometryTrack startTranslation isZero not.
 	self finish: adoption operation in: space.
 	self assert: adoption isCompleted.
 	self assert: preview hasParent not.
