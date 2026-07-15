@@ -503,6 +503,27 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
+	<gtExample>
+	| space element transaction |
+	space := self spaceWithElement.
+	element := space root children first.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { element };
+		mutate: [ element size: 240 @ 100 ];
+		play.
+	self assert: transaction readiness isNil.
+	space pulse.
+	self assert: transaction readiness isCompleted.
+	self assert: transaction operation isRunning.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinateSpace [
 	<gtExample>
 	| space source destination element transaction sourceBounds destinationBounds |

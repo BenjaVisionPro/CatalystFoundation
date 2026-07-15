@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionLayoutTransaction',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'layoutHandler', 'operation', 'phase' ],
+	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'readiness', 'operation', 'phase' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -19,9 +19,7 @@ CFMotionLayoutTransaction >> affecting: aCollection [
 
 { #category : 'controlling' }
 CFMotionLayoutTransaction >> cancel [
-	layoutHandler ifNotNil: [
-		container removeEventHandler: layoutHandler.
-		layoutHandler := nil ].
+	readiness ifNotNil: [ readiness cancel ].
 	operation
 		ifNil: [ phase := #cancelled ]
 		ifNotNil: [
@@ -107,12 +105,10 @@ CFMotionLayoutTransaction >> installLayoutObservationAndMutate [
 	"Run in the space task phase. Register immediately before the mutation so the
 	first layout-computed event necessarily describes this transaction's mutation."
 	phase = #awaitingLayout ifFalse: [ ^ self ].
-	layoutHandler := BlEventHandler
-		on: BlElementLayoutComputedEvent
-		do: [ :anEvent |
-			container removeEventHandler: layoutHandler.
-			self captureDestinationAndStart ].
-	container addEventHandler: layoutHandler.
+	readiness := CFMotionNextLayoutReadiness
+		on: container
+		then: [ self captureDestinationAndStart ].
+	readiness start.
 	mutation value
 ]
 
@@ -162,6 +158,9 @@ CFMotionLayoutTransaction >> participants [ ^ participants ]
 CFMotionLayoutTransaction >> phase [
 	^ phase
 ]
+
+{ #category : 'accessing' }
+CFMotionLayoutTransaction >> readiness [ ^ readiness ]
 
 { #category : 'playing' }
 CFMotionLayoutTransaction >> play [
