@@ -97,8 +97,8 @@ CFMotionLayoutTransaction >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
 { #category : 'testing' }
 CFMotionLayoutTransaction >> isCancelled [ ^ phase = #cancelled ]
 
-{ #category : 'accessing' }
-CFMotionLayoutTransaction >> mutation: aBlock [
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> mutate: aBlock [
 	mutation := aBlock.
 	^ self
 ]
