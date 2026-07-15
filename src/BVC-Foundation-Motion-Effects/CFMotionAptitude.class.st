@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionAptitude',
 	#superclass : 'BrAptitude',
-	#instVars : [ 'hoveredEffect', 'unhoveredEffect', 'enterHandler', 'leaveHandler', 'activeOperation' ],
+	#instVars : [ 'hoveredEffect', 'unhoveredEffect', 'pressedEffect', 'releasedEffect', 'enterHandler', 'leaveHandler', 'downHandler', 'upHandler', 'activeOperation' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
@@ -11,6 +11,12 @@ CFMotionAptitude >> hoveredEffect: anEffectRecipe [
 	hoveredEffect := anEffectRecipe.
 	^ self
 ]
+
+{ #category : 'configuration' }
+CFMotionAptitude >> pressedEffect: anEffectRecipe [ pressedEffect := anEffectRecipe. ^ self ]
+
+{ #category : 'configuration' }
+CFMotionAptitude >> releasedEffect: anEffectRecipe [ releasedEffect := anEffectRecipe. ^ self ]
 
 { #category : 'accessing' }
 CFMotionAptitude >> activeOperation [ ^ activeOperation ]
@@ -36,7 +42,11 @@ CFMotionAptitude >> onInstalledIn: anElement [
 		on: BlMouseLeaveEvent
 		do: [ :anEvent | self play: unhoveredEffect on: anElement ].
 	anElement addEventHandler: enterHandler.
-	anElement addEventHandler: leaveHandler
+	anElement addEventHandler: leaveHandler.
+	downHandler := BlEventHandler on: BlMouseDownEvent do: [ :anEvent | self play: pressedEffect on: anElement ].
+	upHandler := BlEventHandler on: BlMouseUpEvent do: [ :anEvent | self play: releasedEffect on: anElement ].
+	anElement addEventHandler: downHandler.
+	anElement addEventHandler: upHandler
 ]
 
 { #category : 'lifecycle' }
@@ -45,8 +55,12 @@ CFMotionAptitude >> onUninstalledIn: anElement [
 	activeOperation := nil.
 	enterHandler ifNotNil: [ anElement removeEventHandler: enterHandler ].
 	leaveHandler ifNotNil: [ anElement removeEventHandler: leaveHandler ].
+	downHandler ifNotNil: [ anElement removeEventHandler: downHandler ].
+	upHandler ifNotNil: [ anElement removeEventHandler: upHandler ].
 	enterHandler := nil.
 	leaveHandler := nil.
+	downHandler := nil.
+	upHandler := nil.
 	super onUninstalledIn: anElement
 ]
 

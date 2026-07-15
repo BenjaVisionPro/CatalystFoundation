@@ -37,6 +37,18 @@ CFMotionEffects class >> scaleAndFadeOut [
 		yourself
 ]
 
+{ #category : 'recipes' }
+CFMotionEffects class >> compress [
+	^ CFMotionEffectRecipe named: #compress start: [ :element :duration :easing :recipe |
+		(element motion duration: duration; easing: easing; scale: 0.96 @ 0.96) ]
+]
+
+{ #category : 'recipes' }
+CFMotionEffects class >> springBack [
+	^ CFMotionEffectRecipe named: #springBack start: [ :element :duration :easing :recipe |
+		(element motion duration: duration; easing: easing; scale: 1 @ 1) ]
+]
+
 { #category : 'fading' }
 CFMotionEffects class >> crossFadeFrom: anOutgoingElement to: anIncomingElement [
 	^ self

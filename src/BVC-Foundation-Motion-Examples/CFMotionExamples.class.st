@@ -542,6 +542,29 @@ CFMotionExamples >> motionAptitudeCancelsThePreviousInteractionEffect [
 	^ aptitude
 ]
 
+{ #category : 'examples - aptitude' }
+CFMotionExamples >> motionAptitudeRunsThePressedAndReleasedEffects [
+	<gtExample>
+	| space element aptitude pressed released |
+	space := self spaceWithElement.
+	element := space root children first.
+	aptitude := CFMotionAptitude new
+		pressedEffect: CFMotionEffects compress;
+		releasedEffect: CFMotionEffects springBack;
+		yourself.
+	element addAptitude: aptitude.
+	element dispatchEvent: BlMouseDownEvent new.
+	pressed := aptitude activeOperation.
+	self assert: pressed isRunning.
+	element dispatchEvent: BlMouseUpEvent new.
+	released := aptitude activeOperation.
+	self assert: pressed isCancelled.
+	self assert: released isRunning.
+	element removeAptitude: aptitude.
+	self assert: released isCancelled.
+	^ aptitude
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	<gtExample>
