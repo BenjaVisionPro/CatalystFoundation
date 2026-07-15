@@ -94,6 +94,20 @@ CFMotionLayoutTransaction >> initialize [
 	phase := #idle
 ]
 
+{ #category : 'private - playing' }
+CFMotionLayoutTransaction >> installLayoutObservationAndMutate [
+	"Run in the space task phase. Register immediately before the mutation so the
+	first layout-computed event necessarily describes this transaction's mutation."
+	phase = #awaitingLayout ifFalse: [ ^ self ].
+	layoutHandler := BlEventHandler
+		on: BlElementLayoutComputedEvent
+		do: [ :anEvent |
+			container removeEventHandler: layoutHandler.
+			self captureDestinationAndStart ].
+	container addEventHandler: layoutHandler.
+	mutation value
+]
+
 { #category : 'testing' }
 CFMotionLayoutTransaction >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
 
@@ -125,13 +139,8 @@ CFMotionLayoutTransaction >> play [
 	sourceSnapshots := participants collect: [ :each |
 		CFMotionGeometrySnapshot of: each in: coordinateSpace ].
 	phase := #awaitingLayout.
-	layoutHandler := BlEventHandler
-		on: BlElementLayoutComputedEvent
-		do: [ :anEvent |
-			container removeEventHandler: layoutHandler.
-			self captureDestinationAndStart ].
-	container addEventHandler: layoutHandler.
-	mutation value.
+	container enqueueTask: (BlTaskAction new
+		action: [ self installLayoutObservationAndMutate ]).
 	^ self
 ]
 
