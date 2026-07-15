@@ -68,9 +68,11 @@ CFMotionGeometryTrack >> isAtDestination [
 
 { #category : 'playing' }
 CFMotionGeometryTrack >> prepareFromCurrentPresentation [
-	startScale := (sourceSnapshot boundsInParent extent x / destinationSnapshot boundsInParent extent x)
-		@ (sourceSnapshot boundsInParent extent y / destinationSnapshot boundsInParent extent y).
-	startTranslation := sourceSnapshot boundsInParent origin - destinationSnapshot boundsInParent origin.
+	| sourceBoundsInDestinationParent |
+	sourceBoundsInDestinationParent := sourceSnapshot boundsIn: destinationSnapshot parent.
+	startScale := (sourceBoundsInDestinationParent extent x / destinationSnapshot boundsInParent extent x)
+		@ (sourceBoundsInDestinationParent extent y / destinationSnapshot boundsInParent extent y).
+	startTranslation := sourceBoundsInDestinationParent origin - destinationSnapshot boundsInParent origin.
 	self applyProgress: 0.0
 ]
 

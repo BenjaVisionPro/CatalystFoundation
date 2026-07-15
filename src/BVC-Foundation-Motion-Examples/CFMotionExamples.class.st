@@ -276,6 +276,34 @@ CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
 ]
 
 { #category : 'examples - geometry snapshots' }
+CFMotionExamples >> geometrySnapshotConvertsBoundsIntoAnotherParent [
+	<gtExample>
+	| space source destination element snapshot expectedBounds |
+	space := BlSpace new.
+	source := BlElement new
+		relocate: 20 @ 30;
+		size: 200 @ 160;
+		yourself.
+	destination := BlElement new
+		relocate: 360 @ 80;
+		size: 200 @ 160;
+		yourself.
+	element := BlElement new
+		relocate: 40 @ 50;
+		size: 120 @ 80;
+		yourself.
+	space root addChild: source.
+	space root addChild: destination.
+	source addChild: element.
+	space pulse.
+	snapshot := CFMotionGeometrySnapshot of: element in: space root.
+	expectedBounds := BlBounds fromRectangle: element boundsInSpace.
+	destination globalBoundsToLocal: expectedBounds.
+	self assert: (snapshot boundsIn: destination) equals: expectedBounds asRectangle.
+	^ snapshot
+]
+
+{ #category : 'examples - geometry snapshots' }
 CFMotionExamples >> layoutComputedEventCapturesAuthoritativeDestinationGeometry [
 	<gtExample>
 	| space element source destination |
@@ -388,6 +416,45 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	self assert: transaction phase == CFMotionOperationState completed.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinateSpace [
+	<gtExample>
+	| space source destination element transaction sourceBounds destinationBounds |
+	space := BlSpace new.
+	source := BlElement new
+		relocate: 20 @ 30;
+		size: 200 @ 160;
+		yourself.
+	destination := BlElement new
+		relocate: 360 @ 80;
+		size: 200 @ 160;
+		yourself.
+	element := BlElement new
+		relocate: 40 @ 50;
+		size: 120 @ 80;
+		yourself.
+	space root addChild: source.
+	space root addChild: destination.
+	source addChild: element.
+	space pulse.
+	sourceBounds := (CFMotionGeometrySnapshot of: element in: space root) bounds.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { element };
+		move: element from: source to: destination;
+		play.
+	space pulse.
+	self assert: transaction operation isRunning.
+	self assert: element parent == destination.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: sourceBounds.
+	self finish: transaction operation in: space.
+	destinationBounds := (CFMotionGeometrySnapshot of: element in: space root) bounds.
+	self assert: transaction operation isCompleted.
+	self assert: destinationBounds equals: transaction destinationSnapshots first bounds.
 	^ transaction
 ]
 

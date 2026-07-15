@@ -32,6 +32,15 @@ CFMotionGeometrySnapshot class >> of: anElement in: aCoordinateSpace [
 { #category : 'accessing' }
 CFMotionGeometrySnapshot >> bounds [ ^ bounds ]
 
+{ #category : 'converting' }
+CFMotionGeometrySnapshot >> boundsIn: anElement [
+	| mutableBounds |
+	mutableBounds := BlBounds fromRectangle: bounds.
+	coordinateSpace localBoundsToGlobal: mutableBounds.
+	anElement globalBoundsToLocal: mutableBounds.
+	^ mutableBounds asRectangle
+]
+
 { #category : 'accessing' }
 CFMotionGeometrySnapshot >> bounds: aRectangle [ bounds := aRectangle ]
 
