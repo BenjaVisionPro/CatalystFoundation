@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionLayoutTransaction',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'readiness', 'operation', 'phase' ],
+	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'readiness', 'operation', 'phase', 'fadeInElements' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -64,6 +64,11 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 		tracks add: (CFMotionGeometryTrack
 			from: (sourceSnapshots at: eachIndex)
 			to: (destinationSnapshots at: eachIndex)) ].
+	fadeInElements do: [ :each |
+		tracks add: (CFMotionPropertyTrack
+			on: each
+			property: CFOpacityMotionProperty uniqueInstance
+			target: 1.0) ].
 	operation := CFMotionOperation
 		coordinator: coordinator
 		tracks: tracks.
@@ -90,10 +95,18 @@ CFMotionLayoutTransaction >> easing: anInterpolator [
 	^ self
 ]
 
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> fadeIn: anElement [
+	(fadeInElements includes: anElement) ifFalse: [ fadeInElements add: anElement ].
+	anElement opacity: 0.0.
+	^ self
+]
+
 { #category : 'initialization' }
 CFMotionLayoutTransaction >> initialize [
 	super initialize.
 	participants := #().
+	fadeInElements := OrderedCollection new.
 	duration := 180 milliSeconds.
 	easing := BlDecelerateInterpolator factor: 1.4.
 	phase := #idle

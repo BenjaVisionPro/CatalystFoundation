@@ -943,6 +943,31 @@ CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionInsertsAndFadesInTheDeclaredElement [
+	<gtExample>
+	| space first inserted transaction |
+	space := BlSpace new.
+	first := BlElement new size: 120 @ 80; yourself.
+	inserted := BlElement new size: 120 @ 80; yourself.
+	space root addChild: first.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { first };
+		insert: inserted into: space root at: 2;
+		fadeIn: inserted;
+		play.
+	space pulse.
+	self assert: transaction operation tracks size equals: 2.
+	self assert: inserted opacity equals: 0.0.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	self assert: inserted opacity equals: 1.0.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionRemovesTheDeclaredElement [
 	<gtExample>
 	| space removed survivor transaction |
