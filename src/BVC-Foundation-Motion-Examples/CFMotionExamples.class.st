@@ -164,7 +164,7 @@ CFMotionExamples >> transformPresentationReleasesOnlyItsOwnTransformation [
 	externalTransformation := element transformation.
 	presentation release.
 	self assert: element transformation == externalTransformation.
-	self deny: presentation isActive.
+	self assert: presentation isActive not.
 	^ presentation
 ]
 
