@@ -530,6 +530,48 @@ CFMotionExamples >> layoutTransactionUsesNestedContainerCoordinateSpace [
 	^ transaction
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionUsesRootCoordinateSpaceAcrossScaledContainer [
+	<gtExample>
+	| space container element source transaction |
+	space := BlSpace new.
+	container := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 120 @ 80; yourself.
+	space root addChild: container.
+	container addChild: element.
+	container
+		relocate: 50 @ 40;
+		transformDo: [ :aBuilder |
+			aBuilder
+				topLeftOrigin;
+				scaleBy: 2 ].
+	element relocate: 20 @ 30.
+	space pulse.
+	source := CFMotionGeometrySnapshot of: element in: space root.
+	transaction := (container motion
+		duration: 1 milliSeconds;
+		layout)
+		coordinateSpace: space root;
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 120 @ 90;
+				size: 180 @ 60 ];
+		play.
+	self assert: transaction coordinateSpace == space root.
+	self assert: transaction sourceSnapshots first bounds equals: source bounds.
+	space pulse.
+	self assert: transaction operation isRunning.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		closeTo: source bounds.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: transaction destinationSnapshots first bounds.
+	^ transaction
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> assertBounds: actualBounds closeTo: expectedBounds [
 	self assert: (actualBounds origin closeTo: expectedBounds origin precision: 0.0001).

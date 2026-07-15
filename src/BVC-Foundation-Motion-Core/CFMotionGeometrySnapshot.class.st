@@ -1,14 +1,14 @@
 Class {
 	#name : 'CFMotionGeometrySnapshot',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'coordinateSpace', 'bounds', 'parent' ],
+	#instVars : [ 'element', 'coordinateSpace', 'bounds', 'boundsInParent', 'parent' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
 
 { #category : 'instance creation' }
 CFMotionGeometrySnapshot class >> of: anElement in: aCoordinateSpace [
-	| mutableBounds |
+	| mutableBounds mutableParentBounds parent |
 	anElement isAttachedToSceneGraph ifFalse: [
 		self error: 'A geometry subject must be attached to a BlSpace' ].
 	aCoordinateSpace isAttachedToSceneGraph ifFalse: [
@@ -17,11 +17,15 @@ CFMotionGeometrySnapshot class >> of: anElement in: aCoordinateSpace [
 		self error: 'A geometry subject and coordinate space must share a BlSpace' ].
 	mutableBounds := BlBounds fromRectangle: anElement boundsInSpace.
 	aCoordinateSpace globalBoundsToLocal: mutableBounds.
+	parent := anElement hasParent ifTrue: [ anElement parent ].
+	mutableParentBounds := BlBounds fromRectangle: anElement boundsInSpace.
+	parent ifNotNil: [ parent globalBoundsToLocal: mutableParentBounds ].
 	^ self new
 		element: anElement;
 		coordinateSpace: aCoordinateSpace;
 		bounds: mutableBounds asRectangle;
-		parent: (anElement hasParent ifTrue: [ anElement parent ]);
+		boundsInParent: mutableParentBounds asRectangle;
+		parent: parent;
 		yourself
 ]
 
@@ -30,6 +34,12 @@ CFMotionGeometrySnapshot >> bounds [ ^ bounds ]
 
 { #category : 'accessing' }
 CFMotionGeometrySnapshot >> bounds: aRectangle [ bounds := aRectangle ]
+
+{ #category : 'accessing' }
+CFMotionGeometrySnapshot >> boundsInParent [ ^ boundsInParent ]
+
+{ #category : 'accessing' }
+CFMotionGeometrySnapshot >> boundsInParent: aRectangle [ boundsInParent := aRectangle ]
 
 { #category : 'accessing' }
 CFMotionGeometrySnapshot >> coordinateSpace [ ^ coordinateSpace ]
