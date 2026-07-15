@@ -459,6 +459,48 @@ CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinat
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> cancellingCrossParentMoveKeepsDestinationMembershipAndPresentation [
+	<gtExample>
+	| space source destination element transaction presentationBounds |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	source := BlElement new
+		relocate: 20 @ 30;
+		size: 200 @ 160;
+		yourself.
+	destination := BlElement new
+		relocate: 360 @ 80;
+		size: 200 @ 160;
+		yourself.
+	element := BlElement new
+		relocate: 40 @ 50;
+		size: 120 @ 80;
+		yourself.
+	space root addChild: source.
+	space root addChild: destination.
+	source addChild: element.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 second;
+		layout)
+		affecting: { element };
+		move: element from: source to: destination;
+		play.
+	space pulse.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: transaction operation isRunning.
+	presentationBounds := (CFMotionGeometrySnapshot of: element in: space root) bounds.
+	transaction cancel.
+	self assert: transaction isCancelled.
+	self assert: element parent == destination.
+	self assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		closeTo: presentationBounds.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
 	<gtExample>
 	| space element transaction |
