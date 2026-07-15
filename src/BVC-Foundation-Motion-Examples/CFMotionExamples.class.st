@@ -71,6 +71,29 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 	^ second
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> crossFadeUsesOneSharedOperation [
+	<gtExample>
+	| space outgoing incoming operation |
+	space := self spaceWithElement.
+	outgoing := space root children first.
+	incoming := BlElement new size: 120 @ 80; yourself.
+	incoming opacity: 0.0.
+	space root addChild: incoming.
+	operation := CFMotionEffects
+		crossFadeFrom: outgoing
+		to: incoming
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation isRunning.
+	self assert: operation tracks size equals: 2.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: outgoing opacity equals: 0.0.
+	self assert: incoming opacity equals: 1.0.
+	^ operation
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> appearInsertsThenFadesIn [
 	<gtExample>
