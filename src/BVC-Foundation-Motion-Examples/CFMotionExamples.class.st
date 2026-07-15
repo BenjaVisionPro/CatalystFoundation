@@ -543,9 +543,11 @@ CFMotionExamples >> adoptionReplacesThePreviewAtItsDeclaredIndex [
 	adoption := space root motion
 		duration: 1 milliSeconds;
 		adopt: preview as: committed.
-	self assert: adoption isRunning.
+	self assert: adoption isAwaitingLayout.
 	self assert: adoption previewIndex equals: 2.
 	self assert: committed parent == space root.
+	space pulse.
+	self assert: adoption isRunning.
 	self finish: adoption operation in: space.
 	self assert: adoption isCompleted.
 	self assert: preview hasParent not.
@@ -587,10 +589,12 @@ CFMotionExamples >> adoptionMovesAcrossParentsAndReleasesItsOverlay [
 	adoption := destination motion
 		duration: 1 milliSeconds;
 		adopt: preview as: committed from: source.
-	self assert: adoption isRunning.
+	self assert: adoption isAwaitingLayout.
 	self assert: adoption overlay isInstalled.
 	self assert: preview parent == source.
 	self assert: committed parent == destination.
+	space pulse.
+	self assert: adoption isRunning.
 	geometryTrack := adoption operation tracks detect: [ :each | each isKindOf: CFMotionGeometryTrack ].
 	self assert: geometryTrack sourceSnapshot == adoption sourceSnapshot.
 	self assert: geometryTrack destinationSnapshot == adoption destinationSnapshot.

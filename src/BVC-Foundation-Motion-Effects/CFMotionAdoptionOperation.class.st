@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionAdoptionOperation',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'sourceContainer', 'preview', 'committedElement', 'previewIndex', 'sourceSnapshot', 'destinationSnapshot', 'operation', 'overlay' ],
+	#instVars : [ 'container', 'sourceContainer', 'preview', 'committedElement', 'previewIndex', 'sourceSnapshot', 'destinationSnapshot', 'duration', 'easing', 'readiness', 'phase', 'operation', 'overlay' ],
 	#category : 'BVC-Foundation-Motion-Effects',
 	#package : 'BVC-Foundation-Motion-Effects'
 }
@@ -24,8 +24,11 @@ CFMotionAdoptionOperation class >> adopt: aPreview as: aCommittedElement from: a
 
 { #category : 'controlling' }
 CFMotionAdoptionOperation >> cancel [
-	operation isCompleted ifTrue: [ ^ self ].
-	operation ifNotNil: [ operation cancelAndRestore ].
+	self isCompleted ifTrue: [ ^ self ].
+	readiness ifNotNil: [ readiness cancel ].
+	operation
+		ifNil: [ phase := #cancelled ]
+		ifNotNil: [ operation cancelAndRestore ].
 	self removeCommittedElementIfPresent.
 	overlay ifNotNil: [ overlay release ].
 	^ self
@@ -46,14 +49,25 @@ CFMotionAdoptionOperation >> container: anElement [ container := anElement ]
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> destinationSnapshot [ ^ destinationSnapshot ]
 
-{ #category : 'testing' }
-CFMotionAdoptionOperation >> isCancelled [ ^ operation isCancelled ]
+{ #category : 'initialization' }
+CFMotionAdoptionOperation >> initialize [
+	super initialize.
+	phase := #idle
+]
 
 { #category : 'testing' }
-CFMotionAdoptionOperation >> isCompleted [ ^ operation isCompleted ]
+CFMotionAdoptionOperation >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
 
 { #category : 'testing' }
-CFMotionAdoptionOperation >> isRunning [ ^ operation isRunning ]
+CFMotionAdoptionOperation >> isCancelled [
+	^ phase = #cancelled or: [ operation notNil and: [ operation isCancelled ] ]
+]
+
+{ #category : 'testing' }
+CFMotionAdoptionOperation >> isCompleted [ ^ operation notNil and: [ operation isCompleted ] ]
+
+{ #category : 'testing' }
+CFMotionAdoptionOperation >> isRunning [ ^ operation notNil and: [ operation isRunning ] ]
 
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> operation [ ^ operation ]
@@ -71,10 +85,40 @@ CFMotionAdoptionOperation >> preview: anElement [ preview := anElement ]
 CFMotionAdoptionOperation >> previewIndex [ ^ previewIndex ]
 
 { #category : 'accessing' }
+CFMotionAdoptionOperation >> readiness [ ^ readiness ]
+
+{ #category : 'accessing' }
 CFMotionAdoptionOperation >> sourceContainer: anElement [ sourceContainer := anElement ]
 
 { #category : 'accessing' }
 CFMotionAdoptionOperation >> sourceSnapshot [ ^ sourceSnapshot ]
+
+{ #category : 'private - starting' }
+CFMotionAdoptionOperation >> captureDestinationAndStart [
+	| opacity geometryTrack |
+	phase = #awaitingLayout ifFalse: [ ^ self ].
+	destinationSnapshot := CFMotionGeometrySnapshot of: committedElement in: sourceSnapshot coordinateSpace.
+	opacity := CFOpacityMotionProperty uniqueInstance.
+	geometryTrack := CFMotionGeometryTrack
+		on: committedElement
+		from: sourceSnapshot
+		to: destinationSnapshot.
+	operation := CFMotionOperation
+		coordinator: container space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: preview property: opacity target: 0.0.
+			CFMotionPropertyTrack on: committedElement property: opacity target: 1.0.
+			geometryTrack }.
+	phase := #running.
+	operation
+		duration: duration;
+		easing: easing;
+		start.
+	operation onTerminalDo: [ :aCompletedOperation |
+		phase := aCompletedOperation state.
+		aCompletedOperation isCompleted ifTrue: [ self removePreviewIfPresent ].
+		overlay ifNotNil: [ overlay release ] ]
+]
 
 { #category : 'private - controlling' }
 CFMotionAdoptionOperation >> removeCommittedElementIfPresent [
@@ -88,8 +132,10 @@ CFMotionAdoptionOperation >> removePreviewIfPresent [
 
 { #category : 'private - starting' }
 CFMotionAdoptionOperation >> startWithDuration: aDuration easing: anInterpolator [
-	| insertionIndex opacity geometryTrack |
+	| insertionIndex |
 	self validateBeforeStarting.
+	duration := aDuration.
+	easing := anInterpolator.
 	previewIndex := sourceContainer children indexOf: preview.
 	sourceSnapshot := CFMotionGeometrySnapshot of: preview in: preview space root.
 	sourceContainer == container ifFalse: [ overlay := CFMotionOverlay on: preview in: preview space root ].
@@ -97,26 +143,12 @@ CFMotionAdoptionOperation >> startWithDuration: aDuration easing: anInterpolator
 		ifTrue: [ previewIndex ]
 		ifFalse: [ container children size + 1 ].
 	committedElement opacity: 0.0.
+	phase := #awaitingLayout.
+	readiness := CFMotionNextLayoutReadiness
+		on: container
+		then: [ self captureDestinationAndStart ].
+	readiness start.
 	container addChild: committedElement at: insertionIndex.
-	destinationSnapshot := CFMotionGeometrySnapshot of: committedElement in: sourceSnapshot coordinateSpace.
-	opacity := CFOpacityMotionProperty uniqueInstance.
-	geometryTrack := CFMotionGeometryTrack
-		on: committedElement
-		from: sourceSnapshot
-		to: destinationSnapshot.
-	operation := CFMotionOperation
-		coordinator: container space cfMotionCoordinator
-		tracks: {
-			CFMotionPropertyTrack on: preview property: opacity target: 0.0.
-			CFMotionPropertyTrack on: committedElement property: opacity target: 1.0.
-			geometryTrack }.
-	operation
-		duration: aDuration;
-		easing: anInterpolator;
-		start.
-	operation onTerminalDo: [ :aCompletedOperation |
-		aCompletedOperation isCompleted ifTrue: [ self removePreviewIfPresent ].
-		overlay ifNotNil: [ overlay release ] ]
 ]
 
 { #category : 'private - validation' }
