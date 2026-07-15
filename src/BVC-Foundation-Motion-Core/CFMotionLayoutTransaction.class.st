@@ -141,6 +141,17 @@ CFMotionLayoutTransaction >> move: anElement from: aSourceContainer to: aDestina
 		aDestinationContainer addChild: anElement ]
 ]
 
+{ #category : 'configuration' }
+CFMotionLayoutTransaction >> move: anElement from: aSourceContainer to: aDestinationContainer at: anIndex [
+	aSourceContainer == aDestinationContainer ifTrue: [
+		self error: 'A motion move needs distinct source and destination containers' ].
+	anElement parent == aSourceContainer ifFalse: [
+		self error: 'A motion move subject must belong to its declared source container' ].
+	^ self mutate: [
+		aSourceContainer removeChild: anElement.
+		aDestinationContainer addChild: anElement at: anIndex ]
+]
+
 { #category : 'accessing' }
 CFMotionLayoutTransaction >> operation [ ^ operation ]
 

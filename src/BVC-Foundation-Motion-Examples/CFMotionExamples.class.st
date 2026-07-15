@@ -482,6 +482,45 @@ CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinat
 ]
 
 { #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionMovesBetweenParentsAtTheDeclaredIndex [
+	<gtExample>
+	| space source destination element first second transaction |
+	space := BlSpace new.
+	source := BlElement new
+		relocate: 20 @ 30;
+		size: 200 @ 160;
+		yourself.
+	destination := BlElement new
+		relocate: 360 @ 80;
+		size: 200 @ 160;
+		yourself.
+	element := BlElement new size: 120 @ 80; yourself.
+	first := BlElement new size: 80 @ 40; yourself.
+	second := BlElement new size: 80 @ 40; yourself.
+	space root addChild: source.
+	space root addChild: destination.
+	source addChild: element.
+	destination addChild: first.
+	destination addChild: second.
+	space pulse.
+	transaction := (space root motion
+		duration: 1 milliSeconds;
+		layout)
+		affecting: { element };
+		move: element from: source to: destination at: 2;
+		play.
+	space pulse.
+	self assert: transaction operation isRunning.
+	self assert: element parent == destination.
+	self assert: (destination children at: 1) == first.
+	self assert: (destination children at: 2) == element.
+	self assert: (destination children at: 3) == second.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	^ transaction
+]
+
+{ #category : 'examples - layout transaction' }
 CFMotionExamples >> cancellingCrossParentMoveKeepsDestinationMembershipAndPresentation [
 	<gtExample>
 	| space source destination element transaction presentationBounds |
