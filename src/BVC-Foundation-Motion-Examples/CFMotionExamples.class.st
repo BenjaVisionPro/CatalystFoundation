@@ -356,6 +356,33 @@ CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
 	^ transaction
 ]
 
+{ #category : 'examples - geometry operation' }
+CFMotionExamples >> geometryOperationComposesWithApplicationTransform [
+	<gtExample>
+	| space element applicationTransformation source destination track operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 30 @ 10 ].
+	applicationTransformation := element transformation.
+	source := CFMotionGeometrySnapshot of: element in: space root.
+	element
+		relocate: 60 @ 20;
+		size: 240 @ 100.
+	space pulse.
+	destination := CFMotionGeometrySnapshot of: element in: space root.
+	track := CFMotionGeometryTrack from: source to: destination.
+	operation := CFMotionOperation
+		coordinator: space cfMotionCoordinator
+		tracks: { track }.
+	operation duration: 1 milliSeconds.
+	operation start.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: source bounds.
+	self finish: operation in: space.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: destination bounds.
+	self assert: element transformation == applicationTransformation.
+	^ operation
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
