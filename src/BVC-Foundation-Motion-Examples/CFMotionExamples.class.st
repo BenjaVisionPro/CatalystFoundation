@@ -300,6 +300,25 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	^ transaction
 ]
 
+{ #category : 'examples - layout transaction' }
+CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
+	<gtExample>
+	| space element transaction |
+	space := self spaceWithElement.
+	element := space root children first.
+	transaction := (space root motion layout)
+		affecting: { element };
+		mutate: [ element size: 240 @ 100 ];
+		play.
+	transaction cancel.
+	self assert: transaction isCancelled.
+	self assert: transaction operation isNil.
+	space pulse.
+	self assert: transaction operation isNil.
+	self assert: transaction destinationSnapshots isEmpty.
+	^ transaction
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
