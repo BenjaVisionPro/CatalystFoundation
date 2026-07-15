@@ -17,6 +17,15 @@ CFMotionBuilder >> fadeOut [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
+CFMotionBuilder >> scaleIn [
+	^ CFMotionEffects
+		scaleIn: element
+		from: 0.8 @ 0.8
+		duration: duration
+		easing: easing
+]
+
+{ #category : '*BVC-Foundation-Motion-Effects' }
 CFMotionBuilder >> appear: anElement [
 	^ CFMotionAppearanceOperation
 		appear: anElement

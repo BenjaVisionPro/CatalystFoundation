@@ -120,6 +120,64 @@ CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
 	^ operation
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> scaleInCompletesAndRestoresTheApplicationTransformation [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	operation := CFMotionEffects
+		scaleIn: element
+		from: 0.5 @ 0.8
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation isRunning.
+	self assert: operation tracks first presentation ownsCurrentTransformation.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element transformation == applicationTransformation.
+	^ operation
+]
+
+{ #category : 'examples - effects' }
+CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
+	<gtExample>
+	| space element transaction scaleOperation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	transaction := (space root motion
+		duration: 1 second;
+		layout)
+		affecting: { element };
+		mutate: [
+			element
+				relocate: 60 @ 20;
+				size: 240 @ 100 ];
+		play.
+	space pulse.
+	space pulse.
+	self assert: transaction operation isRunning.
+	scaleOperation := element motion
+		duration: 1 second;
+		scaleIn.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: scaleOperation isRunning.
+	self assert: transaction operation tracks first presentation ownsCurrentTransformation.
+	self assert: scaleOperation tracks first presentation ownsCurrentTransformation.
+	scaleOperation cancelAndRestore.
+	self assert: scaleOperation isCancelled.
+	self assert: transaction operation tracks first presentation ownsCurrentTransformation.
+	self finish: transaction operation in: space.
+	self assert: transaction operation isCompleted.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: transaction destinationSnapshots first bounds.
+	^ { transaction. scaleOperation }
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> appearInsertsThenFadesIn [
 	<gtExample>

@@ -45,16 +45,18 @@ CFMotionTransformChannel >> abandon [
 
 { #category : 'controlling' }
 CFMotionTransformChannel >> adopt: aPresentation [
-	(presentations includes: aPresentation) ifFalse: [ ^ false ].
+	| index frozenContribution |
+	index := presentations indexOf: aPresentation ifAbsent: [ ^ false ].
 	self ownsCurrentTransformation ifFalse: [
 		self abandon.
 		^ false ].
-	presentations size = 1 ifFalse: [
-		self error: 'A shared transform channel cannot preserve one contribution independently' ].
-	baseTransformation := appliedTransformation.
-	presentations remove: aPresentation.
-	appliedTransformation := nil.
-	self notifyEmpty.
+	frozenContribution := CFMotionFrozenTransformContribution
+		scale: aPresentation scale
+		translation: aPresentation translation.
+	presentations at: index put: frozenContribution.
+	self hasActivePresentations
+		ifTrue: [ self apply ]
+		ifFalse: [ self bakeCurrentPresentation ].
 	^ true
 ]
 
@@ -69,6 +71,19 @@ CFMotionTransformChannel >> element: anElement [ element := anElement ]
 
 { #category : 'testing' }
 CFMotionTransformChannel >> isEmpty [ ^ presentations isEmpty ]
+
+{ #category : 'private - controlling' }
+CFMotionTransformChannel >> bakeCurrentPresentation [
+	baseTransformation := appliedTransformation.
+	presentations removeAll.
+	appliedTransformation := nil.
+	self notifyEmpty
+]
+
+{ #category : 'testing' }
+CFMotionTransformChannel >> hasActivePresentations [
+	^ presentations anySatisfy: [ :each | each isActive ]
+]
 
 { #category : 'private - controlling' }
 CFMotionTransformChannel >> notifyEmpty [
@@ -97,17 +112,18 @@ CFMotionTransformChannel >> release: aPresentation [
 	(presentations includes: aPresentation) ifFalse: [ ^ self ].
 	self ownsCurrentTransformation
 		ifFalse: [
-			presentations remove: aPresentation.
-			self notifyEmpty.
+			self abandon.
 			^ self ].
 	presentations remove: aPresentation.
-	presentations
-		ifEmpty: [
+	presentations ifEmpty: [
 			element transformation: baseTransformation.
 			appliedTransformation := nil.
 			baseTransformation := nil.
-			self notifyEmpty ]
-		ifNotEmpty: [ self apply ]
+			self notifyEmpty.
+			^ self ].
+	self hasActivePresentations
+		ifTrue: [ self apply ]
+		ifFalse: [ self bakeCurrentPresentation ]
 ]
 
 { #category : 'accessing' }

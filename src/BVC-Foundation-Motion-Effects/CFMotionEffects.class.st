@@ -63,3 +63,27 @@ CFMotionEffects class >> fadeOut: anElement duration: aDuration easing: anInterp
 		easing: anInterpolator;
 		opacity: 0.0
 ]
+
+{ #category : 'scaling' }
+CFMotionEffects class >> scaleIn: anElement [
+	^ self
+		scaleIn: anElement
+		from: 0.8 @ 0.8
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4)
+]
+
+{ #category : 'scaling' }
+CFMotionEffects class >> scaleIn: anElement from: aScale duration: aDuration easing: anInterpolator [
+	| operation |
+	anElement isAttachedToSceneGraph ifFalse: [
+		self error: 'A scale effect subject must be attached to a BlSpace' ].
+	operation := CFMotionOperation
+		coordinator: anElement space cfMotionCoordinator
+		tracks: { CFMotionScaleTrack on: anElement from: aScale to: 1 @ 1 }.
+	operation
+		duration: aDuration;
+		easing: anInterpolator;
+		start.
+	^ operation
+]
