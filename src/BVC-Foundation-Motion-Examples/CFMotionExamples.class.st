@@ -344,6 +344,7 @@ CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
 	transaction cancel.
 	self assert: transaction isCancelled.
 	self assert: transaction operation isCancelled.
+	self assert: transaction phase == CFMotionOperationState cancelled.
 	self assert: transaction operation tracks first presentation isActive not.
 	self assert: space cfMotionCoordinator activeOperations isEmpty.
 	self

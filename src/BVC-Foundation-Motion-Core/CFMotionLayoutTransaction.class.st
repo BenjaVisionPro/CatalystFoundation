@@ -22,8 +22,11 @@ CFMotionLayoutTransaction >> cancel [
 	layoutHandler ifNotNil: [
 		container removeEventHandler: layoutHandler.
 		layoutHandler := nil ].
-	operation ifNotNil: [ operation cancel ].
-	phase := #cancelled.
+	operation
+		ifNil: [ phase := #cancelled ]
+		ifNotNil: [
+			operation cancel.
+			phase := operation state ].
 	^ self
 ]
 
