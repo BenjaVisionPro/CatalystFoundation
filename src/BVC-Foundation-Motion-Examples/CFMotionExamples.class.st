@@ -523,6 +523,25 @@ CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
 	^ transaction
 ]
 
+{ #category : 'examples - readiness' }
+CFMotionExamples >> nextLayoutReadinessCancellationRemovesItsObserver [
+	<gtExample>
+	| space readiness completed |
+	space := self spaceWithElement.
+	completed := false.
+	readiness := CFMotionNextLayoutReadiness
+		on: space root
+		then: [ completed := true ].
+	readiness start.
+	self assert: readiness isWaiting.
+	readiness cancel.
+	self assert: readiness isCancelled.
+	space root requestLayout.
+	space pulse.
+	self assert: completed not.
+	^ readiness
+]
+
 { #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinateSpace [
 	<gtExample>
