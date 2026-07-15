@@ -71,6 +71,60 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 	^ second
 ]
 
+{ #category : 'examples - appearance' }
+CFMotionExamples >> appearInsertsThenFadesIn [
+	<gtExample>
+	| space element appearance |
+	space := BlSpace new.
+	element := BlElement new size: 120 @ 80; yourself.
+	appearance := space root motion
+		duration: 1 milliSeconds;
+		appear: element.
+	self assert: appearance isRunning.
+	self assert: element parent == space root.
+	self assert: element visibility isVisible.
+	self assert: element opacity equals: 0.0.
+	self finish: appearance operation in: space.
+	self assert: appearance isCompleted.
+	self assert: element parent == space root.
+	self assert: element opacity equals: 1.0.
+	^ appearance
+]
+
+{ #category : 'examples - appearance' }
+CFMotionExamples >> disappearFadesOutThenRemoves [
+	<gtExample>
+	| space element disappearance |
+	space := self spaceWithElement.
+	element := space root children first.
+	disappearance := element motion
+		duration: 1 milliSeconds;
+		disappear.
+	self assert: disappearance isRunning.
+	self assert: element parent == space root.
+	self finish: disappearance operation in: space.
+	self assert: disappearance isCompleted.
+	self assert: element hasParent not.
+	^ disappearance
+]
+
+{ #category : 'examples - appearance' }
+CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
+	<gtExample>
+	| space element disappearance |
+	space := self spaceWithElement.
+	element := space root children first.
+	disappearance := element motion
+		duration: 1 second;
+		disappear.
+	element opacity: 0.4.
+	disappearance cancel.
+	self assert: disappearance isCancelled.
+	self assert: element parent == space root.
+	self assert: element opacity equals: 1.0.
+	^ disappearance
+]
+
 { #category : 'examples - retargeting' }
 CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 	<gtExample>
