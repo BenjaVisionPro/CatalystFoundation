@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionScaleTrack',
 	#superclass : 'CFMotionTrack',
-	#instVars : [ 'element', 'sourceScale', 'targetScale', 'startScale', 'presentation' ],
+	#instVars : [ 'element', 'sourceScale', 'targetScale', 'startScale', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -15,6 +15,12 @@ CFMotionScaleTrack class >> on: anElement from: aSourceScale to: aTargetScale [
 		yourself
 ]
 
+{ #category : 'configuration' }
+CFMotionScaleTrack >> adoptAtDestination [
+	completionPolicy := #adopt.
+	^ self
+]
+
 { #category : 'accessing' }
 CFMotionScaleTrack >> animationTarget [ ^ element ]
 
@@ -22,7 +28,9 @@ CFMotionScaleTrack >> animationTarget [ ^ element ]
 CFMotionScaleTrack >> applyDestination [
 	presentation ifNil: [ ^ self ].
 	presentation scale: targetScale.
-	presentation release
+	completionPolicy = #adopt
+		ifTrue: [ presentation adoptCurrentPresentation ]
+		ifFalse: [ presentation release ]
 ]
 
 { #category : 'playing' }
@@ -50,6 +58,12 @@ CFMotionScaleTrack >> element: anElement [ element := anElement ]
 
 { #category : 'testing' }
 CFMotionScaleTrack >> isAtDestination [ ^ startScale = targetScale ]
+
+{ #category : 'initialization' }
+CFMotionScaleTrack >> initialize [
+	super initialize.
+	completionPolicy := #release
+]
 
 { #category : 'accessing' }
 CFMotionScaleTrack >> presentation [ ^ presentation ]

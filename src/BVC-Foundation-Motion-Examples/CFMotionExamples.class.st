@@ -34,6 +34,61 @@ CFMotionExamples >> opacityCompletes [
 	^ operation
 ]
 
+{ #category : 'examples - property motion' }
+CFMotionExamples >> scaleCompletesAtThePresentedValue [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	applicationTransformation := element transformation.
+	operation := element motion
+		duration: 1 milliSeconds;
+		scale: 0.5 @ 0.8.
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: operation tracks first presentation isActive not.
+	self assert: element transformation matrix ~= applicationTransformation matrix.
+	^ operation
+]
+
+{ #category : 'examples - property motion' }
+CFMotionExamples >> translationComposesWithASettledScale [
+	<gtExample>
+	| space element scaleOperation scaleTransformation translationOperation |
+	space := self spaceWithElement.
+	element := space root children first.
+	scaleOperation := element motion
+		duration: 1 milliSeconds;
+		scale: 0.5 @ 0.8.
+	self finish: scaleOperation in: space.
+	scaleTransformation := element transformation.
+	translationOperation := element motion
+		duration: 1 milliSeconds;
+		translation: 40 @ 20.
+	self finish: translationOperation in: space.
+	self assert: translationOperation isCompleted.
+	self assert: element transformation matrix ~= scaleTransformation matrix.
+	^ translationOperation
+]
+
+{ #category : 'examples - property motion' }
+CFMotionExamples >> scaleRetargetsThroughItsPresentedProperty [
+	<gtExample>
+	| space element first second |
+	space := self spaceWithElement.
+	element := space root children first.
+	first := element motion
+		duration: 1 second;
+		scale: 0.5 @ 0.8.
+	second := element motion
+		duration: 1 second;
+		scale: 0.8 @ 0.6.
+	self assert: first == second.
+	self assert: second tracks first targetScale equals: 0.8 @ 0.6.
+	^ second
+]
+
 { #category : 'examples - effects' }
 CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 	<gtExample>

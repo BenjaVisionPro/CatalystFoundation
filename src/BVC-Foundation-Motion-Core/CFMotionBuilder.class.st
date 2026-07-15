@@ -49,3 +49,25 @@ CFMotionBuilder >> opacity: aNumber [
 		duration: duration
 		easing: easing
 ]
+
+{ #category : 'playing' }
+CFMotionBuilder >> scale: aPoint [
+	element isAttachedToSceneGraph
+		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
+	^ element space cfMotionCoordinator
+		retarget: ((CFMotionScaleTrack on: element from: 1 @ 1 to: aPoint)
+			adoptAtDestination)
+		duration: duration
+		easing: easing
+]
+
+{ #category : 'playing' }
+CFMotionBuilder >> translation: aPoint [
+	element isAttachedToSceneGraph
+		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
+	^ element space cfMotionCoordinator
+		retarget: ((CFMotionTranslationTrack on: element from: 0 @ 0 to: aPoint)
+			adoptAtDestination)
+		duration: duration
+		easing: easing
+]
