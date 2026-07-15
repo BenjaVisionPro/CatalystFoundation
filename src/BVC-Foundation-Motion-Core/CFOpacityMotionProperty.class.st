@@ -12,7 +12,7 @@ CFOpacityMotionProperty class >> uniqueInstance [
 ]
 
 { #category : 'accessing' }
-CFOpacityMotionProperty >> valueOf: anElement [ ^ anElement opacity ]
+CFOpacityMotionProperty >> currentPresentationOf: anElement [ ^ anElement opacity ]
 
 { #category : 'accessing' }
-CFOpacityMotionProperty >> value: aNumber of: anElement [ anElement opacity: aNumber ]
+CFOpacityMotionProperty >> apply: aNumber to: anElement [ anElement opacity: aNumber ]

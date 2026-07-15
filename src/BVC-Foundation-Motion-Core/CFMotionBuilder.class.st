@@ -28,13 +28,14 @@ CFMotionBuilder >> duration: aDuration [ duration := aDuration ]
 CFMotionBuilder >> easing: anInterpolator [ easing := anInterpolator ]
 
 { #category : 'playing' }
-CFMotionBuilder >> opacityTo: aNumber [
-	| operation |
-	operation := CFMotionPropertyOperation
-		on: element
-		property: CFOpacityMotionProperty uniqueInstance.
-	operation
-		duration: duration;
-		easing: easing.
-	^ operation retargetTo: aNumber
+CFMotionBuilder >> opacity: aNumber [
+	element isAttachedToSceneGraph
+		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
+	^ element space cfMotionCoordinator
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFOpacityMotionProperty uniqueInstance
+			target: aNumber)
+		duration: duration
+		easing: easing
 ]

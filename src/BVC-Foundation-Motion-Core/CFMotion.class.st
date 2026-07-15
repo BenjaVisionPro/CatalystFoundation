@@ -9,8 +9,3 @@ Class {
 CFMotion class >> on: anElement [
 	^ CFMotionBuilder on: anElement
 ]
-
-{ #category : 'instance creation' }
-CFMotion class >> layoutIn: aCoordinateSpace [
-	^ CFMotionLayoutTransaction in: aCoordinateSpace
-]

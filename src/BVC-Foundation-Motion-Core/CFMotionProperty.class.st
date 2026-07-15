@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'accessing' }
-CFMotionProperty >> valueOf: anElement [ self subclassResponsibility ]
+CFMotionProperty >> currentPresentationOf: anElement [ self subclassResponsibility ]
 
 { #category : 'accessing' }
-CFMotionProperty >> value: aValue of: anElement [ self subclassResponsibility ]
+CFMotionProperty >> apply: aValue to: anElement [ self subclassResponsibility ]
