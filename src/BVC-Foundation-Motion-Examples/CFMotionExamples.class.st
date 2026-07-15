@@ -94,6 +94,32 @@ CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	^ operation
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
+	<gtExample>
+	| space outgoing incoming operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	outgoing := space root children first.
+	incoming := BlElement new size: 120 @ 80; yourself.
+	incoming opacity: 0.0.
+	space root addChild: incoming.
+	operation := CFMotionEffects
+		crossFadeFrom: outgoing
+		to: incoming
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: operation isRunning.
+	operation cancelAndRestore.
+	self assert: operation isCancelled.
+	self assert: outgoing opacity equals: 1.0.
+	self assert: incoming opacity equals: 0.0.
+	^ operation
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> appearInsertsThenFadesIn [
 	<gtExample>
