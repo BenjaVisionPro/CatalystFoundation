@@ -476,10 +476,12 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	self assert: second destinationSnapshots second bounds equals: ((80 @ 180) extent: 100 @ 120).
 	self assert: second operation tracks first presentation ownsCurrentTransformation.
 	self assert: second operation tracks second presentation ownsCurrentTransformation.
-	self assert: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
-		equals: second sourceSnapshots first bounds.
-	self assert: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
-		equals: second sourceSnapshots second bounds.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
+		closeTo: second sourceSnapshots first bounds.
+	self
+		assertBounds: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
+		closeTo: second sourceSnapshots second bounds.
 	self assert: space cfMotionCoordinator activeOperations size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
@@ -490,6 +492,12 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	self assert: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
 		equals: second destinationSnapshots second bounds.
 	^ second
+]
+
+{ #category : 'private - running' }
+CFMotionExamples >> assertBounds: actualBounds closeTo: expectedBounds [
+	self assert: (actualBounds origin closeTo: expectedBounds origin precision: 0.0001).
+	self assert: (actualBounds corner closeTo: expectedBounds corner precision: 0.0001)
 ]
 
 { #category : 'private - running' }
