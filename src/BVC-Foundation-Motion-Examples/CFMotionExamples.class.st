@@ -248,8 +248,30 @@ CFMotionExamples >> popInCoordinatesOpacityAndScale [
 	^ operation
 ]
 
+{ #category : 'examples - effects' }
+CFMotionExamples >> popOutCoordinatesOpacityAndScale [
+	<gtExample>
+	| space element applicationTransformation operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	operation := CFMotionEffects
+		popOut: element
+		to: 0.5 @ 0.8
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: operation tracks size equals: 2.
+	self assert: operation tracks second presentation ownsCurrentTransformation.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 0.0.
+	self assert: element transformation == applicationTransformation.
+	^ operation
+]
+
 { #category : 'examples - appearance' }
-CFMotionExamples >> disappearFadesOutThenRemoves [
+CFMotionExamples >> disappearPopsOutThenRemoves [
 	<gtExample>
 	| space element disappearance |
 	space := self spaceWithElement.
@@ -259,6 +281,7 @@ CFMotionExamples >> disappearFadesOutThenRemoves [
 		disappear.
 	self assert: disappearance isRunning.
 	self assert: element parent == space root.
+	self assert: disappearance operation tracks size equals: 2.
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
 	self assert: element hasParent not.
@@ -279,6 +302,7 @@ CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	self assert: disappearance isCancelled.
 	self assert: element parent == space root.
 	self assert: element opacity equals: 1.0.
+	self assert: disappearance operation tracks second presentation isActive not.
 	^ disappearance
 ]
 

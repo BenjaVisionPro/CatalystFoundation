@@ -115,7 +115,8 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 { #category : 'private - starting' }
 CFMotionAppearanceOperation >> startDisappearingWithDuration: aDuration easing: anInterpolator [
 	operation := CFMotionEffects
-		fadeOut: element
+		popOut: element
+		to: 0.8 @ 0.8
 		duration: aDuration
 		easing: anInterpolator.
 	operation onTerminalDo: [ :aCompletedOperation |
