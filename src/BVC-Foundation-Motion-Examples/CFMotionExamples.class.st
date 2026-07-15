@@ -222,6 +222,28 @@ CFMotionExamples >> inverseScalePresentsSourceExtentOverLaidOutDestination [
 	^ presentation
 ]
 
+{ #category : 'examples - geometry presentation probe' }
+CFMotionExamples >> inverseTransformPresentsSourceBoundsOverMovedAndResizedDestination [
+	<gtExample>
+	| space element source destination presentation presented |
+	space := self spaceWithElement.
+	element := space root children first.
+	source := CFMotionGeometrySnapshot of: element in: space root.
+	element
+		relocate: 60 @ 20;
+		size: 240 @ 100.
+	space pulse.
+	destination := CFMotionGeometrySnapshot of: element in: space root.
+	presentation := CFMotionTransformPresentation on: element.
+	presentation scale: (source bounds extent x / destination bounds extent x)
+		@ (source bounds extent y / destination bounds extent y).
+	presentation translation: source bounds origin - destination bounds origin.
+	presented := CFMotionGeometrySnapshot of: element in: space root.
+	self assert: destination bounds equals: ((60 @ 20) extent: 240 @ 100).
+	self assert: presented bounds equals: source bounds.
+	^ presentation
+]
+
 { #category : 'private - running' }
 CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.

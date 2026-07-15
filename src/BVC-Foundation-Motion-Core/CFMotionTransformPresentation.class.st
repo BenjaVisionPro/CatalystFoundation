@@ -38,12 +38,12 @@ CFMotionTransformPresentation >> apply [
 	composite add: baseTransformation asElementTransformation.
 	motionTransformation := BlAffineCompositeTransformation new.
 	origin := BlAffineTransformationTopLeftOrigin new.
-	translation isZero ifFalse: [
-		motionTransformation addTransformation:
-			((BlTranslationTransformation translation: translation) origin: origin) ].
 	scale = (1 @ 1) ifFalse: [
 		motionTransformation addTransformation:
 			((BlScalingTransformation scale: scale) origin: origin) ].
+	translation isZero ifFalse: [
+		motionTransformation addTransformation:
+			((BlTranslationTransformation translation: translation) origin: origin) ].
 	motionTransformation hasTransformations ifTrue: [
 		composite add: (BlElementLocalTransformation with: motionTransformation) ].
 	appliedTransformation := composite asCachedTransformation.
