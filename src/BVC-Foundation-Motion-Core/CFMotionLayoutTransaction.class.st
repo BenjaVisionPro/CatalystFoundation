@@ -50,6 +50,13 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 	| tracks coordinator |
 	phase = #awaitingLayout ifFalse: [ ^ self ].
 	layoutHandler := nil.
+	coordinator := container space cfMotionCoordinator.
+	"The completed layout is authoritative, but an outgoing geometry presenter can
+	still be transforming it. Settle that presenter before taking the destination."
+	coordinator replaceGeometryOwnersForKeys: (participants collect: [ :each |
+		CFMotionPropertyKey
+			element: each
+			property: CFGeometryMotionProperty uniqueInstance ]).
 	destinationSnapshots := participants collect: [ :each |
 		CFMotionGeometrySnapshot of: each in: coordinateSpace ].
 	tracks := OrderedCollection new.
@@ -57,8 +64,6 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 		tracks add: (CFMotionGeometryTrack
 			from: (sourceSnapshots at: eachIndex)
 			to: (destinationSnapshots at: eachIndex)) ].
-	coordinator := container space cfMotionCoordinator.
-	coordinator replaceGeometryOwnersFor: tracks.
 	operation := CFMotionOperation
 		coordinator: coordinator
 		tracks: tracks.

@@ -59,11 +59,16 @@ CFMotionCoordinator >> releaseAllFor: anOperation [
 
 { #category : 'ownership' }
 CFMotionCoordinator >> replaceGeometryOwnersFor: geometryTracks [
+	^ self replaceGeometryOwnersForKeys: (geometryTracks collect: #propertyKey)
+]
+
+{ #category : 'ownership' }
+CFMotionCoordinator >> replaceGeometryOwnersForKeys: propertyKeys [
 	| ownersToReplace |
 	ownersToReplace := OrderedCollection new.
-	geometryTracks do: [ :eachTrack |
+	propertyKeys do: [ :eachKey |
 		| owner |
-		owner := self ownerOf: eachTrack propertyKey.
+		owner := self ownerOf: eachKey.
 		(owner notNil and: [ (ownersToReplace includes: owner) not ]) ifTrue: [
 			ownersToReplace add: owner ] ].
 	ownersToReplace do: [ :eachOwner |
