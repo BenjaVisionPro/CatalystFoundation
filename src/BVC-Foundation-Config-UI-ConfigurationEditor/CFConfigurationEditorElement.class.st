@@ -984,7 +984,6 @@ CFConfigurationEditorElement >> clearAdoptedPlacementPreviewState [
 	pendingRootPreview := false
 ]
 
-{ #category : 'private - animations' }
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> placePreviewIn: anItemsElement at: anIndex axis: anAxis [
 	| rawIndex |
