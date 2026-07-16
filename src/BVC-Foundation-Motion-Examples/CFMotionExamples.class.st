@@ -1150,6 +1150,28 @@ CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
 	^ second
 ]
 
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
+	<gtExample>
+	| space element track operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	track := (CFMotionVerticalExtentTrack
+		on: element
+		from: element extent y
+		to: 140)
+		fitContentAtDestination.
+	operation := CFMotionOperation
+		coordinator: space cfMotionCoordinator
+		tracks: { track }.
+	operation duration: 1 milliSeconds.
+	operation start.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element constraints vertical resizer class name equals: #BlLayoutFitContentResizer.
+	^ operation
+]
+
 { #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	<gtExample>
