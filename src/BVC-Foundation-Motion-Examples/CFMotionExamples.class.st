@@ -1172,6 +1172,39 @@ CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
 	^ operation
 ]
 
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
+	<gtExample>
+	| space element preview extentTrack opacityTrack operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	preview := BlElement new
+		size: 120 @ 40;
+		opacity: 0;
+		yourself.
+	space root addChild: preview.
+	space pulse.
+	extentTrack := (CFMotionVerticalExtentTrack
+		on: element
+		from: element extent y
+		to: 140)
+		fitContentAtDestination.
+	opacityTrack := CFMotionPropertyTrack
+		on: preview
+		property: CFOpacityMotionProperty uniqueInstance
+		target: 0.58.
+	operation := CFMotionOperation
+		coordinator: space cfMotionCoordinator
+		tracks: { extentTrack. opacityTrack }.
+	operation duration: 1 milliSeconds.
+	operation start.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: preview opacity equals: 0.58.
+	self assert: element constraints vertical resizer class name equals: #BlLayoutFitContentResizer.
+	^ operation
+]
+
 { #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	<gtExample>
