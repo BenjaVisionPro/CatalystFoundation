@@ -1117,6 +1117,39 @@ CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
 	^ operation
 ]
 
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentMotionCompletesAtItsRequestedExtent [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	operation := element motion
+		duration: 1 milliSeconds;
+		verticalExtent: 140.
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element extent y equals: 140.
+	^ operation
+]
+
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
+	<gtExample>
+	| space element first second |
+	space := self spaceWithElement.
+	element := space root children first.
+	first := element motion
+		duration: 1 second;
+		verticalExtent: 140.
+	second := element motion
+		duration: 1 second;
+		verticalExtent: 100.
+	self assert: first == second.
+	self assert: second tracks first targetExtent equals: 100.
+	^ second
+]
+
 { #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	<gtExample>

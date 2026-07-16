@@ -18,7 +18,6 @@ Class {
 		'activeInsertionIndex',
 		'placementProvider',
 		'placementHysteresis',
-		'animations',
 		'activePlacementCandidate',
 		'previewConfiguration',
 		'dropCompletionToken',
@@ -37,7 +36,8 @@ Class {
 		'pendingRootPreview',
 		'previewOpacityOperation',
 		'previewOpacityGeneration',
-		'placementMotionOperation'
+		'placementMotionOperation',
+		'hoverExtentOperation'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -123,7 +123,6 @@ CFConfigurationEditorElement >> clearPlacementPreview [
 	previewVisible := false.
 	pendingPreviewCandidate := nil.
 	pendingRootPreview := false.
-	animations stopAll.
 	self detachPlacementPreview
 ]
 
@@ -362,7 +361,6 @@ CFConfigurationEditorElement >> initialize [
 	planner := CFConfigurationPlanner new.
 	placementProvider := self createPlacementProvider.
 	placementHysteresis := CFConfigurationPlacementHysteresis new.
-	animations := CFAnimationCoordinator on: self.
 	previewVisible := false.
 	libraryVisible := true.
 	configurationsToExpandAfterRefresh := IdentitySet new.
@@ -849,10 +847,7 @@ CFConfigurationEditorElement >> invalidatePreviewOpacityOperation [
 CFConfigurationEditorElement >> stopPlacementMotion [
 	placementMotionOperation ifNotNil: [ :anOperation |
 		anOperation isRunning ifTrue: [ anOperation cancelSettlingAtEnd ] ].
-	placementMotionOperation := nil.
-	"Keep this while hover expansion still uses the editor's legacy height
-	 animation under the same scheduling key."
-	animations ifNotNil: [ animations stop: #placementLayout ]
+	placementMotionOperation := nil
 ]
 
 { #category : 'private - dropping' }
@@ -990,23 +985,6 @@ CFConfigurationEditorElement >> clearAdoptedPlacementPreviewState [
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> pointAnimationFrom: startPoint to: targetPoint onStep: aBlock [
-	| animation |
-	animation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
-		duration: 140 milliSeconds;
-		easing: (BlDecelerateInterpolator factor: 1);
-		onStepDo: [ :progress |
-			aBlock value: ((startPoint x + ((targetPoint x - startPoint x) * progress))
-				@ (startPoint y + ((targetPoint y - startPoint y) * progress))) ];
-		yourself.
-	animation onFinishedDo: [ aBlock value: targetPoint ].
-	^ animation
-]
-
-
-
 { #category : 'private - previewing' }
 CFConfigurationEditorElement >> placePreviewIn: anItemsElement at: anIndex axis: anAxis [
 	| rawIndex |
@@ -1168,6 +1146,7 @@ CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
 		ifTrue: [ dragAssessment ]
 		ifFalse: [ planner assessAsset: asset in: configuration ].
 	affectedItems := self placementAnimationItemsForConfigurationNode: node assessment: assessment.
+	self settleHoverExtentMotionAtDestination.
 	self stopPlacementMotion.
 	self clearPlacementTransformsInItems: affectedItems.
 	collapsedHeight := node extent y.
@@ -1188,7 +1167,7 @@ CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animateHoverExpansionOf: aNode fromHeight: collapsedHeight toHeight: expandedHeight [
-	| preview animation easing |
+	| preview |
 	preview := previewElement.
 	preview ifNil: [
 		aNode vFitContent.
@@ -1197,20 +1176,12 @@ CFConfigurationEditorElement >> animateHoverExpansionOf: aNode fromHeight: colla
 		aNode vFitContent.
 		preview opacity: 0.58.
 		^ self ].
-	easing := BlDecelerateInterpolator factor: 1.4.
-	animation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
-		duration: 180 milliSeconds;
-		easing: easing;
-		onStepDo: [ :progress |
-			aNode vExact: collapsedHeight + ((expandedHeight - collapsedHeight) * progress).
-			preview opacity: 0.58 * progress ];
-		yourself.
-	animation onFinishedDo: [
-		aNode parent ifNotNil: [ aNode vFitContent ].
-		previewElement == preview ifTrue: [ preview opacity: 0.58 ] ].
-	animations play: animation named: #placementLayout
+	self
+		startHoverExtentMotionOf: aNode
+		from: collapsedHeight
+		to: expandedHeight
+		fading: preview
+		toOpacity: 0.58
 ]
 
 { #category : 'private - planning' }
@@ -1280,8 +1251,9 @@ CFConfigurationEditorElement >> collapseHoverExpandedConfigurationForm [
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animateHoverCollapseOf: aNode [
-	| expandedHeight animation easing |
+	| expandedHeight |
 	aNode isExpanded ifFalse: [ ^ aNode beCollapsed ].
+	self settleHoverExtentMotionAtDestination.
 	expandedHeight := aNode extent y.
 	aNode
 		vExact: expandedHeight;
@@ -1295,18 +1267,48 @@ CFConfigurationEditorElement >> animateHoverCollapseOf: aNode [
 				collapsedHeight >= expandedHeight
 					ifTrue: [ aNode vFitContent ]
 					ifFalse: [
-						easing := BlDecelerateInterpolator factor: 1.4.
-						animation := BlNumberTransition new
-							from: 0.0;
-							to: 1.0;
-							duration: 180 milliSeconds;
-							easing: easing;
-							onStepDo: [ :progress |
-								aNode vExact: expandedHeight - ((expandedHeight - collapsedHeight) * progress) ];
-							yourself.
-						animation onFinishedDo: [
-							aNode parent ifNotNil: [ aNode vFitContent ] ].
-						animations play: animation named: #hoverFormLayout ] ] ] ]
+						self
+							startHoverExtentMotionOf: aNode
+							from: expandedHeight
+							to: collapsedHeight
+							fading: nil
+							toOpacity: nil ] ] ] ]
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> settleHoverExtentMotionAtDestination [
+	hoverExtentOperation ifNotNil: [ :anOperation |
+		anOperation isRunning ifTrue: [ anOperation cancelSettlingAtEnd ] ].
+	hoverExtentOperation := nil
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> startHoverExtentMotionOf: aNode from: sourceHeight to: targetHeight fading: aPreview toOpacity: targetOpacity [
+	| tracks operation |
+	self invalidatePreviewOpacityOperation.
+	tracks := OrderedCollection new.
+	tracks add: ((CFMotionVerticalExtentTrack
+		on: aNode
+		from: sourceHeight
+		to: targetHeight)
+		fitContentAtDestination).
+	aPreview ifNotNil: [
+		tracks add: (CFMotionPropertyTrack
+			on: aPreview
+			property: CFOpacityMotionProperty uniqueInstance
+			target: targetOpacity) ].
+	operation := CFMotionOperation
+		coordinator: self space cfMotionCoordinator
+		tracks: tracks.
+	hoverExtentOperation := operation.
+	operation
+		duration: 180 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		onTerminalDo: [ :aCompletedOperation |
+			hoverExtentOperation == aCompletedOperation ifTrue: [
+				hoverExtentOperation := nil ] ];
+		start.
+	^ operation
 ]
 
 { #category : 'private - planning' }
@@ -1362,6 +1364,6 @@ CFConfigurationEditorElement >> assessment: anAssessment hasPlacementForConfigur
 CFConfigurationEditorElement >> onRemovedFromSceneGraph [
 	super onRemovedFromSceneGraph.
 	self invalidatePreviewOpacityOperation.
+	self settleHoverExtentMotionAtDestination.
 	self stopPlacementMotion.
-	animations ifNotNil: [ animations stopAll ]
 ]
