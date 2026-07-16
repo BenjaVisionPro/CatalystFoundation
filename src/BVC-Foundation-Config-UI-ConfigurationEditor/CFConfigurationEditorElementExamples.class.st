@@ -26,7 +26,7 @@ CFConfigurationEditorElementExamples >> overlayPreviewIsNotAPlacementAnimationOr
 		with: affectedItems.
 	self assert: (elements includes: rootNode).
 	self assert: (elements includes: committedNode).
-	self deny: (elements includes: overlayPreview).
+	self assert: (elements includes: overlayPreview) not.
 	self assert: elements size equals: 2.
 	^ elements
 ]
@@ -86,7 +86,7 @@ CFConfigurationEditorElementExamples >> placementAnimationDoesNotTraverseUnaffec
 		with: affectedItems.
 	self assert: (elements includes: rootNode).
 	self assert: (elements includes: directNode).
-	self deny: (elements includes: nestedNode).
+	self assert: (elements includes: nestedNode) not.
 	self assert: elements size equals: 2.
 	^ elements
 ]
