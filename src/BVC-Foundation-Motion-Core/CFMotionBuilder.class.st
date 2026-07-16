@@ -114,14 +114,32 @@ CFMotionBuilder >> translation: aPoint [
 ]
 
 { #category : 'playing' }
-CFMotionBuilder >> verticalExtent: aNumber [
+CFMotionBuilder >> extentFrom: aSourceExtent to: aTargetExtent [
 	element isAttachedToSceneGraph
 		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
 	^ element space cfMotionCoordinator
-		retarget: (CFMotionVerticalExtentTrack
+		retarget: (CFMotionExtentTrack
 			on: element
-			from: element extent y
-			to: aNumber)
+			from: aSourceExtent
+			to: aTargetExtent)
 		duration: duration
 		easing: easing
+]
+
+{ #category : 'playing' }
+CFMotionBuilder >> horizontalExtent: aNumber [
+	| currentExtent |
+	currentExtent := element extent.
+	^ self
+		extentFrom: currentExtent
+		to: aNumber @ currentExtent y
+]
+
+{ #category : 'playing' }
+CFMotionBuilder >> verticalExtent: aNumber [
+	| currentExtent |
+	currentExtent := element extent.
+	^ self
+		extentFrom: currentExtent
+		to: currentExtent x @ aNumber
 ]

@@ -1286,10 +1286,10 @@ CFConfigurationEditorElement >> startHoverExtentMotionOf: aNode from: sourceHeig
 	| tracks operation |
 	self invalidatePreviewOpacityOperation.
 	tracks := OrderedCollection new.
-	tracks add: ((CFMotionVerticalExtentTrack
+	tracks add: ((CFMotionExtentTrack
 		on: aNode
-		from: sourceHeight
-		to: targetHeight)
+		from: aNode extent x @ sourceHeight
+		to: aNode extent x @ targetHeight)
 		fitContentAtDestination).
 	aPreview ifNotNil: [
 		tracks add: (CFMotionPropertyTrack

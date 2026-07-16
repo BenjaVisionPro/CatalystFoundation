@@ -1174,8 +1174,44 @@ CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
 		duration: 1 second;
 		verticalExtent: 100.
 	self assert: first == second.
-	self assert: second tracks first targetExtent equals: 100.
+	self assert: second tracks first targetExtent y equals: 100.
 	^ second
+]
+
+{ #category : 'examples - extent motion' }
+CFMotionExamples >> horizontalExtentMotionPreservesVerticalLayout [
+	<gtExample>
+	| space element originalHeight operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	originalHeight := element extent y.
+	operation := element motion
+		duration: 1 milliSeconds;
+		horizontalExtent: 180.
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element extent x equals: 180.
+	self assert: element extent y equals: originalHeight.
+	^ operation
+]
+
+{ #category : 'examples - extent motion' }
+CFMotionExamples >> extentMotionCompletesAcrossBothAxes [
+	<gtExample>
+	| space element sourceExtent targetExtent operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	sourceExtent := element extent.
+	targetExtent := 180 @ 140.
+	operation := element motion
+		duration: 1 milliSeconds;
+		extentFrom: sourceExtent to: targetExtent.
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element extent equals: targetExtent.
+	^ operation
 ]
 
 { #category : 'examples - vertical extent motion' }
@@ -1184,10 +1220,10 @@ CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
 	| space element track operation |
 	space := self spaceWithElement.
 	element := space root children first.
-	track := (CFMotionVerticalExtentTrack
+	track := (CFMotionExtentTrack
 		on: element
-		from: element extent y
-		to: 140)
+		from: element extent x @ element extent y
+		to: element extent x @ 140)
 		fitContentAtDestination.
 	operation := CFMotion
 		coordinator: space cfMotionCoordinator
@@ -1212,10 +1248,10 @@ CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 		yourself.
 	space root addChild: preview.
 	space pulse.
-	extentTrack := (CFMotionVerticalExtentTrack
+	extentTrack := (CFMotionExtentTrack
 		on: element
-		from: element extent y
-		to: 140)
+		from: element extent x @ element extent y
+		to: element extent x @ 140)
 		fitContentAtDestination.
 	opacityTrack := CFMotionPropertyTrack
 		on: preview
