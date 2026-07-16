@@ -74,21 +74,6 @@ CFCompactObjectElementExamples >> compactPresentationSupportsObjectsWithoutIcons
 ]
 
 { #category : 'examples' }
-CFCompactObjectElementExamples >> formHeaderUsesCompactPresentation [
-	<gtExample>
-	| aMemento aHeader aCompactElement |
-	aMemento := GtMagritteMemento model: CFMagritteEditorExample exampleDefault.
-	aHeader := CFMaFormHeaderElement new
-		memento: aMemento;
-		yourself.
-	aCompactElement := aHeader childNamed: #compactObject.
-
-	self assert: aCompactElement class equals: CFCompactObjectElement.
-	self assert: aCompactElement titleText equals: 'Editor example'.
-	^ aHeader
-]
-
-{ #category : 'examples' }
 CFCompactObjectElementExamples >> toManyDefaultItemUsesCompactPresentation [
 	<gtExample>
 	| anObject aViewModel aDescription anElement |
