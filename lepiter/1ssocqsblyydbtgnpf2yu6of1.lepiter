@@ -1,0 +1,76 @@
+{
+	"__schema" : "4.1",
+	"__type" : "page",
+	"children" : {
+		"__type" : "snippets",
+		"items" : [
+			{
+				"__type" : "textSnippet",
+				"children" : {
+					"__type" : "snippets",
+					"items" : [ ]
+				},
+				"createEmail" : {
+					"__type" : "email",
+					"emailString" : "<unknown>"
+				},
+				"createTime" : {
+					"__type" : "time",
+					"time" : {
+						"__type" : "dateAndTime",
+						"dateAndTimeString" : "2026-07-16T15:06:50.391477+10:00"
+					}
+				},
+				"editEmail" : {
+					"__type" : "email",
+					"emailString" : "<unknown>"
+				},
+				"editTime" : {
+					"__type" : "time",
+					"time" : {
+						"__type" : "dateAndTime",
+						"dateAndTimeString" : "2026-07-16T15:06:50.391477+10:00"
+					}
+				},
+				"uid" : {
+					"__type" : "uid",
+					"uidString" : "B/LgfVo6RyyoR/CtCQTC0A=="
+				},
+				"paragraphStyle" : {
+					"__type" : "textStyle"
+				},
+				"string" : "# Motion\n\nMotion presents changes to real Bloc state. It keeps the model and layout authoritative, while tracks own the temporary presentation.\n\nThe pages below are a live gallery. Every demonstration is a separate, editable example snippet: change its code, accept it, and replay the preview directly beside it.\n\n- [[Foundation / Motion / Properties and effects]]\n- [[Foundation / Motion / Layout and composition]]\n- [[Foundation / Motion / Interaction and adoption]]"
+			}
+		]
+	},
+	"createEmail" : {
+		"__type" : "email",
+		"emailString" : "<unknown>"
+	},
+	"createTime" : {
+		"__type" : "time",
+		"time" : {
+			"__type" : "dateAndTime",
+			"dateAndTimeString" : "2026-07-16T15:05:55.472294+10:00"
+		}
+	},
+	"editEmail" : {
+		"__type" : "email",
+		"emailString" : "<unknown>"
+	},
+	"editTime" : {
+		"__type" : "time",
+		"time" : {
+			"__type" : "dateAndTime",
+			"dateAndTimeString" : "2026-07-16T15:05:55.472294+10:00"
+		}
+	},
+	"pageType" : {
+		"__type" : "namedPage",
+		"title" : "Foundation / Motion"
+	},
+	"uid" : {
+		"__type" : "uuid",
+		"uuid" : "1d47e850-8dec-429c-bddd-a04bb30d671e"
+	}
+}

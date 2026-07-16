@@ -6,116 +6,68 @@ Class {
 }
 
 { #category : 'examples - gallery' }
-CFMotionGalleryExamples >> liveGallery [
+CFMotionGalleryExamples >> adoption [
 	<gtExample>
-	^ self gallery
-]
-
-{ #category : 'examples - gallery' }
-CFMotionGalleryExamples >> advancedGallery [
-	<gtExample>
-	^ self advancedGalleryElement
-]
-
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> advancedGalleryElement [
-	| gallery adoptionCard source destination preview committed |
-	gallery := BlElement new
-		size: 700 @ 600;
-		background: Color white;
-		yourself.
-	gallery addChild: (self label: 'Advanced Motion gallery' at: 20 @ 14 size: 24 color: Color black).
-	gallery addChild: (self label: 'The following panels demonstrate Motion features whose visual result depends on several elements.' at: 20 @ 42 size: 12 color: Color gray).
-	gallery addChild: (self crossFadeDemoAt: 20 @ 76).
-	gallery addChild: (self verticalRevealDemoAt: 370 @ 76).
-	gallery addChild: (self aptitudeDemoAt: 20 @ 294).
-
-	"Adoption owns a preview-to-committed handoff. A new preview is created after the previous handoff completes."
-	adoptionCard := BlElement new
+	| card source destination preview committed |
+	card := BlElement new
 		size: 330 @ 180;
-		relocate: 370 @ 294;
 		background: (Color purple alpha: 0.10);
 		clipChildren: true;
 		yourself.
 	source := BlElement new
-		size: 145 @ 120;
-		relocate: 10 @ 50;
+		size: 145 @ 110;
+		relocate: 10 @ 56;
 		background: (Color blue alpha: 0.10);
 		clipChildren: true;
 		yourself.
 	destination := BlElement new
-		size: 145 @ 120;
-		relocate: 175 @ 50;
+		size: 145 @ 110;
+		relocate: 175 @ 56;
 		background: (Color green alpha: 0.10);
 		clipChildren: true;
 		yourself.
-	"The source and destination are displayed side by side inside one adoption card."
-	adoptionCard addChild: (self label: 'Adoption' at: 12 @ 12 size: 16 color: Color black).
-	adoptionCard addChild: (self label: 'Click source to hand the preview to the destination.' at: 12 @ 32 size: 11 color: Color gray).
-	adoptionCard addChild: (self label: 'source' at: 12 @ 152 size: 10 color: Color blue).
-	adoptionCard addChild: (self label: 'destination' at: 177 @ 152 size: 10 color: Color green).
-	adoptionCard addChildren: { source. destination }.
-	gallery addChild: adoptionCard.
+	card addChild: (self label: 'Adoption' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'Click source to hand the preview to destination.' at: 12 @ 34 size: 10 color: Color gray).
+	card addChild: (self label: 'source' at: 12 @ 164 size: 9 color: Color blue).
+	card addChild: (self label: 'destination' at: 177 @ 164 size: 9 color: Color green).
+	card addChildren: { source. destination }.
 	preview := BlElement new
 		size: 80 @ 50;
-		relocate: 32 @ 42;
+		relocate: 32 @ 30;
 		background: Color purple;
 		yourself.
 	source addChild: preview.
 	source when: BlClickEvent do: [ :anEvent |
-	preview hasParent ifFalse: [
+		preview hasParent ifFalse: [
 			preview := BlElement new
 				size: 80 @ 50;
-				relocate: 32 @ 42;
+				relocate: 32 @ 30;
 				background: Color purple;
 				yourself.
 			source addChild: preview ].
-	committed := BlElement new
+		committed := BlElement new
 			size: 80 @ 50;
-			relocate: 32 @ 42;
+			relocate: 32 @ 30;
 			background: Color purple;
 			yourself.
 		destination motion
 			duration: 700 milliSeconds;
 			adopt: preview as: committed from: source ].
-	^ gallery
-]
-
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> aptitudeDemoAt: aPoint [
-	| card target aptitude |
-	card := BlElement new
-		size: 330 @ 180;
-		relocate: aPoint;
-		background: (Color orange alpha: 0.12);
-		yourself.
-	card addChild: (self label: 'Interaction aptitude' at: 12 @ 12 size: 16 color: Color black).
-	card addChild: (self label: 'Press and release the tile.' at: 12 @ 36 size: 11 color: Color gray).
-	target := BlElement new
-		size: 110 @ 64;
-		relocate: 110 @ 82;
-		background: Color orange;
-		yourself.
-	aptitude := CFMotionAptitude new
-		pressedEffect: CFMotionEffects compress;
-		releasedEffect: CFMotionEffects springBack;
-		yourself.
-	target addAptitude: aptitude.
-	card addChild: target.
 	^ card
 ]
 
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> crossFadeDemoAt: aPoint [
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> crossFade [
+	<gtExample>
 	| card outgoing incoming active |
 	active := false.
 	card := BlElement new
 		size: 330 @ 180;
-		relocate: aPoint;
 		background: (Color red alpha: 0.10);
 		yourself.
 	card addChild: (self label: 'Cross-fade' at: 12 @ 12 size: 16 color: Color black).
 	card addChild: (self label: 'One opacity operation coordinates two elements.' at: 12 @ 36 size: 11 color: Color gray).
+	card addChild: (self label: 'Click to replay' at: 12 @ 158 size: 10 color: Color gray).
 	outgoing := BlElement new
 		size: 80 @ 80;
 		relocate: 125 @ 72;
@@ -136,18 +88,162 @@ CFMotionGalleryExamples >> crossFadeDemoAt: aPoint [
 	^ card
 ]
 
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> interactionAptitude [
+	<gtExample>
+	| card target aptitude |
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color orange alpha: 0.12);
+		yourself.
+	card addChild: (self label: 'Interaction aptitude' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'Press and release the tile.' at: 12 @ 36 size: 11 color: Color gray).
+	target := BlElement new
+		size: 110 @ 64;
+		relocate: 110 @ 82;
+		background: Color orange;
+		yourself.
+	aptitude := CFMotionAptitude new
+		pressedEffect: CFMotionEffects compress;
+		releasedEffect: CFMotionEffects springBack;
+		yourself.
+	target addAptitude: aptitude.
+	card addChild: target.
+	^ card
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> layoutTransaction [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Layout transaction'
+		subtitle: 'Authoritative geometry changes; Motion presents it.'
+		color: Color brown
+		action: [ :element :active | | transaction destination |
+			destination := active ifTrue: [ 230 @ 82 ] ifFalse: [ 24 @ 82 ].
+			transaction := (element parent motion
+				duration: 600 milliSeconds;
+				layout).
+			transaction
+				affecting: { element };
+				mutate: [ element relocate: destination ];
+				play ]
+]
+
 { #category : 'gallery' }
-CFMotionGalleryExamples >> verticalRevealDemoAt: aPoint [
+CFMotionGalleryExamples >> label: aString at: aPoint size: aNumber color: aColor [
+	^ BrLabel new
+		aptitude: (BrGlamorousLabelAptitude new
+			fontSize: aNumber;
+			foreground: aColor);
+		text: aString;
+		relocate: aPoint;
+		yourself
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> opacity [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Opacity'
+		subtitle: 'A property track fades the tile.'
+		color: Color blue
+		action: [ :element :active |
+			element motion
+				duration: 600 milliSeconds;
+				opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]) ]
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> riseAndFade [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Rise and fade'
+		subtitle: 'An effect owns opacity and translation.'
+		color: Color purple
+		action: [ :element :active |
+			active
+				ifTrue: [ CFMotionEffects fallAndFadeOut: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
+				ifFalse: [ CFMotionEffects riseAndFadeIn: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> rotation [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Rotation'
+		subtitle: 'Rotation is another transform property.'
+		color: Color orange
+		action: [ :element :active |
+			element motion
+				duration: 600 milliSeconds;
+				rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]) ]
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> scaleAndFade [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Scale and fade'
+		subtitle: 'One operation coordinates two tracks.'
+		color: Color red
+		action: [ :element :active |
+			active
+				ifTrue: [ CFMotionEffects scaleAndFadeOut: element to: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
+				ifFalse: [ CFMotionEffects scaleAndFadeIn: element from: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]
+]
+
+{ #category : 'gallery' }
+CFMotionGalleryExamples >> toggleCardTitled: aTitle subtitle: aSubtitle color: aColor action: anActionBlock [
+	| card visual active |
+	active := false.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (aColor alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: aTitle at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: aSubtitle at: 12 @ 36 size: 11 color: Color gray).
+	card addChild: (self label: 'Click to replay' at: 12 @ 158 size: 10 color: Color gray).
+	visual := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: aColor;
+		yourself.
+	card addChild: visual.
+	card when: BlClickEvent do: [ :anEvent |
+		active := active not.
+		anActionBlock value: visual value: active ].
+	^ card
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> transformComposition [
+	<gtExample>
+	^ self
+		toggleCardTitled: 'Transform composition'
+		subtitle: 'Scale and translation share a channel.'
+		color: Color green
+		action: [ :element :active |
+			element motion
+				duration: 600 milliSeconds;
+				scale: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]);
+				translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]) ]
+]
+
+{ #category : 'examples - gallery' }
+CFMotionGalleryExamples >> verticalReveal [
+	<gtExample>
 	| card content active |
 	active := false.
 	card := BlElement new
 		size: 330 @ 180;
-		relocate: aPoint;
 		background: (Color green alpha: 0.10);
 		clipChildren: true;
 		yourself.
 	card addChild: (self label: 'Vertical reveal' at: 12 @ 12 size: 16 color: Color black).
 	card addChild: (self label: 'Height changes without scaling the content.' at: 12 @ 36 size: 11 color: Color gray).
+	card addChild: (self label: 'Click to replay' at: 12 @ 158 size: 10 color: Color gray).
 	content := BlElement new
 		size: 220 @ 100;
 		relocate: 55 @ 66;
@@ -163,118 +259,4 @@ CFMotionGalleryExamples >> verticalRevealDemoAt: aPoint [
 			duration: 600 milliSeconds;
 			verticalExtent: (active ifTrue: [ 38 ] ifFalse: [ 100 ]) ].
 	^ card
-]
-
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> cardAt: aPoint title: aTitle subtitle: aSubtitle color: aColor action: anActionBlock [
-	| card visual active |
-	active := false.
-	card := BlElement new
-		size: 210 @ 180;
-		relocate: aPoint;
-		background: (aColor alpha: 0.12);
-		clipChildren: true;
-		yourself.
-	card addChild: (self label: aTitle at: 12 @ 12 size: 16 color: Color black).
-	card addChild: (self label: aSubtitle at: 12 @ 36 size: 11 color: Color gray).
-	card addChild: (self label: 'Click to replay' at: 12 @ 158 size: 10 color: Color gray).
-	visual := BlElement new
-		size: 56 @ 56;
-		relocate: 77 @ 82;
-		background: aColor;
-		yourself.
-	card addChild: visual.
-	card when: BlClickEvent do: [ :anEvent |
-		active := active not.
-		anActionBlock value: visual value: active ].
-	^ card
-]
-
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> gallery [
-	| gallery |
-	gallery := BlElement new
-		size: 700 @ 470;
-		background: Color white;
-		yourself.
-	gallery addChild: (self label: 'Motion gallery' at: 20 @ 14 size: 24 color: Color black).
-	gallery addChild: (self label: 'Each tile is a live Motion example. Click it repeatedly to retarget or reverse the presentation.' at: 20 @ 42 size: 12 color: Color gray).
-	gallery
-		addChild: (self
-				cardAt: 20 @ 76
-				title: 'Opacity'
-				subtitle: 'A property track fades the tile.'
-				color: Color blue
-				action: [ :element :active |
-					element motion
-						duration: 600 milliSeconds;
-						opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]) ]).
-	gallery
-		addChild: (self
-				cardAt: 245 @ 76
-				title: 'Transform composition'
-				subtitle: 'Scale and translation share a channel.'
-				color: Color green
-				action: [ :element :active |
-					element motion
-						duration: 600 milliSeconds;
-						scale: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]);
-						translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]) ]).
-	gallery
-		addChild: (self
-				cardAt: 470 @ 76
-				title: 'Rotation'
-				subtitle: 'Rotation is another transform property.'
-				color: Color orange
-				action: [ :element :active |
-					element motion
-						duration: 600 milliSeconds;
-						rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]) ]).
-	gallery
-		addChild: (self
-				cardAt: 20 @ 272
-				title: 'Rise and fade'
-				subtitle: 'An effect owns opacity and translation.'
-				color: Color purple
-				action: [ :element :active |
-					active
-						ifTrue: [ CFMotionEffects fallAndFadeOut: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
-						ifFalse: [ CFMotionEffects riseAndFadeIn: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]).
-	gallery
-		addChild: (self
-				cardAt: 245 @ 272
-				title: 'Scale and fade'
-				subtitle: 'One operation coordinates two tracks.'
-				color: Color red
-				action: [ :element :active |
-					active
-						ifTrue: [ CFMotionEffects scaleAndFadeOut: element to: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
-						ifFalse: [ CFMotionEffects scaleAndFadeIn: element from: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]).
-	gallery
-		addChild: (self
-				cardAt: 470 @ 272
-				title: 'Layout transaction'
-				subtitle: 'Authoritative geometry changes; Motion presents it.'
-				color: Color brown
-				action: [ :element :active | | transaction destination |
-					destination := active ifTrue: [ 130 @ 82 ] ifFalse: [ 24 @ 82 ].
-					transaction := (element parent motion
-						duration: 600 milliSeconds;
-						layout).
-					transaction
-						affecting: { element };
-						mutate: [ element relocate: destination ];
-						play ]).
-	^ gallery
-]
-
-{ #category : 'gallery' }
-CFMotionGalleryExamples >> label: aString at: aPoint size: aNumber color: aColor [
-	^ BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			fontSize: aNumber;
-			foreground: aColor);
-		text: aString;
-		relocate: aPoint;
-		yourself
 ]
