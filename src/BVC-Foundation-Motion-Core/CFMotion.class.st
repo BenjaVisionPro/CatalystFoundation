@@ -151,15 +151,20 @@ CFMotion >> releaseClaims [
 ]
 
 { #category : 'playing' }
-CFMotion >> retarget: aTrack duration: aDuration easing: anInterpolator [
-	| ownedTrack |
-	ownedTrack := tracks
-		detect: [ :each | each propertyKey = aTrack propertyKey ]
-		ifNone: [ self error: 'A Motion can only retarget a property it owns' ].
+CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator [
+	| requestedTracks ownedTracks |
+	requestedTracks := aTrackOrTracks isCollection
+		ifTrue: [ aTrackOrTracks asArray ]
+		ifFalse: [ { aTrackOrTracks } ].
+	ownedTracks := requestedTracks collect: [ :each |
+		tracks
+			detect: [ :ownedTrack | ownedTrack propertyKey = each propertyKey ]
+			ifNone: [ self error: 'A Motion can only retarget a property it owns' ] ].
 	duration := aDuration.
 	easing := anInterpolator.
-	ownedTrack targetValue: aTrack targetValue.
-	trace record: #retargeted for: self track: ownedTrack.
+	requestedTracks with: ownedTracks do: [ :each :ownedTrack |
+		ownedTrack targetValue: each targetValue.
+		trace record: #retargeted for: self track: ownedTrack ].
 	self startFromCurrentPresentation.
 	^ self
 ]

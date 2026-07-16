@@ -126,7 +126,8 @@ CFMotionGalleryExamples >> relocate [
 		toggleCardTitled: 'Relocate'
 		subtitle: 'Move to an authoritative layout position.'
 		color: Color brown
-		action: [ :element :active |
+		action: [ :element :active :currentMotion |
+			currentMotion ifNotNil: [ currentMotion cancel ].
 			element motion
 				duration: 600 milliSeconds;
 				relocate: (active ifTrue: [ 230 @ 82 ] ifFalse: [ 24 @ 82 ]) ]
@@ -150,12 +151,23 @@ CFMotionGalleryExamples >> opacity [
 		toggleCardTitled: 'Opacity'
 		subtitle: 'A property track fades the tile.'
 		color: Color blue
-		action: [ :element :active |
-			(element motion
-				duration: 600 milliSeconds;
-				opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]);
-				build)
-				start ]
+		action: [ :element :active :currentMotion |
+			currentMotion
+				ifNil: [
+					(element motion
+						duration: 600 milliSeconds;
+						holdAtDestination;
+						opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]);
+						build)
+						start ]
+				ifNotNil: [
+					currentMotion
+						retarget: (CFMotionPropertyTrack
+							on: element
+							property: CFMotionOpacityProperty uniqueInstance
+							target: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]))
+						duration: 600 milliSeconds
+						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
 { #category : 'examples - gallery' }
@@ -165,14 +177,30 @@ CFMotionGalleryExamples >> riseAndFade [
 		toggleCardTitled: 'Rise and fade'
 		subtitle: 'One Motion coordinates opacity and translation.'
 		color: Color purple
-		action: [ :element :active |
-			((active
-				ifTrue: [ CFMotionBuilder fallAndFadeOut ]
-				ifFalse: [ CFMotionBuilder riseAndFadeIn ])
-				element: element;
-				duration: 600 milliSeconds;
-				build)
-				start ]
+		action: [ :element :active :currentMotion |
+			currentMotion
+				ifNil: [
+					((active
+						ifTrue: [ CFMotionBuilder fallAndFadeOut ]
+						ifFalse: [ CFMotionBuilder riseAndFadeIn ])
+						element: element;
+						duration: 600 milliSeconds;
+						holdAtDestination;
+						build)
+						start ]
+				ifNotNil: [
+					currentMotion
+						retarget: {
+							CFMotionPropertyTrack
+								on: element
+								property: CFMotionOpacityProperty uniqueInstance
+								target: (active ifTrue: [ 0.0 ] ifFalse: [ 1.0 ]).
+							CFMotionTranslationTrack
+								on: element
+								from: 0 @ 0
+								to: (active ifTrue: [ 0 @ 12 ] ifFalse: [ 0 @ 0 ]) }
+						duration: 600 milliSeconds
+						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
 { #category : 'examples - gallery' }
@@ -182,12 +210,23 @@ CFMotionGalleryExamples >> rotation [
 		toggleCardTitled: 'Rotation'
 		subtitle: 'Rotation is another transform property.'
 		color: Color orange
-		action: [ :element :active |
-			(element motion
-				duration: 600 milliSeconds;
-				rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]);
-				build)
-				start ]
+		action: [ :element :active :currentMotion |
+			currentMotion
+				ifNil: [
+					(element motion
+						duration: 600 milliSeconds;
+						holdAtDestination;
+						rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]);
+						build)
+						start ]
+				ifNotNil: [
+					currentMotion
+						retarget: (CFMotionRotationTrack
+							on: element
+							from: 0
+							to: (active ifTrue: [ 45 ] ifFalse: [ 0 ]))
+						duration: 600 milliSeconds
+						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
 { #category : 'examples - gallery' }
@@ -197,14 +236,30 @@ CFMotionGalleryExamples >> scaleAndFade [
 		toggleCardTitled: 'Scale and fade'
 		subtitle: 'One Motion coordinates two tracks.'
 		color: Color red
-		action: [ :element :active |
-			((active
-				ifTrue: [ CFMotionBuilder scaleAndFadeOut ]
-				ifFalse: [ CFMotionBuilder scaleAndFadeIn ])
-				element: element;
-				duration: 600 milliSeconds;
-				build)
-				start ]
+		action: [ :element :active :currentMotion |
+			currentMotion
+				ifNil: [
+					((active
+						ifTrue: [ CFMotionBuilder scaleAndFadeOut ]
+						ifFalse: [ CFMotionBuilder scaleAndFadeIn ])
+						element: element;
+						duration: 600 milliSeconds;
+						holdAtDestination;
+						build)
+						start ]
+				ifNotNil: [
+					currentMotion
+						retarget: {
+							CFMotionPropertyTrack
+								on: element
+								property: CFMotionOpacityProperty uniqueInstance
+								target: (active ifTrue: [ 0.0 ] ifFalse: [ 1.0 ]).
+							CFMotionScaleTrack
+								on: element
+								from: 1 @ 1
+								to: (active ifTrue: [ 0.8 @ 0.8 ] ifFalse: [ 1 @ 1 ]) }
+						duration: 600 milliSeconds
+						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
 { #category : 'gallery' }
@@ -227,8 +282,10 @@ CFMotionGalleryExamples >> toggleCardTitled: aTitle subtitle: aSubtitle color: a
 	card addChild: visual.
 	card when: BlClickEvent do: [ :anEvent |
 		active := active not.
-		currentMotion ifNotNil: [ currentMotion cancel ].
-		currentMotion := anActionBlock value: visual value: active ].
+		currentMotion := anActionBlock
+			cull: visual
+			cull: active
+			cull: currentMotion ].
 	^ card
 ]
 
@@ -239,13 +296,29 @@ CFMotionGalleryExamples >> transformComposition [
 		toggleCardTitled: 'Transform composition'
 		subtitle: 'Scale and translation share a channel.'
 		color: Color green
-		action: [ :element :active |
-			(element motion
-				duration: 600 milliSeconds;
-				scale: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]);
-				translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]);
-				build)
-				start ]
+		action: [ :element :active :currentMotion |
+			currentMotion
+				ifNil: [
+					(element motion
+						duration: 600 milliSeconds;
+						holdAtDestination;
+						scale: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]);
+						translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]);
+						build)
+						start ]
+				ifNotNil: [
+					currentMotion
+						retarget: {
+							CFMotionScaleTrack
+								on: element
+								from: 1 @ 1
+								to: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]).
+							CFMotionTranslationTrack
+								on: element
+								from: 0 @ 0
+								to: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]) }
+						duration: 600 milliSeconds
+						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
 { #category : 'examples - gallery' }

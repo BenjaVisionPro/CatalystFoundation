@@ -32,7 +32,7 @@ CFMotionTransformPresentation >> initialize [
 CFMotionTransformPresentation >> addContributionTo: aCompositeTransformation [
 	| motionTransformation origin |
 	motionTransformation := BlAffineCompositeTransformation new.
-	origin := BlAffineTransformationTopLeftOrigin new.
+	origin := BlAffineTransformationCenterOrigin new.
 	scale = (1 @ 1) ifFalse: [
 		motionTransformation addTransformation:
 			((BlScalingTransformation scale: scale) origin: origin) ].
