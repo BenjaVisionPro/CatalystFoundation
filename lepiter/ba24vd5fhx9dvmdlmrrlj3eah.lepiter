@@ -73,7 +73,7 @@
 					"__type" : "uid",
 					"uidString" : "WpE8dylZR4euwcSlCfQ5aA=="
 				},
-				"exampleSelector" : "layoutTransaction",
+				"exampleSelector" : "relocate",
 				"previewHeight" : 200,
 				"previewShowSelector" : "gtViewsFor:",
 				"exampleBehaviorName" : "CFMotionGalleryExamples",

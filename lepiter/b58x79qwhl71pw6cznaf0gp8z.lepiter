@@ -39,7 +39,7 @@
 				"paragraphStyle" : {
 					"__type" : "textStyle"
 				},
-				"string" : "# Interaction and adoption\n\nAptitudes turn interaction events into Motion operations. Adoption moves a preview from a source container to its committed destination without imperatively faking the handoff."
+				"string" : "# Interaction and adoption\n\n`CFMotionButtonAptitude` turns button interaction into Motion: press compresses, leaving while pressed returns to rest, entering again compresses, and release returns to rest. Adoption moves a preview from its source container to its committed destination without faking the handoff."
 			},
 			{
 				"__type" : "exampleSnippet",

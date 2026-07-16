@@ -39,7 +39,7 @@
 				"paragraphStyle" : {
 					"__type" : "textStyle"
 				},
-				"string" : "# Properties and effects\n\nEach block is independent. Click its card to run, reverse, or retarget the operation; edit the example code to experiment with duration, easing, and targets."
+				"string" : "# Properties\n\nEach block is independent. Click its card to run, reverse, or retarget its Motion; edit the example code to experiment with duration, easing, and targets."
 			},
 			{
 				"__type" : "exampleSnippet",
@@ -307,7 +307,7 @@
 	},
 	"pageType" : {
 		"__type" : "namedPage",
-		"title" : "Motion / Properties and effects"
+		"title" : "Motion / Properties"
 	},
 	"uid" : {
 		"__type" : "uuid",
