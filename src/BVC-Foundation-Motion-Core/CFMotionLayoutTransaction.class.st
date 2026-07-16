@@ -69,7 +69,7 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 			on: each
 			property: CFOpacityMotionProperty uniqueInstance
 			target: 1.0) ].
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: coordinator
 		tracks: tracks.
 	phase := #running.
@@ -129,7 +129,7 @@ CFMotionLayoutTransaction >> isAwaitingLayout [ ^ phase = #awaitingLayout ]
 
 { #category : 'testing' }
 CFMotionLayoutTransaction >> isCancelled [
-	^ phase = #cancelled or: [ phase == CFMotionOperationState cancelled ]
+	^ phase = #cancelled or: [ phase == CFMotionState cancelled ]
 ]
 
 { #category : 'configuration' }

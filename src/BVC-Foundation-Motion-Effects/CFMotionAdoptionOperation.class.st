@@ -103,7 +103,7 @@ CFMotionAdoptionOperation >> captureDestinationAndStart [
 		on: committedElement
 		from: sourceSnapshot
 		to: destinationSnapshot.
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: container space cfMotionCoordinator
 		tracks: {
 			CFMotionPropertyTrack on: preview property: opacity target: 0.0.

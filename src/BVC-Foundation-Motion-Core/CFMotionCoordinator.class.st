@@ -99,7 +99,7 @@ CFMotionCoordinator >> retarget: aTrack duration: aDuration easing: anInterpolat
 			retarget: aTrack
 			duration: aDuration
 			easing: anInterpolator ].
-	operation := CFMotionOperation coordinator: self tracks: { aTrack }.
+	operation := CFMotion coordinator: self tracks: { aTrack }.
 	operation
 		duration: aDuration;
 		easing: anInterpolator.

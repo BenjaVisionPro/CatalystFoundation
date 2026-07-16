@@ -738,7 +738,7 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: af
 	transitions ifEmpty: [
 		completionBlock ifNotNil: [ completionBlock value ].
 		^ self ].
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: self space cfMotionCoordinator
 		tracks: (transitions collect: [ :each |
 			CFMotionTranslationTrack
@@ -1296,7 +1296,7 @@ CFConfigurationEditorElement >> startHoverExtentMotionOf: aNode from: sourceHeig
 			on: aPreview
 			property: CFOpacityMotionProperty uniqueInstance
 			target: targetOpacity) ].
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: self space cfMotionCoordinator
 		tracks: tracks.
 	hoverExtentOperation := operation.

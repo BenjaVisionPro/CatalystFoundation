@@ -1132,7 +1132,7 @@ CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
 	operation duration: 1 milliSeconds.
@@ -1189,7 +1189,7 @@ CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
 		from: element extent y
 		to: 140)
 		fitContentAtDestination.
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
 	operation duration: 1 milliSeconds.
@@ -1221,7 +1221,7 @@ CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 		on: preview
 		property: CFOpacityMotionProperty uniqueInstance
 		target: 0.58.
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { extentTrack. opacityTrack }.
 	operation duration: 1 milliSeconds.
@@ -1257,7 +1257,7 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 		equals: transaction sourceSnapshots first bounds.
 	self finish: transaction operation in: space.
 	self assert: transaction operation isCompleted.
-	self assert: transaction phase == CFMotionOperationState completed.
+	self assert: transaction phase == CFMotionState completed.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
 	^ transaction
@@ -1572,7 +1572,7 @@ CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
 	transaction cancel.
 	self assert: transaction isCancelled.
 	self assert: transaction operation isCancelled.
-	self assert: transaction phase == CFMotionOperationState cancelled.
+	self assert: transaction phase == CFMotionState cancelled.
 	self assert: transaction operation tracks first presentation isActive not.
 	self assert: space cfMotionCoordinator activeOperations isEmpty.
 	self
@@ -1637,7 +1637,7 @@ CFMotionExamples >> geometryOperationComposesWithApplicationTransform [
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
-	operation := CFMotionOperation
+	operation := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
 	operation duration: 1 milliSeconds.

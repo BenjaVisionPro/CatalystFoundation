@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFMotionOperationState',
+	#name : 'CFMotionState',
 	#superclass : 'Object',
 	#instVars : [ 'name' ],
 	#classInstVars : [ 'states' ],
@@ -8,37 +8,37 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFMotionOperationState class >> named: aSymbol [
+CFMotionState class >> named: aSymbol [
 	^ (states ifNil: [ states := Dictionary new ])
 		at: aSymbol
 		ifAbsentPut: [ self new name: aSymbol; yourself ]
 ]
 
 { #category : 'instance creation' }
-CFMotionOperationState class >> idle [ ^ self named: #idle ]
+CFMotionState class >> idle [ ^ self named: #idle ]
 
 { #category : 'instance creation' }
-CFMotionOperationState class >> running [ ^ self named: #running ]
+CFMotionState class >> running [ ^ self named: #running ]
 
 { #category : 'instance creation' }
-CFMotionOperationState class >> completed [ ^ self named: #completed ]
+CFMotionState class >> completed [ ^ self named: #completed ]
 
 { #category : 'instance creation' }
-CFMotionOperationState class >> cancelled [ ^ self named: #cancelled ]
+CFMotionState class >> cancelled [ ^ self named: #cancelled ]
 
 { #category : 'accessing' }
-CFMotionOperationState >> name [ ^ name ]
+CFMotionState >> name [ ^ name ]
 
 { #category : 'accessing' }
-CFMotionOperationState >> name: aSymbol [ name := aSymbol ]
+CFMotionState >> name: aSymbol [ name := aSymbol ]
 
 { #category : 'testing' }
-CFMotionOperationState >> isTerminal [
+CFMotionState >> isTerminal [
 	^ self == self class completed or: [ self == self class cancelled ]
 ]
 
 { #category : 'printing' }
-CFMotionOperationState >> printOn: aStream [
+CFMotionState >> printOn: aStream [
 	super printOn: aStream.
 	aStream nextPutAll: ': '; nextPutAll: name asString
 ]
