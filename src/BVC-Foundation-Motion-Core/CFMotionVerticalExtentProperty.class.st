@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFGeometryMotionProperty',
+	#name : 'CFMotionVerticalExtentProperty',
 	#superclass : 'CFMotionProperty',
 	#classInstVars : [ 'uniqueInstance' ],
 	#category : 'BVC-Foundation-Motion-Core',
@@ -7,16 +7,16 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFGeometryMotionProperty class >> uniqueInstance [
+CFMotionVerticalExtentProperty class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
 { #category : 'accessing' }
-CFGeometryMotionProperty >> currentPresentationOf: anElement [
-	^ anElement transformation
+CFMotionVerticalExtentProperty >> apply: aNumber to: anElement [
+	anElement constraintsDo: [ :c | c vertical exact: aNumber ]
 ]
 
 { #category : 'accessing' }
-CFGeometryMotionProperty >> apply: aTransformation to: anElement [
-	anElement transformation: aTransformation
+CFMotionVerticalExtentProperty >> currentPresentationOf: anElement [
+	^ anElement extent y
 ]

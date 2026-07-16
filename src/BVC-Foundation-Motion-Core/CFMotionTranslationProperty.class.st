@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFTranslationMotionProperty',
+	#name : 'CFMotionTranslationProperty',
 	#superclass : 'CFMotionProperty',
 	#classInstVars : [ 'uniqueInstance' ],
 	#category : 'BVC-Foundation-Motion-Core',
@@ -7,16 +7,16 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFTranslationMotionProperty class >> uniqueInstance [
+CFMotionTranslationProperty class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
 { #category : 'accessing' }
-CFTranslationMotionProperty >> apply: aValue to: anElement [
+CFMotionTranslationProperty >> apply: aValue to: anElement [
 	self error: 'Translation motion is applied through a transform channel'
 ]
 
 { #category : 'accessing' }
-CFTranslationMotionProperty >> currentPresentationOf: anElement [
+CFMotionTranslationProperty >> currentPresentationOf: anElement [
 	self error: 'Translation motion is read through a transform channel'
 ]

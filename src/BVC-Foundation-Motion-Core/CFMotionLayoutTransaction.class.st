@@ -56,7 +56,7 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 	coordinator replaceGeometryOwnersForKeys: (participants collect: [ :each |
 		CFMotionPropertyKey
 			element: each
-			property: CFGeometryMotionProperty uniqueInstance ]).
+			property: CFMotionGeometryProperty uniqueInstance ]).
 	destinationSnapshots := participants collect: [ :each |
 		CFMotionGeometrySnapshot of: each in: coordinateSpace ].
 	tracks := OrderedCollection new.
@@ -67,7 +67,7 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 	fadeInElements do: [ :each |
 		tracks add: (CFMotionPropertyTrack
 			on: each
-			property: CFOpacityMotionProperty uniqueInstance
+			property: CFMotionOpacityProperty uniqueInstance
 			target: 1.0) ].
 	operation := CFMotion
 		coordinator: coordinator

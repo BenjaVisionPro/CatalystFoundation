@@ -1294,7 +1294,7 @@ CFConfigurationEditorElement >> startHoverExtentMotionOf: aNode from: sourceHeig
 	aPreview ifNotNil: [
 		tracks add: (CFMotionPropertyTrack
 			on: aPreview
-			property: CFOpacityMotionProperty uniqueInstance
+			property: CFMotionOpacityProperty uniqueInstance
 			target: targetOpacity) ].
 	operation := CFMotion
 		coordinator: self space cfMotionCoordinator

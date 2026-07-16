@@ -85,7 +85,7 @@ CFMotionTranslationTrack >> preserveCurrentPresentation [
 CFMotionTranslationTrack >> propertyKey [
 	^ CFMotionPropertyKey
 		element: element
-		property: CFTranslationMotionProperty uniqueInstance
+		property: CFMotionTranslationProperty uniqueInstance
 ]
 
 { #category : 'playing' }

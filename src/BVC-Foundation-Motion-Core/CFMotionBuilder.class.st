@@ -64,7 +64,7 @@ CFMotionBuilder >> opacity: aNumber [
 	^ element space cfMotionCoordinator
 		retarget: (CFMotionPropertyTrack
 			on: element
-			property: CFOpacityMotionProperty uniqueInstance
+			property: CFMotionOpacityProperty uniqueInstance
 			target: aNumber)
 		duration: duration
 		easing: easing

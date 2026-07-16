@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFVerticalExtentMotionProperty',
+	#name : 'CFMotionOpacityProperty',
 	#superclass : 'CFMotionProperty',
 	#classInstVars : [ 'uniqueInstance' ],
 	#category : 'BVC-Foundation-Motion-Core',
@@ -7,16 +7,12 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFVerticalExtentMotionProperty class >> uniqueInstance [
+CFMotionOpacityProperty class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
 { #category : 'accessing' }
-CFVerticalExtentMotionProperty >> apply: aNumber to: anElement [
-	anElement constraintsDo: [ :c | c vertical exact: aNumber ]
-]
+CFMotionOpacityProperty >> currentPresentationOf: anElement [ ^ anElement opacity ]
 
 { #category : 'accessing' }
-CFVerticalExtentMotionProperty >> currentPresentationOf: anElement [
-	^ anElement extent y
-]
+CFMotionOpacityProperty >> apply: aNumber to: anElement [ anElement opacity: aNumber ]

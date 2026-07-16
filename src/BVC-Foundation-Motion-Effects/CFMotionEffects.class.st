@@ -126,7 +126,7 @@ CFMotionEffects class >> crossFadeFrom: anOutgoingElement to: anIncomingElement 
 		self error: 'A cross fade incoming element must be attached to a BlSpace' ].
 	anOutgoingElement space == anIncomingElement space ifFalse: [
 		self error: 'Cross fade elements must share a BlSpace' ].
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	operation := CFMotion
 		coordinator: anOutgoingElement space cfMotionCoordinator
 		tracks: {
@@ -179,7 +179,7 @@ CFMotionEffects class >> riseAndFadeIn: anElement distance: aNumber duration: aD
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
 		self error: 'A rise-and-fade-in effect subject must be attached to a BlSpace' ].
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	operation := CFMotion
 		coordinator: anElement space cfMotionCoordinator
 		tracks: {
@@ -206,7 +206,7 @@ CFMotionEffects class >> fallAndFadeOut: anElement distance: aNumber duration: a
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
 		self error: 'A fall-and-fade-out effect subject must be attached to a BlSpace' ].
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	operation := CFMotion
 		coordinator: anElement space cfMotionCoordinator
 		tracks: {
@@ -233,7 +233,7 @@ CFMotionEffects class >> scaleAndFadeIn: anElement from: aScale duration: aDurat
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
 		self error: 'A scale-and-fade-in effect subject must be attached to a BlSpace' ].
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	operation := CFMotion
 		coordinator: anElement space cfMotionCoordinator
 		tracks: {
@@ -260,7 +260,7 @@ CFMotionEffects class >> scaleAndFadeOut: anElement to: aScale duration: aDurati
 	| operation opacity |
 	anElement isAttachedToSceneGraph ifFalse: [
 		self error: 'A scale-and-fade-out effect subject must be attached to a BlSpace' ].
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	operation := CFMotion
 		coordinator: anElement space cfMotionCoordinator
 		tracks: {

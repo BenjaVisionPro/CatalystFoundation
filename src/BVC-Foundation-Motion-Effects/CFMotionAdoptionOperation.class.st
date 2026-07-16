@@ -98,7 +98,7 @@ CFMotionAdoptionOperation >> captureDestinationAndStart [
 	| opacity geometryTrack |
 	phase = #awaitingLayout ifFalse: [ ^ self ].
 	destinationSnapshot := CFMotionGeometrySnapshot of: committedElement in: sourceSnapshot coordinateSpace.
-	opacity := CFOpacityMotionProperty uniqueInstance.
+	opacity := CFMotionOpacityProperty uniqueInstance.
 	geometryTrack := CFMotionGeometryTrack
 		on: committedElement
 		from: sourceSnapshot

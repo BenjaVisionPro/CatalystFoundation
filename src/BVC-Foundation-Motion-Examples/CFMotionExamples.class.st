@@ -139,7 +139,7 @@ CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 		fadeIn.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
-	self assert: operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self assert: operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self assert: element opacity equals: 1.0.
 	^ operation
 ]
@@ -174,7 +174,7 @@ CFMotionExamples >> appearUsingFadeInSelectsTheFadeRecipe [
 		duration: 1 milliSeconds;
 		appear: element using: CFMotionEffects fadeIn.
 	self assert: appearance effect name equals: #fadeIn.
-	self assert: appearance operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self assert: appearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	self assert: element opacity equals: 1.0.
@@ -191,7 +191,7 @@ CFMotionExamples >> disappearUsingFadeOutSelectsTheFadeRecipe [
 		duration: 1 milliSeconds;
 		disappearUsing: CFMotionEffects fadeOut.
 	self assert: disappearance effect name equals: #fadeOut.
-	self assert: disappearance operation tracks first property == CFOpacityMotionProperty uniqueInstance.
+	self assert: disappearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
 	self assert: element hasParent not.
@@ -790,7 +790,7 @@ CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 	second := element motion opacity: 0.8.
 	key := CFMotionPropertyKey
 		element: element
-		property: CFOpacityMotionProperty uniqueInstance.
+		property: CFMotionOpacityProperty uniqueInstance.
 	self assert: first == second.
 	self assert: (first tracks first startValue) equals: 0.6.
 	self assert: (first tracks first targetValue) equals: 0.8.
@@ -808,7 +808,7 @@ CFMotionExamples >> opacityReplacementKeepsOneOwner [
 	second := element motion opacity: 0.8.
 	key := CFMotionPropertyKey
 		element: element
-		property: CFOpacityMotionProperty uniqueInstance.
+		property: CFMotionOpacityProperty uniqueInstance.
 	self assert: first == second.
 	self assert: (space cfMotionCoordinator ownerOf: key) == first.
 	self assert: space cfMotionCoordinator activeOperations size equals: 1.
@@ -839,7 +839,7 @@ CFMotionExamples >> opacityCleanupReleasesOwnership [
 	operation := element motion opacity: 0.2.
 	key := CFMotionPropertyKey
 		element: element
-		property: CFOpacityMotionProperty uniqueInstance.
+		property: CFMotionOpacityProperty uniqueInstance.
 	operation cancelSettlingAtEnd.
 	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
 	self assert: space cfMotionCoordinator activeOperations isEmpty.
@@ -1219,7 +1219,7 @@ CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 		fitContentAtDestination.
 	opacityTrack := CFMotionPropertyTrack
 		on: preview
-		property: CFOpacityMotionProperty uniqueInstance
+		property: CFMotionOpacityProperty uniqueInstance
 		target: 0.58.
 	operation := CFMotion
 		coordinator: space cfMotionCoordinator

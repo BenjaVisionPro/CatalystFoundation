@@ -105,7 +105,7 @@ CFMotionGeometryTrack >> preserveCurrentPresentation [
 CFMotionGeometryTrack >> propertyKey [
 	^ CFMotionPropertyKey
 		element: element
-		property: CFGeometryMotionProperty uniqueInstance
+		property: CFMotionGeometryProperty uniqueInstance
 ]
 
 { #category : 'playing' }

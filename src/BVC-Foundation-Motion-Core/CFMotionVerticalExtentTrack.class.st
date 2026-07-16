@@ -77,7 +77,7 @@ CFMotionVerticalExtentTrack >> preserveCurrentPresentation [
 CFMotionVerticalExtentTrack >> propertyKey [
 	^ CFMotionPropertyKey
 		element: element
-		property: CFVerticalExtentMotionProperty uniqueInstance
+		property: CFMotionVerticalExtentProperty uniqueInstance
 ]
 
 { #category : 'playing' }

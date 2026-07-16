@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFOpacityMotionProperty',
+	#name : 'CFMotionGeometryProperty',
 	#superclass : 'CFMotionProperty',
 	#classInstVars : [ 'uniqueInstance' ],
 	#category : 'BVC-Foundation-Motion-Core',
@@ -7,12 +7,16 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFOpacityMotionProperty class >> uniqueInstance [
+CFMotionGeometryProperty class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
 { #category : 'accessing' }
-CFOpacityMotionProperty >> currentPresentationOf: anElement [ ^ anElement opacity ]
+CFMotionGeometryProperty >> currentPresentationOf: anElement [
+	^ anElement transformation
+]
 
 { #category : 'accessing' }
-CFOpacityMotionProperty >> apply: aNumber to: anElement [ anElement opacity: aNumber ]
+CFMotionGeometryProperty >> apply: aTransformation to: anElement [
+	anElement transformation: aTransformation
+]

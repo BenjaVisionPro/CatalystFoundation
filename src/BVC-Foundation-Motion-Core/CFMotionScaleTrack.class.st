@@ -85,7 +85,7 @@ CFMotionScaleTrack >> preserveCurrentPresentation [
 CFMotionScaleTrack >> propertyKey [
 	^ CFMotionPropertyKey
 		element: element
-		property: CFScaleMotionProperty uniqueInstance
+		property: CFMotionScaleProperty uniqueInstance
 ]
 
 { #category : 'playing' }

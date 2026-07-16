@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFScaleMotionProperty',
+	#name : 'CFMotionScaleProperty',
 	#superclass : 'CFMotionProperty',
 	#classInstVars : [ 'uniqueInstance' ],
 	#category : 'BVC-Foundation-Motion-Core',
@@ -7,16 +7,16 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFScaleMotionProperty class >> uniqueInstance [
+CFMotionScaleProperty class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
 { #category : 'accessing' }
-CFScaleMotionProperty >> apply: aValue to: anElement [
+CFMotionScaleProperty >> apply: aValue to: anElement [
 	self error: 'Scale motion is applied through a transform channel'
 ]
 
 { #category : 'accessing' }
-CFScaleMotionProperty >> currentPresentationOf: anElement [
+CFMotionScaleProperty >> currentPresentationOf: anElement [
 	self error: 'Scale motion is read through a transform channel'
 ]
