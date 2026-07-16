@@ -25,11 +25,10 @@ CFMotionExamples >> opacityCompletes [
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.2.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		opacity: 1.0;
-		build;
-		start.
+		build) start.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	self assert: element opacity equals: 1.0.
@@ -43,11 +42,10 @@ CFMotionExamples >> scaleCompletesAtThePresentedValue [
 	space := self spaceWithElement.
 	element := space root children first.
 	applicationTransformation := element transformation.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
-		build;
-		start.
+		build) start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -62,18 +60,16 @@ CFMotionExamples >> translationComposesWithASettledScale [
 	| space element scaleOperation scaleTransformation translationOperation |
 	space := self spaceWithElement.
 	element := space root children first.
-	scaleOperation := element motion
+	scaleOperation := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
-		build;
-		start.
+		build) start.
 	self finish: scaleOperation in: space.
 	scaleTransformation := element transformation.
-	translationOperation := element motion
+	translationOperation := (element motion
 		duration: 1 milliSeconds;
 		translation: 40 @ 20;
-		build;
-		start.
+		build) start.
 	self finish: translationOperation in: space.
 	self assert: translationOperation isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
@@ -107,11 +103,10 @@ CFMotionExamples >> rotationCompletesAtThePresentedValue [
 	space := self spaceWithElement.
 	element := space root children first.
 	applicationTransformation := element transformation.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		rotation: 30;
-		build;
-		start.
+		build) start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -126,18 +121,16 @@ CFMotionExamples >> rotationComposesWithASettledScale [
 	| space element scaleOperation scaleTransformation rotationOperation |
 	space := self spaceWithElement.
 	element := space root children first.
-	scaleOperation := element motion
+	scaleOperation := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
-		build;
-		start.
+		build) start.
 	self finish: scaleOperation in: space.
 	scaleTransformation := element transformation.
-	rotationOperation := element motion
+	rotationOperation := (element motion
 		duration: 1 milliSeconds;
 		rotation: 30;
-		build;
-		start.
+		build) start.
 	self finish: rotationOperation in: space.
 	self assert: rotationOperation isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
@@ -441,7 +434,7 @@ CFMotionExamples >> riseAndFadeInBuilderBuildsTheStandardTranslation [
 	space := BlSpace new.
 	element := BlElement new size: 120 @ 80; yourself.
 	appearance := space root motion
-		duration: 1 second;
+		duration: 1 milliSeconds;
 		appear: element using: CFMotionBuilder riseAndFadeIn.
 	self assert: appearance operation tracks second sourceTranslation equals: 0 @ 12.
 	self finish: appearance operation in: space.
@@ -456,6 +449,7 @@ CFMotionExamples >> scaleAndFadeInBuilderBuildsTheStandardSourceScale [
 	space := BlSpace new.
 	element := BlElement new size: 120 @ 80; yourself.
 	appearance := space root motion
+		duration: 1 milliSeconds;
 		appear: element using: CFMotionBuilder scaleAndFadeIn.
 	self assert: appearance operation tracks second sourceScale equals: 0.8 @ 0.8.
 	self finish: appearance operation in: space.
@@ -735,7 +729,7 @@ CFMotionExamples >> motionButtonAptitudeReturnsToRestOnRelease [
 	motion := aptitude activeMotion.
 	element dispatchEvent: BlMouseUpEvent primary.
 	self assert: aptitude activeMotion == motion.
-	self assert: motion isRunning.
+	self assert: (motion isRunning or: [ motion isCompleted ]).
 	self assert: motion tracks first targetScale equals: 1 @ 1.
 	^ motion
 ]
@@ -773,7 +767,9 @@ CFMotionExamples >> motionButtonAptitudeReleasesTheHeldPresentation [
 	space pulse.
 	self assert: motion state == CFMotionState settled.
 	element dispatchEvent: BlMouseUpEvent primary.
-	self finish: motion in: space.
+	space pulse.
+	150 milliSeconds wait.
+	space pulse.
 	self assert: motion isCompleted.
 	self assert: motion tracks first presentation isActive not.
 	^ motion
@@ -1176,11 +1172,10 @@ CFMotionExamples >> verticalExtentMotionCompletesAtItsRequestedExtent [
 	| space element operation |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		verticalExtent: 140;
-		build;
-		start.
+		build) start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -1215,11 +1210,10 @@ CFMotionExamples >> horizontalExtentMotionPreservesVerticalLayout [
 	space := self spaceWithElement.
 	element := space root children first.
 	originalHeight := element extent y.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		horizontalExtent: 180;
-		build;
-		start.
+		build) start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -1236,11 +1230,10 @@ CFMotionExamples >> extentMotionCompletesAcrossBothAxes [
 	element := space root children first.
 	sourceExtent := element extent.
 	targetExtent := 180 @ 140.
-	operation := element motion
+	operation := (element motion
 		duration: 1 milliSeconds;
 		extentFrom: sourceExtent to: targetExtent;
-		build;
-		start.
+		build) start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.

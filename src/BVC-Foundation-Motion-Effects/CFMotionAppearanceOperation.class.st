@@ -135,22 +135,20 @@ CFMotionAppearanceOperation >> startAppearingWithDuration: aDuration easing: anI
 	element
 		visibility: BlVisibility visible;
 		opacity: 0.0.
-	operation := motionBuilder copy
+	operation := (motionBuilder copy
 		element: element;
 		duration: aDuration;
 		easing: anInterpolator;
-		build;
-		start
+		build) start
 ]
 
 { #category : 'private - starting' }
 CFMotionAppearanceOperation >> startDisappearingWithDuration: aDuration easing: anInterpolator [
-	operation := motionBuilder copy
+	operation := (motionBuilder copy
 		element: element;
 		duration: aDuration;
 		easing: anInterpolator;
-		build;
-		start.
+		build) start.
 	operation onTerminalDo: [ :aCompletedOperation |
 		(aCompletedOperation isCompleted and: [ element opacity closeTo: 0.0 ]) ifTrue: [
 			self removeElementIfPresent ] ]
