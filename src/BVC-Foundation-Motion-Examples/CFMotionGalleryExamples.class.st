@@ -8,7 +8,7 @@ Class {
 { #category : 'examples - gallery' }
 CFMotionGalleryExamples >> adoption [
 	<gtExample>
-	| card source destination preview committed |
+	| card source destination preview committed currentMotion |
 	card := BlElement new
 		size: 330 @ 180;
 		background: (Color purple alpha: 0.10);
@@ -38,6 +38,7 @@ CFMotionGalleryExamples >> adoption [
 		yourself.
 	source addChild: preview.
 	source when: BlClickEvent do: [ :anEvent |
+		currentMotion ifNotNil: [ currentMotion cancel ].
 		preview hasParent ifFalse: [
 			preview := BlElement new
 				size: 80 @ 50;
@@ -50,16 +51,16 @@ CFMotionGalleryExamples >> adoption [
 			relocate: 32 @ 30;
 			background: Color purple;
 			yourself.
-		destination motion
+		currentMotion := (destination motion
 			duration: 700 milliSeconds;
-			adopt: preview as: committed from: source ].
+			adopt: preview as: committed from: source) ].
 	^ card
 ]
 
 { #category : 'examples - gallery' }
 CFMotionGalleryExamples >> crossFade [
 	<gtExample>
-	| card outgoing incoming active |
+	| card outgoing incoming active currentMotion |
 	active := false.
 	card := BlElement new
 		size: 330 @ 180;
@@ -83,16 +84,17 @@ CFMotionGalleryExamples >> crossFade [
 	card when: BlClickEvent do: [ :anEvent |
 		| departing arriving |
 		active := active not.
+		currentMotion ifNotNil: [ currentMotion cancel ].
 		departing := active ifTrue: [ outgoing ] ifFalse: [ incoming ].
 		arriving := active ifTrue: [ incoming ] ifFalse: [ outgoing ].
-		(CFMotion
+		currentMotion := ((CFMotion
 			coordinator: card space cfMotionCoordinator
 			tracks: {
 				CFMotionPropertyTrack on: departing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
 				CFMotionPropertyTrack on: arriving property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
 			duration: 600 milliSeconds;
 			easing: (BlDecelerateInterpolator factor: 1.4);
-			start ].
+			start) ].
 	^ card
 ]
 
@@ -207,7 +209,7 @@ CFMotionGalleryExamples >> scaleAndFade [
 
 { #category : 'gallery' }
 CFMotionGalleryExamples >> toggleCardTitled: aTitle subtitle: aSubtitle color: aColor action: anActionBlock [
-	| card visual active |
+	| card visual active currentMotion |
 	active := false.
 	card := BlElement new
 		size: 330 @ 180;
@@ -225,7 +227,8 @@ CFMotionGalleryExamples >> toggleCardTitled: aTitle subtitle: aSubtitle color: a
 	card addChild: visual.
 	card when: BlClickEvent do: [ :anEvent |
 		active := active not.
-		anActionBlock value: visual value: active ].
+		currentMotion ifNotNil: [ currentMotion cancel ].
+		currentMotion := anActionBlock value: visual value: active ].
 	^ card
 ]
 
@@ -248,7 +251,7 @@ CFMotionGalleryExamples >> transformComposition [
 { #category : 'examples - gallery' }
 CFMotionGalleryExamples >> verticalReveal [
 	<gtExample>
-	| card content active |
+	| card content active currentMotion |
 	active := false.
 	card := BlElement new
 		size: 330 @ 180;
@@ -269,10 +272,11 @@ CFMotionGalleryExamples >> verticalReveal [
 	card addChild: content.
 	card when: BlClickEvent do: [ :anEvent |
 		active := active not.
-		(content motion
+		currentMotion ifNotNil: [ currentMotion cancel ].
+		currentMotion := ((content motion
 			duration: 600 milliSeconds;
 			verticalExtent: (active ifTrue: [ 38 ] ifFalse: [ 100 ]);
 			build)
-			start ].
+			start) ].
 	^ card
 ]
