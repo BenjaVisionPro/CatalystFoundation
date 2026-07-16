@@ -21,6 +21,9 @@ CFMotionState class >> idle [ ^ self named: #idle ]
 CFMotionState class >> running [ ^ self named: #running ]
 
 { #category : 'instance creation' }
+CFMotionState class >> settled [ ^ self named: #settled ]
+
+{ #category : 'instance creation' }
 CFMotionState class >> completed [ ^ self named: #completed ]
 
 { #category : 'instance creation' }

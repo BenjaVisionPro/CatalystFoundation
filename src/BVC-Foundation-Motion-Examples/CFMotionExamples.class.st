@@ -27,7 +27,9 @@ CFMotionExamples >> opacityCompletes [
 	element opacity: 0.2.
 	operation := element motion
 		duration: 1 milliSeconds;
-		opacity: 1.0.
+		opacity: 1.0;
+		build;
+		start.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	self assert: element opacity equals: 1.0.
@@ -43,7 +45,9 @@ CFMotionExamples >> scaleCompletesAtThePresentedValue [
 	applicationTransformation := element transformation.
 	operation := element motion
 		duration: 1 milliSeconds;
-		scale: 0.5 @ 0.8.
+		scale: 0.5 @ 0.8;
+		build;
+		start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -60,12 +64,16 @@ CFMotionExamples >> translationComposesWithASettledScale [
 	element := space root children first.
 	scaleOperation := element motion
 		duration: 1 milliSeconds;
-		scale: 0.5 @ 0.8.
+		scale: 0.5 @ 0.8;
+		build;
+		start.
 	self finish: scaleOperation in: space.
 	scaleTransformation := element transformation.
 	translationOperation := element motion
 		duration: 1 milliSeconds;
-		translation: 40 @ 20.
+		translation: 40 @ 20;
+		build;
+		start.
 	self finish: translationOperation in: space.
 	self assert: translationOperation isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
@@ -78,12 +86,15 @@ CFMotionExamples >> scaleRetargetsThroughItsPresentedProperty [
 	| space element first second |
 	space := self spaceWithElement.
 	element := space root children first.
-	first := element motion
+	first := (element motion
 		duration: 1 second;
-		scale: 0.5 @ 0.8.
-	second := element motion
-		duration: 1 second;
-		scale: 0.8 @ 0.6.
+		scale: 0.5 @ 0.8;
+		build)
+		start.
+	second := first
+		retarget: (CFMotionScaleTrack on: element from: 1 @ 1 to: 0.8 @ 0.6)
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
 	self assert: first == second.
 	self assert: second tracks first targetScale equals: 0.8 @ 0.6.
 	^ second
@@ -98,7 +109,9 @@ CFMotionExamples >> rotationCompletesAtThePresentedValue [
 	applicationTransformation := element transformation.
 	operation := element motion
 		duration: 1 milliSeconds;
-		rotation: 30.
+		rotation: 30;
+		build;
+		start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -115,28 +128,34 @@ CFMotionExamples >> rotationComposesWithASettledScale [
 	element := space root children first.
 	scaleOperation := element motion
 		duration: 1 milliSeconds;
-		scale: 0.5 @ 0.8.
+		scale: 0.5 @ 0.8;
+		build;
+		start.
 	self finish: scaleOperation in: space.
 	scaleTransformation := element transformation.
 	rotationOperation := element motion
 		duration: 1 milliSeconds;
-		rotation: 30.
+		rotation: 30;
+		build;
+		start.
 	self finish: rotationOperation in: space.
 	self assert: rotationOperation isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
 	^ rotationOperation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 	<gtExample>
 	| space element operation |
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion
+	operation := (CFMotionBuilder fadeIn
+		element: element;
 		duration: 1 milliSeconds;
-		fadeIn.
+		build)
+		start.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	self assert: operation tracks first property == CFMotionOpacityProperty uniqueInstance.
@@ -144,19 +163,25 @@ CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 	<gtExample>
 	| space element first second |
 	space := self spaceWithElement.
 	element := space root children first.
-	first := element motion
+	first := (CFMotionBuilder fadeOut
+		element: element;
 		duration: 1 second;
-		fadeOut.
+		build)
+		start.
 	element opacity: 0.4.
-	second := element motion
-		duration: 1 second;
-		fadeIn.
+	second := first
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
 	self assert: first == second.
 	self assert: second isRunning.
 	self assert: second tracks first startValue equals: 0.4.
@@ -164,16 +189,16 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 	^ second
 ]
 
-{ #category : 'examples - effects' }
-CFMotionExamples >> appearUsingFadeInSelectsTheFadeRecipe [
+{ #category : 'examples - motions' }
+CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	<gtExample>
 	| space element appearance |
 	space := self spaceWithElement.
 	element := BlElement new size: 120 @ 80; yourself.
 	appearance := space root motion
 		duration: 1 milliSeconds;
-		appear: element using: CFMotionEffects fadeIn.
-	self assert: appearance effect name equals: #fadeIn.
+		appear: element using: CFMotionBuilder fadeIn.
+	self assert: appearance motionBuilder class equals: CFMotionBuilder.
 	self assert: appearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
@@ -181,16 +206,16 @@ CFMotionExamples >> appearUsingFadeInSelectsTheFadeRecipe [
 	^ appearance
 ]
 
-{ #category : 'examples - effects' }
-CFMotionExamples >> disappearUsingFadeOutSelectsTheFadeRecipe [
+{ #category : 'examples - motions' }
+CFMotionExamples >> disappearUsingFadeOutBuildsTheFadeMotion [
 	<gtExample>
 	| space element disappearance |
 	space := self spaceWithElement.
 	element := space root children first.
 	disappearance := element motion
 		duration: 1 milliSeconds;
-		disappearUsing: CFMotionEffects fadeOut.
-	self assert: disappearance effect name equals: #fadeOut.
+		disappearUsing: CFMotionBuilder fadeOut.
+	self assert: disappearance motionBuilder class equals: CFMotionBuilder.
 	self assert: disappearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
@@ -198,43 +223,41 @@ CFMotionExamples >> disappearUsingFadeOutSelectsTheFadeRecipe [
 	^ disappearance
 ]
 
-{ #category : 'examples - effects' }
-CFMotionExamples >> scaleInRecipeUsesItsConfiguredScale [
+{ #category : 'examples - motions' }
+CFMotionExamples >> scaleInBuilderBuildsAScaleMotion [
 	<gtExample>
-	| space element effect operation |
+	| space element operation |
 	space := self spaceWithElement.
 	element := space root children first.
-	effect := CFMotionEffects scaleIn scale: 0.6 @ 0.7; yourself.
-	operation := effect
-		playOn: element
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
-	self assert: effect name equals: #scaleIn.
-	self assert: operation tracks first sourceScale equals: 0.6 @ 0.7.
+	operation := (CFMotionBuilder scaleIn
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
+	self assert: operation tracks first sourceScale equals: 0.8 @ 0.8.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
-CFMotionExamples >> scaleOutRecipeUsesItsConfiguredScale [
+{ #category : 'examples - motions' }
+CFMotionExamples >> scaleOutBuilderBuildsAScaleMotion [
 	<gtExample>
-	| space element effect operation |
+	| space element operation |
 	space := self spaceWithElement.
 	element := space root children first.
-	effect := CFMotionEffects scaleOut scale: 0.6 @ 0.7; yourself.
-	operation := effect
-		playOn: element
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
-	self assert: effect name equals: #scaleOut.
-	self assert: operation tracks first targetScale equals: 0.6 @ 0.7.
+	operation := (CFMotionBuilder scaleOut
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
+	self assert: operation tracks first targetScale equals: 0.8 @ 0.8.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	<gtExample>
 	| space outgoing incoming operation |
@@ -243,11 +266,14 @@ CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	incoming := BlElement new size: 120 @ 80; yourself.
 	incoming opacity: 0.0.
 	space root addChild: incoming.
-	operation := CFMotionEffects
-		crossFadeFrom: outgoing
-		to: incoming
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotion
+		coordinator: space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
+			CFMotionPropertyTrack on: incoming property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
+		duration: 1 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		start.
 	self assert: operation isRunning.
 	self assert: operation tracks size equals: 2.
 	self finish: operation in: space.
@@ -257,7 +283,7 @@ CFMotionExamples >> crossFadeUsesOneSharedOperation [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
 	<gtExample>
 	| space outgoing incoming operation |
@@ -267,11 +293,14 @@ CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
 	incoming := BlElement new size: 120 @ 80; yourself.
 	incoming opacity: 0.0.
 	space root addChild: incoming.
-	operation := CFMotionEffects
-		crossFadeFrom: outgoing
-		to: incoming
-		duration: 1 second
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotion
+		coordinator: space cfMotionCoordinator
+		tracks: {
+			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
+			CFMotionPropertyTrack on: incoming property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
+		duration: 1 second;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		start.
 	space pulse.
 	space time wait: 500 milliSeconds.
 	space pulse.
@@ -283,7 +312,7 @@ CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> scaleInCompletesAndRestoresTheApplicationTransformation [
 	<gtExample>
 	| space element applicationTransformation operation |
@@ -291,11 +320,11 @@ CFMotionExamples >> scaleInCompletesAndRestoresTheApplicationTransformation [
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := CFMotionEffects
-		scaleIn: element
-		from: 0.5 @ 0.8
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotionBuilder scaleIn
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
 	self assert: operation isRunning.
 	self assert: operation tracks first presentation ownsCurrentTransformation.
 	self finish: operation in: space.
@@ -304,7 +333,7 @@ CFMotionExamples >> scaleInCompletesAndRestoresTheApplicationTransformation [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 	<gtExample>
 	| space element transaction scaleOperation |
@@ -323,9 +352,11 @@ CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 	space pulse.
 	space pulse.
 	self assert: transaction operation isRunning.
-	scaleOperation := element motion
+	scaleOperation := (CFMotionBuilder scaleIn
+		element: element;
 		duration: 1 second;
-		scaleIn.
+		build)
+		start.
 	space time wait: 500 milliSeconds.
 	space pulse.
 	self assert: scaleOperation isRunning.
@@ -388,14 +419,14 @@ CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenScalesAndFadesIn [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> appearUsingRiseAndFadeInSelectsTheTranslationRecipe [
+CFMotionExamples >> appearUsingRiseAndFadeInBuildsTheTranslationMotion [
 	<gtExample>
 	| space element appearance |
 	space := BlSpace new.
 	element := BlElement new size: 120 @ 80; yourself.
 	appearance := space root motion
 		duration: 1 milliSeconds;
-		appear: element using: CFMotionEffects riseAndFadeIn.
+		appear: element using: CFMotionBuilder riseAndFadeIn.
 	self assert: (appearance operation tracks second isKindOf: CFMotionTranslationTrack).
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
@@ -404,43 +435,35 @@ CFMotionExamples >> appearUsingRiseAndFadeInSelectsTheTranslationRecipe [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> configurableRiseAndFadeInRecipeOverridesTheBuilderDuration [
+CFMotionExamples >> riseAndFadeInBuilderBuildsTheStandardTranslation [
 	<gtExample>
-	| space element appearance recipe |
+	| space element appearance |
 	space := BlSpace new.
 	element := BlElement new size: 120 @ 80; yourself.
-	recipe := CFMotionEffects riseAndFadeIn
-		distance: 24;
-		duration: 1 milliSeconds;
-		yourself.
 	appearance := space root motion
 		duration: 1 second;
-		appear: element using: recipe.
-	self assert: appearance operation tracks second sourceTranslation equals: 0 @ 24.
+		appear: element using: CFMotionBuilder riseAndFadeIn.
+	self assert: appearance operation tracks second sourceTranslation equals: 0 @ 12.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	^ appearance
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> configurableScaleAndFadeInRecipeSelectsItsSourceScale [
+CFMotionExamples >> scaleAndFadeInBuilderBuildsTheStandardSourceScale [
 	<gtExample>
-	| space element appearance recipe |
+	| space element appearance |
 	space := BlSpace new.
 	element := BlElement new size: 120 @ 80; yourself.
-	recipe := CFMotionEffects scaleAndFadeIn
-		scale: 0.5 @ 0.6;
-		duration: 1 milliSeconds;
-		yourself.
 	appearance := space root motion
-		appear: element using: recipe.
-	self assert: appearance operation tracks second sourceScale equals: 0.5 @ 0.6.
+		appear: element using: CFMotionBuilder scaleAndFadeIn.
+	self assert: appearance operation tracks second sourceScale equals: 0.8 @ 0.8.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	^ appearance
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>
 	| space element applicationTransformation operation |
@@ -450,11 +473,11 @@ CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 		opacity: 0.0;
 		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := CFMotionEffects
-		scaleAndFadeIn: element
-		from: 0.5 @ 0.8
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotionBuilder scaleAndFadeIn
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
 	self assert: operation tracks size equals: 2.
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
@@ -464,7 +487,7 @@ CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
 	<gtExample>
 	| space element applicationTransformation operation |
@@ -472,11 +495,11 @@ CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := CFMotionEffects
-		scaleAndFadeOut: element
-		to: 0.5 @ 0.8
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotionBuilder scaleAndFadeOut
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
 	self assert: operation tracks size equals: 2.
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
@@ -486,7 +509,7 @@ CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
 	<gtExample>
 	| space element applicationTransformation operation |
@@ -496,11 +519,11 @@ CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
 		opacity: 0.0;
 		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := CFMotionEffects
-		riseAndFadeIn: element
-		distance: 24
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotionBuilder riseAndFadeIn
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
 	self assert: operation tracks size equals: 2.
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
@@ -510,7 +533,7 @@ CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
 	^ operation
 ]
 
-{ #category : 'examples - effects' }
+{ #category : 'examples - motions' }
 CFMotionExamples >> fallAndFadeOutCoordinatesOpacityAndTranslation [
 	<gtExample>
 	| space element applicationTransformation operation |
@@ -518,11 +541,11 @@ CFMotionExamples >> fallAndFadeOutCoordinatesOpacityAndTranslation [
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := CFMotionEffects
-		fallAndFadeOut: element
-		distance: 24
-		duration: 1 milliSeconds
-		easing: (BlDecelerateInterpolator factor: 1.4).
+	operation := (CFMotionBuilder fallAndFadeOut
+		element: element;
+		duration: 1 milliSeconds;
+		build)
+		start.
 	self assert: operation tracks size equals: 2.
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
@@ -551,14 +574,14 @@ CFMotionExamples >> disappearScalesAndFadesOutThenRemoves [
 ]
 
 { #category : 'examples - appearance' }
-CFMotionExamples >> disappearUsingFallAndFadeOutSelectsTheTranslationRecipe [
+CFMotionExamples >> disappearUsingFallAndFadeOutBuildsTheTranslationMotion [
 	<gtExample>
 	| space element disappearance |
 	space := self spaceWithElement.
 	element := space root children first.
 	disappearance := element motion
 		duration: 1 milliSeconds;
-		disappearUsing: CFMotionEffects fallAndFadeOut.
+		disappearUsing: CFMotionBuilder fallAndFadeOut.
 	self assert: (disappearance operation tracks second isKindOf: CFMotionTranslationTrack).
 	self finish: disappearance operation in: space.
 	self assert: disappearance isCompleted.
@@ -668,96 +691,92 @@ CFMotionExamples >> cancellingCrossParentAdoptionRestoresThePreviewAndReleasesIt
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionAptitudeInstallsAndRemovesItsHandlers [
+CFMotionExamples >> motionButtonAptitudeInstallsAndRemovesItsHandlers [
 	<gtExample>
 	| space element aptitude |
 	space := self spaceWithElement.
 	element := space root children first.
-	aptitude := CFMotionAptitude new
-		hoveredEffect: CFMotionEffects riseAndFadeIn;
-		unhoveredEffect: CFMotionEffects fallAndFadeOut;
-		yourself.
+	aptitude := CFMotionButtonAptitude new.
 	element addAptitude: aptitude.
 	self assert: aptitude isAttachedToWidget.
-	self assert: aptitude hasInstalledHandlers.
 	element removeAptitude: aptitude.
 	self assert: aptitude isAttachedToWidget not.
-	self assert: aptitude hasInstalledHandlers not.
 	^ aptitude
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionAptitudeCancelsThePreviousInteractionEffect [
+CFMotionExamples >> motionButtonAptitudeRetargetsWhilePressed [
 	<gtExample>
-	| space element aptitude enterOperation leaveOperation |
+	| space element aptitude motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	aptitude := CFMotionAptitude new
-		hoveredEffect: CFMotionEffects riseAndFadeIn;
-		unhoveredEffect: CFMotionEffects fallAndFadeOut;
-		yourself.
+	aptitude := CFMotionButtonAptitude new.
 	element addAptitude: aptitude.
-	element dispatchEvent: BlMouseEnterEvent new.
-	enterOperation := aptitude activeOperation.
-	self assert: enterOperation isRunning.
-	element dispatchEvent: BlMouseLeaveEvent new.
-	leaveOperation := aptitude activeOperation.
-	self assert: enterOperation isCancelled.
-	self assert: leaveOperation isRunning.
-	element removeAptitude: aptitude.
-	self assert: leaveOperation isCancelled.
-	^ aptitude
+	element dispatchEvent: BlMouseDownEvent primary.
+	motion := aptitude activeMotion.
+	self assert: motion isRunning.
+	motion
+		retarget: (CFMotionScaleTrack on: element from: 1 @ 1 to: 1 @ 1)
+		duration: 1 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: motion tracks first targetScale equals: 1 @ 1.
+	^ motion
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionAptitudeRunsThePressedAndReleasedEffects [
+CFMotionExamples >> motionButtonAptitudeReturnsToRestOnRelease [
 	<gtExample>
-	| space element aptitude pressed released |
+	| space element aptitude motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	aptitude := CFMotionAptitude new
-		pressedEffect: CFMotionEffects compress;
-		releasedEffect: CFMotionEffects springBack;
-		yourself.
+	aptitude := CFMotionButtonAptitude new.
 	element addAptitude: aptitude.
-	element dispatchEvent: BlMouseDownEvent new.
-	pressed := aptitude activeOperation.
-	self assert: pressed isRunning.
-	element dispatchEvent: BlMouseUpEvent new.
-	released := aptitude activeOperation.
-	self assert: pressed isCancelled.
-	self assert: released isCompleted.
-	element removeAptitude: aptitude.
-	self assert: released isCompleted.
-	^ aptitude
+	element dispatchEvent: BlMouseDownEvent primary.
+	motion := aptitude activeMotion.
+	element dispatchEvent: BlMouseUpEvent primary.
+	self assert: aptitude activeMotion == motion.
+	self assert: motion isRunning.
+	self assert: motion tracks first targetScale equals: 1 @ 1.
+	^ motion
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionAptitudeSpringsBackAfterHeldPress [
+CFMotionExamples >> motionButtonAptitudeHoldsTheCompressedPresentation [
 	<gtExample>
-	| space element aptitude pressed released |
+	| space element aptitude motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	aptitude := CFMotionAptitude new
-		pressedEffect: CFMotionEffects compress;
-		releasedEffect: CFMotionEffects springBack;
-		yourself.
+	aptitude := CFMotionButtonAptitude new.
 	element addAptitude: aptitude.
-	element dispatchEvent: BlMouseDownEvent new.
-	pressed := aptitude activeOperation.
+	element dispatchEvent: BlMouseDownEvent primary.
+	motion := aptitude activeMotion.
 	space pulse.
 	150 milliSeconds wait.
 	space pulse.
-	self assert: pressed isCompleted.
-	element dispatchEvent: BlMouseUpEvent new.
-	released := aptitude activeOperation.
-	self assert: released isRunning.
-	self assert: released tracks first targetScale equals: (1 / 0.96) @ (1 / 0.96).
+	self assert: motion state == CFMotionState settled.
+	self assert: motion tracks first presentation isActive.
+	^ motion
+]
+
+{ #category : 'examples - aptitude' }
+CFMotionExamples >> motionButtonAptitudeReleasesTheHeldPresentation [
+	<gtExample>
+	| space element aptitude motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	aptitude := CFMotionButtonAptitude new.
+	element addAptitude: aptitude.
+	element dispatchEvent: BlMouseDownEvent primary.
+	motion := aptitude activeMotion.
 	space pulse.
 	150 milliSeconds wait.
 	space pulse.
-	self assert: released isCompleted.
-	^ aptitude
+	self assert: motion state == CFMotionState settled.
+	element dispatchEvent: BlMouseUpEvent primary.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	self assert: motion tracks first presentation isActive not.
+	^ motion
 ]
 
 { #category : 'examples - appearance' }
@@ -785,9 +804,12 @@ CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.2.
-	first := element motion opacity: 1.0.
+	first := (element motion opacity: 1.0; build) start.
 	element opacity: 0.6.
-	second := element motion opacity: 0.8.
+	second := first
+		retarget: (CFMotionPropertyTrack on: element property: CFMotionOpacityProperty uniqueInstance target: 0.8)
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
 	key := CFMotionPropertyKey
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
@@ -804,8 +826,11 @@ CFMotionExamples >> opacityReplacementKeepsOneOwner [
 	| space element first second key |
 	space := self spaceWithElement.
 	element := space root children first.
-	first := element motion opacity: 0.2.
-	second := element motion opacity: 0.8.
+	first := (element motion opacity: 0.2; build) start.
+	second := first
+		retarget: (CFMotionPropertyTrack on: element property: CFMotionOpacityProperty uniqueInstance target: 0.8)
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
 	key := CFMotionPropertyKey
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
@@ -822,7 +847,7 @@ CFMotionExamples >> opacityCancellationPreservesCurrentPresentation [
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.2.
-	operation := element motion opacity: 1.0.
+	operation := (element motion opacity: 1.0; build) start.
 	element opacity: 0.6.
 	operation cancelPreservingCurrentPresentation.
 	self assert: operation isCancelled.
@@ -836,7 +861,7 @@ CFMotionExamples >> opacityCleanupReleasesOwnership [
 	| space element operation key |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := element motion opacity: 0.2.
+	operation := (element motion opacity: 0.2; build) start.
 	key := CFMotionPropertyKey
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
@@ -852,7 +877,7 @@ CFMotionExamples >> opacityOperationIsInspectable [
 	| space element operation |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := element motion opacity: 0.2.
+	operation := (element motion opacity: 0.2; build) start.
 	self assert: operation coordinator == space cfMotionCoordinator.
 	self assert: operation tracks size equals: 1.
 	self assert: operation trace entries isNotEmpty.
@@ -1153,7 +1178,9 @@ CFMotionExamples >> verticalExtentMotionCompletesAtItsRequestedExtent [
 	element := space root children first.
 	operation := element motion
 		duration: 1 milliSeconds;
-		verticalExtent: 140.
+		verticalExtent: 140;
+		build;
+		start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -1167,12 +1194,15 @@ CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
 	| space element first second |
 	space := self spaceWithElement.
 	element := space root children first.
-	first := element motion
+	first := (element motion
 		duration: 1 second;
-		verticalExtent: 140.
-	second := element motion
-		duration: 1 second;
-		verticalExtent: 100.
+		verticalExtent: 140;
+		build)
+		start.
+	second := first
+		retarget: (CFMotionExtentTrack on: element from: element extent to: element extent x @ 100)
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
 	self assert: first == second.
 	self assert: second tracks first targetExtent y equals: 100.
 	^ second
@@ -1187,7 +1217,9 @@ CFMotionExamples >> horizontalExtentMotionPreservesVerticalLayout [
 	originalHeight := element extent y.
 	operation := element motion
 		duration: 1 milliSeconds;
-		horizontalExtent: 180.
+		horizontalExtent: 180;
+		build;
+		start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
@@ -1206,7 +1238,9 @@ CFMotionExamples >> extentMotionCompletesAcrossBothAxes [
 	targetExtent := 180 @ 140.
 	operation := element motion
 		duration: 1 milliSeconds;
-		extentFrom: sourceExtent to: targetExtent.
+		extentFrom: sourceExtent to: targetExtent;
+		build;
+		start.
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.

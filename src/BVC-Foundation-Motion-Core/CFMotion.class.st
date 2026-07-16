@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotion',
 	#superclass : 'Object',
-	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers' ],
+	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers', 'holdAtDestination' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -22,7 +22,8 @@ CFMotion >> initialize [
 	generation := 0.
 	state := CFMotionState idle.
 	trace := CFMotionTrace new.
-	terminalHandlers := OrderedCollection new
+	terminalHandlers := OrderedCollection new.
+	holdAtDestination := false
 ]
 
 { #category : 'accessing' }
@@ -62,6 +63,10 @@ CFMotion >> cancelApplying: aBlock [
 { #category : 'private - controlling' }
 CFMotion >> complete [
 	state isTerminal ifTrue: [ ^ self ].
+	holdAtDestination ifTrue: [
+		state := CFMotionState settled.
+		trace record: #settled for: self.
+		^ self ].
 	tracks do: [ :each | each applyDestination ].
 	state := CFMotionState completed.
 	trace record: #completed for: self.
@@ -107,6 +112,18 @@ CFMotion >> isCompleted [ ^ state == CFMotionState completed ]
 { #category : 'testing' }
 CFMotion >> isRunning [ ^ state == CFMotionState running ]
 
+{ #category : 'configuration' }
+CFMotion >> holdAtDestination [
+	holdAtDestination := true.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFMotion >> holdAtDestination: aBoolean [
+	holdAtDestination := aBoolean.
+	^ self
+]
+
 { #category : 'private - notifying' }
 CFMotion >> notifyTerminalHandlers [
 	terminalHandlers do: [ :each | each cull: self ].
@@ -138,13 +155,23 @@ CFMotion >> retarget: aTrack duration: aDuration easing: anInterpolator [
 	| ownedTrack |
 	ownedTrack := tracks
 		detect: [ :each | each propertyKey = aTrack propertyKey ]
-		ifNone: [ self error: 'An operation can only retarget a property it owns' ].
+		ifNone: [ self error: 'A Motion can only retarget a property it owns' ].
 	duration := aDuration.
 	easing := anInterpolator.
 	ownedTrack targetValue: aTrack targetValue.
 	trace record: #retargeted for: self track: ownedTrack.
 	self startFromCurrentPresentation.
 	^ self
+]
+
+{ #category : 'controlling' }
+CFMotion >> reversed [
+	^ (CFMotion
+		coordinator: coordinator
+		tracks: (tracks reverse collect: #reversed))
+		duration: duration;
+		easing: easing;
+		yourself
 ]
 
 { #category : 'playing' }

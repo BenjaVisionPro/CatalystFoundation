@@ -31,3 +31,6 @@ CFMotionTrack >> prepareFromCurrentPresentation [ self subclassResponsibility ]
 
 { #category : 'playing' }
 CFMotionTrack >> restoreOrigin [ self subclassResponsibility ]
+
+{ #category : 'controlling' }
+CFMotionTrack >> reversed [ self subclassResponsibility ]

@@ -29,8 +29,9 @@ CFMotionScaleTrack >> applyDestination [
 	presentation ifNil: [ ^ self ].
 	presentation scale: targetScale.
 	completionPolicy = #adopt
-		ifTrue: [ presentation adoptCurrentPresentation ]
-		ifFalse: [ presentation release ]
+		ifTrue: [ ^ presentation adoptCurrentPresentation ].
+	completionPolicy = #release
+		ifTrue: [ presentation release ]
 ]
 
 { #category : 'playing' }
@@ -93,6 +94,21 @@ CFMotionScaleTrack >> restoreOrigin [
 	presentation ifNil: [ ^ self ].
 	presentation scale: 1 @ 1.
 	presentation release
+]
+
+{ #category : 'controlling' }
+CFMotionScaleTrack >> reversed [
+	| currentScale |
+	presentation ifNil: [
+		self error: 'A scale track must start before it can be reversed' ].
+	currentScale := presentation scale.
+	(currentScale x isZero or: [ currentScale y isZero ]) ifTrue: [
+		self error: 'A scale track at zero cannot be reversed' ].
+	^ (self class
+		on: element
+		from: 1 @ 1
+		to: currentScale reciprocal)
+		adoptAtDestination
 ]
 
 { #category : 'accessing' }

@@ -29,8 +29,9 @@ CFMotionTranslationTrack >> applyDestination [
 	presentation ifNil: [ ^ self ].
 	presentation translation: targetTranslation.
 	completionPolicy = #adopt
-		ifTrue: [ presentation adoptCurrentPresentation ]
-		ifFalse: [ presentation release ]
+		ifTrue: [ ^ presentation adoptCurrentPresentation ].
+	completionPolicy = #release
+		ifTrue: [ presentation release ]
 ]
 
 { #category : 'playing' }
@@ -93,6 +94,17 @@ CFMotionTranslationTrack >> restoreOrigin [
 	presentation ifNil: [ ^ self ].
 	presentation translation: 0 @ 0.
 	presentation release
+]
+
+{ #category : 'controlling' }
+CFMotionTranslationTrack >> reversed [
+	presentation ifNil: [
+		self error: 'A translation track must start before it can be reversed' ].
+	^ (self class
+		on: element
+		from: 0 @ 0
+		to: presentation translation negated)
+		adoptAtDestination
 ]
 
 { #category : 'accessing' }

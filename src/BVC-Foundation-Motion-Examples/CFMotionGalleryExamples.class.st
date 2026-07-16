@@ -66,7 +66,7 @@ CFMotionGalleryExamples >> crossFade [
 		background: (Color red alpha: 0.10);
 		yourself.
 	card addChild: (self label: 'Cross-fade' at: 12 @ 12 size: 16 color: Color black).
-	card addChild: (self label: 'One opacity operation coordinates two elements.' at: 12 @ 36 size: 11 color: Color gray).
+	card addChild: (self label: 'One Motion coordinates two elements.' at: 12 @ 36 size: 11 color: Color gray).
 	card addChild: (self label: 'Click to replay' at: 12 @ 158 size: 10 color: Color gray).
 	outgoing := BlElement new
 		size: 80 @ 80;
@@ -81,10 +81,18 @@ CFMotionGalleryExamples >> crossFade [
 		yourself.
 	card addChildren: { outgoing. incoming }.
 	card when: BlClickEvent do: [ :anEvent |
+		| departing arriving |
 		active := active not.
-		active
-			ifTrue: [ CFMotionEffects crossFadeFrom: outgoing to: incoming duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
-			ifFalse: [ CFMotionEffects crossFadeFrom: incoming to: outgoing duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ].
+		departing := active ifTrue: [ outgoing ] ifFalse: [ incoming ].
+		arriving := active ifTrue: [ incoming ] ifFalse: [ outgoing ].
+		(CFMotion
+			coordinator: card space cfMotionCoordinator
+			tracks: {
+				CFMotionPropertyTrack on: departing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
+				CFMotionPropertyTrack on: arriving property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
+			duration: 600 milliSeconds;
+			easing: (BlDecelerateInterpolator factor: 1.4);
+			start ].
 	^ card
 ]
 
@@ -103,10 +111,7 @@ CFMotionGalleryExamples >> interactionAptitude [
 		relocate: 110 @ 82;
 		background: Color orange;
 		yourself.
-	aptitude := CFMotionAptitude new
-		pressedEffect: CFMotionEffects compress;
-		releasedEffect: CFMotionEffects springBack;
-		yourself.
+	aptitude := CFMotionButtonAptitude new.
 	target addAptitude: aptitude.
 	card addChild: target.
 	^ card
@@ -144,9 +149,11 @@ CFMotionGalleryExamples >> opacity [
 		subtitle: 'A property track fades the tile.'
 		color: Color blue
 		action: [ :element :active |
-			element motion
+			(element motion
 				duration: 600 milliSeconds;
-				opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]) ]
+				opacity: (active ifTrue: [ 0.18 ] ifFalse: [ 1.0 ]);
+				build)
+				start ]
 ]
 
 { #category : 'examples - gallery' }
@@ -154,12 +161,16 @@ CFMotionGalleryExamples >> riseAndFade [
 	<gtExample>
 	^ self
 		toggleCardTitled: 'Rise and fade'
-		subtitle: 'An effect owns opacity and translation.'
+		subtitle: 'One Motion coordinates opacity and translation.'
 		color: Color purple
 		action: [ :element :active |
-			active
-				ifTrue: [ CFMotionEffects fallAndFadeOut: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
-				ifFalse: [ CFMotionEffects riseAndFadeIn: element distance: 28 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]
+			((active
+				ifTrue: [ CFMotionBuilder fallAndFadeOut ]
+				ifFalse: [ CFMotionBuilder riseAndFadeIn ])
+				element: element;
+				duration: 600 milliSeconds;
+				build)
+				start ]
 ]
 
 { #category : 'examples - gallery' }
@@ -170,9 +181,11 @@ CFMotionGalleryExamples >> rotation [
 		subtitle: 'Rotation is another transform property.'
 		color: Color orange
 		action: [ :element :active |
-			element motion
+			(element motion
 				duration: 600 milliSeconds;
-				rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]) ]
+				rotation: (active ifTrue: [ 45 ] ifFalse: [ 0 ]);
+				build)
+				start ]
 ]
 
 { #category : 'examples - gallery' }
@@ -180,12 +193,16 @@ CFMotionGalleryExamples >> scaleAndFade [
 	<gtExample>
 	^ self
 		toggleCardTitled: 'Scale and fade'
-		subtitle: 'One operation coordinates two tracks.'
+		subtitle: 'One Motion coordinates two tracks.'
 		color: Color red
 		action: [ :element :active |
-			active
-				ifTrue: [ CFMotionEffects scaleAndFadeOut: element to: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ]
-				ifFalse: [ CFMotionEffects scaleAndFadeIn: element from: 0.55 @ 0.55 duration: 600 milliSeconds easing: (BlDecelerateInterpolator factor: 1.4) ] ]
+			((active
+				ifTrue: [ CFMotionBuilder scaleAndFadeOut ]
+				ifFalse: [ CFMotionBuilder scaleAndFadeIn ])
+				element: element;
+				duration: 600 milliSeconds;
+				build)
+				start ]
 ]
 
 { #category : 'gallery' }
@@ -220,10 +237,12 @@ CFMotionGalleryExamples >> transformComposition [
 		subtitle: 'Scale and translation share a channel.'
 		color: Color green
 		action: [ :element :active |
-			element motion
+			(element motion
 				duration: 600 milliSeconds;
 				scale: (active ifTrue: [ 0.62 @ 0.62 ] ifFalse: [ 1 @ 1 ]);
-				translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]) ]
+				translation: (active ifTrue: [ 28 @ -12 ] ifFalse: [ 0 @ 0 ]);
+				build)
+				start ]
 ]
 
 { #category : 'examples - gallery' }
@@ -250,8 +269,10 @@ CFMotionGalleryExamples >> verticalReveal [
 	card addChild: content.
 	card when: BlClickEvent do: [ :anEvent |
 		active := active not.
-		content motion
+		(content motion
 			duration: 600 milliSeconds;
-			verticalExtent: (active ifTrue: [ 38 ] ifFalse: [ 100 ]) ].
+			verticalExtent: (active ifTrue: [ 38 ] ifFalse: [ 100 ]);
+			build)
+			start ].
 	^ card
 ]

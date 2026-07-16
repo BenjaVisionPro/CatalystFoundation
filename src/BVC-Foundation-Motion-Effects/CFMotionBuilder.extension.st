@@ -1,67 +1,6 @@
 Extension { #name : 'CFMotionBuilder' }
 
 { #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> fadeIn [
-	^ CFMotionEffects
-		fadeIn: element
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> fadeOut [
-	^ CFMotionEffects
-		fadeOut: element
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> riseAndFadeIn [
-	^ CFMotionEffects
-		riseAndFadeIn: element
-		distance: 12
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> fallAndFadeOut [
-	^ CFMotionEffects
-		fallAndFadeOut: element
-		distance: 12
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> scaleIn [
-	^ CFMotionEffects
-		scaleIn: element
-		from: 0.8 @ 0.8
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> scaleAndFadeIn [
-	^ CFMotionEffects
-		scaleAndFadeIn: element
-		from: 0.8 @ 0.8
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> scaleAndFadeOut [
-	^ CFMotionEffects
-		scaleAndFadeOut: element
-		to: 0.8 @ 0.8
-		duration: duration
-		easing: easing
-]
-
-{ #category : '*BVC-Foundation-Motion-Effects' }
 CFMotionBuilder >> appear: anElement [
 	^ CFMotionAppearanceOperation
 		appear: anElement
@@ -81,11 +20,11 @@ CFMotionBuilder >> appear: anElement at: anIndex [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> appear: anElement using: anEffect [
+CFMotionBuilder >> appear: anElement using: aMotionBuilder [
 	^ CFMotionAppearanceOperation
 		appear: anElement
 		in: element
-		using: anEffect
+		using: aMotionBuilder
 		duration: duration
 		easing: easing
 ]
@@ -114,10 +53,10 @@ CFMotionBuilder >> disappear [
 ]
 
 { #category : '*BVC-Foundation-Motion-Effects' }
-CFMotionBuilder >> disappearUsing: anEffect [
+CFMotionBuilder >> disappearUsing: aMotionBuilder [
 	^ CFMotionAppearanceOperation
 		disappear: element
-		using: anEffect
+		using: aMotionBuilder
 		duration: duration
 		easing: easing
 ]

@@ -68,6 +68,13 @@ CFMotionPropertyTrack >> restoreOrigin [
 	property apply: originValue to: element
 ]
 
+{ #category : 'controlling' }
+CFMotionPropertyTrack >> reversed [
+	originValue ifNil: [
+		self error: 'A property track must start before it can be reversed' ].
+	^ self class on: element property: property target: originValue
+]
+
 { #category : 'accessing' }
 CFMotionPropertyTrack >> startValue [ ^ startValue ]
 

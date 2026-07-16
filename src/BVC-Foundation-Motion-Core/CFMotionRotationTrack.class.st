@@ -29,8 +29,9 @@ CFMotionRotationTrack >> applyDestination [
 	presentation ifNil: [ ^ self ].
 	presentation rotation: targetRotation.
 	completionPolicy = #adopt
-		ifTrue: [ presentation adoptCurrentPresentation ]
-		ifFalse: [ presentation release ]
+		ifTrue: [ ^ presentation adoptCurrentPresentation ].
+	completionPolicy = #release
+		ifTrue: [ presentation release ]
 ]
 
 { #category : 'playing' }
@@ -93,6 +94,17 @@ CFMotionRotationTrack >> restoreOrigin [
 	presentation ifNil: [ ^ self ].
 	presentation rotation: 0.
 	presentation release
+]
+
+{ #category : 'controlling' }
+CFMotionRotationTrack >> reversed [
+	presentation ifNil: [
+		self error: 'A rotation track must start before it can be reversed' ].
+	^ (self class
+		on: element
+		from: 0
+		to: presentation rotation negated)
+		adoptAtDestination
 ]
 
 { #category : 'accessing' }
