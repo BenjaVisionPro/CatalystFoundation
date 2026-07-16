@@ -1235,6 +1235,36 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	^ transaction
 ]
 
+{ #category : 'examples - layout convenience' }
+CFMotionExamples >> layoutMotionConveniencesDescribeSingleElementGeometry [
+	<gtExample>
+	| space element relocation resize geometry |
+	space := self spaceWithElement.
+	element := space root children first.
+	relocation := element motion
+		duration: 1 milliSeconds;
+		relocate: 60 @ 20.
+	space pulse.
+	self finish: relocation operation in: space.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: ((60 @ 20) extent: 120 @ 80).
+	resize := element motion
+		duration: 1 milliSeconds;
+		resize: 240 @ 100.
+	space pulse.
+	self finish: resize operation in: space.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: ((60 @ 20) extent: 240 @ 100).
+	geometry := element motion
+		duration: 1 milliSeconds;
+		geometry: ((120 @ 40) extent: 180 @ 60).
+	space pulse.
+	self finish: geometry operation in: space.
+	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
+		equals: ((120 @ 40) extent: 180 @ 60).
+	^ { relocation. resize. geometry }
+]
+
 { #category : 'examples - layout transaction' }
 CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
 	<gtExample>

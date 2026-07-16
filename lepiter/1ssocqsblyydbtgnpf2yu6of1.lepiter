@@ -39,7 +39,7 @@
 				"paragraphStyle" : {
 					"__type" : "textStyle"
 				},
-				"string" : "# Motion\n\nMotion presents changes to real Bloc state. It keeps the model and layout authoritative, while tracks own the temporary presentation.\n\n## Contents\n\n- [[Motion / Properties and effects]]\n  - Property tracks: opacity, transforms, and rotation\n  - Effect recipes: rise and fade, scale and fade, and cross-fade\n- [[Motion / Layout and composition]]\n  - Layout transactions\n  - Vertical extent without content scaling\n- [[Motion / Interaction and adoption]]\n  - Press and release aptitudes\n  - Preview-to-committed adoption\n\nEvery demonstration is a separate, editable example snippet: change its code, accept it, and replay the preview directly beside it."
+				"string" : "# Motion\n\nMotion presents changes to real Bloc state. It keeps the model and layout authoritative, while tracks own the temporary presentation.\n\n## Contents\n\n- [[Motion / Properties and effects]]\n  - Property tracks: opacity, transforms, and rotation\n  - Effect recipes: rise and fade, scale and fade, and cross-fade\n- [[Motion / Layout and composition]]\n  - Direct relocation, resizing, and geometry\n  - Coordinated layout transactions and vertical extent without content scaling\n- [[Motion / Interaction and adoption]]\n  - Press and release aptitudes\n  - Preview-to-committed adoption\n\nEvery demonstration is a separate, editable example snippet: change its code, accept it, and replay the preview directly beside it."
 			}
 		]
 	},

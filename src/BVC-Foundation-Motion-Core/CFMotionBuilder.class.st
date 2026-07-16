@@ -27,6 +27,14 @@ CFMotionBuilder >> duration: aDuration [ duration := aDuration ]
 { #category : 'configuration' }
 CFMotionBuilder >> easing: anInterpolator [ easing := anInterpolator ]
 
+{ #category : 'playing' }
+CFMotionBuilder >> geometry: aRectangle [
+	^ self mutateLayout: [
+		element
+			relocate: aRectangle origin;
+			size: aRectangle extent ]
+]
+
 { #category : 'building' }
 CFMotionBuilder >> layout [
 	element isAttachedToSceneGraph
@@ -35,6 +43,18 @@ CFMotionBuilder >> layout [
 		duration: duration;
 		easing: easing;
 		yourself
+]
+
+{ #category : 'private - playing' }
+CFMotionBuilder >> mutateLayout: aBlock [
+	element hasParent ifFalse: [
+		self error: 'A simple layout motion subject must belong to a container' ].
+	^ (CFMotionLayoutTransaction on: element parent)
+		duration: duration;
+		easing: easing;
+		affecting: { element };
+		mutate: aBlock;
+		play
 ]
 
 { #category : 'playing' }
@@ -51,6 +71,11 @@ CFMotionBuilder >> opacity: aNumber [
 ]
 
 { #category : 'playing' }
+CFMotionBuilder >> relocate: aPoint [
+	^ self mutateLayout: [ element relocate: aPoint ]
+]
+
+{ #category : 'playing' }
 CFMotionBuilder >> scale: aPoint [
 	element isAttachedToSceneGraph
 		ifFalse: [ self error: 'A motion subject must be attached to a BlSpace' ].
@@ -59,6 +84,11 @@ CFMotionBuilder >> scale: aPoint [
 			adoptAtDestination)
 		duration: duration
 		easing: easing
+]
+
+{ #category : 'playing' }
+CFMotionBuilder >> resize: anExtent [
+	^ self mutateLayout: [ element size: anExtent ]
 ]
 
 { #category : 'playing' }

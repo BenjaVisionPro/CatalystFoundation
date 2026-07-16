@@ -113,21 +113,16 @@ CFMotionGalleryExamples >> interactionAptitude [
 ]
 
 { #category : 'examples - gallery' }
-CFMotionGalleryExamples >> layoutTransaction [
+CFMotionGalleryExamples >> relocate [
 	<gtExample>
 	^ self
-		toggleCardTitled: 'Layout transaction'
-		subtitle: 'Authoritative geometry changes; Motion presents it.'
+		toggleCardTitled: 'Relocate'
+		subtitle: 'Move to an authoritative layout position.'
 		color: Color brown
-		action: [ :element :active | | transaction destination |
-			destination := active ifTrue: [ 230 @ 82 ] ifFalse: [ 24 @ 82 ].
-			transaction := (element parent motion
+		action: [ :element :active |
+			element motion
 				duration: 600 milliSeconds;
-				layout).
-			transaction
-				affecting: { element };
-				mutate: [ element relocate: destination ];
-				play ]
+				relocate: (active ifTrue: [ 230 @ 82 ] ifFalse: [ 24 @ 82 ]) ]
 ]
 
 { #category : 'gallery' }
