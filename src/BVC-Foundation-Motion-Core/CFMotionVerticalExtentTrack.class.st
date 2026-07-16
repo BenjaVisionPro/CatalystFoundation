@@ -21,13 +21,18 @@ CFMotionVerticalExtentTrack >> animationTarget [ ^ element ]
 { #category : 'playing' }
 CFMotionVerticalExtentTrack >> applyDestination [
 	completionPolicy = #fitContent
-		ifTrue: [ element vFitContent ]
-		ifFalse: [ element vExact: targetExtent ]
+		ifTrue: [ element constraintsDo: [ :c | c vertical fitContent ] ]
+		ifFalse: [ self applyExtent: targetExtent ]
 ]
 
 { #category : 'playing' }
 CFMotionVerticalExtentTrack >> applyProgress: aProgress [
-	element vExact: ((targetExtent - startExtent) * aProgress + startExtent)
+	self applyExtent: ((targetExtent - startExtent) * aProgress + startExtent)
+]
+
+{ #category : 'private - playing' }
+CFMotionVerticalExtentTrack >> applyExtent: aNumber [
+	element constraintsDo: [ :c | c vertical exact: aNumber ]
 ]
 
 { #category : 'playing' }
@@ -59,14 +64,13 @@ CFMotionVerticalExtentTrack >> isAtDestination [ ^ startExtent = targetExtent ]
 { #category : 'playing' }
 CFMotionVerticalExtentTrack >> prepareFromCurrentPresentation [
 	startExtent := element extent y.
-	element
-		vExact: startExtent;
-		clipChildren: true
+	self applyExtent: startExtent.
+	element clipChildren: true
 ]
 
 { #category : 'playing' }
 CFMotionVerticalExtentTrack >> preserveCurrentPresentation [
-	element vExact: element extent y
+	self applyExtent: element extent y
 ]
 
 { #category : 'accessing' }
@@ -78,7 +82,7 @@ CFMotionVerticalExtentTrack >> propertyKey [
 
 { #category : 'playing' }
 CFMotionVerticalExtentTrack >> restoreOrigin [
-	element vExact: originExtent
+	self applyExtent: originExtent
 ]
 
 { #category : 'accessing' }

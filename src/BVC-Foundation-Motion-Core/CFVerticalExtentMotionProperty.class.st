@@ -13,7 +13,7 @@ CFVerticalExtentMotionProperty class >> uniqueInstance [
 
 { #category : 'accessing' }
 CFVerticalExtentMotionProperty >> apply: aNumber to: anElement [
-	anElement vExact: aNumber
+	anElement constraintsDo: [ :c | c vertical exact: aNumber ]
 ]
 
 { #category : 'accessing' }
