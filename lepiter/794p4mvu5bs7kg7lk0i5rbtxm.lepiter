@@ -307,7 +307,7 @@
 	},
 	"pageType" : {
 		"__type" : "namedPage",
-		"title" : "Foundation / Motion / Properties and effects"
+		"title" : "Motion / Properties and effects"
 	},
 	"uid" : {
 		"__type" : "uuid",
