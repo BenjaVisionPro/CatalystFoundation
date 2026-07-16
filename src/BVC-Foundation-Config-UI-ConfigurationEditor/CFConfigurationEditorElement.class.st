@@ -823,11 +823,13 @@ CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity duration:
 		and: [ previewOpacityOperation isRunning
 			and: [ previewOpacityOperation tracks first element ~~ element ] ]) ifTrue: [
 		previewOpacityOperation cancel ].
-	operation := (element motion
-		duration: aDuration;
-		easing: anInterpolator;
-		opacity: targetOpacity;
-		build) start.
+	operation := element space cfMotionCoordinator
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: targetOpacity)
+		duration: aDuration
+		easing: anInterpolator.
 	previewOpacityOperation := operation.
 	completionBlock ifNotNil: [
 		operation onTerminalDo: [ :aCompletedOperation |
