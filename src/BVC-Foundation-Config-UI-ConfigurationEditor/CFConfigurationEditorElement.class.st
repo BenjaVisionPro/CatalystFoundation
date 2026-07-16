@@ -36,7 +36,8 @@ Class {
 		'pendingPreviewCandidate',
 		'pendingRootPreview',
 		'previewOpacityOperation',
-		'previewOpacityGeneration'
+		'previewOpacityGeneration',
+		'placementMotionOperation'
 	],
 	#category : 'BVC-Foundation-Config-UI-ConfigurationEditor',
 	#package : 'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -111,6 +112,7 @@ CFConfigurationEditorElement >> configuration: aConfiguration [
 CFConfigurationEditorElement >> clearPlacementPreview [
 	self collapseHoverExpandedConfigurationForm.
 	self invalidatePreviewOpacityOperation.
+	self stopPlacementMotion.
 	dropCompletionToken := nil.
 	activeTargetChoice := nil.
 	activeInsertionIndex := nil.
@@ -552,7 +554,7 @@ CFConfigurationEditorElement >> hidePlacementPreview [
 	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
 	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
 	previewBounds := self boundsOf: previewElement inLocalCoordinatesOf: self.
-	animations stop: #placementLayout.
+	self stopPlacementMotion.
 	self clearPlacementTransformsInItems: affectedItems.
 	preview := previewElement.
 	previewElement removeFromParent.
@@ -644,7 +646,7 @@ CFConfigurationEditorElement >> movePreviewIntoTargetAnimating: aCandidate [
 	previewItemsElement ifNotNil: [ affectedItems add: previewItemsElement ].
 	affectedItems add: items.
 	beforeGeometry := self capturePresentedGeometryInItems: affectedItems.
-	animations stop: #placementLayout.
+	self stopPlacementMotion.
 	self clearPlacementTransformsInItems: affectedItems.
 	previewItemsElement := items.
 	previewAxis := aCandidate axis.
@@ -715,7 +717,7 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: af
 
 { #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: affectedItemElements then: completionBlock [
-	| elements globalDeltas transitions animation |
+	| elements globalDeltas transitions operation |
 	elements := self placementAnimationElementsInItems: affectedItemElements.
 	globalDeltas := IdentityDictionary new.
 	elements do: [ :each |
@@ -738,18 +740,23 @@ CFConfigurationEditorElement >> animatePlacementFrom: beforeGeometry inItems: af
 	transitions ifEmpty: [
 		completionBlock ifNotNil: [ completionBlock value ].
 		^ self ].
-	self applyPlacementTransitions: transitions progress: 0.0.
-	animation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
+	operation := CFMotionOperation
+		coordinator: self space cfMotionCoordinator
+		tracks: (transitions collect: [ :each |
+			CFMotionTranslationTrack
+				on: each key
+				from: each value
+				to: 0 @ 0 ]).
+	placementMotionOperation := operation.
+	operation
 		duration: 180 milliSeconds;
 		easing: (BlDecelerateInterpolator factor: 1.4);
-		onStepDo: [ :progress | self applyPlacementTransitions: transitions progress: progress ];
-		yourself.
-	animation onFinishedDo: [
-		self clearPlacementTransitionElements: transitions.
-		completionBlock ifNotNil: [ completionBlock value ] ].
-	animations play: animation named: #placementLayout
+		onTerminalDo: [ :aCompletedOperation |
+			placementMotionOperation == aCompletedOperation ifTrue: [
+				placementMotionOperation := nil ].
+			(aCompletedOperation isCompleted and: [ completionBlock notNil ]) ifTrue: [
+				completionBlock value ] ];
+		start
 ]
 
 { #category : 'private - animations' }
@@ -796,20 +803,6 @@ CFConfigurationEditorElement >> nearestAnimatedConfigurationAncestorOf: anElemen
 ]
 
 { #category : 'private - animations' }
-CFConfigurationEditorElement >> applyPlacementTransitions: transitions progress: progress [
-	transitions do: [ :association |
-		| remaining |
-		remaining := association value * (1.0 - progress).
-		association key transformDo: [ :builder | builder translateBy: remaining ] ]
-]
-
-{ #category : 'private - animations' }
-CFConfigurationEditorElement >> clearPlacementTransitionElements: transitions [
-	transitions do: [ :association |
-		association key transformation: BlElementLocalTransformation new ]
-]
-
-{ #category : 'private - animations' }
 CFConfigurationEditorElement >> animatePreviewOpacityTo: targetOpacity then: completionBlock [
 	self
 		animatePreviewOpacityTo: targetOpacity
@@ -850,6 +843,16 @@ CFConfigurationEditorElement >> invalidatePreviewOpacityOperation [
 	previewOpacityOperation ifNotNil: [ :anOperation |
 		anOperation isRunning ifTrue: [ anOperation cancel ] ].
 	previewOpacityOperation := nil
+]
+
+{ #category : 'private - animations' }
+CFConfigurationEditorElement >> stopPlacementMotion [
+	placementMotionOperation ifNotNil: [ :anOperation |
+		anOperation isRunning ifTrue: [ anOperation cancelSettlingAtEnd ] ].
+	placementMotionOperation := nil.
+	"Keep this while hover expansion still uses the editor's legacy height
+	 animation under the same scheduling key."
+	animations ifNotNil: [ animations stop: #placementLayout ]
 ]
 
 { #category : 'private - dropping' }
@@ -1165,7 +1168,7 @@ CFConfigurationEditorElement >> expandHoverTargetAndShowPreview [
 		ifTrue: [ dragAssessment ]
 		ifFalse: [ planner assessAsset: asset in: configuration ].
 	affectedItems := self placementAnimationItemsForConfigurationNode: node assessment: assessment.
-	animations stop: #placementLayout.
+	self stopPlacementMotion.
 	self clearPlacementTransformsInItems: affectedItems.
 	collapsedHeight := node extent y.
 	node
@@ -1359,5 +1362,6 @@ CFConfigurationEditorElement >> assessment: anAssessment hasPlacementForConfigur
 CFConfigurationEditorElement >> onRemovedFromSceneGraph [
 	super onRemovedFromSceneGraph.
 	self invalidatePreviewOpacityOperation.
+	self stopPlacementMotion.
 	animations ifNotNil: [ animations stopAll ]
 ]
