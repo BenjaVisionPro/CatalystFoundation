@@ -18,7 +18,7 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.732275+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.727631+10:00"
 					}
 				},
 				"editEmail" : {
@@ -29,17 +29,17 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.732275+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.727631+10:00"
 					}
 				},
 				"uid" : {
 					"__type" : "uid",
-					"uidString" : "lxM+06YeSRyGcFSUw5dxRQ=="
+					"uidString" : "HbPOq5SLT6+fIFqKnaCUYQ=="
 				},
 				"paragraphStyle" : {
 					"__type" : "textStyle"
 				},
-				"string" : "# Interaction and adoption\n\nAptitudes turn interaction events into Motion operations. Adoption moves a preview from a source container to its committed destination without imperatively faking the handoff."
+				"string" : "# Layout and composition\n\nGeometry is authored through layout mutation, then Motion presents the resulting geometry. Extent motion changes an element’s extent rather than scaling its child layout."
 			},
 			{
 				"__type" : "exampleSnippet",
@@ -55,7 +55,7 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.733166+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.7286+10:00"
 					}
 				},
 				"editEmail" : {
@@ -66,14 +66,14 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.733166+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.7286+10:00"
 					}
 				},
 				"uid" : {
 					"__type" : "uid",
-					"uidString" : "ZhNb8MGSRC+OzqoxA2SFsQ=="
+					"uidString" : "WpE8dylZR4euwcSlCfQ5aA=="
 				},
-				"exampleSelector" : "interactionAptitude",
+				"exampleSelector" : "layoutTransaction",
 				"previewHeight" : 200,
 				"previewShowSelector" : "gtViewsFor:",
 				"exampleBehaviorName" : "CFMotionGalleryExamples",
@@ -95,7 +95,7 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.733994+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.728973+10:00"
 					}
 				},
 				"editEmail" : {
@@ -106,14 +106,14 @@
 					"__type" : "time",
 					"time" : {
 						"__type" : "dateAndTime",
-						"dateAndTimeString" : "2026-07-16T15:06:50.733994+10:00"
+						"dateAndTimeString" : "2026-07-16T15:06:50.728973+10:00"
 					}
 				},
 				"uid" : {
 					"__type" : "uid",
-					"uidString" : "s+XLDt3FTGi9ppg3u/0OXA=="
+					"uidString" : "4n6Z00yVRVmrfE9c0gvKZw=="
 				},
-				"exampleSelector" : "adoption",
+				"exampleSelector" : "verticalReveal",
 				"previewHeight" : 200,
 				"previewShowSelector" : "gtViewsFor:",
 				"exampleBehaviorName" : "CFMotionGalleryExamples",
@@ -131,7 +131,7 @@
 		"__type" : "time",
 		"time" : {
 			"__type" : "dateAndTime",
-			"dateAndTimeString" : "2026-07-16T15:06:05.652192+10:00"
+			"dateAndTimeString" : "2026-07-16T15:06:02.387763+10:00"
 		}
 	},
 	"editEmail" : {
@@ -142,15 +142,15 @@
 		"__type" : "time",
 		"time" : {
 			"__type" : "dateAndTime",
-			"dateAndTimeString" : "2026-07-16T15:06:05.652192+10:00"
+			"dateAndTimeString" : "2026-07-16T15:14:38.974765+10:00"
 		}
 	},
 	"pageType" : {
 		"__type" : "namedPage",
-		"title" : "Motion / Interaction and adoption"
+		"title" : "Motion / Layout and composition"
 	},
 	"uid" : {
 		"__type" : "uuid",
-		"uuid" : "d3df7c04-9c42-4d9a-a5a9-85fbeff743bc"
+		"uuid" : "19420a1c-f1e5-4a3f-9c8f-d7784de685be"
 	}
 }

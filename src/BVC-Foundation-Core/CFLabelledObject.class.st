@@ -31,12 +31,12 @@ CFLabelledObject >> labelDescription [
 ]
 
 { #category : 'printing' }
-CFLabelledObject >> gtDisplayOn: aStream [
+CFLabelledObject >> gtDisstartOn: aStream [
 	| aLabelString |
 	aLabelString := self label ifNotNil: [ :aLabel | aLabel asString ].
 
 	(aLabelString isNil or: [ aLabelString isEmpty ])
-		ifTrue: [ ^ super gtDisplayOn: aStream ].
+		ifTrue: [ ^ super gtDisstartOn: aStream ].
 
 	aStream nextPutAll: aLabelString
 ]
