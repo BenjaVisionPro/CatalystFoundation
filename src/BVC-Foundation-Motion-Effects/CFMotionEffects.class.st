@@ -73,8 +73,37 @@ CFMotionEffects class >> compress [
 
 { #category : 'recipes' }
 CFMotionEffects class >> springBack [
-	^ CFMotionEffectRecipe named: #springBack start: [ :element :duration :easing :recipe |
-		(element motion duration: duration; easing: easing; scale: 1 @ 1) ]
+	^ (CFMotionEffectRecipe named: #springBack start: [ :element :duration :easing :recipe |
+		(element motion duration: duration; easing: easing; scale: 1 @ 1) ])
+		continuation: [ :aPreviousOperation :element :duration :easing |
+			self springBackOn: element after: aPreviousOperation duration: duration easing: easing ];
+		yourself
+]
+
+{ #category : 'private - recipes' }
+CFMotionEffects class >> springBackOn: anElement after: aPreviousOperation duration: aDuration easing: anInterpolator [
+	| scaleTrack targetScale |
+	aPreviousOperation ifNil: [
+		^ anElement motion
+			duration: aDuration;
+			easing: anInterpolator;
+			scale: 1 @ 1 ].
+	scaleTrack := aPreviousOperation tracks
+		detect: [ :each | each isKindOf: CFMotionScaleTrack ]
+		ifNone: [ ^ anElement motion
+			duration: aDuration;
+			easing: anInterpolator;
+			scale: 1 @ 1 ].
+	targetScale := scaleTrack targetScale.
+	(targetScale x isZero or: [ targetScale y isZero ]) ifTrue: [
+		^ anElement motion
+			duration: aDuration;
+			easing: anInterpolator;
+			scale: 1 @ 1 ].
+	^ anElement motion
+		duration: aDuration;
+		easing: anInterpolator;
+		scale: (targetScale x reciprocal) @ (targetScale y reciprocal)
 ]
 
 { #category : 'fading' }

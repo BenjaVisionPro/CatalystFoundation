@@ -17,6 +17,12 @@ CFMotionEffectRecipe >> distance: aNumber [
 	^ self
 ]
 
+{ #category : 'configuration' }
+CFMotionEffectRecipe >> continuation: aBlock [
+	options at: #continuation put: aBlock.
+	^ self
+]
+
 { #category : 'accessing' }
 CFMotionEffectRecipe >> distance [ ^ options at: #distance ]
 
@@ -57,6 +63,17 @@ CFMotionEffectRecipe >> playOn: anElement duration: aDuration easing: anInterpol
 		value: (duration ifNil: [ aDuration ])
 		value: (easing ifNil: [ anInterpolator ])
 		value: self
+]
+
+{ #category : 'playing' }
+CFMotionEffectRecipe >> playAfter: aPreviousOperation on: anElement duration: aDuration easing: anInterpolator [
+	| continuationBlock |
+	continuationBlock := options at: #continuation ifAbsent: [ ^ self playOn: anElement duration: aDuration easing: anInterpolator ].
+	^ continuationBlock
+		value: aPreviousOperation
+		value: anElement
+		value: (duration ifNil: [ aDuration ])
+		value: (easing ifNil: [ anInterpolator ])
 ]
 
 { #category : 'accessing' }

@@ -732,6 +732,34 @@ CFMotionExamples >> motionAptitudeRunsThePressedAndReleasedEffects [
 	^ aptitude
 ]
 
+{ #category : 'examples - aptitude' }
+CFMotionExamples >> motionAptitudeSpringsBackAfterHeldPress [
+	<gtExample>
+	| space element aptitude pressed released |
+	space := self spaceWithElement.
+	element := space root children first.
+	aptitude := CFMotionAptitude new
+		pressedEffect: CFMotionEffects compress;
+		releasedEffect: CFMotionEffects springBack;
+		yourself.
+	element addAptitude: aptitude.
+	element dispatchEvent: BlMouseDownEvent new.
+	pressed := aptitude activeOperation.
+	space pulse.
+	150 milliSeconds wait.
+	space pulse.
+	self assert: pressed isCompleted.
+	element dispatchEvent: BlMouseUpEvent new.
+	released := aptitude activeOperation.
+	self assert: released isRunning.
+	self assert: released tracks first targetScale equals: (1 / 0.96) @ (1 / 0.96).
+	space pulse.
+	150 milliSeconds wait.
+	space pulse.
+	self assert: released isCompleted.
+	^ aptitude
+]
+
 { #category : 'examples - appearance' }
 CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	<gtExample>

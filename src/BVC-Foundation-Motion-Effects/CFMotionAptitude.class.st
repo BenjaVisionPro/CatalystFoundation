@@ -44,7 +44,7 @@ CFMotionAptitude >> onInstalledIn: anElement [
 	anElement addEventHandler: enterHandler.
 	anElement addEventHandler: leaveHandler.
 	downHandler := BlEventHandler on: BlMouseDownEvent do: [ :anEvent | self play: pressedEffect on: anElement ].
-	upHandler := BlEventHandler on: BlMouseUpEvent do: [ :anEvent | self play: releasedEffect on: anElement ].
+	upHandler := BlEventHandler on: BlMouseUpEvent do: [ :anEvent | self playReleasedEffect: releasedEffect on: anElement ].
 	anElement addEventHandler: downHandler.
 	anElement addEventHandler: upHandler
 ]
@@ -70,6 +70,22 @@ CFMotionAptitude >> play: anEffectRecipe on: anElement [
 	anEffectRecipe ifNotNil: [
 		activeOperation := anEffectRecipe
 			playOn: anElement
+			duration: 120 milliSeconds
+			easing: (BlDecelerateInterpolator factor: 1.4) ]
+]
+
+{ #category : 'private - playing' }
+CFMotionAptitude >> playReleasedEffect: anEffectRecipe on: anElement [
+	| previousOperation |
+	previousOperation := activeOperation.
+	previousOperation ifNotNil: [
+		previousOperation isRunning ifTrue: [
+			previousOperation cancelAndRestore.
+			previousOperation := nil ] ].
+	anEffectRecipe ifNotNil: [
+		activeOperation := anEffectRecipe
+			playAfter: previousOperation
+			on: anElement
 			duration: 120 milliSeconds
 			easing: (BlDecelerateInterpolator factor: 1.4) ]
 ]
