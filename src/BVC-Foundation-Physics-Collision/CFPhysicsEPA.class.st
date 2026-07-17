@@ -1,0 +1,86 @@
+Class {
+	#name : 'CFPhysicsEPA',
+	#superclass : 'Object',
+	#category : 'BVC-Foundation-Physics-Collision',
+	#package : 'BVC-Foundation-Physics-Collision'
+}
+
+{ #category : 'collision' }
+CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: simplexArray [
+	| polytope edge support supportDistance contactPoint |
+	polytope := simplexArray asOrderedCollection.
+	(self signedAreaOf: polytope) < 0 ifTrue: [ polytope := polytope reversed asOrderedCollection ].
+	1 to: 48 do: [ :iteration |
+		edge := self closestEdgeOf: polytope.
+		support := CFPhysicsGJK
+			supportBetween: firstBody
+			and: secondBody
+			inDirection: edge third.
+		supportDistance := self dot: support point with: edge third.
+		(supportDistance - edge fourth) <= 0.00001 ifTrue: [
+			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
+			^ (CFPhysicsManifold normal: edge third penetration: (supportDistance max: 0.0))
+				points: { contactPoint };
+				yourself ].
+		polytope add: support beforeIndex: edge fifth ].
+	^ nil
+]
+
+{ #category : 'private' }
+CFPhysicsEPA class >> closestEdgeOf: polytope [
+	| bestFirst bestSecond bestNormal bestDistance bestInsert count |
+	bestDistance := Float infinity.
+	count := polytope size.
+	1 to: count do: [ :index |
+		| nextIndex first second edge normal distance |
+		nextIndex := index = count ifTrue: [ 1 ] ifFalse: [ index + 1 ].
+		first := polytope at: index.
+		second := polytope at: nextIndex.
+		edge := second point - first point.
+		normal := edge y @ edge x negated.
+		normal r > 0 ifTrue: [ normal := normal / normal r ].
+		distance := self dot: normal with: first point.
+		distance < 0 ifTrue: [
+			normal := normal negated.
+			distance := distance negated ].
+		distance < bestDistance ifTrue: [
+			bestFirst := first.
+			bestSecond := second.
+			bestNormal := normal.
+			bestDistance := distance.
+			bestInsert := nextIndex ] ].
+	^ { bestFirst. bestSecond. bestNormal. bestDistance. bestInsert }
+]
+
+{ #category : 'private' }
+CFPhysicsEPA class >> contactPointOnEdgeFrom: firstSupport to: secondSupport [
+	| edge denominator parameter firstWitness secondWitness |
+	edge := secondSupport point - firstSupport point.
+	denominator := self dot: edge with: edge.
+	parameter := denominator = 0
+		ifTrue: [ 0.0 ]
+		ifFalse: [ (((self dot: firstSupport point negated with: edge) / denominator) max: 0.0) min: 1.0 ].
+	firstWitness := firstSupport firstPoint
+		+ ((secondSupport firstPoint - firstSupport firstPoint) * parameter).
+	secondWitness := firstSupport secondPoint
+		+ ((secondSupport secondPoint - firstSupport secondPoint) * parameter).
+	^ (firstWitness + secondWitness) / 2.0
+]
+
+{ #category : 'private' }
+CFPhysicsEPA class >> signedAreaOf: polytope [
+	| area count |
+	area := 0.0.
+	count := polytope size.
+	1 to: count do: [ :index |
+		| first second |
+		first := (polytope at: index) point.
+		second := (polytope at: (index = count ifTrue: [ 1 ] ifFalse: [ index + 1 ])) point.
+		area := area + ((first x * second y) - (second x * first y)) ].
+	^ area / 2.0
+]
+
+{ #category : 'private' }
+CFPhysicsEPA class >> dot: first with: second [
+	^ (first x * second x) + (first y * second y)
+]

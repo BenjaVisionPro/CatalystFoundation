@@ -85,10 +85,6 @@ CFPhysicsShapeState >> isPolygon [
 		or: [ element geometry isKindOf: BlNormalizedPolygonGeometry ]
 ]
 
-{ #category : 'testing' }
-CFPhysicsShapeState >> isRectangle [
-	^ self isCircle not and: [ self isPolygon not ]
-]
 
 { #category : 'circle' }
 CFPhysicsShapeState >> radius [
@@ -115,8 +111,12 @@ CFPhysicsShapeState >> localCollisionVertices [
 
 { #category : 'mass' }
 CFPhysicsShapeState >> area [
-	| vertices sum count |
+	| vertices sum count radius anExtent |
 	self isCircle ifTrue: [ ^ Float pi * self radius squared ].
+	self isRoundedRectangle ifTrue: [
+		radius := self roundedRectangleRadius.
+		anExtent := self extent.
+		^ (anExtent x * anExtent y) - ((4.0 - Float pi) * radius squared) ].
 	vertices := self localCollisionVertices.
 	sum := 0.0.
 	count := vertices size.
@@ -126,4 +126,74 @@ CFPhysicsShapeState >> area [
 		second := vertices at: (index = count ifTrue: [ 1 ] ifFalse: [ index + 1 ]).
 		sum := sum + ((first x * second y) - (second x * first y)) ].
 	^ sum abs / 2.0
+]
+
+
+{ #category : 'testing' }
+CFPhysicsShapeState >> isRoundedRectangle [
+	^ element geometry isKindOf: BlRoundedRectangleGeometry
+]
+
+{ #category : 'testing' }
+CFPhysicsShapeState >> isRectangle [
+	^ self isCircle not
+		and: [ self isPolygon not
+			and: [ self isRoundedRectangle not ] ]
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> centreAt: aPosition [
+	^ aPosition + (self extent / 2.0)
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> supportPointAt: aPosition inDirection: aDirection [
+	| direction |
+	direction := aDirection r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ aDirection / aDirection r ].
+	self isCircle ifTrue: [
+		^ (self circleCentreAt: aPosition) + (direction * self radius) ].
+	self isRoundedRectangle ifTrue: [
+		^ self roundedRectangleSupportPointAt: aPosition inDirection: direction ].
+	^ self supportPointOf: (self collisionVerticesAt: aPosition) inDirection: direction
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> supportPointOf: vertices inDirection: direction [
+	| best bestProjection projection |
+	best := vertices first.
+	bestProjection := (best x * direction x) + (best y * direction y).
+	vertices allButFirst do: [ :each |
+		projection := (each x * direction x) + (each y * direction y).
+		projection > bestProjection ifTrue: [
+			best := each.
+			bestProjection := projection ] ].
+	^ best
+]
+
+{ #category : 'rounded rectangle' }
+CFPhysicsShapeState >> roundedRectangleRadius [
+	| radii radius |
+	radii := element geometry cornerRadii.
+	radius := radii topLeft.
+	((radii topRight = radius)
+		and: [ radii bottomRight = radius
+			and: [ radii bottomLeft = radius ] ])
+		ifFalse: [ self error: 'Physics currently requires equal rounded-rectangle corner radii' ].
+	^ radius min: (self extent min / 2.0)
+]
+
+{ #category : 'rounded rectangle' }
+CFPhysicsShapeState >> roundedRectangleSupportPointAt: aPosition inDirection: direction [
+	| anExtent radius innerPoint |
+	anExtent := self extent.
+	radius := self roundedRectangleRadius.
+	radius = 0 ifTrue: [
+		^ self supportPointOf: (self collisionVerticesAt: aPosition) inDirection: direction ].
+	innerPoint :=
+		(direction x >= 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ])
+		@
+		(direction y >= 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ]).
+	^ aPosition + innerPoint + (direction * radius)
 ]

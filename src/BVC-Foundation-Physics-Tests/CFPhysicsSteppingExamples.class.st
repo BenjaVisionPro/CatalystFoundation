@@ -474,3 +474,49 @@ CFPhysicsSteppingExamples >> circleContactsConvexPolygon [
 	self assert: contact normal x > 0.
 	^ contact
 ]
+
+
+{ #category : 'examples - convex collision' }
+CFPhysicsSteppingExamples >> roundedRectangleSupportPointUsesCornerArc [
+	<gtExample>
+	| owner body world shape point expected |
+	owner := BlElement new.
+	body := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
+		size: 40 @ 20;
+		yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	shape := body physics bodyState shapeState.
+	point := shape supportPointAt: 0 @ 0 inDirection: 1 @ 1.
+	expected := 35 @ 15 + (((1 @ 1) / (1 @ 1) r) * 5).
+	self assert: (point distanceTo: expected) < 0.000001.
+	^ shape
+]
+
+{ #category : 'examples - convex collision' }
+CFPhysicsSteppingExamples >> roundedRectanglesUseGeneralConvexCollision [
+	<gtExample>
+	| owner first second world contact |
+	owner := BlElement new.
+	first := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
+		size: 20 @ 20;
+		yourself.
+	second := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
+		size: 20 @ 20;
+		yourself.
+	owner addChild: first.
+	owner addChild: second.
+	world := owner physics beWorld.
+	first physics position: 0 @ 0.
+	second physics beStatic; position: 15 @ 0.
+	world gravity: 0 @ 0; step.
+	contact := world contacts first.
+	self assert: contact manifold notNil.
+	self assert: contact penetration >= 0.
+	self assert: contact normal x > 0.
+	^ contact
+]
