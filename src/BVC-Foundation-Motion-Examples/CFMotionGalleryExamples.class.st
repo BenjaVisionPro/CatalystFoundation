@@ -126,8 +126,7 @@ CFMotionGalleryExamples >> relocate [
 		toggleCardTitled: 'Relocate'
 		subtitle: 'Move to an authoritative layout position.'
 		color: Color brown
-		action: [ :element :active :currentMotion |
-			currentMotion ifNotNil: [ currentMotion cancel ].
+		action: [ :element :active |
 			element motion
 				duration: 600 milliSeconds;
 				relocate: (active ifTrue: [ 230 @ 82 ] ifFalse: [ 24 @ 82 ]) ]
