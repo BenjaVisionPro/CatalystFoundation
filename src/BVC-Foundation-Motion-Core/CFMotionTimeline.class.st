@@ -68,7 +68,7 @@ CFMotionTimeline >> resolveTracksWithTimelineEnd [
 	changed := true.
 	[ changed ] whileTrue: [
 		changed := false.
-		tracks do: [ :each | changed := (each resolveUsing: self) or: [ changed ] ] ] ]
+		tracks do: [ :each | changed := (each resolveUsing: self) or: [ changed ] ] ]
 ]
 
 { #category : 'private - resolving' }
