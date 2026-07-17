@@ -126,6 +126,7 @@ CFPhysicsBodyState >> rotation: aNumber [
 
 { #category : 'geometry' }
 CFPhysicsBodyState >> shapeState [
+	shapeState ifNil: [ shapeState := CFPhysicsShapeState on: element ].
 	^ shapeState
 ]
 
@@ -134,11 +135,6 @@ CFPhysicsBodyState >> sequence [
 	^ sequence
 ]
 
-
-{ #category : 'geometry' }
-CFPhysicsBodyState >> shapeState [
-	^ shapeState
-]
 
 { #category : 'ordering' }
 CFPhysicsBodyState >> sequence: anInteger [
