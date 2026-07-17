@@ -151,3 +151,39 @@ CFPhysicsExamples >> inspectPersistentContact [
 	self assert: world contacts first == contact.
 	^ contact
 ]
+
+{ #category : 'examples - collision' }
+CFPhysicsExamples >> circleSettlesOnStaticGround [
+	<gtExample>
+	| space worldElement ball ground world |
+	space := BlSpace new.
+	worldElement := BlElement new
+		size: 600 @ 400;
+		yourself.
+	ball := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 50 @ 50;
+		background: Color blue;
+		yourself.
+	ground := BlElement new
+		size: 400 @ 40;
+		background: Color gray;
+		yourself.
+	space root addChild: worldElement.
+	worldElement addChild: ball.
+	worldElement addChild: ground.
+	world := worldElement physics beWorld.
+	ball physics position: 100 @ 0.
+	ground physics
+		beStatic;
+		position: 0 @ 200.
+	world
+		stepDuration: 10 milliseconds;
+		gravity: 0 @ 600;
+		step: 120.
+	self assert: (ball physics position distanceTo: 100 @ 150) < 0.000001.
+	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: world contacts size equals: 1.
+	self assert: world contacts first manifold points size equals: 1.
+	^ space
+]

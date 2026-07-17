@@ -72,7 +72,7 @@ CFPhysicsContactManager >> updateBodies: bodies [
 			(first isStatic and: [ second isStatic ]) ifFalse: [
 				contactFirst := self contactFirstBodyFrom: first second: second.
 				contactSecond := self contactSecondBodyFrom: first second: second.
-				manifold := CFPhysicsRectangleCollision
+				manifold := CFPhysicsCollision
 					manifoldBetween: contactFirst
 					and: contactSecond.
 				manifold ifNotNil: [

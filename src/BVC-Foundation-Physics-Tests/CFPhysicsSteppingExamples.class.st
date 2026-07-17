@@ -187,3 +187,87 @@ CFPhysicsSteppingExamples >> contactOwnsManifold [
 	self assert: contact penetration equals: contact manifold penetration.
 	^ contact manifold
 ]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> circleShapeUsesInscribedRadius [
+	<gtExample>
+	| owner circle world shape |
+	owner := BlElement new.
+	circle := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 30 @ 40;
+		yourself.
+	owner addChild: circle.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	shape := circle physics bodyState shapeState.
+	self assert: shape isCircle.
+	self assert: shape radius equals: 15.
+	self assert: shape aabb extent equals: 30 @ 30.
+	^ shape
+]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> dynamicCircleStopsOnStaticRectangle [
+	<gtExample>
+	| owner ball ground world contact |
+	owner := BlElement new.
+	ball := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 20 @ 20;
+		yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: ball.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	ball physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
+	contact := world contacts first.
+	self assert: (ball physics position distanceTo: 10 @ 20) < 0.000001.
+	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: contact normal equals: 0 @ 1.
+	self assert: contact manifold points size equals: 1.
+	^ contact
+]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> overlappingCirclesProduceExactManifold [
+	<gtExample>
+	| owner first second world contact |
+	owner := BlElement new.
+	first := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	second := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	owner addChild: first.
+	owner addChild: second.
+	world := owner physics beWorld.
+	first physics position: 0 @ 0.
+	second physics beStatic; position: 15 @ 0.
+	world gravity: 0 @ 0; step.
+	contact := world contacts first.
+	self assert: contact normal equals: 1 @ 0.
+	self assert: contact penetration equals: 5.
+	self assert: contact manifold points first equals: 10 @ 10.
+	self assert: first physics position equals: -5 @ 0.
+	^ contact
+]
+
+{ #category : 'examples - contacts' }
+CFPhysicsSteppingExamples >> circleRectangleContactPersistsAcrossSteps [
+	<gtExample>
+	| owner ball ground world contact |
+	owner := BlElement new.
+	ball := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: ball.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	ball physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
+	contact := world contacts first.
+	world step.
+	self assert: world contacts first == contact.
+	self assert: contact continuedThisStep.
+	^ contact
+]
