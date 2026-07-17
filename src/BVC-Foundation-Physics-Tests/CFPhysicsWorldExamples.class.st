@@ -61,3 +61,19 @@ CFPhysicsWorldExamples >> worldOwnerBelongsToAncestorWorldOnly [
 	self assert: nested physics owningWorld == outerWorld.
 	^ nested
 ]
+
+
+{ #category : 'examples - worlds' }
+CFPhysicsWorldExamples >> ownedWorldAndOwningWorldAreDistinct [
+    <gtExample>
+    | owner body world |
+    owner := BlElement new.
+    body := BlElement new.
+    owner addChild: body.
+    world := owner physics beWorld.
+    world synchroniseMembership.
+    self assert: owner physics ownedWorld equals: world.
+    self assert: body physics ownedWorld equals: nil.
+    self assert: body physics owningWorld equals: world.
+    ^ body
+]

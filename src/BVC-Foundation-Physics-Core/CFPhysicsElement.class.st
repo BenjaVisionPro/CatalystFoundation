@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world' ],
+	#instVars : [ 'element', 'ownedWorld' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -25,8 +25,8 @@ CFPhysicsElement >> beStatic [
 
 { #category : 'worlds' }
 CFPhysicsElement >> beWorld [
-	world ifNil: [ world := CFPhysicsWorld on: element ].
-	^ world
+	ownedWorld ifNil: [ ownedWorld := CFPhysicsWorld on: element ].
+	^ ownedWorld
 ]
 
 { #category : 'bodies' }
@@ -80,7 +80,12 @@ CFPhysicsElement >> restitution: aNumber [
 
 { #category : 'worlds' }
 CFPhysicsElement >> existingWorld [
-	^ world
+	^ ownedWorld
+]
+
+{ #category : 'worlds' }
+CFPhysicsElement >> ownedWorld [
+	^ ownedWorld
 ]
 
 { #category : 'body type' }
@@ -95,7 +100,7 @@ CFPhysicsElement >> isStatic [
 
 { #category : 'worlds' }
 CFPhysicsElement >> isWorld [
-	^ world notNil
+	^ ownedWorld notNil
 ]
 
 { #category : 'worlds' }
@@ -149,11 +154,19 @@ CFPhysicsElement >> rotation: aNumber [
 	self requireBodyState rotation: aNumber
 ]
 
+
+{ #category : 'worlds' }
+CFPhysicsElement >> world [
+	"Answer the physics world that contains this element. World-owning elements
+	use #ownedWorld to access the world they establish."
+	^ self owningWorld
+]
+
 { #category : 'worlds' }
 CFPhysicsElement >> synchroniseWorldMembership [
 	| owningWorld |
 	owningWorld := self owningWorld.
-	world ifNotNil: [ world synchroniseMembership ].
+	ownedWorld ifNotNil: [ ownedWorld synchroniseMembership ].
 	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
 	^ owningWorld
 ]

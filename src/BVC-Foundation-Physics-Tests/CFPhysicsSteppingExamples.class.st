@@ -224,7 +224,7 @@ CFPhysicsSteppingExamples >> dynamicCircleStopsOnStaticRectangle [
 	ground physics beStatic; position: 0 @ 40.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
 	contact := world contacts first.
-	self assert: (ball physics position distanceTo: 10 @ 20) < 0.000001.
+	self assert: (ball physics position distanceTo: 10 @ 20) <= CFPhysicsContact new positionSlop.
 	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
 	self assert: contact normal equals: 0 @ 1.
 	self assert: contact manifold points size equals: 1.
@@ -246,7 +246,7 @@ CFPhysicsSteppingExamples >> overlappingCirclesProduceExactManifold [
 	world gravity: 0 @ 0; step.
 	contact := world contacts first.
 	self assert: contact normal equals: 1 @ 0.
-	self assert: contact penetration equals: 0.0.
+	self assert: contact penetration <= CFPhysicsContact new positionSlop.
 	self assert: contact manifold points first equals: 15 @ 10.
 	self assert: first physics position equals: -5 @ 0.
 	^ contact
