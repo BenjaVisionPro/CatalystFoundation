@@ -415,6 +415,108 @@ CFMotionExamples >> directNamedScaleAndFadeInCanRetargetThroughItsReturnedMotion
 	^ operation
 ]
 
+{ #category : 'examples - composed motion' }
+CFMotionExamples >> composedMotionCompletesAfterItsLastComponent [
+	<gtExample>
+	| space element fade scale motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	fade := element motion
+		duration: 400 milliSeconds;
+		opacity: 1.0;
+		build.
+	scale := element motion
+		duration: 1 second;
+		scale: 1.2 @ 1.2;
+		build.
+	motion := (CFMotion composedOf: { fade. scale }) start.
+	self assert: motion isRunning.
+	self assert: motion componentMotions equals: { fade. scale }.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: fade isCompleted.
+	self assert: scale isRunning.
+	self assert: motion isRunning.
+	space time wait: 600 milliSeconds.
+	space pulse.
+	self assert: scale isCompleted.
+	self assert: motion isCompleted.
+	^ motion
+]
+
+{ #category : 'examples - composed motion' }
+CFMotionExamples >> cancellingAComposedMotionCancelsAndRestoresEveryComponent [
+	<gtExample>
+	| space element originalTransformation fade scale motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	originalTransformation := element transformation.
+	fade := element motion
+		duration: 1 second;
+		opacity: 1.0;
+		build.
+	scale := element motion
+		duration: 1 second;
+		scale: 1.2 @ 1.2;
+		build.
+	motion := (CFMotion composedOf: { fade. scale }) start.
+	space pulse.
+	space time wait: 90 milliSeconds.
+	space pulse.
+	motion cancelAndRestore.
+	self assert: motion isCancelled.
+	self assert: fade isCancelled.
+	self assert: scale isCancelled.
+	self assert: element opacity equals: 0.0.
+	self assert: element transformation == originalTransformation.
+	^ motion
+]
+
+{ #category : 'examples - timeline layout' }
+CFMotionExamples >> timelineDerivesItsEndAndPlacesTracksRelativeToIt [
+	<gtExample>
+	| timeline path bounce fade |
+	timeline := CFMotionTimeline new.
+	path := (CFMotionTimelineTrack in: timeline)
+		duration: 1 second.
+	bounce := (CFMotionTimelineTrack in: timeline)
+		duration: 250 milliSeconds;
+		repeatsEvery: 250 milliSeconds;
+		endsAt: timeline end.
+	fade := (CFMotionTimelineTrack in: timeline)
+		duration: 100 milliSeconds;
+		ends: 100 milliSeconds before: timeline end.
+	self assert: timeline duration equals: 1 second.
+	self assert: path resolvedStart equals: 0 milliSeconds.
+	self assert: path resolvedEnd equals: 1 second.
+	self assert: bounce resolvedStart equals: 0 milliSeconds.
+	self assert: bounce resolvedEnd equals: 1 second.
+	self assert: fade resolvedStart equals: 800 milliSeconds.
+	self assert: fade resolvedEnd equals: 900 milliSeconds.
+	^ timeline
+]
+
+{ #category : 'examples - timeline layout' }
+CFMotionExamples >> timelinePlacesATrackAfterAnotherTrackEnds [
+	<gtExample>
+	| timeline path arrival |
+	timeline := CFMotionTimeline new.
+	path := (CFMotionTimelineTrack in: timeline)
+		duration: 1 second.
+	arrival := (CFMotionTimelineTrack in: timeline)
+		duration: 200 milliSeconds;
+		starts: 100 milliSeconds after: path end.
+	self assert: timeline duration equals: 1300 milliSeconds.
+	self assert: arrival resolvedStart equals: 1100 milliSeconds.
+	self assert: arrival resolvedEnd equals: 1300 milliSeconds.
+	^ timeline
+]
+
 { #category : 'examples - motions' }
 CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	<gtExample>

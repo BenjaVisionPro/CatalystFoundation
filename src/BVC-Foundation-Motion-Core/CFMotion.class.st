@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotion',
 	#superclass : 'Object',
-	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers', 'holdAtDestination' ],
+	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers', 'holdAtDestination', 'componentMotions' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -14,6 +14,14 @@ CFMotion class >> coordinator: aCoordinator tracks: aCollection [
 		yourself
 ]
 
+{ #category : 'instance creation' }
+CFMotion class >> composedOf: aCollection [
+	| aMotion |
+	aMotion := self new.
+	aMotion componentMotions: aCollection.
+	^ aMotion
+]
+
 { #category : 'initialization' }
 CFMotion >> initialize [
 	super initialize.
@@ -23,7 +31,8 @@ CFMotion >> initialize [
 	state := CFMotionState idle.
 	trace := CFMotionTrace new.
 	terminalHandlers := OrderedCollection new.
-	holdAtDestination := false
+	holdAtDestination := false.
+	componentMotions := OrderedCollection new
 ]
 
 { #category : 'accessing' }
@@ -34,17 +43,30 @@ CFMotion >> cancel [ ^ self cancelPreservingCurrentPresentation ]
 
 { #category : 'controlling' }
 CFMotion >> cancelAndRestore [
+	(self hasComponentMotions) ifTrue: [ ^ self cancelComponentMotionsWith: #cancelAndRestore ].
 	^ self cancelApplying: [ :each | each restoreOrigin ]
 ]
 
 { #category : 'controlling' }
 CFMotion >> cancelPreservingCurrentPresentation [
+	(self hasComponentMotions) ifTrue: [ ^ self cancelComponentMotionsWith: #cancel ].
 	^ self cancelApplying: [ :each | each preserveCurrentPresentation ]
 ]
 
 { #category : 'controlling' }
 CFMotion >> cancelSettlingAtEnd [
+	(self hasComponentMotions) ifTrue: [ ^ self cancelComponentMotionsWith: #cancelSettlingAtEnd ].
 	^ self cancelApplying: [ :each | each applyDestination ]
+]
+
+{ #category : 'private - controlling' }
+CFMotion >> cancelComponentMotionsWith: aSelector [
+	state isTerminal ifTrue: [ ^ self ].
+	state := CFMotionState cancelled.
+	trace record: #cancelled for: self.
+	componentMotions do: [ :each | each perform: aSelector ].
+	self notifyTerminalHandlers.
+	^ self
 ]
 
 { #category : 'private - controlling' }
@@ -63,6 +85,11 @@ CFMotion >> cancelApplying: aBlock [
 { #category : 'private - controlling' }
 CFMotion >> complete [
 	state isTerminal ifTrue: [ ^ self ].
+	(self hasComponentMotions) ifTrue: [
+		state := CFMotionState completed.
+		trace record: #completed for: self.
+		self notifyTerminalHandlers.
+		^ self ].
 	holdAtDestination ifTrue: [
 		state := CFMotionState settled.
 		trace record: #settled for: self.
@@ -79,6 +106,15 @@ CFMotion >> coordinator [ ^ coordinator ]
 
 { #category : 'accessing' }
 CFMotion >> coordinator: aCoordinator [ coordinator := aCoordinator ]
+
+{ #category : 'accessing' }
+CFMotion >> componentMotions [ ^ componentMotions asArray ]
+
+{ #category : 'private - initialization' }
+CFMotion >> componentMotions: aCollection [
+	componentMotions := aCollection asOrderedCollection.
+	^ self
+]
 
 { #category : 'private - playing' }
 CFMotion >> discardAnimation [
@@ -108,6 +144,9 @@ CFMotion >> isCancelled [ ^ state == CFMotionState cancelled ]
 
 { #category : 'testing' }
 CFMotion >> isCompleted [ ^ state == CFMotionState completed ]
+
+{ #category : 'private - testing' }
+CFMotion >> hasComponentMotions [ ^ componentMotions isNotEmpty ]
 
 { #category : 'testing' }
 CFMotion >> isRunning [ ^ state == CFMotionState running ]
@@ -153,6 +192,8 @@ CFMotion >> releaseClaims [
 { #category : 'playing' }
 CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator [
 	| requestedTracks ownedTracks |
+	(self hasComponentMotions) ifTrue: [
+		self error: 'A composed Motion must retarget one of its component Motions' ].
 	requestedTracks := aTrackOrTracks isCollection
 		ifTrue: [ aTrackOrTracks asArray ]
 		ifFalse: [ { aTrackOrTracks } ].
@@ -171,6 +212,8 @@ CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator 
 
 { #category : 'controlling' }
 CFMotion >> reversed [
+	(self hasComponentMotions) ifTrue: [
+		^ CFMotion composedOf: (componentMotions collect: #reversed) ].
 	^ (CFMotion
 		coordinator: coordinator
 		tracks: (tracks reverse collect: #reversed))
@@ -181,10 +224,36 @@ CFMotion >> reversed [
 
 { #category : 'playing' }
 CFMotion >> start [
+	(self hasComponentMotions) ifTrue: [ ^ self startComponentMotions ].
 	self claimTracks.
 	tracks do: [ :each | each captureOriginIn: coordinator ].
 	self startFromCurrentPresentation.
 	^ self
+]
+
+{ #category : 'private - playing' }
+CFMotion >> startComponentMotions [
+	state isTerminal ifTrue: [ self error: 'A completed Motion cannot start again' ].
+	(state == CFMotionState running) ifTrue: [ self error: 'A Motion cannot start while it is already running' ].
+	state := CFMotionState running.
+	trace record: #started for: self.
+	componentMotions do: [ :each |
+		each onTerminalDo: [ :anOperation | self finishComponentMotionsIfTerminal ].
+		each start ].
+	self finishComponentMotionsIfTerminal.
+	^ self
+]
+
+{ #category : 'private - playing' }
+CFMotion >> finishComponentMotionsIfTerminal [
+	(state == CFMotionState running) ifFalse: [ ^ self ].
+	(componentMotions allSatisfy: [ :each | each state isTerminal ]) ifFalse: [ ^ self ].
+	(componentMotions anySatisfy: #isCancelled)
+		ifTrue: [
+			state := CFMotionState cancelled.
+			trace record: #cancelled for: self.
+			self notifyTerminalHandlers ]
+		ifFalse: [ self complete ]
 ]
 
 { #category : 'private - playing' }
