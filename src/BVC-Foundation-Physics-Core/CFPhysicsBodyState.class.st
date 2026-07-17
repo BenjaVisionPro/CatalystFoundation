@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation' ],
+	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -12,6 +12,25 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 		element: anElement;
 		world: aWorld;
 		yourself
+]
+
+{ #category : 'stepping' }
+CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
+	dynamic ifFalse: [ ^ self ].
+	velocity := velocity + (gravityVector * seconds).
+	position := position + (velocity * seconds).
+	self present
+]
+
+{ #category : 'body type' }
+CFPhysicsBodyState >> beDynamic [
+	dynamic := true
+]
+
+{ #category : 'body type' }
+CFPhysicsBodyState >> beStatic [
+	dynamic := false.
+	velocity := 0 @ 0
 ]
 
 { #category : 'accessing' }
@@ -29,7 +48,19 @@ CFPhysicsBodyState >> element: anElement [
 CFPhysicsBodyState >> initialize [
 	super initialize.
 	position := 0 @ 0.
-	rotation := 0
+	rotation := 0.
+	velocity := 0 @ 0.
+	dynamic := true
+]
+
+{ #category : 'body type' }
+CFPhysicsBodyState >> isDynamic [
+	^ dynamic
+]
+
+{ #category : 'body type' }
+CFPhysicsBodyState >> isStatic [
+	^ dynamic not
 ]
 
 { #category : 'presenting' }
@@ -74,6 +105,16 @@ CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
 	position := aPoint.
 	rotation := aNumber.
 	self present
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyState >> velocity [
+	^ velocity
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyState >> velocity: aPoint [
+	velocity := aPoint
 ]
 
 { #category : 'accessing' }

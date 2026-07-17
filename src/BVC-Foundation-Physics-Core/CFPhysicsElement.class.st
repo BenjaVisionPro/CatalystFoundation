@@ -13,10 +13,28 @@ CFPhysicsElement class >> on: anElement [
 		yourself
 ]
 
+{ #category : 'body type' }
+CFPhysicsElement >> beDynamic [
+	self requireBodyState beDynamic
+]
+
+{ #category : 'body type' }
+CFPhysicsElement >> beStatic [
+	self requireBodyState beStatic
+]
+
 { #category : 'worlds' }
 CFPhysicsElement >> beWorld [
 	world ifNil: [ world := CFPhysicsWorld on: element ].
 	^ world
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> bodyState [
+	| owningWorld |
+	owningWorld := self owningWorld.
+	owningWorld ifNil: [ ^ nil ].
+	^ owningWorld bodyStateFor: element
 ]
 
 { #category : 'accessing' }
@@ -32,6 +50,16 @@ CFPhysicsElement >> element: anElement [
 { #category : 'worlds' }
 CFPhysicsElement >> existingWorld [
 	^ world
+]
+
+{ #category : 'body type' }
+CFPhysicsElement >> isDynamic [
+	^ self requireBodyState isDynamic
+]
+
+{ #category : 'body type' }
+CFPhysicsElement >> isStatic [
+	^ self requireBodyState isStatic
 ]
 
 { #category : 'worlds' }
@@ -52,25 +80,6 @@ CFPhysicsElement >> owningWorld [
 	^ nil
 ]
 
-{ #category : 'worlds' }
-CFPhysicsElement >> synchroniseWorldMembership [
-	| owningWorld |
-	owningWorld := self owningWorld.
-	world ifNotNil: [ world synchroniseMembership ].
-	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
-	^ owningWorld
-]
-
-
-{ #category : 'bodies' }
-CFPhysicsElement >> bodyState [
-	| owningWorld |
-	world ifNotNil: [ ^ nil ].
-	owningWorld := self owningWorld.
-	owningWorld ifNil: [ ^ nil ].
-	^ owningWorld bodyStateFor: element
-]
-
 { #category : 'bodies' }
 CFPhysicsElement >> position [
 	^ self requireBodyState position
@@ -89,7 +98,6 @@ CFPhysicsElement >> presentation [
 { #category : 'private - bodies' }
 CFPhysicsElement >> requireBodyState [
 	| owningWorld bodyState |
-	world ifNotNil: [ self error: 'A world owner is not a body in its own world' ].
 	owningWorld := self owningWorld.
 	owningWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	bodyState := owningWorld bodyStateFor: element.
@@ -110,7 +118,26 @@ CFPhysicsElement >> rotation: aNumber [
 	self requireBodyState rotation: aNumber
 ]
 
+{ #category : 'worlds' }
+CFPhysicsElement >> synchroniseWorldMembership [
+	| owningWorld |
+	owningWorld := self owningWorld.
+	world ifNotNil: [ world synchroniseMembership ].
+	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
+	^ owningWorld
+]
+
 { #category : 'bodies' }
 CFPhysicsElement >> translation: aPoint rotation: aNumber [
 	self requireBodyState translation: aPoint rotation: aNumber
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> velocity [
+	^ self requireBodyState velocity
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> velocity: aPoint [
+	self requireBodyState velocity: aPoint
 ]

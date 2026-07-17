@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -29,6 +29,16 @@ CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 		self collectMembersFrom: each into: aSet ]
 ]
 
+{ #category : 'accessing' }
+CFPhysicsWorld >> gravity [
+	^ gravity
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorld >> gravity: aPoint [
+	gravity := aPoint
+]
+
 { #category : 'testing' }
 CFPhysicsWorld >> includes: anElement [
 	^ members includes: anElement
@@ -38,7 +48,9 @@ CFPhysicsWorld >> includes: anElement [
 CFPhysicsWorld >> initialize [
 	super initialize.
 	members := IdentitySet new.
-	bodyStates := IdentityDictionary new
+	bodyStates := IdentityDictionary new.
+	gravity := 0 @ 1000.
+	stepDuration := 16 milliseconds
 ]
 
 { #category : 'accessing' }
@@ -60,6 +72,32 @@ CFPhysicsWorld >> owner: anElement [
 CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
 		(bodyStates removeKey: each) release ]
+]
+
+{ #category : 'stepping' }
+CFPhysicsWorld >> step [
+	| seconds |
+	self synchroniseMembership.
+	seconds := stepDuration asSeconds.
+	bodyStates valuesDo: [ :each |
+		each advanceBy: seconds gravity: gravity ].
+	^ self
+]
+
+{ #category : 'stepping' }
+CFPhysicsWorld >> step: aPositiveInteger [
+	aPositiveInteger timesRepeat: [ self step ].
+	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorld >> stepDuration [
+	^ stepDuration
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorld >> stepDuration: aDuration [
+	stepDuration := aDuration
 ]
 
 { #category : 'membership' }

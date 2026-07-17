@@ -67,3 +67,28 @@ CFPhysicsExamples >> manuallyPresentedBodyPose [
 	self assert: body physics presentation isAttached.
 	^ space
 ]
+
+
+{ #category : 'examples - stepping' }
+CFPhysicsExamples >> manuallySteppedFallingBody [
+	<gtExample>
+	| space worldElement body world |
+	space := BlSpace new.
+	worldElement := BlElement new
+		size: 600 @ 400;
+		yourself.
+	body := BlElement new
+		size: 50 @ 50;
+		background: Color blue;
+		yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body.
+	world := worldElement physics beWorld.
+	body physics.
+	world gravity: 0 @ 600.
+	world step: 30.
+	self assert: body physics isDynamic.
+	self assert: body physics position y > 0.
+	self assert: body physics velocity y > 0.
+	^ space
+]
