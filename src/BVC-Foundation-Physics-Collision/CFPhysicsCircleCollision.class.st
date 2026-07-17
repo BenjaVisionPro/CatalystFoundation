@@ -18,7 +18,7 @@ CFPhysicsCircleCollision class >> manifoldBetweenCircle: firstBody andCircle: se
 	delta := secondCentre - firstCentre.
 	distanceSquared := delta x squared + delta y squared.
 	radiusSum := firstBody shapeState radius + secondBody shapeState radius.
-	distanceSquared >= radiusSum squared ifTrue: [ ^ nil ].
+	distanceSquared > radiusSum squared ifTrue: [ ^ nil ].
 	distance := distanceSquared sqrt.
 	normal := distance = 0
 		ifTrue: [ 1 @ 0 ]
@@ -43,7 +43,7 @@ CFPhysicsCircleCollision class >> manifoldBetweenCircle: circleBody andRectangle
 	distanceSquared := delta x squared + delta y squared.
 	radius := circleBody shapeState radius.
 	distanceSquared > 0 ifTrue: [
-		distanceSquared >= radius squared ifTrue: [ ^ nil ].
+		distanceSquared > radius squared ifTrue: [ ^ nil ].
 		distance := distanceSquared sqrt.
 		normal := delta / distance.
 		penetration := radius - distance.

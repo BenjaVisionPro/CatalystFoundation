@@ -19,12 +19,12 @@ CFPhysicsRectangleCollision class >> manifoldBetween: firstBody and: secondBody 
 			normal := (secondCentre x >= firstCentre x)
 				ifTrue: [ 1 @ 0 ]
 				ifFalse: [ -1 @ 0 ].
-			penetration := overlap x ]
+			penetration := overlap x max: 0.0 ]
 		ifFalse: [
 			normal := (secondCentre y >= firstCentre y)
 				ifTrue: [ 0 @ 1 ]
 				ifFalse: [ 0 @ -1 ].
-			penetration := overlap y ].
+			penetration := overlap y max: 0.0 ].
 	point :=
 		((firstBounds minimum x max: secondBounds minimum x)
 			+ (firstBounds maximum x min: secondBounds maximum x) / 2.0)
