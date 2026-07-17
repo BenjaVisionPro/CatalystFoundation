@@ -64,7 +64,7 @@ CFPhysicsContact >> restitution [
 
 { #category : 'resolving' }
 CFPhysicsContact >> solvePosition [
-	| currentManifold inverseMassSum correction normal |
+	| currentManifold inverseMassSum correction normal effectivePenetration |
 	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
 	currentManifold := CFPhysicsCollision manifoldBetween: firstBody and: secondBody.
 	currentManifold ifNil: [ ^ self ].
@@ -72,8 +72,10 @@ CFPhysicsContact >> solvePosition [
 	manifold := currentManifold.
 	inverseMassSum := firstBody inverseMass + secondBody inverseMass.
 	inverseMassSum = 0 ifTrue: [ ^ self ].
+	effectivePenetration := (manifold penetration - self positionSlop) max: 0.0.
+	effectivePenetration = 0 ifTrue: [ ^ self ].
 	normal := manifold normal.
-	correction := normal * (manifold penetration / inverseMassSum).
+	correction := normal * (effectivePenetration / inverseMassSum).
 	firstBody translateBy: correction * firstBody inverseMass negated.
 	secondBody translateBy: correction * secondBody inverseMass
 ]
@@ -151,4 +153,9 @@ CFPhysicsContact >> prepareVelocityConstraintWithRestitutionThreshold: aThreshol
 CFPhysicsContact >> propagateAwakeState [
 	firstBody isAwake ifTrue: [ secondBody isSleeping ifTrue: [ secondBody wake ] ].
 	secondBody isAwake ifTrue: [ firstBody isSleeping ifTrue: [ firstBody wake ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> positionSlop [
+	^ 0.000001
 ]

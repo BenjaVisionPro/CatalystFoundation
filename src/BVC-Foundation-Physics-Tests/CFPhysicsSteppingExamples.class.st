@@ -604,3 +604,26 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 	self assert: manifold penetration equals: 0.0.
 	^ manifold
 ]
+
+
+{ #category : 'examples - rotation collision' }
+CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
+	<gtExample>
+	| owner body ground world contact |
+	owner := BlElement new.
+	body := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 60 @ 30;
+		yourself.
+	ground := BlElement new size: 400 @ 40; yourself.
+	owner addChild: body; addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 100 @ 80; rotation: Float pi / 6.
+	ground physics beStatic; position: 0 @ 200.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
+	self assert: body physics isSleeping.
+	self assert: world contacts size equals: 1.
+	contact := world contacts first.
+	self assert: contact isTouching.
+	^ contact
+]
