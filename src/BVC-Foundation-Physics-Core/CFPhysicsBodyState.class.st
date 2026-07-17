@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts' ],
+	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -16,7 +16,7 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 
 { #category : 'stepping' }
 CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
-	dynamic ifFalse: [ ^ self ].
+	(dynamic and: [ awake ]) ifFalse: [ ^ self ].
 	velocity := velocity + (gravityVector * seconds).
 	position := position + (velocity * seconds)
 ]
@@ -53,12 +53,15 @@ CFPhysicsBodyState >> aabb [
 
 { #category : 'body type' }
 CFPhysicsBodyState >> beDynamic [
-	dynamic := true
+	dynamic := true.
+	self wake
 ]
 
 { #category : 'body type' }
 CFPhysicsBodyState >> beStatic [
 	dynamic := false.
+	awake := false.
+	sleepTime := 0.0.
 	velocity := 0 @ 0
 ]
 
@@ -128,6 +131,8 @@ CFPhysicsBodyState >> initialize [
 	rotation := 0.
 	velocity := 0 @ 0.
 	dynamic := true.
+	awake := true.
+	sleepTime := 0.0.
 	contacts := IdentitySet new
 ]
 
@@ -154,6 +159,7 @@ CFPhysicsBodyState >> position [
 { #category : 'accessing' }
 CFPhysicsBodyState >> position: aPoint [
 	position := aPoint.
+	self wake.
 	self present
 ]
 
@@ -175,6 +181,7 @@ CFPhysicsBodyState >> rotation [
 { #category : 'accessing' }
 CFPhysicsBodyState >> rotation: aNumber [
 	rotation := aNumber.
+	self wake.
 	self present
 ]
 
@@ -206,6 +213,7 @@ CFPhysicsBodyState >> translateBy: aPoint [
 CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
 	position := aPoint.
 	rotation := aNumber.
+	self wake.
 	self present
 ]
 
@@ -217,7 +225,9 @@ CFPhysicsBodyState >> velocity [
 { #category : 'accessing' }
 CFPhysicsBodyState >> velocity: aPoint [
 	velocity := dynamic
-		ifTrue: [ aPoint ]
+		ifTrue: [
+			aPoint = (0 @ 0) ifFalse: [ self wake ].
+			aPoint ]
 		ifFalse: [ 0 @ 0 ]
 ]
 
@@ -229,4 +239,47 @@ CFPhysicsBodyState >> world [
 { #category : 'accessing' }
 CFPhysicsBodyState >> world: aWorld [
 	world := aWorld
+]
+
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> isAwake [
+	^ dynamic and: [ awake ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> isSleeping [
+	^ dynamic and: [ awake not ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> sleep [
+	dynamic ifFalse: [ ^ self ].
+	awake := false.
+	sleepTime := 0.0.
+	velocity := 0 @ 0
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> sleepTime [
+	^ sleepTime
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared requiredTime: requiredTime [
+	dynamic ifFalse: [ ^ self ].
+	((velocity x squared + velocity y squared) <= thresholdSquared)
+		ifTrue: [
+			sleepTime := sleepTime + seconds.
+			sleepTime >= requiredTime ifTrue: [ self sleep ] ]
+		ifFalse: [
+			sleepTime := 0.0.
+			awake := true ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> wake [
+	dynamic ifFalse: [ ^ self ].
+	awake := true.
+	sleepTime := 0.0
 ]

@@ -172,3 +172,24 @@ CFPhysicsElement >> velocity [
 CFPhysicsElement >> velocity: aPoint [
 	self requireBodyState velocity: aPoint
 ]
+
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> isAwake [
+	^ self requireBodyState isAwake
+]
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> isSleeping [
+	^ self requireBodyState isSleeping
+]
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> sleep [
+	self requireBodyState sleep
+]
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> wake [
+	self requireBodyState wake
+]

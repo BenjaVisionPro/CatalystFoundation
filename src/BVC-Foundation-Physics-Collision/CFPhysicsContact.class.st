@@ -63,16 +63,25 @@ CFPhysicsContact >> restitution [
 ]
 
 { #category : 'resolving' }
-CFPhysicsContact >> resolve [
-	| inverseMassSum correction normal point relativeVelocity normalVelocity impulseMagnitude oldImpulse tangent tangentVelocity tangentMagnitude oldTangent maximumFriction |
-	touching ifFalse: [ ^ self ].
+CFPhysicsContact >> solvePositionFraction: aFraction [
+	| inverseMassSum correction normal |
+	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
 	inverseMassSum := firstBody inverseMass + secondBody inverseMass.
 	inverseMassSum = 0 ifTrue: [ ^ self ].
 	normal := manifold normal.
-	correction := normal * (manifold penetration / inverseMassSum).
+	correction := normal * ((manifold penetration * aFraction) / inverseMassSum).
 	firstBody translateBy: correction * firstBody inverseMass negated.
-	secondBody translateBy: correction * secondBody inverseMass.
+	secondBody translateBy: correction * secondBody inverseMass
+]
+
+{ #category : 'resolving' }
+CFPhysicsContact >> solveVelocity [
+	| inverseMassSum normal point relativeVelocity normalVelocity impulseMagnitude oldImpulse tangent tangentVelocity tangentMagnitude oldTangent maximumFriction |
+	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
+	inverseMassSum := firstBody inverseMass + secondBody inverseMass.
+	inverseMassSum = 0 ifTrue: [ ^ self ].
 	manifold contactPoints ifEmpty: [ ^ self ].
+	normal := manifold normal.
 	point := manifold contactPoints first.
 	relativeVelocity := secondBody velocity - firstBody velocity.
 	normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
@@ -106,10 +115,16 @@ CFPhysicsContact >> updateWithManifold: aManifold [
 { #category : 'resolving' }
 CFPhysicsContact >> warmStart [
 	| point normal tangent impulse |
-	(touching and: [ manifold contactPoints notEmpty ]) ifFalse: [ ^ self ].
+	(touching and: [ self shouldSolve and: [ manifold contactPoints notEmpty ] ]) ifFalse: [ ^ self ].
 	point := manifold contactPoints first.
 	normal := manifold normal.
 	tangent := normal y negated @ normal x.
 	impulse := (normal * point normalImpulse) + (tangent * point tangentImpulse).
 	self applyImpulse: impulse
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> shouldSolve [
+	^ firstBody isAwake or: [ secondBody isAwake ]
 ]

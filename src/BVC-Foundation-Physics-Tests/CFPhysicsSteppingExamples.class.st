@@ -344,3 +344,68 @@ CFPhysicsSteppingExamples >> materialValuesBelongToShape [
 	self assert: material restitution equals: 0.4.
 	^ material
 ]
+
+
+{ #category : 'examples - solver' }
+CFPhysicsSteppingExamples >> worldExposesSolverIterations [
+	<gtExample>
+	| owner world |
+	owner := BlElement new.
+	world := owner physics beWorld.
+	world velocityIterations: 6; positionIterations: 2.
+	self assert: world velocityIterations equals: 6.
+	self assert: world positionIterations equals: 2.
+	^ world
+]
+
+{ #category : 'examples - sleeping' }
+CFPhysicsSteppingExamples >> settledBodyGoesToSleep [
+	<gtExample>
+	| owner body ground world |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world
+		stepDuration: 10 milliseconds;
+		gravity: 0 @ 100;
+		sleepTimeThreshold: 100 milliseconds;
+		step: 120.
+	self assert: body physics isSleeping.
+	self assert: body physics velocity equals: 0 @ 0.
+	^ body
+]
+
+{ #category : 'examples - sleeping' }
+CFPhysicsSteppingExamples >> assigningVelocityWakesSleepingBody [
+	<gtExample>
+	| body |
+	body := self settledBodyGoesToSleep.
+	body physics velocity: 10 @ 0.
+	self assert: body physics isAwake.
+	self assert: body physics velocity equals: 10 @ 0.
+	^ body
+]
+
+{ #category : 'examples - solver' }
+CFPhysicsSteppingExamples >> twoBodyStackRemainsOrdered [
+	<gtExample>
+	| owner lower upper ground world |
+	owner := BlElement new.
+	lower := BlElement new size: 20 @ 20; yourself.
+	upper := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: lower; addChild: upper; addChild: ground.
+	world := owner physics beWorld.
+	lower physics position: 10 @ 10.
+	upper physics position: 10 @ -15.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 180.
+	self assert: lower physics position y <= 20.0001.
+	self assert: upper physics position y <= lower physics position y - 19.9.
+	^ owner
+]

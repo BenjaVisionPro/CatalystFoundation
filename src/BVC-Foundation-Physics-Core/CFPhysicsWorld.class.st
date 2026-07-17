@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence', 'velocityIterations', 'positionIterations', 'sleepLinearThreshold', 'sleepTimeThreshold' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -67,7 +67,11 @@ CFPhysicsWorld >> initialize [
 	contactManager := CFPhysicsContactManager new.
 	nextBodySequence := 1.
 	gravity := 0 @ 1000.
-	stepDuration := 16 milliseconds
+	stepDuration := 16 milliseconds.
+	velocityIterations := 8.
+	positionIterations := 3.
+	sleepLinearThreshold := 0.1.
+	sleepTimeThreshold := 500 milliseconds
 ]
 
 { #category : 'accessing' }
@@ -110,13 +114,22 @@ CFPhysicsWorld >> resolveRectangleContactsAmong: bodies [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
-	| seconds bodies |
+	| seconds bodies sleepSeconds |
 	self synchroniseMembership.
 	seconds := stepDuration asMilliSeconds / 1000.0.
+	sleepSeconds := sleepTimeThreshold asMilliSeconds / 1000.0.
 	bodies := self bodyStatesInOrder.
 	bodies do: [ :each |
 		each advanceBy: seconds gravity: gravity ].
 	self resolveRectangleContactsAmong: bodies.
+	contactManager warmStart.
+	contactManager solveVelocityIterations: velocityIterations.
+	contactManager solvePositionIterations: positionIterations.
+	bodies do: [ :each |
+		each
+			updateSleepBy: seconds
+			linearThresholdSquared: sleepLinearThreshold squared
+			requiredTime: sleepSeconds ].
 	bodies do: [ :each | each present ].
 	^ self
 ]
@@ -149,4 +162,50 @@ CFPhysicsWorld >> synchroniseMembership [
 			self registerBodyFor: each ]) present ].
 	members := currentMembers.
 	^ members
+]
+
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> velocityIterations [
+	^ velocityIterations
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> velocityIterations: anInteger [
+	velocityIterations := anInteger max: 1
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> positionIterations [
+	^ positionIterations
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> positionIterations: anInteger [
+	positionIterations := anInteger max: 1
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepLinearThreshold [
+	^ sleepLinearThreshold
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepLinearThreshold: aNumber [
+	sleepLinearThreshold := aNumber max: 0.0
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepTimeThreshold [
+	^ sleepTimeThreshold
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepTimeThreshold: aDuration [
+	sleepTimeThreshold := aDuration
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> wakeAll [
+	bodyStates valuesDo: [ :each | each wake ]
 ]

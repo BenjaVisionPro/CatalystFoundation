@@ -81,6 +81,8 @@ CFPhysicsContactManager >> updateBodies: bodies [
 					contact := contactsByKey at: key ifAbsent: [ nil ].
 					contact
 						ifNil: [
+							contactFirst wake.
+							contactSecond wake.
 							contact := CFPhysicsContact
 								first: contactFirst
 								second: contactSecond
@@ -91,7 +93,26 @@ CFPhysicsContactManager >> updateBodies: bodies [
 						ifNotNil: [ contact updateWithManifold: manifold ] ] ] ] ].
 	(contactsByKey keys reject: [ :each | activeKeys includes: each ]) do: [ :each |
 		self removeContactAt: each ].
-	self contacts do: [ :each | each warmStart ].
-	self contacts do: [ :each | each resolve ].
 	^ self contacts
+]
+
+
+{ #category : 'solving' }
+CFPhysicsContactManager >> warmStart [
+	self contacts do: [ :each | each warmStart ]
+]
+
+{ #category : 'solving' }
+CFPhysicsContactManager >> solveVelocityIterations: anInteger [
+	anInteger timesRepeat: [
+		self contacts do: [ :each | each solveVelocity ] ]
+]
+
+{ #category : 'solving' }
+CFPhysicsContactManager >> solvePositionIterations: anInteger [
+	| fraction |
+	anInteger <= 0 ifTrue: [ ^ self ].
+	fraction := 1.0 / anInteger.
+	anInteger timesRepeat: [
+		self contacts do: [ :each | each solvePositionFraction: fraction ] ]
 ]
