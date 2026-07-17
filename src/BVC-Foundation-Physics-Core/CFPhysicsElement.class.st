@@ -47,6 +47,37 @@ CFPhysicsElement >> element: anElement [
 	element := anElement
 ]
 
+
+{ #category : 'material' }
+CFPhysicsElement >> density [
+	^ self requireBodyState density
+]
+
+{ #category : 'material' }
+CFPhysicsElement >> density: aNumber [
+	self requireBodyState density: aNumber
+]
+
+{ #category : 'material' }
+CFPhysicsElement >> friction [
+	^ self requireBodyState friction
+]
+
+{ #category : 'material' }
+CFPhysicsElement >> friction: aNumber [
+	self requireBodyState friction: aNumber
+]
+
+{ #category : 'material' }
+CFPhysicsElement >> restitution [
+	^ self requireBodyState restitution
+]
+
+{ #category : 'material' }
+CFPhysicsElement >> restitution: aNumber [
+	self requireBodyState restitution: aNumber
+]
+
 { #category : 'worlds' }
 CFPhysicsElement >> existingWorld [
 	^ world

@@ -187,3 +187,42 @@ CFPhysicsExamples >> circleSettlesOnStaticGround [
 	self assert: world contacts first manifold points size equals: 1.
 	^ space
 ]
+
+{ #category : 'examples - materials' }
+CFPhysicsExamples >> bouncingCircle [
+	<gtExample>
+	| space worldElement ball ground world |
+	space := BlSpace new.
+	worldElement := BlElement new size: 600 @ 400; yourself.
+	ball := BlElement new geometry: BlCircleGeometry new; size: 50 @ 50; background: Color blue; yourself.
+	ground := BlElement new size: 400 @ 40; background: Color gray; yourself.
+	space root addChild: worldElement.
+	worldElement addChild: ball.
+	worldElement addChild: ground.
+	world := worldElement physics beWorld.
+	ball physics position: 100 @ 149; velocity: 0 @ 200; restitution: 0.8.
+	ground physics beStatic; position: 0 @ 200; restitution: 0.8.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step.
+	self assert: ball physics velocity y < 0.
+	^ space
+]
+
+{ #category : 'examples - materials' }
+CFPhysicsExamples >> slidingRectangleWithFriction [
+	<gtExample>
+	| space worldElement body ground world initialSpeed |
+	space := BlSpace new.
+	worldElement := BlElement new size: 600 @ 400; yourself.
+	body := BlElement new size: 50 @ 50; background: Color blue; yourself.
+	ground := BlElement new size: 400 @ 40; background: Color gray; yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body.
+	worldElement addChild: ground.
+	world := worldElement physics beWorld.
+	body physics position: 100 @ 150; velocity: 200 @ 0; friction: 0.8.
+	ground physics beStatic; position: 0 @ 200; friction: 0.8.
+	initialSpeed := body physics velocity x.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 10.
+	self assert: body physics velocity x abs < initialSpeed abs.
+	^ space
+]

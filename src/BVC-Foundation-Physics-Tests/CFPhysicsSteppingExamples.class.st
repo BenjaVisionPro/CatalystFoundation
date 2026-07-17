@@ -271,3 +271,76 @@ CFPhysicsSteppingExamples >> circleRectangleContactPersistsAcrossSteps [
 	self assert: contact continuedThisStep.
 	^ contact
 ]
+
+{ #category : 'examples - materials' }
+CFPhysicsSteppingExamples >> cachedNormalImpulsePersistsAcrossSteps [
+	<gtExample>
+	| owner body ground world contact firstImpulse secondImpulse |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
+	contact := world contacts first.
+	firstImpulse := contact manifold contactPoints first normalImpulse.
+	world step.
+	secondImpulse := contact manifold contactPoints first normalImpulse.
+	self assert: world contacts first == contact.
+	self assert: firstImpulse > 0.
+	self assert: secondImpulse > 0.
+	^ contact
+]
+
+{ #category : 'examples - materials' }
+CFPhysicsSteppingExamples >> restitutionProducesBounce [
+	<gtExample>
+	| owner ball ground world |
+	owner := BlElement new.
+	ball := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: ball.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	ball physics position: 10 @ 20.5; velocity: 0 @ 100; restitution: 1.0.
+	ground physics beStatic; position: 0 @ 40; restitution: 1.0.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 0; step.
+	self assert: ball physics velocity y < 0.
+	^ ball
+]
+
+{ #category : 'examples - materials' }
+CFPhysicsSteppingExamples >> frictionReducesTangentialVelocity [
+	<gtExample>
+	| owner body ground world |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 20; velocity: 100 @ 0; friction: 1.0.
+	ground physics beStatic; position: 0 @ 40; friction: 1.0.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step.
+	self assert: body physics velocity x abs < 100.
+	^ body
+]
+
+{ #category : 'examples - materials' }
+CFPhysicsSteppingExamples >> materialValuesBelongToShape [
+	<gtExample>
+	| owner body world material |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 30; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	body physics density: 2; friction: 0.7; restitution: 0.4.
+	material := body physics bodyState shapeState material.
+	self assert: material density equals: 2.0.
+	self assert: material friction equals: 0.7.
+	self assert: material restitution equals: 0.4.
+	^ material
+]

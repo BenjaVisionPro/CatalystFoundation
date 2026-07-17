@@ -91,6 +91,7 @@ CFPhysicsContactManager >> updateBodies: bodies [
 						ifNotNil: [ contact updateWithManifold: manifold ] ] ] ] ].
 	(contactsByKey keys reject: [ :each | activeKeys includes: each ]) do: [ :each |
 		self removeContactAt: each ].
+	self contacts do: [ :each | each warmStart ].
 	self contacts do: [ :each | each resolve ].
 	^ self contacts
 ]

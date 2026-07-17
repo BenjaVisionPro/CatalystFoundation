@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',
-	#instVars : [ 'element' ],
+	#instVars : [ 'element', 'material' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -41,6 +41,17 @@ CFPhysicsShapeState >> element [
 { #category : 'accessing' }
 CFPhysicsShapeState >> element: anElement [
 	element := anElement
+]
+
+{ #category : 'initialization' }
+CFPhysicsShapeState >> initialize [
+	super initialize.
+	material := CFPhysicsMaterial new
+]
+
+{ #category : 'material' }
+CFPhysicsShapeState >> material [
+	^ material
 ]
 
 { #category : 'geometry' }

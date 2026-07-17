@@ -82,7 +82,43 @@ CFPhysicsBodyState >> extent [
 
 { #category : 'mass' }
 CFPhysicsBodyState >> inverseMass [
-	^ dynamic ifTrue: [ 1.0 ] ifFalse: [ 0.0 ]
+	| area mass |
+	dynamic ifFalse: [ ^ 0.0 ].
+	area := self shapeState isCircle
+		ifTrue: [ Float pi * self shapeState radius squared ]
+		ifFalse: [ self shapeState extent x * self shapeState extent y ].
+	mass := area * self shapeState material density.
+	^ mass > 0 ifTrue: [ 1.0 / mass ] ifFalse: [ 0.0 ]
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> friction [
+	^ self shapeState material friction
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> friction: aNumber [
+	self shapeState material friction: aNumber
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> restitution [
+	^ self shapeState material restitution
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> restitution: aNumber [
+	self shapeState material restitution: aNumber
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> density [
+	^ self shapeState material density
+]
+
+{ #category : 'material' }
+CFPhysicsBodyState >> density: aNumber [
+	self shapeState material density: aNumber
 ]
 
 { #category : 'initialization' }
