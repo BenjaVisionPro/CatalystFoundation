@@ -104,9 +104,15 @@ CFPhysicsWorld >> resolveRectangleContactsAmong: bodies [
 			first := bodies at: firstIndex.
 			second := bodies at: secondIndex.
 			(first isStatic and: [ second isStatic ]) ifFalse: [
-				contact := CFPhysicsRectangleCollision
-					contactBetween: first
-					and: second.
+				contact := first isStatic
+					ifTrue: [
+						CFPhysicsRectangleCollision
+							contactBetween: second
+							and: first ]
+					ifFalse: [
+						CFPhysicsRectangleCollision
+							contactBetween: first
+							and: second ].
 				contact ifNotNil: [
 					contacts add: contact.
 					contact resolve ] ] ] ]
