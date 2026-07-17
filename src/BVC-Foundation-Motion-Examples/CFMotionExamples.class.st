@@ -520,11 +520,12 @@ CFMotionExamples >> timelinePlacesATrackAfterAnotherTrackEnds [
 { #category : 'examples - timeline execution' }
 CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
 	<gtExample>
-	| space element timeline fade translation scale motion |
+	| space element timeline fade translation scale motion easing |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
+	easing := BlDecelerateInterpolator factor: 1.4.
 	timeline := CFMotionTimeline new.
 	fade := (CFMotionTimelineTrack
 		on: (CFMotionPropertyTrack
@@ -548,8 +549,10 @@ CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
 	space time wait: 500 milliSeconds.
 	space pulse.
 	self assert: (element opacity closeTo: 1.0).
-	self assert: (translation motionTrack presentation translation x closeTo: 20.0).
-	self assert: (scale motionTrack presentation scale x closeTo: 1.15).
+	self assert: (translation motionTrack presentation translation x
+		closeTo: 40.0 * (easing interpolate: 0.5)).
+	self assert: (scale motionTrack presentation scale x
+		closeTo: 1.0 + (0.2 * (easing interpolate: 0.75))).
 	self assert: motion isRunning.
 	space time wait: 600 milliSeconds.
 	space pulse.
