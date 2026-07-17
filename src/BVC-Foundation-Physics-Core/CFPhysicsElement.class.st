@@ -60,3 +60,57 @@ CFPhysicsElement >> synchroniseWorldMembership [
 	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
 	^ owningWorld
 ]
+
+
+{ #category : 'bodies' }
+CFPhysicsElement >> bodyState [
+	| owningWorld |
+	world ifNotNil: [ ^ nil ].
+	owningWorld := self owningWorld.
+	owningWorld ifNil: [ ^ nil ].
+	^ owningWorld bodyStateFor: element
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> position [
+	^ self requireBodyState position
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> position: aPoint [
+	self requireBodyState position: aPoint
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> presentation [
+	^ self requireBodyState presentation
+]
+
+{ #category : 'private - bodies' }
+CFPhysicsElement >> requireBodyState [
+	| owningWorld bodyState |
+	world ifNotNil: [ self error: 'A world owner is not a body in its own world' ].
+	owningWorld := self owningWorld.
+	owningWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	bodyState := owningWorld bodyStateFor: element.
+	bodyState ifNil: [
+		owningWorld synchroniseMembership.
+		bodyState := owningWorld bodyStateFor: element ].
+	bodyState ifNil: [ self error: 'The element is not tracked by its physics world' ].
+	^ bodyState
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> rotation [
+	^ self requireBodyState rotation
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> rotation: aNumber [
+	self requireBodyState rotation: aNumber
+]
+
+{ #category : 'bodies' }
+CFPhysicsElement >> translation: aPoint rotation: aNumber [
+	self requireBodyState translation: aPoint rotation: aNumber
+]

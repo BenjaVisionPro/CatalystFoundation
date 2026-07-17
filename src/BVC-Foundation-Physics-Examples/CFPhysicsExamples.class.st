@@ -42,3 +42,28 @@ CFPhysicsExamples >> physicsWorldWithOneBody [
 	self assert: (world includes: body).
 	^ root
 ]
+
+
+{ #category : 'examples - presentation' }
+CFPhysicsExamples >> manuallyPresentedBodyPose [
+	<gtExample>
+	| space worldElement body world |
+	space := BlSpace new.
+	worldElement := BlElement new
+		size: 600 @ 400;
+		yourself.
+	body := BlElement new
+		size: 80 @ 50;
+		background: Color blue;
+		yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body.
+	world := worldElement physics beWorld.
+	body physics.
+	world synchroniseMembership.
+	body physics translation: 240 @ 140 rotation: 0.35.
+	self assert: body physics position equals: 240 @ 140.
+	self assert: body physics rotation equals: 0.35.
+	self assert: body physics presentation isAttached.
+	^ space
+]

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members' ],
+	#instVars : [ 'owner', 'members', 'bodyStates' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -13,6 +13,22 @@ CFPhysicsWorld class >> on: anElement [
 		yourself
 ]
 
+{ #category : 'body states' }
+CFPhysicsWorld >> bodyStateFor: anElement [
+	^ bodyStates at: anElement ifAbsent: [ nil ]
+]
+
+{ #category : 'membership' }
+CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
+	| physics |
+	physics := anElement existingPhysics.
+	physics ifNotNil: [
+		physics owningWorld == self ifTrue: [ aSet add: anElement ].
+		physics isWorld ifTrue: [ ^ self ] ].
+	anElement children do: [ :each |
+		self collectMembersFrom: each into: aSet ]
+]
+
 { #category : 'testing' }
 CFPhysicsWorld >> includes: anElement [
 	^ members includes: anElement
@@ -21,7 +37,8 @@ CFPhysicsWorld >> includes: anElement [
 { #category : 'initialization' }
 CFPhysicsWorld >> initialize [
 	super initialize.
-	members := IdentitySet new
+	members := IdentitySet new.
+	bodyStates := IdentityDictionary new
 ]
 
 { #category : 'accessing' }
@@ -40,22 +57,21 @@ CFPhysicsWorld >> owner: anElement [
 ]
 
 { #category : 'membership' }
+CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
+	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
+		(bodyStates removeKey: each) release ]
+]
+
+{ #category : 'membership' }
 CFPhysicsWorld >> synchroniseMembership [
 	| currentMembers |
 	currentMembers := IdentitySet new.
 	owner children do: [ :each |
 		self collectMembersFrom: each into: currentMembers ].
+	self retireBodiesAbsentFrom: currentMembers.
+	currentMembers do: [ :each |
+		(bodyStates at: each ifAbsentPut: [
+			CFPhysicsBodyState element: each world: self ]) present ].
 	members := currentMembers.
 	^ members
-]
-
-{ #category : 'membership' }
-CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
-	| physics |
-	physics := anElement existingPhysics.
-	physics ifNotNil: [
-		physics owningWorld == self ifTrue: [ aSet add: anElement ].
-		physics isWorld ifTrue: [ ^ self ] ].
-	anElement children do: [ :each |
-		self collectMembersFrom: each into: aSet ]
 ]
