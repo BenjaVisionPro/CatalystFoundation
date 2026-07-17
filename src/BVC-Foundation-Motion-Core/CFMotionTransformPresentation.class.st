@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionTransformPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'channel', 'translation', 'scale', 'rotation', 'active' ],
+	#instVars : [ 'element', 'channel', 'translation', 'scale', 'rotation', 'transformOrigin', 'active' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -25,26 +25,26 @@ CFMotionTransformPresentation >> initialize [
 	translation := 0 @ 0.
 	scale := 1 @ 1.
 	rotation := 0.
+	transformOrigin := BlAffineTransformationCenterOrigin new.
 	active := false
 ]
 
 { #category : 'private - applying' }
 CFMotionTransformPresentation >> addContributionTo: aCompositeTransformation [
-	| motionTransformation origin |
+	| motionTransformation |
 	motionTransformation := BlAffineCompositeTransformation new.
-	origin := BlAffineTransformationCenterOrigin new.
 	scale = (1 @ 1) ifFalse: [
 		motionTransformation addTransformation:
-			((BlScalingTransformation scale: scale) origin: origin) ].
+			((BlScalingTransformation scale: scale) origin: transformOrigin) ].
 	rotation isZero ifFalse: [
 		motionTransformation addTransformation:
 			(BlRotationTransformation new
 				angle: rotation;
 				axis: BlVector zAxis;
-				origin: origin) ].
+				origin: transformOrigin) ].
 	translation isZero ifFalse: [
 		motionTransformation addTransformation:
-			((BlTranslationTransformation translation: translation) origin: origin) ].
+			((BlTranslationTransformation translation: translation) origin: transformOrigin) ].
 	motionTransformation hasTransformations ifTrue: [
 		aCompositeTransformation add: (BlElementLocalTransformation with: motionTransformation) ]
 ]
@@ -142,3 +142,9 @@ CFMotionTransformPresentation >> translation: aPoint [
 	translation := aPoint.
 	self apply
 ]
+
+{ #category : 'accessing' }
+CFMotionTransformPresentation >> transformOrigin [ ^ transformOrigin ]
+
+{ #category : 'accessing' }
+CFMotionTransformPresentation >> transformOrigin: anOrigin [ transformOrigin := anOrigin ]

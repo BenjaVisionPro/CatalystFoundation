@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionFrozenTransformContribution',
 	#superclass : 'Object',
-	#instVars : [ 'translation', 'scale', 'rotation' ],
+	#instVars : [ 'translation', 'scale', 'rotation', 'transformOrigin' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -17,21 +17,20 @@ CFMotionFrozenTransformContribution class >> scale: aScale rotation: aRotation t
 
 { #category : 'private - applying' }
 CFMotionFrozenTransformContribution >> addContributionTo: aCompositeTransformation [
-	| motionTransformation origin |
+	| motionTransformation |
 	motionTransformation := BlAffineCompositeTransformation new.
-	origin := BlAffineTransformationCenterOrigin new.
 	scale = (1 @ 1) ifFalse: [
 		motionTransformation addTransformation:
-			((BlScalingTransformation scale: scale) origin: origin) ].
+			((BlScalingTransformation scale: scale) origin: transformOrigin) ].
 	rotation isZero ifFalse: [
 		motionTransformation addTransformation:
 			(BlRotationTransformation new
 				angle: rotation;
 				axis: BlVector zAxis;
-				origin: origin) ].
+				origin: transformOrigin) ].
 	translation isZero ifFalse: [
 		motionTransformation addTransformation:
-			((BlTranslationTransformation translation: translation) origin: origin) ].
+			((BlTranslationTransformation translation: translation) origin: transformOrigin) ].
 	motionTransformation hasTransformations ifTrue: [
 		aCompositeTransformation add: (BlElementLocalTransformation with: motionTransformation) ]
 ]
@@ -50,3 +49,6 @@ CFMotionFrozenTransformContribution >> rotation: aNumber [ rotation := aNumber ]
 
 { #category : 'accessing' }
 CFMotionFrozenTransformContribution >> translation: aPoint [ translation := aPoint ]
+
+{ #category : 'accessing' }
+CFMotionFrozenTransformContribution >> transformOrigin: anOrigin [ transformOrigin := anOrigin ]

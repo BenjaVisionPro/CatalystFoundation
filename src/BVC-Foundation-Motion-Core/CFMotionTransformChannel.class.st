@@ -54,6 +54,7 @@ CFMotionTransformChannel >> adopt: aPresentation [
 		scale: aPresentation scale
 		rotation: aPresentation rotation
 		translation: aPresentation translation.
+	frozenContribution transformOrigin: aPresentation transformOrigin.
 	presentations at: index put: frozenContribution.
 	self hasActivePresentations
 		ifTrue: [ self apply ]

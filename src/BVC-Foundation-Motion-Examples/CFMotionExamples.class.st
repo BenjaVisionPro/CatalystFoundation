@@ -1110,6 +1110,7 @@ CFMotionExamples >> inverseScalePresentsSourceExtentOverLaidOutDestination [
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	presentation := CFMotionTransformPresentation on: element.
+	presentation transformOrigin: BlAffineTransformationTopLeftOrigin new.
 	presentation scale: (source bounds extent x / destination bounds extent x)
 		@ (source bounds extent y / destination bounds extent y).
 	presented := CFMotionGeometrySnapshot of: element in: space root.
@@ -1131,6 +1132,7 @@ CFMotionExamples >> inverseTransformPresentsSourceBoundsOverMovedAndResizedDesti
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	presentation := CFMotionTransformPresentation on: element.
+	presentation transformOrigin: BlAffineTransformationTopLeftOrigin new.
 	presentation scale: (source bounds extent x / destination bounds extent x)
 		@ (source bounds extent y / destination bounds extent y).
 	presentation translation: source bounds origin - destination bounds origin.

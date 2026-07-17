@@ -56,14 +56,16 @@ CFMotionGeometryTrack >> applyProgress: aProgress [
 
 { #category : 'playing' }
 CFMotionGeometryTrack >> captureOrigin [
-	presentation := CFMotionTransformPresentation on: element
+	presentation := CFMotionTransformPresentation on: element.
+	presentation transformOrigin: BlAffineTransformationTopLeftOrigin new
 ]
 
 { #category : 'playing' }
 CFMotionGeometryTrack >> captureOriginIn: aCoordinator [
 	presentation := CFMotionTransformPresentation
 		on: element
-		using: (aCoordinator transformChannelFor: element)
+		using: (aCoordinator transformChannelFor: element).
+	presentation transformOrigin: BlAffineTransformationTopLeftOrigin new
 ]
 
 { #category : 'accessing' }
