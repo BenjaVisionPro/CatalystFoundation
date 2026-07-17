@@ -278,3 +278,26 @@ CFPhysicsExamples >> roundedRectangleSettlesOnRoundedGround [
 	self assert: world contacts size equals: 1.
 	^ space
 ]
+
+
+{ #category : 'examples - rotation collision' }
+CFPhysicsExamples >> rotatedRoundedRectangleSettlesOnGround [
+	<gtExample>
+	| space worldElement body ground world |
+	space := BlSpace new.
+	worldElement := BlElement new size: 600 @ 400; yourself.
+	body := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 60 @ 30;
+		background: Color blue;
+		yourself.
+	ground := BlElement new size: 400 @ 40; background: Color gray; yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body; addChild: ground.
+	world := worldElement physics beWorld.
+	body physics position: 100 @ 80; rotation: Float pi / 6.
+	ground physics beStatic; position: 0 @ 200.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
+	self assert: world contacts notEmpty.
+	^ space
+]

@@ -31,9 +31,11 @@ CFPhysicsGJK class >> supportBetween: firstBody and: secondBody inDirection: dir
 	| firstPoint secondPoint |
 	firstPoint := firstBody shapeState
 		supportPointAt: firstBody position
+		rotation: firstBody rotation
 		inDirection: direction.
 	secondPoint := secondBody shapeState
 		supportPointAt: secondBody position
+		rotation: secondBody rotation
 		inDirection: direction negated.
 	^ CFPhysicsSupportPoint
 		point: firstPoint - secondPoint

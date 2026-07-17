@@ -548,3 +548,34 @@ CFPhysicsSteppingExamples >> separatedRoundedRectanglesDoNotProduceManifold [
 	self assert: manifold isNil.
 	^ first
 ]
+
+
+{ #category : 'examples - rotation collision' }
+CFPhysicsSteppingExamples >> rotatedRectangleAABBUsesRotatedGeometry [
+	<gtExample>
+	| owner body world aabb |
+	owner := BlElement new.
+	body := BlElement new size: 40 @ 20; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	body physics rotation: Float pi / 2.
+	aabb := body physics bodyState aabb.
+	self assert: (aabb extent distanceTo: 20 @ 40) < 0.00001.
+	^ aabb
+]
+
+{ #category : 'examples - rotation collision' }
+CFPhysicsSteppingExamples >> rotatedRectangleProducesContact [
+	<gtExample>
+	| owner body ground world |
+	owner := BlElement new.
+	body := BlElement new size: 40 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body; addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 30 @ 20; rotation: Float pi / 4.
+	ground physics beStatic; position: 0 @ 40.
+	world gravity: 0 @ 0; step.
+	self assert: world contacts notEmpty.
+	^ world contacts first
+]

@@ -21,17 +21,18 @@ CFPhysicsShapeState >> aabb [
 
 { #category : 'collision' }
 CFPhysicsShapeState >> aabbAt: aPosition [
-	| vertices minimum maximum |
-	self isCircle ifTrue: [
-		^ CFPhysicsAABB
-			position: (self circleCentreAt: aPosition) - self radius asPoint
-			extent: (self radius * 2.0) asPoint ].
-	vertices := self collisionVerticesAt: aPosition.
-	minimum := vertices first.
-	maximum := vertices first.
-	vertices allButFirst do: [ :each |
-		minimum := (minimum x min: each x) @ (minimum y min: each y).
-		maximum := (maximum x max: each x) @ (maximum y max: each y) ].
+	^ self aabbAt: aPosition rotation: 0
+]
+
+{ #category : 'collision' }
+CFPhysicsShapeState >> aabbAt: aPosition rotation: anAngle [
+	| left right top bottom minimum maximum |
+	left := self supportPointAt: aPosition rotation: anAngle inDirection: -1 @ 0.
+	right := self supportPointAt: aPosition rotation: anAngle inDirection: 1 @ 0.
+	top := self supportPointAt: aPosition rotation: anAngle inDirection: 0 @ -1.
+	bottom := self supportPointAt: aPosition rotation: anAngle inDirection: 0 @ 1.
+	minimum := left x @ top y.
+	maximum := right x @ bottom y.
 	^ CFPhysicsAABB position: minimum extent: maximum - minimum
 ]
 
@@ -93,9 +94,15 @@ CFPhysicsShapeState >> radius [
 
 { #category : 'polygon' }
 CFPhysicsShapeState >> collisionVerticesAt: aPosition [
-	| localVertices |
-	localVertices := self localCollisionVertices.
-	^ localVertices collect: [ :each | each + aPosition ]
+	^ self collisionVerticesAt: aPosition rotation: 0
+]
+
+{ #category : 'polygon' }
+CFPhysicsShapeState >> collisionVerticesAt: aPosition rotation: anAngle [
+	| centre |
+	centre := self extent / 2.0.
+	^ self localCollisionVertices collect: [ :each |
+		aPosition + (self rotate: each around: centre by: anAngle) ]
 ]
 
 { #category : 'polygon' }
@@ -148,15 +155,50 @@ CFPhysicsShapeState >> centreAt: aPosition [
 
 { #category : 'convex support' }
 CFPhysicsShapeState >> supportPointAt: aPosition inDirection: aDirection [
-	| direction |
+	^ self supportPointAt: aPosition rotation: 0 inDirection: aDirection
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> supportPointAt: aPosition rotation: anAngle inDirection: aDirection [
+	| direction localDirection localPoint centre |
 	direction := aDirection r = 0
 		ifTrue: [ 1 @ 0 ]
 		ifFalse: [ aDirection / aDirection r ].
 	self isCircle ifTrue: [
 		^ (self circleCentreAt: aPosition) + (direction * self radius) ].
+	localDirection := self rotateVector: direction by: anAngle negated.
+	localPoint := self localSupportPointInDirection: localDirection.
+	centre := self extent / 2.0.
+	^ aPosition + (self rotate: localPoint around: centre by: anAngle)
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> localSupportPointInDirection: direction [
 	self isRoundedRectangle ifTrue: [
-		^ self roundedRectangleSupportPointAt: aPosition inDirection: direction ].
-	^ self supportPointOf: (self collisionVerticesAt: aPosition) inDirection: direction
+		^ self roundedRectangleLocalSupportPointInDirection: direction ].
+	^ self supportPointOf: self localCollisionVertices inDirection: direction
+]
+
+{ #category : 'geometry' }
+CFPhysicsShapeState >> rotate: aPoint around: aCentre by: anAngle [
+	| translated cosine sine |
+	anAngle = 0 ifTrue: [ ^ aPoint ].
+	translated := aPoint - aCentre.
+	cosine := anAngle cos.
+	sine := anAngle sin.
+	^ aCentre +
+		(((translated x * cosine) - (translated y * sine))
+		@ ((translated x * sine) + (translated y * cosine)))
+]
+
+{ #category : 'geometry' }
+CFPhysicsShapeState >> rotateVector: aPoint by: anAngle [
+	| cosine sine |
+	anAngle = 0 ifTrue: [ ^ aPoint ].
+	cosine := anAngle cos.
+	sine := anAngle sin.
+	^ ((aPoint x * cosine) - (aPoint y * sine))
+		@ ((aPoint x * sine) + (aPoint y * cosine))
 ]
 
 { #category : 'convex support' }
@@ -186,14 +228,19 @@ CFPhysicsShapeState >> roundedRectangleRadius [
 
 { #category : 'rounded rectangle' }
 CFPhysicsShapeState >> roundedRectangleSupportPointAt: aPosition inDirection: direction [
+	^ aPosition + (self roundedRectangleLocalSupportPointInDirection: direction)
+]
+
+{ #category : 'rounded rectangle' }
+CFPhysicsShapeState >> roundedRectangleLocalSupportPointInDirection: direction [
 	| anExtent radius innerPoint |
 	anExtent := self extent.
 	radius := self roundedRectangleRadius.
 	radius = 0 ifTrue: [
-		^ self supportPointOf: (self collisionVerticesAt: aPosition) inDirection: direction ].
+		^ self supportPointOf: self localCollisionVertices inDirection: direction ].
 	innerPoint :=
 		(direction x >= 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ])
 		@
 		(direction y >= 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ]).
-	^ aPosition + innerPoint + (direction * radius)
+	^ innerPoint + (direction * radius)
 ]

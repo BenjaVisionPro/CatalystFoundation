@@ -7,6 +7,8 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
+	(firstBody rotation ~= 0 or: [ secondBody rotation ~= 0 ])
+		ifTrue: [ ^ CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody ].
 	(firstBody shapeState isRoundedRectangle or: [ secondBody shapeState isRoundedRectangle ])
 		ifTrue: [ ^ CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody ].
 	firstBody shapeState isCircle ifTrue: [
