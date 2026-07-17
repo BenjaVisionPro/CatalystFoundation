@@ -63,13 +63,17 @@ CFPhysicsContact >> restitution [
 ]
 
 { #category : 'resolving' }
-CFPhysicsContact >> solvePositionFraction: aFraction [
-	| inverseMassSum correction normal |
+CFPhysicsContact >> solvePosition [
+	| currentManifold inverseMassSum correction normal |
 	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
+	currentManifold := CFPhysicsCollision manifoldBetween: firstBody and: secondBody.
+	currentManifold ifNil: [ ^ self ].
+	currentManifold preserveImpulsesFrom: manifold.
+	manifold := currentManifold.
 	inverseMassSum := firstBody inverseMass + secondBody inverseMass.
 	inverseMassSum = 0 ifTrue: [ ^ self ].
 	normal := manifold normal.
-	correction := normal * ((manifold penetration * aFraction) / inverseMassSum).
+	correction := normal * (manifold penetration / inverseMassSum).
 	firstBody translateBy: correction * firstBody inverseMass negated.
 	secondBody translateBy: correction * secondBody inverseMass
 ]
@@ -85,7 +89,7 @@ CFPhysicsContact >> solveVelocity [
 	point := manifold contactPoints first.
 	relativeVelocity := secondBody velocity - firstBody velocity.
 	normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
-	impulseMagnitude := (normalVelocity negated * (1.0 + self restitution)) / inverseMassSum.
+	impulseMagnitude := (point velocityBias - normalVelocity) / inverseMassSum.
 	oldImpulse := point normalImpulse.
 	point normalImpulse: (oldImpulse + impulseMagnitude max: 0.0).
 	self applyImpulse: normal * (point normalImpulse - oldImpulse).
@@ -127,4 +131,24 @@ CFPhysicsContact >> warmStart [
 { #category : 'private - solving' }
 CFPhysicsContact >> shouldSolve [
 	^ firstBody isAwake or: [ secondBody isAwake ]
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> prepareVelocityConstraintWithRestitutionThreshold: aThreshold [
+	| point normal relativeVelocity normalVelocity |
+	(touching and: [ self shouldSolve and: [ manifold contactPoints notEmpty ] ]) ifFalse: [ ^ self ].
+	point := manifold contactPoints first.
+	normal := manifold normal.
+	relativeVelocity := secondBody velocity - firstBody velocity.
+	normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
+	point velocityBias: (normalVelocity < aThreshold negated
+		ifTrue: [ normalVelocity negated * self restitution ]
+		ifFalse: [ 0.0 ])
+]
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> propagateAwakeState [
+	firstBody isAwake ifTrue: [ secondBody isSleeping ifTrue: [ secondBody wake ] ].
+	secondBody isAwake ifTrue: [ firstBody isSleeping ifTrue: [ firstBody wake ] ]
 ]

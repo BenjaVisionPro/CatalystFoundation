@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence', 'velocityIterations', 'positionIterations', 'sleepLinearThreshold', 'sleepTimeThreshold' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence', 'velocityIterations', 'positionIterations', 'sleepLinearThreshold', 'sleepTimeThreshold', 'restitutionThreshold' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -70,6 +70,7 @@ CFPhysicsWorld >> initialize [
 	stepDuration := 16 milliseconds.
 	velocityIterations := 8.
 	positionIterations := 3.
+	restitutionThreshold := 1.0.
 	sleepLinearThreshold := 0.1.
 	sleepTimeThreshold := 500 milliseconds
 ]
@@ -122,6 +123,7 @@ CFPhysicsWorld >> step [
 	bodies do: [ :each |
 		each advanceBy: seconds gravity: gravity ].
 	self resolveRectangleContactsAmong: bodies.
+	contactManager prepareVelocityConstraintsWithRestitutionThreshold: restitutionThreshold.
 	contactManager warmStart.
 	contactManager solveVelocityIterations: velocityIterations.
 	contactManager solvePositionIterations: positionIterations.
@@ -208,4 +210,15 @@ CFPhysicsWorld >> sleepTimeThreshold: aDuration [
 { #category : 'sleeping' }
 CFPhysicsWorld >> wakeAll [
 	bodyStates valuesDo: [ :each | each wake ]
+]
+
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> restitutionThreshold [
+	^ restitutionThreshold
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> restitutionThreshold: aNumber [
+	restitutionThreshold := aNumber asFloat max: 0.0
 ]

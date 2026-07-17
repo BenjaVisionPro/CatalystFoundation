@@ -110,9 +110,13 @@ CFPhysicsContactManager >> solveVelocityIterations: anInteger [
 
 { #category : 'solving' }
 CFPhysicsContactManager >> solvePositionIterations: anInteger [
-	| fraction |
-	anInteger <= 0 ifTrue: [ ^ self ].
-	fraction := 1.0 / anInteger.
 	anInteger timesRepeat: [
-		self contacts do: [ :each | each solvePositionFraction: fraction ] ]
+		self contacts do: [ :each | each solvePosition ] ]
+]
+
+{ #category : 'solving' }
+CFPhysicsContactManager >> prepareVelocityConstraintsWithRestitutionThreshold: aThreshold [
+	self contacts do: [ :each |
+		each propagateAwakeState.
+		each prepareVelocityConstraintWithRestitutionThreshold: aThreshold ]
 ]
