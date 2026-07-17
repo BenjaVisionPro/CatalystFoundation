@@ -21,25 +21,13 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third
-				penetration: (self effectivePenetrationFor: supportDistance))
+				penetration: supportDistance)
 				points: { contactPoint };
 				yourself ].
 		polytope add: support beforeIndex: edge fifth ].
 	^ nil
 ]
 
-
-{ #category : 'collision tolerance' }
-CFPhysicsEPA class >> effectivePenetrationFor: aDistance [
-	^ aDistance <= self linearSlop
-		ifTrue: [ 0.0 ]
-		ifFalse: [ aDistance ]
-]
-
-{ #category : 'collision tolerance' }
-CFPhysicsEPA class >> linearSlop [
-	^ 0.1
-]
 
 { #category : 'private' }
 CFPhysicsEPA class >> closestEdgeOf: polytope [
