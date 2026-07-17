@@ -98,6 +98,104 @@ CFMotionGalleryExamples >> crossFade [
 	^ card
 ]
 
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> fadeIn [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color blue alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Fade in' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request starts the Motion.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color blue;
+		opacity: 0.0;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion fadeIn.
+	^ card
+]
+
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> fadeInWithDuration [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color purple alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Fade in with configuration' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'The block configures before the Motion starts.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color purple;
+		opacity: 0.0;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion fadeIn: [ :builder | builder duration: 600 milliSeconds ].
+	^ card
+]
+
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> fadeOut [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color red alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Fade out' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request starts the Motion.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color red;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion fadeOut.
+	^ card
+]
+
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> fallAndFadeOut [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color orange alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Fall and fade out' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request coordinates two tracks.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color orange;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion fallAndFadeOut.
+	^ card
+]
+
 { #category : 'examples - gallery' }
 CFMotionGalleryExamples >> interactionAptitude [
 	<gtExample>
@@ -202,6 +300,31 @@ CFMotionGalleryExamples >> riseAndFade [
 						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
 ]
 
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> riseAndFadeIn [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color green alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Rise and fade in' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request coordinates two tracks.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color green;
+		opacity: 0.0;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion riseAndFadeIn.
+	^ card
+]
+
 { #category : 'examples - gallery' }
 CFMotionGalleryExamples >> rotation [
 	<gtExample>
@@ -259,6 +382,55 @@ CFMotionGalleryExamples >> scaleAndFade [
 								to: (active ifTrue: [ 0.8 @ 0.8 ] ifFalse: [ 1 @ 1 ]) }
 						duration: 600 milliSeconds
 						easing: (BlDecelerateInterpolator factor: 1.4) ] ]
+]
+
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> scaleAndFadeIn [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color purple alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Scale and fade in' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request coordinates two tracks.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color purple;
+		opacity: 0.0;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion scaleAndFadeIn.
+	^ card
+]
+
+{ #category : 'examples - public gallery' }
+CFMotionGalleryExamples >> scaleAndFadeOut [
+	<gtExample>
+	| space card tile |
+	space := BlSpace new.
+	card := BlElement new
+		size: 330 @ 180;
+		background: (Color red alpha: 0.12);
+		clipChildren: true;
+		yourself.
+	card addChild: (self label: 'Scale and fade out' at: 12 @ 12 size: 16 color: Color black).
+	card addChild: (self label: 'One public request coordinates two tracks.' at: 12 @ 36 size: 11 color: Color gray).
+	tile := BlElement new
+		size: 56 @ 56;
+		relocate: 137 @ 82;
+		background: Color red;
+		yourself.
+	card addChild: tile.
+	space root addChild: card.
+	space pulse.
+	tile motion scaleAndFadeOut.
+	^ card
 ]
 
 { #category : 'gallery' }

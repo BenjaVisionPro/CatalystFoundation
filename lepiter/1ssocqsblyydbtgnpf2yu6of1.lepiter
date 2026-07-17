@@ -39,7 +39,7 @@
 				"paragraphStyle" : {
 					"__type" : "textStyle"
 				},
-				"string" : "# Motion\n\nMotion presents changes to real Bloc state. Layout and model state remain authoritative; tracks own only the temporary presentation.\n\n`CFMotion` is the live, running Motion. `CFMotionBuilder` configures a Motion and `build` returns it ready to `start`. Standard builders such as `fadeIn`, `riseAndFadeIn`, and `compress` are available on the class side.\n\n## Contents\n\n- [[Motion / Properties]]\n  - Opacity, scale, translation, rotation, and composed transforms\n- [[Motion / Layout and composition]]\n  - Relocation and extent Motion without scaling child layout\n- [[Motion / Interaction and adoption]]\n  - Button press/release and preview-to-committed adoption\n\nEvery demonstration is a separate, editable example snippet: change its code, accept it, and replay the live preview beside it."
+				"string" : "# Motion\n\nMotion presents changes to real Bloc state. Layout and model state remain authoritative; tracks own only the temporary presentation.\n\n`CFMotion` is the live, running Motion. `CFMotionBuilder` is the common configuration and construction surface. Simple named requests start immediately; custom Motion remains an explicit `build` then `start` flow.\n\n## Public gallery\n\n- [[Motion / Named motions]]\n  - Direct fades plus composed rise/fall-and-fade and scale-and-fade entrance and exit\n\nEach snippet returns its visual fixture after issuing one public Motion request. It does not own a click handler or retain a current Motion merely to replay the demonstration."
 			}
 		]
 	},

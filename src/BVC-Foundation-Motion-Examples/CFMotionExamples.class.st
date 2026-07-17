@@ -281,6 +281,140 @@ CFMotionExamples >> customMotionBuildThenStartRemainsExplicit [
 	^ motion
 ]
 
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedRiseAndFadeInBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion riseAndFadeIn.
+	self assert: operation isRunning.
+	self assert: operation tracks size equals: 2.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedFallAndFadeOutBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	operation := element motion fallAndFadeOut.
+	self assert: operation isRunning.
+	self assert: operation tracks size equals: 2.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 0.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedRiseAndFadeInCanRetargetThroughItsReturnedMotion [
+	<gtExample>
+	| space element operation retargeted |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion riseAndFadeIn.
+	space pulse.
+	space time wait: 90 milliSeconds.
+	space pulse.
+	retargeted := operation
+		retarget: {
+			CFMotionPropertyTrack
+				on: element
+				property: CFMotionOpacityProperty uniqueInstance
+				target: 0.0.
+			CFMotionTranslationTrack on: element from: 0 @ 0 to: 0 @ 12 }
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: retargeted == operation description: 'Retargeting must keep the named Motion instance'.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted description: 'The retargeted named Motion must complete'.
+	self assert: (element opacity closeTo: 0.0) description: 'The retargeted named Motion must reach its opacity target'.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedScaleAndFadeInBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion scaleAndFadeIn.
+	self assert: operation isRunning.
+	self assert: operation tracks size equals: 2.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedScaleAndFadeOutBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	operation := element motion scaleAndFadeOut.
+	self assert: operation isRunning.
+	self assert: operation tracks size equals: 2.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 0.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedScaleAndFadeInCanRetargetThroughItsReturnedMotion [
+	<gtExample>
+	| space element operation retargeted |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion scaleAndFadeIn.
+	space pulse.
+	space time wait: 90 milliSeconds.
+	space pulse.
+	retargeted := operation
+		retarget: {
+			CFMotionPropertyTrack
+				on: element
+				property: CFMotionOpacityProperty uniqueInstance
+				target: 0.0.
+			CFMotionScaleTrack on: element from: 1 @ 1 to: 0.8 @ 0.8 }
+		duration: 1 second
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	self assert: retargeted == operation description: 'Retargeting must keep the named Motion instance'.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted description: 'The retargeted named Motion must complete'.
+	self assert: (element opacity closeTo: 0.0) description: 'The retargeted named Motion must reach its opacity target'.
+	^ operation
+]
+
 { #category : 'examples - motions' }
 CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	<gtExample>

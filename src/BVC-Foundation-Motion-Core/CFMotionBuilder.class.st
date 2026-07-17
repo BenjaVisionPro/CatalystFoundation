@@ -197,6 +197,46 @@ CFMotionBuilder >> fadeOut [
 	^ self build start
 ]
 
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> fallAndFadeOut [
+	^ (CFMotionBuilder fallAndFadeOut
+		element: element;
+		duration: duration;
+		easing: easing;
+		build)
+		start
+]
+
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> riseAndFadeIn [
+	^ (CFMotionBuilder riseAndFadeIn
+		element: element;
+		duration: duration;
+		easing: easing;
+		build)
+		start
+]
+
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> scaleAndFadeIn [
+	^ (CFMotionBuilder scaleAndFadeIn
+		element: element;
+		duration: duration;
+		easing: easing;
+		build)
+		start
+]
+
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> scaleAndFadeOut [
+	^ (CFMotionBuilder scaleAndFadeOut
+		element: element;
+		duration: duration;
+		easing: easing;
+		build)
+		start
+]
+
 { #category : 'playing' }
 CFMotionBuilder >> geometry: aRectangle [
 	^ self mutateLayout: [
