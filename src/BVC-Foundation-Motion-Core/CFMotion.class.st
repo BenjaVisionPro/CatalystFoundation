@@ -22,6 +22,15 @@ CFMotion class >> composedOf: aCollection [
 	^ aMotion
 ]
 
+{ #category : 'instance creation' }
+CFMotion class >> timeline: aTimeline coordinator: aCoordinator [
+	aTimeline resolveTemporalLayout.
+	^ (self coordinator: aCoordinator tracks: aTimeline tracks)
+		duration: aTimeline duration;
+		easing: BlEasing linear;
+		yourself
+]
+
 { #category : 'initialization' }
 CFMotion >> initialize [
 	super initialize.
@@ -225,6 +234,7 @@ CFMotion >> reversed [
 { #category : 'playing' }
 CFMotion >> start [
 	(self hasComponentMotions) ifTrue: [ ^ self startComponentMotions ].
+	tracks do: [ :each | each validateForExecution ].
 	self claimTracks.
 	tracks do: [ :each | each captureOriginIn: coordinator ].
 	self startFromCurrentPresentation.

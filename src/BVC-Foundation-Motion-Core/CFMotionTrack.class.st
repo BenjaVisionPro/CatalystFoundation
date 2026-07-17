@@ -34,3 +34,6 @@ CFMotionTrack >> restoreOrigin [ self subclassResponsibility ]
 
 { #category : 'controlling' }
 CFMotionTrack >> reversed [ self subclassResponsibility ]
+
+{ #category : 'private - validation' }
+CFMotionTrack >> validateForExecution [ ]

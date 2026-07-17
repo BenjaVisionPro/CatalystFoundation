@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionTimelineTrack',
-	#superclass : 'Object',
-	#instVars : [ 'timeline', 'duration', 'repeatInterval', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
+	#superclass : 'CFMotionTrack',
+	#instVars : [ 'timeline', 'motionTrack', 'duration', 'easing', 'repeatInterval', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -11,6 +11,42 @@ CFMotionTimelineTrack class >> in: aTimeline [
 	^ self new
 		timeline: aTimeline;
 		yourself
+]
+
+{ #category : 'instance creation' }
+CFMotionTimelineTrack class >> on: aMotionTrack in: aTimeline [
+	^ (self in: aTimeline)
+		motionTrack: aMotionTrack;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMotionTimelineTrack >> animationTarget [
+	^ motionTrack animationTarget
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> applyDestination [
+	motionTrack applyDestination
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> applyProgress: aProgress [
+	| elapsedTime |
+	elapsedTime := timeline duration * aProgress.
+	elapsedTime < resolvedStart ifTrue: [ ^ self ].
+	elapsedTime >= resolvedEnd ifTrue: [ ^ motionTrack applyProgress: 1.0 ].
+	motionTrack applyProgress: (easing interpolate: (elapsedTime - resolvedStart) / duration)
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> captureOrigin [
+	motionTrack captureOrigin
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> captureOriginIn: aCoordinator [
+	motionTrack captureOriginIn: aCoordinator
 ]
 
 { #category : 'private - resolving' }
@@ -81,6 +117,7 @@ CFMotionTimelineTrack >> initialize [
 	super initialize.
 	startOffset := 0 milliSeconds.
 	endOffset := 0 milliSeconds.
+	easing := BlDecelerateInterpolator factor: 1.4.
 	hasExplicitStartPlacement := false.
 	hasEndPlacement := false
 ]
@@ -90,6 +127,32 @@ CFMotionTimelineTrack >> isFinite [
 	duration ifNil: [ ^ false ].
 	repeatInterval ifNil: [ ^ true ].
 	^ hasEndPlacement
+]
+
+{ #category : 'testing' }
+CFMotionTimelineTrack >> isAtDestination [
+	^ resolvedStart = (0 milliSeconds) and: [ motionTrack isAtDestination ]
+]
+
+{ #category : 'accessing' }
+CFMotionTimelineTrack >> motionTrack [
+	^ motionTrack
+]
+
+{ #category : 'private - initialization' }
+CFMotionTimelineTrack >> motionTrack: aMotionTrack [
+	motionTrack := aMotionTrack.
+	^ self
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> preserveCurrentPresentation [
+	motionTrack preserveCurrentPresentation
+]
+
+{ #category : 'accessing' }
+CFMotionTimelineTrack >> propertyKey [
+	^ motionTrack propertyKey
 ]
 
 { #category : 'testing' }
@@ -179,6 +242,11 @@ CFMotionTimelineTrack >> repeatsEvery: anInterval [
 	^ self
 ]
 
+{ #category : 'playing' }
+CFMotionTimelineTrack >> prepareFromCurrentPresentation [
+	motionTrack prepareFromCurrentPresentation
+]
+
 { #category : 'accessing' }
 CFMotionTimelineTrack >> resolvedEnd [
 	^ resolvedEnd
@@ -187,6 +255,16 @@ CFMotionTimelineTrack >> resolvedEnd [
 { #category : 'accessing' }
 CFMotionTimelineTrack >> resolvedStart [
 	^ resolvedStart
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> restoreOrigin [
+	motionTrack restoreOrigin
+]
+
+{ #category : 'controlling' }
+CFMotionTimelineTrack >> reversed [
+	^ self class on: motionTrack reversed in: timeline
 ]
 
 { #category : 'accessing' }
@@ -236,4 +314,12 @@ CFMotionTimelineTrack >> timeline: aTimeline [
 CFMotionTimelineTrack >> validateAnchor: anAnchor [
 	(anAnchor isIn: timeline) ifFalse: [
 		self error: 'A Motion track anchor must belong to its timeline' ]
+]
+
+{ #category : 'private - validation' }
+CFMotionTimelineTrack >> validateForExecution [
+	repeatInterval ifNotNil: [
+		self error: 'Repeated Motion tracks are not executable yet' ].
+	motionTrack ifNil: [
+		self error: 'A Motion timeline track needs a visual track before it can execute' ]
 ]

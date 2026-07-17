@@ -517,6 +517,46 @@ CFMotionExamples >> timelinePlacesATrackAfterAnotherTrackEnds [
 	^ timeline
 ]
 
+{ #category : 'examples - timeline execution' }
+CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
+	<gtExample>
+	| space element timeline fade translation scale motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	fade := (CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		in: timeline)
+		duration: 400 milliSeconds.
+	translation := (CFMotionTimelineTrack
+		on: (CFMotionTranslationTrack on: element from: 0 @ 0 to: 40 @ 0)
+		in: timeline)
+		duration: 1 second.
+	scale := (CFMotionTimelineTrack
+		on: (CFMotionScaleTrack on: element from: 1 @ 1 to: 1.2 @ 1.2)
+		in: timeline)
+		duration: 400 milliSeconds;
+		starts: 200 milliSeconds after: timeline start.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	self assert: motion tracks equals: { fade. translation. scale }.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 1.0).
+	self assert: (translation motionTrack presentation translation x closeTo: 20.0).
+	self assert: (scale motionTrack presentation scale x closeTo: 1.15).
+	self assert: motion isRunning.
+	space time wait: 600 milliSeconds.
+	space pulse.
+	self assert: motion isCompleted.
+	^ motion
+]
+
 { #category : 'examples - motions' }
 CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	<gtExample>
