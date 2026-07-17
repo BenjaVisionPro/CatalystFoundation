@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic' ],
+	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -18,8 +18,18 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
 	dynamic ifFalse: [ ^ self ].
 	velocity := velocity + (gravityVector * seconds).
-	position := position + (velocity * seconds).
-	self present
+	position := position + (velocity * seconds)
+]
+
+
+{ #category : 'velocity' }
+CFPhysicsBodyState >> addVelocity: aPoint [
+	dynamic ifTrue: [ velocity := velocity + aPoint ]
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyState >> aabb [
+	^ shapeState aabbAt: position
 ]
 
 { #category : 'body type' }
@@ -41,7 +51,19 @@ CFPhysicsBodyState >> element [
 { #category : 'accessing' }
 CFPhysicsBodyState >> element: anElement [
 	element := anElement.
-	presentation := CFPhysicsPresentation on: anElement
+	presentation := CFPhysicsPresentation on: anElement.
+	shapeState := CFPhysicsShapeState on: anElement
+]
+
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> extent [
+	^ element extent
+]
+
+{ #category : 'mass' }
+CFPhysicsBodyState >> inverseMass [
+	^ dynamic ifTrue: [ 1.0 ] ifFalse: [ 0.0 ]
 ]
 
 { #category : 'initialization' }
@@ -98,6 +120,34 @@ CFPhysicsBodyState >> rotation [
 CFPhysicsBodyState >> rotation: aNumber [
 	rotation := aNumber.
 	self present
+]
+
+
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> shapeState [
+	^ shapeState
+]
+
+{ #category : 'ordering' }
+CFPhysicsBodyState >> sequence [
+	^ sequence
+]
+
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> shapeState [
+	^ shapeState
+]
+
+{ #category : 'ordering' }
+CFPhysicsBodyState >> sequence: anInteger [
+	sequence := anInteger
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyState >> translateBy: aPoint [
+	position := position + aPoint
 ]
 
 { #category : 'presenting' }

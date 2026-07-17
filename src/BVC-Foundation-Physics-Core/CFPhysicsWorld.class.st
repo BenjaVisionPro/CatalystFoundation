@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contacts', 'nextBodySequence' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -18,6 +18,12 @@ CFPhysicsWorld >> bodyStateFor: anElement [
 	^ bodyStates at: anElement ifAbsent: [ nil ]
 ]
 
+{ #category : 'body states' }
+CFPhysicsWorld >> bodyStatesInOrder [
+	^ bodyStates values sorted: [ :first :second |
+		first sequence < second sequence ]
+]
+
 { #category : 'membership' }
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
@@ -27,6 +33,11 @@ CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 		physics isWorld ifTrue: [ ^ self ] ].
 	anElement children do: [ :each |
 		self collectMembersFrom: each into: aSet ]
+]
+
+{ #category : 'collision' }
+CFPhysicsWorld >> contacts [
+	^ contacts asArray
 ]
 
 { #category : 'accessing' }
@@ -49,6 +60,8 @@ CFPhysicsWorld >> initialize [
 	super initialize.
 	members := IdentitySet new.
 	bodyStates := IdentityDictionary new.
+	contacts := OrderedCollection new.
+	nextBodySequence := 1.
 	gravity := 0 @ 1000.
 	stepDuration := 16 milliseconds
 ]
@@ -68,19 +81,48 @@ CFPhysicsWorld >> owner: anElement [
 	owner := anElement
 ]
 
+{ #category : 'body states' }
+CFPhysicsWorld >> registerBodyFor: anElement [
+	| body |
+	body := CFPhysicsBodyState element: anElement world: self.
+	body sequence: nextBodySequence.
+	nextBodySequence := nextBodySequence + 1.
+	^ body
+]
+
 { #category : 'membership' }
 CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
 		(bodyStates removeKey: each) release ]
 ]
 
+{ #category : 'collision' }
+CFPhysicsWorld >> resolveRectangleContactsAmong: bodies [
+	contacts := OrderedCollection new.
+	1 to: bodies size do: [ :firstIndex |
+		firstIndex + 1 to: bodies size do: [ :secondIndex |
+			| first second contact |
+			first := bodies at: firstIndex.
+			second := bodies at: secondIndex.
+			(first isStatic and: [ second isStatic ]) ifFalse: [
+				contact := CFPhysicsRectangleCollision
+					contactBetween: first
+					and: second.
+				contact ifNotNil: [
+					contacts add: contact.
+					contact resolve ] ] ] ]
+]
+
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
-	| seconds |
+	| seconds bodies |
 	self synchroniseMembership.
 	seconds := stepDuration asMilliSeconds / 1000.0.
-	bodyStates valuesDo: [ :each |
+	bodies := self bodyStatesInOrder.
+	bodies do: [ :each |
 		each advanceBy: seconds gravity: gravity ].
+	self resolveRectangleContactsAmong: bodies.
+	bodies do: [ :each | each present ].
 	^ self
 ]
 
@@ -109,7 +151,7 @@ CFPhysicsWorld >> synchroniseMembership [
 	self retireBodiesAbsentFrom: currentMembers.
 	currentMembers do: [ :each |
 		(bodyStates at: each ifAbsentPut: [
-			CFPhysicsBodyState element: each world: self ]) present ].
+			self registerBodyFor: each ]) present ].
 	members := currentMembers.
 	^ members
 ]

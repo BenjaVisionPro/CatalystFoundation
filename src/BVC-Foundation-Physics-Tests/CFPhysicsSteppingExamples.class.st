@@ -61,3 +61,62 @@ CFPhysicsSteppingExamples >> worldOwnerCanRemainBodyOfAncestorWorld [
 	self assert: nested physics position equals: 0.05 @ 0.
 	^ nested
 ]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> dynamicRectangleStopsOnStaticRectangle [
+	<gtExample>
+	| owner body ground world |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 0.
+	ground physics
+		beStatic;
+		position: 0 @ 40.
+	world
+		stepDuration: 10 milliseconds;
+		gravity: 0 @ 100;
+		step: 100.
+	self assert: (body physics position distanceTo: 10 @ 20) < 0.000001.
+	self assert: (body physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: world contacts size equals: 1.
+	self assert: world contacts first normal equals: 0 @ 1.
+	^ body
+]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> separatedRectanglesProduceNoContact [
+	<gtExample>
+	| owner first second world |
+	owner := BlElement new.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChild: first.
+	owner addChild: second.
+	world := owner physics beWorld.
+	first physics position: 0 @ 0.
+	second physics
+		beStatic;
+		position: 100 @ 100.
+	world gravity: 0 @ 0.
+	world step.
+	self assert: world contacts isEmpty.
+	^ world
+]
+
+{ #category : 'examples - collision' }
+CFPhysicsSteppingExamples >> shapeStateUsesElementExtent [
+	<gtExample>
+	| owner body world shape |
+	owner := BlElement new.
+	body := BlElement new size: 30 @ 40; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	shape := body physics bodyState shapeState.
+	self assert: shape extent equals: 30 @ 40.
+	^ shape
+]

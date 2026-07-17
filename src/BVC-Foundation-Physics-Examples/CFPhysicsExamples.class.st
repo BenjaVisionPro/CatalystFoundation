@@ -92,3 +92,37 @@ CFPhysicsExamples >> manuallySteppedFallingBody [
 	self assert: body physics velocity y > 0.
 	^ space
 ]
+
+{ #category : 'examples - collision' }
+CFPhysicsExamples >> rectangleSettlesOnStaticGround [
+	<gtExample>
+	| space worldElement body ground world |
+	space := BlSpace new.
+	worldElement := BlElement new
+		size: 600 @ 400;
+		yourself.
+	body := BlElement new
+		size: 50 @ 50;
+		background: Color blue;
+		yourself.
+	ground := BlElement new
+		size: 400 @ 40;
+		background: Color gray;
+		yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body.
+	worldElement addChild: ground.
+	world := worldElement physics beWorld.
+	body physics position: 100 @ 0.
+	ground physics
+		beStatic;
+		position: 0 @ 200.
+	world
+		stepDuration: 10 milliseconds;
+		gravity: 0 @ 600;
+		step: 120.
+	self assert: (body physics position distanceTo: 100 @ 150) < 0.000001.
+	self assert: (body physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: world contacts size equals: 1.
+	^ space
+]
