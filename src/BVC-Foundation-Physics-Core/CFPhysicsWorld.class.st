@@ -27,10 +27,9 @@ CFPhysicsWorld >> bodyStatesInOrder [
 { #category : 'membership' }
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
-	physics := anElement existingPhysics.
-	physics ifNotNil: [
-		physics owningWorld == self ifTrue: [ aSet add: anElement ].
-		physics isWorld ifTrue: [ ^ self ] ].
+	physics := anElement physics.
+	physics owningWorld == self ifTrue: [ aSet add: anElement ].
+	physics isWorld ifTrue: [ ^ self ].
 	anElement children do: [ :each |
 		self collectMembersFrom: each into: aSet ]
 ]
