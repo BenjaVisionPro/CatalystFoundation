@@ -24,7 +24,7 @@ CFPhysicsExamples >> nestedPhysicsWorlds [
 	nestedWorld synchroniseMembership.
 	self assert: (outerWorld includes: outerBody).
 	self assert: (outerWorld includes: nestedWorldElement).
-	self deny: (outerWorld includes: nestedBody).
+	self assert: (outerWorld includes: nestedBody) not.
 	self assert: (nestedWorld includes: nestedBody).
 	^ root
 ]

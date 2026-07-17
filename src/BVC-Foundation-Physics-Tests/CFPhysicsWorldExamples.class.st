@@ -18,7 +18,7 @@ CFPhysicsWorldExamples >> nearestAncestorWorldOwnsElement [
 	nestedWorld := nested physics beWorld.
 	body physics.
 	self assert: body physics owningWorld == nestedWorld.
-	self deny: body physics owningWorld == outerWorld.
+	self assert: (body physics owningWorld == outerWorld) not.
 	^ body
 ]
 
@@ -39,7 +39,7 @@ CFPhysicsWorldExamples >> reparentingTransfersMembership [
 	secondOwner addChild: body.
 	firstWorld synchroniseMembership.
 	secondWorld synchroniseMembership.
-	self deny: (firstWorld includes: body).
+	self assert: (firstWorld includes: body) not.
 	self assert: (secondWorld includes: body).
 	self assert: body physics owningWorld == secondWorld.
 	^ body
@@ -57,7 +57,7 @@ CFPhysicsWorldExamples >> worldOwnerBelongsToAncestorWorldOnly [
 	outerWorld synchroniseMembership.
 	nestedWorld synchroniseMembership.
 	self assert: (outerWorld includes: nested).
-	self deny: (nestedWorld includes: nested).
+	self assert: (nestedWorld includes: nested) not.
 	self assert: nested physics owningWorld == outerWorld.
 	^ nested
 ]
