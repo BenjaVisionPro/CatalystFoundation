@@ -18,7 +18,7 @@ CFPhysicsPolygonCollision class >> manifoldBetween: firstBody and: secondBody [
 		ifTrue: [ bestAxis := bestAxis negated ].
 	point := ((self supportPointOf: firstVertices inDirection: bestAxis)
 		+ (self supportPointOf: secondVertices inDirection: bestAxis negated)) / 2.0.
-	^ (CFPhysicsManifold normal: bestAxis penetration: bestOverlap max: 0.0)
+	^ (CFPhysicsManifold normal: bestAxis penetration: (bestOverlap max: 0.0))
 		points: { point };
 		yourself
 ]
@@ -47,7 +47,7 @@ CFPhysicsPolygonCollision class >> manifoldBetweenCircle: circleBody andPolygon:
 	(self dot: (self centreOf: vertices) - circleCentre with: normal) < 0
 		ifTrue: [ normal := normal negated ].
 	point := circleCentre + (normal * radius).
-	^ (CFPhysicsManifold normal: normal penetration: penetration max: 0.0)
+	^ (CFPhysicsManifold normal: normal penetration: (penetration max: 0.0))
 		points: { point };
 		yourself
 ]
