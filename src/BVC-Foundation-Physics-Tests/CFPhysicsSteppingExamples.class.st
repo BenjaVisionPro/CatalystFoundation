@@ -409,3 +409,68 @@ CFPhysicsSteppingExamples >> twoBodyStackRemainsOrdered [
 	self assert: upper physics position y <= (lower physics position y - 19.9).
 	^ owner
 ]
+
+{ #category : 'examples - polygon collision' }
+CFPhysicsSteppingExamples >> convexPolygonShapeUsesItsVertices [
+	<gtExample>
+	| owner polygon world shape |
+	owner := BlElement new.
+	polygon := BlElement new
+		geometry: (BlPolygonGeometry vertices: { 0 @ 20. 20 @ 0. 40 @ 20. 20 @ 40 });
+		size: 40 @ 40;
+		yourself.
+	owner addChild: polygon.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	shape := polygon physics bodyState shapeState.
+	self assert: shape isPolygon.
+	self assert: shape localCollisionVertices size equals: 4.
+	self assert: shape area equals: 800.0.
+	self assert: shape aabb extent equals: 40 @ 40.
+	^ shape
+]
+
+{ #category : 'examples - polygon collision' }
+CFPhysicsSteppingExamples >> dynamicPolygonStopsOnStaticRectangle [
+	<gtExample>
+	| owner polygon ground world contact |
+	owner := BlElement new.
+	polygon := BlElement new
+		geometry: (BlPolygonGeometry vertices: { 0 @ 20. 20 @ 0. 40 @ 20. 20 @ 40 });
+		size: 40 @ 40;
+		yourself.
+	ground := BlElement new size: 120 @ 20; yourself.
+	owner addChild: polygon.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	polygon physics position: 20 @ 0.
+	ground physics beStatic; position: 0 @ 60.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 120.
+	contact := world contacts first.
+	self assert: polygon physics position y <= 20.0001.
+	self assert: contact normal equals: 0 @ 1.
+	self assert: contact manifold points size equals: 1.
+	^ contact
+]
+
+{ #category : 'examples - polygon collision' }
+CFPhysicsSteppingExamples >> circleContactsConvexPolygon [
+	<gtExample>
+	| owner circle polygon world contact |
+	owner := BlElement new.
+	circle := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	polygon := BlElement new
+		geometry: (BlPolygonGeometry vertices: { 0 @ 20. 20 @ 0. 40 @ 20. 20 @ 40 });
+		size: 40 @ 40;
+		yourself.
+	owner addChild: circle.
+	owner addChild: polygon.
+	world := owner physics beWorld.
+	circle physics position: 10 @ 10.
+	polygon physics beStatic; position: 25 @ 0.
+	world gravity: 0 @ 0; step.
+	contact := world contacts first.
+	self assert: contact manifold notNil.
+	self assert: contact normal x > 0.
+	^ contact
+]

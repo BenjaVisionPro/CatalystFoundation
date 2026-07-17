@@ -10,8 +10,8 @@ CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
 	firstBody shapeState isCircle ifTrue: [
 		secondBody shapeState isCircle ifTrue: [
 			^ CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andCircle: secondBody ].
-		^ CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andRectangle: secondBody ].
+		^ CFPhysicsPolygonCollision manifoldBetweenCircle: firstBody andPolygon: secondBody ].
 	secondBody shapeState isCircle ifTrue: [
-		^ CFPhysicsCircleCollision manifoldBetweenRectangle: firstBody andCircle: secondBody ].
-	^ CFPhysicsRectangleCollision manifoldBetween: firstBody and: secondBody
+		^ CFPhysicsPolygonCollision manifoldBetweenPolygon: firstBody andCircle: secondBody ].
+	^ CFPhysicsPolygonCollision manifoldBetween: firstBody and: secondBody
 ]

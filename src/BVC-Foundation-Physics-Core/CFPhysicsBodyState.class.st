@@ -87,9 +87,7 @@ CFPhysicsBodyState >> extent [
 CFPhysicsBodyState >> inverseMass [
 	| area mass |
 	dynamic ifFalse: [ ^ 0.0 ].
-	area := self shapeState isCircle
-		ifTrue: [ Float pi * self shapeState radius squared ]
-		ifFalse: [ self shapeState extent x * self shapeState extent y ].
+	area := self shapeState area.
 	mass := area * self shapeState material density.
 	^ mass > 0 ifTrue: [ 1.0 / mass ] ifFalse: [ 0.0 ]
 ]

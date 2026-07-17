@@ -226,3 +226,26 @@ CFPhysicsExamples >> slidingRectangleWithFriction [
 	self assert: body physics velocity x abs < initialSpeed abs.
 	^ space
 ]
+
+{ #category : 'examples - polygons' }
+CFPhysicsExamples >> fallingConvexPolygon [
+	<gtExample>
+	| space worldElement polygon ground world |
+	space := BlSpace new.
+	worldElement := BlElement new size: 600 @ 400; yourself.
+	polygon := BlElement new
+		geometry: (BlPolygonGeometry vertices: { 0 @ 25. 25 @ 0. 50 @ 25. 25 @ 50 });
+		size: 50 @ 50;
+		background: Color blue;
+		yourself.
+	ground := BlElement new size: 400 @ 40; background: Color gray; yourself.
+	space root addChild: worldElement.
+	worldElement addChild: polygon.
+	worldElement addChild: ground.
+	world := worldElement physics beWorld.
+	polygon physics position: 100 @ 0.
+	ground physics beStatic; position: 0 @ 200.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
+	self assert: world contacts notEmpty.
+	^ space
+]
