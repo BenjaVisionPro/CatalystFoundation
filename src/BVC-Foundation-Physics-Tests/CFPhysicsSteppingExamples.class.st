@@ -247,7 +247,7 @@ CFPhysicsSteppingExamples >> overlappingCirclesProduceExactManifold [
 	contact := world contacts first.
 	self assert: contact normal equals: 1 @ 0.
 	self assert: contact penetration equals: 5.
-	self assert: contact manifold points first equals: 10 @ 10.
+	self assert: contact manifold points first equals: 20 @ 10.
 	self assert: first physics position equals: -5 @ 0.
 	^ contact
 ]

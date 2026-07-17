@@ -13,6 +13,12 @@ CFPhysicsShapeState class >> on: anElement [
 		yourself
 ]
 
+
+{ #category : 'collision' }
+CFPhysicsShapeState >> aabb [
+	^ self aabbAt: 0 @ 0
+]
+
 { #category : 'collision' }
 CFPhysicsShapeState >> aabbAt: aPosition [
 	self isCircle ifTrue: [
