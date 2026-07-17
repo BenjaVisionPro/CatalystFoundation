@@ -78,7 +78,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 CFPhysicsWorld >> step [
 	| seconds |
 	self synchroniseMembership.
-	seconds := stepDuration asSeconds.
+	seconds := stepDuration asMilliSeconds / 1000.0.
 	bodyStates valuesDo: [ :each |
 		each advanceBy: seconds gravity: gravity ].
 	^ self
