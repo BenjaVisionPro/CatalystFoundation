@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contacts', 'nextBodySequence' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -36,7 +36,12 @@ CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 
 { #category : 'collision' }
 CFPhysicsWorld >> contacts [
-	^ contacts asArray
+	^ contactManager contacts
+]
+
+{ #category : 'collision' }
+CFPhysicsWorld >> endedContacts [
+	^ contactManager endedContacts
 ]
 
 { #category : 'accessing' }
@@ -59,7 +64,7 @@ CFPhysicsWorld >> initialize [
 	super initialize.
 	members := IdentitySet new.
 	bodyStates := IdentityDictionary new.
-	contacts := OrderedCollection new.
+	contactManager := CFPhysicsContactManager new.
 	nextBodySequence := 1.
 	gravity := 0 @ 1000.
 	stepDuration := 16 milliseconds
@@ -92,30 +97,15 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 { #category : 'membership' }
 CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
-		(bodyStates removeKey: each) release ]
+		| body |
+		body := bodyStates removeKey: each.
+		contactManager removeBody: body.
+		body release ]
 ]
 
 { #category : 'collision' }
 CFPhysicsWorld >> resolveRectangleContactsAmong: bodies [
-	contacts := OrderedCollection new.
-	1 to: bodies size do: [ :firstIndex |
-		firstIndex + 1 to: bodies size do: [ :secondIndex |
-			| first second contact |
-			first := bodies at: firstIndex.
-			second := bodies at: secondIndex.
-			(first isStatic and: [ second isStatic ]) ifFalse: [
-				contact := first isStatic
-					ifTrue: [
-						CFPhysicsRectangleCollision
-							contactBetween: second
-							and: first ]
-					ifFalse: [
-						CFPhysicsRectangleCollision
-							contactBetween: first
-							and: second ].
-				contact ifNotNil: [
-					contacts add: contact.
-					contact resolve ] ] ] ]
+	^ contactManager updateBodies: bodies
 ]
 
 { #category : 'stepping' }

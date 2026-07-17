@@ -126,3 +126,28 @@ CFPhysicsExamples >> rectangleSettlesOnStaticGround [
 	self assert: world contacts size equals: 1.
 	^ space
 ]
+
+{ #category : 'examples - contacts' }
+CFPhysicsExamples >> inspectPersistentContact [
+	<gtExample>
+	| owner body ground world contact |
+	owner := BlElement new.
+	body := BlElement new
+		size: 50 @ 50;
+		background: Color blue;
+		yourself.
+	ground := BlElement new
+		size: 400 @ 40;
+		background: Color gray;
+		yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 100 @ 0.
+	ground physics beStatic; position: 0 @ 200.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
+	contact := world contacts first.
+	world step.
+	self assert: world contacts first == contact.
+	^ contact
+]

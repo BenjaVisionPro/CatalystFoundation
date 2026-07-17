@@ -120,3 +120,70 @@ CFPhysicsSteppingExamples >> shapeStateUsesElementExtent [
 	self assert: shape extent equals: 30 @ 40.
 	^ shape
 ]
+
+{ #category : 'examples - contacts' }
+CFPhysicsSteppingExamples >> sameContactInstanceSurvivesAcrossSteps [
+	<gtExample>
+	| owner body ground world contact |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
+	contact := world contacts first.
+	world step.
+	self assert: world contacts first == contact.
+	self assert: contact continuedThisStep.
+	^ contact
+]
+
+{ #category : 'examples - contacts' }
+CFPhysicsSteppingExamples >> bodyKnowsItsContacts [
+	<gtExample>
+	| contact |
+	contact := self sameContactInstanceSurvivesAcrossSteps.
+	self assert: (contact firstBody contacts includes: contact).
+	self assert: (contact secondBody contacts includes: contact).
+	^ contact firstBody
+]
+
+{ #category : 'examples - contacts' }
+CFPhysicsSteppingExamples >> contactEndsAfterSeparation [
+	<gtExample>
+	| owner body ground world contact |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 20; yourself.
+	ground := BlElement new size: 100 @ 20; yourself.
+	owner addChild: body.
+	owner addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 10 @ 0.
+	ground physics beStatic; position: 0 @ 40.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
+	contact := world contacts first.
+	world gravity: 0 @ 0.
+	body physics position: 200 @ 0.
+	world step.
+	self assert: world contacts isEmpty.
+	self assert: world endedContacts size equals: 1.
+	self assert: world endedContacts first == contact.
+	self assert: contact endedThisStep.
+	self assert: (contact firstBody contacts includes: contact) not.
+	self assert: (contact secondBody contacts includes: contact) not.
+	^ contact
+]
+
+{ #category : 'examples - contacts' }
+CFPhysicsSteppingExamples >> contactOwnsManifold [
+	<gtExample>
+	| contact |
+	contact := self sameContactInstanceSurvivesAcrossSteps.
+	self assert: contact manifold notNil.
+	self assert: contact normal equals: contact manifold normal.
+	self assert: contact penetration equals: contact manifold penetration.
+	^ contact manifold
+]

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState' ],
+	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -27,9 +27,28 @@ CFPhysicsBodyState >> addVelocity: aPoint [
 	dynamic ifTrue: [ velocity := velocity + aPoint ]
 ]
 
+
+{ #category : 'contacts' }
+CFPhysicsBodyState >> addContact: aContact [
+	contacts ifNil: [ contacts := IdentitySet new ].
+	contacts add: aContact
+]
+
+{ #category : 'contacts' }
+CFPhysicsBodyState >> contacts [
+	contacts ifNil: [ contacts := IdentitySet new ].
+	^ contacts asArray
+]
+
+{ #category : 'contacts' }
+CFPhysicsBodyState >> removeContact: aContact [
+	contacts ifNil: [ ^ self ].
+	contacts remove: aContact ifAbsent: [ ]
+]
+
 { #category : 'collision' }
 CFPhysicsBodyState >> aabb [
-	^ shapeState aabbAt: position
+	^ self shapeState aabbAt: position
 ]
 
 { #category : 'body type' }
@@ -72,7 +91,8 @@ CFPhysicsBodyState >> initialize [
 	position := 0 @ 0.
 	rotation := 0.
 	velocity := 0 @ 0.
-	dynamic := true
+	dynamic := true.
+	contacts := IdentitySet new
 ]
 
 { #category : 'body type' }

@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'collision' }
-CFPhysicsRectangleCollision class >> contactBetween: firstBody and: secondBody [
+CFPhysicsRectangleCollision class >> manifoldBetween: firstBody and: secondBody [
 	| firstBounds secondBounds overlap firstCentre secondCentre normal penetration |
 	firstBounds := firstBody aabb.
 	secondBounds := secondBody aabb.
@@ -25,9 +25,5 @@ CFPhysicsRectangleCollision class >> contactBetween: firstBody and: secondBody [
 				ifTrue: [ 0 @ 1 ]
 				ifFalse: [ 0 @ -1 ].
 			penetration := overlap y ].
-	^ CFPhysicsContact
-		first: firstBody
-		second: secondBody
-		normal: normal
-		penetration: penetration
+	^ CFPhysicsManifold normal: normal penetration: penetration
 ]
