@@ -179,6 +179,24 @@ CFMotionBuilder >> element: anElement [
 	^ self
 ]
 
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> fadeIn [
+	self opacity: 1.0.
+	^ self build start
+]
+
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> fadeIn: aConfigurationBlock [
+	aConfigurationBlock value: self.
+	^ self fadeIn
+]
+
+{ #category : 'playing - named motions' }
+CFMotionBuilder >> fadeOut [
+	self opacity: 0.0.
+	^ self build start
+]
+
 { #category : 'playing' }
 CFMotionBuilder >> geometry: aRectangle [
 	^ self mutateLayout: [

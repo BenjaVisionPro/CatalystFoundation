@@ -182,6 +182,105 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 	^ second
 ]
 
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedFadeInBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion fadeIn.
+	self assert: operation isRunning.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedFadeOutBuildsAndStartsImmediately [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	operation := element motion fadeOut.
+	self assert: operation isRunning.
+	space pulse.
+	space time wait: 1 second.
+	space pulse.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 0.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> directNamedFadeOutCancellationPreservesCurrentPresentation [
+	<gtExample>
+	| space element operation presentedOpacity |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	operation := element motion fadeOut.
+	space pulse.
+	space time wait: 90 milliSeconds.
+	space pulse.
+	presentedOpacity := element opacity.
+	operation cancelPreservingCurrentPresentation.
+	self assert: operation isCancelled.
+	self assert: element opacity equals: presentedOpacity.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> namedFadeInConfigurationBlockStartsWhenItReturns [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element opacity: 0.0.
+	operation := element motion fadeIn: [ :builder |
+		builder duration: 1 milliSeconds ].
+	self assert: operation isRunning.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element opacity equals: 1.0.
+	^ operation
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> namedMotionRequiresAnAttachedElement [
+	<gtExample>
+	| element didFail |
+	element := BlElement new.
+	didFail := false.
+	[ element motion fadeOut ] on: Error do: [ :anError | didFail := true ].
+	self assert: didFail.
+	^ element
+]
+
+{ #category : 'examples - public API' }
+CFMotionExamples >> customMotionBuildThenStartRemainsExplicit [
+	<gtExample>
+	| space element motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	motion := element motion
+		duration: 1 milliSeconds;
+		opacity: 0.2;
+		build.
+	self assert: motion state == CFMotionState idle.
+	motion start.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	self assert: (element opacity closeTo: 0.2).
+	^ motion
+]
+
 { #category : 'examples - motions' }
 CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	<gtExample>
@@ -1182,6 +1281,46 @@ CFMotionExamples >> verticalExtentMotionCompletesAtItsRequestedExtent [
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	self assert: element extent y equals: 140.
+	^ operation
+]
+
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentMotionCancellationPreservesCurrentExtent [
+	<gtExample>
+	| space element operation presentedExtent |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	operation := (element motion
+		duration: 1 second;
+		verticalExtent: 140;
+		build) start.
+	space pulse.
+	space time wait: 500 milliSeconds.
+	space pulse.
+	presentedExtent := element extent.
+	operation cancelPreservingCurrentPresentation.
+	self assert: operation isCancelled.
+	self assert: element extent equals: presentedExtent.
+	^ operation
+]
+
+{ #category : 'examples - vertical extent motion' }
+CFMotionExamples >> verticalExtentMotionCollapsesToItsRequestedExtent [
+	<gtExample>
+	| space element operation |
+	space := self spaceWithElement.
+	element := space root children first.
+	element constraintsDo: [ :constraints |
+		constraints vertical exact: 140 ].
+	space pulse.
+	operation := (element motion
+		duration: 1 milliSeconds;
+		verticalExtent: 40;
+		build) start.
+	self finish: operation in: space.
+	self assert: operation isCompleted.
+	self assert: element extent y equals: 40.
 	^ operation
 ]
 
