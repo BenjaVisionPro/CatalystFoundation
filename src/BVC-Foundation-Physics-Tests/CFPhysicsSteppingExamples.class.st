@@ -520,3 +520,31 @@ CFPhysicsSteppingExamples >> roundedRectanglesUseGeneralConvexCollision [
 	self assert: contact normal x > 0.
 	^ contact
 ]
+
+
+{ #category : 'examples - convex collision' }
+CFPhysicsSteppingExamples >> separatedRoundedRectanglesDoNotProduceManifold [
+	<gtExample>
+	| owner first second world manifold |
+	owner := BlElement new.
+	first := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+		size: 50 @ 50;
+		yourself.
+	second := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 400 @ 40;
+		yourself.
+	owner addChild: first.
+	owner addChild: second.
+	world := owner physics beWorld.
+	first physics position: 100 @ 149.999999999.
+	second physics beStatic; position: 0 @ 200.
+	world synchroniseMembership.
+	self assert: (first physics bodyState aabb overlaps: second physics bodyState aabb) not.
+	manifold := CFPhysicsConvexCollision
+		manifoldBetween: first physics bodyState
+		and: second physics bodyState.
+	self assert: manifold isNil.
+	^ first
+]
