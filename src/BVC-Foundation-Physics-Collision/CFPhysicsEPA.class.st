@@ -18,11 +18,12 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 			inDirection: edge third.
 		supportDistance := self dot: support point with: edge third.
 		((supportDistance closeTo: edge fourth)
-			or: [ polytope anySatisfy: [ :each | each point = support point ] ]) ifTrue: [
+			or: [ support point = edge first point
+				or: [ support point = edge second point ] ]) ifTrue: [
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third
-				penetration: edge fourth)
+				penetration: supportDistance)
 				points: { contactPoint };
 				yourself ].
 		polytope add: support beforeIndex: edge fifth ].

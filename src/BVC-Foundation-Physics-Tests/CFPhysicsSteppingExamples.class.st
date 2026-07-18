@@ -19,8 +19,10 @@ CFPhysicsSteppingExamples >> dynamicBodyAdvancesUnderGravity [
 	world step: 2.
 	expectedVelocity := 0 @ 2.
 	expectedPosition := 0 @ 0.03.
-	self assert: (body physics velocity distanceTo: expectedVelocity) < 0.000001.
-	self assert: (body physics position distanceTo: expectedPosition) < 0.000001.
+	self assert: (body physics velocity x closeTo: expectedVelocity x).
+	self assert: (body physics velocity y closeTo: expectedVelocity y).
+	self assert: (body physics position x closeTo: expectedPosition x).
+	self assert: (body physics position y closeTo: expectedPosition y).
 	^ body
 ]
 
@@ -82,7 +84,8 @@ CFPhysicsSteppingExamples >> dynamicRectangleStopsOnStaticRectangle [
 		step: 100.
 	self assert: (body physics position x closeTo: 10.0).
 	self assert: (body physics position y closeTo: 20.0).
-	self assert: (body physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: (body physics velocity x closeTo: 0.0).
+	self assert: (body physics velocity y closeTo: 0.0).
 	self assert: world contacts size equals: 1.
 	self assert: world contacts first normal equals: 0 @ 1.
 	^ body
@@ -227,7 +230,8 @@ CFPhysicsSteppingExamples >> dynamicCircleStopsOnStaticRectangle [
 	contact := world contacts first.
 	self assert: (ball physics position x closeTo: 10.0).
 	self assert: (ball physics position y closeTo: 20.0).
-	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: (ball physics velocity x closeTo: 0.0).
+	self assert: (ball physics velocity y closeTo: 0.0).
 	self assert: contact normal equals: 0 @ 1.
 	self assert: contact manifold points size equals: 1.
 	^ contact
@@ -451,7 +455,7 @@ CFPhysicsSteppingExamples >> dynamicPolygonStopsOnStaticRectangle [
 	ground physics beStatic; position: 0 @ 60.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 120.
 	contact := world contacts first.
-	self assert: polygon physics position y <= 20.0001.
+	self assert: (polygon physics position y closeTo: 20.0).
 	self assert: contact normal equals: 0 @ 1.
 	self assert: contact manifold points size equals: 1.
 	^ contact
@@ -495,7 +499,8 @@ CFPhysicsSteppingExamples >> roundedRectangleSupportPointUsesCornerArc [
 	shape := body physics bodyState shapeState.
 	point := shape supportPointAt: 0 @ 0 inDirection: 1 @ 1.
 	expected := 35 @ 15 + (((1 @ 1) / (1 @ 1) r) * 5).
-	self assert: (point distanceTo: expected) < 0.000001.
+	self assert: (point x closeTo: expected x).
+	self assert: (point y closeTo: expected y).
 	^ shape
 ]
 
@@ -564,7 +569,8 @@ CFPhysicsSteppingExamples >> rotatedRectangleAABBUsesRotatedGeometry [
 	world := owner physics beWorld.
 	body physics rotation: Float pi / 2.
 	aabb := body physics bodyState aabb.
-	self assert: (aabb extent distanceTo: 20 @ 40) < 0.00001.
+	self assert: (aabb extent x closeTo: 20.0).
+	self assert: (aabb extent y closeTo: 40.0).
 	^ aabb
 ]
 

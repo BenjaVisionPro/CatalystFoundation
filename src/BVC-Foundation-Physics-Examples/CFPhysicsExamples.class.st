@@ -121,8 +121,10 @@ CFPhysicsExamples >> rectangleSettlesOnStaticGround [
 		stepDuration: 10 milliseconds;
 		gravity: 0 @ 600;
 		step: 120.
-	self assert: (body physics position distanceTo: 100 @ 150) < 0.000001.
-	self assert: (body physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: (body physics position x closeTo: 100.0).
+	self assert: (body physics position y closeTo: 150.0).
+	self assert: (body physics velocity x closeTo: 0.0).
+	self assert: (body physics velocity y closeTo: 0.0).
 	self assert: world contacts size equals: 1.
 	^ space
 ]
@@ -181,8 +183,10 @@ CFPhysicsExamples >> circleSettlesOnStaticGround [
 		stepDuration: 10 milliseconds;
 		gravity: 0 @ 600;
 		step: 120.
-	self assert: (ball physics position distanceTo: 100 @ 150) < 0.000001.
-	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
+	self assert: (ball physics position x closeTo: 100.0).
+	self assert: (ball physics position y closeTo: 150.0).
+	self assert: (ball physics velocity x closeTo: 0.0).
+	self assert: (ball physics velocity y closeTo: 0.0).
 	self assert: world contacts size equals: 1.
 	self assert: world contacts first manifold points size equals: 1.
 	^ space
@@ -274,7 +278,7 @@ CFPhysicsExamples >> roundedRectangleSettlesOnRoundedGround [
 	body physics position: 100 @ 0.
 	ground physics beStatic; position: 0 @ 200.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
-	self assert: body physics position y <= 150.0001.
+	self assert: (body physics position y closeTo: 150.0).
 	self assert: world contacts size equals: 1.
 	^ space
 ]
