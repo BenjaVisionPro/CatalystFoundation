@@ -206,3 +206,22 @@ CFPhysicsElement >> sleep [
 CFPhysicsElement >> wake [
 	self requireBodyState wake
 ]
+
+
+{ #category : 'angular dynamics' }
+CFPhysicsElement >> angularVelocity [ ^ self requireBodyState angularVelocity ]
+
+{ #category : 'angular dynamics' }
+CFPhysicsElement >> angularVelocity: aNumber [ self requireBodyState angularVelocity: aNumber ]
+
+{ #category : 'angular dynamics' }
+CFPhysicsElement >> angularDamping [ ^ self requireBodyState angularDamping ]
+
+{ #category : 'angular dynamics' }
+CFPhysicsElement >> angularDamping: aNumber [ self requireBodyState angularDamping: aNumber ]
+
+{ #category : 'angular dynamics' }
+CFPhysicsElement >> applyTorque: aNumber [ self requireBodyState applyTorque: aNumber ]
+
+{ #category : 'mass' }
+CFPhysicsElement >> inverseInertia [ ^ self requireBodyState inverseInertia ]

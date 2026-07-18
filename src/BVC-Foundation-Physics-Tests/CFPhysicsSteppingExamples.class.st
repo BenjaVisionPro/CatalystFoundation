@@ -636,3 +636,62 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	self assert: contact isTouching.
 	^ contact
 ]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> torqueChangesAngularVelocity [
+	<gtExample>
+	| owner body world |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 40; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0; stepDuration: 10 milliseconds.
+	body physics applyTorque: 10000.
+	world step.
+	self assert: body physics angularVelocity > 0.
+	self assert: body physics rotation > 0.
+	^ body
+]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> centredImpulseDoesNotRotateCircle [
+	<gtExample>
+	| owner circle world state |
+	owner := BlElement new.
+	circle := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	owner addChild: circle.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	state := circle physics bodyState.
+	state applyImpulse: 10 @ 0 atWorldPoint: state centre.
+	self assert: state angularVelocity equals: 0.0.
+	^ circle
+]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> offCentreImpulseRotatesRectangle [
+	<gtExample>
+	| owner body world state |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 40; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	state := body physics bodyState.
+	state applyImpulse: 10 @ 0 atWorldPoint: state centre + (0 @ 10).
+	self assert: state angularVelocity < 0.
+	^ body
+]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> staticBodyHasNoInverseInertia [
+	<gtExample>
+	| owner body world |
+	owner := BlElement new.
+	body := BlElement new size: 20 @ 40; yourself.
+	owner addChild: body.
+	world := owner physics beWorld.
+	body physics beStatic.
+	self assert: body physics inverseInertia equals: 0.0.
+	^ body
+]

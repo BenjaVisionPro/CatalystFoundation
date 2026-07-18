@@ -301,3 +301,21 @@ CFPhysicsExamples >> rotatedRoundedRectangleSettlesOnGround [
 	self assert: world contacts notEmpty.
 	^ space
 ]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsExamples >> torqueRotatesRectangle [
+	<gtExample>
+	| space worldElement body world |
+	space := BlSpace new.
+	worldElement := BlElement new size: 600 @ 400; yourself.
+	body := BlElement new size: 80 @ 40; background: Color blue; yourself.
+	space root addChild: worldElement.
+	worldElement addChild: body.
+	world := worldElement physics beWorld.
+	world gravity: 0 @ 0; stepDuration: 10 milliseconds.
+	body physics applyTorque: 1000000.
+	world step: 20.
+	self assert: body physics angularVelocity > 0.
+	self assert: body physics rotation > 0.
+	^ space
+]

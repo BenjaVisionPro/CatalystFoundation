@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence', 'velocityIterations', 'positionIterations', 'sleepLinearThreshold', 'sleepTimeThreshold', 'restitutionThreshold' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'contactManager', 'nextBodySequence', 'velocityIterations', 'positionIterations', 'sleepLinearThreshold', 'sleepAngularThreshold', 'sleepTimeThreshold', 'restitutionThreshold' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -72,6 +72,7 @@ CFPhysicsWorld >> initialize [
 	positionIterations := 3.
 	restitutionThreshold := 1.0.
 	sleepLinearThreshold := 0.1.
+	sleepAngularThreshold := 0.05.
 	sleepTimeThreshold := 500 milliseconds
 ]
 
@@ -131,6 +132,7 @@ CFPhysicsWorld >> step [
 		each
 			updateSleepBy: seconds
 			linearThresholdSquared: sleepLinearThreshold squared
+			angularThresholdSquared: sleepAngularThreshold squared
 			requiredTime: sleepSeconds ].
 	bodies do: [ :each | each present ].
 	^ self
@@ -222,3 +224,10 @@ CFPhysicsWorld >> restitutionThreshold [
 CFPhysicsWorld >> restitutionThreshold: aNumber [
 	restitutionThreshold := aNumber asFloat max: 0.0
 ]
+
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepAngularThreshold [ ^ sleepAngularThreshold ]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepAngularThreshold: aNumber [ sleepAngularThreshold := aNumber asFloat max: 0.0 ]

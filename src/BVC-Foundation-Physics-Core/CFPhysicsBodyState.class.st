@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime' ],
+	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -18,7 +18,11 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
 	(dynamic and: [ awake ]) ifFalse: [ ^ self ].
 	velocity := velocity + (gravityVector * seconds).
-	position := position + (velocity * seconds)
+	angularVelocity := angularVelocity + (torque * self inverseInertia * seconds).
+	angularDamping > 0 ifTrue: [ angularVelocity := angularVelocity * ((1.0 - (angularDamping * seconds)) max: 0.0) ].
+	position := position + (velocity * seconds).
+	rotation := rotation + (angularVelocity * seconds).
+	torque := 0.0
 ]
 
 
@@ -62,7 +66,9 @@ CFPhysicsBodyState >> beStatic [
 	dynamic := false.
 	awake := false.
 	sleepTime := 0.0.
-	velocity := 0 @ 0
+	velocity := 0 @ 0.
+	angularVelocity := 0.0.
+	torque := 0.0
 ]
 
 { #category : 'accessing' }
@@ -131,6 +137,9 @@ CFPhysicsBodyState >> initialize [
 	dynamic := true.
 	awake := true.
 	sleepTime := 0.0.
+	angularVelocity := 0.0.
+	torque := 0.0.
+	angularDamping := 0.0.
 	contacts := IdentitySet new
 ]
 
@@ -255,7 +264,9 @@ CFPhysicsBodyState >> sleep [
 	dynamic ifFalse: [ ^ self ].
 	awake := false.
 	sleepTime := 0.0.
-	velocity := 0 @ 0
+	velocity := 0 @ 0.
+	angularVelocity := 0.0.
+	torque := 0.0
 ]
 
 { #category : 'sleeping' }
@@ -264,9 +275,9 @@ CFPhysicsBodyState >> sleepTime [
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared requiredTime: requiredTime [
+CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
 	dynamic ifFalse: [ ^ self ].
-	((velocity x squared + velocity y squared) <= thresholdSquared)
+	((velocity x squared + velocity y squared) <= thresholdSquared and: [ angularVelocity squared <= angularThresholdSquared ])
 		ifTrue: [
 			sleepTime := sleepTime + seconds.
 			sleepTime >= requiredTime ifTrue: [ self sleep ] ]
@@ -280,4 +291,85 @@ CFPhysicsBodyState >> wake [
 	dynamic ifFalse: [ ^ self ].
 	awake := true.
 	sleepTime := 0.0
+]
+
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> angularVelocity [
+	^ angularVelocity
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> angularVelocity: aNumber [
+	angularVelocity := dynamic ifTrue: [ aNumber asFloat ] ifFalse: [ 0.0 ].
+	angularVelocity = 0.0 ifFalse: [ self wake ]
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> angularDamping [
+	^ angularDamping
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> angularDamping: aNumber [
+	angularDamping := aNumber asFloat max: 0.0
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> applyTorque: aNumber [
+	dynamic ifFalse: [ ^ self ].
+	torque := torque + aNumber.
+	aNumber = 0 ifFalse: [ self wake ]
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> addAngularVelocity: aNumber [
+	dynamic ifTrue: [ angularVelocity := angularVelocity + aNumber ]
+]
+
+{ #category : 'mass' }
+CFPhysicsBodyState >> mass [
+	| inverse |
+	inverse := self inverseMass.
+	^ inverse = 0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverse ]
+]
+
+{ #category : 'mass' }
+CFPhysicsBodyState >> inverseInertia [
+	| mass extent inertia |
+	dynamic ifFalse: [ ^ 0.0 ].
+	mass := self mass.
+	mass = 0 ifTrue: [ ^ 0.0 ].
+	extent := self shapeState extent.
+	inertia := self shapeState isCircle
+		ifTrue: [ mass * self shapeState radius squared / 2.0 ]
+		ifFalse: [ mass * (extent x squared + extent y squared) / 12.0 ].
+	^ inertia > 0 ifTrue: [ 1.0 / inertia ] ifFalse: [ 0.0 ]
+]
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> centre [
+	^ self shapeState centreAt: position
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> velocityAtWorldPoint: aPoint [
+	| radiusVector |
+	radiusVector := aPoint - self centre.
+	^ velocity + ((angularVelocity * radiusVector y negated) @ (angularVelocity * radiusVector x))
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyState >> applyImpulse: anImpulse atWorldPoint: aPoint [
+	| radiusVector cross |
+	dynamic ifFalse: [ ^ self ].
+	self addVelocity: anImpulse * self inverseMass.
+	radiusVector := aPoint - self centre.
+	cross := (radiusVector x * anImpulse y) - (radiusVector y * anImpulse x).
+	self addAngularVelocity: cross * self inverseInertia
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyState >> rotateBy: anAngle [
+	rotation := rotation + anAngle
 ]
