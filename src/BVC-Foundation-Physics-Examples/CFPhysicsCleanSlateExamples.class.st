@@ -19,5 +19,11 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsClipVertex.
 		CFPhysicsPolygonManifoldBuilder.
 		CFPhysicsBlocShapeFactory.
-		CFPhysicsBlocManifoldBuilder }
+		CFPhysicsBlocManifoldBuilder.
+		CFPhysicsPair.
+		CFPhysicsPairFinder.
+		CFPhysicsContactUpdater.
+		CFPhysicsContactPipeline.
+		CFPhysicsContactPipelineResult.
+		CFPhysicsConstraintBuilder }
 ]

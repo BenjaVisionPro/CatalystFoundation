@@ -339,3 +339,76 @@ CFPhysicsCleanSlateChecks >> cleanSlateManifoldWithFeatureIndex: anInteger [
 	manifold contactPoints: { point }.
 	^ manifold
 ]
+
+{ #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateChecks >> pairFinderReturnsOverlappingPairsInSequenceOrder [
+	<gtExample>
+	| first second third pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	third := self cleanSlateBodyWithSequence: 3 position: 10 @ 10 extent: 20 @ 20.
+	pairs := CFPhysicsPairFinder new pairsAmong: { third. first. second }.
+	self assert: (pairs collect: [ :pair | { pair firstBody sequence. pair secondBody sequence } ])
+		equals: { { 1. 2 }. { 1. 3 }. { 2. 3 } }.
+	^ pairs
+]
+
+{ #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateChecks >> pairFinderRejectsSeparatedBodies [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs isEmpty.
+	^ pairs
+]
+
+{ #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateChecks >> pairFinderRejectsStaticStaticPairs [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	first beStatic.
+	second beStatic.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs isEmpty.
+	^ pairs
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateChecks >> contactPipelineFeedsDiscoveredPairsThroughBlocManifolds [
+	<gtExample>
+	| ground box pipeline firstResult secondResult |
+	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
+	ground beStatic.
+	box := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
+	pipeline := CFPhysicsContactPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	firstResult := pipeline updateBodies: { box. ground } fromContacts: #().
+	self assert: firstResult pairs size equals: 1.
+	self assert: firstResult beganContacts size equals: 1.
+	self assert: firstResult activeContacts first manifold contactPoints size equals: 2.
+	box position: 20 @ 50.
+	secondResult := pipeline updateBodies: { ground. box } fromContacts: firstResult activeContacts.
+	self assert: secondResult pairs isEmpty.
+	self assert: secondResult activeContacts isEmpty.
+	self assert: secondResult endedContacts size equals: 1.
+	^ secondResult
+]
+
+{ #category : 'private - pair discovery' }
+CFPhysicsCleanSlateChecks >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
+	^ (CFPhysicsBodyState
+		element: (BlElement new
+			geometry: BlRoundedRectangleGeometry new;
+			size: anExtent;
+			yourself)
+		world: nil)
+		sequence: anInteger;
+		position: aPoint;
+		yourself
+]
