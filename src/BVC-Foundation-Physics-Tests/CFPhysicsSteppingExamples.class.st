@@ -616,42 +616,6 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 ]
 
 
-
-{ #category : 'private - diagnostics' }
-CFPhysicsSteppingExamples >> physicsSleepingDiagnosticFor: anElement world: aWorld step: stepIndex [
-	| state contacts contact points point |
-	state := anElement physics bodyState.
-	contacts := aWorld contacts.
-	Transcript
-		cr;
-		nextPutAll: 'CFPhysics sleeping snapshot step='; print: stepIndex;
-		nextPutAll: ' awake='; print: state isAwake;
-		nextPutAll: ' sleeping='; print: state isSleeping;
-		nextPutAll: ' sleepTime='; print: state sleepTime;
-		nextPutAll: ' position='; print: state position;
-		nextPutAll: ' rotation='; print: state rotation;
-		nextPutAll: ' velocity='; print: state velocity;
-		nextPutAll: ' speedSquared='; print: (state velocity x squared + state velocity y squared);
-		nextPutAll: ' angularVelocity='; print: state angularVelocity;
-		nextPutAll: ' angularSpeedSquared='; print: state angularVelocity squared;
-		nextPutAll: ' contacts='; print: contacts size.
-	contacts isEmpty ifTrue: [ ^ self ].
-	contact := contacts first.
-	Transcript
-		nextPutAll: ' contactId='; print: contact identityHash;
-		nextPutAll: ' touching='; print: contact isTouching;
-		nextPutAll: ' normal='; print: contact normal;
-		nextPutAll: ' penetration='; print: contact penetration.
-	points := contact manifold contactPoints.
-	points isEmpty ifTrue: [ ^ self ].
-	point := points first.
-	Transcript
-		nextPutAll: ' point='; print: point position;
-		nextPutAll: ' normalImpulse='; print: point normalImpulse;
-		nextPutAll: ' tangentImpulse='; print: point tangentImpulse;
-		nextPutAll: ' velocityBias='; print: point velocityBias
-]
-
 { #category : 'examples - rotation collision' }
 CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	<gtExample>
@@ -669,13 +633,7 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		rotation: Float pi / 6;
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600.
-	Transcript cr; nextPutAll: '=== CFPhysics sleeping state diagnostic ==='.
-	1 to: 600 do: [ :stepIndex |
-		world step.
-		((stepIndex \ 50) = 0 or: [ stepIndex > 540 ]) ifTrue: [
-			self physicsSleepingDiagnosticFor: body world: world step: stepIndex ] ].
-	Transcript cr; nextPutAll: '=== end CFPhysics sleeping state diagnostic ==='.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
 	self assert: body physics isSleeping.
 	self assert: world contacts size equals: 1.
 	contact := world contacts first.

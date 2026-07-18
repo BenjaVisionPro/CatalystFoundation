@@ -266,3 +266,67 @@ CFPhysicsShapeState >> collisionRotationFor: anAngle [
 	(normalized closeTo: fullTurn) ifTrue: [ ^ 0.0 ].
 	^ normalized
 ]
+
+
+{ #category : 'collision features' }
+CFPhysicsShapeState >> supportFeatureAt: aPosition rotation: anAngle inDirection: aDirection [
+	| direction collisionRotation localDirection localFeature centre |
+	direction := aDirection r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ aDirection / aDirection r ].
+	self isCircle ifTrue: [
+		^ { (self circleCentreAt: aPosition) + (direction * self radius) } ].
+	collisionRotation := self collisionRotationFor: anAngle.
+	localDirection := self rotateVector: direction by: collisionRotation negated.
+	localFeature := self localSupportFeatureInDirection: localDirection.
+	centre := self extent / 2.0.
+	^ localFeature collect: [ :each |
+		aPosition + (self rotate: each around: centre by: collisionRotation) ]
+]
+
+{ #category : 'collision features' }
+CFPhysicsShapeState >> localSupportFeatureInDirection: aDirection [
+	self isRoundedRectangle ifTrue: [
+		^ self roundedRectangleLocalSupportFeatureInDirection: aDirection ].
+	^ self polygonLocalSupportFeatureInDirection: aDirection
+]
+
+{ #category : 'collision features' }
+CFPhysicsShapeState >> roundedRectangleLocalSupportFeatureInDirection: aDirection [
+	| direction anExtent radius |
+	direction := aDirection r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ aDirection / aDirection r ].
+	anExtent := self extent.
+	radius := self roundedRectangleRadius.
+	direction x = 0 ifTrue: [
+		^ direction y > 0
+			ifTrue: [ { radius @ anExtent y. (anExtent x - radius) @ anExtent y } ]
+			ifFalse: [ { (anExtent x - radius) @ 0. radius @ 0 } ] ].
+	direction y = 0 ifTrue: [
+		^ direction x > 0
+			ifTrue: [ { anExtent x @ (anExtent y - radius). anExtent x @ radius } ]
+			ifFalse: [ { 0 @ radius. 0 @ (anExtent y - radius) } ] ].
+	^ { self roundedRectangleLocalSupportPointInDirection: direction }
+]
+
+{ #category : 'collision features' }
+CFPhysicsShapeState >> polygonLocalSupportFeatureInDirection: aDirection [
+	| vertices bestProjection feature projection |
+	vertices := self localCollisionVertices.
+	bestProjection := Float infinity negated.
+	feature := OrderedCollection new.
+	vertices do: [ :each |
+		projection := (each x * aDirection x) + (each y * aDirection y).
+		projection > bestProjection
+			ifTrue: [
+				bestProjection := projection.
+				feature := OrderedCollection with: each ]
+			ifFalse: [ projection = bestProjection ifTrue: [ feature add: each ] ] ].
+	feature size > 2 ifTrue: [
+		feature := (feature sorted: [ :first :second |
+			(first x * aDirection y negated + (first y * aDirection x))
+				< (second x * aDirection y negated + (second y * aDirection x)) ]) asOrderedCollection.
+		^ { feature first. feature last } ].
+	^ feature asArray
+]

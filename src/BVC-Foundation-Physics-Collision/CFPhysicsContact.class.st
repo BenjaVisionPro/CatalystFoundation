@@ -81,19 +81,25 @@ CFPhysicsContact >> restitution [
 
 { #category : 'resolving' }
 CFPhysicsContact >> solvePosition [
-	| currentManifold inverseMassSum correction normal penetration contactPoint firstRadius secondRadius firstAngular secondAngular |
+	| currentManifold penetration normal |
 	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
 	currentManifold := CFPhysicsCollision manifoldBetween: firstBody and: secondBody.
 	currentManifold ifNil: [ ^ self ].
 	currentManifold preserveImpulsesFrom: manifold.
 	manifold := currentManifold.
-	inverseMassSum := self effectiveMassAlong: currentManifold normal at: currentManifold contactPoints first position.
-	inverseMassSum = 0 ifTrue: [ ^ self ].
 	penetration := manifold penetration max: 0.0.
 	penetration = 0 ifTrue: [ ^ self ].
 	normal := manifold normal.
+	manifold contactPoints do: [ :point |
+		self solvePositionAt: point position along: normal penetration: penetration ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> solvePositionAt: contactPoint along: normal penetration: penetration [
+	| inverseMassSum correction firstRadius secondRadius firstAngular secondAngular |
+	inverseMassSum := self effectiveMassAlong: normal at: contactPoint.
+	inverseMassSum = 0 ifTrue: [ ^ self ].
 	correction := normal * (penetration / inverseMassSum).
-	contactPoint := manifold contactPoints first position.
 	firstRadius := contactPoint - firstBody centre.
 	secondRadius := contactPoint - secondBody centre.
 	firstAngular := (self crossOf: firstRadius with: correction) * firstBody inverseInertia negated.
@@ -106,11 +112,17 @@ CFPhysicsContact >> solvePosition [
 
 { #category : 'resolving' }
 CFPhysicsContact >> solveVelocity [
-	| normal point contactPosition relativeVelocity normalVelocity effectiveMass impulseMagnitude oldImpulse tangent tangentVelocity tangentMass tangentMagnitude oldTangent maximumFriction |
+	| normal |
 	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
 	manifold contactPoints ifEmpty: [ ^ self ].
 	normal := manifold normal.
-	point := manifold contactPoints first.
+	manifold contactPoints do: [ :point |
+		self solveVelocityAt: point along: normal ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsContact >> solveVelocityAt: point along: normal [
+	| contactPosition relativeVelocity normalVelocity effectiveMass impulseMagnitude oldImpulse tangent tangentVelocity tangentMass tangentMagnitude oldTangent maximumFriction |
 	contactPosition := point position.
 	relativeVelocity := (secondBody velocityAtWorldPoint: contactPosition) - (firstBody velocityAtWorldPoint: contactPosition).
 	normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
@@ -147,13 +159,14 @@ CFPhysicsContact >> updateWithManifold: aManifold [
 
 { #category : 'resolving' }
 CFPhysicsContact >> warmStart [
-	| point normal tangent impulse |
+	| normal tangent |
 	(touching and: [ self shouldSolve and: [ manifold contactPoints notEmpty ] ]) ifFalse: [ ^ self ].
-	point := manifold contactPoints first.
 	normal := manifold normal.
 	tangent := normal y negated @ normal x.
-	impulse := (normal * point normalImpulse) + (tangent * point tangentImpulse).
-	self applyImpulse: impulse at: point position
+	manifold contactPoints do: [ :point |
+		| impulse |
+		impulse := (normal * point normalImpulse) + (tangent * point tangentImpulse).
+		self applyImpulse: impulse at: point position ]
 ]
 
 
@@ -165,15 +178,16 @@ CFPhysicsContact >> shouldSolve [
 
 { #category : 'private - solving' }
 CFPhysicsContact >> prepareVelocityConstraintWithRestitutionThreshold: aThreshold [
-	| point normal relativeVelocity normalVelocity |
+	| normal |
 	(touching and: [ self shouldSolve and: [ manifold contactPoints notEmpty ] ]) ifFalse: [ ^ self ].
-	point := manifold contactPoints first.
 	normal := manifold normal.
-	relativeVelocity := (secondBody velocityAtWorldPoint: point position) - (firstBody velocityAtWorldPoint: point position).
-	normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
-	point velocityBias: (normalVelocity < aThreshold negated
-		ifTrue: [ normalVelocity negated * self restitution ]
-		ifFalse: [ 0.0 ])
+	manifold contactPoints do: [ :point |
+		| relativeVelocity normalVelocity |
+		relativeVelocity := (secondBody velocityAtWorldPoint: point position) - (firstBody velocityAtWorldPoint: point position).
+		normalVelocity := (relativeVelocity x * normal x) + (relativeVelocity y * normal y).
+		point velocityBias: (normalVelocity < aThreshold negated
+			ifTrue: [ normalVelocity negated * self restitution ]
+			ifFalse: [ 0.0 ]) ]
 ]
 
 { #category : 'private - solving' }

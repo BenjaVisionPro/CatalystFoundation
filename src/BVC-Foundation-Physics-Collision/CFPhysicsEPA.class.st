@@ -7,7 +7,7 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: simplexArray [
-	| polytope edge support supportDistance contactPoint |
+	| polytope edge support supportDistance normal contactPoints |
 	polytope := simplexArray asOrderedCollection.
 	(self signedAreaOf: polytope) < 0 ifTrue: [ polytope := polytope reversed asOrderedCollection ].
 	1 to: 48 do: [ :iteration |
@@ -20,11 +20,12 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 		((supportDistance closeTo: edge fourth)
 			or: [ support point = edge first point
 				or: [ support point = edge second point ] ]) ifTrue: [
-			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
-			^ (CFPhysicsManifold
-				normal: (self collisionNormalFor: edge third)
-				penetration: edge fourth)
-				points: { contactPoint };
+			normal := self collisionNormalFor: edge third.
+			contactPoints := self contactPointsBetween: firstBody and: secondBody normal: normal.
+			contactPoints ifEmpty: [
+				contactPoints := { self contactPointOnEdgeFrom: edge first to: edge second } ].
+			^ (CFPhysicsManifold normal: normal penetration: edge fourth)
+				points: contactPoints;
 				yourself ].
 		polytope add: support beforeIndex: edge fifth ].
 	^ nil
