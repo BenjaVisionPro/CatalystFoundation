@@ -23,5 +23,6 @@ CFPhysicsPairFinder >> pairsAmong: bodies [
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsider: first with: second [
 	(first isStatic and: [ second isStatic ]) ifTrue: [ ^ false ].
+	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
 	^ first aabb overlaps: second aabb
 ]

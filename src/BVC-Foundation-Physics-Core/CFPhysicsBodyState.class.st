@@ -413,3 +413,44 @@ CFPhysicsBodyState >> beSolid [
 CFPhysicsBodyState >> isSensor [
 	^ self shapeState isSensor
 ]
+
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionFilter [
+	^ self shapeState collisionFilter
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionCategoryBits [
+	^ self shapeState collisionCategoryBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionCategoryBits: anInteger [
+	self shapeState collisionCategoryBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionMaskBits [
+	^ self shapeState collisionMaskBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionMaskBits: anInteger [
+	self shapeState collisionMaskBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionGroupIndex [
+	^ self shapeState collisionGroupIndex
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> collisionGroupIndex: anInteger [
+	self shapeState collisionGroupIndex: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyState >> allowsCollisionWith: anotherBody [
+	^ self shapeState allowsCollisionWith: anotherBody shapeState
+]

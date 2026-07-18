@@ -241,3 +241,34 @@ CFPhysicsElement >> beSolid [
 CFPhysicsElement >> isSensor [
 	^ self requireBodyState isSensor
 ]
+
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionCategoryBits [
+	^ self requireBodyState collisionCategoryBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionCategoryBits: anInteger [
+	self requireBodyState collisionCategoryBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionMaskBits [
+	^ self requireBodyState collisionMaskBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionMaskBits: anInteger [
+	self requireBodyState collisionMaskBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionGroupIndex [
+	^ self requireBodyState collisionGroupIndex
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsElement >> collisionGroupIndex: anInteger [
+	self requireBodyState collisionGroupIndex: anInteger
+]

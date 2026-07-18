@@ -975,3 +975,78 @@ CFPhysicsCleanSlateChecks >> sensorContactPublishesEndedEventWithoutSolveData [
 	self assert: secondResult contactSolveResults isEmpty.
 	^ secondResult
 ]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateChecks >> collisionFiltersAllowOrdinaryOverlappingBodies [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs size equals: 1.
+	self assert: first collisionCategoryBits equals: 1.
+	self assert: first collisionMaskBits equals: 16rFFFFFFFF.
+	self assert: first collisionGroupIndex equals: 0.
+	^ pairs
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateChecks >> collisionMasksRejectBodiesBeforeManifoldConstruction [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	first collisionCategoryBits: 2r0001.
+	first collisionMaskBits: 2r0010.
+	second collisionCategoryBits: 2r0100.
+	second collisionMaskBits: 2r0001.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs isEmpty.
+	^ pairs
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateChecks >> positiveCollisionGroupOverridesMasks [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	first collisionMaskBits: 0; collisionGroupIndex: 7.
+	second collisionMaskBits: 0; collisionGroupIndex: 7.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs size equals: 1.
+	^ pairs
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateChecks >> negativeCollisionGroupSuppressesCollision [
+	<gtExample>
+	| first second pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	first collisionGroupIndex: -3.
+	second collisionGroupIndex: -3.
+	pairs := CFPhysicsPairFinder new pairsAmong: { first. second }.
+	self assert: pairs isEmpty.
+	^ pairs
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateChecks >> elementFacingCollisionFilteringConfiguresItsBody [
+	<gtExample>
+	| owner child world body |
+	owner := BlElement new size: 200 @ 200; yourself.
+	child := BlElement new size: 30 @ 30; yourself.
+	owner addChild: child.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	child physics
+		collisionCategoryBits: 2r0010;
+		collisionMaskBits: 2r0101;
+		collisionGroupIndex: -4.
+	body := world bodyStateFor: child.
+	self assert: body collisionCategoryBits equals: 2r0010.
+	self assert: body collisionMaskBits equals: 2r0101.
+	self assert: body collisionGroupIndex equals: -4.
+	^ child
+]

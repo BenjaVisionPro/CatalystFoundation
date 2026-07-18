@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'material', 'sensor' ],
+	#instVars : [ 'element', 'material', 'sensor', 'collisionFilter' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -55,7 +55,8 @@ CFPhysicsShapeState >> element: anElement [
 CFPhysicsShapeState >> initialize [
 	super initialize.
 	material := CFPhysicsMaterial new.
-	sensor := false
+	sensor := false.
+	collisionFilter := CFPhysicsCollisionFilter new
 ]
 
 { #category : 'material' }
@@ -346,4 +347,45 @@ CFPhysicsShapeState >> beSolid [
 { #category : 'sensors' }
 CFPhysicsShapeState >> isSensor [
 	^ sensor
+]
+
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionFilter [
+	^ collisionFilter
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionCategoryBits [
+	^ collisionFilter categoryBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionCategoryBits: anInteger [
+	collisionFilter categoryBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionMaskBits [
+	^ collisionFilter maskBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionMaskBits: anInteger [
+	collisionFilter maskBits: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionGroupIndex [
+	^ collisionFilter groupIndex
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> collisionGroupIndex: anInteger [
+	collisionFilter groupIndex: anInteger
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsShapeState >> allowsCollisionWith: anotherShapeState [
+	^ collisionFilter allowsCollisionWith: anotherShapeState collisionFilter
 ]

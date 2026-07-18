@@ -12,6 +12,7 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsStep.
 		CFPhysicsBodyStepState.
 		CFPhysicsContactFeatureId.
+		CFPhysicsCollisionFilter.
 		CFPhysicsPolygonShape.
 		CFPhysicsClipVertex.
 		CFPhysicsPolygonManifoldBuilder.
