@@ -348,3 +348,36 @@ CFPhysicsElement >> removeContainment: aContainmentConstraint [
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeContainmentConstraint: aContainmentConstraint ]
 ]
+
+{ #category : 'attraction interaction' }
+CFPhysicsElement >> attract: anotherElement [
+	| aWorld otherWorld attraction |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	attraction := CFPhysicsAttractionConstraint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addAttractionConstraint: attraction
+]
+
+{ #category : 'attraction interaction' }
+CFPhysicsElement >> attractions [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld attractionsUsingBody: body
+]
+
+{ #category : 'attraction interaction' }
+CFPhysicsElement >> removeAttraction: anAttractionConstraint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeAttractionConstraint: anAttractionConstraint ]
+]
+

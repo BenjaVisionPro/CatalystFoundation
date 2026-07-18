@@ -1463,3 +1463,158 @@ CFPhysicsCleanSlateChecks >> retiringABodyRemovesOnlyItsSprings [
 	self assert: third physics springs equals: { unrelated }.
 	^ world
 ]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> constantForceResponseCanBeLimitedByDistance [
+	<gtExample>
+	| response |
+	response := CFPhysicsConstantForceResponse force: 250.
+	self assert: (response forceMagnitudeAtDistance: 10) equals: 250.0.
+	response maximumDistance: 100.
+	self assert: (response forceMagnitudeAtDistance: 100) equals: 250.0.
+	self assert: (response forceMagnitudeAtDistance: 101) equals: 0.0.
+	response maximumDistance: nil.
+	self assert: (response forceMagnitudeAtDistance: 1000) equals: 250.0.
+	^ response
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> attractionEndpointsAreResolvedThroughAnchors [
+	<gtExample>
+	| first second attraction |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	self assert: attraction anchorA class equals: CFPhysicsBodyCentreAnchor.
+	self assert: attraction anchorB class equals: CFPhysicsBodyCentreAnchor.
+	self assert: attraction anchorA worldPoint equals: 10 @ 10.
+	self assert: attraction anchorB worldPoint equals: 110 @ 10.
+	self assert: attraction bodyA == first.
+	self assert: attraction bodyB == second.
+	^ attraction
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> attractionAppliesEqualAndOppositeImpulse [
+	<gtExample>
+	| first second attraction |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction force: 1000.
+	attraction prepareForStep: 0.1.
+	self assert: first velocity x > 0.
+	self assert: second velocity x < 0.
+	self assert: first velocity y equals: 0.
+	self assert: second velocity y equals: 0.
+	self assert: first velocity equals: second velocity negated.
+	^ attraction
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> attractionCanPullTowardAStaticBody [
+	<gtExample>
+	| dynamicBody staticBody attraction |
+	dynamicBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	staticBody := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	staticBody beStatic.
+	attraction := CFPhysicsAttractionConstraint between: dynamicBody and: staticBody.
+	attraction force: 1000.
+	attraction prepareForStep: 0.1.
+	self assert: dynamicBody velocity x > 0.
+	self assert: staticBody velocity equals: 0 @ 0.
+	^ attraction
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> attractionsAreInstalledAndDiscoveredThroughBlocElements [
+	<gtExample>
+	| owner first second third world firstAttraction secondAttraction |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstAttraction := first physics attract: second.
+	secondAttraction := first physics attract: third.
+	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
+	self assert: second physics attractions equals: { firstAttraction }.
+	self assert: world attractionConstraints equals: { firstAttraction. secondAttraction }.
+	first physics removeAttraction: firstAttraction.
+	self assert: first physics attractions equals: { secondAttraction }.
+	self assert: firstAttraction isActive not.
+	self assert: secondAttraction isActive.
+	^ world
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> duplicateAttractionsRemainIndependent [
+	<gtExample>
+	| owner first second world firstAttraction secondAttraction |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	firstAttraction := first physics attract: second.
+	secondAttraction := first physics attract: second.
+	self assert: (firstAttraction == secondAttraction) not.
+	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
+	first physics removeAttraction: firstAttraction.
+	self assert: first physics attractions equals: { secondAttraction }.
+	self assert: secondAttraction isActive.
+	^ world
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> retiringABodyRemovesOnlyItsAttractions [
+	<gtExample>
+	| owner first second third fourth world attachedA attachedB unrelated |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	fourth := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third. fourth }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	attachedA := first physics attract: second.
+	attachedB := first physics attract: third.
+	unrelated := third physics attract: fourth.
+	owner removeChild: first.
+	world synchroniseMembership.
+	self assert: world attractionConstraints equals: { unrelated }.
+	self assert: attachedA isActive not.
+	self assert: attachedB isActive not.
+	self assert: unrelated isActive.
+	self assert: third physics attractions equals: { unrelated }.
+	^ world
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> worldStepAppliesAttractionBeforeIntegration [
+	<gtExample>
+	| owner first second world attraction |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	attraction := first physics attract: second.
+	attraction force: 1000.
+	world step.
+	self assert: first physics velocity x > 0.
+	self assert: second physics velocity x < 0.
+	self assert: first physics position x > 0.
+	self assert: second physics position x < 100.
+	^ world
+]
+
