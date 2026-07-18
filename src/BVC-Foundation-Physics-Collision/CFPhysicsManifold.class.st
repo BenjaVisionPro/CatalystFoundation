@@ -41,19 +41,13 @@ CFPhysicsManifold >> points: aCollection [
 
 { #category : 'updating' }
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
-	| available |
 	anOldManifold ifNil: [ ^ self ].
-	available := anOldManifold contactPoints asOrderedCollection.
 	contactPoints do: [ :point |
-		| nearest |
-		available ifNotEmpty: [
-			nearest := available first.
-			available allButFirst do: [ :candidate |
-				(candidate position distanceTo: point position)
-					< (nearest position distanceTo: point position)
-					ifTrue: [ nearest := candidate ] ].
-			point
-				normalImpulse: nearest normalImpulse;
-				tangentImpulse: nearest tangentImpulse.
-			available remove: nearest ] ]
+		point featureId ifNotNil: [ :featureId |
+			anOldManifold contactPoints
+				detect: [ :oldPoint | oldPoint featureId = featureId ]
+				ifFound: [ :oldPoint |
+					point
+						normalImpulse: oldPoint normalImpulse;
+						tangentImpulse: oldPoint tangentImpulse ] ] ]
 ]

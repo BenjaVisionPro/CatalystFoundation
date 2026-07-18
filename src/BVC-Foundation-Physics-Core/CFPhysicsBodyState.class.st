@@ -373,3 +373,17 @@ CFPhysicsBodyState >> applyImpulse: anImpulse atWorldPoint: aPoint [
 CFPhysicsBodyState >> rotateBy: anAngle [
 	rotation := rotation + anAngle
 ]
+
+{ #category : 'stepping' }
+CFPhysicsBodyState >> torque [
+	^ torque
+]
+
+{ #category : 'stepping' }
+CFPhysicsBodyState >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
+	position := aPosition.
+	rotation := anAngle.
+	velocity := dynamic ifTrue: [ aVelocity ] ifFalse: [ 0 @ 0 ].
+	angularVelocity := dynamic ifTrue: [ anAngularVelocity ] ifFalse: [ 0.0 ].
+	torque := 0.0
+]

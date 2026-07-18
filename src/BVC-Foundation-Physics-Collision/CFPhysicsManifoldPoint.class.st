@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsManifoldPoint',
 	#superclass : 'Object',
-	#instVars : [ 'position', 'normalImpulse', 'tangentImpulse', 'velocityBias' ],
+	#instVars : [ 'position', 'separation', 'featureId', 'normalImpulse', 'tangentImpulse' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
@@ -16,7 +16,8 @@ CFPhysicsManifoldPoint >> initialize [
 	super initialize.
 	normalImpulse := 0.0.
 	tangentImpulse := 0.0.
-	velocityBias := 0.0
+	separation := 0.0.
+	featureId := nil
 ]
 
 { #category : 'accessing' }
@@ -32,13 +33,12 @@ CFPhysicsManifoldPoint >> tangentImpulse [ ^ tangentImpulse ]
 { #category : 'accessing' }
 CFPhysicsManifoldPoint >> tangentImpulse: aNumber [ tangentImpulse := aNumber ]
 
-{ #category : 'accessing' }
-CFPhysicsManifoldPoint >> velocityBias [
-	velocityBias ifNil: [ velocityBias := 0.0 ].
-	^ velocityBias
-]
 
 { #category : 'accessing' }
-CFPhysicsManifoldPoint >> velocityBias: aNumber [
-	velocityBias := aNumber asFloat
-]
+CFPhysicsManifoldPoint >> separation [ ^ separation ]
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> separation: aNumber [ separation := aNumber asFloat ]
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> featureId [ ^ featureId ]
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> featureId: anObject [ featureId := anObject ]

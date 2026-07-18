@@ -74,6 +74,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Motion-Effects'
 		'BVC-Foundation-Motion-Examples'
 		'BVC-Foundation-Physics-Collision'
+		'BVC-Foundation-Physics-Dynamics'
 		'BVC-Foundation-Physics-Core'
 		'BVC-Foundation-Physics-Examples'
 		'BVC-Foundation-Physics-Tests'
@@ -97,8 +98,10 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Motion-Examples'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Motion-Effects') ].
 	spec package: 'BVC-Foundation-Physics-Collision'.
+	spec package: 'BVC-Foundation-Physics-Dynamics'
+		with: [ spec requires: #('BVC-Foundation-Physics-Collision') ].
 	spec package: 'BVC-Foundation-Physics-Core'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Collision') ].
+		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Collision' 'BVC-Foundation-Physics-Dynamics') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core') ].
 	spec package: 'BVC-Foundation-Physics-Tests'
