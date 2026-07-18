@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'ownedWorld' ],
+	#instVars : [ 'element', 'ownedWorld', 'pointerDragHandler' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -271,4 +271,28 @@ CFPhysicsElement >> collisionGroupIndex [
 { #category : 'collision filtering' }
 CFPhysicsElement >> collisionGroupIndex: anInteger [
 	self requireBodyState collisionGroupIndex: anInteger
+]
+
+
+{ #category : 'pointer interaction' }
+CFPhysicsElement >> enablePointerDragging [
+	pointerDragHandler ifNil: [
+		pointerDragHandler := CFPhysicsPointerDragHandler on: element ].
+	^ pointerDragHandler
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsElement >> disablePointerDragging [
+	pointerDragHandler ifNotNil: [ pointerDragHandler uninstall ].
+	pointerDragHandler := nil
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsElement >> isPointerDraggingEnabled [
+	^ pointerDragHandler notNil
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsElement >> pointerDragHandler [
+	^ pointerDragHandler
 ]

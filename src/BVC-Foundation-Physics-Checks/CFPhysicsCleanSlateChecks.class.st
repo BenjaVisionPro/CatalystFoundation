@@ -1154,3 +1154,80 @@ CFPhysicsCleanSlateChecks >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 	self assert: result contactSolveResults size equals: 1.
 	^ result
 ]
+
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateChecks >> pointerConstraintPreservesTheGrabOffset [
+	<gtExample>
+	| body constraint timestamp |
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 35 @ 42
+		timestamp: timestamp.
+	self assert: constraint grabOffset equals: 15 @ 12.
+	constraint updatePointerPosition: 75 @ 62 timestamp: timestamp + 20 milliSeconds.
+	constraint prepareForStep: 0.016.
+	self assert: body velocity x > 0.
+	self assert: body velocity y > 0.
+	self assert: body position equals: 20 @ 30.
+	^ constraint
+]
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateChecks >> pointerConstraintReleasesWithPointerVelocity [
+	<gtExample>
+	| body constraint timestamp |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 10 @ 10
+		timestamp: timestamp.
+	constraint updatePointerPosition: 30 @ 10 timestamp: timestamp + 20 milliSeconds.
+	constraint release.
+	self assert: constraint isActive not.
+	self assert: body velocity equals: 1000 @ 0.
+	^ constraint
+]
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateChecks >> worldPreparesPointerConstraintsBeforeSolving [
+	<gtExample>
+	| owner child world body constraint timestamp |
+	owner := BlElement new size: 400 @ 300; yourself.
+	child := BlElement new size: 40 @ 40; yourself.
+	owner addChild: child.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	body := world bodyStateFor: child.
+	body position: 20 @ 20.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 30 @ 30
+		timestamp: timestamp.
+	constraint updatePointerPosition: 90 @ 30 timestamp: timestamp + 20 milliSeconds.
+	world addPointerConstraint: constraint.
+	world step.
+	self assert: body position x > 20.
+	self assert: world pointerConstraints size equals: 1.
+	world removePointerConstraint: constraint.
+	self assert: world pointerConstraints isEmpty.
+	^ world
+]
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateChecks >> pointerDraggingIsInstalledThroughThePhysicsFacade [
+	<gtExample>
+	| element handler |
+	element := BlElement new size: 40 @ 40; yourself.
+	handler := element physics enablePointerDragging.
+	self assert: handler element equals: element.
+	self assert: element physics isPointerDraggingEnabled.
+	element physics disablePointerDragging.
+	self assert: element physics isPointerDraggingEnabled not.
+	^ element
+]

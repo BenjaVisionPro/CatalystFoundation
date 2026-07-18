@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -26,6 +26,7 @@ CFPhysicsWorld >> initialize [
 	contactHertz := 30.0.
 	contactDampingRatio := 10.0.
 	activeContacts := #().
+	pointerConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -166,13 +167,15 @@ CFPhysicsWorld >> newStep [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
-	| bodies |
+	| bodies step |
 	self synchroniseMembership.
 	bodies := self bodyStatesInOrder.
+	step := self newStep.
+	self preparePointerConstraintsForStep: step timeStep.
 	lastStepResult := stepPipeline
 		stepBodies: bodies
 		fromContacts: activeContacts
-		step: self newStep
+		step: step
 		gravity: gravity
 		restitutionThreshold: restitutionThreshold.
 	activeContacts := lastStepResult activeContacts.
@@ -225,4 +228,33 @@ CFPhysicsWorld >> hitEventThreshold: aNumber [ stepPipeline hitEventThreshold: a
 { #category : 'events' }
 CFPhysicsWorld >> hitEvents [
 	^ lastStepResult ifNil: [ #() ] ifNotNil: [ lastStepResult hitEvents ]
+]
+
+
+{ #category : 'pointer interaction' }
+CFPhysicsWorld >> pointerConstraints [
+	^ pointerConstraints asArray sorted: [ :first :second |
+		first body sequence < second body sequence ]
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsWorld >> addPointerConstraint: aConstraint [
+	pointerConstraints add: aConstraint.
+	^ aConstraint
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsWorld >> removePointerConstraint: aConstraint [
+	(pointerConstraints includes: aConstraint) ifTrue: [
+		aConstraint release.
+		pointerConstraints remove: aConstraint ].
+	^ aConstraint
+]
+
+{ #category : 'pointer interaction' }
+CFPhysicsWorld >> preparePointerConstraintsForStep: seconds [
+	pointerConstraints copy do: [ :each |
+		each isActive
+			ifTrue: [ each prepareForStep: seconds ]
+			ifFalse: [ pointerConstraints remove: each ifAbsent: [ ] ] ]
 ]
