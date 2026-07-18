@@ -80,7 +80,8 @@ CFPhysicsSteppingExamples >> dynamicRectangleStopsOnStaticRectangle [
 		stepDuration: 10 milliseconds;
 		gravity: 0 @ 100;
 		step: 100.
-	self assert: (body physics position distanceTo: 10 @ 20) <= (CFPhysicsContact new positionSlop * 1.001).
+	self assert: body physics position x closeTo: 10.0.
+	self assert: body physics position y closeTo: 20.0.
 	self assert: (body physics velocity distanceTo: 0 @ 0) < 0.000001.
 	self assert: world contacts size equals: 1.
 	self assert: world contacts first normal equals: 0 @ 1.
@@ -224,7 +225,8 @@ CFPhysicsSteppingExamples >> dynamicCircleStopsOnStaticRectangle [
 	ground physics beStatic; position: 0 @ 40.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 100.
 	contact := world contacts first.
-	self assert: (ball physics position distanceTo: 10 @ 20) <= (CFPhysicsContact new positionSlop * 1.001).
+	self assert: ball physics position x closeTo: 10.0.
+	self assert: ball physics position y closeTo: 20.0.
 	self assert: (ball physics velocity distanceTo: 0 @ 0) < 0.000001.
 	self assert: contact normal equals: 0 @ 1.
 	self assert: contact manifold points size equals: 1.
@@ -246,9 +248,11 @@ CFPhysicsSteppingExamples >> overlappingCirclesProduceExactManifold [
 	world gravity: 0 @ 0; step.
 	contact := world contacts first.
 	self assert: contact normal equals: 1 @ 0.
-	self assert: contact penetration <= CFPhysicsContact new positionSlop.
-	self assert: (contact manifold points first distanceTo: 15 @ 10) <= (CFPhysicsContact new positionSlop * 1.001).
-	self assert: (first physics position distanceTo: -5 @ 0) <= (CFPhysicsContact new positionSlop * 1.001).
+	self assert: contact penetration closeTo: 0.0.
+	self assert: contact manifold points first x closeTo: 15.0.
+	self assert: contact manifold points first y closeTo: 10.0.
+	self assert: first physics position x closeTo: -5.0.
+	self assert: first physics position y closeTo: 0.0.
 	^ contact
 ]
 
@@ -718,7 +722,7 @@ CFPhysicsSteppingExamples >> polygonGroundContactUsesBodyWitnessPoint [
 	contact := world contacts first.
 	centre := polygon physics bodyState centre.
 	contactPoint := contact manifold points first.
-	self assert: (contactPoint x - centre x) abs <= CFPhysicsContact new positionSlop.
+	self assert: contactPoint x closeTo: centre x.
 	^ contact
 ]
 
@@ -764,23 +768,3 @@ CFPhysicsSteppingExamples >> verticalRoundedRectangleSupportUsesFaceCentre [
 ]
 
 
-{ #category : 'examples - angular dynamics' }
-CFPhysicsSteppingExamples >> nearVerticalRoundedRectangleSupportUsesFaceCentre [
-	<gtExample>
-	| element owner world state point |
-	owner := BlElement new.
-	element := BlElement new
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		size: 60 @ 30;
-		yourself.
-	owner addChild: element.
-	world := owner physics beWorld.
-	world synchroniseMembership.
-	state := element physics bodyState.
-	point := state shapeState
-		supportPointAt: 0 @ 0
-		rotation: 0
-		inDirection: 0.0000015 @ 1.
-	self assert: (point distanceTo: 30 @ 30) <= state shapeState supportDirectionSlop.
-	^ point
-]

@@ -17,7 +17,7 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 			and: secondBody
 			inDirection: edge third.
 		supportDistance := self dot: support point with: edge third.
-		(supportDistance - edge fourth) <= 0.00001 ifTrue: [
+		(supportDistance closeTo: edge fourth) ifTrue: [
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third

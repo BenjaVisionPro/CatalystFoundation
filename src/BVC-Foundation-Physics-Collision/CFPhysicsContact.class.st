@@ -81,7 +81,7 @@ CFPhysicsContact >> restitution [
 
 { #category : 'resolving' }
 CFPhysicsContact >> solvePosition [
-	| currentManifold inverseMassSum correction normal effectivePenetration contactPoint firstRadius secondRadius firstAngular secondAngular |
+	| currentManifold inverseMassSum correction normal penetration contactPoint firstRadius secondRadius firstAngular secondAngular |
 	(touching and: [ self shouldSolve ]) ifFalse: [ ^ self ].
 	currentManifold := CFPhysicsCollision manifoldBetween: firstBody and: secondBody.
 	currentManifold ifNil: [ ^ self ].
@@ -89,10 +89,10 @@ CFPhysicsContact >> solvePosition [
 	manifold := currentManifold.
 	inverseMassSum := self effectiveMassAlong: currentManifold normal at: currentManifold contactPoints first position.
 	inverseMassSum = 0 ifTrue: [ ^ self ].
-	effectivePenetration := (manifold penetration - self positionSlop) max: 0.0.
-	effectivePenetration = 0 ifTrue: [ ^ self ].
+	penetration := manifold penetration max: 0.0.
+	penetration = 0 ifTrue: [ ^ self ].
 	normal := manifold normal.
-	correction := normal * (effectivePenetration / inverseMassSum).
+	correction := normal * (penetration / inverseMassSum).
 	contactPoint := manifold contactPoints first position.
 	firstRadius := contactPoint - firstBody centre.
 	secondRadius := contactPoint - secondBody centre.
@@ -182,7 +182,3 @@ CFPhysicsContact >> propagateAwakeState [
 	secondBody isAwake ifTrue: [ firstBody isSleeping ifTrue: [ firstBody wake ] ]
 ]
 
-{ #category : 'private - solving' }
-CFPhysicsContact >> positionSlop [
-	^ 0.000001
-]

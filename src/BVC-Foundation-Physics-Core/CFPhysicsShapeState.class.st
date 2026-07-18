@@ -99,10 +99,11 @@ CFPhysicsShapeState >> collisionVerticesAt: aPosition [
 
 { #category : 'polygon' }
 CFPhysicsShapeState >> collisionVerticesAt: aPosition rotation: anAngle [
-	| centre |
+	| centre collisionRotation |
 	centre := self extent / 2.0.
+	collisionRotation := self collisionRotationFor: anAngle.
 	^ self localCollisionVertices collect: [ :each |
-		aPosition + (self rotate: each around: centre by: anAngle) ]
+		aPosition + (self rotate: each around: centre by: collisionRotation) ]
 ]
 
 { #category : 'polygon' }
@@ -160,16 +161,17 @@ CFPhysicsShapeState >> supportPointAt: aPosition inDirection: aDirection [
 
 { #category : 'convex support' }
 CFPhysicsShapeState >> supportPointAt: aPosition rotation: anAngle inDirection: aDirection [
-	| direction localDirection localPoint centre |
+	| direction localDirection localPoint centre collisionRotation |
 	direction := aDirection r = 0
 		ifTrue: [ 1 @ 0 ]
 		ifFalse: [ aDirection / aDirection r ].
 	self isCircle ifTrue: [
 		^ (self circleCentreAt: aPosition) + (direction * self radius) ].
-	localDirection := self rotateVector: direction by: anAngle negated.
+	collisionRotation := self collisionRotationFor: anAngle.
+	localDirection := self rotateVector: direction by: collisionRotation negated.
 	localPoint := self localSupportPointInDirection: localDirection.
 	centre := self extent / 2.0.
-	^ aPosition + (self rotate: localPoint around: centre by: anAngle)
+	^ aPosition + (self rotate: localPoint around: centre by: collisionRotation)
 ]
 
 { #category : 'convex support' }
@@ -233,32 +235,34 @@ CFPhysicsShapeState >> roundedRectangleSupportPointAt: aPosition inDirection: di
 
 { #category : 'rounded rectangle' }
 CFPhysicsShapeState >> roundedRectangleLocalSupportPointInDirection: direction [
-	| anExtent radius innerPoint innerX innerY canonicalDirection |
+	| anExtent radius innerPoint innerX innerY unitDirection |
 	anExtent := self extent.
 	radius := self roundedRectangleRadius.
 	radius = 0 ifTrue: [
 		^ self supportPointOf: self localCollisionVertices inDirection: direction ].
-	canonicalDirection :=
-		((direction x abs <= self supportDirectionSlop
-			ifTrue: [ 0.0 ]
-			ifFalse: [ direction x ])
-		@
-		(direction y abs <= self supportDirectionSlop
-			ifTrue: [ 0.0 ]
-			ifFalse: [ direction y ])).
-	canonicalDirection r = 0 ifTrue: [ canonicalDirection := 1 @ 0 ].
-	canonicalDirection := canonicalDirection / canonicalDirection r.
-	innerX := canonicalDirection x = 0
+	unitDirection := direction r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ direction / direction r ].
+	innerX := unitDirection x = 0
 		ifTrue: [ anExtent x / 2.0 ]
-		ifFalse: [ canonicalDirection x > 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ] ].
-	innerY := canonicalDirection y = 0
+		ifFalse: [ unitDirection x > 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ] ].
+	innerY := unitDirection y = 0
 		ifTrue: [ anExtent y / 2.0 ]
-		ifFalse: [ canonicalDirection y > 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ] ].
+		ifFalse: [ unitDirection y > 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ] ].
 	innerPoint := innerX @ innerY.
-	^ innerPoint + (canonicalDirection * radius)
+	^ innerPoint + (unitDirection * radius)
 ]
 
-{ #category : 'rounded rectangle' }
-CFPhysicsShapeState >> supportDirectionSlop [
-	^ 0.00001
+{ #category : 'geometry' }
+CFPhysicsShapeState >> collisionRotationFor: anAngle [
+	| fullTurn quarterTurn normalized |
+	fullTurn := Float pi * 2.0.
+	quarterTurn := Float pi / 2.0.
+	normalized := anAngle \ fullTurn.
+	(normalized closeTo: 0.0) ifTrue: [ ^ 0.0 ].
+	(normalized closeTo: quarterTurn) ifTrue: [ ^ quarterTurn ].
+	(normalized closeTo: Float pi) ifTrue: [ ^ Float pi ].
+	(normalized closeTo: quarterTurn * 3.0) ifTrue: [ ^ quarterTurn * 3.0 ].
+	(normalized closeTo: fullTurn) ifTrue: [ ^ 0.0 ].
+	^ normalized
 ]
