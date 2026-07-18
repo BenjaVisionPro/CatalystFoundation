@@ -1866,3 +1866,32 @@ CFPhysicsCleanSlateChecks >> relationshipsCanResolveNormalisedAnchors [
 	self assert: anchorB worldPoint equals: 80 @ 0.
 	^ { spring. attraction. repulsion }
 ]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> explicitAnchorsCanCreateWorldOwnedRelationships [
+	<gtExample>
+	| owner first second world anchorA anchorB spring attraction repulsion |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 40 @ 20; yourself.
+	second := BlElement new size: 60 @ 30; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	first physics position: 20 @ 30.
+	second physics position: 200 @ 80.
+	anchorA := first physics localAnchorAt: 40 @ 10.
+	anchorB := second physics normalisedAnchorAt: 0 @ 0.5.
+	spring := anchorA springTo: anchorB.
+	attraction := anchorA attract: anchorB.
+	repulsion := anchorA repel: anchorB.
+	self assert: spring anchorA == anchorA.
+	self assert: spring anchorB == anchorB.
+	self assert: attraction anchorA == anchorA.
+	self assert: attraction anchorB == anchorB.
+	self assert: repulsion anchorA == anchorA.
+	self assert: repulsion anchorB == anchorB.
+	self assert: world springConstraints equals: { spring }.
+	self assert: world attractionConstraints equals: { attraction }.
+	self assert: world repulsionConstraints equals: { repulsion }.
+	^ { spring. attraction. repulsion }
+]
