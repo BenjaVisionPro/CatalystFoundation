@@ -1814,3 +1814,55 @@ CFPhysicsCleanSlateChecks >> relationshipsCanResolveBodyLocalAnchors [
 	self assert: anchorB worldPoint equals: 100 @ 10.
 	^ { spring. attraction. repulsion }
 ]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> normalisedAnchorFollowsBodyGeometry [
+	<gtExample>
+	| body anchor |
+	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
+	anchor := CFPhysicsNormalisedAnchor on: body at: 1 @ 0.5.
+	self assert: anchor body == body.
+	self assert: anchor normalisedPoint equals: 1 @ 0.5.
+	self assert: anchor worldPoint equals: 120 @ 50.
+	body element size: 80 @ 40.
+	self assert: anchor worldPoint equals: 140 @ 50.
+	body rotation: Float pi / 2.
+	self assert: (anchor worldPoint closeTo: 100 @ 90).
+	^ anchor
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> elementCanCreateANormalisedAnchor [
+	<gtExample>
+	| owner element world anchor |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 40 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	element physics position: 100 @ 50.
+	anchor := element physics normalisedAnchorAt: 1 @ 1.
+	self assert: anchor class equals: CFPhysicsNormalisedAnchor.
+	self assert: anchor body == element physics bodyState.
+	self assert: anchor worldPoint equals: 120 @ 60.
+	^ anchor
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> relationshipsCanResolveNormalisedAnchors [
+	<gtExample>
+	| first second anchorA anchorB spring attraction repulsion |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 40 @ 20.
+	anchorA := CFPhysicsNormalisedAnchor on: first at: 1 @ 0.5.
+	anchorB := CFPhysicsNormalisedAnchor on: second at: 0 @ 0.5.
+	spring := CFPhysicsSpringConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	self assert: spring anchorA == anchorA.
+	self assert: attraction anchorA == anchorA.
+	self assert: repulsion anchorA == anchorA.
+	self assert: anchorA worldPoint equals: 10 @ 0.
+	self assert: anchorB worldPoint equals: 80 @ 0.
+	^ { spring. attraction. repulsion }
+]

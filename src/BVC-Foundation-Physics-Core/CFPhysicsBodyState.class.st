@@ -459,3 +459,13 @@ CFPhysicsBodyState >> allowsCollisionWith: anotherBody [
 CFPhysicsBodyState >> worldPointForLocalPoint: aPoint [
 	^ position + (self shapeState rotateVector: aPoint by: rotation)
 ]
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> localPointForNormalisedPoint: aPoint [
+	^ (aPoint - (0.5 @ 0.5)) * self extent
+]
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> worldPointForNormalisedPoint: aPoint [
+	^ self worldPointForLocalPoint: (self localPointForNormalisedPoint: aPoint)
+]
