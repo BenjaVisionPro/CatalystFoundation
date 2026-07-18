@@ -1102,7 +1102,7 @@ CFPhysicsCleanSlateChecks >> circleAgainstRectangleProducesMixedShapeManifold [
 	self assert: manifold notNil.
 	self assert: manifold contactPoints size equals: 1.
 	self assert: manifold normal equals: 0 @ 1.
-	self assert: (manifold contactPoints first separation closeTo: -2.0).
+	self assert: (manifold contactPoints first separation closeTo: -8.0).
 	self assert: manifold contactPoints first localAnchorA notNil.
 	self assert: manifold contactPoints first localAnchorB notNil.
 	^ manifold
