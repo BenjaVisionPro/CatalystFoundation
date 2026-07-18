@@ -89,3 +89,74 @@ CFPhysicsCleanSlateChecks >> manifoldDoesNotUsePositionAsIdentity [
 	self assert: newPoint normalImpulse equals: 0.0.
 	^ newManifold
 ]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateChecks >> faceContactProducesTwoPoints [
+	<gtExample>
+	| ground box manifold |
+	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
+	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
+	manifold := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
+		andShape: box position: 20 @ 15 rotation: 0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints size equals: 2.
+	self assert: manifold normal equals: 0 @ 1.
+	manifold contactPoints do: [ :point |
+		self assert: (point separation closeTo: -5.0).
+		self assert: point featureId notNil.
+		self assert: point localAnchorA notNil.
+		self assert: point localAnchorB notNil ].
+	^ manifold
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateChecks >> faceContactIdentityPersistsAcrossTangentialMotion [
+	<gtExample>
+	| ground box first second firstIds secondIds |
+	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
+	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
+	first := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
+		andShape: box position: 20 @ 15 rotation: 0.
+	second := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
+		andShape: box position: 21 @ 15 rotation: 0.
+	firstIds := first contactPoints collect: [ :point | point featureId ].
+	secondIds := second contactPoints collect: [ :point | point featureId ].
+	self assert: firstIds asSet equals: secondIds asSet.
+	^ second
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateChecks >> roundedPolygonUsesCoreAndRadius [
+	<gtExample>
+	| ground box manifold |
+	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
+	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20 radius: 5.
+	manifold := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
+		andShape: box position: 20 @ 15 rotation: 0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints size equals: 2.
+	manifold contactPoints do: [ :point |
+		self assert: (point separation closeTo: -5.0) ].
+	^ manifold
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateChecks >> separatedPolygonCoresRespectCombinedRadius [
+	<gtExample>
+	| first second touching separated |
+	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
+	second := CFPhysicsPolygonShape rectangleExtent: 60 @ 20 radius: 5.
+	touching := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: first position: 0 @ 0 rotation: 0
+		andShape: second position: 20 @ 20 rotation: 0.
+	separated := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: first position: 0 @ 0 rotation: 0
+		andShape: second position: 20 @ 21 rotation: 0.
+	self assert: touching notNil.
+	self assert: separated isNil.
+	^ touching
+]

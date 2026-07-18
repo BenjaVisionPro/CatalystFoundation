@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsManifoldPoint',
 	#superclass : 'Object',
-	#instVars : [ 'position', 'separation', 'featureId', 'normalImpulse', 'tangentImpulse' ],
+	#instVars : [ 'position', 'separation', 'featureId', 'normalImpulse', 'tangentImpulse', 'localAnchorA', 'localAnchorB' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
@@ -17,7 +17,9 @@ CFPhysicsManifoldPoint >> initialize [
 	normalImpulse := 0.0.
 	tangentImpulse := 0.0.
 	separation := 0.0.
-	featureId := nil
+	featureId := nil.
+	localAnchorA := nil.
+	localAnchorB := nil
 ]
 
 { #category : 'accessing' }
@@ -42,3 +44,16 @@ CFPhysicsManifoldPoint >> separation: aNumber [ separation := aNumber asFloat ]
 CFPhysicsManifoldPoint >> featureId [ ^ featureId ]
 { #category : 'accessing' }
 CFPhysicsManifoldPoint >> featureId: anObject [ featureId := anObject ]
+
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> localAnchorA [ ^ localAnchorA ]
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> localAnchorA: aPoint [ localAnchorA := aPoint ]
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> localAnchorB [ ^ localAnchorB ]
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> localAnchorB: aPoint [ localAnchorB := aPoint ]

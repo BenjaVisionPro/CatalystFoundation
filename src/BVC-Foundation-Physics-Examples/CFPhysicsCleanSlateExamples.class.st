@@ -14,5 +14,8 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsContactConstraintPoint.
 		CFPhysicsContactConstraint.
 		CFPhysicsSoftStepSolver.
-		CFPhysicsContactFeatureId }
+		CFPhysicsContactFeatureId.
+		CFPhysicsPolygonShape.
+		CFPhysicsClipVertex.
+		CFPhysicsPolygonManifoldBuilder }
 ]
