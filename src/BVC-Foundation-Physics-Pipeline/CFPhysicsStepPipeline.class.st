@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipeline',
 	#superclass : 'Object',
-	#instVars : [ 'contactPipeline', 'constraintBuilder' ],
+	#instVars : [ 'contactPipeline', 'constraintBuilder', 'islandBuilder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -11,6 +11,7 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 	^ self new
 		contactPipeline: (CFPhysicsContactPipeline manifoldBuilder: aBlock);
 		constraintBuilder: CFPhysicsConstraintBuilder new;
+		islandBuilder: CFPhysicsIslandBuilder new;
 		yourself
 ]
 
@@ -24,9 +25,14 @@ CFPhysicsStepPipeline >> constraintBuilder: aConstraintBuilder [
 	constraintBuilder := aConstraintBuilder
 ]
 
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> islandBuilder: anIslandBuilder [
+	islandBuilder := anIslandBuilder
+]
+
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	| orderedBodies contactResult bodyStates constraints solver |
+	| orderedBodies contactResult bodyStates constraints islands solver |
 	orderedBodies := bodies asArray sorted: [ :left :right | left sequence < right sequence ].
 	contactResult := contactPipeline
 		updateBodies: orderedBodies
@@ -35,10 +41,11 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 	constraints := constraintBuilder
 		constraintsFrom: contactResult activeContacts
 		bodyStates: bodyStates.
-	solver := CFPhysicsSoftStepSolver
+	islands := islandBuilder islandsFromBodies: orderedBodies constraints: constraints.
+	solver := CFPhysicsIslandSolver
 		step: step
 		bodyStates: bodyStates
-		constraints: constraints.
+		islands: islands.
 	solver
 		solveWithGravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
@@ -48,6 +55,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 		contactResult: contactResult;
 		bodyStates: bodyStates;
 		constraints: constraints;
+		islands: islands;
 		solver: solver;
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'solver', 'gravity', 'restitutionThreshold' ],
+	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'gravity', 'restitutionThreshold' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -26,6 +26,10 @@ CFPhysicsStepPipelineResult >> bodyStates: aDictionary [ bodyStates := aDictiona
 CFPhysicsStepPipelineResult >> constraints [ ^ constraints ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> constraints: aCollection [ constraints := aCollection asArray ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> islands [ ^ islands ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> islands: aCollection [ islands := aCollection asArray ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> solver [ ^ solver ]
 { #category : 'accessing' }

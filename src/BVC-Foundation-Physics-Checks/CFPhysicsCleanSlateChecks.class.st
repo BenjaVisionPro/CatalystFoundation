@@ -543,3 +543,73 @@ CFPhysicsCleanSlateChecks >> worldCarriesActiveContactsExplicitlyBetweenSteps [
 	self assert: world activeContacts equals: secondResult activeContacts.
 	^ secondResult
 ]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateChecks >> islandBuilderSeparatesDisconnectedDynamicGroups [
+	<gtExample>
+	| first second third fourth constraints islands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	fourth := self cleanSlateBodyWithSequence: 4.
+	constraints := {
+		self cleanSlateConstraintBetween: first and: second.
+		self cleanSlateConstraintBetween: third and: fourth }.
+	islands := CFPhysicsIslandBuilder new
+		islandsFromBodies: { fourth. second. third. first }
+		constraints: constraints.
+	self assert: islands size equals: 2.
+	self assert: (islands first dynamicBodies collect: #sequence) equals: #(1 2).
+	self assert: (islands second dynamicBodies collect: #sequence) equals: #(3 4).
+	self assert: islands first constraints size equals: 1.
+	self assert: islands second constraints size equals: 1.
+	^ islands
+]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateChecks >> staticBodyDoesNotBridgeDynamicIslands [
+	<gtExample>
+	| first ground second constraints islands |
+	first := self cleanSlateBodyWithSequence: 1.
+	ground := self cleanSlateBodyWithSequence: 2.
+	ground beStatic.
+	second := self cleanSlateBodyWithSequence: 3.
+	constraints := {
+		self cleanSlateConstraintBetween: first and: ground.
+		self cleanSlateConstraintBetween: ground and: second }.
+	islands := CFPhysicsIslandBuilder new
+		islandsFromBodies: { second. ground. first }
+		constraints: constraints.
+	self assert: islands size equals: 2.
+	self assert: (islands first dynamicBodies collect: #sequence) equals: #(1).
+	self assert: (islands second dynamicBodies collect: #sequence) equals: #(3).
+	self assert: islands first staticBodies equals: { ground }.
+	self assert: islands second staticBodies equals: { ground }.
+	self assert: islands first constraints size equals: 1.
+	self assert: islands second constraints size equals: 1.
+	^ islands
+]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateChecks >> stepPipelineSolvesExplicitIslands [
+	<gtExample>
+	| result |
+	result := self stepPipelineExposesTheComposedStep.
+	self assert: result islands size equals: 1.
+	self assert: result islands first constraints equals: result constraints.
+	self assert: result solver islands equals: result islands.
+	self assert: result solver softStepSolvers size equals: result islands size.
+	^ result
+]
+
+{ #category : 'private - islands' }
+CFPhysicsCleanSlateChecks >> cleanSlateConstraintBetween: firstBody and: secondBody [
+	| contact |
+	contact := CFPhysicsContact
+		pair: (CFPhysicsPair first: firstBody second: secondBody)
+		manifold: (self cleanSlateManifoldWithFeatureIndex: secondBody sequence).
+	^ CFPhysicsPreparedConstraint new
+		contact: contact;
+		points: #();
+		yourself
+]
