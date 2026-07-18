@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipeline',
 	#superclass : 'Object',
-	#instVars : [ 'contactPipeline', 'constraintBuilder', 'islandBuilder', 'sleepStage' ],
+	#instVars : [ 'contactPipeline', 'constraintBuilder', 'islandBuilder', 'sleepStage', 'contactEventStage' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -13,6 +13,7 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 		constraintBuilder: CFPhysicsConstraintBuilder new;
 		islandBuilder: CFPhysicsIslandBuilder new;
 		sleepStage: CFPhysicsIslandSleepStage new;
+		contactEventStage: CFPhysicsContactEventStage new;
 		yourself
 ]
 
@@ -20,6 +21,13 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 CFPhysicsStepPipeline >> contactPipeline: aContactPipeline [
 	contactPipeline := aContactPipeline
 ]
+
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> contactEventStage [ ^ contactEventStage ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> contactEventStage: anEventStage [ contactEventStage := anEventStage ]
 
 { #category : 'accessing' }
 CFPhysicsStepPipeline >> constraintBuilder: aConstraintBuilder [
@@ -45,7 +53,7 @@ CFPhysicsStepPipeline >> sleepConfiguration: aConfiguration [ sleepStage configu
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	| orderedBodies contactResult bodyStates constraints islands solver sleepDecisions |
+	| orderedBodies contactResult bodyStates constraints islands solver sleepDecisions contactEvents |
 	orderedBodies := bodies asArray sorted: [ :left :right | left sequence < right sequence ].
 	contactResult := contactPipeline
 		updateBodies: orderedBodies
@@ -67,6 +75,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 		updateIslands: islands
 		bodyStates: bodyStates
 		elapsed: step timeStep.
+	contactEvents := contactEventStage eventsFrom: contactResult.
 	^ CFPhysicsStepPipelineResult new
 		step: step;
 		bodies: orderedBodies;
@@ -76,6 +85,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 		islands: islands;
 		solver: solver;
 		sleepDecisions: sleepDecisions;
+		contactEvents: contactEvents;
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
 		yourself

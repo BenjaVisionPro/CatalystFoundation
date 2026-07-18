@@ -31,6 +31,10 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsSleepConfiguration.
 		CFPhysicsIslandSleepStage.
 		CFPhysicsIslandSleepDecision.
+		CFPhysicsContactEvent.
+		CFPhysicsContactBeganEvent.
+		CFPhysicsContactEndedEvent.
+		CFPhysicsContactEventStage.
 		CFPhysicsSoftStepSolver.
 		CFPhysicsStepPipeline.
 		CFPhysicsStepPipelineResult.

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'gravity', 'restitutionThreshold' ],
+	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactEvents', 'gravity', 'restitutionThreshold' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -47,6 +47,19 @@ CFPhysicsStepPipelineResult >> sleptIslands [
 CFPhysicsStepPipelineResult >> wokenBodies [
 	^ sleepDecisions flatCollect: [ :decision | decision wokeBodies ]
 ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactEvents [ ^ contactEvents ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactEvents: aCollection [ contactEvents := aCollection asArray ]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> contactBeganEvents [
+	^ contactEvents select: [ :event | event began ]
+]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> contactEndedEvents [
+	^ contactEvents select: [ :event | event ended ]
+]
+
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> gravity [ ^ gravity ]
 { #category : 'accessing' }

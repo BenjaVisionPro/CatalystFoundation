@@ -712,3 +712,62 @@ CFPhysicsCleanSlateChecks >> stepPipelineExposesIslandSleepDecisions [
 	self assert: result sleepDecisions first island == result islands first.
 	^ result sleepDecisions
 ]
+
+{ #category : 'examples - contact events' }
+CFPhysicsCleanSlateChecks >> contactEventStagePublishesLifecycleEvents [
+	<gtExample>
+	| first second pair manifold beganContact endedContact batch result events |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	beganContact := CFPhysicsContact pair: pair manifold: manifold.
+	endedContact := beganContact copyForUpdate.
+	endedContact updateWith: nil.
+	batch := CFPhysicsContactUpdateBatch
+		active: { beganContact }
+		began: { beganContact }
+		continued: #()
+		ended: { endedContact }.
+	result := CFPhysicsContactPipelineResult pairs: { pair } contactBatch: batch.
+	events := CFPhysicsContactEventStage new eventsFrom: result.
+	self assert: events size equals: 2.
+	self assert: events first began.
+	self assert: events second ended.
+	self assert: events first manifold == manifold.
+	self assert: events second manifold == manifold.
+	^ events
+]
+
+{ #category : 'examples - contact events' }
+CFPhysicsCleanSlateChecks >> continuedContactsDoNotPublishLifecycleEvents [
+	<gtExample>
+	| first second pair contact batch result events |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	contact := CFPhysicsContact pair: pair manifold: (self cleanSlateManifoldWithFeatureIndex: 1).
+	contact := contact copyForUpdate
+		updateWith: (self cleanSlateManifoldWithFeatureIndex: 1);
+		yourself.
+	batch := CFPhysicsContactUpdateBatch
+		active: { contact }
+		began: #()
+		continued: { contact }
+		ended: #().
+	result := CFPhysicsContactPipelineResult pairs: { pair } contactBatch: batch.
+	events := CFPhysicsContactEventStage new eventsFrom: result.
+	self assert: events isEmpty.
+	^ events
+]
+
+{ #category : 'examples - contact events' }
+CFPhysicsCleanSlateChecks >> stepPipelineExposesContactEvents [
+	<gtExample>
+	| result |
+	result := self stepPipelineExposesTheComposedStep.
+	self assert: result contactEvents size equals: result beganContacts size + result endedContacts size.
+	self assert: result contactBeganEvents size equals: result beganContacts size.
+	self assert: result contactEndedEvents size equals: result endedContacts size.
+	^ result contactEvents
+]
