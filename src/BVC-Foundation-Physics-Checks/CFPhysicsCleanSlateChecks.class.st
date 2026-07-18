@@ -795,10 +795,10 @@ CFPhysicsCleanSlateChecks >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: result stageExecutions second output == result contactResult.
 	self assert: result stageExecutions fourth output equals: result constraints.
 	self assert: result stageExecutions fifth output equals: result islands.
-	self assert: result stageExecutions seventh output == result solver.
-	self assert: result stageExecutions eighth output contactResults equals: result contactSolveResults.
-	self assert: result stageExecutions eighth output hitEvents equals: result hitEvents.
-	self assert: result stageExecutions tenth output equals: result contactEvents.
+	self assert: ((result stageExecutions at: 7) output == result solver).
+	self assert: (result stageExecutions at: 8) output contactResults equals: result contactSolveResults.
+	self assert: (result stageExecutions at: 8) output hitEvents equals: result hitEvents.
+	self assert: (result stageExecutions at: 10) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -846,10 +846,10 @@ CFPhysicsCleanSlateChecks >> hitEventsAreDerivedAfterSolving [
 	stage hitEventThreshold: 0.0.
 	result := self stepPipelineExposesTheComposedStep.
 	stage executeOn: result.
-	self assert: result hitEvents allSatisfy: [ :event |
-		event normalImpulse > 0.0 and: [ event approachSpeed > 0.0 ] ].
-	self assert: result hitEvents allSatisfy: [ :event |
-		result activeContacts includes: event contact ].
+	self assert: (result hitEvents allSatisfy: [ :event |
+		event normalImpulse > 0.0 and: [ event approachSpeed > 0.0 ] ]).
+	self assert: (result hitEvents allSatisfy: [ :event |
+		result activeContacts includes: event contact ]).
 	^ result hitEvents
 ]
 
