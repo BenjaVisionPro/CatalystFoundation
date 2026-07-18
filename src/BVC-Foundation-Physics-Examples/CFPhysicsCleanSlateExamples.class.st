@@ -65,5 +65,7 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsRepulsionConstraint.
 		CFPhysicsDistanceResponse.
 		CFPhysicsConstantForceResponse.
+		CFPhysicsLinearFalloffResponse.
+		CFPhysicsSoftenedInverseSquareResponse.
 		CFPhysicsContainmentConstraint }
 ]

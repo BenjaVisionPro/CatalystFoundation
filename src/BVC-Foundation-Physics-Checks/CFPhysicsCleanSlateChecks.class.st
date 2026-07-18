@@ -1942,3 +1942,57 @@ CFPhysicsCleanSlateChecks >> repulsionCanUseLinearFalloffResponse [
 	self assert: first velocity equals: second velocity negated.
 	^ repulsion
 ]
+
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> softenedInverseSquareResponseFallsOffWithoutSingularity [
+	<gtExample>
+	| response |
+	response := CFPhysicsSoftenedInverseSquareResponse
+		force: 400
+		softeningDistance: 20.
+	self assert: (response forceMagnitudeAtDistance: 0) equals: 400.0.
+	self assert: (response forceMagnitudeAtDistance: 20) equals: 200.0.
+	self assert: (response forceMagnitudeAtDistance: 40) equals: 80.0.
+	response maximumDistance: 50.
+	self assert: (response forceMagnitudeAtDistance: 51) equals: 0.0.
+	^ response
+]
+
+{ #category : 'examples - attraction interaction' }
+CFPhysicsCleanSlateChecks >> attractionCanUseSoftenedInverseSquareResponse [
+	<gtExample>
+	| first second attraction response |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
+	response := CFPhysicsSoftenedInverseSquareResponse
+		force: 1000
+		softeningDistance: 100.
+	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction distanceResponse: response.
+	attraction prepareForStep: 0.1.
+	self assert: attraction distanceResponse == response.
+	self assert: first velocity x > 0.
+	self assert: second velocity x < 0.
+	self assert: first velocity equals: second velocity negated.
+	^ attraction
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> repulsionCanUseSoftenedInverseSquareResponse [
+	<gtExample>
+	| first second repulsion response |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
+	response := CFPhysicsSoftenedInverseSquareResponse
+		force: 1000
+		softeningDistance: 100.
+	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion distanceResponse: response.
+	repulsion prepareForStep: 0.1.
+	self assert: repulsion distanceResponse == response.
+	self assert: first velocity x < 0.
+	self assert: second velocity x > 0.
+	self assert: first velocity equals: second velocity negated.
+	^ repulsion
+]
