@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'gravity', 'restitutionThreshold' ],
+	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'gravity', 'restitutionThreshold' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -34,6 +34,19 @@ CFPhysicsStepPipelineResult >> islands: aCollection [ islands := aCollection asA
 CFPhysicsStepPipelineResult >> solver [ ^ solver ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> solver: anObject [ solver := anObject ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> sleepDecisions [ ^ sleepDecisions ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> sleepDecisions: aCollection [ sleepDecisions := aCollection asArray ]
+{ #category : 'sleeping' }
+CFPhysicsStepPipelineResult >> sleptIslands [
+	^ (sleepDecisions select: [ :decision | decision slept ])
+		collect: [ :decision | decision island ]
+]
+{ #category : 'sleeping' }
+CFPhysicsStepPipelineResult >> wokenBodies [
+	^ sleepDecisions flatCollect: [ :decision | decision wokeBodies ]
+]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> gravity [ ^ gravity ]
 { #category : 'accessing' }

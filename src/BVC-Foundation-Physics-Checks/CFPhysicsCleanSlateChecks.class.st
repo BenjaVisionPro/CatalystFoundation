@@ -613,3 +613,102 @@ CFPhysicsCleanSlateChecks >> cleanSlateConstraintBetween: firstBody and: secondB
 		points: #();
 		yourself
 ]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateChecks >> islandWakePropagatesAcrossConnectedDynamicBodies [
+	<gtExample>
+	| first second island stage decisions |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	second sleep.
+	island := CFPhysicsIsland new
+		addBody: first;
+		addBody: second;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new.
+	stage propagateWakeAcross: { island }.
+	decisions := stage
+		updateIslands: { island }
+		bodyStates: (IdentityDictionary new
+			at: first put: (CFPhysicsBodyStepState on: first);
+			at: second put: (CFPhysicsBodyStepState on: second);
+			yourself)
+		elapsed: 0.0.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	self assert: decisions first wokeBodies equals: { second }.
+	^ decisions first
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateChecks >> islandSleepsAsOneDecision [
+	<gtExample>
+	| first second island stage configuration bodyStates firstDecision secondDecision |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	island := CFPhysicsIsland new
+		addBody: first;
+		addBody: second;
+		yourself.
+	configuration := CFPhysicsSleepConfiguration standard
+		linearVelocityThreshold: 1.0;
+		angularVelocityThreshold: 1.0;
+		timeToSleep: 0.02;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	stage propagateWakeAcross: { island }.
+	firstDecision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.01) first.
+	self assert: firstDecision eligible.
+	self assert: firstDecision slept not.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	stage propagateWakeAcross: { island }.
+	secondDecision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.01) first.
+	self assert: secondDecision eligible.
+	self assert: secondDecision slept.
+	self assert: first isSleeping.
+	self assert: second isSleeping.
+	^ secondDecision
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateChecks >> movingMemberKeepsTheWholeIslandAwake [
+	<gtExample>
+	| first second island stage bodyStates decision |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first advanceSleepTimeBy: 0.25.
+	second advanceSleepTimeBy: 0.25.
+	second velocity: 10 @ 0.
+	island := CFPhysicsIsland new
+		addBody: first;
+		addBody: second;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	stage propagateWakeAcross: { island }.
+	decision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.016) first.
+	self assert: decision eligible not.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	self assert: first sleepTime equals: 0.0.
+	self assert: second sleepTime equals: 0.0.
+	^ decision
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateChecks >> stepPipelineExposesIslandSleepDecisions [
+	<gtExample>
+	| result |
+	result := self stepPipelineExposesTheComposedStep.
+	self assert: result sleepDecisions size equals: result islands size.
+	self assert: result sleepDecisions first island == result islands first.
+	^ result sleepDecisions
+]

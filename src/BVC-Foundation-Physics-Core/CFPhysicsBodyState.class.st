@@ -387,3 +387,13 @@ CFPhysicsBodyState >> commitPosition: aPosition rotation: anAngle velocity: aVel
 	angularVelocity := dynamic ifTrue: [ anAngularVelocity ] ifFalse: [ 0.0 ].
 	torque := 0.0
 ]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> advanceSleepTimeBy: seconds [
+	dynamic ifTrue: [ sleepTime := sleepTime + seconds ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> resetSleepTime [
+	sleepTime := 0.0
+]

@@ -23,7 +23,8 @@ CFPhysicsIslandSolver >> initialize [
 
 { #category : 'solving' }
 CFPhysicsIslandSolver >> solveWithGravity: gravityVector restitutionThreshold: restitutionThreshold [
-	softStepSolvers := islands collect: [ :island |
+	softStepSolvers := (islands select: [ :island |
+		island dynamicBodies anySatisfy: [ :body | body isAwake ] ]) collect: [ :island |
 		| solver |
 		solver := CFPhysicsSoftStepSolver
 			step: step

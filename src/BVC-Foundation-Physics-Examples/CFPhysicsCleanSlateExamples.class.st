@@ -28,6 +28,9 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsIsland.
 		CFPhysicsIslandBuilder.
 		CFPhysicsIslandSolver.
+		CFPhysicsSleepConfiguration.
+		CFPhysicsIslandSleepStage.
+		CFPhysicsIslandSleepDecision.
 		CFPhysicsSoftStepSolver.
 		CFPhysicsStepPipeline.
 		CFPhysicsStepPipelineResult.
