@@ -239,3 +239,103 @@ CFPhysicsCleanSlateChecks >> circleDoesNotPretendToBeAPolygon [
 	self assert: shapeState polygonShape isNil.
 	^ shapeState
 ]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateChecks >> contactPipelineOrdersPairsDeterministically [
+	<gtExample>
+	| first second third pairs |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	pairs := {
+		CFPhysicsPair first: third second: first.
+		CFPhysicsPair first: third second: second.
+		CFPhysicsPair first: second second: first }
+		sorted: [ :left :right | left comesBefore: right ].
+	self assert: (pairs collect: [ :pair | { pair firstBody sequence. pair secondBody sequence } ])
+		equals: { { 1. 2 }. { 1. 3 }. { 2. 3 } }.
+	^ pairs
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateChecks >> contactPipelineReportsBeginContinueAndEnd [
+	<gtExample>
+	| first second pair manifold updater firstBatch secondBatch thirdBatch |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | manifold ].
+	firstBatch := updater updatePairs: { pair } fromContacts: #().
+	self assert: firstBatch beganContacts size equals: 1.
+	self assert: firstBatch continuedContacts isEmpty.
+	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
+	self assert: secondBatch beganContacts isEmpty.
+	self assert: secondBatch continuedContacts size equals: 1.
+	thirdBatch := updater updatePairs: #() fromContacts: secondBatch activeContacts.
+	self assert: thirdBatch activeContacts isEmpty.
+	self assert: thirdBatch endedContacts size equals: 1.
+	^ thirdBatch
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateChecks >> contactPipelinePersistsImpulsesByFeatureIdentity [
+	<gtExample>
+	| first second pair oldManifold newManifold updater initial next oldPoint newPoint |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	oldManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	oldPoint := oldManifold contactPoints first.
+	oldPoint normalImpulse: 7.0; tangentImpulse: 2.0.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | oldManifold ].
+	initial := updater updatePairs: { pair } fromContacts: #().
+	newManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | newManifold ].
+	next := updater updatePairs: { pair } fromContacts: initial activeContacts.
+	newPoint := next activeContacts first manifold contactPoints first.
+	self assert: newPoint normalImpulse equals: 7.0.
+	self assert: newPoint tangentImpulse equals: 2.0.
+	^ next
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateChecks >> preparedConstraintCopiesContactGeometryWithoutMutatingIt [
+	<gtExample>
+	| first second pair manifold contact constraint point |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	contact := CFPhysicsContact pair: pair manifold: manifold.
+	constraint := CFPhysicsPreparedConstraint fromContact: contact.
+	point := constraint points first.
+	self assert: constraint contact == contact.
+	self assert: constraint normal equals: manifold normal.
+	self assert: point featureId equals: manifold contactPoints first featureId.
+	self assert: point localAnchorA equals: manifold contactPoints first localAnchorA.
+	self assert: point localAnchorB equals: manifold contactPoints first localAnchorB.
+	self assert: point baseSeparation equals: manifold contactPoints first separation.
+	^ constraint
+]
+
+{ #category : 'private - contact pipeline' }
+CFPhysicsCleanSlateChecks >> cleanSlateBodyWithSequence: anInteger [
+	^ (CFPhysicsBodyState element: (BlElement new size: 10 @ 10; yourself) world: nil)
+		sequence: anInteger;
+		yourself
+]
+
+{ #category : 'private - contact pipeline' }
+CFPhysicsCleanSlateChecks >> cleanSlateManifoldWithFeatureIndex: anInteger [
+	| point manifold |
+	point := CFPhysicsManifoldPoint at: 5 @ 5.
+	point
+		featureId: (CFPhysicsContactFeatureId featureA: #face index: 0 featureB: #vertex index: anInteger);
+		localAnchorA: 5 @ 5;
+		localAnchorB: 5 @ 0;
+		separation: -1.0.
+	manifold := CFPhysicsManifold normal: 0 @ 1 penetration: 1.0.
+	manifold contactPoints: { point }.
+	^ manifold
+]
