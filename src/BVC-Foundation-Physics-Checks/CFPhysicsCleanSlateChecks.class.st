@@ -33,7 +33,7 @@ CFPhysicsCleanSlateChecks >> contactFeatureIdentityIsStructural [
 		featureA: #face index: 3 featureB: #vertex index: 1.
 	self assert: first equals: second.
 	self assert: first hash equals: second hash.
-	self deny: first = different.
+	self assert: (first = different) not.
 	^ first
 ]
 
