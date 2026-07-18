@@ -262,6 +262,14 @@ CFPhysicsBodyState >> isSleeping [
 { #category : 'sleeping' }
 CFPhysicsBodyState >> sleep [
 	dynamic ifFalse: [ ^ self ].
+	Transcript
+		cr;
+		nextPutAll: 'CFPhysics sleep body='; print: element identityHash;
+		nextPutAll: ' position='; print: position;
+		nextPutAll: ' rotation='; print: rotation;
+		nextPutAll: ' velocity='; print: velocity;
+		nextPutAll: ' angularVelocity='; print: angularVelocity;
+		nextPutAll: ' accumulatedTime='; print: sleepTime.
 	awake := false.
 	sleepTime := 0.0.
 	velocity := 0 @ 0.
@@ -276,19 +284,50 @@ CFPhysicsBodyState >> sleepTime [
 
 { #category : 'sleeping' }
 CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
+	| speedSquared angularSpeedSquared eligible previousSleepTime |
 	dynamic ifFalse: [ ^ self ].
-	((velocity x squared + velocity y squared) <= thresholdSquared and: [ angularVelocity squared <= angularThresholdSquared ])
+	speedSquared := velocity x squared + velocity y squared.
+	angularSpeedSquared := angularVelocity squared.
+	eligible := speedSquared <= thresholdSquared and: [ angularSpeedSquared <= angularThresholdSquared ].
+	previousSleepTime := sleepTime.
+	eligible
 		ifTrue: [
+			previousSleepTime = 0.0 ifTrue: [
+				Transcript
+					cr;
+					nextPutAll: 'CFPhysics sleep eligibility began body='; print: element identityHash;
+					nextPutAll: ' speedSquared='; print: speedSquared;
+					nextPutAll: ' linearThresholdSquared='; print: thresholdSquared;
+					nextPutAll: ' angularSpeedSquared='; print: angularSpeedSquared;
+					nextPutAll: ' angularThresholdSquared='; print: angularThresholdSquared ].
 			sleepTime := sleepTime + seconds.
 			sleepTime >= requiredTime ifTrue: [ self sleep ] ]
 		ifFalse: [
+			previousSleepTime > 0.0 ifTrue: [
+				Transcript
+					cr;
+					nextPutAll: 'CFPhysics sleep eligibility lost body='; print: element identityHash;
+					nextPutAll: ' previousSleepTime='; print: previousSleepTime;
+					nextPutAll: ' speedSquared='; print: speedSquared;
+					nextPutAll: ' linearThresholdSquared='; print: thresholdSquared;
+					nextPutAll: ' angularSpeedSquared='; print: angularSpeedSquared;
+					nextPutAll: ' angularThresholdSquared='; print: angularThresholdSquared ].
 			sleepTime := 0.0.
 			awake := true ]
 ]
 
 { #category : 'sleeping' }
 CFPhysicsBodyState >> wake [
+	| wasAwake previousSleepTime |
 	dynamic ifFalse: [ ^ self ].
+	wasAwake := awake.
+	previousSleepTime := sleepTime.
+	Transcript
+		cr;
+		nextPutAll: 'CFPhysics wake body='; print: element identityHash;
+		nextPutAll: ' wasAwake='; print: wasAwake;
+		nextPutAll: ' previousSleepTime='; print: previousSleepTime;
+		nextPutAll: ' sender='; print: thisContext sender.
 	awake := true.
 	sleepTime := 0.0
 ]
