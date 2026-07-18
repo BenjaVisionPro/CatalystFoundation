@@ -258,7 +258,7 @@ CFPhysicsShapeState >> collisionRotationFor: anAngle [
 	| fullTurn quarterTurn normalized |
 	fullTurn := Float pi * 2.0.
 	quarterTurn := Float pi / 2.0.
-	normalized := anAngle \ fullTurn.
+	normalized := anAngle \\ fullTurn.
 	(normalized closeTo: 0.0) ifTrue: [ ^ 0.0 ].
 	(normalized closeTo: quarterTurn) ifTrue: [ ^ quarterTurn ].
 	(normalized closeTo: Float pi) ifTrue: [ ^ Float pi ].
