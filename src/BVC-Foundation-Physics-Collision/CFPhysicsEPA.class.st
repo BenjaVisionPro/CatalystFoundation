@@ -10,16 +10,27 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 	| polytope edge support supportDistance contactPoint |
 	polytope := simplexArray asOrderedCollection.
 	(self signedAreaOf: polytope) < 0 ifTrue: [ polytope := polytope reversed asOrderedCollection ].
+	Transcript show: '=== CFPhysics EPA diagnostic ==='; cr.
+	Transcript show: 'initial polytope='; show: (polytope collect: [ :each | each point ]) printString; cr.
 	1 to: 48 do: [ :iteration |
 		edge := self closestEdgeOf: polytope.
-		edge ifNil: [ ^ nil ].
+		Transcript
+			show: 'iteration='; show: iteration printString;
+			show: ' edgeFirst='; show: edge first point printString;
+			show: ' edgeSecond='; show: edge second point printString;
+			show: ' normal='; show: edge third printString;
+			show: ' edgeDistance='; show: edge fourth printString; cr.
 		support := CFPhysicsGJK
 			supportBetween: firstBody
 			and: secondBody
 			inDirection: edge third.
 		supportDistance := self dot: support point with: edge third.
-		((supportDistance closeTo: edge fourth)
-			or: [ polytope anySatisfy: [ :each | each point = support point ] ]) ifTrue: [
+		Transcript
+			show: ' support='; show: support point printString;
+			show: ' supportDistance='; show: supportDistance printString;
+			show: ' duplicate='; show: (polytope anySatisfy: [ :each | each point = support point ]) printString; cr.
+		(supportDistance closeTo: edge fourth) ifTrue: [
+			Transcript show: 'converged normal='; show: edge third printString; cr; show: '=== end EPA diagnostic ==='; cr.
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third
@@ -27,6 +38,7 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 				points: { contactPoint };
 				yourself ].
 		polytope add: support beforeIndex: edge fifth ].
+	Transcript show: 'iteration limit reached'; cr; show: '=== end EPA diagnostic ==='; cr.
 	^ nil
 ]
 
@@ -42,25 +54,23 @@ CFPhysicsEPA class >> closestEdgeOf: polytope [
 		first := polytope at: index.
 		second := polytope at: nextIndex.
 		edge := second point - first point.
-		edge r > 0 ifTrue: [
-			normal := edge y @ edge x negated.
-			normal := normal / normal r.
-			distance := self dot: normal with: first point.
-			distance < 0 ifTrue: [
-				normal := normal negated.
-				distance := distance negated ].
-			normal := self collisionNormalFor: normal.
-			distance := self dot: normal with: first point.
-			distance < 0 ifTrue: [
-				normal := normal negated.
-				distance := distance negated ].
-			distance < bestDistance ifTrue: [
-				bestFirst := first.
-				bestSecond := second.
-				bestNormal := normal.
-				bestDistance := distance.
-				bestInsert := nextIndex ] ] ].
-	bestFirst ifNil: [ ^ nil ].
+		normal := edge y @ edge x negated.
+		normal r > 0 ifTrue: [ normal := normal / normal r ].
+		distance := self dot: normal with: first point.
+		distance < 0 ifTrue: [
+			normal := normal negated.
+			distance := distance negated ].
+		normal := self collisionNormalFor: normal.
+		distance := self dot: normal with: first point.
+		distance < 0 ifTrue: [
+			normal := normal negated.
+			distance := distance negated ].
+		distance < bestDistance ifTrue: [
+			bestFirst := first.
+			bestSecond := second.
+			bestNormal := normal.
+			bestDistance := distance.
+			bestInsert := nextIndex ] ].
 	^ { bestFirst. bestSecond. bestNormal. bestDistance. bestInsert }
 ]
 
