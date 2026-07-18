@@ -77,7 +77,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Physics-Dynamics'
 		'BVC-Foundation-Physics-Core'
 		'BVC-Foundation-Physics-Examples'
-		'BVC-Foundation-Physics-Tests'
+		'BVC-Foundation-Physics-Checks'
 		'BVC-Foundation-UI-Animation'
 		'BVC-Foundation-Magritte-GT'
 		'BVC-Foundation-Magritte-Seaside'
@@ -103,9 +103,9 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Physics-Core'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Collision' 'BVC-Foundation-Physics-Dynamics') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
-		with: [ spec requires: #('BVC-Foundation-Physics-Core') ].
-	spec package: 'BVC-Foundation-Physics-Tests'
-		with: [ spec requires: #('BVC-Foundation-Physics-Core') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Dynamics') ].
+	spec package: 'BVC-Foundation-Physics-Checks'
+		with: [ spec requires: #('BVC-Foundation-Physics-Dynamics') ].
 	spec package: 'BVC-Foundation-UI-Animation'.
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].

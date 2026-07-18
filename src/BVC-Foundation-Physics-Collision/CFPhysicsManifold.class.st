@@ -14,6 +14,13 @@ CFPhysicsManifold class >> normal: aNormal penetration: aNumber [
 { #category : 'accessing' }
 CFPhysicsManifold >> contactPoints [ ^ contactPoints ]
 
+
+
+{ #category : 'accessing' }
+CFPhysicsManifold >> contactPoints: aCollection [
+	contactPoints := aCollection asArray
+]
+
 { #category : 'initialization' }
 CFPhysicsManifold >> initialize [
 	super initialize.
