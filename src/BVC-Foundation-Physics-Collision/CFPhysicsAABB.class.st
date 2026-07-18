@@ -53,8 +53,7 @@ CFPhysicsAABB >> overlapWith: anotherAABB [
 CFPhysicsAABB >> overlaps: anotherAABB [
 	| overlap |
 	overlap := self overlapWith: anotherAABB.
-	^ (overlap x >= 0 or: [ overlap x closeTo: 0.0 ])
-		and: [ overlap y >= 0 or: [ overlap y closeTo: 0.0 ] ]
+	^ overlap x >= 0 and: [ overlap y >= 0 ]
 ]
 
 { #category : 'accessing' }
