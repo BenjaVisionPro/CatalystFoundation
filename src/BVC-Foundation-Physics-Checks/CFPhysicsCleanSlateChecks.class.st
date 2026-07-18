@@ -771,3 +771,47 @@ CFPhysicsCleanSlateChecks >> stepPipelineExposesContactEvents [
 	self assert: result contactEndedEvents size equals: result endedContacts size.
 	^ result contactEvents
 ]
+
+{ #category : 'examples - step stages' }
+CFPhysicsCleanSlateChecks >> stepPipelineExecutesExplicitOrderedStages [
+	<gtExample>
+	| result expectedTypes |
+	result := self stepPipelineExposesTheComposedStep.
+	expectedTypes := {
+		CFPhysicsPairFinderStage.
+		CFPhysicsContactUpdateStage.
+		CFPhysicsBodyStateCaptureStage.
+		CFPhysicsConstraintPreparationStage.
+		CFPhysicsIslandBuilderStage.
+		CFPhysicsIslandWakeStage.
+		CFPhysicsIslandSolverStage.
+		CFPhysicsIslandSleepingStage.
+		CFPhysicsContactEventsStage }.
+	self assert: result executedStages size equals: expectedTypes size.
+	expectedTypes withIndexDo: [ :stageType :index |
+		self assert: ((result executedStages at: index) isKindOf: stageType) ].
+	self assert: result stageExecutions first output equals: result pairs.
+	self assert: result stageExecutions second output == result contactResult.
+	self assert: result stageExecutions fourth output equals: result constraints.
+	self assert: result stageExecutions fifth output equals: result islands.
+	self assert: result stageExecutions seventh output == result solver.
+	self assert: result stageExecutions ninth output equals: result contactEvents.
+	^ result stageExecutions
+]
+
+{ #category : 'examples - step stages' }
+CFPhysicsCleanSlateChecks >> stepPipelineExposesReplaceableStageList [
+	<gtExample>
+	| pipeline stages |
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	stages := pipeline stages.
+	self assert: stages size equals: 9.
+	self assert: stages first class equals: CFPhysicsPairFinderStage.
+	self assert: stages last class equals: CFPhysicsContactEventsStage.
+	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 4).
+	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
+	^ pipeline
+]

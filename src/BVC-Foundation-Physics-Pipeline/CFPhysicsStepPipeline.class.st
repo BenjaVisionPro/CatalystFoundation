@@ -1,101 +1,78 @@
 Class {
 	#name : 'CFPhysicsStepPipeline',
 	#superclass : 'Object',
-	#instVars : [ 'contactPipeline', 'constraintBuilder', 'islandBuilder', 'sleepStage', 'contactEventStage' ],
+	#instVars : [ 'stages' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
 CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
+	| sleepBehaviour |
+	sleepBehaviour := CFPhysicsIslandSleepStage new.
 	^ self new
-		contactPipeline: (CFPhysicsContactPipeline manifoldBuilder: aBlock);
-		constraintBuilder: CFPhysicsConstraintBuilder new;
-		islandBuilder: CFPhysicsIslandBuilder new;
-		sleepStage: CFPhysicsIslandSleepStage new;
-		contactEventStage: CFPhysicsContactEventStage new;
+		stages: {
+			CFPhysicsPairFinderStage new.
+			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
+			CFPhysicsBodyStateCaptureStage new.
+			CFPhysicsConstraintPreparationStage new.
+			CFPhysicsIslandBuilderStage new.
+			CFPhysicsIslandWakeStage new sleepBehaviour: sleepBehaviour; yourself.
+			CFPhysicsIslandSolverStage new.
+			CFPhysicsIslandSleepingStage new sleepBehaviour: sleepBehaviour; yourself.
+			CFPhysicsContactEventsStage new };
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsStepPipeline >> contactPipeline: aContactPipeline [
-	contactPipeline := aContactPipeline
-]
-
-
-{ #category : 'accessing' }
-CFPhysicsStepPipeline >> contactEventStage [ ^ contactEventStage ]
-
-{ #category : 'accessing' }
-CFPhysicsStepPipeline >> contactEventStage: anEventStage [ contactEventStage := anEventStage ]
-
-{ #category : 'accessing' }
-CFPhysicsStepPipeline >> constraintBuilder: aConstraintBuilder [
-	constraintBuilder := aConstraintBuilder
+{ #category : 'initialization' }
+CFPhysicsStepPipeline >> initialize [
+	super initialize.
+	stages := #()
 ]
 
 { #category : 'accessing' }
-CFPhysicsStepPipeline >> islandBuilder: anIslandBuilder [
-	islandBuilder := anIslandBuilder
+CFPhysicsStepPipeline >> stages [ ^ stages ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> stages: aCollection [
+	stages := aCollection asArray
 ]
 
 { #category : 'accessing' }
-CFPhysicsStepPipeline >> sleepStage [ ^ sleepStage ]
+CFPhysicsStepPipeline >> stageOfType: aStageClass [
+	^ stages
+		detect: [ :stage | stage isKindOf: aStageClass ]
+		ifNone: [ self error: 'The step pipeline does not contain ', aStageClass name asString ]
+]
 
 { #category : 'accessing' }
-CFPhysicsStepPipeline >> sleepStage: aSleepStage [ sleepStage := aSleepStage ]
+CFPhysicsStepPipeline >> sleepStage [
+	^ self stageOfType: CFPhysicsIslandSleepingStage
+]
 
 { #category : 'accessing' }
-CFPhysicsStepPipeline >> sleepConfiguration [ ^ sleepStage configuration ]
+CFPhysicsStepPipeline >> sleepConfiguration [
+	^ self sleepStage configuration
+]
 
 { #category : 'accessing' }
-CFPhysicsStepPipeline >> sleepConfiguration: aConfiguration [ sleepStage configuration: aConfiguration ]
+CFPhysicsStepPipeline >> sleepConfiguration: aConfiguration [
+	self sleepStage configuration: aConfiguration
+]
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	| orderedBodies contactResult bodyStates constraints islands solver sleepDecisions contactEvents |
-	orderedBodies := bodies asArray sorted: [ :left :right | left sequence < right sequence ].
-	contactResult := contactPipeline
-		updateBodies: orderedBodies
-		fromContacts: previousContacts.
-	bodyStates := self captureBodyStatesFor: orderedBodies.
-	constraints := constraintBuilder
-		constraintsFrom: contactResult activeContacts
-		bodyStates: bodyStates.
-	islands := islandBuilder islandsFromBodies: orderedBodies constraints: constraints.
-	sleepStage propagateWakeAcross: islands.
-	solver := CFPhysicsIslandSolver
-		step: step
-		bodyStates: bodyStates
-		islands: islands.
-	solver
-		solveWithGravity: gravityVector
-		restitutionThreshold: restitutionThreshold.
-	sleepDecisions := sleepStage
-		updateIslands: islands
-		bodyStates: bodyStates
-		elapsed: step timeStep.
-	contactEvents := contactEventStage eventsFrom: contactResult.
-	^ CFPhysicsStepPipelineResult new
+	| result |
+	result := CFPhysicsStepPipelineResult new
 		step: step;
-		bodies: orderedBodies;
-		contactResult: contactResult;
-		bodyStates: bodyStates;
-		constraints: constraints;
-		islands: islands;
-		solver: solver;
-		sleepDecisions: sleepDecisions;
-		contactEvents: contactEvents;
+		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
+		previousContacts: previousContacts;
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
-		yourself
-]
-
-{ #category : 'private - stepping' }
-CFPhysicsStepPipeline >> captureBodyStatesFor: bodies [
-	| states |
-	states := IdentityDictionary new.
-	bodies do: [ :body |
-		states at: body put: (CFPhysicsBodyStepState on: body) ].
-	^ states
+		yourself.
+	stages do: [ :stage |
+		| output |
+		output := stage executeOn: result.
+		result recordStage: stage output: output ].
+	^ result
 ]

@@ -1,10 +1,23 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactEvents', 'gravity', 'restitutionThreshold' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
+
+{ #category : 'initialization' }
+CFPhysicsStepPipelineResult >> initialize [
+	super initialize.
+	bodies := #().
+	previousContacts := #().
+	pairs := #().
+	constraints := #().
+	islands := #().
+	sleepDecisions := #().
+	contactEvents := #().
+	stageExecutions := OrderedCollection new
+]
 
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> step [ ^ step ]
@@ -14,6 +27,14 @@ CFPhysicsStepPipelineResult >> step: anObject [ step := anObject ]
 CFPhysicsStepPipelineResult >> bodies [ ^ bodies ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> bodies: aCollection [ bodies := aCollection asArray ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> previousContacts [ ^ previousContacts ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> previousContacts: aCollection [ previousContacts := aCollection asArray ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> pairs [ ^ pairs ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> pairs: aCollection [ pairs := aCollection asArray ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactResult [ ^ contactResult ]
 { #category : 'accessing' }
@@ -38,28 +59,10 @@ CFPhysicsStepPipelineResult >> solver: anObject [ solver := anObject ]
 CFPhysicsStepPipelineResult >> sleepDecisions [ ^ sleepDecisions ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> sleepDecisions: aCollection [ sleepDecisions := aCollection asArray ]
-{ #category : 'sleeping' }
-CFPhysicsStepPipelineResult >> sleptIslands [
-	^ (sleepDecisions select: [ :decision | decision slept ])
-		collect: [ :decision | decision island ]
-]
-{ #category : 'sleeping' }
-CFPhysicsStepPipelineResult >> wokenBodies [
-	^ sleepDecisions flatCollect: [ :decision | decision wokeBodies ]
-]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactEvents [ ^ contactEvents ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactEvents: aCollection [ contactEvents := aCollection asArray ]
-{ #category : 'contacts' }
-CFPhysicsStepPipelineResult >> contactBeganEvents [
-	^ contactEvents select: [ :event | event began ]
-]
-{ #category : 'contacts' }
-CFPhysicsStepPipelineResult >> contactEndedEvents [
-	^ contactEvents select: [ :event | event ended ]
-]
-
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> gravity [ ^ gravity ]
 { #category : 'accessing' }
@@ -69,8 +72,37 @@ CFPhysicsStepPipelineResult >> restitutionThreshold [ ^ restitutionThreshold ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> restitutionThreshold: aNumber [ restitutionThreshold := aNumber ]
 
-{ #category : 'contacts' }
-CFPhysicsStepPipelineResult >> pairs [ ^ contactResult pairs ]
+{ #category : 'stages' }
+CFPhysicsStepPipelineResult >> recordStage: aStage output: anObject [
+	stageExecutions add: (CFPhysicsStepStageExecution stage: aStage output: anObject)
+]
+
+{ #category : 'stages' }
+CFPhysicsStepPipelineResult >> stageExecutions [ ^ stageExecutions asArray ]
+
+{ #category : 'stages' }
+CFPhysicsStepPipelineResult >> executedStages [
+	^ self stageExecutions collect: #stage
+]
+
+{ #category : 'stages' }
+CFPhysicsStepPipelineResult >> executionForStageType: aStageClass [
+	^ self stageExecutions
+		detect: [ :execution | execution stage isKindOf: aStageClass ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsStepPipelineResult >> sleptIslands [
+	^ (sleepDecisions select: [ :decision | decision slept ])
+		collect: [ :decision | decision island ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsStepPipelineResult >> wokenBodies [
+	^ sleepDecisions flatCollect: [ :decision | decision wokeBodies ]
+]
+
 { #category : 'contacts' }
 CFPhysicsStepPipelineResult >> activeContacts [ ^ contactResult activeContacts ]
 { #category : 'contacts' }
@@ -79,3 +111,11 @@ CFPhysicsStepPipelineResult >> beganContacts [ ^ contactResult beganContacts ]
 CFPhysicsStepPipelineResult >> continuedContacts [ ^ contactResult continuedContacts ]
 { #category : 'contacts' }
 CFPhysicsStepPipelineResult >> endedContacts [ ^ contactResult endedContacts ]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> contactBeganEvents [
+	^ contactEvents select: [ :event | event began ]
+]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> contactEndedEvents [
+	^ contactEvents select: [ :event | event ended ]
+]
