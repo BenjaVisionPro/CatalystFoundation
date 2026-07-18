@@ -12,12 +12,14 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 	(self signedAreaOf: polytope) < 0 ifTrue: [ polytope := polytope reversed asOrderedCollection ].
 	1 to: 48 do: [ :iteration |
 		edge := self closestEdgeOf: polytope.
+		edge ifNil: [ ^ nil ].
 		support := CFPhysicsGJK
 			supportBetween: firstBody
 			and: secondBody
 			inDirection: edge third.
 		supportDistance := self dot: support point with: edge third.
-		(supportDistance closeTo: edge fourth) ifTrue: [
+		((supportDistance closeTo: edge fourth)
+			or: [ polytope anySatisfy: [ :each | each point = support point ] ]) ifTrue: [
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third
@@ -40,23 +42,25 @@ CFPhysicsEPA class >> closestEdgeOf: polytope [
 		first := polytope at: index.
 		second := polytope at: nextIndex.
 		edge := second point - first point.
-		normal := edge y @ edge x negated.
-		normal r > 0 ifTrue: [ normal := normal / normal r ].
-		distance := self dot: normal with: first point.
-		distance < 0 ifTrue: [
-			normal := normal negated.
-			distance := distance negated ].
-		normal := self collisionNormalFor: normal.
-		distance := self dot: normal with: first point.
-		distance < 0 ifTrue: [
-			normal := normal negated.
-			distance := distance negated ].
-		distance < bestDistance ifTrue: [
-			bestFirst := first.
-			bestSecond := second.
-			bestNormal := normal.
-			bestDistance := distance.
-			bestInsert := nextIndex ] ].
+		edge r > 0 ifTrue: [
+			normal := edge y @ edge x negated.
+			normal := normal / normal r.
+			distance := self dot: normal with: first point.
+			distance < 0 ifTrue: [
+				normal := normal negated.
+				distance := distance negated ].
+			normal := self collisionNormalFor: normal.
+			distance := self dot: normal with: first point.
+			distance < 0 ifTrue: [
+				normal := normal negated.
+				distance := distance negated ].
+			distance < bestDistance ifTrue: [
+				bestFirst := first.
+				bestSecond := second.
+				bestNormal := normal.
+				bestDistance := distance.
+				bestInsert := nextIndex ] ] ].
+	bestFirst ifNil: [ ^ nil ].
 	^ { bestFirst. bestSecond. bestNormal. bestDistance. bestInsert }
 ]
 
