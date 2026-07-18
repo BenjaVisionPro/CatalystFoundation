@@ -439,3 +439,65 @@ CFPhysicsCleanSlateChecks >> cleanSlateBodyWithSequence: anInteger position: aPo
 		position: aPoint;
 		yourself
 ]
+
+{ #category : 'examples - step pipeline' }
+CFPhysicsCleanSlateChecks >> stepPipelineExposesTheComposedStep [
+	<gtExample>
+	| ground box step pipeline result |
+	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
+	ground beStatic.
+	box := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	result := pipeline
+		stepBodies: { box. ground }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result step == step.
+	self assert: (result bodies collect: #sequence) equals: #(1 2).
+	self assert: result pairs size equals: 1.
+	self assert: result beganContacts size equals: 1.
+	self assert: result activeContacts size equals: 1.
+	self assert: result bodyStates size equals: 2.
+	self assert: result constraints size equals: 1.
+	self assert: result constraints first contact == result activeContacts first.
+	self assert: result solver notNil.
+	^ result
+]
+
+{ #category : 'examples - step pipeline' }
+CFPhysicsCleanSlateChecks >> stepPipelineCarriesActiveContactsIntoTheNextStep [
+	<gtExample>
+	| firstResult ground box step pipeline secondResult |
+	firstResult := self stepPipelineExposesTheComposedStep.
+	ground := firstResult bodies first.
+	box := firstResult bodies second.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	secondResult := pipeline
+		stepBodies: { box. ground }
+		fromContacts: firstResult activeContacts
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: secondResult beganContacts isEmpty.
+	self assert: secondResult continuedContacts size equals: 1.
+	self assert: secondResult activeContacts size equals: 1.
+	^ secondResult
+]
