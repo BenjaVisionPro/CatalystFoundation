@@ -7,7 +7,7 @@ Class {
 
 { #category : 'building' }
 CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates [
-	^ contacts collect: [ :contact |
+	^ (contacts reject: [ :contact | contact isSensor ]) collect: [ :contact |
 		self
 			constraintFrom: contact
 			bodyStateA: (bodyStates at: contact firstBody)

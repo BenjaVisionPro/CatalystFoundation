@@ -225,3 +225,19 @@ CFPhysicsElement >> applyTorque: aNumber [ self requireBodyState applyTorque: aN
 
 { #category : 'mass' }
 CFPhysicsElement >> inverseInertia [ ^ self requireBodyState inverseInertia ]
+
+
+{ #category : 'sensors' }
+CFPhysicsElement >> beSensor [
+	self requireBodyState beSensor
+]
+
+{ #category : 'sensors' }
+CFPhysicsElement >> beSolid [
+	self requireBodyState beSolid
+]
+
+{ #category : 'sensors' }
+CFPhysicsElement >> isSensor [
+	^ self requireBodyState isSensor
+]

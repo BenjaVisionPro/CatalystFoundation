@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'material' ],
+	#instVars : [ 'element', 'material', 'sensor' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -54,7 +54,8 @@ CFPhysicsShapeState >> element: anElement [
 { #category : 'initialization' }
 CFPhysicsShapeState >> initialize [
 	super initialize.
-	material := CFPhysicsMaterial new
+	material := CFPhysicsMaterial new.
+	sensor := false
 ]
 
 { #category : 'material' }
@@ -329,4 +330,20 @@ CFPhysicsShapeState >> polygonLocalSupportFeatureInDirection: aDirection [
 				< (second x * aDirection y negated + (second y * aDirection x)) ]) asOrderedCollection.
 		^ { feature first. feature last } ].
 	^ feature asArray
+]
+
+
+{ #category : 'sensors' }
+CFPhysicsShapeState >> beSensor [
+	sensor := true
+]
+
+{ #category : 'sensors' }
+CFPhysicsShapeState >> beSolid [
+	sensor := false
+]
+
+{ #category : 'sensors' }
+CFPhysicsShapeState >> isSensor [
+	^ sensor
 ]

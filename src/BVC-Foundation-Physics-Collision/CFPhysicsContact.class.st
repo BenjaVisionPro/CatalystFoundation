@@ -61,3 +61,14 @@ CFPhysicsContact >> copyForUpdate [
 		manifold: manifold;
 		yourself
 ]
+
+
+{ #category : 'testing' }
+CFPhysicsContact >> isSensor [
+	^ self firstBody isSensor or: [ self secondBody isSensor ]
+]
+
+{ #category : 'testing' }
+CFPhysicsContact >> isSolid [
+	^ self isSensor not
+]

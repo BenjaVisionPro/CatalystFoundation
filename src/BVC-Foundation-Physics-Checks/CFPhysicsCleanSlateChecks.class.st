@@ -876,3 +876,102 @@ CFPhysicsCleanSlateChecks >> stepPipelineExposesPostSolveStage [
 	self assert: execution output hitEvents equals: result hitEvents.
 	^ execution
 ]
+
+
+{ #category : 'examples - sensors' }
+CFPhysicsCleanSlateChecks >> sensorContactParticipatesInLifecycleButNotSolving [
+	<gtExample>
+	| ground sensor step pipeline result |
+	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
+	ground beStatic.
+	sensor := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
+	sensor beSensor.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	result := pipeline
+		stepBodies: { sensor. ground }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first isSensor.
+	self assert: result beganContacts size equals: 1.
+	self assert: result constraints isEmpty.
+	self assert: result contactSolveResults isEmpty.
+	self assert: result hitEvents isEmpty.
+	self assert: result contactBeganEvents size equals: 1.
+	self assert: result contactBeganEvents first isSensor.
+	^ result
+]
+
+{ #category : 'examples - sensors' }
+CFPhysicsCleanSlateChecks >> sensorContactDoesNotJoinDynamicBodiesIntoOneIsland [
+	<gtExample>
+	| first second sensor step pipeline result dynamicIslands |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	sensor := self cleanSlateBodyWithSequence: 3 position: 0 @ 0 extent: 50 @ 20.
+	sensor beStatic; beSensor.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	result := pipeline
+		stepBodies: { second. sensor. first }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	dynamicIslands := result islands select: [ :island |
+		island bodies anySatisfy: [ :body | body isDynamic ] ].
+	self assert: result activeContacts size equals: 2.
+	self assert: result constraints isEmpty.
+	self assert: dynamicIslands size equals: 2.
+	self assert: (dynamicIslands allSatisfy: [ :island |
+		(island bodies select: [ :body | body isDynamic ]) size = 1 ]).
+	^ result
+]
+
+{ #category : 'examples - sensors' }
+CFPhysicsCleanSlateChecks >> sensorContactPublishesEndedEventWithoutSolveData [
+	<gtExample>
+	| firstResult sensor ground secondResult step pipeline |
+	firstResult := self sensorContactParticipatesInLifecycleButNotSolving.
+	ground := firstResult bodies first.
+	sensor := firstResult bodies second.
+	sensor position: 0 @ 100.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	secondResult := pipeline
+		stepBodies: { sensor. ground }
+		fromContacts: firstResult activeContacts
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: secondResult activeContacts isEmpty.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult contactEndedEvents size equals: 1.
+	self assert: secondResult contactEndedEvents first isSensor.
+	self assert: secondResult contactSolveResults isEmpty.
+	^ secondResult
+]

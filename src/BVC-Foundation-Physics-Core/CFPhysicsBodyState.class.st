@@ -397,3 +397,19 @@ CFPhysicsBodyState >> advanceSleepTimeBy: seconds [
 CFPhysicsBodyState >> resetSleepTime [
 	sleepTime := 0.0
 ]
+
+
+{ #category : 'sensors' }
+CFPhysicsBodyState >> beSensor [
+	self shapeState beSensor
+]
+
+{ #category : 'sensors' }
+CFPhysicsBodyState >> beSolid [
+	self shapeState beSolid
+]
+
+{ #category : 'sensors' }
+CFPhysicsBodyState >> isSensor [
+	^ self shapeState isSensor
+]

@@ -41,3 +41,14 @@ CFPhysicsContactEvent >> comesBefore: anotherEvent [
 		^ self began and: [ anotherEvent ended ] ].
 	^ self pair comesBefore: anotherEvent pair
 ]
+
+
+{ #category : 'testing' }
+CFPhysicsContactEvent >> isSensor [
+	^ contact isSensor
+]
+
+{ #category : 'testing' }
+CFPhysicsContactEvent >> isSolid [
+	^ contact isSolid
+]
