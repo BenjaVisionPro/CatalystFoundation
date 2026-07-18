@@ -73,7 +73,9 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle 
 	distance := delta r.
 	separation := distance - radiusSum.
 	separation > 0.0 ifTrue: [ ^ nil ].
-	normal := distance = 0.0 ifTrue: [ faceNormal negated ] ifFalse: [ delta / distance ].
+	normal := polygonFeatureKind = #face
+		ifTrue: [ faceNormal negated ]
+		ifFalse: [ distance = 0.0 ifTrue: [ faceNormal negated ] ifFalse: [ delta / distance ] ].
 	worldPoint := centre + (normal * (circle radius + (separation / 2.0))).
 	point := CFPhysicsManifoldPoint at: worldPoint.
 	point
