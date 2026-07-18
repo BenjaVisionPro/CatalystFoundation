@@ -1050,3 +1050,107 @@ CFPhysicsCleanSlateChecks >> elementFacingCollisionFilteringConfiguresItsBody [
 	self assert: body collisionGroupIndex equals: -4.
 	^ child
 ]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateChecks >> overlappingCirclesProducePersistentSinglePointManifold [
+	<gtExample>
+	| first second firstManifold secondManifold |
+	first := CFPhysicsShapeState on: (BlElement new
+		geometry: BlCircleGeometry new;
+		size: 30 @ 30;
+		yourself).
+	second := CFPhysicsShapeState on: (BlElement new
+		geometry: BlCircleGeometry new;
+		size: 30 @ 30;
+		yourself).
+	firstManifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: first position: 0 @ 0 rotation: 0
+		andShapeState: second position: 25 @ 0 rotation: 0.
+	secondManifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: first position: 1 @ 0 rotation: 0
+		andShapeState: second position: 25 @ 0 rotation: 0.
+	self assert: firstManifold notNil.
+	self assert: firstManifold contactPoints size equals: 1.
+	self assert: firstManifold normal equals: 1 @ 0.
+	self assert: (firstManifold contactPoints first separation closeTo: -5.0).
+	self assert: firstManifold contactPoints first featureId equals: secondManifold contactPoints first featureId.
+	^ firstManifold
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateChecks >> separatedCirclesDoNotProduceAManifold [
+	<gtExample>
+	| first second manifold |
+	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	second := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	manifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: first position: 0 @ 0 rotation: 0
+		andShapeState: second position: 31 @ 0 rotation: 0.
+	self assert: manifold isNil.
+	^ manifold
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateChecks >> circleAgainstRectangleProducesMixedShapeManifold [
+	<gtExample>
+	| circle rectangle manifold |
+	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
+	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
+	manifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: circle position: 30 @ 12 rotation: 0
+		andShapeState: rectangle position: 0 @ 20 rotation: 0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints size equals: 1.
+	self assert: manifold normal equals: 0 @ 1.
+	self assert: (manifold contactPoints first separation closeTo: -2.0).
+	self assert: manifold contactPoints first localAnchorA notNil.
+	self assert: manifold contactPoints first localAnchorB notNil.
+	^ manifold
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateChecks >> mixedShapeOrderingReversesOnlyTheManifoldOrientation [
+	<gtExample>
+	| circle rectangle circleFirst polygonFirst |
+	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
+	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
+	circleFirst := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: circle position: 30 @ 12 rotation: 0
+		andShapeState: rectangle position: 0 @ 20 rotation: 0.
+	polygonFirst := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: rectangle position: 0 @ 20 rotation: 0
+		andShapeState: circle position: 30 @ 12 rotation: 0.
+	self assert: polygonFirst notNil.
+	self assert: polygonFirst normal equals: circleFirst normal negated.
+	self assert: polygonFirst contactPoints first position equals: circleFirst contactPoints first position.
+	self assert: polygonFirst contactPoints first separation equals: circleFirst contactPoints first separation.
+	^ polygonFirst
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateChecks >> circleContactsFlowThroughTheOrdinaryStepPipeline [
+	<gtExample>
+	| first second step pipeline result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 30 @ 30.
+	second := self cleanSlateBodyWithSequence: 2 position: 25 @ 0 extent: 30 @ 30.
+	first element geometry: BlCircleGeometry new.
+	second element geometry: BlCircleGeometry new.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder manifoldBetweenBody: pair firstBody andBody: pair secondBody ].
+	result := pipeline
+		stepBodies: { second. first }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result activeContacts size equals: 1.
+	self assert: result beganContacts size equals: 1.
+	self assert: result constraints size equals: 1.
+	self assert: result contactSolveResults size equals: 1.
+	^ result
+]
