@@ -160,6 +160,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		body := bodyStates removeKey: each.
 		self removeSpringsUsingBody: body.
 		self removeAttractionsUsingBody: body.
+		self removeRepulsionsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
