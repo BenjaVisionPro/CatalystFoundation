@@ -2038,3 +2038,71 @@ CFPhysicsCleanSlateChecks >> relationshipsResolveThroughAnEndpointPair [
 	self assert: repulsion bodyB == second.
 	^ { spring. attraction. repulsion }
 ]
+
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> worldAnchorRemainsAtItsWorldPoint [
+	<gtExample>
+	| world anchor |
+	world := CFPhysicsWorld new.
+	anchor := world anchorAt: 75 @ 40.
+	self assert: anchor body isNil.
+	self assert: anchor world == world.
+	self assert: anchor worldPoint equals: 75 @ 40.
+	anchor point: 90 @ 55.
+	self assert: anchor worldPoint equals: 90 @ 55.
+	^ anchor
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> springCanAttachABodyToAWorldPoint [
+	<gtExample>
+	| world body bodyAnchor worldAnchor spring |
+	world := CFPhysicsWorld new.
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	body world: world.
+	bodyAnchor := CFPhysicsBodyCentreAnchor on: body.
+	worldAnchor := world anchorAt: 110 @ 10.
+	spring := bodyAnchor springTo: worldAnchor.
+	spring restLength: 50; damping: 0.
+	spring prepareForStep: 0.1.
+	self assert: spring bodyA == body.
+	self assert: spring bodyB isNil.
+	self assert: body velocity x > 0.
+	^ spring
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> attractionAndRepulsionCanUseWorldAnchors [
+	<gtExample>
+	| world attracted repelled attraction repulsion |
+	world := CFPhysicsWorld new.
+	attracted := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	repelled := self cleanSlateBodyWithSequence: 2 position: 0 @ 40 extent: 20 @ 20.
+	attracted world: world.
+	repelled world: world.
+	attraction := (CFPhysicsBodyCentreAnchor on: attracted)
+		attract: (world anchorAt: 110 @ 10).
+	repulsion := (CFPhysicsBodyCentreAnchor on: repelled)
+		repel: (world anchorAt: 110 @ 50).
+	attraction prepareForStep: 0.1.
+	repulsion prepareForStep: 0.1.
+	self assert: attracted velocity x > 0.
+	self assert: repelled velocity x < 0.
+	^ { attraction. repulsion }
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
+	<gtExample>
+	| world body spring |
+	world := CFPhysicsWorld new.
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	body world: world.
+	spring := (CFPhysicsBodyCentreAnchor on: body)
+		springTo: (world anchorAt: 100 @ 10).
+	world removeSpringsUsingBody: body.
+	self assert: world springConstraints isEmpty.
+	self assert: spring isActive not.
+	^ spring
+]

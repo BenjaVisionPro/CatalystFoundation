@@ -432,3 +432,12 @@ CFPhysicsElement >> normalisedAnchorAt: aPoint [
 	aWorld synchroniseMembership.
 	^ CFPhysicsNormalisedAnchor on: self requireBodyState at: aPoint
 ]
+
+
+{ #category : 'anchors' }
+CFPhysicsElement >> worldAnchorAt: aPoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	^ aWorld anchorAt: aPoint
+]

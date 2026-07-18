@@ -113,27 +113,31 @@ CFPhysicsSpringConstraint >> orderingKey [
 
 { #category : 'stepping' }
 CFPhysicsSpringConstraint >> prepareForStep: seconds [
-	| displacement distance direction relativeSpeed extension force impulse firstBody secondBody |
+	| displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstDynamic secondDynamic firstVelocity secondVelocity |
 	active ifFalse: [ ^ self ].
 	firstBody := self bodyA.
 	secondBody := self bodyB.
-	(firstBody isDynamic or: [ secondBody isDynamic ]) ifFalse: [ ^ self ].
+	firstDynamic := firstBody notNil and: [ firstBody isDynamic ].
+	secondDynamic := secondBody notNil and: [ secondBody isDynamic ].
+	(firstDynamic or: [ secondDynamic ]) ifFalse: [ ^ self ].
 	displacement := endpointPair worldPointB - endpointPair worldPointA.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.
-	relativeSpeed := (secondBody velocity - firstBody velocity) dotProduct: direction.
+	firstVelocity := firstBody ifNil: [ 0 @ 0 ] ifNotNil: [ firstBody velocity ].
+	secondVelocity := secondBody ifNil: [ 0 @ 0 ] ifNotNil: [ secondBody velocity ].
+	relativeSpeed := (secondVelocity - firstVelocity) dotProduct: direction.
 	extension := distance - restLength.
 	force := (extension * stiffness) + (relativeSpeed * damping).
 	force := (force max: maximumForce negated) min: maximumForce.
 	impulse := direction * (force * seconds).
-	firstBody isDynamic ifTrue: [
+	firstDynamic ifTrue: [
 		firstBody addVelocity: impulse * firstBody inverseMass ].
-	secondBody isDynamic ifTrue: [
+	secondDynamic ifTrue: [
 		secondBody addVelocity: impulse negated * secondBody inverseMass ].
 	force = 0 ifFalse: [
-		firstBody wake.
-		secondBody wake ]
+		firstDynamic ifTrue: [ firstBody wake ].
+		secondDynamic ifTrue: [ secondBody wake ] ]
 ]
 
 { #category : 'controlling' }

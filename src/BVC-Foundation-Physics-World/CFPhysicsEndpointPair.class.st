@@ -15,6 +15,13 @@ CFPhysicsEndpointPair >> bodyB [
 	self subclassResponsibility
 ]
 
+
+
+{ #category : 'accessing' }
+CFPhysicsEndpointPair >> world [
+	self subclassResponsibility
+]
+
 { #category : 'geometry' }
 CFPhysicsEndpointPair >> worldPointA [
 	self subclassResponsibility
@@ -27,5 +34,6 @@ CFPhysicsEndpointPair >> worldPointB [
 
 { #category : 'testing' }
 CFPhysicsEndpointPair >> includesBody: aBodyState [
-	^ self bodyA == aBodyState or: [ self bodyB == aBodyState ]
+	^ (self bodyA notNil and: [ self bodyA == aBodyState ])
+		or: [ self bodyB notNil and: [ self bodyB == aBodyState ] ]
 ]

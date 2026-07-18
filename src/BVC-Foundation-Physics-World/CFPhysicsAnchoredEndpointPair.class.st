@@ -53,3 +53,14 @@ CFPhysicsAnchoredEndpointPair >> worldPointA [
 CFPhysicsAnchoredEndpointPair >> worldPointB [
 	^ anchorB worldPoint
 ]
+
+
+{ #category : 'accessing' }
+CFPhysicsAnchoredEndpointPair >> world [
+	| firstWorld secondWorld |
+	firstWorld := anchorA world.
+	secondWorld := anchorB world.
+	(firstWorld notNil and: [ firstWorld == secondWorld ])
+		ifFalse: [ self error: 'Both endpoints must belong to the same physics world' ].
+	^ firstWorld
+]

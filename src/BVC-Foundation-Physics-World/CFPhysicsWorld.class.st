@@ -289,8 +289,8 @@ CFPhysicsWorld >> attractionConstraints [
 
 { #category : 'attraction interaction' }
 CFPhysicsWorld >> addAttractionConstraint: aConstraint [
-	(aConstraint bodyA world == self and: [ aConstraint bodyB world == self ])
-		ifFalse: [ self error: 'Both attraction bodies must belong to this physics world' ].
+	aConstraint endpointPair world == self
+		ifFalse: [ self error: 'Attraction endpoints must belong to this physics world' ].
 	aConstraint sequence: nextAttractionSequence.
 	nextAttractionSequence := nextAttractionSequence + 1.
 	attractionConstraints add: aConstraint.
@@ -338,8 +338,8 @@ CFPhysicsWorld >> repulsionConstraints [
 
 { #category : 'repulsion interaction' }
 CFPhysicsWorld >> addRepulsionConstraint: aConstraint [
-	(aConstraint bodyA world == self and: [ aConstraint bodyB world == self ])
-		ifFalse: [ self error: 'Both repulsion bodies must belong to this physics world' ].
+	aConstraint endpointPair world == self
+		ifFalse: [ self error: 'Repulsion endpoints must belong to this physics world' ].
 	aConstraint sequence: nextRepulsionSequence.
 	nextRepulsionSequence := nextRepulsionSequence + 1.
 	repulsionConstraints add: aConstraint.
@@ -387,8 +387,8 @@ CFPhysicsWorld >> springConstraints [
 
 { #category : 'spring interaction' }
 CFPhysicsWorld >> addSpringConstraint: aConstraint [
-	(aConstraint bodyA world == self and: [ aConstraint bodyB world == self ])
-		ifFalse: [ self error: 'Both spring bodies must belong to this physics world' ].
+	aConstraint endpointPair world == self
+		ifFalse: [ self error: 'Spring endpoints must belong to this physics world' ].
 	aConstraint sequence: nextSpringSequence.
 	nextSpringSequence := nextSpringSequence + 1.
 	springConstraints add: aConstraint.
@@ -464,4 +464,10 @@ CFPhysicsWorld >> prepareContainmentConstraintsForStep [
 		each isActive
 			ifTrue: [ each prepareForBounds: (0 @ 0 extent: self containmentExtent) ]
 			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ]
+]
+
+
+{ #category : 'anchors' }
+CFPhysicsWorld >> anchorAt: aPoint [
+	^ CFPhysicsWorldAnchor in: self at: aPoint
 ]

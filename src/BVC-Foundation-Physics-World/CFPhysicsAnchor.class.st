@@ -19,6 +19,11 @@ CFPhysicsAnchor >> body [ ^ body ]
 { #category : 'accessing' }
 CFPhysicsAnchor >> body: aBodyState [ body := aBodyState ]
 
+{ #category : 'accessing' }
+CFPhysicsAnchor >> world [
+	^ body world
+]
+
 { #category : 'geometry' }
 CFPhysicsAnchor >> worldPoint [
 	self subclassResponsibility
@@ -27,10 +32,12 @@ CFPhysicsAnchor >> worldPoint [
 { #category : 'private - relationships' }
 CFPhysicsAnchor >> relationshipWorldWith: anotherAnchor [
 	| firstWorld secondWorld |
-	firstWorld := self body world.
-	secondWorld := anotherAnchor body world.
+	firstWorld := self world.
+	secondWorld := anotherAnchor world.
 	(firstWorld notNil and: [ firstWorld == secondWorld ])
-		ifFalse: [ self error: 'Both anchors must belong to bodies in the same physics world' ].
+		ifFalse: [ self error: 'Both anchors must belong to the same physics world' ].
+	(self body isNil and: [ anotherAnchor body isNil ])
+		ifTrue: [ self error: 'A relationship requires at least one body anchor' ].
 	^ firstWorld
 ]
 
