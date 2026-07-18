@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsSpringConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'anchorA', 'anchorB', 'restLength', 'stiffness', 'damping', 'maximumForce', 'active', 'sequence' ],
+	#instVars : [ 'endpointPair', 'restLength', 'stiffness', 'damping', 'maximumForce', 'active', 'sequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -15,16 +15,22 @@ CFPhysicsSpringConstraint class >> between: firstBodyState and: secondBodyState 
 
 { #category : 'instance creation' }
 CFPhysicsSpringConstraint class >> betweenAnchor: firstAnchor andAnchor: secondAnchor [
+	^ self betweenEndpoints: (CFPhysicsAnchoredEndpointPair
+		anchorA: firstAnchor
+		anchorB: secondAnchor)
+]
+
+{ #category : 'instance creation' }
+CFPhysicsSpringConstraint class >> betweenEndpoints: anEndpointPair [
 	^ self new
-		anchorA: firstAnchor;
-		anchorB: secondAnchor;
-		restLength: (self distanceBetweenAnchor: firstAnchor andAnchor: secondAnchor);
+		endpointPair: anEndpointPair;
+		restLength: (self distanceBetweenEndpoints: anEndpointPair);
 		yourself
 ]
 
 { #category : 'private' }
-CFPhysicsSpringConstraint class >> distanceBetweenAnchor: firstAnchor andAnchor: secondAnchor [
-	^ (secondAnchor worldPoint - firstAnchor worldPoint) r
+CFPhysicsSpringConstraint class >> distanceBetweenEndpoints: anEndpointPair [
+	^ (anEndpointPair worldPointB - anEndpointPair worldPointA) r
 ]
 
 { #category : 'initialization' }
@@ -39,22 +45,22 @@ CFPhysicsSpringConstraint >> initialize [
 ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> anchorA [ ^ anchorA ]
+CFPhysicsSpringConstraint >> endpointPair [ ^ endpointPair ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> anchorA: anAnchor [ anchorA := anAnchor ]
+CFPhysicsSpringConstraint >> endpointPair: anEndpointPair [ endpointPair := anEndpointPair ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> anchorB [ ^ anchorB ]
+CFPhysicsSpringConstraint >> anchorA [ ^ endpointPair anchorA ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> anchorB: anAnchor [ anchorB := anAnchor ]
+CFPhysicsSpringConstraint >> anchorB [ ^ endpointPair anchorB ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> bodyA [ ^ anchorA body ]
+CFPhysicsSpringConstraint >> bodyA [ ^ endpointPair bodyA ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> bodyB [ ^ anchorB body ]
+CFPhysicsSpringConstraint >> bodyB [ ^ endpointPair bodyB ]
 
 { #category : 'accessing' }
 CFPhysicsSpringConstraint >> firstBody [ ^ self bodyA ]
@@ -97,7 +103,7 @@ CFPhysicsSpringConstraint >> isActive [ ^ active ]
 
 { #category : 'testing' }
 CFPhysicsSpringConstraint >> includesBody: aBodyState [
-	^ self bodyA == aBodyState or: [ self bodyB == aBodyState ]
+	^ endpointPair includesBody: aBodyState
 ]
 
 { #category : 'ordering' }
@@ -112,7 +118,7 @@ CFPhysicsSpringConstraint >> prepareForStep: seconds [
 	firstBody := self bodyA.
 	secondBody := self bodyB.
 	(firstBody isDynamic or: [ secondBody isDynamic ]) ifFalse: [ ^ self ].
-	displacement := anchorB worldPoint - anchorA worldPoint.
+	displacement := endpointPair worldPointB - endpointPair worldPointA.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.

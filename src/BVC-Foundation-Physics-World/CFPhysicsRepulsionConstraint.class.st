@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRepulsionConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'anchorA', 'anchorB', 'distanceResponse', 'active', 'sequence' ],
+	#instVars : [ 'endpointPair', 'distanceResponse', 'active', 'sequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -15,9 +15,15 @@ CFPhysicsRepulsionConstraint class >> between: firstBodyState and: secondBodySta
 
 { #category : 'instance creation' }
 CFPhysicsRepulsionConstraint class >> betweenAnchor: firstAnchor andAnchor: secondAnchor [
+	^ self betweenEndpoints: (CFPhysicsAnchoredEndpointPair
+		anchorA: firstAnchor
+		anchorB: secondAnchor)
+]
+
+{ #category : 'instance creation' }
+CFPhysicsRepulsionConstraint class >> betweenEndpoints: anEndpointPair [
 	^ self new
-		anchorA: firstAnchor;
-		anchorB: secondAnchor;
+		endpointPair: anEndpointPair;
 		yourself
 ]
 
@@ -30,34 +36,22 @@ CFPhysicsRepulsionConstraint >> initialize [
 ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> anchorA [
-	^ anchorA
-]
+CFPhysicsRepulsionConstraint >> endpointPair [ ^ endpointPair ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> anchorA: anAnchor [
-	anchorA := anAnchor
-]
+CFPhysicsRepulsionConstraint >> endpointPair: anEndpointPair [ endpointPair := anEndpointPair ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> anchorB [
-	^ anchorB
-]
+CFPhysicsRepulsionConstraint >> anchorA [ ^ endpointPair anchorA ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> anchorB: anAnchor [
-	anchorB := anAnchor
-]
+CFPhysicsRepulsionConstraint >> anchorB [ ^ endpointPair anchorB ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> bodyA [
-	^ anchorA body
-]
+CFPhysicsRepulsionConstraint >> bodyA [ ^ endpointPair bodyA ]
 
 { #category : 'accessing' }
-CFPhysicsRepulsionConstraint >> bodyB [
-	^ anchorB body
-]
+CFPhysicsRepulsionConstraint >> bodyB [ ^ endpointPair bodyB ]
 
 { #category : 'configuration' }
 CFPhysicsRepulsionConstraint >> distanceResponse [
@@ -91,7 +85,7 @@ CFPhysicsRepulsionConstraint >> maximumDistance: aNumber [
 
 { #category : 'testing' }
 CFPhysicsRepulsionConstraint >> includesBody: aBodyState [
-	^ self bodyA == aBodyState or: [ self bodyB == aBodyState ]
+	^ endpointPair includesBody: aBodyState
 ]
 
 { #category : 'testing' }
@@ -121,7 +115,7 @@ CFPhysicsRepulsionConstraint >> prepareForStep: seconds [
 	firstBody := self bodyA.
 	secondBody := self bodyB.
 	(firstBody isDynamic or: [ secondBody isDynamic ]) ifFalse: [ ^ self ].
-	displacement := anchorB worldPoint - anchorA worldPoint.
+	displacement := endpointPair worldPointB - endpointPair worldPointA.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
 	forceMagnitude := distanceResponse forceMagnitudeAtDistance: distance.

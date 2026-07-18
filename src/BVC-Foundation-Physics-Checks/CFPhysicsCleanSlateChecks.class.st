@@ -1996,3 +1996,45 @@ CFPhysicsCleanSlateChecks >> repulsionCanUseSoftenedInverseSquareResponse [
 	self assert: first velocity equals: second velocity negated.
 	^ repulsion
 ]
+
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> anchoredEndpointPairResolvesBothEndpointsTogether [
+	<gtExample>
+	| first second anchorA anchorB endpoints |
+	first := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 40 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 50 extent: 60 @ 30.
+	anchorA := CFPhysicsLocalAnchor on: first at: 20 @ 0.
+	anchorB := CFPhysicsNormalisedAnchor on: second at: 0 @ 0.5.
+	endpoints := CFPhysicsAnchoredEndpointPair anchorA: anchorA anchorB: anchorB.
+	self assert: endpoints anchorA == anchorA.
+	self assert: endpoints anchorB == anchorB.
+	self assert: endpoints bodyA == first.
+	self assert: endpoints bodyB == second.
+	self assert: endpoints worldPointA equals: 30 @ 20.
+	self assert: endpoints worldPointB equals: 70 @ 50.
+	^ endpoints
+]
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> relationshipsResolveThroughAnEndpointPair [
+	<gtExample>
+	| first second endpoints spring attraction repulsion |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	endpoints := CFPhysicsAnchoredEndpointPair
+		anchorA: (CFPhysicsLocalAnchor on: first at: 10 @ 0)
+		anchorB: (CFPhysicsLocalAnchor on: second at: -10 @ 0).
+	spring := CFPhysicsSpringConstraint betweenEndpoints: endpoints.
+	attraction := CFPhysicsAttractionConstraint betweenEndpoints: endpoints.
+	repulsion := CFPhysicsRepulsionConstraint betweenEndpoints: endpoints.
+	self assert: spring endpointPair == endpoints.
+	self assert: attraction endpointPair == endpoints.
+	self assert: repulsion endpointPair == endpoints.
+	self assert: spring restLength equals: 80.0.
+	self assert: spring bodyA == first.
+	self assert: spring bodyB == second.
+	self assert: attraction bodyA == first.
+	self assert: repulsion bodyB == second.
+	^ { spring. attraction. repulsion }
+]
