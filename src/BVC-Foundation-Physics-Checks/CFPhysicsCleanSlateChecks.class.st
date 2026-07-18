@@ -299,23 +299,50 @@ CFPhysicsCleanSlateChecks >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	^ next
 ]
 
-{ #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateChecks >> preparedConstraintCopiesContactGeometryWithoutMutatingIt [
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateChecks >> constraintBuilderPreparesSolverData [
 	<gtExample>
-	| first second pair manifold contact constraint point |
+	| first second pair manifold contact bodyStates constraints constraint point |
 	first := self cleanSlateBodyWithSequence: 1.
+	first beStatic.
 	second := self cleanSlateBodyWithSequence: 2.
 	pair := CFPhysicsPair first: first second: second.
 	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
 	contact := CFPhysicsContact pair: pair manifold: manifold.
-	constraint := CFPhysicsPreparedConstraint fromContact: contact.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	constraints := CFPhysicsConstraintBuilder new
+		constraintsFrom: { contact }
+		bodyStates: bodyStates.
+	constraint := constraints first.
 	point := constraint points first.
 	self assert: constraint contact == contact.
-	self assert: constraint normal equals: manifold normal.
+	self assert: constraint bodyStateA == (bodyStates at: first).
+	self assert: constraint bodyStateB == (bodyStates at: second).
+	self assert: constraint normal equals: 0 @ 1.
+	self assert: constraint tangent equals: -1 @ 0.
 	self assert: point featureId equals: manifold contactPoints first featureId.
-	self assert: point localAnchorA equals: manifold contactPoints first localAnchorA.
-	self assert: point localAnchorB equals: manifold contactPoints first localAnchorB.
-	self assert: point baseSeparation equals: manifold contactPoints first separation.
+	self assert: point normalMass > 0.0.
+	self assert: point tangentMass > 0.0.
+	self assert: point baseSeparation equals: -1.0.
+	^ constraint
+]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateChecks >> preparedConstraintWritesSolvedImpulsesBackExplicitly [
+	<gtExample>
+	| constraint manifoldPoint preparedPoint |
+	constraint := self constraintBuilderPreparesSolverData.
+	manifoldPoint := constraint contact manifold contactPoints first.
+	preparedPoint := constraint points first.
+	preparedPoint normalImpulse: 4.0; tangentImpulse: 1.5.
+	self assert: manifoldPoint normalImpulse equals: 0.0.
+	self assert: manifoldPoint tangentImpulse equals: 0.0.
+	constraint writeImpulsesBack.
+	self assert: manifoldPoint normalImpulse equals: 4.0.
+	self assert: manifoldPoint tangentImpulse equals: 1.5.
 	^ constraint
 ]
 
