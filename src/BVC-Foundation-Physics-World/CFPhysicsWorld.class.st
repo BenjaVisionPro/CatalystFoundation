@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'containmentConstraints' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -28,6 +28,7 @@ CFPhysicsWorld >> initialize [
 	activeContacts := #().
 	pointerConstraints := IdentitySet new.
 	springConstraints := IdentitySet new.
+	containmentConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -153,6 +154,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		| body |
 		body := bodyStates removeKey: each.
 		self removeSpringsUsingBody: body.
+		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
 		body release ]
@@ -174,6 +176,7 @@ CFPhysicsWorld >> step [
 	bodies := self bodyStatesInOrder.
 	step := self newStep.
 	self prepareSpringConstraintsForStep: step timeStep.
+	self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
 	lastStepResult := stepPipeline
 		stepBodies: bodies
@@ -297,4 +300,41 @@ CFPhysicsWorld >> prepareSpringConstraintsForStep: seconds [
 		each isActive
 			ifTrue: [ each prepareForStep: seconds ]
 			ifFalse: [ springConstraints remove: each ifAbsent: [ ] ] ]
+]
+
+
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> containmentConstraints [
+	^ containmentConstraints asArray sorted: [ :first :second |
+		first body sequence < second body sequence ]
+]
+
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> addContainmentConstraint: aConstraint [
+	aConstraint body world == self
+		ifFalse: [ self error: 'The contained body must belong to this physics world' ].
+	containmentConstraints add: aConstraint.
+	^ aConstraint
+]
+
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> removeContainmentConstraint: aConstraint [
+	(containmentConstraints includes: aConstraint) ifTrue: [
+		aConstraint release.
+		containmentConstraints remove: aConstraint ].
+	^ aConstraint
+]
+
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> removeContainmentsUsingBody: aBodyState [
+	(containmentConstraints select: [ :each | each body == aBodyState ]) copy do: [ :each |
+		self removeContainmentConstraint: each ]
+]
+
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> prepareContainmentConstraintsForStep [
+	containmentConstraints copy do: [ :each |
+		each isActive
+			ifTrue: [ each prepareForBounds: (0 @ 0 extent: owner extent) ]
+			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ]
 ]

@@ -60,5 +60,6 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsWorld.
 		CFPhysicsPointerConstraint.
 		CFPhysicsPointerDragHandler.
-		CFPhysicsSpringConstraint }
+		CFPhysicsSpringConstraint.
+		CFPhysicsContainmentConstraint }
 ]

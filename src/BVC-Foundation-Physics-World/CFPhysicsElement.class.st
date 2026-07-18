@@ -318,3 +318,21 @@ CFPhysicsElement >> removeSpring: aSpringConstraint [
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
 ]
+
+
+{ #category : 'containment interaction' }
+CFPhysicsElement >> containWithinWorld [
+	| aWorld constraint |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aWorld synchroniseMembership.
+	constraint := CFPhysicsContainmentConstraint on: self requireBodyState.
+	^ aWorld addContainmentConstraint: constraint
+]
+
+{ #category : 'containment interaction' }
+CFPhysicsElement >> removeContainment: aContainmentConstraint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeContainmentConstraint: aContainmentConstraint ]
+]
