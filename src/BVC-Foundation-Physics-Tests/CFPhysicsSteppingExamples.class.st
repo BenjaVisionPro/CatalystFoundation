@@ -613,7 +613,7 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 { #category : 'examples - rotation collision' }
 CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	<gtExample>
-	| owner body ground world state snapshots events previousSleepTime previousEligible previousContactCount previousContactIdentity |
+	| owner body ground world contact |
 	owner := BlElement new.
 	body := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
@@ -627,96 +627,13 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		rotation: Float pi / 6;
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600.
-	world synchroniseMembership.
-	state := body physics bodyState.
-	snapshots := OrderedCollection new.
-	events := OrderedCollection new.
-	previousSleepTime := state sleepTime.
-	previousEligible := nil.
-	previousContactCount := world contacts size.
-	previousContactIdentity := nil.
-	1 to: 600 do: [ :stepIndex |
-		| eligible contactCount contactIdentity snapshot |
-		world step.
-		eligible :=
-			(state velocity x squared + state velocity y squared) <= world sleepLinearThreshold squared
-				and: [ state angularVelocity squared <= world sleepAngularThreshold squared ].
-		contactCount := world contacts size.
-		contactIdentity := contactCount = 0
-			ifTrue: [ nil ]
-			ifFalse: [ world contacts first identityHash ].
-		snapshot := self
-			physicsSleepingDiagnosticSnapshotFor: state
-			world: world
-			step: stepIndex
-			eligible: eligible.
-		snapshots add: snapshot.
-		snapshots size > 60 ifTrue: [ snapshots removeFirst ].
-		(previousEligible isNil or: [ previousEligible ~= eligible ]) ifTrue: [
-			events add: 'eligibility changed: ', snapshot ].
-		(previousSleepTime > 0.0 and: [ state sleepTime = 0.0 ]) ifTrue: [
-			events add: 'sleep time reset: ', snapshot ].
-		(previousContactCount ~= contactCount) ifTrue: [
-			events add: 'contact count changed: ', snapshot ].
-		(previousContactIdentity notNil and: [ contactIdentity notNil and: [ previousContactIdentity ~= contactIdentity ] ]) ifTrue: [
-			events add: 'contact identity changed: ', snapshot ].
-		state isSleeping ifTrue: [ events add: 'body slept: ', snapshot ].
-		previousSleepTime := state sleepTime.
-		previousEligible := eligible.
-		previousContactCount := contactCount.
-		previousContactIdentity := contactIdentity ].
-	Transcript
-		cr;
-		show: '=== CFPhysics sleeping diagnostic ==='; cr;
-		show: 'Events:'; cr.
-	events do: [ :each | Transcript show: each; cr ].
-	Transcript show: 'Last 60 steps:'; cr.
-	snapshots do: [ :each | Transcript show: each; cr ].
-	Transcript show: '=== end diagnostic ==='; cr.
-	self
-		assert: body physics isSleeping
-		description: [ self physicsSleepingDiagnosticSnapshotFor: state world: world step: 600 eligible: previousEligible ].
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
+	self assert: body physics isSleeping.
 	self assert: world contacts size equals: 1.
-	self assert: world contacts first isTouching.
-	^ world contacts first
+	contact := world contacts first.
+	self assert: contact isTouching.
+	^ contact
 ]
-
-{ #category : 'private - diagnostics' }
-CFPhysicsSteppingExamples >> physicsSleepingDiagnosticSnapshotFor: state world: world step: stepIndex eligible: eligible [
-	| contacts contact point |
-	contacts := world contacts.
-	^ String streamContents: [ :stream |
-		stream
-			nextPutAll: 'step='; print: stepIndex;
-			nextPutAll: ' awake='; print: state isAwake;
-			nextPutAll: ' sleeping='; print: state isSleeping;
-			nextPutAll: ' eligible='; print: eligible;
-			nextPutAll: ' sleepTime='; print: state sleepTime;
-			nextPutAll: ' position='; print: state position;
-			nextPutAll: ' rotation='; print: state rotation;
-			nextPutAll: ' velocity='; print: state velocity;
-			nextPutAll: ' speedSquared='; print: state velocity x squared + state velocity y squared;
-			nextPutAll: ' angularVelocity='; print: state angularVelocity;
-			nextPutAll: ' angularSpeedSquared='; print: state angularVelocity squared;
-			nextPutAll: ' contacts='; print: contacts size.
-		contacts isEmpty ifFalse: [
-			contact := contacts first.
-			stream
-				nextPutAll: ' contactId='; print: contact identityHash;
-				nextPutAll: ' touching='; print: contact isTouching;
-				nextPutAll: ' normal='; print: contact manifold normal;
-				nextPutAll: ' penetration='; print: contact manifold penetration;
-				nextPutAll: ' points='; print: contact manifold contactPoints size.
-			contact manifold contactPoints isEmpty ifFalse: [
-				point := contact manifold contactPoints first.
-				stream
-					nextPutAll: ' point='; print: point position;
-					nextPutAll: ' normalImpulse='; print: point normalImpulse;
-					nextPutAll: ' tangentImpulse='; print: point tangentImpulse;
-					nextPutAll: ' velocityBias='; print: point velocityBias ] ] ]
-]
-
 
 { #category : 'examples - angular dynamics' }
 CFPhysicsSteppingExamples >> torqueChangesAngularVelocity [

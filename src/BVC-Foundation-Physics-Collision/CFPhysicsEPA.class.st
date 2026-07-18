@@ -46,6 +46,11 @@ CFPhysicsEPA class >> closestEdgeOf: polytope [
 		distance < 0 ifTrue: [
 			normal := normal negated.
 			distance := distance negated ].
+		normal := self collisionNormalFor: normal.
+		distance := self dot: normal with: first point.
+		distance < 0 ifTrue: [
+			normal := normal negated.
+			distance := distance negated ].
 		distance < bestDistance ifTrue: [
 			bestFirst := first.
 			bestSecond := second.
@@ -53,6 +58,22 @@ CFPhysicsEPA class >> closestEdgeOf: polytope [
 			bestDistance := distance.
 			bestInsert := nextIndex ] ].
 	^ { bestFirst. bestSecond. bestNormal. bestDistance. bestInsert }
+]
+
+
+{ #category : 'private' }
+CFPhysicsEPA class >> collisionNormalFor: aNormal [
+	| x y normal |
+	x := (aNormal x closeTo: 0.0)
+		ifTrue: [ 0.0 ]
+		ifFalse: [ aNormal x ].
+	y := (aNormal y closeTo: 0.0)
+		ifTrue: [ 0.0 ]
+		ifFalse: [ aNormal y ].
+	normal := x @ y.
+	^ normal r = 0
+		ifTrue: [ aNormal ]
+		ifFalse: [ normal / normal r ]
 ]
 
 { #category : 'private' }
