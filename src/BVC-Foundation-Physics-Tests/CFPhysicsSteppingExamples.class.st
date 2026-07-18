@@ -699,7 +699,6 @@ CFPhysicsSteppingExamples >> physicsSleepingDiagnosticSnapshotFor: state world: 
 			nextPutAll: ' speedSquared='; print: state velocity x squared + state velocity y squared;
 			nextPutAll: ' angularVelocity='; print: state angularVelocity;
 			nextPutAll: ' angularSpeedSquared='; print: state angularVelocity squared;
-			nextPutAll: ' torque='; print: state torque;
 			nextPutAll: ' contacts='; print: contacts size.
 		contacts isEmpty ifFalse: [
 			contact := contacts first.
