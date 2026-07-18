@@ -2109,3 +2109,78 @@ CFPhysicsCleanSlateChecks >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 	self assert: spring isActive not.
 	^ spring
 ]
+
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> nearestGeometryEndpointsResolveCircleBoundaries [
+	<gtExample>
+	| first second endpoints points |
+	first := (CFPhysicsBodyState
+		element: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself)
+		world: nil)
+		sequence: 1;
+		position: 0 @ 0;
+		yourself.
+	second := (CFPhysicsBodyState
+		element: (BlElement new geometry: BlCircleGeometry new; size: 40 @ 40; yourself)
+		world: nil)
+		sequence: 2;
+		position: 100 @ -10;
+		yourself.
+	endpoints := CFPhysicsNearestGeometryEndpointPair between: first and: second.
+	points := endpoints worldPoints.
+	self assert: points first equals: 20 @ 10.
+	self assert: points second equals: 100 @ 10.
+	^ endpoints
+]
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> nearestGeometryEndpointsResolveRectangleEdges [
+	<gtExample>
+	| first second endpoints points |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 10 extent: 30 @ 20.
+	endpoints := CFPhysicsNearestGeometryEndpointPair between: first and: second.
+	points := endpoints worldPoints.
+	self assert: points first equals: 40 @ 20.
+	self assert: points second equals: 100 @ 20.
+	^ endpoints
+]
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> nearestGeometryEndpointPairTracksCurrentGeometry [
+	<gtExample>
+	| first second endpoints initial moved |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	endpoints := CFPhysicsNearestGeometryEndpointPair between: first and: second.
+	initial := endpoints worldPoints.
+	second position: 60 @ 40.
+	moved := endpoints worldPoints.
+	self assert: initial equals: { 20 @ 10. 100 @ 10 }.
+	self assert: moved ~= initial.
+	self assert: ((moved second - moved first) r) < ((initial second - initial first) r).
+	^ endpoints
+]
+
+{ #category : 'examples - relationship endpoints' }
+CFPhysicsCleanSlateChecks >> nearestGeometryEndpointsCreateWorldOwnedRelationships [
+	<gtExample>
+	| world first second endpoints spring attraction repulsion |
+	world := CFPhysicsWorld new.
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	first world: world.
+	second world: world.
+	endpoints := CFPhysicsNearestGeometryEndpointPair between: first and: second.
+	spring := endpoints spring.
+	attraction := endpoints attraction.
+	repulsion := endpoints repulsion.
+	self assert: spring endpointPair == endpoints.
+	self assert: attraction endpointPair == endpoints.
+	self assert: repulsion endpointPair == endpoints.
+	self assert: world springConstraints equals: { spring }.
+	self assert: world attractionConstraints equals: { attraction }.
+	self assert: world repulsionConstraints equals: { repulsion }.
+	^ { spring. attraction. repulsion }
+]

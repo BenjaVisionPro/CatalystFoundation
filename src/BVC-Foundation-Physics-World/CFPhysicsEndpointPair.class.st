@@ -42,3 +42,19 @@ CFPhysicsEndpointPair >> includesBody: aBodyState [
 	^ (self bodyA notNil and: [ self bodyA == aBodyState ])
 		or: [ self bodyB notNil and: [ self bodyB == aBodyState ] ]
 ]
+
+
+{ #category : 'relationships' }
+CFPhysicsEndpointPair >> spring [
+	^ self world addSpringConstraint: (CFPhysicsSpringConstraint betweenEndpoints: self)
+]
+
+{ #category : 'relationships' }
+CFPhysicsEndpointPair >> attraction [
+	^ self world addAttractionConstraint: (CFPhysicsAttractionConstraint betweenEndpoints: self)
+]
+
+{ #category : 'relationships' }
+CFPhysicsEndpointPair >> repulsion [
+	^ self world addRepulsionConstraint: (CFPhysicsRepulsionConstraint betweenEndpoints: self)
+]

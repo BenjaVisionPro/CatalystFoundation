@@ -395,3 +395,87 @@ CFPhysicsShapeState >> allowsCollisionWith: anotherShapeState [
 CFPhysicsShapeState >> localPointForWorldPoint: aPoint position: aPosition rotation: anAngle [
 	^ self rotateVector: aPoint - aPosition by: anAngle negated
 ]
+
+
+{ #category : 'geometry queries' }
+CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint at: aPosition rotation: anAngle [
+	| centre direction vertices best bestDistance candidate distance localPoint collisionRotation |
+	self isCircle ifTrue: [
+		centre := self circleCentreAt: aPosition.
+		direction := aWorldPoint - centre.
+		direction r = 0 ifTrue: [ direction := 1 @ 0 ].
+		^ centre + ((direction / direction r) * self radius) ].
+	collisionRotation := self collisionRotationFor: anAngle.
+	self isRoundedRectangle ifTrue: [
+		localPoint := self rotate: (aWorldPoint - aPosition) around: self extent / 2.0 by: collisionRotation negated.
+		localPoint := self nearestRoundedRectangleBoundaryPointTo: localPoint.
+		^ aPosition + (self rotate: localPoint around: self extent / 2.0 by: collisionRotation) ].
+	vertices := self collisionVerticesAt: aPosition rotation: anAngle.
+	best := nil.
+	bestDistance := Float infinity.
+	1 to: vertices size do: [ :index |
+		candidate := self
+			closestPointTo: aWorldPoint
+			onSegmentFrom: (vertices at: index)
+			to: (vertices at: (index = vertices size ifTrue: [ 1 ] ifFalse: [ index + 1 ])).
+		distance := ((candidate x - aWorldPoint x) squared + (candidate y - aWorldPoint y) squared).
+		distance < bestDistance ifTrue: [
+			best := candidate.
+			bestDistance := distance ] ].
+	^ best
+]
+
+{ #category : 'geometry queries' }
+CFPhysicsShapeState >> closestPointTo: aPoint onSegmentFrom: firstPoint to: secondPoint [
+	| edge lengthSquared parameter |
+	edge := secondPoint - firstPoint.
+	lengthSquared := (edge x * edge x) + (edge y * edge y).
+	lengthSquared = 0 ifTrue: [ ^ firstPoint ].
+	parameter := (((aPoint - firstPoint) x * edge x)
+		+ ((aPoint - firstPoint) y * edge y)) / lengthSquared.
+	parameter := (parameter max: 0.0) min: 1.0.
+	^ firstPoint + (edge * parameter)
+]
+
+{ #category : 'geometry queries' }
+CFPhysicsShapeState >> nearestRoundedRectangleBoundaryPointTo: aLocalPoint [
+	| anExtent radius innerMinimum innerMaximum innerPoint delta distances minimumDistance |
+	anExtent := self extent.
+	radius := self roundedRectangleRadius.
+	radius = 0 ifTrue: [
+		^ self nearestPolygonBoundaryPointTo: aLocalPoint vertices: self localCollisionVertices ].
+	innerMinimum := radius @ radius.
+	innerMaximum := (anExtent x - radius) @ (anExtent y - radius).
+	innerPoint :=
+		((aLocalPoint x max: innerMinimum x) min: innerMaximum x)
+		@ ((aLocalPoint y max: innerMinimum y) min: innerMaximum y).
+	delta := aLocalPoint - innerPoint.
+	delta r > 0 ifTrue: [ ^ innerPoint + ((delta / delta r) * radius) ].
+	distances := {
+		aLocalPoint y.
+		anExtent y - aLocalPoint y.
+		aLocalPoint x.
+		anExtent x - aLocalPoint x }.
+	minimumDistance := distances min.
+	minimumDistance = distances first ifTrue: [ ^ aLocalPoint x @ 0 ].
+	minimumDistance = distances second ifTrue: [ ^ aLocalPoint x @ anExtent y ].
+	minimumDistance = distances third ifTrue: [ ^ 0 @ aLocalPoint y ].
+	^ anExtent x @ aLocalPoint y
+]
+
+{ #category : 'geometry queries' }
+CFPhysicsShapeState >> nearestPolygonBoundaryPointTo: aPoint vertices: vertices [
+	| best bestDistance candidate distance |
+	best := nil.
+	bestDistance := Float infinity.
+	1 to: vertices size do: [ :index |
+		candidate := self
+			closestPointTo: aPoint
+			onSegmentFrom: (vertices at: index)
+			to: (vertices at: (index = vertices size ifTrue: [ 1 ] ifFalse: [ index + 1 ])).
+		distance := ((candidate x - aPoint x) squared + (candidate y - aPoint y) squared).
+		distance < bestDistance ifTrue: [
+			best := candidate.
+			bestDistance := distance ] ].
+	^ best
+]

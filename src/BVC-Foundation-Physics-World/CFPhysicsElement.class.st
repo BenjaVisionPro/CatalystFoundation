@@ -441,3 +441,17 @@ CFPhysicsElement >> worldAnchorAt: aPoint [
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	^ aWorld anchorAt: aPoint
 ]
+
+
+{ #category : 'relationship endpoints' }
+CFPhysicsElement >> nearestGeometryEndpointsTo: anotherElement [
+	| aWorld otherWorld |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	^ CFPhysicsNearestGeometryEndpointPair
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState
+]
