@@ -454,3 +454,8 @@ CFPhysicsBodyState >> collisionGroupIndex: anInteger [
 CFPhysicsBodyState >> allowsCollisionWith: anotherBody [
 	^ self shapeState allowsCollisionWith: anotherBody shapeState
 ]
+
+{ #category : 'geometry' }
+CFPhysicsBodyState >> worldPointForLocalPoint: aPoint [
+	^ position + (self shapeState rotateVector: aPoint by: rotation)
+]

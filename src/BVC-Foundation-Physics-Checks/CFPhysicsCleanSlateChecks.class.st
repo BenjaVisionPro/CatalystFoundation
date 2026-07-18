@@ -1759,3 +1759,58 @@ CFPhysicsCleanSlateChecks >> worldStepAppliesRepulsionBeforeIntegration [
 	self assert: second physics position x > 100.
 	^ world
 ]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> localAnchorFollowsBodyTranslationAndRotation [
+	<gtExample>
+	| body anchor |
+	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
+	anchor := CFPhysicsLocalAnchor on: body at: 20 @ 0.
+	self assert: anchor body == body.
+	self assert: anchor localPoint equals: 20 @ 0.
+	self assert: anchor worldPoint equals: 120 @ 50.
+	body position: 110 @ 60.
+	self assert: anchor worldPoint equals: 130 @ 60.
+	body rotation: Float pi / 2.
+	self assert: (anchor worldPoint closeTo: 110 @ 80).
+	^ anchor
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> elementCanCreateALocalAnchor [
+	<gtExample>
+	| owner element world anchor |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 40 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	element physics position: 100 @ 50.
+	anchor := element physics localAnchorAt: 40 @ 10.
+	self assert: anchor class equals: CFPhysicsLocalAnchor.
+	self assert: anchor body == element physics bodyState.
+	self assert: anchor worldPoint equals: 140 @ 60.
+	^ anchor
+]
+
+{ #category : 'examples - anchors' }
+CFPhysicsCleanSlateChecks >> relationshipsCanResolveBodyLocalAnchors [
+	<gtExample>
+	| first second anchorA anchorB spring attraction repulsion |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	anchorA := CFPhysicsLocalAnchor on: first at: 20 @ 10.
+	anchorB := CFPhysicsLocalAnchor on: second at: 0 @ 10.
+	spring := CFPhysicsSpringConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	self assert: spring anchorA == anchorA.
+	self assert: spring anchorB == anchorB.
+	self assert: attraction anchorA == anchorA.
+	self assert: attraction anchorB == anchorB.
+	self assert: repulsion anchorA == anchorA.
+	self assert: repulsion anchorB == anchorB.
+	self assert: anchorA worldPoint equals: 20 @ 10.
+	self assert: anchorB worldPoint equals: 100 @ 10.
+	^ { spring. attraction. repulsion }
+]

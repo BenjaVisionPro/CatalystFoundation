@@ -414,3 +414,12 @@ CFPhysicsElement >> removeRepulsion: aRepulsionConstraint [
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeRepulsionConstraint: aRepulsionConstraint ]
 ]
+
+{ #category : 'anchors' }
+CFPhysicsElement >> localAnchorAt: aPoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aWorld synchroniseMembership.
+	^ CFPhysicsLocalAnchor on: self requireBodyState at: aPoint
+]
