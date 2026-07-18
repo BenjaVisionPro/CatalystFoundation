@@ -762,3 +762,25 @@ CFPhysicsSteppingExamples >> verticalRoundedRectangleSupportUsesFaceCentre [
 	self assert: point equals: 30 @ 30.
 	^ point
 ]
+
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> nearVerticalRoundedRectangleSupportUsesFaceCentre [
+	<gtExample>
+	| element owner world state point |
+	owner := BlElement new.
+	element := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 60 @ 30;
+		yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	state := element physics bodyState.
+	point := state shapeState
+		supportPointAt: 0 @ 0
+		rotation: 0
+		inDirection: 0.0000015 @ 1.
+	self assert: (point distanceTo: 30 @ 30) <= state shapeState supportDirectionSlop.
+	^ point
+]

@@ -238,12 +238,17 @@ CFPhysicsShapeState >> roundedRectangleLocalSupportPointInDirection: direction [
 	radius := self roundedRectangleRadius.
 	radius = 0 ifTrue: [
 		^ self supportPointOf: self localCollisionVertices inDirection: direction ].
-	innerX := direction x = 0
+	innerX := direction x abs <= self supportDirectionSlop
 		ifTrue: [ anExtent x / 2.0 ]
 		ifFalse: [ direction x > 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ] ].
-	innerY := direction y = 0
+	innerY := direction y abs <= self supportDirectionSlop
 		ifTrue: [ anExtent y / 2.0 ]
 		ifFalse: [ direction y > 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ] ].
 	innerPoint := innerX @ innerY.
 	^ innerPoint + (direction * radius)
+]
+
+{ #category : 'rounded rectangle' }
+CFPhysicsShapeState >> supportDirectionSlop [
+	^ 0.00001
 ]
