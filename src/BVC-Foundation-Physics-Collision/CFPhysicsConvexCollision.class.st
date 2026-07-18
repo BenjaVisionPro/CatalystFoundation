@@ -10,13 +10,6 @@ CFPhysicsConvexCollision class >> manifoldBetween: firstBody and: secondBody [
 	| simplex |
 	(firstBody aabb overlaps: secondBody aabb) ifFalse: [ ^ nil ].
 	simplex := CFPhysicsGJK simplexBetween: firstBody and: secondBody.
-	simplex ifNil: [
-		Transcript
-			nextPutAll: 'CFPhysics GJK nil despite AABB overlap firstPosition='; print: firstBody position;
-			nextPutAll: ' firstRotation='; print: firstBody rotation;
-			nextPutAll: ' secondPosition='; print: secondBody position;
-			nextPutAll: ' secondRotation='; print: secondBody rotation;
-			cr.
-		^ nil ].
+	simplex ifNil: [ ^ nil ].
 	^ CFPhysicsEPA manifoldBetween: firstBody and: secondBody fromSimplex: simplex
 ]

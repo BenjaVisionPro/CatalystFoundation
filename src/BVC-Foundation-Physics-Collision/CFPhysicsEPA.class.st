@@ -20,23 +20,10 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 		((supportDistance closeTo: edge fourth)
 			or: [ support point = edge first point
 				or: [ support point = edge second point ] ]) ifTrue: [
-			Transcript
-				nextPutAll: 'CFPhysics EPA terminate iteration='; print: iteration;
-				nextPutAll: ' reason=';
-				nextPutAll: ((supportDistance closeTo: edge fourth)
-					ifTrue: [ 'distance' ]
-					ifFalse: [ 'edge-endpoint' ]);
-				nextPutAll: ' edgeFirst='; print: edge first point;
-				nextPutAll: ' edgeSecond='; print: edge second point;
-				nextPutAll: ' normal='; print: edge third;
-				nextPutAll: ' edgeDistance='; print: edge fourth;
-				nextPutAll: ' support='; print: support point;
-				nextPutAll: ' supportDistance='; print: supportDistance;
-				cr.
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
-				normal: edge third
-				penetration: supportDistance)
+				normal: (self collisionNormalFor: edge third)
+				penetration: edge fourth)
 				points: { contactPoint };
 				yourself ].
 		polytope add: support beforeIndex: edge fifth ].
@@ -57,11 +44,6 @@ CFPhysicsEPA class >> closestEdgeOf: polytope [
 		edge := second point - first point.
 		normal := edge y @ edge x negated.
 		normal r > 0 ifTrue: [ normal := normal / normal r ].
-		distance := self dot: normal with: first point.
-		distance < 0 ifTrue: [
-			normal := normal negated.
-			distance := distance negated ].
-		normal := self collisionNormalFor: normal.
 		distance := self dot: normal with: first point.
 		distance < 0 ifTrue: [
 			normal := normal negated.

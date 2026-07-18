@@ -634,14 +634,6 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
-	Transcript
-		nextPutAll: 'sleepingRotatedRoundedRectangleRetainsContact position='; print: body physics position;
-		nextPutAll: ' rotation='; print: body physics rotation;
-		nextPutAll: ' velocity='; print: body physics velocity;
-		nextPutAll: ' angularVelocity='; print: body physics angularVelocity;
-		nextPutAll: ' sleeping='; print: body physics isSleeping;
-		nextPutAll: ' contacts='; print: world contacts size;
-		cr.
 	self assert: body physics isSleeping.
 	self assert: world contacts size equals: 1.
 	contact := world contacts first.

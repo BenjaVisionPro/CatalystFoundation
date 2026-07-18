@@ -278,13 +278,6 @@ CFPhysicsExamples >> roundedRectangleSettlesOnRoundedGround [
 	body physics position: 100 @ 0.
 	ground physics beStatic; position: 0 @ 200.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
-	Transcript
-		nextPutAll: 'roundedRectangleSettlesOnRoundedGround position='; print: body physics position;
-		nextPutAll: ' rotation='; print: body physics rotation;
-		nextPutAll: ' velocity='; print: body physics velocity;
-		nextPutAll: ' angularVelocity='; print: body physics angularVelocity;
-		nextPutAll: ' contacts='; print: world contacts size;
-		cr.
 	self assert: (body physics position y closeTo: 150.0).
 	self assert: world contacts size equals: 1.
 	^ space
@@ -309,13 +302,6 @@ CFPhysicsExamples >> rotatedRoundedRectangleSettlesOnGround [
 	body physics position: 100 @ 80; rotation: Float pi / 6.
 	ground physics beStatic; position: 0 @ 200.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
-	Transcript
-		nextPutAll: 'rotatedRoundedRectangleSettlesOnGround position='; print: body physics position;
-		nextPutAll: ' rotation='; print: body physics rotation;
-		nextPutAll: ' velocity='; print: body physics velocity;
-		nextPutAll: ' angularVelocity='; print: body physics angularVelocity;
-		nextPutAll: ' contacts='; print: world contacts size;
-		cr.
 	self assert: world contacts notEmpty.
 	^ space
 ]
