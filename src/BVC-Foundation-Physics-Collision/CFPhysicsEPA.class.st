@@ -67,7 +67,7 @@ CFPhysicsEPA class >> contactPointOnEdgeFrom: firstSupport to: secondSupport [
 		+ ((secondSupport firstPoint - firstSupport firstPoint) * parameter).
 	secondWitness := firstSupport secondPoint
 		+ ((secondSupport secondPoint - firstSupport secondPoint) * parameter).
-	^ (firstWitness + secondWitness) / 2.0
+	^ firstWitness
 ]
 
 { #category : 'private' }

@@ -8,16 +8,19 @@ Class {
 { #category : 'collision' }
 CFPhysicsPolygonCollision class >> manifoldBetween: firstBody and: secondBody [
 	| firstVertices secondVertices bestAxis bestOverlap result point |
-	firstVertices := firstBody shapeState collisionVerticesAt: firstBody position.
-	secondVertices := secondBody shapeState collisionVerticesAt: secondBody position.
+	firstVertices := firstBody shapeState
+		collisionVerticesAt: firstBody position
+		rotation: firstBody rotation.
+	secondVertices := secondBody shapeState
+		collisionVerticesAt: secondBody position
+		rotation: secondBody rotation.
 	result := self separatingAxisBetween: firstVertices and: secondVertices.
 	result ifNil: [ ^ nil ].
 	bestAxis := result first.
 	bestOverlap := result second.
 	(self dot: (self centreOf: secondVertices) - (self centreOf: firstVertices) with: bestAxis) < 0
 		ifTrue: [ bestAxis := bestAxis negated ].
-	point := ((self supportPointOf: firstVertices inDirection: bestAxis)
-		+ (self supportPointOf: secondVertices inDirection: bestAxis negated)) / 2.0.
+	point := self supportPointOf: firstVertices inDirection: bestAxis.
 	^ (CFPhysicsManifold normal: bestAxis penetration: (bestOverlap max: 0.0))
 		points: { point };
 		yourself
@@ -28,7 +31,9 @@ CFPhysicsPolygonCollision class >> manifoldBetweenCircle: circleBody andPolygon:
 	| circleCentre radius vertices axes closestVertex closestDistance axis result normal penetration point |
 	circleCentre := circleBody shapeState circleCentreAt: circleBody position.
 	radius := circleBody shapeState radius.
-	vertices := polygonBody shapeState collisionVerticesAt: polygonBody position.
+	vertices := polygonBody shapeState
+		collisionVerticesAt: polygonBody position
+		rotation: polygonBody rotation.
 	axes := self axesFor: vertices.
 	closestVertex := vertices first.
 	closestDistance := (closestVertex distanceTo: circleCentre).

@@ -695,3 +695,45 @@ CFPhysicsSteppingExamples >> staticBodyHasNoInverseInertia [
 	self assert: body physics inverseInertia equals: 0.0.
 	^ body
 ]
+
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> polygonGroundContactUsesBodyWitnessPoint [
+	<gtExample>
+	| owner polygon ground world contact centre contactPoint |
+	owner := BlElement new.
+	polygon := BlElement new
+		geometry: (BlPolygonGeometry vertices: { 0 @ 0. 20 @ 0. 40 @ 20. 20 @ 40 });
+		size: 40 @ 40;
+		yourself.
+	ground := BlElement new size: 120 @ 20; yourself.
+	owner addChild: polygon; addChild: ground.
+	world := owner physics beWorld.
+	polygon physics position: 20 @ 19.
+	ground physics beStatic; position: 0 @ 60.
+	world gravity: 0 @ 0; step.
+	contact := world contacts first.
+	centre := polygon physics bodyState centre.
+	contactPoint := contact manifold points first.
+	self assert: (contactPoint x - centre x) abs <= CFPhysicsContact new positionSlop.
+	^ contact
+]
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> roundedRectangleRestingContactDoesNotInjectAngularVelocity [
+	<gtExample>
+	| owner body ground world |
+	owner := BlElement new.
+	body := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 60 @ 30;
+		yourself.
+	ground := BlElement new size: 400 @ 40; yourself.
+	owner addChild: body; addChild: ground.
+	world := owner physics beWorld.
+	body physics position: 100 @ 170.
+	ground physics beStatic; position: 0 @ 200.
+	world gravity: 0 @ 0; step: 10.
+	self assert: body physics angularVelocity abs <= world sleepAngularThreshold.
+	^ body
+]
