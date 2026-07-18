@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -15,6 +15,8 @@ CFPhysicsStepPipelineResult >> initialize [
 	constraints := #().
 	islands := #().
 	sleepDecisions := #().
+	contactSolveResults := #().
+	hitEvents := #().
 	contactEvents := #().
 	stageExecutions := OrderedCollection new
 ]
@@ -59,6 +61,16 @@ CFPhysicsStepPipelineResult >> solver: anObject [ solver := anObject ]
 CFPhysicsStepPipelineResult >> sleepDecisions [ ^ sleepDecisions ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> sleepDecisions: aCollection [ sleepDecisions := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactSolveResults [ ^ contactSolveResults ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactSolveResults: aCollection [ contactSolveResults := aCollection asArray ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> hitEvents [ ^ hitEvents ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> hitEvents: aCollection [ hitEvents := aCollection asArray ]
+
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactEvents [ ^ contactEvents ]
 { #category : 'accessing' }

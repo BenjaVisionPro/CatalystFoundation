@@ -19,6 +19,7 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 			CFPhysicsIslandBuilderStage new.
 			CFPhysicsIslandWakeStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsIslandSolverStage new.
+			CFPhysicsPostSolveStage new.
 			CFPhysicsIslandSleepingStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsContactEventsStage new };
 		yourself
@@ -75,4 +76,19 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 		output := stage executeOn: result.
 		result recordStage: stage output: output ].
 	^ result
+]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> postSolveStage [
+	^ self stageOfType: CFPhysicsPostSolveStage
+]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> hitEventThreshold [
+	^ self postSolveStage hitEventThreshold
+]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipeline >> hitEventThreshold: aNumber [
+	self postSolveStage hitEventThreshold: aNumber
 ]

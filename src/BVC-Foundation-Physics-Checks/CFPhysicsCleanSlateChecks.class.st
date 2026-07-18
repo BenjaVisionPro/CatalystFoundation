@@ -785,6 +785,7 @@ CFPhysicsCleanSlateChecks >> stepPipelineExecutesExplicitOrderedStages [
 		CFPhysicsIslandBuilderStage.
 		CFPhysicsIslandWakeStage.
 		CFPhysicsIslandSolverStage.
+		CFPhysicsPostSolveStage.
 		CFPhysicsIslandSleepingStage.
 		CFPhysicsContactEventsStage }.
 	self assert: result executedStages size equals: expectedTypes size.
@@ -795,7 +796,9 @@ CFPhysicsCleanSlateChecks >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: result stageExecutions fourth output equals: result constraints.
 	self assert: result stageExecutions fifth output equals: result islands.
 	self assert: result stageExecutions seventh output == result solver.
-	self assert: result stageExecutions ninth output equals: result contactEvents.
+	self assert: result stageExecutions eighth output contactResults equals: result contactSolveResults.
+	self assert: result stageExecutions eighth output hitEvents equals: result hitEvents.
+	self assert: result stageExecutions tenth output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -808,10 +811,68 @@ CFPhysicsCleanSlateChecks >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 9.
+	self assert: stages size equals: 10.
 	self assert: stages first class equals: CFPhysicsPairFinderStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
 	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 4).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
+]
+
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateChecks >> postSolveCollectorCapturesSolvedImpulses [
+	<gtExample>
+	| result solveResult pointResult constraint |
+	result := self stepPipelineExposesTheComposedStep.
+	self assert: result contactSolveResults size equals: result constraints size.
+	solveResult := result contactSolveResults first.
+	constraint := result constraints first.
+	self assert: solveResult contact == constraint contact.
+	self assert: solveResult normal equals: constraint normal.
+	self assert: solveResult points size equals: constraint points size.
+	pointResult := solveResult points first.
+	self assert: pointResult featureId equals: constraint points first featureId.
+	self assert: pointResult normalImpulse equals: constraint points first normalImpulse.
+	self assert: pointResult tangentImpulse equals: constraint points first tangentImpulse.
+	^ solveResult
+]
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateChecks >> hitEventsAreDerivedAfterSolving [
+	<gtExample>
+	| result stage |
+	stage := CFPhysicsPostSolveStage new.
+	stage hitEventThreshold: 0.0.
+	result := self stepPipelineExposesTheComposedStep.
+	stage executeOn: result.
+	self assert: result hitEvents allSatisfy: [ :event |
+		event normalImpulse > 0.0 and: [ event approachSpeed > 0.0 ] ].
+	self assert: result hitEvents allSatisfy: [ :event |
+		result activeContacts includes: event contact ].
+	^ result hitEvents
+]
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateChecks >> hitEventThresholdSuppressesSmallApproaches [
+	<gtExample>
+	| result stage |
+	result := self stepPipelineExposesTheComposedStep.
+	stage := CFPhysicsPostSolveStage new.
+	stage hitEventThreshold: 1.0e100.
+	stage executeOn: result.
+	self assert: result hitEvents isEmpty.
+	^ result hitEvents
+]
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateChecks >> stepPipelineExposesPostSolveStage [
+	<gtExample>
+	| result execution |
+	result := self stepPipelineExposesTheComposedStep.
+	execution := result executionForStageType: CFPhysicsPostSolveStage.
+	self assert: execution notNil.
+	self assert: execution output contactResults equals: result contactSolveResults.
+	self assert: execution output hitEvents equals: result hitEvents.
+	^ execution
 ]

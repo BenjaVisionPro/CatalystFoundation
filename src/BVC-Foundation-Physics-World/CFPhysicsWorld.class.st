@@ -215,3 +215,14 @@ CFPhysicsWorld >> timeToSleep: aNumber [ self sleepConfiguration timeToSleep: aN
 CFPhysicsWorld >> wakeAll [
 	bodyStates valuesDo: [ :each | each wake ]
 ]
+
+{ #category : 'events' }
+CFPhysicsWorld >> hitEventThreshold [ ^ stepPipeline hitEventThreshold ]
+
+{ #category : 'events' }
+CFPhysicsWorld >> hitEventThreshold: aNumber [ stepPipeline hitEventThreshold: aNumber ]
+
+{ #category : 'events' }
+CFPhysicsWorld >> hitEvents [
+	^ lastStepResult ifNil: [ #() ] ifNotNil: [ lastStepResult hitEvents ]
+]
