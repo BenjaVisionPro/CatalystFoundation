@@ -312,6 +312,18 @@ CFPhysicsElement >> springTo: anotherElement [
 	^ aWorld addSpringConstraint: spring
 ]
 
+
+{ #category : 'spring interaction' }
+CFPhysicsElement >> springs [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld springsUsingBody: body
+]
+
 { #category : 'spring interaction' }
 CFPhysicsElement >> removeSpring: aSpringConstraint [
 	| aWorld |

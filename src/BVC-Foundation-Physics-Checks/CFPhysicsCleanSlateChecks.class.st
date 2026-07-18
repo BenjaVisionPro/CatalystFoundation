@@ -1379,3 +1379,87 @@ CFPhysicsCleanSlateChecks >> containmentUsesTheCurrentWorldExtent [
 	self assert: element physics position equals: 130 @ 20.
 	^ world
 ]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> springEndpointsAreResolvedThroughAnchors [
+	<gtExample>
+	| first second spring |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	spring := CFPhysicsSpringConstraint between: first and: second.
+	self assert: spring anchorA class equals: CFPhysicsBodyCentreAnchor.
+	self assert: spring anchorB class equals: CFPhysicsBodyCentreAnchor.
+	self assert: spring anchorA worldPoint equals: 10 @ 10.
+	self assert: spring anchorB worldPoint equals: 110 @ 10.
+	self assert: spring bodyA == first.
+	self assert: spring bodyB == second.
+	^ spring
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> oneElementCanOwnManyIndependentSpringRelationships [
+	<gtExample>
+	| owner first second third fourth world firstSpring secondSpring thirdSpring |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	fourth := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third. fourth }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	firstSpring := first physics springTo: second.
+	secondSpring := first physics springTo: third.
+	thirdSpring := first physics springTo: fourth.
+	self assert: first physics springs equals: { firstSpring. secondSpring. thirdSpring }.
+	self assert: second physics springs equals: { firstSpring }.
+	first physics removeSpring: secondSpring.
+	self assert: first physics springs equals: { firstSpring. thirdSpring }.
+	self assert: world springConstraints equals: { firstSpring. thirdSpring }.
+	^ world
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> duplicateSpringEndpointsRemainIndependent [
+	<gtExample>
+	| owner first second world firstSpring secondSpring |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	firstSpring := first physics springTo: second.
+	secondSpring := first physics springTo: second.
+	self deny: firstSpring == secondSpring.
+	self assert: first physics springs equals: { firstSpring. secondSpring }.
+	first physics removeSpring: firstSpring.
+	self assert: first physics springs equals: { secondSpring }.
+	self assert: secondSpring isActive.
+	^ world
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> retiringABodyRemovesOnlyItsSprings [
+	<gtExample>
+	| owner first second third fourth world attachedA attachedB unrelated |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	fourth := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third. fourth }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	attachedA := first physics springTo: second.
+	attachedB := first physics springTo: third.
+	unrelated := third physics springTo: fourth.
+	owner removeChild: first.
+	world synchroniseMembership.
+	self assert: world springConstraints equals: { unrelated }.
+	self assert: attachedA isActive not.
+	self assert: attachedB isActive not.
+	self assert: unrelated isActive.
+	self assert: third physics springs equals: { unrelated }.
+	^ world
+]

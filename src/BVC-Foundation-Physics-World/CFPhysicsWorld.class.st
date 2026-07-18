@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'containmentConstraints' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'containmentConstraints', 'nextSpringSequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -28,6 +28,7 @@ CFPhysicsWorld >> initialize [
 	activeContacts := #().
 	pointerConstraints := IdentitySet new.
 	springConstraints := IdentitySet new.
+	nextSpringSequence := 1.
 	containmentConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
@@ -267,6 +268,11 @@ CFPhysicsWorld >> preparePointerConstraintsForStep: seconds [
 
 
 { #category : 'spring interaction' }
+CFPhysicsWorld >> springs [
+	^ self springConstraints
+]
+
+{ #category : 'spring interaction' }
 CFPhysicsWorld >> springConstraints [
 	^ springConstraints asArray sorted: [ :first :second |
 		first orderingKey < second orderingKey ]
@@ -274,10 +280,18 @@ CFPhysicsWorld >> springConstraints [
 
 { #category : 'spring interaction' }
 CFPhysicsWorld >> addSpringConstraint: aConstraint [
-	(aConstraint firstBody world == self and: [ aConstraint secondBody world == self ])
+	(aConstraint bodyA world == self and: [ aConstraint bodyB world == self ])
 		ifFalse: [ self error: 'Both spring bodies must belong to this physics world' ].
+	aConstraint sequence: nextSpringSequence.
+	nextSpringSequence := nextSpringSequence + 1.
 	springConstraints add: aConstraint.
 	^ aConstraint
+]
+
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> springsUsingBody: aBodyState [
+	^ self springConstraints select: [ :each | each includesBody: aBodyState ]
 ]
 
 { #category : 'spring interaction' }

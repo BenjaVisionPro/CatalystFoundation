@@ -1,24 +1,30 @@
 Class {
 	#name : 'CFPhysicsSpringConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'firstBody', 'secondBody', 'restLength', 'stiffness', 'damping', 'maximumForce', 'active' ],
+	#instVars : [ 'anchorA', 'anchorB', 'restLength', 'stiffness', 'damping', 'maximumForce', 'active', 'sequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
 
 { #category : 'instance creation' }
 CFPhysicsSpringConstraint class >> between: firstBodyState and: secondBodyState [
+	^ self
+		betweenAnchor: (CFPhysicsBodyCentreAnchor on: firstBodyState)
+		andAnchor: (CFPhysicsBodyCentreAnchor on: secondBodyState)
+]
+
+{ #category : 'instance creation' }
+CFPhysicsSpringConstraint class >> betweenAnchor: firstAnchor andAnchor: secondAnchor [
 	^ self new
-		firstBody: firstBodyState;
-		secondBody: secondBodyState;
-		restLength: (self distanceBetween: firstBodyState and: secondBodyState);
+		anchorA: firstAnchor;
+		anchorB: secondAnchor;
+		restLength: (self distanceBetweenAnchor: firstAnchor andAnchor: secondAnchor);
 		yourself
 ]
 
 { #category : 'private' }
-CFPhysicsSpringConstraint class >> distanceBetween: firstBodyState and: secondBodyState [
-	^ ((secondBodyState position + (secondBodyState extent / 2.0))
-		- (firstBodyState position + (firstBodyState extent / 2.0))) r
+CFPhysicsSpringConstraint class >> distanceBetweenAnchor: firstAnchor andAnchor: secondAnchor [
+	^ (secondAnchor worldPoint - firstAnchor worldPoint) r
 ]
 
 { #category : 'initialization' }
@@ -28,20 +34,39 @@ CFPhysicsSpringConstraint >> initialize [
 	stiffness := 40.0.
 	damping := 8.0.
 	maximumForce := 100000.0.
-	active := true
+	active := true.
+	sequence := 0
 ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> firstBody [ ^ firstBody ]
+CFPhysicsSpringConstraint >> anchorA [ ^ anchorA ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> firstBody: aBodyState [ firstBody := aBodyState ]
+CFPhysicsSpringConstraint >> anchorA: anAnchor [ anchorA := anAnchor ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> secondBody [ ^ secondBody ]
+CFPhysicsSpringConstraint >> anchorB [ ^ anchorB ]
 
 { #category : 'accessing' }
-CFPhysicsSpringConstraint >> secondBody: aBodyState [ secondBody := aBodyState ]
+CFPhysicsSpringConstraint >> anchorB: anAnchor [ anchorB := anAnchor ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringConstraint >> bodyA [ ^ anchorA body ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringConstraint >> bodyB [ ^ anchorB body ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringConstraint >> firstBody [ ^ self bodyA ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringConstraint >> secondBody [ ^ self bodyB ]
+
+{ #category : 'ordering' }
+CFPhysicsSpringConstraint >> sequence [ ^ sequence ]
+
+{ #category : 'ordering' }
+CFPhysicsSpringConstraint >> sequence: anInteger [ sequence := anInteger ]
 
 { #category : 'configuration' }
 CFPhysicsSpringConstraint >> restLength [ ^ restLength ]
@@ -72,33 +97,22 @@ CFPhysicsSpringConstraint >> isActive [ ^ active ]
 
 { #category : 'testing' }
 CFPhysicsSpringConstraint >> includesBody: aBodyState [
-	^ firstBody == aBodyState or: [ secondBody == aBodyState ]
+	^ self bodyA == aBodyState or: [ self bodyB == aBodyState ]
 ]
 
 { #category : 'ordering' }
 CFPhysicsSpringConstraint >> orderingKey [
-	| firstSequence secondSequence |
-	firstSequence := firstBody sequence min: secondBody sequence.
-	secondSequence := firstBody sequence max: secondBody sequence.
-	^ (firstSequence * 1000000) + secondSequence
-]
-
-{ #category : 'geometry' }
-CFPhysicsSpringConstraint >> firstCentre [
-	^ firstBody position + (firstBody extent / 2.0)
-]
-
-{ #category : 'geometry' }
-CFPhysicsSpringConstraint >> secondCentre [
-	^ secondBody position + (secondBody extent / 2.0)
+	^ sequence
 ]
 
 { #category : 'stepping' }
 CFPhysicsSpringConstraint >> prepareForStep: seconds [
-	| displacement distance direction relativeSpeed extension force impulse |
+	| displacement distance direction relativeSpeed extension force impulse firstBody secondBody |
 	active ifFalse: [ ^ self ].
+	firstBody := self bodyA.
+	secondBody := self bodyB.
 	(firstBody isDynamic or: [ secondBody isDynamic ]) ifFalse: [ ^ self ].
-	displacement := self secondCentre - self firstCentre.
+	displacement := anchorB worldPoint - anchorA worldPoint.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.
