@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -27,6 +27,7 @@ CFPhysicsWorld >> initialize [
 	contactDampingRatio := 10.0.
 	activeContacts := #().
 	pointerConstraints := IdentitySet new.
+	springConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -151,6 +152,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
 		| body |
 		body := bodyStates removeKey: each.
+		self removeSpringsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
 		body release ]
@@ -171,6 +173,7 @@ CFPhysicsWorld >> step [
 	self synchroniseMembership.
 	bodies := self bodyStatesInOrder.
 	step := self newStep.
+	self prepareSpringConstraintsForStep: step timeStep.
 	self preparePointerConstraintsForStep: step timeStep.
 	lastStepResult := stepPipeline
 		stepBodies: bodies
@@ -257,4 +260,41 @@ CFPhysicsWorld >> preparePointerConstraintsForStep: seconds [
 		each isActive
 			ifTrue: [ each prepareForStep: seconds ]
 			ifFalse: [ pointerConstraints remove: each ifAbsent: [ ] ] ]
+]
+
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> springConstraints [
+	^ springConstraints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> addSpringConstraint: aConstraint [
+	(aConstraint firstBody world == self and: [ aConstraint secondBody world == self ])
+		ifFalse: [ self error: 'Both spring bodies must belong to this physics world' ].
+	springConstraints add: aConstraint.
+	^ aConstraint
+]
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> removeSpringConstraint: aConstraint [
+	(springConstraints includes: aConstraint) ifTrue: [
+		aConstraint release.
+		springConstraints remove: aConstraint ].
+	^ aConstraint
+]
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> removeSpringsUsingBody: aBodyState [
+	(springConstraints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeSpringConstraint: each ]
+]
+
+{ #category : 'spring interaction' }
+CFPhysicsWorld >> prepareSpringConstraintsForStep: seconds [
+	springConstraints copy do: [ :each |
+		each isActive
+			ifTrue: [ each prepareForStep: seconds ]
+			ifFalse: [ springConstraints remove: each ifAbsent: [ ] ] ]
 ]

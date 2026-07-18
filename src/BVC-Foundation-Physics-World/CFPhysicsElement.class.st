@@ -296,3 +296,25 @@ CFPhysicsElement >> isPointerDraggingEnabled [
 CFPhysicsElement >> pointerDragHandler [
 	^ pointerDragHandler
 ]
+
+
+{ #category : 'spring interaction' }
+CFPhysicsElement >> springTo: anotherElement [
+	| aWorld otherWorld spring |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	spring := CFPhysicsSpringConstraint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addSpringConstraint: spring
+]
+
+{ #category : 'spring interaction' }
+CFPhysicsElement >> removeSpring: aSpringConstraint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
+]

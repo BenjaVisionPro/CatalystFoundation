@@ -1231,3 +1231,75 @@ CFPhysicsCleanSlateChecks >> pointerDraggingIsInstalledThroughThePhysicsFacade [
 	self assert: element physics isPointerDraggingEnabled not.
 	^ element
 ]
+
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> springAtItsRestLengthDoesNotChangeVelocity [
+	<gtExample>
+	| first second spring |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	spring := CFPhysicsSpringConstraint between: first and: second.
+	spring prepareForStep: 0.016.
+	self assert: first velocity equals: 0 @ 0.
+	self assert: second velocity equals: 0 @ 0.
+	^ spring
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> stretchedSpringPullsBodiesTogether [
+	<gtExample>
+	| first second spring |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	spring := CFPhysicsSpringConstraint between: first and: second.
+	spring restLength: 50.
+	spring stiffness: 100.
+	spring damping: 0.
+	spring prepareForStep: 0.016.
+	self assert: first velocity x > 0.
+	self assert: second velocity x < 0.
+	self assert: first velocity y equals: 0.
+	self assert: second velocity y equals: 0.
+	^ spring
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> springCanConnectADynamicElementToAStaticAnchor [
+	<gtExample>
+	| first second spring |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	first beStatic.
+	spring := CFPhysicsSpringConstraint between: first and: second.
+	spring restLength: 50.
+	spring prepareForStep: 0.016.
+	self assert: first velocity equals: 0 @ 0.
+	self assert: second velocity x < 0.
+	^ spring
+]
+
+{ #category : 'examples - spring interaction' }
+CFPhysicsCleanSlateChecks >> springsAreInstalledThroughBlocElements [
+	<gtExample>
+	| owner first second world spring |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChild: first.
+	owner addChild: second.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	spring := first physics springTo: second.
+	spring restLength: 50.
+	world step.
+	self assert: world springConstraints size equals: 1.
+	self assert: first physics velocity x > 0.
+	self assert: second physics velocity x < 0.
+	first physics removeSpring: spring.
+	self assert: world springConstraints isEmpty.
+	^ world
+]
