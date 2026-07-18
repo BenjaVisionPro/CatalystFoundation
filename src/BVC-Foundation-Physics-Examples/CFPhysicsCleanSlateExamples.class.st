@@ -27,5 +27,6 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsConstraintPoint.
 		CFPhysicsSoftStepSolver.
 		CFPhysicsStepPipeline.
-		CFPhysicsStepPipelineResult }
+		CFPhysicsStepPipelineResult.
+		CFPhysicsWorld }
 ]

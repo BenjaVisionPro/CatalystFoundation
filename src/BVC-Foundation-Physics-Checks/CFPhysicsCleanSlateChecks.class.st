@@ -501,3 +501,45 @@ CFPhysicsCleanSlateChecks >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 	self assert: secondResult activeContacts size equals: 1.
 	^ secondResult
 ]
+
+{ #category : 'examples - world cutover' }
+CFPhysicsCleanSlateChecks >> worldDelegatesOneStepToTheExplicitPipeline [
+	<gtExample>
+	| owner ground box world groundBody boxBody result |
+	owner := BlElement new.
+	ground := BlElement new size: 100 @ 20; yourself.
+	box := BlElement new size: 60 @ 20; yourself.
+	owner addChild: ground.
+	owner addChild: box.
+	world := owner physics beWorld.
+	world
+		gravity: 0 @ 0;
+		synchroniseMembership.
+	groundBody := world bodyStateFor: ground.
+	boxBody := world bodyStateFor: box.
+	groundBody
+		position: 0 @ 0;
+		beStatic.
+	boxBody position: 20 @ 15.
+	result := world step.
+	self assert: result == world lastStepResult.
+	self assert: result bodies equals: world bodyStatesInOrder.
+	self assert: result activeContacts size equals: 1.
+	self assert: world contacts equals: result activeContacts.
+	self assert: result step substepCount equals: world substepCount.
+	^ world
+]
+
+{ #category : 'examples - world cutover' }
+CFPhysicsCleanSlateChecks >> worldCarriesActiveContactsExplicitlyBetweenSteps [
+	<gtExample>
+	| world firstResult secondResult |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstResult := world lastStepResult.
+	secondResult := world step.
+	self assert: firstResult beganContacts size equals: 1.
+	self assert: secondResult beganContacts isEmpty.
+	self assert: secondResult continuedContacts size equals: 1.
+	self assert: world activeContacts equals: secondResult activeContacts.
+	^ secondResult
+]

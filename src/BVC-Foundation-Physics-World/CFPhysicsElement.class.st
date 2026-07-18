@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
 	#instVars : [ 'element', 'ownedWorld' ],
-	#category : 'BVC-Foundation-Physics-Core',
-	#package : 'BVC-Foundation-Physics-Core'
+	#category : 'BVC-Foundation-Physics-World',
+	#package : 'BVC-Foundation-Physics-World'
 }
 
 { #category : 'instance creation' }
