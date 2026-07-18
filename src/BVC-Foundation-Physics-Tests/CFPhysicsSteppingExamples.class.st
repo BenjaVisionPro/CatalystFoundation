@@ -618,7 +618,7 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 { #category : 'examples - rotation collision' }
 CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	<gtExample>
-	| owner body ground world contact firstContactStep lastContactStep contactTransitions previousContactCount diagnostics |
+	| owner body ground world contact |
 	owner := BlElement new.
 	body := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
@@ -632,36 +632,11 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		rotation: Float pi / 6;
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600.
-	firstContactStep := nil.
-	lastContactStep := nil.
-	contactTransitions := OrderedCollection new.
-	previousContactCount := 0.
-	1 to: 600 do: [ :stepIndex |
-		| currentContactCount |
-		world step.
-		currentContactCount := world contacts size.
-		currentContactCount > 0 ifTrue: [
-			firstContactStep ifNil: [ firstContactStep := stepIndex ].
-			lastContactStep := stepIndex ].
-		currentContactCount = previousContactCount ifFalse: [
-			contactTransitions add: { stepIndex. previousContactCount. currentContactCount } ].
-		previousContactCount := currentContactCount ].
-	diagnostics := String streamContents: [ :stream |
-		stream
-			nextPutAll: 'position='; print: body physics position;
-			nextPutAll: ' rotation='; print: body physics rotation;
-			nextPutAll: ' velocity='; print: body physics velocity;
-			nextPutAll: ' angularVelocity='; print: body physics angularVelocity;
-			nextPutAll: ' sleepTime='; print: body physics bodyState sleepTime;
-			nextPutAll: ' contacts='; print: world contacts size;
-			nextPutAll: ' firstContactStep='; print: firstContactStep;
-			nextPutAll: ' lastContactStep='; print: lastContactStep;
-			nextPutAll: ' transitions='; print: contactTransitions asArray ].
-	self assert: body physics isSleeping description: diagnostics.
-	self assert: world contacts size equals: 1 description: diagnostics.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
+	self assert: body physics isSleeping.
+	self assert: world contacts size equals: 1.
 	contact := world contacts first.
-	self assert: contact isTouching description: diagnostics.
+	self assert: contact isTouching.
 	^ contact
 ]
 
@@ -764,4 +739,26 @@ CFPhysicsSteppingExamples >> roundedRectangleRestingContactDoesNotInjectAngularV
 	world gravity: 0 @ 0; step: 10.
 	self assert: body physics angularVelocity abs <= world sleepAngularThreshold.
 	^ body
+]
+
+
+{ #category : 'examples - angular dynamics' }
+CFPhysicsSteppingExamples >> verticalRoundedRectangleSupportUsesFaceCentre [
+	<gtExample>
+	| element owner world state point |
+	owner := BlElement new.
+	element := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		size: 60 @ 30;
+		yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	state := element physics bodyState.
+	point := state shapeState
+		supportPointAt: 0 @ 0
+		rotation: 0
+		inDirection: 0 @ 1.
+	self assert: point equals: 30 @ 30.
+	^ point
 ]
