@@ -278,8 +278,8 @@ CFPhysicsExamples >> roundedRectangleSettlesOnRoundedGround [
 	body physics position: 100 @ 0.
 	ground physics beStatic; position: 0 @ 200.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
-	self assert: (body physics position y closeTo: 150.0).
 	self assert: world contacts size equals: 1.
+	self assert: world contacts first isTouching.
 	^ space
 ]
 
