@@ -1431,7 +1431,7 @@ CFPhysicsCleanSlateChecks >> duplicateSpringEndpointsRemainIndependent [
 	world synchroniseMembership.
 	firstSpring := first physics springTo: second.
 	secondSpring := first physics springTo: second.
-	self deny: firstSpring == secondSpring.
+	self assert: (firstSpring == secondSpring) not.
 	self assert: first physics springs equals: { firstSpring. secondSpring }.
 	first physics removeSpring: firstSpring.
 	self assert: first physics springs equals: { secondSpring }.
