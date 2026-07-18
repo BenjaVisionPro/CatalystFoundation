@@ -304,6 +304,12 @@ CFPhysicsWorld >> prepareSpringConstraintsForStep: seconds [
 
 
 { #category : 'containment interaction' }
+CFPhysicsWorld >> containmentExtent [
+	^ (CFPhysicsShapeState on: owner) extent
+]
+
+
+{ #category : 'containment interaction' }
 CFPhysicsWorld >> containmentConstraints [
 	^ containmentConstraints asArray sorted: [ :first :second |
 		first body sequence < second body sequence ]
@@ -335,6 +341,6 @@ CFPhysicsWorld >> removeContainmentsUsingBody: aBodyState [
 CFPhysicsWorld >> prepareContainmentConstraintsForStep [
 	containmentConstraints copy do: [ :each |
 		each isActive
-			ifTrue: [ each prepareForBounds: (0 @ 0 extent: owner extent) ]
+			ifTrue: [ each prepareForBounds: (0 @ 0 extent: self containmentExtent) ]
 			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ]
 ]

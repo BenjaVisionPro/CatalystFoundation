@@ -86,7 +86,7 @@ CFPhysicsBodyState >> element: anElement [
 
 { #category : 'geometry' }
 CFPhysicsBodyState >> extent [
-	^ element extent
+	^ self shapeState extent
 ]
 
 { #category : 'mass' }
