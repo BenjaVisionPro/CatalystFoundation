@@ -20,6 +20,19 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 		((supportDistance closeTo: edge fourth)
 			or: [ support point = edge first point
 				or: [ support point = edge second point ] ]) ifTrue: [
+			Transcript
+				nextPutAll: 'CFPhysics EPA terminate iteration='; print: iteration;
+				nextPutAll: ' reason=';
+				nextPutAll: ((supportDistance closeTo: edge fourth)
+					ifTrue: [ 'distance' ]
+					ifFalse: [ 'edge-endpoint' ]);
+				nextPutAll: ' edgeFirst='; print: edge first point;
+				nextPutAll: ' edgeSecond='; print: edge second point;
+				nextPutAll: ' normal='; print: edge third;
+				nextPutAll: ' edgeDistance='; print: edge fourth;
+				nextPutAll: ' support='; print: support point;
+				nextPutAll: ' supportDistance='; print: supportDistance;
+				cr.
 			contactPoint := self contactPointOnEdgeFrom: edge first to: edge second.
 			^ (CFPhysicsManifold
 				normal: edge third
