@@ -30,7 +30,9 @@ CFPhysicsSpringConstraint class >> betweenEndpoints: anEndpointPair [
 
 { #category : 'private' }
 CFPhysicsSpringConstraint class >> distanceBetweenEndpoints: anEndpointPair [
-	^ (anEndpointPair worldPointB - anEndpointPair worldPointA) r
+	| points |
+	points := anEndpointPair worldPoints.
+	^ (points second - points first) r
 ]
 
 { #category : 'initialization' }
@@ -113,14 +115,15 @@ CFPhysicsSpringConstraint >> orderingKey [
 
 { #category : 'stepping' }
 CFPhysicsSpringConstraint >> prepareForStep: seconds [
-	| displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstDynamic secondDynamic firstVelocity secondVelocity |
+	| points displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstDynamic secondDynamic firstVelocity secondVelocity |
 	active ifFalse: [ ^ self ].
 	firstBody := self bodyA.
 	secondBody := self bodyB.
 	firstDynamic := firstBody notNil and: [ firstBody isDynamic ].
 	secondDynamic := secondBody notNil and: [ secondBody isDynamic ].
 	(firstDynamic or: [ secondDynamic ]) ifFalse: [ ^ self ].
-	displacement := endpointPair worldPointB - endpointPair worldPointA.
+	points := endpointPair worldPoints.
+	displacement := points second - points first.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.

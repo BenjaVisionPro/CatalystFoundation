@@ -23,13 +23,18 @@ CFPhysicsEndpointPair >> world [
 ]
 
 { #category : 'geometry' }
-CFPhysicsEndpointPair >> worldPointA [
+CFPhysicsEndpointPair >> worldPoints [
 	self subclassResponsibility
 ]
 
 { #category : 'geometry' }
+CFPhysicsEndpointPair >> worldPointA [
+	^ self worldPoints first
+]
+
+{ #category : 'geometry' }
 CFPhysicsEndpointPair >> worldPointB [
-	self subclassResponsibility
+	^ self worldPoints second
 ]
 
 { #category : 'testing' }

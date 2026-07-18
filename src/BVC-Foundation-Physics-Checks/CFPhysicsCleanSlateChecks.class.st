@@ -2001,7 +2001,7 @@ CFPhysicsCleanSlateChecks >> repulsionCanUseSoftenedInverseSquareResponse [
 { #category : 'examples - relationship endpoints' }
 CFPhysicsCleanSlateChecks >> anchoredEndpointPairResolvesBothEndpointsTogether [
 	<gtExample>
-	| first second anchorA anchorB endpoints |
+	| first second anchorA anchorB endpoints points |
 	first := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 40 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 50 extent: 60 @ 30.
 	anchorA := CFPhysicsLocalAnchor on: first at: 20 @ 0.
@@ -2011,8 +2011,11 @@ CFPhysicsCleanSlateChecks >> anchoredEndpointPairResolvesBothEndpointsTogether [
 	self assert: endpoints anchorB == anchorB.
 	self assert: endpoints bodyA == first.
 	self assert: endpoints bodyB == second.
-	self assert: endpoints worldPointA equals: 30 @ 20.
-	self assert: endpoints worldPointB equals: 70 @ 50.
+	points := endpoints worldPoints.
+	self assert: points first equals: 30 @ 20.
+	self assert: points second equals: 70 @ 50.
+	self assert: endpoints worldPointA equals: points first.
+	self assert: endpoints worldPointB equals: points second.
 	^ endpoints
 ]
 

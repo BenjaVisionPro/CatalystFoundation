@@ -45,13 +45,8 @@ CFPhysicsAnchoredEndpointPair >> bodyB [
 ]
 
 { #category : 'geometry' }
-CFPhysicsAnchoredEndpointPair >> worldPointA [
-	^ anchorA worldPoint
-]
-
-{ #category : 'geometry' }
-CFPhysicsAnchoredEndpointPair >> worldPointB [
-	^ anchorB worldPoint
+CFPhysicsAnchoredEndpointPair >> worldPoints [
+	^ { anchorA worldPoint. anchorB worldPoint }
 ]
 
 
