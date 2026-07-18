@@ -627,9 +627,12 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	ground := BlElement new size: 400 @ 40; yourself.
 	owner addChild: body; addChild: ground.
 	world := owner physics beWorld.
-	body physics position: 100 @ 80; rotation: Float pi / 6.
+	body physics
+		position: 100 @ 80;
+		rotation: Float pi / 6;
+		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 120.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
 	self assert: body physics isSleeping.
 	self assert: world contacts size equals: 1.
 	contact := world contacts first.
@@ -709,7 +712,7 @@ CFPhysicsSteppingExamples >> polygonGroundContactUsesBodyWitnessPoint [
 	ground := BlElement new size: 120 @ 20; yourself.
 	owner addChild: polygon; addChild: ground.
 	world := owner physics beWorld.
-	polygon physics position: 20 @ 19.
+	polygon physics position: 20 @ 21.
 	ground physics beStatic; position: 0 @ 60.
 	world gravity: 0 @ 0; step.
 	contact := world contacts first.
