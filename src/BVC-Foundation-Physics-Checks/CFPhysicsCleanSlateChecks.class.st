@@ -160,3 +160,82 @@ CFPhysicsCleanSlateChecks >> separatedPolygonCoresRespectCombinedRadius [
 	self assert: separated isNil.
 	^ touching
 ]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateChecks >> rectangleElementProducesPolygonShape [
+	<gtExample>
+	| element shapeState polygon |
+	element := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 80 @ 30;
+		yourself.
+	shapeState := CFPhysicsShapeState on: element.
+	polygon := shapeState polygonShape.
+	self assert: polygon notNil.
+	self assert: polygon radius equals: 0.0.
+	self assert: polygon vertices equals: { 0.0 @ 0.0. 80.0 @ 0.0. 80.0 @ 30.0. 0.0 @ 30.0 }.
+	^ polygon
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateChecks >> roundedRectangleElementProducesInsetCoreAndRadius [
+	<gtExample>
+	| element shapeState polygon |
+	element := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 6));
+		size: 80 @ 30;
+		yourself.
+	shapeState := CFPhysicsShapeState on: element.
+	polygon := shapeState polygonShape.
+	self assert: polygon radius equals: 6.0.
+	self assert: polygon vertices equals: { 6.0 @ 6.0. 74.0 @ 6.0. 74.0 @ 24.0. 6.0 @ 24.0 }.
+	^ polygon
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateChecks >> normalizedPolygonElementUsesItsRenderedExtent [
+	<gtExample>
+	| element shapeState polygon |
+	element := BlElement new
+		geometry: (BlNormalizedPolygonGeometry vertices: { 0 @ 0. 1 @ 0. 0.5 @ 1 });
+		size: 80 @ 30;
+		yourself.
+	shapeState := CFPhysicsShapeState on: element.
+	polygon := shapeState polygonShape.
+	self assert: polygon vertices equals: { 0 @ 0. 80 @ 0. 40.0 @ 30 }.
+	^ polygon
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateChecks >> BlocGeometryRoutesToPolygonManifold [
+	<gtExample>
+	| ground box manifold |
+	ground := CFPhysicsShapeState on: (BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 100 @ 20;
+		yourself).
+	box := CFPhysicsShapeState on: (BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 5));
+		size: 60 @ 20;
+		yourself).
+	manifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenShapeState: ground position: 0 @ 0 rotation: 0
+		andShapeState: box position: 20 @ 15 rotation: 0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints size equals: 2.
+	self assert: manifold normal equals: 0 @ 1.
+	^ manifold
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateChecks >> circleDoesNotPretendToBeAPolygon [
+	<gtExample>
+	| element shapeState |
+	element := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 30 @ 30;
+		yourself.
+	shapeState := CFPhysicsShapeState on: element.
+	self assert: shapeState polygonShape isNil.
+	^ shapeState
+]
