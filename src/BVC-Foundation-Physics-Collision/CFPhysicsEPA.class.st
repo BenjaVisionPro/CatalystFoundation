@@ -32,6 +32,63 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 ]
 
 
+
+{ #category : 'private - manifold' }
+CFPhysicsEPA class >> contactPointsBetween: firstBody and: secondBody normal: aNormal [
+	| firstFeature secondFeature tangent firstMinimum firstMaximum secondMinimum secondMaximum overlapMinimum overlapMaximum projections |
+	firstFeature := firstBody shapeState
+		supportFeatureAt: firstBody position
+		rotation: firstBody rotation
+		inDirection: aNormal.
+	secondFeature := secondBody shapeState
+		supportFeatureAt: secondBody position
+		rotation: secondBody rotation
+		inDirection: aNormal negated.
+	(firstFeature isEmpty or: [ secondFeature isEmpty ]) ifTrue: [ ^ #() ].
+	(firstFeature size = 1 or: [ secondFeature size = 1 ]) ifTrue: [
+		^ { (firstFeature first + secondFeature first) / 2.0 } ].
+	tangent := aNormal y negated @ aNormal x.
+	firstMinimum := (self dot: firstFeature first with: tangent)
+		min: (self dot: firstFeature second with: tangent).
+	firstMaximum := (self dot: firstFeature first with: tangent)
+		max: (self dot: firstFeature second with: tangent).
+	secondMinimum := (self dot: secondFeature first with: tangent)
+		min: (self dot: secondFeature second with: tangent).
+	secondMaximum := (self dot: secondFeature first with: tangent)
+		max: (self dot: secondFeature second with: tangent).
+	overlapMinimum := firstMinimum max: secondMinimum.
+	overlapMaximum := firstMaximum min: secondMaximum.
+	overlapMinimum > overlapMaximum ifTrue: [ ^ #() ].
+	projections := overlapMinimum = overlapMaximum
+		ifTrue: [ { overlapMinimum } ]
+		ifFalse: [ { overlapMinimum. overlapMaximum } ].
+	^ projections collect: [ :projection |
+		| firstPoint secondPoint |
+		firstPoint := self
+			pointOnFeature: firstFeature
+			atProjection: projection
+			along: tangent.
+		secondPoint := self
+			pointOnFeature: secondFeature
+			atProjection: projection
+			along: tangent.
+		(firstPoint + secondPoint) / 2.0 ]
+]
+
+{ #category : 'private - manifold' }
+CFPhysicsEPA class >> pointOnFeature: aFeature atProjection: aProjection along: aTangent [
+	| first second firstProjection secondProjection denominator parameter |
+	aFeature size = 1 ifTrue: [ ^ aFeature first ].
+	first := aFeature first.
+	second := aFeature second.
+	firstProjection := self dot: first with: aTangent.
+	secondProjection := self dot: second with: aTangent.
+	denominator := secondProjection - firstProjection.
+	denominator = 0 ifTrue: [ ^ (first + second) / 2.0 ].
+	parameter := (aProjection - firstProjection) / denominator.
+	^ first + ((second - first) * parameter)
+]
+
 { #category : 'private' }
 CFPhysicsEPA class >> closestEdgeOf: polytope [
 	| bestFirst bestSecond bestNormal bestDistance bestInsert count |
