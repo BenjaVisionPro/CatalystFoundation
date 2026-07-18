@@ -233,19 +233,29 @@ CFPhysicsShapeState >> roundedRectangleSupportPointAt: aPosition inDirection: di
 
 { #category : 'rounded rectangle' }
 CFPhysicsShapeState >> roundedRectangleLocalSupportPointInDirection: direction [
-	| anExtent radius innerPoint innerX innerY |
+	| anExtent radius innerPoint innerX innerY canonicalDirection |
 	anExtent := self extent.
 	radius := self roundedRectangleRadius.
 	radius = 0 ifTrue: [
 		^ self supportPointOf: self localCollisionVertices inDirection: direction ].
-	innerX := direction x abs <= self supportDirectionSlop
+	canonicalDirection :=
+		((direction x abs <= self supportDirectionSlop
+			ifTrue: [ 0.0 ]
+			ifFalse: [ direction x ])
+		@
+		(direction y abs <= self supportDirectionSlop
+			ifTrue: [ 0.0 ]
+			ifFalse: [ direction y ])).
+	canonicalDirection r = 0 ifTrue: [ canonicalDirection := 1 @ 0 ].
+	canonicalDirection := canonicalDirection / canonicalDirection r.
+	innerX := canonicalDirection x = 0
 		ifTrue: [ anExtent x / 2.0 ]
-		ifFalse: [ direction x > 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ] ].
-	innerY := direction y abs <= self supportDirectionSlop
+		ifFalse: [ canonicalDirection x > 0 ifTrue: [ anExtent x - radius ] ifFalse: [ radius ] ].
+	innerY := canonicalDirection y = 0
 		ifTrue: [ anExtent y / 2.0 ]
-		ifFalse: [ direction y > 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ] ].
+		ifFalse: [ canonicalDirection y > 0 ifTrue: [ anExtent y - radius ] ifFalse: [ radius ] ].
 	innerPoint := innerX @ innerY.
-	^ innerPoint + (direction * radius)
+	^ innerPoint + (canonicalDirection * radius)
 ]
 
 { #category : 'rounded rectangle' }
