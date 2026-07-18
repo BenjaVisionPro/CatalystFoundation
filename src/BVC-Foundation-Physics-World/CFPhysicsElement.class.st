@@ -381,3 +381,36 @@ CFPhysicsElement >> removeAttraction: anAttractionConstraint [
 	aWorld ifNotNil: [ aWorld removeAttractionConstraint: anAttractionConstraint ]
 ]
 
+
+
+{ #category : 'repulsion interaction' }
+CFPhysicsElement >> repel: anotherElement [
+	| aWorld otherWorld repulsion |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	repulsion := CFPhysicsRepulsionConstraint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addRepulsionConstraint: repulsion
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsElement >> repulsions [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld repulsionsUsingBody: body
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsElement >> removeRepulsion: aRepulsionConstraint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeRepulsionConstraint: aRepulsionConstraint ]
+]

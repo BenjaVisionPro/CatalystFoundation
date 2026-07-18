@@ -1618,3 +1618,144 @@ CFPhysicsCleanSlateChecks >> worldStepAppliesAttractionBeforeIntegration [
 	^ world
 ]
 
+
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> repulsionEndpointsAreResolvedThroughAnchors [
+	<gtExample>
+	| first second repulsion |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	self assert: repulsion anchorA class equals: CFPhysicsBodyCentreAnchor.
+	self assert: repulsion anchorB class equals: CFPhysicsBodyCentreAnchor.
+	self assert: repulsion anchorA worldPoint equals: 10 @ 10.
+	self assert: repulsion anchorB worldPoint equals: 110 @ 10.
+	self assert: repulsion bodyA == first.
+	self assert: repulsion bodyB == second.
+	^ repulsion
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> repulsionAppliesEqualAndOppositeImpulse [
+	<gtExample>
+	| first second repulsion |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion force: 1000.
+	repulsion prepareForStep: 0.1.
+	self assert: first velocity x < 0.
+	self assert: second velocity x > 0.
+	self assert: first velocity y equals: 0.
+	self assert: second velocity y equals: 0.
+	self assert: first velocity equals: second velocity negated.
+	^ repulsion
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> repulsionCanPushAwayFromAStaticBody [
+	<gtExample>
+	| dynamicBody staticBody repulsion |
+	dynamicBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	staticBody := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	staticBody beStatic.
+	repulsion := CFPhysicsRepulsionConstraint between: dynamicBody and: staticBody.
+	repulsion force: 1000.
+	repulsion prepareForStep: 0.1.
+	self assert: dynamicBody velocity x < 0.
+	self assert: staticBody velocity equals: 0 @ 0.
+	^ repulsion
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> repulsionsAreInstalledAndDiscoveredThroughBlocElements [
+	<gtExample>
+	| owner first second third world firstRepulsion secondRepulsion |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstRepulsion := first physics repel: second.
+	secondRepulsion := first physics repel: third.
+	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
+	self assert: second physics repulsions equals: { firstRepulsion }.
+	self assert: world repulsionConstraints equals: { firstRepulsion. secondRepulsion }.
+	first physics removeRepulsion: firstRepulsion.
+	self assert: first physics repulsions equals: { secondRepulsion }.
+	self assert: firstRepulsion isActive not.
+	self assert: secondRepulsion isActive.
+	^ world
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> duplicateRepulsionsRemainIndependent [
+	<gtExample>
+	| owner first second world firstRepulsion secondRepulsion |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	firstRepulsion := first physics repel: second.
+	secondRepulsion := first physics repel: second.
+	self assert: (firstRepulsion == secondRepulsion) not.
+	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
+	first physics removeRepulsion: firstRepulsion.
+	self assert: first physics repulsions equals: { secondRepulsion }.
+	self assert: secondRepulsion isActive.
+	^ world
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> retiringABodyRemovesOnlyItsRepulsions [
+	<gtExample>
+	| owner first second third fourth world attachedA attachedB unrelated |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	fourth := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third. fourth }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	attachedA := first physics repel: second.
+	attachedB := first physics repel: third.
+	unrelated := third physics repel: fourth.
+	owner removeChild: first.
+	world synchroniseMembership.
+	self assert: world repulsionConstraints equals: { unrelated }.
+	self assert: attachedA isActive not.
+	self assert: attachedB isActive not.
+	self assert: unrelated isActive.
+	self assert: third physics repulsions equals: { unrelated }.
+	^ world
+]
+
+{ #category : 'examples - repulsion interaction' }
+CFPhysicsCleanSlateChecks >> worldStepAppliesRepulsionBeforeIntegration [
+	<gtExample>
+	| owner first second world repulsion |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	repulsion := first physics repel: second.
+	repulsion force: 1000.
+	world step.
+	self assert: first physics velocity x < 0.
+	self assert: second physics velocity x > 0.
+	self assert: first physics position x < 0.
+	self assert: second physics position x > 100.
+	^ world
+]

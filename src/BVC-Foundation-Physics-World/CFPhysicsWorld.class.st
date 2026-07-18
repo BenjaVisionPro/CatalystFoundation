@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -29,8 +29,10 @@ CFPhysicsWorld >> initialize [
 	pointerConstraints := IdentitySet new.
 	springConstraints := IdentitySet new.
 	attractionConstraints := IdentitySet new.
+	repulsionConstraints := IdentitySet new.
 	nextSpringSequence := 1.
 	nextAttractionSequence := 1.
+	nextRepulsionSequence := 1.
 	containmentConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
@@ -180,6 +182,7 @@ CFPhysicsWorld >> step [
 	bodies := self bodyStatesInOrder.
 	step := self newStep.
 	self prepareAttractionConstraintsForStep: step timeStep.
+	self prepareRepulsionConstraintsForStep: step timeStep.
 	self prepareSpringConstraintsForStep: step timeStep.
 	self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
@@ -318,6 +321,55 @@ CFPhysicsWorld >> prepareAttractionConstraintsForStep: seconds [
 		each isActive
 			ifTrue: [ each prepareForStep: seconds ]
 			ifFalse: [ attractionConstraints remove: each ifAbsent: [ ] ] ]
+]
+
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> repulsions [
+	^ self repulsionConstraints
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> repulsionConstraints [
+	^ repulsionConstraints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> addRepulsionConstraint: aConstraint [
+	(aConstraint bodyA world == self and: [ aConstraint bodyB world == self ])
+		ifFalse: [ self error: 'Both repulsion bodies must belong to this physics world' ].
+	aConstraint sequence: nextRepulsionSequence.
+	nextRepulsionSequence := nextRepulsionSequence + 1.
+	repulsionConstraints add: aConstraint.
+	^ aConstraint
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> repulsionsUsingBody: aBodyState [
+	^ self repulsionConstraints select: [ :each | each includesBody: aBodyState ]
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> removeRepulsionConstraint: aConstraint [
+	(repulsionConstraints includes: aConstraint) ifTrue: [
+		aConstraint release.
+		repulsionConstraints remove: aConstraint ].
+	^ aConstraint
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> removeRepulsionsUsingBody: aBodyState [
+	(repulsionConstraints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeRepulsionConstraint: each ]
+]
+
+{ #category : 'repulsion interaction' }
+CFPhysicsWorld >> prepareRepulsionConstraintsForStep: seconds [
+	repulsionConstraints copy do: [ :each |
+		each isActive
+			ifTrue: [ each prepareForStep: seconds ]
+			ifFalse: [ repulsionConstraints remove: each ifAbsent: [ ] ] ]
 ]
 
 

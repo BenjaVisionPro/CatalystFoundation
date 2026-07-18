@@ -61,5 +61,9 @@ CFPhysicsCleanSlateExamples >> currentImplementationSurface [
 		CFPhysicsPointerConstraint.
 		CFPhysicsPointerDragHandler.
 		CFPhysicsSpringConstraint.
+		CFPhysicsAttractionConstraint.
+		CFPhysicsRepulsionConstraint.
+		CFPhysicsDistanceResponse.
+		CFPhysicsConstantForceResponse.
 		CFPhysicsContainmentConstraint }
 ]
