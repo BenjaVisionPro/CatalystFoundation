@@ -618,7 +618,7 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 { #category : 'examples - rotation collision' }
 CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	<gtExample>
-	| owner body ground world contact |
+	| owner body ground world contact firstContactStep lastContactStep contactTransitions previousContactCount diagnostics |
 	owner := BlElement new.
 	body := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
@@ -632,11 +632,36 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		rotation: Float pi / 6;
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
-	self assert: body physics isSleeping.
-	self assert: world contacts size equals: 1.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600.
+	firstContactStep := nil.
+	lastContactStep := nil.
+	contactTransitions := OrderedCollection new.
+	previousContactCount := 0.
+	1 to: 600 do: [ :stepIndex |
+		| currentContactCount |
+		world step.
+		currentContactCount := world contacts size.
+		currentContactCount > 0 ifTrue: [
+			firstContactStep ifNil: [ firstContactStep := stepIndex ].
+			lastContactStep := stepIndex ].
+		currentContactCount = previousContactCount ifFalse: [
+			contactTransitions add: { stepIndex. previousContactCount. currentContactCount } ].
+		previousContactCount := currentContactCount ].
+	diagnostics := String streamContents: [ :stream |
+		stream
+			nextPutAll: 'position='; print: body physics position;
+			nextPutAll: ' rotation='; print: body physics rotation;
+			nextPutAll: ' velocity='; print: body physics velocity;
+			nextPutAll: ' angularVelocity='; print: body physics angularVelocity;
+			nextPutAll: ' sleepTime='; print: body physics bodyState sleepTime;
+			nextPutAll: ' contacts='; print: world contacts size;
+			nextPutAll: ' firstContactStep='; print: firstContactStep;
+			nextPutAll: ' lastContactStep='; print: lastContactStep;
+			nextPutAll: ' transitions='; print: contactTransitions asArray ].
+	self assert: body physics isSleeping description: diagnostics.
+	self assert: world contacts size equals: 1 description: diagnostics.
 	contact := world contacts first.
-	self assert: contact isTouching.
+	self assert: contact isTouching description: diagnostics.
 	^ contact
 ]
 
