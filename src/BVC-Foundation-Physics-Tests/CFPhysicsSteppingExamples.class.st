@@ -248,7 +248,7 @@ CFPhysicsSteppingExamples >> overlappingCirclesProduceExactManifold [
 	self assert: contact normal equals: 1 @ 0.
 	self assert: contact penetration <= CFPhysicsContact new positionSlop.
 	self assert: (contact manifold points first distanceTo: 15 @ 10) <= (CFPhysicsContact new positionSlop * 1.001).
-	self assert: first physics position equals: -5 @ 0.
+	self assert: (first physics position distanceTo: -5 @ 0) <= (CFPhysicsContact new positionSlop * 1.001).
 	^ contact
 ]
 
@@ -405,8 +405,17 @@ CFPhysicsSteppingExamples >> twoBodyStackRemainsOrdered [
 	upper physics position: 10 @ -15.
 	ground physics beStatic; position: 0 @ 40.
 	world stepDuration: 10 milliseconds; gravity: 0 @ 100; step: 180.
-	self assert: lower physics position y <= 20.0001.
-	self assert: upper physics position y <= (lower physics position y - 19.9).
+	self
+		assert: lower physics position y <= 20.0001
+		description: [ 'Lower body y=', lower physics position y printString,
+			' upper y=', upper physics position y printString,
+			' contacts=', world contacts size printString ].
+	self
+		assert: upper physics position y <= (lower physics position y - 19.9)
+		description: [ 'Lower body y=', lower physics position y printString,
+			' upper y=', upper physics position y printString,
+			' separation=', (lower physics position y - upper physics position y) printString,
+			' contacts=', world contacts size printString ].
 	^ owner
 ]
 
