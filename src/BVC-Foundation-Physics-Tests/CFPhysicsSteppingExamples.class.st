@@ -619,7 +619,7 @@ CFPhysicsSteppingExamples >> touchingRotatedRoundedRectangleHasNoFalsePenetratio
 { #category : 'examples - rotation collision' }
 CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 	<gtExample>
-	| owner body ground world contact state |
+	| owner body ground world contact |
 	owner := BlElement new.
 	body := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
@@ -633,56 +633,12 @@ CFPhysicsSteppingExamples >> sleepingRotatedRoundedRectangleRetainsContact [
 		rotation: Float pi / 6;
 		angularDamping: 2.0.
 	ground physics beStatic; position: 0 @ 200.
-	world stepDuration: 10 milliseconds; gravity: 0 @ 600.
-	state := body physics bodyState.
-	Transcript cr; nextPutAll: '=== CFPhysics Box2D manifold sleeping diagnostic ==='; cr.
-	1 to: 600 do: [ :stepIndex |
-		world step.
-		(((stepIndex \\ 50) = 0) or: [ stepIndex > 540 ]) ifTrue: [
-			self physicsManifoldSleepingDiagnosticFor: state world: world step: stepIndex ] ].
-	Transcript nextPutAll: '=== end CFPhysics Box2D manifold sleeping diagnostic ==='; cr.
+	world stepDuration: 10 milliseconds; gravity: 0 @ 600; step: 600.
 	self assert: body physics isSleeping.
 	self assert: world contacts size equals: 1.
 	contact := world contacts first.
 	self assert: contact isTouching.
 	^ contact
-]
-
-{ #category : 'private - diagnostics' }
-CFPhysicsSteppingExamples >> physicsManifoldSleepingDiagnosticFor: state world: world step: stepIndex [
-	| contacts speedSquared angularSpeedSquared |
-	contacts := world contacts.
-	speedSquared := state velocity x squared + state velocity y squared.
-	angularSpeedSquared := state angularVelocity squared.
-	Transcript
-		nextPutAll: 'step='; print: stepIndex;
-		nextPutAll: ' awake='; print: state isAwake;
-		nextPutAll: ' sleeping='; print: state isSleeping;
-		nextPutAll: ' sleepTime='; print: state sleepTime;
-		nextPutAll: ' position='; print: state position;
-		nextPutAll: ' rotation='; print: state rotation;
-		nextPutAll: ' velocity='; print: state velocity;
-		nextPutAll: ' speedSquared='; print: speedSquared;
-		nextPutAll: ' angularVelocity='; print: state angularVelocity;
-		nextPutAll: ' angularSpeedSquared='; print: angularSpeedSquared;
-		nextPutAll: ' contacts='; print: contacts size;
-		cr.
-	contacts do: [ :contact |
-		Transcript
-			nextPutAll: ' contactId='; print: contact identityHash;
-			nextPutAll: ' touching='; print: contact isTouching;
-			nextPutAll: ' normal='; print: contact normal;
-			nextPutAll: ' penetration='; print: contact penetration;
-			nextPutAll: ' pointCount='; print: contact manifold contactPoints size;
-			cr.
-		contact manifold contactPoints withIndexDo: [ :point :pointIndex |
-			Transcript
-				nextPutAll: '  point='; print: pointIndex;
-				nextPutAll: ' position='; print: point position;
-				nextPutAll: ' normalImpulse='; print: point normalImpulse;
-				nextPutAll: ' tangentImpulse='; print: point tangentImpulse;
-				nextPutAll: ' velocityBias='; print: point velocityBias;
-				cr ] ]
 ]
 
 { #category : 'examples - angular dynamics' }

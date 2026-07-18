@@ -46,7 +46,9 @@ CFPhysicsEPA class >> contactPointsBetween: firstBody and: secondBody normal: aN
 		inDirection: aNormal negated.
 	(firstFeature isEmpty or: [ secondFeature isEmpty ]) ifTrue: [ ^ #() ].
 	(firstFeature size = 1 or: [ secondFeature size = 1 ]) ifTrue: [
-		^ { (firstFeature first + secondFeature first) / 2.0 } ].
+		"Box2D keeps point/curved contacts on the simplex witness path. Only
+		face-to-face contacts are clipped into a multi-point manifold here."
+		^ #() ].
 	tangent := aNormal y negated @ aNormal x.
 	firstMinimum := (self dot: firstFeature first with: tangent)
 		min: (self dot: firstFeature second with: tangent).
