@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'motionPresentation', 'space' ],
+	#instVars : [ 'element', 'presentation', 'space' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -25,37 +25,37 @@ CFPhysicsPresentation >> element: anElement [
 
 { #category : 'testing' }
 CFPhysicsPresentation >> isAttached [
-	^ motionPresentation notNil
+	^ presentation notNil
 ]
 
 { #category : 'testing' }
 CFPhysicsPresentation >> ownsCurrentTransformation [
-	^ motionPresentation notNil
-		and: [ motionPresentation ownsCurrentTransformation ]
+	^ presentation notNil
+		and: [ presentation ownsCurrentTransformation ]
 ]
 
 { #category : 'accessing' }
-CFPhysicsPresentation >> motionPresentation [
-	^ motionPresentation
+CFPhysicsPresentation >> presentation [
+	^ presentation
 ]
 
 { #category : 'presenting' }
 CFPhysicsPresentation >> presentTranslation: aPoint rotation: aNumber [
-	self synchroniseAttachment.
-	motionPresentation ifNotNil: [
-		motionPresentation translation: aPoint rotation: aNumber ]
+	self synchroniseSpace.
+	presentation ifNotNil: [
+		presentation translation: aPoint rotation: aNumber ]
 ]
 
 { #category : 'controlling' }
 CFPhysicsPresentation >> release [
-	motionPresentation ifNotNil: [ :aPresentation |
+	presentation ifNotNil: [ :aPresentation |
 		aPresentation release ].
-	motionPresentation := nil.
+	presentation := nil.
 	space := nil
 ]
 
-{ #category : 'private - attachment' }
-CFPhysicsPresentation >> synchroniseAttachment [
+{ #category : 'private - space' }
+CFPhysicsPresentation >> synchroniseSpace [
 	| currentSpace |
 	currentSpace := element isAttachedToSceneGraph
 		ifTrue: [ element space ]
@@ -64,7 +64,7 @@ CFPhysicsPresentation >> synchroniseAttachment [
 	self release.
 	currentSpace ifNil: [ ^ self ].
 	space := currentSpace.
-	motionPresentation := CFMotionTransformPresentation
+	presentation := CFMotionTransformPresentation
 		on: element
 		using: (space cfMotionCoordinator transformChannelFor: element)
 ]

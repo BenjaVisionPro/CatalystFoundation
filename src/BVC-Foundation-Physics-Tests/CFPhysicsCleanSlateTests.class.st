@@ -2184,21 +2184,3 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationship
 	self assert: world repulsionConstraints equals: { repulsion }.
 	^ { spring. attraction. repulsion }
 ]
-
-{ #category : 'examples - presentation' }
-CFPhysicsCleanSlateTests >> bodyPresentationStateCanBeResynchronisedAtAPlaybackBoundary [
-	<gtExample>
-	| body |
-	body := CFPhysicsBodyState
-		element: (BlElement new size: 20 @ 20; yourself)
-		world: nil.
-	body position: 10 @ 20.
-	body beginStep.
-	body translateBy: 5 @ 0.
-	self assert: body previousPosition equals: 10 @ 20.
-	self assert: body position equals: 15 @ 20.
-	body synchronisePresentationState.
-	self assert: body previousPosition equals: body position.
-	self assert: body previousRotation equals: body rotation.
-	^ body
-]

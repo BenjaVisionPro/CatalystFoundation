@@ -221,13 +221,6 @@ CFPhysicsWorld >> step: aPositiveInteger [
 
 
 { #category : 'presenting' }
-CFPhysicsWorld >> synchronisePresentationState [
-	self synchroniseMembership.
-	self bodyStatesInOrder do: [ :each | each synchronisePresentationState ].
-	^ self
-]
-
-{ #category : 'presenting' }
 CFPhysicsWorld >> present [
 	self synchroniseMembership.
 	self bodyStatesInOrder do: [ :each | each present ].

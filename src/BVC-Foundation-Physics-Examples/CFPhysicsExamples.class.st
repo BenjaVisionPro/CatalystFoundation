@@ -65,24 +65,23 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
 	space pulse.
-	self assert: world synchronisationCount equals: 1.
-	self assert: world presentationStateSynchronisationCount equals: 1.
-	self assert: world presentationCount equals: 2.
+	self assert: world synchronisationCount equals: 0.
+	self assert: world presentationCount equals: 1.
 	self assert: world stepCount equals: 0.
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 0.
-	self assert: world presentationCount equals: 3.
+	self assert: world presentationCount equals: 2.
 	self assert: (world lastPresentationAlpha closeTo: 0.625).
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 1.
-	self assert: world presentationCount equals: 4.
+	self assert: world presentationCount equals: 3.
 	self assert: (world lastPresentationAlpha closeTo: 0.25).
 	space time wait: 30 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 3.
-	self assert: world presentationCount equals: 5.
+	self assert: world presentationCount equals: 4.
 	self assert: (world lastPresentationAlpha closeTo: 0.125).
 	self assert: motion isRunning.
 	motion cancel.
@@ -319,7 +318,7 @@ CFPhysicsExamples >> replacingPhysicsWorldOwnerStopsExistingPlayback [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsExamples >> restartingPhysicsSteppingResynchronisesPresentationState [
+CFPhysicsExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	<gtExample>
 	| space owner world firstBehaviour firstTimeline firstMotion secondBehaviour secondTimeline secondMotion |
 	space := BlSpace new.
@@ -339,7 +338,6 @@ CFPhysicsExamples >> restartingPhysicsSteppingResynchronisesPresentationState [
 	space time wait: 15 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 1.
-	self assert: world presentationStateSynchronisationCount equals: 1.
 	firstMotion cancel.
 	self assert: firstBehaviour isActive not.
 	secondBehaviour := CFPhysicsWorldBehaviour on: world.
@@ -347,7 +345,6 @@ CFPhysicsExamples >> restartingPhysicsSteppingResynchronisesPresentationState [
 	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
 	secondMotion := (CFMotion timeline: secondTimeline coordinator: space cfMotionCoordinator) start.
 	space pulse.
-	self assert: world presentationStateSynchronisationCount equals: 2.
 	self assert: world stepCount equals: 1.
 	self assert: secondBehaviour accumulatedTime equals: 0 milliSeconds.
 	secondMotion cancel.
@@ -369,7 +366,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := state presentation motionPresentation.
+	physicsPresentation := state presentation presentation.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.5 @ 0.75.
@@ -402,7 +399,7 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := state presentation motionPresentation.
+	physicsPresentation := state presentation presentation.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.8 @ 0.8.
