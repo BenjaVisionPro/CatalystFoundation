@@ -114,3 +114,84 @@ CFPhysicsExamples >> physicsWorldBehaviourRunsTheExistingWorld [
 	motion cancel.
 	^ host
 ]
+
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> independentPhysicsWorldBehavioursShareOneFrameDriver [
+	<gtExample>
+	| space firstOwner secondOwner firstWorld secondWorld firstBehaviour secondBehaviour firstTimeline secondTimeline firstMotion secondMotion coordinator |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	firstOwner := BlElement new size: 160 @ 120.
+	secondOwner := BlElement new size: 160 @ 120.
+	space root addChild: firstOwner.
+	space root addChild: secondOwner.
+	space pulse.
+	firstWorld := CFPhysicsWorldStepRecorder new
+		owner: firstOwner;
+		stepDuration: 10 milliSeconds;
+		yourself.
+	secondWorld := CFPhysicsWorldStepRecorder new
+		owner: secondOwner;
+		stepDuration: 15 milliSeconds;
+		yourself.
+	firstBehaviour := CFPhysicsWorldBehaviour on: firstWorld.
+	secondBehaviour := CFPhysicsWorldBehaviour on: secondWorld.
+	firstTimeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
+	secondTimeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
+	coordinator := space cfMotionCoordinator.
+	firstMotion := (CFMotion timeline: firstTimeline coordinator: coordinator) start.
+	secondMotion := (CFMotion timeline: secondTimeline coordinator: coordinator) start.
+	space pulse.
+	self assert: coordinator activeMotions size equals: 2.
+	self assert: coordinator frameDriver isActive.
+	space time wait: 30 milliSeconds.
+	space pulse.
+	self assert: firstWorld stepCount equals: 3.
+	self assert: secondWorld stepCount equals: 2.
+	firstMotion cancel.
+	self assert: firstBehaviour isActive not.
+	self assert: secondBehaviour isActive.
+	self assert: coordinator activeMotions size equals: 1.
+	space time wait: 15 milliSeconds.
+	space pulse.
+	self assert: firstWorld stepCount equals: 3.
+	self assert: secondWorld stepCount equals: 3.
+	secondMotion cancel.
+	self assert: coordinator hasActiveMotions not.
+	self assert: coordinator frameDriver isActive not.
+	^ coordinator
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
+	<gtExample>
+	| space owner world behaviour timeline motion stepCountBeforeDetachment |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		yourself.
+	behaviour := CFPhysicsWorldBehaviour on: world.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 20 milliSeconds.
+	space pulse.
+	self assert: world stepCount equals: 2.
+	stepCountBeforeDetachment := world stepCount.
+	owner removeFromParent.
+	space pulse.
+	self assert: motion isCancelled.
+	self assert: behaviour isActive not.
+	self assert: world stepCount equals: stepCountBeforeDetachment.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	^ behaviour
+]
