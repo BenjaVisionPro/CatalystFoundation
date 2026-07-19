@@ -54,7 +54,11 @@ CFPhysicsWorld >> initialize [
 CFPhysicsWorld >> owner [ ^ owner ]
 
 { #category : 'accessing' }
-CFPhysicsWorld >> owner: anElement [ owner := anElement ]
+CFPhysicsWorld >> owner: anElement [
+	owner == anElement ifTrue: [ ^ self ].
+	self stopStepping.
+	owner := anElement
+]
 
 { #category : 'accessing' }
 CFPhysicsWorld >> gravity [ ^ gravity ]
@@ -218,7 +222,9 @@ CFPhysicsWorld >> step: aPositiveInteger [
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> startStepping [
 	| behaviour timeline motion |
-	self isStepping ifTrue: [ ^ steppingMotion ].
+	self isStepping ifTrue: [
+		steppingMotion isPaused ifTrue: [ steppingMotion resume ].
+		^ steppingMotion ].
 	owner ifNil: [ self error: 'A Physics world needs an owner before it can start stepping' ].
 	owner space ifNil: [ self error: 'A Physics world owner must be attached to a BlSpace before it can start stepping' ].
 	behaviour := CFPhysicsWorldBehaviour on: self.

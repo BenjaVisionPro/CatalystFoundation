@@ -240,3 +240,72 @@ CFPhysicsExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ behaviour
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> startSteppingResumesTheExistingPausedMotion [
+	<gtExample>
+	| space owner world motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	motion := world startStepping.
+	space pulse.
+	world pauseStepping.
+	self assert: motion isPaused.
+	self assert: world startStepping == motion.
+	self assert: motion isRunning.
+	world stopStepping.
+	^ world
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> physicsWorldRestartsAfterOwnerDetachment [
+	<gtExample>
+	| space owner world firstMotion secondMotion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	world stepDuration: 10 milliSeconds.
+	firstMotion := world startStepping.
+	space pulse.
+	owner removeFromParent.
+	space pulse.
+	self assert: firstMotion isCancelled.
+	self assert: world steppingMotion isNil.
+	space root addChild: owner.
+	space pulse.
+	secondMotion := world startStepping.
+	self deny: secondMotion == firstMotion.
+	self assert: secondMotion isRunning.
+	self assert: world steppingMotion == secondMotion.
+	world stopStepping.
+	^ world
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> replacingPhysicsWorldOwnerStopsExistingPlayback [
+	<gtExample>
+	| space firstOwner secondOwner world motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	firstOwner := BlElement new size: 320 @ 200.
+	secondOwner := BlElement new size: 320 @ 200.
+	space root addChild: firstOwner.
+	space root addChild: secondOwner.
+	space pulse.
+	world := firstOwner physics beWorld.
+	motion := world startStepping.
+	space pulse.
+	world owner: secondOwner.
+	self assert: motion isCancelled.
+	self assert: world steppingMotion isNil.
+	self assert: world owner == secondOwner.
+	^ world
+]
+
