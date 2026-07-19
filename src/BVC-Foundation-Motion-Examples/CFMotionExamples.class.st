@@ -2872,3 +2872,28 @@ CFMotionExamples >> finiteBehaviourEndsWithCompletedState [
 	self assert: behaviour terminalStates equals: { CFMotionState completed }.
 	^ behaviour
 ]
+
+{ #category : 'examples - cleanup' }
+CFMotionExamples >> detachedPresentationTargetCancelsAndCleansUpItsMotion [
+	<gtExample>
+	| space element motion key |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	motion := (element motion
+		duration: 1 second;
+		opacity: 0.0;
+		build) start.
+	key := motion tracks first propertyKey.
+	space pulse.
+	self assert: motion isRunning.
+	self assert: (space cfMotionCoordinator ownerOf: key) == motion.
+	space root removeChild: element.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: motion isCancelled.
+	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	^ motion
+]
+

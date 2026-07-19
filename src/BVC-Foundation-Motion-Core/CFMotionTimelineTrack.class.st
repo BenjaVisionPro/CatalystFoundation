@@ -181,6 +181,12 @@ CFMotionTimelineTrack >> isIndefinite [
 	^ indefinite
 ]
 
+
+{ #category : 'testing' }
+CFMotionTimelineTrack >> isPlaybackValidIn: aCoordinator [
+	^ behaviour isPlaybackValidIn: aCoordinator
+]
+
 { #category : 'testing' }
 CFMotionTimelineTrack >> isAtDestination [
 	^ resolvedStart = (0 milliSeconds) and: [ behaviour isAtDestination ]

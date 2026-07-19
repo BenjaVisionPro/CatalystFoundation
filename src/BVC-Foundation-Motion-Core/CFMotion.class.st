@@ -5,7 +5,7 @@ I own my tracks, optional source timeline, playback position, easing, lifecycle 
 
 The coordinator owns frame scheduling and cross-Motion presentation coordination. Timeline tracks own temporal placement and Behaviours own presentation or dynamic work. When I own a CFMotionTimeline, that timeline owns playback position and track evaluation; I remain the lifecycle and presentation-ownership shell.
 
-I begin each Behaviour exactly once after origin capture and end it exactly once when playback completes, settles or is cancelled. Pause and resume preserve that Behaviour lifetime.
+I begin each Behaviour exactly once after origin capture and end it exactly once when playback completes, settles or is cancelled. Pause and resume preserve that Behaviour lifetime. Before evaluating a frame I verify that every Behaviour remains valid in this coordinator; if an application detaches or moves a presentation target, I cancel and release all claims rather than continuing to mutate an orphaned element.
 "
 Class {
 	#name : 'CFMotion',
@@ -280,6 +280,8 @@ CFMotion >> startFromCurrentPresentation [
 CFMotion >> advanceWith: aFrame [
 	| progress |
 	state == CFMotionState running ifFalse: [ ^ self ].
+	(tracks allSatisfy: [ :each | each isPlaybackValidIn: coordinator ]) ifFalse: [
+		^ self cancelPreservingCurrentPresentation ].
 	timeline ifNotNil: [
 		timeline advanceBy: aFrame elapsedTime.
 		timeline isComplete ifTrue: [ self complete ].

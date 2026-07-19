@@ -6,6 +6,8 @@ I own what happens when Motion is evaluated. I may interpolate a property, calcu
 I do not own temporal placement, a playhead or frame scheduling. CFMotionTimelineTrack owns when I run. CFMotionTimeline owns the playhead. CFMotionCoordinator owns frame cadence.
 
 CFMotion sends playbackStartedIn: once when a playback begins and playbackEndedWith: once when that playback becomes terminal. Pause and resume do not repeat either callback. Subclasses use these callbacks for resources whose lifetime spans the whole playback; ordinary interpolated Behaviours may ignore them.
+
+Before each evaluation CFMotion asks whether I remain valid in its coordinator. A Behaviour without a presentation target is valid by default. A target-backed Behaviour is valid only while its target remains attached to the coordinator's BlSpace. This lets Motion terminate cleanly when application structure removes a presented element.
 "
 Class {
 	#name : 'CFMotionBehaviour',
@@ -33,6 +35,16 @@ CFMotionBehaviour >> captureOrigin [ ]
 
 { #category : 'playing' }
 CFMotionBehaviour >> captureOriginIn: aCoordinator [ self captureOrigin ]
+
+
+{ #category : 'testing' }
+CFMotionBehaviour >> isPlaybackValidIn: aCoordinator [
+	| target |
+	target := self animationTarget.
+	target ifNil: [ ^ true ].
+	^ target isAttachedToSceneGraph
+		and: [ target space == aCoordinator space ]
+]
 
 { #category : 'playing' }
 CFMotionBehaviour >> playbackStartedIn: aCoordinator [ ]
