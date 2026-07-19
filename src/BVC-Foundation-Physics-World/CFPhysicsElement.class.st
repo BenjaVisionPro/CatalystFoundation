@@ -126,10 +126,6 @@ CFPhysicsElement >> position: aPoint [
 	self requireBodyState position: aPoint
 ]
 
-{ #category : 'bodies' }
-CFPhysicsElement >> presentation [
-	^ self requireBodyState presentation
-]
 
 { #category : 'private - bodies' }
 CFPhysicsElement >> requireBodyState [
