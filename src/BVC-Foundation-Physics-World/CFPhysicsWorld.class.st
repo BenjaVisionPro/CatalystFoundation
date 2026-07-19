@@ -5,7 +5,7 @@ I own body membership, solver configuration, constraints, contacts and the expli
 
 For continuous presentation playback I own one indefinite Motion through #startStepping. That Motion contains a CFPhysicsWorldBehaviour and converts shared Bloc presentation frames into whole fixed Physics steps. #pauseStepping and #resumeStepping preserve the same Motion and Behaviour lifetime; #stopStepping cancels it. I do not create a second clock or task. CFMotionCoordinator remains the sole presentation-frame driver.
 
-Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They neither present nor implicitly start or alter continuous playback. #stepAndPresent is the explicit convenience when both operations are required.
+Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They neither present nor implicitly start or alter continuous playback. #stepAndPresent is the explicit convenience when both operations are required. Manual presentation is unavailable while continuous playback is running or paused, so one world never has competing presentation owners.
 "
 Class {
 	#name : 'CFPhysicsWorld',
@@ -222,6 +222,8 @@ CFPhysicsWorld >> step: aPositiveInteger [
 
 { #category : 'private - presenting' }
 CFPhysicsWorld >> presentation [
+	self isStepping ifTrue: [
+		self error: 'Manual Physics presentation is unavailable during continuous stepping' ].
 	^ presentation ifNil: [
 		presentation := CFPhysicsWorldPresentation on: self ]
 ]
@@ -246,9 +248,10 @@ CFPhysicsWorld >> presentAtAlpha: aNumber [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> stepAndPresent [
-	| result |
+	| result manualPresentation |
+	manualPresentation := self presentation.
 	result := self step.
-	self present.
+	manualPresentation present.
 	^ result
 ]
 

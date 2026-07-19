@@ -494,3 +494,31 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 	(world presentation presentationFor: state) release.
 	^ result
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
+	<gtExample>
+	| space owner world motion stepResultBeforeAttempt |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	motion := world startStepping.
+	space pulse.
+	stepResultBeforeAttempt := world lastStepResult.
+	self
+		should: [ world present ]
+		raise: Error.
+	self assert: world lastStepResult == stepResultBeforeAttempt.
+	world pauseStepping.
+	self
+		should: [ world stepAndPresent ]
+		raise: Error.
+	self assert: world lastStepResult == stepResultBeforeAttempt.
+	world stopStepping.
+	world present.
+	self assert: motion isCancelled.
+	^ world
+]
