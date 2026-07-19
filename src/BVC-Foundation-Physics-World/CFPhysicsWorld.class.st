@@ -3,14 +3,14 @@ I am the deterministic Physics simulation owned by one Bloc element.
 
 I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step is the simulation primitive: it synchronises membership and advances the pipeline by one fixed #stepDuration. Presentation is explicit and separate.
 
-For continuous presentation playback I own one indefinite Motion through #startStepping. That Motion contains a CFPhysicsWorldBehaviour and converts shared Bloc presentation frames into whole fixed Physics steps. #pauseStepping and #resumeStepping preserve the same Motion and Behaviour lifetime; #stopStepping cancels it. I do not create a second clock or task. CFMotionCoordinator remains the sole presentation-frame driver.
+For continuous presentation playback I retain one CFPhysicsWorldPlayback collaborator. It owns the indefinite Motion, Physics Behaviour and continuous world presentation. #startStepping, #pauseStepping, #resumeStepping and #stopStepping delegate to that boundary. I do not assemble Motion timelines or create a second clock or task. CFMotionCoordinator remains the sole presentation-frame driver.
 
 Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They neither present nor implicitly start or alter continuous playback. #stepAndPresent is the explicit convenience when both operations are required. Manual presentation is unavailable while continuous playback is running or paused, so one world never has competing presentation owners.
 "
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'steppingMotion', 'presentation' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'playback', 'presentation' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -43,7 +43,7 @@ CFPhysicsWorld >> initialize [
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
 	containmentConstraints := IdentitySet new.
-	steppingMotion := nil.
+	playback := nil.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -257,53 +257,40 @@ CFPhysicsWorld >> stepAndPresent [
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> startStepping [
-	| behaviour timeline motion |
-	self isStepping ifTrue: [
-		steppingMotion isPaused ifTrue: [ steppingMotion resume ].
-		^ steppingMotion ].
-	owner ifNil: [ self error: 'A Physics world needs an owner before it can start stepping' ].
-	owner space ifNil: [ self error: 'A Physics world owner must be attached to a BlSpace before it can start stepping' ].
-	self releasePresentation.
-	behaviour := CFPhysicsWorldBehaviour
-		on: self
-		presentation: (CFPhysicsWorldPresentation on: self in: owner space cfMotionCoordinator).
-	timeline := CFMotionTimeline new.
-	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := CFMotion timeline: timeline coordinator: owner space cfMotionCoordinator.
-	steppingMotion := motion.
-	motion onTerminalDo: [ :endedMotion |
-		steppingMotion == endedMotion ifTrue: [ steppingMotion := nil ] ].
-	motion start.
-	^ motion
+	^ self playback start
 ]
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> pauseStepping [
-	steppingMotion ifNotNil: [ :motion | motion pause ].
+	playback ifNotNil: [ :aPlayback | aPlayback pause ].
 	^ self
 ]
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> resumeStepping [
-	steppingMotion ifNotNil: [ :motion | motion resume ].
+	playback ifNotNil: [ :aPlayback | aPlayback resume ].
 	^ self
 ]
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> stopStepping [
-	steppingMotion ifNotNil: [ :motion | motion stop ].
+	playback ifNotNil: [ :aPlayback | aPlayback stop ].
 	^ self
 ]
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> steppingMotion [
-	^ steppingMotion
+	^ playback ifNil: [ nil ] ifNotNil: [ :aPlayback | aPlayback motion ]
 ]
 
 { #category : 'testing' }
 CFPhysicsWorld >> isStepping [
-	^ steppingMotion notNil and: [
-		steppingMotion isRunning or: [ steppingMotion isPaused ] ]
+	^ playback notNil and: [ playback isActive ]
+]
+
+{ #category : 'private - continuous stepping' }
+CFPhysicsWorld >> playback [
+	^ playback ifNil: [ playback := CFPhysicsWorldPlayback on: self ]
 ]
 
 
