@@ -2501,3 +2501,93 @@ CFMotionExamples >> motionRetainsItsSourceTimeline [
 	self assert: motion tracks equals: { track }.
 	^ motion
 ]
+
+
+{ #category : 'examples - timeline runtime' }
+CFMotionExamples >> timelineOwnsPlaybackPosition [
+	<gtExample>
+	| space element timeline motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		in: timeline)
+		duration: 100 milliSeconds;
+		easing: BlEasing linear.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 35 milliSeconds.
+	space pulse.
+	self assert: timeline elapsedTime equals: 35 milliSeconds.
+	self assert: motion elapsedTime equals: timeline elapsedTime.
+	self assert: (timeline progress closeTo: 0.35).
+	self assert: (element opacity closeTo: 0.35).
+	^ timeline
+]
+
+{ #category : 'examples - timeline runtime' }
+CFMotionExamples >> timelineEvaluatesOverlappingTracksAtOnePosition [
+	<gtExample>
+	| space element timeline opacityTrack scaleTrack motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	opacityTrack := (CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		in: timeline)
+		duration: 100 milliSeconds;
+		easing: BlEasing linear.
+	scaleTrack := (CFMotionTimelineTrack
+		on: (CFMotionScaleTrack on: element from: 1 @ 1 to: 2 @ 2)
+		in: timeline)
+		starts: 25 milliSeconds after: timeline start;
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: timeline elapsedTime equals: 50 milliSeconds.
+	self assert: (element opacity closeTo: 0.5).
+	self assert: (scaleTrack motionTrack presentation scale closeTo: 1.5 @ 1.5).
+	self assert: motion isRunning.
+	^ timeline
+]
+
+{ #category : 'examples - timeline runtime' }
+CFMotionExamples >> timelineClampsAtItsResolvedEndAndCompletesMotion [
+	<gtExample>
+	| space element timeline motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0)
+		in: timeline)
+		duration: 40 milliSeconds;
+		easing: BlEasing linear.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: timeline elapsedTime equals: 40 milliSeconds.
+	self assert: timeline isComplete.
+	self assert: motion isCompleted.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	^ motion
+]

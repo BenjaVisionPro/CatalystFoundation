@@ -3,7 +3,7 @@ I am a complete temporal composition played by a CFMotionCoordinator.
 
 I own my tracks, optional source timeline, playback position, easing, lifecycle and completion. I prepare and claim my presentation tracks when started, then advance only from the shared CFMotionFrames supplied by my coordinator. I do not create Bloc animations, schedule pulses or read a clock.
 
-The coordinator owns frame scheduling and cross-Motion presentation coordination. Tracks own presentation interpolation. CFMotionTimeline currently supplies temporal layout and will become the richer runtime timeline in the next cutover slice.
+The coordinator owns frame scheduling and cross-Motion presentation coordination. Tracks own presentation interpolation. When I own a CFMotionTimeline, that timeline owns playback position and track evaluation; I remain the lifecycle and presentation-ownership shell.
 "
 Class {
 	#name : 'CFMotion',
@@ -34,7 +34,6 @@ CFMotion class >> timeline: aTimeline coordinator: aCoordinator [
 	aTimeline resolveTemporalLayout.
 	^ (self coordinator: aCoordinator tracks: aTimeline tracks)
 		timeline: aTimeline;
-		duration: aTimeline duration;
 		easing: BlEasing linear;
 		yourself
 ]
@@ -260,7 +259,9 @@ CFMotion >> finishComponentMotionsIfTerminal [
 CFMotion >> startFromCurrentPresentation [
 	coordinator removeActiveMotion: self.
 	tracks do: [ :each | each prepareFromCurrentPresentation ].
-	elapsedTime := 0 milliSeconds.
+	timeline
+		ifNil: [ elapsedTime := 0 milliSeconds ]
+		ifNotNil: [ timeline prepareForPlayback ].
 	state := CFMotionState running.
 	trace record: #started for: self.
 	(tracks allSatisfy: [ :each | each isAtDestination ]) ifTrue: [
@@ -272,6 +273,10 @@ CFMotion >> startFromCurrentPresentation [
 CFMotion >> advanceWith: aFrame [
 	| progress |
 	state == CFMotionState running ifFalse: [ ^ self ].
+	timeline ifNotNil: [
+		timeline advanceBy: aFrame elapsedTime.
+		timeline isComplete ifTrue: [ self complete ].
+		^ self ].
 	elapsedTime := elapsedTime + aFrame elapsedTime.
 	progress := duration isZero
 		ifTrue: [ 1.0 ]
@@ -306,7 +311,9 @@ CFMotion >> isPaused [
 
 { #category : 'accessing' }
 CFMotion >> elapsedTime [
-	^ elapsedTime
+	^ timeline
+		ifNil: [ elapsedTime ]
+		ifNotNil: [ timeline elapsedTime ]
 ]
 
 { #category : 'accessing' }

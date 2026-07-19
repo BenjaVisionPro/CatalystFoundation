@@ -1,3 +1,10 @@
+"
+I place one visual Motion track within a CFMotionTimeline.
+
+I own the track's temporal anchors, offsets, duration, easing and resolved start and end times. At runtime the timeline gives me an absolute playback position. I decide whether my visual track has not started, is active, or has finished, then apply the corresponding local progress.
+
+I do not own a clock or lifecycle. The timeline owns playback position; the wrapped visual track owns presentation.
+"
 Class {
 	#name : 'CFMotionTimelineTrack',
 	#superclass : 'CFMotionTrack',
@@ -31,12 +38,15 @@ CFMotionTimelineTrack >> applyDestination [
 ]
 
 { #category : 'playing' }
+CFMotionTimelineTrack >> applyAt: anElapsedTime [
+	anElapsedTime < resolvedStart ifTrue: [ ^ self ].
+	anElapsedTime >= resolvedEnd ifTrue: [ ^ motionTrack applyProgress: 1.0 ].
+	motionTrack applyProgress: (easing interpolate: (anElapsedTime - resolvedStart) / duration)
+]
+
+{ #category : 'playing' }
 CFMotionTimelineTrack >> applyProgress: aProgress [
-	| elapsedTime |
-	elapsedTime := timeline duration * aProgress.
-	elapsedTime < resolvedStart ifTrue: [ ^ self ].
-	elapsedTime >= resolvedEnd ifTrue: [ ^ motionTrack applyProgress: 1.0 ].
-	motionTrack applyProgress: (easing interpolate: (elapsedTime - resolvedStart) / duration)
+	self applyAt: timeline duration * aProgress
 ]
 
 { #category : 'playing' }
@@ -66,6 +76,13 @@ CFMotionTimelineTrack >> duration: aDuration [
 { #category : 'accessing' }
 CFMotionTimelineTrack >> duration [
 	^ duration
+]
+
+
+{ #category : 'configuration' }
+CFMotionTimelineTrack >> easing: anInterpolator [
+	easing := anInterpolator.
+	^ self
 ]
 
 { #category : 'configuration' }
