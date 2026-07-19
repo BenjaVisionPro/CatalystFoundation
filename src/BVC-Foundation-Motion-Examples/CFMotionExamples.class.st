@@ -2411,3 +2411,93 @@ CFMotionExamples >> coordinatorFrameDriverResetsElapsedTimeAfterInactivity [
 	self assert: secondMotion frames first elapsedTime equals: 0 milliSeconds.
 	^ secondMotion
 ]
+
+{ #category : 'examples - motion lifecycle' }
+CFMotionExamples >> motionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
+	<gtExample>
+	| space element motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	motion := (CFMotion
+		coordinator: space cfMotionCoordinator
+		tracks: { CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0 })
+		duration: 100 milliSeconds;
+		easing: BlEasing linear;
+		start.
+	self assert: motion isRunning.
+	self assert: space cfMotionCoordinator activeMotions equals: { motion }.
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.4).
+	self assert: motion elapsedTime equals: 40 milliSeconds.
+	space time wait: 60 milliSeconds.
+	space pulse.
+	self assert: motion isCompleted.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: (element opacity closeTo: 1.0).
+	^ motion
+]
+
+{ #category : 'examples - motion lifecycle' }
+CFMotionExamples >> motionPauseAndResumePreservePlaybackPosition [
+	<gtExample>
+	| space element motion pausedOpacity |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	motion := (CFMotion
+		coordinator: space cfMotionCoordinator
+		tracks: { CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0 })
+		duration: 100 milliSeconds;
+		easing: BlEasing linear;
+		start.
+	space pulse.
+	space time wait: 30 milliSeconds.
+	space pulse.
+	pausedOpacity := element opacity.
+	motion pause.
+	self assert: motion isPaused.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	space time wait: 2 seconds.
+	space pulse.
+	self assert: element opacity equals: pausedOpacity.
+	self assert: motion elapsedTime equals: 30 milliSeconds.
+	motion resume.
+	space pulse.
+	self assert: motion elapsedTime equals: 30 milliSeconds.
+	space time wait: 20 milliSeconds.
+	space pulse.
+	self assert: motion elapsedTime equals: 50 milliSeconds.
+	self assert: (element opacity closeTo: 0.5).
+	^ motion
+]
+
+{ #category : 'examples - motion lifecycle' }
+CFMotionExamples >> motionRetainsItsSourceTimeline [
+	<gtExample>
+	| space element timeline track motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	timeline := CFMotionTimeline new.
+	track := (CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0)
+		in: timeline)
+		duration: 100 milliSeconds.
+	motion := CFMotion timeline: timeline coordinator: space cfMotionCoordinator.
+	self assert: motion timeline == timeline.
+	self assert: motion tracks equals: { track }.
+	^ motion
+]

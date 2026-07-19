@@ -1,7 +1,14 @@
+"
+I am a complete temporal composition played by a CFMotionCoordinator.
+
+I own my tracks, optional source timeline, playback position, easing, lifecycle and completion. I prepare and claim my presentation tracks when started, then advance only from the shared CFMotionFrames supplied by my coordinator. I do not create Bloc animations, schedule pulses or read a clock.
+
+The coordinator owns frame scheduling and cross-Motion presentation coordination. Tracks own presentation interpolation. CFMotionTimeline currently supplies temporal layout and will become the richer runtime timeline in the next cutover slice.
+"
 Class {
 	#name : 'CFMotion',
 	#superclass : 'Object',
-	#instVars : [ 'coordinator', 'tracks', 'duration', 'easing', 'animation', 'generation', 'state', 'trace', 'terminalHandlers', 'holdAtDestination', 'componentMotions' ],
+	#instVars : [ 'coordinator', 'timeline', 'tracks', 'duration', 'easing', 'elapsedTime', 'state', 'trace', 'terminalHandlers', 'holdAtDestination', 'componentMotions' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -26,6 +33,7 @@ CFMotion class >> composedOf: aCollection [
 CFMotion class >> timeline: aTimeline coordinator: aCoordinator [
 	aTimeline resolveTemporalLayout.
 	^ (self coordinator: aCoordinator tracks: aTimeline tracks)
+		timeline: aTimeline;
 		duration: aTimeline duration;
 		easing: BlEasing linear;
 		yourself
@@ -36,16 +44,13 @@ CFMotion >> initialize [
 	super initialize.
 	duration := 180 milliSeconds.
 	easing := BlDecelerateInterpolator factor: 1.4.
-	generation := 0.
+	elapsedTime := 0 milliSeconds.
 	state := CFMotionState idle.
 	trace := CFMotionTrace new.
 	terminalHandlers := OrderedCollection new.
 	holdAtDestination := false.
 	componentMotions := OrderedCollection new
 ]
-
-{ #category : 'accessing' }
-CFMotion >> animation [ ^ animation ]
 
 { #category : 'controlling' }
 CFMotion >> cancel [ ^ self cancelPreservingCurrentPresentation ]
@@ -81,8 +86,7 @@ CFMotion >> cancelComponentMotionsWith: aSelector [
 { #category : 'private - controlling' }
 CFMotion >> cancelApplying: aBlock [
 	state isTerminal ifTrue: [ ^ self ].
-	generation := generation + 1.
-	self discardAnimation.
+	coordinator removeActiveMotion: self.
 	tracks do: aBlock.
 	state := CFMotionState cancelled.
 	trace record: #cancelled for: self.
@@ -94,6 +98,7 @@ CFMotion >> cancelApplying: aBlock [
 { #category : 'private - controlling' }
 CFMotion >> complete [
 	state isTerminal ifTrue: [ ^ self ].
+	coordinator ifNotNil: [ coordinator removeActiveMotion: self ].
 	(self hasComponentMotions) ifTrue: [
 		state := CFMotionState completed.
 		trace record: #completed for: self.
@@ -125,13 +130,6 @@ CFMotion >> componentMotions: aCollection [
 	^ self
 ]
 
-{ #category : 'private - playing' }
-CFMotion >> discardAnimation [
-	| currentAnimation |
-	currentAnimation := animation.
-	animation := nil.
-	currentAnimation ifNotNil: [ :each | each stopIfRunning ]
-]
 
 { #category : 'accessing' }
 CFMotion >> duration: aDuration [ duration := aDuration ]
@@ -139,14 +137,6 @@ CFMotion >> duration: aDuration [ duration := aDuration ]
 { #category : 'accessing' }
 CFMotion >> easing: anInterpolator [ easing := anInterpolator ]
 
-{ #category : 'private - playing' }
-CFMotion >> finish: anAnimation generation: anInteger [
-	(animation == anAnimation
-		and: [ generation = anInteger and: [ state == CFMotionState running ] ])
-		ifTrue: [
-			animation := nil.
-			self complete ]
-]
 
 { #category : 'testing' }
 CFMotion >> isCancelled [ ^ state == CFMotionState cancelled ]
@@ -268,27 +258,65 @@ CFMotion >> finishComponentMotionsIfTerminal [
 
 { #category : 'private - playing' }
 CFMotion >> startFromCurrentPresentation [
-	| currentGeneration newAnimation |
-	generation := generation + 1.
-	currentGeneration := generation.
-	self discardAnimation.
+	coordinator removeActiveMotion: self.
 	tracks do: [ :each | each prepareFromCurrentPresentation ].
+	elapsedTime := 0 milliSeconds.
 	state := CFMotionState running.
 	trace record: #started for: self.
 	(tracks allSatisfy: [ :each | each isAtDestination ]) ifTrue: [
 		^ self complete ].
-	newAnimation := BlNumberTransition new
-		from: 0.0;
-		to: 1.0;
-		duration: duration;
-		easing: easing;
-		onStepDo: [ :progress |
-			tracks do: [ :each | each applyProgress: progress ] ];
-		yourself.
-	animation := newAnimation.
-	newAnimation onFinishedDo: [
-		self finish: newAnimation generation: currentGeneration ].
-	tracks first animationTarget addAnimation: newAnimation
+	coordinator play: self
+]
+
+{ #category : 'playing' }
+CFMotion >> advanceWith: aFrame [
+	| progress |
+	state == CFMotionState running ifFalse: [ ^ self ].
+	elapsedTime := elapsedTime + aFrame elapsedTime.
+	progress := duration isZero
+		ifTrue: [ 1.0 ]
+		ifFalse: [ (elapsedTime / duration) min: 1.0 ].
+	progress := easing interpolate: progress.
+	tracks do: [ :each | each applyProgress: progress ].
+	elapsedTime >= duration ifTrue: [ self complete ]
+]
+
+{ #category : 'controlling' }
+CFMotion >> pause [
+	state == CFMotionState running ifFalse: [ ^ self ].
+	coordinator removeActiveMotion: self.
+	state := CFMotionState paused.
+	trace record: #paused for: self.
+	^ self
+]
+
+{ #category : 'controlling' }
+CFMotion >> resume [
+	state == CFMotionState paused ifFalse: [ ^ self ].
+	state := CFMotionState running.
+	trace record: #resumed for: self.
+	coordinator play: self.
+	^ self
+]
+
+{ #category : 'testing' }
+CFMotion >> isPaused [
+	^ state == CFMotionState paused
+]
+
+{ #category : 'accessing' }
+CFMotion >> elapsedTime [
+	^ elapsedTime
+]
+
+{ #category : 'accessing' }
+CFMotion >> timeline [
+	^ timeline
+]
+
+{ #category : 'accessing' }
+CFMotion >> timeline: aTimeline [
+	timeline := aTimeline
 ]
 
 { #category : 'accessing' }

@@ -1,3 +1,8 @@
+"
+I represent the lifecycle state of a CFMotion.
+
+States are canonical identity objects so Motion can compare them directly. Idle has not started, running receives coordinator frames, paused retains playback and presentation without receiving frames, settled deliberately holds destination presentation, and completed or cancelled are terminal. I contain no transition policy; CFMotion owns valid lifecycle changes.
+"
 Class {
 	#name : 'CFMotionState',
 	#superclass : 'Object',
@@ -19,6 +24,9 @@ CFMotionState class >> idle [ ^ self named: #idle ]
 
 { #category : 'instance creation' }
 CFMotionState class >> running [ ^ self named: #running ]
+
+{ #category : 'instance creation' }
+CFMotionState class >> paused [ ^ self named: #paused ]
 
 { #category : 'instance creation' }
 CFMotionState class >> settled [ ^ self named: #settled ]
