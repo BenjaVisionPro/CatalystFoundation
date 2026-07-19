@@ -18,13 +18,6 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsWorldBehaviour class >> on: aPhysicsWorld [
-	^ self new
-		world: aPhysicsWorld;
-		yourself
-]
-
-{ #category : 'instance creation' }
 CFPhysicsWorldBehaviour class >> on: aPhysicsWorld presentation: aPresentation [
 	^ self new
 		world: aPhysicsWorld;
@@ -50,7 +43,7 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 	[ accumulatedTime >= stepDuration ] whileTrue: [
 		world step.
 		accumulatedTime := accumulatedTime - stepDuration ].
-	(presentation ifNil: [ world ])
+	presentation
 		presentAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
 ]
 
@@ -95,6 +88,7 @@ CFPhysicsWorldBehaviour >> reversed [
 { #category : 'private - validation' }
 CFPhysicsWorldBehaviour >> validateForExecution [
 	world ifNil: [ self error: 'A Physics world Behaviour needs a world' ].
+	presentation ifNil: [ self error: 'A Physics world Behaviour needs a presentation' ].
 	world owner ifNil: [ self error: 'A Physics world Behaviour needs an owner element' ].
 	world stepDuration <= (0 milliSeconds) ifTrue: [
 		self error: 'A Physics world step duration must be positive' ]

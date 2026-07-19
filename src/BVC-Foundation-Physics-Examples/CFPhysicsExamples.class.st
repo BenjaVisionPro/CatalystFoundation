@@ -50,7 +50,7 @@ CFPhysicsExamples >> bodiesAfterStepping [
 { #category : 'examples - motion integration' }
 CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	<gtExample>
-	| space owner world behaviour timeline track motion |
+	| space owner world presentation behaviour timeline track motion |
 	space := BlSpace new.
 	space time: BlTime simulated.
 	owner := BlElement new size: 320 @ 200.
@@ -60,31 +60,32 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 		owner: owner;
 		stepDuration: 16 milliSeconds;
 		yourself.
-	behaviour := CFPhysicsWorldBehaviour on: world.
+	presentation := CFPhysicsPresentationRecorder new.
+	behaviour := CFPhysicsWorldBehaviour on: world presentation: presentation.
 	timeline := CFMotionTimeline new.
 	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
 	space pulse.
-	self assert: world synchronisationCount equals: 0.
-	self assert: world presentationCount equals: 1.
+	self assert: presentation presentationCount equals: 1.
 	self assert: world stepCount equals: 0.
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 0.
-	self assert: world presentationCount equals: 2.
-	self assert: (world lastPresentationAlpha closeTo: 0.625).
+	self assert: presentation presentationCount equals: 2.
+	self assert: (presentation lastPresentationAlpha closeTo: 0.625).
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 1.
-	self assert: world presentationCount equals: 3.
-	self assert: (world lastPresentationAlpha closeTo: 0.25).
+	self assert: presentation presentationCount equals: 3.
+	self assert: (presentation lastPresentationAlpha closeTo: 0.25).
 	space time wait: 30 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 3.
-	self assert: world presentationCount equals: 4.
-	self assert: (world lastPresentationAlpha closeTo: 0.125).
+	self assert: presentation presentationCount equals: 4.
+	self assert: (presentation lastPresentationAlpha closeTo: 0.125).
 	self assert: motion isRunning.
 	motion cancel.
+	self assert: presentation releaseCount equals: 1.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ track
 ]
@@ -144,8 +145,8 @@ CFPhysicsExamples >> independentPhysicsWorldBehavioursShareOneFrameDriver [
 		owner: secondOwner;
 		stepDuration: 15 milliSeconds;
 		yourself.
-	firstBehaviour := CFPhysicsWorldBehaviour on: firstWorld.
-	secondBehaviour := CFPhysicsWorldBehaviour on: secondWorld.
+	firstBehaviour := CFPhysicsWorldBehaviour on: firstWorld presentation: CFPhysicsPresentationRecorder new.
+	secondBehaviour := CFPhysicsWorldBehaviour on: secondWorld presentation: CFPhysicsPresentationRecorder new.
 	firstTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
 	secondTimeline := CFMotionTimeline new.
@@ -231,7 +232,7 @@ CFPhysicsExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
 		owner: owner;
 		stepDuration: 10 milliSeconds;
 		yourself.
-	behaviour := CFPhysicsWorldBehaviour on: world.
+	behaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
@@ -330,7 +331,7 @@ CFPhysicsExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 		owner: owner;
 		stepDuration: 10 milliSeconds;
 		yourself.
-	firstBehaviour := CFPhysicsWorldBehaviour on: world.
+	firstBehaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
 	firstTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
 	firstMotion := (CFMotion timeline: firstTimeline coordinator: space cfMotionCoordinator) start.
@@ -340,7 +341,7 @@ CFPhysicsExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	self assert: world stepCount equals: 1.
 	firstMotion cancel.
 	self assert: firstBehaviour isActive not.
-	secondBehaviour := CFPhysicsWorldBehaviour on: world.
+	secondBehaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
 	secondTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
 	secondMotion := (CFMotion timeline: secondTimeline coordinator: space cfMotionCoordinator) start.

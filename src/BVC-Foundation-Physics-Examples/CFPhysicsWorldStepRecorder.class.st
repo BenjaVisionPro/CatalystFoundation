@@ -1,12 +1,12 @@
 "
 I am a small executable-example collaborator for CFPhysicsWorldBehaviour.
 
-I expose the CFPhysicsWorld protocol used by that Behaviour and record synchronisation and fixed-step calls. I exist only to make frame-to-step accumulation observable without coupling the example to solver outcomes.
+I expose only the simulation protocol used by that Behaviour and record fixed-step calls. Presentation is supplied by a separate collaborator so the examples preserve the production boundary.
 "
 Class {
 	#name : 'CFPhysicsWorldStepRecorder',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'synchronisationCount', 'presentationCount', 'lastPresentationAlpha' ],
+	#instVars : [ 'owner', 'stepDuration', 'stepCount' ],
 	#category : 'BVC-Foundation-Physics-Examples',
 	#package : 'BVC-Foundation-Physics-Examples'
 }
@@ -15,10 +15,7 @@ Class {
 CFPhysicsWorldStepRecorder >> initialize [
 	super initialize.
 	stepDuration := 16 milliSeconds.
-	stepCount := 0.
-	synchronisationCount := 0.
-	presentationCount := 0.
-	lastPresentationAlpha := nil
+	stepCount := 0
 ]
 
 { #category : 'accessing' }
@@ -40,33 +37,3 @@ CFPhysicsWorldStepRecorder >> stepDuration [ ^ stepDuration ]
 
 { #category : 'accessing' }
 CFPhysicsWorldStepRecorder >> stepDuration: aDuration [ stepDuration := aDuration ]
-
-{ #category : 'membership' }
-CFPhysicsWorldStepRecorder >> synchroniseMembership [
-	synchronisationCount := synchronisationCount + 1
-]
-
-{ #category : 'accessing' }
-CFPhysicsWorldStepRecorder >> synchronisationCount [ ^ synchronisationCount ]
-
-
-{ #category : 'presenting' }
-CFPhysicsWorldStepRecorder >> present [
-	presentationCount := presentationCount + 1
-]
-
-{ #category : 'accessing' }
-CFPhysicsWorldStepRecorder >> presentationCount [ ^ presentationCount ]
-
-
-{ #category : 'presenting' }
-CFPhysicsWorldStepRecorder >> presentAtAlpha: aNumber [
-	presentationCount := presentationCount + 1.
-	lastPresentationAlpha := aNumber
-]
-
-{ #category : 'accessing' }
-CFPhysicsWorldStepRecorder >> lastPresentationAlpha [
-	^ lastPresentationAlpha
-]
-
