@@ -79,6 +79,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Physics-Pipeline'
 		'BVC-Foundation-Physics-Bloc'
 		'BVC-Foundation-Physics-World'
+		'BVC-Foundation-Physics-Tools'
 		'BVC-Foundation-Physics-Examples'
 		'BVC-Foundation-Physics-Checks'
 		'BVC-Foundation-UI-Animation'
@@ -111,10 +112,12 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Collision') ].
 	spec package: 'BVC-Foundation-Physics-World'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Dynamics' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc') ].
+	spec package: 'BVC-Foundation-Physics-Tools'
+		with: [ spec requires: #('BVC-Foundation-Physics-World') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
 		with: [ spec requires: #('BVC-Foundation-Physics-Dynamics' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-World') ].
 	spec package: 'BVC-Foundation-Physics-Checks'
-		with: [ spec requires: #('BVC-Foundation-Physics-Dynamics' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-World') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Dynamics' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-World' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-UI-Animation'.
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
