@@ -54,7 +54,7 @@ CFPhysicsPresentation >> release [
 	space := nil
 ]
 
-{ #category : 'private - attachment' }
+{ #category : 'attachment' }
 CFPhysicsPresentation >> synchroniseAttachment [
 	| currentSpace |
 	currentSpace := element isAttachedToSceneGraph

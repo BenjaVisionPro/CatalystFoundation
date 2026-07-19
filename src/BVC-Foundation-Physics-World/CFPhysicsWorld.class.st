@@ -221,6 +221,12 @@ CFPhysicsWorld >> step: aPositiveInteger [
 
 
 { #category : 'presenting' }
+CFPhysicsWorld >> synchronisePresentationAttachments [
+	self bodyStatesInOrder do: [ :each | each synchronisePresentationAttachment ].
+	^ self
+]
+
+{ #category : 'presenting' }
 CFPhysicsWorld >> synchronisePresentationState [
 	self synchroniseMembership.
 	self bodyStatesInOrder do: [ :each | each synchronisePresentationState ].

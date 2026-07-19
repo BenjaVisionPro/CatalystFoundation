@@ -67,7 +67,8 @@ CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
 CFPhysicsWorldBehaviour >> playbackEndedWith: aMotionState [
 	active := false.
 	previousLocalTime := 0 milliSeconds.
-	accumulatedTime := 0 milliSeconds
+	accumulatedTime := 0 milliSeconds.
+	world synchronisePresentationAttachments
 ]
 
 { #category : 'testing' }
