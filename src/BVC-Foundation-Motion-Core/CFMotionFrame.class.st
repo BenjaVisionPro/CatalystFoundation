@@ -1,9 +1,7 @@
 "
-I describe one presentation frame observed by Motion.
+I am the immutable time sample shared by every Motion advanced in one Bloc frame.
 
-A CFMotionCoordinator creates one instance per Bloc frame and supplies that same instance to every Motion it advances. My absoluteTime is sampled from the owning BlSpace's BlTime. My elapsedTime is the duration since the previous active Motion frame and is zero for the first frame after activation or resumption. My frameId identifies the enclosing BlSpaceFrame.
-
-I do not define simulation time steps, interpolation policy, playback position or rendering behaviour. Motions, timelines and downstream Behaviours interpret my timing information according to their own responsibilities.
+absoluteTime is sampled once from the owning BlSpace clock, elapsedTime excludes inactive time and is zero on the first frame after driver activation, and frameId identifies the enclosing BlSpaceFrame. I contain no interpolation, simulation-step or playback policy.
 "
 Class {
 	#name : 'CFMotionFrame',

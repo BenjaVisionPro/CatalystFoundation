@@ -1,9 +1,9 @@
 "
-I coordinate Motion presentation within one BlSpace.
+I coordinate all Motion playback within one BlSpace.
 
-There is one CFMotionCoordinator per BlSpace. I own the ordered collection of active Motions, the single CFMotionFrameDriver that advances them, property ownership, transform composition channels and execution history. Every active Motion receives the same CFMotionFrame in stable registration order during Bloc's task phase.
+I own the single CFMotionFrameDriver, the stable registration order of active Motions, presentation-property ownership, transform composition channels and playback history. Each Bloc frame produces one immutable CFMotionFrame which I deliver to every active Motion in registration order.
 
-I decide neither what a Motion contains nor how its timeline interprets time. A CFMotion owns its temporal composition and lifecycle. Bloc owns pulse scheduling and rendering. I connect those responsibilities without introducing another timer or scheduler.
+I never interpret a timeline or perform presentation work. Bloc owns pulse scheduling, CFMotion owns playback lifecycle, CFMotionTimeline owns playback position, and CFMotionBehaviour owns evaluated work.
 "
 Class {
 	#name : 'CFMotionCoordinator',
@@ -27,12 +27,12 @@ CFMotionCoordinator >> advanceWith: aFrame [
 ]
 
 { #category : 'ownership' }
-CFMotionCoordinator >> claim: aKey for: anOperation [
+CFMotionCoordinator >> claim: aKey for: aMotion [
 	| currentOwner |
 	currentOwner := self ownerOf: aKey.
-	(currentOwner notNil and: [ currentOwner ~~ anOperation ])
+	(currentOwner notNil and: [ currentOwner ~~ aMotion ])
 		ifTrue: [ self error: 'A Motion property can have only one owner in a BlSpace' ].
-	owners at: aKey put: anOperation
+	owners at: aKey put: aMotion
 ]
 
 { #category : 'accessing' }
@@ -70,16 +70,16 @@ CFMotionCoordinator >> play: aMotion [
 ]
 
 { #category : 'ownership' }
-CFMotionCoordinator >> release: aKey from: anOperation [
-	(owners at: aKey ifAbsent: [ nil ]) == anOperation
+CFMotionCoordinator >> release: aKey from: aMotion [
+	(owners at: aKey ifAbsent: [ nil ]) == aMotion
 		ifTrue: [ owners removeKey: aKey ]
 ]
 
 { #category : 'ownership' }
-CFMotionCoordinator >> releaseAllFor: anOperation [
-	anOperation tracks do: [ :each |
+CFMotionCoordinator >> releaseAllFor: aMotion [
+	aMotion tracks do: [ :each |
 		each propertyKey ifNotNil: [ :aKey |
-			self release: aKey from: anOperation ] ]
+			self release: aKey from: aMotion ] ]
 ]
 
 { #category : 'playing' }

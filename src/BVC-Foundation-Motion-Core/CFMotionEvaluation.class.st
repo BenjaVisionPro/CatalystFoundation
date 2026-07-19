@@ -1,9 +1,7 @@
 "
-I am an immutable evaluation supplied by a CFMotionTimelineTrack to a CFMotionBehaviour.
+I am the immutable value passed from a timeline track to its Behaviour.
 
-I describe one Behaviour evaluation in both timeline and local terms. timelineTime is the absolute playhead position. localTime is measured from the track's resolved start. progress is the track's eased normalised progress.
-
-I contain no scheduling, lifecycle or presentation policy. A timeline track creates me; a Behaviour interprets me.
+timelineTime is the timeline playhead, localTime is measured from the track's resolved start, and progress is eased normalised progress for a finite track or nil for an indefinite track. I contain no scheduling, lifecycle or presentation policy.
 "
 Class {
 	#name : 'CFMotionEvaluation',

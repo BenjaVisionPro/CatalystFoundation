@@ -1,9 +1,9 @@
 "
-I am the temporal runtime owned by a CFMotion.
+I own temporal composition and playback position for one Motion.
 
-I own an ordered collection of timeline tracks, their resolved temporal layout, and the current playback position. Before playback I resolve the track anchors and reset my playhead. For each coordinator frame I advance that playhead once and ask every track to evaluate at the resulting absolute timeline time. A finite timeline clamps at its resolved end and completes. A timeline containing an indefinite track keeps advancing until its Motion is explicitly stopped or cancelled.
+I resolve track anchors before playback, reset and advance one playhead, and evaluate my ordered tracks at that absolute timeline position. A finite timeline clamps at its resolved end and reports completion. A timeline containing an indefinite track has no duration, progress or automatic completion.
 
-I do not schedule frames, own presentation claims, or manage Motion lifecycle. CFMotion owns lifecycle and delegates temporal advancement to me. CFMotionCoordinator supplies the shared frame cadence. CFMotionTimelineTrack owns temporal placement and translates my absolute playback position into presentation progress for its visual track.
+I never schedule frames, claim presentation properties or manage Motion lifecycle. CFMotion owns lifecycle, CFMotionCoordinator supplies the shared frame cadence, CFMotionTimelineTrack owns temporal placement, and CFMotionBehaviour owns the work performed by an evaluation.
 "
 Class {
 	#name : 'CFMotionTimeline',

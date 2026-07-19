@@ -1,9 +1,9 @@
 "
-I am Motion's sole bridge to Bloc frame scheduling within one BlSpace.
+I am the sole Bloc task that advances Motion in one BlSpace.
 
-I am a BlTask owned by a CFMotionCoordinator. While that coordinator has active Motions I requeue through the normal BlSpace task queue, causing Bloc to request another pulse. On each execution I sample the space's BlTime once, construct one CFMotionFrame and ask the coordinator to advance all active Motions with it.
+While my coordinator has active Motions I sample BlSpace time once per execution, create one shared CFMotionFrame and requeue through the normal Bloc task queue. When no Motion remains active I stop requeueing and clear the elapsed-time baseline, so inactive wall-clock time is never delivered on reactivation.
 
-I own no Motion content, timeline state, playback policy or presentation contribution. Bloc decides when a frame occurs; I translate that occurrence into a shared Motion frame. When inactive I do not requeue, allowing the space to become idle. Reactivation resets my elapsed-time baseline so inactive or paused wall-clock time is not delivered to Motion.
+I own no Motion content, playback position or presentation policy.
 "
 Class {
 	#name : 'CFMotionFrameDriver',

@@ -1,13 +1,9 @@
 "
-I am presentation or dynamic logic evaluated by a Motion track.
+I own the work performed by one Motion evaluation.
 
-I own what happens when Motion is evaluated. I may interpolate a property, calculate a procedural value, advance a spring, run a state machine or eventually advance a Physics world. I receive a CFMotionEvaluation and apply work from that evaluation.
+A CFMotionTimelineTrack sends me immutable CFMotionEvaluations. I may interpolate presentation, calculate procedural values, advance a dynamic system or coordinate another runtime. I may claim one presentation property through propertyKey, or return nil when my work has no exclusive presentation owner.
 
-I do not own temporal placement, a playhead or frame scheduling. CFMotionTimelineTrack owns when I run. CFMotionTimeline owns the playhead. CFMotionCoordinator owns frame cadence.
-
-CFMotion sends playbackStartedIn: once when a playback begins and playbackEndedWith: once when that playback becomes terminal. Pause and resume do not repeat either callback. Subclasses use these callbacks for resources whose lifetime spans the whole playback; ordinary interpolated Behaviours may ignore them.
-
-Before each evaluation CFMotion asks whether I remain valid in its coordinator. A Behaviour without a presentation target is valid by default. A target-backed Behaviour is valid only while its target remains attached to the coordinator's BlSpace. This lets Motion terminate cleanly when application structure removes a presented element.
+I do not own temporal placement, playback position, scheduling or Motion lifecycle. playbackStartedIn: and playbackEndedWith: delimit one whole playback and are each delivered exactly once; pause and resume occur inside that lifetime. Target-backed Behaviours must remain attached to the coordinator's BlSpace, while targetless Behaviours are valid until explicitly stopped.
 "
 Class {
 	#name : 'CFMotionBehaviour',

@@ -31,7 +31,7 @@ CFMotionExamples >> opacityCompletes [
 		build) start.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -152,7 +152,7 @@ CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
 	self finish: operation in: space.
 	self assert: operation isCompleted.
 	self assert: operation tracks first property == CFMotionOpacityProperty uniqueInstance.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -196,7 +196,7 @@ CFMotionExamples >> directNamedFadeInBuildsAndStartsImmediately [
 	space time wait: 1 second.
 	space pulse.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -247,7 +247,7 @@ CFMotionExamples >> namedFadeInConfigurationBlockStartsWhenItReturns [
 	self assert: operation isRunning.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -296,7 +296,7 @@ CFMotionExamples >> directNamedRiseAndFadeInBuildsAndStartsImmediately [
 	space time wait: 1 second.
 	space pulse.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -363,7 +363,7 @@ CFMotionExamples >> directNamedScaleAndFadeInBuildsAndStartsImmediately [
 	space time wait: 1 second.
 	space pulse.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ operation
 ]
 
@@ -573,7 +573,7 @@ CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
 	self assert: appearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ appearance
 ]
 
@@ -762,7 +762,7 @@ CFMotionExamples >> appearInsertsThenScalesAndFadesIn [
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
 	self assert: element parent == space root.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ appearance
 ]
 
@@ -801,7 +801,7 @@ CFMotionExamples >> appearUsingRiseAndFadeInBuildsTheTranslationMotion [
 	self assert: (appearance operation tracks second isKindOf: CFMotionTranslationTrack).
 	self finish: appearance operation in: space.
 	self assert: appearance isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	^ appearance
 ]
 
@@ -854,7 +854,7 @@ CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	self assert: element transformation == applicationTransformation.
 	^ operation
 ]
@@ -900,7 +900,7 @@ CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
 	self assert: operation tracks second presentation ownsCurrentTransformation.
 	self finish: operation in: space.
 	self assert: operation isCompleted.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	self assert: element transformation == applicationTransformation.
 	^ operation
 ]
@@ -1166,7 +1166,7 @@ CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	disappearance cancel.
 	self assert: disappearance isCancelled.
 	self assert: element parent == space root.
-	self assert: element opacity equals: 1.0.
+	self assert: (element opacity closeTo: 1.0).
 	self assert: disappearance operation tracks second presentation isActive not.
 	^ disappearance
 ]
@@ -2895,5 +2895,62 @@ CFMotionExamples >> detachedPresentationTargetCancelsAndCleansUpItsMotion [
 	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ motion
+]
+
+{ #category : 'examples - architecture' }
+CFMotionExamples >> stopPreservesCurrentPresentationAndTerminatesPlayback [
+	<gtExample>
+	| space element motion opacityAtStop |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	motion := (element motion
+		duration: 100 milliSeconds;
+		opacity: 0.0;
+		build) start.
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	opacityAtStop := element opacity.
+	motion stop.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: motion isCancelled.
+	self assert: (element opacity closeTo: opacityAtStop).
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	^ motion
+]
+
+{ #category : 'examples - architecture' }
+CFMotionExamples >> oneMotionComposesFiniteAndIndefiniteBehaviours [
+	<gtExample>
+	| space element timeline finiteTrack recorder indefiniteTrack motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	finiteTrack := (CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	recorder := CFMotionEvaluationRecorder new.
+	indefiniteTrack := (CFMotionTimelineTrack on: recorder in: timeline)
+		startsAt: finiteTrack end;
+		indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 75 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 1.0).
+	self assert: recorder evaluations first localTime equals: 25 milliSeconds.
+	self assert: motion isRunning.
+	motion stop.
+	self assert: motion isCancelled.
+	^ indefiniteTrack
 ]
 

@@ -1,11 +1,11 @@
 "
-I am a complete temporal composition played by a CFMotionCoordinator.
+I own the lifecycle of one playable temporal composition.
 
-I own my tracks, optional source timeline, playback position, easing, lifecycle and completion. I prepare and claim my presentation tracks when started, then advance only from the shared CFMotionFrames supplied by my coordinator. I do not create Bloc animations, schedule pulses or read a clock.
+I start, pause, resume and stop playback; coordinate presentation ownership; and deliver Behaviour lifecycle callbacks exactly once. When I own a CFMotionTimeline, the timeline is the sole owner of playback position and track evaluation. Direct track compositions built without a timeline use Motion-owned normalised playback, while timeline compositions delegate playback position entirely to their timeline. Neither path owns scheduling.
 
-The coordinator owns frame scheduling and cross-Motion presentation coordination. Timeline tracks own temporal placement and Behaviours own presentation or dynamic work. When I own a CFMotionTimeline, that timeline owns playback position and track evaluation; I remain the lifecycle and presentation-ownership shell.
+I advance only from immutable CFMotionFrames supplied by my CFMotionCoordinator. I never read a clock, enqueue a Bloc task or create a Bloc animation. The coordinator owns scheduling and cross-Motion ownership, the timeline owns temporal composition, timeline tracks own placement, and Behaviours own presentation or dynamic work.
 
-I begin each Behaviour exactly once after origin capture and end it exactly once when playback completes, settles or is cancelled. Pause and resume preserve that Behaviour lifetime. Before evaluating a frame I verify that every Behaviour remains valid in this coordinator; if an application detaches or moves a presentation target, I cancel and release all claims rather than continuing to mutate an orphaned element.
+Stopping preserves the current presentation. Explicit cancellation variants may instead restore the origin or settle at the destination. A terminal Motion cannot restart; creating a new playback creates a new Motion.
 "
 Class {
 	#name : 'CFMotion',
@@ -55,6 +55,11 @@ CFMotion >> initialize [
 
 { #category : 'controlling' }
 CFMotion >> cancel [ ^ self cancelPreservingCurrentPresentation ]
+
+{ #category : 'controlling' }
+CFMotion >> stop [
+	^ self cancelPreservingCurrentPresentation
+]
 
 { #category : 'controlling' }
 CFMotion >> cancelAndRestore [

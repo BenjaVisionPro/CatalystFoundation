@@ -252,7 +252,7 @@ CFPhysicsWorld >> resumeStepping [
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> stopStepping [
-	steppingMotion ifNotNil: [ :motion | motion cancel ].
+	steppingMotion ifNotNil: [ :motion | motion stop ].
 	^ self
 ]
 

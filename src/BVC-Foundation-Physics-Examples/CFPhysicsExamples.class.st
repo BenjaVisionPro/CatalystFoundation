@@ -281,7 +281,7 @@ CFPhysicsExamples >> physicsWorldRestartsAfterOwnerDetachment [
 	space root addChild: owner.
 	space pulse.
 	secondMotion := world startStepping.
-	self assert: secondMotion ~~ firstMotion.
+	self deny: secondMotion == firstMotion.
 	self assert: secondMotion isRunning.
 	self assert: world steppingMotion == secondMotion.
 	world stopStepping.
