@@ -2620,3 +2620,82 @@ CFMotionExamples >> timelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
 	self assert: motion isRunning.
 	^ timelineTrack
 ]
+
+
+{ #category : 'examples - transform composition' }
+CFMotionExamples >> coordinatorProvidesOneTransformChannelPerElement [
+	<gtExample>
+	| space element coordinator firstChannel secondChannel |
+	space := self spaceWithElement.
+	element := space root children first.
+	coordinator := space cfMotionCoordinator.
+	firstChannel := coordinator transformChannelFor: element.
+	secondChannel := coordinator transformChannelFor: element.
+	self assert: firstChannel == secondChannel.
+	self assert: firstChannel element == element.
+	^ firstChannel
+]
+
+{ #category : 'examples - transform composition' }
+CFMotionExamples >> independentMotionsComposeThroughTheCoordinatorTransformChannel [
+	<gtExample>
+	| space element coordinator applicationTransformation translation scale translationMotion scaleMotion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element transformDo: [ :builder | builder translateBy: 20 @ 0 ].
+	applicationTransformation := element transformation.
+	coordinator := space cfMotionCoordinator.
+	translation := CFMotionTranslationTrack
+		on: element
+		from: 0 @ 0
+		to: 80 @ 40.
+	scale := CFMotionScaleTrack
+		on: element
+		from: 1 @ 1
+		to: 0.5 @ 0.75.
+	translationMotion := (CFMotion coordinator: coordinator tracks: { translation })
+		duration: 100 milliSeconds;
+		easing: BlEasing linear;
+		start.
+	scaleMotion := (CFMotion coordinator: coordinator tracks: { scale })
+		duration: 100 milliSeconds;
+		easing: BlEasing linear;
+		start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: translation presentation channel == scale presentation channel.
+	self assert: translation presentation translation equals: 40 @ 20.
+	self assert: scale presentation scale equals: 0.75 @ 0.875.
+	self assert: translation presentation ownsCurrentTransformation.
+	self assert: scale presentation ownsCurrentTransformation.
+	translationMotion cancelAndRestore.
+	self assert: translation presentation isActive not.
+	self assert: scale presentation ownsCurrentTransformation.
+	scaleMotion cancelAndRestore.
+	self assert: scale presentation isActive not.
+	self assert: element transformation == applicationTransformation.
+	^ element
+]
+
+{ #category : 'examples - transform composition' }
+CFMotionExamples >> transformChannelPreservesStableRegistrationOrder [
+	<gtExample>
+	| space element channel first second |
+	space := self spaceWithElement.
+	element := space root children first.
+	channel := space cfMotionCoordinator transformChannelFor: element.
+	first := CFMotionTransformPresentation on: element using: channel.
+	second := CFMotionTransformPresentation on: element using: channel.
+	first scale: 2 @ 2.
+	second translation: 30 @ 10.
+	self assert: first ownsCurrentTransformation.
+	self assert: second ownsCurrentTransformation.
+	self assert: channel ownsCurrentTransformation.
+	first release.
+	self assert: second ownsCurrentTransformation.
+	second release.
+	self assert: channel isEmpty.
+	^ channel
+]

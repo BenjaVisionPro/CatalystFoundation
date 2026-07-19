@@ -1,3 +1,10 @@
+"
+I am one Behaviour's mutable transform contribution to a CFMotionTransformChannel.
+
+I hold translation, scale, rotation and transform origin for one element. I do not replace the element transformation directly. Instead I register with a shared channel and ask that channel to compose all active contributions in deterministic registration order over the element's pre-Motion transformation.
+
+I may release my contribution, adopt it as a frozen contribution, or relinquish ownership when application code externally replaces the composed transformation. I own only my contribution; the channel owns composition and the coordinator owns channel identity.
+"
 Class {
 	#name : 'CFMotionTransformPresentation',
 	#superclass : 'Object',
