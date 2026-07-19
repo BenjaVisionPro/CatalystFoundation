@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'rotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
+	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -132,7 +132,9 @@ CFPhysicsBodyState >> density: aNumber [
 CFPhysicsBodyState >> initialize [
 	super initialize.
 	position := 0 @ 0.
+	previousPosition := position.
 	rotation := 0.
+	previousRotation := rotation.
 	velocity := 0 @ 0.
 	dynamic := true.
 	awake := true.
@@ -153,6 +155,32 @@ CFPhysicsBodyState >> isStatic [
 	^ dynamic not
 ]
 
+
+{ #category : 'stepping' }
+CFPhysicsBodyState >> beginStep [
+	previousPosition := position.
+	previousRotation := rotation
+]
+
+{ #category : 'presenting' }
+CFPhysicsBodyState >> presentAtAlpha: aNumber [
+	| alpha presentedPosition presentedRotation |
+	alpha := (aNumber max: 0.0) min: 1.0.
+	presentedPosition := previousPosition + ((position - previousPosition) * alpha).
+	presentedRotation := previousRotation + ((rotation - previousRotation) * alpha).
+	presentation presentTranslation: presentedPosition rotation: presentedRotation
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyState >> previousPosition [
+	^ previousPosition
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyState >> previousRotation [
+	^ previousRotation
+]
+
 { #category : 'presenting' }
 CFPhysicsBodyState >> present [
 	presentation presentTranslation: position rotation: rotation
@@ -165,6 +193,7 @@ CFPhysicsBodyState >> position [
 
 { #category : 'accessing' }
 CFPhysicsBodyState >> position: aPoint [
+	previousPosition := aPoint.
 	position := aPoint.
 	self wake
 ]
@@ -186,6 +215,7 @@ CFPhysicsBodyState >> rotation [
 
 { #category : 'accessing' }
 CFPhysicsBodyState >> rotation: aNumber [
+	previousRotation := aNumber.
 	rotation := aNumber.
 	self wake
 ]
@@ -216,7 +246,9 @@ CFPhysicsBodyState >> translateBy: aPoint [
 
 { #category : 'presenting' }
 CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
+	previousPosition := aPoint.
 	position := aPoint.
+	previousRotation := aNumber.
 	rotation := aNumber.
 	self wake
 ]

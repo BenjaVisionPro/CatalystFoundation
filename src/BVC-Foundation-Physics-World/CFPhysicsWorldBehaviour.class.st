@@ -42,7 +42,7 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 	[ accumulatedTime >= stepDuration ] whileTrue: [
 		world step.
 		accumulatedTime := accumulatedTime - stepDuration ].
-	world present
+	world presentAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
 ]
 
 { #category : 'initialization' }

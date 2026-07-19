@@ -195,6 +195,7 @@ CFPhysicsWorld >> step [
 	| bodies step |
 	self synchroniseMembership.
 	bodies := self bodyStatesInOrder.
+	bodies do: #beginStep.
 	step := self newStep.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
@@ -223,6 +224,13 @@ CFPhysicsWorld >> step: aPositiveInteger [
 CFPhysicsWorld >> present [
 	self synchroniseMembership.
 	self bodyStatesInOrder do: [ :each | each present ].
+	^ self
+]
+
+{ #category : 'presenting' }
+CFPhysicsWorld >> presentAtAlpha: aNumber [
+	self synchroniseMembership.
+	self bodyStatesInOrder do: [ :each | each presentAtAlpha: aNumber ].
 	^ self
 ]
 
