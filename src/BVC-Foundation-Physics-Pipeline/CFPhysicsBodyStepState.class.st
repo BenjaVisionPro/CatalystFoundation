@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
 	#instVars : [ 'body', 'linearVelocity', 'angularVelocity', 'deltaPosition', 'deltaRotation' ],
-	#category : 'BVC-Foundation-Physics-Dynamics',
-	#package : 'BVC-Foundation-Physics-Dynamics'
+	#category : 'BVC-Foundation-Physics-Pipeline',
+	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }

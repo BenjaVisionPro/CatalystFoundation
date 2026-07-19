@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFPhysicsOverlayChecks',
+	#name : 'CFPhysicsOverlayTests',
 	#superclass : 'Object',
-	#category : 'BVC-Foundation-Physics-Checks',
-	#package : 'BVC-Foundation-Physics-Checks'
+	#category : 'BVC-Foundation-Physics-Tests',
+	#package : 'BVC-Foundation-Physics-Tests'
 }
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayChecks >> physicsHost [
+CFPhysicsOverlayTests >> physicsHost [
 	<gtExample>
 	| space container host first second world |
 	space := BlSpace new.
@@ -43,7 +43,7 @@ CFPhysicsOverlayChecks >> physicsHost [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayChecks >> physicsOverlayCanBeInstalled [
+CFPhysicsOverlayTests >> physicsOverlayCanBeInstalled [
 	<gtExample>
 	| host overlay |
 	host := self physicsHost.
@@ -58,7 +58,7 @@ CFPhysicsOverlayChecks >> physicsOverlayCanBeInstalled [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayChecks >> physicsOverlayCanBeRemovedWithoutChangingTheHost [
+CFPhysicsOverlayTests >> physicsOverlayCanBeRemovedWithoutChangingTheHost [
 	<gtExample>
 	| host overlay |
 	host := self physicsOverlayCanBeInstalled.
@@ -71,7 +71,7 @@ CFPhysicsOverlayChecks >> physicsOverlayCanBeRemovedWithoutChangingTheHost [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayChecks >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
+CFPhysicsOverlayTests >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 	<gtExample>
 	| host overlay world body representation |
 	host := self physicsOverlayCanBeInstalled.
@@ -92,7 +92,7 @@ CFPhysicsOverlayChecks >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing 
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayChecks >> physicsOverlayRemovesRetiredBodyRepresentations [
+CFPhysicsOverlayTests >> physicsOverlayRemovesRetiredBodyRepresentations [
 	<gtExample>
 	| host overlay world retiredElement retiredBody |
 	host := self physicsOverlayCanBeInstalled.

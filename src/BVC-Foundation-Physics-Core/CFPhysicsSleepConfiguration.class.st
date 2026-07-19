@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsSleepConfiguration',
 	#superclass : 'Object',
 	#instVars : [ 'linearVelocityThreshold', 'angularVelocityThreshold', 'timeToSleep' ],
-	#category : 'BVC-Foundation-Physics-Dynamics',
-	#package : 'BVC-Foundation-Physics-Dynamics'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }

@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
 	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient' ],
-	#category : 'BVC-Foundation-Physics-Dynamics',
-	#package : 'BVC-Foundation-Physics-Dynamics'
+	#category : 'BVC-Foundation-Physics-Pipeline',
+	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
