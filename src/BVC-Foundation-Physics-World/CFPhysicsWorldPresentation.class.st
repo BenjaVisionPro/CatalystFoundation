@@ -1,54 +1,101 @@
 Class {
 	#name : 'CFPhysicsWorldPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'coordinator', 'presentations' ],
+	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
+
+{ #category : 'instance creation' }
+CFPhysicsWorldPresentation class >> on: aWorld [
+	^ self new
+		world: aWorld;
+		yourself
+]
 
 { #category : 'instance creation' }
 CFPhysicsWorldPresentation class >> on: aWorld in: aCoordinator [
 	^ self new
 		world: aWorld;
 		coordinator: aCoordinator;
+		useFixedCoordinator;
 		yourself
 ]
 
 { #category : 'initialization' }
 CFPhysicsWorldPresentation >> initialize [
 	super initialize.
-	presentations := IdentityDictionary new
+	presentations := IdentityDictionary new.
+	fixedCoordinator := false
+]
+
+{ #category : 'presenting' }
+CFPhysicsWorldPresentation >> present [
+	self prepare ifFalse: [ ^ self ].
+	world synchroniseMembership.
+	self synchronisePresentations.
+	world bodyStatesInOrder do: #present
 ]
 
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
+	self prepare ifFalse: [ ^ self ].
 	world synchroniseMembership.
 	self synchronisePresentations.
 	world bodyStatesInOrder do: [ :each | each presentAtAlpha: aNumber ]
 ]
 
 { #category : 'private - presenting' }
+CFPhysicsWorldPresentation >> prepare [
+	| currentCoordinator |
+	fixedCoordinator ifTrue: [ ^ coordinator notNil ].
+	currentCoordinator := self resolvedCoordinator.
+	currentCoordinator ifNil: [
+		self releasePresentations.
+		coordinator := nil.
+		^ false ].
+	coordinator == currentCoordinator ifFalse: [
+		self releasePresentations.
+		coordinator := currentCoordinator ].
+	^ true
+]
+
+{ #category : 'private - presenting' }
+CFPhysicsWorldPresentation >> resolvedCoordinator [
+	| owner |
+	owner := world owner.
+	(owner notNil and: [ owner isAttachedToSceneGraph ]) ifFalse: [ ^ nil ].
+	^ owner space cfMotionCoordinator
+]
+
+{ #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> synchronisePresentations [
-	| bodyStates currentBodies |
+	| bodyStates currentBodies transformPresentation |
 	bodyStates := world bodyStatesInOrder.
 	currentBodies := IdentitySet new.
 	currentBodies addAll: bodyStates.
 	(presentations keys reject: [ :each | currentBodies includes: each ]) do: [ :each |
 		(presentations removeKey: each) release ].
 	bodyStates do: [ :each |
-		presentations at: each ifAbsentPut: [
-			| transformPresentation |
+		transformPresentation := presentations at: each ifAbsent: [ nil ].
+		(transformPresentation isNil or: [ transformPresentation isActive not ]) ifTrue: [
+			transformPresentation ifNotNil: [ transformPresentation release ].
 			transformPresentation := CFMotionTransformPresentation
 				on: each element
 				using: (coordinator transformChannelFor: each element).
-			each usePresentation: transformPresentation.
-			transformPresentation ] ]
+			presentations at: each put: transformPresentation.
+			each usePresentation: transformPresentation ] ]
 ]
 
 { #category : 'controlling' }
 CFPhysicsWorldPresentation >> release [
-	presentations keysAndValuesDo: [ :body :each |
-		body presentation release ].
+	self releasePresentations.
+	fixedCoordinator ifFalse: [ coordinator := nil ]
+]
+
+{ #category : 'private - controlling' }
+CFPhysicsWorldPresentation >> releasePresentations [
+	presentations valuesDo: [ :each | each release ].
 	presentations removeAll
 ]
 
@@ -60,4 +107,9 @@ CFPhysicsWorldPresentation >> world: aWorld [
 { #category : 'private - initialization' }
 CFPhysicsWorldPresentation >> coordinator: aCoordinator [
 	coordinator := aCoordinator
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsWorldPresentation >> useFixedCoordinator [
+	fixedCoordinator := true
 ]

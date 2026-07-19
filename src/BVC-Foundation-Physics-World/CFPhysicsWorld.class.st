@@ -10,7 +10,7 @@ Manual #step and #step: remain available for tests, tools and explicitly control
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'steppingMotion', 'presentationCoordinator' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'steppingMotion', 'presentation' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -57,8 +57,7 @@ CFPhysicsWorld >> owner [ ^ owner ]
 CFPhysicsWorld >> owner: anElement [
 	owner == anElement ifTrue: [ ^ self ].
 	self stopStepping.
-	self releasePresentations.
-	presentationCoordinator := nil.
+	self releasePresentation.
 	owner := anElement
 ]
 
@@ -136,8 +135,6 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
 	body := CFPhysicsBodyState element: anElement world: self.
 	body sequence: nextBodySequence.
-	presentationCoordinator ifNotNil: [
-		self preparePresentationFor: body in: presentationCoordinator ].
 	nextBodySequence := nextBodySequence + 1.
 	^ body
 ]
@@ -224,56 +221,27 @@ CFPhysicsWorld >> step: aPositiveInteger [
 
 
 
-{ #category : 'presenting' }
-CFPhysicsWorld >> preparePresentation [
-	| currentCoordinator |
-	currentCoordinator := (owner notNil and: [ owner isAttachedToSceneGraph ])
-		ifTrue: [ owner space cfMotionCoordinator ]
-		ifFalse: [ nil ].
-	currentCoordinator ifNil: [
-		self releasePresentations.
-		presentationCoordinator := nil.
-		^ self ].
-	self preparePresentationIn: currentCoordinator
-]
-
-{ #category : 'presenting' }
-CFPhysicsWorld >> preparePresentationIn: aCoordinator [
-	presentationCoordinator == aCoordinator ifTrue: [ ^ self ].
-	self releasePresentations.
-	presentationCoordinator := aCoordinator.
-	self bodyStatesInOrder do: [ :each |
-		self preparePresentationFor: each in: aCoordinator ]
+{ #category : 'private - presenting' }
+CFPhysicsWorld >> presentation [
+	^ presentation ifNil: [
+		presentation := CFPhysicsWorldPresentation on: self ]
 ]
 
 { #category : 'private - presenting' }
-CFPhysicsWorld >> preparePresentationFor: aBodyState in: aCoordinator [
-	| element |
-	element := aBodyState element.
-	aBodyState usePresentation:
-		(CFMotionTransformPresentation
-			on: element
-			using: (aCoordinator transformChannelFor: element))
-]
-
-{ #category : 'presenting' }
-CFPhysicsWorld >> releasePresentations [
-	bodyStates valuesDo: [ :each | each presentation release ]
+CFPhysicsWorld >> releasePresentation [
+	presentation ifNotNil: [ :aPresentation | aPresentation release ].
+	presentation := nil
 ]
 
 { #category : 'presenting' }
 CFPhysicsWorld >> present [
-	self preparePresentation.
-	self synchroniseMembership.
-	self bodyStatesInOrder do: [ :each | each present ].
+	self presentation present.
 	^ self
 ]
 
 { #category : 'presenting' }
 CFPhysicsWorld >> presentAtAlpha: aNumber [
-	self preparePresentation.
-	self synchroniseMembership.
-	self bodyStatesInOrder do: [ :each | each presentAtAlpha: aNumber ].
+	self presentation presentAtAlpha: aNumber.
 	^ self
 ]
 
@@ -293,6 +261,7 @@ CFPhysicsWorld >> startStepping [
 		^ steppingMotion ].
 	owner ifNil: [ self error: 'A Physics world needs an owner before it can start stepping' ].
 	owner space ifNil: [ self error: 'A Physics world owner must be attached to a BlSpace before it can start stepping' ].
+	self releasePresentation.
 	behaviour := CFPhysicsWorldBehaviour
 		on: self
 		presentation: (CFPhysicsWorldPresentation on: self in: owner space cfMotionCoordinator).
