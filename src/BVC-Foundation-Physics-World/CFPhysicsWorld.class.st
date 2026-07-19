@@ -10,7 +10,7 @@ Manual #step and #step: remain available for tests, tools and explicitly control
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'steppingMotion' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'steppingMotion', 'presentationCoordinator' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -57,6 +57,8 @@ CFPhysicsWorld >> owner [ ^ owner ]
 CFPhysicsWorld >> owner: anElement [
 	owner == anElement ifTrue: [ ^ self ].
 	self stopStepping.
+	self releasePresentations.
+	presentationCoordinator := nil.
 	owner := anElement
 ]
 
@@ -134,6 +136,8 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
 	body := CFPhysicsBodyState element: anElement world: self.
 	body sequence: nextBodySequence.
+	presentationCoordinator ifNotNil: [
+		self preparePresentationFor: body in: presentationCoordinator ].
 	nextBodySequence := nextBodySequence + 1.
 	^ body
 ]
@@ -221,7 +225,45 @@ CFPhysicsWorld >> step: aPositiveInteger [
 
 
 { #category : 'presenting' }
+CFPhysicsWorld >> preparePresentation [
+	| currentCoordinator |
+	currentCoordinator := (owner notNil and: [ owner isAttachedToSceneGraph ])
+		ifTrue: [ owner space cfMotionCoordinator ]
+		ifFalse: [ nil ].
+	currentCoordinator ifNil: [
+		self releasePresentations.
+		presentationCoordinator := nil.
+		^ self ].
+	self preparePresentationIn: currentCoordinator
+]
+
+{ #category : 'presenting' }
+CFPhysicsWorld >> preparePresentationIn: aCoordinator [
+	presentationCoordinator == aCoordinator ifTrue: [ ^ self ].
+	self releasePresentations.
+	presentationCoordinator := aCoordinator.
+	self bodyStatesInOrder do: [ :each |
+		self preparePresentationFor: each in: aCoordinator ]
+]
+
+{ #category : 'private - presenting' }
+CFPhysicsWorld >> preparePresentationFor: aBodyState in: aCoordinator [
+	| element |
+	element := aBodyState element.
+	aBodyState usePresentation:
+		(CFMotionTransformPresentation
+			on: element
+			using: (aCoordinator transformChannelFor: element))
+]
+
+{ #category : 'presenting' }
+CFPhysicsWorld >> releasePresentations [
+	bodyStates valuesDo: [ :each | each presentation release ]
+]
+
+{ #category : 'presenting' }
 CFPhysicsWorld >> present [
+	self preparePresentation.
 	self synchroniseMembership.
 	self bodyStatesInOrder do: [ :each | each present ].
 	^ self
@@ -229,6 +271,7 @@ CFPhysicsWorld >> present [
 
 { #category : 'presenting' }
 CFPhysicsWorld >> presentAtAlpha: aNumber [
+	self preparePresentation.
 	self synchroniseMembership.
 	self bodyStatesInOrder do: [ :each | each presentAtAlpha: aNumber ].
 	^ self

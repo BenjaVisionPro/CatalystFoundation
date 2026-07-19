@@ -79,7 +79,7 @@ CFPhysicsBodyState >> element [
 { #category : 'accessing' }
 CFPhysicsBodyState >> element: anElement [
 	element := anElement.
-	presentation := CFPhysicsPresentation on: anElement.
+	presentation := CFPhysicsPresentation new.
 	shapeState := CFPhysicsShapeState on: anElement
 ]
 
@@ -196,6 +196,12 @@ CFPhysicsBodyState >> position: aPoint [
 	previousPosition := aPoint.
 	position := aPoint.
 	self wake
+]
+
+
+{ #category : 'presenting' }
+CFPhysicsBodyState >> usePresentation: aPresentation [
+	presentation use: aPresentation
 ]
 
 { #category : 'accessing' }

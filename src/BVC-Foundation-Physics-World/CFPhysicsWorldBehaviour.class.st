@@ -55,6 +55,7 @@ CFPhysicsWorldBehaviour >> initialize [
 
 { #category : 'playing' }
 CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
+	world preparePresentationIn: aCoordinator.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
 	active := true

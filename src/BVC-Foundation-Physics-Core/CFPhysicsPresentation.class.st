@@ -1,27 +1,10 @@
 Class {
 	#name : 'CFPhysicsPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'presentation', 'space' ],
+	#instVars : [ 'presentation' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
-
-{ #category : 'instance creation' }
-CFPhysicsPresentation class >> on: anElement [
-	^ self new
-		element: anElement;
-		yourself
-]
-
-{ #category : 'accessing' }
-CFPhysicsPresentation >> element [
-	^ element
-]
-
-{ #category : 'accessing' }
-CFPhysicsPresentation >> element: anElement [
-	element := anElement
-]
 
 { #category : 'testing' }
 CFPhysicsPresentation >> isAttached [
@@ -41,7 +24,6 @@ CFPhysicsPresentation >> presentation [
 
 { #category : 'presenting' }
 CFPhysicsPresentation >> presentTranslation: aPoint rotation: aNumber [
-	self synchroniseSpace.
 	presentation ifNotNil: [
 		presentation translation: aPoint rotation: aNumber ]
 ]
@@ -50,21 +32,12 @@ CFPhysicsPresentation >> presentTranslation: aPoint rotation: aNumber [
 CFPhysicsPresentation >> release [
 	presentation ifNotNil: [ :aPresentation |
 		aPresentation release ].
-	presentation := nil.
-	space := nil
+	presentation := nil
 ]
 
-{ #category : 'private - space' }
-CFPhysicsPresentation >> synchroniseSpace [
-	| currentSpace |
-	currentSpace := element isAttachedToSceneGraph
-		ifTrue: [ element space ]
-		ifFalse: [ nil ].
-	currentSpace == space ifTrue: [ ^ self ].
+{ #category : 'controlling' }
+CFPhysicsPresentation >> use: aPresentation [
+	presentation == aPresentation ifTrue: [ ^ self ].
 	self release.
-	currentSpace ifNil: [ ^ self ].
-	space := currentSpace.
-	presentation := CFMotionTransformPresentation
-		on: element
-		using: (space cfMotionCoordinator transformChannelFor: element)
+	presentation := aPresentation
 ]
