@@ -78,6 +78,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Physics-Pipeline'
 		'BVC-Foundation-Physics-Bloc'
 		'BVC-Foundation-Physics-World'
+		'BVC-Foundation-Physics-Motion'
 		'BVC-Foundation-Physics-Tools'
 		'BVC-Foundation-Physics-Examples'
 		'BVC-Foundation-Physics-Tests'
@@ -102,17 +103,19 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Physics-Collision'.
 	spec package: 'BVC-Foundation-Physics-Core'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Collision') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Collision') ].
 	spec package: 'BVC-Foundation-Physics-Pipeline'
 		with: [ spec requires: #('BVC-Foundation-Physics-Collision' 'BVC-Foundation-Physics-Core') ].
 	spec package: 'BVC-Foundation-Physics-Bloc'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Collision') ].
 	spec package: 'BVC-Foundation-Physics-World'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc') ].
+	spec package: 'BVC-Foundation-Physics-Motion'
+		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-World') ].
 	spec package: 'BVC-Foundation-Physics-Tools'
 		with: [ spec requires: #('BVC-Foundation-Physics-World') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
-		with: [ spec requires: #('BVC-Foundation-Physics-World' 'BVC-Foundation-Physics-Tools') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-World' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-Physics-Tests'
 		with: [ spec requires: #('BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-World' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-UI-Animation'.

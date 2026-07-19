@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsWorldPresentation',
 	#superclass : 'Object',
 	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Motion',
+	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'instance creation' }

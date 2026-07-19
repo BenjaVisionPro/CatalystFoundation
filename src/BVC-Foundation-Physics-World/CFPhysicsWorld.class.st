@@ -1,11 +1,9 @@
 "
 I am the deterministic Physics simulation owned by one Bloc element.
 
-I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step is the simulation primitive: it synchronises membership and advances the pipeline by one fixed #stepDuration. Presentation is explicit and separate.
+I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step synchronises membership and advances the pipeline by one fixed #stepDuration. I do not schedule frames or own visual presentation resources.
 
-For continuous presentation playback I retain one CFPhysicsWorldPlayback collaborator. It owns the indefinite Motion, Physics Behaviour and continuous world presentation. #startStepping, #pauseStepping, #resumeStepping and #stopStepping delegate to that boundary. I do not assemble Motion timelines or create a second clock or task. CFMotionCoordinator remains the sole presentation-frame driver.
-
-Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They neither present nor implicitly start or alter continuous playback. #stepAndPresent is the explicit convenience when both operations are required. Manual presentation is unavailable while continuous playback is running or paused, so one world never has competing presentation owners.
+Motion-backed presentation and continuous playback are optional integration capabilities supplied by BVC-Foundation-Physics-Motion.
 "
 Class {
 	#name : 'CFPhysicsWorld',
@@ -44,6 +42,7 @@ CFPhysicsWorld >> initialize [
 	nextRepulsionSequence := 1.
 	containmentConstraints := IdentitySet new.
 	playback := nil.
+	presentation := nil.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -56,8 +55,9 @@ CFPhysicsWorld >> owner [ ^ owner ]
 { #category : 'accessing' }
 CFPhysicsWorld >> owner: anElement [
 	owner == anElement ifTrue: [ ^ self ].
-	self stopStepping.
-	self releasePresentation.
+	playback ifNotNil: [ :aPlayback | aPlayback stop ].
+	presentation ifNotNil: [ :aPresentation | aPresentation release ].
+	presentation := nil.
 	owner := anElement
 ]
 
@@ -218,80 +218,6 @@ CFPhysicsWorld >> step: aPositiveInteger [
 	^ lastStepResult
 ]
 
-
-
-{ #category : 'private - presenting' }
-CFPhysicsWorld >> presentation [
-	self isStepping ifTrue: [
-		self error: 'Manual Physics presentation is unavailable during continuous stepping' ].
-	^ presentation ifNil: [
-		presentation := CFPhysicsWorldPresentation on: self ]
-]
-
-{ #category : 'private - presenting' }
-CFPhysicsWorld >> releasePresentation [
-	presentation ifNotNil: [ :aPresentation | aPresentation release ].
-	presentation := nil
-]
-
-{ #category : 'presenting' }
-CFPhysicsWorld >> present [
-	self presentation present.
-	^ self
-]
-
-{ #category : 'presenting' }
-CFPhysicsWorld >> presentAtAlpha: aNumber [
-	self presentation presentAtAlpha: aNumber.
-	^ self
-]
-
-{ #category : 'stepping' }
-CFPhysicsWorld >> stepAndPresent [
-	| result manualPresentation |
-	manualPresentation := self presentation.
-	result := self step.
-	manualPresentation present.
-	^ result
-]
-
-{ #category : 'continuous stepping' }
-CFPhysicsWorld >> startStepping [
-	^ self playback start
-]
-
-{ #category : 'continuous stepping' }
-CFPhysicsWorld >> pauseStepping [
-	playback ifNotNil: [ :aPlayback | aPlayback pause ].
-	^ self
-]
-
-{ #category : 'continuous stepping' }
-CFPhysicsWorld >> resumeStepping [
-	playback ifNotNil: [ :aPlayback | aPlayback resume ].
-	^ self
-]
-
-{ #category : 'continuous stepping' }
-CFPhysicsWorld >> stopStepping [
-	playback ifNotNil: [ :aPlayback | aPlayback stop ].
-	^ self
-]
-
-{ #category : 'continuous stepping' }
-CFPhysicsWorld >> steppingMotion [
-	^ playback ifNil: [ nil ] ifNotNil: [ :aPlayback | aPlayback motion ]
-]
-
-{ #category : 'testing' }
-CFPhysicsWorld >> isStepping [
-	^ playback notNil and: [ playback isActive ]
-]
-
-{ #category : 'private - continuous stepping' }
-CFPhysicsWorld >> playback [
-	^ playback ifNil: [ playback := CFPhysicsWorldPlayback on: self ]
-]
 
 
 { #category : 'sleeping' }

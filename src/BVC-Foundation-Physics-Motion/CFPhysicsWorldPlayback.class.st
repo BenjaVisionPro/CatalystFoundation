@@ -9,8 +9,8 @@ Class {
 	#name : 'CFPhysicsWorldPlayback',
 	#superclass : 'Object',
 	#instVars : [ 'world', 'motion', 'presentation' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Motion',
+	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'instance creation' }

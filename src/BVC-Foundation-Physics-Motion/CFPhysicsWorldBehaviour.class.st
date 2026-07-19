@@ -13,8 +13,8 @@ Class {
 	#name : 'CFPhysicsWorldBehaviour',
 	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'presentation' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Motion',
+	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'instance creation' }
