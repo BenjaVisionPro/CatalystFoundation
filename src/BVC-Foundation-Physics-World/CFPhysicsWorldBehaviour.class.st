@@ -12,7 +12,7 @@ My animation target is the world's owner element. Normal Motion validity therefo
 Class {
 	#name : 'CFPhysicsWorldBehaviour',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active' ],
+	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'presentation' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -21,6 +21,14 @@ Class {
 CFPhysicsWorldBehaviour class >> on: aPhysicsWorld [
 	^ self new
 		world: aPhysicsWorld;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CFPhysicsWorldBehaviour class >> on: aPhysicsWorld presentation: aPresentation [
+	^ self new
+		world: aPhysicsWorld;
+		presentation: aPresentation;
 		yourself
 ]
 
@@ -42,7 +50,8 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 	[ accumulatedTime >= stepDuration ] whileTrue: [
 		world step.
 		accumulatedTime := accumulatedTime - stepDuration ].
-	world presentAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
+	(presentation ifNil: [ world ])
+		presentAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
 ]
 
 { #category : 'initialization' }
@@ -62,6 +71,7 @@ CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
 
 { #category : 'playing' }
 CFPhysicsWorldBehaviour >> playbackEndedWith: aMotionState [
+	presentation ifNotNil: [ presentation release ].
 	active := false.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds
@@ -98,4 +108,9 @@ CFPhysicsWorldBehaviour >> world [
 { #category : 'private - initialization' }
 CFPhysicsWorldBehaviour >> world: aPhysicsWorld [
 	world := aPhysicsWorld
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsWorldBehaviour >> presentation: aPresentation [
+	presentation := aPresentation
 ]

@@ -293,7 +293,9 @@ CFPhysicsWorld >> startStepping [
 		^ steppingMotion ].
 	owner ifNil: [ self error: 'A Physics world needs an owner before it can start stepping' ].
 	owner space ifNil: [ self error: 'A Physics world owner must be attached to a BlSpace before it can start stepping' ].
-	behaviour := CFPhysicsWorldBehaviour on: self.
+	behaviour := CFPhysicsWorldBehaviour
+		on: self
+		presentation: (CFPhysicsWorldPresentation on: self in: owner space cfMotionCoordinator).
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := CFMotion timeline: timeline coordinator: owner space cfMotionCoordinator.
