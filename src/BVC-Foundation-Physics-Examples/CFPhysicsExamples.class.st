@@ -413,3 +413,86 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	self assert: body transformation == applicationTransformation.
 	^ channel
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
+	<gtExample>
+	| space host body world state |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	world := host physics beWorld.
+	world synchroniseMembership.
+	state := world bodyStateFor: body.
+	self assert: state presentation isAttached not.
+	state position: 40 @ 20.
+	state rotation: Float pi / 4.0.
+	state translation: 60 @ 30 rotation: Float pi / 2.0.
+	self assert: state position equals: 60 @ 30.
+	self assert: state rotation equals: Float pi / 2.0.
+	self assert: state presentation isAttached not.
+	world present.
+	self assert: state presentation isAttached.
+	state presentation release.
+	^ state
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
+	<gtExample>
+	| space host body world state initialPosition |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	world := host physics beWorld.
+	world
+		gravity: 0 @ 0;
+		stepDuration: 10 milliSeconds;
+		synchroniseMembership.
+	state := world bodyStateFor: body.
+	state
+		position: 20 @ 20;
+		velocity: 100 @ 0.
+	initialPosition := state position.
+	world step: 2.
+	self assert: state position x > initialPosition x.
+	self assert: state presentation isAttached not.
+	world present.
+	self assert: state presentation isAttached.
+	state presentation release.
+	^ world
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> stepAndPresentRemainsExplicit [
+	<gtExample>
+	| space host body world state initialPosition result |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	world := host physics beWorld.
+	world
+		gravity: 0 @ 0;
+		stepDuration: 10 milliSeconds;
+		synchroniseMembership.
+	state := world bodyStateFor: body.
+	state
+		position: 20 @ 20;
+		velocity: 100 @ 0.
+	initialPosition := state position.
+	result := world stepAndPresent.
+	self assert: result == world lastStepResult.
+	self assert: state position x > initialPosition x.
+	self assert: state presentation isAttached.
+	state presentation release.
+	^ result
+]
