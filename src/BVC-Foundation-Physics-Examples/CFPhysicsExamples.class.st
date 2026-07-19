@@ -498,7 +498,7 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 { #category : 'examples - motion integration' }
 CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 	<gtExample>
-	| space owner world motion stepResultBeforeAttempt |
+	| space owner world motion stepResultBeforeAttempt presentError stepAndPresentError |
 	space := BlSpace new.
 	space time: BlTime simulated.
 	owner := BlElement new size: 320 @ 200.
@@ -508,14 +508,20 @@ CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 	motion := world startStepping.
 	space pulse.
 	stepResultBeforeAttempt := world lastStepResult.
-	self
-		should: [ world present ]
-		raise: Error.
+	presentError := [
+		world present.
+		nil ]
+		on: Error
+		do: [ :anError | anError ].
+	self assert: presentError notNil.
 	self assert: world lastStepResult == stepResultBeforeAttempt.
 	world pauseStepping.
-	self
-		should: [ world stepAndPresent ]
-		raise: Error.
+	stepAndPresentError := [
+		world stepAndPresent.
+		nil ]
+		on: Error
+		do: [ :anError | anError ].
+	self assert: stepAndPresentError notNil.
 	self assert: world lastStepResult == stepResultBeforeAttempt.
 	world stopStepping.
 	world present.
