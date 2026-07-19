@@ -2334,3 +2334,80 @@ CFMotionExamples >> finish: anOperation in: aSpace [
 	aSpace pulse.
 	^ anOperation
 ]
+
+{ #category : 'examples - frame driver' }
+CFMotionExamples >> coordinatorAdvancesActiveMotionsWithOneSharedFrame [
+	<gtExample>
+	| space coordinator firstMotion secondMotion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	coordinator := space cfMotionCoordinator.
+	firstMotion := CFMotionFrameRecorder new.
+	secondMotion := CFMotionFrameRecorder new.
+	coordinator play: firstMotion.
+	coordinator play: secondMotion.
+	space pulse.
+	self assert: firstMotion frames size equals: 1.
+	self assert: secondMotion frames size equals: 1.
+	self assert: firstMotion frames first == secondMotion frames first.
+	self assert: firstMotion frames first elapsedTime equals: 0 milliSeconds.
+	self assert: coordinator frameDriver isActive.
+	^ coordinator
+]
+
+{ #category : 'examples - frame driver' }
+CFMotionExamples >> coordinatorFrameDriverUsesSpaceTime [
+	<gtExample>
+	| space coordinator motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	coordinator := space cfMotionCoordinator.
+	motion := CFMotionFrameRecorder new.
+	coordinator play: motion.
+	space pulse.
+	space time wait: 17 milliSeconds.
+	space pulse.
+	self assert: motion frames size equals: 2.
+	self assert: motion frames second elapsedTime equals: 17 milliSeconds.
+	self assert: motion frames second absoluteTime equals: space time now.
+	^ motion
+]
+
+{ #category : 'examples - frame driver' }
+CFMotionExamples >> coordinatorFrameDriverIdlesWithoutActiveMotions [
+	<gtExample>
+	| space coordinator motion frameCount |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	coordinator := space cfMotionCoordinator.
+	motion := CFMotionFrameRecorder new.
+	coordinator play: motion.
+	space pulse.
+	frameCount := motion frames size.
+	coordinator removeActiveMotion: motion.
+	self assert: coordinator hasActiveMotions not.
+	self assert: coordinator frameDriver isActive not.
+	space time wait: 17 milliSeconds.
+	space pulse.
+	self assert: motion frames size equals: frameCount.
+	^ coordinator
+]
+
+{ #category : 'examples - frame driver' }
+CFMotionExamples >> coordinatorFrameDriverResetsElapsedTimeAfterInactivity [
+	<gtExample>
+	| space coordinator firstMotion secondMotion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	coordinator := space cfMotionCoordinator.
+	firstMotion := CFMotionFrameRecorder new.
+	coordinator play: firstMotion.
+	space pulse.
+	coordinator removeActiveMotion: firstMotion.
+	space time wait: 3 seconds.
+	secondMotion := CFMotionFrameRecorder new.
+	coordinator play: secondMotion.
+	space pulse.
+	self assert: secondMotion frames first elapsedTime equals: 0 milliSeconds.
+	^ secondMotion
+]
