@@ -1,39 +1,12 @@
+"
+I am the abstract base for the existing property and transform Behaviours.
+
+My historical class name remains while the presentation implementations are migrated. Semantically, my subclasses are Behaviours: they own what is presented and are evaluated by temporal tracks.
+"
 Class {
 	#name : 'CFMotionTrack',
-	#superclass : 'Object',
+	#superclass : 'CFMotionBehaviour',
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
 
-{ #category : 'accessing' }
-CFMotionTrack >> animationTarget [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> applyDestination [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> applyProgress: aProgress [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> captureOrigin [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> captureOriginIn: aCoordinator [ self captureOrigin ]
-
-{ #category : 'accessing' }
-CFMotionTrack >> propertyKey [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> preserveCurrentPresentation [ ]
-
-{ #category : 'playing' }
-CFMotionTrack >> prepareFromCurrentPresentation [ self subclassResponsibility ]
-
-{ #category : 'playing' }
-CFMotionTrack >> restoreOrigin [ self subclassResponsibility ]
-
-{ #category : 'controlling' }
-CFMotionTrack >> reversed [ self subclassResponsibility ]
-
-{ #category : 'private - validation' }
-CFMotionTrack >> validateForExecution [ ]

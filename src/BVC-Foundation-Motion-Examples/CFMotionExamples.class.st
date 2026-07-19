@@ -549,9 +549,9 @@ CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
 	space time wait: 500 milliSeconds.
 	space pulse.
 	self assert: (element opacity closeTo: 1.0).
-	self assert: (translation motionTrack presentation translation x
+	self assert: (translation behaviour presentation translation x
 		closeTo: 40.0 * (easing interpolate: 0.5)).
-	self assert: (scale motionTrack presentation scale x
+	self assert: (scale behaviour presentation scale x
 		closeTo: 1.0 + (0.2 * (easing interpolate: 0.75))).
 	self assert: motion isRunning.
 	space time wait: 600 milliSeconds.
@@ -2560,7 +2560,7 @@ CFMotionExamples >> timelineEvaluatesOverlappingTracksAtOnePosition [
 	space pulse.
 	self assert: timeline elapsedTime equals: 50 milliSeconds.
 	self assert: (element opacity closeTo: 0.5).
-	self assert: (scaleTrack motionTrack presentation scale closeTo: 1.5 @ 1.5).
+	self assert: (scaleTrack behaviour presentation scale closeTo: 1.5 @ 1.5).
 	self assert: motion isRunning.
 	^ timeline
 ]
@@ -2590,4 +2590,33 @@ CFMotionExamples >> timelineClampsAtItsResolvedEndAndCompletesMotion [
 	self assert: motion isCompleted.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ motion
+]
+
+
+{ #category : 'examples - behaviours' }
+CFMotionExamples >> timelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
+	<gtExample>
+	| space element timeline timelineTrack behaviour motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	behaviour := CFMotionPropertyTrack
+		on: element
+		property: CFMotionOpacityProperty uniqueInstance
+		target: 1.0.
+	timeline := CFMotionTimeline new.
+	timelineTrack := (CFMotionTimelineTrack on: behaviour in: timeline)
+		starts: 20 milliSeconds after: timeline start;
+		duration: 100 milliSeconds;
+		easing: BlEasing linear.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 70 milliSeconds.
+	space pulse.
+	self assert: timeline elapsedTime equals: 70 milliSeconds.
+	self assert: (element opacity closeTo: 0.5).
+	self assert: timelineTrack behaviour == behaviour.
+	self assert: motion isRunning.
+	^ timelineTrack
 ]

@@ -1,14 +1,14 @@
 "
-I place one visual Motion track within a CFMotionTimeline.
+I place one CFMotionBehaviour within a CFMotionTimeline.
 
 I own the track's temporal anchors, offsets, duration, easing and resolved start and end times. At runtime the timeline gives me an absolute playback position. I decide whether my visual track has not started, is active, or has finished, then apply the corresponding local progress.
 
-I do not own a clock or lifecycle. The timeline owns playback position; the wrapped visual track owns presentation.
+I do not own a clock or lifecycle. The timeline owns playback position; the Behaviour owns presentation.
 "
 Class {
 	#name : 'CFMotionTimelineTrack',
-	#superclass : 'CFMotionTrack',
-	#instVars : [ 'timeline', 'motionTrack', 'duration', 'easing', 'repeatInterval', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
+	#superclass : 'Object',
+	#instVars : [ 'timeline', 'behaviour', 'duration', 'easing', 'repeatInterval', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -21,27 +21,34 @@ CFMotionTimelineTrack class >> in: aTimeline [
 ]
 
 { #category : 'instance creation' }
-CFMotionTimelineTrack class >> on: aMotionTrack in: aTimeline [
+CFMotionTimelineTrack class >> on: aBehaviour in: aTimeline [
 	^ (self in: aTimeline)
-		motionTrack: aMotionTrack;
+		behaviour: aBehaviour;
 		yourself
 ]
 
 { #category : 'accessing' }
 CFMotionTimelineTrack >> animationTarget [
-	^ motionTrack animationTarget
+	^ behaviour animationTarget
 ]
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> applyDestination [
-	motionTrack applyDestination
+	behaviour applyDestination
 ]
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> applyAt: anElapsedTime [
+	| localTime progress |
 	anElapsedTime < resolvedStart ifTrue: [ ^ self ].
-	anElapsedTime >= resolvedEnd ifTrue: [ ^ motionTrack applyProgress: 1.0 ].
-	motionTrack applyProgress: (easing interpolate: (anElapsedTime - resolvedStart) / duration)
+	localTime := (anElapsedTime - resolvedStart) max: 0 milliSeconds.
+	progress := anElapsedTime >= resolvedEnd
+		ifTrue: [ 1.0 ]
+		ifFalse: [ easing interpolate: localTime / duration ].
+	behaviour evaluate: (CFMotionEvaluation
+		timelineTime: anElapsedTime
+		localTime: (localTime min: duration)
+		progress: progress)
 ]
 
 { #category : 'playing' }
@@ -51,12 +58,12 @@ CFMotionTimelineTrack >> applyProgress: aProgress [
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> captureOrigin [
-	motionTrack captureOrigin
+	behaviour captureOrigin
 ]
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> captureOriginIn: aCoordinator [
-	motionTrack captureOriginIn: aCoordinator
+	behaviour captureOriginIn: aCoordinator
 ]
 
 { #category : 'private - resolving' }
@@ -148,28 +155,28 @@ CFMotionTimelineTrack >> isFinite [
 
 { #category : 'testing' }
 CFMotionTimelineTrack >> isAtDestination [
-	^ resolvedStart = (0 milliSeconds) and: [ motionTrack isAtDestination ]
+	^ resolvedStart = (0 milliSeconds) and: [ behaviour isAtDestination ]
 ]
 
 { #category : 'accessing' }
-CFMotionTimelineTrack >> motionTrack [
-	^ motionTrack
+CFMotionTimelineTrack >> behaviour [
+	^ behaviour
 ]
 
 { #category : 'private - initialization' }
-CFMotionTimelineTrack >> motionTrack: aMotionTrack [
-	motionTrack := aMotionTrack.
+CFMotionTimelineTrack >> behaviour: aBehaviour [
+	behaviour := aBehaviour.
 	^ self
 ]
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> preserveCurrentPresentation [
-	motionTrack preserveCurrentPresentation
+	behaviour preserveCurrentPresentation
 ]
 
 { #category : 'accessing' }
 CFMotionTimelineTrack >> propertyKey [
-	^ motionTrack propertyKey
+	^ behaviour propertyKey
 ]
 
 { #category : 'testing' }
@@ -261,7 +268,7 @@ CFMotionTimelineTrack >> repeatsEvery: anInterval [
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> prepareFromCurrentPresentation [
-	motionTrack prepareFromCurrentPresentation
+	behaviour prepareFromCurrentPresentation
 ]
 
 { #category : 'accessing' }
@@ -276,12 +283,12 @@ CFMotionTimelineTrack >> resolvedStart [
 
 { #category : 'playing' }
 CFMotionTimelineTrack >> restoreOrigin [
-	motionTrack restoreOrigin
+	behaviour restoreOrigin
 ]
 
 { #category : 'controlling' }
 CFMotionTimelineTrack >> reversed [
-	^ self class on: motionTrack reversed in: timeline
+	^ self class on: behaviour reversed in: timeline
 ]
 
 { #category : 'accessing' }
@@ -337,6 +344,6 @@ CFMotionTimelineTrack >> validateAnchor: anAnchor [
 CFMotionTimelineTrack >> validateForExecution [
 	repeatInterval ifNotNil: [
 		self error: 'Repeated Motion tracks are not executable yet' ].
-	motionTrack ifNil: [
+	behaviour ifNil: [
 		self error: 'A Motion timeline track needs a visual track before it can execute' ]
 ]
