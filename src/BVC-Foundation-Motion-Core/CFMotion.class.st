@@ -10,7 +10,7 @@ Stopping preserves the current presentation. Explicit cancellation variants may 
 Class {
 	#name : 'CFMotion',
 	#superclass : 'Object',
-	#instVars : [ 'coordinator', 'timeline', 'tracks', 'duration', 'easing', 'elapsedTime', 'state', 'trace', 'terminalHandlers', 'holdAtDestination', 'componentMotions' ],
+	#instVars : [ 'coordinator', 'timeline', 'tracks', 'duration', 'easing', 'elapsedTime', 'state', 'terminalHandlers', 'holdAtDestination', 'componentMotions' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -47,7 +47,6 @@ CFMotion >> initialize [
 	easing := BlDecelerateInterpolator factor: 1.4.
 	elapsedTime := 0 milliSeconds.
 	state := CFMotionState idle.
-	trace := CFMotionTrace new.
 	terminalHandlers := OrderedCollection new.
 	holdAtDestination := false.
 	componentMotions := OrderedCollection new
@@ -83,7 +82,6 @@ CFMotion >> cancelSettlingAtEnd [
 CFMotion >> cancelComponentMotionsWith: aSelector [
 	state isTerminal ifTrue: [ ^ self ].
 	state := CFMotionState cancelled.
-	trace record: #cancelled for: self.
 	componentMotions do: [ :each | each perform: aSelector ].
 	self notifyTerminalHandlers.
 	^ self
@@ -95,7 +93,6 @@ CFMotion >> cancelApplying: aBlock [
 	coordinator removeActiveMotion: self.
 	tracks do: aBlock.
 	state := CFMotionState cancelled.
-	trace record: #cancelled for: self.
 	tracks do: [ :each | each playbackEndedWith: state ].
 	self releaseClaims.
 	self notifyTerminalHandlers.
@@ -108,17 +105,14 @@ CFMotion >> complete [
 	coordinator ifNotNil: [ coordinator removeActiveMotion: self ].
 	(self hasComponentMotions) ifTrue: [
 		state := CFMotionState completed.
-		trace record: #completed for: self.
 		self notifyTerminalHandlers.
 		^ self ].
 	holdAtDestination ifTrue: [
 		state := CFMotionState settled.
-		trace record: #settled for: self.
 		tracks do: [ :each | each playbackEndedWith: state ].
 		^ self ].
 	tracks do: [ :each | each applyDestination ].
 	state := CFMotionState completed.
-	trace record: #completed for: self.
 	tracks do: [ :each | each playbackEndedWith: state ].
 	self releaseClaims.
 	self notifyTerminalHandlers
@@ -189,13 +183,11 @@ CFMotion >> onTerminalDo: aBlock [
 CFMotion >> claimTracks [
 	tracks do: [ :each |
 		each propertyKey ifNotNil: [ :aKey | coordinator claim: aKey for: self ] ].
-	trace record: #claimed for: self
 ]
 
 { #category : 'private - ownership' }
 CFMotion >> releaseClaims [
 	coordinator releaseAllFor: self.
-	trace record: #cleanedUp for: self
 ]
 
 { #category : 'playing' }
@@ -214,7 +206,6 @@ CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator 
 	easing := anInterpolator.
 	requestedTracks with: ownedTracks do: [ :each :ownedTrack |
 		ownedTrack targetValue: each targetValue.
-		trace record: #retargeted for: self track: ownedTrack ].
 	self startFromCurrentPresentation.
 	^ self
 ]
@@ -247,9 +238,8 @@ CFMotion >> startComponentMotions [
 	state isTerminal ifTrue: [ self error: 'A completed Motion cannot start again' ].
 	(state == CFMotionState running) ifTrue: [ self error: 'A Motion cannot start while it is already running' ].
 	state := CFMotionState running.
-	trace record: #started for: self.
 	componentMotions do: [ :each |
-		each onTerminalDo: [ :anOperation | self finishComponentMotionsIfTerminal ].
+		each onTerminalDo: [ :anMotion | self finishComponentMotionsIfTerminal ].
 		each start ].
 	self finishComponentMotionsIfTerminal.
 	^ self
@@ -262,7 +252,6 @@ CFMotion >> finishComponentMotionsIfTerminal [
 	(componentMotions anySatisfy: #isCancelled)
 		ifTrue: [
 			state := CFMotionState cancelled.
-			trace record: #cancelled for: self.
 			self notifyTerminalHandlers ]
 		ifFalse: [ self complete ]
 ]
@@ -275,7 +264,6 @@ CFMotion >> startFromCurrentPresentation [
 		ifNil: [ elapsedTime := 0 milliSeconds ]
 		ifNotNil: [ timeline prepareForPlayback ].
 	state := CFMotionState running.
-	trace record: #started for: self.
 	(timeline isNil and: [ tracks allSatisfy: [ :each | each isAtDestination ] ]) ifTrue: [
 		^ self complete ].
 	coordinator play: self
@@ -305,7 +293,6 @@ CFMotion >> pause [
 	state == CFMotionState running ifFalse: [ ^ self ].
 	coordinator removeActiveMotion: self.
 	state := CFMotionState paused.
-	trace record: #paused for: self.
 	^ self
 ]
 
@@ -313,7 +300,6 @@ CFMotion >> pause [
 CFMotion >> resume [
 	state == CFMotionState paused ifFalse: [ ^ self ].
 	state := CFMotionState running.
-	trace record: #resumed for: self.
 	coordinator play: self.
 	^ self
 ]
@@ -342,9 +328,6 @@ CFMotion >> timeline: aTimeline [
 
 { #category : 'accessing' }
 CFMotion >> state [ ^ state ]
-
-{ #category : 'accessing' }
-CFMotion >> trace [ ^ trace ]
 
 { #category : 'accessing' }
 CFMotion >> tracks [ ^ tracks asArray ]

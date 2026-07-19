@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionRotationTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'sourceRotation', 'targetRotation', 'startRotation', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'

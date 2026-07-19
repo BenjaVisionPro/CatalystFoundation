@@ -5,8 +5,8 @@ Class {
 	#name : 'CFMotionFrameRecorder',
 	#superclass : 'Object',
 	#instVars : [ 'frames' ],
-	#category : 'BVC-Foundation-Motion-Examples',
-	#package : 'BVC-Foundation-Motion-Examples'
+	#category : 'BVC-Foundation-Motion-Tests',
+	#package : 'BVC-Foundation-Motion-Tests'
 }
 
 { #category : 'playing' }

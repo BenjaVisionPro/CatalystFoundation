@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionTranslationTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'sourceTranslation', 'targetTranslation', 'startTranslation', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'

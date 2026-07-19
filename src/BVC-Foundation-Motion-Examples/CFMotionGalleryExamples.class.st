@@ -6,58 +6,6 @@ Class {
 }
 
 { #category : 'examples - gallery' }
-CFMotionGalleryExamples >> adoption [
-	<gtExample>
-	| card source destination preview committed currentMotion |
-	card := BlElement new
-		size: 330 @ 180;
-		background: (Color purple alpha: 0.10);
-		clipChildren: true;
-		yourself.
-	source := BlElement new
-		size: 145 @ 110;
-		relocate: 10 @ 56;
-		background: (Color blue alpha: 0.10);
-		clipChildren: true;
-		yourself.
-	destination := BlElement new
-		size: 145 @ 110;
-		relocate: 175 @ 56;
-		background: (Color green alpha: 0.10);
-		clipChildren: true;
-		yourself.
-	card addChild: (self label: 'Adoption' at: 12 @ 12 size: 16 color: Color black).
-	card addChild: (self label: 'Click source to hand the preview to destination.' at: 12 @ 34 size: 10 color: Color gray).
-	card addChild: (self label: 'source' at: 12 @ 164 size: 9 color: Color blue).
-	card addChild: (self label: 'destination' at: 177 @ 164 size: 9 color: Color green).
-	card addChildren: { source. destination }.
-	preview := BlElement new
-		size: 80 @ 50;
-		relocate: 32 @ 30;
-		background: Color purple;
-		yourself.
-	source addChild: preview.
-	source when: BlClickEvent do: [ :anEvent |
-		currentMotion ifNotNil: [ currentMotion cancel ].
-		preview hasParent ifFalse: [
-			preview := BlElement new
-				size: 80 @ 50;
-				relocate: 32 @ 30;
-				background: Color purple;
-				yourself.
-			source addChild: preview ].
-		committed := BlElement new
-			size: 80 @ 50;
-			relocate: 32 @ 30;
-			background: Color purple;
-			yourself.
-		currentMotion := (destination motion
-			duration: 700 milliSeconds;
-			adopt: preview as: committed from: source) ].
-	^ card
-]
-
-{ #category : 'examples - gallery' }
 CFMotionGalleryExamples >> crossFade [
 	<gtExample>
 	| card outgoing incoming active currentMotion |

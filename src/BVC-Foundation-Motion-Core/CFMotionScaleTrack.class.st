@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionScaleTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'sourceScale', 'targetScale', 'startScale', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'

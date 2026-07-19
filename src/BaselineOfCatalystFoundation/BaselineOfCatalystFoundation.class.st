@@ -71,8 +71,8 @@ BaselineOfCatalystFoundation >> defineGemStoneGroupsOn: spec [
 BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 	spec group: 'ui' with: #(
 		'BVC-Foundation-Motion-Core'
-		'BVC-Foundation-Motion-Effects'
 		'BVC-Foundation-Motion-Examples'
+		'BVC-Foundation-Motion-Tests'
 		'BVC-Foundation-Physics-Collision'
 		'BVC-Foundation-Physics-Core'
 		'BVC-Foundation-Physics-Pipeline'
@@ -96,10 +96,10 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		baseline: 'Gt4FontAwesome'
 		with: [ spec repository: 'git@github.com:BenjaVisionPro/gt4FontAwesome.git' ].
 	spec package: 'BVC-Foundation-Motion-Core'.
-	spec package: 'BVC-Foundation-Motion-Effects'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Motion-Examples'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Motion-Effects') ].
+		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
+	spec package: 'BVC-Foundation-Motion-Tests'
+		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Physics-Collision'.
 	spec package: 'BVC-Foundation-Physics-Core'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Collision') ].

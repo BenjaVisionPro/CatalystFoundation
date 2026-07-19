@@ -5,8 +5,8 @@ Class {
 	#name : 'CFMotionLifecycleRecorder',
 	#superclass : 'CFMotionEvaluationRecorder',
 	#instVars : [ 'coordinators', 'terminalStates' ],
-	#category : 'BVC-Foundation-Motion-Examples',
-	#package : 'BVC-Foundation-Motion-Examples'
+	#category : 'BVC-Foundation-Motion-Tests',
+	#package : 'BVC-Foundation-Motion-Tests'
 }
 
 { #category : 'initialization' }

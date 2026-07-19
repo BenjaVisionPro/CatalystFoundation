@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFMotionLayoutTransaction',
 	#superclass : 'Object',
-	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'readiness', 'operation', 'phase', 'fadeInElements' ],
+	#instVars : [ 'container', 'coordinateSpace', 'participants', 'mutation', 'duration', 'easing', 'sourceSnapshots', 'destinationSnapshots', 'readiness', 'motion', 'phase', 'fadeInElements' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -20,11 +20,11 @@ CFMotionLayoutTransaction >> affecting: aCollection [
 { #category : 'controlling' }
 CFMotionLayoutTransaction >> cancel [
 	readiness ifNotNil: [ readiness cancel ].
-	operation
+	motion
 		ifNil: [ phase := #cancelled ]
 		ifNotNil: [
-			operation cancel.
-			phase := operation state ].
+			motion cancel.
+			phase := motion state ].
 	^ self
 ]
 
@@ -69,14 +69,14 @@ CFMotionLayoutTransaction >> captureDestinationAndStart [
 			on: each
 			property: CFMotionOpacityProperty uniqueInstance
 			target: 1.0) ].
-	operation := CFMotion
+	motion := CFMotion
 		coordinator: coordinator
 		tracks: tracks.
 	phase := #running.
-	operation
+	motion
 		duration: duration;
 		easing: easing;
-		onTerminalDo: [ :anOperation | phase := anOperation state ];
+		onTerminalDo: [ :anMotion | phase := anMotion state ];
 		start.
 ]
 
@@ -179,7 +179,7 @@ CFMotionLayoutTransaction >> move: anElement from: aSourceContainer to: aDestina
 ]
 
 { #category : 'accessing' }
-CFMotionLayoutTransaction >> operation [ ^ operation ]
+CFMotionLayoutTransaction >> motion [ ^ motion ]
 
 { #category : 'accessing' }
 CFMotionLayoutTransaction >> participants [ ^ participants ]

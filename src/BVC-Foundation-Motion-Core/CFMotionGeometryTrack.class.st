@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionGeometryTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'sourceSnapshot', 'destinationSnapshot', 'presentation', 'startScale', 'startTranslation' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'

@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionPropertyTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'property', 'targetValue', 'originValue', 'startValue' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'

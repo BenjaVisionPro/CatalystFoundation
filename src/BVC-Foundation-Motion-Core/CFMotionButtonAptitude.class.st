@@ -2,8 +2,8 @@ Class {
 	#name : 'CFMotionButtonAptitude',
 	#superclass : 'BrAptitude',
 	#instVars : [ 'activeMotion', 'pressed', 'downHandler', 'upHandler', 'dragStartHandler', 'dragEnterHandler', 'dragLeaveHandler', 'dragEndHandler' ],
-	#category : 'BVC-Foundation-Motion-Effects',
-	#package : 'BVC-Foundation-Motion-Effects'
+	#category : 'BVC-Foundation-Motion-Core',
+	#package : 'BVC-Foundation-Motion-Core'
 }
 
 { #category : 'accessing' }

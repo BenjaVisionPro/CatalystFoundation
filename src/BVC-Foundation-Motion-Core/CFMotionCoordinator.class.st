@@ -106,7 +106,7 @@ CFMotionCoordinator >> replaceGeometryOwnersForKeys: propertyKeys [
 	ownersToReplace do: [ :eachOwner |
 		(eachOwner tracks allSatisfy: [ :eachTrack |
 			eachTrack isKindOf: CFMotionGeometryTrack ]) ifFalse: [
-			self error: 'Geometry retargeting cannot replace a mixed Motion operation' ] ].
+			self error: 'Geometry retargeting cannot replace a mixed Motion motion' ] ].
 	ownersToReplace do: [ :eachOwner |
 		eachOwner cancelSettlingAtEnd ]
 ]

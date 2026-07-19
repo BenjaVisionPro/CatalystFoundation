@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFMotionExamples',
-	#superclass : 'Object',
-	#category : 'BVC-Foundation-Motion-Examples',
-	#package : 'BVC-Foundation-Motion-Examples'
+	#name : 'CFMotionTest',
+	#superclass : 'TestCase',
+	#category : 'BVC-Foundation-Motion-Tests',
+	#package : 'BVC-Foundation-Motion-Tests'
 }
 
 { #category : 'examples - setup' }
-CFMotionExamples >> spaceWithElement [
+CFMotionTest >> spaceWithElement [
 	| space element |
 	space := BlSpace new.
 	element := BlElement new
@@ -19,65 +19,65 @@ CFMotionExamples >> spaceWithElement [
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> opacityCompletes [
+CFMotionTest >> testOpacityCompletes [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.2.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		opacity: 1.0;
 		build) start.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> scaleCompletesAtThePresentedValue [
+CFMotionTest >> testScaleCompletesAtThePresentedValue [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	applicationTransformation := element transformation.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
 		build) start.
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
-	self assert: operation tracks first presentation isActive not.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	self assert: motion tracks first presentation isActive not.
 	self assert: element transformation matrix ~= applicationTransformation matrix.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> translationComposesWithASettledScale [
+CFMotionTest >> testTranslationComposesWithASettledScale [
 	<gtExample>
-	| space element scaleOperation scaleTransformation translationOperation |
+	| space element scaleMotion scaleTransformation translationMotion |
 	space := self spaceWithElement.
 	element := space root children first.
-	scaleOperation := (element motion
+	scaleMotion := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
 		build) start.
-	self finish: scaleOperation in: space.
+	self finish: scaleMotion in: space.
 	scaleTransformation := element transformation.
-	translationOperation := (element motion
+	translationMotion := (element motion
 		duration: 1 milliSeconds;
 		translation: 40 @ 20;
 		build) start.
-	self finish: translationOperation in: space.
-	self assert: translationOperation isCompleted.
+	self finish: translationMotion in: space.
+	self assert: translationMotion isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
-	^ translationOperation
+	^ translationMotion
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> scaleRetargetsThroughItsPresentedProperty [
+CFMotionTest >> testScaleRetargetsThroughItsPresentedProperty [
 	<gtExample>
 	| space element first second |
 	space := self spaceWithElement.
@@ -97,67 +97,67 @@ CFMotionExamples >> scaleRetargetsThroughItsPresentedProperty [
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> rotationCompletesAtThePresentedValue [
+CFMotionTest >> testRotationCompletesAtThePresentedValue [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	applicationTransformation := element transformation.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		rotation: 30;
 		build) start.
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
-	self assert: operation tracks first presentation rotation equals: 30.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	self assert: motion tracks first presentation rotation equals: 30.
 	self assert: element transformation matrix ~= applicationTransformation matrix.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - property motion' }
-CFMotionExamples >> rotationComposesWithASettledScale [
+CFMotionTest >> testRotationComposesWithASettledScale [
 	<gtExample>
-	| space element scaleOperation scaleTransformation rotationOperation |
+	| space element scaleMotion scaleTransformation rotationMotion |
 	space := self spaceWithElement.
 	element := space root children first.
-	scaleOperation := (element motion
+	scaleMotion := (element motion
 		duration: 1 milliSeconds;
 		scale: 0.5 @ 0.8;
 		build) start.
-	self finish: scaleOperation in: space.
+	self finish: scaleMotion in: space.
 	scaleTransformation := element transformation.
-	rotationOperation := (element motion
+	rotationMotion := (element motion
 		duration: 1 milliSeconds;
 		rotation: 30;
 		build) start.
-	self finish: rotationOperation in: space.
-	self assert: rotationOperation isCompleted.
+	self finish: rotationMotion in: space.
+	self assert: rotationMotion isCompleted.
 	self assert: element transformation matrix ~= scaleTransformation matrix.
-	^ rotationOperation
+	^ rotationMotion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> fadeInCompletesThroughTheSharedOpacityOperation [
+CFMotionTest >> testFadeInCompletesThroughTheSharedOpacityMotion [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := (CFMotionBuilder fadeIn
+	motion := (CFMotionBuilder fadeIn
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
-	self assert: operation tracks first property == CFMotionOpacityProperty uniqueInstance.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	self assert: motion tracks first property == CFMotionOpacityProperty uniqueInstance.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
+CFMotionTest >> testFadeOutRetargetsToFadeInThroughTheSharedOpacityMotion [
 	<gtExample>
 	| space element first second |
 	space := self spaceWithElement.
@@ -183,76 +183,76 @@ CFMotionExamples >> fadeOutRetargetsToFadeInThroughTheSharedOpacityOperation [
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedFadeInBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedFadeInBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion fadeIn.
-	self assert: operation isRunning.
+	motion := element motion fadeIn.
+	self assert: motion isRunning.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedFadeOutBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedFadeOutBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	operation := element motion fadeOut.
-	self assert: operation isRunning.
+	motion := element motion fadeOut.
+	self assert: motion isRunning.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: element opacity equals: 0.0.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedFadeOutCancellationPreservesCurrentPresentation [
+CFMotionTest >> testDirectNamedFadeOutCancellationPreservesCurrentPresentation [
 	<gtExample>
-	| space element operation presentedOpacity |
+	| space element motion presentedOpacity |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	operation := element motion fadeOut.
+	motion := element motion fadeOut.
 	space pulse.
 	space time wait: 90 milliSeconds.
 	space pulse.
 	presentedOpacity := element opacity.
-	operation cancelPreservingCurrentPresentation.
-	self assert: operation isCancelled.
+	motion cancelPreservingCurrentPresentation.
+	self assert: motion isCancelled.
 	self assert: element opacity equals: presentedOpacity.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> namedFadeInConfigurationBlockStartsWhenItReturns [
+CFMotionTest >> testNamedFadeInConfigurationBlockStartsWhenItReturns [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion fadeIn: [ :builder |
+	motion := element motion fadeIn: [ :builder |
 		builder duration: 1 milliSeconds ].
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> namedMotionRequiresAnAttachedElement [
+CFMotionTest >> testNamedMotionRequiresAnAttachedElement [
 	<gtExample>
 	| element didFail |
 	element := BlElement new.
@@ -263,7 +263,7 @@ CFMotionExamples >> namedMotionRequiresAnAttachedElement [
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> customMotionBuildThenStartRemainsExplicit [
+CFMotionTest >> testCustomMotionBuildThenStartRemainsExplicit [
 	<gtExample>
 	| space element motion |
 	space := self spaceWithElement.
@@ -282,55 +282,55 @@ CFMotionExamples >> customMotionBuildThenStartRemainsExplicit [
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedRiseAndFadeInBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedRiseAndFadeInBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion riseAndFadeIn.
-	self assert: operation isRunning.
-	self assert: operation tracks size equals: 2.
+	motion := element motion riseAndFadeIn.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 2.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedFallAndFadeOutBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedFallAndFadeOutBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	operation := element motion fallAndFadeOut.
-	self assert: operation isRunning.
-	self assert: operation tracks size equals: 2.
+	motion := element motion fallAndFadeOut.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 2.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: element opacity equals: 0.0.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedRiseAndFadeInCanRetargetThroughItsReturnedMotion [
+CFMotionTest >> testDirectNamedRiseAndFadeInCanRetargetThroughItsReturnedMotion [
 	<gtExample>
-	| space element operation retargeted |
+	| space element motion retargeted |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion riseAndFadeIn.
+	motion := element motion riseAndFadeIn.
 	space pulse.
 	space time wait: 90 milliSeconds.
 	space pulse.
-	retargeted := operation
+	retargeted := motion
 		retarget: {
 			CFMotionPropertyTrack
 				on: element
@@ -339,65 +339,65 @@ CFMotionExamples >> directNamedRiseAndFadeInCanRetargetThroughItsReturnedMotion 
 			CFMotionTranslationTrack on: element from: 0 @ 0 to: 0 @ 12 }
 		duration: 1 second
 		easing: (BlDecelerateInterpolator factor: 1.4).
-	self assert: retargeted == operation description: 'Retargeting must keep the named Motion instance'.
+	self assert: retargeted == motion description: 'Retargeting must keep the named Motion instance'.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted description: 'The retargeted named Motion must complete'.
+	self assert: motion isCompleted description: 'The retargeted named Motion must complete'.
 	self assert: (element opacity closeTo: 0.0) description: 'The retargeted named Motion must reach its opacity target'.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedScaleAndFadeInBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedScaleAndFadeInBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion scaleAndFadeIn.
-	self assert: operation isRunning.
-	self assert: operation tracks size equals: 2.
+	motion := element motion scaleAndFadeIn.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 2.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedScaleAndFadeOutBuildsAndStartsImmediately [
+CFMotionTest >> testDirectNamedScaleAndFadeOutBuildsAndStartsImmediately [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	operation := element motion scaleAndFadeOut.
-	self assert: operation isRunning.
-	self assert: operation tracks size equals: 2.
+	motion := element motion scaleAndFadeOut.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 2.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted.
+	self assert: motion isCompleted.
 	self assert: element opacity equals: 0.0.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - public API' }
-CFMotionExamples >> directNamedScaleAndFadeInCanRetargetThroughItsReturnedMotion [
+CFMotionTest >> testDirectNamedScaleAndFadeInCanRetargetThroughItsReturnedMotion [
 	<gtExample>
-	| space element operation retargeted |
+	| space element motion retargeted |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
 	element opacity: 0.0.
-	operation := element motion scaleAndFadeIn.
+	motion := element motion scaleAndFadeIn.
 	space pulse.
 	space time wait: 90 milliSeconds.
 	space pulse.
-	retargeted := operation
+	retargeted := motion
 		retarget: {
 			CFMotionPropertyTrack
 				on: element
@@ -406,17 +406,17 @@ CFMotionExamples >> directNamedScaleAndFadeInCanRetargetThroughItsReturnedMotion
 			CFMotionScaleTrack on: element from: 1 @ 1 to: 0.8 @ 0.8 }
 		duration: 1 second
 		easing: (BlDecelerateInterpolator factor: 1.4).
-	self assert: retargeted == operation description: 'Retargeting must keep the named Motion instance'.
+	self assert: retargeted == motion description: 'Retargeting must keep the named Motion instance'.
 	space pulse.
 	space time wait: 1 second.
 	space pulse.
-	self assert: operation isCompleted description: 'The retargeted named Motion must complete'.
+	self assert: motion isCompleted description: 'The retargeted named Motion must complete'.
 	self assert: (element opacity closeTo: 0.0) description: 'The retargeted named Motion must reach its opacity target'.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - composed motion' }
-CFMotionExamples >> composedMotionCompletesAfterItsLastComponent [
+CFMotionTest >> testComposedMotionCompletesAfterItsLastComponent [
 	<gtExample>
 	| space element fade scale motion |
 	space := self spaceWithElement.
@@ -448,7 +448,7 @@ CFMotionExamples >> composedMotionCompletesAfterItsLastComponent [
 ]
 
 { #category : 'examples - composed motion' }
-CFMotionExamples >> cancellingAComposedMotionCancelsAndRestoresEveryComponent [
+CFMotionTest >> testCancellingAComposedMotionCancelsAndRestoresEveryComponent [
 	<gtExample>
 	| space element originalTransformation fade scale motion |
 	space := self spaceWithElement.
@@ -478,7 +478,7 @@ CFMotionExamples >> cancellingAComposedMotionCancelsAndRestoresEveryComponent [
 ]
 
 { #category : 'examples - timeline layout' }
-CFMotionExamples >> timelineDerivesItsEndAndPlacesTracksRelativeToIt [
+CFMotionTest >> testTimelineDerivesItsEndAndPlacesTracksRelativeToIt [
 	<gtExample>
 	| timeline path bounce fade |
 	timeline := CFMotionTimeline new.
@@ -502,7 +502,7 @@ CFMotionExamples >> timelineDerivesItsEndAndPlacesTracksRelativeToIt [
 ]
 
 { #category : 'examples - timeline layout' }
-CFMotionExamples >> timelinePlacesATrackAfterAnotherTrackEnds [
+CFMotionTest >> testTimelinePlacesATrackAfterAnotherTrackEnds [
 	<gtExample>
 	| timeline path arrival |
 	timeline := CFMotionTimeline new.
@@ -518,7 +518,7 @@ CFMotionExamples >> timelinePlacesATrackAfterAnotherTrackEnds [
 ]
 
 { #category : 'examples - timeline execution' }
-CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
+CFMotionTest >> testTimelineExecutesFiniteTracksFromOneRootMotion [
 	<gtExample>
 	| space element timeline fade translation scale motion easing |
 	space := self spaceWithElement.
@@ -561,83 +561,49 @@ CFMotionExamples >> timelineExecutesFiniteTracksFromOneRootMotion [
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> appearUsingFadeInBuildsTheFadeMotion [
+CFMotionTest >> testScaleInBuilderBuildsAScaleMotion [
 	<gtExample>
-	| space element appearance |
-	space := self spaceWithElement.
-	element := BlElement new size: 120 @ 80; yourself.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: element using: CFMotionBuilder fadeIn.
-	self assert: appearance motionBuilder class equals: CFMotionBuilder.
-	self assert: appearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	self assert: (element opacity closeTo: 1.0).
-	^ appearance
-]
-
-{ #category : 'examples - motions' }
-CFMotionExamples >> disappearUsingFadeOutBuildsTheFadeMotion [
-	<gtExample>
-	| space element disappearance |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	disappearance := element motion
-		duration: 1 milliSeconds;
-		disappearUsing: CFMotionBuilder fadeOut.
-	self assert: disappearance motionBuilder class equals: CFMotionBuilder.
-	self assert: disappearance operation tracks first property == CFMotionOpacityProperty uniqueInstance.
-	self finish: disappearance operation in: space.
-	self assert: disappearance isCompleted.
-	self assert: element hasParent not.
-	^ disappearance
-]
-
-{ #category : 'examples - motions' }
-CFMotionExamples >> scaleInBuilderBuildsAScaleMotion [
-	<gtExample>
-	| space element operation |
-	space := self spaceWithElement.
-	element := space root children first.
-	operation := (CFMotionBuilder scaleIn
+	motion := (CFMotionBuilder scaleIn
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks first sourceScale equals: 0.8 @ 0.8.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
-	^ operation
+	self assert: motion tracks first sourceScale equals: 0.8 @ 0.8.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> scaleOutBuilderBuildsAScaleMotion [
+CFMotionTest >> testScaleOutBuilderBuildsAScaleMotion [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := (CFMotionBuilder scaleOut
+	motion := (CFMotionBuilder scaleOut
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks first targetScale equals: 0.8 @ 0.8.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
-	^ operation
+	self assert: motion tracks first targetScale equals: 0.8 @ 0.8.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> crossFadeUsesOneSharedOperation [
+CFMotionTest >> testCrossFadeUsesOneSharedMotion [
 	<gtExample>
-	| space outgoing incoming operation |
+	| space outgoing incoming motion |
 	space := self spaceWithElement.
 	outgoing := space root children first.
 	incoming := BlElement new size: 120 @ 80; yourself.
 	incoming opacity: 0.0.
 	space root addChild: incoming.
-	operation := (CFMotion
+	motion := (CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: {
 			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
@@ -645,26 +611,26 @@ CFMotionExamples >> crossFadeUsesOneSharedOperation [
 		duration: 1 milliSeconds;
 		easing: (BlDecelerateInterpolator factor: 1.4);
 		start.
-	self assert: operation isRunning.
-	self assert: operation tracks size equals: 2.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 2.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: outgoing opacity equals: 0.0.
 	self assert: incoming opacity equals: 1.0.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
+CFMotionTest >> testCrossFadeCancellationRestoresBothParticipants [
 	<gtExample>
-	| space outgoing incoming operation |
+	| space outgoing incoming motion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	outgoing := space root children first.
 	incoming := BlElement new size: 120 @ 80; yourself.
 	incoming opacity: 0.0.
 	space root addChild: incoming.
-	operation := (CFMotion
+	motion := (CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: {
 			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
@@ -675,39 +641,39 @@ CFMotionExamples >> crossFadeCancellationRestoresBothParticipants [
 	space pulse.
 	space time wait: 500 milliSeconds.
 	space pulse.
-	self assert: operation isRunning.
-	operation cancelAndRestore.
-	self assert: operation isCancelled.
+	self assert: motion isRunning.
+	motion cancelAndRestore.
+	self assert: motion isCancelled.
 	self assert: outgoing opacity equals: 1.0.
 	self assert: incoming opacity equals: 0.0.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> scaleInCompletesAndRestoresTheApplicationTransformation [
+CFMotionTest >> testScaleInCompletesAndRestoresTheApplicationTransformation [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := (CFMotionBuilder scaleIn
+	motion := (CFMotionBuilder scaleIn
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation isRunning.
-	self assert: operation tracks first presentation ownsCurrentTransformation.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self assert: motion tracks first presentation ownsCurrentTransformation.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element transformation == applicationTransformation.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
+CFMotionTest >> testScaleInComposesWithRunningLayoutGeometry [
 	<gtExample>
-	| space element transaction scaleOperation |
+	| space element transaction scaleMotion |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
@@ -722,348 +688,122 @@ CFMotionExamples >> scaleInComposesWithRunningLayoutGeometry [
 		play.
 	space pulse.
 	space pulse.
-	self assert: transaction operation isRunning.
-	scaleOperation := (CFMotionBuilder scaleIn
+	self assert: transaction motion isRunning.
+	scaleMotion := (CFMotionBuilder scaleIn
 		element: element;
 		duration: 1 second;
 		build)
 		start.
 	space time wait: 500 milliSeconds.
 	space pulse.
-	self assert: scaleOperation isRunning.
-	self assert: transaction operation tracks first presentation ownsCurrentTransformation.
-	self assert: scaleOperation tracks first presentation ownsCurrentTransformation.
-	scaleOperation cancelAndRestore.
-	self assert: scaleOperation isCancelled.
-	self assert: transaction operation tracks first presentation ownsCurrentTransformation.
+	self assert: scaleMotion isRunning.
+	self assert: transaction motion tracks first presentation ownsCurrentTransformation.
+	self assert: scaleMotion tracks first presentation ownsCurrentTransformation.
+	scaleMotion cancelAndRestore.
+	self assert: scaleMotion isCancelled.
+	self assert: transaction motion tracks first presentation ownsCurrentTransformation.
 	space time wait: 1 second.
 	space pulse.
-	self assert: transaction operation isCompleted.
+	self assert: transaction motion isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
-	^ { transaction. scaleOperation }
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsThenScalesAndFadesIn [
-	<gtExample>
-	| space element appearance |
-	space := BlSpace new.
-	element := BlElement new size: 120 @ 80; yourself.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: element.
-	self assert: appearance isRunning.
-	self assert: element parent == space root.
-	self assert: element visibility isVisible.
-	self assert: element opacity equals: 0.0.
-	self assert: appearance operation tracks size equals: 2.
-	self assert: appearance operation tracks second presentation ownsCurrentTransformation.
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	self assert: element parent == space root.
-	self assert: (element opacity closeTo: 1.0).
-	^ appearance
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> appearInsertsAtTheDeclaredIndexThenScalesAndFadesIn [
-	<gtExample>
-	| space first second inserted appearance |
-	space := BlSpace new.
-	first := BlElement new size: 120 @ 80; yourself.
-	second := BlElement new size: 120 @ 80; yourself.
-	inserted := BlElement new size: 120 @ 80; yourself.
-	space root addChild: first.
-	space root addChild: second.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: inserted at: 2.
-	self assert: appearance isRunning.
-	self assert: (space root children at: 1) == first.
-	self assert: (space root children at: 2) == inserted.
-	self assert: (space root children at: 3) == second.
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	self assert: inserted opacity equals: 1.0.
-	^ appearance
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> appearUsingRiseAndFadeInBuildsTheTranslationMotion [
-	<gtExample>
-	| space element appearance |
-	space := BlSpace new.
-	element := BlElement new size: 120 @ 80; yourself.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: element using: CFMotionBuilder riseAndFadeIn.
-	self assert: (appearance operation tracks second isKindOf: CFMotionTranslationTrack).
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	self assert: (element opacity closeTo: 1.0).
-	^ appearance
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> riseAndFadeInBuilderBuildsTheStandardTranslation [
-	<gtExample>
-	| space element appearance |
-	space := BlSpace new.
-	element := BlElement new size: 120 @ 80; yourself.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: element using: CFMotionBuilder riseAndFadeIn.
-	self assert: appearance operation tracks second sourceTranslation equals: 0 @ 12.
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	^ appearance
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> scaleAndFadeInBuilderBuildsTheStandardSourceScale [
-	<gtExample>
-	| space element appearance |
-	space := BlSpace new.
-	element := BlElement new size: 120 @ 80; yourself.
-	appearance := space root motion
-		duration: 1 milliSeconds;
-		appear: element using: CFMotionBuilder scaleAndFadeIn.
-	self assert: appearance operation tracks second sourceScale equals: 0.8 @ 0.8.
-	self finish: appearance operation in: space.
-	self assert: appearance isCompleted.
-	^ appearance
+	^ { transaction. scaleMotion }
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> scaleAndFadeInCoordinatesOpacityAndScale [
+CFMotionTest >> testScaleAndFadeInCoordinatesOpacityAndScale [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element
 		opacity: 0.0;
 		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := (CFMotionBuilder scaleAndFadeIn
+	motion := (CFMotionBuilder scaleAndFadeIn
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks size equals: 2.
-	self assert: operation tracks second presentation ownsCurrentTransformation.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion tracks size equals: 2.
+	self assert: motion tracks second presentation ownsCurrentTransformation.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
 	self assert: element transformation == applicationTransformation.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> scaleAndFadeOutCoordinatesOpacityAndScale [
+CFMotionTest >> testScaleAndFadeOutCoordinatesOpacityAndScale [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := (CFMotionBuilder scaleAndFadeOut
+	motion := (CFMotionBuilder scaleAndFadeOut
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks size equals: 2.
-	self assert: operation tracks second presentation ownsCurrentTransformation.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion tracks size equals: 2.
+	self assert: motion tracks second presentation ownsCurrentTransformation.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element opacity equals: 0.0.
 	self assert: element transformation == applicationTransformation.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> riseAndFadeInCoordinatesOpacityAndTranslation [
+CFMotionTest >> testRiseAndFadeInCoordinatesOpacityAndTranslation [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element
 		opacity: 0.0;
 		transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := (CFMotionBuilder riseAndFadeIn
+	motion := (CFMotionBuilder riseAndFadeIn
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks size equals: 2.
-	self assert: operation tracks second presentation ownsCurrentTransformation.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion tracks size equals: 2.
+	self assert: motion tracks second presentation ownsCurrentTransformation.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: (element opacity closeTo: 1.0).
 	self assert: element transformation == applicationTransformation.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - motions' }
-CFMotionExamples >> fallAndFadeOutCoordinatesOpacityAndTranslation [
+CFMotionTest >> testFallAndFadeOutCoordinatesOpacityAndTranslation [
 	<gtExample>
-	| space element applicationTransformation operation |
+	| space element applicationTransformation motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	operation := (CFMotionBuilder fallAndFadeOut
+	motion := (CFMotionBuilder fallAndFadeOut
 		element: element;
 		duration: 1 milliSeconds;
 		build)
 		start.
-	self assert: operation tracks size equals: 2.
-	self assert: operation tracks second presentation ownsCurrentTransformation.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion tracks size equals: 2.
+	self assert: motion tracks second presentation ownsCurrentTransformation.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element opacity equals: 0.0.
 	self assert: element transformation == applicationTransformation.
-	^ operation
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> disappearScalesAndFadesOutThenRemoves [
-	<gtExample>
-	| space element disappearance |
-	space := self spaceWithElement.
-	element := space root children first.
-	disappearance := element motion
-		duration: 1 milliSeconds;
-		disappear.
-	self assert: disappearance isRunning.
-	self assert: element parent == space root.
-	self assert: disappearance operation tracks size equals: 2.
-	self finish: disappearance operation in: space.
-	self assert: disappearance isCompleted.
-	self assert: element hasParent not.
-	^ disappearance
-]
-
-{ #category : 'examples - appearance' }
-CFMotionExamples >> disappearUsingFallAndFadeOutBuildsTheTranslationMotion [
-	<gtExample>
-	| space element disappearance |
-	space := self spaceWithElement.
-	element := space root children first.
-	disappearance := element motion
-		duration: 1 milliSeconds;
-		disappearUsing: CFMotionBuilder fallAndFadeOut.
-	self assert: (disappearance operation tracks second isKindOf: CFMotionTranslationTrack).
-	self finish: disappearance operation in: space.
-	self assert: disappearance isCompleted.
-	self assert: element hasParent not.
-	^ disappearance
-]
-
-{ #category : 'examples - adoption' }
-CFMotionExamples >> adoptionReplacesThePreviewAtItsDeclaredIndex [
-	<gtExample>
-	| space first preview last committed adoption |
-	space := BlSpace new.
-	first := BlElement new size: 120 @ 80; yourself.
-	preview := BlElement new size: 120 @ 80; yourself.
-	last := BlElement new size: 120 @ 80; yourself.
-	committed := BlElement new size: 120 @ 80; yourself.
-	space root addChildren: { first. preview. last }.
-	adoption := space root motion
-		duration: 1 milliSeconds;
-		adopt: preview as: committed.
-	self assert: adoption isAwaitingLayout.
-	self assert: adoption previewIndex equals: 2.
-	self assert: committed parent == space root.
-	space pulse.
-	self assert: adoption isRunning.
-	self finish: adoption operation in: space.
-	self assert: adoption isCompleted.
-	self assert: preview hasParent not.
-	self assert: committed parent == space root.
-	self assert: (space root children at: 2) == committed.
-	^ adoption
-]
-
-{ #category : 'examples - adoption' }
-CFMotionExamples >> cancellingAdoptionRestoresThePreviewAndRemovesTheCommittedElement [
-	<gtExample>
-	| space preview committed adoption |
-	space := self spaceWithElement.
-	preview := space root children first.
-	committed := BlElement new size: 120 @ 80; yourself.
-	adoption := space root motion
-		duration: 1 second;
-		adopt: preview as: committed.
-	adoption cancel.
-	self assert: adoption isCancelled.
-	self assert: preview parent == space root.
-	self assert: committed hasParent not.
-	self assert: preview opacity equals: 1.0.
-	^ adoption
-]
-
-{ #category : 'examples - adoption' }
-CFMotionExamples >> adoptionMovesAcrossParentsAndReleasesItsOverlay [
-	<gtExample>
-	| space source destination preview committed adoption geometryTrack |
-	space := BlSpace new.
-	source := BlElement new size: 240 @ 160; relocate: 20 @ 30; yourself.
-	destination := BlElement new size: 240 @ 160; relocate: 260 @ 180; yourself.
-	preview := BlElement new size: 120 @ 80; yourself.
-	committed := BlElement new size: 120 @ 80; yourself.
-	space root addChildren: { source. destination }.
-	source addChild: preview.
-	space pulse.
-	adoption := destination motion
-		duration: 1 milliSeconds;
-		adopt: preview as: committed from: source.
-	self assert: adoption isAwaitingLayout.
-	self assert: adoption overlay isInstalled.
-	self assert: preview parent == source.
-	self assert: committed parent == destination.
-	space pulse.
-	self assert: adoption isRunning.
-	geometryTrack := adoption operation tracks detect: [ :each | each isKindOf: CFMotionGeometryTrack ].
-	self assert: geometryTrack sourceSnapshot == adoption sourceSnapshot.
-	self assert: geometryTrack destinationSnapshot == adoption destinationSnapshot.
-	self assert: geometryTrack startTranslation isZero not.
-	self finish: adoption operation in: space.
-	self assert: adoption isCompleted.
-	self assert: preview hasParent not.
-	self assert: committed parent == destination.
-	self assert: adoption overlay isInstalled not.
-	^ adoption
-]
-
-{ #category : 'examples - adoption' }
-CFMotionExamples >> cancellingCrossParentAdoptionRestoresThePreviewAndReleasesItsOverlay [
-	<gtExample>
-	| space source destination preview committed adoption |
-	space := BlSpace new.
-	source := BlElement new size: 240 @ 160; yourself.
-	destination := BlElement new size: 240 @ 160; yourself.
-	preview := BlElement new size: 120 @ 80; yourself.
-	committed := BlElement new size: 120 @ 80; yourself.
-	space root addChildren: { source. destination }.
-	source addChild: preview.
-	space pulse.
-	adoption := destination motion
-		duration: 1 second;
-		adopt: preview as: committed from: source.
-	adoption cancel.
-	self assert: adoption isCancelled.
-	self assert: preview parent == source.
-	self assert: preview opacity equals: 1.0.
-	self assert: committed hasParent not.
-	self assert: adoption overlay isInstalled not.
-	^ adoption
+	^ motion
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionButtonAptitudeInstallsAndRemovesItsHandlers [
+CFMotionTest >> testMotionButtonAptitudeInstallsAndRemovesItsHandlers [
 	<gtExample>
 	| space element aptitude |
 	space := self spaceWithElement.
@@ -1077,7 +817,7 @@ CFMotionExamples >> motionButtonAptitudeInstallsAndRemovesItsHandlers [
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionButtonAptitudeRetargetsWhilePressed [
+CFMotionTest >> testMotionButtonAptitudeRetargetsWhilePressed [
 	<gtExample>
 	| space element aptitude motion |
 	space := self spaceWithElement.
@@ -1096,7 +836,7 @@ CFMotionExamples >> motionButtonAptitudeRetargetsWhilePressed [
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionButtonAptitudeReturnsToRestOnRelease [
+CFMotionTest >> testMotionButtonAptitudeReturnsToRestOnRelease [
 	<gtExample>
 	| space element aptitude motion |
 	space := self spaceWithElement.
@@ -1113,7 +853,7 @@ CFMotionExamples >> motionButtonAptitudeReturnsToRestOnRelease [
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionButtonAptitudeHoldsTheCompressedPresentation [
+CFMotionTest >> testMotionButtonAptitudeHoldsTheCompressedPresentation [
 	<gtExample>
 	| space element aptitude motion |
 	space := self spaceWithElement.
@@ -1131,7 +871,7 @@ CFMotionExamples >> motionButtonAptitudeHoldsTheCompressedPresentation [
 ]
 
 { #category : 'examples - aptitude' }
-CFMotionExamples >> motionButtonAptitudeReleasesTheHeldPresentation [
+CFMotionTest >> testMotionButtonAptitudeReleasesTheHeldPresentation [
 	<gtExample>
 	| space element aptitude motion |
 	space := self spaceWithElement.
@@ -1153,27 +893,8 @@ CFMotionExamples >> motionButtonAptitudeReleasesTheHeldPresentation [
 	^ motion
 ]
 
-{ #category : 'examples - appearance' }
-CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
-	<gtExample>
-	| space element disappearance |
-	space := self spaceWithElement.
-	element := space root children first.
-	disappearance := element motion
-		duration: 1 second;
-		disappear.
-	element opacity: 0.4.
-	disappearance cancel.
-	self assert: disappearance isCancelled.
-	self assert: element parent == space root.
-	self assert: (element opacity closeTo: 1.0).
-	self assert: disappearance operation tracks second presentation isActive not.
-	^ disappearance
-]
-
-
 { #category : 'examples - retargeting' }
-CFMotionExamples >> coordinatorRetargetKeepsTheOwningMotion [
+CFMotionTest >> testCoordinatorRetargetKeepsTheOwningMotion [
 	<gtExample>
 	| space element coordinator first retargeted key |
 	space := self spaceWithElement.
@@ -1197,7 +918,7 @@ CFMotionExamples >> coordinatorRetargetKeepsTheOwningMotion [
 ]
 
 { #category : 'examples - retargeting' }
-CFMotionExamples >> coordinatorRetargetStartsAMotionForAnUnownedProperty [
+CFMotionTest >> testCoordinatorRetargetStartsAMotionForAnUnownedProperty [
 	<gtExample>
 	| space element coordinator motion key |
 	space := self spaceWithElement.
@@ -1220,7 +941,7 @@ CFMotionExamples >> coordinatorRetargetStartsAMotionForAnUnownedProperty [
 ]
 
 { #category : 'examples - retargeting' }
-CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
+CFMotionTest >> testOpacityRetargetsFromCurrentPresentation [
 	<gtExample>
 	| space element first second key |
 	space := self spaceWithElement.
@@ -1243,7 +964,7 @@ CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 ]
 
 { #category : 'examples - ownership' }
-CFMotionExamples >> opacityReplacementKeepsOneOwner [
+CFMotionTest >> testOpacityReplacementKeepsOneOwner [
 	<gtExample>
 	| space element first second key |
 	space := self spaceWithElement.
@@ -1263,51 +984,38 @@ CFMotionExamples >> opacityReplacementKeepsOneOwner [
 ]
 
 { #category : 'examples - cancellation' }
-CFMotionExamples >> opacityCancellationPreservesCurrentPresentation [
+CFMotionTest >> testOpacityCancellationPreservesCurrentPresentation [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element opacity: 0.2.
-	operation := (element motion opacity: 1.0; build) start.
+	motion := (element motion opacity: 1.0; build) start.
 	element opacity: 0.6.
-	operation cancelPreservingCurrentPresentation.
-	self assert: operation isCancelled.
+	motion cancelPreservingCurrentPresentation.
+	self assert: motion isCancelled.
 	self assert: element opacity equals: 0.6.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - cleanup' }
-CFMotionExamples >> opacityCleanupReleasesOwnership [
+CFMotionTest >> testOpacityCleanupReleasesOwnership [
 	<gtExample>
-	| space element operation key |
+	| space element motion key |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := (element motion opacity: 0.2; build) start.
+	motion := (element motion opacity: 0.2; build) start.
 	key := CFMotionPropertyKey
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
-	operation cancelSettlingAtEnd.
+	motion cancelSettlingAtEnd.
 	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
 	self assert: space cfMotionCoordinator activeMotions isEmpty.
-	^ operation
-]
-
-{ #category : 'examples - inspection' }
-CFMotionExamples >> opacityOperationIsInspectable [
-	<gtExample>
-	| space element operation |
-	space := self spaceWithElement.
-	element := space root children first.
-	operation := (element motion opacity: 0.2; build) start.
-	self assert: operation coordinator == space cfMotionCoordinator.
-	self assert: operation tracks size equals: 1.
-	self assert: operation trace entries isNotEmpty.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - structural motion' }
-CFMotionExamples >> overlayTracksItsReferenceAndCleansUp [
+CFMotionTest >> testOverlayTracksItsReferenceAndCleansUp [
 	<gtExample>
 	| space reference overlay |
 	space := BlSpace new.
@@ -1335,7 +1043,7 @@ CFMotionExamples >> overlayTracksItsReferenceAndCleansUp [
 ]
 
 { #category : 'examples - structural motion' }
-CFMotionExamples >> motionOverlayTracksANestedReferenceAndCleansUp [
+CFMotionTest >> testMotionOverlayTracksANestedReferenceAndCleansUp [
 	<gtExample>
 	| space container reference motionOverlay |
 	space := BlSpace new.
@@ -1367,7 +1075,7 @@ CFMotionExamples >> motionOverlayTracksANestedReferenceAndCleansUp [
 ]
 
 { #category : 'examples - transform ownership probe' }
-CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
+CFMotionTest >> testRelativeTransformAnimationOverwritesAnExternalTransform [
 	<gtExample>
 	| space element animation applicationMatrix externalMatrix |
 	space := self spaceWithElement.
@@ -1395,7 +1103,7 @@ CFMotionExamples >> relativeTransformAnimationOverwritesAnExternalTransform [
 ]
 
 { #category : 'examples - transform ownership probe' }
-CFMotionExamples >> transformPresentationReleasesOnlyItsOwnTransformation [
+CFMotionTest >> testTransformPresentationReleasesOnlyItsOwnTransformation [
 	<gtExample>
 	| space element applicationTransformation externalTransformation presentation |
 	space := self spaceWithElement.
@@ -1420,7 +1128,7 @@ CFMotionExamples >> transformPresentationReleasesOnlyItsOwnTransformation [
 ]
 
 { #category : 'examples - transform ownership probe' }
-CFMotionExamples >> transformPresentationsDoNotComposeWithoutASharedChannel [
+CFMotionTest >> testTransformPresentationsDoNotComposeWithoutASharedChannel [
 	<gtExample>
 	| space element translationPresentation scalePresentation |
 	space := self spaceWithElement.
@@ -1438,7 +1146,7 @@ CFMotionExamples >> transformPresentationsDoNotComposeWithoutASharedChannel [
 ]
 
 { #category : 'examples - transform ownership probe' }
-CFMotionExamples >> transformPresentationsComposeThroughASharedChannel [
+CFMotionTest >> testTransformPresentationsComposeThroughASharedChannel [
 	<gtExample>
 	| space element applicationTransformation channel translationPresentation scalePresentation |
 	space := self spaceWithElement.
@@ -1463,7 +1171,7 @@ CFMotionExamples >> transformPresentationsComposeThroughASharedChannel [
 ]
 
 { #category : 'examples - geometry snapshots' }
-CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
+CFMotionTest >> testGeometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
 	<gtExample>
 	| space element snapshot expectedBounds |
 	space := self spaceWithElement.
@@ -1479,7 +1187,7 @@ CFMotionExamples >> geometrySnapshotCapturesImmutableBoundsInDeclaredSpace [
 ]
 
 { #category : 'examples - geometry snapshots' }
-CFMotionExamples >> geometrySnapshotConvertsBoundsIntoAnotherParent [
+CFMotionTest >> testGeometrySnapshotConvertsBoundsIntoAnotherParent [
 	<gtExample>
 	| space source destination element snapshot expectedBounds |
 	space := BlSpace new.
@@ -1507,7 +1215,7 @@ CFMotionExamples >> geometrySnapshotConvertsBoundsIntoAnotherParent [
 ]
 
 { #category : 'examples - geometry snapshots' }
-CFMotionExamples >> layoutComputedEventCapturesAuthoritativeDestinationGeometry [
+CFMotionTest >> testLayoutComputedEventCapturesAuthoritativeDestinationGeometry [
 	<gtExample>
 	| space element source destination |
 	space := self spaceWithElement.
@@ -1526,7 +1234,7 @@ CFMotionExamples >> layoutComputedEventCapturesAuthoritativeDestinationGeometry 
 ]
 
 { #category : 'examples - geometry presentation probe' }
-CFMotionExamples >> inverseScalePresentsSourceExtentOverLaidOutDestination [
+CFMotionTest >> testInverseScalePresentsSourceExtentOverLaidOutDestination [
 	<gtExample>
 	| space element source destination presentation presented |
 	space := self spaceWithElement.
@@ -1546,7 +1254,7 @@ CFMotionExamples >> inverseScalePresentsSourceExtentOverLaidOutDestination [
 ]
 
 { #category : 'examples - geometry presentation probe' }
-CFMotionExamples >> inverseTransformPresentsSourceBoundsOverMovedAndResizedDestination [
+CFMotionTest >> testInverseTransformPresentsSourceBoundsOverMovedAndResizedDestination [
 	<gtExample>
 	| space element source destination presentation presented |
 	space := self spaceWithElement.
@@ -1568,10 +1276,10 @@ CFMotionExamples >> inverseTransformPresentsSourceBoundsOverMovedAndResizedDesti
 	^ presentation
 ]
 
-{ #category : 'examples - geometry operation' }
-CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
+{ #category : 'examples - geometry motion' }
+CFMotionTest >> testGeometryMotionCompletesAtAuthoritativeLayout [
 	<gtExample>
-	| space element source destination track operation |
+	| space element source destination track motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	source := CFMotionGeometrySnapshot of: element in: space root.
@@ -1581,44 +1289,44 @@ CFMotionExamples >> geometryOperationCompletesAtAuthoritativeLayout [
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
-	operation := CFMotion
+	motion := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
-	operation duration: 1 milliSeconds.
-	operation start.
+	motion duration: 1 milliSeconds.
+	motion start.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: source bounds.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: destination bounds.
 	self assert: track presentation isActive not.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentMotionCompletesAtItsRequestedExtent [
+CFMotionTest >> testVerticalExtentMotionCompletesAtItsRequestedExtent [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		verticalExtent: 140;
 		build) start.
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element extent y equals: 140.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentMotionCancellationPreservesCurrentExtent [
+CFMotionTest >> testVerticalExtentMotionCancellationPreservesCurrentExtent [
 	<gtExample>
-	| space element operation presentedExtent |
+	| space element motion presentedExtent |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 second;
 		verticalExtent: 140;
 		build) start.
@@ -1626,33 +1334,33 @@ CFMotionExamples >> verticalExtentMotionCancellationPreservesCurrentExtent [
 	space time wait: 500 milliSeconds.
 	space pulse.
 	presentedExtent := element extent.
-	operation cancelPreservingCurrentPresentation.
-	self assert: operation isCancelled.
+	motion cancelPreservingCurrentPresentation.
+	self assert: motion isCancelled.
 	self assert: element extent equals: presentedExtent.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentMotionCollapsesToItsRequestedExtent [
+CFMotionTest >> testVerticalExtentMotionCollapsesToItsRequestedExtent [
 	<gtExample>
-	| space element operation |
+	| space element motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element constraintsDo: [ :constraints |
 		constraints vertical exact: 140 ].
 	space pulse.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		verticalExtent: 40;
 		build) start.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element extent y equals: 40.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
+CFMotionTest >> testVerticalExtentMotionRetargetsTheCurrentMotion [
 	<gtExample>
 	| space element first second |
 	space := self spaceWithElement.
@@ -1672,47 +1380,47 @@ CFMotionExamples >> verticalExtentMotionRetargetsTheCurrentOperation [
 ]
 
 { #category : 'examples - extent motion' }
-CFMotionExamples >> horizontalExtentMotionPreservesVerticalLayout [
+CFMotionTest >> testHorizontalExtentMotionPreservesVerticalLayout [
 	<gtExample>
-	| space element originalHeight operation |
+	| space element originalHeight motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	originalHeight := element extent y.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		horizontalExtent: 180;
 		build) start.
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element extent x equals: 180.
 	self assert: element extent y equals: originalHeight.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - extent motion' }
-CFMotionExamples >> extentMotionCompletesAcrossBothAxes [
+CFMotionTest >> testExtentMotionCompletesAcrossBothAxes [
 	<gtExample>
-	| space element sourceExtent targetExtent operation |
+	| space element sourceExtent targetExtent motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	sourceExtent := element extent.
 	targetExtent := 180 @ 140.
-	operation := (element motion
+	motion := (element motion
 		duration: 1 milliSeconds;
 		extentFrom: sourceExtent to: targetExtent;
 		build) start.
-	self assert: operation isRunning.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	self assert: motion isRunning.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element extent equals: targetExtent.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
+CFMotionTest >> testVerticalExtentTrackReleasesItsExactConstraintAtCompletion [
 	<gtExample>
-	| space element track operation |
+	| space element track motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	track := (CFMotionExtentTrack
@@ -1720,21 +1428,21 @@ CFMotionExamples >> verticalExtentTrackReleasesItsExactConstraintAtCompletion [
 		from: element extent x @ element extent y
 		to: element extent x @ 140)
 		fitContentAtDestination.
-	operation := CFMotion
+	motion := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
-	operation duration: 1 milliSeconds.
-	operation start.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	motion duration: 1 milliSeconds.
+	motion start.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: element constraints vertical resizer class name equals: #BlLayoutFitContentResizer.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - vertical extent motion' }
-CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
+CFMotionTest >> testVerticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 	<gtExample>
-	| space element preview extentTrack opacityTrack operation |
+	| space element preview extentTrack opacityTrack motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	preview := BlElement new
@@ -1752,20 +1460,20 @@ CFMotionExamples >> verticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 		on: preview
 		property: CFMotionOpacityProperty uniqueInstance
 		target: 0.58.
-	operation := CFMotion
+	motion := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { extentTrack. opacityTrack }.
-	operation duration: 1 milliSeconds.
-	operation start.
-	self finish: operation in: space.
-	self assert: operation isCompleted.
+	motion duration: 1 milliSeconds.
+	motion start.
+	self finish: motion in: space.
+	self assert: motion isCompleted.
 	self assert: preview opacity equals: 0.58.
 	self assert: element constraints vertical resizer class name equals: #BlLayoutFitContentResizer.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
+CFMotionTest >> testLayoutTransactionCapturesThenCompletesGeometry [
 	<gtExample>
 	| space element transaction |
 	space := self spaceWithElement.
@@ -1783,11 +1491,11 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 	self assert: transaction isAwaitingLayout.
 	self assert: transaction sourceSnapshots first bounds equals: ((0 @ 0) extent: 120 @ 80).
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction sourceSnapshots first bounds.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	self assert: transaction phase == CFMotionState completed.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
@@ -1795,7 +1503,7 @@ CFMotionExamples >> layoutTransactionCapturesThenCompletesGeometry [
 ]
 
 { #category : 'examples - layout convenience' }
-CFMotionExamples >> layoutMotionConveniencesDescribeSingleElementGeometry [
+CFMotionTest >> testLayoutMotionConveniencesDescribeSingleElementGeometry [
 	<gtExample>
 	| space element relocation resize geometry |
 	space := self spaceWithElement.
@@ -1804,28 +1512,28 @@ CFMotionExamples >> layoutMotionConveniencesDescribeSingleElementGeometry [
 		duration: 1 milliSeconds;
 		relocate: 60 @ 20.
 	space pulse.
-	self finish: relocation operation in: space.
+	self finish: relocation motion in: space.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: ((60 @ 20) extent: 120 @ 80).
 	resize := element motion
 		duration: 1 milliSeconds;
 		resize: 240 @ 100.
 	space pulse.
-	self finish: resize operation in: space.
+	self finish: resize motion in: space.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: ((60 @ 20) extent: 240 @ 100).
 	geometry := element motion
 		duration: 1 milliSeconds;
 		geometry: ((120 @ 40) extent: 180 @ 60).
 	space pulse.
-	self finish: geometry operation in: space.
+	self finish: geometry motion in: space.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: ((120 @ 40) extent: 180 @ 60).
 	^ { relocation. resize. geometry }
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
+CFMotionTest >> testLayoutTransactionInsertsAtTheDeclaredIndex [
 	<gtExample>
 	| space first second inserted transaction |
 	space := BlSpace new.
@@ -1846,13 +1554,13 @@ CFMotionExamples >> layoutTransactionInsertsAtTheDeclaredIndex [
 	self assert: (space root children at: 1) == first.
 	self assert: (space root children at: 2) == inserted.
 	self assert: (space root children at: 3) == second.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionInsertsAndFadesInTheDeclaredElement [
+CFMotionTest >> testLayoutTransactionInsertsAndFadesInTheDeclaredElement [
 	<gtExample>
 	| space first inserted transaction |
 	space := BlSpace new.
@@ -1868,16 +1576,16 @@ CFMotionExamples >> layoutTransactionInsertsAndFadesInTheDeclaredElement [
 		fadeIn: inserted;
 		play.
 	space pulse.
-	self assert: transaction operation tracks size equals: 2.
+	self assert: transaction motion tracks size equals: 2.
 	self assert: inserted opacity equals: 0.0.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	self assert: inserted opacity equals: 1.0.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionRemovesTheDeclaredElement [
+CFMotionTest >> testLayoutTransactionRemovesTheDeclaredElement [
 	<gtExample>
 	| space removed survivor transaction |
 	space := BlSpace new.
@@ -1894,13 +1602,13 @@ CFMotionExamples >> layoutTransactionRemovesTheDeclaredElement [
 	space pulse.
 	self assert: removed hasParent not.
 	self assert: survivor parent == space root.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
+CFMotionTest >> testLayoutTransactionExposesCompletedNextLayoutReadiness [
 	<gtExample>
 	| space element transaction |
 	space := self spaceWithElement.
@@ -1914,14 +1622,14 @@ CFMotionExamples >> layoutTransactionExposesCompletedNextLayoutReadiness [
 	self assert: transaction readiness isNil.
 	space pulse.
 	self assert: transaction readiness isCompleted.
-	self assert: transaction operation isRunning.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self assert: transaction motion isRunning.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	^ transaction
 ]
 
 { #category : 'examples - readiness' }
-CFMotionExamples >> nextLayoutReadinessCancellationRemovesItsObserver [
+CFMotionTest >> testNextLayoutReadinessCancellationRemovesItsObserver [
 	<gtExample>
 	| space readiness completed |
 	space := self spaceWithElement.
@@ -1940,7 +1648,7 @@ CFMotionExamples >> nextLayoutReadinessCancellationRemovesItsObserver [
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinateSpace [
+CFMotionTest >> testLayoutTransactionMovesBetweenParentsThroughDeclaredCoordinateSpace [
 	<gtExample>
 	| space source destination element transaction sourceBounds destinationBounds |
 	space := BlSpace new.
@@ -1968,18 +1676,18 @@ CFMotionExamples >> layoutTransactionMovesBetweenParentsThroughDeclaredCoordinat
 		move: element from: source to: destination;
 		play.
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	self assert: element parent == destination.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: sourceBounds.
-	self finish: transaction operation in: space.
+	self finish: transaction motion in: space.
 	destinationBounds := (CFMotionGeometrySnapshot of: element in: space root) bounds.
-	self assert: transaction operation isCompleted.
+	self assert: transaction motion isCompleted.
 	self assert: destinationBounds equals: transaction destinationSnapshots first bounds.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionMovesBetweenParentsAtTheDeclaredIndex [
+CFMotionTest >> testLayoutTransactionMovesBetweenParentsAtTheDeclaredIndex [
 	<gtExample>
 	| space source destination element first second transaction |
 	space := BlSpace new.
@@ -2007,18 +1715,18 @@ CFMotionExamples >> layoutTransactionMovesBetweenParentsAtTheDeclaredIndex [
 		move: element from: source to: destination at: 2;
 		play.
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	self assert: element parent == destination.
 	self assert: (destination children at: 1) == first.
 	self assert: (destination children at: 2) == element.
 	self assert: (destination children at: 3) == second.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> cancellingCrossParentMoveKeepsDestinationMembershipAndPresentation [
+CFMotionTest >> testCancellingCrossParentMoveKeepsDestinationMembershipAndPresentation [
 	<gtExample>
 	| space source destination element transaction presentationBounds |
 	space := BlSpace new.
@@ -2049,7 +1757,7 @@ CFMotionExamples >> cancellingCrossParentMoveKeepsDestinationMembershipAndPresen
 	space pulse.
 	space time wait: 500 milliSeconds.
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	presentationBounds := (CFMotionGeometrySnapshot of: element in: space root) bounds.
 	transaction cancel.
 	self assert: transaction isCancelled.
@@ -2060,7 +1768,7 @@ CFMotionExamples >> cancellingCrossParentMoveKeepsDestinationMembershipAndPresen
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
+CFMotionTest >> testLayoutTransactionCancellationRemovesPendingLayoutObserver [
 	<gtExample>
 	| space element transaction |
 	space := self spaceWithElement.
@@ -2071,15 +1779,15 @@ CFMotionExamples >> layoutTransactionCancellationRemovesPendingLayoutObserver [
 		play.
 	transaction cancel.
 	self assert: transaction isCancelled.
-	self assert: transaction operation isNil.
+	self assert: transaction motion isNil.
 	space pulse.
-	self assert: transaction operation isNil.
+	self assert: transaction motion isNil.
 	self assert: transaction destinationSnapshots isEmpty.
 	^ transaction
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
+CFMotionTest >> testLayoutTransactionCancellationPreservesRunningGeometry [
 	<gtExample>
 	| space element transaction presentation |
 	space := self spaceWithElement.
@@ -2098,13 +1806,13 @@ CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
 	space pulse.
 	space time wait: 500 milliSeconds.
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	presentation := CFMotionGeometrySnapshot of: element in: space root.
 	transaction cancel.
 	self assert: transaction isCancelled.
-	self assert: transaction operation isCancelled.
+	self assert: transaction motion isCancelled.
 	self assert: transaction phase == CFMotionState cancelled.
-	self assert: transaction operation tracks first presentation isActive not.
+	self assert: transaction motion tracks first presentation isActive not.
 	self assert: space cfMotionCoordinator activeMotions isEmpty.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
@@ -2117,7 +1825,7 @@ CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
+CFMotionTest >> testLayoutTransactionCoordinatesMultipleParticipants [
 	<gtExample>
 	| space first second transaction |
 	space := BlSpace new.
@@ -2140,12 +1848,12 @@ CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
 				size: 180 @ 40 ];
 		play.
 	space pulse.
-	self assert: transaction operation tracks size equals: 2.
+	self assert: transaction motion tracks size equals: 2.
 	self assert: (CFMotionGeometrySnapshot of: first in: space root) bounds
 		equals: transaction sourceSnapshots first bounds.
 	self assert: (CFMotionGeometrySnapshot of: second in: space root) bounds
 		equals: transaction sourceSnapshots second bounds.
-	self finish: transaction operation in: space.
+	self finish: transaction motion in: space.
 	self assert: (CFMotionGeometrySnapshot of: first in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
 	self assert: (CFMotionGeometrySnapshot of: second in: space root) bounds
@@ -2153,10 +1861,10 @@ CFMotionExamples >> layoutTransactionCoordinatesMultipleParticipants [
 	^ transaction
 ]
 
-{ #category : 'examples - geometry operation' }
-CFMotionExamples >> geometryOperationComposesWithApplicationTransform [
+{ #category : 'examples - geometry motion' }
+CFMotionTest >> testGeometryMotionComposesWithApplicationTransform [
 	<gtExample>
-	| space element applicationTransformation source destination track operation |
+	| space element applicationTransformation source destination track motion |
 	space := self spaceWithElement.
 	element := space root children first.
 	element transformDo: [ :aBuilder | aBuilder translateBy: 30 @ 10 ].
@@ -2168,20 +1876,20 @@ CFMotionExamples >> geometryOperationComposesWithApplicationTransform [
 	space pulse.
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
-	operation := CFMotion
+	motion := CFMotion
 		coordinator: space cfMotionCoordinator
 		tracks: { track }.
-	operation duration: 1 milliSeconds.
-	operation start.
+	motion duration: 1 milliSeconds.
+	motion start.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: source bounds.
-	self finish: operation in: space.
+	self finish: motion in: space.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds equals: destination bounds.
 	self assert: element transformation == applicationTransformation.
-	^ operation
+	^ motion
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
+CFMotionTest >> testLayoutTransactionRetargetsFromCurrentPresentation [
 	<gtExample>
 	| space element first second |
 	space := self spaceWithElement.
@@ -2210,24 +1918,24 @@ CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
 				size: 180 @ 60 ];
 		play.
 	space pulse.
-	self assert: first operation isCancelled.
-	self assert: second operation isRunning.
+	self assert: first motion isCancelled.
+	self assert: second motion isRunning.
 	self assert: second destinationSnapshots first bounds equals: ((120 @ 40) extent: 180 @ 60).
-	self assert: second operation tracks first presentation ownsCurrentTransformation.
+	self assert: second motion tracks first presentation ownsCurrentTransformation.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: second sourceSnapshots first bounds.
 	self assert: space cfMotionCoordinator activeMotions size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
-	self assert: second operation isCompleted.
+	self assert: second motion isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: second destinationSnapshots first bounds.
 	^ second
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPresentation [
+CFMotionTest >> testLayoutTransactionRetargetsMultipleParticipantsFromCurrentPresentation [
 	<gtExample>
 	| space firstElement secondElement first second |
 	space := BlSpace new.
@@ -2267,12 +1975,12 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 				size: 100 @ 120 ];
 		play.
 	space pulse.
-	self assert: first operation isCancelled.
-	self assert: second operation isRunning.
+	self assert: first motion isCancelled.
+	self assert: second motion isRunning.
 	self assert: second destinationSnapshots first bounds equals: ((120 @ 40) extent: 180 @ 60).
 	self assert: second destinationSnapshots second bounds equals: ((80 @ 180) extent: 100 @ 120).
-	self assert: second operation tracks first presentation ownsCurrentTransformation.
-	self assert: second operation tracks second presentation ownsCurrentTransformation.
+	self assert: second motion tracks first presentation ownsCurrentTransformation.
+	self assert: second motion tracks second presentation ownsCurrentTransformation.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
 		closeTo: second sourceSnapshots first bounds.
@@ -2283,7 +1991,7 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
-	self assert: second operation isCompleted.
+	self assert: second motion isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: firstElement in: space root) bounds
 		equals: second destinationSnapshots first bounds.
 	self assert: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
@@ -2292,7 +2000,7 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionUsesNestedContainerCoordinateSpace [
+CFMotionTest >> testLayoutTransactionUsesNestedContainerCoordinateSpace [
 	<gtExample>
 	| space container element transaction |
 	space := BlSpace new.
@@ -2315,12 +2023,12 @@ CFMotionExamples >> layoutTransactionUsesNestedContainerCoordinateSpace [
 	self assert: transaction coordinateSpace == container.
 	self assert: transaction sourceSnapshots first bounds equals: ((20 @ 30) extent: 120 @ 80).
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: element in: container) bounds
 		closeTo: transaction sourceSnapshots first bounds.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	self assert: transaction destinationSnapshots first bounds equals: ((120 @ 90) extent: 180 @ 60).
 	self assert: (CFMotionGeometrySnapshot of: element in: container) bounds
 		equals: transaction destinationSnapshots first bounds.
@@ -2328,7 +2036,7 @@ CFMotionExamples >> layoutTransactionUsesNestedContainerCoordinateSpace [
 ]
 
 { #category : 'examples - layout transaction' }
-CFMotionExamples >> layoutTransactionUsesRootCoordinateSpaceAcrossScaledContainer [
+CFMotionTest >> testLayoutTransactionUsesRootCoordinateSpaceAcrossScaledContainer [
 	<gtExample>
 	| space container element source transaction |
 	space := BlSpace new.
@@ -2358,33 +2066,33 @@ CFMotionExamples >> layoutTransactionUsesRootCoordinateSpaceAcrossScaledContaine
 	self assert: transaction coordinateSpace == space root.
 	self assert: transaction sourceSnapshots first bounds equals: source bounds.
 	space pulse.
-	self assert: transaction operation isRunning.
+	self assert: transaction motion isRunning.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		closeTo: source bounds.
-	self finish: transaction operation in: space.
-	self assert: transaction operation isCompleted.
+	self finish: transaction motion in: space.
+	self assert: transaction motion isCompleted.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: transaction destinationSnapshots first bounds.
 	^ transaction
 ]
 
 { #category : 'private - running' }
-CFMotionExamples >> assertBounds: actualBounds closeTo: expectedBounds [
+CFMotionTest >> assertBounds: actualBounds closeTo: expectedBounds [
 	self assert: (actualBounds origin closeTo: expectedBounds origin precision: 0.0001).
 	self assert: (actualBounds corner closeTo: expectedBounds corner precision: 0.0001)
 ]
 
 { #category : 'private - running' }
-CFMotionExamples >> finish: anOperation in: aSpace [
+CFMotionTest >> finish: anMotion in: aSpace [
 	aSpace pulse.
 	5 milliSeconds wait.
 	aSpace pulse.
-	^ anOperation
+	^ anMotion
 ]
 
 { #category : 'examples - frame driver' }
-CFMotionExamples >> coordinatorAdvancesActiveMotionsWithOneSharedFrame [
+CFMotionTest >> testCoordinatorAdvancesActiveMotionsWithOneSharedFrame [
 	<gtExample>
 	| space coordinator firstMotion secondMotion |
 	space := BlSpace new.
@@ -2404,7 +2112,7 @@ CFMotionExamples >> coordinatorAdvancesActiveMotionsWithOneSharedFrame [
 ]
 
 { #category : 'examples - frame driver' }
-CFMotionExamples >> coordinatorFrameDriverUsesSpaceTime [
+CFMotionTest >> testCoordinatorFrameDriverUsesSpaceTime [
 	<gtExample>
 	| space coordinator motion |
 	space := BlSpace new.
@@ -2422,7 +2130,7 @@ CFMotionExamples >> coordinatorFrameDriverUsesSpaceTime [
 ]
 
 { #category : 'examples - frame driver' }
-CFMotionExamples >> coordinatorFrameDriverIdlesWithoutActiveMotions [
+CFMotionTest >> testCoordinatorFrameDriverIdlesWithoutActiveMotions [
 	<gtExample>
 	| space coordinator motion frameCount |
 	space := BlSpace new.
@@ -2442,7 +2150,7 @@ CFMotionExamples >> coordinatorFrameDriverIdlesWithoutActiveMotions [
 ]
 
 { #category : 'examples - frame driver' }
-CFMotionExamples >> coordinatorFrameDriverResetsElapsedTimeAfterInactivity [
+CFMotionTest >> testCoordinatorFrameDriverResetsElapsedTimeAfterInactivity [
 	<gtExample>
 	| space coordinator firstMotion secondMotion |
 	space := BlSpace new.
@@ -2461,7 +2169,7 @@ CFMotionExamples >> coordinatorFrameDriverResetsElapsedTimeAfterInactivity [
 ]
 
 { #category : 'examples - motion lifecycle' }
-CFMotionExamples >> motionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
+CFMotionTest >> testMotionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
 	<gtExample>
 	| space element motion |
 	space := self spaceWithElement.
@@ -2493,7 +2201,7 @@ CFMotionExamples >> motionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
 ]
 
 { #category : 'examples - motion lifecycle' }
-CFMotionExamples >> motionPauseAndResumePreservePlaybackPosition [
+CFMotionTest >> testMotionPauseAndResumePreservePlaybackPosition [
 	<gtExample>
 	| space element motion pausedOpacity |
 	space := self spaceWithElement.
@@ -2531,7 +2239,7 @@ CFMotionExamples >> motionPauseAndResumePreservePlaybackPosition [
 ]
 
 { #category : 'examples - motion lifecycle' }
-CFMotionExamples >> motionRetainsItsSourceTimeline [
+CFMotionTest >> testMotionRetainsItsSourceTimeline [
 	<gtExample>
 	| space element timeline track motion |
 	space := self spaceWithElement.
@@ -2552,7 +2260,7 @@ CFMotionExamples >> motionRetainsItsSourceTimeline [
 
 
 { #category : 'examples - timeline runtime' }
-CFMotionExamples >> timelineOwnsPlaybackPosition [
+CFMotionTest >> testTimelineOwnsPlaybackPosition [
 	<gtExample>
 	| space element timeline motion |
 	space := self spaceWithElement.
@@ -2580,7 +2288,7 @@ CFMotionExamples >> timelineOwnsPlaybackPosition [
 ]
 
 { #category : 'examples - timeline runtime' }
-CFMotionExamples >> timelineEvaluatesOverlappingTracksAtOnePosition [
+CFMotionTest >> testTimelineEvaluatesOverlappingTracksAtOnePosition [
 	<gtExample>
 	| space element timeline opacityTrack scaleTrack motion |
 	space := self spaceWithElement.
@@ -2614,7 +2322,7 @@ CFMotionExamples >> timelineEvaluatesOverlappingTracksAtOnePosition [
 ]
 
 { #category : 'examples - timeline runtime' }
-CFMotionExamples >> timelineClampsAtItsResolvedEndAndCompletesMotion [
+CFMotionTest >> testTimelineClampsAtItsResolvedEndAndCompletesMotion [
 	<gtExample>
 	| space element timeline motion |
 	space := self spaceWithElement.
@@ -2642,7 +2350,7 @@ CFMotionExamples >> timelineClampsAtItsResolvedEndAndCompletesMotion [
 
 
 { #category : 'examples - behaviours' }
-CFMotionExamples >> timelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
+CFMotionTest >> testTimelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
 	<gtExample>
 	| space element timeline timelineTrack behaviour motion |
 	space := self spaceWithElement.
@@ -2671,7 +2379,7 @@ CFMotionExamples >> timelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
 
 
 { #category : 'examples - transform composition' }
-CFMotionExamples >> coordinatorProvidesOneTransformChannelPerElement [
+CFMotionTest >> testCoordinatorProvidesOneTransformChannelPerElement [
 	<gtExample>
 	| space element coordinator firstChannel secondChannel |
 	space := self spaceWithElement.
@@ -2685,7 +2393,7 @@ CFMotionExamples >> coordinatorProvidesOneTransformChannelPerElement [
 ]
 
 { #category : 'examples - transform composition' }
-CFMotionExamples >> independentMotionsComposeThroughTheCoordinatorTransformChannel [
+CFMotionTest >> testIndependentMotionsComposeThroughTheCoordinatorTransformChannel [
 	<gtExample>
 	| space element coordinator applicationTransformation translation scale translationMotion scaleMotion |
 	space := self spaceWithElement.
@@ -2728,7 +2436,7 @@ CFMotionExamples >> independentMotionsComposeThroughTheCoordinatorTransformChann
 ]
 
 { #category : 'examples - transform composition' }
-CFMotionExamples >> transformChannelPreservesStableRegistrationOrder [
+CFMotionTest >> testTransformChannelPreservesStableRegistrationOrder [
 	<gtExample>
 	| space element channel first second |
 	space := self spaceWithElement.
@@ -2750,7 +2458,7 @@ CFMotionExamples >> transformChannelPreservesStableRegistrationOrder [
 
 
 { #category : 'examples - indefinite behaviours' }
-CFMotionExamples >> indefiniteTimelineAdvancesUntilExplicitlyCancelled [
+CFMotionTest >> testIndefiniteTimelineAdvancesUntilExplicitlyCancelled [
 	<gtExample>
 	| space timeline behaviour track motion firstEvaluation secondEvaluation thirdEvaluation |
 	space := self spaceWithElement.
@@ -2788,7 +2496,7 @@ CFMotionExamples >> indefiniteTimelineAdvancesUntilExplicitlyCancelled [
 ]
 
 { #category : 'examples - indefinite behaviours' }
-CFMotionExamples >> indefiniteTrackMayStartAfterFiniteTimelineContent [
+CFMotionTest >> testIndefiniteTrackMayStartAfterFiniteTimelineContent [
 	<gtExample>
 	| space element timeline finiteTrack behaviour indefiniteTrack motion |
 	space := self spaceWithElement.
@@ -2823,7 +2531,7 @@ CFMotionExamples >> indefiniteTrackMayStartAfterFiniteTimelineContent [
 
 
 { #category : 'examples - behaviour lifecycle' }
-CFMotionExamples >> behaviourLifecycleSpansPauseAndResume [
+CFMotionTest >> testBehaviourLifecycleSpansPauseAndResume [
 	<gtExample>
 	| space timeline behaviour motion |
 	space := self spaceWithElement.
@@ -2853,7 +2561,7 @@ CFMotionExamples >> behaviourLifecycleSpansPauseAndResume [
 ]
 
 { #category : 'examples - behaviour lifecycle' }
-CFMotionExamples >> finiteBehaviourEndsWithCompletedState [
+CFMotionTest >> testFiniteBehaviourEndsWithCompletedState [
 	<gtExample>
 	| space timeline behaviour motion |
 	space := self spaceWithElement.
@@ -2874,7 +2582,7 @@ CFMotionExamples >> finiteBehaviourEndsWithCompletedState [
 ]
 
 { #category : 'examples - cleanup' }
-CFMotionExamples >> detachedPresentationTargetCancelsAndCleansUpItsMotion [
+CFMotionTest >> testDetachedPresentationTargetCancelsAndCleansUpItsMotion [
 	<gtExample>
 	| space element motion key |
 	space := self spaceWithElement.
@@ -2898,7 +2606,7 @@ CFMotionExamples >> detachedPresentationTargetCancelsAndCleansUpItsMotion [
 ]
 
 { #category : 'examples - architecture' }
-CFMotionExamples >> stopPreservesCurrentPresentationAndTerminatesPlayback [
+CFMotionTest >> testStopPreservesCurrentPresentationAndTerminatesPlayback [
 	<gtExample>
 	| space element motion opacityAtStop |
 	space := self spaceWithElement.
@@ -2922,7 +2630,7 @@ CFMotionExamples >> stopPreservesCurrentPresentationAndTerminatesPlayback [
 ]
 
 { #category : 'examples - architecture' }
-CFMotionExamples >> oneMotionComposesFiniteAndIndefiniteBehaviours [
+CFMotionTest >> testOneMotionComposesFiniteAndIndefiniteBehaviours [
 	<gtExample>
 	| space element timeline finiteTrack recorder indefiniteTrack motion |
 	space := self spaceWithElement.

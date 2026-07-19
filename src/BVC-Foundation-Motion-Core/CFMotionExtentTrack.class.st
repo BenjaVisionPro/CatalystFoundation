@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMotionExtentTrack',
-	#superclass : 'CFMotionTrack',
+	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'element', 'sourceExtent', 'targetExtent', 'startExtent', 'originExtent', 'completionPolicy', 'hasStarted' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
