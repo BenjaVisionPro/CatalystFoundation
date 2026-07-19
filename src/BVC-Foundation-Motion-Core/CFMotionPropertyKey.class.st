@@ -1,3 +1,8 @@
+"
+I identify one independently owned presentation property on one element.
+
+My element and property are compared by identity so every coordinator reaches the same ownership decision for the same presentation surface. I carry no mutable ownership state; CFMotionCoordinator maps me to the Motion that currently owns that surface.
+"
 Class {
 	#name : 'CFMotionPropertyKey',
 	#superclass : 'Object',

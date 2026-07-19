@@ -8,7 +8,7 @@ I decide neither what a Motion contains nor how its timeline interprets time. A 
 Class {
 	#name : 'CFMotionCoordinator',
 	#superclass : 'Object',
-	#instVars : [ 'space', 'owners', 'activeOperations', 'activeMotions', 'history', 'transformChannels', 'frameDriver' ],
+	#instVars : [ 'space', 'owners', 'activeMotions', 'history', 'transformChannels', 'frameDriver' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -21,9 +21,6 @@ CFMotionCoordinator >> activeMotions [
 	^ activeMotions asArray
 ]
 
-{ #category : 'accessing' }
-CFMotionCoordinator >> activeOperations [ ^ activeOperations asArray ]
-
 { #category : 'playing' }
 CFMotionCoordinator >> advanceWith: aFrame [
 	activeMotions asArray do: [ :each | each advanceWith: aFrame ]
@@ -35,10 +32,7 @@ CFMotionCoordinator >> claim: aKey for: anOperation [
 	currentOwner := self ownerOf: aKey.
 	(currentOwner notNil and: [ currentOwner ~~ anOperation ])
 		ifTrue: [ self error: 'A Motion property can have only one owner in a BlSpace' ].
-	owners at: aKey put: anOperation.
-	(activeOperations includes: anOperation) ifFalse: [
-		activeOperations add: anOperation.
-		history add: anOperation ]
+	owners at: aKey put: anOperation
 ]
 
 { #category : 'accessing' }
@@ -58,7 +52,6 @@ CFMotionCoordinator >> history [ ^ history asArray ]
 CFMotionCoordinator >> initialize [
 	super initialize.
 	owners := Dictionary new.
-	activeOperations := OrderedCollection new.
 	activeMotions := OrderedCollection new.
 	history := OrderedCollection new.
 	transformChannels := IdentityDictionary new
@@ -70,8 +63,8 @@ CFMotionCoordinator >> ownerOf: aKey [ ^ owners at: aKey ifAbsent: [ nil ] ]
 { #category : 'playing' }
 CFMotionCoordinator >> play: aMotion [
 	(activeMotions includes: aMotion) ifFalse: [
-		activeMotions add: aMotion.
-		history add: aMotion ].
+		activeMotions add: aMotion ].
+	(history includes: aMotion) ifFalse: [ history add: aMotion ].
 	frameDriver activate.
 	^ aMotion
 ]
@@ -85,8 +78,7 @@ CFMotionCoordinator >> release: aKey from: anOperation [
 { #category : 'ownership' }
 CFMotionCoordinator >> releaseAllFor: anOperation [
 	anOperation tracks do: [ :each |
-		self release: each propertyKey from: anOperation ].
-	activeOperations remove: anOperation ifAbsent: [ nil ]
+		self release: each propertyKey from: anOperation ]
 ]
 
 { #category : 'playing' }
@@ -120,18 +112,18 @@ CFMotionCoordinator >> replaceGeometryOwnersForKeys: propertyKeys [
 
 { #category : 'playing' }
 CFMotionCoordinator >> retarget: aTrack duration: aDuration easing: anInterpolator [
-	| owner operation |
+	| owner motion |
 	owner := self ownerOf: aTrack propertyKey.
 	owner ifNotNil: [
 		^ owner
 			retarget: aTrack
 			duration: aDuration
 			easing: anInterpolator ].
-	operation := CFMotion coordinator: self tracks: { aTrack }.
-	operation
+	motion := CFMotion coordinator: self tracks: { aTrack }.
+	motion
 		duration: aDuration;
 		easing: anInterpolator.
-	^ operation start
+	^ motion start
 ]
 
 { #category : 'accessing' }

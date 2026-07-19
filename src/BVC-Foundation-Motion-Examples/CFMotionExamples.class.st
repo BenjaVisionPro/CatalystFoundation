@@ -1171,6 +1171,54 @@ CFMotionExamples >> cancellingDisappearPreservesMembershipAndPresentation [
 	^ disappearance
 ]
 
+
+{ #category : 'examples - retargeting' }
+CFMotionExamples >> coordinatorRetargetKeepsTheOwningMotion [
+	<gtExample>
+	| space element coordinator first retargeted key |
+	space := self spaceWithElement.
+	element := space root children first.
+	coordinator := space cfMotionCoordinator.
+	first := (element motion opacity: 0.2; build) start.
+	retargeted := coordinator
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.8)
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	key := CFMotionPropertyKey
+		element: element
+		property: CFMotionOpacityProperty uniqueInstance.
+	self assert: retargeted == first.
+	self assert: (coordinator ownerOf: key) == first.
+	self assert: coordinator activeMotions size equals: 1.
+	^ first
+]
+
+{ #category : 'examples - retargeting' }
+CFMotionExamples >> coordinatorRetargetStartsAMotionForAnUnownedProperty [
+	<gtExample>
+	| space element coordinator motion key |
+	space := self spaceWithElement.
+	element := space root children first.
+	coordinator := space cfMotionCoordinator.
+	motion := coordinator
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.8)
+		duration: 180 milliSeconds
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	key := CFMotionPropertyKey
+		element: element
+		property: CFMotionOpacityProperty uniqueInstance.
+	self assert: motion isRunning.
+	self assert: (coordinator ownerOf: key) == motion.
+	self assert: coordinator activeMotions size equals: 1.
+	^ motion
+]
+
 { #category : 'examples - retargeting' }
 CFMotionExamples >> opacityRetargetsFromCurrentPresentation [
 	<gtExample>
@@ -1210,7 +1258,7 @@ CFMotionExamples >> opacityReplacementKeepsOneOwner [
 		property: CFMotionOpacityProperty uniqueInstance.
 	self assert: first == second.
 	self assert: (space cfMotionCoordinator ownerOf: key) == first.
-	self assert: space cfMotionCoordinator activeOperations size equals: 1.
+	self assert: space cfMotionCoordinator activeMotions size equals: 1.
 	^ first
 ]
 
@@ -1241,7 +1289,7 @@ CFMotionExamples >> opacityCleanupReleasesOwnership [
 		property: CFMotionOpacityProperty uniqueInstance.
 	operation cancelSettlingAtEnd.
 	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
-	self assert: space cfMotionCoordinator activeOperations isEmpty.
+	self assert: space cfMotionCoordinator activeMotions isEmpty.
 	^ operation
 ]
 
@@ -2057,7 +2105,7 @@ CFMotionExamples >> layoutTransactionCancellationPreservesRunningGeometry [
 	self assert: transaction operation isCancelled.
 	self assert: transaction phase == CFMotionState cancelled.
 	self assert: transaction operation tracks first presentation isActive not.
-	self assert: space cfMotionCoordinator activeOperations isEmpty.
+	self assert: space cfMotionCoordinator activeMotions isEmpty.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		closeTo: presentation bounds.
@@ -2168,7 +2216,7 @@ CFMotionExamples >> layoutTransactionRetargetsFromCurrentPresentation [
 	self assert: second operation tracks first presentation ownsCurrentTransformation.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: second sourceSnapshots first bounds.
-	self assert: space cfMotionCoordinator activeOperations size equals: 1.
+	self assert: space cfMotionCoordinator activeMotions size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
@@ -2231,7 +2279,7 @@ CFMotionExamples >> layoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
 		closeTo: second sourceSnapshots second bounds.
-	self assert: space cfMotionCoordinator activeOperations size equals: 1.
+	self assert: space cfMotionCoordinator activeMotions size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
