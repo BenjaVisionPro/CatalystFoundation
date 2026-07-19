@@ -107,3 +107,23 @@ CFPhysicsOverlayTests >> physicsOverlayRemovesRetiredBodyRepresentations [
 	self assert: overlay bodyElements size equals: 1.
 	^ host
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayCanBeToggledRepeatedly [
+	<gtExample>
+	| host firstOverlay secondOverlay |
+	host := self physicsHost.
+	firstOverlay := host togglePhysicsOverlay.
+	host space pulse.
+	self assert: firstOverlay isInstalled.
+	self assert: host existingPhysicsOverlay == firstOverlay.
+	host togglePhysicsOverlay.
+	self assert: host existingPhysicsOverlay isNil.
+	self assert: firstOverlay isInstalled not.
+	secondOverlay := host togglePhysicsOverlay.
+	host space pulse.
+	self assert: secondOverlay isInstalled.
+	self assert: host existingPhysicsOverlay == secondOverlay.
+	self assert: secondOverlay ~~ firstOverlay.
+	^ host
+]

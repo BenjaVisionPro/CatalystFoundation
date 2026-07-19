@@ -27,23 +27,19 @@ BlElement >> hidePhysicsOverlay [
 ]
 
 { #category : '*BVC-Foundation-Physics-Tools' }
-BlElement >> gtShowPhysicsOverlayFor: anAction [
-	<gtAction>
-	((self existingPhysics notNil and: [ self existingPhysics isWorld ])
-		and: [ self existingPhysicsOverlay isNil ])
-		ifFalse: [ ^ anAction noAction ].
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		tooltip: 'Show physics overlay';
-		action: [ self showPhysicsOverlay ]
+BlElement >> togglePhysicsOverlay [
+	^ self existingPhysicsOverlay
+		ifNil: [ self showPhysicsOverlay ]
+		ifNotNil: [ self hidePhysicsOverlay ]
 ]
 
 { #category : '*BVC-Foundation-Physics-Tools' }
-BlElement >> gtHidePhysicsOverlayFor: anAction [
+BlElement >> gtTogglePhysicsOverlayFor: anAction [
 	<gtAction>
-	self existingPhysicsOverlay ifNil: [ ^ anAction noAction ].
+	(self existingPhysics notNil and: [ self existingPhysics isWorld ])
+		ifFalse: [ ^ anAction noAction ].
 	^ anAction button
-		icon: BrGlamorousVectorIcons cancel;
-		tooltip: 'Hide physics overlay';
-		action: [ self hidePhysicsOverlay ]
+		icon: BrGlamorousVectorIcons inspect;
+		tooltip: 'Toggle physics overlay';
+		action: [ self togglePhysicsOverlay ]
 ]
