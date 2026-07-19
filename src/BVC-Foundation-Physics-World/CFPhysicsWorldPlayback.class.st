@@ -1,14 +1,14 @@
 "
 I own continuous Motion playback for one CFPhysicsWorld.
 
-I am the explicit integration boundary between Physics simulation and Motion playback. The world asks me to start, pause, resume or stop; I assemble and retain the Motion timeline, Physics Behaviour and world presentation needed for that playback.
+I am the explicit integration boundary between Physics simulation and Motion playback. The world asks me to start, pause, resume or stop; I assemble and retain the Motion timeline, Physics Behaviour and world presentation needed for that playback. I own and release the continuous presentation together with its Motion; the Behaviour only advances simulation and requests presentation frames.
 
 One instance represents the reusable playback capability of one world. A running or paused Motion is one playback lifetime. Once that Motion reaches a terminal state I forget it, so a later #start creates a fresh Behaviour, presentation and fixed-step accumulator.
 "
 Class {
 	#name : 'CFPhysicsWorldPlayback',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'motion' ],
+	#instVars : [ 'world', 'motion', 'presentation' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -22,15 +22,21 @@ CFPhysicsWorldPlayback class >> on: aWorld [
 
 { #category : 'controlling' }
 CFPhysicsWorldPlayback >> start [
+	| coordinator |
 	self isActive ifTrue: [
 		motion isPaused ifTrue: [ motion resume ].
 		^ motion ].
 	self validateForStart.
 	world releasePresentation.
-	motion := self newMotion.
-	motion onTerminalDo: [ :endedMotion |
-		motion == endedMotion ifTrue: [ motion := nil ] ].
-	motion start.
+	coordinator := world owner space cfMotionCoordinator.
+	presentation := CFPhysicsWorldPresentation on: world in: coordinator.
+	motion := self newMotionWith: presentation in: coordinator.
+	motion onTerminalDo: [ :endedMotion | self playbackEnded: endedMotion ].
+	[ motion start ]
+		on: Error
+		do: [ :anError |
+			self releasePlayback.
+			anError pass ].
 	^ motion
 ]
 
@@ -61,15 +67,26 @@ CFPhysicsWorldPlayback >> motion [
 ]
 
 { #category : 'private - creation' }
-CFPhysicsWorldPlayback >> newMotion [
-	| coordinator behaviour timeline |
-	coordinator := world owner space cfMotionCoordinator.
+CFPhysicsWorldPlayback >> newMotionWith: aPresentation in: aCoordinator [
+	| behaviour timeline |
 	behaviour := CFPhysicsWorldBehaviour
 		on: world
-		presentation: (CFPhysicsWorldPresentation on: world in: coordinator).
+		presentation: aPresentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	^ CFMotion timeline: timeline coordinator: coordinator
+	^ CFMotion timeline: timeline coordinator: aCoordinator
+]
+
+{ #category : 'private - lifecycle' }
+CFPhysicsWorldPlayback >> playbackEnded: anEndedMotion [
+	motion == anEndedMotion ifTrue: [ self releasePlayback ]
+]
+
+{ #category : 'private - lifecycle' }
+CFPhysicsWorldPlayback >> releasePlayback [
+	presentation ifNotNil: [ :aPresentation | aPresentation release ].
+	presentation := nil.
+	motion := nil
 ]
 
 { #category : 'private - validation' }

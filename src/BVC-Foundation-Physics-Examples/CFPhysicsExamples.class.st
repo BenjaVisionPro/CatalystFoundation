@@ -85,7 +85,8 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	self assert: (presentation lastPresentationAlpha closeTo: 0.125).
 	self assert: motion isRunning.
 	motion cancel.
-	self assert: presentation releaseCount equals: 1.
+	self assert: behaviour isActive not.
+	self assert: presentation releaseCount equals: 0.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ track
 ]

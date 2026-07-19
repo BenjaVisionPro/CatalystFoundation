@@ -5,7 +5,7 @@ My playback lifetime is explicit. I become active when Motion starts me and inac
 
 I adapt Motion's presentation-frame cadence to Physics' deterministic fixed step. Each evaluation contributes the increase in local Motion time to an accumulator. I advance the world in whole #stepDuration increments and retain any remainder for a later frame. A zero-time initial Motion frame performs no Physics step; a long presentation frame may perform several fixed steps.
 
-I own no frame scheduling, timeline placement, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
+I own no frame scheduling, timeline placement, presentation lifetime, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
 
 My animation target is the world's owner element. Normal Motion validity therefore cancels playback if that owner leaves or moves away from the coordinator's BlSpace.
 "
@@ -64,7 +64,6 @@ CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
 
 { #category : 'playing' }
 CFPhysicsWorldBehaviour >> playbackEndedWith: aMotionState [
-	presentation ifNotNil: [ presentation release ].
 	active := false.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds
