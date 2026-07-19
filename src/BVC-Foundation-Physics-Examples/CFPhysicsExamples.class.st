@@ -82,9 +82,9 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsExamples >> physicsWorldBehaviourRunsTheExistingWorld [
+CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	<gtExample>
-	| space host body world initialPosition behaviour timeline motion |
+	| space host body world initialPosition motion |
 	space := BlSpace new.
 	space time: BlTime simulated.
 	host := BlElement new size: 500 @ 320.
@@ -103,15 +103,16 @@ CFPhysicsExamples >> physicsWorldBehaviourRunsTheExistingWorld [
 		position: 40 @ 40;
 		velocity: 100 @ 0.
 	initialPosition := (world bodyStateFor: body) position.
-	behaviour := CFPhysicsWorldBehaviour on: world.
-	timeline := CFMotionTimeline new.
-	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := world startStepping.
+	self assert: world isStepping.
+	self assert: world steppingMotion == motion.
 	space pulse.
 	space time wait: 20 milliSeconds.
 	space pulse.
 	self assert: (world bodyStateFor: body) position x > initialPosition x.
-	motion cancel.
+	world stopStepping.
+	self assert: world isStepping not.
+	self assert: world steppingMotion isNil.
 	^ host
 ]
 
@@ -164,6 +165,50 @@ CFPhysicsExamples >> independentPhysicsWorldBehavioursShareOneFrameDriver [
 	self assert: coordinator frameDriver isActive not.
 	^ coordinator
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
+	<gtExample>
+	| space owner body world firstMotion positionBeforePause positionWhilePaused |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	owner addChild: body.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	world
+		gravity: 0 @ 0;
+		stepDuration: 10 milliSeconds;
+		synchroniseMembership.
+	(world bodyStateFor: body)
+		position: 20 @ 20;
+		velocity: 100 @ 0.
+	firstMotion := world startStepping.
+	self assert: world startStepping == firstMotion.
+	space pulse.
+	space time wait: 20 milliSeconds.
+	space pulse.
+	positionBeforePause := (world bodyStateFor: body) position.
+	world pauseStepping.
+	self assert: firstMotion isPaused.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	positionWhilePaused := (world bodyStateFor: body) position.
+	self assert: positionWhilePaused equals: positionBeforePause.
+	world resumeStepping.
+	self assert: firstMotion isRunning.
+	space pulse.
+	space time wait: 10 milliSeconds.
+	space pulse.
+	self assert: (world bodyStateFor: body) position x > positionWhilePaused x.
+	world stopStepping.
+	self assert: firstMotion isCancelled.
+	self assert: world steppingMotion isNil.
+	^ world
+]
+
 
 { #category : 'examples - motion integration' }
 CFPhysicsExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
