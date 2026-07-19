@@ -59,6 +59,7 @@ CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
 	accumulatedTime := 0 milliSeconds.
 	active := true.
 	world synchroniseMembership.
+	world synchronisePresentationState.
 	world present
 ]
 

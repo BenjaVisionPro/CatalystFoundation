@@ -163,6 +163,12 @@ CFPhysicsBodyState >> beginStep [
 ]
 
 { #category : 'presenting' }
+CFPhysicsBodyState >> synchronisePresentationState [
+	previousPosition := position.
+	previousRotation := rotation
+]
+
+{ #category : 'presenting' }
 CFPhysicsBodyState >> presentAtAlpha: aNumber [
 	| alpha presentedPosition presentedRotation |
 	alpha := (aNumber max: 0.0) min: 1.0.

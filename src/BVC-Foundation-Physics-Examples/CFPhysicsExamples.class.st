@@ -66,6 +66,7 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
 	space pulse.
 	self assert: world synchronisationCount equals: 1.
+	self assert: world presentationStateSynchronisationCount equals: 1.
 	self assert: world presentationCount equals: 2.
 	self assert: world stepCount equals: 0.
 	space time wait: 10 milliSeconds.
@@ -317,3 +318,38 @@ CFPhysicsExamples >> replacingPhysicsWorldOwnerStopsExistingPlayback [
 	^ world
 ]
 
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> restartingPhysicsSteppingResynchronisesPresentationState [
+	<gtExample>
+	| space owner world firstBehaviour firstTimeline firstMotion secondBehaviour secondTimeline secondMotion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		yourself.
+	firstBehaviour := CFPhysicsWorldBehaviour on: world.
+	firstTimeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
+	firstMotion := (CFMotion timeline: firstTimeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 15 milliSeconds.
+	space pulse.
+	self assert: world stepCount equals: 1.
+	self assert: world presentationStateSynchronisationCount equals: 1.
+	firstMotion cancel.
+	self assert: firstBehaviour isActive not.
+	secondBehaviour := CFPhysicsWorldBehaviour on: world.
+	secondTimeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
+	secondMotion := (CFMotion timeline: secondTimeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	self assert: world presentationStateSynchronisationCount equals: 2.
+	self assert: world stepCount equals: 1.
+	self assert: secondBehaviour accumulatedTime equals: 0 milliSeconds.
+	secondMotion cancel.
+	^ secondBehaviour
+]
