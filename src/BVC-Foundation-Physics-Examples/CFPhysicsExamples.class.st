@@ -353,3 +353,63 @@ CFPhysicsExamples >> restartingPhysicsSteppingResynchronisesPresentationState [
 	secondMotion cancel.
 	^ secondBehaviour
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
+	<gtExample>
+	| space host body world state physicsPresentation channel scalePresentation |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	world := host physics beWorld.
+	world synchroniseMembership.
+	state := world bodyStateFor: body.
+	state position: 40 @ 20.
+	world present.
+	physicsPresentation := state presentation motionPresentation.
+	channel := physicsPresentation channel.
+	scalePresentation := CFMotionTransformPresentation on: body using: channel.
+	scalePresentation scale: 0.5 @ 0.75.
+	self assert: physicsPresentation ownsCurrentTransformation.
+	self assert: scalePresentation ownsCurrentTransformation.
+	state position: 60 @ 30.
+	world present.
+	self assert: physicsPresentation ownsCurrentTransformation.
+	self assert: scalePresentation ownsCurrentTransformation.
+	scalePresentation release.
+	self assert: physicsPresentation ownsCurrentTransformation.
+	state presentation release.
+	^ channel
+]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms [
+	<gtExample>
+	| space host body applicationTransformation world state physicsPresentation channel scalePresentation |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	body transformDo: [ :builder | builder translateBy: 8 @ 0 ].
+	applicationTransformation := body transformation.
+	world := host physics beWorld.
+	world synchroniseMembership.
+	state := world bodyStateFor: body.
+	state position: 40 @ 20.
+	world present.
+	physicsPresentation := state presentation motionPresentation.
+	channel := physicsPresentation channel.
+	scalePresentation := CFMotionTransformPresentation on: body using: channel.
+	scalePresentation scale: 0.8 @ 0.8.
+	state presentation release.
+	self assert: physicsPresentation isActive not.
+	self assert: scalePresentation ownsCurrentTransformation.
+	scalePresentation release.
+	self assert: body transformation == applicationTransformation.
+	^ channel
+]
