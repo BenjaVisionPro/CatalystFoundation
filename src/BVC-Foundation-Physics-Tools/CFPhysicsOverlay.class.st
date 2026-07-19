@@ -58,7 +58,8 @@ CFPhysicsOverlay >> install [
 	| container |
 	self isInstalled ifTrue: [ ^ self ].
 	container := host parent.
-	container ifNil: [ self error: 'The physics host must be in a Bloc presentation before its overlay can be shown' ].
+	(container notNil and: [ host isAttachedToSceneGraph ])
+		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
 	self refresh.
 	^ self

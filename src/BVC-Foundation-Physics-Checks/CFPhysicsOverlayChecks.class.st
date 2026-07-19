@@ -8,7 +8,8 @@ Class {
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayChecks >> physicsHost [
 	<gtExample>
-	| container host first second world |
+	| space container host first second world |
+	space := BlSpace new.
 	container := BlElement new
 		size: 500 @ 320;
 		yourself.
@@ -25,6 +26,7 @@ CFPhysicsOverlayChecks >> physicsHost [
 		size: 90 @ 50;
 		background: Color lightGreen;
 		yourself.
+	space root addChild: container.
 	container addChild: host.
 	host addChild: first.
 	host addChild: second.
@@ -34,6 +36,7 @@ CFPhysicsOverlayChecks >> physicsHost [
 	(world bodyStateFor: second)
 		position: 180 @ 120;
 		rotation: Float pi / 8.0.
+	space pulse.
 	self assert: host existingPhysicsOverlay isNil.
 	self assert: host children size equals: 2.
 	^ host
@@ -45,6 +48,7 @@ CFPhysicsOverlayChecks >> physicsOverlayCanBeInstalled [
 	| host overlay |
 	host := self physicsHost.
 	overlay := host showPhysicsOverlay.
+	host space pulse.
 	self assert: overlay isInstalled.
 	self assert: host existingPhysicsOverlay == overlay.
 	self assert: overlay bodyElements size equals: 2.
@@ -80,6 +84,7 @@ CFPhysicsOverlayChecks >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing 
 		position: 85 @ 70;
 		rotation: Float pi / 4.0.
 	overlay refresh.
+	host space pulse.
 	self assert: (overlay bodyElements includes: representation).
 	self assert: representation position equals: 85 @ 70.
 	self assert: representation extent equals: body shapeState extent.
