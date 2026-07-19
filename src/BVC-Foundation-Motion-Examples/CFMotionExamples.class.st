@@ -2752,7 +2752,7 @@ CFMotionExamples >> transformChannelPreservesStableRegistrationOrder [
 { #category : 'examples - indefinite behaviours' }
 CFMotionExamples >> indefiniteTimelineAdvancesUntilExplicitlyCancelled [
 	<gtExample>
-	| space timeline behaviour track motion firstEvaluation secondEvaluation |
+	| space timeline behaviour track motion firstEvaluation secondEvaluation thirdEvaluation |
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	behaviour := CFMotionEvaluationRecorder new.
@@ -2766,16 +2766,21 @@ CFMotionExamples >> indefiniteTimelineAdvancesUntilExplicitlyCancelled [
 	space pulse.
 	firstEvaluation := behaviour evaluations first.
 	secondEvaluation := behaviour evaluations second.
+	thirdEvaluation := behaviour evaluations third.
 	self assert: timeline isIndefinite.
 	self assert: timeline duration isNil.
 	self assert: timeline progress isNil.
 	self assert: timeline isComplete not.
 	self assert: motion isRunning.
-	self assert: firstEvaluation timelineTime equals: 40 milliSeconds.
-	self assert: firstEvaluation localTime equals: 40 milliSeconds.
+	self assert: firstEvaluation timelineTime isZero.
+	self assert: firstEvaluation localTime isZero.
 	self assert: firstEvaluation hasProgress not.
-	self assert: secondEvaluation timelineTime equals: 100 milliSeconds.
-	self assert: secondEvaluation localTime equals: 100 milliSeconds.
+	self assert: secondEvaluation timelineTime equals: 40 milliSeconds.
+	self assert: secondEvaluation localTime equals: 40 milliSeconds.
+	self assert: secondEvaluation hasProgress not.
+	self assert: thirdEvaluation timelineTime equals: 100 milliSeconds.
+	self assert: thirdEvaluation localTime equals: 100 milliSeconds.
+	self assert: thirdEvaluation hasProgress not.
 	motion cancel.
 	self assert: motion isCancelled.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
