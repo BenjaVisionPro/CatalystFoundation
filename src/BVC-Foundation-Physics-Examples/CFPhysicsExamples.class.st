@@ -366,7 +366,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := state presentation presentation.
+	physicsPresentation := world presentation presentationFor: state.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.5 @ 0.75.
@@ -378,7 +378,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	self assert: scalePresentation ownsCurrentTransformation.
 	scalePresentation release.
 	self assert: physicsPresentation ownsCurrentTransformation.
-	state presentation release.
+	(world presentation presentationFor: state) release.
 	^ channel
 ]
 
@@ -399,11 +399,11 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := state presentation presentation.
+	physicsPresentation := world presentation presentationFor: state.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.8 @ 0.8.
-	state presentation release.
+	(world presentation presentationFor: state) release.
 	self assert: physicsPresentation isActive not.
 	self assert: scalePresentation ownsCurrentTransformation.
 	scalePresentation release.
@@ -424,16 +424,16 @@ CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
 	world := host physics beWorld.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
-	self assert: state presentation isAttached not.
+	self assert: (world presentation isPresenting: state) not.
 	state position: 40 @ 20.
 	state rotation: Float pi / 4.0.
 	state translation: 60 @ 30 rotation: Float pi / 2.0.
 	self assert: state position equals: 60 @ 30.
 	self assert: state rotation equals: Float pi / 2.0.
-	self assert: state presentation isAttached not.
+	self assert: (world presentation isPresenting: state) not.
 	world present.
-	self assert: state presentation isAttached.
-	state presentation release.
+	self assert: (world presentation isPresenting: state).
+	(world presentation presentationFor: state) release.
 	^ state
 ]
 
@@ -459,10 +459,10 @@ CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
 	initialPosition := state position.
 	world step: 2.
 	self assert: state position x > initialPosition x.
-	self assert: state presentation isAttached not.
+	self assert: (world presentation isPresenting: state) not.
 	world present.
-	self assert: state presentation isAttached.
-	state presentation release.
+	self assert: (world presentation isPresenting: state).
+	(world presentation presentationFor: state) release.
 	^ world
 ]
 
@@ -489,7 +489,7 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 	result := world stepAndPresent.
 	self assert: result == world lastStepResult.
 	self assert: state position x > initialPosition x.
-	self assert: state presentation isAttached.
-	state presentation release.
+	self assert: (world presentation isPresenting: state).
+	(world presentation presentationFor: state) release.
 	^ result
 ]

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'presentation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
+	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -79,7 +79,6 @@ CFPhysicsBodyState >> element [
 { #category : 'accessing' }
 CFPhysicsBodyState >> element: anElement [
 	element := anElement.
-	presentation := CFPhysicsPresentation new.
 	shapeState := CFPhysicsShapeState on: anElement
 ]
 
@@ -162,14 +161,6 @@ CFPhysicsBodyState >> beginStep [
 	previousRotation := rotation
 ]
 
-{ #category : 'presenting' }
-CFPhysicsBodyState >> presentAtAlpha: aNumber [
-	| alpha presentedPosition presentedRotation |
-	alpha := (aNumber max: 0.0) min: 1.0.
-	presentedPosition := previousPosition + ((position - previousPosition) * alpha).
-	presentedRotation := previousRotation + ((rotation - previousRotation) * alpha).
-	presentation presentTranslation: presentedPosition rotation: presentedRotation
-]
 
 { #category : 'accessing' }
 CFPhysicsBodyState >> previousPosition [
@@ -181,10 +172,6 @@ CFPhysicsBodyState >> previousRotation [
 	^ previousRotation
 ]
 
-{ #category : 'presenting' }
-CFPhysicsBodyState >> present [
-	presentation presentTranslation: position rotation: rotation
-]
 
 { #category : 'accessing' }
 CFPhysicsBodyState >> position [
@@ -199,20 +186,8 @@ CFPhysicsBodyState >> position: aPoint [
 ]
 
 
-{ #category : 'presenting' }
-CFPhysicsBodyState >> usePresentation: aPresentation [
-	presentation use: aPresentation
-]
 
-{ #category : 'accessing' }
-CFPhysicsBodyState >> presentation [
-	^ presentation
-]
 
-{ #category : 'controlling' }
-CFPhysicsBodyState >> release [
-	presentation release
-]
 
 { #category : 'accessing' }
 CFPhysicsBodyState >> rotation [

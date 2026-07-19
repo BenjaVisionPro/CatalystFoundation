@@ -34,7 +34,10 @@ CFPhysicsWorldPresentation >> present [
 	self prepare ifFalse: [ ^ self ].
 	world synchroniseMembership.
 	self synchronisePresentations.
-	world bodyStatesInOrder do: #present
+	world bodyStatesInOrder do: [ :each |
+		(self presentationFor: each)
+			translation: each position
+			rotation: each rotation ]
 ]
 
 { #category : 'presenting' }
@@ -42,7 +45,14 @@ CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
 	self prepare ifFalse: [ ^ self ].
 	world synchroniseMembership.
 	self synchronisePresentations.
-	world bodyStatesInOrder do: [ :each | each presentAtAlpha: aNumber ]
+	world bodyStatesInOrder do: [ :each |
+		| alpha presentedPosition presentedRotation |
+		alpha := (aNumber max: 0.0) min: 1.0.
+		presentedPosition := each previousPosition + ((each position - each previousPosition) * alpha).
+		presentedRotation := each previousRotation + ((each rotation - each previousRotation) * alpha).
+		(self presentationFor: each)
+			translation: presentedPosition
+			rotation: presentedRotation ]
 ]
 
 { #category : 'private - presenting' }
@@ -83,8 +93,20 @@ CFPhysicsWorldPresentation >> synchronisePresentations [
 			transformPresentation := CFMotionTransformPresentation
 				on: each element
 				using: (coordinator transformChannelFor: each element).
-			presentations at: each put: transformPresentation.
-			each usePresentation: transformPresentation ] ]
+			presentations at: each put: transformPresentation ] ]
+]
+
+
+{ #category : 'accessing' }
+CFPhysicsWorldPresentation >> presentationFor: aBodyState [
+	^ presentations at: aBodyState
+]
+
+{ #category : 'testing' }
+CFPhysicsWorldPresentation >> isPresenting: aBodyState [
+	| aPresentation |
+	aPresentation := presentations at: aBodyState ifAbsent: [ ^ false ].
+	^ aPresentation isActive
 ]
 
 { #category : 'controlling' }

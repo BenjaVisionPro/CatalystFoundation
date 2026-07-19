@@ -178,8 +178,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeRepulsionsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
-			contact firstBody == body or: [ contact secondBody == body ] ].
-		body release ]
+			contact firstBody == body or: [ contact secondBody == body ] ] ]
 ]
 
 { #category : 'stepping' }
