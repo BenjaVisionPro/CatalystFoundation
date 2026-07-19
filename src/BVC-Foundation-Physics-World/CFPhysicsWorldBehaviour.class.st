@@ -41,7 +41,8 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 	stepDuration := world stepDuration.
 	[ accumulatedTime >= stepDuration ] whileTrue: [
 		world step.
-		accumulatedTime := accumulatedTime - stepDuration ]
+		accumulatedTime := accumulatedTime - stepDuration ].
+	world present
 ]
 
 { #category : 'initialization' }
@@ -57,7 +58,8 @@ CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
 	active := true.
-	world synchroniseMembership
+	world synchroniseMembership.
+	world present
 ]
 
 { #category : 'playing' }

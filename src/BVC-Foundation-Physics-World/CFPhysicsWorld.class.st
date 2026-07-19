@@ -1,11 +1,11 @@
 "
 I am the deterministic Physics simulation owned by one Bloc element.
 
-I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step is the simulation primitive: it synchronises membership, advances the pipeline by one fixed #stepDuration and presents the resulting body states.
+I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step is the simulation primitive: it synchronises membership and advances the pipeline by one fixed #stepDuration. Presentation is explicit and separate.
 
 For continuous presentation playback I own one indefinite Motion through #startStepping. That Motion contains a CFPhysicsWorldBehaviour and converts shared Bloc presentation frames into whole fixed Physics steps. #pauseStepping and #resumeStepping preserve the same Motion and Behaviour lifetime; #stopStepping cancels it. I do not create a second clock or task. CFMotionCoordinator remains the sole presentation-frame driver.
 
-Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They do not implicitly start or alter continuous playback.
+Manual #step and #step: remain available for tests, tools and explicitly controlled simulation. They neither present nor implicitly start or alter continuous playback. #stepAndPresent is the explicit convenience when both operations are required.
 "
 Class {
 	#name : 'CFPhysicsWorld',
@@ -208,7 +208,6 @@ CFPhysicsWorld >> step [
 		gravity: gravity
 		restitutionThreshold: restitutionThreshold.
 	activeContacts := lastStepResult activeContacts.
-	bodies do: [ :each | each present ].
 	^ lastStepResult
 ]
 
@@ -218,6 +217,22 @@ CFPhysicsWorld >> step: aPositiveInteger [
 	^ lastStepResult
 ]
 
+
+
+{ #category : 'presenting' }
+CFPhysicsWorld >> present [
+	self synchroniseMembership.
+	self bodyStatesInOrder do: [ :each | each present ].
+	^ self
+]
+
+{ #category : 'stepping' }
+CFPhysicsWorld >> stepAndPresent [
+	| result |
+	result := self step.
+	self present.
+	^ result
+]
 
 { #category : 'continuous stepping' }
 CFPhysicsWorld >> startStepping [

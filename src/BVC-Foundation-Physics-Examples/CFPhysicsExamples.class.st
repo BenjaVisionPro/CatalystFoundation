@@ -43,6 +43,7 @@ CFPhysicsExamples >> bodiesAfterStepping [
 	host := self bodies.
 	world := host physics existingWorld.
 	world step: 30.
+	world present.
 	^ host
 ]
 
@@ -65,16 +66,20 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
 	space pulse.
 	self assert: world synchronisationCount equals: 1.
+	self assert: world presentationCount equals: 2.
 	self assert: world stepCount equals: 0.
+	self assert: world presentationCount equals: 3.
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 0.
 	space time wait: 10 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 1.
+	self assert: world presentationCount equals: 4.
 	space time wait: 30 milliSeconds.
 	space pulse.
 	self assert: world stepCount equals: 3.
+	self assert: world presentationCount equals: 5.
 	self assert: motion isRunning.
 	motion cancel.
 	self assert: space cfMotionCoordinator hasActiveMotions not.

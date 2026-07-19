@@ -6,7 +6,7 @@ I expose the CFPhysicsWorld protocol used by that Behaviour and record synchroni
 Class {
 	#name : 'CFPhysicsWorldStepRecorder',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'synchronisationCount' ],
+	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'synchronisationCount', 'presentationCount' ],
 	#category : 'BVC-Foundation-Physics-Examples',
 	#package : 'BVC-Foundation-Physics-Examples'
 }
@@ -16,7 +16,8 @@ CFPhysicsWorldStepRecorder >> initialize [
 	super initialize.
 	stepDuration := 16 milliSeconds.
 	stepCount := 0.
-	synchronisationCount := 0
+	synchronisationCount := 0.
+	presentationCount := 0
 ]
 
 { #category : 'accessing' }
@@ -46,3 +47,13 @@ CFPhysicsWorldStepRecorder >> synchroniseMembership [
 
 { #category : 'accessing' }
 CFPhysicsWorldStepRecorder >> synchronisationCount [ ^ synchronisationCount ]
+
+
+{ #category : 'presenting' }
+CFPhysicsWorldStepRecorder >> present [
+	presentationCount := presentationCount + 1
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldStepRecorder >> presentationCount [ ^ presentationCount ]
+

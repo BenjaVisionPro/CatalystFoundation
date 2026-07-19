@@ -166,8 +166,7 @@ CFPhysicsBodyState >> position [
 { #category : 'accessing' }
 CFPhysicsBodyState >> position: aPoint [
 	position := aPoint.
-	self wake.
-	self present
+	self wake
 ]
 
 { #category : 'accessing' }
@@ -188,8 +187,7 @@ CFPhysicsBodyState >> rotation [
 { #category : 'accessing' }
 CFPhysicsBodyState >> rotation: aNumber [
 	rotation := aNumber.
-	self wake.
-	self present
+	self wake
 ]
 
 
@@ -220,8 +218,7 @@ CFPhysicsBodyState >> translateBy: aPoint [
 CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
 	position := aPoint.
 	rotation := aNumber.
-	self wake.
-	self present
+	self wake
 ]
 
 { #category : 'accessing' }
