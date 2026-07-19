@@ -402,5 +402,6 @@ CFMotionTimelineTrack >> validateForExecution [
 	repeatInterval ifNotNil: [
 		self error: 'Repeated Motion tracks are not executable yet' ].
 	behaviour ifNil: [
-		self error: 'A Motion timeline track needs a visual track before it can execute' ]
+		self error: 'A Motion timeline track needs a Behaviour before it can execute' ].
+	behaviour validateForExecution
 ]
