@@ -2820,3 +2820,55 @@ CFMotionExamples >> indefiniteTrackMayStartAfterFiniteTimelineContent [
 	motion cancel.
 	^ indefiniteTrack
 ]
+
+
+{ #category : 'examples - behaviour lifecycle' }
+CFMotionExamples >> behaviourLifecycleSpansPauseAndResume [
+	<gtExample>
+	| space timeline behaviour motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	behaviour := CFMotionLifecycleRecorder new.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	self assert: behaviour coordinators equals: { space cfMotionCoordinator }.
+	self assert: behaviour terminalStates isEmpty.
+	space pulse.
+	motion pause.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: behaviour evaluations size equals: 1.
+	self assert: behaviour coordinators size equals: 1.
+	self assert: behaviour terminalStates isEmpty.
+	motion resume.
+	space pulse.
+	self assert: behaviour evaluations size equals: 2.
+	self assert: behaviour coordinators size equals: 1.
+	motion cancel.
+	self assert: behaviour terminalStates equals: { CFMotionState cancelled }.
+	motion cancel.
+	self assert: behaviour terminalStates size equals: 1.
+	^ behaviour
+]
+
+{ #category : 'examples - behaviour lifecycle' }
+CFMotionExamples >> finiteBehaviourEndsWithCompletedState [
+	<gtExample>
+	| space timeline behaviour motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	behaviour := CFMotionLifecycleRecorder new.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: motion isCompleted.
+	self assert: behaviour coordinators size equals: 1.
+	self assert: behaviour terminalStates equals: { CFMotionState completed }.
+	^ behaviour
+]

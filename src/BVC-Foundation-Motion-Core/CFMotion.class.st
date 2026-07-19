@@ -3,7 +3,9 @@ I am a complete temporal composition played by a CFMotionCoordinator.
 
 I own my tracks, optional source timeline, playback position, easing, lifecycle and completion. I prepare and claim my presentation tracks when started, then advance only from the shared CFMotionFrames supplied by my coordinator. I do not create Bloc animations, schedule pulses or read a clock.
 
-The coordinator owns frame scheduling and cross-Motion presentation coordination. Tracks own presentation interpolation. When I own a CFMotionTimeline, that timeline owns playback position and track evaluation; I remain the lifecycle and presentation-ownership shell.
+The coordinator owns frame scheduling and cross-Motion presentation coordination. Timeline tracks own temporal placement and Behaviours own presentation or dynamic work. When I own a CFMotionTimeline, that timeline owns playback position and track evaluation; I remain the lifecycle and presentation-ownership shell.
+
+I begin each Behaviour exactly once after origin capture and end it exactly once when playback completes, settles or is cancelled. Pause and resume preserve that Behaviour lifetime.
 "
 Class {
 	#name : 'CFMotion',
@@ -89,6 +91,7 @@ CFMotion >> cancelApplying: aBlock [
 	tracks do: aBlock.
 	state := CFMotionState cancelled.
 	trace record: #cancelled for: self.
+	tracks do: [ :each | each playbackEndedWith: state ].
 	self releaseClaims.
 	self notifyTerminalHandlers.
 	^ self
@@ -106,10 +109,12 @@ CFMotion >> complete [
 	holdAtDestination ifTrue: [
 		state := CFMotionState settled.
 		trace record: #settled for: self.
+		tracks do: [ :each | each playbackEndedWith: state ].
 		^ self ].
 	tracks do: [ :each | each applyDestination ].
 	state := CFMotionState completed.
 	trace record: #completed for: self.
+	tracks do: [ :each | each playbackEndedWith: state ].
 	self releaseClaims.
 	self notifyTerminalHandlers
 ]
@@ -227,6 +232,7 @@ CFMotion >> start [
 	tracks do: [ :each | each validateForExecution ].
 	self claimTracks.
 	tracks do: [ :each | each captureOriginIn: coordinator ].
+	tracks do: [ :each | each playbackStartedIn: coordinator ].
 	self startFromCurrentPresentation.
 	^ self
 ]

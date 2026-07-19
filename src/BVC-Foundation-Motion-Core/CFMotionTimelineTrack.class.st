@@ -3,7 +3,7 @@ I place one CFMotionBehaviour within a CFMotionTimeline.
 
 I own the track's temporal anchors, offsets, finite duration or indefinite lifetime, easing, and resolved temporal placement. At runtime the timeline gives me an absolute playback position. I decide whether my Behaviour has started and construct its local evaluation. Finite tracks also calculate eased progress and finish at a resolved end; indefinite tracks keep receiving unbounded local time and no progress value.
 
-I do not own a clock or lifecycle. The timeline owns playback position; the Behaviour owns presentation.
+I forward whole-playback lifecycle and presentation-ownership messages to my Behaviour. I do not own a clock or playback lifecycle. The timeline owns playback position; the Behaviour owns presentation or dynamic work.
 "
 Class {
 	#name : 'CFMotionTimelineTrack',
@@ -195,6 +195,16 @@ CFMotionTimelineTrack >> behaviour [
 CFMotionTimelineTrack >> behaviour: aBehaviour [
 	behaviour := aBehaviour.
 	^ self
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> playbackStartedIn: aCoordinator [
+	behaviour playbackStartedIn: aCoordinator
+]
+
+{ #category : 'playing' }
+CFMotionTimelineTrack >> playbackEndedWith: aMotionState [
+	behaviour playbackEndedWith: aMotionState
 ]
 
 { #category : 'playing' }
