@@ -205,7 +205,7 @@ CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator 
 	duration := aDuration.
 	easing := anInterpolator.
 	requestedTracks with: ownedTracks do: [ :each :ownedTrack |
-		ownedTrack targetValue: each targetValue.
+		ownedTrack targetValue: each targetValue ].
 	self startFromCurrentPresentation.
 	^ self
 ]
