@@ -1,14 +1,14 @@
 "
 I place one CFMotionBehaviour within a CFMotionTimeline.
 
-I own the track's temporal anchors, offsets, duration, easing and resolved start and end times. At runtime the timeline gives me an absolute playback position. I decide whether my visual track has not started, is active, or has finished, then apply the corresponding local progress.
+I own the track's temporal anchors, offsets, finite duration or indefinite lifetime, easing, and resolved temporal placement. At runtime the timeline gives me an absolute playback position. I decide whether my Behaviour has started and construct its local evaluation. Finite tracks also calculate eased progress and finish at a resolved end; indefinite tracks keep receiving unbounded local time and no progress value.
 
 I do not own a clock or lifecycle. The timeline owns playback position; the Behaviour owns presentation.
 "
 Class {
 	#name : 'CFMotionTimelineTrack',
 	#superclass : 'Object',
-	#instVars : [ 'timeline', 'behaviour', 'duration', 'easing', 'repeatInterval', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
+	#instVars : [ 'timeline', 'behaviour', 'duration', 'easing', 'repeatInterval', 'indefinite', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -42,6 +42,12 @@ CFMotionTimelineTrack >> applyAt: anElapsedTime [
 	| localTime progress |
 	anElapsedTime < resolvedStart ifTrue: [ ^ self ].
 	localTime := (anElapsedTime - resolvedStart) max: 0 milliSeconds.
+	indefinite ifTrue: [
+		behaviour evaluate: (CFMotionEvaluation
+			timelineTime: anElapsedTime
+			localTime: localTime
+			progress: nil).
+		^ self ].
 	progress := anElapsedTime >= resolvedEnd
 		ifTrue: [ 1.0 ]
 		ifFalse: [ easing interpolate: localTime / duration ].
@@ -74,6 +80,7 @@ CFMotionTimelineTrack >> clearResolvedTimes [
 
 { #category : 'configuration' }
 CFMotionTimelineTrack >> duration: aDuration [
+	indefinite ifTrue: [ self error: 'An indefinite Motion track cannot have a duration' ].
 	aDuration <= (0 milliSeconds) ifTrue: [
 		self error: 'A Motion track duration must be positive' ].
 	duration := aDuration.
@@ -109,6 +116,7 @@ CFMotionTimelineTrack >> endsAt: anAnchor [
 
 { #category : 'private - configuration' }
 CFMotionTimelineTrack >> endsAt: anAnchor offset: anOffset [
+	indefinite ifTrue: [ self error: 'An indefinite Motion track cannot have an end placement' ].
 	self validateAnchor: anAnchor.
 	endAnchor := anAnchor.
 	endOffset := anOffset.
@@ -143,14 +151,34 @@ CFMotionTimelineTrack >> initialize [
 	endOffset := 0 milliSeconds.
 	easing := BlDecelerateInterpolator factor: 1.4.
 	hasExplicitStartPlacement := false.
-	hasEndPlacement := false
+	hasEndPlacement := false.
+	indefinite := false
 ]
 
 { #category : 'testing' }
 CFMotionTimelineTrack >> isFinite [
+	indefinite ifTrue: [ ^ false ].
 	duration ifNil: [ ^ false ].
 	repeatInterval ifNil: [ ^ true ].
 	^ hasEndPlacement
+]
+
+
+{ #category : 'configuration' }
+CFMotionTimelineTrack >> indefinite [
+	duration ifNotNil: [
+		self error: 'A Motion track with a duration cannot become indefinite' ].
+	hasEndPlacement ifTrue: [
+		self error: 'An indefinite Motion track cannot have an end placement' ].
+	repeatInterval ifNotNil: [
+		self error: 'An indefinite Motion track cannot repeat' ].
+	indefinite := true.
+	^ self
+]
+
+{ #category : 'testing' }
+CFMotionTimelineTrack >> isIndefinite [
+	^ indefinite
 ]
 
 { #category : 'testing' }
@@ -189,10 +217,20 @@ CFMotionTimelineTrack >> referencesTimelineEndWith: aCollection [
 
 { #category : 'private - resolving' }
 CFMotionTimelineTrack >> resolveUsing: aTimeline [
-	duration ifNil: [ self error: 'A Motion track needs a duration' ].
+	indefinite ifTrue: [ ^ self resolveIndefiniteUsing: aTimeline ].
+	duration ifNil: [ self error: 'A finite Motion track needs a duration' ].
 	repeatInterval
 		ifNil: [ ^ self resolveSingleOccurrenceUsing: aTimeline ]
 		ifNotNil: [ ^ self resolveRepeatedOccurrencesUsing: aTimeline ]
+]
+
+
+{ #category : 'private - resolving' }
+CFMotionTimelineTrack >> resolveIndefiniteUsing: aTimeline [
+	| placedStart |
+	placedStart := self resolvedStartPlacementUsing: aTimeline.
+	placedStart ifNil: [ ^ false ].
+	^ self recordResolvedStart: placedStart
 ]
 
 { #category : 'private - resolving' }
@@ -260,6 +298,7 @@ CFMotionTimelineTrack >> repeatInterval [
 
 { #category : 'configuration' }
 CFMotionTimelineTrack >> repeatsEvery: anInterval [
+	indefinite ifTrue: [ self error: 'An indefinite Motion track cannot repeat' ].
 	anInterval <= (0 milliSeconds) ifTrue: [
 		self error: 'A Motion repeat interval must be positive' ].
 	repeatInterval := anInterval.
@@ -342,6 +381,8 @@ CFMotionTimelineTrack >> validateAnchor: anAnchor [
 
 { #category : 'private - validation' }
 CFMotionTimelineTrack >> validateForExecution [
+	indefinite ifFalse: [
+		duration ifNil: [ self error: 'A finite Motion track needs a duration' ] ].
 	repeatInterval ifNotNil: [
 		self error: 'Repeated Motion tracks are not executable yet' ].
 	behaviour ifNil: [

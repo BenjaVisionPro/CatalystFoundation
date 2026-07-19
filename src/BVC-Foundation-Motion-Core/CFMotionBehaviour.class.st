@@ -13,10 +13,10 @@ Class {
 }
 
 { #category : 'accessing' }
-CFMotionBehaviour >> animationTarget [ self subclassResponsibility ]
+CFMotionBehaviour >> animationTarget [ ^ nil ]
 
 { #category : 'playing' }
-CFMotionBehaviour >> applyDestination [ self subclassResponsibility ]
+CFMotionBehaviour >> applyDestination [ ]
 
 { #category : 'evaluating' }
 CFMotionBehaviour >> evaluate: anEvaluation [
@@ -27,22 +27,22 @@ CFMotionBehaviour >> evaluate: anEvaluation [
 CFMotionBehaviour >> applyProgress: aProgress [ self subclassResponsibility ]
 
 { #category : 'playing' }
-CFMotionBehaviour >> captureOrigin [ self subclassResponsibility ]
+CFMotionBehaviour >> captureOrigin [ ]
 
 { #category : 'playing' }
 CFMotionBehaviour >> captureOriginIn: aCoordinator [ self captureOrigin ]
 
 { #category : 'accessing' }
-CFMotionBehaviour >> propertyKey [ self subclassResponsibility ]
+CFMotionBehaviour >> propertyKey [ ^ nil ]
 
 { #category : 'playing' }
 CFMotionBehaviour >> preserveCurrentPresentation [ ]
 
 { #category : 'playing' }
-CFMotionBehaviour >> prepareFromCurrentPresentation [ self subclassResponsibility ]
+CFMotionBehaviour >> prepareFromCurrentPresentation [ ]
 
 { #category : 'playing' }
-CFMotionBehaviour >> restoreOrigin [ self subclassResponsibility ]
+CFMotionBehaviour >> restoreOrigin [ ]
 
 { #category : 'controlling' }
 CFMotionBehaviour >> reversed [ self subclassResponsibility ]

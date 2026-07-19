@@ -78,7 +78,8 @@ CFMotionCoordinator >> release: aKey from: anOperation [
 { #category : 'ownership' }
 CFMotionCoordinator >> releaseAllFor: anOperation [
 	anOperation tracks do: [ :each |
-		self release: each propertyKey from: anOperation ]
+		each propertyKey ifNotNil: [ :aKey |
+			self release: aKey from: anOperation ] ]
 ]
 
 { #category : 'playing' }

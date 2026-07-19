@@ -177,7 +177,8 @@ CFMotion >> onTerminalDo: aBlock [
 
 { #category : 'private - ownership' }
 CFMotion >> claimTracks [
-	tracks do: [ :each | coordinator claim: each propertyKey for: self ].
+	tracks do: [ :each |
+		each propertyKey ifNotNil: [ :aKey | coordinator claim: aKey for: self ] ].
 	trace record: #claimed for: self
 ]
 
@@ -264,7 +265,7 @@ CFMotion >> startFromCurrentPresentation [
 		ifNotNil: [ timeline prepareForPlayback ].
 	state := CFMotionState running.
 	trace record: #started for: self.
-	(tracks allSatisfy: [ :each | each isAtDestination ]) ifTrue: [
+	(timeline isNil and: [ tracks allSatisfy: [ :each | each isAtDestination ] ]) ifTrue: [
 		^ self complete ].
 	coordinator play: self
 ]

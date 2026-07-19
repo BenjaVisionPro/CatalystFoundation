@@ -2747,3 +2747,71 @@ CFMotionExamples >> transformChannelPreservesStableRegistrationOrder [
 	self assert: channel isEmpty.
 	^ channel
 ]
+
+
+{ #category : 'examples - indefinite behaviours' }
+CFMotionExamples >> indefiniteTimelineAdvancesUntilExplicitlyCancelled [
+	<gtExample>
+	| space timeline behaviour track motion firstEvaluation secondEvaluation |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	behaviour := CFMotionEvaluationRecorder new.
+	timeline := CFMotionTimeline new.
+	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	space time wait: 60 milliSeconds.
+	space pulse.
+	firstEvaluation := behaviour evaluations first.
+	secondEvaluation := behaviour evaluations second.
+	self assert: timeline isIndefinite.
+	self assert: timeline duration isNil.
+	self assert: timeline progress isNil.
+	self assert: timeline isComplete not.
+	self assert: motion isRunning.
+	self assert: firstEvaluation timelineTime equals: 40 milliSeconds.
+	self assert: firstEvaluation localTime equals: 40 milliSeconds.
+	self assert: firstEvaluation hasProgress not.
+	self assert: secondEvaluation timelineTime equals: 100 milliSeconds.
+	self assert: secondEvaluation localTime equals: 100 milliSeconds.
+	motion cancel.
+	self assert: motion isCancelled.
+	self assert: space cfMotionCoordinator hasActiveMotions not.
+	^ track
+]
+
+{ #category : 'examples - indefinite behaviours' }
+CFMotionExamples >> indefiniteTrackMayStartAfterFiniteTimelineContent [
+	<gtExample>
+	| space element timeline finiteTrack behaviour indefiniteTrack motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	finiteTrack := (CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	behaviour := CFMotionEvaluationRecorder new.
+	indefiniteTrack := (CFMotionTimelineTrack on: behaviour in: timeline)
+		startsAt: finiteTrack end;
+		indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 75 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 1.0).
+	self assert: behaviour evaluations size equals: 1.
+	self assert: behaviour evaluations first timelineTime equals: 75 milliSeconds.
+	self assert: behaviour evaluations first localTime equals: 25 milliSeconds.
+	self assert: motion isRunning.
+	motion cancel.
+	^ indefiniteTrack
+]

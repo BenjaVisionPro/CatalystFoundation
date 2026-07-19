@@ -22,6 +22,11 @@ CFMotionEvaluation class >> timelineTime: aTimelineTime localTime: aLocalTime pr
 		yourself
 ]
 
+{ #category : 'testing' }
+CFMotionEvaluation >> hasProgress [
+	^ progress notNil
+]
+
 { #category : 'accessing' }
 CFMotionEvaluation >> localTime [ ^ localTime ]
 

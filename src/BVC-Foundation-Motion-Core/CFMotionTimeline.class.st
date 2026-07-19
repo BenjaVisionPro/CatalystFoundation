@@ -1,14 +1,14 @@
 "
 I am the temporal runtime owned by a CFMotion.
 
-I own an ordered collection of timeline tracks, their resolved temporal layout, and the current playback position. Before playback I resolve the track anchors and reset my playhead. For each coordinator frame I advance that playhead once, clamp it to my finite duration, and ask every track to present itself at the resulting absolute timeline time.
+I own an ordered collection of timeline tracks, their resolved temporal layout, and the current playback position. Before playback I resolve the track anchors and reset my playhead. For each coordinator frame I advance that playhead once and ask every track to evaluate at the resulting absolute timeline time. A finite timeline clamps at its resolved end and completes. A timeline containing an indefinite track keeps advancing until its Motion is explicitly stopped or cancelled.
 
 I do not schedule frames, own presentation claims, or manage Motion lifecycle. CFMotion owns lifecycle and delegates temporal advancement to me. CFMotionCoordinator supplies the shared frame cadence. CFMotionTimelineTrack owns temporal placement and translates my absolute playback position into presentation progress for its visual track.
 "
 Class {
 	#name : 'CFMotionTimeline',
 	#superclass : 'Object',
-	#instVars : [ 'tracks', 'startAnchor', 'endAnchor', 'resolvedEnd', 'elapsedTime' ],
+	#instVars : [ 'tracks', 'startAnchor', 'endAnchor', 'resolvedEnd', 'elapsedTime', 'indefinite' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -22,7 +22,8 @@ CFMotionTimeline >> addTrack: aTrack [
 { #category : 'playing' }
 CFMotionTimeline >> advanceBy: aDuration [
 	self ensureResolvedTemporalLayout.
-	elapsedTime := (elapsedTime + aDuration) min: resolvedEnd.
+	elapsedTime := elapsedTime + aDuration.
+	indefinite ifFalse: [ elapsedTime := elapsedTime min: resolvedEnd ].
 	self applyCurrentPosition.
 	^ self
 ]
@@ -35,7 +36,7 @@ CFMotionTimeline >> applyCurrentPosition [
 { #category : 'accessing' }
 CFMotionTimeline >> duration [
 	self ensureResolvedTemporalLayout.
-	^ resolvedEnd
+	^ indefinite ifTrue: [ nil ] ifFalse: [ resolvedEnd ]
 ]
 
 { #category : 'accessing' }
@@ -59,13 +60,26 @@ CFMotionTimeline >> initialize [
 	tracks := OrderedCollection new.
 	startAnchor := CFMotionTemporalAnchor timelineStartIn: self.
 	endAnchor := CFMotionTemporalAnchor timelineEndIn: self.
-	elapsedTime := 0 milliSeconds
+	elapsedTime := 0 milliSeconds.
+	indefinite := false
 ]
 
 { #category : 'testing' }
 CFMotionTimeline >> isComplete [
 	self ensureResolvedTemporalLayout.
-	^ elapsedTime >= resolvedEnd
+	^ indefinite not and: [ elapsedTime >= resolvedEnd ]
+]
+
+{ #category : 'testing' }
+CFMotionTimeline >> isFinite [
+	self ensureResolvedTemporalLayout.
+	^ indefinite not
+]
+
+{ #category : 'testing' }
+CFMotionTimeline >> isIndefinite [
+	self ensureResolvedTemporalLayout.
+	^ indefinite
 ]
 
 { #category : 'playing' }
@@ -78,6 +92,7 @@ CFMotionTimeline >> prepareForPlayback [
 { #category : 'accessing' }
 CFMotionTimeline >> progress [
 	self ensureResolvedTemporalLayout.
+	indefinite ifTrue: [ ^ nil ].
 	resolvedEnd isZero ifTrue: [ ^ 1.0 ].
 	^ (elapsedTime / resolvedEnd) min: 1.0
 ]
@@ -85,6 +100,7 @@ CFMotionTimeline >> progress [
 { #category : 'private - resolving' }
 CFMotionTimeline >> resolveTemporalLayout [
 	resolvedEnd := nil.
+	indefinite := tracks anySatisfy: #isIndefinite.
 	tracks do: [ :each | each clearResolvedTimes ].
 	self resolveTracksThatDoNotReferenceTimelineEnd.
 	self deriveTimelineEnd.
@@ -126,7 +142,7 @@ CFMotionTimeline >> resolveTracksWithTimelineEnd [
 { #category : 'private - resolving' }
 CFMotionTimeline >> resolvedTimeOf: anAnchor [
 	anAnchor kind = #timelineStart ifTrue: [ ^ 0 milliSeconds ].
-	anAnchor kind = #timelineEnd ifTrue: [ ^ resolvedEnd ].
+	anAnchor kind = #timelineEnd ifTrue: [ ^ indefinite ifTrue: [ nil ] ifFalse: [ resolvedEnd ] ].
 	anAnchor kind = #trackStart ifTrue: [ ^ anAnchor track resolvedStart ].
 	anAnchor kind = #trackEnd ifTrue: [ ^ anAnchor track resolvedEnd ].
 	self error: 'An unknown Motion temporal anchor cannot be resolved'
@@ -144,14 +160,18 @@ CFMotionTimeline >> tracks [
 
 { #category : 'private - resolving' }
 CFMotionTimeline >> validateResolvedTemporalLayout [
-	(tracks anySatisfy: [ :each |
-		each referencesTimelineEndWith: IdentitySet new ]) ifTrue: [
-		resolvedEnd ifNil: [
-			self error: 'A Motion timeline needs a finite track to establish its end' ] ].
+	indefinite ifTrue: [
+		(tracks anySatisfy: [ :each |
+			each referencesTimelineEndWith: IdentitySet new ]) ifTrue: [
+			self error: 'An indefinite Motion timeline has no timeline end anchor' ] ].
 	tracks do: [ :each |
 		each isFinite ifTrue: [
 			(each resolvedStart isNil or: [ each resolvedEnd isNil ]) ifTrue: [
-				self error: 'A finite Motion track must have a resolvable temporal layout' ] ] ].
-	resolvedEnd ifNil: [
-		self error: 'A Motion timeline needs a finite duration before it can play' ]
+				self error: 'A finite Motion track must have a resolvable temporal layout' ] ].
+		each isIndefinite ifTrue: [
+			each resolvedStart ifNil: [
+				self error: 'An indefinite Motion track must have a resolvable start' ] ] ].
+	indefinite ifFalse: [
+		resolvedEnd ifNil: [
+			self error: 'A finite Motion timeline needs a duration before it can play' ] ]
 ]
