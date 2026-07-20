@@ -1699,6 +1699,31 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	^ result
 ]
 
+{ #category : 'examples - rail joints' }
+CFPhysicsCleanSlateTests >> railJointConstrainsAnAnchoredElementToItsAxis [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	element physics velocity: 100 @ 100.
+	element physics angularVelocity: 10.0.
+	result := world step.
+	self assert: world railJoints equals: { joint }.
+	self assert: result constraints size equals: 1.
+	self assert: result constraints first class equals: CFPhysicsPreparedRailJoint.
+	self assert: element physics velocity y abs < 1.0e-6.
+	self assert: element physics angularVelocity abs < 1.0e-6.
+	^ result
+]
+
 { #category : 'examples - fixed joints' }
 CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
 	<gtExample>

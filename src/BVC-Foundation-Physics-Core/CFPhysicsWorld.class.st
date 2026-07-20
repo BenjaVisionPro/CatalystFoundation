@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'previousTimeStep', 'warmStarting' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -43,12 +43,14 @@ CFPhysicsWorld >> initialize [
 	nextDistanceJointSequence := 1.
 	nextRevoluteJointSequence := 1.
 	nextFixedJointSequence := 1.
+	nextRailJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	containmentConstraints := IdentitySet new.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
 	fixedJoints := IdentitySet new.
+	railJoints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -191,6 +193,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeDistanceJointsUsingBody: body.
 		self removeRevoluteJointsUsingBody: body.
 		self removeFixedJointsUsingBody: body.
+		self removeRailJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ] ]
@@ -492,7 +495,7 @@ CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 
 { #category : 'joints' }
 CFPhysicsWorld >> joints [
-	^ (self distanceJoints, self revoluteJoints, self fixedJoints) asArray sorted: [ :first :second |
+	^ (self distanceJoints, self revoluteJoints, self fixedJoints, self railJoints) asArray sorted: [ :first :second |
 		first orderingKey = second orderingKey
 			ifTrue: [ first class name asString < second class name asString ]
 			ifFalse: [ first orderingKey < second orderingKey ] ]
@@ -595,6 +598,44 @@ CFPhysicsWorld >> removeFixedJoint: aJoint [
 CFPhysicsWorld >> removeFixedJointsUsingBody: aBodyState [
 	(fixedJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
 		self removeFixedJoint: each ]
+]
+
+{ #category : 'rail joints' }
+CFPhysicsWorld >> railJoints [
+	^ railJoints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'rail joints' }
+CFPhysicsWorld >> addRailJoint: aJoint [
+	aJoint endpointPair world == self
+		ifFalse: [ self error: 'Rail joint endpoints must belong to this physics world' ].
+	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
+		ifFalse: [ self error: 'A rail joint requires at least one body endpoint' ].
+	aJoint sequence: nextRailJointSequence.
+	nextRailJointSequence := nextRailJointSequence + 1.
+	railJoints add: aJoint.
+	aJoint wakeBodies.
+	^ aJoint
+]
+
+{ #category : 'rail joints' }
+CFPhysicsWorld >> railJointsUsingBody: aBodyState [
+	^ self railJoints select: [ :each | each includesBody: aBodyState ]
+]
+
+{ #category : 'rail joints' }
+CFPhysicsWorld >> removeRailJoint: aJoint [
+	(railJoints includes: aJoint) ifTrue: [
+		aJoint release.
+		railJoints remove: aJoint ].
+	^ aJoint
+]
+
+{ #category : 'rail joints' }
+CFPhysicsWorld >> removeRailJointsUsingBody: aBodyState [
+	(railJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeRailJoint: each ]
 ]
 
 { #category : 'distance joints' }

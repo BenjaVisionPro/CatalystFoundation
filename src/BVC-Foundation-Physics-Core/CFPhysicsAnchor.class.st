@@ -74,6 +74,14 @@ CFPhysicsAnchor >> fixedJointTo: anotherAnchor [
 ]
 
 { #category : 'relationships' }
+CFPhysicsAnchor >> railJointTo: anotherAnchor along: anAxis [
+	| aWorld joint |
+	aWorld := self relationshipWorldWith: anotherAnchor.
+	joint := CFPhysicsRailJoint betweenAnchor: self andAnchor: anotherAnchor along: anAxis.
+	^ aWorld addRailJoint: joint
+]
+
+{ #category : 'relationships' }
 CFPhysicsAnchor >> attract: anotherAnchor [
 	| aWorld attraction |
 	aWorld := self relationshipWorldWith: anotherAnchor.

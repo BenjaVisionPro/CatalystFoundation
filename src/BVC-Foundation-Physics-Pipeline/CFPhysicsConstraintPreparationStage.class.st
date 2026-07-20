@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder', 'railJointConstraintBuilder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -12,7 +12,8 @@ CFPhysicsConstraintPreparationStage >> initialize [
 	constraintBuilder := CFPhysicsConstraintBuilder new.
 	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new.
 	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new.
-	fixedJointConstraintBuilder := CFPhysicsFixedJointConstraintBuilder new
+	fixedJointConstraintBuilder := CFPhysicsFixedJointConstraintBuilder new.
+	railJointConstraintBuilder := CFPhysicsRailJointConstraintBuilder new
 ]
 
 { #category : 'accessing' }
@@ -31,6 +32,10 @@ CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder: anObject 
 CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder [ ^ fixedJointConstraintBuilder ]
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder: anObject [ fixedJointConstraintBuilder := anObject ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder [ ^ railJointConstraintBuilder ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder: anObject [ railJointConstraintBuilder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
@@ -58,6 +63,10 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 			warmStartRatio: aStepResult step warmStartRatio);
 		yourself.
 	jointConstraints addAll: (fixedJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
+	jointConstraints addAll: (railJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio).

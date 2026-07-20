@@ -438,6 +438,39 @@ CFPhysicsElement >> removeFixedJoint: aJoint [
 	aWorld ifNotNil: [ aWorld removeFixedJoint: aJoint ]
 ]
 
+{ #category : 'rail joints' }
+CFPhysicsElement >> railJointTo: anotherElement along: anAxis [
+	| aWorld otherWorld joint |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsRailJoint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState
+		along: anAxis.
+	^ aWorld addRailJoint: joint
+]
+
+{ #category : 'rail joints' }
+CFPhysicsElement >> railJoints [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld railJointsUsingBody: body
+]
+
+{ #category : 'rail joints' }
+CFPhysicsElement >> removeRailJoint: aJoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeRailJoint: aJoint ]
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsElement >> containWithinWorld [
