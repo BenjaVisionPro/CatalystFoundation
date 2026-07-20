@@ -5,23 +5,25 @@ My playback lifetime is explicit. I become active when Motion starts me and inac
 
 I adapt Motion's presentation-frame cadence to Physics' deterministic fixed step. Each evaluation contributes the increase in local Motion time to an accumulator. I advance the world in whole #stepDuration increments and retain any remainder for a later frame. A zero-time initial Motion frame performs no Physics step; a long presentation frame may perform several fixed steps.
 
-I own no frame scheduling, timeline placement, presentation lifetime, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
+I own no frame scheduling, timeline placement, frame-consumer lifetime, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
+
+After stepping I publish the interpolation alpha through the small #frameReadyAtAlpha: consumer protocol. I do not know whether that consumer presents, records, profiles or ignores the frame.
 
 My animation target is the world's owner element. Normal Motion validity therefore cancels playback if that owner leaves or moves away from the coordinator's BlSpace.
 "
 Class {
 	#name : 'CFPhysicsWorldBehaviour',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'presentation' ],
+	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'frameConsumer' ],
 	#category : 'BVC-Foundation-Physics-Motion',
 	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'instance creation' }
-CFPhysicsWorldBehaviour class >> on: aPhysicsWorld presentation: aPresentation [
+CFPhysicsWorldBehaviour class >> on: aPhysicsWorld frameConsumer: aFrameConsumer [
 	^ self new
 		world: aPhysicsWorld;
-		presentation: aPresentation;
+		frameConsumer: aFrameConsumer;
 		yourself
 ]
 
@@ -43,8 +45,8 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 	[ accumulatedTime >= stepDuration ] whileTrue: [
 		world step.
 		accumulatedTime := accumulatedTime - stepDuration ].
-	presentation
-		presentAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
+	frameConsumer
+		frameReadyAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
 ]
 
 { #category : 'initialization' }
@@ -87,7 +89,7 @@ CFPhysicsWorldBehaviour >> reversed [
 { #category : 'private - validation' }
 CFPhysicsWorldBehaviour >> validateForExecution [
 	world ifNil: [ self error: 'A Physics world Behaviour needs a world' ].
-	presentation ifNil: [ self error: 'A Physics world Behaviour needs a presentation' ].
+	frameConsumer ifNil: [ self error: 'A Physics world Behaviour needs a frame consumer' ].
 	world owner ifNil: [ self error: 'A Physics world Behaviour needs an owner element' ].
 	world stepDuration <= (0 milliSeconds) ifTrue: [
 		self error: 'A Physics world step duration must be positive' ]
@@ -104,6 +106,6 @@ CFPhysicsWorldBehaviour >> world: aPhysicsWorld [
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsWorldBehaviour >> presentation: aPresentation [
-	presentation := aPresentation
+CFPhysicsWorldBehaviour >> frameConsumer: aFrameConsumer [
+	frameConsumer := aFrameConsumer
 ]

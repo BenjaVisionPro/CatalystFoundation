@@ -1,7 +1,7 @@
 "
 I own continuous Motion playback for one CFPhysicsWorld.
 
-I am the explicit integration boundary between Physics simulation and Motion playback. The world asks me to start, pause, resume or stop; I assemble and retain the Motion timeline, Physics Behaviour and world presentation needed for that playback. I own and release the continuous presentation together with its Motion; the Behaviour only advances simulation and requests presentation frames.
+I am the explicit integration boundary between Physics simulation and Motion playback. The world asks me to start, pause, resume or stop; I assemble and retain the Motion timeline, Physics Behaviour and frame consumer needed for that playback. I own and release the continuous presentation together with its Motion; the Behaviour only advances simulation and requests presentation frames.
 
 One instance represents the reusable playback capability of one world. A running or paused Motion is one playback lifetime. Once that Motion reaches a terminal state I forget it, so a later #start creates a fresh Behaviour, presentation and fixed-step accumulator.
 "
@@ -71,7 +71,7 @@ CFPhysicsWorldPlayback >> newMotionWith: aPresentation in: aCoordinator [
 	| behaviour timeline |
 	behaviour := CFPhysicsWorldBehaviour
 		on: world
-		presentation: aPresentation.
+		frameConsumer: aPresentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	^ CFMotion timeline: timeline coordinator: aCoordinator

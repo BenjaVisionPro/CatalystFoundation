@@ -29,6 +29,12 @@ CFPhysicsWorldPresentation >> initialize [
 	fixedCoordinator := false
 ]
 
+
+{ #category : 'consuming frames' }
+CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
+	self presentAtAlpha: aNumber
+]
+
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> present [
 	self prepare ifFalse: [ ^ self ].

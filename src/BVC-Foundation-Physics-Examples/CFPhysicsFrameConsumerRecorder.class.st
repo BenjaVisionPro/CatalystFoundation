@@ -1,10 +1,10 @@
 "
-I record the presentation protocol used by CFPhysicsWorldBehaviour in executable examples.
+I record the frame-consumer protocol used by CFPhysicsWorldBehaviour in executable examples.
 
-I am deliberately separate from CFPhysicsWorldStepRecorder so simulation and presentation remain distinct collaborators.
+I am deliberately separate from CFPhysicsWorldStepRecorder so simulation stepping and frame consumption remain distinct collaborators.
 "
 Class {
-	#name : 'CFPhysicsPresentationRecorder',
+	#name : 'CFPhysicsFrameConsumerRecorder',
 	#superclass : 'Object',
 	#instVars : [ 'presentationCount', 'lastPresentationAlpha', 'releaseCount' ],
 	#category : 'BVC-Foundation-Physics-Examples',
@@ -12,35 +12,35 @@ Class {
 }
 
 { #category : 'initialization' }
-CFPhysicsPresentationRecorder >> initialize [
+CFPhysicsFrameConsumerRecorder >> initialize [
 	super initialize.
 	presentationCount := 0.
 	lastPresentationAlpha := nil.
 	releaseCount := 0
 ]
 
-{ #category : 'presenting' }
-CFPhysicsPresentationRecorder >> presentAtAlpha: aNumber [
+{ #category : 'consuming frames' }
+CFPhysicsFrameConsumerRecorder >> frameReadyAtAlpha: aNumber [
 	presentationCount := presentationCount + 1.
 	lastPresentationAlpha := aNumber
 ]
 
 { #category : 'controlling' }
-CFPhysicsPresentationRecorder >> release [
+CFPhysicsFrameConsumerRecorder >> release [
 	releaseCount := releaseCount + 1
 ]
 
 { #category : 'accessing' }
-CFPhysicsPresentationRecorder >> presentationCount [
+CFPhysicsFrameConsumerRecorder >> presentationCount [
 	^ presentationCount
 ]
 
 { #category : 'accessing' }
-CFPhysicsPresentationRecorder >> lastPresentationAlpha [
+CFPhysicsFrameConsumerRecorder >> lastPresentationAlpha [
 	^ lastPresentationAlpha
 ]
 
 { #category : 'accessing' }
-CFPhysicsPresentationRecorder >> releaseCount [
+CFPhysicsFrameConsumerRecorder >> releaseCount [
 	^ releaseCount
 ]

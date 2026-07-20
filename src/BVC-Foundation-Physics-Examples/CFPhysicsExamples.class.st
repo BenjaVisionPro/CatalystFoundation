@@ -60,8 +60,8 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 		owner: owner;
 		stepDuration: 16 milliSeconds;
 		yourself.
-	presentation := CFPhysicsPresentationRecorder new.
-	behaviour := CFPhysicsWorldBehaviour on: world presentation: presentation.
+	presentation := CFPhysicsFrameConsumerRecorder new.
+	behaviour := CFPhysicsWorldBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
@@ -146,8 +146,8 @@ CFPhysicsExamples >> independentPhysicsWorldBehavioursShareOneFrameDriver [
 		owner: secondOwner;
 		stepDuration: 15 milliSeconds;
 		yourself.
-	firstBehaviour := CFPhysicsWorldBehaviour on: firstWorld presentation: CFPhysicsPresentationRecorder new.
-	secondBehaviour := CFPhysicsWorldBehaviour on: secondWorld presentation: CFPhysicsPresentationRecorder new.
+	firstBehaviour := CFPhysicsWorldBehaviour on: firstWorld frameConsumer: CFPhysicsFrameConsumerRecorder new.
+	secondBehaviour := CFPhysicsWorldBehaviour on: secondWorld frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	firstTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
 	secondTimeline := CFMotionTimeline new.
@@ -233,7 +233,7 @@ CFPhysicsExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
 		owner: owner;
 		stepDuration: 10 milliSeconds;
 		yourself.
-	behaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
+	behaviour := CFPhysicsWorldBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
 	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
@@ -332,7 +332,7 @@ CFPhysicsExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 		owner: owner;
 		stepDuration: 10 milliSeconds;
 		yourself.
-	firstBehaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
+	firstBehaviour := CFPhysicsWorldBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	firstTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
 	firstMotion := (CFMotion timeline: firstTimeline coordinator: space cfMotionCoordinator) start.
@@ -342,7 +342,7 @@ CFPhysicsExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	self assert: world stepCount equals: 1.
 	firstMotion cancel.
 	self assert: firstBehaviour isActive not.
-	secondBehaviour := CFPhysicsWorldBehaviour on: world presentation: CFPhysicsPresentationRecorder new.
+	secondBehaviour := CFPhysicsWorldBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	secondTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
 	secondMotion := (CFMotion timeline: secondTimeline coordinator: space cfMotionCoordinator) start.
