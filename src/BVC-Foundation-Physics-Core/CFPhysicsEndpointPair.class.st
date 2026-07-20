@@ -55,6 +55,11 @@ CFPhysicsEndpointPair >> distanceJoint [
 ]
 
 { #category : 'relationships' }
+CFPhysicsEndpointPair >> revoluteJoint [
+	^ self world addRevoluteJoint: (CFPhysicsRevoluteJoint betweenEndpoints: self)
+]
+
+{ #category : 'relationships' }
 CFPhysicsEndpointPair >> attraction [
 	^ self world addAttractionConstraint: (CFPhysicsAttractionConstraint betweenEndpoints: self)
 ]

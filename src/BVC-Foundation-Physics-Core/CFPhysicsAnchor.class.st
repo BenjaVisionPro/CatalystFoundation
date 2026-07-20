@@ -58,6 +58,14 @@ CFPhysicsAnchor >> distanceJointTo: anotherAnchor [
 ]
 
 { #category : 'relationships' }
+CFPhysicsAnchor >> revoluteJointTo: anotherAnchor [
+	| aWorld joint |
+	aWorld := self relationshipWorldWith: anotherAnchor.
+	joint := CFPhysicsRevoluteJoint betweenAnchor: self andAnchor: anotherAnchor.
+	^ aWorld addRevoluteJoint: joint
+]
+
+{ #category : 'relationships' }
 CFPhysicsAnchor >> attract: anotherAnchor [
 	| aWorld attraction |
 	aWorld := self relationshipWorldWith: anotherAnchor.

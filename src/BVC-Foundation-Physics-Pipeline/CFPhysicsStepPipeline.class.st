@@ -81,7 +81,10 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		step: step;
 		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
 		previousContacts: previousContacts;
-		joints: (joints asArray sorted: [ :left :right | left orderingKey < right orderingKey ]);
+		joints: (joints asArray sorted: [ :left :right |
+			left orderingKey = right orderingKey
+				ifTrue: [ left class name asString < right class name asString ]
+				ifFalse: [ left orderingKey < right orderingKey ] ]);
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
 		yourself.

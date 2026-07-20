@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'previousTimeStep', 'warmStarting' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'previousTimeStep', 'warmStarting' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -41,10 +41,12 @@ CFPhysicsWorld >> initialize [
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
 	nextDistanceJointSequence := 1.
+	nextRevoluteJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	containmentConstraints := IdentitySet new.
 	distanceJoints := IdentitySet new.
+	revoluteJoints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -185,6 +187,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeAttractionsUsingBody: body.
 		self removeRepulsionsUsingBody: body.
 		self removeDistanceJointsUsingBody: body.
+		self removeRevoluteJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ] ]
@@ -224,7 +227,7 @@ CFPhysicsWorld >> step [
 	lastStepResult := stepPipeline
 		stepBodies: bodies
 		fromContacts: activeContacts
-		joints: self distanceJoints
+		joints: self joints
 		step: step
 		gravity: gravity
 		restitutionThreshold: restitutionThreshold.
@@ -484,6 +487,14 @@ CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 	^ self distanceJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
+{ #category : 'joints' }
+CFPhysicsWorld >> joints [
+	^ (self distanceJoints, self revoluteJoints) asArray sorted: [ :first :second |
+		first orderingKey = second orderingKey
+			ifTrue: [ first class name asString < second class name asString ]
+			ifFalse: [ first orderingKey < second orderingKey ] ]
+]
+
 { #category : 'collision filtering' }
 CFPhysicsWorld >> distanceJointPreventsCollisionBetween: firstBody and: secondBody [
 	^ distanceJoints anySatisfy: [ :joint |
@@ -507,9 +518,52 @@ CFPhysicsWorld >> removeDistanceJointsUsingBody: aBodyState [
 		self removeDistanceJoint: each ]
 ]
 
+{ #category : 'revolute joints' }
+CFPhysicsWorld >> revoluteJoints [
+	^ revoluteJoints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsWorld >> addRevoluteJoint: aJoint [
+	aJoint endpointPair world == self
+		ifFalse: [ self error: 'Revolute joint endpoints must belong to this physics world' ].
+	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
+		ifFalse: [ self error: 'A revolute joint requires at least one body endpoint' ].
+	aJoint sequence: nextRevoluteJointSequence.
+	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
+	revoluteJoints add: aJoint.
+	aJoint wakeBodies.
+	^ aJoint
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsWorld >> revoluteJointsUsingBody: aBodyState [
+	^ self revoluteJoints select: [ :each | each includesBody: aBodyState ]
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsWorld >> removeRevoluteJoint: aJoint [
+	(revoluteJoints includes: aJoint) ifTrue: [
+		aJoint release.
+		revoluteJoints remove: aJoint ].
+	^ aJoint
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsWorld >> removeRevoluteJointsUsingBody: aBodyState [
+	(revoluteJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeRevoluteJoint: each ]
+]
+
 { #category : 'distance joints' }
 CFPhysicsWorld >> wakeDistanceJointsUsingAnchor: anAnchor [
-	(distanceJoints select: [ :each | each includesAnchor: anAnchor ]) do: #wakeBodies
+	self wakeJointsUsingAnchor: anAnchor
+]
+
+{ #category : 'joints' }
+CFPhysicsWorld >> wakeJointsUsingAnchor: anAnchor [
+	(self joints select: [ :each | each includesAnchor: anAnchor ]) do: #wakeBodies
 ]
 
 

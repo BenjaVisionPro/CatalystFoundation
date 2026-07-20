@@ -374,6 +374,38 @@ CFPhysicsElement >> removeDistanceJoint: aJoint [
 	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
 ]
 
+{ #category : 'revolute joints' }
+CFPhysicsElement >> revoluteJointTo: anotherElement [
+	| aWorld otherWorld joint |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsRevoluteJoint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addRevoluteJoint: joint
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsElement >> revoluteJoints [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld revoluteJointsUsingBody: body
+]
+
+{ #category : 'revolute joints' }
+CFPhysicsElement >> removeRevoluteJoint: aJoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsElement >> containWithinWorld [

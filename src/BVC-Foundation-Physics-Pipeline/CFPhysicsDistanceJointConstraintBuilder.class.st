@@ -7,7 +7,8 @@ Class {
 
 { #category : 'building' }
 CFPhysicsDistanceJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	^ (joints select: [ :joint | joint isActive ]) collect: [ :joint |
+	^ (joints select: [ :joint |
+		(joint isKindOf: CFPhysicsDistanceJoint) and: [ joint isActive ] ]) collect: [ :joint |
 		self constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio ]
 ]
 

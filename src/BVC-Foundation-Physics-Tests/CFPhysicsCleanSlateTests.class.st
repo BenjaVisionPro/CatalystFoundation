@@ -1556,6 +1556,96 @@ CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
 	^ joint
 ]
 
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
+	<gtExample>
+	| first second firstAnchor secondAnchor joint |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 20 @ 0 extent: 20 @ 20.
+	firstAnchor := CFPhysicsLocalAnchor on: first at: 20 @ 10.
+	secondAnchor := CFPhysicsLocalAnchor on: second at: 0 @ 10.
+	joint := CFPhysicsRevoluteJoint betweenAnchor: firstAnchor andAnchor: secondAnchor.
+	self assert: joint firstBody == first.
+	self assert: joint secondBody == second.
+	self assert: joint anchorA == firstAnchor.
+	self assert: joint anchorB == secondAnchor.
+	self assert: joint accumulatedImpulse equals: 0 @ 0.
+	^ joint
+]
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
+	<gtExample>
+	| owner first second world firstAnchor secondAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 20 @ 0.
+	second physics beStatic.
+	firstAnchor := first physics localAnchorAt: 20 @ 10.
+	secondAnchor := second physics localAnchorAt: 0 @ 10.
+	joint := firstAnchor revoluteJointTo: secondAnchor.
+	first physics velocity: 100 @ 0.
+	result := world step.
+	self assert: world revoluteJoints equals: { joint }.
+	self assert: result constraints size equals: 1.
+	self assert: result constraints first class equals: CFPhysicsPreparedRevoluteJoint.
+	self assert: result islands size equals: 1.
+	self assert: first physics velocity x abs < 1.0e-6.
+	^ result
+]
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor revoluteJointTo: worldAnchor.
+	element physics velocity: 100 @ 0.
+	result := world step.
+	self assert: joint firstBody == element physics bodyState.
+	self assert: joint secondBody isNil.
+	self assert: result constraints size equals: 1.
+	self assert: result islands size equals: 1.
+	self assert: element physics velocity x abs < 1.0e-6.
+	^ result
+]
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor revoluteJointTo: worldAnchor.
+	element physics bodyState sleep.
+	worldAnchor point: 110 @ 10.
+	self assert: element physics bodyState isAwake.
+	world step.
+	self assert: element physics velocity x > 0.
+	^ joint
+]
+
 { #category : 'examples - collision filtering' }
 CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
