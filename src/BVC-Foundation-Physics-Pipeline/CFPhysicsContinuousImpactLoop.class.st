@@ -18,18 +18,20 @@ CFPhysicsContinuousImpactLoop >> initialize [
 
 { #category : 'executing' }
 CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
-	| impacts impactSolveResults remainingTime tolerance iterationLimitReached |
+	| impacts impactSolveResults sensorContactsByKey remainingTime tolerance iterationLimitReached |
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
+	sensorContactsByKey := Dictionary new.
 	remainingTime := step timeStep.
 	tolerance := 1.0e-9.
 	iterationLimitReached := false.
 	1 to: maximumIterations do: [ :iteration |
-		| pairs solidPairs impact advancement impactStep solveResult |
+		| pairs solidPairs sensorPairs impact advancement impactStep solveResult |
 		remainingTime <= tolerance ifTrue: [
 			^ self
 				resultWithImpacts: impacts
 				impactSolveResults: impactSolveResults
+				sensorContacts: (self orderedSensorContactsFrom: sensorContactsByKey)
 				bodyStates: bodyStates
 				remainingTime: 0.0
 				iterationLimitReached: false ].
@@ -38,17 +40,26 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 			for: remainingTime.
 		solidPairs := pairs reject: [ :pair |
 			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+		sensorPairs := pairs select: [ :pair |
+			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 		impact := impactFinder
 			earliestAmong: solidPairs
 			bodyStates: bodyStates
 			for: remainingTime
 			afterFraction: tolerance.
+		self
+			recordSensorContactsAmong: sensorPairs
+			bodyStates: bodyStates
+			for: remainingTime
+			throughFraction: (impact ifNil: [ 1.0 ] ifNotNil: [ impact fraction ])
+			into: sensorContactsByKey.
 		impact ifNil: [
 			bodyStates valuesDo: [ :state |
 				state integratePositionBy: remainingTime ].
 			^ self
 				resultWithImpacts: impacts
 				impactSolveResults: impactSolveResults
+				sensorContacts: (self orderedSensorContactsFrom: sensorContactsByKey)
 				bodyStates: bodyStates
 				remainingTime: 0.0
 				iterationLimitReached: false ].
@@ -74,19 +85,61 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 	^ self
 		resultWithImpacts: impacts
 		impactSolveResults: impactSolveResults
+		sensorContacts: (self orderedSensorContactsFrom: sensorContactsByKey)
 		bodyStates: bodyStates
 		remainingTime: remainingTime
 		iterationLimitReached: iterationLimitReached
 ]
 
 { #category : 'private' }
-CFPhysicsContinuousImpactLoop >> resultWithImpacts: impacts impactSolveResults: solveResults bodyStates: bodyStates remainingTime: remainingTime iterationLimitReached: iterationLimitReached [
+CFPhysicsContinuousImpactLoop >> resultWithImpacts: impacts impactSolveResults: solveResults sensorContacts: sensorContacts bodyStates: bodyStates remainingTime: remainingTime iterationLimitReached: iterationLimitReached [
 	^ CFPhysicsContinuousImpactLoopResult
 		impacts: impacts
 		impactSolveResults: solveResults
+		sensorContacts: sensorContacts
 		bodyStates: bodyStates
 		remainingTime: remainingTime
 		iterationLimitReached: iterationLimitReached
+]
+
+{ #category : 'private - sensors' }
+CFPhysicsContinuousImpactLoop >> recordSensorContactsAmong: pairs bodyStates: bodyStates for: seconds throughFraction: maximumFraction into: contactsByKey [
+	| tolerance |
+	tolerance := 1.0e-9.
+	(impactFinder
+		impactsAmong: pairs
+		bodyStates: bodyStates
+		for: seconds
+		afterFraction: tolerance) do: [ :impact |
+		impact fraction <= (maximumFraction + tolerance) ifTrue: [
+			| contact |
+			contact := self
+				contactForSensorImpact: impact
+				bodyStates: bodyStates
+				for: seconds.
+			contact ifNotNil: [
+				contactsByKey at: contact key ifAbsentPut: [ contact ] ] ] ]
+]
+
+{ #category : 'private - sensors' }
+CFPhysicsContinuousImpactLoop >> contactForSensorImpact: impact bodyStates: bodyStates for: seconds [
+	| pair firstSweep secondSweep manifold |
+	pair := impact pair.
+	firstSweep := (bodyStates at: pair firstBody) predictedSweepFor: seconds.
+	secondSweep := (bodyStates at: pair secondBody) predictedSweepFor: seconds.
+	manifold := CFPhysicsCollision
+		manifoldBetweenShapeState: pair firstBody shapeState
+		transform: (firstSweep transformAt: impact fraction)
+		andShapeState: pair secondBody shapeState
+		transform: (secondSweep transformAt: impact fraction).
+	manifold ifNil: [ ^ nil ].
+	^ CFPhysicsContact pair: pair manifold: manifold
+]
+
+{ #category : 'private - sensors' }
+CFPhysicsContinuousImpactLoop >> orderedSensorContactsFrom: contactsByKey [
+	^ contactsByKey values asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ]
 ]
 
 { #category : 'accessing' }

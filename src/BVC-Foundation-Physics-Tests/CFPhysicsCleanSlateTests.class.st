@@ -3879,6 +3879,90 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 
 
 { #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResolvedPath [
+	<gtExample>
+	| moving wall sensor pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	wall := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	sensor := self cleanSlateBodyWithSequence: 3 position: 70 @ 0 extent: 20 @ 20.
+	wall beStatic.
+	sensor beStatic; beSensor.
+	moving velocity: 100 @ 0.
+	moving beginStep.
+	wall beginStep.
+	sensor beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { sensor. wall. moving }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self assert: result continuousStepResult impacts size equals: 1.
+	self assert: result continuousStepResult impacts first pair firstBody equals: moving.
+	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
+	self assert: result continuousSensorContacts isEmpty.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first isSensor not.
+	self assert: result constraints size equals: 1.
+	self assert: (moving position closeTo: 10 @ 0).
+	^ result
+]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedImpact [
+	<gtExample>
+	| moving sensor wall pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	sensor := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	wall := self cleanSlateBodyWithSequence: 3 position: 70 @ 0 extent: 20 @ 20.
+	sensor beStatic; beSensor.
+	wall beStatic.
+	moving velocity: 100 @ 0.
+	moving beginStep.
+	sensor beginStep.
+	wall beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { wall. sensor. moving }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self assert: result continuousStepResult impacts size equals: 1.
+	self assert: result continuousStepResult impacts first pair firstBody equals: moving.
+	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
+	self assert: result continuousSensorContacts size equals: 1.
+	self assert: result continuousSensorContacts first isSensor.
+	self assert: result activeContacts size equals: 2.
+	self assert: result activeContacts first isSensor.
+	self assert: result activeContacts second isSensor not.
+	self assert: result constraints size equals: 1.
+	self assert: (moving position closeTo: 50 @ 0).
+	^ result
+]
+
+
+{ #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	<gtExample>
 	| firstResult moving sensor pipeline step secondResult |

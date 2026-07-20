@@ -1,16 +1,17 @@
 Class {
 	#name : 'CFPhysicsContinuousImpactLoopResult',
 	#superclass : 'Object',
-	#instVars : [ 'impacts', 'impactSolveResults', 'bodyStates', 'remainingTime', 'iterationLimitReached' ],
+	#instVars : [ 'impacts', 'impactSolveResults', 'sensorContacts', 'bodyStates', 'remainingTime', 'iterationLimitReached' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
-CFPhysicsContinuousImpactLoopResult class >> impacts: impacts impactSolveResults: solveResults bodyStates: aDictionary remainingTime: seconds iterationLimitReached: aBoolean [
+CFPhysicsContinuousImpactLoopResult class >> impacts: impacts impactSolveResults: solveResults sensorContacts: contacts bodyStates: aDictionary remainingTime: seconds iterationLimitReached: aBoolean [
 	^ self new
 		impacts: impacts;
 		impactSolveResults: solveResults;
+		sensorContacts: contacts;
 		bodyStates: aDictionary;
 		remainingTime: seconds;
 		iterationLimitReached: aBoolean;
@@ -28,6 +29,12 @@ CFPhysicsContinuousImpactLoopResult >> impactSolveResults [ ^ impactSolveResults
 
 { #category : 'accessing' }
 CFPhysicsContinuousImpactLoopResult >> impactSolveResults: aCollection [ impactSolveResults := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> sensorContacts [ ^ sensorContacts ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> sensorContacts: aCollection [ sensorContacts := aCollection asArray ]
 
 { #category : 'accessing' }
 CFPhysicsContinuousImpactLoopResult >> bodyStates [ ^ bodyStates ]

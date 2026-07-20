@@ -15,30 +15,30 @@ CFPhysicsContinuousStepStage >> initialize [
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| continuousResult solidPairs sensorPairs tolerance initialImpact sensorContacts |
+	| continuousResult solidPairs sensorPairs tolerance initialImpact |
 	tolerance := 1.0e-9.
 	solidPairs := aStepResult pairs reject: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 	sensorPairs := aStepResult pairs select: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
-	sensorContacts := self
-		sensorContactsAmong: sensorPairs
-		bodyStates: aStepResult bodyStates
-		for: aStepResult step timeStep
-		afterFraction: tolerance.
-	aStepResult continuousSensorContacts: sensorContacts.
 	initialImpact := impactFinder
 		earliestAmong: solidPairs
 		bodyStates: aStepResult bodyStates
 		for: aStepResult step timeStep
 		afterFraction: tolerance.
 	initialImpact ifNil: [
+		aStepResult continuousSensorContacts: (self
+			sensorContactsAmong: sensorPairs
+			bodyStates: aStepResult bodyStates
+			for: aStepResult step timeStep
+			afterFraction: tolerance).
 		aStepResult continuousStepResult: nil.
 		^ nil ].
 	continuousResult := loop
 		executeBodyStates: aStepResult bodyStates
 		step: aStepResult step
 		restitutionThreshold: aStepResult restitutionThreshold.
+	aStepResult continuousSensorContacts: continuousResult sensorContacts.
 	continuousResult hasImpacts ifTrue: [
 		self commitBodyStatesInOrder: aStepResult bodyStates ].
 	aStepResult continuousStepResult: continuousResult.
