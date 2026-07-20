@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
+	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -24,7 +24,13 @@ CFPhysicsRevoluteJoint class >> betweenAnchor: firstAnchor andAnchor: secondAnch
 CFPhysicsRevoluteJoint class >> betweenEndpoints: anEndpointPair [
 	^ self new
 		endpointPair: anEndpointPair;
+		referenceAngle: ((self angleFor: anEndpointPair bodyB) - (self angleFor: anEndpointPair bodyA));
 		yourself
+]
+
+{ #category : 'private' }
+CFPhysicsRevoluteJoint class >> angleFor: aBody [
+	^ aBody ifNil: [ 0.0 ] ifNotNil: [ aBody rotation ]
 ]
 
 { #category : 'initialization' }
@@ -33,6 +39,10 @@ CFPhysicsRevoluteJoint >> initialize [
 	active := true.
 	sequence := 0.
 	accumulatedImpulse := 0 @ 0.
+	referenceAngle := 0.0.
+	limitsEnabled := false.
+	lowerAngle := 0.0.
+	upperAngle := 0.0.
 	motorEnabled := false.
 	motorSpeed := 0.0.
 	maximumMotorImpulse := 0.0.
@@ -60,6 +70,37 @@ CFPhysicsRevoluteJoint >> secondBody [ ^ self bodyB ]
 CFPhysicsRevoluteJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
 { #category : 'solver state' }
 CFPhysicsRevoluteJoint >> accumulatedImpulse: aPoint [ accumulatedImpulse := aPoint ]
+
+{ #category : 'configuration' }
+CFPhysicsRevoluteJoint >> referenceAngle [ ^ referenceAngle ]
+{ #category : 'configuration' }
+CFPhysicsRevoluteJoint >> referenceAngle: aNumber [
+	referenceAngle := aNumber asFloat.
+	self wakeBodies
+]
+
+{ #category : 'limits' }
+CFPhysicsRevoluteJoint >> limitsEnabled [ ^ limitsEnabled ]
+{ #category : 'limits' }
+CFPhysicsRevoluteJoint >> limitsEnabled: aBoolean [
+	limitsEnabled = aBoolean ifTrue: [ ^ self ].
+	limitsEnabled := aBoolean.
+	self wakeBodies
+]
+{ #category : 'limits' }
+CFPhysicsRevoluteJoint >> lowerAngle [ ^ lowerAngle ]
+{ #category : 'limits' }
+CFPhysicsRevoluteJoint >> upperAngle [ ^ upperAngle ]
+{ #category : 'limits' }
+CFPhysicsRevoluteJoint >> limitAnglesFrom: aLowerAngle to: anUpperAngle [
+	| lower upper |
+	lower := aLowerAngle asFloat.
+	upper := anUpperAngle asFloat.
+	lower < upper ifFalse: [ self error: 'A revolute joint limit requires a lower angle smaller than its upper angle' ].
+	lowerAngle := lower.
+	upperAngle := upper.
+	self wakeBodies
+]
 
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorEnabled [ ^ motorEnabled ]

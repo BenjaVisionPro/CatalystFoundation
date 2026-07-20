@@ -138,7 +138,8 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 	increment := self revoluteJointImpulseFor: relativeVelocity + bias constraint: constraint.
 	constraint impulse: constraint impulse + increment.
 	self applyRevoluteJointImpulse: increment constraint: constraint.
-	self solveRevoluteJointMotor: constraint
+	self solveRevoluteJointMotor: constraint.
+	self solveRevoluteJointLimit: constraint biasEnabled: biasEnabled
 ]
 
 { #category : 'private - solving' }
@@ -158,6 +159,34 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointMotor: constraint [
 		min: constraint maximumMotorImpulse.
 	constraint motorImpulse: newImpulse.
 	self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRevoluteJointLimit: constraint biasEnabled: biasEnabled [
+	| angle relativeVelocity separation bias increment oldImpulse newImpulse |
+	(self isLimitedRevoluteJointConstraint: constraint) ifFalse: [ ^ self ].
+	angle := constraint limitBaseAngle
+		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
+		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	angle < constraint lowerAngle ifTrue: [
+		separation := angle - constraint lowerAngle.
+		relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+		increment := constraint limitMass * (relativeVelocity + bias) negated.
+		oldImpulse := constraint limitImpulse max: 0.0.
+		newImpulse := (oldImpulse + increment) max: 0.0.
+		constraint limitImpulse: newImpulse.
+		^ self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
+	angle > constraint upperAngle ifTrue: [
+		separation := angle - constraint upperAngle.
+		relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+		increment := constraint limitMass * (relativeVelocity + bias) negated.
+		oldImpulse := constraint limitImpulse min: 0.0.
+		newImpulse := (oldImpulse + increment) min: 0.0.
+		constraint limitImpulse: newImpulse.
+		^ self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
+	constraint limitImpulse: 0.0
 ]
 
 { #category : 'private - solving' }
@@ -293,6 +322,12 @@ CFPhysicsSoftStepSolver >> fixedJointRelativeAngularVelocity: constraint [
 CFPhysicsSoftStepSolver >> isMotorJointConstraint: constraint [
 	^ constraint joint class == CFPhysicsRevoluteJoint
 		and: [ constraint motorEnabled and: [ constraint maximumMotorImpulse > 0.0 ] ]
+]
+
+{ #category : 'private - testing' }
+CFPhysicsSoftStepSolver >> isLimitedRevoluteJointConstraint: constraint [
+	^ constraint joint class == CFPhysicsRevoluteJoint
+		and: [ constraint limitsEnabled and: [ constraint limitMass > 0.0 ] ]
 ]
 
 { #category : 'private - solving' }

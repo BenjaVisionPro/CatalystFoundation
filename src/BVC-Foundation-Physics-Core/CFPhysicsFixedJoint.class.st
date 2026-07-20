@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsFixedJoint',
 	#superclass : 'CFPhysicsRevoluteJoint',
-	#instVars : [ 'referenceAngle', 'accumulatedAngularImpulse' ],
+	#instVars : [ 'accumulatedAngularImpulse' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -28,25 +28,16 @@ CFPhysicsFixedJoint class >> betweenEndpoints: anEndpointPair [
 		yourself
 ]
 
-{ #category : 'private' }
-CFPhysicsFixedJoint class >> angleFor: aBody [
-	^ aBody ifNil: [ 0.0 ] ifNotNil: [ aBody rotation ]
-]
-
 { #category : 'initialization' }
 CFPhysicsFixedJoint >> initialize [
 	super initialize.
-	referenceAngle := 0.0.
 	accumulatedAngularImpulse := 0.0
 ]
 
 { #category : 'configuration' }
-CFPhysicsFixedJoint >> referenceAngle [ ^ referenceAngle ]
-{ #category : 'configuration' }
 CFPhysicsFixedJoint >> referenceAngle: aNumber [
-	referenceAngle := aNumber asFloat.
-	accumulatedAngularImpulse := 0.0.
-	self wakeBodies
+	super referenceAngle: aNumber.
+	accumulatedAngularImpulse := 0.0
 ]
 
 { #category : 'solver state' }

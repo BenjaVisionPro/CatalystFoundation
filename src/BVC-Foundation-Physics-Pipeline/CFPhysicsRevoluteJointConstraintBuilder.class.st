@@ -14,7 +14,7 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: b
 
 { #category : 'private - building' }
 CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass |
+	| stateA stateB centreA centreB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	centreA := self centreFor: joint firstBody state: stateA.
@@ -26,6 +26,8 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 	inverseMassB := self inverseMassFor: joint secondBody.
 	inverseInertiaA := self inverseInertiaFor: joint firstBody.
 	inverseInertiaB := self inverseInertiaFor: joint secondBody.
+	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].
+	angleB := stateB ifNil: [ 0.0 ] ifNotNil: [ stateB currentTransform rotation ].
 	kxx := inverseMassA + inverseMassB
 		+ (inverseInertiaA * anchorA y squared)
 		+ (inverseInertiaB * anchorB y squared).
@@ -53,6 +55,12 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		effectiveMassXY: massXY;
 		effectiveMassYY: massYY;
 		impulse: joint accumulatedImpulse * warmStartRatio;
+		limitBaseAngle: angleB - angleA - joint referenceAngle;
+		limitsEnabled: joint limitsEnabled;
+		lowerAngle: joint lowerAngle;
+		upperAngle: joint upperAngle;
+		limitMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
+		limitImpulse: 0.0;
 		motorEnabled: joint motorEnabled;
 		motorSpeed: joint motorSpeed;
 		maximumMotorImpulse: joint maximumMotorImpulse;

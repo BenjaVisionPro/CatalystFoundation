@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
+	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'limitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -50,6 +50,30 @@ CFPhysicsPreparedRevoluteJoint >> effectiveMassYY: aNumber [ effectiveMassYY := 
 CFPhysicsPreparedRevoluteJoint >> impulse [ ^ impulse ]
 { #category : 'accessing' }
 CFPhysicsPreparedRevoluteJoint >> impulse: aPoint [ impulse := aPoint ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitBaseAngle [ ^ limitBaseAngle ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitBaseAngle: aNumber [ limitBaseAngle := aNumber ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitsEnabled [ ^ limitsEnabled ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitsEnabled: aBoolean [ limitsEnabled := aBoolean ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> lowerAngle [ ^ lowerAngle ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> lowerAngle: aNumber [ lowerAngle := aNumber ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> upperAngle [ ^ upperAngle ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> upperAngle: aNumber [ upperAngle := aNumber ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitMass [ ^ limitMass ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitMass: aNumber [ limitMass := aNumber ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitImpulse [ ^ limitImpulse ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> limitImpulse: aNumber [ limitImpulse := aNumber ]
 { #category : 'motor' }
 CFPhysicsPreparedRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
 { #category : 'motor' }

@@ -1674,6 +1674,31 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 	^ result
 ]
 
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor revoluteJointTo: worldAnchor.
+	joint
+		limitAnglesFrom: -0.25 to: 0.25;
+		limitsEnabled: true.
+	element physics rotation: 0.5.
+	result := world step.
+	self assert: result constraints first limitsEnabled.
+	self assert: result constraints first limitBaseAngle equals: 0.5.
+	self assert: element physics angularVelocity < 0.0.
+	^ result
+]
+
 { #category : 'examples - fixed joints' }
 CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
 	<gtExample>
