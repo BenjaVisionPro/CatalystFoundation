@@ -43,7 +43,7 @@ CFPhysicsWorldPresentation >> present [
 	world bodyStatesInOrder do: [ :each |
 		(self presentationFor: each)
 			translation: each position
-			rotation: each rotation ]
+			rotation: each rotation radiansToDegrees ]
 ]
 
 { #category : 'presenting' }
@@ -58,7 +58,7 @@ CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
 		presentedRotation := each previousRotation + ((each rotation - each previousRotation) * alpha).
 		(self presentationFor: each)
 			translation: presentedPosition
-			rotation: presentedRotation ]
+			rotation: presentedRotation radiansToDegrees ]
 ]
 
 { #category : 'private - presenting' }

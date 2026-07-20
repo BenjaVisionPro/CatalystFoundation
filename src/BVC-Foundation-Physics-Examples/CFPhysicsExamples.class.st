@@ -434,6 +434,27 @@ CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
 ]
 
 { #category : 'examples - motion integration' }
+CFPhysicsExamples >> physicsPresentationConvertsPhysicsRotationToMotionDegrees [
+	<gtExample>
+	| space host body world state presentation |
+	space := BlSpace new.
+	host := BlElement new size: 320 @ 200.
+	body := BlElement new size: 20 @ 20.
+	host addChild: body.
+	space root addChild: host.
+	space pulse.
+	world := host physics beWorld.
+	world synchroniseMembership.
+	state := world bodyStateFor: body.
+	state rotation: Float pi / 2.0.
+	world present.
+	presentation := (CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state.
+	self assert: presentation rotation equals: 90.0.
+	presentation release.
+	^ presentation
+]
+
+{ #category : 'examples - motion integration' }
 CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
 	<gtExample>
 	| space host body world state initialPosition |
