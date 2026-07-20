@@ -3848,7 +3848,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	sensor := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
 	sensor beStatic; beSensor.
-	moving velocity: 40 @ 0.
+	moving velocity: 60 @ 0.
 	moving beginStep.
 	sensor beginStep.
 	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
@@ -3872,7 +3872,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 	self assert: result activeContacts first isSensor.
 	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
-	self assert: (moving position closeTo: 40 @ 0).
+	self assert: (moving position closeTo: 60 @ 0).
 	self assert: result contactBeganEvents size equals: 1.
 	^ result
 ]
@@ -3903,6 +3903,7 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 		step: step
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
+	self assert: secondResult pairs isEmpty.
 	self assert: secondResult activeContacts isEmpty.
 	self assert: secondResult beganContacts isEmpty.
 	self assert: secondResult continuedContacts isEmpty.
@@ -3911,6 +3912,6 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	self assert: secondResult constraints isEmpty.
 	self assert: secondResult contactBeganEvents isEmpty.
 	self assert: secondResult contactEndedEvents size equals: 1.
-	self assert: (moving position closeTo: 40 @ 0).
+	self assert: (moving position closeTo: 60 @ 0).
 	^ secondResult
 ]
