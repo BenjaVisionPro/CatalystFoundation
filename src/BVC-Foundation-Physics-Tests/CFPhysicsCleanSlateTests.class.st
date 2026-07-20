@@ -2966,3 +2966,102 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementUsesRelativeMotion [
 	self assert: (result fraction closeTo: 0.5).
 	^ result
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> earliestImpactFinderSelectsSmallestFraction [
+	<gtExample>
+	| moving near far bodyStates nearPair farPair result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	near := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	far := self cleanSlateBodyWithSequence: 3 position: 50 @ 0 extent: 20 @ 20.
+	near beStatic.
+	far beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: near put: (CFPhysicsBodyStepState on: near);
+		at: far put: (CFPhysicsBodyStepState on: far);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	nearPair := CFPhysicsPair first: moving second: near.
+	farPair := CFPhysicsPair first: moving second: far.
+	result := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { farPair. nearPair }
+		bodyStates: bodyStates
+		for: 1.0.
+	self assert: result pair equals: nearPair.
+	self assert: (result fraction closeTo: 0.25).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> earliestImpactFinderBreaksFractionTiesByPairOrder [
+	<gtExample>
+	| moving firstObstacle secondObstacle bodyStates firstPair secondPair result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	firstObstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	secondObstacle := self cleanSlateBodyWithSequence: 3 position: 30 @ 0 extent: 20 @ 20.
+	firstObstacle beStatic.
+	secondObstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: firstObstacle put: (CFPhysicsBodyStepState on: firstObstacle);
+		at: secondObstacle put: (CFPhysicsBodyStepState on: secondObstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	firstPair := CFPhysicsPair first: moving second: firstObstacle.
+	secondPair := CFPhysicsPair first: moving second: secondObstacle.
+	result := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { secondPair. firstPair }
+		bodyStates: bodyStates
+		for: 1.0.
+	self assert: result pair equals: firstPair.
+	self assert: (result fraction closeTo: 0.25).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> earliestImpactFinderIgnoresSeparatedPairs [
+	<gtExample>
+	| moving obstacle bodyStates pair result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: -20 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	result := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { pair }
+		bodyStates: bodyStates
+		for: 1.0.
+	self assert: result isNil.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> earliestImpactFinderDoesNotMutateBodies [
+	<gtExample>
+	| moving obstacle originalMovingPosition originalObstaclePosition bodyStates pair result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	originalMovingPosition := moving position.
+	originalObstaclePosition := obstacle position.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	result := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { pair }
+		bodyStates: bodyStates
+		for: 1.0.
+	self assert: result timeOfImpactResult hasImpact.
+	self assert: moving position equals: originalMovingPosition.
+	self assert: obstacle position equals: originalObstaclePosition.
+	^ result
+]
