@@ -166,7 +166,7 @@ CFPhysicsGJK class >> distanceBetweenShapeState: firstShapeState transform: firs
 		state fourth ifTrue: [ ^ self distanceResultFromState: state ].
 		closest := state second.
 		closest r <= tolerance ifTrue: [ ^ self distanceResultFromState: state ].
-		((closest x squared + closest y squared) >= previousDistanceSquared - tolerance)
+		((closest x squared + closest y squared) >= (previousDistanceSquared - tolerance))
 			ifTrue: [ ^ self distanceResultFromState: state ].
 		previousDistanceSquared := closest x squared + closest y squared.
 		direction := closest negated.
