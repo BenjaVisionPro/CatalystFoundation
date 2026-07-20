@@ -7,32 +7,50 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
-	| manifold |
-	(firstBody rotation ~= 0 or: [ secondBody rotation ~= 0 ])
-		ifTrue: [ manifold := CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody ]
-		ifFalse: [
-			(firstBody shapeState isRoundedRectangle or: [ secondBody shapeState isRoundedRectangle ])
-				ifTrue: [ manifold := CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody ]
-				ifFalse: [
-					firstBody shapeState isCircle
-						ifTrue: [
-							secondBody shapeState isCircle
-								ifTrue: [ manifold := CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andCircle: secondBody ]
-								ifFalse: [
-									secondBody shapeState isRectangle
-										ifTrue: [ manifold := CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andRectangle: secondBody ]
-										ifFalse: [ manifold := CFPhysicsPolygonCollision manifoldBetweenCircle: firstBody andPolygon: secondBody ] ] ]
-						ifFalse: [
-							secondBody shapeState isCircle
-								ifTrue: [
-									firstBody shapeState isRectangle
-										ifTrue: [ manifold := CFPhysicsCircleCollision manifoldBetweenRectangle: firstBody andCircle: secondBody ]
-										ifFalse: [ manifold := CFPhysicsPolygonCollision manifoldBetweenPolygon: firstBody andCircle: secondBody ] ]
-								ifFalse: [
-									(firstBody shapeState isRectangle and: [ secondBody shapeState isRectangle ])
-										ifTrue: [ manifold := CFPhysicsRectangleCollision manifoldBetween: firstBody and: secondBody ]
-										ifFalse: [ manifold := CFPhysicsPolygonCollision manifoldBetween: firstBody and: secondBody ] ] ] ] ] ].
-	^ self ensureLocalAnchorsOn: manifold between: firstBody and: secondBody
+	(firstBody rotation ~= 0 or: [ secondBody rotation ~= 0 ]) ifTrue: [
+		^ self
+			ensureLocalAnchorsOn: (CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody)
+			between: firstBody
+			and: secondBody ].
+	(firstBody shapeState isRoundedRectangle or: [ secondBody shapeState isRoundedRectangle ]) ifTrue: [
+		^ self
+			ensureLocalAnchorsOn: (CFPhysicsConvexCollision manifoldBetween: firstBody and: secondBody)
+			between: firstBody
+			and: secondBody ].
+	firstBody shapeState isCircle ifTrue: [
+		secondBody shapeState isCircle ifTrue: [
+			^ self
+				ensureLocalAnchorsOn: (CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andCircle: secondBody)
+				between: firstBody
+				and: secondBody ].
+		secondBody shapeState isRectangle ifTrue: [
+			^ self
+				ensureLocalAnchorsOn: (CFPhysicsCircleCollision manifoldBetweenCircle: firstBody andRectangle: secondBody)
+				between: firstBody
+				and: secondBody ].
+		^ self
+			ensureLocalAnchorsOn: (CFPhysicsPolygonCollision manifoldBetweenCircle: firstBody andPolygon: secondBody)
+			between: firstBody
+			and: secondBody ].
+	secondBody shapeState isCircle ifTrue: [
+		firstBody shapeState isRectangle ifTrue: [
+			^ self
+				ensureLocalAnchorsOn: (CFPhysicsCircleCollision manifoldBetweenRectangle: firstBody andCircle: secondBody)
+				between: firstBody
+				and: secondBody ].
+		^ self
+			ensureLocalAnchorsOn: (CFPhysicsPolygonCollision manifoldBetweenPolygon: firstBody andCircle: secondBody)
+			between: firstBody
+			and: secondBody ].
+	(firstBody shapeState isRectangle and: [ secondBody shapeState isRectangle ]) ifTrue: [
+		^ self
+			ensureLocalAnchorsOn: (CFPhysicsRectangleCollision manifoldBetween: firstBody and: secondBody)
+			between: firstBody
+			and: secondBody ].
+	^ self
+		ensureLocalAnchorsOn: (CFPhysicsPolygonCollision manifoldBetween: firstBody and: secondBody)
+		between: firstBody
+		and: secondBody
 ]
 
 { #category : 'private' }
