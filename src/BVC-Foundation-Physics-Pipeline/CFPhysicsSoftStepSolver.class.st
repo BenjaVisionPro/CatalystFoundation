@@ -27,6 +27,15 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	bodyStates valuesDo: [ :state | state commit ]
 ]
 
+{ #category : 'solving' }
+CFPhysicsSoftStepSolver >> solveImpactWithRestitutionThreshold: restitutionThreshold [
+	self warmStart.
+	step substepCount timesRepeat: [
+		self solveContactsWithBias: false ].
+	self applyRestitutionWithThreshold: restitutionThreshold.
+	constraints do: [ :constraint | constraint writeImpulsesBack ]
+]
+
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStart [
 	constraints do: [ :constraint |
