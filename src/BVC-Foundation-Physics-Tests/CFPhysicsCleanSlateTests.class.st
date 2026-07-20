@@ -2478,7 +2478,7 @@ CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
 	self assert: sweep startTransform position equals: 10 @ 20.
 	self assert: sweep startTransform rotation equals: 0.
 	self assert: sweep endTransform position equals: 20 @ 20.
-	self assert: sweep endTransform rotation closeTo: Float pi / 2.0.
+	self assert: (sweep endTransform rotation closeTo: Float pi / 2.0).
 	^ sweep
 ]
 
