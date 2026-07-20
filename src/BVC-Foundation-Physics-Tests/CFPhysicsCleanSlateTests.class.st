@@ -2695,3 +2695,90 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 	self assert: result activeContacts isEmpty.
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> predictedPairDiscoveryDoesNotMutateBodies [
+	<gtExample>
+	| moving obstacle step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	moving velocity: 100 @ 0.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
+	obstacle beStatic.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsStepPipelineResult new
+		step: step;
+		bodies: { obstacle. moving };
+		previousContacts: #();
+		gravity: 0 @ 0;
+		restitutionThreshold: 1.0;
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	CFPhysicsVelocityIntegrationStage new executeOn: result.
+	CFPhysicsPairFinderStage new executeOn: result.
+	self assert: moving position equals: 0 @ 0.
+	self assert: moving rotation equals: 0.0.
+	self assert: result pairs size equals: 1.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> predictedPairDiscoveryUsesPreparedVelocity [
+	<gtExample>
+	| moving obstacle step result state |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
+	obstacle beStatic.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsStepPipelineResult new
+		step: step;
+		bodies: { obstacle. moving };
+		previousContacts: #();
+		gravity: 100 @ 0;
+		restitutionThreshold: 1.0;
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	CFPhysicsVelocityIntegrationStage new executeOn: result.
+	CFPhysicsPairFinderStage new executeOn: result.
+	state := result bodyStates at: moving.
+	self assert: state linearVelocity equals: 100 @ 0.
+	self assert: moving velocity equals: 0 @ 0.
+	self assert: result pairs size equals: 1.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> predictedPairDiscoveryPreservesDeterministicOrder [
+	<gtExample>
+	| first second third step result sequences |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	second := self cleanSlateBodyWithSequence: 2 position: 0 @ 0 extent: 10 @ 10.
+	third := self cleanSlateBodyWithSequence: 3 position: 0 @ 0 extent: 10 @ 10.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsStepPipelineResult new
+		step: step;
+		bodies: { third. first. second };
+		previousContacts: #();
+		gravity: 0 @ 0;
+		restitutionThreshold: 1.0;
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	CFPhysicsVelocityIntegrationStage new executeOn: result.
+	CFPhysicsPairFinderStage new executeOn: result.
+	sequences := result pairs collect: [ :pair |
+		{ pair firstBody sequence. pair secondBody sequence } ].
+	self assert: sequences equals: #(#(1 2) #(1 3) #(2 3)).
+	^ result
+]
+
