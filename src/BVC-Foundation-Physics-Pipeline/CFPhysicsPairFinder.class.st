@@ -7,49 +7,86 @@ Class {
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmong: bodies [
-	| ordered pairs |
-	ordered := bodies asArray sorted: [ :left :right | left sequence < right sequence ].
+	| entries active pairs |
+	entries := (bodies collect: [ :body | { body. body sweptAABB. body sequence } ]) asArray.
+	entries := self entriesSortedByMinimumX: entries.
+	active := OrderedCollection new.
 	pairs := OrderedCollection new.
-	1 to: ordered size do: [ :firstIndex |
-		firstIndex + 1 to: ordered size do: [ :secondIndex |
-			| first second |
-			first := ordered at: firstIndex.
-			second := ordered at: secondIndex.
-			(self shouldConsider: first with: second) ifTrue: [
-				pairs add: (CFPhysicsPair first: first second: second) ] ] ].
-	^ pairs asArray
+	entries do: [ :entry |
+		active := active reject: [ :other |
+			other second maximum x < entry second minimum x ].
+		active do: [ :other |
+			(self
+				shouldConsider: other first
+				with: entry first
+				firstAABB: other second
+				secondAABB: entry second) ifTrue: [
+					pairs add: (CFPhysicsPair first: other first second: entry first) ] ].
+		active add: entry ].
+	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
 ]
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsider: first with: second [
+	^ self
+		shouldConsider: first
+		with: second
+		firstAABB: first sweptAABB
+		secondAABB: second sweptAABB
+]
+
+{ #category : 'testing' }
+CFPhysicsPairFinder >> shouldConsider: first with: second firstAABB: firstAABB secondAABB: secondAABB [
 	(first isStatic and: [ second isStatic ]) ifTrue: [ ^ false ].
 	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
-	^ first sweptAABB overlaps: second sweptAABB
+	^ firstAABB overlaps: secondAABB
 ]
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds [
-	| ordered pairs |
-	ordered := stepStates asArray sorted: [ :left :right |
-		left body sequence < right body sequence ].
+	| entries active pairs |
+	entries := (stepStates collect: [ :state |
+		{ state. state predictedSweptAABBFor: seconds. state body sequence } ]) asArray.
+	entries := self entriesSortedByMinimumX: entries.
+	active := OrderedCollection new.
 	pairs := OrderedCollection new.
-	1 to: ordered size do: [ :firstIndex |
-		firstIndex + 1 to: ordered size do: [ :secondIndex |
-			| first second |
-			first := ordered at: firstIndex.
-			second := ordered at: secondIndex.
-			(self shouldConsiderStepState: first with: second for: seconds) ifTrue: [
-				pairs add: (CFPhysicsPair first: first body second: second body) ] ] ].
-	^ pairs asArray
+	entries do: [ :entry |
+		active := active reject: [ :other |
+			other second maximum x < entry second minimum x ].
+		active do: [ :other |
+			(self
+				shouldConsiderStepState: other first
+				with: entry first
+				firstAABB: other second
+				secondAABB: entry second) ifTrue: [
+					pairs add: (CFPhysicsPair first: other first body second: entry first body) ] ].
+		active add: entry ].
+	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
 ]
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsiderStepState: first with: second for: seconds [
+	^ self
+		shouldConsiderStepState: first
+		with: second
+		firstAABB: (first predictedSweptAABBFor: seconds)
+		secondAABB: (second predictedSweptAABBFor: seconds)
+]
+
+{ #category : 'testing' }
+CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
 	| firstBody secondBody |
 	firstBody := first body.
 	secondBody := second body.
 	(firstBody isStatic and: [ secondBody isStatic ]) ifTrue: [ ^ false ].
 	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
-	^ (first predictedSweptAABBFor: seconds) overlaps:
-		(second predictedSweptAABBFor: seconds)
+	^ firstAABB overlaps: secondAABB
+]
+
+{ #category : 'private - ordering' }
+CFPhysicsPairFinder >> entriesSortedByMinimumX: entries [
+	^ entries sorted: [ :left :right |
+		left second minimum x = right second minimum x
+			ifTrue: [ left third < right third ]
+			ifFalse: [ left second minimum x < right second minimum x ] ]
 ]
