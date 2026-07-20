@@ -1711,6 +1711,32 @@ CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 	^ result
 ]
 
+{ #category : 'examples - constraint graph' }
+CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
+	<gtExample>
+	| owner first second third fourth world revolute fixed unrelated |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	fourth := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third. fourth }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	revolute := first physics revoluteJointTo: second.
+	fixed := first physics fixedJointTo: third.
+	unrelated := second physics distanceJointTo: fourth.
+	owner removeChild: first.
+	world synchroniseMembership.
+	self assert: world revoluteJoints isEmpty.
+	self assert: world fixedJoints isEmpty.
+	self assert: world distanceJoints equals: { unrelated }.
+	self assert: revolute isActive not.
+	self assert: fixed isActive not.
+	self assert: unrelated isActive.
+	^ world
+]
+
 { #category : 'examples - collision filtering' }
 CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
