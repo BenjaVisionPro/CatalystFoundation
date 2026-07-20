@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRailJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceAngle', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse' ],
+	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceTranslation', 'referenceAngle', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -27,6 +27,7 @@ CFPhysicsRailJoint class >> betweenEndpoints: anEndpointPair along: anAxis [
 	^ self new
 		endpointPair: anEndpointPair;
 		axis: anAxis;
+		referenceTranslation: (self translationBetweenEndpoints: anEndpointPair along: anAxis);
 		referenceAngle: ((self angleFor: anEndpointPair bodyB) - (self angleFor: anEndpointPair bodyA));
 		yourself
 ]
@@ -36,12 +37,27 @@ CFPhysicsRailJoint class >> angleFor: aBody [
 	^ aBody ifNil: [ 0.0 ] ifNotNil: [ aBody rotation ]
 ]
 
+{ #category : 'private' }
+CFPhysicsRailJoint class >> translationBetweenEndpoints: anEndpointPair along: anAxis [
+	| length axisVector points |
+	length := anAxis r.
+	length = 0.0 ifTrue: [ self error: 'A rail joint requires a non-zero axis' ].
+	axisVector := anAxis / length.
+	points := anEndpointPair worldPoints.
+	^ ((points first - points second) x * axisVector x)
+		+ ((points first - points second) y * axisVector y)
+]
+
 { #category : 'initialization' }
 CFPhysicsRailJoint >> initialize [
 	super initialize.
 	axis := 1 @ 0.
 	normal := 0 @ 1.
+	referenceTranslation := 0.0.
 	referenceAngle := 0.0.
+	limitsEnabled := false.
+	lowerTranslation := 0.0.
+	upperTranslation := 0.0.
 	active := true.
 	sequence := 0.
 	accumulatedPerpendicularImpulse := 0.0.
@@ -74,6 +90,8 @@ CFPhysicsRailJoint >> axis: aPoint [
 	length = 0.0 ifTrue: [ self error: 'A rail joint requires a non-zero axis' ].
 	axis := aPoint / length.
 	normal := axis y negated @ axis x.
+	endpointPair ifNotNil: [
+		referenceTranslation := self class translationBetweenEndpoints: endpointPair along: axis ].
 	accumulatedPerpendicularImpulse := 0.0.
 	accumulatedAngularImpulse := 0.0.
 	self wakeBodies
@@ -81,11 +99,41 @@ CFPhysicsRailJoint >> axis: aPoint [
 { #category : 'configuration' }
 CFPhysicsRailJoint >> normal [ ^ normal ]
 { #category : 'configuration' }
+CFPhysicsRailJoint >> referenceTranslation [ ^ referenceTranslation ]
+{ #category : 'configuration' }
+CFPhysicsRailJoint >> referenceTranslation: aNumber [
+	referenceTranslation := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
 CFPhysicsRailJoint >> referenceAngle [ ^ referenceAngle ]
 { #category : 'configuration' }
 CFPhysicsRailJoint >> referenceAngle: aNumber [
 	referenceAngle := aNumber asFloat.
 	accumulatedAngularImpulse := 0.0.
+	self wakeBodies
+]
+
+{ #category : 'limits' }
+CFPhysicsRailJoint >> limitsEnabled [ ^ limitsEnabled ]
+{ #category : 'limits' }
+CFPhysicsRailJoint >> limitsEnabled: aBoolean [
+	limitsEnabled = aBoolean ifTrue: [ ^ self ].
+	limitsEnabled := aBoolean.
+	self wakeBodies
+]
+{ #category : 'limits' }
+CFPhysicsRailJoint >> lowerTranslation [ ^ lowerTranslation ]
+{ #category : 'limits' }
+CFPhysicsRailJoint >> upperTranslation [ ^ upperTranslation ]
+{ #category : 'limits' }
+CFPhysicsRailJoint >> limitTranslationFrom: aLowerTranslation to: anUpperTranslation [
+	| lower upper |
+	lower := aLowerTranslation asFloat.
+	upper := anUpperTranslation asFloat.
+	lower < upper ifFalse: [ self error: 'A rail joint limit requires a lower translation smaller than its upper translation' ].
+	lowerTranslation := lower.
+	upperTranslation := upper.
 	self wakeBodies
 ]
 

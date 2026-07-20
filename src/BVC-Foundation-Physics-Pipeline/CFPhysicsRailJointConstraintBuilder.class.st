@@ -14,7 +14,7 @@ CFPhysicsRailJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyS
 
 { #category : 'private - building' }
 CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB displacement normal crossA crossB inversePerpendicularMass inverseAngularMass angleA angleB |
+	| stateA stateB centreA centreB anchorA anchorB displacement axis normal crossA crossB axisCrossA axisCrossB inversePerpendicularMass inverseTranslationMass inverseAngularMass angleA angleB |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	centreA := self centreFor: joint firstBody state: stateA.
@@ -22,11 +22,16 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 	anchorA := joint endpointPair worldPointA - centreA.
 	anchorB := joint endpointPair worldPointB - centreB.
 	displacement := (centreB + anchorB) - (centreA + anchorA).
+	axis := joint axis.
 	normal := joint normal.
 	crossA := self cross: anchorA with: normal.
 	crossB := self cross: anchorB with: normal.
 	inversePerpendicularMass := (self inverseMassFor: joint firstBody cross: crossA)
 		+ (self inverseMassFor: joint secondBody cross: crossB).
+	axisCrossA := self cross: anchorA with: axis.
+	axisCrossB := self cross: anchorB with: axis.
+	inverseTranslationMass := (self inverseMassFor: joint firstBody cross: axisCrossA)
+		+ (self inverseMassFor: joint secondBody cross: axisCrossB).
 	inverseAngularMass := (self inverseInertiaFor: joint firstBody)
 		+ (self inverseInertiaFor: joint secondBody).
 	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].
@@ -37,10 +42,17 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		bodyStateB: stateB;
 		anchorA: anchorA;
 		anchorB: anchorB;
+		axis: axis;
 		normal: normal;
 		basePerpendicularSeparation: (self dot: displacement with: normal);
 		perpendicularMass: (inversePerpendicularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inversePerpendicularMass ]);
 		perpendicularImpulse: joint accumulatedPerpendicularImpulse * warmStartRatio;
+		baseTranslation: (self dot: displacement negated with: axis) - joint referenceTranslation;
+		limitsEnabled: joint limitsEnabled;
+		lowerTranslation: joint lowerTranslation;
+		upperTranslation: joint upperTranslation;
+		translationMass: (inverseTranslationMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseTranslationMass ]);
+		translationImpulse: 0.0;
 		baseAngle: angleB - angleA - joint referenceAngle;
 		angularMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
 		angularImpulse: joint accumulatedAngularImpulse * warmStartRatio;

@@ -1724,6 +1724,31 @@ CFPhysicsCleanSlateTests >> railJointConstrainsAnAnchoredElementToItsAxis [
 	^ result
 ]
 
+{ #category : 'examples - rail joints' }
+CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	joint
+		limitTranslationFrom: -10 to: 10;
+		limitsEnabled: true.
+	element physics position: 20 @ 0.
+	result := world step.
+	self assert: result constraints first limitsEnabled.
+	self assert: result constraints first baseTranslation equals: 20.0.
+	self assert: element physics velocity x < 0.0.
+	^ result
+]
+
 { #category : 'examples - fixed joints' }
 CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
 	<gtExample>
