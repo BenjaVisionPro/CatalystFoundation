@@ -1532,6 +1532,30 @@ CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpo
 	^ joint
 ]
 
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
+	<gtExample>
+	| owner first second world firstAnchor secondAnchor joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	second physics beStatic.
+	firstAnchor := first physics localAnchorAt: 20 @ 0.
+	secondAnchor := second physics localAnchorAt: 0 @ 20.
+	joint := firstAnchor distanceJointTo: secondAnchor.
+	joint restLength: 20.
+	world step.
+	self assert: first physics angularVelocity abs > 0.0.
+	self assert: second physics angularVelocity equals: 0.0.
+	^ joint
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
