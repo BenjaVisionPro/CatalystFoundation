@@ -24,5 +24,5 @@ CFPhysicsPairFinder >> pairsAmong: bodies [
 CFPhysicsPairFinder >> shouldConsider: first with: second [
 	(first isStatic and: [ second isStatic ]) ifTrue: [ ^ false ].
 	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
-	^ first aabb overlaps: second aabb
+	^ first sweptAABB overlaps: second sweptAABB
 ]

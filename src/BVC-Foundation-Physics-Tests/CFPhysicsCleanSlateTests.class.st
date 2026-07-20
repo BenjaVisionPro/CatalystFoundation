@@ -2423,3 +2423,43 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 		bounds extent y closeTo: body shapeState boundingRadius * 2.0 ]).
 	^ bounds
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> pairFinderReturnsCandidateAcrossSweptPath [
+	<gtExample>
+	| moving obstacle pairs |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	moving
+		beginStep;
+		addVelocity: 100 @ 0;
+		advanceBy: 1.0 gravity: 0 @ 0.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
+	obstacle beStatic.
+
+	self deny: (moving aabb overlaps: obstacle aabb).
+	self assert: (moving sweptAABB overlaps: obstacle sweptAABB).
+	pairs := CFPhysicsPairFinder new pairsAmong: { obstacle. moving }.
+	self assert: pairs size equals: 1.
+	self assert: pairs first firstBody equals: moving.
+	self assert: pairs first secondBody equals: obstacle.
+	^ pairs
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedSweptPaths [
+	<gtExample>
+	| moving obstacle pairs |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	moving
+		beginStep;
+		addVelocity: 100 @ 0;
+		advanceBy: 1.0 gravity: 0 @ 0.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 30 extent: 10 @ 10.
+	obstacle beStatic.
+
+	self deny: (moving sweptAABB overlaps: obstacle sweptAABB).
+	pairs := CFPhysicsPairFinder new pairsAmong: { moving. obstacle }.
+	self assert: pairs isEmpty.
+	^ pairs
+]
+
