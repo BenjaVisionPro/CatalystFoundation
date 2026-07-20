@@ -79,3 +79,18 @@ CFPhysicsEarliestImpactFinder >> impactsAmong: pairs bodyStates: bodyStates for:
 	^ impacts asArray sorted: [ :left :right |
 		(self candidate: left comesBefore: right tolerance: 1.0e-9) ]
 ]
+
+{ #category : 'finding' }
+CFPhysicsEarliestImpactFinder >> impactsAtEarliestTimeAmong: pairs bodyStates: bodyStates for: seconds afterFraction: minimumFraction [
+	| impacts earliest tolerance |
+	tolerance := 1.0e-9.
+	impacts := self
+		impactsAmong: pairs
+		bodyStates: bodyStates
+		for: seconds
+		afterFraction: minimumFraction.
+	impacts ifEmpty: [ ^ #() ].
+	earliest := impacts first.
+	^ impacts select: [ :each |
+		each fraction <= (earliest fraction + tolerance) ]
+]

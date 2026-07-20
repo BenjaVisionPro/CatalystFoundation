@@ -7,13 +7,23 @@ Class {
 
 { #category : 'advancing' }
 CFPhysicsImpactAdvancer >> advanceBodyStates: bodyStates to: aPairTimeOfImpact for: seconds [
+	^ (self
+		advanceBodyStates: bodyStates
+		toImpacts: { aPairTimeOfImpact }
+		for: seconds) first
+]
+
+{ #category : 'advancing' }
+CFPhysicsImpactAdvancer >> advanceBodyStates: bodyStates toImpacts: impacts for: seconds [
 	| elapsedTime remainingTime |
-	elapsedTime := seconds * aPairTimeOfImpact fraction.
+	impacts ifEmpty: [ ^ #() ].
+	elapsedTime := seconds * impacts first fraction.
 	remainingTime := seconds - elapsedTime.
 	bodyStates valuesDo: [ :state |
 		state integratePositionBy: elapsedTime ].
-	^ CFPhysicsImpactAdvancementResult
-		impact: aPairTimeOfImpact
-		elapsedTime: elapsedTime
-		remainingTime: remainingTime
+	^ impacts collect: [ :impact |
+		CFPhysicsImpactAdvancementResult
+			impact: impact
+			elapsedTime: elapsedTime
+			remainingTime: remainingTime ]
 ]

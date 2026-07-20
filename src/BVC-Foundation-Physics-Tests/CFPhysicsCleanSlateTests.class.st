@@ -3636,6 +3636,45 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopSolvesMultipleImpactsInTimeOrder
 ]
 
 { #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousImpactLoopSolvesSimultaneousImpactsAsOneTimeSlice [
+	<gtExample>
+	| firstMoving firstObstacle secondMoving secondObstacle bodyStates step result |
+	firstMoving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	firstObstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	secondMoving := self cleanSlateBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
+	secondObstacle := self cleanSlateBodyWithSequence: 4 position: 30 @ 100 extent: 20 @ 20.
+	firstObstacle beStatic.
+	secondObstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: firstMoving put: (CFPhysicsBodyStepState on: firstMoving);
+		at: firstObstacle put: (CFPhysicsBodyStepState on: firstObstacle);
+		at: secondMoving put: (CFPhysicsBodyStepState on: secondMoving);
+		at: secondObstacle put: (CFPhysicsBodyStepState on: secondObstacle);
+		yourself.
+	(bodyStates at: firstMoving) linearVelocity: 40 @ 0.
+	(bodyStates at: secondMoving) linearVelocity: 40 @ 0.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousImpactLoop new
+		executeBodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self assert: result impacts size equals: 2.
+	self assert: result impacts first pair firstBody equals: firstMoving.
+	self assert: result impacts second pair firstBody equals: secondMoving.
+	self assert: ((bodyStates at: firstMoving) currentTransform position closeTo: 10 @ 0).
+	self assert: ((bodyStates at: secondMoving) currentTransform position closeTo: 10 @ 100).
+	self assert: ((bodyStates at: firstMoving) linearVelocity x abs < 1.0e-6).
+	self assert: ((bodyStates at: secondMoving) linearVelocity x abs < 1.0e-6).
+	self assert: (result remainingTime closeTo: 0.0).
+	self assert: result iterationLimitReached not.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> continuousImpactLoopLeavesRemainderExplicitAtIterationLimit [
 	<gtExample>
 	| firstMoving firstObstacle secondMoving secondObstacle bodyStates step loop result |

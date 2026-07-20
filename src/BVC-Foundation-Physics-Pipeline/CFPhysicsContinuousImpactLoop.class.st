@@ -26,7 +26,7 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 	tolerance := 1.0e-9.
 	iterationLimitReached := false.
 	1 to: maximumIterations do: [ :iteration |
-		| pairs solidPairs sensorPairs impact advancement impactStep solveResult |
+		| pairs solidPairs sensorPairs impactsAtEarliestTime earliestImpact advancements impactStep solveResults |
 		remainingTime <= tolerance ifTrue: [
 			^ self
 				resultWithImpacts: impacts
@@ -42,18 +42,21 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 		sensorPairs := pairs select: [ :pair |
 			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
-		impact := impactFinder
-			earliestAmong: solidPairs
+		impactsAtEarliestTime := impactFinder
+			impactsAtEarliestTimeAmong: solidPairs
 			bodyStates: bodyStates
 			for: remainingTime
 			afterFraction: tolerance.
+		earliestImpact := impactsAtEarliestTime
+			ifEmpty: [ nil ]
+			ifNotEmpty: [ impactsAtEarliestTime first ].
 		self
 			recordSensorContactsAmong: sensorPairs
 			bodyStates: bodyStates
 			for: remainingTime
-			throughFraction: (impact ifNil: [ 1.0 ] ifNotNil: [ impact fraction ])
+			throughFraction: (earliestImpact ifNil: [ 1.0 ] ifNotNil: [ earliestImpact fraction ])
 			into: sensorContactsByKey.
-		impact ifNil: [
+		earliestImpact ifNil: [
 			bodyStates valuesDo: [ :state |
 				state integratePositionBy: remainingTime ].
 			^ self
@@ -63,24 +66,24 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 				bodyStates: bodyStates
 				remainingTime: 0.0
 				iterationLimitReached: false ].
-		advancement := impactAdvancer
+		advancements := impactAdvancer
 			advanceBodyStates: bodyStates
-			to: impact
+			toImpacts: impactsAtEarliestTime
 			for: remainingTime.
 		impactStep := CFPhysicsStep
-			timeStep: advancement remainingTime
+			timeStep: advancements first remainingTime
 			substeps: step substepCount
 			contactHertz: step contactHertz
 			dampingRatio: step contactDampingRatio.
 		impactStep warmStartRatio: 0.0.
-		solveResult := impactSolver
-			solveAdvancement: advancement
+		solveResults := impactSolver
+			solveAdvancements: advancements
 			bodyStates: bodyStates
 			step: impactStep
 			restitutionThreshold: restitutionThreshold.
-		impacts add: impact.
-		impactSolveResults add: solveResult.
-		remainingTime := solveResult remainingTime ].
+		impacts addAll: impactsAtEarliestTime.
+		impactSolveResults addAll: solveResults.
+		remainingTime := advancements first remainingTime ].
 	remainingTime > tolerance ifTrue: [ iterationLimitReached := true ].
 	^ self
 		resultWithImpacts: impacts

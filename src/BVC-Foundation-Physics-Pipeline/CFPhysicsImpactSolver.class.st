@@ -14,7 +14,31 @@ CFPhysicsImpactSolver >> initialize [
 
 { #category : 'solving' }
 CFPhysicsImpactSolver >> solveAdvancement: advancement bodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
-	| pair firstState secondState manifold contact constraints solver |
+	^ (self
+		solveAdvancements: { advancement }
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: restitutionThreshold) first
+]
+
+{ #category : 'solving' }
+CFPhysicsImpactSolver >> solveAdvancements: advancements bodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
+	| results constraints solver |
+	results := advancements collect: [ :advancement |
+		self resultForAdvancement: advancement bodyStates: bodyStates ].
+	constraints := results flatCollect: #constraints.
+	constraints ifNotEmpty: [
+		solver := CFPhysicsSoftStepSolver
+			step: step
+			bodyStates: bodyStates
+			constraints: constraints.
+		solver solveImpactWithRestitutionThreshold: restitutionThreshold ].
+	^ results asArray
+]
+
+{ #category : 'private - solving' }
+CFPhysicsImpactSolver >> resultForAdvancement: advancement bodyStates: bodyStates [
+	| pair firstState secondState manifold contact constraints |
 	pair := advancement impact pair.
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
@@ -33,11 +57,6 @@ CFPhysicsImpactSolver >> solveAdvancement: advancement bodyStates: bodyStates st
 		constraintsFrom: { contact }
 		bodyStates: bodyStates
 		warmStartRatio: 0.0.
-	solver := CFPhysicsSoftStepSolver
-		step: step
-		bodyStates: bodyStates
-		constraints: constraints.
-	solver solveImpactWithRestitutionThreshold: restitutionThreshold.
 	^ CFPhysicsImpactSolveResult
 		advancement: advancement
 		contact: contact
