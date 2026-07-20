@@ -2695,7 +2695,8 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 	self assert: result pairs size equals: 1.
 	self assert: result pairs first firstBody equals: moving.
 	self assert: result pairs first secondBody equals: obstacle.
-	self assert: result activeContacts isEmpty.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first pair equals: result pairs first.
 	^ result
 ]
 
@@ -3569,7 +3570,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 		step: step
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
-	self deny: result hasContinuousImpact.
+	self assert: result hasContinuousImpact not.
 	self assert: (moving position closeTo: 10 @ 0).
 	self assert: result solver notNil.
 	^ result
