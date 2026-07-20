@@ -1582,6 +1582,30 @@ CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints
 	^ joint
 ]
 
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
+	<gtExample>
+	| owner first second world joint firstResult secondResult |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 10 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts size equals: 1.
+	joint := first physics distanceJointTo: second.
+	joint collideConnected: false.
+	secondResult := world step.
+	self assert: secondResult activeContacts isEmpty.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult contactEndedEvents size equals: 1.
+	^ secondResult
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
