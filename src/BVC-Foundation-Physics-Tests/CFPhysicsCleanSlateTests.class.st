@@ -2483,6 +2483,53 @@ CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
 ]
 
 { #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> beginningStepProducesStationarySweep [
+	<gtExample>
+	| body sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body
+		rotation: Float pi / 3.0;
+		beginStep.
+	sweep := body sweep.
+	self assert: sweep startTransform position equals: 10 @ 20.
+	self assert: sweep endTransform position equals: 10 @ 20.
+	self assert: (sweep startTransform rotation closeTo: Float pi / 3.0).
+	self assert: (sweep endTransform rotation closeTo: Float pi / 3.0).
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> settingTransformResetsSweepEndpoints [
+	<gtExample>
+	| body sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		beginStep;
+		addVelocity: 20 @ 0;
+		addAngularVelocity: Float pi;
+		advanceBy: 0.5 gravity: 0 @ 0;
+		translation: 40 @ 50 rotation: Float pi / 4.0.
+	sweep := body sweep.
+	self assert: sweep startTransform position equals: 40 @ 50.
+	self assert: sweep endTransform position equals: 40 @ 50.
+	self assert: (sweep startTransform rotation closeTo: Float pi / 4.0).
+	self assert: (sweep endTransform rotation closeTo: Float pi / 4.0).
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sweepInterpolationPreservesIntegratedAngularDisplacement [
+	<gtExample>
+	| sweep transform |
+	sweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 0 rotation: 0.0)
+		to: (CFPhysicsTransform position: 0 @ 0 rotation: Float pi * 3.0).
+	transform := sweep transformAt: 0.5.
+	self assert: (transform rotation closeTo: Float pi * 1.5).
+	^ transform
+]
+
+{ #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
 	<gtExample>
 	| sweep transform |
