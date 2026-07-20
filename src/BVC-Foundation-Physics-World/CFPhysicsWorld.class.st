@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'playback', 'presentation' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence' ],
 	#category : 'BVC-Foundation-Physics-World',
 	#package : 'BVC-Foundation-Physics-World'
 }
@@ -41,8 +41,6 @@ CFPhysicsWorld >> initialize [
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
 	containmentConstraints := IdentitySet new.
-	playback := nil.
-	presentation := nil.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -55,9 +53,8 @@ CFPhysicsWorld >> owner [ ^ owner ]
 { #category : 'accessing' }
 CFPhysicsWorld >> owner: anElement [
 	owner == anElement ifTrue: [ ^ self ].
-	playback ifNotNil: [ :aPlayback | aPlayback stop ].
-	presentation ifNotNil: [ :aPresentation | aPresentation release ].
-	presentation := nil.
+	(self respondsTo: #physicsOwnerWillChange) ifTrue: [
+		self physicsOwnerWillChange ].
 	owner := anElement
 ]
 

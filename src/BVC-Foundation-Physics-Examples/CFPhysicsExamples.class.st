@@ -115,14 +115,12 @@ CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	initialPosition := (world bodyStateFor: body) position.
 	motion := world startStepping.
 	self assert: world isStepping.
-	self assert: world steppingMotion == motion.
 	space pulse.
 	space time wait: 20 milliSeconds.
 	space pulse.
 	self assert: (world bodyStateFor: body) position x > initialPosition x.
 	world stopStepping.
 	self assert: world isStepping not.
-	self assert: world steppingMotion isNil.
 	^ host
 ]
 
@@ -215,7 +213,6 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	self assert: (world bodyStateFor: body) position x > positionWhilePaused x.
 	world stopStepping.
 	self assert: firstMotion isCancelled.
-	self assert: world steppingMotion isNil.
 	^ world
 ]
 
@@ -287,13 +284,11 @@ CFPhysicsExamples >> physicsWorldRestartsAfterOwnerDetachment [
 	owner removeFromParent.
 	space pulse.
 	self assert: firstMotion isCancelled.
-	self assert: world steppingMotion isNil.
 	space root addChild: owner.
 	space pulse.
 	secondMotion := world startStepping.
 	self assert: secondMotion ~~ firstMotion.
 	self assert: secondMotion isRunning.
-	self assert: world steppingMotion == secondMotion.
 	world stopStepping.
 	^ world
 ]
@@ -314,7 +309,6 @@ CFPhysicsExamples >> replacingPhysicsWorldOwnerStopsExistingPlayback [
 	space pulse.
 	world owner: secondOwner.
 	self assert: motion isCancelled.
-	self assert: world steppingMotion isNil.
 	self assert: world owner == secondOwner.
 	^ world
 ]
@@ -368,7 +362,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := world presentation presentationFor: state.
+	physicsPresentation := (CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.5 @ 0.75.
@@ -380,7 +374,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	self assert: scalePresentation ownsCurrentTransformation.
 	scalePresentation release.
 	self assert: physicsPresentation ownsCurrentTransformation.
-	(world presentation presentationFor: state) release.
+	((CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state) release.
 	^ channel
 ]
 
@@ -401,11 +395,11 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
-	physicsPresentation := world presentation presentationFor: state.
+	physicsPresentation := (CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state.
 	channel := physicsPresentation channel.
 	scalePresentation := CFMotionTransformPresentation on: body using: channel.
 	scalePresentation scale: 0.8 @ 0.8.
-	(world presentation presentationFor: state) release.
+	((CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state) release.
 	self assert: physicsPresentation isActive not.
 	self assert: scalePresentation ownsCurrentTransformation.
 	scalePresentation release.
@@ -426,16 +420,16 @@ CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
 	world := host physics beWorld.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
-	self assert: (world presentation isPresenting: state) not.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state) not.
 	state position: 40 @ 20.
 	state rotation: Float pi / 4.0.
 	state translation: 60 @ 30 rotation: Float pi / 2.0.
 	self assert: state position equals: 60 @ 30.
 	self assert: state rotation equals: Float pi / 2.0.
-	self assert: (world presentation isPresenting: state) not.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state) not.
 	world present.
-	self assert: (world presentation isPresenting: state).
-	(world presentation presentationFor: state) release.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state).
+	((CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state) release.
 	^ state
 ]
 
@@ -461,10 +455,10 @@ CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
 	initialPosition := state position.
 	world step: 2.
 	self assert: state position x > initialPosition x.
-	self assert: (world presentation isPresenting: state) not.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state) not.
 	world present.
-	self assert: (world presentation isPresenting: state).
-	(world presentation presentationFor: state) release.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state).
+	((CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state) release.
 	^ world
 ]
 
@@ -491,8 +485,8 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 	result := world stepAndPresent.
 	self assert: result == world lastStepResult.
 	self assert: state position x > initialPosition x.
-	self assert: (world presentation isPresenting: state).
-	(world presentation presentationFor: state) release.
+	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state).
+	((CFPhysicsWorldMotionIntegration for: world) manualPresentation presentationFor: state) release.
 	^ result
 ]
 

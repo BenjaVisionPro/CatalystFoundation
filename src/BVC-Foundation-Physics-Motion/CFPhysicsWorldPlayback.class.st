@@ -27,7 +27,6 @@ CFPhysicsWorldPlayback >> start [
 		motion isPaused ifTrue: [ motion resume ].
 		^ motion ].
 	self validateForStart.
-	world releasePresentation.
 	coordinator := world owner space cfMotionCoordinator.
 	presentation := CFPhysicsWorldPresentation on: world in: coordinator.
 	motion := self newMotionWith: presentation in: coordinator.
