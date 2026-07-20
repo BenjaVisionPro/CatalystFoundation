@@ -2066,6 +2066,23 @@ CFPhysicsCleanSlateTests >> containmentCanBounceAtTheWorldEdge [
 ]
 
 { #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> containmentBouncesUsingRotatedBodyBounds [
+	<gtExample>
+	| body containment |
+	body := self cleanSlateBodyWithSequence: 1 position: 80 @ 20 extent: 40 @ 20.
+	body
+		rotation: Float pi / 2.0;
+		velocity: 50 @ 0.
+	containment := CFPhysicsContainmentConstraint on: body.
+	containment restitution: 0.5.
+	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
+	self assert: (body position x closeTo: 70.0).
+	self assert: (body position y closeTo: 20.0).
+	self assert: body velocity equals: -25 @ 0.
+	^ containment
+]
+
+{ #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentIsInstalledThroughTheBlocElement [
 	<gtExample>
 	| owner element world containment |
