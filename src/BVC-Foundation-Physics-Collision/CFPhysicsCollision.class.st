@@ -28,11 +28,29 @@ CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
 
 { #category : 'collision' }
 CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
-	^ self
-		manifoldBetween: (CFPhysicsCollisionBodyView
-			shapeState: firstShapeState
-			transform: firstTransform)
-		and: (CFPhysicsCollisionBodyView
-			shapeState: secondShapeState
-			transform: secondTransform)
+	| firstBody secondBody manifold distanceResult normal centreDelta |
+	firstBody := CFPhysicsCollisionBodyView
+		shapeState: firstShapeState
+		transform: firstTransform.
+	secondBody := CFPhysicsCollisionBodyView
+		shapeState: secondShapeState
+		transform: secondTransform.
+	manifold := self manifoldBetween: firstBody and: secondBody.
+	manifold ifNotNil: [ ^ manifold ].
+	distanceResult := CFPhysicsGJK
+		distanceBetweenShapeState: firstShapeState
+		transform: firstTransform
+		andShapeState: secondShapeState
+		transform: secondTransform.
+	distanceResult distance > 1.0e-7 ifTrue: [ ^ nil ].
+	normal := distanceResult axis.
+	normal r = 0 ifTrue: [
+		centreDelta := (secondShapeState centreAt: secondTransform position)
+			- (firstShapeState centreAt: firstTransform position).
+		normal := centreDelta r = 0
+			ifTrue: [ 1 @ 0 ]
+			ifFalse: [ centreDelta / centreDelta r ] ].
+	^ (CFPhysicsManifold normal: normal penetration: 0.0)
+		points: { (distanceResult firstPoint + distanceResult secondPoint) / 2.0 };
+		yourself
 ]
