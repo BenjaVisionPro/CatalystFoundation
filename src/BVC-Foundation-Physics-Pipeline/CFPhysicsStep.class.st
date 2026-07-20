@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'warmStartRatio' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -20,6 +20,7 @@ CFPhysicsStep class >> timeStep: seconds substeps: anInteger contactHertz: hertz
 { #category : 'preparing' }
 CFPhysicsStep >> prepare [
 	| omega a1 a2 a3 |
+	warmStartRatio ifNil: [ warmStartRatio := 1.0 ].
 	substepCount := substepCount max: 1.
 	substepTime := timeStep / substepCount.
 	inverseSubstepTime := substepTime = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / substepTime ].
@@ -58,3 +59,9 @@ CFPhysicsStep >> biasRate [ ^ biasRate ]
 CFPhysicsStep >> massCoefficient [ ^ massCoefficient ]
 { #category : 'accessing' }
 CFPhysicsStep >> impulseCoefficient [ ^ impulseCoefficient ]
+
+{ #category : 'warm starting' }
+CFPhysicsStep >> warmStartRatio [ ^ warmStartRatio ]
+
+{ #category : 'warm starting' }
+CFPhysicsStep >> warmStartRatio: aNumber [ warmStartRatio := aNumber asFloat max: 0.0 ]

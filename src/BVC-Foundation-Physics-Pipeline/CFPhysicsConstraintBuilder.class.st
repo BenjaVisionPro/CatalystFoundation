@@ -7,15 +7,21 @@ Class {
 
 { #category : 'building' }
 CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates [
+	^ self constraintsFrom: contacts bodyStates: bodyStates warmStartRatio: 1.0
+]
+
+{ #category : 'building' }
+CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	^ (contacts reject: [ :contact | contact isSensor ]) collect: [ :contact |
 		self
 			constraintFrom: contact
 			bodyStateA: (bodyStates at: contact firstBody)
-			bodyStateB: (bodyStates at: contact secondBody) ]
+			bodyStateB: (bodyStates at: contact secondBody)
+			warmStartRatio: warmStartRatio ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB [
+CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
 	| normal tangent constraint |
 	normal := contact manifold normal.
 	tangent := normal y negated @ normal x.
@@ -35,12 +41,13 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 			bodyStateA: stateA
 			bodyStateB: stateB
 			normal: normal
-			tangent: tangent ]).
+			tangent: tangent
+			warmStartRatio: warmStartRatio ]).
 	^ constraint
 ]
 
 { #category : 'private - building' }
-CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent [
+CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
 	| point anchorA anchorB rnA rnB rtA rtB normalDenominator tangentDenominator relativeVelocity |
 	anchorA := self rotatedAnchorFor: manifoldPoint localAnchorA body: contact firstBody.
 	anchorB := self rotatedAnchorFor: manifoldPoint localAnchorB body: contact secondBody.
@@ -65,8 +72,8 @@ CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStat
 		normalMass: (normalDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / normalDenominator ]);
 		tangentMass: (tangentDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / tangentDenominator ]);
 		relativeNormalVelocity: (self dot: relativeVelocity with: normal);
-		normalImpulse: manifoldPoint normalImpulse;
-		tangentImpulse: manifoldPoint tangentImpulse;
+		normalImpulse: manifoldPoint normalImpulse * warmStartRatio;
+		tangentImpulse: manifoldPoint tangentImpulse * warmStartRatio;
 		yourself.
 	^ point
 ]

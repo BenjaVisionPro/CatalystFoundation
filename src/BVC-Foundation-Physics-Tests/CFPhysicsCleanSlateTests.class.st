@@ -2246,3 +2246,45 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationship
 	self assert: world repulsionConstraints equals: { repulsion }.
 	^ { spring. attraction. repulsion }
 ]
+
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintBuilderScalesRetainedImpulsesForChangedTimeStep [
+	<gtExample>
+	| first second pair manifold contact bodyStates constraint point |
+	first := self cleanSlateBodyWithSequence: 1.
+	first beStatic.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	manifold contactPoints first
+		normalImpulse: 8.0;
+		tangentImpulse: -2.0.
+	contact := CFPhysicsContact pair: pair manifold: manifold.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	constraint := (CFPhysicsConstraintBuilder new
+		constraintsFrom: { contact }
+		bodyStates: bodyStates
+		warmStartRatio: 0.5) first.
+	point := constraint points first.
+	self assert: point normalImpulse equals: 4.0.
+	self assert: point tangentImpulse equals: -1.0.
+	^ constraint
+]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldScalesWarmStartingWhenStepDurationChanges [
+	<gtExample>
+	| world firstStep secondStep |
+	world := CFPhysicsWorld on: BlElement new.
+	firstStep := world newStep.
+	self assert: firstStep warmStartRatio equals: 1.0.
+	world step.
+	world stepDuration: 8 milliseconds.
+	secondStep := world newStep.
+	self assert: secondStep warmStartRatio equals: 0.5.
+	^ secondStep
+]

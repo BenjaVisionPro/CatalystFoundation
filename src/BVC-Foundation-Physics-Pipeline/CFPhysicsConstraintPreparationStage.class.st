@@ -22,7 +22,8 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	| constraints |
 	constraints := constraintBuilder
 		constraintsFrom: aStepResult activeContacts
-		bodyStates: aStepResult bodyStates.
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio.
 	aStepResult constraints: constraints.
 	^ constraints
 ]
