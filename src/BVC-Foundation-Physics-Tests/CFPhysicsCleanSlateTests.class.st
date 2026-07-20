@@ -2436,7 +2436,7 @@ CFPhysicsCleanSlateTests >> pairFinderReturnsCandidateAcrossSweptPath [
 	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
 	obstacle beStatic.
 
-	self deny: (moving aabb overlaps: obstacle aabb).
+	self assert: (moving aabb overlaps: obstacle aabb) not.
 	self assert: (moving sweptAABB overlaps: obstacle sweptAABB).
 	pairs := CFPhysicsPairFinder new pairsAmong: { obstacle. moving }.
 	self assert: pairs size equals: 1.
@@ -2457,7 +2457,7 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedSweptPaths [
 	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 30 extent: 10 @ 10.
 	obstacle beStatic.
 
-	self deny: (moving sweptAABB overlaps: obstacle sweptAABB).
+	self assert: (moving sweptAABB overlaps: obstacle sweptAABB) not.
 	pairs := CFPhysicsPairFinder new pairsAmong: { moving. obstacle }.
 	self assert: pairs isEmpty.
 	^ pairs
