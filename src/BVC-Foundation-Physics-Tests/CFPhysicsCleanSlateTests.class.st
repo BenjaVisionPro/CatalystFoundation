@@ -1461,6 +1461,8 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	self assert: result islands first constraints equals: result constraints.
 	self assert: first physics velocity x > 0.
 	self assert: second physics velocity x < 0.
+	self assert: result contactSolveResults isEmpty.
+	self assert: result hitEvents isEmpty.
 	^ result
 ]
 

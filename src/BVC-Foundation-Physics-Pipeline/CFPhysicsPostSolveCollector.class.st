@@ -14,8 +14,10 @@ CFPhysicsPostSolveCollector >> initialize [
 
 { #category : 'collecting' }
 CFPhysicsPostSolveCollector >> collectFrom: constraints [
-	| results events |
-	results := constraints collect: [ :constraint |
+	| contactConstraints results events |
+	contactConstraints := constraints select: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedConstraint ].
+	results := contactConstraints collect: [ :constraint |
 		CFPhysicsContactSolveResult fromConstraint: constraint ].
 	events := OrderedCollection new.
 	results do: [ :result |

@@ -43,5 +43,5 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 		warmStartRatio: aStepResult step warmStartRatio.
 	constraints := constraints asOrderedCollection addAll: jointConstraints; yourself.
 	aStepResult constraints: constraints.
-	^ constraints
+	^ aStepResult constraints
 ]
