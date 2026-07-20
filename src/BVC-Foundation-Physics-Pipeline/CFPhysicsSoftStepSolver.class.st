@@ -16,9 +16,7 @@ CFPhysicsSoftStepSolver class >> step: aStep bodyStates: aDictionary constraints
 ]
 
 { #category : 'solving' }
-CFPhysicsSoftStepSolver >> solveWithGravity: gravityVector restitutionThreshold: restitutionThreshold [
-	bodyStates valuesDo: [ :state |
-		state integrateVelocityBy: step timeStep gravity: gravityVector ].
+CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	self warmStart.
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: true.

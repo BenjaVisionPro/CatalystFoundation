@@ -866,6 +866,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	result := self stepPipelineExposesTheComposedStep.
 	expectedTypes := {
 		CFPhysicsBodyStateCaptureStage.
+		CFPhysicsVelocityIntegrationStage.
 		CFPhysicsPairFinderStage.
 		CFPhysicsContactUpdateStage.
 		CFPhysicsConstraintPreparationStage.
@@ -879,14 +880,15 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	expectedTypes withIndexDo: [ :stageType :index |
 		self assert: ((result executedStages at: index) isKindOf: stageType) ].
 	self assert: result stageExecutions first output == result bodyStates.
-	self assert: result stageExecutions second output equals: result pairs.
-	self assert: result stageExecutions third output == result contactResult.
-	self assert: result stageExecutions fourth output equals: result constraints.
-	self assert: result stageExecutions fifth output equals: result islands.
-	self assert: ((result stageExecutions at: 7) output == result solver).
-	self assert: (result stageExecutions at: 8) output contactResults equals: result contactSolveResults.
-	self assert: (result stageExecutions at: 8) output hitEvents equals: result hitEvents.
-	self assert: (result stageExecutions at: 10) output equals: result contactEvents.
+	self assert: result stageExecutions second output == result bodyStates.
+	self assert: result stageExecutions third output equals: result pairs.
+	self assert: result stageExecutions fourth output == result contactResult.
+	self assert: result stageExecutions fifth output equals: result constraints.
+	self assert: result stageExecutions sixth output equals: result islands.
+	self assert: ((result stageExecutions at: 8) output == result solver).
+	self assert: (result stageExecutions at: 9) output contactResults equals: result contactSolveResults.
+	self assert: (result stageExecutions at: 9) output hitEvents equals: result hitEvents.
+	self assert: (result stageExecutions at: 11) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -899,11 +901,12 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 10.
+	self assert: stages size equals: 11.
 	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
-	self assert: stages second class equals: CFPhysicsPairFinderStage.
+	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
+	self assert: stages third class equals: CFPhysicsPairFinderStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
-	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 4).
+	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 5).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
 ]

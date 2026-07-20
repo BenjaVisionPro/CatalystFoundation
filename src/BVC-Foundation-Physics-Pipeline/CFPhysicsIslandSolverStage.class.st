@@ -12,9 +12,7 @@ CFPhysicsIslandSolverStage >> executeOn: aStepResult [
 		step: aStepResult step
 		bodyStates: aStepResult bodyStates
 		islands: aStepResult islands.
-	solver
-		solveWithGravity: aStepResult gravity
-		restitutionThreshold: aStepResult restitutionThreshold.
+	solver solveWithRestitutionThreshold: aStepResult restitutionThreshold.
 	aStepResult solver: solver.
 	^ solver
 ]
