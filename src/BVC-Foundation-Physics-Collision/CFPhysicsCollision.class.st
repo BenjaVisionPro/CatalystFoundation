@@ -25,3 +25,14 @@ CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
 		ifTrue: [ ^ CFPhysicsRectangleCollision manifoldBetween: firstBody and: secondBody ].
 	^ CFPhysicsPolygonCollision manifoldBetween: firstBody and: secondBody
 ]
+
+{ #category : 'collision' }
+CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
+	^ self
+		manifoldBetween: (CFPhysicsCollisionBodyView
+			shapeState: firstShapeState
+			transform: firstTransform)
+		and: (CFPhysicsCollisionBodyView
+			shapeState: secondShapeState
+			transform: secondTransform)
+]

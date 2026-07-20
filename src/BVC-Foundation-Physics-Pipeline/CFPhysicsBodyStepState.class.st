@@ -84,3 +84,10 @@ CFPhysicsBodyStepState >> predictedSweepFor: seconds [
 CFPhysicsBodyStepState >> predictedSweptAABBFor: seconds [
 	^ body shapeState sweptAABBAlong: (self predictedSweepFor: seconds)
 ]
+
+{ #category : 'prediction' }
+CFPhysicsBodyStepState >> currentTransform [
+	^ CFPhysicsTransform
+		position: body position + deltaPosition
+		rotation: body rotation + deltaRotation
+]

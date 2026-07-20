@@ -3151,3 +3151,53 @@ CFPhysicsCleanSlateTests >> impactAdvancerAdvancesAllMovingStatesThroughSameElap
 	self assert: ((bodyStates at: second) deltaPosition closeTo: -2 @ 0).
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> impactManifoldUsesAdvancedStepTransforms [
+	<gtExample>
+	| moving obstacle bodyStates pair impact advancement manifold |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	impact := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { pair }
+		bodyStates: bodyStates
+		for: 1.0.
+	advancement := CFPhysicsImpactAdvancer new
+		advanceBodyStates: bodyStates
+		to: impact
+		for: 1.0.
+	manifold := CFPhysicsCollision
+		manifoldBetweenShapeState: moving shapeState
+		transform: (bodyStates at: moving) currentTransform
+		andShapeState: obstacle shapeState
+		transform: (bodyStates at: obstacle) currentTransform.
+	self assert: manifold notNil.
+	self assert: (advancement fraction closeTo: 0.25).
+	self assert: moving position equals: 0 @ 0.
+	self assert: obstacle position equals: 30 @ 0.
+	^ manifold
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> transformExplicitManifoldDoesNotUseAuthoritativeTransforms [
+	<gtExample>
+	| first second manifold |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	manifold := CFPhysicsCollision
+		manifoldBetweenShapeState: first shapeState
+		transform: (CFPhysicsTransform position: 0 @ 0 rotation: 0.0)
+		andShapeState: second shapeState
+		transform: (CFPhysicsTransform position: 20 @ 0 rotation: 0.0).
+	self assert: manifold notNil.
+	self assert: first position equals: 0 @ 0.
+	self assert: second position equals: 100 @ 0.
+	^ manifold
+]
