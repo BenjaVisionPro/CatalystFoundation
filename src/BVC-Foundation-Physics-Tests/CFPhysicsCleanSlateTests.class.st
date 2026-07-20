@@ -3331,3 +3331,87 @@ CFPhysicsCleanSlateTests >> impactSolverDoesNotCommitAuthoritativeBodies [
 	self assert: ((bodyStates at: moving) currentTransform position closeTo: 10 @ 0).
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> remainingTimeIntegrationUsesPostImpactVelocity [
+	<gtExample>
+	| moving obstacle bodyStates pair impact advancement step solveResult movingState |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	movingState := bodyStates at: moving.
+	movingState linearVelocity: 40 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	impact := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { pair }
+		bodyStates: bodyStates
+		for: 1.0.
+	advancement := CFPhysicsImpactAdvancer new
+		advanceBodyStates: bodyStates
+		to: impact
+		for: 1.0.
+	step := CFPhysicsStep
+		timeStep: advancement remainingTime
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	solveResult := CFPhysicsImpactSolver new
+		solveAdvancement: advancement
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	CFPhysicsRemainingTimeIntegrator new
+		integrateBodyStates: bodyStates
+		after: solveResult.
+	self assert: (movingState linearVelocity x abs < 1.0e-6).
+	self assert: (movingState currentTransform position closeTo: 10 @ 0).
+	self assert: moving position equals: 0 @ 0.
+	^ solveResult
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> remainingTimeIntegrationAdvancesOtherBodiesThroughFullStep [
+	<gtExample>
+	| moving obstacle other bodyStates pair impact advancement step solveResult otherState |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	other := self cleanSlateBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		at: other put: (CFPhysicsBodyStepState on: other);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	otherState := bodyStates at: other.
+	otherState linearVelocity: 8 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	impact := CFPhysicsEarliestImpactFinder new
+		earliestAmong: { pair }
+		bodyStates: bodyStates
+		for: 1.0.
+	advancement := CFPhysicsImpactAdvancer new
+		advanceBodyStates: bodyStates
+		to: impact
+		for: 1.0.
+	step := CFPhysicsStep
+		timeStep: advancement remainingTime
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	solveResult := CFPhysicsImpactSolver new
+		solveAdvancement: advancement
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	CFPhysicsRemainingTimeIntegrator new
+		integrateBodyStates: bodyStates
+		after: solveResult.
+	self assert: (otherState currentTransform position closeTo: 8 @ 100).
+	self assert: other position equals: 0 @ 100.
+	^ solveResult
+]
