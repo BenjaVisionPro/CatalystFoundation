@@ -40,7 +40,7 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 				iterations: iteration ].
 		advance := distanceResult distance / closingSpeed.
 		nextFraction := fraction + advance.
-		(nextFraction > 1.0 or: [ nextFraction <= fraction + tolerance ]) ifTrue: [
+		(nextFraction > 1.0 or: [ nextFraction <= (fraction + tolerance) ]) ifTrue: [
 			^ self
 				separatedResultBetweenShapeState: firstShapeState
 				sweep: firstSweep
