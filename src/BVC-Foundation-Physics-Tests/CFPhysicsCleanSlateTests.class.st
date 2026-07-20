@@ -3876,3 +3876,41 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 	self assert: result contactBeganEvents size equals: 1.
 	^ result
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
+	<gtExample>
+	| firstResult moving sensor pipeline step secondResult |
+	firstResult := self stepPipelinePublishesSweptSensorWithoutSolvingOrBlockingMotion.
+	moving := firstResult bodies first.
+	sensor := firstResult bodies second.
+	moving velocity: 0 @ 0.
+	moving beginStep.
+	sensor beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	secondResult := pipeline
+		stepBodies: { sensor. moving }
+		fromContacts: firstResult activeContacts
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: secondResult activeContacts isEmpty.
+	self assert: secondResult beganContacts isEmpty.
+	self assert: secondResult continuedContacts isEmpty.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult endedContacts first isSensor.
+	self assert: secondResult constraints isEmpty.
+	self assert: secondResult contactBeganEvents isEmpty.
+	self assert: secondResult contactEndedEvents size equals: 1.
+	self assert: (moving position closeTo: 40 @ 0).
+	^ secondResult
+]
