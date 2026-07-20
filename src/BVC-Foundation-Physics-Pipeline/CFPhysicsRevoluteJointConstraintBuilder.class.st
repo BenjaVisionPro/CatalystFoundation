@@ -8,7 +8,7 @@ Class {
 { #category : 'building' }
 CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	^ (joints select: [ :joint |
-		(joint isKindOf: CFPhysicsRevoluteJoint) and: [ joint isActive ] ]) collect: [ :joint |
+		joint class == CFPhysicsRevoluteJoint and: [ joint isActive ] ]) collect: [ :joint |
 			self constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio ]
 ]
 

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContinuousImpactLoop',
 	#superclass : 'Object',
-	#instVars : [ 'pairFinder', 'impactFinder', 'impactAdvancer', 'impactSolver', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'maximumIterations' ],
+	#instVars : [ 'pairFinder', 'impactFinder', 'impactAdvancer', 'impactSolver', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder', 'maximumIterations' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -15,6 +15,7 @@ CFPhysicsContinuousImpactLoop >> initialize [
 	impactSolver := CFPhysicsImpactSolver new.
 	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new.
 	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new.
+	fixedJointConstraintBuilder := CFPhysicsFixedJointConstraintBuilder new.
 	maximumIterations := 8
 ]
 
@@ -97,6 +98,10 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints st
 				bodyStates: bodyStates
 				warmStartRatio: step warmStartRatio);
 			yourself.
+		jointConstraints addAll: (fixedJointConstraintBuilder
+			constraintsFrom: joints
+			bodyStates: bodyStates
+			warmStartRatio: step warmStartRatio).
 		solveResults := impactSolver
 			solveAdvancements: advancements
 			bodyStates: bodyStates

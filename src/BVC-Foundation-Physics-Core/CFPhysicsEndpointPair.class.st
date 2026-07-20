@@ -60,6 +60,11 @@ CFPhysicsEndpointPair >> revoluteJoint [
 ]
 
 { #category : 'relationships' }
+CFPhysicsEndpointPair >> fixedJoint [
+	^ self world addFixedJoint: (CFPhysicsFixedJoint betweenEndpoints: self)
+]
+
+{ #category : 'relationships' }
 CFPhysicsEndpointPair >> attraction [
 	^ self world addAttractionConstraint: (CFPhysicsAttractionConstraint betweenEndpoints: self)
 ]

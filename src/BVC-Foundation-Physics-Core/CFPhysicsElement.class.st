@@ -406,6 +406,38 @@ CFPhysicsElement >> removeRevoluteJoint: aJoint [
 	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
 ]
 
+{ #category : 'fixed joints' }
+CFPhysicsElement >> fixedJointTo: anotherElement [
+	| aWorld otherWorld joint |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsFixedJoint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addFixedJoint: joint
+]
+
+{ #category : 'fixed joints' }
+CFPhysicsElement >> fixedJoints [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld fixedJointsUsingBody: body
+]
+
+{ #category : 'fixed joints' }
+CFPhysicsElement >> removeFixedJoint: aJoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeFixedJoint: aJoint ]
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsElement >> containWithinWorld [

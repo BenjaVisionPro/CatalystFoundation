@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -11,7 +11,8 @@ CFPhysicsConstraintPreparationStage >> initialize [
 	super initialize.
 	constraintBuilder := CFPhysicsConstraintBuilder new.
 	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new.
-	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new
+	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new.
+	fixedJointConstraintBuilder := CFPhysicsFixedJointConstraintBuilder new
 ]
 
 { #category : 'accessing' }
@@ -26,6 +27,10 @@ CFPhysicsConstraintPreparationStage >> distanceJointConstraintBuilder: anObject 
 CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder [ ^ revoluteJointConstraintBuilder ]
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder: anObject [ revoluteJointConstraintBuilder := anObject ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder [ ^ fixedJointConstraintBuilder ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder: anObject [ fixedJointConstraintBuilder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
@@ -52,6 +57,10 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 			bodyStates: aStepResult bodyStates
 			warmStartRatio: aStepResult step warmStartRatio);
 		yourself.
+	jointConstraints addAll: (fixedJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
 	constraints := constraints asOrderedCollection addAll: jointConstraints; yourself.
 	aStepResult constraints: constraints.
 	^ aStepResult constraints

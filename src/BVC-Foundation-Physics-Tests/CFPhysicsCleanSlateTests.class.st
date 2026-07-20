@@ -1646,6 +1646,46 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody 
 	^ joint
 ]
 
+{ #category : 'examples - fixed joints' }
+CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
+	<gtExample>
+	| first second joint |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	first rotation: 0.25.
+	second rotation: 0.75.
+	joint := CFPhysicsFixedJoint between: first and: second.
+	self assert: joint firstBody == first.
+	self assert: joint secondBody == second.
+	self assert: joint referenceAngle equals: 0.5.
+	self assert: joint accumulatedAngularImpulse equals: 0.0.
+	^ joint
+]
+
+{ #category : 'examples - fixed joints' }
+CFPhysicsCleanSlateTests >> fixedJointAnchorsABodyOrientationToTheWorld [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor fixedJointTo: worldAnchor.
+	element physics angularVelocity: 10.0.
+	result := world step.
+	self assert: world fixedJoints equals: { joint }.
+	self assert: result constraints size equals: 1.
+	self assert: result constraints first class equals: CFPhysicsPreparedFixedJoint.
+	self assert: result islands size equals: 1.
+	self assert: element physics angularVelocity abs < 1.0e-6.
+	^ result
+]
+
 { #category : 'examples - collision filtering' }
 CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
