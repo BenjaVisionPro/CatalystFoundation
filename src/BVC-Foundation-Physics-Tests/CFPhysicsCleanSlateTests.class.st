@@ -1745,7 +1745,8 @@ CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
 	result := world step.
 	self assert: result constraints first limitsEnabled.
 	self assert: result constraints first baseTranslation equals: 20.0.
-	self assert: element physics velocity x < 0.0.
+	self assert: element physics position x <= (10.0 + 1.0e-6).
+	self assert: element physics velocity x abs < 1.0e-6.
 	^ result
 ]
 
