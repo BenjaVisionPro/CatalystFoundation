@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse' ],
+	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -50,8 +50,30 @@ CFPhysicsPreparedRevoluteJoint >> effectiveMassYY: aNumber [ effectiveMassYY := 
 CFPhysicsPreparedRevoluteJoint >> impulse [ ^ impulse ]
 { #category : 'accessing' }
 CFPhysicsPreparedRevoluteJoint >> impulse: aPoint [ impulse := aPoint ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorEnabled: aBoolean [ motorEnabled := aBoolean ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorSpeed [ ^ motorSpeed ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorSpeed: aNumber [ motorSpeed := aNumber ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> maximumMotorImpulse [ ^ maximumMotorImpulse ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> maximumMotorImpulse: aNumber [ maximumMotorImpulse := aNumber ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorMass [ ^ motorMass ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorMass: aNumber [ motorMass := aNumber ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorImpulse [ ^ motorImpulse ]
+{ #category : 'motor' }
+CFPhysicsPreparedRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumber ]
 
 { #category : 'writing back' }
 CFPhysicsPreparedRevoluteJoint >> writeImpulsesBack [
-	joint accumulatedImpulse: impulse
+	joint
+		accumulatedImpulse: impulse;
+		motorImpulse: motorImpulse
 ]

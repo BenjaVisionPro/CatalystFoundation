@@ -57,6 +57,7 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
 		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
+		self warmStartRevoluteJointMotor: constraint.
 		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
 			self applyFixedJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
 ]
@@ -136,7 +137,27 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 	bias := biasEnabled ifTrue: [ separation * step biasRate ] ifFalse: [ 0 @ 0 ].
 	increment := self revoluteJointImpulseFor: relativeVelocity + bias constraint: constraint.
 	constraint impulse: constraint impulse + increment.
-	self applyRevoluteJointImpulse: increment constraint: constraint
+	self applyRevoluteJointImpulse: increment constraint: constraint.
+	self solveRevoluteJointMotor: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartRevoluteJointMotor: constraint [
+	(self isMotorJointConstraint: constraint) ifTrue: [
+		self applyFixedJointAngularImpulse: constraint motorImpulse constraint: constraint ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRevoluteJointMotor: constraint [
+	| relativeVelocity increment oldImpulse newImpulse |
+	(self isMotorJointConstraint: constraint) ifFalse: [ ^ self ].
+	relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+	increment := constraint motorMass * (constraint motorSpeed - relativeVelocity).
+	oldImpulse := constraint motorImpulse.
+	newImpulse := ((oldImpulse + increment) max: constraint maximumMotorImpulse negated)
+		min: constraint maximumMotorImpulse.
+	constraint motorImpulse: newImpulse.
+	self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -266,6 +287,12 @@ CFPhysicsSoftStepSolver >> revoluteJointRelativeVelocity: constraint [
 CFPhysicsSoftStepSolver >> fixedJointRelativeAngularVelocity: constraint [
 	^ (constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ])
 		- (constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ])
+]
+
+{ #category : 'private - testing' }
+CFPhysicsSoftStepSolver >> isMotorJointConstraint: constraint [
+	^ constraint joint class == CFPhysicsRevoluteJoint
+		and: [ constraint motorEnabled and: [ constraint maximumMotorImpulse > 0.0 ] ]
 ]
 
 { #category : 'private - solving' }

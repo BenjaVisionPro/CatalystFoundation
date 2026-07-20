@@ -14,7 +14,7 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: b
 
 { #category : 'private - building' }
 CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY |
+	| stateA stateB centreA centreB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	centreA := self centreFor: joint firstBody state: stateA.
@@ -41,6 +41,7 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 			massXX := kyy / determinant.
 			massXY := kxy negated / determinant.
 			massYY := kxx / determinant ].
+	inverseAngularMass := inverseInertiaA + inverseInertiaB.
 	^ CFPhysicsPreparedRevoluteJoint new
 		joint: joint;
 		bodyStateA: stateA;
@@ -52,6 +53,11 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		effectiveMassXY: massXY;
 		effectiveMassYY: massYY;
 		impulse: joint accumulatedImpulse * warmStartRatio;
+		motorEnabled: joint motorEnabled;
+		motorSpeed: joint motorSpeed;
+		maximumMotorImpulse: joint maximumMotorImpulse;
+		motorMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
+		motorImpulse: joint motorImpulse * warmStartRatio;
 		yourself
 ]
 

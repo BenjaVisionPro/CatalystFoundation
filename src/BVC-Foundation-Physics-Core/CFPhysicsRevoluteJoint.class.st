@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse' ],
+	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -32,7 +32,11 @@ CFPhysicsRevoluteJoint >> initialize [
 	super initialize.
 	active := true.
 	sequence := 0.
-	accumulatedImpulse := 0 @ 0
+	accumulatedImpulse := 0 @ 0.
+	motorEnabled := false.
+	motorSpeed := 0.0.
+	maximumMotorImpulse := 0.0.
+	motorImpulse := 0.0
 ]
 
 { #category : 'accessing' }
@@ -56,6 +60,36 @@ CFPhysicsRevoluteJoint >> secondBody [ ^ self bodyB ]
 CFPhysicsRevoluteJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
 { #category : 'solver state' }
 CFPhysicsRevoluteJoint >> accumulatedImpulse: aPoint [ accumulatedImpulse := aPoint ]
+
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> motorEnabled: aBoolean [
+	motorEnabled = aBoolean ifTrue: [ ^ self ].
+	motorEnabled := aBoolean.
+	motorImpulse := 0.0.
+	self wakeBodies
+]
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> motorSpeed [ ^ motorSpeed ]
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> motorSpeed: aNumber [
+	motorSpeed := aNumber asFloat.
+	motorImpulse := 0.0.
+	self wakeBodies
+]
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> maximumMotorImpulse [ ^ maximumMotorImpulse ]
+{ #category : 'motor' }
+CFPhysicsRevoluteJoint >> maximumMotorImpulse: aNumber [
+	maximumMotorImpulse := aNumber asFloat max: 0.0.
+	motorImpulse := 0.0.
+	self wakeBodies
+]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> motorImpulse [ ^ motorImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumber asFloat ]
 
 { #category : 'ordering' }
 CFPhysicsRevoluteJoint >> sequence [ ^ sequence ]

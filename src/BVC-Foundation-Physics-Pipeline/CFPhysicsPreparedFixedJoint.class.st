@@ -21,6 +21,7 @@ CFPhysicsPreparedFixedJoint >> angularImpulse: aNumber [ angularImpulse := aNumb
 
 { #category : 'writing back' }
 CFPhysicsPreparedFixedJoint >> writeImpulsesBack [
-	super writeImpulsesBack.
-	joint accumulatedAngularImpulse: angularImpulse
+	joint
+		accumulatedImpulse: impulse;
+		accumulatedAngularImpulse: angularImpulse
 ]

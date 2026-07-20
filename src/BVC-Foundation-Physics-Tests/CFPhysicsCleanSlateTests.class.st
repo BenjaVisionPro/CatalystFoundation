@@ -1646,6 +1646,34 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody 
 	^ joint
 ]
 
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
+	<gtExample>
+	| owner first second world firstAnchor secondAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 30 @ 0.
+	second physics beStatic.
+	firstAnchor := first physics localAnchorAt: 30 @ 10.
+	secondAnchor := second physics localAnchorAt: 0 @ 10.
+	joint := firstAnchor revoluteJointTo: secondAnchor.
+	joint
+		motorEnabled: true;
+		motorSpeed: 10.0;
+		maximumMotorImpulse: 1000.0.
+	result := world step.
+	self assert: result constraints first motorEnabled.
+	self assert: first physics angularVelocity < 0.0.
+	self assert: second physics angularVelocity equals: 0.0.
+	^ result
+]
+
 { #category : 'examples - fixed joints' }
 CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
 	<gtExample>
