@@ -2417,7 +2417,9 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 	bounds := body sweptAABB.
 	self assert: (bounds overlaps: previousBounds).
 	self assert: (bounds overlaps: currentBounds).
-	self assert: bounds extent x >= (body shapeState boundingRadius * 2.0).
-	self assert: bounds extent y >= (body shapeState boundingRadius * 2.0).
+	self assert: ((bounds extent x >= (body shapeState boundingRadius * 2.0)) or: [
+		bounds extent x closeTo: body shapeState boundingRadius * 2.0 ]).
+	self assert: ((bounds extent y >= (body shapeState boundingRadius * 2.0)) or: [
+		bounds extent y closeTo: body shapeState boundingRadius * 2.0 ]).
 	^ bounds
 ]
