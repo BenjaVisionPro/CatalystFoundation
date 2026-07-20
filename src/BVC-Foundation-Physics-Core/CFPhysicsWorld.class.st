@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'previousTimeStep' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'previousTimeStep', 'warmStarting' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -41,6 +41,7 @@ CFPhysicsWorld >> initialize [
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
 	previousTimeStep := nil.
+	warmStarting := true.
 	containmentConstraints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
@@ -94,6 +95,13 @@ CFPhysicsWorld >> contactDampingRatio [ ^ contactDampingRatio ]
 
 { #category : 'solver configuration' }
 CFPhysicsWorld >> contactDampingRatio: aNumber [ contactDampingRatio := aNumber asFloat max: 0.0 ]
+
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> warmStarting [ ^ warmStarting ]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> warmStarting: aBoolean [ warmStarting := aBoolean ]
 
 { #category : 'pipeline' }
 CFPhysicsWorld >> stepPipeline [ ^ stepPipeline ]
@@ -188,11 +196,13 @@ CFPhysicsWorld >> newStep [
 		substeps: substepCount
 		contactHertz: contactHertz
 		dampingRatio: contactDampingRatio.
-	step warmStartRatio: (previousTimeStep
-		ifNil: [ 1.0 ]
-		ifNotNil: [ previousTimeStep = 0.0
-			ifTrue: [ 0.0 ]
-			ifFalse: [ currentTimeStep / previousTimeStep ] ]).
+	step warmStartRatio: (warmStarting
+		ifFalse: [ 0.0 ]
+		ifTrue: [ previousTimeStep
+			ifNil: [ 1.0 ]
+			ifNotNil: [ previousTimeStep = 0.0
+				ifTrue: [ 0.0 ]
+				ifFalse: [ currentTimeStep / previousTimeStep ] ] ]).
 	^ step
 ]
 

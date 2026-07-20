@@ -2288,3 +2288,32 @@ CFPhysicsCleanSlateTests >> worldScalesWarmStartingWhenStepDurationChanges [
 	self assert: secondStep warmStartRatio equals: 0.5.
 	^ secondStep
 ]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldWarmStartingDefaultsToEnabled [
+	<gtExample>
+	| world |
+	world := CFPhysicsWorld new.
+	self assert: world warmStarting.
+	^ world
+]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldCanDisableAndResumeWarmStarting [
+	<gtExample>
+	| world disabledStep resumedStep |
+	world := CFPhysicsWorld on: BlElement new.
+	world step.
+
+	world warmStarting: false.
+	world stepDuration: 8 milliseconds.
+	disabledStep := world newStep.
+	self assert: disabledStep warmStartRatio equals: 0.0.
+	world step.
+
+	world warmStarting: true.
+	world stepDuration: 4 milliseconds.
+	resumedStep := world newStep.
+	self assert: resumedStep warmStartRatio equals: 0.5.
+	^ resumedStep
+]
