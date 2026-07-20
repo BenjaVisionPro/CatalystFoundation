@@ -38,25 +38,3 @@ CFPhysicsSweep >> startTransform: aTransform [
 CFPhysicsSweep >> transformAt: alpha [
 	^ startTransform interpolatedTo: endTransform at: alpha
 ]
-
-{ #category : 'geometry' }
-CFPhysicsSweep >> sweptAABBFor: aShapeState [
-	| startBounds endBounds radius startCentre endCentre minimum maximum |
-	startBounds := aShapeState
-		aabbAt: startTransform position
-		rotation: startTransform rotation.
-	endBounds := aShapeState
-		aabbAt: endTransform position
-		rotation: endTransform rotation.
-	startTransform rotation = endTransform rotation ifTrue: [
-		^ startBounds mergedWith: endBounds ].
-
-	radius := aShapeState boundingRadius.
-	startCentre := aShapeState centreAt: startTransform position.
-	endCentre := aShapeState centreAt: endTransform position.
-	minimum := ((startCentre x min: endCentre x) - radius)
-		@ ((startCentre y min: endCentre y) - radius).
-	maximum := ((startCentre x max: endCentre x) + radius)
-		@ ((startCentre y max: endCentre y) + radius).
-	^ CFPhysicsAABB position: minimum extent: maximum - minimum
-]

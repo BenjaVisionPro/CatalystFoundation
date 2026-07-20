@@ -513,5 +513,5 @@ CFPhysicsBodyState >> sweep [
 
 { #category : 'collision' }
 CFPhysicsBodyState >> sweptAABB [
-	^ self sweep sweptAABBFor: self shapeState
+	^ self shapeState sweptAABBAlong: self sweep
 ]

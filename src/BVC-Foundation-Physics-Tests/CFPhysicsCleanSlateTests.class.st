@@ -2548,7 +2548,7 @@ CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweptAABBDelegatesToSweep [
+CFPhysicsCleanSlateTests >> sweptAABBDelegatesToShapeState [
 	<gtExample>
 	| body bodyBounds sweepBounds |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -2557,7 +2557,7 @@ CFPhysicsCleanSlateTests >> sweptAABBDelegatesToSweep [
 		addVelocity: 100 @ 0;
 		advanceBy: 1.0 gravity: 0 @ 0.
 	bodyBounds := body sweptAABB.
-	sweepBounds := body sweep sweptAABBFor: body shapeState.
+	sweepBounds := body shapeState sweptAABBAlong: body sweep.
 	self assert: bodyBounds minimum equals: sweepBounds minimum.
 	self assert: bodyBounds maximum equals: sweepBounds maximum.
 	^ bodyBounds

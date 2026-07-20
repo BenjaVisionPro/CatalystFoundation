@@ -36,6 +36,30 @@ CFPhysicsShapeState >> aabbAt: aPosition rotation: anAngle [
 	^ CFPhysicsAABB position: minimum extent: maximum - minimum
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsShapeState >> sweptAABBAlong: aSweep [
+	| startTransform endTransform startBounds endBounds radius startCentre endCentre minimum maximum |
+	startTransform := aSweep startTransform.
+	endTransform := aSweep endTransform.
+	startBounds := self
+		aabbAt: startTransform position
+		rotation: startTransform rotation.
+	endBounds := self
+		aabbAt: endTransform position
+		rotation: endTransform rotation.
+	startTransform rotation = endTransform rotation ifTrue: [
+		^ startBounds mergedWith: endBounds ].
+
+	radius := self boundingRadius.
+	startCentre := self centreAt: startTransform position.
+	endCentre := self centreAt: endTransform position.
+	minimum := ((startCentre x min: endCentre x) - radius)
+		@ ((startCentre y min: endCentre y) - radius).
+	maximum := ((startCentre x max: endCentre x) + radius)
+		@ ((startCentre y max: endCentre y) + radius).
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
 { #category : 'circle' }
 CFPhysicsShapeState >> circleCentreAt: aPosition [
 	^ aPosition + (self extent / 2.0)
