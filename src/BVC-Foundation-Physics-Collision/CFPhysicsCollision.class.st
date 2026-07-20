@@ -28,7 +28,7 @@ CFPhysicsCollision class >> manifoldBetween: firstBody and: secondBody [
 
 { #category : 'collision' }
 CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
-	| firstBody secondBody manifold distanceResult normal centreDelta |
+	| firstBody secondBody manifold distanceResult normal centreDelta worldPoint point |
 	firstBody := CFPhysicsCollisionBodyView
 		shapeState: firstShapeState
 		transform: firstTransform.
@@ -50,7 +50,19 @@ CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform
 		normal := centreDelta r = 0
 			ifTrue: [ 1 @ 0 ]
 			ifFalse: [ centreDelta / centreDelta r ] ].
+	worldPoint := (distanceResult firstPoint + distanceResult secondPoint) / 2.0.
+	point := CFPhysicsManifoldPoint at: worldPoint.
+	point
+		separation: 0.0;
+		localAnchorA: (firstShapeState
+			localPointForWorldPoint: worldPoint
+			position: firstTransform position
+			rotation: firstTransform rotation);
+		localAnchorB: (secondShapeState
+			localPointForWorldPoint: worldPoint
+			position: secondTransform position
+			rotation: secondTransform rotation).
 	^ (CFPhysicsManifold normal: normal penetration: 0.0)
-		points: { (distanceResult firstPoint + distanceResult secondPoint) / 2.0 };
+		contactPoints: { point };
 		yourself
 ]

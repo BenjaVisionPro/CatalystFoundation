@@ -3201,3 +3201,57 @@ CFPhysicsCleanSlateTests >> transformExplicitManifoldDoesNotUseAuthoritativeTran
 	self assert: second position equals: 100 @ 0.
 	^ manifold
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> transformExplicitTouchingManifoldProvidesLocalAnchors [
+	<gtExample>
+	| first second firstTransform secondTransform manifold point |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	firstTransform := CFPhysicsTransform position: 0 @ 0 rotation: 0.0.
+	secondTransform := CFPhysicsTransform position: 20 @ 0 rotation: 0.0.
+	manifold := CFPhysicsCollision
+		manifoldBetweenShapeState: first shapeState
+		transform: firstTransform
+		andShapeState: second shapeState
+		transform: secondTransform.
+	point := manifold contactPoints first.
+	self assert: point localAnchorA notNil.
+	self assert: point localAnchorB notNil.
+	self assert: (point localAnchorA closeTo: 20 @ 10).
+	self assert: (point localAnchorB closeTo: 0 @ 10).
+	^ manifold
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> constraintBuilderUsesAdvancedStepRotation [
+	<gtExample>
+	| first second firstState secondState bodyStates manifoldPoint manifold contact constraint anchor |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 20 @ 0 extent: 20 @ 20.
+	firstState := CFPhysicsBodyStepState on: first.
+	secondState := CFPhysicsBodyStepState on: second.
+	firstState angularVelocity: Float pi / 2.0.
+	firstState integratePositionBy: 1.0.
+	bodyStates := IdentityDictionary new
+		at: first put: firstState;
+		at: second put: secondState;
+		yourself.
+	manifoldPoint := CFPhysicsManifoldPoint at: 20 @ 10.
+	manifoldPoint
+		localAnchorA: 20 @ 10;
+		localAnchorB: 0 @ 10.
+	manifold := (CFPhysicsManifold normal: 1 @ 0 penetration: 0.0)
+		contactPoints: { manifoldPoint };
+		yourself.
+	contact := CFPhysicsContact
+		pair: (CFPhysicsPair first: first second: second)
+		manifold: manifold.
+	constraint := (CFPhysicsConstraintBuilder new
+		constraintsFrom: { contact }
+		bodyStates: bodyStates) first.
+	anchor := constraint points first anchorA.
+	self assert: (anchor closeTo: 0 @ 10).
+	^ constraint
+]

@@ -49,8 +49,8 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 { #category : 'private - building' }
 CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
 	| point anchorA anchorB rnA rnB rtA rtB normalDenominator tangentDenominator relativeVelocity |
-	anchorA := self rotatedAnchorFor: manifoldPoint localAnchorA body: contact firstBody.
-	anchorB := self rotatedAnchorFor: manifoldPoint localAnchorB body: contact secondBody.
+	anchorA := self rotatedAnchorFor: manifoldPoint localAnchorA bodyState: stateA.
+	anchorB := self rotatedAnchorFor: manifoldPoint localAnchorB bodyState: stateB.
 	rnA := self cross: anchorA with: normal.
 	rnB := self cross: anchorB with: normal.
 	normalDenominator := contact firstBody inverseMass + contact secondBody inverseMass
@@ -79,12 +79,13 @@ CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStat
 ]
 
 { #category : 'private - geometry' }
-CFPhysicsConstraintBuilder >> rotatedAnchorFor: localAnchor body: body [
-	| localCentre relative cosine sine |
-	localCentre := body shapeState extent / 2.0.
+CFPhysicsConstraintBuilder >> rotatedAnchorFor: localAnchor bodyState: bodyState [
+	| localCentre relative rotation cosine sine |
+	localCentre := bodyState body shapeState extent / 2.0.
 	relative := localAnchor - localCentre.
-	cosine := body rotation cos.
-	sine := body rotation sin.
+	rotation := bodyState currentTransform rotation.
+	cosine := rotation cos.
+	sine := rotation sin.
 	^ ((relative x * cosine) - (relative y * sine))
 		@ ((relative x * sine) + (relative y * cosine))
 ]
