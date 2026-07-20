@@ -1329,6 +1329,41 @@ CFPhysicsCleanSlateTests >> pointerDraggingIsInstalledThroughThePhysicsFacade [
 	^ element
 ]
 
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
+	<gtExample>
+	| space owner button world pointerPosition |
+	space := BlSpace new.
+	owner := BlElement new size: 200 @ 120; yourself.
+	button := BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		label: 'Drag me';
+		size: 90 @ 32;
+		yourself.
+	owner addChild: button.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	button physics
+		position: 20 @ 20;
+		enablePointerDragging.
+	pointerPosition := button bounds inSpace center.
+	BlSpace simulateEvents: {
+		BlMouseDownEvent primary position: pointerPosition.
+		BlMouseMoveEvent primary position: pointerPosition + (30 @ 0) }
+		on: button.
+	self assert: world pointerConstraints size equals: 1.
+	world step.
+	self assert: button physics position x > 20.
+	BlSpace simulateEvents: {
+		BlMouseUpEvent primary position: pointerPosition + (30 @ 0) }
+		on: button.
+	self assert: world pointerConstraints isEmpty.
+	^ button
+]
+
 
 { #category : 'examples - spring interaction' }
 CFPhysicsCleanSlateTests >> springAtItsRestLengthDoesNotChangeVelocity [

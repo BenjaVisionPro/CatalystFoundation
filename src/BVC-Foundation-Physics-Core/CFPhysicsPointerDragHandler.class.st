@@ -29,9 +29,9 @@ CFPhysicsPointerDragHandler >> installOn: anElement [
 		anEvent isPrimaryButtonDrag ifTrue: [ self continueFrom: anEvent ] ].
 	dragEndHandler := BlEventHandler on: BlDragEndEvent do: [ :anEvent |
 		anEvent isPrimaryButtonDrag ifTrue: [ self endFrom: anEvent ] ].
-	element addEventHandler: dragStartHandler.
-	element addEventHandler: dragHandler.
-	element addEventHandler: dragEndHandler
+	element addEventFilter: dragStartHandler.
+	element addEventFilter: dragHandler.
+	element addEventFilter: dragEndHandler
 ]
 
 { #category : 'events' }
@@ -80,7 +80,7 @@ CFPhysicsPointerDragHandler >> uninstall [
 		constraint := nil ].
 	element ifNotNil: [
 		{ dragStartHandler. dragHandler. dragEndHandler } do: [ :each |
-			each ifNotNil: [ element removeEventHandler: each ] ] ].
+			each ifNotNil: [ element removeEventFilter: each ] ] ].
 	dragStartHandler := nil.
 	dragHandler := nil.
 	dragEndHandler := nil.

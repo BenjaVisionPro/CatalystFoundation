@@ -15,7 +15,10 @@ CFPhysicsShowcaseExamples >> clickMe [
 		constraintsDo: [ :constraints | constraints minHeight: 250 ];
 		yourself.
 	world := host physics beWorld.
-	world gravity: 0 @ 8.
+	world
+		gravity: 0 @ 8;
+		contactHertz: 120.0;
+		contactDampingRatio: 1.0.
 	random := Random new.
 	buttons := (1 to: 14) collect: [ :each |
 		self newClickMeButtonUsing: random ].
@@ -39,8 +42,11 @@ CFPhysicsShowcaseExamples >> clickMe [
 
 { #category : 'showcase - controls' }
 CFPhysicsShowcaseExamples >> newClickMeButtonUsing: aRandom [
+	| aptitude |
+	aptitude := BrGlamorousButtonWithLabelAptitude new.
+	aptitude foreground: Color black.
 	^ BrButton new
-		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		aptitude: aptitude;
 		label: 'Click Me';
 		size: 104 @ 42;
 		action: [ :aButton |
@@ -51,8 +57,8 @@ CFPhysicsShowcaseExamples >> newClickMeButtonUsing: aRandom [
 
 { #category : 'showcase - controls' }
 CFPhysicsShowcaseExamples >> randomClickVelocityUsing: aRandom [
-	^ ((aRandom next * 360.0) - 180.0)
-		@ ((aRandom next * 280.0) - 180.0)
+	^ ((aRandom next * 540.0) - 270.0)
+		@ ((aRandom next * 420.0) - 270.0)
 ]
 
 { #category : 'showcase - controls' }
