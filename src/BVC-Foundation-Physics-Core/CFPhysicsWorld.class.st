@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'previousTimeStep', 'warmStarting' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'previousTimeStep', 'warmStarting' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -40,9 +40,11 @@ CFPhysicsWorld >> initialize [
 	nextSpringSequence := 1.
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
+	nextDistanceJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	containmentConstraints := IdentitySet new.
+	distanceJoints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBody: pair firstBody
@@ -182,6 +184,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeSpringsUsingBody: body.
 		self removeAttractionsUsingBody: body.
 		self removeRepulsionsUsingBody: body.
+		self removeDistanceJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ] ]
@@ -454,6 +457,41 @@ CFPhysicsWorld >> prepareSpringConstraintsForStep: seconds [
 		each isActive
 			ifTrue: [ each prepareForStep: seconds ]
 			ifFalse: [ springConstraints remove: each ifAbsent: [ ] ] ]
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> distanceJoints [
+	^ distanceJoints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> addDistanceJoint: aJoint [
+	aJoint endpointPair world == self
+		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
+	aJoint sequence: nextDistanceJointSequence.
+	nextDistanceJointSequence := nextDistanceJointSequence + 1.
+	distanceJoints add: aJoint.
+	^ aJoint
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
+	^ self distanceJoints select: [ :each | each includesBody: aBodyState ]
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> removeDistanceJoint: aJoint [
+	(distanceJoints includes: aJoint) ifTrue: [
+		aJoint release.
+		distanceJoints remove: aJoint ].
+	^ aJoint
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> removeDistanceJointsUsingBody: aBodyState [
+	(distanceJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeDistanceJoint: each ]
 ]
 
 

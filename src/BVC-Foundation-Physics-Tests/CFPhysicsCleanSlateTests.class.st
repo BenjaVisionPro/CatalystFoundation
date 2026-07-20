@@ -1401,6 +1401,44 @@ CFPhysicsCleanSlateTests >> springsAreInstalledThroughBlocElements [
 	^ world
 ]
 
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
+	<gtExample>
+	| first second joint |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	self assert: joint anchorA class equals: CFPhysicsBodyCentreAnchor.
+	self assert: joint anchorB class equals: CFPhysicsBodyCentreAnchor.
+	self assert: joint firstBody == first.
+	self assert: joint secondBody == second.
+	self assert: joint restLength equals: 100.0.
+	^ joint
+]
+
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
+	<gtExample>
+	| owner first second third world attached unrelated |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	attached := first physics distanceJointTo: second.
+	unrelated := second physics distanceJointTo: third.
+	self assert: first physics distanceJoints equals: { attached }.
+	self assert: second physics distanceJoints equals: { attached. unrelated }.
+	owner removeChild: first.
+	world synchroniseMembership.
+	self assert: world distanceJoints equals: { unrelated }.
+	self assert: attached isActive not.
+	self assert: unrelated isActive.
+	^ world
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [

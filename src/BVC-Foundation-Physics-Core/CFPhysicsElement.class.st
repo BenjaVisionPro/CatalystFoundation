@@ -342,6 +342,38 @@ CFPhysicsElement >> removeSpring: aSpringConstraint [
 	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
 ]
 
+{ #category : 'distance joints' }
+CFPhysicsElement >> distanceJointTo: anotherElement [
+	| aWorld otherWorld joint |
+	aWorld := self owningWorld.
+	otherWorld := anotherElement physics owningWorld.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsDistanceJoint
+		between: self requireBodyState
+		and: anotherElement physics requireBodyState.
+	^ aWorld addDistanceJoint: joint
+]
+
+{ #category : 'distance joints' }
+CFPhysicsElement >> distanceJoints [
+	| aWorld body |
+	aWorld := self owningWorld.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld distanceJointsUsingBody: body
+]
+
+{ #category : 'distance joints' }
+CFPhysicsElement >> removeDistanceJoint: aJoint [
+	| aWorld |
+	aWorld := self owningWorld.
+	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsElement >> containWithinWorld [

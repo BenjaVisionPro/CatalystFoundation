@@ -50,6 +50,11 @@ CFPhysicsEndpointPair >> spring [
 ]
 
 { #category : 'relationships' }
+CFPhysicsEndpointPair >> distanceJoint [
+	^ self world addDistanceJoint: (CFPhysicsDistanceJoint betweenEndpoints: self)
+]
+
+{ #category : 'relationships' }
 CFPhysicsEndpointPair >> attraction [
 	^ self world addAttractionConstraint: (CFPhysicsAttractionConstraint betweenEndpoints: self)
 ]
