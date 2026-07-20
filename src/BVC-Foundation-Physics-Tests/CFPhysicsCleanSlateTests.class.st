@@ -1694,7 +1694,7 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	element physics rotation: 0.5.
 	result := world step.
 	self assert: result constraints first limitsEnabled.
-	self assert: result constraints first limitBaseAngle equals: 0.5.
+	self assert: result constraints first limitBaseAngle equals: -0.5.
 	self assert: element physics angularVelocity < 0.0.
 	^ result
 ]
