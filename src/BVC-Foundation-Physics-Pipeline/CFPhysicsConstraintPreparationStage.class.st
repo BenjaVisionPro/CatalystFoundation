@@ -61,7 +61,16 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio).
+	jointConstraints := self orderedJointConstraints: jointConstraints.
 	constraints := constraints asOrderedCollection addAll: jointConstraints; yourself.
 	aStepResult constraints: constraints.
 	^ aStepResult constraints
+]
+
+{ #category : 'private - ordering' }
+CFPhysicsConstraintPreparationStage >> orderedJointConstraints: jointConstraints [
+	^ jointConstraints asArray sorted: [ :first :second |
+		first joint orderingKey = second joint orderingKey
+			ifTrue: [ first joint class name asString < second joint class name asString ]
+			ifFalse: [ first joint orderingKey < second joint orderingKey ] ]
 ]

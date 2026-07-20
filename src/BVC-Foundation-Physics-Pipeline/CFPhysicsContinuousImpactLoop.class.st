@@ -102,6 +102,7 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints st
 			constraintsFrom: joints
 			bodyStates: bodyStates
 			warmStartRatio: step warmStartRatio).
+		jointConstraints := self orderedJointConstraints: jointConstraints.
 		solveResults := impactSolver
 			solveAdvancements: advancements
 			bodyStates: bodyStates
@@ -119,6 +120,14 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints st
 		bodyStates: bodyStates
 		remainingTime: remainingTime
 		iterationLimitReached: iterationLimitReached
+]
+
+{ #category : 'private - ordering' }
+CFPhysicsContinuousImpactLoop >> orderedJointConstraints: jointConstraints [
+	^ jointConstraints asArray sorted: [ :first :second |
+		first joint orderingKey = second joint orderingKey
+			ifTrue: [ first joint class name asString < second joint class name asString ]
+			ifFalse: [ first joint orderingKey < second joint orderingKey ] ]
 ]
 
 { #category : 'private' }

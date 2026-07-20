@@ -1686,6 +1686,31 @@ CFPhysicsCleanSlateTests >> fixedJointAnchorsABodyOrientationToTheWorld [
 	^ result
 ]
 
+{ #category : 'examples - constraint graph' }
+CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
+	<gtExample>
+	| owner element world bodyAnchor revoluteAnchor distanceAnchor revolute distance result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	revoluteAnchor := world anchorAt: 10 @ 10.
+	distanceAnchor := world anchorAt: 10 @ 10.
+	revolute := bodyAnchor revoluteJointTo: revoluteAnchor.
+	distance := bodyAnchor distanceJointTo: distanceAnchor.
+	result := world step.
+	self assert: result joints equals: { distance. revolute }.
+	self assert: (result constraints collect: #joint) equals: result joints.
+	self assert: (result constraints collect: #class) equals: {
+		CFPhysicsPreparedDistanceJoint.
+		CFPhysicsPreparedRevoluteJoint }.
+	^ result
+]
+
 { #category : 'examples - collision filtering' }
 CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>

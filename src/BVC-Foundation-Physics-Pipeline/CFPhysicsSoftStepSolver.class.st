@@ -20,9 +20,7 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	self warmStart.
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: true.
-		self solveDistanceJointsWithBias: true.
-		self solveRevoluteJointsWithBias: true.
-		self solveFixedJointsWithBias: true.
+		self solveJointConstraintsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
 		self solveContactsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
@@ -35,9 +33,7 @@ CFPhysicsSoftStepSolver >> solveImpactWithRestitutionThreshold: restitutionThres
 	self warmStart.
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: false.
-		self solveDistanceJointsWithBias: true.
-		self solveRevoluteJointsWithBias: true.
-		self solveFixedJointsWithBias: true ].
+		self solveJointConstraintsWithBias: true ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
@@ -51,12 +47,18 @@ CFPhysicsSoftStepSolver >> warmStart [
 					+ (constraint tangent * point tangentImpulse)
 				at: point
 				constraint: constraint ] ].
-	self distanceJointConstraints do: [ :constraint |
-		self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
-	self revoluteJointConstraints do: [ :constraint |
-		self applyRevoluteJointImpulse: constraint impulse constraint: constraint ].
-	self fixedJointConstraints do: [ :constraint |
-		self applyFixedJointAngularImpulse: constraint angularImpulse constraint: constraint ]
+	self orderedJointConstraints do: [ :constraint |
+		self warmStartJointConstraint: constraint ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
+	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
+		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
+	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
+		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
+		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
+			self applyFixedJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
 ]
 
 { #category : 'private - solving' }
@@ -70,50 +72,84 @@ CFPhysicsSoftStepSolver >> solveContactsWithBias: biasEnabled [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveDistanceJointsWithBias: biasEnabled [
-	self distanceJointConstraints do: [ :constraint |
-		| relativeVelocity separation bias increment |
-		relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
-		separation := constraint baseSeparation
-			+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
-				- (self distanceJointDeltaPositionFor: constraint bodyStateA)
-				with: constraint direction).
-		separation := separation
-			+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint direction)
-			- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint direction).
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint effectiveMass * (relativeVelocity + bias) negated.
-		constraint impulse: constraint impulse + increment.
-		self applyDistanceJointImpulse: constraint direction * increment constraint: constraint ]
+	self orderedJointConstraints do: [ :constraint |
+		(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
+			self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ] ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointsWithBias: biasEnabled [
-	self revoluteJointConstraints do: [ :constraint |
-		| relativeVelocity separation bias increment |
-		relativeVelocity := self revoluteJointRelativeVelocity: constraint.
-		separation := constraint baseSeparation
-			+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
-			- (self distanceJointDeltaPositionFor: constraint bodyStateA)
-			+ ((self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB)
-			- ((self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA).
-		bias := biasEnabled ifTrue: [ separation * step biasRate ] ifFalse: [ 0 @ 0 ].
-		increment := self revoluteJointImpulseFor: relativeVelocity + bias constraint: constraint.
-		constraint impulse: constraint impulse + increment.
-		self applyRevoluteJointImpulse: increment constraint: constraint ]
+	self orderedJointConstraints do: [ :constraint |
+		(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
+			self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled ] ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveFixedJointsWithBias: biasEnabled [
-	self fixedJointConstraints do: [ :constraint |
-		| relativeVelocity separation bias increment |
-		relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
-		separation := constraint baseAngle
-			+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
-			- (self distanceJointDeltaRotationFor: constraint bodyStateA).
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint angularMass * (relativeVelocity + bias) negated.
-		constraint angularImpulse: constraint angularImpulse + increment.
-		self applyFixedJointAngularImpulse: increment constraint: constraint ]
+	self orderedJointConstraints do: [ :constraint |
+		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
+			self solveFixedJointConstraint: constraint biasEnabled: biasEnabled ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveJointConstraintsWithBias: biasEnabled [
+	self orderedJointConstraints do: [ :constraint |
+		self solveJointConstraint: constraint biasEnabled: biasEnabled ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEnabled [
+	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
+		^ self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ].
+	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
+		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled.
+		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
+			self solveFixedJointConstraint: constraint biasEnabled: biasEnabled ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled: biasEnabled [
+	| relativeVelocity separation bias increment |
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
+	separation := constraint baseSeparation
+		+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
+			- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+			with: constraint direction).
+	separation := separation
+		+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint direction)
+		- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint direction).
+	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+	increment := constraint effectiveMass * (relativeVelocity + bias) negated.
+	constraint impulse: constraint impulse + increment.
+	self applyDistanceJointImpulse: constraint direction * increment constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled [
+	| relativeVelocity separation bias increment |
+	relativeVelocity := self revoluteJointRelativeVelocity: constraint.
+	separation := constraint baseSeparation
+		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+		+ ((self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB)
+		- ((self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA).
+	bias := biasEnabled ifTrue: [ separation * step biasRate ] ifFalse: [ 0 @ 0 ].
+	increment := self revoluteJointImpulseFor: relativeVelocity + bias constraint: constraint.
+	constraint impulse: constraint impulse + increment.
+	self applyRevoluteJointImpulse: increment constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveFixedJointConstraint: constraint biasEnabled: biasEnabled [
+	| relativeVelocity separation bias increment |
+	relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+	separation := constraint baseAngle
+		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
+		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+	increment := constraint angularMass * (relativeVelocity + bias) negated.
+	constraint angularImpulse: constraint angularImpulse + increment.
+	self applyFixedJointAngularImpulse: increment constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -273,6 +309,14 @@ CFPhysicsSoftStepSolver >> revoluteJointConstraints [
 { #category : 'private - accessing' }
 CFPhysicsSoftStepSolver >> fixedJointConstraints [
 	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedFixedJoint ]
+]
+
+{ #category : 'private - accessing' }
+CFPhysicsSoftStepSolver >> orderedJointConstraints [
+	^ ((self distanceJointConstraints, self revoluteJointConstraints) asArray sorted: [ :first :second |
+		first joint orderingKey = second joint orderingKey
+			ifTrue: [ first joint class name asString < second joint class name asString ]
+			ifFalse: [ first joint orderingKey < second joint orderingKey ] ])
 ]
 
 { #category : 'private - solving' }
