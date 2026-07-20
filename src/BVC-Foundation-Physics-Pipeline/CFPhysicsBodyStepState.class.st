@@ -63,21 +63,18 @@ CFPhysicsBodyStepState >> deltaRotation [ ^ deltaRotation ]
 
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
-	body isAwake ifFalse: [
-		^ CFPhysicsTransform
-			position: body position
-			rotation: body rotation ].
+	| currentTransform |
+	currentTransform := self currentTransform.
+	body isAwake ifFalse: [ ^ currentTransform ].
 	^ CFPhysicsTransform
-		position: body position + (linearVelocity * seconds)
-		rotation: body rotation + (angularVelocity * seconds)
+		position: currentTransform position + (linearVelocity * seconds)
+		rotation: currentTransform rotation + (angularVelocity * seconds)
 ]
 
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedSweepFor: seconds [
 	^ CFPhysicsSweep
-		from: (CFPhysicsTransform
-			position: body position
-			rotation: body rotation)
+		from: self currentTransform
 		to: (self predictedTransformAfter: seconds)
 ]
 { #category : 'prediction' }

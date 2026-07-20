@@ -3575,3 +3575,19 @@ CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 	self assert: result solver notNil.
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> predictedSweepContinuesFromAdvancedStepState [
+	<gtExample>
+	| body state sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	state := CFPhysicsBodyStepState on: body.
+	state linearVelocity: 40 @ 0.
+	state integratePositionBy: 0.25.
+	sweep := state predictedSweepFor: 0.75.
+	self assert: (sweep startTransform position closeTo: 10 @ 0).
+	self assert: (sweep endTransform position closeTo: 40 @ 0).
+	self assert: body position equals: 0 @ 0.
+	^ sweep
+]
+
