@@ -2660,3 +2660,38 @@ CFPhysicsCleanSlateTests >> zeroDurationPredictionProducesStationarySweep [
 	self assert: (sweep startTransform rotation closeTo: sweep endTransform rotation).
 	^ sweep
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
+	<gtExample>
+	| moving obstacle step pipeline result predictedEndBounds |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	moving velocity: 100 @ 0.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
+	obstacle beStatic.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ].
+	result := pipeline
+		stepBodies: { obstacle. moving }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	predictedEndBounds := moving shapeState
+		aabbAt: 100 @ 0
+		rotation: moving rotation.
+	self assert: ((moving shapeState aabbAt: 0 @ 0 rotation: 0.0) overlaps: obstacle aabb) not.
+	self assert: (predictedEndBounds overlaps: obstacle aabb) not.
+	self assert: result pairs size equals: 1.
+	self assert: result pairs first firstBody equals: moving.
+	self assert: result pairs first secondBody equals: obstacle.
+	self assert: result activeContacts isEmpty.
+	^ result
+]
