@@ -43,3 +43,22 @@ CFPhysicsEarliestImpactFinder >> timeOfImpactFor: pair bodyStates: bodyStates fo
 		sweep: (secondState predictedSweepFor: seconds).
 	^ CFPhysicsPairTimeOfImpact pair: pair result: result
 ]
+
+{ #category : 'finding' }
+CFPhysicsEarliestImpactFinder >> earliestAmong: pairs bodyStates: bodyStates for: seconds afterFraction: minimumFraction [
+	| earliest tolerance |
+	tolerance := 1.0e-9.
+	earliest := nil.
+	pairs do: [ :pair |
+		| candidate |
+		candidate := self
+			timeOfImpactFor: pair
+			bodyStates: bodyStates
+			for: seconds.
+		(candidate timeOfImpactResult hasImpact and: [
+			candidate fraction > minimumFraction ]) ifTrue: [
+			(earliest isNil or: [
+				(self candidate: candidate comesBefore: earliest tolerance: tolerance) ])
+				ifTrue: [ earliest := candidate ] ] ].
+	^ earliest
+]
