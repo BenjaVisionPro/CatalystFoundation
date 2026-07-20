@@ -60,3 +60,15 @@ CFPhysicsAABB >> overlaps: anotherAABB [
 CFPhysicsAABB >> extent [
 	^ maximum - minimum
 ]
+
+{ #category : 'combining' }
+CFPhysicsAABB >> mergedWith: anotherAABB [
+	| mergedMinimum mergedMaximum |
+	mergedMinimum := (minimum x min: anotherAABB minimum x)
+		@ (minimum y min: anotherAABB minimum y).
+	mergedMaximum := (maximum x max: anotherAABB maximum x)
+		@ (maximum y max: anotherAABB maximum y).
+	^ CFPhysicsAABB
+		position: mergedMinimum
+		extent: mergedMaximum - mergedMinimum
+]

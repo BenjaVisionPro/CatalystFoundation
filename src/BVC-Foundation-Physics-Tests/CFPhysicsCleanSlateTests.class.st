@@ -2371,3 +2371,53 @@ CFPhysicsCleanSlateTests >> manifoldRejectsImpulsesWhenNormalReverses [
 	self assert: newPoint tangentImpulse equals: 0.0.
 	^ newManifold
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> aabbMergesBothBounds [
+	<gtExample>
+	| first second merged |
+	first := CFPhysicsAABB position: 10 @ 20 extent: 30 @ 40.
+	second := CFPhysicsAABB position: -5 @ 35 extent: 25 @ 50.
+	merged := first mergedWith: second.
+	self assert: merged minimum equals: -5 @ 20.
+	self assert: merged maximum equals: 40 @ 85.
+	^ merged
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
+	<gtExample>
+	| element body bounds |
+	element := BlElement new extent: 20 @ 10.
+	body := CFPhysicsBodyState element: element world: nil.
+	body
+		position: 10 @ 20;
+		beginStep;
+		addVelocity: 30 @ -5;
+		advanceBy: 1.0 gravity: 0 @ 0.
+	bounds := body sweptAABB.
+	self assert: bounds minimum equals: 10 @ 15.
+	self assert: bounds maximum equals: 60 @ 30.
+	^ bounds
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
+	<gtExample>
+	| element body bounds previousBounds currentBounds |
+	element := BlElement new extent: 40 @ 10.
+	body := CFPhysicsBodyState element: element world: nil.
+	body
+		position: 10 @ 20;
+		beginStep;
+		addAngularVelocity: Float pi / 2.0;
+		advanceBy: 1.0 gravity: 0 @ 0.
+	previousBounds := body shapeState aabbAt: body previousPosition rotation: body previousRotation.
+	currentBounds := body aabb.
+	bounds := body sweptAABB.
+	self assert: (bounds overlaps: previousBounds).
+	self assert: (bounds overlaps: currentBounds).
+	self assert: bounds extent x >= (body shapeState boundingRadius * 2.0).
+	self assert: bounds extent y >= (body shapeState boundingRadius * 2.0).
+	^ bounds
+]

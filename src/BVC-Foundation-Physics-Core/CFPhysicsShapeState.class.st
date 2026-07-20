@@ -479,3 +479,12 @@ CFPhysicsShapeState >> nearestPolygonBoundaryPointTo: aPoint vertices: vertices 
 			bestDistance := distance ] ].
 	^ best
 ]
+
+{ #category : 'geometry' }
+CFPhysicsShapeState >> boundingRadius [
+	| centre |
+	self isCircle ifTrue: [ ^ self radius ].
+	centre := self extent / 2.0.
+	^ (self localCollisionVertices
+		collect: [ :vertex | (vertex - centre) r ]) max
+]
