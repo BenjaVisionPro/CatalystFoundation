@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping' ],
+	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping', 'sleepingAllowed' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -28,7 +28,9 @@ CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
 
 { #category : 'velocity' }
 CFPhysicsBodyState >> addVelocity: aPoint [
-	dynamic ifTrue: [ velocity := velocity + aPoint ]
+	dynamic ifTrue: [
+		velocity := velocity + aPoint.
+		aPoint = (0 @ 0) ifFalse: [ self wake ] ]
 ]
 
 
@@ -141,6 +143,7 @@ CFPhysicsBodyState >> initialize [
 	angularVelocity := 0.0.
 	torque := 0.0.
 	angularDamping := 0.0.
+	sleepingAllowed := true.
 	contacts := IdentitySet new
 ]
 
@@ -266,12 +269,29 @@ CFPhysicsBodyState >> isAwake [
 
 { #category : 'sleeping' }
 CFPhysicsBodyState >> isSleeping [
-	^ dynamic and: [ awake not ]
+	^ dynamic and: [ sleepingAllowed and: [ awake not ] ]
 ]
 
 { #category : 'sleeping' }
+CFPhysicsBodyState >> allowsSleeping [
+	^ sleepingAllowed
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> allowSleeping [
+	sleepingAllowed := true
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyState >> preventSleeping [
+	sleepingAllowed := false.
+	self wake
+]
+
+
+{ #category : 'sleeping' }
 CFPhysicsBodyState >> sleep [
-	dynamic ifFalse: [ ^ self ].
+	(dynamic and: [ sleepingAllowed ]) ifFalse: [ ^ self ].
 	awake := false.
 	sleepTime := 0.0.
 	velocity := 0 @ 0.
@@ -286,7 +306,9 @@ CFPhysicsBodyState >> sleepTime [
 
 { #category : 'sleeping' }
 CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
-	dynamic ifFalse: [ ^ self ].
+	(dynamic and: [ sleepingAllowed ]) ifFalse: [
+		self wake.
+		^ self ].
 	((velocity x squared + velocity y squared) <= thresholdSquared and: [ angularVelocity squared <= angularThresholdSquared ])
 		ifTrue: [
 			sleepTime := sleepTime + seconds.
@@ -334,7 +356,9 @@ CFPhysicsBodyState >> applyTorque: aNumber [
 
 { #category : 'angular dynamics' }
 CFPhysicsBodyState >> addAngularVelocity: aNumber [
-	dynamic ifTrue: [ angularVelocity := angularVelocity + aNumber ]
+	dynamic ifTrue: [
+		angularVelocity := angularVelocity + aNumber.
+		aNumber = 0 ifFalse: [ self wake ] ]
 ]
 
 { #category : 'mass' }

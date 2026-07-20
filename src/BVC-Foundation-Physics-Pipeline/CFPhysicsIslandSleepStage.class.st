@@ -58,10 +58,11 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 
 	eligible := dynamicBodies allSatisfy: [ :body |
 		| state |
-		state := bodyStates at: body.
-		configuration
-			acceptsLinearVelocity: state linearVelocity
-			angularVelocity: state angularVelocity ].
+		body allowsSleeping and: [
+			state := bodyStates at: body.
+			configuration
+				acceptsLinearVelocity: state linearVelocity
+				angularVelocity: state angularVelocity ] ].
 
 	eligible
 		ifTrue: [

@@ -194,6 +194,21 @@ CFPhysicsElement >> isSleeping [
 ]
 
 { #category : 'sleeping' }
+CFPhysicsElement >> allowsSleeping [
+	^ self requireBodyState allowsSleeping
+]
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> allowSleeping [
+	self requireBodyState allowSleeping
+]
+
+{ #category : 'sleeping' }
+CFPhysicsElement >> preventSleeping [
+	self requireBodyState preventSleeping
+]
+
+{ #category : 'sleeping' }
 CFPhysicsElement >> sleep [
 	self requireBodyState sleep
 ]

@@ -704,6 +704,68 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
 ]
 
 { #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	body preventSleeping.
+	body sleep.
+	self assert: body allowsSleeping not.
+	self assert: body isAwake.
+	self assert: body isSleeping not.
+	body allowSleeping.
+	body sleep.
+	self assert: body allowsSleeping.
+	self assert: body isSleeping.
+	^ body
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> impulseWakesSleepingBody [
+	<gtExample>
+	| body centre |
+	body := self cleanSlateBodyWithSequence: 1.
+	body sleep.
+	centre := body centre.
+	body applyImpulse: 10 @ 0 atWorldPoint: centre.
+	self assert: body isAwake.
+	self assert: body velocity equals: 10 @ 0 * body inverseMass.
+	^ body
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> bodyThatPreventsSleepingKeepsItsIslandAwake [
+	<gtExample>
+	| first second island stage configuration bodyStates decision |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	second preventSleeping.
+	island := CFPhysicsIsland new
+		addBody: first;
+		addBody: second;
+		yourself.
+	configuration := CFPhysicsSleepConfiguration standard
+		linearVelocityThreshold: 1.0;
+		angularVelocityThreshold: 1.0;
+		timeToSleep: 0.01;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	stage propagateWakeAcross: { island }.
+	decision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.02) first.
+	self assert: decision eligible not.
+	self assert: decision slept not.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	self assert: first sleepTime equals: 0.0.
+	self assert: second sleepTime equals: 0.0.
+	^ decision
+]
+
+{ #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> stepPipelineExposesIslandSleepDecisions [
 	<gtExample>
 	| result |
