@@ -2782,3 +2782,44 @@ CFPhysicsCleanSlateTests >> predictedPairDiscoveryPreservesDeterministicOrder [
 	^ result
 ]
 
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> gjkUsesExplicitTransformsForOverlapQueries [
+	<gtExample>
+	| first second firstTransform overlappingTransform separatedTransform overlappingSimplex separatedSimplex |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstTransform := CFPhysicsTransform position: 0 @ 0 rotation: 0.
+	overlappingTransform := CFPhysicsTransform position: 10 @ 0 rotation: 0.
+	separatedTransform := CFPhysicsTransform position: 30 @ 0 rotation: 0.
+	overlappingSimplex := CFPhysicsGJK
+		simplexBetweenShapeState: first
+		transform: firstTransform
+		andShapeState: second
+		transform: overlappingTransform.
+	separatedSimplex := CFPhysicsGJK
+		simplexBetweenShapeState: first
+		transform: firstTransform
+		andShapeState: second
+		transform: separatedTransform.
+	self assert: overlappingSimplex notNil.
+	self assert: separatedSimplex isNil.
+	^ overlappingSimplex
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> gjkExplicitTransformQueryIncludesRotation [
+	<gtExample>
+	| first second firstTransform secondTransform simplex |
+	first := CFPhysicsShapeState on: (BlElement new size: 40 @ 10; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
+	firstTransform := CFPhysicsTransform position: 0 @ 0 rotation: Float pi / 2.0.
+	secondTransform := CFPhysicsTransform position: 14 @ 14 rotation: 0.
+	simplex := CFPhysicsGJK
+		simplexBetweenShapeState: first
+		transform: firstTransform
+		andShapeState: second
+		transform: secondTransform.
+	self assert: simplex notNil.
+	^ simplex
+]
