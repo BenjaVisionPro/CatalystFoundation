@@ -158,27 +158,24 @@ CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: bia
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRailJointLimit: constraint biasEnabled: biasEnabled [
-	| translation relativeVelocity separation bias increment oldImpulse newImpulse |
+	| translation relativeVelocity requiredVelocity increment oldImpulse newImpulse |
 	(self isLimitedRailJointConstraint: constraint) ifFalse: [ ^ self ].
 	translation := constraint baseTranslation
 		+ (self dot: ((self distanceJointDeltaPositionFor: constraint bodyStateB)
 			- (self distanceJointDeltaPositionFor: constraint bodyStateA)) negated with: constraint axis)
 		+ (self dot: ((self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA) with: constraint axis)
 		- (self dot: ((self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB) with: constraint axis).
-	translation < constraint lowerTranslation ifTrue: [
-		separation := translation - constraint lowerTranslation.
-		relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) negated with: constraint axis.
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint translationMass * (relativeVelocity + bias) negated.
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) negated with: constraint axis.
+	translation + (relativeVelocity * step substepTime) < constraint lowerTranslation ifTrue: [
+		requiredVelocity := (constraint lowerTranslation - translation) / step substepTime.
+		increment := constraint translationMass * (requiredVelocity - relativeVelocity).
 		oldImpulse := constraint translationImpulse max: 0.0.
 		newImpulse := (oldImpulse + increment) max: 0.0.
 		constraint translationImpulse: newImpulse.
 		^ self applyDistanceJointImpulse: (constraint axis * (newImpulse - oldImpulse)) negated constraint: constraint ].
-	translation > constraint upperTranslation ifTrue: [
-		separation := translation - constraint upperTranslation.
-		relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) negated with: constraint axis.
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint translationMass * (relativeVelocity + bias) negated.
+	translation + (relativeVelocity * step substepTime) > constraint upperTranslation ifTrue: [
+		requiredVelocity := (constraint upperTranslation - translation) / step substepTime.
+		increment := constraint translationMass * (requiredVelocity - relativeVelocity).
 		oldImpulse := constraint translationImpulse min: 0.0.
 		newImpulse := (oldImpulse + increment) min: 0.0.
 		constraint translationImpulse: newImpulse.
