@@ -3777,6 +3777,8 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
 	self assert: result hasContinuousImpact not.
 	self assert: result solver notNil.
 	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first manifold contactPoints first localAnchorA notNil.
+	self assert: result activeContacts first manifold contactPoints first localAnchorB notNil.
 	^ result
 ]
 
