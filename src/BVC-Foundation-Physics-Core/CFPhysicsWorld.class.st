@@ -475,6 +475,7 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.
+	aJoint wakeBodies.
 	^ aJoint
 ]
 
@@ -495,6 +496,11 @@ CFPhysicsWorld >> removeDistanceJoint: aJoint [
 CFPhysicsWorld >> removeDistanceJointsUsingBody: aBodyState [
 	(distanceJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
 		self removeDistanceJoint: each ]
+]
+
+{ #category : 'distance joints' }
+CFPhysicsWorld >> wakeDistanceJointsUsingAnchor: anAnchor [
+	(distanceJoints select: [ :each | each includesAnchor: anAnchor ]) do: #wakeBodies
 ]
 
 

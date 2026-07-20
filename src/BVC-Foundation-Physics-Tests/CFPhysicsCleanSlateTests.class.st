@@ -1490,6 +1490,29 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 	^ result
 ]
 
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor distanceJointTo: worldAnchor.
+	joint restLength: 0.
+	element physics bodyState sleep.
+	worldAnchor point: 110 @ 10.
+	self assert: element physics bodyState isAwake.
+	world step.
+	self assert: element physics velocity x > 0.
+	^ joint
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [

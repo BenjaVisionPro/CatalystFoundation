@@ -66,7 +66,8 @@ CFPhysicsDistanceJoint >> restLength [ ^ restLength ]
 { #category : 'configuration' }
 CFPhysicsDistanceJoint >> restLength: aNumber [
 	restLength := aNumber asFloat max: 0.0.
-	accumulatedImpulse := 0.0
+	accumulatedImpulse := 0.0.
+	self wakeBodies
 ]
 { #category : 'solver state' }
 CFPhysicsDistanceJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
@@ -84,6 +85,18 @@ CFPhysicsDistanceJoint >> orderingKey [ ^ sequence ]
 CFPhysicsDistanceJoint >> isActive [ ^ active ]
 { #category : 'testing' }
 CFPhysicsDistanceJoint >> includesBody: aBodyState [ ^ endpointPair includesBody: aBodyState ]
+
+{ #category : 'testing' }
+CFPhysicsDistanceJoint >> includesAnchor: anAnchor [
+	(endpointPair respondsTo: #anchorA) ifFalse: [ ^ false ].
+	^ endpointPair anchorA == anAnchor or: [ endpointPair anchorB == anAnchor ]
+]
+
+{ #category : 'waking' }
+CFPhysicsDistanceJoint >> wakeBodies [
+	self firstBody ifNotNil: [ :body | body wake ].
+	self secondBody ifNotNil: [ :body | body wake ]
+]
 
 { #category : 'controlling' }
 CFPhysicsDistanceJoint >> release [ active := false ]

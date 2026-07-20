@@ -21,7 +21,8 @@ CFPhysicsWorldAnchor >> point [
 
 { #category : 'accessing' }
 CFPhysicsWorldAnchor >> point: aPoint [
-	point := aPoint
+	point := aPoint.
+	world ifNotNil: [ world wakeDistanceJointsUsingAnchor: self ]
 ]
 
 { #category : 'accessing' }
