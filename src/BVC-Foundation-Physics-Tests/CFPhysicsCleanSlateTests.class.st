@@ -2491,7 +2491,7 @@ CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
 		to: (CFPhysicsTransform position: 20 @ 30 rotation: Float pi).
 	transform := sweep transformAt: 0.25.
 	self assert: transform position equals: 5 @ 15.
-	self assert: transform rotation closeTo: Float pi / 4.0.
+	self assert: (transform rotation closeTo: Float pi / 4.0).
 	^ transform
 ]
 
