@@ -3673,3 +3673,78 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopLeavesRemainderExplicitAtIterati
 	self assert: secondMoving position equals: 0 @ 100.
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
+	<gtExample>
+	| firstMoving firstObstacle secondMoving secondObstacle pipeline step result |
+	firstMoving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	firstObstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	secondMoving := self cleanSlateBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
+	secondObstacle := self cleanSlateBodyWithSequence: 4 position: 40 @ 100 extent: 20 @ 20.
+	firstObstacle beStatic.
+	secondObstacle beStatic.
+	firstMoving velocity: 40 @ 0.
+	secondMoving velocity: 40 @ 0.
+	firstMoving beginStep.
+	firstObstacle beginStep.
+	secondMoving beginStep.
+	secondObstacle beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { secondObstacle. firstMoving. secondMoving. firstObstacle }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self assert: result continuousStepResult impacts size equals: 2.
+	self assert: result continuousStepResult impacts first pair firstBody equals: firstMoving.
+	self assert: result continuousStepResult impacts second pair firstBody equals: secondMoving.
+	self assert: (firstMoving position closeTo: 10 @ 0).
+	self assert: (secondMoving position closeTo: 20 @ 100).
+	self assert: result activeContacts size equals: 2.
+	self assert: result constraints size equals: 2.
+	self assert: result solver isNil.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExists [
+	<gtExample>
+	| moving obstacle pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	moving velocity: 10 @ 0.
+	moving beginStep.
+	obstacle beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. obstacle }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact not.
+	self assert: result continuousStepResult isNil.
+	self assert: result solver notNil.
+	self assert: (moving position closeTo: 10 @ 0).
+	^ result
+]

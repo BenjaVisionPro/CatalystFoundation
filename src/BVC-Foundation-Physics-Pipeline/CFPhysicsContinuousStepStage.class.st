@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContinuousStepStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'executor' ],
+	#instVars : [ 'loop', 'impactFinder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -9,23 +9,48 @@ Class {
 { #category : 'initialization' }
 CFPhysicsContinuousStepStage >> initialize [
 	super initialize.
-	executor := CFPhysicsContinuousStepExecutor new
+	loop := CFPhysicsContinuousImpactLoop new.
+	impactFinder := CFPhysicsEarliestImpactFinder new
 ]
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| continuousResult |
-	continuousResult := executor
-		executePairs: aStepResult pairs
+	| continuousResult solidPairs tolerance initialImpact |
+	tolerance := 1.0e-9.
+	solidPairs := aStepResult pairs reject: [ :pair |
+		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+	initialImpact := impactFinder
+		earliestAmong: solidPairs
 		bodyStates: aStepResult bodyStates
+		for: aStepResult step timeStep
+		afterFraction: tolerance.
+	initialImpact ifNil: [
+		aStepResult continuousStepResult: nil.
+		^ nil ].
+	continuousResult := loop
+		executeBodyStates: aStepResult bodyStates
 		step: aStepResult step
 		restitutionThreshold: aStepResult restitutionThreshold.
+	continuousResult hasImpacts ifTrue: [
+		self commitBodyStatesInOrder: aStepResult bodyStates ].
 	aStepResult continuousStepResult: continuousResult.
 	^ continuousResult
 ]
 
-{ #category : 'accessing' }
-CFPhysicsContinuousStepStage >> executor [ ^ executor ]
+{ #category : 'private - committing' }
+CFPhysicsContinuousStepStage >> commitBodyStatesInOrder: bodyStates [
+	(bodyStates values sorted: [ :first :second |
+		first body sequence < second body sequence ]) do: #commit
+]
 
 { #category : 'accessing' }
-CFPhysicsContinuousStepStage >> executor: anObject [ executor := anObject ]
+CFPhysicsContinuousStepStage >> loop [ ^ loop ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> loop: anObject [ loop := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> impactFinder [ ^ impactFinder ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> impactFinder: anObject [ impactFinder := anObject ]

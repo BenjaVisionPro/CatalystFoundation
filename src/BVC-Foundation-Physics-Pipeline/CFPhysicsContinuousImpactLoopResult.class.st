@@ -49,3 +49,29 @@ CFPhysicsContinuousImpactLoopResult >> iterationLimitReached: aBoolean [ iterati
 
 { #category : 'testing' }
 CFPhysicsContinuousImpactLoopResult >> hasImpacts [ ^ impacts notEmpty ]
+
+{ #category : 'testing' }
+CFPhysicsContinuousImpactLoopResult >> hasImpact [
+	^ self hasImpacts
+]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> impact [
+	^ impacts
+		ifEmpty: [ nil ]
+		ifNotEmpty: [ impacts last ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> impactSolveResult [
+	^ impactSolveResults
+		ifEmpty: [ nil ]
+		ifNotEmpty: [ impactSolveResults last ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> fraction [
+	^ impacts
+		ifEmpty: [ nil ]
+		ifNotEmpty: [ impacts first fraction ]
+]

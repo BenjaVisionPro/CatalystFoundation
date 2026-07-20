@@ -21,7 +21,12 @@ CFPhysicsConstraintPreparationStage >> constraintBuilder: anObject [ constraintB
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	| constraints |
 	constraints := aStepResult hasContinuousImpact
-		ifTrue: [ aStepResult continuousStepResult impactSolveResult constraints ]
+		ifTrue: [
+			| allConstraints |
+			allConstraints := OrderedCollection new.
+			aStepResult continuousStepResult impactSolveResults do: [ :solveResult |
+				allConstraints addAll: solveResult constraints ].
+			allConstraints ]
 		ifFalse: [
 			constraintBuilder
 				constraintsFrom: aStepResult activeContacts

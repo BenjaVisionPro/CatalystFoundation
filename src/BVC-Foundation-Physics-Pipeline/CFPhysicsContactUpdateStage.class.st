@@ -24,7 +24,7 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 	batch := aStepResult hasContinuousImpact
 		ifTrue: [
 			contactUpdater
-				updateImpactContact: aStepResult continuousStepResult impactSolveResult contact
+				updateImpactContacts: (aStepResult continuousStepResult impactSolveResults collect: #contact)
 				fromContacts: aStepResult previousContacts ]
 		ifFalse: [
 			contactUpdater
