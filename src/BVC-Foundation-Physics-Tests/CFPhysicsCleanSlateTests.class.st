@@ -3637,6 +3637,42 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 ]
 
 { #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpactSlice [
+	<gtExample>
+	| moving obstacle tether joint pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	tether := self cleanSlateBodyWithSequence: 3 position: 100 @ 100 extent: 20 @ 20.
+	obstacle beStatic.
+	tether beStatic.
+	moving velocity: 40 @ 0.
+	moving beginStep.
+	obstacle beginStep.
+	tether beginStep.
+	joint := CFPhysicsDistanceJoint between: moving and: tether.
+	joint restLength: 50.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. obstacle. tether }
+		fromContacts: #()
+		joints: { joint }
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self assert: joint accumulatedImpulse isZero not.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 	<gtExample>
 	| moving obstacle pipeline step result |

@@ -36,6 +36,7 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 		^ nil ].
 	continuousResult := loop
 		executeBodyStates: aStepResult bodyStates
+		joints: aStepResult joints
 		step: aStepResult step
 		restitutionThreshold: aStepResult restitutionThreshold.
 	aStepResult continuousSensorContacts: continuousResult sensorContacts.

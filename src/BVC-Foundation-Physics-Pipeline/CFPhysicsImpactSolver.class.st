@@ -23,10 +23,22 @@ CFPhysicsImpactSolver >> solveAdvancement: advancement bodyStates: bodyStates st
 
 { #category : 'solving' }
 CFPhysicsImpactSolver >> solveAdvancements: advancements bodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
+	^ self
+		solveAdvancements: advancements
+		bodyStates: bodyStates
+		jointConstraints: #()
+		step: step
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'solving' }
+CFPhysicsImpactSolver >> solveAdvancements: advancements bodyStates: bodyStates jointConstraints: jointConstraints step: step restitutionThreshold: restitutionThreshold [
 	| results constraints solver |
 	results := advancements collect: [ :advancement |
 		self resultForAdvancement: advancement bodyStates: bodyStates ].
-	constraints := results flatCollect: #constraints.
+	constraints := (results flatCollect: #constraints) asOrderedCollection
+		addAll: jointConstraints;
+		yourself.
 	constraints ifNotEmpty: [
 		solver := CFPhysicsSoftStepSolver
 			step: step

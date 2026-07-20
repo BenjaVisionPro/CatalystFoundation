@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContinuousImpactLoop',
 	#superclass : 'Object',
-	#instVars : [ 'pairFinder', 'impactFinder', 'impactAdvancer', 'impactSolver', 'maximumIterations' ],
+	#instVars : [ 'pairFinder', 'impactFinder', 'impactAdvancer', 'impactSolver', 'distanceJointConstraintBuilder', 'maximumIterations' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -13,11 +13,21 @@ CFPhysicsContinuousImpactLoop >> initialize [
 	impactFinder := CFPhysicsEarliestImpactFinder new.
 	impactAdvancer := CFPhysicsImpactAdvancer new.
 	impactSolver := CFPhysicsImpactSolver new.
+	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new.
 	maximumIterations := 8
 ]
 
 { #category : 'executing' }
 CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
+	^ self
+		executeBodyStates: bodyStates
+		joints: #()
+		step: step
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'executing' }
+CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints step: step restitutionThreshold: restitutionThreshold [
 	| impacts impactSolveResults sensorContactsByKey remainingTime tolerance iterationLimitReached |
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
@@ -26,7 +36,7 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 	tolerance := 1.0e-9.
 	iterationLimitReached := false.
 	1 to: maximumIterations do: [ :iteration |
-		| pairs solidPairs sensorPairs impactsAtEarliestTime earliestImpact advancements impactStep solveResults |
+		| pairs solidPairs sensorPairs impactsAtEarliestTime earliestImpact advancements impactStep jointConstraints solveResults |
 		remainingTime <= tolerance ifTrue: [
 			^ self
 				resultWithImpacts: impacts
@@ -76,9 +86,14 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 			contactHertz: step contactHertz
 			dampingRatio: step contactDampingRatio.
 		impactStep warmStartRatio: 0.0.
+		jointConstraints := distanceJointConstraintBuilder
+			constraintsFrom: joints
+			bodyStates: bodyStates
+			warmStartRatio: step warmStartRatio.
 		solveResults := impactSolver
 			solveAdvancements: advancements
 			bodyStates: bodyStates
+			jointConstraints: jointConstraints
 			step: impactStep
 			restitutionThreshold: restitutionThreshold.
 		impacts addAll: impactsAtEarliestTime.
@@ -174,3 +189,9 @@ CFPhysicsContinuousImpactLoop >> impactSolver [ ^ impactSolver ]
 
 { #category : 'accessing' }
 CFPhysicsContinuousImpactLoop >> impactSolver: anObject [ impactSolver := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoop >> distanceJointConstraintBuilder [ ^ distanceJointConstraintBuilder ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoop >> distanceJointConstraintBuilder: anObject [ distanceJointConstraintBuilder := anObject ]

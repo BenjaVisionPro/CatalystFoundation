@@ -32,7 +32,8 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 CFPhysicsSoftStepSolver >> solveImpactWithRestitutionThreshold: restitutionThreshold [
 	self warmStart.
 	step substepCount timesRepeat: [
-		self solveContactsWithBias: false ].
+		self solveContactsWithBias: false.
+		self solveDistanceJointsWithBias: true ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
