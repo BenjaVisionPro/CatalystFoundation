@@ -78,7 +78,11 @@ CFPhysicsDistanceJoint >> accumulatedImpulse: aNumber [ accumulatedImpulse := aN
 { #category : 'configuration' }
 CFPhysicsDistanceJoint >> collideConnected [ ^ collideConnected ]
 { #category : 'configuration' }
-CFPhysicsDistanceJoint >> collideConnected: aBoolean [ collideConnected := aBoolean ]
+CFPhysicsDistanceJoint >> collideConnected: aBoolean [
+	collideConnected = aBoolean ifTrue: [ ^ self ].
+	collideConnected := aBoolean.
+	self wakeBodies
+]
 
 { #category : 'ordering' }
 CFPhysicsDistanceJoint >> sequence [ ^ sequence ]

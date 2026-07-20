@@ -1606,6 +1606,25 @@ CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
 	^ secondResult
 ]
 
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
+	<gtExample>
+	| owner first second world joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	joint := first physics distanceJointTo: second.
+	first physics bodyState sleep.
+	second physics bodyState sleep.
+	joint collideConnected: false.
+	self assert: first physics bodyState isAwake.
+	self assert: second physics bodyState isAwake.
+	^ joint
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
