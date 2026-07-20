@@ -2877,3 +2877,92 @@ CFPhysicsCleanSlateTests >> gjkDistanceReportsOverlap [
 	self assert: result axis equals: 0 @ 0.
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> conservativeAdvancementFindsLinearImpact [
+	<gtExample>
+	| first second firstSweep secondSweep result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 40 @ 0 rotation: 0).
+	secondSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 30 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 30 @ 0 rotation: 0).
+	result := CFPhysicsConservativeAdvancement
+		betweenShapeState: first
+		sweep: firstSweep
+		andShapeState: second
+		sweep: secondSweep.
+	self assert: result hasImpact.
+	self assert: (result fraction closeTo: 0.25).
+	self assert: result distanceResult distance <= 1.0e-7.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> conservativeAdvancementReportsInitialOverlap [
+	<gtExample>
+	| first second firstSweep secondSweep result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 10 @ 0 rotation: 0).
+	secondSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 10 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 10 @ 0 rotation: 0).
+	result := CFPhysicsConservativeAdvancement
+		betweenShapeState: first
+		sweep: firstSweep
+		andShapeState: second
+		sweep: secondSweep.
+	self assert: result hasImpact.
+	self assert: (result fraction closeTo: 0.0).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> conservativeAdvancementReportsSeparatingMotion [
+	<gtExample>
+	| first second firstSweep secondSweep result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: -20 @ 0 rotation: 0).
+	secondSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 30 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 30 @ 0 rotation: 0).
+	result := CFPhysicsConservativeAdvancement
+		betweenShapeState: first
+		sweep: firstSweep
+		andShapeState: second
+		sweep: secondSweep.
+	self assert: result isSeparated.
+	self assert: (result fraction closeTo: 1.0).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> conservativeAdvancementUsesRelativeMotion [
+	<gtExample>
+	| first second firstSweep secondSweep result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 20 @ 0 rotation: 0).
+	secondSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 40 @ 0 rotation: 0)
+		to: (CFPhysicsTransform position: 20 @ 0 rotation: 0).
+	result := CFPhysicsConservativeAdvancement
+		betweenShapeState: first
+		sweep: firstSweep
+		andShapeState: second
+		sweep: secondSweep.
+	self assert: result hasImpact.
+	self assert: (result fraction closeTo: 0.5).
+	^ result
+]
