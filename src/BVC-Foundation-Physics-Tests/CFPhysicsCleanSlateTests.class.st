@@ -1749,6 +1749,36 @@ CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
 	^ result
 ]
 
+{ #category : 'examples - rail joints' }
+CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor timestamp pointerConstraint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	timestamp := DateAndTime now.
+	pointerConstraint := CFPhysicsPointerConstraint
+		body: element physics bodyState
+		pointerPosition: 10 @ 10
+		timestamp: timestamp.
+	pointerConstraint
+		updatePointerPosition: 10 @ 90
+		timestamp: timestamp + 20 milliSeconds.
+	world addPointerConstraint: pointerConstraint.
+	result := world step.
+	self assert: result constraints first class equals: CFPhysicsPreparedRailJoint.
+	self assert: element physics velocity y abs < 1.0e-6.
+	self assert: element physics position y abs < 1.0e-6.
+	^ result
+]
+
 { #category : 'examples - fixed joints' }
 CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
 	<gtExample>
