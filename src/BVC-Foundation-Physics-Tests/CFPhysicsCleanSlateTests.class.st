@@ -299,6 +299,31 @@ CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	^ next
 ]
 
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
+	<gtExample>
+	| first second pair oldManifold newManifold updater initial next point |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	oldManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	oldManifold contactPoints first
+		normalImpulse: 7.0;
+		tangentImpulse: 2.0.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | oldManifold ].
+	initial := updater updatePairs: { pair } fromContacts: #().
+
+	second beSensor.
+	newManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | newManifold ].
+	next := updater updatePairs: { pair } fromContacts: initial activeContacts.
+	point := next activeContacts first manifold contactPoints first.
+
+	self assert: point normalImpulse equals: 0.0.
+	self assert: point tangentImpulse equals: 0.0.
+	^ next
+]
+
 { #category : 'examples - constraints' }
 CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	<gtExample>

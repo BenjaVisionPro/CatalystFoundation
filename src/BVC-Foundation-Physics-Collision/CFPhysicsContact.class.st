@@ -50,7 +50,9 @@ CFPhysicsContact >> isTouching [ ^ manifold notNil ]
 { #category : 'updating' }
 CFPhysicsContact >> updateWith: aManifold [
 	previousManifold := manifold.
-	aManifold ifNotNil: [ aManifold preserveImpulsesFrom: previousManifold ].
+	aManifold ifNotNil: [
+		aManifold preserveImpulsesFrom: previousManifold.
+		self isSensor ifTrue: [ aManifold clearImpulses ] ].
 	manifold := aManifold
 ]
 

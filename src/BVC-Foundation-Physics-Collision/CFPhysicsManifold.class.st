@@ -46,6 +46,15 @@ CFPhysicsManifold >> points: aCollection [
 	contactPoints := aCollection collect: [ :each | CFPhysicsManifoldPoint at: each ]
 ]
 
+
+{ #category : 'updating' }
+CFPhysicsManifold >> clearImpulses [
+	contactPoints do: [ :point |
+		point
+			normalImpulse: 0.0;
+			tangentImpulse: 0.0 ]
+]
+
 { #category : 'updating' }
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
 	anOldManifold ifNil: [ ^ self ].
