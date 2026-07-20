@@ -2562,3 +2562,101 @@ CFPhysicsCleanSlateTests >> sweptAABBDelegatesToSweep [
 	self assert: bodyBounds maximum equals: sweepBounds maximum.
 	^ bodyBounds
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepStatePredictsLinearMovement [
+	<gtExample>
+	| body state transform |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body velocity: 12 @ -4.
+	state := CFPhysicsBodyStepState on: body.
+	transform := state predictedTransformAfter: 0.5.
+	self assert: transform position equals: 16 @ 18.
+	self assert: transform rotation equals: 0.
+	self assert: body position equals: 10 @ 20.
+	^ transform
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepStatePredictsAngularMovement [
+	<gtExample>
+	| body state transform |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body angularVelocity: Float pi.
+	state := CFPhysicsBodyStepState on: body.
+	transform := state predictedTransformAfter: 0.5.
+	self assert: transform position equals: 10 @ 20.
+	self assert: (transform rotation closeTo: Float pi / 2.0).
+	self assert: body rotation equals: 0.
+	^ transform
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepStatePredictsCombinedMovementSweep [
+	<gtExample>
+	| body state sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body
+		rotation: Float pi / 4.0;
+		velocity: 8 @ 6;
+		angularVelocity: Float pi / 2.0.
+	state := CFPhysicsBodyStepState on: body.
+	sweep := state predictedSweepFor: 2.0.
+	self assert: sweep startTransform position equals: 10 @ 20.
+	self assert: (sweep startTransform rotation closeTo: Float pi / 4.0).
+	self assert: sweep endTransform position equals: 26 @ 32.
+	self assert: (sweep endTransform rotation closeTo: Float pi * 1.25).
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> staticStepStatePredictsStationarySweep [
+	<gtExample>
+	| body state sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body beStatic.
+	state := CFPhysicsBodyStepState on: body.
+	state
+		linearVelocity: 100 @ 50;
+		angularVelocity: Float pi.
+	sweep := state predictedSweepFor: 1.0.
+	self assert: sweep startTransform position equals: 10 @ 20.
+	self assert: sweep endTransform position equals: 10 @ 20.
+	self assert: sweep startTransform rotation equals: 0.
+	self assert: sweep endTransform rotation equals: 0.
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sleepingStepStatePredictsStationarySweep [
+	<gtExample>
+	| body state sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body sleep.
+	state := CFPhysicsBodyStepState on: body.
+	state
+		linearVelocity: 100 @ 50;
+		angularVelocity: Float pi.
+	sweep := state predictedSweepFor: 1.0.
+	self assert: sweep startTransform position equals: 10 @ 20.
+	self assert: sweep endTransform position equals: 10 @ 20.
+	self assert: sweep startTransform rotation equals: 0.
+	self assert: sweep endTransform rotation equals: 0.
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> zeroDurationPredictionProducesStationarySweep [
+	<gtExample>
+	| body state sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body
+		rotation: Float pi / 3.0;
+		velocity: 100 @ 50;
+		angularVelocity: Float pi.
+	state := CFPhysicsBodyStepState on: body.
+	sweep := state predictedSweepFor: 0.0.
+	self assert: sweep startTransform position equals: sweep endTransform position.
+	self assert: (sweep startTransform rotation closeTo: sweep endTransform rotation).
+	^ sweep
+]

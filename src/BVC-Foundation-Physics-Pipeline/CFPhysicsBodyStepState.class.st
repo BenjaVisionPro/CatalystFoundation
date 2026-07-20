@@ -60,3 +60,23 @@ CFPhysicsBodyStepState >> angularVelocity: aNumber [ angularVelocity := aNumber 
 CFPhysicsBodyStepState >> deltaPosition [ ^ deltaPosition ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> deltaRotation [ ^ deltaRotation ]
+
+{ #category : 'prediction' }
+CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
+	body isAwake ifFalse: [
+		^ CFPhysicsTransform
+			position: body position
+			rotation: body rotation ].
+	^ CFPhysicsTransform
+		position: body position + (linearVelocity * seconds)
+		rotation: body rotation + (angularVelocity * seconds)
+]
+
+{ #category : 'prediction' }
+CFPhysicsBodyStepState >> predictedSweepFor: seconds [
+	^ CFPhysicsSweep
+		from: (CFPhysicsTransform
+			position: body position
+			rotation: body rotation)
+		to: (self predictedTransformAfter: seconds)
+]
