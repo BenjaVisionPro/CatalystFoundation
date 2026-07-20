@@ -2823,3 +2823,57 @@ CFPhysicsCleanSlateTests >> gjkExplicitTransformQueryIncludesRotation [
 	self assert: simplex notNil.
 	^ simplex
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> gjkDistanceReportsSeparationAndWitnessPoints [
+	<gtExample>
+	| first second result separation |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	result := CFPhysicsGJK
+		distanceBetweenShapeState: first
+		transform: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		andShapeState: second
+		transform: (CFPhysicsTransform position: 30 @ 0 rotation: 0).
+	separation := result secondPoint - result firstPoint.
+	self assert: result isSeparated.
+	self assert: (result distance closeTo: 10.0).
+	self assert: (separation r closeTo: result distance).
+	self assert: (result axis x closeTo: 1.0).
+	self assert: (result axis y closeTo: 0.0).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> gjkDistanceUsesExplicitRotation [
+	<gtExample>
+	| first second result |
+	first := CFPhysicsShapeState on: (BlElement new size: 40 @ 10; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
+	result := CFPhysicsGJK
+		distanceBetweenShapeState: first
+		transform: (CFPhysicsTransform position: 0 @ 0 rotation: Float pi / 2.0)
+		andShapeState: second
+		transform: (CFPhysicsTransform position: 30 @ 0 rotation: 0).
+	self assert: result isSeparated.
+	self assert: result distance > 0.
+	self assert: ((result secondPoint - result firstPoint) r closeTo: result distance).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> gjkDistanceReportsOverlap [
+	<gtExample>
+	| first second result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	result := CFPhysicsGJK
+		distanceBetweenShapeState: first
+		transform: (CFPhysicsTransform position: 0 @ 0 rotation: 0)
+		andShapeState: second
+		transform: (CFPhysicsTransform position: 10 @ 0 rotation: 0).
+	self assert: result isOverlapping.
+	self assert: (result distance closeTo: 0.0).
+	self assert: result axis equals: 0 @ 0.
+	^ result
+]
