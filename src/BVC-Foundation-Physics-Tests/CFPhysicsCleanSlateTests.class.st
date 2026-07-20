@@ -1329,6 +1329,26 @@ CFPhysicsCleanSlateTests >> pointerDraggingIsInstalledThroughThePhysicsFacade [
 	^ element
 ]
 
+{ #category : 'examples - world membership' }
+CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFromTheWorld [
+	<gtExample>
+	| owner button label world |
+	owner := BlElement new size: 200 @ 120; yourself.
+	button := BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		label: 'Click Me';
+		yourself.
+	label := button childWithId: #label.
+	button physics excludeDescendantsFromWorld.
+	owner addChild: button.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	self assert: world members size equals: 1.
+	self assert: (world includes: button).
+	self deny: (world includes: label).
+	^ world
+]
+
 { #category : 'examples - pointer interaction' }
 CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
 	<gtExample>
@@ -1340,6 +1360,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
 		label: 'Drag me';
 		size: 90 @ 32;
 		yourself.
+	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
 	space root addChild: owner.
 	space pulse.

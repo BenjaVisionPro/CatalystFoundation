@@ -163,7 +163,8 @@ CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
 	physics := anElement physics.
-	physics owningWorld == self ifTrue: [ aSet add: anElement ].
+	(physics owningWorld == self and: [ physics isExcludedFromWorld not ])
+		ifTrue: [ aSet add: anElement ].
 	physics isWorld ifTrue: [ ^ self ].
 	anElement children do: [ :each |
 		self collectMembersFrom: each into: aSet ]

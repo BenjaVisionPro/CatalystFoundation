@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'ownedWorld', 'pointerDragHandler' ],
+	#instVars : [ 'element', 'ownedWorld', 'pointerDragHandler', 'excludedFromWorld' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -45,6 +45,29 @@ CFPhysicsElement >> element [
 { #category : 'accessing' }
 CFPhysicsElement >> element: anElement [
 	element := anElement
+]
+
+{ #category : 'world membership' }
+CFPhysicsElement >> excludeFromWorld [
+	excludedFromWorld := true
+]
+
+{ #category : 'world membership' }
+CFPhysicsElement >> includeInWorld [
+	excludedFromWorld := false
+]
+
+{ #category : 'world membership' }
+CFPhysicsElement >> isExcludedFromWorld [
+	^ excludedFromWorld = true
+]
+
+{ #category : 'world membership' }
+CFPhysicsElement >> excludeDescendantsFromWorld [
+	element children do: [ :each |
+		each physics
+			excludeFromWorld;
+			excludeDescendantsFromWorld ]
 ]
 
 

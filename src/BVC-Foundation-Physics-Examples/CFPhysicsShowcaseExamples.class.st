@@ -42,17 +42,19 @@ CFPhysicsShowcaseExamples >> clickMe [
 
 { #category : 'showcase - controls' }
 CFPhysicsShowcaseExamples >> newClickMeButtonUsing: aRandom [
-	| aptitude |
+	| aptitude button |
 	aptitude := BrGlamorousButtonWithLabelAptitude new.
 	aptitude foreground: Color black.
-	^ BrButton new
+	button := BrButton new
 		aptitude: aptitude;
 		label: 'Click Me';
 		size: 104 @ 42;
 		action: [ :aButton |
 			aButton physics bodyState
 				addVelocity: (self randomClickVelocityUsing: aRandom) ];
-		yourself
+		yourself.
+	button physics excludeDescendantsFromWorld.
+	^ button
 ]
 
 { #category : 'showcase - controls' }
