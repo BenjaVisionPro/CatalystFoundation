@@ -3839,3 +3839,40 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopReportsIterationCapDeterministic
 	self assert: (result remainingTime closeTo: 0.75).
 	^ result
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBlockingMotion [
+	<gtExample>
+	| moving sensor pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	sensor := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	sensor beStatic; beSensor.
+	moving velocity: 40 @ 0.
+	moving beginStep.
+	sensor beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { sensor. moving }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact not.
+	self assert: result continuousSensorContacts size equals: 1.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first isSensor.
+	self assert: result constraints isEmpty.
+	self assert: result solver notNil.
+	self assert: (moving position closeTo: 40 @ 0).
+	self assert: result contactBeganEvents size equals: 1.
+	^ result
+]

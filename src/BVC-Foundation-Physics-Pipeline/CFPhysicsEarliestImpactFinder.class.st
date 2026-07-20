@@ -62,3 +62,20 @@ CFPhysicsEarliestImpactFinder >> earliestAmong: pairs bodyStates: bodyStates for
 				ifTrue: [ earliest := candidate ] ] ].
 	^ earliest
 ]
+
+{ #category : 'finding' }
+CFPhysicsEarliestImpactFinder >> impactsAmong: pairs bodyStates: bodyStates for: seconds afterFraction: minimumFraction [
+	| impacts |
+	impacts := OrderedCollection new.
+	pairs do: [ :pair |
+		| candidate |
+		candidate := self
+			timeOfImpactFor: pair
+			bodyStates: bodyStates
+			for: seconds.
+		(candidate timeOfImpactResult hasImpact and: [
+			candidate fraction > minimumFraction ]) ifTrue: [
+			impacts add: candidate ] ].
+	^ impacts asArray sorted: [ :left :right |
+		(self candidate: left comesBefore: right tolerance: 1.0e-9) ]
+]
