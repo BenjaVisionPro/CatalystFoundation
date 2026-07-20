@@ -224,6 +224,7 @@ CFPhysicsWorld >> step [
 	lastStepResult := stepPipeline
 		stepBodies: bodies
 		fromContacts: activeContacts
+		joints: self distanceJoints
 		step: step
 		gravity: gravity
 		restitutionThreshold: restitutionThreshold.
@@ -469,6 +470,8 @@ CFPhysicsWorld >> distanceJoints [
 CFPhysicsWorld >> addDistanceJoint: aJoint [
 	aJoint endpointPair world == self
 		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
+	(aJoint firstBody notNil and: [ aJoint secondBody notNil ])
+		ifFalse: [ self error: 'Distance joints currently require two body endpoints' ].
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.

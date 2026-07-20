@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -9,17 +9,22 @@ Class {
 { #category : 'initialization' }
 CFPhysicsConstraintPreparationStage >> initialize [
 	super initialize.
-	constraintBuilder := CFPhysicsConstraintBuilder new
+	constraintBuilder := CFPhysicsConstraintBuilder new.
+	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new
 ]
 
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> constraintBuilder [ ^ constraintBuilder ]
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> constraintBuilder: anObject [ constraintBuilder := anObject ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> distanceJointConstraintBuilder [ ^ distanceJointConstraintBuilder ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> distanceJointConstraintBuilder: anObject [ distanceJointConstraintBuilder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
-	| constraints |
+	| constraints jointConstraints |
 	constraints := aStepResult hasContinuousImpact
 		ifTrue: [
 			| allConstraints |
@@ -32,6 +37,11 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 				constraintsFrom: aStepResult activeContacts
 				bodyStates: aStepResult bodyStates
 				warmStartRatio: aStepResult step warmStartRatio ].
+	jointConstraints := distanceJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio.
+	constraints := constraints asOrderedCollection addAll: jointConstraints; yourself.
 	aStepResult constraints: constraints.
 	^ constraints
 ]

@@ -1439,6 +1439,31 @@ CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 	^ world
 ]
 
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
+	<gtExample>
+	| owner first second world joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	joint := first physics distanceJointTo: second.
+	joint restLength: 50.
+	result := world step.
+	self assert: result constraints size equals: 1.
+	self assert: result constraints first class equals: CFPhysicsPreparedDistanceJoint.
+	self assert: result islands size equals: 1.
+	self assert: result islands first constraints equals: result constraints.
+	self assert: first physics velocity x > 0.
+	self assert: second physics velocity x < 0.
+	^ result
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [

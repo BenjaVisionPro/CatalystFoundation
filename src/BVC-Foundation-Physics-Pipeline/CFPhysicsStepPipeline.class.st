@@ -65,11 +65,23 @@ CFPhysicsStepPipeline >> sleepConfiguration: aConfiguration [
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		stepBodies: bodies
+		fromContacts: previousContacts
+		joints: #()
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'stepping' }
+CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	| result |
 	result := CFPhysicsStepPipelineResult new
 		step: step;
 		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
 		previousContacts: previousContacts;
+		joints: (joints asArray sorted: [ :left :right | left orderingKey < right orderingKey ]);
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
 		yourself.

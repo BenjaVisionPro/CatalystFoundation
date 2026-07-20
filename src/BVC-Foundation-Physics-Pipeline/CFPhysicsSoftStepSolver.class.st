@@ -20,8 +20,10 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	self warmStart.
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: true.
+		self solveDistanceJointsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
-		self solveContactsWithBias: false ].
+		self solveContactsWithBias: false.
+		self solveDistanceJointsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ].
 	bodyStates valuesDo: [ :state | state commit ]
@@ -38,22 +40,40 @@ CFPhysicsSoftStepSolver >> solveImpactWithRestitutionThreshold: restitutionThres
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStart [
-	constraints do: [ :constraint |
+	self contactConstraints do: [ :constraint |
 		constraint points do: [ :point |
 			self
 				applyImpulse: (constraint normal * point normalImpulse)
 					+ (constraint tangent * point tangentImpulse)
 				at: point
-				constraint: constraint ] ]
+				constraint: constraint ] ].
+	self distanceJointConstraints do: [ :constraint |
+		self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveContactsWithBias: biasEnabled [
-	constraints do: [ :constraint |
+	self contactConstraints do: [ :constraint |
 		constraint points do: [ :point |
 			self solveNormalAt: point constraint: constraint biasEnabled: biasEnabled ].
 		constraint points do: [ :point |
 			self solveTangentAt: point constraint: constraint ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveDistanceJointsWithBias: biasEnabled [
+	self distanceJointConstraints do: [ :constraint |
+		| relativeVelocity separation bias increment |
+		relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
+		separation := constraint baseSeparation
+			+ (self dot: constraint bodyStateB deltaPosition - constraint bodyStateA deltaPosition with: constraint direction).
+		separation := separation
+			+ (self dot: (self rotated: constraint anchorB by: constraint bodyStateB deltaRotation) - constraint anchorB with: constraint direction)
+			- (self dot: (self rotated: constraint anchorA by: constraint bodyStateA deltaRotation) - constraint anchorA with: constraint direction).
+		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+		increment := constraint effectiveMass * (relativeVelocity + bias) negated.
+		constraint impulse: constraint impulse + increment.
+		self applyDistanceJointImpulse: constraint direction * increment constraint: constraint ]
 ]
 
 { #category : 'private - solving' }
@@ -91,7 +111,7 @@ CFPhysicsSoftStepSolver >> solveTangentAt: point constraint: constraint [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
-	constraints do: [ :constraint |
+	self contactConstraints do: [ :constraint |
 		constraint points do: [ :point |
 			point relativeNormalVelocity < threshold negated ifTrue: [
 				| normalVelocity increment oldImpulse newImpulse |
@@ -102,6 +122,44 @@ CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 				newImpulse := (oldImpulse + increment) max: 0.0.
 				point normalImpulse: newImpulse.
 				self applyImpulse: constraint normal * (newImpulse - oldImpulse) at: point constraint: constraint ] ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyDistanceJointImpulse: impulse constraint: constraint [
+	| anchorA anchorB |
+	anchorA := self rotated: constraint anchorA by: constraint bodyStateA deltaRotation.
+	anchorB := self rotated: constraint anchorB by: constraint bodyStateB deltaRotation.
+	constraint bodyStateA linearVelocity:
+		constraint bodyStateA linearVelocity - (impulse * constraint firstBody inverseMass).
+	constraint bodyStateA angularVelocity:
+		constraint bodyStateA angularVelocity
+			- ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia).
+	constraint bodyStateB linearVelocity:
+		constraint bodyStateB linearVelocity + (impulse * constraint secondBody inverseMass).
+	constraint bodyStateB angularVelocity:
+		constraint bodyStateB angularVelocity
+			+ ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointRelativeVelocity: constraint [
+	| anchorA anchorB |
+	anchorA := self rotated: constraint anchorA by: constraint bodyStateA deltaRotation.
+	anchorB := self rotated: constraint anchorB by: constraint bodyStateB deltaRotation.
+	^ (constraint bodyStateB linearVelocity
+		+ (self crossScalar: constraint bodyStateB angularVelocity with: anchorB))
+		- (constraint bodyStateA linearVelocity
+			+ (self crossScalar: constraint bodyStateA angularVelocity with: anchorA))
+]
+
+{ #category : 'private - accessing' }
+CFPhysicsSoftStepSolver >> contactConstraints [
+	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedConstraint ]
+]
+
+{ #category : 'private - accessing' }
+CFPhysicsSoftStepSolver >> distanceJointConstraints [
+	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedDistanceJoint ]
 ]
 
 { #category : 'private - solving' }
