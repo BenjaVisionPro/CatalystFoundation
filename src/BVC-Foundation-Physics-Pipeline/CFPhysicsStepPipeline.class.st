@@ -12,9 +12,9 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 	sleepBehaviour := CFPhysicsIslandSleepStage new.
 	^ self new
 		stages: {
+			CFPhysicsBodyStateCaptureStage new.
 			CFPhysicsPairFinderStage new.
 			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
-			CFPhysicsBodyStateCaptureStage new.
 			CFPhysicsConstraintPreparationStage new.
 			CFPhysicsIslandBuilderStage new.
 			CFPhysicsIslandWakeStage new sleepBehaviour: sleepBehaviour; yourself.
