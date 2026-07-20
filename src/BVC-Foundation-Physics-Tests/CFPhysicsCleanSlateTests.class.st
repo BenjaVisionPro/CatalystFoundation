@@ -2342,3 +2342,32 @@ CFPhysicsCleanSlateTests >> worldCanDisableAndResumeWarmStarting [
 	self assert: resumedStep warmStartRatio equals: 0.5.
 	^ resumedStep
 ]
+
+{ #category : 'examples - contacts' }
+CFPhysicsCleanSlateTests >> manifoldRejectsImpulsesWhenNormalReverses [
+	<gtExample>
+	| featureId oldPoint oldManifold newPoint newManifold |
+	featureId := CFPhysicsContactFeatureId
+		featureA: #face index: 0 featureB: #vertex index: 1.
+	oldPoint := CFPhysicsManifoldPoint at: 10 @ 20.
+	oldPoint
+		featureId: featureId;
+		normalImpulse: 7.5;
+		tangentImpulse: -1.25.
+	oldManifold := CFPhysicsManifold new
+		normal: 0 @ 1;
+		contactPoints: { oldPoint };
+		yourself.
+
+	newPoint := CFPhysicsManifoldPoint at: 10 @ 20.
+	newPoint featureId: featureId.
+	newManifold := CFPhysicsManifold new
+		normal: 0 @ -1;
+		contactPoints: { newPoint };
+		preserveImpulsesFrom: oldManifold;
+		yourself.
+
+	self assert: newPoint normalImpulse equals: 0.0.
+	self assert: newPoint tangentImpulse equals: 0.0.
+	^ newManifold
+]

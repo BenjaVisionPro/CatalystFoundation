@@ -58,6 +58,7 @@ CFPhysicsManifold >> clearImpulses [
 { #category : 'updating' }
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
 	anOldManifold ifNil: [ ^ self ].
+	(self hasCompatibleNormalWith: anOldManifold) ifFalse: [ ^ self ].
 	contactPoints do: [ :point |
 		point featureId ifNotNil: [ :featureId |
 			anOldManifold contactPoints
@@ -66,4 +67,10 @@ CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
 					point
 						normalImpulse: oldPoint normalImpulse;
 						tangentImpulse: oldPoint tangentImpulse ] ] ]
+]
+
+{ #category : 'testing' }
+CFPhysicsManifold >> hasCompatibleNormalWith: anotherManifold [
+	(normal isNil or: [ anotherManifold normal isNil ]) ifTrue: [ ^ true ].
+	^ (normal dotProduct: anotherManifold normal) > 0.0
 ]
