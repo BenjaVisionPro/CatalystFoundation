@@ -50,7 +50,7 @@ CFPhysicsSoftStepSolver >> warmStart [
 				at: point
 				constraint: constraint ] ].
 	self distanceJointConstraints do: [ :constraint |
-		self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ]
+		self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
 	self revoluteJointConstraints do: [ :constraint |
 		self applyRevoluteJointImpulse: constraint impulse constraint: constraint ]
 ]
