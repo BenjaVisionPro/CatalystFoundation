@@ -1,8 +1,8 @@
 Class {
 	#name : 'CFPhysicsBodyCentreAnchor',
 	#superclass : 'CFPhysicsAnchor',
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'geometry' }

@@ -9,8 +9,8 @@ Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
 	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }

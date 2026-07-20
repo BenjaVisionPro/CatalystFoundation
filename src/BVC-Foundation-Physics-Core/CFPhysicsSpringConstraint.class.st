@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsSpringConstraint',
 	#superclass : 'Object',
 	#instVars : [ 'endpointPair', 'restLength', 'stiffness', 'damping', 'maximumForce', 'active', 'sequence' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }

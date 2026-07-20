@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsPointerConstraint',
 	#superclass : 'Object',
 	#instVars : [ 'body', 'pointerPosition', 'previousPointerPosition', 'previousTimestamp', 'pointerVelocity', 'grabOffset', 'responsiveness', 'velocityRetention', 'maximumSpeed', 'active' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }

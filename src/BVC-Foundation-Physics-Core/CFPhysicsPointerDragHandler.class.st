@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsPointerDragHandler',
 	#superclass : 'Object',
 	#instVars : [ 'element', 'constraint', 'dragStartHandler', 'dragHandler', 'dragEndHandler' ],
-	#category : 'BVC-Foundation-Physics-World',
-	#package : 'BVC-Foundation-Physics-World'
+	#category : 'BVC-Foundation-Physics-Core',
+	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }
