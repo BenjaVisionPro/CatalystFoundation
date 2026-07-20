@@ -470,8 +470,8 @@ CFPhysicsWorld >> distanceJoints [
 CFPhysicsWorld >> addDistanceJoint: aJoint [
 	aJoint endpointPair world == self
 		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
-	(aJoint firstBody notNil and: [ aJoint secondBody notNil ])
-		ifFalse: [ self error: 'Distance joints currently require two body endpoints' ].
+	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
+		ifFalse: [ self error: 'A distance joint requires at least one body endpoint' ].
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.

@@ -65,10 +65,12 @@ CFPhysicsSoftStepSolver >> solveDistanceJointsWithBias: biasEnabled [
 		| relativeVelocity separation bias increment |
 		relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
 		separation := constraint baseSeparation
-			+ (self dot: constraint bodyStateB deltaPosition - constraint bodyStateA deltaPosition with: constraint direction).
+			+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
+				- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+				with: constraint direction).
 		separation := separation
-			+ (self dot: (self rotated: constraint anchorB by: constraint bodyStateB deltaRotation) - constraint anchorB with: constraint direction)
-			- (self dot: (self rotated: constraint anchorA by: constraint bodyStateA deltaRotation) - constraint anchorA with: constraint direction).
+			+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint direction)
+			- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint direction).
 		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 		increment := constraint effectiveMass * (relativeVelocity + bias) negated.
 		constraint impulse: constraint impulse + increment.
@@ -126,29 +128,44 @@ CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyDistanceJointImpulse: impulse constraint: constraint [
 	| anchorA anchorB |
-	anchorA := self rotated: constraint anchorA by: constraint bodyStateA deltaRotation.
-	anchorB := self rotated: constraint anchorB by: constraint bodyStateB deltaRotation.
-	constraint bodyStateA linearVelocity:
-		constraint bodyStateA linearVelocity - (impulse * constraint firstBody inverseMass).
-	constraint bodyStateA angularVelocity:
-		constraint bodyStateA angularVelocity
-			- ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia).
-	constraint bodyStateB linearVelocity:
-		constraint bodyStateB linearVelocity + (impulse * constraint secondBody inverseMass).
-	constraint bodyStateB angularVelocity:
-		constraint bodyStateB angularVelocity
-			+ ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia)
+	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	constraint bodyStateA ifNotNil: [ :state |
+		state linearVelocity:
+			state linearVelocity - (impulse * constraint firstBody inverseMass).
+		state angularVelocity:
+			state angularVelocity - ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia) ].
+	constraint bodyStateB ifNotNil: [ :state |
+		state linearVelocity:
+			state linearVelocity + (impulse * constraint secondBody inverseMass).
+		state angularVelocity:
+			state angularVelocity + ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia) ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> distanceJointRelativeVelocity: constraint [
 	| anchorA anchorB |
-	anchorA := self rotated: constraint anchorA by: constraint bodyStateA deltaRotation.
-	anchorB := self rotated: constraint anchorB by: constraint bodyStateB deltaRotation.
-	^ (constraint bodyStateB linearVelocity
-		+ (self crossScalar: constraint bodyStateB angularVelocity with: anchorB))
-		- (constraint bodyStateA linearVelocity
-			+ (self crossScalar: constraint bodyStateA angularVelocity with: anchorA))
+	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	^ (self distanceJointVelocityFor: constraint bodyStateB anchor: anchorB)
+		- (self distanceJointVelocityFor: constraint bodyStateA anchor: anchorA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointVelocityFor: aState anchor: anAnchor [
+	^ aState
+		ifNil: [ 0 @ 0 ]
+		ifNotNil: [ aState linearVelocity + (self crossScalar: aState angularVelocity with: anAnchor) ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointDeltaPositionFor: aState [
+	^ aState ifNil: [ 0 @ 0 ] ifNotNil: [ aState deltaPosition ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointDeltaRotationFor: aState [
+	^ aState ifNil: [ 0.0 ] ifNotNil: [ aState deltaRotation ]
 ]
 
 { #category : 'private - accessing' }

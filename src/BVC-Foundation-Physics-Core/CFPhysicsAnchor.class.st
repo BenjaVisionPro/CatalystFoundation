@@ -50,6 +50,14 @@ CFPhysicsAnchor >> springTo: anotherAnchor [
 ]
 
 { #category : 'relationships' }
+CFPhysicsAnchor >> distanceJointTo: anotherAnchor [
+	| aWorld joint |
+	aWorld := self relationshipWorldWith: anotherAnchor.
+	joint := CFPhysicsDistanceJoint betweenAnchor: self andAnchor: anotherAnchor.
+	^ aWorld addDistanceJoint: joint
+]
+
+{ #category : 'relationships' }
 CFPhysicsAnchor >> attract: anotherAnchor [
 	| aWorld attraction |
 	aWorld := self relationshipWorldWith: anotherAnchor.

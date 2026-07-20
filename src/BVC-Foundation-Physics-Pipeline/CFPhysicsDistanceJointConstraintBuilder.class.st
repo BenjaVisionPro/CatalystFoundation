@@ -14,10 +14,10 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintsFrom: joints bodyStates: b
 { #category : 'private - building' }
 CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	| stateA stateB centreA centreB anchorA anchorB displacement distance direction rnA rnB inverseMass |
-	stateA := bodyStates at: joint firstBody.
-	stateB := bodyStates at: joint secondBody.
-	centreA := stateA currentTransform position + (joint firstBody extent / 2.0).
-	centreB := stateB currentTransform position + (joint secondBody extent / 2.0).
+	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
+	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
+	centreA := self centreFor: joint firstBody state: stateA.
+	centreB := self centreFor: joint secondBody state: stateB.
 	anchorA := joint endpointPair worldPointA - centreA.
 	anchorB := joint endpointPair worldPointB - centreB.
 	displacement := (centreB + anchorB) - (centreA + anchorA).
@@ -25,9 +25,8 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 	direction := distance = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ displacement / distance ].
 	rnA := self cross: anchorA with: direction.
 	rnB := self cross: anchorB with: direction.
-	inverseMass := joint firstBody inverseMass + joint secondBody inverseMass
-		+ (joint firstBody inverseInertia * rnA squared)
-		+ (joint secondBody inverseInertia * rnB squared).
+	inverseMass := (self inverseMassFor: joint firstBody cross: rnA)
+		+ (self inverseMassFor: joint secondBody cross: rnB).
 	^ CFPhysicsPreparedDistanceJoint new
 		joint: joint;
 		bodyStateA: stateA;
@@ -44,4 +43,18 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 { #category : 'private - mathematics' }
 CFPhysicsDistanceJointConstraintBuilder >> cross: first with: second [
 	^ (first x * second y) - (first y * second x)
+]
+
+{ #category : 'private - building' }
+CFPhysicsDistanceJointConstraintBuilder >> centreFor: aBody state: aState [
+	^ aBody
+		ifNil: [ 0 @ 0 ]
+		ifNotNil: [ aState currentTransform position + (aBody extent / 2.0) ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsDistanceJointConstraintBuilder >> inverseMassFor: aBody cross: aCross [
+	^ aBody
+		ifNil: [ 0.0 ]
+		ifNotNil: [ aBody inverseMass + (aBody inverseInertia * aCross squared) ]
 ]

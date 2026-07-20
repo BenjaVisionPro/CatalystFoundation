@@ -1466,6 +1466,30 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	^ result
 ]
 
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 100 @ 10.
+	joint := bodyAnchor distanceJointTo: worldAnchor.
+	joint restLength: 50.
+	result := world step.
+	self assert: joint firstBody == element physics bodyState.
+	self assert: joint secondBody isNil.
+	self assert: result constraints size equals: 1.
+	self assert: result islands size equals: 1.
+	self assert: element physics velocity x > 0.
+	^ result
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
