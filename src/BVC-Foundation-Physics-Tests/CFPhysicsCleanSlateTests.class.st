@@ -1561,8 +1561,8 @@ CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
 	<gtExample>
 	| first second firstAnchor secondAnchor joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 20 @ 0 extent: 20 @ 20.
-	firstAnchor := CFPhysicsLocalAnchor on: first at: 20 @ 10.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	firstAnchor := CFPhysicsLocalAnchor on: first at: 30 @ 10.
 	secondAnchor := CFPhysicsLocalAnchor on: second at: 0 @ 10.
 	joint := CFPhysicsRevoluteJoint betweenAnchor: firstAnchor andAnchor: secondAnchor.
 	self assert: joint firstBody == first.
@@ -1585,9 +1585,9 @@ CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
-	second physics position: 20 @ 0.
+	second physics position: 30 @ 0.
 	second physics beStatic.
-	firstAnchor := first physics localAnchorAt: 20 @ 10.
+	firstAnchor := first physics localAnchorAt: 30 @ 10.
 	secondAnchor := second physics localAnchorAt: 0 @ 10.
 	joint := firstAnchor revoluteJointTo: secondAnchor.
 	first physics velocity: 100 @ 0.
