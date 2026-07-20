@@ -3748,3 +3748,92 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExi
 	self assert: (moving position closeTo: 10 @ 0).
 	^ result
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
+	<gtExample>
+	| moving obstacle pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	moving velocity: 10 @ 0.
+	moving beginStep.
+	obstacle beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. obstacle }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact not.
+	self assert: result solver notNil.
+	self assert: result activeContacts size equals: 1.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
+	<gtExample>
+	| moving sensor pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	sensor := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	sensor beStatic; beSensor.
+	moving velocity: 10 @ 0.
+	moving beginStep.
+	sensor beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { sensor. moving }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact not.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first isSensor.
+	self assert: result constraints isEmpty.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
+	<gtExample>
+	| result |
+	result := self stepPipelineSolvesMultipleContinuousImpactsInTimeOrder.
+	self assert: result activeContacts size equals: 2.
+	self assert: result activeContacts first pair firstBody sequence equals: 1.
+	self assert: result activeContacts first pair secondBody sequence equals: 2.
+	self assert: result activeContacts second pair firstBody sequence equals: 3.
+	self assert: result activeContacts second pair secondBody sequence equals: 4.
+	^ result activeContacts
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousImpactLoopReportsIterationCapDeterministically [
+	<gtExample>
+	| result |
+	result := self continuousImpactLoopLeavesRemainderExplicitAtIterationLimit.
+	self assert: result impacts size equals: 1.
+	self assert: result impacts first pair firstBody sequence equals: 1.
+	self assert: result impacts first pair secondBody sequence equals: 2.
+	self assert: result iterationLimitReached.
+	self assert: (result remainingTime closeTo: 0.75).
+	^ result
+]
