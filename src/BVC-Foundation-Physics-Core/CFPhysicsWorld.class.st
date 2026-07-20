@@ -484,6 +484,14 @@ CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 	^ self distanceJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
+{ #category : 'collision filtering' }
+CFPhysicsWorld >> distanceJointPreventsCollisionBetween: firstBody and: secondBody [
+	^ distanceJoints anySatisfy: [ :joint |
+		joint isActive and: [ joint collideConnected not and: [
+			(joint firstBody == firstBody and: [ joint secondBody == secondBody ])
+				or: [ joint firstBody == secondBody and: [ joint secondBody == firstBody ] ] ] ]
+]
+
 { #category : 'distance joints' }
 CFPhysicsWorld >> removeDistanceJoint: aJoint [
 	(distanceJoints includes: aJoint) ifTrue: [

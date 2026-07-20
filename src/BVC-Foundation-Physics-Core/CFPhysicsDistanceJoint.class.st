@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsDistanceJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'restLength', 'active', 'sequence', 'accumulatedImpulse' ],
+	#instVars : [ 'endpointPair', 'restLength', 'active', 'sequence', 'accumulatedImpulse', 'collideConnected' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -41,7 +41,8 @@ CFPhysicsDistanceJoint >> initialize [
 	restLength := 0.0.
 	active := true.
 	sequence := 0.
-	accumulatedImpulse := 0.0
+	accumulatedImpulse := 0.0.
+	collideConnected := true
 ]
 
 { #category : 'accessing' }
@@ -73,6 +74,11 @@ CFPhysicsDistanceJoint >> restLength: aNumber [
 CFPhysicsDistanceJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
 { #category : 'solver state' }
 CFPhysicsDistanceJoint >> accumulatedImpulse: aNumber [ accumulatedImpulse := aNumber asFloat ]
+
+{ #category : 'configuration' }
+CFPhysicsDistanceJoint >> collideConnected [ ^ collideConnected ]
+{ #category : 'configuration' }
+CFPhysicsDistanceJoint >> collideConnected: aBoolean [ collideConnected := aBoolean ]
 
 { #category : 'ordering' }
 CFPhysicsDistanceJoint >> sequence [ ^ sequence ]

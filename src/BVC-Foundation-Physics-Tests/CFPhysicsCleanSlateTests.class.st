@@ -1556,6 +1556,32 @@ CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
 	^ joint
 ]
 
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
+	<gtExample>
+	| owner first second world joint pairs |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 10 @ 0.
+	joint := first physics distanceJointTo: second.
+	self assert: joint collideConnected.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs size equals: 1.
+	joint collideConnected: false.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs isEmpty.
+	^ joint
+]
+
 
 { #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
