@@ -2,7 +2,7 @@ Extension { #name : 'CFPhysicsWorld' }
 
 { #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysicsWorld >> present [
-	CFPhysicsWorldMotionIntegration for: self present.
+	(CFPhysicsWorldMotionIntegration for: self) present.
 	^ self
 ]
 
