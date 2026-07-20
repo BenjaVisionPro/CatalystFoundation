@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -18,7 +18,8 @@ CFPhysicsStepPipelineResult >> initialize [
 	contactSolveResults := #().
 	hitEvents := #().
 	contactEvents := #().
-	stageExecutions := OrderedCollection new
+	stageExecutions := OrderedCollection new.
+	continuousStepResult := nil
 ]
 
 { #category : 'accessing' }
@@ -130,4 +131,16 @@ CFPhysicsStepPipelineResult >> contactBeganEvents [
 { #category : 'contacts' }
 CFPhysicsStepPipelineResult >> contactEndedEvents [
 	^ contactEvents select: [ :event | event ended ]
+]
+
+
+{ #category : 'continuous collision' }
+CFPhysicsStepPipelineResult >> continuousStepResult [ ^ continuousStepResult ]
+
+{ #category : 'continuous collision' }
+CFPhysicsStepPipelineResult >> continuousStepResult: anObject [ continuousStepResult := anObject ]
+
+{ #category : 'continuous collision' }
+CFPhysicsStepPipelineResult >> hasContinuousImpact [
+	^ continuousStepResult notNil and: [ continuousStepResult hasImpact ]
 ]

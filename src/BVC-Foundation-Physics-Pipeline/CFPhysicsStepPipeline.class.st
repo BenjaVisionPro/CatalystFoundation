@@ -15,6 +15,7 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 			CFPhysicsBodyStateCaptureStage new.
 			CFPhysicsVelocityIntegrationStage new.
 			CFPhysicsPairFinderStage new.
+			CFPhysicsContinuousStepStage new.
 			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
 			CFPhysicsConstraintPreparationStage new.
 			CFPhysicsIslandBuilderStage new.

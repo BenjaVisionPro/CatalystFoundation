@@ -868,6 +868,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 		CFPhysicsBodyStateCaptureStage.
 		CFPhysicsVelocityIntegrationStage.
 		CFPhysicsPairFinderStage.
+		CFPhysicsContinuousStepStage.
 		CFPhysicsContactUpdateStage.
 		CFPhysicsConstraintPreparationStage.
 		CFPhysicsIslandBuilderStage.
@@ -882,13 +883,14 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: result stageExecutions first output == result bodyStates.
 	self assert: result stageExecutions second output == result bodyStates.
 	self assert: result stageExecutions third output equals: result pairs.
-	self assert: result stageExecutions fourth output == result contactResult.
-	self assert: result stageExecutions fifth output equals: result constraints.
-	self assert: result stageExecutions sixth output equals: result islands.
-	self assert: ((result stageExecutions at: 8) output == result solver).
-	self assert: (result stageExecutions at: 9) output contactResults equals: result contactSolveResults.
-	self assert: (result stageExecutions at: 9) output hitEvents equals: result hitEvents.
-	self assert: (result stageExecutions at: 11) output equals: result contactEvents.
+	self assert: result stageExecutions fourth output isNil.
+	self assert: result stageExecutions fifth output == result contactResult.
+	self assert: result stageExecutions sixth output equals: result constraints.
+	self assert: result stageExecutions seventh output equals: result islands.
+	self assert: ((result stageExecutions at: 9) output == result solver).
+	self assert: (result stageExecutions at: 10) output contactResults equals: result contactSolveResults.
+	self assert: (result stageExecutions at: 10) output hitEvents equals: result hitEvents.
+	self assert: (result stageExecutions at: 12) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -901,12 +903,13 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 11.
+	self assert: stages size equals: 12.
 	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
 	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
 	self assert: stages third class equals: CFPhysicsPairFinderStage.
+	self assert: stages fourth class equals: CFPhysicsContinuousStepStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
-	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 5).
+	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 6).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
 ]
@@ -3505,4 +3508,69 @@ CFPhysicsCleanSlateTests >> continuousStepExecutorLeavesSeparatedStatesUncommitt
 	self assert: first position equals: 0 @ 0.
 	self assert: second position equals: 100 @ 0.
 	^ bodyStates
+]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
+	<gtExample>
+	| moving obstacle pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	moving velocity: 40 @ 0.
+	moving beginStep.
+	obstacle beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. obstacle }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self assert: (result continuousStepResult fraction closeTo: 0.25).
+	self assert: (moving position closeTo: 10 @ 0).
+	self assert: (moving velocity x abs < 1.0e-6).
+	self assert: result activeContacts size equals: 1.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
+	<gtExample>
+	| moving obstacle pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	moving velocity: 10 @ 0.
+	moving beginStep.
+	obstacle beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. obstacle }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self deny: result hasContinuousImpact.
+	self assert: (moving position closeTo: 10 @ 0).
+	self assert: result solver notNil.
+	^ result
 ]

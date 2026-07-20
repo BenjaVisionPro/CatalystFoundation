@@ -20,10 +20,13 @@ CFPhysicsConstraintPreparationStage >> constraintBuilder: anObject [ constraintB
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	| constraints |
-	constraints := constraintBuilder
-		constraintsFrom: aStepResult activeContacts
-		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio.
+	constraints := aStepResult hasContinuousImpact
+		ifTrue: [ aStepResult continuousStepResult impactSolveResult constraints ]
+		ifFalse: [
+			constraintBuilder
+				constraintsFrom: aStepResult activeContacts
+				bodyStates: aStepResult bodyStates
+				warmStartRatio: aStepResult step warmStartRatio ].
 	aStepResult constraints: constraints.
 	^ constraints
 ]

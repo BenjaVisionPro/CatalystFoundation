@@ -21,9 +21,15 @@ CFPhysicsContactUpdateStage >> contactUpdater: anObject [ contactUpdater := anOb
 { #category : 'executing' }
 CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 	| batch contactResult |
-	batch := contactUpdater
-		updatePairs: aStepResult pairs
-		fromContacts: aStepResult previousContacts.
+	batch := aStepResult hasContinuousImpact
+		ifTrue: [
+			contactUpdater
+				updateImpactContact: aStepResult continuousStepResult impactSolveResult contact
+				fromContacts: aStepResult previousContacts ]
+		ifFalse: [
+			contactUpdater
+				updatePairs: aStepResult pairs
+				fromContacts: aStepResult previousContacts ].
 	contactResult := CFPhysicsContactPipelineResult
 		pairs: aStepResult pairs
 		contactBatch: batch.

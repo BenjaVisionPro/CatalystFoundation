@@ -17,12 +17,16 @@ CFPhysicsContinuousStepExecutor >> initialize [
 
 { #category : 'executing' }
 CFPhysicsContinuousStepExecutor >> executePairs: pairs bodyStates: bodyStates step: step restitutionThreshold: restitutionThreshold [
-	| impact advancement impactStep solveResult |
+	| impact advancement impactStep solveResult solidPairs tolerance |
+	tolerance := 1.0e-9.
+	solidPairs := pairs reject: [ :pair |
+		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 	impact := impactFinder
-		earliestAmong: pairs
+		earliestAmong: solidPairs
 		bodyStates: bodyStates
 		for: step timeStep.
 	impact ifNil: [ ^ nil ].
+	impact fraction <= tolerance ifTrue: [ ^ nil ].
 	advancement := impactAdvancer
 		advanceBodyStates: bodyStates
 		to: impact

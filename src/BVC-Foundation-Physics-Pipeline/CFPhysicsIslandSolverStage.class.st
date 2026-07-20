@@ -8,6 +8,9 @@ Class {
 { #category : 'executing' }
 CFPhysicsIslandSolverStage >> executeOn: aStepResult [
 	| solver |
+	aStepResult hasContinuousImpact ifTrue: [
+		aStepResult solver: nil.
+		^ nil ].
 	solver := CFPhysicsIslandSolver
 		step: aStepResult step
 		bodyStates: aStepResult bodyStates
