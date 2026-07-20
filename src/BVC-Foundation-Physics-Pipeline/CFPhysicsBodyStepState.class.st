@@ -35,6 +35,11 @@ CFPhysicsBodyStepState >> integratePositionBy: seconds [
 	deltaRotation := deltaRotation + (angularVelocity * seconds)
 ]
 
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> translateBy: aPoint [
+	body isDynamic ifTrue: [ deltaPosition := deltaPosition + aPoint ]
+]
+
 { #category : 'committing' }
 CFPhysicsBodyStepState >> commit [
 	body

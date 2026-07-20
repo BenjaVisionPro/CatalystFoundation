@@ -22,6 +22,7 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
+		self solveContactPositions.
 		self solveContactsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ].
@@ -265,10 +266,7 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 	| relativeVelocity normalVelocity separation bias increment oldImpulse newImpulse |
 	relativeVelocity := self relativeVelocityAt: point constraint: constraint.
 	normalVelocity := self dot: relativeVelocity with: constraint normal.
-	separation := point baseSeparation
-		+ (self dot: constraint bodyStateB deltaPosition - constraint bodyStateA deltaPosition with: constraint normal)
-		+ (self dot: (self rotated: point anchorB by: constraint bodyStateB deltaRotation) - point anchorB with: constraint normal)
-		- (self dot: (self rotated: point anchorA by: constraint bodyStateA deltaRotation) - point anchorA with: constraint normal).
+	separation := self contactSeparationAt: point constraint: constraint.
 	bias := biasEnabled
 		ifTrue: [ step biasRate * (separation min: 0.0) ]
 		ifFalse: [ 0.0 ].
@@ -278,6 +276,26 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 	newImpulse := (oldImpulse + increment) max: 0.0.
 	point normalImpulse: newImpulse.
 	self applyImpulse: constraint normal * (newImpulse - oldImpulse) at: point constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveContactPositions [
+	self contactConstraints do: [ :constraint |
+		constraint points do: [ :point |
+			self solveContactPositionAt: point constraint: constraint ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveContactPositionAt: point constraint: constraint [
+	| separation inverseMass correction |
+	separation := self contactSeparationAt: point constraint: constraint.
+	separation >= 0.0 ifTrue: [ ^ self ].
+	inverseMass := constraint firstBody inverseMass + constraint secondBody inverseMass.
+	inverseMass = 0.0 ifTrue: [ ^ self ].
+	correction := constraint normal
+		* (separation negated / inverseMass).
+	constraint bodyStateA translateBy: correction negated * constraint firstBody inverseMass.
+	constraint bodyStateB translateBy: correction * constraint secondBody inverseMass
 ]
 
 { #category : 'private - solving' }
@@ -459,6 +477,14 @@ CFPhysicsSoftStepSolver >> relativeVelocityAt: point constraint: constraint [
 		+ (self crossScalar: constraint bodyStateB angularVelocity with: anchorB))
 		- (constraint bodyStateA linearVelocity
 			+ (self crossScalar: constraint bodyStateA angularVelocity with: anchorA))
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> contactSeparationAt: point constraint: constraint [
+	^ point baseSeparation
+		+ (self dot: constraint bodyStateB deltaPosition - constraint bodyStateA deltaPosition with: constraint normal)
+		+ (self dot: (self rotated: point anchorB by: constraint bodyStateB deltaRotation) - point anchorB with: constraint normal)
+		- (self dot: (self rotated: point anchorA by: constraint bodyStateA deltaRotation) - point anchorA with: constraint normal)
 ]
 
 { #category : 'private - solving' }
