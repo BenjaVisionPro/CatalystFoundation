@@ -16,6 +16,10 @@ CFPhysicsPreparedConstraint >> contact [ ^ contact ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> contact: anObject [ contact := anObject ]
 { #category : 'accessing' }
+CFPhysicsPreparedConstraint >> firstBody [ ^ contact firstBody ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> secondBody [ ^ contact secondBody ]
+{ #category : 'accessing' }
 CFPhysicsPreparedConstraint >> bodyStateA [ ^ bodyStateA ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> bodyStateA: anObject [ bodyStateA := anObject ]

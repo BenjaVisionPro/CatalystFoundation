@@ -121,15 +121,15 @@ CFPhysicsSoftStepSolver >> applyImpulse: impulse at: point constraint: constrain
 	anchorA := self rotated: point anchorA by: constraint bodyStateA deltaRotation.
 	anchorB := self rotated: point anchorB by: constraint bodyStateB deltaRotation.
 	constraint bodyStateA linearVelocity:
-		constraint bodyStateA linearVelocity - (impulse * constraint contact firstBody inverseMass).
+		constraint bodyStateA linearVelocity - (impulse * constraint firstBody inverseMass).
 	constraint bodyStateA angularVelocity:
 		constraint bodyStateA angularVelocity
-			- ((self cross: anchorA with: impulse) * constraint contact firstBody inverseInertia).
+			- ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia).
 	constraint bodyStateB linearVelocity:
-		constraint bodyStateB linearVelocity + (impulse * constraint contact secondBody inverseMass).
+		constraint bodyStateB linearVelocity + (impulse * constraint secondBody inverseMass).
 	constraint bodyStateB angularVelocity:
 		constraint bodyStateB angularVelocity
-			+ ((self cross: anchorB with: impulse) * constraint contact secondBody inverseInertia)
+			+ ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia)
 ]
 
 { #category : 'private - mathematics' }

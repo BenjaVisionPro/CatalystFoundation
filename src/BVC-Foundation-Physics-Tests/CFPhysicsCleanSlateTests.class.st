@@ -344,6 +344,8 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	constraint := constraints first.
 	point := constraint points first.
 	self assert: constraint contact == contact.
+	self assert: constraint firstBody == first.
+	self assert: constraint secondBody == second.
 	self assert: constraint bodyStateA == (bodyStates at: first).
 	self assert: constraint bodyStateB == (bodyStates at: second).
 	self assert: constraint normal equals: 0 @ 1.

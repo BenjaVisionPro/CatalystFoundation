@@ -26,8 +26,8 @@ CFPhysicsIslandBuilder >> constraintsByBodyFrom: constraints [
 	| result |
 	result := IdentityDictionary new.
 	constraints do: [ :constraint |
-		self add: constraint for: constraint contact firstBody to: result.
-		self add: constraint for: constraint contact secondBody to: result ].
+		self add: constraint for: constraint firstBody to: result.
+		self add: constraint for: constraint secondBody to: result ].
 	^ result
 ]
 
@@ -53,8 +53,8 @@ CFPhysicsIslandBuilder >> islandFrom: seed constraintsByBody: constraintsByBody 
 					| first second |
 					visitedConstraints add: constraint.
 					island addConstraint: constraint.
-					first := constraint contact firstBody.
-					second := constraint contact secondBody.
+					first := constraint firstBody.
+					second := constraint secondBody.
 					island addBody: first.
 					island addBody: second.
 					(first isDynamic and: [ (visited includes: first) not ]) ifTrue: [ pending add: first ].
