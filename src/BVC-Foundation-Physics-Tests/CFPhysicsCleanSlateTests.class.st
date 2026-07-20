@@ -2463,3 +2463,51 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedSweptPaths [
 	^ pairs
 ]
 
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
+	<gtExample>
+	| body sweep |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body
+		beginStep;
+		addVelocity: 20 @ 0;
+		angularVelocity: Float pi;
+		advanceBy: 0.5 gravity: 0 @ 0.
+	sweep := body sweep.
+	self assert: sweep startTransform position equals: 10 @ 20.
+	self assert: sweep startTransform rotation equals: 0.
+	self assert: sweep endTransform position equals: 20 @ 20.
+	self assert: sweep endTransform rotation closeTo: Float pi / 2.0.
+	^ sweep
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
+	<gtExample>
+	| sweep transform |
+	sweep := CFPhysicsSweep
+		from: (CFPhysicsTransform position: 0 @ 10 rotation: 0.0)
+		to: (CFPhysicsTransform position: 20 @ 30 rotation: Float pi).
+	transform := sweep transformAt: 0.25.
+	self assert: transform position equals: 5 @ 15.
+	self assert: transform rotation closeTo: Float pi / 4.0.
+	^ transform
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sweptAABBDelegatesToSweep [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		beginStep;
+		addVelocity: 100 @ 0;
+		advanceBy: 1.0 gravity: 0 @ 0.
+	| bodyBounds sweepBounds |
+	bodyBounds := body sweptAABB.
+	sweepBounds := body sweep sweptAABBFor: body shapeState.
+	self assert: bodyBounds minimum equals: sweepBounds minimum.
+	self assert: bodyBounds maximum equals: sweepBounds maximum.
+	^ bodyBounds
+]

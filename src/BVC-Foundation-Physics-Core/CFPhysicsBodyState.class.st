@@ -504,22 +504,14 @@ CFPhysicsBodyState >> worldPointForNormalisedPoint: aPoint [
 	^ self worldPointForLocalPoint: (self localPointForNormalisedPoint: aPoint)
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsBodyState >> sweep [
+	^ CFPhysicsSweep
+		from: (CFPhysicsTransform position: previousPosition rotation: previousRotation)
+		to: (CFPhysicsTransform position: position rotation: rotation)
+]
+
 { #category : 'collision' }
 CFPhysicsBodyState >> sweptAABB [
-	| previousBounds currentBounds radius previousCentre currentCentre minimum maximum |
-	previousBounds := self shapeState
-		aabbAt: previousPosition
-		rotation: previousRotation.
-	currentBounds := self aabb.
-	previousRotation = rotation ifTrue: [
-		^ previousBounds mergedWith: currentBounds ].
-
-	radius := self shapeState boundingRadius.
-	previousCentre := self shapeState centreAt: previousPosition.
-	currentCentre := self shapeState centreAt: position.
-	minimum := ((previousCentre x min: currentCentre x) - radius)
-		@ ((previousCentre y min: currentCentre y) - radius).
-	maximum := ((previousCentre x max: currentCentre x) + radius)
-		@ ((previousCentre y max: currentCentre y) + radius).
-	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+	^ self sweep sweptAABBFor: self shapeState
 ]
