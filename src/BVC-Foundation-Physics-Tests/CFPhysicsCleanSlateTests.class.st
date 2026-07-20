@@ -3415,3 +3415,94 @@ CFPhysicsCleanSlateTests >> remainingTimeIntegrationAdvancesOtherBodiesThroughFu
 	self assert: other position equals: 0 @ 100.
 	^ solveResult
 ]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousStepExecutorCommitsImpactOnce [
+	<gtExample>
+	| moving obstacle bodyStates pair step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousStepExecutor new
+		executePairs: { pair }
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self assert: result hasImpact.
+	self assert: (result fraction closeTo: 0.25).
+	self assert: (moving position closeTo: 10 @ 0).
+	self assert: (moving velocity x abs < 1.0e-6).
+	self assert: obstacle position equals: 30 @ 0.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousStepExecutorCommitsOtherBodiesAfterFullStep [
+	<gtExample>
+	| moving obstacle other bodyStates pair step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	other := self cleanSlateBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		at: other put: (CFPhysicsBodyStepState on: other);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	(bodyStates at: other) linearVelocity: 8 @ 0.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousStepExecutor new
+		executePairs: { pair }
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self assert: result hasImpact.
+	self assert: (moving position closeTo: 10 @ 0).
+	self assert: (other position closeTo: 8 @ 100).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousStepExecutorLeavesSeparatedStatesUncommitted [
+	<gtExample>
+	| first second bodyStates pair step result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	(bodyStates at: first) linearVelocity: -10 @ 0.
+	pair := CFPhysicsPair first: first second: second.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousStepExecutor new
+		executePairs: { pair }
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self assert: result isNil.
+	self assert: first position equals: 0 @ 0.
+	self assert: second position equals: 100 @ 0.
+	^ bodyStates
+]
