@@ -16,18 +16,58 @@ CFPhysicsContinuousStepStage >> initialize [
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| continuousResult solidPairs sensorPairs tolerance initialImpact continuousBodyStates continuousBodies continuousJoints |
+	| solidPairs sensorPairs tolerance remainingSolidPairs initialImpact continuousBodyStates continuousBodies continuousJoints componentResult impacts impactSolveResults completedBodies completedDynamicBodies sensorContactsByKey iterationLimitReached continuousResult |
 	tolerance := 1.0e-9.
 	solidPairs := aStepResult pairs reject: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 	sensorPairs := aStepResult pairs select: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
-	initialImpact := impactFinder
-		earliestAmong: solidPairs
-		bodyStates: aStepResult bodyStates
-		for: aStepResult step timeStep
-		afterFraction: tolerance.
-	initialImpact ifNil: [
+	impacts := OrderedCollection new.
+	impactSolveResults := OrderedCollection new.
+	completedBodies := IdentitySet new.
+	completedDynamicBodies := IdentitySet new.
+	sensorContactsByKey := Dictionary new.
+	iterationLimitReached := false.
+	[
+		remainingSolidPairs := solidPairs reject: [ :pair |
+			(self pair: pair includesAnyDynamicBodyFrom: completedDynamicBodies) ].
+		initialImpact := impactFinder
+			earliestAmong: remainingSolidPairs
+			bodyStates: aStepResult bodyStates
+			for: aStepResult step timeStep
+			afterFraction: tolerance.
+		initialImpact notNil
+	] whileTrue: [
+		continuousBodyStates := componentBuilder
+			bodyStatesForImpact: initialImpact
+			from: aStepResult bodyStates
+			joints: aStepResult joints.
+		continuousBodies := continuousBodyStates keys.
+		continuousJoints := componentBuilder
+			jointsForBodies: continuousBodies
+			from: aStepResult joints.
+		self
+			recordSensorContactsAmong: (sensorPairs select: [ :pair |
+				self pair: pair includesAnyDynamicBodyFrom: continuousBodies ])
+			bodyStates: aStepResult bodyStates
+			for: aStepResult step timeStep
+			afterFraction: tolerance
+			throughFraction: initialImpact fraction
+			into: sensorContactsByKey.
+		componentResult := loop
+			executeBodyStates: continuousBodyStates
+			joints: continuousJoints
+			step: aStepResult step
+			restitutionThreshold: aStepResult restitutionThreshold.
+		componentResult hasImpacts ifFalse: [
+			self error: 'A continuous component must contain its detected impact' ].
+		impacts addAll: componentResult impacts.
+		impactSolveResults addAll: componentResult impactSolveResults.
+		completedBodies addAll: componentResult completedBodies.
+		completedDynamicBodies addAll: (componentResult completedBodies select: #isDynamic).
+		iterationLimitReached := iterationLimitReached or: [ componentResult iterationLimitReached ].
+		self commitBodyStatesInOrder: continuousBodyStates ].
+	impacts ifEmpty: [
 		aStepResult continuousSensorContacts: (self
 			sensorContactsAmong: sensorPairs
 			bodyStates: aStepResult bodyStates
@@ -35,28 +75,25 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 			afterFraction: tolerance).
 		aStepResult continuousStepResult: nil.
 		^ nil ].
-	continuousBodyStates := componentBuilder
-		bodyStatesForImpact: initialImpact
-		from: aStepResult bodyStates
-		joints: aStepResult joints.
-	continuousBodies := continuousBodyStates keys.
-	continuousJoints := componentBuilder
-		jointsForBodies: continuousBodies
-		from: aStepResult joints.
-	continuousResult := loop
-		executeBodyStates: continuousBodyStates
-		joints: continuousJoints
-		step: aStepResult step
-		restitutionThreshold: aStepResult restitutionThreshold.
-	aStepResult continuousSensorContacts: (self
-		sensorContactsAmong: sensorPairs
+	self
+		recordSensorContactsAmong: (sensorPairs reject: [ :pair |
+			self pair: pair includesAnyDynamicBodyFrom: completedDynamicBodies ])
 		bodyStates: aStepResult bodyStates
 		for: aStepResult step timeStep
 		afterFraction: tolerance
-		throughFraction: initialImpact fraction).
-	continuousResult hasImpacts ifTrue: [
-		self commitBodyStatesInOrder: continuousBodyStates.
-		self recaptureBodyStatesAndPairsOn: aStepResult ].
+		throughFraction: 1.0
+		into: sensorContactsByKey.
+	self recaptureBodyStatesAndPairsOn: aStepResult.
+	aStepResult continuousSensorContacts: (self orderedContactsFrom: sensorContactsByKey).
+	continuousResult := CFPhysicsContinuousImpactLoopResult
+		impacts: impacts
+		impactSolveResults: impactSolveResults
+		sensorContacts: aStepResult continuousSensorContacts
+		bodyStates: aStepResult bodyStates
+		remainingTime: 0.0
+		iterationLimitReached: iterationLimitReached
+		completedBodies: (completedBodies asArray sorted: [ :first :second |
+			first sequence < second sequence ]).
 	aStepResult continuousStepResult: continuousResult.
 	^ continuousResult
 ]
@@ -128,6 +165,31 @@ CFPhysicsContinuousStepStage >> contactForSensorImpact: impact bodyStates: bodyS
 	manifold ifNil: [ ^ nil ].
 	^ CFPhysicsContact pair: pair manifold: manifold
 ]
+
+
+{ #category : 'private - testing' }
+CFPhysicsContinuousStepStage >> pair: pair includesAnyDynamicBodyFrom: bodies [
+	^ (pair firstBody isDynamic and: [ bodies includes: pair firstBody ])
+		or: [ pair secondBody isDynamic and: [ bodies includes: pair secondBody ] ]
+]
+
+{ #category : 'private - sensors' }
+CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bodyStates for: seconds afterFraction: minimumFraction throughFraction: maximumFraction into: contactsByKey [
+	(self
+		sensorContactsAmong: pairs
+		bodyStates: bodyStates
+		for: seconds
+		afterFraction: minimumFraction
+		throughFraction: maximumFraction) do: [ :contact |
+		contactsByKey at: contact key ifAbsentPut: [ contact ] ]
+]
+
+{ #category : 'private - ordering' }
+CFPhysicsContinuousStepStage >> orderedContactsFrom: contactsByKey [
+	^ contactsByKey values asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ]
+]
+
 
 { #category : 'accessing' }
 CFPhysicsContinuousStepStage >> componentBuilder [ ^ componentBuilder ]
