@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContinuousStepStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'loop', 'impactFinder' ],
+	#instVars : [ 'loop', 'impactFinder', 'componentBuilder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -10,12 +10,13 @@ Class {
 CFPhysicsContinuousStepStage >> initialize [
 	super initialize.
 	loop := CFPhysicsContinuousImpactLoop new.
-	impactFinder := CFPhysicsEarliestImpactFinder new
+	impactFinder := CFPhysicsEarliestImpactFinder new.
+	componentBuilder := CFPhysicsContinuousComponentBuilder new
 ]
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| continuousResult solidPairs sensorPairs tolerance initialImpact |
+	| continuousResult solidPairs sensorPairs tolerance initialImpact continuousBodyStates continuousBodies continuousJoints |
 	tolerance := 1.0e-9.
 	solidPairs := aStepResult pairs reject: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
@@ -34,14 +35,27 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 			afterFraction: tolerance).
 		aStepResult continuousStepResult: nil.
 		^ nil ].
+	continuousBodyStates := componentBuilder
+		bodyStatesForImpact: initialImpact
+		from: aStepResult bodyStates
+		joints: aStepResult joints.
+	continuousBodies := continuousBodyStates keys.
+	continuousJoints := componentBuilder
+		jointsForBodies: continuousBodies
+		from: aStepResult joints.
 	continuousResult := loop
-		executeBodyStates: aStepResult bodyStates
-		joints: aStepResult joints
+		executeBodyStates: continuousBodyStates
+		joints: continuousJoints
 		step: aStepResult step
 		restitutionThreshold: aStepResult restitutionThreshold.
-	aStepResult continuousSensorContacts: continuousResult sensorContacts.
+	aStepResult continuousSensorContacts: (self
+		sensorContactsAmong: sensorPairs
+		bodyStates: aStepResult bodyStates
+		for: aStepResult step timeStep
+		afterFraction: tolerance
+		throughFraction: initialImpact fraction).
 	continuousResult hasImpacts ifTrue: [
-		self commitBodyStatesInOrder: aStepResult bodyStates.
+		self commitBodyStatesInOrder: continuousBodyStates.
 		self recaptureBodyStatesAndPairsOn: aStepResult ].
 	aStepResult continuousStepResult: continuousResult.
 	^ continuousResult
@@ -88,6 +102,18 @@ CFPhysicsContinuousStepStage >> sensorContactsAmong: pairs bodyStates: bodyState
 		reject: #isNil
 ]
 
+
+{ #category : 'private - sensors' }
+CFPhysicsContinuousStepStage >> sensorContactsAmong: pairs bodyStates: bodyStates for: seconds afterFraction: minimumFraction throughFraction: maximumFraction [
+	^ ((impactFinder
+		impactsAmong: pairs
+		bodyStates: bodyStates
+		for: seconds
+		afterFraction: minimumFraction) select: [ :impact |
+		impact fraction <= (maximumFraction + 1.0e-9) ]) collect: [ :impact |
+		self contactForSensorImpact: impact bodyStates: bodyStates for: seconds ] thenReject: #isNil
+]
+
 { #category : 'private - sensors' }
 CFPhysicsContinuousStepStage >> contactForSensorImpact: impact bodyStates: bodyStates for: seconds [
 	| pair firstSweep secondSweep manifold |
@@ -102,3 +128,9 @@ CFPhysicsContinuousStepStage >> contactForSensorImpact: impact bodyStates: bodyS
 	manifold ifNil: [ ^ nil ].
 	^ CFPhysicsContact pair: pair manifold: manifold
 ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> componentBuilder [ ^ componentBuilder ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> componentBuilder: anObject [ componentBuilder := anObject ]

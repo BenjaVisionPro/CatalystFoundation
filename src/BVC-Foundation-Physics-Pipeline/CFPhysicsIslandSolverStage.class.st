@@ -7,26 +7,30 @@ Class {
 
 { #category : 'executing' }
 CFPhysicsIslandSolverStage >> executeOn: aStepResult [
-	| solver step |
-	step := aStepResult hasContinuousImpact
-		ifTrue: [ self recoveryStepFor: aStepResult step ]
-		ifFalse: [ aStepResult step ].
+	| solver islands |
+	islands := self ordinaryIslandsOn: aStepResult.
 	solver := CFPhysicsIslandSolver
-		step: step
+		step: aStepResult step
 		bodyStates: aStepResult bodyStates
-		islands: aStepResult islands.
+		islands: islands.
 	solver solveWithRestitutionThreshold: aStepResult restitutionThreshold.
 	aStepResult solver: solver.
 	^ solver
 ]
 
-{ #category : 'private - stepping' }
-CFPhysicsIslandSolverStage >> recoveryStepFor: aStep [
-	^ (CFPhysicsStep
-		timeStep: 0.0
-		substeps: aStep substepCount
-		contactHertz: aStep contactHertz
-		dampingRatio: aStep contactDampingRatio)
-		warmStartRatio: 0.0;
-		yourself
+{ #category : 'private - islands' }
+CFPhysicsIslandSolverStage >> ordinaryIslandsOn: aStepResult [
+	| completedBodies |
+	aStepResult hasContinuousImpact ifFalse: [ ^ aStepResult islands ].
+	completedBodies := IdentitySet new.
+	completedBodies addAll: aStepResult continuousStepResult completedBodies.
+	^ aStepResult islands reject: [ :island |
+		| completedDynamicBodies ordinaryDynamicBodies |
+		completedDynamicBodies := island dynamicBodies select: [ :body |
+			completedBodies includes: body ].
+		ordinaryDynamicBodies := island dynamicBodies reject: [ :body |
+			completedBodies includes: body ].
+		(completedDynamicBodies notEmpty and: [ ordinaryDynamicBodies notEmpty ]) ifTrue: [
+			self error: 'A physics island cannot be partly completed by continuous collision' ].
+		completedDynamicBodies notEmpty ]
 ]

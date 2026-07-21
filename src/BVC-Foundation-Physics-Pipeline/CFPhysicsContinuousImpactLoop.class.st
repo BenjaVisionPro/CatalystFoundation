@@ -144,6 +144,7 @@ CFPhysicsContinuousImpactLoop >> resultWithImpacts: impacts impactSolveResults: 
 		bodyStates: bodyStates
 		remainingTime: remainingTime
 		iterationLimitReached: iterationLimitReached
+		completedBodies: (bodyStates keys sorted: [ :first :second | first sequence < second sequence ])
 ]
 
 { #category : 'private - sensors' }

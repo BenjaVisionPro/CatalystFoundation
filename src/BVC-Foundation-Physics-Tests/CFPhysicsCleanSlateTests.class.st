@@ -4639,7 +4639,43 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	self assert: result hasContinuousImpact.
 	self assert: result activeContacts size equals: 2.
 	self assert: result solver notNil.
+	self assert: (result continuousStepResult completedBodies includes: moving).
+	self assert: (result continuousStepResult completedBodies includes: wall).
+	self deny: (result continuousStepResult completedBodies includes: overlapping).
+	self deny: (result continuousStepResult completedBodies includes: obstacle).
 	self assert: overlapping position x < 0.0.
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMovingBody [
+	<gtExample>
+	| moving wall separate pipeline step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	wall := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	separate := self cleanSlateBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
+	wall beStatic.
+	moving velocity: 40 @ 0.
+	separate velocity: 5 @ 0.
+	{ moving. wall. separate } do: #beginStep.
+	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+		CFPhysicsCollision
+			manifoldBetween: pair firstBody
+			and: pair secondBody ].
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := pipeline
+		stepBodies: { moving. wall. separate }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result hasContinuousImpact.
+	self deny: (result continuousStepResult completedBodies includes: separate).
+	self assert: separate position x equals: 5.0.
 	^ result
 ]
 

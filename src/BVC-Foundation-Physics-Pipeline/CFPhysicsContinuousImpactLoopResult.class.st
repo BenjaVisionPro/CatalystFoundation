@@ -1,13 +1,13 @@
 Class {
 	#name : 'CFPhysicsContinuousImpactLoopResult',
 	#superclass : 'Object',
-	#instVars : [ 'impacts', 'impactSolveResults', 'sensorContacts', 'bodyStates', 'remainingTime', 'iterationLimitReached' ],
+	#instVars : [ 'impacts', 'impactSolveResults', 'sensorContacts', 'bodyStates', 'remainingTime', 'iterationLimitReached', 'completedBodies' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
-CFPhysicsContinuousImpactLoopResult class >> impacts: impacts impactSolveResults: solveResults sensorContacts: contacts bodyStates: aDictionary remainingTime: seconds iterationLimitReached: aBoolean [
+CFPhysicsContinuousImpactLoopResult class >> impacts: impacts impactSolveResults: solveResults sensorContacts: contacts bodyStates: aDictionary remainingTime: seconds iterationLimitReached: aBoolean completedBodies: bodies [
 	^ self new
 		impacts: impacts;
 		impactSolveResults: solveResults;
@@ -15,6 +15,7 @@ CFPhysicsContinuousImpactLoopResult class >> impacts: impacts impactSolveResults
 		bodyStates: aDictionary;
 		remainingTime: seconds;
 		iterationLimitReached: aBoolean;
+		completedBodies: bodies;
 		yourself
 ]
 
@@ -82,3 +83,9 @@ CFPhysicsContinuousImpactLoopResult >> fraction [
 		ifEmpty: [ nil ]
 		ifNotEmpty: [ impacts first fraction ]
 ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> completedBodies [ ^ completedBodies ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousImpactLoopResult >> completedBodies: aCollection [ completedBodies := aCollection asArray ]
