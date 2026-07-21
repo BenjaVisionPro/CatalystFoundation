@@ -571,6 +571,26 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 	^ result
 ]
 
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> contactUpdaterRetainsAnExistingContactWhileItsBroadPhasePairRemains [
+	<gtExample>
+	| first second pair initial updater result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	pair := CFPhysicsPair first: first second: second.
+	initial := CFPhysicsContact
+		pair: pair
+		manifold: (CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: first
+			andBody: second).
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :ignored | nil ].
+	result := updater updatePairs: { pair } fromContacts: { initial }.
+	self assert: result beganContacts isEmpty.
+	self assert: result continuedContacts size equals: 1.
+	self assert: result activeContacts size equals: 1.
+	^ result
+]
+
 { #category : 'examples - step pipeline' }
 CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 	<gtExample>

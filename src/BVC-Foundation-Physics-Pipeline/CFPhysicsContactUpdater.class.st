@@ -28,6 +28,8 @@ CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 		| manifold contact previous |
 		manifold := manifoldBuilder value: pair.
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		(manifold isNil and: [ previous notNil ]) ifTrue: [
+			manifold := previous manifold ].
 		manifold ifNotNil: [
 			contact := previous
 				ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
@@ -136,9 +138,11 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 		| manifold impactContact contact previous |
 		manifold := manifoldBuilder value: pair.
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
+		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
 		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
 			manifold := impactContact manifold ].
-		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		(manifold isNil and: [ previous notNil ]) ifTrue: [
+			manifold := previous manifold ].
 		manifold ifNotNil: [
 			contact := previous
 				ifNil: [
