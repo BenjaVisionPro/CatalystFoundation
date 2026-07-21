@@ -8,7 +8,7 @@ Changing the world owner asks me to release the complete integration lifetime be
 Class {
 	#name : 'CFPhysicsWorldMotionIntegration',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'playback', 'manualPresentation', 'lifecycleHandler' ],
+	#instVars : [ 'world', 'playback', 'manualPresentation' ],
 	#classVars : [ 'Associations' ],
 	#category : 'BVC-Foundation-Physics-Motion',
 	#package : 'BVC-Foundation-Physics-Motion'
@@ -40,18 +40,7 @@ CFPhysicsWorldMotionIntegration class >> releaseFor: aWorld [
 
 { #category : 'private - initialization' }
 CFPhysicsWorldMotionIntegration >> world: aWorld [
-	world := aWorld.
-	self installLifecycleHandler
-]
-
-{ #category : 'private - lifecycle' }
-CFPhysicsWorldMotionIntegration >> installLifecycleHandler [
-	| owner |
-	owner := world owner.
-	owner ifNil: [ ^ self ].
-	lifecycleHandler ifNil: [
-		lifecycleHandler := CFPhysicsWorldLifecycleHandler on: world.
-		owner addEventHandler: lifecycleHandler ]
+	world := aWorld
 ]
 
 { #category : 'private - presenting' }
@@ -122,8 +111,5 @@ CFPhysicsWorldMotionIntegration >> releaseManualPresentation [
 CFPhysicsWorldMotionIntegration >> release [
 	playback ifNotNil: #stop.
 	playback := nil.
-	self releaseManualPresentation.
-	lifecycleHandler ifNotNil: [
-		world owner ifNotNil: [ :anOwner | anOwner removeEventHandler: lifecycleHandler ].
-		lifecycleHandler := nil ]
+	self releaseManualPresentation
 ]

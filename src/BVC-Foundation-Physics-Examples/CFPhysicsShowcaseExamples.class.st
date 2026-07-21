@@ -15,15 +15,27 @@ CFPhysicsShowcaseExamples >> clickMe [
 		constraintsDo: [ :constraints | constraints minHeight: 250 ];
 		yourself.
 	world := host physics beWorld.
-	world gravity: 0 @ 8.
+	world
+		gravity: 0 @ 8;
+		contactHertz: 120.0;
+		contactDampingRatio: 1.0.
 	random := Random new.
 	buttons := (1 to: 14) collect: [ :each |
 		self newClickMeButtonUsing: random ].
 	host addChildren: buttons.
+	world synchroniseMembership.
 	buttons do: [ :each |
+		| containment |
 		each physics
 			position: (self randomPositionFor: each in: host using: random);
-			velocity: (self randomInitialVelocityUsing: random) ].
+			velocity: (self randomInitialVelocityUsing: random);
+			restitution: 0.82;
+			friction: 0.15;
+			angularDamping: 12.0.
+		containment := each physics containWithinWorld.
+		containment restitution: 0.9 ].
+	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
+		world startStepping ].
 	^ host
 ]
 

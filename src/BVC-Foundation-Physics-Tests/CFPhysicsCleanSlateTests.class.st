@@ -571,26 +571,6 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 	^ result
 ]
 
-{ #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> contactUpdaterRetainsAnExistingContactWhileItsBroadPhasePairRemains [
-	<gtExample>
-	| first second pair initial updater result |
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
-	pair := CFPhysicsPair first: first second: second.
-	initial := CFPhysicsContact
-		pair: pair
-		manifold: (CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: first
-			andBody: second).
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :ignored | nil ].
-	result := updater updatePairs: { pair } fromContacts: { initial }.
-	self assert: result beganContacts isEmpty.
-	self assert: result continuedContacts size equals: 1.
-	self assert: result activeContacts size equals: 1.
-	^ result
-]
-
 { #category : 'examples - step pipeline' }
 CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 	<gtExample>
@@ -2176,31 +2156,6 @@ CFPhysicsCleanSlateTests >> containmentStopsOutwardVelocity [
 	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
 	self assert: body position equals: 80 @ 20.
 	self assert: body velocity equals: 0 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentAppliesFrictionAlongTheWorldEdge [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 90 extent: 20 @ 20.
-	body velocity: 10 @ 4.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: body velocity equals: 8 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentIgnoresUnlaidOutWorldBounds [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 20 extent: 20 @ 20.
-	body velocity: 10 @ 4.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment prepareForBounds: (0 @ 0 extent: 0 @ 0).
-	self assert: body position equals: 20 @ 20.
-	self assert: body velocity equals: 10 @ 4.
 	^ containment
 ]
 

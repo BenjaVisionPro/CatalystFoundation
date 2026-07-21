@@ -32,9 +32,9 @@ CFPhysicsPullInteractionHandler >> installOn: anElement [
 	endHandler := BlEventHandler on: BlPullEndEvent do: [ :anEvent |
 		self endFrom: anEvent ].
 	element
-		addEventFilter: startHandler;
-		addEventFilter: pullHandler;
-		addEventFilter: endHandler
+		addEventHandler: startHandler;
+		addEventHandler: pullHandler;
+		addEventHandler: endHandler
 ]
 
 { #category : 'events' }

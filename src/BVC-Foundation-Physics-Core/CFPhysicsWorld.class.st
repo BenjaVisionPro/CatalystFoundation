@@ -146,17 +146,10 @@ CFPhysicsWorld >> bodyStatesInOrder [
 
 { #category : 'body states' }
 CFPhysicsWorld >> registerBodyFor: anElement [
-	| body containment |
+	| body |
 	body := CFPhysicsBodyState element: anElement world: self.
-	body
-		sequence: nextBodySequence;
-		friction: 0.5;
-		restitution: 0.2;
-		angularDamping: 1.0.
+	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment restitution: 0.2.
-	self addContainmentConstraint: containment.
 	^ body
 ]
 

@@ -499,10 +499,6 @@ CFPhysicsElement >> containWithinWorld [
 	aWorld := self owningWorld.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	aWorld synchroniseMembership.
-	constraint := aWorld containmentConstraints
-		detect: [ :each | each body == self requireBodyState ]
-		ifNone: [ nil ].
-	constraint ifNotNil: [ ^ constraint ].
 	constraint := CFPhysicsContainmentConstraint on: self requireBodyState.
 	^ aWorld addContainmentConstraint: constraint
 ]
