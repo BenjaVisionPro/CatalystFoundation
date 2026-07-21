@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPullInteractionHandler',
-	#superclass : 'BlCustomEventHandler',
-	#instVars : [ 'element', 'constraint', 'enabled', 'responsiveness', 'velocityRetention', 'maximumSpeed' ],
+	#superclass : 'Object',
+	#instVars : [ 'element', 'constraint', 'startHandler', 'pullHandler', 'endHandler', 'enabled', 'responsiveness', 'velocityRetention', 'maximumSpeed' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -25,27 +25,16 @@ CFPhysicsPullInteractionHandler >> initialize [
 { #category : 'lifecycle' }
 CFPhysicsPullInteractionHandler >> installOn: anElement [
 	element := anElement.
-	element addEventHandler: self
-]
-
-{ #category : 'events' }
-CFPhysicsPullInteractionHandler >> eventsToHandle [
-	^ { BlPullStartEvent. BlPullEvent. BlPullEndEvent }
-]
-
-{ #category : 'events' }
-CFPhysicsPullInteractionHandler >> pullStartEvent: anEvent [
-	self beginFrom: anEvent
-]
-
-{ #category : 'events' }
-CFPhysicsPullInteractionHandler >> pullEvent: anEvent [
-	self continueFrom: anEvent
-]
-
-{ #category : 'events' }
-CFPhysicsPullInteractionHandler >> pullEndEvent: anEvent [
-	self endFrom: anEvent
+	startHandler := BlEventHandler on: BlPullStartEvent do: [ :anEvent |
+		self beginFrom: anEvent ].
+	pullHandler := BlEventHandler on: BlPullEvent do: [ :anEvent |
+		self continueFrom: anEvent ].
+	endHandler := BlEventHandler on: BlPullEndEvent do: [ :anEvent |
+		self endFrom: anEvent ].
+	element
+		addEventHandler: startHandler;
+		addEventHandler: pullHandler;
+		addEventHandler: endHandler
 ]
 
 { #category : 'events' }
