@@ -31,7 +31,9 @@ CFPhysicsRectangleCollision class >> manifoldBetween: firstBody and: secondBody 
 		@
 		((firstBounds minimum y max: secondBounds minimum y)
 			+ (firstBounds maximum y min: secondBounds maximum y) / 2.0).
+	point := CFPhysicsManifoldPoint at: point.
+	point separation: penetration negated.
 	^ (CFPhysicsManifold normal: normal penetration: penetration)
-		points: { point };
+		contactPoints: { point };
 		yourself
 ]
