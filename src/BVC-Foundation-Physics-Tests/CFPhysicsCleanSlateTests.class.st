@@ -1280,6 +1280,21 @@ CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 ]
 
 
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateTests >> pointerConstraintOwnsTimingWhenNoEventTimestampExists [
+	<gtExample>
+	| body constraint |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 10 @ 10.
+	constraint updatePointerPosition: 30 @ 10.
+	self assert: constraint isActive.
+	self assert: constraint pointerPosition equals: 30 @ 10.
+	^ constraint
+]
+
 { #category : 'examples - pointer interaction' }
 CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheGrabOffset [
 	<gtExample>

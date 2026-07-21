@@ -7,6 +7,14 @@ Class {
 }
 
 { #category : 'instance creation' }
+CFPhysicsPointerConstraint class >> body: aBodyState pointerPosition: aPoint [
+	^ self new
+		body: aBodyState;
+		beginAt: aPoint;
+		yourself
+]
+
+{ #category : 'instance creation' }
 CFPhysicsPointerConstraint class >> body: aBodyState pointerPosition: aPoint timestamp: aDateAndTime [
 	^ self new
 		body: aBodyState;
@@ -31,10 +39,15 @@ CFPhysicsPointerConstraint >> body [ ^ body ]
 CFPhysicsPointerConstraint >> body: aBodyState [ body := aBodyState ]
 
 { #category : 'controlling' }
+CFPhysicsPointerConstraint >> beginAt: aPoint [
+	self beginAt: aPoint timestamp: self currentTimestamp
+]
+
+{ #category : 'controlling' }
 CFPhysicsPointerConstraint >> beginAt: aPoint timestamp: aDateAndTime [
 	pointerPosition := aPoint.
 	previousPointerPosition := aPoint.
-	previousTimestamp := aDateAndTime.
+	previousTimestamp := aDateAndTime ifNil: [ self currentTimestamp ].
 	pointerVelocity := 0 @ 0.
 	grabOffset := aPoint - body position.
 	active := true.
@@ -42,9 +55,15 @@ CFPhysicsPointerConstraint >> beginAt: aPoint timestamp: aDateAndTime [
 ]
 
 { #category : 'controlling' }
+CFPhysicsPointerConstraint >> updatePointerPosition: aPoint [
+	self updatePointerPosition: aPoint timestamp: self currentTimestamp
+]
+
+{ #category : 'controlling' }
 CFPhysicsPointerConstraint >> updatePointerPosition: aPoint timestamp: aDateAndTime [
 	| seconds |
 	active ifFalse: [ ^ self ].
+	aDateAndTime ifNil: [ ^ self updatePointerPosition: aPoint ].
 	seconds := (aDateAndTime - previousTimestamp) asMilliSeconds / 1000.0.
 	seconds > 0 ifTrue: [
 		pointerVelocity := (aPoint - previousPointerPosition) / seconds ].
@@ -52,6 +71,11 @@ CFPhysicsPointerConstraint >> updatePointerPosition: aPoint timestamp: aDateAndT
 	previousTimestamp := aDateAndTime.
 	pointerPosition := aPoint.
 	body wake
+]
+
+{ #category : 'private' }
+CFPhysicsPointerConstraint >> currentTimestamp [
+	^ DateAndTime now
 ]
 
 { #category : 'stepping' }

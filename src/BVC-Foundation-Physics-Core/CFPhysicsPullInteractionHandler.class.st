@@ -49,8 +49,7 @@ CFPhysicsPullInteractionHandler >> beginFrom: anEvent [
 	self releaseConstraint.
 	constraint := CFPhysicsPointerConstraint
 		body: body
-		pointerPosition: body position
-		timestamp: anEvent timestamp.
+		pointerPosition: body position.
 	constraint
 		responsiveness: responsiveness;
 		velocityRetention: velocityRetention;
@@ -62,9 +61,7 @@ CFPhysicsPullInteractionHandler >> beginFrom: anEvent [
 CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
 	constraint ifNil: [ ^ self ].
 	self restorePositionFrom: anEvent.
-	constraint
-		updatePointerPosition: anEvent newPosition
-		timestamp: anEvent timestamp
+	constraint updatePointerPosition: anEvent newPosition
 ]
 
 { #category : 'events' }
