@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContainmentConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'margin', 'restitution', 'active' ],
+	#instVars : [ 'body', 'margin', 'friction', 'restitution', 'active' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -17,6 +17,7 @@ CFPhysicsContainmentConstraint class >> on: aBodyState [
 CFPhysicsContainmentConstraint >> initialize [
 	super initialize.
 	margin := 0.0.
+	friction := 0.5.
 	restitution := 0.0.
 	active := true
 ]
@@ -34,6 +35,14 @@ CFPhysicsContainmentConstraint >> margin [ ^ margin ]
 CFPhysicsContainmentConstraint >> margin: aNumber [ margin := aNumber asFloat max: 0.0 ]
 
 { #category : 'configuration' }
+CFPhysicsContainmentConstraint >> friction [ ^ friction ]
+
+{ #category : 'configuration' }
+CFPhysicsContainmentConstraint >> friction: aNumber [
+	friction := aNumber asFloat max: 0.0
+]
+
+{ #category : 'configuration' }
 CFPhysicsContainmentConstraint >> restitution [ ^ restitution ]
 
 { #category : 'configuration' }
@@ -46,7 +55,7 @@ CFPhysicsContainmentConstraint >> isActive [ ^ active ]
 
 { #category : 'stepping' }
 CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
-	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY |
+	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY hitHorizontalEdge hitVerticalEdge mixedFriction |
 	(active and: [ body isDynamic ]) ifFalse: [ ^ self ].
 	minimum := aRectangle origin + (margin @ margin).
 	maximum := aRectangle corner - (margin @ margin).
@@ -61,18 +70,39 @@ CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
 		+ ((maximum y - bodyBounds maximum y) min: 0.0).
 	velocityX := velocity x.
 	velocityY := velocity y.
+	hitVerticalEdge := false.
+	hitHorizontalEdge := false.
 	(bodyBounds minimum x < minimum x and: [ velocityX < 0 ]) ifTrue: [
-		velocityX := velocityX negated * restitution ].
+		velocityX := velocityX negated * restitution.
+		hitVerticalEdge := true ].
 	(bodyBounds maximum x > maximum x and: [ velocityX > 0 ]) ifTrue: [
-		velocityX := velocityX negated * restitution ].
+		velocityX := velocityX negated * restitution.
+		hitVerticalEdge := true ].
 	(bodyBounds minimum y < minimum y and: [ velocityY < 0 ]) ifTrue: [
-		velocityY := velocityY negated * restitution ].
+		velocityY := velocityY negated * restitution.
+		hitHorizontalEdge := true ].
 	(bodyBounds maximum y > maximum y and: [ velocityY > 0 ]) ifTrue: [
-		velocityY := velocityY negated * restitution ].
+		velocityY := velocityY negated * restitution.
+		hitHorizontalEdge := true ].
+	mixedFriction := (friction * body friction) sqrt.
+	hitHorizontalEdge ifTrue: [
+		velocityX := self
+			velocity: velocityX
+			approachingZeroBy: mixedFriction * velocity y abs ].
+	hitVerticalEdge ifTrue: [
+		velocityY := self
+			velocity: velocityY
+			approachingZeroBy: mixedFriction * velocity x abs ].
 	(correctedX ~= position x or: [ correctedY ~= position y ]) ifTrue: [
 		body translateBy: (correctedX @ correctedY) - position.
-		body velocity: velocityX @ velocityY.
-		body wake ]
+		body correctVelocity: velocityX @ velocityY ]
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsContainmentConstraint >> velocity: aVelocity approachingZeroBy: anAmount [
+	aVelocity > 0.0 ifTrue: [ ^ (aVelocity - anAmount) max: 0.0 ].
+	aVelocity < 0.0 ifTrue: [ ^ (aVelocity + anAmount) min: 0.0 ].
+	^ 0.0
 ]
 
 { #category : 'controlling' }

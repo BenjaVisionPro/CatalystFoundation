@@ -2160,6 +2160,33 @@ CFPhysicsCleanSlateTests >> containmentStopsOutwardVelocity [
 ]
 
 { #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> containmentAppliesFrictionAlongTheWorldEdge [
+	<gtExample>
+	| body containment |
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 90 extent: 20 @ 20.
+	body velocity: 10 @ 4.
+	containment := CFPhysicsContainmentConstraint on: body.
+	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
+	self assert: body velocity equals: 8 @ 0.
+	^ containment
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> containmentCorrectionDoesNotWakeTheBody [
+	<gtExample>
+	| body containment |
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 90 extent: 20 @ 20.
+	body velocity: 0 @ 4.
+	body sleep.
+	body wake.
+	body advanceSleepTimeBy: 0.25.
+	containment := CFPhysicsContainmentConstraint on: body.
+	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
+	self assert: body sleepTime equals: 0.25.
+	^ containment
+]
+
+{ #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCanBounceAtTheWorldEdge [
 	<gtExample>
 	| body containment |

@@ -251,6 +251,13 @@ CFPhysicsBodyState >> velocity: aPoint [
 		ifFalse: [ 0 @ 0 ]
 ]
 
+{ #category : 'stepping' }
+CFPhysicsBodyState >> correctVelocity: aPoint [
+	velocity := dynamic
+		ifTrue: [ aPoint ]
+		ifFalse: [ 0 @ 0 ]
+]
+
 { #category : 'accessing' }
 CFPhysicsBodyState >> world [
 	^ world
