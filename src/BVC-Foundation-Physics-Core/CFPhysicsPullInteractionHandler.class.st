@@ -90,6 +90,7 @@ CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 { #category : 'private' }
 CFPhysicsPullInteractionHandler >> finishConstraint [
 	constraint ifNil: [ ^ self ].
+	constraint release.
 	constraint body world removePointerConstraint: constraint.
 	constraint := nil
 ]
