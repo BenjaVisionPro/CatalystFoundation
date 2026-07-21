@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContinuousStepStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'impactFinder' ],
+	#instVars : [ 'impactFinder', 'pairFinder' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -9,15 +9,17 @@ Class {
 { #category : 'initialization' }
 CFPhysicsContinuousStepStage >> initialize [
 	super initialize.
-	impactFinder := CFPhysicsEarliestImpactFinder new
+	impactFinder := CFPhysicsEarliestImpactFinder new.
+	pairFinder := CFPhysicsPairFinder new
 ]
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
-	solidPairs := aStepResult pairs reject: [ :pair |
+	| solvedPairs solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
+	solvedPairs := pairFinder pairsAmongSolvedStepStates: aStepResult bodyStates values.
+	solidPairs := solvedPairs reject: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
-	sensorPairs := aStepResult pairs select: [ :pair |
+	sensorPairs := solvedPairs select: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
@@ -129,3 +131,9 @@ CFPhysicsContinuousStepStage >> impactFinder [ ^ impactFinder ]
 
 { #category : 'accessing' }
 CFPhysicsContinuousStepStage >> impactFinder: anObject [ impactFinder := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> pairFinder [ ^ pairFinder ]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> pairFinder: anObject [ pairFinder := anObject ]

@@ -110,6 +110,12 @@ CFPhysicsBodyStepState >> solvedSweep [
 	^ CFPhysicsSweep from: self startTransform to: self solvedTransform
 ]
 
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> solvedSweptAABB [
+	^ body shapeState sweptAABBAlong: self solvedSweep
+]
+
 { #category : 'continuous collision' }
 CFPhysicsBodyStepState >> clampSolvedTransformToFraction: aFraction [
 	| fraction |

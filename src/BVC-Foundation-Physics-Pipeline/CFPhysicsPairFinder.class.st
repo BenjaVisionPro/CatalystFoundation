@@ -26,6 +26,29 @@ CFPhysicsPairFinder >> pairsAmong: bodies [
 	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
 ]
 
+
+{ #category : 'finding' }
+CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
+	| entries active pairs |
+	entries := (stepStates collect: [ :state |
+		{ state. state solvedSweptAABB. state body sequence } ]) asArray.
+	entries := self entriesSortedByMinimumX: entries.
+	active := OrderedCollection new.
+	pairs := OrderedCollection new.
+	entries do: [ :entry |
+		active := active reject: [ :other |
+			other second maximum x < entry second minimum x ].
+		active do: [ :other |
+			(self
+				shouldConsiderStepState: other first
+				with: entry first
+				firstAABB: other second
+				secondAABB: entry second) ifTrue: [
+				pairs add: (CFPhysicsPair first: other first body second: entry first body) ] ].
+		active add: entry ].
+	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
+]
+
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsider: first with: second [
 	^ self
