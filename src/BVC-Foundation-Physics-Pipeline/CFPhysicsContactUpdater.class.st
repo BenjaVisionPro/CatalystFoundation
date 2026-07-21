@@ -28,6 +28,8 @@ CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 		| manifold contact previous |
 		manifold := manifoldBuilder value: pair.
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		(manifold isNil and: [ previous notNil ]) ifTrue: [
+			manifold := previous manifold ].
 		manifold ifNotNil: [
 			contact := previous
 				ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
