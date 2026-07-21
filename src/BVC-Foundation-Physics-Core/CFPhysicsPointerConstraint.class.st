@@ -122,9 +122,17 @@ CFPhysicsPointerConstraint >> cancel [
 
 { #category : 'controlling' }
 CFPhysicsPointerConstraint >> release [
+	| releaseVelocity sampleAge |
 	active ifFalse: [ ^ self ].
 	active := false.
-	body isDynamic ifTrue: [ body velocity: (self limitedVelocity: pointerVelocity) ]
+	body isDynamic ifFalse: [ ^ self ].
+	releaseVelocity := body velocity.
+	previousTimestamp ifNotNil: [
+		sampleAge := (self currentTimestamp - previousTimestamp) asMilliSeconds / 1000.0.
+		(sampleAge <= 0.12 and: [ pointerVelocity ~= (0 @ 0) ]) ifTrue: [
+			releaseVelocity := pointerVelocity ] ].
+	body velocity: (self limitedVelocity: releaseVelocity).
+	body wake
 ]
 
 { #category : 'testing' }

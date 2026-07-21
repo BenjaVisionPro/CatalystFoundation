@@ -1316,6 +1316,23 @@ CFPhysicsCleanSlateTests >> pointerConstraintInitialTargetMovementDoesNotCreateV
 ]
 
 { #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateTests >> pointerConstraintReleasePreservesSimulatedVelocityWithoutAPointerSample [
+	<gtExample>
+	| body constraint timestamp |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 10 @ 10
+		timestamp: timestamp.
+	constraint movePointerPositionTo: 30 @ 10 timestamp: timestamp + 1 milliSecond.
+	body velocity: 420 @ 35.
+	constraint release.
+	self assert: body velocity equals: 420 @ 35.
+	^ constraint
+]
+
+{ #category : 'examples - pointer interaction' }
 CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheGrabOffset [
 	<gtExample>
 	| body constraint timestamp |
