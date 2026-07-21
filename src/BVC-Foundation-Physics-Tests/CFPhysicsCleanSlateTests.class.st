@@ -945,14 +945,15 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 		CFPhysicsBodyStateCaptureStage.
 		CFPhysicsVelocityIntegrationStage.
 		CFPhysicsPairFinderStage.
-		CFPhysicsContinuousStepStage.
 		CFPhysicsContactUpdateStage.
 		CFPhysicsConstraintPreparationStage.
 		CFPhysicsIslandBuilderStage.
 		CFPhysicsIslandWakeStage.
 		CFPhysicsIslandSolverStage.
 		CFPhysicsPostSolveStage.
+		CFPhysicsContinuousStepStage.
 		CFPhysicsIslandSleepingStage.
+		CFPhysicsBodyCommitStage.
 		CFPhysicsContactEventsStage }.
 	self assert: result executedStages size equals: expectedTypes size.
 	expectedTypes withIndexDo: [ :stageType :index |
@@ -960,14 +961,13 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: result stageExecutions first output == result bodyStates.
 	self assert: result stageExecutions second output == result bodyStates.
 	self assert: result stageExecutions third output equals: result pairs.
-	self assert: result stageExecutions fourth output isNil.
-	self assert: result stageExecutions fifth output == result contactResult.
-	self assert: result stageExecutions sixth output equals: result constraints.
-	self assert: result stageExecutions seventh output equals: result islands.
-	self assert: ((result stageExecutions at: 9) output == result solver).
-	self assert: (result stageExecutions at: 10) output contactResults equals: result contactSolveResults.
-	self assert: (result stageExecutions at: 10) output hitEvents equals: result hitEvents.
-	self assert: (result stageExecutions at: 12) output equals: result contactEvents.
+	self assert: result stageExecutions fourth output == result contactResult.
+	self assert: result stageExecutions fifth output equals: result constraints.
+	self assert: result stageExecutions sixth output equals: result islands.
+	self assert: (result stageExecutions at: 8) output == result solver.
+	self assert: (result stageExecutions at: 9) output contactResults equals: result contactSolveResults.
+	self assert: (result stageExecutions at: 9) output hitEvents equals: result hitEvents.
+	self assert: (result stageExecutions at: 13) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -980,13 +980,14 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 12.
+	self assert: stages size equals: 13.
 	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
 	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
 	self assert: stages third class equals: CFPhysicsPairFinderStage.
-	self assert: stages seventh class equals: CFPhysicsContinuousStepStage.
+	self assert: (stages at: 10) class equals: CFPhysicsContinuousStepStage.
+	self assert: (stages at: 12) class equals: CFPhysicsBodyCommitStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
-	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 6).
+	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 5).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
 ]

@@ -123,3 +123,17 @@ CFPhysicsBodyStepState >> clampSolvedTransformToFraction: aFraction [
 	deltaPosition := deltaPosition * fraction.
 	deltaRotation := deltaRotation * fraction
 ]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> maximumPointMotion [
+	^ deltaPosition r + (deltaRotation abs * body shapeState boundingRadius)
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> isFastForContinuousCollision [
+	body isDynamic ifFalse: [ ^ false ].
+	body isAwake ifFalse: [ ^ false ].
+	body isSensor ifTrue: [ ^ false ].
+	^ self maximumPointMotion > (0.5 * body shapeState minimumExtent)
+]
+

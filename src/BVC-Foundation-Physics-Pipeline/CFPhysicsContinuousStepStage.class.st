@@ -24,17 +24,16 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
 	sensorContactsByKey := Dictionary new.
-	(aStepResult bodyStates values asArray sorted: [ :first :second |
-		first body sequence < second body sequence ]) do: [ :state |
-		state body isDynamic ifTrue: [
-			self
-				clampSolvedState: state
-				amongSolidPairs: solidPairs
-				sensorPairs: sensorPairs
-				bodyStates: aStepResult bodyStates
-				impacts: impacts
-				impactSolveResults: impactSolveResults
-				sensorContactsByKey: sensorContactsByKey ] ].
+	((aStepResult bodyStates values select: #isFastForContinuousCollision) asArray
+		sorted: [ :first :second | first body sequence < second body sequence ]) do: [ :state |
+		self
+			clampSolvedState: state
+			amongSolidPairs: solidPairs
+			sensorPairs: sensorPairs
+			bodyStates: aStepResult bodyStates
+			impacts: impacts
+			impactSolveResults: impactSolveResults
+			sensorContactsByKey: sensorContactsByKey ].
 	aStepResult continuousSensorContacts: (self orderedContactsFrom: sensorContactsByKey).
 	impacts ifEmpty: [
 		aStepResult continuousStepResult: nil.

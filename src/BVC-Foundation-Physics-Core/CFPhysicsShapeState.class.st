@@ -118,6 +118,11 @@ CFPhysicsShapeState >> radius [
 	^ self extent min / 2.0
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsShapeState >> minimumExtent [
+	^ self extent min / 2.0
+]
+
 { #category : 'polygon' }
 CFPhysicsShapeState >> collisionVerticesAt: aPosition [
 	^ self collisionVerticesAt: aPosition rotation: 0
