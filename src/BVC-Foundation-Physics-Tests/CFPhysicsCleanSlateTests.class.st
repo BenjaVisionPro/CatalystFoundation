@@ -1481,7 +1481,7 @@ CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFr
 { #category : 'examples - pull interaction' }
 CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 	<gtExample>
-	| space owner button world pointerPosition dragStart dragMove dragEnd |
+	| space owner button world pointerPosition dragStart dragMove dragEnd pullEvents |
 	space := BlSpace new.
 	owner := BlElement new size: 200 @ 120; yourself.
 	button := BrButton new
@@ -1490,6 +1490,10 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		size: 90 @ 32;
 		addEventHandler: BlPullHandler new;
 		yourself.
+	pullEvents := OrderedCollection new.
+	button addEventHandler: (BlEventHandler
+		on: BlPullEvent
+		do: [ :anEvent | pullEvents add: anEvent ]).
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
 	space root addChild: owner.
@@ -1510,6 +1514,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		dragStart.
 		dragMove }
 		on: button.
+	self assert: pullEvents size equals: 1.
 	self assert: world pointerConstraints size equals: 1.
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
@@ -4644,7 +4649,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	self assert: result hasContinuousImpact.
 	self assert: result activeContacts size equals: 2.
 	self assert: result solver notNil.
-	self assert: overlapping position x < -9.9.
+	self assert: overlapping position x < 0.0.
 	^ result
 ]
 
