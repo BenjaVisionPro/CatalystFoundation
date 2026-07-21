@@ -1495,12 +1495,12 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		do: [ :anEvent | pullEvents add: anEvent ]).
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
-	scripter := BlScripter new element: owner.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	button physics position: 20 @ 20.
 	button relocate: 20 @ 20.
+	scripter := BlScripter new element: owner.
 	scripter mouseMoveOver
 		onChildAt: 1;
 		play.
