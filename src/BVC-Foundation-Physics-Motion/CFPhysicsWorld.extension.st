@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysicsWorld' }
 
 { #category : '*BVC-Foundation-Physics-Motion' }
+CFPhysicsWorld >> activateDefaultIntegration [
+	CFPhysicsWorldMotionIntegration for: self
+]
+
+{ #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysicsWorld >> present [
 	(CFPhysicsWorldMotionIntegration for: self) present.
 	^ self

@@ -142,7 +142,7 @@ CFPhysicsBodyState >> initialize [
 	sleepTime := 0.0.
 	angularVelocity := 0.0.
 	torque := 0.0.
-	angularDamping := 0.0.
+	angularDamping := 1.0.
 	sleepingAllowed := true.
 	contacts := IdentitySet new
 ]
