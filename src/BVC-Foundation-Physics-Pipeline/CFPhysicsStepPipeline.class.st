@@ -15,12 +15,15 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 			CFPhysicsBodyStateCaptureStage new.
 			CFPhysicsVelocityIntegrationStage new.
 			CFPhysicsPairFinderStage new.
-			CFPhysicsContinuousStepStage new.
 			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
 			CFPhysicsConstraintPreparationStage new.
 			CFPhysicsIslandBuilderStage new.
 			CFPhysicsIslandWakeStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsIslandSolverStage new.
+			CFPhysicsContinuousStepStage new.
+			CFPhysicsBodyCommitStage new.
+			CFPhysicsPairFinderStage new.
+			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
 			CFPhysicsPostSolveStage new.
 			CFPhysicsIslandSleepingStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsContactEventsStage new };

@@ -94,3 +94,37 @@ CFPhysicsEarliestImpactFinder >> impactsAtEarliestTimeAmong: pairs bodyStates: b
 	^ impacts select: [ :each |
 		each fraction <= (earliest fraction + tolerance) ]
 ]
+
+
+{ #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> earliestSolvedAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction [
+	| candidates |
+	candidates := self solvedImpactsAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction.
+	^ candidates ifEmpty: [ nil ] ifNotEmpty: [ candidates first ]
+]
+
+{ #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedImpactsAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction [
+	| impacts |
+	impacts := OrderedCollection new.
+	pairs do: [ :pair |
+		| candidate |
+		candidate := self solvedTimeOfImpactFor: pair bodyStates: bodyStates.
+		(candidate timeOfImpactResult hasImpact and: [ candidate fraction > minimumFraction ]) ifTrue: [
+			impacts add: candidate ] ].
+	^ impacts asArray sorted: [ :left :right |
+		self candidate: left comesBefore: right tolerance: 1.0e-9 ]
+]
+
+{ #category : 'private - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodyStates [
+	| firstState secondState result |
+	firstState := bodyStates at: pair firstBody.
+	secondState := bodyStates at: pair secondBody.
+	result := CFPhysicsConservativeAdvancement
+		betweenShapeState: pair firstBody shapeState
+		sweep: firstState solvedSweep
+		andShapeState: pair secondBody shapeState
+		sweep: secondState solvedSweep.
+	^ CFPhysicsPairTimeOfImpact pair: pair result: result
+]

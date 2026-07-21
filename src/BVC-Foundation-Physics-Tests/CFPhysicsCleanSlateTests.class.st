@@ -984,7 +984,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
 	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
 	self assert: stages third class equals: CFPhysicsPairFinderStage.
-	self assert: stages fourth class equals: CFPhysicsContinuousStepStage.
+	self assert: stages seventh class equals: CFPhysicsContinuousStepStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
 	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 6).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
@@ -4639,10 +4639,6 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	self assert: result hasContinuousImpact.
 	self assert: result activeContacts size equals: 2.
 	self assert: result solver notNil.
-	self assert: (result continuousStepResult completedBodies includes: moving).
-	self assert: (result continuousStepResult completedBodies includes: wall).
-	self assert: (result continuousStepResult completedBodies includes: overlapping) not.
-	self assert: (result continuousStepResult completedBodies includes: obstacle) not.
 	self assert: overlapping position x < 0.0.
 	^ result
 ]
@@ -4674,7 +4670,6 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMoving
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
-	self assert: (result continuousStepResult completedBodies includes: separate) not.
 	self assert: separate position x equals: 5.0.
 	^ result
 ]

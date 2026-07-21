@@ -93,3 +93,27 @@ CFPhysicsBodyStepState >> currentTransform [
 		position: body position + deltaPosition
 		rotation: body rotation + deltaRotation
 ]
+
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> startTransform [
+	^ CFPhysicsTransform position: body position rotation: body rotation
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> solvedTransform [
+	^ self currentTransform
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> solvedSweep [
+	^ CFPhysicsSweep from: self startTransform to: self solvedTransform
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> clampSolvedTransformToFraction: aFraction [
+	| fraction |
+	fraction := (aFraction max: 0.0) min: 1.0.
+	deltaPosition := deltaPosition * fraction.
+	deltaRotation := deltaRotation * fraction
+]
