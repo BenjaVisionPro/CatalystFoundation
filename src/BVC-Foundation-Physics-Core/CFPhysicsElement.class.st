@@ -25,10 +25,7 @@ CFPhysicsElement >> beStatic [
 
 { #category : 'worlds' }
 CFPhysicsElement >> beWorld [
-	ownedWorld ifNil: [
-		ownedWorld := CFPhysicsWorld on: element.
-		(ownedWorld respondsTo: #activateDefaultIntegration) ifTrue: [
-			ownedWorld activateDefaultIntegration ] ].
+	ownedWorld ifNil: [ ownedWorld := CFPhysicsWorld on: element ].
 	^ ownedWorld
 ]
 

@@ -55,7 +55,7 @@ CFPhysicsContainmentConstraint >> isActive [ ^ active ]
 
 { #category : 'stepping' }
 CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
-	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY hitHorizontalEdge hitVerticalEdge mixedFriction |
+	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY hitHorizontalEdge hitVerticalEdge |
 	(active and: [ body isDynamic ]) ifFalse: [ ^ self ].
 	(aRectangle width <= (margin * 2.0) or: [ aRectangle height <= (margin * 2.0) ]) ifTrue: [ ^ self ].
 	minimum := aRectangle origin + (margin @ margin).
@@ -85,15 +85,14 @@ CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
 	(bodyBounds maximum y > maximum y and: [ velocityY > 0 ]) ifTrue: [
 		velocityY := velocityY negated * restitution.
 		hitHorizontalEdge := true ].
-	mixedFriction := (friction * body friction) sqrt.
 	hitHorizontalEdge ifTrue: [
 		velocityX := self
 			velocity: velocityX
-			approachingZeroBy: mixedFriction * velocity y abs ].
+			approachingZeroBy: friction * velocity y abs ].
 	hitVerticalEdge ifTrue: [
 		velocityY := self
 			velocity: velocityY
-			approachingZeroBy: mixedFriction * velocity x abs ].
+			approachingZeroBy: friction * velocity x abs ].
 	(correctedX ~= position x or: [ correctedY ~= position y ]) ifTrue: [
 		body translateBy: (correctedX @ correctedY) - position.
 		body correctVelocity: velocityX @ velocityY ]

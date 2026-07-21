@@ -30,8 +30,8 @@ CFPhysicsWorld >> initialize [
 	stepDuration := 16 milliseconds.
 	restitutionThreshold := 1.0.
 	substepCount := 4.
-	contactHertz := 120.0.
-	contactDampingRatio := 1.0.
+	contactHertz := 30.0.
+	contactDampingRatio := 10.0.
 	activeContacts := #().
 	pointerConstraints := IdentitySet new.
 	springConstraints := IdentitySet new.
