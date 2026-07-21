@@ -1481,8 +1481,7 @@ CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFr
 { #category : 'examples - pull interaction' }
 CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 	<gtExample>
-	| space owner button world pointerPosition pullEvents |
-	space := BlSpace new.
+	| scripter owner button world pullEvents |
 	owner := BlElement new size: 200 @ 120; yourself.
 	button := BrButton new
 		aptitude: BrGlamorousButtonWithLabelAptitude new;
@@ -1496,28 +1495,25 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		do: [ :anEvent | pullEvents add: anEvent ]).
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
-	space root addChild: owner.
-	space pulse.
+	scripter := BlScripter new element: owner.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	button physics position: 20 @ 20.
 	button relocate: 20 @ 20.
-	pointerPosition := button bounds inSpace center.
-	BlSpace
-		simulateEvents: {
-			BlMouseDownEvent primary position: pointerPosition.
-			BlMouseMoveEvent primary position: pointerPosition + (30 @ 0) }
-		on: button.
+	scripter mouseMoveOver
+		onChildAt: 1;
+		play.
+	scripter mouseDown play.
+	scripter mouseMove
+		by: 30 @ 0;
+		play.
 	self assert: pullEvents size equals: 1.
 	self assert: world pointerConstraints size equals: 1.
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
 	self assert: button physics position x > 20.
-	BlSpace
-		simulateEvents: {
-			BlMouseUpEvent primary position: pointerPosition + (30 @ 0) }
-		on: button.
+	scripter mouseUp play.
 	self assert: world pointerConstraints isEmpty.
 	self assert: button physics bodyState velocity x > 0.
 	^ button
