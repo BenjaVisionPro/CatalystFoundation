@@ -40,18 +40,10 @@ CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder: anObject [ ra
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	| constraints jointConstraints |
-	constraints := aStepResult hasContinuousImpact
-		ifTrue: [
-			| allConstraints |
-			allConstraints := OrderedCollection new.
-			aStepResult continuousStepResult impactSolveResults do: [ :solveResult |
-				allConstraints addAll: solveResult constraints ].
-			allConstraints ]
-		ifFalse: [
-			constraintBuilder
-				constraintsFrom: aStepResult activeContacts
-				bodyStates: aStepResult bodyStates
-				warmStartRatio: aStepResult step warmStartRatio ].
+	constraints := constraintBuilder
+		constraintsFrom: aStepResult activeContacts
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio.
 	jointConstraints := distanceJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates

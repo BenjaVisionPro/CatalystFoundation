@@ -41,7 +41,8 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 		restitutionThreshold: aStepResult restitutionThreshold.
 	aStepResult continuousSensorContacts: continuousResult sensorContacts.
 	continuousResult hasImpacts ifTrue: [
-		self commitBodyStatesInOrder: aStepResult bodyStates ].
+		self commitBodyStatesInOrder: aStepResult bodyStates.
+		self recaptureBodyStatesAndPairsOn: aStepResult ].
 	aStepResult continuousStepResult: continuousResult.
 	^ continuousResult
 ]
@@ -50,6 +51,18 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 CFPhysicsContinuousStepStage >> commitBodyStatesInOrder: bodyStates [
 	(bodyStates values sorted: [ :first :second |
 		first body sequence < second body sequence ]) do: #commit
+]
+
+{ #category : 'private - capturing' }
+CFPhysicsContinuousStepStage >> recaptureBodyStatesAndPairsOn: aStepResult [
+	| states |
+	states := IdentityDictionary new.
+	aStepResult bodies do: [ :body |
+		states at: body put: (CFPhysicsBodyStepState on: body) ].
+	aStepResult bodyStates: states.
+	aStepResult pairs: (CFPhysicsPairFinder new
+		pairsAmongStepStates: states values
+		for: 0.0)
 ]
 
 { #category : 'accessing' }
