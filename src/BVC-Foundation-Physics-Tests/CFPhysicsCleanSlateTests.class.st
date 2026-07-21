@@ -1296,6 +1296,26 @@ CFPhysicsCleanSlateTests >> pointerConstraintOwnsTimingWhenNoEventTimestampExist
 ]
 
 { #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateTests >> pointerConstraintInitialTargetMovementDoesNotCreateVelocity [
+	<gtExample>
+	| body constraint timestamp |
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 25 @ 35
+		timestamp: timestamp.
+	constraint
+		movePointerPositionTo: 80 @ 90
+		timestamp: timestamp + 1 milliSecond.
+	self assert: constraint pointerPosition equals: 80 @ 90.
+	self assert: constraint pointerVelocity equals: 0 @ 0.
+	constraint release.
+	self assert: body velocity equals: 0 @ 0.
+	^ constraint
+]
+
+{ #category : 'examples - pointer interaction' }
 CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheGrabOffset [
 	<gtExample>
 	| body constraint timestamp |

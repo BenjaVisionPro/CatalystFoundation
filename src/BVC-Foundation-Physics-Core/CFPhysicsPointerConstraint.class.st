@@ -54,6 +54,22 @@ CFPhysicsPointerConstraint >> beginAt: aPoint timestamp: aDateAndTime [
 	body wake
 ]
 
+
+{ #category : 'controlling' }
+CFPhysicsPointerConstraint >> movePointerPositionTo: aPoint [
+	self movePointerPositionTo: aPoint timestamp: self currentTimestamp
+]
+
+{ #category : 'controlling' }
+CFPhysicsPointerConstraint >> movePointerPositionTo: aPoint timestamp: aDateAndTime [
+	active ifFalse: [ ^ self ].
+	pointerPosition := aPoint.
+	previousPointerPosition := aPoint.
+	previousTimestamp := aDateAndTime ifNil: [ self currentTimestamp ].
+	pointerVelocity := 0 @ 0.
+	body wake
+]
+
 { #category : 'controlling' }
 CFPhysicsPointerConstraint >> updatePointerPosition: aPoint [
 	self updatePointerPosition: aPoint timestamp: self currentTimestamp
@@ -97,6 +113,11 @@ CFPhysicsPointerConstraint >> limitedVelocity: aPoint [
 	speed := aPoint r.
 	(speed <= maximumSpeed or: [ speed = 0 ]) ifTrue: [ ^ aPoint ].
 	^ aPoint * (maximumSpeed / speed)
+]
+
+{ #category : 'controlling' }
+CFPhysicsPointerConstraint >> cancel [
+	active := false
 ]
 
 { #category : 'controlling' }

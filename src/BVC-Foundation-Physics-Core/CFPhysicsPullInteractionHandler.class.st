@@ -39,35 +39,23 @@ CFPhysicsPullInteractionHandler >> installOn: anElement [
 
 { #category : 'events' }
 CFPhysicsPullInteractionHandler >> beginFrom: anEvent [
-	| world body |
 	(self shouldHandle: anEvent) ifFalse: [ ^ self ].
-	world := element physics world.
-	world ifNil: [ ^ self ].
-	world synchroniseMembership.
-	body := world bodyStateFor: element.
-	(body isNil or: [ body isDynamic not ]) ifTrue: [ ^ self ].
-	self releaseConstraint.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: body position.
-	constraint
-		responsiveness: responsiveness;
-		velocityRetention: velocityRetention;
-		maximumSpeed: maximumSpeed.
-	world addPointerConstraint: constraint
+	self removeConstraint
 ]
 
 { #category : 'events' }
 CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
+	constraint
+		ifNil: [ self beginConstraintFrom: anEvent ]
+		ifNotNil: [ constraint updatePointerPosition: anEvent newPosition ].
 	constraint ifNil: [ ^ self ].
-	self restorePositionFrom: anEvent.
-	constraint updatePointerPosition: anEvent newPosition
+	self restorePositionFrom: anEvent
 ]
 
 { #category : 'events' }
 CFPhysicsPullInteractionHandler >> endFrom: anEvent [
 	constraint ifNil: [ ^ self ].
-	self releaseConstraint
+	self finishConstraint
 ]
 
 { #category : 'private' }
@@ -81,8 +69,35 @@ CFPhysicsPullInteractionHandler >> restorePositionFrom: anEvent [
 ]
 
 { #category : 'private' }
-CFPhysicsPullInteractionHandler >> releaseConstraint [
+CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
+	| world body |
+	world := element physics world.
+	world ifNil: [ ^ self ].
+	world synchroniseMembership.
+	body := world bodyStateFor: element.
+	(body isNil or: [ body isDynamic not ]) ifTrue: [ ^ self ].
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: anEvent oldPosition.
+	constraint
+		responsiveness: responsiveness;
+		velocityRetention: velocityRetention;
+		maximumSpeed: maximumSpeed;
+		movePointerPositionTo: anEvent newPosition.
+	world addPointerConstraint: constraint
+]
+
+{ #category : 'private' }
+CFPhysicsPullInteractionHandler >> finishConstraint [
 	constraint ifNil: [ ^ self ].
+	constraint body world removePointerConstraint: constraint.
+	constraint := nil
+]
+
+{ #category : 'private' }
+CFPhysicsPullInteractionHandler >> removeConstraint [
+	constraint ifNil: [ ^ self ].
+	constraint cancel.
 	constraint body world removePointerConstraint: constraint.
 	constraint := nil
 ]
@@ -95,7 +110,7 @@ CFPhysicsPullInteractionHandler >> enable [
 { #category : 'controlling' }
 CFPhysicsPullInteractionHandler >> disable [
 	enabled := false.
-	self releaseConstraint
+	self removeConstraint
 ]
 
 { #category : 'testing' }
