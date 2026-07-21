@@ -31,8 +31,7 @@ CFPhysicsShowcaseExamples >> clickMe [
 			velocity: (self randomInitialVelocityUsing: random);
 			restitution: 0.82;
 			friction: 0.15;
-			angularDamping: 12.0;
-			enablePointerDragging.
+			angularDamping: 12.0.
 		containment := each physics containWithinWorld.
 		containment restitution: 0.9 ].
 	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
@@ -49,6 +48,7 @@ CFPhysicsShowcaseExamples >> newClickMeButtonUsing: aRandom [
 		aptitude: aptitude;
 		label: 'Click Me';
 		size: 104 @ 42;
+		addEventHandler: BlPullHandler new;
 		action: [ :aButton |
 			aButton physics bodyState
 				addVelocity: (self randomClickVelocityUsing: aRandom) ];

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'ownedWorld', 'pointerDragHandler', 'excludedFromWorld' ],
+	#instVars : [ 'element', 'ownedWorld', 'pullInteractionHandler', 'excludedFromWorld' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -44,7 +44,8 @@ CFPhysicsElement >> element [
 
 { #category : 'accessing' }
 CFPhysicsElement >> element: anElement [
-	element := anElement
+	element := anElement.
+	pullInteractionHandler := CFPhysicsPullInteractionHandler on: element
 ]
 
 { #category : 'world membership' }
@@ -308,29 +309,26 @@ CFPhysicsElement >> collisionGroupIndex: anInteger [
 ]
 
 
-{ #category : 'pointer interaction' }
-CFPhysicsElement >> enablePointerDragging [
-	pointerDragHandler ifNil: [
-		pointerDragHandler := CFPhysicsPointerDragHandler on: element ].
-	^ pointerDragHandler
+{ #category : 'pull interaction' }
+CFPhysicsElement >> enablePullInteraction [
+	pullInteractionHandler enable.
+	^ pullInteractionHandler
 ]
 
-{ #category : 'pointer interaction' }
-CFPhysicsElement >> disablePointerDragging [
-	pointerDragHandler ifNotNil: [ pointerDragHandler uninstall ].
-	pointerDragHandler := nil
+{ #category : 'pull interaction' }
+CFPhysicsElement >> disablePullInteraction [
+	pullInteractionHandler disable
 ]
 
-{ #category : 'pointer interaction' }
-CFPhysicsElement >> isPointerDraggingEnabled [
-	^ pointerDragHandler notNil
+{ #category : 'pull interaction' }
+CFPhysicsElement >> isPullInteractionEnabled [
+	^ pullInteractionHandler isEnabled
 ]
 
-{ #category : 'pointer interaction' }
-CFPhysicsElement >> pointerDragHandler [
-	^ pointerDragHandler
+{ #category : 'pull interaction' }
+CFPhysicsElement >> pullInteractionHandler [
+	^ pullInteractionHandler
 ]
-
 
 { #category : 'spring interaction' }
 CFPhysicsElement >> springTo: anotherElement [

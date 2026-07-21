@@ -1343,16 +1343,18 @@ CFPhysicsCleanSlateTests >> worldPreparesPointerConstraintsBeforeSolving [
 	^ world
 ]
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerDraggingIsInstalledThroughThePhysicsFacade [
+{ #category : 'examples - pull interaction' }
+CFPhysicsCleanSlateTests >> pullInteractionIsInstalledThroughThePhysicsFacade [
 	<gtExample>
 	| element handler |
 	element := BlElement new size: 40 @ 40; yourself.
-	handler := element physics enablePointerDragging.
+	handler := element physics pullInteractionHandler.
 	self assert: handler element equals: element.
-	self assert: element physics isPointerDraggingEnabled.
-	element physics disablePointerDragging.
-	self assert: element physics isPointerDraggingEnabled not.
+	self assert: element physics isPullInteractionEnabled.
+	element physics disablePullInteraction.
+	self assert: element physics isPullInteractionEnabled not.
+	element physics enablePullInteraction.
+	self assert: element physics isPullInteractionEnabled.
 	^ element
 ]
 
@@ -1376,8 +1378,8 @@ CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFr
 	^ world
 ]
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
+{ #category : 'examples - pull interaction' }
+CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 	<gtExample>
 	| space owner button world pointerPosition dragStart dragMove dragEnd |
 	space := BlSpace new.
@@ -1386,6 +1388,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
 		aptitude: BrGlamorousButtonWithLabelAptitude new;
 		label: 'Drag me';
 		size: 90 @ 32;
+		addEventHandler: BlPullHandler new;
 		yourself.
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
@@ -1394,9 +1397,8 @@ CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
-	button physics
-		position: 20 @ 20;
-		enablePointerDragging.
+	button physics position: 20 @ 20.
+	button relocate: 20 @ 20.
 	pointerPosition := button bounds inSpace center.
 	dragStart := (BlMouseDownEvent primary position: pointerPosition) asDragStartEvent
 		startButtons: BlMouseButton primary;
@@ -1409,16 +1411,16 @@ CFPhysicsCleanSlateTests >> pointerDraggingStartsForAGlamorousButton [
 		dragMove }
 		on: button.
 	self assert: world pointerConstraints size equals: 1.
+	self assert: button constraints position equals: 20 @ 20.
 	world step.
 	self assert: button physics position x > 20.
 	dragEnd := BlDragEndEvent new
 		copyFrom: (BlMouseUpEvent primary position: pointerPosition + (30 @ 0));
 		startButtons: BlMouseButton primary;
 		yourself.
-	BlSpace simulateEvents: {
-		dragEnd }
-		on: button.
+	BlSpace simulateEvents: { dragEnd } on: button.
 	self assert: world pointerConstraints isEmpty.
+	self assert: button physics bodyState velocity x > 0.
 	^ button
 ]
 
