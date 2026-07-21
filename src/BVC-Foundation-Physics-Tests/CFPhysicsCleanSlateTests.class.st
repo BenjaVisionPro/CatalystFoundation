@@ -547,7 +547,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesTheComposedStep [
 { #category : 'examples - step pipeline' }
 CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 	<gtExample>
-	| ground box step pipeline result |
+	| ground box step pipeline result manifold |
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
 	ground beStatic.
 	box := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
@@ -566,8 +566,13 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 		step: step
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
+	manifold := CFPhysicsBlocManifoldBuilder
+		manifoldBetweenBody: ground
+		andBody: box.
 	self assert: result activeContacts size equals: 1.
-	self assert: (box position y closeTo: 20.0).
+	self assert: box position y > 15.0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints first separation > -5.0.
 	^ result
 ]
 

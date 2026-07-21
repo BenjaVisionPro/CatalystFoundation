@@ -22,7 +22,6 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
-		self solveContactPositions.
 		self solveContactsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ].
@@ -276,27 +275,6 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 	newImpulse := (oldImpulse + increment) max: 0.0.
 	point normalImpulse: newImpulse.
 	self applyImpulse: constraint normal * (newImpulse - oldImpulse) at: point constraint: constraint
-]
-
-{ #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveContactPositions [
-	self contactConstraints do: [ :constraint |
-		constraint points do: [ :point |
-			self solveContactPositionAt: point constraint: constraint ] ]
-]
-
-{ #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveContactPositionAt: point constraint: constraint [
-	| separation penetration inverseMass correction |
-	separation := self contactSeparationAt: point constraint: constraint.
-	penetration := separation negated.
-	penetration <= 0.0 ifTrue: [ ^ self ].
-	inverseMass := constraint firstBody inverseMass + constraint secondBody inverseMass.
-	inverseMass = 0.0 ifTrue: [ ^ self ].
-	correction := constraint normal
-		* (penetration / inverseMass).
-	constraint bodyStateA translateBy: correction negated * constraint firstBody inverseMass.
-	constraint bodyStateB translateBy: correction * constraint secondBody inverseMass
 ]
 
 { #category : 'private - solving' }
