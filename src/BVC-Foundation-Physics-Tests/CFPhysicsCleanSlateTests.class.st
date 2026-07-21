@@ -161,6 +161,49 @@ CFPhysicsCleanSlateTests >> separatedPolygonCoresRespectCombinedRadius [
 	^ touching
 ]
 
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> polygonRotationUsesItsCentre [
+	<gtExample>
+	| shape vertices |
+	shape := CFPhysicsPolygonShape rectangleExtent: 80 @ 30.
+	vertices := shape worldVerticesAt: 100 @ 50 rotation: Float pi / 2.0.
+	self assert: shape rotationCentre equals: 40.0 @ 15.0.
+	self assert: (vertices first closeTo: 155.0 @ 25.0).
+	self assert: (vertices second closeTo: 155.0 @ 105.0).
+	self assert: (vertices third closeTo: 125.0 @ 105.0).
+	self assert: (vertices fourth closeTo: 125.0 @ 25.0).
+	^ shape
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> polygonWorldAndLocalTransformsRoundTripAroundCentre [
+	<gtExample>
+	| shape localPoint worldPoint recoveredPoint |
+	shape := CFPhysicsPolygonShape rectangleExtent: 80 @ 30.
+	localPoint := 70 @ 10.
+	worldPoint := 100 @ 50
+		+ (shape rotate: localPoint around: shape rotationCentre by: Float pi / 3.0).
+	recoveredPoint := shape
+		localPointForWorldPoint: worldPoint
+		position: 100 @ 50
+		rotation: Float pi / 3.0.
+	self assert: (recoveredPoint closeTo: localPoint).
+	^ shape
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateTests >> blocPolygonShapeUsesElementCentreAsRotationCentre [
+	<gtExample>
+	| element polygon |
+	element := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 80 @ 30;
+		yourself.
+	polygon := (CFPhysicsShapeState on: element) polygonShape.
+	self assert: polygon rotationCentre equals: 40.0 @ 15.0.
+	^ polygon
+]
+
 { #category : 'examples - Bloc geometry' }
 CFPhysicsCleanSlateTests >> rectangleElementProducesPolygonShape [
 	<gtExample>

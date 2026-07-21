@@ -15,7 +15,8 @@ CFPhysicsBlocShapeFactory class >> polygonShapeFor: aShapeState [
 	aShapeState isPolygon ifTrue: [
 		^ CFPhysicsPolygonShape
 			vertices: aShapeState localCollisionVertices
-			radius: 0.0 ].
+			radius: 0.0
+			rotationCentre: aShapeState extent / 2.0 ].
 	aShapeState isRectangle ifTrue: [
 		^ CFPhysicsPolygonShape rectangleExtent: aShapeState extent ].
 	^ nil

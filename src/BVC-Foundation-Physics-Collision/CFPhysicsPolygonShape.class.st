@@ -1,16 +1,30 @@
 Class {
 	#name : 'CFPhysicsPolygonShape',
 	#superclass : 'Object',
-	#instVars : [ 'vertices', 'normals', 'radius' ],
+	#instVars : [ 'vertices', 'normals', 'radius', 'rotationCentre' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
 
 { #category : 'instance creation' }
 CFPhysicsPolygonShape class >> vertices: aCollection radius: aNumber [
+	| shape |
+	shape := self new
+		vertices: aCollection;
+		radius: aNumber;
+		yourself.
+	shape
+		rotationCentre: shape inferredRotationCentre;
+		computeNormals.
+	^ shape
+]
+
+{ #category : 'instance creation' }
+CFPhysicsPolygonShape class >> vertices: aCollection radius: aNumber rotationCentre: aPoint [
 	^ self new
 		vertices: aCollection;
 		radius: aNumber;
+		rotationCentre: aPoint;
 		computeNormals;
 		yourself
 ]
@@ -31,6 +45,7 @@ CFPhysicsPolygonShape class >> rectangleExtent: anExtent radius: aRadius [
 			(anExtent x - radiusValue) @ (anExtent y - radiusValue).
 			radiusValue @ (anExtent y - radiusValue) }
 		radius: radiusValue
+		rotationCentre: anExtent / 2.0
 ]
 
 { #category : 'initialization' }
@@ -38,7 +53,8 @@ CFPhysicsPolygonShape >> initialize [
 	super initialize.
 	vertices := #().
 	normals := #().
-	radius := 0.0
+	radius := 0.0.
+	rotationCentre := 0.0 @ 0.0
 ]
 
 { #category : 'initialization' }
@@ -77,10 +93,34 @@ CFPhysicsPolygonShape >> radius: aNumber [
 	radius := aNumber asFloat
 ]
 
+{ #category : 'accessing' }
+CFPhysicsPolygonShape >> rotationCentre [
+	^ rotationCentre
+]
+
+{ #category : 'accessing' }
+CFPhysicsPolygonShape >> rotationCentre: aPoint [
+	rotationCentre := aPoint
+]
+
+{ #category : 'geometry' }
+CFPhysicsPolygonShape >> inferredRotationCentre [
+	| minimumX minimumY maximumX maximumY |
+	vertices ifEmpty: [ ^ 0.0 @ 0.0 ].
+	minimumX := maximumX := vertices first x.
+	minimumY := maximumY := vertices first y.
+	vertices allButFirst do: [ :vertex |
+		minimumX := minimumX min: vertex x.
+		minimumY := minimumY min: vertex y.
+		maximumX := maximumX max: vertex x.
+		maximumY := maximumY max: vertex y ].
+	^ ((minimumX + maximumX) / 2.0) @ ((minimumY + maximumY) / 2.0)
+]
+
 { #category : 'geometry' }
 CFPhysicsPolygonShape >> worldVerticesAt: aPosition rotation: anAngle [
 	^ vertices collect: [ :vertex |
-		aPosition + (self rotate: vertex by: anAngle) ]
+		aPosition + (self rotate: vertex around: rotationCentre by: anAngle) ]
 ]
 
 { #category : 'geometry' }
@@ -90,7 +130,10 @@ CFPhysicsPolygonShape >> worldNormalsAtRotation: anAngle [
 
 { #category : 'geometry' }
 CFPhysicsPolygonShape >> localPointForWorldPoint: aPoint position: aPosition rotation: anAngle [
-	^ self rotate: aPoint - aPosition by: anAngle negated
+	^ self
+		rotate: aPoint - aPosition
+		around: rotationCentre
+		by: anAngle negated
 ]
 
 { #category : 'geometry' }
@@ -101,4 +144,10 @@ CFPhysicsPolygonShape >> rotate: aPoint by: anAngle [
 	sine := anAngle sin.
 	^ ((aPoint x * cosine) - (aPoint y * sine))
 		@ ((aPoint x * sine) + (aPoint y * cosine))
+]
+
+
+{ #category : 'geometry' }
+CFPhysicsPolygonShape >> rotate: aPoint around: aCentre by: anAngle [
+	^ aCentre + (self rotate: aPoint - aCentre by: anAngle)
 ]

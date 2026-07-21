@@ -417,7 +417,10 @@ CFPhysicsShapeState >> allowsCollisionWith: anotherShapeState [
 
 { #category : 'geometry' }
 CFPhysicsShapeState >> localPointForWorldPoint: aPoint position: aPosition rotation: anAngle [
-	^ self rotateVector: aPoint - aPosition by: anAngle negated
+	^ self
+		rotate: aPoint - aPosition
+		around: self extent / 2.0
+		by: (self collisionRotationFor: anAngle) negated
 ]
 
 
