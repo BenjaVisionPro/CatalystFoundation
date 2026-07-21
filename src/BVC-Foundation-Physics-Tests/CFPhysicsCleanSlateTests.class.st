@@ -4641,8 +4641,8 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	self assert: result solver notNil.
 	self assert: (result continuousStepResult completedBodies includes: moving).
 	self assert: (result continuousStepResult completedBodies includes: wall).
-	self deny: (result continuousStepResult completedBodies includes: overlapping).
-	self deny: (result continuousStepResult completedBodies includes: obstacle).
+	self assert: (result continuousStepResult completedBodies includes: overlapping) not.
+	self assert: (result continuousStepResult completedBodies includes: obstacle) not.
 	self assert: overlapping position x < 0.0.
 	^ result
 ]
@@ -4674,7 +4674,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMoving
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
-	self deny: (result continuousStepResult completedBodies includes: separate).
+	self assert: (result continuousStepResult completedBodies includes: separate) not.
 	self assert: separate position x equals: 5.0.
 	^ result
 ]
