@@ -567,7 +567,7 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result activeContacts size equals: 1.
-	self assert: box position y > 19.98.
+	self assert: (box position y closeTo: 20.0).
 	^ result
 ]
 

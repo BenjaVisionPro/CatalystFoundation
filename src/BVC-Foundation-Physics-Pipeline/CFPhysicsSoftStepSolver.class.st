@@ -289,7 +289,7 @@ CFPhysicsSoftStepSolver >> solveContactPositions [
 CFPhysicsSoftStepSolver >> solveContactPositionAt: point constraint: constraint [
 	| separation penetration inverseMass correction |
 	separation := self contactSeparationAt: point constraint: constraint.
-	penetration := separation negated - self contactPositionSlop.
+	penetration := separation negated.
 	penetration <= 0.0 ifTrue: [ ^ self ].
 	inverseMass := constraint firstBody inverseMass + constraint secondBody inverseMass.
 	inverseMass = 0.0 ifTrue: [ ^ self ].
@@ -297,11 +297,6 @@ CFPhysicsSoftStepSolver >> solveContactPositionAt: point constraint: constraint 
 		* (penetration / inverseMass).
 	constraint bodyStateA translateBy: correction negated * constraint firstBody inverseMass.
 	constraint bodyStateB translateBy: correction * constraint secondBody inverseMass
-]
-
-{ #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> contactPositionSlop [
-	^ 0.01
 ]
 
 { #category : 'private - solving' }
