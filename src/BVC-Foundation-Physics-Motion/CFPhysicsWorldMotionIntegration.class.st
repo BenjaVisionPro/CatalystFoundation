@@ -51,8 +51,7 @@ CFPhysicsWorldMotionIntegration >> installLifecycleHandler [
 	owner ifNil: [ ^ self ].
 	lifecycleHandler ifNil: [
 		lifecycleHandler := CFPhysicsWorldLifecycleHandler on: world.
-		owner addEventHandler: lifecycleHandler ].
-	owner isAttachedToSceneGraph ifTrue: [ self startStepping ]
+		owner addEventHandler: lifecycleHandler ]
 ]
 
 { #category : 'private - presenting' }

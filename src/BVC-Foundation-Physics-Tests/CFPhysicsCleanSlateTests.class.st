@@ -2172,17 +2172,15 @@ CFPhysicsCleanSlateTests >> containmentAppliesFrictionAlongTheWorldEdge [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentCorrectionDoesNotWakeTheBody [
+CFPhysicsCleanSlateTests >> containmentIgnoresUnlaidOutWorldBounds [
 	<gtExample>
 	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 90 extent: 20 @ 20.
-	body velocity: 0 @ 4.
-	body sleep.
-	body wake.
-	body advanceSleepTimeBy: 0.25.
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 20 extent: 20 @ 20.
+	body velocity: 10 @ 4.
 	containment := CFPhysicsContainmentConstraint on: body.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: body sleepTime equals: 0.25.
+	containment prepareForBounds: (0 @ 0 extent: 0 @ 0).
+	self assert: body position equals: 20 @ 20.
+	self assert: body velocity equals: 10 @ 4.
 	^ containment
 ]
 

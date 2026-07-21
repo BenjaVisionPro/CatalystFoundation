@@ -30,8 +30,8 @@ CFPhysicsMaterial >> friction: aNumber [
 CFPhysicsMaterial >> initialize [
 	super initialize.
 	density := 1.0.
-	friction := 0.5.
-	restitution := 0.2
+	friction := 0.3.
+	restitution := 0.0
 ]
 
 { #category : 'accessing' }

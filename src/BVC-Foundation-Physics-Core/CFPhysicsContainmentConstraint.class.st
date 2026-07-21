@@ -57,6 +57,7 @@ CFPhysicsContainmentConstraint >> isActive [ ^ active ]
 CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
 	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY hitHorizontalEdge hitVerticalEdge mixedFriction |
 	(active and: [ body isDynamic ]) ifFalse: [ ^ self ].
+	(aRectangle width <= (margin * 2.0) or: [ aRectangle height <= (margin * 2.0) ]) ifTrue: [ ^ self ].
 	minimum := aRectangle origin + (margin @ margin).
 	maximum := aRectangle corner - (margin @ margin).
 	maximum x < minimum x ifTrue: [ maximum := minimum x @ maximum y ].
