@@ -63,7 +63,8 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 	maximumFraction := impact ifNil: [ 1.0 ] ifNotNil: [ impact fraction ].
 	self
 		recordSensorContactsAmong: (sensorPairs select: [ :pair |
-			self pair: pair includesBody: body ])
+			(self pair: pair includesBody: body) and: [
+			self pairHasStaticCounterpart: pair for: body ] ])
 		bodyStates: bodyStates
 		throughFraction: maximumFraction
 		into: sensorContactsByKey.

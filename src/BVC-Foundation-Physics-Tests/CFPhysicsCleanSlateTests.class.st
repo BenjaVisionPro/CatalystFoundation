@@ -3420,7 +3420,7 @@ CFPhysicsCleanSlateTests >> zeroDurationPredictionProducesStationarySweep [
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 	<gtExample>
-	| moving obstacle step pipeline result predictedEndBounds |
+	| moving obstacle step pipeline result predictedEndBounds impact |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
 	moving velocity: 100 @ 0.
 	obstacle := self cleanSlateBodyWithSequence: 2 position: 50 @ 0 extent: 10 @ 10.
@@ -3445,11 +3445,12 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 		rotation: moving rotation.
 	self assert: ((moving shapeState aabbAt: 0 @ 0 rotation: 0.0) overlaps: obstacle aabb) not.
 	self assert: (predictedEndBounds overlaps: obstacle aabb) not.
-	self assert: result pairs size equals: 1.
-	self assert: result pairs first firstBody equals: moving.
-	self assert: result pairs first secondBody equals: obstacle.
-	self assert: result activeContacts size equals: 1.
-	self assert: result activeContacts first pair equals: result pairs first.
+	self assert: result pairs isEmpty.
+	self assert: result activeContacts isEmpty.
+	self assert: result hasContinuousImpact.
+	impact := result continuousStepResult impacts first.
+	self assert: impact pair firstBody equals: moving.
+	self assert: impact pair secondBody equals: obstacle.
 	^ result
 ]
 
@@ -4293,8 +4294,9 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 	self assert: result hasContinuousImpact.
 	self assert: (result continuousStepResult fraction closeTo: 0.25).
 	self assert: (moving position closeTo: 10 @ 0).
-	self assert: (moving velocity x abs < 1.0e-6).
-	self assert: result activeContacts size equals: 1.
+	self assert: (moving velocity closeTo: 40 @ 0).
+	self assert: result activeContacts isEmpty.
+	self assert: result constraints isEmpty.
 	^ result
 ]
 
@@ -4539,8 +4541,8 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrd
 	self assert: result continuousStepResult impacts second pair firstBody equals: secondMoving.
 	self assert: (firstMoving position closeTo: 10 @ 0).
 	self assert: (secondMoving position closeTo: 20 @ 100).
-	self assert: result activeContacts size equals: 2.
-	self assert: result constraints size equals: 2.
+	self assert: result activeContacts isEmpty.
+	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
 	^ result
 ]
@@ -4638,7 +4640,9 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
-	self assert: result activeContacts size equals: 2.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeContacts first pair firstBody equals: overlapping.
+	self assert: result activeContacts first pair secondBody equals: obstacle.
 	self assert: result solver notNil.
 	self assert: overlapping position x < 0.0.
 	^ result
@@ -4710,14 +4714,15 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
 	<gtExample>
-	| result |
+	| result impacts |
 	result := self stepPipelineSolvesMultipleContinuousImpactsInTimeOrder.
-	self assert: result activeContacts size equals: 2.
-	self assert: result activeContacts first pair firstBody sequence equals: 1.
-	self assert: result activeContacts first pair secondBody sequence equals: 2.
-	self assert: result activeContacts second pair firstBody sequence equals: 3.
-	self assert: result activeContacts second pair secondBody sequence equals: 4.
-	^ result activeContacts
+	impacts := result continuousStepResult impacts.
+	self assert: impacts size equals: 2.
+	self assert: impacts first pair firstBody sequence equals: 1.
+	self assert: impacts first pair secondBody sequence equals: 2.
+	self assert: impacts second pair firstBody sequence equals: 3.
+	self assert: impacts second pair secondBody sequence equals: 4.
+	^ impacts
 ]
 
 { #category : 'examples - continuous collision' }
@@ -4761,15 +4766,13 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact not.
 	self assert: result continuousSensorContacts size equals: 1.
-	self assert: result activeContacts size equals: 1.
-	self assert: result activeContacts first isSensor.
+	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
 	self assert: (moving position closeTo: 60 @ 0).
-	self assert: result contactBeganEvents size equals: 1.
+	self assert: result contactBeganEvents isEmpty.
 	^ result
 ]
-
 
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResolvedPath [
@@ -4804,13 +4807,11 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 	self assert: result continuousStepResult impacts first pair firstBody equals: moving.
 	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
 	self assert: result continuousSensorContacts isEmpty.
-	self assert: result activeContacts size equals: 1.
-	self assert: result activeContacts first isSensor not.
-	self assert: result constraints size equals: 1.
+	self assert: result activeContacts isEmpty.
+	self assert: result constraints isEmpty.
 	self assert: (moving position closeTo: 10 @ 0).
 	^ result
 ]
-
 
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedImpact [
@@ -4846,14 +4847,11 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
 	self assert: result continuousSensorContacts size equals: 1.
 	self assert: result continuousSensorContacts first isSensor.
-	self assert: result activeContacts size equals: 2.
-	self assert: result activeContacts first isSensor.
-	self assert: result activeContacts second isSensor not.
-	self assert: result constraints size equals: 1.
+	self assert: result activeContacts isEmpty.
+	self assert: result constraints isEmpty.
 	self assert: (moving position closeTo: 50 @ 0).
 	^ result
 ]
-
 
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
@@ -4884,11 +4882,12 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	self assert: secondResult activeContacts isEmpty.
 	self assert: secondResult beganContacts isEmpty.
 	self assert: secondResult continuedContacts isEmpty.
-	self assert: secondResult endedContacts size equals: 1.
-	self assert: secondResult endedContacts first isSensor.
+	self assert: secondResult endedContacts isEmpty.
 	self assert: secondResult constraints isEmpty.
 	self assert: secondResult contactBeganEvents isEmpty.
-	self assert: secondResult contactEndedEvents size equals: 1.
+	self assert: secondResult contactEndedEvents isEmpty.
+	self assert: secondResult continuousSensorContacts isEmpty.
 	self assert: (moving position closeTo: 60 @ 0).
 	^ secondResult
 ]
+
