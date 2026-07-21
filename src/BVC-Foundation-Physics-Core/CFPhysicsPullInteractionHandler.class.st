@@ -45,7 +45,6 @@ CFPhysicsPullInteractionHandler >> beginFrom: anEvent [
 
 { #category : 'events' }
 CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
-	(self shouldHandle: anEvent) ifFalse: [ ^ self ].
 	constraint
 		ifNil: [ self beginConstraintFrom: anEvent ]
 		ifNotNil: [ constraint updatePointerPosition: anEvent newPosition ].
@@ -55,7 +54,6 @@ CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
 
 { #category : 'events' }
 CFPhysicsPullInteractionHandler >> endFrom: anEvent [
-	(self shouldHandle: anEvent) ifFalse: [ ^ self ].
 	constraint ifNil: [ ^ self ].
 	self finishConstraint
 ]
