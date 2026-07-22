@@ -154,3 +154,24 @@ CFPhysicsDynamicBodyType >> canSeedSolverIsland [
 CFPhysicsDynamicBodyType >> propagatesSolverIsland [
 	^ true
 ]
+
+{ #category : 'pointer constraints' }
+CFPhysicsDynamicBodyType >> acceptsPointerConstraint [
+	^ true
+]
+
+{ #category : 'pointer constraints' }
+CFPhysicsDynamicBodyType >> prepareForPointerConstraint: aConstraint by: seconds [
+	aConstraint prepareDynamicBodyBy: seconds
+]
+
+{ #category : 'pointer constraints' }
+CFPhysicsDynamicBodyType >> releaseFromPointerConstraint: aConstraint [
+	aConstraint releaseDynamicBody
+]
+
+{ #category : 'containment' }
+CFPhysicsDynamicBodyType >> applyContainmentConstraint: aConstraint bounds: aRectangle [
+	aConstraint applyToDynamicBodyInBounds: aRectangle
+]
+

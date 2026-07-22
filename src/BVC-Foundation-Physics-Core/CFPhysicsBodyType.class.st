@@ -172,3 +172,21 @@ CFPhysicsBodyType >> canSeedSolverIsland [
 CFPhysicsBodyType >> propagatesSolverIsland [
 	^ false
 ]
+
+{ #category : 'pointer constraints' }
+CFPhysicsBodyType >> acceptsPointerConstraint [
+	^ false
+]
+
+{ #category : 'pointer constraints' }
+CFPhysicsBodyType >> prepareForPointerConstraint: aConstraint by: seconds [
+]
+
+{ #category : 'pointer constraints' }
+CFPhysicsBodyType >> releaseFromPointerConstraint: aConstraint [
+]
+
+{ #category : 'containment' }
+CFPhysicsBodyType >> applyContainmentConstraint: aConstraint bounds: aRectangle [
+]
+

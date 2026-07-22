@@ -96,8 +96,13 @@ CFPhysicsPointerConstraint >> currentTimestamp [
 
 { #category : 'stepping' }
 CFPhysicsPointerConstraint >> prepareForStep: seconds [
+	active ifFalse: [ ^ self ].
+	body prepareForPointerConstraint: self by: seconds
+]
+
+{ #category : 'stepping' }
+CFPhysicsPointerConstraint >> prepareDynamicBodyBy: seconds [
 	| desiredPosition correction desiredVelocity blendedVelocity |
-	(active and: [ body isDynamic ]) ifFalse: [ ^ self ].
 	desiredPosition := pointerPosition - grabOffset.
 	correction := desiredPosition - body position.
 	desiredVelocity := (correction * responsiveness) + pointerVelocity.
@@ -122,10 +127,14 @@ CFPhysicsPointerConstraint >> cancel [
 
 { #category : 'controlling' }
 CFPhysicsPointerConstraint >> release [
-	| releaseVelocity sampleAge |
 	active ifFalse: [ ^ self ].
 	active := false.
-	body isDynamic ifFalse: [ ^ self ].
+	body releaseFromPointerConstraint: self
+]
+
+{ #category : 'controlling' }
+CFPhysicsPointerConstraint >> releaseDynamicBody [
+	| releaseVelocity sampleAge |
 	releaseVelocity := body velocity.
 	previousTimestamp ifNotNil: [
 		sampleAge := (self currentTimestamp - previousTimestamp) asMilliSeconds / 1000.0.

@@ -75,7 +75,7 @@ CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 	world ifNil: [ ^ self ].
 	world synchroniseMembership.
 	body := world bodyStateFor: element.
-	(body isNil or: [ body isDynamic not ]) ifTrue: [ ^ self ].
+	(body isNil or: [ body acceptsPointerConstraint not ]) ifTrue: [ ^ self ].
 	constraint := CFPhysicsPointerConstraint
 		body: body
 		pointerPosition: anEvent oldPosition.

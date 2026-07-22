@@ -46,8 +46,13 @@ CFPhysicsContainmentConstraint >> isActive [ ^ active ]
 
 { #category : 'stepping' }
 CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
+	active ifFalse: [ ^ self ].
+	body applyContainmentConstraint: self bounds: aRectangle
+]
+
+{ #category : 'stepping' }
+CFPhysicsContainmentConstraint >> applyToDynamicBodyInBounds: aRectangle [
 	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY |
-	(active and: [ body isDynamic ]) ifFalse: [ ^ self ].
 	minimum := aRectangle origin + (margin @ margin).
 	maximum := aRectangle corner - (margin @ margin).
 	maximum x < minimum x ifTrue: [ maximum := minimum x @ maximum y ].
