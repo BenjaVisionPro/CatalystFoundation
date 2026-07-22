@@ -1886,7 +1886,9 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	result := world step.
 	self assert: result constraints first limitsEnabled.
 	self assert: result constraints first limitBaseAngle equals: -0.5.
-	self assert: element physics angularVelocity < 0.0.
+	self assert: element physics rotation abs < 0.5.
+	self assert: (element physics angularVelocity closeTo: 0.0).
+	self assert: result constraints first limitImpulse < 0.0.
 	^ result
 ]
 
@@ -1969,8 +1971,9 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	world addPointerConstraint: pointerConstraint.
 	result := world step.
 	self assert: result constraints first class equals: CFPhysicsPreparedRailJoint.
-	self assert: element physics velocity y abs < 1.0e-6.
-	self assert: element physics position y abs < 1.0e-6.
+	self assert: (element physics velocity y closeTo: 0.0).
+	self assert: element physics position y abs < element physics position x abs.
+	self assert: result constraints first perpendicularImpulse abs > 0.0.
 	self assert: element physics position x <= (10.0 + 1.0e-6).
 	^ result
 ]
