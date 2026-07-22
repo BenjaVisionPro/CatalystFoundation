@@ -60,9 +60,7 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 		| state |
 		body allowsSleeping and: [
 			state := bodyStates at: body.
-			configuration
-				acceptsLinearVelocity: state linearVelocity
-				angularVelocity: state angularVelocity ] ].
+			configuration acceptsStepState: state elapsed: seconds ] ].
 
 	eligible
 		ifTrue: [

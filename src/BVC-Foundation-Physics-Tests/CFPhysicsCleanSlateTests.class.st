@@ -805,6 +805,57 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
 	^ decision
 ]
 
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> positionCorrectionKeepsAnIslandAwake [
+	<gtExample>
+	| body island stage configuration state decision |
+	body := self cleanSlateBodyWithSequence: 1.
+	island := CFPhysicsIsland new addBody: body; yourself.
+	configuration := CFPhysicsSleepConfiguration standard
+		linearVelocityThreshold: 1.0;
+		angularVelocityThreshold: 1.0;
+		timeToSleep: 0.01;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
+	state := CFPhysicsBodyStepState on: body.
+	state translateBy: 1 @ 0.
+	stage propagateWakeAcross: { island }.
+	decision := (stage
+		updateIslands: { island }
+		bodyStates: (IdentityDictionary new at: body put: state; yourself)
+		elapsed: 0.02) first.
+	self assert: decision eligible not.
+	self assert: body isAwake.
+	self assert: body sleepTime equals: 0.0.
+	^ decision
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
+	<gtExample>
+	| body island stage configuration state decision |
+	body := self cleanSlateBodyWithSequence: 1.
+	island := CFPhysicsIsland new addBody: body; yourself.
+	configuration := CFPhysicsSleepConfiguration standard
+		linearVelocityThreshold: 1.0;
+		angularVelocityThreshold: 1.0;
+		timeToSleep: 1.0;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
+	state := CFPhysicsBodyStepState on: body.
+	state translateBy: 0.01 @ 0.
+	stage propagateWakeAcross: { island }.
+	decision := (stage
+		updateIslands: { island }
+		bodyStates: (IdentityDictionary new at: body put: state; yourself)
+		elapsed: 0.02) first.
+	self assert: decision eligible.
+	self assert: decision slept not.
+	self assert: (body sleepTime closeTo: 0.02).
+	^ decision
+]
+
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
 	<gtExample>
