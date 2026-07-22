@@ -5232,9 +5232,9 @@ CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
 	element := BlElement new.
 	physics := element physics.
 	world := physics beWorld.
-	self assert: (element userData at: CFPhysicsElement) identicalTo: physics.
-	self assert: (element userData at: CFPhysicsWorld) identicalTo: world.
-	self assert: physics world identicalTo: world.
+	self assert: (element userData at: CFPhysicsElement) == physics.
+	self assert: (element userData at: CFPhysicsWorld) == world.
+	self assert: physics world == world.
 	^ world
 ]
 
@@ -5246,7 +5246,7 @@ CFPhysicsCleanSlateTests >> worldAnswersNearestExplicitWorld [
 	child := BlElement new.
 	root addChild: child.
 	world := root physics beWorld.
-	self assert: child physics world identicalTo: world.
+	self assert: child physics world == world.
 	self assert: child physics isWorld not.
 	^ world
 ]
@@ -5261,7 +5261,7 @@ CFPhysicsCleanSlateTests >> worldInstallsAtRootWhenNoWorldExists [
 	root addChild: parent.
 	parent addChild: child.
 	world := child physics world.
-	self assert: root physics existingWorld identicalTo: world.
+	self assert: root physics existingWorld == world.
 	self assert: parent physics existingWorld isNil.
 	self assert: child physics existingWorld isNil.
 	^ world
