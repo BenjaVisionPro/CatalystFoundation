@@ -4891,3 +4891,58 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	^ secondResult
 ]
 
+
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateIntegratesAccumulatedForceByInverseMass [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body applyForce: 200 @ -100.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
+	self assert: (state linearVelocity x closeTo: 1.0).
+	self assert: (state linearVelocity y closeTo: -0.5).
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateAppliesPerBodyGravityScale [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body gravityScale: 0.25.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 2.0 gravity: 0 @ 10.
+	self assert: state linearVelocity equals: 0 @ 5.
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateAppliesPadeLinearDamping [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		velocity: 12 @ -6;
+		linearDamping: 2.0.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
+	self assert: state linearVelocity equals: 6 @ -3.
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		applyForce: 20 @ 30;
+		applyTorque: 40.
+	state := CFPhysicsBodyStepState on: body.
+	state commit.
+	self assert: body force equals: 0 @ 0.
+	self assert: body torque equals: 0.0.
+	^ body
+]

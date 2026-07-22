@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'torque', 'angularDamping', 'sleepingAllowed' ],
+	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'dynamic', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -17,11 +17,13 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 { #category : 'stepping' }
 CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
 	(dynamic and: [ awake ]) ifFalse: [ ^ self ].
-	velocity := velocity + (gravityVector * seconds).
+	velocity := velocity + (((gravityVector * gravityScale) + (force * self inverseMass)) * seconds).
 	angularVelocity := angularVelocity + (torque * self inverseInertia * seconds).
-	angularDamping > 0 ifTrue: [ angularVelocity := angularVelocity * ((1.0 - (angularDamping * seconds)) max: 0.0) ].
+	linearDamping > 0 ifTrue: [ velocity := velocity * (1.0 / (1.0 + (seconds * linearDamping))) ].
+	angularDamping > 0 ifTrue: [ angularVelocity := angularVelocity * (1.0 / (1.0 + (seconds * angularDamping))) ].
 	position := position + (velocity * seconds).
 	rotation := rotation + (angularVelocity * seconds).
+	force := 0 @ 0.
 	torque := 0.0
 ]
 
@@ -70,6 +72,7 @@ CFPhysicsBodyState >> beStatic [
 	sleepTime := 0.0.
 	velocity := 0 @ 0.
 	angularVelocity := 0.0.
+	force := 0 @ 0.
 	torque := 0.0
 ]
 
@@ -141,8 +144,11 @@ CFPhysicsBodyState >> initialize [
 	awake := true.
 	sleepTime := 0.0.
 	angularVelocity := 0.0.
+	force := 0 @ 0.
 	torque := 0.0.
+	linearDamping := 0.0.
 	angularDamping := 0.0.
+	gravityScale := 1.0.
 	sleepingAllowed := true.
 	contacts := IdentitySet new
 ]
@@ -296,6 +302,7 @@ CFPhysicsBodyState >> sleep [
 	sleepTime := 0.0.
 	velocity := 0 @ 0.
 	angularVelocity := 0.0.
+	force := 0 @ 0.
 	torque := 0.0
 ]
 
@@ -325,6 +332,44 @@ CFPhysicsBodyState >> wake [
 	sleepTime := 0.0
 ]
 
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> force [
+	^ force
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> applyForce: aPoint [
+	dynamic ifFalse: [ ^ self ].
+	force := force + aPoint.
+	aPoint = (0 @ 0) ifFalse: [ self wake ]
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> clearForces [
+	force := 0 @ 0.
+	torque := 0.0
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> linearDamping [
+	^ linearDamping
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> linearDamping: aNumber [
+	linearDamping := aNumber asFloat max: 0.0
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> gravityScale [
+	^ gravityScale
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyState >> gravityScale: aNumber [
+	gravityScale := aNumber asFloat
+]
 
 { #category : 'angular dynamics' }
 CFPhysicsBodyState >> angularVelocity [
@@ -419,6 +464,7 @@ CFPhysicsBodyState >> commitPosition: aPosition rotation: anAngle velocity: aVel
 	rotation := anAngle.
 	velocity := dynamic ifTrue: [ aVelocity ] ifFalse: [ 0 @ 0 ].
 	angularVelocity := dynamic ifTrue: [ anAngularVelocity ] ifFalse: [ 0.0 ].
+	force := 0 @ 0.
 	torque := 0.0
 ]
 

@@ -22,8 +22,10 @@ CFPhysicsBodyStepState >> capture [
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
 	body isDynamic ifFalse: [ ^ self ].
-	linearVelocity := linearVelocity + (gravityVector * seconds).
+	linearVelocity := linearVelocity + ((((gravityVector * body gravityScale) + (body force * body inverseMass))) * seconds).
 	angularVelocity := angularVelocity + (body torque * body inverseInertia * seconds).
+	body linearDamping > 0.0 ifTrue: [
+		linearVelocity := linearVelocity * (1.0 / (1.0 + (seconds * body linearDamping))) ].
 	body angularDamping > 0.0 ifTrue: [
 		angularVelocity := angularVelocity * (1.0 / (1.0 + (seconds * body angularDamping))) ]
 ]

@@ -243,8 +243,44 @@ CFPhysicsElement >> wake [
 ]
 
 
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> clearForces [ self requireBodyState clearForces ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> linearDamping [ ^ self requireBodyState linearDamping ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> gravityScale [ ^ self requireBodyState gravityScale ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
+
 { #category : 'angular dynamics' }
 CFPhysicsElement >> angularVelocity [ ^ self requireBodyState angularVelocity ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> clearForces [ self requireBodyState clearForces ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> linearDamping [ ^ self requireBodyState linearDamping ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> gravityScale [ ^ self requireBodyState gravityScale ]
+
+{ #category : 'linear dynamics' }
+CFPhysicsElement >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
 
 { #category : 'angular dynamics' }
 CFPhysicsElement >> angularVelocity: aNumber [ self requireBodyState angularVelocity: aNumber ]
