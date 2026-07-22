@@ -19,6 +19,11 @@ CFPhysicsElement >> beDynamic [
 ]
 
 { #category : 'body type' }
+CFPhysicsElement >> beKinematic [
+	self requireBodyState beKinematic
+]
+
+{ #category : 'body type' }
 CFPhysicsElement >> beStatic [
 	self requireBodyState beStatic
 ]
@@ -115,6 +120,11 @@ CFPhysicsElement >> ownedWorld [
 { #category : 'body type' }
 CFPhysicsElement >> isDynamic [
 	^ self requireBodyState isDynamic
+]
+
+{ #category : 'body type' }
+CFPhysicsElement >> isKinematic [
+	^ self requireBodyState isKinematic
 ]
 
 { #category : 'body type' }

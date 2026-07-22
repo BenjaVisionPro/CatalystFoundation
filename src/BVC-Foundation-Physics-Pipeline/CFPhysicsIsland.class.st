@@ -39,6 +39,11 @@ CFPhysicsIsland >> dynamicBodies [
 ]
 
 { #category : 'accessing' }
+CFPhysicsIsland >> kinematicBodies [
+	^ self bodies select: #isKinematic
+]
+
+{ #category : 'accessing' }
 CFPhysicsIsland >> staticBodies [
 	^ self bodies select: #isStatic
 ]

@@ -60,7 +60,7 @@ CFPhysicsPairFinder >> shouldConsider: first with: second [
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsider: first with: second firstAABB: firstAABB secondAABB: secondAABB [
-	(first isStatic and: [ second isStatic ]) ifTrue: [ ^ false ].
+	((first isDynamic or: [ second isDynamic ]) not) ifTrue: [ ^ false ].
 	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
 	(self jointPreventsCollisionBetween: first and: second) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
@@ -102,7 +102,7 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: fi
 	| firstBody secondBody |
 	firstBody := first body.
 	secondBody := second body.
-	(firstBody isStatic and: [ secondBody isStatic ]) ifTrue: [ ^ false ].
+	((firstBody isDynamic or: [ secondBody isDynamic ]) not) ifTrue: [ ^ false ].
 	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
 	(self jointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB

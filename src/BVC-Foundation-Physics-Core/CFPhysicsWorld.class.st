@@ -649,6 +649,11 @@ CFPhysicsWorld >> wakeJointsUsingAnchor: anAnchor [
 	(self joints select: [ :each | each includesAnchor: anAnchor ]) do: #wakeBodies
 ]
 
+{ #category : 'joints' }
+CFPhysicsWorld >> wakeJointsUsingBody: aBodyState [
+	(self joints select: [ :each | each includesBody: aBodyState ]) do: #wakeBodies
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsWorld >> containmentExtent [

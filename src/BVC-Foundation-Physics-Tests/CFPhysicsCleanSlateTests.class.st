@@ -5160,3 +5160,67 @@ CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
 	^ first
 ]
 
+
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> kinematicBodyIntegratesItsPrescribedVelocityWithoutForces [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		beKinematic;
+		velocity: 4 @ -2;
+		angularVelocity: 0.5;
+		linearDamping: 10.0;
+		angularDamping: 10.0;
+		applyForce: 1000 @ 1000;
+		applyTorque: 1000.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 2.0 gravity: 0 @ 100.
+	self assert: state linearVelocity equals: 4 @ -2.
+	self assert: (state angularVelocity closeTo: 0.5).
+	state integratePositionBy: 2.0.
+	state commit.
+	self assert: (body position closeTo: 8 @ -4).
+	self assert: (body rotation closeTo: 1.0).
+	^ body
+]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> kinematicBodyHasInfiniteMassAndCannotSleep [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	body beKinematic.
+	self assert: body isKinematic.
+	self deny: body isDynamic.
+	self deny: body isStatic.
+	self assert: body inverseMass equals: 0.0.
+	self assert: body inverseInertia equals: 0.0.
+	body sleep.
+	self assert: body isAwake.
+	self deny: body isSleeping.
+	^ body
+]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
+	<gtExample>
+	| dynamic kinematic static finder pairs |
+	dynamic := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	kinematic := self cleanSlateBodyWithSequence: 2 position: 0 @ 0 extent: 20 @ 20.
+	static := self cleanSlateBodyWithSequence: 3 position: 0 @ 0 extent: 20 @ 20.
+	kinematic beKinematic.
+	static beStatic.
+	finder := CFPhysicsPairFinder new.
+	pairs := finder pairsAmong: { static. kinematic. dynamic }.
+	self assert: pairs size equals: 2.
+	self assert: (pairs anySatisfy: [ :pair |
+		pair firstBody == dynamic and: [ pair secondBody == kinematic ] ]).
+	self assert: (pairs anySatisfy: [ :pair |
+		pair firstBody == dynamic and: [ pair secondBody == static ] ]).
+	self deny: (pairs anySatisfy: [ :pair |
+		(pair firstBody == kinematic and: [ pair secondBody == static ]) or: [
+			pair firstBody == static and: [ pair secondBody == kinematic ] ] ]).
+	^ pairs
+]
