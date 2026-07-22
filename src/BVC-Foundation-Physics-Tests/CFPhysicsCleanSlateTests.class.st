@@ -418,7 +418,7 @@ CFPhysicsCleanSlateTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly
 
 { #category : 'private - contact pipeline' }
 CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger [
-	^ (CFPhysicsBodyState element: (BlElement new size: 10 @ 10; yourself) world: nil)
+	^ (CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil)
 		sequence: anInteger;
 		yourself
 ]
@@ -499,7 +499,7 @@ CFPhysicsCleanSlateTests >> contactPipelineFeedsDiscoveredPairsThroughBlocManifo
 
 { #category : 'private - pair discovery' }
 CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
-	^ (CFPhysicsBodyState
+	^ (CFPhysicsBody
 		element: (BlElement new
 			geometry: BlRoundedRectangleGeometry new;
 			size: anExtent;
@@ -3120,13 +3120,13 @@ CFPhysicsCleanSlateTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 CFPhysicsCleanSlateTests >> nearestGeometryEndpointsResolveCircleBoundaries [
 	<gtExample>
 	| first second endpoints points |
-	first := (CFPhysicsBodyState
+	first := (CFPhysicsBody
 		element: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself)
 		world: nil)
 		sequence: 1;
 		position: 0 @ 0;
 		yourself.
-	second := (CFPhysicsBodyState
+	second := (CFPhysicsBody
 		element: (BlElement new geometry: BlCircleGeometry new; size: 40 @ 40; yourself)
 		world: nil)
 		sequence: 2;
@@ -3307,7 +3307,7 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
 	<gtExample>
 	| element body bounds |
 	element := BlElement new extent: 20 @ 10.
-	body := CFPhysicsBodyState element: element world: nil.
+	body := CFPhysicsBody element: element world: nil.
 	body
 		position: 10 @ 20;
 		beginStep;
@@ -3324,7 +3324,7 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 	<gtExample>
 	| element body bounds previousBounds currentBounds |
 	element := BlElement new extent: 40 @ 10.
-	body := CFPhysicsBodyState element: element world: nil.
+	body := CFPhysicsBody element: element world: nil.
 	body
 		position: 10 @ 20;
 		beginStep;

@@ -1,6 +1,6 @@
-Extension { #name : 'CFPhysicsBodyState' }
+Extension { #name : 'CFPhysicsBody' }
 
 { #category : '*BVC-Foundation-Physics-Tools' }
-CFPhysicsBodyState >> physicsOverlayElementIn: aContext [
+CFPhysicsBody >> physicsOverlayElementIn: aContext [
 	^ CFPhysicsBodyOverlayElement on: self context: aContext
 ]

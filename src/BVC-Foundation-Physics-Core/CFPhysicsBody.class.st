@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFPhysicsBodyState',
+	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
 	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed' ],
 	#category : 'BVC-Foundation-Physics-Core',
@@ -7,7 +7,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsBodyState class >> element: anElement world: aWorld [
+CFPhysicsBody class >> element: anElement world: aWorld [
 	^ self new
 		element: anElement;
 		world: aWorld;
@@ -15,7 +15,7 @@ CFPhysicsBodyState class >> element: anElement world: aWorld [
 ]
 
 { #category : 'stepping' }
-CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
+CFPhysicsBody >> advanceBy: seconds gravity: gravityVector [
 	(self isMovable and: [ self isAwake ]) ifFalse: [ ^ self ].
 	self isDynamic ifTrue: [
 		velocity := velocity + (((gravityVector * gravityScale) + (force * self inverseMass)) * seconds).
@@ -30,7 +30,7 @@ CFPhysicsBodyState >> advanceBy: seconds gravity: gravityVector [
 
 
 { #category : 'velocity' }
-CFPhysicsBodyState >> addVelocity: aPoint [
+CFPhysicsBody >> addVelocity: aPoint [
 	self isDynamic ifTrue: [
 		velocity := velocity + aPoint.
 		aPoint = (0 @ 0) ifFalse: [ self wake ] ]
@@ -38,49 +38,49 @@ CFPhysicsBodyState >> addVelocity: aPoint [
 
 
 { #category : 'contacts' }
-CFPhysicsBodyState >> addContact: aContact [
+CFPhysicsBody >> addContact: aContact [
 	contacts ifNil: [ contacts := IdentitySet new ].
 	contacts add: aContact
 ]
 
 { #category : 'contacts' }
-CFPhysicsBodyState >> contacts [
+CFPhysicsBody >> contacts [
 	contacts ifNil: [ contacts := IdentitySet new ].
 	^ contacts asArray
 ]
 
 { #category : 'contacts' }
-CFPhysicsBodyState >> removeContact: aContact [
+CFPhysicsBody >> removeContact: aContact [
 	contacts ifNil: [ ^ self ].
 	contacts remove: aContact ifAbsent: [ ]
 ]
 
 { #category : 'collision' }
-CFPhysicsBodyState >> aabb [
+CFPhysicsBody >> aabb [
 	^ self shapeState aabbAt: position rotation: rotation
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> beDynamic [
-	self setBodyType: #dynamic
+CFPhysicsBody >> beDynamic [
+	self setBodyType: (CFPhysicsDynamicBodyType on: self)
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> beKinematic [
-	self setBodyType: #kinematic
+CFPhysicsBody >> beKinematic [
+	self setBodyType: (CFPhysicsKinematicBodyType on: self)
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> beStatic [
-	self setBodyType: #static
+CFPhysicsBody >> beStatic [
+	self setBodyType: (CFPhysicsStaticBodyType on: self)
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> setBodyType: aSymbol [
-	bodyType = aSymbol ifTrue: [ ^ self ].
+CFPhysicsBody >> setBodyType: aBodyType [
+	bodyType class = aBodyType class ifTrue: [ ^ self ].
 	self wakeContactNeighbours.
 	world ifNotNil: [ world wakeJointsUsingBody: self ].
-	bodyType := aSymbol.
+	bodyType := aBodyType.
 	self isStatic
 		ifTrue: [
 			awake := false.
@@ -93,7 +93,7 @@ CFPhysicsBodyState >> setBodyType: aSymbol [
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> wakeContactNeighbours [
+CFPhysicsBody >> wakeContactNeighbours [
 	self contacts do: [ :contact |
 		(contact firstBody == self
 			ifTrue: [ contact secondBody ]
@@ -101,24 +101,24 @@ CFPhysicsBodyState >> wakeContactNeighbours [
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> element [
+CFPhysicsBody >> element [
 	^ element
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> element: anElement [
+CFPhysicsBody >> element: anElement [
 	element := anElement.
 	shapeState := CFPhysicsShapeState on: anElement
 ]
 
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> extent [
+CFPhysicsBody >> extent [
 	^ self shapeState extent
 ]
 
 { #category : 'mass' }
-CFPhysicsBodyState >> inverseMass [
+CFPhysicsBody >> inverseMass [
 	| area mass |
 	self isDynamic ifFalse: [ ^ 0.0 ].
 	area := self shapeState area.
@@ -127,44 +127,44 @@ CFPhysicsBodyState >> inverseMass [
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> friction [
+CFPhysicsBody >> friction [
 	^ self shapeState material friction
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> friction: aNumber [
+CFPhysicsBody >> friction: aNumber [
 	self shapeState material friction: aNumber
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> restitution [
+CFPhysicsBody >> restitution [
 	^ self shapeState material restitution
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> restitution: aNumber [
+CFPhysicsBody >> restitution: aNumber [
 	self shapeState material restitution: aNumber
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> density [
+CFPhysicsBody >> density [
 	^ self shapeState material density
 ]
 
 { #category : 'material' }
-CFPhysicsBodyState >> density: aNumber [
+CFPhysicsBody >> density: aNumber [
 	self shapeState material density: aNumber
 ]
 
 { #category : 'initialization' }
-CFPhysicsBodyState >> initialize [
+CFPhysicsBody >> initialize [
 	super initialize.
 	position := 0 @ 0.
 	previousPosition := position.
 	rotation := 0.
 	previousRotation := rotation.
 	velocity := 0 @ 0.
-	bodyType := #dynamic.
+	bodyType := CFPhysicsDynamicBodyType on: self.
 	awake := true.
 	sleepTime := 0.0.
 	angularVelocity := 0.0.
@@ -178,51 +178,51 @@ CFPhysicsBodyState >> initialize [
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> isDynamic [
-	^ bodyType = #dynamic
+CFPhysicsBody >> isDynamic [
+	^ bodyType isDynamic
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> isKinematic [
-	^ bodyType = #kinematic
+CFPhysicsBody >> isKinematic [
+	^ bodyType isKinematic
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> isMovable [
-	^ self isStatic not
+CFPhysicsBody >> isMovable [
+	^ bodyType isMovable
 ]
 
 { #category : 'body type' }
-CFPhysicsBodyState >> isStatic [
-	^ bodyType = #static
+CFPhysicsBody >> isStatic [
+	^ bodyType isStatic
 ]
 
 
 { #category : 'stepping' }
-CFPhysicsBodyState >> beginStep [
+CFPhysicsBody >> beginStep [
 	previousPosition := position.
 	previousRotation := rotation
 ]
 
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> previousPosition [
+CFPhysicsBody >> previousPosition [
 	^ previousPosition
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> previousRotation [
+CFPhysicsBody >> previousRotation [
 	^ previousRotation
 ]
 
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> position [
+CFPhysicsBody >> position [
 	^ position
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> position: aPoint [
+CFPhysicsBody >> position: aPoint [
 	previousPosition := aPoint.
 	position := aPoint.
 	self wake
@@ -233,12 +233,12 @@ CFPhysicsBodyState >> position: aPoint [
 
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> rotation [
+CFPhysicsBody >> rotation [
 	^ rotation
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> rotation: aNumber [
+CFPhysicsBody >> rotation: aNumber [
 	previousRotation := aNumber.
 	rotation := aNumber.
 	self wake
@@ -247,29 +247,29 @@ CFPhysicsBodyState >> rotation: aNumber [
 
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> shapeState [
+CFPhysicsBody >> shapeState [
 	shapeState ifNil: [ shapeState := CFPhysicsShapeState on: element ].
 	^ shapeState
 ]
 
 { #category : 'ordering' }
-CFPhysicsBodyState >> sequence [
+CFPhysicsBody >> sequence [
 	^ sequence
 ]
 
 
 { #category : 'ordering' }
-CFPhysicsBodyState >> sequence: anInteger [
+CFPhysicsBody >> sequence: anInteger [
 	sequence := anInteger
 ]
 
 { #category : 'collision' }
-CFPhysicsBodyState >> translateBy: aPoint [
+CFPhysicsBody >> translateBy: aPoint [
 	position := position + aPoint
 ]
 
 { #category : 'presenting' }
-CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
+CFPhysicsBody >> translation: aPoint rotation: aNumber [
 	previousPosition := aPoint.
 	position := aPoint.
 	previousRotation := aNumber.
@@ -278,12 +278,12 @@ CFPhysicsBodyState >> translation: aPoint rotation: aNumber [
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> velocity [
+CFPhysicsBody >> velocity [
 	^ velocity
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> velocity: aPoint [
+CFPhysicsBody >> velocity: aPoint [
 	velocity := self isMovable
 		ifTrue: [
 			aPoint = (0 @ 0) ifFalse: [ self wake ].
@@ -292,45 +292,45 @@ CFPhysicsBodyState >> velocity: aPoint [
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> world [
+CFPhysicsBody >> world [
 	^ world
 ]
 
 { #category : 'accessing' }
-CFPhysicsBodyState >> world: aWorld [
+CFPhysicsBody >> world: aWorld [
 	world := aWorld
 ]
 
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> isAwake [
+CFPhysicsBody >> isAwake [
 	^ self isKinematic or: [ self isDynamic and: [ awake ] ]
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> isSleeping [
+CFPhysicsBody >> isSleeping [
 	^ self isDynamic and: [ sleepingAllowed and: [ awake not ] ]
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> allowsSleeping [
+CFPhysicsBody >> allowsSleeping [
 	^ sleepingAllowed
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> allowSleeping [
+CFPhysicsBody >> allowSleeping [
 	sleepingAllowed := true
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> preventSleeping [
+CFPhysicsBody >> preventSleeping [
 	sleepingAllowed := false.
 	self wake
 ]
 
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> sleep [
+CFPhysicsBody >> sleep [
 	(self isDynamic and: [ sleepingAllowed ]) ifFalse: [ ^ self ].
 	awake := false.
 	sleepTime := 0.0.
@@ -341,12 +341,12 @@ CFPhysicsBodyState >> sleep [
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> sleepTime [
+CFPhysicsBody >> sleepTime [
 	^ sleepTime
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
+CFPhysicsBody >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
 	(self isDynamic and: [ sleepingAllowed ]) ifFalse: [
 		self wake.
 		^ self ].
@@ -360,7 +360,7 @@ CFPhysicsBodyState >> updateSleepBy: seconds linearThresholdSquared: thresholdSq
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> wake [
+CFPhysicsBody >> wake [
 	self isDynamic ifFalse: [ ^ self ].
 	awake := true.
 	sleepTime := 0.0
@@ -368,87 +368,87 @@ CFPhysicsBodyState >> wake [
 
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> force [
+CFPhysicsBody >> force [
 	^ force
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> applyForce: aPoint [
+CFPhysicsBody >> applyForce: aPoint [
 	self isDynamic ifFalse: [ ^ self ].
 	force := force + aPoint.
 	aPoint = (0 @ 0) ifFalse: [ self wake ]
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> clearForces [
+CFPhysicsBody >> clearForces [
 	force := 0 @ 0.
 	torque := 0.0
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> linearDamping [
+CFPhysicsBody >> linearDamping [
 	^ linearDamping
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> linearDamping: aNumber [
+CFPhysicsBody >> linearDamping: aNumber [
 	linearDamping := aNumber asFloat max: 0.0
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> gravityScale [
+CFPhysicsBody >> gravityScale [
 	^ gravityScale
 ]
 
 { #category : 'linear dynamics' }
-CFPhysicsBodyState >> gravityScale: aNumber [
+CFPhysicsBody >> gravityScale: aNumber [
 	gravityScale := aNumber asFloat
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> angularVelocity [
+CFPhysicsBody >> angularVelocity [
 	^ angularVelocity
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> angularVelocity: aNumber [
+CFPhysicsBody >> angularVelocity: aNumber [
 	angularVelocity := self isMovable ifTrue: [ aNumber asFloat ] ifFalse: [ 0.0 ].
 	angularVelocity = 0.0 ifFalse: [ self wake ]
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> angularDamping [
+CFPhysicsBody >> angularDamping [
 	^ angularDamping
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> angularDamping: aNumber [
+CFPhysicsBody >> angularDamping: aNumber [
 	angularDamping := aNumber asFloat max: 0.0
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> applyTorque: aNumber [
+CFPhysicsBody >> applyTorque: aNumber [
 	self isDynamic ifFalse: [ ^ self ].
 	torque := torque + aNumber.
 	aNumber = 0 ifFalse: [ self wake ]
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> addAngularVelocity: aNumber [
+CFPhysicsBody >> addAngularVelocity: aNumber [
 	self isDynamic ifTrue: [
 		angularVelocity := angularVelocity + aNumber.
 		aNumber = 0 ifFalse: [ self wake ] ]
 ]
 
 { #category : 'mass' }
-CFPhysicsBodyState >> mass [
+CFPhysicsBody >> mass [
 	| inverse |
 	inverse := self inverseMass.
 	^ inverse = 0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverse ]
 ]
 
 { #category : 'mass' }
-CFPhysicsBodyState >> inverseInertia [
+CFPhysicsBody >> inverseInertia [
 	| mass extent inertia |
 	self isDynamic ifFalse: [ ^ 0.0 ].
 	mass := self mass.
@@ -461,19 +461,19 @@ CFPhysicsBodyState >> inverseInertia [
 ]
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> centre [
+CFPhysicsBody >> centre [
 	^ self shapeState centreAt: position
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> velocityAtWorldPoint: aPoint [
+CFPhysicsBody >> velocityAtWorldPoint: aPoint [
 	| radiusVector |
 	radiusVector := aPoint - self centre.
 	^ velocity + ((angularVelocity * radiusVector y negated) @ (angularVelocity * radiusVector x))
 ]
 
 { #category : 'angular dynamics' }
-CFPhysicsBodyState >> applyImpulse: anImpulse atWorldPoint: aPoint [
+CFPhysicsBody >> applyImpulse: anImpulse atWorldPoint: aPoint [
 	| radiusVector cross |
 	self isDynamic ifFalse: [ ^ self ].
 	self addVelocity: anImpulse * self inverseMass.
@@ -483,17 +483,17 @@ CFPhysicsBodyState >> applyImpulse: anImpulse atWorldPoint: aPoint [
 ]
 
 { #category : 'collision' }
-CFPhysicsBodyState >> rotateBy: anAngle [
+CFPhysicsBody >> rotateBy: anAngle [
 	rotation := rotation + anAngle
 ]
 
 { #category : 'stepping' }
-CFPhysicsBodyState >> torque [
+CFPhysicsBody >> torque [
 	^ torque
 ]
 
 { #category : 'stepping' }
-CFPhysicsBodyState >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
+CFPhysicsBody >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
 	position := aPosition.
 	rotation := anAngle.
 	velocity := self isMovable ifTrue: [ aVelocity ] ifFalse: [ 0 @ 0 ].
@@ -503,95 +503,95 @@ CFPhysicsBodyState >> commitPosition: aPosition rotation: anAngle velocity: aVel
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> advanceSleepTimeBy: seconds [
+CFPhysicsBody >> advanceSleepTimeBy: seconds [
 	self isDynamic ifTrue: [ sleepTime := sleepTime + seconds ]
 ]
 
 { #category : 'sleeping' }
-CFPhysicsBodyState >> resetSleepTime [
+CFPhysicsBody >> resetSleepTime [
 	sleepTime := 0.0
 ]
 
 
 { #category : 'sensors' }
-CFPhysicsBodyState >> beSensor [
+CFPhysicsBody >> beSensor [
 	self shapeState beSensor
 ]
 
 { #category : 'sensors' }
-CFPhysicsBodyState >> beSolid [
+CFPhysicsBody >> beSolid [
 	self shapeState beSolid
 ]
 
 { #category : 'sensors' }
-CFPhysicsBodyState >> isSensor [
+CFPhysicsBody >> isSensor [
 	^ self shapeState isSensor
 ]
 
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionFilter [
+CFPhysicsBody >> collisionFilter [
 	^ self shapeState collisionFilter
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionCategoryBits [
+CFPhysicsBody >> collisionCategoryBits [
 	^ self shapeState collisionCategoryBits
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionCategoryBits: anInteger [
+CFPhysicsBody >> collisionCategoryBits: anInteger [
 	self shapeState collisionCategoryBits: anInteger
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionMaskBits [
+CFPhysicsBody >> collisionMaskBits [
 	^ self shapeState collisionMaskBits
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionMaskBits: anInteger [
+CFPhysicsBody >> collisionMaskBits: anInteger [
 	self shapeState collisionMaskBits: anInteger
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionGroupIndex [
+CFPhysicsBody >> collisionGroupIndex [
 	^ self shapeState collisionGroupIndex
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> collisionGroupIndex: anInteger [
+CFPhysicsBody >> collisionGroupIndex: anInteger [
 	self shapeState collisionGroupIndex: anInteger
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsBodyState >> allowsCollisionWith: anotherBody [
+CFPhysicsBody >> allowsCollisionWith: anotherBody [
 	^ self shapeState allowsCollisionWith: anotherBody shapeState
 ]
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> worldPointForLocalPoint: aPoint [
+CFPhysicsBody >> worldPointForLocalPoint: aPoint [
 	^ position + (self shapeState rotateVector: aPoint by: rotation)
 ]
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> localPointForNormalisedPoint: aPoint [
+CFPhysicsBody >> localPointForNormalisedPoint: aPoint [
 	^ (aPoint - (0.5 @ 0.5)) * self extent
 ]
 
 { #category : 'geometry' }
-CFPhysicsBodyState >> worldPointForNormalisedPoint: aPoint [
+CFPhysicsBody >> worldPointForNormalisedPoint: aPoint [
 	^ self worldPointForLocalPoint: (self localPointForNormalisedPoint: aPoint)
 ]
 
 { #category : 'continuous collision' }
-CFPhysicsBodyState >> sweep [
+CFPhysicsBody >> sweep [
 	^ CFPhysicsSweep
 		from: (CFPhysicsTransform position: previousPosition rotation: previousRotation)
 		to: (CFPhysicsTransform position: position rotation: rotation)
 ]
 
 { #category : 'collision' }
-CFPhysicsBodyState >> sweptAABB [
+CFPhysicsBody >> sweptAABB [
 	^ self shapeState sweptAABBAlong: self sweep
 ]

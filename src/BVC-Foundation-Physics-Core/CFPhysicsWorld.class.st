@@ -147,7 +147,7 @@ CFPhysicsWorld >> bodyStatesInOrder [
 { #category : 'body states' }
 CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
-	body := CFPhysicsBodyState element: anElement world: self.
+	body := CFPhysicsBody element: anElement world: self.
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
 	^ body
