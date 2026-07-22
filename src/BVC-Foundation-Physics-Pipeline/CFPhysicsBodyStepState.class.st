@@ -141,9 +141,6 @@ CFPhysicsBodyStepState >> maximumPointMotion [
 
 { #category : 'continuous collision' }
 CFPhysicsBodyStepState >> isFastForContinuousCollision [
-	body isDynamic ifFalse: [ ^ false ].
-	body isAwake ifFalse: [ ^ false ].
-	body isSensor ifTrue: [ ^ false ].
-	^ self maximumPointMotion > (0.5 * body shapeState minimumExtent)
+	^ body bodyType isFastForContinuousCollision: self
 ]
 

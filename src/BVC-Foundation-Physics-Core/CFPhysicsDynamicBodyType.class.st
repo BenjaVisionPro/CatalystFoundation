@@ -175,3 +175,20 @@ CFPhysicsDynamicBodyType >> applyContainmentConstraint: aConstraint bounds: aRec
 	aConstraint applyToDynamicBodyInBounds: aRectangle
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsDynamicBodyType >> isFastForContinuousCollision: aStepState [
+	body isAwake ifFalse: [ ^ false ].
+	body isSensor ifTrue: [ ^ false ].
+	^ aStepState maximumPointMotion > (0.5 * body shapeState minimumExtent)
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsDynamicBodyType >> requiresContinuousCollisionAgainst: anotherBodyType [
+	^ anotherBodyType isContinuousCollisionCounterpartForDynamicBodyType
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsDynamicBodyType >> isContinuousCollisionCounterpartForDynamicBodyType [
+	^ false
+]
+

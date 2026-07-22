@@ -723,3 +723,8 @@ CFPhysicsBody >> applyContainmentConstraint: aConstraint bounds: aRectangle [
 	bodyType applyContainmentConstraint: aConstraint bounds: aRectangle
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsBody >> requiresContinuousCollisionAgainst: anotherBody [
+	^ bodyType requiresContinuousCollisionAgainst: anotherBody bodyType
+]
+

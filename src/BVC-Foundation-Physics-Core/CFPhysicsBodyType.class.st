@@ -190,3 +190,18 @@ CFPhysicsBodyType >> releaseFromPointerConstraint: aConstraint [
 CFPhysicsBodyType >> applyContainmentConstraint: aConstraint bounds: aRectangle [
 ]
 
+{ #category : 'continuous collision' }
+CFPhysicsBodyType >> isFastForContinuousCollision: aStepState [
+	^ false
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyType >> requiresContinuousCollisionAgainst: anotherBodyType [
+	^ false
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyType >> isContinuousCollisionCounterpartForDynamicBodyType [
+	^ true
+]
+

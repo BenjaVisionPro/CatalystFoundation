@@ -55,7 +55,7 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 	| body candidates impact maximumFraction impactContact advancement |
 	body := state body.
 	candidates := solidPairs select: [ :pair |
-		(self pair: pair includesBody: body) and: [ self pairHasNonDynamicCounterpart: pair for: body ] ].
+		(self pair: pair includesBody: body) and: [ self pair: pair requiresContinuousCollisionFor: body ] ].
 	impact := impactFinder
 		earliestSolvedAmong: candidates
 		bodyStates: bodyStates
@@ -64,7 +64,7 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 	self
 		recordSensorContactsAmong: (sensorPairs select: [ :pair |
 			(self pair: pair includesBody: body) and: [
-			self pairHasNonDynamicCounterpart: pair for: body ] ])
+			self pair: pair requiresContinuousCollisionFor: body ] ])
 		bodyStates: bodyStates
 		throughFraction: maximumFraction
 		into: sensorContactsByKey.
@@ -115,9 +115,12 @@ CFPhysicsContinuousStepStage >> pair: pair includesBody: body [
 ]
 
 { #category : 'private - testing' }
-CFPhysicsContinuousStepStage >> pairHasNonDynamicCounterpart: pair for: body [
-	pair firstBody == body ifTrue: [ ^ pair secondBody isDynamic not ].
-	^ pair firstBody isDynamic not
+CFPhysicsContinuousStepStage >> pair: pair requiresContinuousCollisionFor: body [
+	| counterpart |
+	counterpart := pair firstBody == body
+		ifTrue: [ pair secondBody ]
+		ifFalse: [ pair firstBody ].
+	^ body requiresContinuousCollisionAgainst: counterpart
 ]
 
 { #category : 'private - ordering' }
