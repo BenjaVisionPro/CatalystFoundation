@@ -22,7 +22,8 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
-		self solveContactsWithBias: false ].
+		self solveContactsWithBias: false.
+		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
