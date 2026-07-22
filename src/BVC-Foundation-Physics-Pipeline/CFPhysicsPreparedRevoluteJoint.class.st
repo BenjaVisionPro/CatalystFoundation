@@ -1,27 +1,11 @@
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
-	#superclass : 'Object',
-	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'limitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
+	#superclass : 'CFPhysicsPreparedJointConstraint',
+	#instVars : [ 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'limitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> joint [ ^ joint ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> joint: anObject [ joint := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> firstBody [ ^ joint firstBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> secondBody [ ^ joint secondBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> bodyStateA [ ^ bodyStateA ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> bodyStateA: anObject [ bodyStateA := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> bodyStateB [ ^ bodyStateB ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRevoluteJoint >> bodyStateB: anObject [ bodyStateB := anObject ]
 { #category : 'accessing' }
 CFPhysicsPreparedRevoluteJoint >> anchorA [ ^ anchorA ]
 { #category : 'accessing' }

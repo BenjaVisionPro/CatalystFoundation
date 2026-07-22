@@ -1,27 +1,11 @@
 Class {
 	#name : 'CFPhysicsPreparedDistanceJoint',
-	#superclass : 'Object',
-	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'direction', 'baseSeparation', 'effectiveMass', 'impulse' ],
+	#superclass : 'CFPhysicsPreparedJointConstraint',
+	#instVars : [ 'anchorA', 'anchorB', 'direction', 'baseSeparation', 'effectiveMass', 'impulse' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> joint [ ^ joint ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> joint: anObject [ joint := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> firstBody [ ^ joint firstBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> secondBody [ ^ joint secondBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> bodyStateA [ ^ bodyStateA ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> bodyStateA: anObject [ bodyStateA := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> bodyStateB [ ^ bodyStateB ]
-{ #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> bodyStateB: anObject [ bodyStateB := anObject ]
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> anchorA [ ^ anchorA ]
 { #category : 'accessing' }

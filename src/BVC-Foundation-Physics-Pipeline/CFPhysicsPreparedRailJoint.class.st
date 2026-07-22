@@ -1,27 +1,11 @@
 Class {
 	#name : 'CFPhysicsPreparedRailJoint',
-	#superclass : 'Object',
-	#instVars : [ 'joint', 'bodyStateA', 'bodyStateB', 'anchorA', 'anchorB', 'axis', 'normal', 'basePerpendicularSeparation', 'perpendicularMass', 'perpendicularImpulse', 'baseTranslation', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'translationMass', 'translationImpulse', 'baseAngle', 'angularMass', 'angularImpulse' ],
+	#superclass : 'CFPhysicsPreparedJointConstraint',
+	#instVars : [ 'anchorA', 'anchorB', 'axis', 'normal', 'basePerpendicularSeparation', 'perpendicularMass', 'perpendicularImpulse', 'baseTranslation', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'translationMass', 'translationImpulse', 'baseAngle', 'angularMass', 'angularImpulse' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
 
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> joint [ ^ joint ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> joint: anObject [ joint := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> firstBody [ ^ joint firstBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> secondBody [ ^ joint secondBody ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> bodyStateA [ ^ bodyStateA ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> bodyStateA: anObject [ bodyStateA := anObject ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> bodyStateB [ ^ bodyStateB ]
-{ #category : 'accessing' }
-CFPhysicsPreparedRailJoint >> bodyStateB: anObject [ bodyStateB := anObject ]
 { #category : 'accessing' }
 CFPhysicsPreparedRailJoint >> anchorA [ ^ anchorA ]
 { #category : 'accessing' }

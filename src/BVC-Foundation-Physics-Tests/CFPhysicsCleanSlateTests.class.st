@@ -5049,3 +5049,13 @@ CFPhysicsCleanSlateTests >> islandRebuildSplitsRemovedConnectivityDeterministica
 	self assert: (split second dynamicBodies collect: #sequence) equals: #(3).
 	^ split
 ]
+
+{ #category : 'examples - constraint preparation' }
+CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract [
+	<gtExample>
+	self assert: CFPhysicsPreparedDistanceJoint superclass equals: CFPhysicsPreparedJointConstraint.
+	self assert: CFPhysicsPreparedRevoluteJoint superclass equals: CFPhysicsPreparedJointConstraint.
+	self assert: CFPhysicsPreparedRailJoint superclass equals: CFPhysicsPreparedJointConstraint.
+	self assert: (CFPhysicsPreparedFixedJoint inheritsFrom: CFPhysicsPreparedJointConstraint).
+	^ CFPhysicsPreparedJointConstraint
+]
