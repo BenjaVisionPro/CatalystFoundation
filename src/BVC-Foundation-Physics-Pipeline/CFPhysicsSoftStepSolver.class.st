@@ -22,7 +22,8 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
 		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
-		self solveContactsWithBias: false ].
+		self solveContactsWithBias: false.
+		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	constraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
@@ -114,7 +115,7 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias increment |
+	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
 	separation := constraint baseSeparation
 		+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
@@ -124,14 +125,17 @@ CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled:
 		+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint direction)
 		- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint direction).
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	increment := constraint effectiveMass * (relativeVelocity + bias) negated.
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (massCoefficient * constraint effectiveMass * (relativeVelocity + bias)) negated
+		- (impulseCoefficient * constraint impulse).
 	constraint impulse: constraint impulse + increment.
 	self applyDistanceJointImpulse: constraint direction * increment constraint: constraint
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
+	| relativeVelocity separation bias massCoefficient impulseCoefficient increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
 	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint normal.
 	separation := constraint basePerpendicularSeparation
 		+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
@@ -141,7 +145,10 @@ CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: bia
 		+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint normal)
 		- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint normal).
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	increment := constraint perpendicularMass * (relativeVelocity + bias) negated.
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (massCoefficient * constraint perpendicularMass * (relativeVelocity + bias)) negated
+		- (impulseCoefficient * constraint perpendicularImpulse).
 	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
 	self applyDistanceJointImpulse: constraint normal * increment constraint: constraint.
 	angularRelativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
@@ -149,7 +156,8 @@ CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: bia
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
 	angularBias := biasEnabled ifTrue: [ step biasRate * angularSeparation ] ifFalse: [ 0.0 ].
-	angularIncrement := constraint angularMass * (angularRelativeVelocity + angularBias) negated.
+	angularIncrement := (massCoefficient * constraint angularMass * (angularRelativeVelocity + angularBias)) negated
+		- (impulseCoefficient * constraint angularImpulse).
 	constraint angularImpulse: constraint angularImpulse + angularIncrement.
 	self applyFixedJointAngularImpulse: angularIncrement constraint: constraint.
 	self solveRailJointLimit: constraint biasEnabled: biasEnabled
@@ -184,7 +192,7 @@ CFPhysicsSoftStepSolver >> solveRailJointLimit: constraint biasEnabled: biasEnab
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias increment |
+	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	relativeVelocity := self revoluteJointRelativeVelocity: constraint.
 	separation := constraint baseSeparation
 		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
@@ -192,7 +200,11 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 		+ ((self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB)
 		- ((self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA).
 	bias := biasEnabled ifTrue: [ separation * step biasRate ] ifFalse: [ 0 @ 0 ].
-	increment := self revoluteJointImpulseFor: relativeVelocity + bias constraint: constraint.
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (self
+		revoluteJointImpulseFor: (relativeVelocity + bias) * massCoefficient
+		constraint: constraint) - (constraint impulse * impulseCoefficient).
 	constraint impulse: constraint impulse + increment.
 	self applyRevoluteJointImpulse: increment constraint: constraint.
 	self solveRevoluteJointMotor: constraint.
@@ -248,13 +260,16 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointLimit: constraint biasEnabled: bias
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveFixedJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias increment |
+	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
 	separation := constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	increment := constraint angularMass * (relativeVelocity + bias) negated.
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (massCoefficient * constraint angularMass * (relativeVelocity + bias)) negated
+		- (impulseCoefficient * constraint angularImpulse).
 	constraint angularImpulse: constraint angularImpulse + increment.
 	self applyFixedJointAngularImpulse: increment constraint: constraint
 ]
