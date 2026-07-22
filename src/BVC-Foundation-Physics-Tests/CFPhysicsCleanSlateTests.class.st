@@ -5137,3 +5137,26 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 	self assert: (CFPhysicsPreparedFixedJoint inheritsFrom: CFPhysicsPreparedJointConstraint).
 	^ CFPhysicsPreparedJointConstraint
 ]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
+	<gtExample>
+	| first second contact |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	contact := CFPhysicsContact
+		pair: (CFPhysicsPair first: first second: second)
+		manifold: nil.
+	first addContact: contact.
+	second addContact: contact.
+	second sleep.
+	self assert: second isSleeping.
+	first beStatic.
+	self assert: second isAwake.
+	second sleep.
+	self assert: second isSleeping.
+	first beDynamic.
+	self assert: second isAwake.
+	^ first
+]
+

@@ -61,12 +61,16 @@ CFPhysicsBodyState >> aabb [
 
 { #category : 'body type' }
 CFPhysicsBodyState >> beDynamic [
+	dynamic ifTrue: [ ^ self ].
 	dynamic := true.
-	self wake
+	self wake.
+	self wakeContactNeighbours
 ]
 
 { #category : 'body type' }
 CFPhysicsBodyState >> beStatic [
+	dynamic ifFalse: [ ^ self ].
+	self wakeContactNeighbours.
 	dynamic := false.
 	awake := false.
 	sleepTime := 0.0.
@@ -74,6 +78,15 @@ CFPhysicsBodyState >> beStatic [
 	angularVelocity := 0.0.
 	force := 0 @ 0.
 	torque := 0.0
+]
+
+
+{ #category : 'body type' }
+CFPhysicsBodyState >> wakeContactNeighbours [
+	self contacts do: [ :contact |
+		(contact firstBody == self
+			ifTrue: [ contact secondBody ]
+			ifFalse: [ contact firstBody ]) wake ]
 ]
 
 { #category : 'accessing' }
