@@ -21,7 +21,11 @@ CFPhysicsBodyStepState >> capture [
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
-	body isDynamic ifFalse: [ ^ self ].
+	body bodyType integrateVelocityOf: self by: seconds gravity: gravityVector
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector [
 	linearVelocity := linearVelocity + ((((gravityVector * body gravityScale) + (body force * body inverseMass))) * seconds).
 	angularVelocity := angularVelocity + (body torque * body inverseInertia * seconds).
 	body linearDamping > 0.0 ifTrue: [
@@ -32,14 +36,23 @@ CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integratePositionBy: seconds [
-	body isAwake ifFalse: [ ^ self ].
+	body bodyType integratePositionOf: self by: seconds
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateCurrentVelocityBy: seconds [
 	deltaPosition := deltaPosition + (linearVelocity * seconds).
 	deltaRotation := deltaRotation + (angularVelocity * seconds)
 ]
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> translateBy: aPoint [
-	body isDynamic ifTrue: [ deltaPosition := deltaPosition + aPoint ]
+	body bodyType translate: self by: aPoint
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> accumulateTranslation: aPoint [
+	deltaPosition := deltaPosition + aPoint
 ]
 
 { #category : 'committing' }
@@ -70,12 +83,7 @@ CFPhysicsBodyStepState >> deltaRotation [ ^ deltaRotation ]
 
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
-	| currentTransform |
-	currentTransform := self currentTransform.
-	body isAwake ifFalse: [ ^ currentTransform ].
-	^ CFPhysicsTransform
-		position: currentTransform position + (linearVelocity * seconds)
-		rotation: currentTransform rotation + (angularVelocity * seconds)
+	^ body bodyType predictedTransformOf: self after: seconds
 ]
 
 { #category : 'prediction' }

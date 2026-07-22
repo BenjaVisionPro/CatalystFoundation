@@ -72,3 +72,36 @@ CFPhysicsBodyType >> addVelocity: aPoint [
 { #category : 'angular dynamics' }
 CFPhysicsBodyType >> addAngularVelocity: aNumber [
 ]
+
+
+{ #category : 'velocity' }
+CFPhysicsBodyType >> velocity: aPoint [
+	body stopMotion
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyType >> angularVelocity: aNumber [
+	body stopMotion
+]
+
+{ #category : 'stepping' }
+CFPhysicsBodyType >> commitVelocity: aVelocity angularVelocity: anAngularVelocity [
+	body stopMotion
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyType >> integrateVelocityOf: aStepState by: seconds gravity: gravityVector [
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyType >> integratePositionOf: aStepState by: seconds [
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyType >> translate: aStepState by: aPoint [
+]
+
+{ #category : 'prediction' }
+CFPhysicsBodyType >> predictedTransformOf: aStepState after: seconds [
+	^ aStepState currentTransform
+]

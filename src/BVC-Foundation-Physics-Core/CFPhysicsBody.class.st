@@ -181,6 +181,11 @@ CFPhysicsBody >> initialize [
 ]
 
 { #category : 'body type' }
+CFPhysicsBody >> bodyType [
+	^ bodyType
+]
+
+{ #category : 'body type' }
 CFPhysicsBody >> isDynamic [
 	^ bodyType isDynamic
 ]
@@ -287,11 +292,14 @@ CFPhysicsBody >> velocity [
 
 { #category : 'accessing' }
 CFPhysicsBody >> velocity: aPoint [
-	velocity := self isMovable
-		ifTrue: [
-			aPoint = (0 @ 0) ifFalse: [ self wake ].
-			aPoint ]
-		ifFalse: [ 0 @ 0 ]
+	bodyType velocity: aPoint.
+	^ self
+]
+
+{ #category : 'velocity' }
+CFPhysicsBody >> assignVelocity: aPoint [
+	velocity := aPoint.
+	aPoint = (0 @ 0) ifFalse: [ self wake ]
 ]
 
 { #category : 'accessing' }
@@ -426,7 +434,13 @@ CFPhysicsBody >> angularVelocity [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> angularVelocity: aNumber [
-	angularVelocity := self isMovable ifTrue: [ aNumber asFloat ] ifFalse: [ 0.0 ].
+	bodyType angularVelocity: aNumber.
+	^ self
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> assignAngularVelocity: aNumber [
+	angularVelocity := aNumber asFloat.
 	angularVelocity = 0.0 ifFalse: [ self wake ]
 ]
 
@@ -529,10 +543,21 @@ CFPhysicsBody >> torque [
 CFPhysicsBody >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
 	position := aPosition.
 	rotation := anAngle.
-	velocity := self isMovable ifTrue: [ aVelocity ] ifFalse: [ 0 @ 0 ].
-	angularVelocity := self isMovable ifTrue: [ anAngularVelocity ] ifFalse: [ 0.0 ].
+	bodyType commitVelocity: aVelocity angularVelocity: anAngularVelocity.
 	force := 0 @ 0.
 	torque := 0.0
+]
+
+{ #category : 'stepping' }
+CFPhysicsBody >> commitVelocity: aVelocity angularVelocity: anAngularVelocity [
+	velocity := aVelocity.
+	angularVelocity := anAngularVelocity
+]
+
+{ #category : 'stepping' }
+CFPhysicsBody >> stopMotion [
+	velocity := 0 @ 0.
+	angularVelocity := 0.0
 ]
 
 { #category : 'sleeping' }

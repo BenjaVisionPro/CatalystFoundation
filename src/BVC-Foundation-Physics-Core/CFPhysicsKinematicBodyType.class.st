@@ -9,3 +9,34 @@ Class {
 CFPhysicsKinematicBodyType >> isKinematic [
 	^ true
 ]
+
+
+{ #category : 'velocity' }
+CFPhysicsKinematicBodyType >> velocity: aPoint [
+	body assignVelocity: aPoint
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsKinematicBodyType >> angularVelocity: aNumber [
+	body assignAngularVelocity: aNumber
+]
+
+{ #category : 'stepping' }
+CFPhysicsKinematicBodyType >> commitVelocity: aVelocity angularVelocity: anAngularVelocity [
+	body commitVelocity: aVelocity angularVelocity: anAngularVelocity
+]
+
+
+{ #category : 'integration' }
+CFPhysicsKinematicBodyType >> integratePositionOf: aStepState by: seconds [
+	aStepState integrateCurrentVelocityBy: seconds
+]
+
+{ #category : 'prediction' }
+CFPhysicsKinematicBodyType >> predictedTransformOf: aStepState after: seconds [
+	| currentTransform |
+	currentTransform := aStepState currentTransform.
+	^ CFPhysicsTransform
+		position: currentTransform position + (aStepState linearVelocity * seconds)
+		rotation: currentTransform rotation + (aStepState angularVelocity * seconds)
+]
