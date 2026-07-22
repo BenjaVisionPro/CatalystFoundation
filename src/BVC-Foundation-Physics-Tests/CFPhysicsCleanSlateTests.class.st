@@ -5232,7 +5232,7 @@ CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
 	element := BlElement new.
 	physics := element physics.
 	world := physics beWorld.
-	self assert: (element userData at: CFPhysicsElement) == physics.
+	self assert: (element userData at: CFPhysics) == physics.
 	self assert: (element userData at: CFPhysicsWorld) == world.
 	self assert: physics world == world.
 	^ world

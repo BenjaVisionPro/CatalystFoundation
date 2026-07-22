@@ -3,13 +3,13 @@ Extension { #name : 'BlElement' }
 { #category : '*BVC-Foundation-Physics-Core' }
 BlElement >> existingPhysics [
 	^ self userData
-		at: CFPhysicsElement
+		at: CFPhysics
 		ifAbsent: [ nil ]
 ]
 
 { #category : '*BVC-Foundation-Physics-Core' }
 BlElement >> physics [
 	^ self userData
-		at: CFPhysicsElement
-		ifAbsentPut: [ CFPhysicsElement on: self ]
+		at: CFPhysics
+		ifAbsentPut: [ CFPhysics on: self ]
 ]

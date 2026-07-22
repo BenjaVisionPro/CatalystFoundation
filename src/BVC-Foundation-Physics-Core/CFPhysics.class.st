@@ -1,5 +1,5 @@
 Class {
-	#name : 'CFPhysicsElement',
+	#name : 'CFPhysics',
 	#superclass : 'Object',
 	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld' ],
 	#category : 'BVC-Foundation-Physics-Core',
@@ -7,80 +7,80 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsElement class >> on: anElement [
+CFPhysics class >> on: anElement [
 	^ self new
 		element: anElement;
 		yourself
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> beDynamic [
+CFPhysics >> beDynamic [
 	self requireBodyState beDynamic
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> beKinematic [
+CFPhysics >> beKinematic [
 	self requireBodyState beKinematic
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> beStatic [
+CFPhysics >> beStatic [
 	self requireBodyState beStatic
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> beWorld [
+CFPhysics >> beWorld [
 	^ element userData
 		at: CFPhysicsWorld
 		ifAbsentPut: [ CFPhysicsWorld on: element ]
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> bodyState [
+CFPhysics >> bodyState [
 	^ body
 ]
 
 
 { #category : 'private - bodies' }
-CFPhysicsElement >> ensureBodyInWorld: aWorld [
+CFPhysics >> ensureBodyInWorld: aWorld [
 	body ifNil: [ body := CFPhysicsBody element: element world: aWorld ].
 	body world: aWorld.
 	^ body
 ]
 
 { #category : 'private - bodies' }
-CFPhysicsElement >> retireBodyFromWorld: aWorld [
+CFPhysics >> retireBodyFromWorld: aWorld [
 	(body notNil and: [ body world == aWorld ]) ifTrue: [ body world: nil ]
 ]
 
 { #category : 'accessing' }
-CFPhysicsElement >> element [
+CFPhysics >> element [
 	^ element
 ]
 
 { #category : 'accessing' }
-CFPhysicsElement >> element: anElement [
+CFPhysics >> element: anElement [
 	element := anElement.
 	pullInteractionHandler := CFPhysicsPullInteractionHandler on: element
 ]
 
 { #category : 'world membership' }
-CFPhysicsElement >> excludeFromWorld [
+CFPhysics >> excludeFromWorld [
 	excludedFromWorld := true
 ]
 
 { #category : 'world membership' }
-CFPhysicsElement >> includeInWorld [
+CFPhysics >> includeInWorld [
 	excludedFromWorld := false
 ]
 
 { #category : 'world membership' }
-CFPhysicsElement >> isExcludedFromWorld [
+CFPhysics >> isExcludedFromWorld [
 	^ excludedFromWorld = true
 ]
 
 { #category : 'world membership' }
-CFPhysicsElement >> excludeDescendantsFromWorld [
+CFPhysics >> excludeDescendantsFromWorld [
 	element children do: [ :each |
 		each physics
 			excludeFromWorld;
@@ -89,69 +89,69 @@ CFPhysicsElement >> excludeDescendantsFromWorld [
 
 
 { #category : 'material' }
-CFPhysicsElement >> density [
+CFPhysics >> density [
 	^ self requireBodyState density
 ]
 
 { #category : 'material' }
-CFPhysicsElement >> density: aNumber [
+CFPhysics >> density: aNumber [
 	self requireBodyState density: aNumber
 ]
 
 { #category : 'material' }
-CFPhysicsElement >> friction [
+CFPhysics >> friction [
 	^ self requireBodyState friction
 ]
 
 { #category : 'material' }
-CFPhysicsElement >> friction: aNumber [
+CFPhysics >> friction: aNumber [
 	self requireBodyState friction: aNumber
 ]
 
 { #category : 'material' }
-CFPhysicsElement >> restitution [
+CFPhysics >> restitution [
 	^ self requireBodyState restitution
 ]
 
 { #category : 'material' }
-CFPhysicsElement >> restitution: aNumber [
+CFPhysics >> restitution: aNumber [
 	self requireBodyState restitution: aNumber
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> existingWorld [
+CFPhysics >> existingWorld [
 	^ element userData
 		at: CFPhysicsWorld
 		ifAbsent: [ nil ]
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> ownedWorld [
+CFPhysics >> ownedWorld [
 	^ self existingWorld
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> isDynamic [
+CFPhysics >> isDynamic [
 	^ self requireBodyState isDynamic
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> isKinematic [
+CFPhysics >> isKinematic [
 	^ self requireBodyState isKinematic
 ]
 
 { #category : 'body type' }
-CFPhysicsElement >> isStatic [
+CFPhysics >> isStatic [
 	^ self requireBodyState isStatic
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> isWorld [
+CFPhysics >> isWorld [
 	^ self existingWorld notNil
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> owningWorld [
+CFPhysics >> owningWorld [
 	| ancestor physics |
 	ancestor := element parent.
 	[ ancestor notNil ] whileTrue: [
@@ -164,18 +164,18 @@ CFPhysicsElement >> owningWorld [
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> position [
+CFPhysics >> position [
 	^ self requireBodyState position
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> position: aPoint [
+CFPhysics >> position: aPoint [
 	self requireBodyState position: aPoint
 ]
 
 
 { #category : 'private - bodies' }
-CFPhysicsElement >> requireBodyState [
+CFPhysics >> requireBodyState [
 	| owningWorld |
 	body ifNotNil: [ ^ body ].
 	owningWorld := self owningWorld.
@@ -186,18 +186,18 @@ CFPhysicsElement >> requireBodyState [
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> rotation [
+CFPhysics >> rotation [
 	^ self requireBodyState rotation
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> rotation: aNumber [
+CFPhysics >> rotation: aNumber [
 	self requireBodyState rotation: aNumber
 ]
 
 
 { #category : 'worlds' }
-CFPhysicsElement >> world [
+CFPhysics >> world [
 	^ element userData
 		at: CFPhysicsWorld
 		ifAbsent: [
@@ -207,7 +207,7 @@ CFPhysicsElement >> world [
 ]
 
 { #category : 'worlds' }
-CFPhysicsElement >> synchroniseWorldMembership [
+CFPhysics >> synchroniseWorldMembership [
 	| existingWorld owningWorld |
 	existingWorld := self existingWorld.
 	owningWorld := self owningWorld.
@@ -217,182 +217,182 @@ CFPhysicsElement >> synchroniseWorldMembership [
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> translation: aPoint rotation: aNumber [
+CFPhysics >> translation: aPoint rotation: aNumber [
 	self requireBodyState translation: aPoint rotation: aNumber
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> velocity [
+CFPhysics >> velocity [
 	^ self requireBodyState velocity
 ]
 
 { #category : 'bodies' }
-CFPhysicsElement >> velocity: aPoint [
+CFPhysics >> velocity: aPoint [
 	self requireBodyState velocity: aPoint
 ]
 
 
 { #category : 'sleeping' }
-CFPhysicsElement >> isAwake [
+CFPhysics >> isAwake [
 	^ self requireBodyState isAwake
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> isSleeping [
+CFPhysics >> isSleeping [
 	^ self requireBodyState isSleeping
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> allowsSleeping [
+CFPhysics >> allowsSleeping [
 	^ self requireBodyState allowsSleeping
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> allowSleeping [
+CFPhysics >> allowSleeping [
 	self requireBodyState allowSleeping
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> preventSleeping [
+CFPhysics >> preventSleeping [
 	self requireBodyState preventSleeping
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> sleep [
+CFPhysics >> sleep [
 	self requireBodyState sleep
 ]
 
 { #category : 'sleeping' }
-CFPhysicsElement >> wake [
+CFPhysics >> wake [
 	self requireBodyState wake
 ]
 
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
+CFPhysics >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> clearForces [ self requireBodyState clearForces ]
+CFPhysics >> clearForces [ self requireBodyState clearForces ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> linearDamping [ ^ self requireBodyState linearDamping ]
+CFPhysics >> linearDamping [ ^ self requireBodyState linearDamping ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
+CFPhysics >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> gravityScale [ ^ self requireBodyState gravityScale ]
+CFPhysics >> gravityScale [ ^ self requireBodyState gravityScale ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
+CFPhysics >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
 
 { #category : 'angular dynamics' }
-CFPhysicsElement >> angularVelocity [ ^ self requireBodyState angularVelocity ]
+CFPhysics >> angularVelocity [ ^ self requireBodyState angularVelocity ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
+CFPhysics >> applyForce: aPoint [ self requireBodyState applyForce: aPoint ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> clearForces [ self requireBodyState clearForces ]
+CFPhysics >> clearForces [ self requireBodyState clearForces ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> linearDamping [ ^ self requireBodyState linearDamping ]
+CFPhysics >> linearDamping [ ^ self requireBodyState linearDamping ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
+CFPhysics >> linearDamping: aNumber [ self requireBodyState linearDamping: aNumber ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> gravityScale [ ^ self requireBodyState gravityScale ]
+CFPhysics >> gravityScale [ ^ self requireBodyState gravityScale ]
 
 { #category : 'linear dynamics' }
-CFPhysicsElement >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
+CFPhysics >> gravityScale: aNumber [ self requireBodyState gravityScale: aNumber ]
 
 { #category : 'angular dynamics' }
-CFPhysicsElement >> angularVelocity: aNumber [ self requireBodyState angularVelocity: aNumber ]
+CFPhysics >> angularVelocity: aNumber [ self requireBodyState angularVelocity: aNumber ]
 
 { #category : 'angular dynamics' }
-CFPhysicsElement >> angularDamping [ ^ self requireBodyState angularDamping ]
+CFPhysics >> angularDamping [ ^ self requireBodyState angularDamping ]
 
 { #category : 'angular dynamics' }
-CFPhysicsElement >> angularDamping: aNumber [ self requireBodyState angularDamping: aNumber ]
+CFPhysics >> angularDamping: aNumber [ self requireBodyState angularDamping: aNumber ]
 
 { #category : 'angular dynamics' }
-CFPhysicsElement >> applyTorque: aNumber [ self requireBodyState applyTorque: aNumber ]
+CFPhysics >> applyTorque: aNumber [ self requireBodyState applyTorque: aNumber ]
 
 { #category : 'mass' }
-CFPhysicsElement >> inverseInertia [ ^ self requireBodyState inverseInertia ]
+CFPhysics >> inverseInertia [ ^ self requireBodyState inverseInertia ]
 
 
 { #category : 'sensors' }
-CFPhysicsElement >> beSensor [
+CFPhysics >> beSensor [
 	self requireBodyState beSensor
 ]
 
 { #category : 'sensors' }
-CFPhysicsElement >> beSolid [
+CFPhysics >> beSolid [
 	self requireBodyState beSolid
 ]
 
 { #category : 'sensors' }
-CFPhysicsElement >> isSensor [
+CFPhysics >> isSensor [
 	^ self requireBodyState isSensor
 ]
 
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionCategoryBits [
+CFPhysics >> collisionCategoryBits [
 	^ self requireBodyState collisionCategoryBits
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionCategoryBits: anInteger [
+CFPhysics >> collisionCategoryBits: anInteger [
 	self requireBodyState collisionCategoryBits: anInteger
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionMaskBits [
+CFPhysics >> collisionMaskBits [
 	^ self requireBodyState collisionMaskBits
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionMaskBits: anInteger [
+CFPhysics >> collisionMaskBits: anInteger [
 	self requireBodyState collisionMaskBits: anInteger
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionGroupIndex [
+CFPhysics >> collisionGroupIndex [
 	^ self requireBodyState collisionGroupIndex
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsElement >> collisionGroupIndex: anInteger [
+CFPhysics >> collisionGroupIndex: anInteger [
 	self requireBodyState collisionGroupIndex: anInteger
 ]
 
 
 { #category : 'pull interaction' }
-CFPhysicsElement >> enablePullInteraction [
+CFPhysics >> enablePullInteraction [
 	pullInteractionHandler enable.
 	^ pullInteractionHandler
 ]
 
 { #category : 'pull interaction' }
-CFPhysicsElement >> disablePullInteraction [
+CFPhysics >> disablePullInteraction [
 	pullInteractionHandler disable
 ]
 
 { #category : 'pull interaction' }
-CFPhysicsElement >> isPullInteractionEnabled [
+CFPhysics >> isPullInteractionEnabled [
 	^ pullInteractionHandler isEnabled
 ]
 
 { #category : 'pull interaction' }
-CFPhysicsElement >> pullInteractionHandler [
+CFPhysics >> pullInteractionHandler [
 	^ pullInteractionHandler
 ]
 
 { #category : 'spring interaction' }
-CFPhysicsElement >> springTo: anotherElement [
+CFPhysics >> springTo: anotherElement [
 	| aWorld otherWorld spring |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -407,7 +407,7 @@ CFPhysicsElement >> springTo: anotherElement [
 
 
 { #category : 'spring interaction' }
-CFPhysicsElement >> springs [
+CFPhysics >> springs [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -418,14 +418,14 @@ CFPhysicsElement >> springs [
 ]
 
 { #category : 'spring interaction' }
-CFPhysicsElement >> removeSpring: aSpringConstraint [
+CFPhysics >> removeSpring: aSpringConstraint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
 ]
 
 { #category : 'distance joints' }
-CFPhysicsElement >> distanceJointTo: anotherElement [
+CFPhysics >> distanceJointTo: anotherElement [
 	| aWorld otherWorld joint |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -439,7 +439,7 @@ CFPhysicsElement >> distanceJointTo: anotherElement [
 ]
 
 { #category : 'distance joints' }
-CFPhysicsElement >> distanceJoints [
+CFPhysics >> distanceJoints [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -450,14 +450,14 @@ CFPhysicsElement >> distanceJoints [
 ]
 
 { #category : 'distance joints' }
-CFPhysicsElement >> removeDistanceJoint: aJoint [
+CFPhysics >> removeDistanceJoint: aJoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
 ]
 
 { #category : 'revolute joints' }
-CFPhysicsElement >> revoluteJointTo: anotherElement [
+CFPhysics >> revoluteJointTo: anotherElement [
 	| aWorld otherWorld joint |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -471,7 +471,7 @@ CFPhysicsElement >> revoluteJointTo: anotherElement [
 ]
 
 { #category : 'revolute joints' }
-CFPhysicsElement >> revoluteJoints [
+CFPhysics >> revoluteJoints [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -482,14 +482,14 @@ CFPhysicsElement >> revoluteJoints [
 ]
 
 { #category : 'revolute joints' }
-CFPhysicsElement >> removeRevoluteJoint: aJoint [
+CFPhysics >> removeRevoluteJoint: aJoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
 ]
 
 { #category : 'fixed joints' }
-CFPhysicsElement >> fixedJointTo: anotherElement [
+CFPhysics >> fixedJointTo: anotherElement [
 	| aWorld otherWorld joint |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -503,7 +503,7 @@ CFPhysicsElement >> fixedJointTo: anotherElement [
 ]
 
 { #category : 'fixed joints' }
-CFPhysicsElement >> fixedJoints [
+CFPhysics >> fixedJoints [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -514,14 +514,14 @@ CFPhysicsElement >> fixedJoints [
 ]
 
 { #category : 'fixed joints' }
-CFPhysicsElement >> removeFixedJoint: aJoint [
+CFPhysics >> removeFixedJoint: aJoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeFixedJoint: aJoint ]
 ]
 
 { #category : 'rail joints' }
-CFPhysicsElement >> railJointTo: anotherElement along: anAxis [
+CFPhysics >> railJointTo: anotherElement along: anAxis [
 	| aWorld otherWorld joint |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -536,7 +536,7 @@ CFPhysicsElement >> railJointTo: anotherElement along: anAxis [
 ]
 
 { #category : 'rail joints' }
-CFPhysicsElement >> railJoints [
+CFPhysics >> railJoints [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -547,7 +547,7 @@ CFPhysicsElement >> railJoints [
 ]
 
 { #category : 'rail joints' }
-CFPhysicsElement >> removeRailJoint: aJoint [
+CFPhysics >> removeRailJoint: aJoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeRailJoint: aJoint ]
@@ -555,7 +555,7 @@ CFPhysicsElement >> removeRailJoint: aJoint [
 
 
 { #category : 'containment interaction' }
-CFPhysicsElement >> containWithinWorld [
+CFPhysics >> containWithinWorld [
 	| aWorld constraint |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
@@ -565,14 +565,14 @@ CFPhysicsElement >> containWithinWorld [
 ]
 
 { #category : 'containment interaction' }
-CFPhysicsElement >> removeContainment: aContainmentConstraint [
+CFPhysics >> removeContainment: aContainmentConstraint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeContainmentConstraint: aContainmentConstraint ]
 ]
 
 { #category : 'attraction interaction' }
-CFPhysicsElement >> attract: anotherElement [
+CFPhysics >> attract: anotherElement [
 	| aWorld otherWorld attraction |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -586,7 +586,7 @@ CFPhysicsElement >> attract: anotherElement [
 ]
 
 { #category : 'attraction interaction' }
-CFPhysicsElement >> attractions [
+CFPhysics >> attractions [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -597,7 +597,7 @@ CFPhysicsElement >> attractions [
 ]
 
 { #category : 'attraction interaction' }
-CFPhysicsElement >> removeAttraction: anAttractionConstraint [
+CFPhysics >> removeAttraction: anAttractionConstraint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeAttractionConstraint: anAttractionConstraint ]
@@ -606,7 +606,7 @@ CFPhysicsElement >> removeAttraction: anAttractionConstraint [
 
 
 { #category : 'repulsion interaction' }
-CFPhysicsElement >> repel: anotherElement [
+CFPhysics >> repel: anotherElement [
 	| aWorld otherWorld repulsion |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
@@ -620,7 +620,7 @@ CFPhysicsElement >> repel: anotherElement [
 ]
 
 { #category : 'repulsion interaction' }
-CFPhysicsElement >> repulsions [
+CFPhysics >> repulsions [
 	| aWorld body |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ ^ #() ].
@@ -631,14 +631,14 @@ CFPhysicsElement >> repulsions [
 ]
 
 { #category : 'repulsion interaction' }
-CFPhysicsElement >> removeRepulsion: aRepulsionConstraint [
+CFPhysics >> removeRepulsion: aRepulsionConstraint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNotNil: [ aWorld removeRepulsionConstraint: aRepulsionConstraint ]
 ]
 
 { #category : 'anchors' }
-CFPhysicsElement >> localAnchorAt: aPoint [
+CFPhysics >> localAnchorAt: aPoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
@@ -647,7 +647,7 @@ CFPhysicsElement >> localAnchorAt: aPoint [
 ]
 
 { #category : 'anchors' }
-CFPhysicsElement >> normalisedAnchorAt: aPoint [
+CFPhysics >> normalisedAnchorAt: aPoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
@@ -657,7 +657,7 @@ CFPhysicsElement >> normalisedAnchorAt: aPoint [
 
 
 { #category : 'anchors' }
-CFPhysicsElement >> worldAnchorAt: aPoint [
+CFPhysics >> worldAnchorAt: aPoint [
 	| aWorld |
 	aWorld := self owningWorld.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
@@ -666,7 +666,7 @@ CFPhysicsElement >> worldAnchorAt: aPoint [
 
 
 { #category : 'relationship endpoints' }
-CFPhysicsElement >> nearestGeometryEndpointsTo: anotherElement [
+CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
 	| aWorld otherWorld |
 	aWorld := self owningWorld.
 	otherWorld := anotherElement physics owningWorld.
