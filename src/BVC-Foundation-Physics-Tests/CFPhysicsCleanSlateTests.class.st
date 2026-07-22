@@ -5193,13 +5193,13 @@ CFPhysicsCleanSlateTests >> kinematicBodyHasInfiniteMassAndCannotSleep [
 	body := self cleanSlateBodyWithSequence: 1.
 	body beKinematic.
 	self assert: body isKinematic.
-	self deny: body isDynamic.
-	self deny: body isStatic.
+	self assert: body isDynamic not.
+	self assert: body isStatic not.
 	self assert: body inverseMass equals: 0.0.
 	self assert: body inverseInertia equals: 0.0.
 	body sleep.
 	self assert: body isAwake.
-	self deny: body isSleeping.
+	self assert: body isSleeping not.
 	^ body
 ]
 
@@ -5219,8 +5219,8 @@ CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
 		pair firstBody == dynamic and: [ pair secondBody == kinematic ] ]).
 	self assert: (pairs anySatisfy: [ :pair |
 		pair firstBody == dynamic and: [ pair secondBody == static ] ]).
-	self deny: (pairs anySatisfy: [ :pair |
+	self assert: (pairs anySatisfy: [ :pair |
 		(pair firstBody == kinematic and: [ pair secondBody == static ]) or: [
-			pair firstBody == static and: [ pair secondBody == kinematic ] ] ]).
+			pair firstBody == static and: [ pair secondBody == kinematic ] ] ]) not.
 	^ pairs
 ]
