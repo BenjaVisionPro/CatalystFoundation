@@ -503,8 +503,8 @@ CFPhysicsWorld >> joints [
 ]
 
 { #category : 'collision filtering' }
-CFPhysicsWorld >> distanceJointPreventsCollisionBetween: firstBody and: secondBody [
-	^ distanceJoints anySatisfy: [ :joint |
+CFPhysicsWorld >> jointPreventsCollisionBetween: firstBody and: secondBody [
+	^ self joints anySatisfy: [ :joint |
 		(joint isActive and: [ joint collideConnected not ]) and: [
 			(joint firstBody == firstBody and: [ joint secondBody == secondBody ])
 				or: [ joint firstBody == secondBody

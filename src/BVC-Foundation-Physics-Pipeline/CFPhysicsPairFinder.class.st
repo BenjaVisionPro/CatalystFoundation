@@ -62,7 +62,7 @@ CFPhysicsPairFinder >> shouldConsider: first with: second [
 CFPhysicsPairFinder >> shouldConsider: first with: second firstAABB: firstAABB secondAABB: secondAABB [
 	(first isStatic and: [ second isStatic ]) ifTrue: [ ^ false ].
 	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
-	(self distanceJointPreventsCollisionBetween: first and: second) ifTrue: [ ^ false ].
+	(self jointPreventsCollisionBetween: first and: second) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
 ]
 
@@ -104,16 +104,16 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: fi
 	secondBody := second body.
 	(firstBody isStatic and: [ secondBody isStatic ]) ifTrue: [ ^ false ].
 	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
-	(self distanceJointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
+	(self jointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
 ]
 
 { #category : 'private - filtering' }
-CFPhysicsPairFinder >> distanceJointPreventsCollisionBetween: firstBody and: secondBody [
+CFPhysicsPairFinder >> jointPreventsCollisionBetween: firstBody and: secondBody [
 	| world |
 	world := firstBody world.
 	(world isNil or: [ world ~~ secondBody world ]) ifTrue: [ ^ false ].
-	^ world distanceJointPreventsCollisionBetween: firstBody and: secondBody
+	^ world jointPreventsCollisionBetween: firstBody and: secondBody
 ]
 
 { #category : 'private - ordering' }

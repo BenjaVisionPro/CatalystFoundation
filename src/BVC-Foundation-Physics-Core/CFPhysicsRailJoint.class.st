@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRailJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceTranslation', 'referenceAngle', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse' ],
+	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceTranslation', 'referenceAngle', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse', 'collideConnected' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -61,7 +61,8 @@ CFPhysicsRailJoint >> initialize [
 	active := true.
 	sequence := 0.
 	accumulatedPerpendicularImpulse := 0.0.
-	accumulatedAngularImpulse := 0.0
+	accumulatedAngularImpulse := 0.0.
+	collideConnected := true
 ]
 
 { #category : 'accessing' }
@@ -80,6 +81,17 @@ CFPhysicsRailJoint >> bodyB [ ^ endpointPair bodyB ]
 CFPhysicsRailJoint >> firstBody [ ^ self bodyA ]
 { #category : 'accessing' }
 CFPhysicsRailJoint >> secondBody [ ^ self bodyB ]
+
+
+{ #category : 'configuration' }
+CFPhysicsRailJoint >> collideConnected [ ^ collideConnected ]
+
+{ #category : 'configuration' }
+CFPhysicsRailJoint >> collideConnected: aBoolean [
+	collideConnected = aBoolean ifTrue: [ ^ self ].
+	collideConnected := aBoolean.
+	self wakeBodies
+]
 
 { #category : 'configuration' }
 CFPhysicsRailJoint >> axis [ ^ axis ]

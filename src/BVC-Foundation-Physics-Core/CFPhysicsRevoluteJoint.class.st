@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
+	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'collideConnected' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -46,7 +46,8 @@ CFPhysicsRevoluteJoint >> initialize [
 	motorEnabled := false.
 	motorSpeed := 0.0.
 	maximumMotorImpulse := 0.0.
-	motorImpulse := 0.0
+	motorImpulse := 0.0.
+	collideConnected := true
 ]
 
 { #category : 'accessing' }
@@ -65,6 +66,17 @@ CFPhysicsRevoluteJoint >> bodyB [ ^ endpointPair bodyB ]
 CFPhysicsRevoluteJoint >> firstBody [ ^ self bodyA ]
 { #category : 'accessing' }
 CFPhysicsRevoluteJoint >> secondBody [ ^ self bodyB ]
+
+
+{ #category : 'configuration' }
+CFPhysicsRevoluteJoint >> collideConnected [ ^ collideConnected ]
+
+{ #category : 'configuration' }
+CFPhysicsRevoluteJoint >> collideConnected: aBoolean [
+	collideConnected = aBoolean ifTrue: [ ^ self ].
+	collideConnected := aBoolean.
+	self wakeBodies
+]
 
 { #category : 'solver state' }
 CFPhysicsRevoluteJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
