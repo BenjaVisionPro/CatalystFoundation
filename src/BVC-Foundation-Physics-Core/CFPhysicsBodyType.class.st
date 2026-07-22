@@ -142,3 +142,33 @@ CFPhysicsBodyType >> advanceBy: seconds gravity: gravityVector [
 CFPhysicsBodyType >> enter [
 	body markAwake
 ]
+
+{ #category : 'collision' }
+CFPhysicsBodyType >> formsCollisionPairWith: anotherBodyType [
+	^ anotherBodyType formsCollisionPairWithStaticBodyType
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyType >> formsCollisionPairWithDynamicBodyType [
+	^ true
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyType >> formsCollisionPairWithKinematicBodyType [
+	^ false
+]
+
+{ #category : 'collision' }
+CFPhysicsBodyType >> formsCollisionPairWithStaticBodyType [
+	^ false
+]
+
+{ #category : 'islands' }
+CFPhysicsBodyType >> canSeedSolverIsland [
+	^ false
+]
+
+{ #category : 'islands' }
+CFPhysicsBodyType >> propagatesSolverIsland [
+	^ false
+]

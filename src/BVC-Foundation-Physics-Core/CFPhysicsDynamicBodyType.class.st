@@ -129,3 +129,28 @@ CFPhysicsDynamicBodyType >> updateSleepBy: seconds linearThresholdSquared: thres
 CFPhysicsDynamicBodyType >> advanceBy: seconds gravity: gravityVector [
 	body advanceDynamicBy: seconds gravity: gravityVector
 ]
+
+{ #category : 'collision' }
+CFPhysicsDynamicBodyType >> formsCollisionPairWith: anotherBodyType [
+	^ anotherBodyType formsCollisionPairWithDynamicBodyType
+]
+
+{ #category : 'collision' }
+CFPhysicsDynamicBodyType >> formsCollisionPairWithKinematicBodyType [
+	^ true
+]
+
+{ #category : 'collision' }
+CFPhysicsDynamicBodyType >> formsCollisionPairWithStaticBodyType [
+	^ true
+]
+
+{ #category : 'islands' }
+CFPhysicsDynamicBodyType >> canSeedSolverIsland [
+	^ true
+]
+
+{ #category : 'islands' }
+CFPhysicsDynamicBodyType >> propagatesSolverIsland [
+	^ true
+]

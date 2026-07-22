@@ -687,3 +687,18 @@ CFPhysicsBody >> sweep [
 CFPhysicsBody >> sweptAABB [
 	^ self shapeState sweptAABBAlong: self sweep
 ]
+
+{ #category : 'collision' }
+CFPhysicsBody >> formsCollisionPairWith: anotherBody [
+	^ bodyType formsCollisionPairWith: anotherBody bodyType
+]
+
+{ #category : 'islands' }
+CFPhysicsBody >> canSeedSolverIsland [
+	^ bodyType canSeedSolverIsland
+]
+
+{ #category : 'islands' }
+CFPhysicsBody >> propagatesSolverIsland [
+	^ bodyType propagatesSolverIsland
+]

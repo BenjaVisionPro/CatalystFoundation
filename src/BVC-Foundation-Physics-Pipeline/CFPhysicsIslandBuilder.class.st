@@ -13,7 +13,7 @@ CFPhysicsIslandBuilder >> islandsFromBodies: bodies constraints: constraints [
 	visited := IdentitySet new.
 	islands := OrderedCollection new.
 	orderedBodies do: [ :body |
-		(body isDynamic and: [ (visited includes: body) not ]) ifTrue: [
+		(body canSeedSolverIsland and: [ (visited includes: body) not ]) ifTrue: [
 			islands add: (self
 				islandFrom: body
 				constraintsByBody: constraintsByBody
@@ -59,9 +59,9 @@ CFPhysicsIslandBuilder >> islandFrom: seed constraintsByBody: constraintsByBody 
 					second := constraint secondBody.
 					first ifNotNil: [
 						island addBody: first.
-						(first isDynamic and: [ (visited includes: first) not ]) ifTrue: [ pending add: first ] ].
+						(first propagatesSolverIsland and: [ (visited includes: first) not ]) ifTrue: [ pending add: first ] ].
 					second ifNotNil: [
 						island addBody: second.
-						(second isDynamic and: [ (visited includes: second) not ]) ifTrue: [ pending add: second ] ] ] ] ] ].
+						(second propagatesSolverIsland and: [ (visited includes: second) not ]) ifTrue: [ pending add: second ] ] ] ] ] ].
 	^ island
 ]

@@ -52,3 +52,8 @@ CFPhysicsKinematicBodyType >> isAwake [
 CFPhysicsKinematicBodyType >> advanceBy: seconds gravity: gravityVector [
 	body advanceUsingCurrentVelocityBy: seconds
 ]
+
+{ #category : 'collision' }
+CFPhysicsKinematicBodyType >> formsCollisionPairWith: anotherBodyType [
+	^ anotherBodyType formsCollisionPairWithKinematicBodyType
+]
