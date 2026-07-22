@@ -5025,3 +5025,27 @@ CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
 	self assert: body torque equals: 0.0.
 	^ body
 ]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateTests >> islandRebuildSplitsRemovedConnectivityDeterministically [
+	<gtExample>
+	| first second third firstConstraint removedConstraint builder connected split |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	firstConstraint := self cleanSlateConstraintBetween: first and: second.
+	removedConstraint := self cleanSlateConstraintBetween: second and: third.
+	builder := CFPhysicsIslandBuilder new.
+	connected := builder
+		islandsFromBodies: { third. second. first }
+		constraints: { removedConstraint. firstConstraint }.
+	self assert: connected size equals: 1.
+	self assert: (connected first dynamicBodies collect: #sequence) equals: #(1 2 3).
+	split := builder
+		islandsFromBodies: { third. second. first }
+		constraints: { firstConstraint }.
+	self assert: split size equals: 2.
+	self assert: (split first dynamicBodies collect: #sequence) equals: #(1 2).
+	self assert: (split second dynamicBodies collect: #sequence) equals: #(3).
+	^ split
+]
