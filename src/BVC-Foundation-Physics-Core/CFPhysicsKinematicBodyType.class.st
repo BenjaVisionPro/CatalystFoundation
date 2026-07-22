@@ -46,3 +46,9 @@ CFPhysicsKinematicBodyType >> predictedTransformOf: aStepState after: seconds [
 CFPhysicsKinematicBodyType >> isAwake [
 	^ true
 ]
+
+
+{ #category : 'stepping' }
+CFPhysicsKinematicBodyType >> advanceBy: seconds gravity: gravityVector [
+	body advanceUsingCurrentVelocityBy: seconds
+]

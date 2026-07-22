@@ -16,16 +16,24 @@ CFPhysicsBody class >> element: anElement world: aWorld [
 
 { #category : 'stepping' }
 CFPhysicsBody >> advanceBy: seconds gravity: gravityVector [
-	(self isMovable and: [ self isAwake ]) ifFalse: [ ^ self ].
-	self isDynamic ifTrue: [
-		velocity := velocity + (((gravityVector * gravityScale) + (force * self inverseMass)) * seconds).
-		angularVelocity := angularVelocity + (torque * self inverseInertia * seconds).
-		linearDamping > 0 ifTrue: [ velocity := velocity * (1.0 / (1.0 + (seconds * linearDamping))) ].
-		angularDamping > 0 ifTrue: [ angularVelocity := angularVelocity * (1.0 / (1.0 + (seconds * angularDamping))) ] ].
+	bodyType advanceBy: seconds gravity: gravityVector
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsBody >> advanceDynamicBy: seconds gravity: gravityVector [
+	self isAwake ifFalse: [ ^ self ].
+	velocity := velocity + (((gravityVector * gravityScale) + (force * self calculatedInverseMass)) * seconds).
+	angularVelocity := angularVelocity + (torque * self calculatedInverseInertia * seconds).
+	linearDamping > 0 ifTrue: [ velocity := velocity * (1.0 / (1.0 + (seconds * linearDamping))) ].
+	angularDamping > 0 ifTrue: [ angularVelocity := angularVelocity * (1.0 / (1.0 + (seconds * angularDamping))) ].
+	self advanceUsingCurrentVelocityBy: seconds
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsBody >> advanceUsingCurrentVelocityBy: seconds [
 	position := position + (velocity * seconds).
 	rotation := rotation + (angularVelocity * seconds).
-	force := 0 @ 0.
-	torque := 0.0
+	self clearForces
 ]
 
 
@@ -80,15 +88,9 @@ CFPhysicsBody >> setBodyType: aBodyType [
 	self wakeContactNeighbours.
 	world ifNotNil: [ world wakeJointsUsingBody: self ].
 	bodyType := aBodyType.
-	self isStatic
-		ifTrue: [
-			awake := false.
-			velocity := 0 @ 0.
-			angularVelocity := 0.0 ]
-		ifFalse: [ awake := true ].
-	sleepTime := 0.0.
-	force := 0 @ 0.
-	torque := 0.0
+	self resetSleepTime.
+	self clearForces.
+	bodyType enter
 ]
 
 { #category : 'body type' }
@@ -566,6 +568,12 @@ CFPhysicsBody >> awakeState [
 { #category : 'private - sleeping' }
 CFPhysicsBody >> markAwake [
 	awake := true.
+	sleepTime := 0.0
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> markInactive [
+	awake := false.
 	sleepTime := 0.0
 ]
 

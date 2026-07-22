@@ -123,3 +123,9 @@ CFPhysicsDynamicBodyType >> updateSleepBy: seconds linearThresholdSquared: thres
 		angularThresholdSquared: angularThresholdSquared
 		requiredTime: requiredTime
 ]
+
+
+{ #category : 'stepping' }
+CFPhysicsDynamicBodyType >> advanceBy: seconds gravity: gravityVector [
+	body advanceDynamicBy: seconds gravity: gravityVector
+]

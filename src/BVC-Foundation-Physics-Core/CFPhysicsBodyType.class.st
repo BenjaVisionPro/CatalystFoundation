@@ -132,3 +132,13 @@ CFPhysicsBodyType >> advanceSleepTimeBy: seconds [
 { #category : 'sleeping' }
 CFPhysicsBodyType >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
 ]
+
+
+{ #category : 'stepping' }
+CFPhysicsBodyType >> advanceBy: seconds gravity: gravityVector [
+]
+
+{ #category : 'body type' }
+CFPhysicsBodyType >> enter [
+	body markAwake
+]

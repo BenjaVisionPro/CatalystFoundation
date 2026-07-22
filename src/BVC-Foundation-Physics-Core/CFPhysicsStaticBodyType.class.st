@@ -14,3 +14,10 @@ CFPhysicsStaticBodyType >> isMovable [
 CFPhysicsStaticBodyType >> isStatic [
 	^ true
 ]
+
+
+{ #category : 'body type' }
+CFPhysicsStaticBodyType >> enter [
+	body markInactive.
+	body stopMotion
+]
