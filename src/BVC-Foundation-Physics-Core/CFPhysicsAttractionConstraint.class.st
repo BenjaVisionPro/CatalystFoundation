@@ -110,13 +110,10 @@ CFPhysicsAttractionConstraint >> sequence: anInteger [
 
 { #category : 'stepping' }
 CFPhysicsAttractionConstraint >> prepareForStep: seconds [
-	| points displacement distance direction forceMagnitude impulse firstBody secondBody firstDynamic secondDynamic |
+	| points displacement distance direction forceMagnitude impulse firstBody secondBody |
 	active ifFalse: [ ^ self ].
 	firstBody := self bodyA.
 	secondBody := self bodyB.
-	firstDynamic := firstBody notNil and: [ firstBody isDynamic ].
-	secondDynamic := secondBody notNil and: [ secondBody isDynamic ].
-	(firstDynamic or: [ secondDynamic ]) ifFalse: [ ^ self ].
 	points := endpointPair worldPoints.
 	displacement := points second - points first.
 	distance := displacement r.
@@ -125,12 +122,12 @@ CFPhysicsAttractionConstraint >> prepareForStep: seconds [
 	forceMagnitude = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.
 	impulse := direction * (forceMagnitude * seconds).
-	firstDynamic ifTrue: [
+	firstBody ifNotNil: [
 		firstBody addVelocity: impulse * firstBody inverseMass ].
-	secondDynamic ifTrue: [
+	secondBody ifNotNil: [
 		secondBody addVelocity: impulse negated * secondBody inverseMass ].
-	firstDynamic ifTrue: [ firstBody wake ].
-	secondDynamic ifTrue: [ secondBody wake ]
+	firstBody ifNotNil: [ firstBody wake ].
+	secondBody ifNotNil: [ secondBody wake ]
 ]
 
 { #category : 'controlling' }

@@ -115,13 +115,10 @@ CFPhysicsSpringConstraint >> orderingKey [
 
 { #category : 'stepping' }
 CFPhysicsSpringConstraint >> prepareForStep: seconds [
-	| points displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstDynamic secondDynamic firstVelocity secondVelocity |
+	| points displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstVelocity secondVelocity |
 	active ifFalse: [ ^ self ].
 	firstBody := self bodyA.
 	secondBody := self bodyB.
-	firstDynamic := firstBody notNil and: [ firstBody isDynamic ].
-	secondDynamic := secondBody notNil and: [ secondBody isDynamic ].
-	(firstDynamic or: [ secondDynamic ]) ifFalse: [ ^ self ].
 	points := endpointPair worldPoints.
 	displacement := points second - points first.
 	distance := displacement r.
@@ -134,13 +131,13 @@ CFPhysicsSpringConstraint >> prepareForStep: seconds [
 	force := (extension * stiffness) + (relativeSpeed * damping).
 	force := (force max: maximumForce negated) min: maximumForce.
 	impulse := direction * (force * seconds).
-	firstDynamic ifTrue: [
+	firstBody ifNotNil: [
 		firstBody addVelocity: impulse * firstBody inverseMass ].
-	secondDynamic ifTrue: [
+	secondBody ifNotNil: [
 		secondBody addVelocity: impulse negated * secondBody inverseMass ].
 	force = 0 ifFalse: [
-		firstDynamic ifTrue: [ firstBody wake ].
-		secondDynamic ifTrue: [ secondBody wake ] ]
+		firstBody ifNotNil: [ firstBody wake ].
+		secondBody ifNotNil: [ secondBody wake ] ]
 ]
 
 { #category : 'controlling' }
