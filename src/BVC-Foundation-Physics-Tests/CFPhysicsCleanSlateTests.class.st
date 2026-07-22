@@ -3455,7 +3455,7 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> predictedPairDiscoveryDoesNotMutateBodies [
+CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotMutateBodies [
 	<gtExample>
 	| moving obstacle step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -3479,12 +3479,12 @@ CFPhysicsCleanSlateTests >> predictedPairDiscoveryDoesNotMutateBodies [
 	CFPhysicsPairFinderStage new executeOn: result.
 	self assert: moving position equals: 0 @ 0.
 	self assert: moving rotation equals: 0.0.
-	self assert: result pairs size equals: 1.
+	self assert: result pairs isEmpty.
 	^ result
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> predictedPairDiscoveryUsesPreparedVelocity [
+CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSweeps [
 	<gtExample>
 	| moving obstacle step result state |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -3508,7 +3508,7 @@ CFPhysicsCleanSlateTests >> predictedPairDiscoveryUsesPreparedVelocity [
 	state := result bodyStates at: moving.
 	self assert: state linearVelocity equals: 100 @ 0.
 	self assert: moving velocity equals: 0 @ 0.
-	self assert: result pairs size equals: 1.
+	self assert: result pairs isEmpty.
 	^ result
 ]
 
