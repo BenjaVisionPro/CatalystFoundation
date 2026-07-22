@@ -856,6 +856,31 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 	^ decision
 ]
 
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
+	<gtExample>
+	| first second pair manifold previousContact batch stage result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	previousContact := CFPhysicsContact pair: pair manifold: manifold.
+	first sleep.
+	second sleep.
+	batch := CFPhysicsContactUpdater new
+		updatePairs: #()
+		includingImpactContacts: #()
+		fromContacts: { previousContact }.
+	stage := CFPhysicsContactUpdateStage new.
+	stage wakeBodiesForEndedContacts: batch endedContacts.
+	result := batch endedContacts first.
+	self assert: result ended.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	^ result
+]
+
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
 	<gtExample>
