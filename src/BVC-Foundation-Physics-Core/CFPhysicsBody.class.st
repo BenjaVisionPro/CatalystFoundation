@@ -315,12 +315,12 @@ CFPhysicsBody >> world: aWorld [
 
 { #category : 'sleeping' }
 CFPhysicsBody >> isAwake [
-	^ self isKinematic or: [ self isDynamic and: [ awake ] ]
+	^ bodyType isAwake
 ]
 
 { #category : 'sleeping' }
 CFPhysicsBody >> isSleeping [
-	^ self isDynamic and: [ sleepingAllowed and: [ awake not ] ]
+	^ bodyType isSleeping
 ]
 
 { #category : 'sleeping' }
@@ -342,13 +342,7 @@ CFPhysicsBody >> preventSleeping [
 
 { #category : 'sleeping' }
 CFPhysicsBody >> sleep [
-	(self isDynamic and: [ sleepingAllowed ]) ifFalse: [ ^ self ].
-	awake := false.
-	sleepTime := 0.0.
-	velocity := 0 @ 0.
-	angularVelocity := 0.0.
-	force := 0 @ 0.
-	torque := 0.0
+	bodyType sleep
 ]
 
 { #category : 'sleeping' }
@@ -358,23 +352,16 @@ CFPhysicsBody >> sleepTime [
 
 { #category : 'sleeping' }
 CFPhysicsBody >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
-	(self isDynamic and: [ sleepingAllowed ]) ifFalse: [
-		self wake.
-		^ self ].
-	((velocity x squared + velocity y squared) <= thresholdSquared and: [ angularVelocity squared <= angularThresholdSquared ])
-		ifTrue: [
-			sleepTime := sleepTime + seconds.
-			sleepTime >= requiredTime ifTrue: [ self sleep ] ]
-		ifFalse: [
-			sleepTime := 0.0.
-			awake := true ]
+	bodyType
+		updateSleepBy: seconds
+		linearThresholdSquared: thresholdSquared
+		angularThresholdSquared: angularThresholdSquared
+		requiredTime: requiredTime
 ]
 
 { #category : 'sleeping' }
 CFPhysicsBody >> wake [
-	self isDynamic ifFalse: [ ^ self ].
-	awake := true.
-	sleepTime := 0.0
+	bodyType wake
 ]
 
 
@@ -562,12 +549,51 @@ CFPhysicsBody >> stopMotion [
 
 { #category : 'sleeping' }
 CFPhysicsBody >> advanceSleepTimeBy: seconds [
-	self isDynamic ifTrue: [ sleepTime := sleepTime + seconds ]
+	bodyType advanceSleepTimeBy: seconds
 ]
 
 { #category : 'sleeping' }
 CFPhysicsBody >> resetSleepTime [
 	sleepTime := 0.0
+]
+
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> awakeState [
+	^ awake
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> markAwake [
+	awake := true.
+	sleepTime := 0.0
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> putToSleep [
+	awake := false.
+	sleepTime := 0.0.
+	velocity := 0 @ 0.
+	angularVelocity := 0.0.
+	force := 0 @ 0.
+	torque := 0.0
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> incrementSleepTimeBy: seconds [
+	sleepTime := sleepTime + seconds
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> updateDynamicSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
+	sleepingAllowed ifFalse: [
+		self markAwake.
+		^ self ].
+	((velocity x squared + velocity y squared) <= thresholdSquared and: [ angularVelocity squared <= angularThresholdSquared ])
+		ifTrue: [
+			self incrementSleepTimeBy: seconds.
+			sleepTime >= requiredTime ifTrue: [ self putToSleep ] ]
+		ifFalse: [ self markAwake ]
 ]
 
 

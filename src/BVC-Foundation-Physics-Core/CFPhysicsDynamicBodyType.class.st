@@ -88,3 +88,38 @@ CFPhysicsDynamicBodyType >> predictedTransformOf: aStepState after: seconds [
 		position: currentTransform position + (aStepState linearVelocity * seconds)
 		rotation: currentTransform rotation + (aStepState angularVelocity * seconds)
 ]
+
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> isAwake [
+	^ body awakeState
+]
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> isSleeping [
+	^ body allowsSleeping and: [ body awakeState not ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> sleep [
+	body allowsSleeping ifTrue: [ body putToSleep ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> wake [
+	body markAwake
+]
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> advanceSleepTimeBy: seconds [
+	body incrementSleepTimeBy: seconds
+]
+
+{ #category : 'sleeping' }
+CFPhysicsDynamicBodyType >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
+	body
+		updateDynamicSleepBy: seconds
+		linearThresholdSquared: thresholdSquared
+		angularThresholdSquared: angularThresholdSquared
+		requiredTime: requiredTime
+]

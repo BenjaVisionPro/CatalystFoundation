@@ -40,3 +40,9 @@ CFPhysicsKinematicBodyType >> predictedTransformOf: aStepState after: seconds [
 		position: currentTransform position + (aStepState linearVelocity * seconds)
 		rotation: currentTransform rotation + (aStepState angularVelocity * seconds)
 ]
+
+
+{ #category : 'sleeping' }
+CFPhysicsKinematicBodyType >> isAwake [
+	^ true
+]

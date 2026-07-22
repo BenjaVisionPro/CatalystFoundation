@@ -105,3 +105,30 @@ CFPhysicsBodyType >> translate: aStepState by: aPoint [
 CFPhysicsBodyType >> predictedTransformOf: aStepState after: seconds [
 	^ aStepState currentTransform
 ]
+
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> isAwake [
+	^ false
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> isSleeping [
+	^ false
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> sleep [
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> wake [
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> advanceSleepTimeBy: seconds [
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyType >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared angularThresholdSquared: angularThresholdSquared requiredTime: requiredTime [
+]
