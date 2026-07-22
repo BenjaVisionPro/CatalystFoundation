@@ -5224,3 +5224,45 @@ CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
 			pair firstBody == static and: [ pair secondBody == kinematic ] ] ]) not.
 	^ pairs
 ]
+
+{ #category : 'examples - worlds' }
+CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
+	<gtExample>
+	| element physics world |
+	element := BlElement new.
+	physics := element physics.
+	world := physics beWorld.
+	self assert: (element userData at: CFPhysicsElement) identicalTo: physics.
+	self assert: (element userData at: CFPhysicsWorld) identicalTo: world.
+	self assert: physics world identicalTo: world.
+	^ world
+]
+
+{ #category : 'examples - worlds' }
+CFPhysicsCleanSlateTests >> worldAnswersNearestExplicitWorld [
+	<gtExample>
+	| root child world |
+	root := BlElement new.
+	child := BlElement new.
+	root addChild: child.
+	world := root physics beWorld.
+	self assert: child physics world identicalTo: world.
+	self assert: child physics isWorld not.
+	^ world
+]
+
+{ #category : 'examples - worlds' }
+CFPhysicsCleanSlateTests >> worldInstallsAtRootWhenNoWorldExists [
+	<gtExample>
+	| root parent child world |
+	root := BlElement new.
+	parent := BlElement new.
+	child := BlElement new.
+	root addChild: parent.
+	parent addChild: child.
+	world := child physics world.
+	self assert: root physics existingWorld identicalTo: world.
+	self assert: parent physics existingWorld isNil.
+	self assert: child physics existingWorld isNil.
+	^ world
+]

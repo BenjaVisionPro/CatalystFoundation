@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsElement',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'ownedWorld', 'pullInteractionHandler', 'excludedFromWorld' ],
+	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -30,16 +30,27 @@ CFPhysicsElement >> beStatic [
 
 { #category : 'worlds' }
 CFPhysicsElement >> beWorld [
-	ownedWorld ifNil: [ ownedWorld := CFPhysicsWorld on: element ].
-	^ ownedWorld
+	^ element userData
+		at: CFPhysicsWorld
+		ifAbsentPut: [ CFPhysicsWorld on: element ]
 ]
 
 { #category : 'bodies' }
 CFPhysicsElement >> bodyState [
-	| owningWorld |
-	owningWorld := self owningWorld.
-	owningWorld ifNil: [ ^ nil ].
-	^ owningWorld bodyStateFor: element
+	^ body
+]
+
+
+{ #category : 'private - bodies' }
+CFPhysicsElement >> ensureBodyInWorld: aWorld [
+	body ifNil: [ body := CFPhysicsBody element: element world: aWorld ].
+	body world: aWorld.
+	^ body
+]
+
+{ #category : 'private - bodies' }
+CFPhysicsElement >> retireBodyFromWorld: aWorld [
+	(body notNil and: [ body world == aWorld ]) ifTrue: [ body world: nil ]
 ]
 
 { #category : 'accessing' }
@@ -109,12 +120,14 @@ CFPhysicsElement >> restitution: aNumber [
 
 { #category : 'worlds' }
 CFPhysicsElement >> existingWorld [
-	^ ownedWorld
+	^ element userData
+		at: CFPhysicsWorld
+		ifAbsent: [ nil ]
 ]
 
 { #category : 'worlds' }
 CFPhysicsElement >> ownedWorld [
-	^ ownedWorld
+	^ self existingWorld
 ]
 
 { #category : 'body type' }
@@ -134,7 +147,7 @@ CFPhysicsElement >> isStatic [
 
 { #category : 'worlds' }
 CFPhysicsElement >> isWorld [
-	^ ownedWorld notNil
+	^ self existingWorld notNil
 ]
 
 { #category : 'worlds' }
@@ -163,15 +176,13 @@ CFPhysicsElement >> position: aPoint [
 
 { #category : 'private - bodies' }
 CFPhysicsElement >> requireBodyState [
-	| owningWorld bodyState |
+	| owningWorld |
+	body ifNotNil: [ ^ body ].
 	owningWorld := self owningWorld.
 	owningWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	bodyState := owningWorld bodyStateFor: element.
-	bodyState ifNil: [
-		owningWorld synchroniseMembership.
-		bodyState := owningWorld bodyStateFor: element ].
-	bodyState ifNil: [ self error: 'The element is not tracked by its physics world' ].
-	^ bodyState
+	owningWorld synchroniseMembership.
+	body ifNil: [ self error: 'The element is not tracked by its physics world' ].
+	^ body
 ]
 
 { #category : 'bodies' }
@@ -187,16 +198,20 @@ CFPhysicsElement >> rotation: aNumber [
 
 { #category : 'worlds' }
 CFPhysicsElement >> world [
-	"Answer the physics world that contains this element. World-owning elements
-	use #ownedWorld to access the world they establish."
-	^ self owningWorld
+	^ element userData
+		at: CFPhysicsWorld
+		ifAbsent: [
+			element parent
+				ifNil: [ self beWorld ]
+				ifNotNil: [ :aParent | aParent physics world ] ]
 ]
 
 { #category : 'worlds' }
 CFPhysicsElement >> synchroniseWorldMembership [
-	| owningWorld |
+	| existingWorld owningWorld |
+	existingWorld := self existingWorld.
 	owningWorld := self owningWorld.
-	ownedWorld ifNotNil: [ ownedWorld synchroniseMembership ].
+	existingWorld ifNotNil: [ existingWorld synchroniseMembership ].
 	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
 	^ owningWorld
 ]

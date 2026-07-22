@@ -147,7 +147,7 @@ CFPhysicsWorld >> bodyStatesInOrder [
 { #category : 'body states' }
 CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
-	body := CFPhysicsBody element: anElement world: self.
+	body := anElement physics ensureBodyInWorld: self.
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
 	^ body
@@ -188,6 +188,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
 		| body |
 		body := bodyStates removeKey: each.
+		each physics retireBodyFromWorld: self.
 		self removeSpringsUsingBody: body.
 		self removeAttractionsUsingBody: body.
 		self removeRepulsionsUsingBody: body.
