@@ -42,3 +42,33 @@ CFPhysicsBodyType >> isMovable [
 CFPhysicsBodyType >> isStatic [
 	^ false
 ]
+
+{ #category : 'mass' }
+CFPhysicsBodyType >> inverseMass [
+	^ 0.0
+]
+
+{ #category : 'mass' }
+CFPhysicsBodyType >> inverseInertia [
+	^ 0.0
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBodyType >> applyForce: aPoint [
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyType >> applyTorque: aNumber [
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyType >> applyImpulse: anImpulse atWorldPoint: aPoint [
+]
+
+{ #category : 'velocity' }
+CFPhysicsBodyType >> addVelocity: aPoint [
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBodyType >> addAngularVelocity: aNumber [
+]

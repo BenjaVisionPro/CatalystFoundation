@@ -31,9 +31,8 @@ CFPhysicsBody >> advanceBy: seconds gravity: gravityVector [
 
 { #category : 'velocity' }
 CFPhysicsBody >> addVelocity: aPoint [
-	self isDynamic ifTrue: [
-		velocity := velocity + aPoint.
-		aPoint = (0 @ 0) ifFalse: [ self wake ] ]
+	bodyType addVelocity: aPoint.
+	^ self
 ]
 
 
@@ -119,8 +118,12 @@ CFPhysicsBody >> extent [
 
 { #category : 'mass' }
 CFPhysicsBody >> inverseMass [
+	^ bodyType inverseMass
+]
+
+{ #category : 'mass' }
+CFPhysicsBody >> calculatedInverseMass [
 	| area mass |
-	self isDynamic ifFalse: [ ^ 0.0 ].
 	area := self shapeState area.
 	mass := area * self shapeState material density.
 	^ mass > 0 ifTrue: [ 1.0 / mass ] ifFalse: [ 0.0 ]
@@ -374,8 +377,19 @@ CFPhysicsBody >> force [
 
 { #category : 'linear dynamics' }
 CFPhysicsBody >> applyForce: aPoint [
-	self isDynamic ifFalse: [ ^ self ].
+	bodyType applyForce: aPoint.
+	^ self
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBody >> accumulateForce: aPoint [
 	force := force + aPoint.
+	aPoint = (0 @ 0) ifFalse: [ self wake ]
+]
+
+{ #category : 'velocity' }
+CFPhysicsBody >> accumulateVelocity: aPoint [
+	velocity := velocity + aPoint.
 	aPoint = (0 @ 0) ifFalse: [ self wake ]
 ]
 
@@ -428,16 +442,26 @@ CFPhysicsBody >> angularDamping: aNumber [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyTorque: aNumber [
-	self isDynamic ifFalse: [ ^ self ].
+	bodyType applyTorque: aNumber.
+	^ self
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> accumulateTorque: aNumber [
 	torque := torque + aNumber.
 	aNumber = 0 ifFalse: [ self wake ]
 ]
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> addAngularVelocity: aNumber [
-	self isDynamic ifTrue: [
-		angularVelocity := angularVelocity + aNumber.
-		aNumber = 0 ifFalse: [ self wake ] ]
+	bodyType addAngularVelocity: aNumber.
+	^ self
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> accumulateAngularVelocity: aNumber [
+	angularVelocity := angularVelocity + aNumber.
+	aNumber = 0 ifFalse: [ self wake ]
 ]
 
 { #category : 'mass' }
@@ -449,8 +473,12 @@ CFPhysicsBody >> mass [
 
 { #category : 'mass' }
 CFPhysicsBody >> inverseInertia [
+	^ bodyType inverseInertia
+]
+
+{ #category : 'mass' }
+CFPhysicsBody >> calculatedInverseInertia [
 	| mass extent inertia |
-	self isDynamic ifFalse: [ ^ 0.0 ].
 	mass := self mass.
 	mass = 0 ifTrue: [ ^ 0.0 ].
 	extent := self shapeState extent.
@@ -474,12 +502,17 @@ CFPhysicsBody >> velocityAtWorldPoint: aPoint [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyImpulse: anImpulse atWorldPoint: aPoint [
+	bodyType applyImpulse: anImpulse atWorldPoint: aPoint.
+	^ self
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> accumulateImpulse: anImpulse atWorldPoint: aPoint [
 	| radiusVector cross |
-	self isDynamic ifFalse: [ ^ self ].
-	self addVelocity: anImpulse * self inverseMass.
+	self accumulateVelocity: anImpulse * self calculatedInverseMass.
 	radiusVector := aPoint - self centre.
 	cross := (radiusVector x * anImpulse y) - (radiusVector y * anImpulse x).
-	self addAngularVelocity: cross * self inverseInertia
+	self accumulateAngularVelocity: cross * self calculatedInverseInertia
 ]
 
 { #category : 'collision' }
