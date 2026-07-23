@@ -77,7 +77,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareCircleAnchors [
+CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareAnchors [
 	<gtExample>
 	| mondrian edge |
 	mondrian := GtMondrian new.
@@ -89,8 +89,34 @@ CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareCircleAnchors 
 	self assert: edge fromAnchor class equals: BlNearestPositionLooseCircleAnchor.
 	self assert: edge toAnchor class equals: BlNearestPositionLooseCircleAnchor.
 	mondrian physics beWorld.
-	self assert: edge fromAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
-	self assert: edge toAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
+	self assert: edge fromAnchor class equals: CFPhysicsMondrianPresentationAnchor.
+	self assert: edge toAnchor class equals: CFPhysicsMondrianPresentationAnchor.
+	self assert: edge fromAnchor anchor class equals: BlNearestPositionLooseCircleAnchor.
+	self assert: edge toAnchor anchor class equals: BlNearestPositionLooseCircleAnchor.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsPreservesStandardAndCustomAnchors [
+	<gtExample>
+	| mondrian standardEdge customEdge |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three).
+	standardEdge := (mondrian edges
+		fromCenterTop;
+		toRightCenter;
+		connectAssociations: { #one -> #two }) first.
+	customEdge := (mondrian edges
+		connectAssociations: { #two -> #three }) first.
+	customEdge
+		fromAnchor: (CFPhysicsMondrianTestAnchor element: customEdge graph model fromElement);
+		toAnchor: (CFPhysicsMondrianTestAnchor element: customEdge graph model toElement).
+	mondrian physics beWorld.
+	self assert: standardEdge fromAnchor class equals: CFPhysicsMondrianPresentationAnchor.
+	self assert: standardEdge fromAnchor anchor class equals: BlElementTopCenterAnchor.
+	self assert: standardEdge toAnchor anchor class equals: BlElementCenterRightAnchor.
+	self assert: customEdge fromAnchor anchor class equals: CFPhysicsMondrianTestAnchor.
+	self assert: customEdge toAnchor anchor class equals: CFPhysicsMondrianTestAnchor.
 	^ mondrian
 ]
 

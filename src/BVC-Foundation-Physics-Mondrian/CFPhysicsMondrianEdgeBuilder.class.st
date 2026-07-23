@@ -5,11 +5,6 @@ Class {
 	#package : 'BVC-Foundation-Physics-Mondrian'
 }
 
-{ #category : #'scripting anchors' }
-CFPhysicsMondrianEdgeBuilder >> fromNearestCircle [
-	self fromAnchor: CFPhysicsMondrianNearestCircleAnchor
-]
-
 { #category : 'scripting' }
 CFPhysicsMondrianEdgeBuilder >> connect: aCollection from: aFromBlock to: aToBlock [
 	| edges |
@@ -17,11 +12,9 @@ CFPhysicsMondrianEdgeBuilder >> connect: aCollection from: aFromBlock to: aToBlo
 		connect: aCollection
 		from: aFromBlock
 		to: aToBlock.
-	edges do: [ :each | each physics excludeFromWorld ].
+	edges do: [ :each |
+		each physics excludeFromWorld.
+		each fromAnchor: (CFPhysicsMondrianPresentationAnchor on: each fromAnchor).
+		each toAnchor: (CFPhysicsMondrianPresentationAnchor on: each toAnchor) ].
 	^ edges
-]
-
-{ #category : #'scripting anchors' }
-CFPhysicsMondrianEdgeBuilder >> toNearestCircle [
-	self toAnchor: CFPhysicsMondrianNearestCircleAnchor
 ]
