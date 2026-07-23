@@ -21,17 +21,11 @@ CFPhysicsMondrianShowcaseExamples >> defaultPhysicsGraph [
 CFPhysicsMondrianShowcaseExamples >> forceDirectedGraph [
 	<gtExample>
 	<return: #GtMondrian>
-	| mondrian world forceDirected |
+	| mondrian world |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
 	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
-	forceDirected := mondrian physics forceDirected.
-	forceDirected
-		restLength: 118.0;
-		stiffness: 52.0;
-		damping: 7.0;
-		repulsion: 5200.0;
-		maximumRepulsionDistance: 340.0.
+	mondrian physics forceDirected.
 	mondrian root when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
 		world startStepping ].
 	^ mondrian
