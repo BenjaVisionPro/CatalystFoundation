@@ -108,7 +108,7 @@ CFPhysicsMondrianExampleGraphBuilder >> addChildrenAtLevel: aLevel below: parent
 	(self parentCountAtLevel: aLevel from: available size) timesRepeat: [
 		| parent |
 		parent := available removeAt: ((self nextRandom * available size) floor + 1).
-		self childCountAtLevel: aLevel timesRepeat: [
+		(self childCountAtLevel: aLevel) timesRepeat: [
 			| child |
 			child := self newNodeIn: nodes.
 			connections add: parent -> child.
