@@ -1,5 +1,5 @@
 "
-I record the frame-consumer protocol used by CFPhysicsWorldBehaviour in executable examples.
+I record the frame-consumer protocol used by CFPhysicsWorldMotionBehaviour in executable examples.
 
 I am deliberately separate from CFPhysicsWorldStepRecorder so simulation stepping and frame consumption remain distinct collaborators.
 "

@@ -3219,6 +3219,54 @@ CFPhysicsCleanSlateTests >> constraintBuilderScalesRetainedImpulsesForChangedTim
 ]
 
 { #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldSimulationIdentityStartsAtZero [
+	<gtExample>
+	| world step |
+	world := CFPhysicsWorld on: BlElement new.
+	self assert: world simulationTime equals: 0.0.
+	self assert: world stepNumber equals: 0.
+	step := world newStep.
+	self assert: step simulationTime equals: 0.0.
+	self assert: step stepNumber equals: 1.
+	self assert: world simulationTime equals: 0.0.
+	self assert: world stepNumber equals: 0.
+	^ world
+]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldAdvancesSimulationIdentityAfterSuccessfulSteps [
+	<gtExample>
+	| world firstResult secondResult |
+	world := CFPhysicsWorld on: BlElement new.
+	firstResult := world step.
+	self assert: firstResult step simulationTime equals: 0.0.
+	self assert: firstResult step stepNumber equals: 1.
+	self assert: (world simulationTime closeTo: 0.016).
+	self assert: world stepNumber equals: 1.
+	secondResult := world step.
+	self assert: (secondResult step simulationTime closeTo: 0.016).
+	self assert: secondResult step stepNumber equals: 2.
+	self assert: (world simulationTime closeTo: 0.032).
+	self assert: world stepNumber equals: 2.
+	^ secondResult
+]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> changingStepDurationPreservesAccumulatedSimulationTime [
+	<gtExample>
+	| world result |
+	world := CFPhysicsWorld on: BlElement new.
+	world step.
+	world stepDuration: 8 milliseconds.
+	result := world step.
+	self assert: (result step simulationTime closeTo: 0.016).
+	self assert: result step stepNumber equals: 2.
+	self assert: (world simulationTime closeTo: 0.024).
+	self assert: world stepNumber equals: 2.
+	^ result
+]
+
+{ #category : 'examples - stepping' }
 CFPhysicsCleanSlateTests >> worldScalesWarmStartingWhenStepDurationChanges [
 	<gtExample>
 	| world firstStep secondStep |

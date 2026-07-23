@@ -12,7 +12,7 @@ After stepping I publish the interpolation alpha through the small #frameReadyAt
 My animation target is the world's owner element. Normal Motion validity therefore cancels playback if that owner leaves or moves away from the coordinator's BlSpace.
 "
 Class {
-	#name : 'CFPhysicsWorldBehaviour',
+	#name : 'CFPhysicsWorldMotionBehaviour',
 	#superclass : 'CFMotionBehaviour',
 	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'frameConsumer' ],
 	#category : 'BVC-Foundation-Physics-Motion',
@@ -20,7 +20,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsWorldBehaviour class >> on: aPhysicsWorld frameConsumer: aFrameConsumer [
+CFPhysicsWorldMotionBehaviour class >> on: aPhysicsWorld frameConsumer: aFrameConsumer [
 	^ self new
 		world: aPhysicsWorld;
 		frameConsumer: aFrameConsumer;
@@ -28,12 +28,12 @@ CFPhysicsWorldBehaviour class >> on: aPhysicsWorld frameConsumer: aFrameConsumer
 ]
 
 { #category : 'accessing' }
-CFPhysicsWorldBehaviour >> animationTarget [
+CFPhysicsWorldMotionBehaviour >> animationTarget [
 	^ world owner
 ]
 
 { #category : 'evaluating' }
-CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
+CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
 	| elapsed stepDuration |
 	active ifFalse: [ self error: 'A Physics world Behaviour cannot evaluate outside its playback lifetime' ].
 	elapsed := anEvaluation localTime - previousLocalTime.
@@ -50,7 +50,7 @@ CFPhysicsWorldBehaviour >> evaluate: anEvaluation [
 ]
 
 { #category : 'initialization' }
-CFPhysicsWorldBehaviour >> initialize [
+CFPhysicsWorldMotionBehaviour >> initialize [
 	super initialize.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
@@ -58,36 +58,36 @@ CFPhysicsWorldBehaviour >> initialize [
 ]
 
 { #category : 'playing' }
-CFPhysicsWorldBehaviour >> playbackStartedIn: aCoordinator [
+CFPhysicsWorldMotionBehaviour >> playbackStartedIn: aCoordinator [
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
 	active := true
 ]
 
 { #category : 'playing' }
-CFPhysicsWorldBehaviour >> playbackEndedWith: aMotionState [
+CFPhysicsWorldMotionBehaviour >> playbackEndedWith: aMotionState [
 	active := false.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds
 ]
 
 { #category : 'testing' }
-CFPhysicsWorldBehaviour >> isActive [
+CFPhysicsWorldMotionBehaviour >> isActive [
 	^ active
 ]
 
 { #category : 'accessing' }
-CFPhysicsWorldBehaviour >> accumulatedTime [
+CFPhysicsWorldMotionBehaviour >> accumulatedTime [
 	^ accumulatedTime
 ]
 
 { #category : 'controlling' }
-CFPhysicsWorldBehaviour >> reversed [
+CFPhysicsWorldMotionBehaviour >> reversed [
 	self error: 'A Physics world Behaviour cannot be reversed'
 ]
 
 { #category : 'private - validation' }
-CFPhysicsWorldBehaviour >> validateForExecution [
+CFPhysicsWorldMotionBehaviour >> validateForExecution [
 	world ifNil: [ self error: 'A Physics world Behaviour needs a world' ].
 	frameConsumer ifNil: [ self error: 'A Physics world Behaviour needs a frame consumer' ].
 	world owner ifNil: [ self error: 'A Physics world Behaviour needs an owner element' ].
@@ -96,16 +96,16 @@ CFPhysicsWorldBehaviour >> validateForExecution [
 ]
 
 { #category : 'accessing' }
-CFPhysicsWorldBehaviour >> world [
+CFPhysicsWorldMotionBehaviour >> world [
 	^ world
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsWorldBehaviour >> world: aPhysicsWorld [
+CFPhysicsWorldMotionBehaviour >> world: aPhysicsWorld [
 	world := aPhysicsWorld
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsWorldBehaviour >> frameConsumer: aFrameConsumer [
+CFPhysicsWorldMotionBehaviour >> frameConsumer: aFrameConsumer [
 	frameConsumer := aFrameConsumer
 ]

@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -46,6 +46,8 @@ CFPhysicsWorld >> initialize [
 	nextRailJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
+	simulationTime := 0.0.
+	stepNumber := 0.
 	containmentConstraints := IdentitySet new.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
@@ -201,6 +203,18 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 			contact firstBody == body or: [ contact secondBody == body ] ] ]
 ]
 
+
+
+{ #category : 'simulation identity' }
+CFPhysicsWorld >> simulationTime [
+	^ simulationTime
+]
+
+{ #category : 'simulation identity' }
+CFPhysicsWorld >> stepNumber [
+	^ stepNumber
+]
+
 { #category : 'stepping' }
 CFPhysicsWorld >> newStep [
 	| currentTimeStep step |
@@ -210,7 +224,10 @@ CFPhysicsWorld >> newStep [
 		substeps: substepCount
 		contactHertz: contactHertz
 		dampingRatio: contactDampingRatio.
-	step warmStartRatio: (warmStarting
+	step
+		simulationTime: simulationTime;
+		stepNumber: stepNumber + 1;
+		warmStartRatio: (warmStarting
 		ifFalse: [ 0.0 ]
 		ifTrue: [ previousTimeStep
 			ifNil: [ 1.0 ]
@@ -241,6 +258,8 @@ CFPhysicsWorld >> step [
 		restitutionThreshold: restitutionThreshold.
 	activeContacts := lastStepResult activeContacts.
 	previousTimeStep := step timeStep.
+	simulationTime := simulationTime + step timeStep.
+	stepNumber := step stepNumber.
 	^ lastStepResult
 ]
 

@@ -68,7 +68,7 @@ CFPhysicsWorldPlayback >> motion [
 { #category : 'private - creation' }
 CFPhysicsWorldPlayback >> newMotionWith: aPresentation in: aCoordinator [
 	| behaviour timeline |
-	behaviour := CFPhysicsWorldBehaviour
+	behaviour := CFPhysicsWorldMotionBehaviour
 		on: world
 		frameConsumer: aPresentation.
 	timeline := CFMotionTimeline new.
