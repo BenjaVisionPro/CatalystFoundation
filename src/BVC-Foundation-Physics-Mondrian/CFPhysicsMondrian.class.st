@@ -31,7 +31,6 @@ CFPhysicsMondrian >> beWorld [
 	world synchroniseMembership.
 	self adoptCurrentNodePositions.
 	mondrian root layout: BlBasicLayout new.
-	self installGraphChangeHandlers.
 	^ world
 ]
 
@@ -44,21 +43,6 @@ CFPhysicsMondrian >> prepareGraphElements [
 CFPhysicsMondrian >> adoptCurrentNodePositions [
 	mondrian nodeElements do: [ :each |
 		each physics position: each position ]
-]
-
-{ #category : 'private - events' }
-CFPhysicsMondrian >> installGraphChangeHandlers [
-	mondrian root
-		when: BlElementAddedToSuperParentEvent
-		do: [ :anEvent | self refreshWorldMembership ];
-		when: BlElementRemovedFromSuperParentEvent
-		do: [ :anEvent | self refreshWorldMembership ]
-]
-
-{ #category : 'private - events' }
-CFPhysicsMondrian >> refreshWorldMembership [
-	self prepareGraphElements.
-	world synchroniseMembership
 ]
 
 { #category : 'private - initialization' }

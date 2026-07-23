@@ -1,6 +1,11 @@
 Extension { #name : 'GtMondrian' }
 
 { #category : '*BVC-Foundation-Physics-Mondrian' }
+GtMondrian >> edges [
+	^ CFPhysicsMondrianEdgeBuilder new mondrian: self
+]
+
+{ #category : '*BVC-Foundation-Physics-Mondrian' }
 GtMondrian >> physics [
 	^ self root userData
 		at: CFPhysicsMondrian
