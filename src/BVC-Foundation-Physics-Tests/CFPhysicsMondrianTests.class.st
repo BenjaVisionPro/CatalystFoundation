@@ -37,23 +37,18 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedEdges [
+CFPhysicsMondrianTests >> mondrianPhysicsBeWorldExcludesEdges [
 	<gtExample>
-	| mondrian edgeElements world behaviour |
+	| mondrian edgeElements world |
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two three).
 	edgeElements := mondrian edges
 		connectAssociations: { #one -> #two }.
 	world := mondrian physics beWorld.
-	behaviour := mondrian physics forceDirected.
-	world step.
-	self assert: behaviour springsByEdge size equals: 1.
+	self deny: (world includes: edgeElements first).
 	mondrian edges connectAssociations: { #two -> #three }.
-	world step.
-	self assert: behaviour springsByEdge size equals: 2.
-	mondrian root removeChild: edgeElements first.
-	world step.
-	self assert: behaviour springsByEdge size equals: 1.
+	world synchroniseMembership.
+	self assert: world members size equals: 3.
 	^ mondrian
 ]
 
@@ -66,6 +61,28 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 	firstWorld := mondrian physics beWorld.
 	secondWorld := mondrian physics beWorld.
 	self assert: firstWorld == secondWorld.
-	self assert: mondrian physics forceDirected notNil.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
+	<gtExample>
+	| mondrian nodes initialPositions world |
+	mondrian := GtMondrian new.
+	mondrian root
+		size: 920 @ 620;
+		background: Color veryVeryLightGray.
+	mondrian nodes with: (1 to: 12).
+	nodes := mondrian nodeElements.
+	nodes withIndexDo: [ :each :index |
+		each
+			size: 62 @ 34;
+			relocate: 24 + ((index - 1) * 74) @ (28 + (index * 6)) ].
+	initialPositions := nodes collect: [ :each | each position ].
+	world := mondrian physics beWorld.
+	self assert: world gravity equals: 0 @ 1000.
+	world step: 80.
+	nodes with: initialPositions do: [ :each :initialPosition |
+		self assert: each physics position y > initialPosition y ].
 	^ mondrian
 ]
