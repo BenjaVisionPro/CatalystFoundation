@@ -63,17 +63,16 @@ CFPhysicsBreathingBehaviour >> validateConfiguration [
 	forceDirected world == world ifFalse: [ self error: 'Breathing and force-directed Behaviours must belong to the same Physics world' ].
 	origin ifNil: [
 		| nodes |
-		nodes := forceDirected graphSource nodes.
+		nodes := forceDirected nodes.
 		nodes ifNotEmpty: [ origin := nodes first ] ].
 	origin ifNil: [ self error: 'Breathing needs an origin node' ]
 ]
 
 { #category : 'private - topology' }
 CFPhysicsBreathingBehaviour >> graphDistances [
-	| source nodes edges distances frontier nextFrontier distance |
-	source := forceDirected graphSource.
-	nodes := source nodes.
-	edges := source edges.
+	| nodes connections distances frontier nextFrontier distance |
+	nodes := forceDirected nodes.
+	connections := forceDirected connections.
 	(nodes identityIncludes: origin) ifFalse: [ self error: 'The breathing origin must be one of the graph nodes' ].
 	distances := IdentityDictionary new.
 	distances at: origin put: 0.
@@ -82,10 +81,10 @@ CFPhysicsBreathingBehaviour >> graphDistances [
 	[ frontier isNotEmpty ] whileTrue: [
 		nextFrontier := OrderedCollection new.
 		frontier do: [ :node |
-			edges do: [ :edge |
+			connections do: [ :edge |
 				| neighbour sourceNode targetNode |
-				sourceNode := source sourceForEdge: edge.
-				targetNode := source targetForEdge: edge.
+				sourceNode := edge key.
+				targetNode := edge value.
 				neighbour := sourceNode == node
 					ifTrue: [ targetNode ]
 					ifFalse: [ targetNode == node ifTrue: [ sourceNode ] ifFalse: [ nil ] ].
@@ -99,15 +98,14 @@ CFPhysicsBreathingBehaviour >> graphDistances [
 
 { #category : 'private - reconciliation' }
 CFPhysicsBreathingBehaviour >> reconcileSpringsUsing: distances [
-	| desired source |
-	desired := forceDirected springsByEdge.
-	source := forceDirected graphSource.
+	| desired |
+	desired := forceDirected springsByConnection.
 	(springDistances keys reject: [ :constraint | desired values identityIncludes: constraint ]) do: [ :constraint |
 		springDistances removeKey: constraint ].
 	desired keysAndValuesDo: [ :edge :spring |
 		| edgeDistance cohort |
-		edgeDistance := ((distances at: (source sourceForEdge: edge) ifAbsent: [ 0 ])
-			max: (distances at: (source targetForEdge: edge) ifAbsent: [ 0 ])).
+		edgeDistance := ((distances at: edge key ifAbsent: [ 0 ])
+			max: (distances at: edge value ifAbsent: [ 0 ])).
 		cohort := self cohortAtDistance: edgeDistance.
 		spring
 			restLength: cohort second;

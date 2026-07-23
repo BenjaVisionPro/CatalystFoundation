@@ -1,11 +1,13 @@
 "
-I maintain force-directed springs and repulsions for the current contents of a domain-neutral graph source.
+I maintain force-directed springs and repulsions between ordinary Physics bodies.
+
+My participants and connections may be fixed collections or providers, so I can be used by any Physics world whose bodies have relationships. A connection is an Association from one participating element to another; I do not know about graphs or graph adapters.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
-		'graphSource', 'springsByEdge', 'repulsionsByPair',
+		'nodes', 'connections', 'springsByConnection', 'repulsionsByPair',
 		'restLength', 'stiffness', 'damping', 'maximumSpringForce',
 		'repulsion', 'maximumRepulsionDistance'
 	],
@@ -16,8 +18,7 @@ Class {
 { #category : 'initialization' }
 CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
-	graphSource := CFPhysicsGraphSource new.
-	springsByEdge := IdentityDictionary new.
+	springsByConnection := Dictionary new.
 	repulsionsByPair := Dictionary new.
 	restLength := CFPhysicsSharedScalar value: 100.0.
 	stiffness := CFPhysicsSharedScalar value: 40.0.
@@ -27,14 +28,30 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 300.0
 ]
 
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> nodes: aCollectionOrProvider [
+	nodes := aCollectionOrProvider.
+	^ self
+]
+
 { #category : 'accessing' }
-CFPhysicsForceDirectedBehaviour >> graphSource [ ^ graphSource ]
+CFPhysicsForceDirectedBehaviour >> nodes [
+	^ self resolvedParticipantsFrom: nodes default: [ world members ]
+]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> graphSource: aGraphSource [ graphSource := aGraphSource ]
+CFPhysicsForceDirectedBehaviour >> connections: aCollectionOrProvider [
+	connections := aCollectionOrProvider.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsForceDirectedBehaviour >> springsByEdge [ ^ springsByEdge copy ]
+CFPhysicsForceDirectedBehaviour >> connections [
+	^ self resolvedParticipantsFrom: connections default: [ #() ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsForceDirectedBehaviour >> springsByConnection [ ^ springsByConnection copy ]
 
 { #category : 'accessing' }
 CFPhysicsForceDirectedBehaviour >> repulsionsByPair [ ^ repulsionsByPair copy ]
@@ -77,50 +94,49 @@ CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance: aNumber [ maximumRe
 
 { #category : 'updating' }
 CFPhysicsForceDirectedBehaviour >> updateForStep: aPhysicsStep [
-	| nodes edges desiredEdges desiredPairs |
-	nodes := graphSource nodes.
-	edges := graphSource edges.
-	self validateNodes: nodes edges: edges.
-	desiredEdges := edges asIdentitySet.
-	desiredPairs := self orderedPairsFor: nodes.
-	self removeObsoleteSpringsExcept: desiredEdges.
+	| currentNodes currentConnections desiredConnections desiredPairs |
+	currentNodes := self nodes.
+	currentConnections := self connections.
+	self validateNodes: currentNodes connections: currentConnections.
+	desiredConnections := currentConnections asSet.
+	desiredPairs := self orderedPairsFor: currentNodes.
+	self removeObsoleteSpringsExcept: desiredConnections.
 	self removeObsoleteRepulsionsExcept: desiredPairs asSet.
-	edges do: [ :edge | self ensureSpringFor: edge ].
-	desiredPairs do: [ :pair | self ensureRepulsionFor: pair ]
+	currentConnections do: [ :each | self ensureSpringFor: each ].
+	desiredPairs do: [ :each | self ensureRepulsionFor: each ]
 ]
 
 { #category : 'private - validation' }
-CFPhysicsForceDirectedBehaviour >> validateNodes: nodes edges: edges [
+CFPhysicsForceDirectedBehaviour >> validateNodes: currentNodes connections: currentConnections [
 	| nodeSet |
-	nodeSet := nodes asIdentitySet.
-	nodes do: [ :node |
+	nodeSet := currentNodes asIdentitySet.
+	currentNodes do: [ :node |
 		(node physics behaviourWorld == world) ifFalse: [
 			self error: 'Force-directed nodes must belong to the Behaviour physics world' ] ].
-	edges do: [ :edge |
-		((nodeSet includes: (graphSource sourceForEdge: edge)) and: [
-			nodeSet includes: (graphSource targetForEdge: edge) ]) ifFalse: [
-			self error: 'Every force-directed edge endpoint must occur in the graph nodes' ] ]
+	currentConnections do: [ :connection |
+		((nodeSet includes: connection key) and: [ nodeSet includes: connection value ]) ifFalse: [
+			self error: 'Every force-directed connection endpoint must occur in the selected nodes' ] ]
 ]
 
 { #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> orderedPairsFor: nodes [
+CFPhysicsForceDirectedBehaviour >> orderedPairsFor: currentNodes [
 	| pairs |
 	pairs := OrderedCollection new.
-	1 to: nodes size do: [ :firstIndex |
-		firstIndex + 1 to: nodes size do: [ :secondIndex |
+	1 to: currentNodes size do: [ :firstIndex |
+		firstIndex + 1 to: currentNodes size do: [ :secondIndex |
 			pairs add: (CFPhysicsNodePair
-				first: (nodes at: firstIndex)
-				second: (nodes at: secondIndex)) ] ].
+				first: (currentNodes at: firstIndex)
+				second: (currentNodes at: secondIndex)) ] ].
 	^ pairs
 ]
 
 { #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredEdges [
-	(springsByEdge associations sorted: [ :first :second |
+CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredConnections [
+	(springsByConnection associations sorted: [ :first :second |
 		first value sequence < second value sequence ]) do: [ :association |
-		(desiredEdges includes: association key) ifFalse: [
+		(desiredConnections includes: association key) ifFalse: [
 			world removeSpringConstraint: association value.
-			springsByEdge removeKey: association key ] ]
+			springsByConnection removeKey: association key ] ]
 ]
 
 { #category : 'private - reconciliation' }
@@ -133,11 +149,11 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs 
 ]
 
 { #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> ensureSpringFor: edge [
-	^ springsByEdge at: edge ifAbsentPut: [
+CFPhysicsForceDirectedBehaviour >> ensureSpringFor: aConnection [
+	^ springsByConnection at: aConnection ifAbsentPut: [
 		| spring sourceBody targetBody |
-		sourceBody := (graphSource sourceForEdge: edge) physics requireBodyState.
-		targetBody := (graphSource targetForEdge: edge) physics requireBodyState.
+		sourceBody := aConnection key physics requireBodyState.
+		targetBody := aConnection value physics requireBodyState.
 		spring := CFPhysicsSpringConstraint between: sourceBody and: targetBody.
 		spring
 			restLength: restLength;
@@ -162,8 +178,8 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 
 { #category : 'removing' }
 CFPhysicsForceDirectedBehaviour >> removing [
-	springsByEdge values copy do: [ :each | world removeSpringConstraint: each ].
+	springsByConnection values copy do: [ :each | world removeSpringConstraint: each ].
 	repulsionsByPair values copy do: [ :each | world removeRepulsionConstraint: each ].
-	springsByEdge removeAll.
+	springsByConnection removeAll.
 	repulsionsByPair removeAll
 ]

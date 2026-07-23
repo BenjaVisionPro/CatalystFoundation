@@ -86,3 +86,22 @@ CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 		self assert: each physics position y > initialPosition y ].
 	^ mondrian
 ]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnections [
+	<gtExample>
+	| mondrian world behaviour |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three).
+	mondrian edges connectAssociations: { #one -> #two }.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	self assert: behaviour springsByConnection size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 3.
+	mondrian edges connectAssociations: { #two -> #three }.
+	world step.
+	self assert: behaviour springsByConnection size equals: 2.
+	^ mondrian
+]

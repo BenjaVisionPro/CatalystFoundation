@@ -34,6 +34,23 @@ CFPhysicsMondrian >> beWorld [
 	^ world
 ]
 
+{ #category : 'behaviours' }
+CFPhysicsMondrian >> forceDirected [
+	| behaviour |
+	self beWorld.
+	behaviour := mondrian root physics forceDirected.
+	behaviour
+		nodes: [ mondrian nodeElements ];
+		connections: [ self forceDirectedConnections ].
+	^ behaviour
+]
+
+{ #category : 'private - behaviours' }
+CFPhysicsMondrian >> forceDirectedConnections [
+	^ mondrian edgeElements collect: [ :each |
+		each graph model fromElement -> each graph model toElement ]
+]
+
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> prepareGraphElements [
 	mondrian edgeElements do: [ :each | each physics excludeFromWorld ]
