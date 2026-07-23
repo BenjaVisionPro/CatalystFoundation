@@ -5794,3 +5794,75 @@ CFPhysicsCleanSlateTests >> testRemovingWindPreventsFutureForce [
 	world step.
 	self assert: body velocity equals: 0 @ 0
 ]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testJumpingBeanIntensityChangesItsDomainProfile [
+	| root element behaviour lowMinimumDelay lowMinimumImpulse |
+	root := BlElement new.
+	element := BlElement new extent: 20 @ 20.
+	root addChild: element.
+	root physics beWorld.
+	behaviour := element physics jumpingBean.
+	behaviour intensity: 0.0.
+	lowMinimumDelay := behaviour minimumDelay.
+	lowMinimumImpulse := behaviour minimumImpulse.
+	behaviour intensity: 1.0.
+	self assert: behaviour minimumDelay < lowMinimumDelay.
+	self assert: behaviour minimumImpulse > lowMinimumImpulse
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testJumpingBeanCanCoordinateSelectedParticipantsWithIndependentSchedules [
+	| root first second third world behaviour |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	third := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second. third }.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := root physics jumpingBeanAffecting: { first. second }.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		minimumImpulse: 10.0;
+		maximumImpulse: 10.0;
+		minimumAngularImpulse: 0.0;
+		maximumAngularImpulse: 0.0.
+	world step.
+	self assert: (behaviour nextJoltTimeFor: first) equals: world stepDuration.
+	self assert: (behaviour nextJoltTimeFor: second) equals: world stepDuration.
+	world step.
+	self assert: first physics requireBodyState velocity x > 0.0.
+	self assert: second physics requireBodyState velocity x > 0.0.
+	self assert: third physics requireBodyState velocity equals: 0 @ 0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testJumpingBeanParticipantProviderCanChangeBetweenSteps [
+	| root first second world selected behaviour |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	selected := { first }.
+	behaviour := root physics jumpingBeanAffecting: [ selected ].
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0 0.0 0.0 0.0 0.0 0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		minimumImpulse: 10.0;
+		maximumImpulse: 10.0;
+		minimumAngularImpulse: 0.0;
+		maximumAngularImpulse: 0.0.
+	world step.
+	self assert: (behaviour nextJoltTimeFor: first) equals: world stepDuration.
+	selected := { second }.
+	world step.
+	self assert: (behaviour nextJoltTimeFor: first) isNil.
+	self assert: (behaviour nextJoltTimeFor: second) equals: world stepDuration * 2.
+	self assert: first physics requireBodyState velocity equals: 0 @ 0
+]

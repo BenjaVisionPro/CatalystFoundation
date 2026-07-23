@@ -1,9 +1,18 @@
+"
+I make one element or a selected collection of elements jolt at irregular intervals like jumping beans.
+
+Intensity is my public semantic control. I translate it into delay, linear impulse and angular impulse ranges. Each participant keeps an independent schedule, while one injected random source makes the Behaviour deterministic in tests and reproducible when supplied with a deterministic generator.
+
+My jolts are discrete Physics events rather than interpolated values, so I apply impulses directly during fixed Physics steps. Motion remains responsible for continuous temporal interpolation; I do not create a parallel animation mechanism.
+"
 Class {
 	#name : 'CFPhysicsJumpingBeanBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
 		'random',
-		'nextJoltTime',
+		'nextJoltTimes',
+		'participants',
+		'intensity',
 		'minimumDelay',
 		'maximumDelay',
 		'minimumImpulse',
@@ -19,12 +28,8 @@ Class {
 CFPhysicsJumpingBeanBehaviour >> initialize [
 	super initialize.
 	random := Random new.
-	minimumDelay := 0.5.
-	maximumDelay := 2.0.
-	minimumImpulse := 40.0.
-	maximumImpulse := 120.0.
-	minimumAngularImpulse := -3.0.
-	maximumAngularImpulse := 3.0
+	nextJoltTimes := IdentityDictionary new.
+	self intensity: 0.25
 ]
 
 { #category : 'accessing' }
@@ -37,9 +42,42 @@ CFPhysicsJumpingBeanBehaviour >> random: aRandom [
 	random := aRandom
 ]
 
+{ #category : 'configuration' }
+CFPhysicsJumpingBeanBehaviour >> intensity [
+	^ intensity
+]
+
+{ #category : 'configuration' }
+CFPhysicsJumpingBeanBehaviour >> intensity: aNumber [
+	intensity := (aNumber asFloat min: 1.0) max: 0.0.
+	minimumDelay := 1.8 - (1.5 * intensity).
+	maximumDelay := 3.0 - (2.3 * intensity).
+	minimumImpulse := 30.0 + (90.0 * intensity).
+	maximumImpulse := 70.0 + (180.0 * intensity).
+	minimumAngularImpulse := 0.0 - (1.0 + (5.0 * intensity)).
+	maximumAngularImpulse := 1.0 + (5.0 * intensity)
+]
+
+{ #category : 'configuration' }
+CFPhysicsJumpingBeanBehaviour >> affecting: aCollectionOrProvider [
+	participants := aCollectionOrProvider.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsJumpingBeanBehaviour >> participants [
+	participants ifNotNil: [ ^ participants value asArray ].
+	^ { element }
+]
+
 { #category : 'accessing' }
 CFPhysicsJumpingBeanBehaviour >> nextJoltTime [
-	^ nextJoltTime
+	^ self nextJoltTimeFor: element
+]
+
+{ #category : 'accessing' }
+CFPhysicsJumpingBeanBehaviour >> nextJoltTimeFor: anElement [
+	^ nextJoltTimes at: anElement ifAbsent: [ nil ]
 ]
 
 { #category : 'configuration' }
@@ -107,23 +145,42 @@ CFPhysicsJumpingBeanBehaviour >> maximumAngularImpulse: aNumber [
 
 { #category : 'updating' }
 CFPhysicsJumpingBeanBehaviour >> updateForStep: aPhysicsStep [
+	| currentParticipants |
+	currentParticipants := self participants.
+	self forgetParticipantsAbsentFrom: currentParticipants.
+	currentParticipants do: [ :each |
+		(world includes: each) ifTrue: [
+			self updateParticipant: each forStep: aPhysicsStep ] ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsJumpingBeanBehaviour >> updateParticipant: anElement forStep: aPhysicsStep [
+	| nextJoltTime |
+	nextJoltTime := self nextJoltTimeFor: anElement.
 	nextJoltTime ifNil: [
-		^ self scheduleNextJoltAfter: aPhysicsStep simulationTime ].
+		^ self scheduleNextJoltFor: anElement after: aPhysicsStep simulationTime ].
 	aPhysicsStep simulationTime < nextJoltTime ifTrue: [ ^ self ].
-	self applyJolt.
-	self scheduleNextJoltAfter: aPhysicsStep simulationTime
+	self applyJoltTo: anElement.
+	self scheduleNextJoltFor: anElement after: aPhysicsStep simulationTime
 ]
 
 { #category : 'private - scheduling' }
-CFPhysicsJumpingBeanBehaviour >> scheduleNextJoltAfter: simulationTime [
-	nextJoltTime := simulationTime
-		+ (self randomValueBetween: minimumDelay and: maximumDelay)
+CFPhysicsJumpingBeanBehaviour >> scheduleNextJoltFor: anElement after: simulationTime [
+	nextJoltTimes
+		at: anElement
+		put: simulationTime + (self randomValueBetween: minimumDelay and: maximumDelay)
+]
+
+{ #category : 'private - scheduling' }
+CFPhysicsJumpingBeanBehaviour >> forgetParticipantsAbsentFrom: currentParticipants [
+	(nextJoltTimes keys select: [ :each | (currentParticipants identityIncludes: each) not ])
+		do: [ :each | nextJoltTimes removeKey: each ]
 ]
 
 { #category : 'private - jolting' }
-CFPhysicsJumpingBeanBehaviour >> applyJolt [
+CFPhysicsJumpingBeanBehaviour >> applyJoltTo: anElement [
 	| body angle magnitude impulse angularImpulse |
-	body := physics requireBodyState.
+	body := anElement physics requireBodyState.
 	angle := random next * (Float pi * 2.0).
 	magnitude := self randomValueBetween: minimumImpulse and: maximumImpulse.
 	impulse := angle cos @ angle sin * magnitude.
@@ -138,4 +195,9 @@ CFPhysicsJumpingBeanBehaviour >> applyJolt [
 { #category : 'private - random' }
 CFPhysicsJumpingBeanBehaviour >> randomValueBetween: minimum and: maximum [
 	^ minimum + (random next * (maximum - minimum))
+]
+
+{ #category : 'removing' }
+CFPhysicsJumpingBeanBehaviour >> removing [
+	nextJoltTimes removeAll
 ]

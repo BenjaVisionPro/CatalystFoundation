@@ -730,6 +730,13 @@ CFPhysics >> jumpingBean [
 ]
 
 { #category : 'behaviours' }
+CFPhysics >> jumpingBeanAffecting: aCollectionOrProvider [
+	^ self addBehaviour: ((CFPhysicsJumpingBeanBehaviour physics: self)
+		affecting: aCollectionOrProvider;
+		yourself)
+]
+
+{ #category : 'behaviours' }
 CFPhysics >> forceDirected [
 	^ self addBehaviour: (CFPhysicsForceDirectedBehaviour physics: self)
 ]
