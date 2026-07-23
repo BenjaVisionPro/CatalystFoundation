@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsMondrianExampleGraphBuilder',
 	#superclass : 'Object',
-	#instVars : [ 'random' ],
+	#instVars : [ 'randomState' ],
 	#category : 'BVC-Foundation-Physics-Examples',
 	#package : 'BVC-Foundation-Physics-Examples'
 }
@@ -16,7 +16,7 @@ CFPhysicsMondrianExampleGraphBuilder >> exampleGraph [
 { #category : 'building' }
 CFPhysicsMondrianExampleGraphBuilder >> build [
 	| mondrian models |
-	random := self newRandom.
+	randomState := 7319.
 	models := self nodeModels.
 	mondrian := GtMondrian new.
 	self configureRoot: mondrian root.
@@ -87,11 +87,6 @@ CFPhysicsMondrianExampleGraphBuilder >> newNodeElementFor: aModel [
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsMondrianExampleGraphBuilder >> newRandom [
-	^ CFPhysicsRandomSource seed: 7319
-]
-
-{ #category : 'private - building' }
 CFPhysicsMondrianExampleGraphBuilder >> nodeModels [
 	^ 1 to: 12
 ]
@@ -100,12 +95,18 @@ CFPhysicsMondrianExampleGraphBuilder >> nodeModels [
 CFPhysicsMondrianExampleGraphBuilder >> positionNodesOf: aMondrian [
 	aMondrian nodeElements withIndexDo: [ :each :index |
 		| x y |
-		x := 24 + ((index - 1) * 74) + ((random next * 18) - 9).
-		y := 28 + (random next * 120).
+		x := 24 + ((index - 1) * 74) + ((self nextRandom * 18) - 9).
+		y := 28 + (self nextRandom * 120).
 		each relocate: x @ y ]
 ]
 
 { #category : 'private - building' }
 CFPhysicsMondrianExampleGraphBuilder >> randomModelFrom: aCollection [
-	^ aCollection at: (random next * aCollection size) floor + 1
+	^ aCollection at: (self nextRandom * aCollection size) floor + 1
+]
+
+{ #category : 'private - random' }
+CFPhysicsMondrianExampleGraphBuilder >> nextRandom [
+	randomState := (randomState * 48271) \\ 2147483647.
+	^ randomState asFloat / 2147483647.0
 ]

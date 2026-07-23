@@ -724,24 +724,6 @@ CFPhysics >> applyAngularImpulse: aNumber [
 ]
 
 { #category : 'behaviours' }
-CFPhysics >> jumpingBean [
-	^ self addBehaviour:
-		(CFPhysicsJumpingBeanBehaviour physics: self)
-]
-
-{ #category : 'behaviours' }
-CFPhysics >> jumpingBeanAffecting: aCollectionOrProvider [
-	^ self addBehaviour: ((CFPhysicsJumpingBeanBehaviour physics: self)
-		affecting: aCollectionOrProvider;
-		yourself)
-]
-
-{ #category : 'behaviours' }
 CFPhysics >> forceDirected [
 	^ self addBehaviour: (CFPhysicsForceDirectedBehaviour physics: self)
-]
-
-{ #category : 'behaviours' }
-CFPhysics >> sparks [
-	^ self addBehaviour: (CFPhysicsSparksBehaviour physics: self)
 ]
