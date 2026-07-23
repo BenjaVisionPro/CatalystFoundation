@@ -32,6 +32,8 @@ CFPhysicsMondrian >> beWorld [
 	self adoptCurrentNodePositions.
 	mondrian root
 		disableAutoScale;
+		childrenScaleFactor: 1;
+		childrenTranslationFactor: 0 @ 0;
 		layout: BlBasicLayout new.
 	^ world
 ]

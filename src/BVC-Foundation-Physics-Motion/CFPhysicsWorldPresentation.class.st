@@ -63,7 +63,7 @@ CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
 
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> translationFor: aBodyState at: aPhysicsPosition [
-	^ aPhysicsPosition - aBodyState element position
+	^ aPhysicsPosition
 ]
 
 { #category : 'private - presenting' }
