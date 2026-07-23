@@ -746,3 +746,9 @@ CFPhysics >> sparks [
 	^ self addBehaviour:
 		(CFPhysicsSparksBehaviour physics: self)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> wind [
+	^ self addBehaviour:
+		(CFPhysicsWindBehaviour physics: self)
+]

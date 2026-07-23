@@ -5827,3 +5827,141 @@ CFPhysicsCleanSlateTests >> testMultipleSparksBehavioursOwnIndependentElements [
 	self deny: firstElement hasParent.
 	self assert: secondElement hasParent
 ]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWindIsImmediatelyOwnedAndParticipatesInWorld [
+	| root element world behaviour |
+	root := BlElement new.
+	element := BlElement new extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	behaviour := element physics wind.
+	self assert: (element physics behaviours includes: behaviour).
+	self assert: (world behaviours includes: behaviour)
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWindAppliesContinuousForceToItsAnchor [
+	| root element world behaviour body firstVelocity |
+	root := BlElement new.
+	element := BlElement new extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := element physics wind.
+	behaviour force: 120 @ 0.
+	world step.
+	body := element physics requireBodyState.
+	firstVelocity := body velocity x.
+	self assert: firstVelocity > 0.0.
+	world step.
+	self assert: body velocity x > firstVelocity
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWindDefaultsToAnchorAndDescendantsInStableBlocOrder [
+	| root container first nested second world behaviour selected |
+	root := BlElement new.
+	container := BlElement new extent: 20 @ 20.
+	first := BlElement new extent: 10 @ 10.
+	nested := BlElement new extent: 10 @ 10.
+	second := BlElement new extent: 10 @ 10.
+	root addChild: container.
+	container
+		addChild: first;
+		addChild: nested.
+	nested addChild: second.
+	world := root physics beWorld.
+	world synchroniseMembership.
+	behaviour := container physics wind.
+	selected := behaviour elements.
+	self assert: selected size equals: 4.
+	self assert: selected first identicalTo: container.
+	self assert: selected second identicalTo: first.
+	self assert: selected third identicalTo: nested.
+	self assert: selected fourth identicalTo: second
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWorldOwnerWindAffectsAllWorldDescendants [
+	| root first second world behaviour firstBody secondBody |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root
+		addChild: first;
+		addChild: second.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := root physics wind.
+	behaviour force: 100 @ 0.
+	world step.
+	firstBody := first physics requireBodyState.
+	secondBody := second physics requireBodyState.
+	self assert: firstBody velocity x > 0.0.
+	self assert: secondBody velocity x > 0.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWindElementsBlockProvidesChangingDomainSelection [
+	| root first second world selected behaviour firstBody secondBody firstVelocity |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root
+		addChild: first;
+		addChild: second.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	selected := { first }.
+	behaviour := root physics wind.
+	behaviour
+		force: 100 @ 0;
+		elementsBlock: [ selected ].
+	world step.
+	firstBody := first physics requireBodyState.
+	secondBody := second physics requireBodyState.
+	firstVelocity := firstBody velocity x.
+	self assert: firstVelocity > 0.0.
+	self assert: (secondBody velocity x closeTo: 0.0).
+	selected := { second }.
+	world step.
+	self assert: (firstBody velocity x closeTo: firstVelocity).
+	self assert: secondBody velocity x > 0.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testRemovingWindStopsFutureForceWithoutRewindingVelocity [
+	| root element world behaviour body velocity |
+	root := BlElement new.
+	element := BlElement new extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := element physics wind.
+	behaviour force: 100 @ 0.
+	world step.
+	body := element physics requireBodyState.
+	velocity := body velocity.
+	behaviour remove.
+	world step.
+	self assert: (body velocity closeTo: velocity)
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testWindRejectsElementsFromAnotherWorld [
+	| firstRoot firstElement firstWorld secondRoot secondElement behaviour |
+	firstRoot := BlElement new.
+	firstElement := BlElement new extent: 20 @ 20.
+	firstRoot addChild: firstElement.
+	firstWorld := firstRoot physics beWorld.
+	secondRoot := BlElement new.
+	secondElement := BlElement new extent: 20 @ 20.
+	secondRoot addChild: secondElement.
+	secondRoot physics beWorld.
+	behaviour := firstElement physics wind.
+	behaviour elementsBlock: [ { secondElement } ].
+	self
+		should: [ firstWorld step ]
+		raise: Error
+]
