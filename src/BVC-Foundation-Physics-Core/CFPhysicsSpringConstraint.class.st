@@ -80,25 +80,49 @@ CFPhysicsSpringConstraint >> sequence: anInteger [ sequence := anInteger ]
 CFPhysicsSpringConstraint >> restLength [ ^ restLength ]
 
 { #category : 'configuration' }
-CFPhysicsSpringConstraint >> restLength: aNumber [ restLength := aNumber asFloat max: 0.0 ]
+CFPhysicsSpringConstraint >> restLength: aValue [
+	aValue isNumber
+		ifTrue: [ restLength := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue physicsValue asFloat.
+			restLength := aValue ]
+]
 
 { #category : 'configuration' }
 CFPhysicsSpringConstraint >> stiffness [ ^ stiffness ]
 
 { #category : 'configuration' }
-CFPhysicsSpringConstraint >> stiffness: aNumber [ stiffness := aNumber asFloat max: 0.0 ]
+CFPhysicsSpringConstraint >> stiffness: aValue [
+	aValue isNumber
+		ifTrue: [ stiffness := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue physicsValue asFloat.
+			stiffness := aValue ]
+]
 
 { #category : 'configuration' }
 CFPhysicsSpringConstraint >> damping [ ^ damping ]
 
 { #category : 'configuration' }
-CFPhysicsSpringConstraint >> damping: aNumber [ damping := aNumber asFloat max: 0.0 ]
+CFPhysicsSpringConstraint >> damping: aValue [
+	aValue isNumber
+		ifTrue: [ damping := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue physicsValue asFloat.
+			damping := aValue ]
+]
 
 { #category : 'configuration' }
 CFPhysicsSpringConstraint >> maximumForce [ ^ maximumForce ]
 
 { #category : 'configuration' }
-CFPhysicsSpringConstraint >> maximumForce: aNumber [ maximumForce := aNumber asFloat max: 0.0 ]
+CFPhysicsSpringConstraint >> maximumForce: aValue [
+	aValue isNumber
+		ifTrue: [ maximumForce := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue physicsValue asFloat.
+			maximumForce := aValue ]
+]
 
 { #category : 'testing' }
 CFPhysicsSpringConstraint >> isActive [ ^ active ]
@@ -115,7 +139,7 @@ CFPhysicsSpringConstraint >> orderingKey [
 
 { #category : 'stepping' }
 CFPhysicsSpringConstraint >> prepareForStep: seconds [
-	| points displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstVelocity secondVelocity |
+	| points displacement distance direction relativeSpeed extension force impulse firstBody secondBody firstVelocity secondVelocity resolvedMaximumForce |
 	active ifFalse: [ ^ self ].
 	firstBody := self bodyA.
 	secondBody := self bodyB.
@@ -127,9 +151,12 @@ CFPhysicsSpringConstraint >> prepareForStep: seconds [
 	firstVelocity := firstBody ifNil: [ 0 @ 0 ] ifNotNil: [ firstBody velocity ].
 	secondVelocity := secondBody ifNil: [ 0 @ 0 ] ifNotNil: [ secondBody velocity ].
 	relativeSpeed := (secondVelocity - firstVelocity) dotProduct: direction.
-	extension := distance - restLength.
-	force := (extension * stiffness) + (relativeSpeed * damping).
-	force := (force max: maximumForce negated) min: maximumForce.
+	extension := distance - (restLength physicsValue asFloat max: 0.0).
+	force :=
+		(extension * (stiffness physicsValue asFloat max: 0.0))
+			+ (relativeSpeed * (damping physicsValue asFloat max: 0.0)).
+	resolvedMaximumForce := maximumForce physicsValue asFloat max: 0.0.
+	force := (force max: resolvedMaximumForce negated) min: resolvedMaximumForce.
 	impulse := direction * (force * seconds).
 	firstBody ifNotNil: [
 		firstBody addVelocity: impulse * firstBody inverseMass ].
