@@ -61,8 +61,7 @@ CFPhysicsMondrian >> prepareGraphElements [
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> adoptCurrentNodePositions [
 	mondrian nodeElements do: [ :each |
-		each physics position: each position.
-		each relocate: 0 @ 0 ]
+		each physics position: each position ]
 ]
 
 { #category : 'private - initialization' }

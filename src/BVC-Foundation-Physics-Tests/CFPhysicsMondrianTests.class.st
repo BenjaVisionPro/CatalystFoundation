@@ -8,17 +8,15 @@ Class {
 { #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
 	<gtExample>
-	| mondrian nodes initialPositions world |
+	| mondrian nodes world |
 	mondrian := GtMondrian new.
 	nodes := mondrian nodes with: #(one two three).
 	nodes withIndexDo: [ :each :index | each relocate: (index * 30) @ (index * 20) ].
-	initialPositions := nodes collect: [ :each | each position ].
 	world := mondrian physics beWorld.
 	self assert: world owner == mondrian root.
 	self assert: world members size equals: 3.
-	nodes with: initialPositions do: [ :each :initialPosition |
-		self assert: each physics position equals: initialPosition.
-		self assert: each position equals: 0 @ 0 ].
+	nodes do: [ :each |
+		self assert: each physics position equals: each position ].
 	^ mondrian
 ]
 
