@@ -77,6 +77,21 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareCircleAnchors [
+	<gtExample>
+	| mondrian edge |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two).
+	edge := (mondrian edges
+		fromNearestCircle;
+		toNearestCircle;
+		connectAssociations: { #one -> #two }) first.
+	self assert: edge fromAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
+	self assert: edge toAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 	<gtExample>
 	| mondrian nodes initialPositions world |
