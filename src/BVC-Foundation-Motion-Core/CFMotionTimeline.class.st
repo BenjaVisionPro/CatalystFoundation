@@ -8,7 +8,7 @@ I never schedule frames, claim presentation properties or manage Motion lifecycl
 Class {
 	#name : 'CFMotionTimeline',
 	#superclass : 'Object',
-	#instVars : [ 'tracks', 'startAnchor', 'endAnchor', 'resolvedEnd', 'elapsedTime', 'indefinite' ],
+	#instVars : [ 'tracks', 'startAnchor', 'endAnchor', 'resolvedEnd', 'elapsedTime', 'indefinite', 'repeating' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -23,14 +23,14 @@ CFMotionTimeline >> addTrack: aTrack [
 CFMotionTimeline >> advanceBy: aDuration [
 	self ensureResolvedTemporalLayout.
 	elapsedTime := elapsedTime + aDuration.
-	indefinite ifFalse: [ elapsedTime := elapsedTime min: resolvedEnd ].
+	(indefinite or: [ repeating ]) ifFalse: [ elapsedTime := elapsedTime min: resolvedEnd ].
 	self applyCurrentPosition.
 	^ self
 ]
 
 { #category : 'private - playing' }
 CFMotionTimeline >> applyCurrentPosition [
-	tracks do: [ :each | each applyAt: elapsedTime ]
+	tracks do: [ :each | each applyAt: self currentPosition ]
 ]
 
 { #category : 'accessing' }
@@ -61,25 +61,26 @@ CFMotionTimeline >> initialize [
 	startAnchor := CFMotionTemporalAnchor timelineStartIn: self.
 	endAnchor := CFMotionTemporalAnchor timelineEndIn: self.
 	elapsedTime := 0 milliSeconds.
-	indefinite := false
+	indefinite := false.
+	repeating := false
 ]
 
 { #category : 'testing' }
 CFMotionTimeline >> isComplete [
 	self ensureResolvedTemporalLayout.
-	^ indefinite not and: [ elapsedTime >= resolvedEnd ]
+	^ indefinite not and: [ repeating not and: [ elapsedTime >= resolvedEnd ] ]
 ]
 
 { #category : 'testing' }
 CFMotionTimeline >> isFinite [
 	self ensureResolvedTemporalLayout.
-	^ indefinite not
+	^ indefinite not and: [ repeating not ]
 ]
 
 { #category : 'testing' }
 CFMotionTimeline >> isIndefinite [
 	self ensureResolvedTemporalLayout.
-	^ indefinite
+	^ indefinite or: [ repeating ]
 ]
 
 { #category : 'playing' }
@@ -94,7 +95,37 @@ CFMotionTimeline >> progress [
 	self ensureResolvedTemporalLayout.
 	indefinite ifTrue: [ ^ nil ].
 	resolvedEnd isZero ifTrue: [ ^ 1.0 ].
-	^ (elapsedTime / resolvedEnd) min: 1.0
+	^ (self currentPosition / resolvedEnd) min: 1.0
+]
+
+{ #category : 'accessing' }
+CFMotionTimeline >> currentPosition [
+	self ensureResolvedTemporalLayout.
+	(indefinite or: [ repeating not ]) ifTrue: [ ^ elapsedTime ].
+	resolvedEnd isZero ifTrue: [ ^ 0 milliSeconds ].
+	^ (elapsedTime asMilliSeconds \\ resolvedEnd asMilliSeconds) milliSeconds
+]
+
+{ #category : 'configuration' }
+CFMotionTimeline >> repeat [
+	repeating := true.
+	^ self
+]
+
+{ #category : 'testing' }
+CFMotionTimeline >> isRepeating [
+	^ repeating
+]
+
+{ #category : 'playing' }
+CFMotionTimeline >> seekTo: aDuration [
+	self ensureResolvedTemporalLayout.
+	aDuration < (0 milliSeconds) ifTrue: [
+		self error: 'A Motion timeline cannot seek before zero' ].
+	elapsedTime := aDuration.
+	(indefinite or: [ repeating ]) ifFalse: [ elapsedTime := elapsedTime min: resolvedEnd ].
+	self applyCurrentPosition.
+	^ self
 ]
 
 { #category : 'private - resolving' }
