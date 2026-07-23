@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsMondrianExampleGraphBuilder',
 	#superclass : 'Object',
-	#instVars : [ 'randomState' ],
+	#instVars : [ 'randomState', 'nextNodeId', 'depth', 'rootCountRange', 'childrenRanges', 'parentCountRanges' ],
 	#category : 'BVC-Foundation-Physics-Examples',
 	#package : 'BVC-Foundation-Physics-Examples'
 }
@@ -13,23 +13,69 @@ CFPhysicsMondrianExampleGraphBuilder >> exampleGraph [
 	^ self build
 ]
 
+{ #category : 'initialization' }
+CFPhysicsMondrianExampleGraphBuilder >> initialize [
+	super initialize.
+	depth := 3.
+	rootCountRange := 1 @ 7.
+	childrenRanges := Dictionary new
+		at: 1 put: (0 @ 20);
+		at: 2 put: (5 @ 10);
+		yourself.
+	parentCountRanges := Dictionary new
+		at: 2 put: (1 @ 4);
+		yourself
+]
+
 { #category : 'building' }
 CFPhysicsMondrianExampleGraphBuilder >> build [
-	| mondrian models |
+	| mondrian graph |
 	randomState := 7319.
-	models := self nodeModels.
+	nextNodeId := 1.
+	graph := self newGraph.
 	mondrian := GtMondrian new.
 	self configureRoot: mondrian root.
 	mondrian nodes
 		stencil: [ :aModel | self newNodeElementFor: aModel ];
-		with: models.
+		with: graph first.
 	mondrian edges
 		fromNearestCircle;
 		toNearestCircle;
 		stencil: [ :anEdge | self newEdgeElement ];
-		connectAssociations: (self edgesFor: models).
+		connectAssociations: graph second.
 	self positionNodesOf: mondrian.
 	^ mondrian
+]
+
+{ #category : 'configuration' }
+CFPhysicsMondrianExampleGraphBuilder >> childrenAtLevel: aLevel from: aMinimum to: aMaximum [
+	self validateLevel: aLevel.
+	self validateRangeFrom: aMinimum to: aMaximum.
+	childrenRanges at: aLevel put: (aMinimum @ aMaximum).
+	^ self
+]
+
+{ #category : 'configuration' }
+CFPhysicsMondrianExampleGraphBuilder >> depth: aDepth [
+	(aDepth isInteger and: [ aDepth positive ]) ifFalse: [
+		self error: 'Depth must be a positive integer' ].
+	depth := aDepth.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFPhysicsMondrianExampleGraphBuilder >> parentsAtLevel: aLevel from: aMinimum to: aMaximum [
+	self validateLevel: aLevel.
+	self validateRangeFrom: aMinimum to: aMaximum.
+	parentCountRanges at: aLevel put: (aMinimum @ aMaximum).
+	^ self
+]
+
+{ #category : 'configuration' }
+CFPhysicsMondrianExampleGraphBuilder >> rootCountFrom: aMinimum to: aMaximum [
+	self validateRangeFrom: aMinimum to: aMaximum.
+	rootCountRange := aMinimum @ aMaximum.
+	^ self
 ]
 
 { #category : 'private - building' }
@@ -40,24 +86,45 @@ CFPhysicsMondrianExampleGraphBuilder >> configureRoot: aRoot [
 ]
 
 { #category : 'private - building' }
-CFPhysicsMondrianExampleGraphBuilder >> edgesFor: aCollection [
-	| edges |
-	edges := OrderedCollection new.
-	1 to: aCollection size - 1 do: [ :index |
-		edges add: (aCollection at: index) -> (aCollection at: index + 1) ].
-	8 timesRepeat: [ self addChordTo: edges among: aCollection ].
-	^ edges
+CFPhysicsMondrianExampleGraphBuilder >> newGraph [
+	| nodes connections parents |
+	nodes := OrderedCollection new.
+	connections := OrderedCollection new.
+	parents := self newRootNodesIn: nodes.
+	1 to: depth - 1 do: [ :level |
+		parents := self
+			addChildrenAtLevel: level
+			below: parents
+			into: nodes
+			connections: connections ].
+	^ { nodes. connections }
 ]
 
 { #category : 'private - building' }
-CFPhysicsMondrianExampleGraphBuilder >> addChordTo: edges among: aCollection [
-	| source target candidate |
-	source := self randomModelFrom: aCollection.
-	target := self randomModelFrom: aCollection.
-	[ source = target or: [ edges includes: (source -> target) ] ] whileTrue: [
-		target := self randomModelFrom: aCollection ].
-	candidate := source -> target.
-	edges add: candidate
+CFPhysicsMondrianExampleGraphBuilder >> addChildrenAtLevel: aLevel below: parentNodes into: nodes connections: connections [
+	| available children |
+	available := parentNodes asOrderedCollection.
+	children := OrderedCollection new.
+	(self parentCountAtLevel: aLevel from: available size) timesRepeat: [
+		| parent |
+		parent := available removeAt: ((self nextRandom * available size) floor + 1).
+		self childCountAtLevel: aLevel timesRepeat: [
+			| child |
+			child := self newNodeIn: nodes.
+			connections add: parent -> child.
+			children add: child ] ].
+	^ children
+]
+
+{ #category : 'private - building' }
+CFPhysicsMondrianExampleGraphBuilder >> newRootNodesIn: nodes [
+	| roots |
+	roots := OrderedCollection new.
+	self rootCount timesRepeat: [
+		| root |
+		root := self newNodeIn: nodes.
+		roots add: root ].
+	^ roots
 ]
 
 { #category : 'private - building' }
@@ -86,23 +153,64 @@ CFPhysicsMondrianExampleGraphBuilder >> newNodeElementFor: aModel [
 	^ element
 ]
 
-{ #category : 'private - initialization' }
-CFPhysicsMondrianExampleGraphBuilder >> nodeModels [
-	^ 1 to: 12
+{ #category : 'private - building' }
+CFPhysicsMondrianExampleGraphBuilder >> newNodeIn: nodes [
+	| node |
+	node := nextNodeId.
+	nextNodeId := nextNodeId + 1.
+	nodes add: node.
+	^ node
 ]
 
 { #category : 'private - building' }
 CFPhysicsMondrianExampleGraphBuilder >> positionNodesOf: aMondrian [
 	aMondrian nodeElements withIndexDo: [ :each :index |
-		| x y |
-		x := 24 + ((index - 1) * 74) + ((self nextRandom * 18) - 9).
-		y := 28 + (self nextRandom * 120).
+		| column row x y |
+		column := (index - 1) \\ 13.
+		row := (index - 1) // 13.
+		x := 24 + (column * 66) + ((self nextRandom * 8) - 4).
+		y := 24 + (row * 38) + ((self nextRandom * 6) - 3).
 		each relocate: x @ y ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsMondrianExampleGraphBuilder >> randomModelFrom: aCollection [
-	^ aCollection at: (self nextRandom * aCollection size) floor + 1
+CFPhysicsMondrianExampleGraphBuilder >> rootCount [
+	^ self randomIntegerFrom: rootCountRange x to: rootCountRange y
+]
+
+{ #category : 'private - building' }
+CFPhysicsMondrianExampleGraphBuilder >> childCountAtLevel: aLevel [
+	| range |
+	range := childrenRanges at: aLevel ifAbsent: [ ^ 0 ].
+	^ self randomIntegerFrom: range x to: range y
+]
+
+{ #category : 'private - building' }
+CFPhysicsMondrianExampleGraphBuilder >> parentCountAtLevel: aLevel from: anAvailableCount [
+	| range minimum maximum |
+	anAvailableCount isZero ifTrue: [ ^ 0 ].
+	range := parentCountRanges at: aLevel ifAbsent: [ ^ anAvailableCount ].
+	minimum := range x min: anAvailableCount.
+	maximum := range y min: anAvailableCount.
+	^ self randomIntegerFrom: minimum to: maximum
+]
+
+{ #category : 'private - building' }
+CFPhysicsMondrianExampleGraphBuilder >> randomIntegerFrom: aMinimum to: aMaximum [
+	^ aMinimum + (self nextRandom * (aMaximum - aMinimum + 1)) floor
+]
+
+{ #category : 'private - validation' }
+CFPhysicsMondrianExampleGraphBuilder >> validateLevel: aLevel [
+	(aLevel isInteger and: [ aLevel positive ]) ifFalse: [
+		self error: 'Level must be a positive integer' ]
+]
+
+{ #category : 'private - validation' }
+CFPhysicsMondrianExampleGraphBuilder >> validateRangeFrom: aMinimum to: aMaximum [
+	((aMinimum isInteger and: [ aMaximum isInteger ])
+		and: [ aMinimum >= 0 and: [ aMinimum <= aMaximum ] ]) ifFalse: [
+		self error: 'Ranges must contain ordered non-negative integers' ]
 ]
 
 { #category : 'private - random' }
