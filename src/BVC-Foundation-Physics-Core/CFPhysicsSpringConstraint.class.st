@@ -84,7 +84,7 @@ CFPhysicsSpringConstraint >> restLength: aValue [
 	aValue isNumber
 		ifTrue: [ restLength := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			restLength := aValue ]
 ]
 
@@ -96,7 +96,7 @@ CFPhysicsSpringConstraint >> stiffness: aValue [
 	aValue isNumber
 		ifTrue: [ stiffness := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			stiffness := aValue ]
 ]
 
@@ -108,7 +108,7 @@ CFPhysicsSpringConstraint >> damping: aValue [
 	aValue isNumber
 		ifTrue: [ damping := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			damping := aValue ]
 ]
 
@@ -120,7 +120,7 @@ CFPhysicsSpringConstraint >> maximumForce: aValue [
 	aValue isNumber
 		ifTrue: [ maximumForce := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			maximumForce := aValue ]
 ]
 
@@ -151,11 +151,11 @@ CFPhysicsSpringConstraint >> prepareForStep: seconds [
 	firstVelocity := firstBody ifNil: [ 0 @ 0 ] ifNotNil: [ firstBody velocity ].
 	secondVelocity := secondBody ifNil: [ 0 @ 0 ] ifNotNil: [ secondBody velocity ].
 	relativeSpeed := (secondVelocity - firstVelocity) dotProduct: direction.
-	extension := distance - (restLength physicsValue asFloat max: 0.0).
+	extension := distance - (restLength value asFloat max: 0.0).
 	force :=
-		(extension * (stiffness physicsValue asFloat max: 0.0))
-			+ (relativeSpeed * (damping physicsValue asFloat max: 0.0)).
-	resolvedMaximumForce := maximumForce physicsValue asFloat max: 0.0.
+		(extension * (stiffness value asFloat max: 0.0))
+			+ (relativeSpeed * (damping value asFloat max: 0.0)).
+	resolvedMaximumForce := maximumForce value asFloat max: 0.0.
 	force := (force max: resolvedMaximumForce negated) min: resolvedMaximumForce.
 	impulse := direction * (force * seconds).
 	firstBody ifNotNil: [

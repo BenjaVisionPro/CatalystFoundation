@@ -11,7 +11,6 @@ CFPhysicsSharedScalarExamples >> sharedScalarRetainsAndUpdatesItsValue [
 	| scalar |
 	scalar := CFPhysicsSharedScalar value: 12.
 	self assert: scalar value equals: 12.0.
-	self assert: scalar physicsValue equals: 12.0.
 	scalar value: 34.
 	self assert: scalar value equals: 34.0.
 	^ scalar
@@ -20,8 +19,8 @@ CFPhysicsSharedScalarExamples >> sharedScalarRetainsAndUpdatesItsValue [
 { #category : 'examples - shared scalar' }
 CFPhysicsSharedScalarExamples >> ordinaryPhysicsValuesResolveWithoutWrapping [
 	<gtExample>
-	self assert: 42 physicsValue equals: 42.
-	self assert: nil physicsValue isNil.
+	self assert: 42 value equals: 42.
+	self assert: nil value isNil.
 	^ 42
 ]
 

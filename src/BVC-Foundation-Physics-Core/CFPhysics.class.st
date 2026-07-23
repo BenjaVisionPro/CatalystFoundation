@@ -741,14 +741,19 @@ CFPhysics >> forceDirectedUsing: aGraphSource [
 		yourself)
 ]
 
+
 { #category : 'behaviours' }
-CFPhysics >> sparks [
-	^ self addBehaviour:
-		(CFPhysicsSparksBehaviour physics: self)
+CFPhysics >> breathing [
+	| forceDirectedBehaviour |
+	forceDirectedBehaviour := behaviours
+		detect: [ :each | each isKindOf: CFPhysicsForceDirectedBehaviour ]
+		ifNone: [ self error: 'Breathing needs an existing force-directed Behaviour' ].
+	^ self breathingUsing: forceDirectedBehaviour
 ]
 
 { #category : 'behaviours' }
-CFPhysics >> wind [
-	^ self addBehaviour:
-		(CFPhysicsWindBehaviour physics: self)
+CFPhysics >> breathingUsing: aForceDirectedBehaviour [
+	^ self addBehaviour: ((CFPhysicsBreathingBehaviour physics: self)
+		forceDirected: aForceDirectedBehaviour;
+		yourself)
 ]

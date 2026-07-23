@@ -102,7 +102,7 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Physics-Collision'.
 	spec package: 'BVC-Foundation-Physics-Core'
-		with: [ spec requires: #('BVC-Foundation-Physics-Collision') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Collision' 'BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Physics-Pipeline'
 		with: [ spec requires: #('BVC-Foundation-Physics-Collision' 'BVC-Foundation-Physics-Core') ].
 	spec package: 'BVC-Foundation-Physics-Bloc'

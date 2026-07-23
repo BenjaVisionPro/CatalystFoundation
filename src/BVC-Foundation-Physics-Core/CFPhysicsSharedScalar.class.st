@@ -29,7 +29,3 @@ CFPhysicsSharedScalar >> value: aNumber [
 	value := aNumber asFloat
 ]
 
-{ #category : 'evaluating' }
-CFPhysicsSharedScalar >> physicsValue [
-	^ value
-]

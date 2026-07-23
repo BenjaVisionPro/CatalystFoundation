@@ -30,7 +30,7 @@ CFPhysicsConstantForceResponse >> force: aValue [
 	aValue isNumber
 		ifTrue: [ force := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			force := aValue ]
 ]
 
@@ -47,16 +47,16 @@ CFPhysicsConstantForceResponse >> maximumDistance: aValue [
 	aValue isNumber
 		ifTrue: [ maximumDistance := aValue asFloat max: 0.0 ]
 		ifFalse: [
-			aValue physicsValue asFloat.
+			aValue value asFloat.
 			maximumDistance := aValue ]
 ]
 
 { #category : 'evaluating' }
 CFPhysicsConstantForceResponse >> forceMagnitudeAtDistance: aNumber [
 	| resolvedMaximumDistance |
-	resolvedMaximumDistance := maximumDistance physicsValue.
+	resolvedMaximumDistance := maximumDistance value.
 	(resolvedMaximumDistance notNil and: [
 		aNumber > (resolvedMaximumDistance asFloat max: 0.0) ])
 		ifTrue: [ ^ 0.0 ].
-	^ force physicsValue asFloat max: 0.0
+	^ force value asFloat max: 0.0
 ]
