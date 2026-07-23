@@ -57,7 +57,21 @@ CFPhysicsMondrian >> forceDirectedConnections [
 
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> prepareGraphElements [
-	mondrian edgeElements do: [ :each | each physics excludeFromWorld ]
+	mondrian edgeElements do: [ :each |
+		each physics excludeFromWorld.
+		self preparePhysicsPresentationOf: each ]
+]
+
+{ #category : 'private - world setup' }
+CFPhysicsMondrian >> preparePhysicsPresentationOf: anEdgeElement [
+	(anEdgeElement fromAnchor isKindOf: BlNearestPositionLooseCircleAnchor) ifTrue: [
+		anEdgeElement fromAnchor: (CFPhysicsMondrianNearestCircleAnchor
+			referenceElement: anEdgeElement fromAnchor referenceElement
+			relatedTo: anEdgeElement fromAnchor nearestToElement) ].
+	(anEdgeElement toAnchor isKindOf: BlNearestPositionLooseCircleAnchor) ifTrue: [
+		anEdgeElement toAnchor: (CFPhysicsMondrianNearestCircleAnchor
+			referenceElement: anEdgeElement toAnchor referenceElement
+			relatedTo: anEdgeElement toAnchor nearestToElement) ]
 ]
 
 { #category : 'private - world setup' }

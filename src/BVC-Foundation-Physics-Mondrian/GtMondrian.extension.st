@@ -2,7 +2,13 @@ Extension { #name : 'GtMondrian' }
 
 { #category : '*BVC-Foundation-Physics-Mondrian' }
 GtMondrian >> edges [
-	^ CFPhysicsMondrianEdgeBuilder new mondrian: self
+	| physicsMondrian |
+	physicsMondrian := self root userData
+		at: CFPhysicsMondrian
+		ifAbsent: [ nil ].
+	^ (physicsMondrian notNil and: [ physicsMondrian world notNil ])
+		ifTrue: [ CFPhysicsMondrianEdgeBuilder new mondrian: self ]
+		ifFalse: [ GtMondrianEdgeBuilder new mondrian: self ]
 ]
 
 { #category : '*BVC-Foundation-Physics-Mondrian' }

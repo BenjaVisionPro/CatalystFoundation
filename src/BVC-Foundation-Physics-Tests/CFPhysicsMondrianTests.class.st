@@ -86,8 +86,24 @@ CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareCircleAnchors 
 		fromNearestCircle;
 		toNearestCircle;
 		connectAssociations: { #one -> #two }) first.
+	self assert: edge fromAnchor class equals: BlNearestPositionLooseCircleAnchor.
+	self assert: edge toAnchor class equals: BlNearestPositionLooseCircleAnchor.
+	mondrian physics beWorld.
 	self assert: edge fromAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
 	self assert: edge toAnchor class equals: CFPhysicsMondrianNearestCircleAnchor.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianUsesStandardEdgesUntilPhysicsIsEnabled [
+	<gtExample>
+	| mondrian |
+	mondrian := GtMondrian new.
+	self assert: mondrian edges class equals: GtMondrianEdgeBuilder.
+	mondrian physics.
+	self assert: mondrian edges class equals: GtMondrianEdgeBuilder.
+	mondrian physics beWorld.
+	self assert: mondrian edges class equals: CFPhysicsMondrianEdgeBuilder.
 	^ mondrian
 ]
 
