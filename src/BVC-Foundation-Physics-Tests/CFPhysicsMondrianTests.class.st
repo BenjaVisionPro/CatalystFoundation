@@ -109,7 +109,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnection
 { #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 	<gtExample>
-	| mondrian added world behaviour |
+	| mondrian added addedEdge world behaviour |
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
 	mondrian edges connectAssociations: { #one -> #two }.
@@ -121,11 +121,15 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 	self assert: behaviour springsByConnection size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 1.
 	added := (mondrian nodes with: #(three)) first.
-	mondrian edges connectAssociations: { #two -> #three }.
+	addedEdge := (mondrian edges connectAssociations: { #two -> #three }) first.
 	world step.
 	self assert: (world includes: added).
 	self assert: world members size equals: 3.
 	self assert: behaviour springsByConnection size equals: 2.
+	self assert: behaviour repulsionsByPair size equals: 3.
+	mondrian root removeChild: addedEdge.
+	world step.
+	self assert: behaviour springsByConnection size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 3.
 	^ mondrian
 ]
