@@ -95,7 +95,7 @@ CFPhysicsMondrianShowcaseExamples >> colourFor: aModel [
 
 { #category : 'showcase - mondrian' }
 CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: models edges: edges [
-	| root nodesByModel nodeElements graphSource world forceDirected breathing wind beans sparks catalyst leaves |
+	| root nodesByModel nodeElements world forceDirected breathing wind beans sparks catalyst leaves |
 	root := aMondrian root.
 	nodesByModel := IdentityDictionary new.
 	models do: [ :model |
@@ -105,13 +105,10 @@ CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: mod
 				nodeAt: model
 				ifAbsent: [ self error: 'Mondrian did not create an expected node' ]) ].
 	nodeElements := models collect: [ :model | nodesByModel at: model ].
-	root graph edgeChildren do: [ :edgeElement |
-		edgeElement physics excludeFromWorld ].
-	world := root physics beWorld.
+	world := aMondrian physics beWorld.
 	world
 		gravity: 0 @ 0;
-		stepDuration: 16 milliSeconds;
-		synchroniseMembership.
+		stepDuration: 16 milliSeconds.
 	nodeElements withIndexDo: [ :node :index |
 		| angle |
 		angle := (index - 1) * Float twoPi / nodeElements size.
@@ -126,12 +123,7 @@ CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: mod
 			enablePullInteraction.
 		(node physics containWithinWorld)
 			restitution: 0.78 ].
-	graphSource := CFPhysicsGraphSource
-		nodes: [ nodeElements ]
-		edges: [ edges ]
-		source: [ :edge | nodesByModel at: edge key ]
-		target: [ :edge | nodesByModel at: edge value ].
-	forceDirected := root physics forceDirectedUsing: graphSource.
+	forceDirected := aMondrian physics forceDirected.
 	forceDirected
 		restLength: 118.0;
 		stiffness: 52.0;

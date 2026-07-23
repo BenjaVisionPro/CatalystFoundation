@@ -78,6 +78,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Physics-Pipeline'
 		'BVC-Foundation-Physics-Bloc'
 		'BVC-Foundation-Physics-Motion'
+		'BVC-Foundation-Physics-Mondrian'
 		'BVC-Foundation-Physics-Tools'
 		'BVC-Foundation-Physics-Examples'
 		'BVC-Foundation-Physics-Tests'
@@ -109,12 +110,14 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Collision') ].
 	spec package: 'BVC-Foundation-Physics-Motion'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Foundation-Physics-Core') ].
+	spec package: 'BVC-Foundation-Physics-Mondrian'
+		with: [ spec requires: #('BVC-Foundation-Physics-Core') ].
 	spec package: 'BVC-Foundation-Physics-Tools'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Pipeline') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-Physics-Tests'
-		with: [ spec requires: #('BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Tools') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Bloc' 'BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Mondrian' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-UI-Animation'.
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
