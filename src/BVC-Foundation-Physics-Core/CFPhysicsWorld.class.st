@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -48,6 +48,7 @@ CFPhysicsWorld >> initialize [
 	warmStarting := true.
 	simulationTime := 0.0.
 	stepNumber := 0.
+	behaviours := OrderedCollection new.
 	containmentConstraints := IdentitySet new.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
@@ -205,6 +206,38 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 
 
 
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> behaviours [
+	^ behaviours copy
+]
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> addBehaviour: aBehaviour [
+	(behaviours identityIncludes: aBehaviour) ifFalse: [
+		behaviours add: aBehaviour ].
+	^ aBehaviour
+]
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> removeBehaviour: aBehaviour [
+	behaviours remove: aBehaviour ifAbsent: [ ].
+	^ aBehaviour
+]
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> retireInvalidBehaviours [
+	behaviours copy do: [ :each |
+		each stillBelongsToWorld ifFalse: [ each remove ] ]
+]
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> updateBehavioursForStep: aPhysicsStep [
+	behaviours copy do: [ :each |
+		each isRemoved ifFalse: [
+			each updateForStep: aPhysicsStep ] ]
+]
+
 { #category : 'simulation identity' }
 CFPhysicsWorld >> simulationTime [
 	^ simulationTime
@@ -241,9 +274,11 @@ CFPhysicsWorld >> newStep [
 CFPhysicsWorld >> step [
 	| bodies step |
 	self synchroniseMembership.
+	self retireInvalidBehaviours.
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
+	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
 	self prepareSpringConstraintsForStep: step timeStep.

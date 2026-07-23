@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld' ],
+	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld', 'behaviours' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -11,6 +11,46 @@ CFPhysics class >> on: anElement [
 	^ self new
 		element: anElement;
 		yourself
+]
+
+
+{ #category : 'initialization' }
+CFPhysics >> initialize [
+	super initialize.
+	behaviours := OrderedCollection new
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> behaviours [
+	^ behaviours copy
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> behaviourWorld [
+	^ self existingWorld ifNil: [ self owningWorld ]
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> addBehaviour: aBehaviour [
+	| behaviourWorld |
+	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
+		self error: 'The Physics Behaviour already belongs to another Physics facade' ].
+	behaviourWorld := self behaviourWorld.
+	behaviourWorld ifNil: [
+		self error: 'A Physics Behaviour requires an element belonging to a physics world' ].
+	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
+	aBehaviour
+		physics: self;
+		world: behaviourWorld.
+	behaviours add: aBehaviour.
+	behaviourWorld addBehaviour: aBehaviour.
+	^ aBehaviour
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> removeBehaviour: aBehaviour [
+	behaviours remove: aBehaviour ifAbsent: [ ].
+	^ aBehaviour
 ]
 
 { #category : 'body type' }
