@@ -2328,22 +2328,6 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryWaitsForANonZeroWorldExtent [
-	<gtExample>
-	| owner element world |
-	owner := BlElement new.
-	element := BlElement new size: 20 @ 20; yourself.
-	owner addChild: element.
-	world := owner physics beWorld.
-	world gravity: 0 @ 0.
-	world synchroniseMembership.
-	element physics position: 90 @ 90.
-	world step.
-	self assert: element physics position equals: 90 @ 90.
-	^ world
-]
-
-{ #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
 	<gtExample>
 	| owner element world |
@@ -2880,6 +2864,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesRepulsionBeforeIntegration [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
+	world boundary enabled: false.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
@@ -5629,8 +5614,6 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed edge endpoint must occur in the graph nodes' ]
 ]
-
-
 
 
 

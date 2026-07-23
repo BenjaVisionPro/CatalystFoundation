@@ -82,7 +82,7 @@ CFPhysicsContainmentConstraint class >> applyTo: aBodyState bounds: aRectangle m
 
 { #category : 'stepping' }
 CFPhysicsContainmentConstraint >> applyToDynamicBodyInBounds: aRectangle [
-	self
+	self class
 		applyTo: body
 		bounds: aRectangle
 		margin: margin
