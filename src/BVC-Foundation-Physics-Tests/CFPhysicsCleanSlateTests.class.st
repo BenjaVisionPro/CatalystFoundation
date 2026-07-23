@@ -5710,3 +5710,120 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed edge endpoint must occur in the graph nodes' ]
 ]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testSparksIsImmediatelyOwnedAndParticipating [
+	| root source world behaviour |
+	root := BlElement new.
+	source := BlElement new extent: 20 @ 20.
+	root addChild: source.
+	world := root physics beWorld.
+	behaviour := source physics sparks.
+	self assert: source physics behaviours equals: { behaviour }.
+	self assert: world behaviours equals: { behaviour }.
+	self assert: behaviour activeSparks isEmpty
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testSparksEmitsThenLaunchesAfterMembershipAdmission [
+	| root source world behaviour spark body |
+	root := BlElement new.
+	source := BlElement new extent: 20 @ 20.
+	root addChild: source.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := source physics sparks.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0 0.5 0.0 0.5));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		sparkLifetime: world stepDuration * 10;
+		minimumImpulse: 10.0;
+		maximumImpulse: 10.0;
+		minimumAngularImpulse: 2.0;
+		maximumAngularImpulse: 2.0.
+	world step.
+	self assert: behaviour activeSparks isEmpty.
+	world step.
+	self assert: behaviour activeSparks size equals: 1.
+	spark := behaviour activeSparks first.
+	self assert: spark element parent identicalTo: root.
+	self deny: spark isLaunched.
+	world step.
+	self assert: spark isLaunched.
+	body := spark element physics requireBodyState.
+	self assert: body velocity x > 0.0.
+	self assert: (body velocity y closeTo: 0.0).
+	self assert: body angularVelocity > 0.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testSparksExpireUsingSimulationTime [
+	| root source world behaviour sparkElement |
+	root := BlElement new.
+	source := BlElement new extent: 20 @ 20.
+	root addChild: source.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := source physics sparks.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0 0.5 0.0 0.5));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		sparkLifetime: world stepDuration * 2.
+	world step; step.
+	sparkElement := behaviour activeSparks first element.
+	self assert: sparkElement hasParent.
+	world step.
+	self assert: sparkElement hasParent.
+	world step.
+	self deny: sparkElement hasParent.
+	self assert: behaviour activeSparks isEmpty
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testRemovingSparksRemovesAllIntroducedElements [
+	| root source world behaviour sparkElement |
+	root := BlElement new.
+	source := BlElement new extent: 20 @ 20.
+	root addChild: source.
+	world := root physics beWorld.
+	behaviour := source physics sparks.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		sparkLifetime: 10.0.
+	world step; step.
+	sparkElement := behaviour activeSparks first element.
+	behaviour remove.
+	self deny: sparkElement hasParent.
+	self assert: behaviour activeSparks isEmpty.
+	self deny: (world behaviours includes: behaviour)
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testMultipleSparksBehavioursOwnIndependentElements [
+	| root source world first second firstElement secondElement |
+	root := BlElement new.
+	source := BlElement new extent: 20 @ 20.
+	root addChild: source.
+	world := root physics beWorld.
+	first := source physics sparks.
+	second := source physics sparks.
+	first
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration.
+	second
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration.
+	world step; step.
+	firstElement := first activeSparks first element.
+	secondElement := second activeSparks first element.
+	self deny: firstElement identicalTo: secondElement.
+	first remove.
+	self deny: firstElement hasParent.
+	self assert: secondElement hasParent
+]

@@ -740,3 +740,9 @@ CFPhysics >> forceDirectedUsing: aGraphSource [
 		graphSource: aGraphSource;
 		yourself)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> sparks [
+	^ self addBehaviour:
+		(CFPhysicsSparksBehaviour physics: self)
+]
