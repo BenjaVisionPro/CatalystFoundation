@@ -70,7 +70,7 @@ CFMotionValueMotion >> valueAt: anElapsedDuration [
 	repeating
 		ifTrue: [
 			[ localTime < (0 milliSeconds) ] whileTrue: [ localTime := localTime + total ].
-			localTime := (localTime asMilliSeconds \ total asMilliSeconds) milliSeconds ]
+			localTime := (localTime asMilliSeconds \\ total asMilliSeconds) milliSeconds ]
 		ifFalse: [ localTime := (localTime min: total) max: 0 milliSeconds ].
 	cursor := 0 milliSeconds.
 	segments do: [ :segment |

@@ -31,7 +31,7 @@ CFMotionValueMotionExamples >> repeatingValueMotionSupportsPhaseOffset [
 		repeat.
 	motion applyAt: 1 second.
 	self assert: (target value closeTo: 5.0).
-	motion applyAt: 2500 milliSeconds.
+	motion applyAt: 3 seconds.
 	self assert: (target value closeTo: 5.0).
 	^ motion
 ]
