@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -50,6 +50,7 @@ CFPhysicsWorld >> initialize [
 	stepNumber := 0.
 	behaviours := OrderedCollection new.
 	containmentConstraints := IdentitySet new.
+	boundary := CFPhysicsWorldBoundary new.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
 	fixedJoints := IdentitySet new.
@@ -272,7 +273,7 @@ CFPhysicsWorld >> newStep [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
-	| bodies step |
+	| bodies step explicitlyContainedBodies |
 	self synchroniseMembership.
 	self retireInvalidBehaviours.
 	bodies := self bodyStatesInOrder.
@@ -282,7 +283,7 @@ CFPhysicsWorld >> step [
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
 	self prepareSpringConstraintsForStep: step timeStep.
-	self prepareContainmentConstraintsForStep.
+	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
 	lastStepResult := stepPipeline
 		stepBodies: bodies
@@ -292,6 +293,7 @@ CFPhysicsWorld >> step [
 		gravity: gravity
 		restitutionThreshold: restitutionThreshold.
 	activeContacts := lastStepResult activeContacts.
+	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
@@ -715,6 +717,11 @@ CFPhysicsWorld >> containmentExtent [
 	^ (CFPhysicsShapeState on: owner) extent
 ]
 
+{ #category : 'containment interaction' }
+CFPhysicsWorld >> boundary [
+	^ boundary ifNil: [ boundary := CFPhysicsWorldBoundary new ]
+]
+
 
 { #category : 'containment interaction' }
 CFPhysicsWorld >> containmentConstraints [
@@ -745,11 +752,29 @@ CFPhysicsWorld >> removeContainmentsUsingBody: aBodyState [
 ]
 
 { #category : 'containment interaction' }
+CFPhysicsWorld >> applyDefaultBoundaryExcept: explicitlyContainedBodies [
+	| bounds worldBoundary |
+	bounds := 0 @ 0 extent: self containmentExtent.
+	worldBoundary := self boundary.
+	worldBoundary enabled ifTrue: [
+		self bodyStatesInOrder do: [ :each |
+			(explicitlyContainedBodies includes: each) ifFalse: [
+				worldBoundary applyTo: each bounds: bounds ] ] ]
+]
+
+{ #category : 'containment interaction' }
 CFPhysicsWorld >> prepareContainmentConstraintsForStep [
+	| bounds explicitlyContainedBodies |
+	bounds := 0 @ 0 extent: self containmentExtent.
+	explicitlyContainedBodies := IdentitySet new.
 	containmentConstraints copy do: [ :each |
 		each isActive
-			ifTrue: [ each prepareForBounds: (0 @ 0 extent: self containmentExtent) ]
-			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ]
+			ifTrue: [
+				each prepareForBounds: bounds.
+				explicitlyContainedBodies add: each body ]
+			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ].
+	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
+	^ explicitlyContainedBodies
 ]
 
 

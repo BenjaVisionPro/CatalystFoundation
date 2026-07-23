@@ -2294,6 +2294,134 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 
 
 { #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryContainsBodiesByDefault [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 90 @ 90.
+	world step.
+	self assert: element physics position equals: 80 @ 80.
+	self assert: world boundary enabled.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world boundary enabled: false.
+	world synchroniseMembership.
+	element physics position: 90 @ 90.
+	world step.
+	self assert: element physics position equals: 90 @ 90.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryWaitsForANonZeroWorldExtent [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 90 @ 90.
+	world step.
+	self assert: element physics position equals: 90 @ 90.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world boundary restitution: 0.5.
+	world synchroniseMembership.
+	element physics
+		position: 90 @ 20;
+		velocity: 50 @ 0.
+	world step.
+	self assert: (element physics position x closeTo: 79.6).
+	self assert: element physics position y equals: 20.
+	self assert: element physics velocity equals: -25 @ 0.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryUsesItsMargin [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world boundary margin: 10.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	world step.
+	self assert: element physics position equals: 10 @ 10.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldBoundaryUsesTheCurrentWorldExtent [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 130 @ 20.
+	owner size: 160 @ 100.
+	world step.
+	self assert: element physics position equals: 130 @ 20.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> explicitContainmentOverridesTheWorldBoundary [
+	<gtExample>
+	| owner element world containment |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world boundary restitution: 0.0.
+	world synchroniseMembership.
+	containment := element physics containWithinWorld.
+	containment restitution: 0.5.
+	element physics
+		position: 90 @ 20;
+		velocity: 50 @ 0.
+	world step.
+	self assert: (element physics position x closeTo: 79.6).
+	self assert: element physics position y equals: 20.
+	self assert: element physics velocity equals: -25 @ 0.
+	^ containment
+]
+
+{ #category : 'examples - containment interaction' }
 CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
 	<gtExample>
 	| body containment |
@@ -5501,11 +5629,6 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed edge endpoint must occur in the graph nodes' ]
 ]
-
-
-
-
-
 
 
 

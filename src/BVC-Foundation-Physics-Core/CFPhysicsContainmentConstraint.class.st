@@ -50,16 +50,16 @@ CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
 	body applyContainmentConstraint: self bounds: aRectangle
 ]
 
-{ #category : 'stepping' }
-CFPhysicsContainmentConstraint >> applyToDynamicBodyInBounds: aRectangle [
+{ #category : 'private - applying' }
+CFPhysicsContainmentConstraint class >> applyTo: aBodyState bounds: aRectangle margin: aMargin restitution: aRestitution [
 	| minimum maximum bodyBounds position velocity correctedX correctedY velocityX velocityY |
-	minimum := aRectangle origin + (margin @ margin).
-	maximum := aRectangle corner - (margin @ margin).
+	minimum := aRectangle origin + (aMargin @ aMargin).
+	maximum := aRectangle corner - (aMargin @ aMargin).
 	maximum x < minimum x ifTrue: [ maximum := minimum x @ maximum y ].
 	maximum y < minimum y ifTrue: [ maximum := maximum x @ minimum y ].
-	bodyBounds := body aabb.
-	position := body position.
-	velocity := body velocity.
+	bodyBounds := aBodyState aabb.
+	position := aBodyState position.
+	velocity := aBodyState velocity.
 	correctedX := position x + ((minimum x - bodyBounds minimum x) max: 0.0)
 		+ ((maximum x - bodyBounds maximum x) min: 0.0).
 	correctedY := position y + ((minimum y - bodyBounds minimum y) max: 0.0)
@@ -67,17 +67,26 @@ CFPhysicsContainmentConstraint >> applyToDynamicBodyInBounds: aRectangle [
 	velocityX := velocity x.
 	velocityY := velocity y.
 	(bodyBounds minimum x < minimum x and: [ velocityX < 0 ]) ifTrue: [
-		velocityX := velocityX negated * restitution ].
+		velocityX := velocityX negated * aRestitution ].
 	(bodyBounds maximum x > maximum x and: [ velocityX > 0 ]) ifTrue: [
-		velocityX := velocityX negated * restitution ].
+		velocityX := velocityX negated * aRestitution ].
 	(bodyBounds minimum y < minimum y and: [ velocityY < 0 ]) ifTrue: [
-		velocityY := velocityY negated * restitution ].
+		velocityY := velocityY negated * aRestitution ].
 	(bodyBounds maximum y > maximum y and: [ velocityY > 0 ]) ifTrue: [
-		velocityY := velocityY negated * restitution ].
+		velocityY := velocityY negated * aRestitution ].
 	(correctedX ~= position x or: [ correctedY ~= position y ]) ifTrue: [
-		body translateBy: (correctedX @ correctedY) - position.
-		body velocity: velocityX @ velocityY.
-		body wake ]
+		aBodyState translateBy: (correctedX @ correctedY) - position.
+		aBodyState velocity: velocityX @ velocityY.
+		aBodyState wake ]
+]
+
+{ #category : 'stepping' }
+CFPhysicsContainmentConstraint >> applyToDynamicBodyInBounds: aRectangle [
+	self
+		applyTo: body
+		bounds: aRectangle
+		margin: margin
+		restitution: restitution
 ]
 
 { #category : 'controlling' }
