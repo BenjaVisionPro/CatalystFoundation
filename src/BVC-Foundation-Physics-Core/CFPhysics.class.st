@@ -757,3 +757,15 @@ CFPhysics >> breathingUsing: aForceDirectedBehaviour [
 		forceDirected: aForceDirectedBehaviour;
 		yourself)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> wind [
+	^ self addBehaviour: (CFPhysicsWindBehaviour physics: self)
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> windAffecting: aCollection [
+	^ self addBehaviour: ((CFPhysicsWindBehaviour physics: self)
+		affecting: aCollection;
+		yourself)
+]
