@@ -87,7 +87,7 @@ CFMotionValueExamples >> repeatingTimelineSeparatesCycleFromPlaybackSemantics [
 	self assert: timeline elapsedTime equals: 3 seconds.
 	self assert: timeline currentPosition equals: 0 milliSeconds.
 	self assert: timeline isFinite.
-	self deny: timeline isIndefinite.
+	self assert: timeline isIndefinite not.
 	self assert: timeline isRepeating.
 	^ timeline
 ]
