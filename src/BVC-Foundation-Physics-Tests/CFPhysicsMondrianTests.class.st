@@ -131,5 +131,10 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 	world step.
 	self assert: behaviour springsByConnection size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 3.
+	mondrian root removeChild: added.
+	world step.
+	self assert: world members size equals: 2.
+	self assert: behaviour springsByConnection size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1.
 	^ mondrian
 ]
