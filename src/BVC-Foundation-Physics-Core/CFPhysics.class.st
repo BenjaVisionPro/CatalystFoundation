@@ -728,3 +728,15 @@ CFPhysics >> jumpingBean [
 	^ self addBehaviour:
 		(CFPhysicsJumpingBeanBehaviour physics: self)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> forceDirected [
+	^ self addBehaviour: (CFPhysicsForceDirectedBehaviour physics: self)
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> forceDirectedUsing: aGraphSource [
+	^ self addBehaviour: ((CFPhysicsForceDirectedBehaviour physics: self)
+		graphSource: aGraphSource;
+		yourself)
+]

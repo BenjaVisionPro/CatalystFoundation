@@ -5565,3 +5565,148 @@ CFPhysicsCleanSlateTests >> testMultipleJumpingBeansKeepIndependentSchedules [
 	self assert: first nextJoltTime equals: world stepDuration.
 	self assert: second nextJoltTime equals: world stepDuration * 2
 ]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInSourceOrder [
+	| root first second third world edge source behaviour |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	third := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second. third }.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	edge := first -> second.
+	source := CFPhysicsGraphSource
+		nodes: [ { first. second. third } ]
+		edges: [ { edge } ]
+		source: [ :each | each key ]
+		target: [ :each | each value ].
+	behaviour := root physics forceDirectedUsing: source.
+	world step.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 3.
+	self assert: world springConstraints size equals: 1.
+	self assert: world repulsionConstraints size equals: 3
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testForceDirectedRetainsExistingConstraintsWhileReconcilingChanges [
+	| root first second third world nodes edges firstEdge secondEdge source behaviour retainedSpring retainedRepulsion |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	third := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second. third }.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	nodes := OrderedCollection with: first with: second.
+	firstEdge := first -> second.
+	secondEdge := second -> third.
+	edges := OrderedCollection with: firstEdge.
+	source := CFPhysicsGraphSource
+		nodes: [ nodes ]
+		edges: [ edges ]
+		source: [ :each | each key ]
+		target: [ :each | each value ].
+	behaviour := root physics forceDirectedUsing: source.
+	world step.
+	retainedSpring := behaviour springsByEdge at: firstEdge.
+	retainedRepulsion := behaviour repulsionsByPair values anyOne.
+	nodes add: third.
+	edges add: secondEdge.
+	world step.
+	self assert: (behaviour springsByEdge at: firstEdge) identicalTo: retainedSpring.
+	self assert: (behaviour repulsionsByPair values includes: retainedRepulsion).
+	self assert: behaviour springsByEdge size equals: 2.
+	self assert: behaviour repulsionsByPair size equals: 3.
+	edges remove: firstEdge.
+	nodes remove: first.
+	world step.
+	self deny: (behaviour springsByEdge includesKey: firstEdge).
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1.
+	self deny: retainedSpring isActive
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitiveValues [
+	| root first second world edge source behaviour spring repulsion |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	edge := first -> second.
+	source := CFPhysicsGraphSource
+		nodes: [ { first. second } ]
+		edges: [ { edge } ]
+		source: [ :each | each key ]
+		target: [ :each | each value ].
+	behaviour := root physics forceDirectedUsing: source.
+	world step.
+	spring := behaviour springsByEdge at: edge.
+	repulsion := behaviour repulsionsByPair values anyOne.
+	behaviour
+		restLength: 175;
+		stiffness: 25;
+		damping: 4;
+		maximumSpringForce: 500;
+		repulsion: 700;
+		maximumRepulsionDistance: 250.
+	self assert: spring restLength physicsValue equals: 175.0.
+	self assert: spring stiffness physicsValue equals: 25.0.
+	self assert: spring damping physicsValue equals: 4.0.
+	self assert: spring maximumForce physicsValue equals: 500.0.
+	self assert: repulsion force physicsValue equals: 700.0.
+	self assert: repulsion maximumDistance physicsValue equals: 250.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstraints [
+	| root first second world edge source firstBehaviour secondBehaviour firstSpring secondSpring |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	edge := first -> second.
+	source := CFPhysicsGraphSource
+		nodes: [ { first. second } ]
+		edges: [ { edge } ]
+		source: [ :each | each key ]
+		target: [ :each | each value ].
+	firstBehaviour := root physics forceDirectedUsing: source.
+	secondBehaviour := root physics forceDirectedUsing: source.
+	world step.
+	firstSpring := firstBehaviour springsByEdge at: edge.
+	secondSpring := secondBehaviour springsByEdge at: edge.
+	firstBehaviour remove.
+	self deny: firstSpring isActive.
+	self assert: secondSpring isActive.
+	self assert: world springConstraints equals: { secondSpring }.
+	self assert: world repulsionConstraints size equals: 1
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelection [
+	| root first second world edge source |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	edge := first -> second.
+	source := CFPhysicsGraphSource
+		nodes: [ { first } ]
+		edges: [ { edge } ]
+		source: [ :each | each key ]
+		target: [ :each | each value ].
+	root physics forceDirectedUsing: source.
+	self
+		should: [ world step ]
+		raise: Error
+		withExceptionDo: [ :error |
+			self assert: error messageText equals:
+				'Every force-directed edge endpoint must occur in the graph nodes' ]
+]
