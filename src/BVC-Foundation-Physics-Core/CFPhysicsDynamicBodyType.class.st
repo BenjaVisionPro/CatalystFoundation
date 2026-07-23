@@ -192,3 +192,7 @@ CFPhysicsDynamicBodyType >> isContinuousCollisionCounterpartForDynamicBodyType [
 	^ false
 ]
 
+{ #category : 'angular dynamics' }
+CFPhysicsDynamicBodyType >> applyAngularImpulse: aNumber [
+	body accumulateAngularImpulse: aNumber
+]

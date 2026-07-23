@@ -717,3 +717,14 @@ CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
 		between: self requireBodyState
 		and: anotherElement physics requireBodyState
 ]
+
+{ #category : 'angular dynamics' }
+CFPhysics >> applyAngularImpulse: aNumber [
+	self requireBodyState applyAngularImpulse: aNumber
+]
+
+{ #category : 'behaviours' }
+CFPhysics >> jumpingBean [
+	^ self addBehaviour:
+		(CFPhysicsJumpingBeanBehaviour physics: self)
+]

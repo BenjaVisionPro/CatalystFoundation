@@ -5447,3 +5447,121 @@ CFPhysicsCleanSlateTests >> testWorldOwningElementCanOwnBehaviour [
 	self assert: behaviour updates size equals: 1.
 	self assert: behaviour stillBelongsToWorld
 ]
+
+
+{ #category : 'tests - angular dynamics' }
+CFPhysicsCleanSlateTests >> testAngularImpulseChangesDynamicAngularVelocityByInverseInertia [
+	| body impulse expected |
+	body := self cleanSlateBodyWithSequence: 1.
+	impulse := 12.0.
+	expected := impulse * body inverseInertia.
+	body applyAngularImpulse: impulse.
+	self assert: (body angularVelocity closeTo: expected)
+]
+
+{ #category : 'tests - angular dynamics' }
+CFPhysicsCleanSlateTests >> testZeroAngularImpulseDoesNotWakeSleepingBody [
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	body sleep.
+	body applyAngularImpulse: 0.0.
+	self deny: body isAwake
+]
+
+{ #category : 'tests - angular dynamics' }
+CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	body beStatic.
+	body applyAngularImpulse: 12.0.
+	self assert: body angularVelocity equals: 0.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testJumpingBeanIsImmediatelyOwnedAndParticipating [
+	| root element world behaviour |
+	root := BlElement new.
+	element := BlElement new.
+	root addChild: element.
+	world := root physics beWorld.
+	behaviour := element physics jumpingBean.
+	self assert: element physics behaviours equals: { behaviour }.
+	self assert: world behaviours equals: { behaviour }.
+	self assert: behaviour physics identicalTo: element physics.
+	self assert: behaviour world identicalTo: world
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testJumpingBeanSchedulesThenAppliesLinearAndAngularImpulse [
+	| root element world behaviour body initialAngularVelocity |
+	root := BlElement new.
+	element := BlElement new.
+	element extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := element physics jumpingBean.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0 0.0 0.0 0.0 0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration;
+		minimumImpulse: 10.0;
+		maximumImpulse: 10.0;
+		minimumAngularImpulse: 2.0;
+		maximumAngularImpulse: 2.0.
+	world step.
+	body := element physics requireBodyState.
+	initialAngularVelocity := body angularVelocity.
+	self assert: body velocity equals: 0 @ 0.
+	self assert: behaviour nextJoltTime equals: world stepDuration.
+	world step.
+	self assert: body velocity x > 0.0.
+	self assert: (body velocity y closeTo: 0.0).
+	self assert: body angularVelocity > initialAngularVelocity
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testRemovingJumpingBeanPreventsFutureJolts [
+	| root element world behaviour body |
+	root := BlElement new.
+	element := BlElement new.
+	element extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := element physics jumpingBean.
+	behaviour
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration.
+	world step.
+	body := element physics requireBodyState.
+	behaviour remove.
+	world step.
+	self assert: body velocity equals: 0 @ 0.
+	self assert: body angularVelocity equals: 0.0
+]
+
+{ #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testMultipleJumpingBeansKeepIndependentSchedules [
+	| root element world first second |
+	root := BlElement new.
+	element := BlElement new.
+	element extent: 20 @ 20.
+	root addChild: element.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	first := element physics jumpingBean.
+	second := element physics jumpingBean.
+	first
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration;
+		maximumDelay: world stepDuration.
+	second
+		random: (CFPhysicsSequenceRandom values: #(0.0));
+		minimumDelay: world stepDuration * 2;
+		maximumDelay: world stepDuration * 2.
+	world step.
+	self assert: first nextJoltTime equals: world stepDuration.
+	self assert: second nextJoltTime equals: world stepDuration * 2
+]

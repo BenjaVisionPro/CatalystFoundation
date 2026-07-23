@@ -728,3 +728,13 @@ CFPhysicsBody >> requiresContinuousCollisionAgainst: anotherBody [
 	^ bodyType requiresContinuousCollisionAgainst: anotherBody bodyType
 ]
 
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> applyAngularImpulse: aNumber [
+	bodyType applyAngularImpulse: aNumber.
+	^ self
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> accumulateAngularImpulse: aNumber [
+	self accumulateAngularVelocity: aNumber * self calculatedInverseInertia
+]
