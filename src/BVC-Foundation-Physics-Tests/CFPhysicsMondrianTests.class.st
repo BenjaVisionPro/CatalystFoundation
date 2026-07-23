@@ -13,7 +13,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
 	nodes := mondrian nodes with: #(one two three).
 	nodes withIndexDo: [ :each :index | each relocate: (index * 30) @ (index * 20) ].
 	world := mondrian physics beWorld.
-	self assert: world owner identicalTo: mondrian root.
+	self assert: world owner == mondrian root.
 	self assert: world members size equals: 3.
 	nodes do: [ :each |
 		self assert: each physics position equals: each position ].
@@ -32,7 +32,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	self assert: (world includes: added).
 	mondrian root removeChild: initial first.
 	world synchroniseMembership.
-	self deny: (world includes: initial first).
+	self assert: (world includes: initial first) not.
 	^ mondrian
 ]
 
@@ -65,7 +65,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 	mondrian nodes with: #(one two).
 	firstWorld := mondrian physics beWorld.
 	secondWorld := mondrian physics beWorld.
-	self assert: firstWorld identicalTo: secondWorld.
+	self assert: firstWorld == secondWorld.
 	self assert: mondrian physics forceDirected notNil.
 	^ mondrian
 ]
