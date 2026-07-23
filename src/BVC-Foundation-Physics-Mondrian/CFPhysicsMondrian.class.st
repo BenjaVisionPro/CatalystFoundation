@@ -30,7 +30,9 @@ CFPhysicsMondrian >> beWorld [
 	world := mondrian root physics beWorld.
 	world synchroniseMembership.
 	self adoptCurrentNodePositions.
-	mondrian root layout: BlBasicLayout new.
+	mondrian root
+		disableAutoScale;
+		layout: BlBasicLayout new.
 	^ world
 ]
 

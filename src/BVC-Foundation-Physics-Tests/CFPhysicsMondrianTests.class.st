@@ -65,6 +65,18 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
+	<gtExample>
+	| mondrian |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two).
+	self assert: mondrian root autoScaleEnabled.
+	mondrian physics beWorld.
+	self assert: mondrian root autoScaleEnabled not.
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 	<gtExample>
 	| mondrian nodes initialPositions world |
