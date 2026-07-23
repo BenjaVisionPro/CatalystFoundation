@@ -1,6 +1,6 @@
 Extension { #name : 'CFPhysics' }
 
-{ #category : 'behaviours' }
+{ #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysics >> breathing [
 	| forceDirectedBehaviour |
 	forceDirectedBehaviour := behaviours
@@ -9,19 +9,19 @@ CFPhysics >> breathing [
 	^ self breathingUsing: forceDirectedBehaviour
 ]
 
-{ #category : 'behaviours' }
+{ #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysics >> breathingUsing: aForceDirectedBehaviour [
 	^ self addBehaviour: ((CFPhysicsBreathingBehaviour physics: self)
 		forceDirected: aForceDirectedBehaviour;
 		yourself)
 ]
 
-{ #category : 'behaviours' }
+{ #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysics >> wind [
 	^ self addBehaviour: (CFPhysicsWindBehaviour physics: self)
 ]
 
-{ #category : 'behaviours' }
+{ #category : '*BVC-Foundation-Physics-Motion' }
 CFPhysics >> windAffecting: aCollectionOrProvider [
 	^ self addBehaviour: ((CFPhysicsWindBehaviour physics: self)
 		affecting: aCollectionOrProvider;
