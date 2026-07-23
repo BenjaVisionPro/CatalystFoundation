@@ -45,7 +45,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldExcludesEdges [
 	edgeElements := mondrian edges
 		connectAssociations: { #one -> #two }.
 	world := mondrian physics beWorld.
-	self deny: (world includes: edgeElements first).
+	self assert: (world includes: edgeElements first) not.
 	mondrian edges connectAssociations: { #two -> #three }.
 	world synchroniseMembership.
 	self assert: world members size equals: 3.
