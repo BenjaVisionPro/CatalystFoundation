@@ -112,15 +112,20 @@ CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: mod
 		gravity: 0 @ 0;
 		stepDuration: 16 milliSeconds;
 		synchroniseMembership.
-	nodeElements do: [ :node |
+	nodeElements withIndexDo: [ :node :index |
+		| angle |
+		angle := (index - 1) * Float twoPi / nodeElements size.
 		node physics
-			linearDamping: 5.5;
-			angularDamping: 9.0;
-			friction: 0.25;
-			restitution: 0.55;
+			density: 0.012;
+			linearDamping: 1.35;
+			angularDamping: 5.0;
+			friction: 0.18;
+			restitution: 0.68;
+			preventSleeping;
+			velocity: (((angle cos) @ (angle sin)) * 34.0);
 			enablePullInteraction.
 		(node physics containWithinWorld)
-			restitution: 0.72 ].
+			restitution: 0.78 ].
 	graphSource := CFPhysicsGraphSource
 		nodes: [ nodeElements ]
 		edges: [ edges ]
@@ -128,11 +133,11 @@ CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: mod
 		target: [ :edge | nodesByModel at: edge value ].
 	forceDirected := root physics forceDirectedUsing: graphSource.
 	forceDirected
-		restLength: 132.0;
-		stiffness: 34.0;
-		damping: 9.5;
-		repulsion: 1500.0;
-		maximumRepulsionDistance: 300.0.
+		restLength: 118.0;
+		stiffness: 52.0;
+		damping: 7.0;
+		repulsion: 5200.0;
+		maximumRepulsionDistance: 340.0.
 	catalyst := nodesByModel at: #Catalyst.
 	breathing := root physics breathingUsing: forceDirected.
 	breathing
@@ -141,18 +146,21 @@ CFPhysicsMondrianShowcaseExamples >> startLivingPhysicsIn: aMondrian models: mod
 	wind := root physics windAffecting: nodeElements.
 	wind
 		direction: 1 @ -0.18;
-		intensity: 0.11.
+		intensity: 0.28.
 	leaves := #(Breathing Wind JumpingBean Sparks) collect: [ :model |
 		nodesByModel at: model ].
 	beans := root physics jumpingBeanAffecting: leaves.
 	beans
 		randomSource: (CFPhysicsRandomSource seed: 6723);
-		intensity: 0.12.
+		intensity: 0.38.
 	sparks := catalyst physics sparks.
 	sparks
 		randomSource: (CFPhysicsRandomSource seed: 9411);
 		direction: 0 @ -1;
-		intensity: 0.28;
+		intensity: 0.42;
+		minimumLaunchImpulse: 760.0;
+		maximumLaunchImpulse: 1380.0;
+		lifetime: 0.9;
 		sparkFactory: [ self newShowcaseSpark ].
 	world startStepping
 ]
