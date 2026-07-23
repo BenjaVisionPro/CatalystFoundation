@@ -776,3 +776,8 @@ CFPhysics >> windAffecting: aCollection [
 		affecting: aCollection;
 		yourself)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> sparks [
+	^ self addBehaviour: (CFPhysicsSparksBehaviour physics: self)
+]
