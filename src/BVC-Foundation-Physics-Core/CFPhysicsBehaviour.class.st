@@ -77,3 +77,15 @@ CFPhysicsBehaviour >> remove [
 { #category : 'removing' }
 CFPhysicsBehaviour >> removing [
 ]
+
+
+{ #category : 'protected - participants' }
+CFPhysicsBehaviour >> resolvedParticipantsFrom: aCollectionOrProvider default: aBlock [
+	aCollectionOrProvider ifNil: [ ^ aBlock value asArray ].
+	^ aCollectionOrProvider value asArray
+]
+
+{ #category : 'protected - random' }
+CFPhysicsBehaviour >> randomValueBetween: minimum and: maximum using: aRandomSource [
+	^ minimum + (aRandomSource next * (maximum - minimum))
+]

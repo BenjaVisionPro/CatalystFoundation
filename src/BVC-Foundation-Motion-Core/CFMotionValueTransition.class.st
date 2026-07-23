@@ -1,12 +1,12 @@
 "
-I am one Motion Behaviour that interpolates a CFMotionValue between two explicit values.
+I am one Motion Behaviour that interpolates a CFMotionValue between two explicit values. Numeric transitions use the arithmetic convenience interpolator; callers may supply any three-argument interpolator for another value domain.
 
 Temporal placement, easing, repetition and playback all belong to CFMotionTimeline and CFMotionTimelineTrack. I only apply the progress supplied by my track. Explicit endpoints make sequential and repeating compositions deterministic: every occurrence describes the same transition and does not depend on when another track happened to prepare.
 "
 Class {
 	#name : 'CFMotionValueTransition',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'motionValue', 'startValue', 'targetValue' ],
+	#instVars : [ 'motionValue', 'startValue', 'targetValue', 'interpolator' ],
 	#category : 'BVC-Foundation-Motion-Core-Values',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -17,6 +17,19 @@ CFMotionValueTransition class >> on: aMotionValue from: aStartValue to: anEndVal
 		motionValue: aMotionValue;
 		startValue: aStartValue;
 		targetValue: anEndValue;
+		interpolator: [ :start :end :progress | (end - start) * progress + start ];
+		yourself
+]
+
+
+
+{ #category : 'instance creation' }
+CFMotionValueTransition class >> on: aMotionValue from: aStartValue to: anEndValue using: anInterpolator [
+	^ self new
+		motionValue: aMotionValue;
+		startValue: aStartValue;
+		targetValue: anEndValue;
+		interpolator: anInterpolator;
 		yourself
 ]
 
@@ -27,7 +40,17 @@ CFMotionValueTransition >> applyDestination [
 
 { #category : 'playing' }
 CFMotionValueTransition >> applyProgress: aProgress [
-	motionValue value: ((targetValue - startValue) * aProgress + startValue)
+	motionValue value: (interpolator value: startValue value: targetValue value: aProgress)
+]
+
+{ #category : 'accessing' }
+CFMotionValueTransition >> interpolator [
+	^ interpolator
+]
+
+{ #category : 'private - initialization' }
+CFMotionValueTransition >> interpolator: aThreeArgumentBlock [
+	interpolator := aThreeArgumentBlock
 ]
 
 { #category : 'accessing' }
@@ -51,7 +74,7 @@ CFMotionValueTransition >> propertyKey [
 
 { #category : 'controlling' }
 CFMotionValueTransition >> reversed [
-	^ self class on: motionValue from: targetValue to: startValue
+	^ self class on: motionValue from: targetValue to: startValue using: interpolator
 ]
 
 { #category : 'accessing' }

@@ -31,7 +31,7 @@ Class {
 { #category : 'initialization' }
 CFPhysicsSparksBehaviour >> initialize [
 	super initialize.
-	random := Random new.
+	random := CFPhysicsRandomSource new.
 	liveSparks := IdentityDictionary new.
 	direction := 0 @ -1.
 	sparkFactory := [ BlElement new extent: 4 @ 4; yourself ].
@@ -42,7 +42,10 @@ CFPhysicsSparksBehaviour >> initialize [
 CFPhysicsSparksBehaviour >> random [ ^ random ]
 
 { #category : 'accessing' }
-CFPhysicsSparksBehaviour >> random: aRandom [ random := aRandom ]
+CFPhysicsSparksBehaviour >> random: aRandom [ self randomSource: aRandom ]
+
+{ #category : 'accessing' }
+CFPhysicsSparksBehaviour >> randomSource: aRandom [ random := aRandom ]
 
 { #category : 'configuration' }
 CFPhysicsSparksBehaviour >> intensity [ ^ intensity ]
@@ -159,13 +162,17 @@ CFPhysicsSparksBehaviour >> updateForStep: aPhysicsStep [
 { #category : 'private - scheduling' }
 CFPhysicsSparksBehaviour >> scheduleNextEmissionAfter: simulationTime [
 	nextEmissionTime := simulationTime +
-		(self randomValueBetween: minimumEmissionDelay and: maximumEmissionDelay)
+		(self randomValueBetween: minimumEmissionDelay and: maximumEmissionDelay using: random)
 ]
 
 { #category : 'private - emission' }
 CFPhysicsSparksBehaviour >> emitSparkExpiringAfter: simulationTime [
 	| spark container sourceBody sparkBody launchDirection magnitude impulse angularImpulse |
 	spark := sparkFactory value.
+	spark ifNil: [ self error: 'A spark factory must answer an element' ].
+	spark == element ifTrue: [ self error: 'A spark factory must not answer the source element' ].
+	(liveSparks includesKey: spark) ifTrue: [ self error: 'A spark factory must answer a fresh element' ].
+	spark hasParent ifTrue: [ self error: 'A spark factory must answer an unparented element' ].
 	container := element parent ifNil: [ world owner ].
 	container addChild: spark.
 	world synchroniseMembership.
@@ -173,11 +180,12 @@ CFPhysicsSparksBehaviour >> emitSparkExpiringAfter: simulationTime [
 	sparkBody := spark physics requireBodyState.
 	sparkBody position: sourceBody centre - (sparkBody extent / 2.0).
 	launchDirection := self randomLaunchDirection.
-	magnitude := self randomValueBetween: minimumLaunchImpulse and: maximumLaunchImpulse.
+	magnitude := self randomValueBetween: minimumLaunchImpulse and: maximumLaunchImpulse using: random.
 	impulse := launchDirection * magnitude.
 	angularImpulse := self
 		randomValueBetween: minimumAngularImpulse
-		and: maximumAngularImpulse.
+		and: maximumAngularImpulse
+		using: random.
 	sparkBody
 		applyImpulse: impulse atWorldPoint: sparkBody centre;
 		applyAngularImpulse: angularImpulse.
@@ -197,7 +205,7 @@ CFPhysicsSparksBehaviour >> randomLaunchDirection [
 CFPhysicsSparksBehaviour >> removeExpiredSparksAt: simulationTime [
 	| expired |
 	expired := liveSparks keys select: [ :each |
-		simulationTime >= (liveSparks at: each) ].
+		each hasParent not or: [ simulationTime >= (liveSparks at: each) ] ].
 	expired do: [ :each | self removeOwnedSpark: each ]
 ]
 
@@ -215,10 +223,6 @@ CFPhysicsSparksBehaviour >> normalized: aPoint ifZero: fallbackPoint [
 	^ aPoint / length
 ]
 
-{ #category : 'private - random' }
-CFPhysicsSparksBehaviour >> randomValueBetween: minimum and: maximum [
-	^ minimum + (random next * (maximum - minimum))
-]
 
 { #category : 'removing' }
 CFPhysicsSparksBehaviour >> removing [

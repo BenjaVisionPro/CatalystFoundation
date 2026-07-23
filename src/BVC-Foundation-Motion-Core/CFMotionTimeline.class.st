@@ -1,7 +1,7 @@
 "
 I own temporal composition and playback position for one Motion.
 
-I resolve track anchors before playback, reset and advance one playhead, and evaluate my ordered tracks at that absolute timeline position. A finite timeline clamps at its resolved end and reports completion. A timeline containing an indefinite track has no duration, progress or automatic completion.
+I resolve track anchors before playback, reset and advance one playhead, and evaluate my ordered tracks at that absolute timeline position. A non-repeating finite timeline clamps at its resolved end and reports completion. A repeating finite timeline keeps its finite cycle duration while playback continues without automatic completion. A timeline containing an indefinite track has no duration, progress or automatic completion.
 
 I never schedule frames, claim presentation properties or manage Motion lifecycle. CFMotion owns lifecycle, CFMotionCoordinator supplies the shared frame cadence, CFMotionTimelineTrack owns temporal placement, and CFMotionBehaviour owns the work performed by an evaluation.
 "
@@ -40,6 +40,11 @@ CFMotionTimeline >> duration [
 ]
 
 { #category : 'accessing' }
+CFMotionTimeline >> cycleDuration [
+	^ self duration
+]
+
+{ #category : 'accessing' }
 CFMotionTimeline >> elapsedTime [
 	^ elapsedTime
 ]
@@ -74,13 +79,13 @@ CFMotionTimeline >> isComplete [
 { #category : 'testing' }
 CFMotionTimeline >> isFinite [
 	self ensureResolvedTemporalLayout.
-	^ indefinite not and: [ repeating not ]
+	^ indefinite not
 ]
 
 { #category : 'testing' }
 CFMotionTimeline >> isIndefinite [
 	self ensureResolvedTemporalLayout.
-	^ indefinite or: [ repeating ]
+	^ indefinite
 ]
 
 { #category : 'playing' }

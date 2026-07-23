@@ -27,7 +27,7 @@ Class {
 { #category : 'initialization' }
 CFPhysicsJumpingBeanBehaviour >> initialize [
 	super initialize.
-	random := Random new.
+	random := CFPhysicsRandomSource new.
 	nextJoltTimes := IdentityDictionary new.
 	self intensity: 0.25
 ]
@@ -39,6 +39,11 @@ CFPhysicsJumpingBeanBehaviour >> random [
 
 { #category : 'accessing' }
 CFPhysicsJumpingBeanBehaviour >> random: aRandom [
+	self randomSource: aRandom
+]
+
+{ #category : 'accessing' }
+CFPhysicsJumpingBeanBehaviour >> randomSource: aRandom [
 	random := aRandom
 ]
 
@@ -66,8 +71,7 @@ CFPhysicsJumpingBeanBehaviour >> affecting: aCollectionOrProvider [
 
 { #category : 'accessing' }
 CFPhysicsJumpingBeanBehaviour >> participants [
-	participants ifNotNil: [ ^ participants value asArray ].
-	^ { element }
+	^ self resolvedParticipantsFrom: participants default: [ { element } ]
 ]
 
 { #category : 'accessing' }
@@ -168,7 +172,7 @@ CFPhysicsJumpingBeanBehaviour >> updateParticipant: anElement forStep: aPhysicsS
 CFPhysicsJumpingBeanBehaviour >> scheduleNextJoltFor: anElement after: simulationTime [
 	nextJoltTimes
 		at: anElement
-		put: simulationTime + (self randomValueBetween: minimumDelay and: maximumDelay)
+		put: simulationTime + (self randomValueBetween: minimumDelay and: maximumDelay using: random)
 ]
 
 { #category : 'private - scheduling' }
@@ -182,20 +186,17 @@ CFPhysicsJumpingBeanBehaviour >> applyJoltTo: anElement [
 	| body angle magnitude impulse angularImpulse |
 	body := anElement physics requireBodyState.
 	angle := random next * (Float pi * 2.0).
-	magnitude := self randomValueBetween: minimumImpulse and: maximumImpulse.
+	magnitude := self randomValueBetween: minimumImpulse and: maximumImpulse using: random.
 	impulse := angle cos @ angle sin * magnitude.
 	angularImpulse := self
 		randomValueBetween: minimumAngularImpulse
-		and: maximumAngularImpulse.
+		and: maximumAngularImpulse
+		using: random.
 	body
 		applyImpulse: impulse atWorldPoint: body centre;
 		applyAngularImpulse: angularImpulse
 ]
 
-{ #category : 'private - random' }
-CFPhysicsJumpingBeanBehaviour >> randomValueBetween: minimum and: maximum [
-	^ minimum + (random next * (maximum - minimum))
-]
 
 { #category : 'removing' }
 CFPhysicsJumpingBeanBehaviour >> removing [

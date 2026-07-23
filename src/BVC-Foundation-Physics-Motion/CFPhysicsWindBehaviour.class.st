@@ -7,8 +7,8 @@ Class {
 	#name : 'CFPhysicsWindBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [ 'direction', 'intensity', 'participants', 'forceValue', 'timeline' ],
-	#category : 'BVC-Foundation-Physics-Core-Behaviours',
-	#package : 'BVC-Foundation-Physics-Core'
+	#category : 'BVC-Foundation-Physics-Motion-Behaviours',
+	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'initialization' }
@@ -43,16 +43,17 @@ CFPhysicsWindBehaviour >> intensity: aNumber [
 ]
 
 { #category : 'configuration' }
-CFPhysicsWindBehaviour >> affecting: aCollection [
-	participants := aCollection.
+CFPhysicsWindBehaviour >> affecting: aCollectionOrProvider [
+	participants := aCollectionOrProvider.
 	^ self
 ]
 
 { #category : 'accessing' }
 CFPhysicsWindBehaviour >> participants [
-	participants ifNotNil: [ ^ participants value asArray ].
-	element physics existingWorld == world ifTrue: [ ^ world members ].
-	^ { element }
+	^ self resolvedParticipantsFrom: participants default: [
+		element physics existingWorld == world
+			ifTrue: [ world members ]
+			ifFalse: [ { element } ] ]
 ]
 
 { #category : 'accessing' }

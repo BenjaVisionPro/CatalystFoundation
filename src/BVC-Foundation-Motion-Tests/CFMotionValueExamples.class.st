@@ -56,3 +56,38 @@ CFMotionValueExamples >> repeatingTimelineCanSeekToAPhase [
 	self assert: (value value closeTo: 2.5).
 	^ timeline
 ]
+
+
+{ #category : 'examples - values' }
+CFMotionValueExamples >> motionValueSupportsCustomInterpolation [
+	<gtExample>
+	| value timeline track |
+	value := CFMotionValue value: 'start'.
+	timeline := CFMotionTimeline new.
+	track := CFMotionTimelineTrack
+		on: (value transitionFrom: 'start' to: 'end' using: [ :start :end :progress | progress < 0.5 ifTrue: [ start ] ifFalse: [ end ] ])
+		in: timeline.
+	track duration: 1 second; easing: BlEasing linear.
+	timeline prepareForPlayback; advanceBy: 750 milliSeconds.
+	self assert: value value equals: 'end'.
+	^ timeline
+]
+
+{ #category : 'examples - values' }
+CFMotionValueExamples >> repeatingTimelineSeparatesCycleFromPlaybackSemantics [
+	<gtExample>
+	| value timeline track |
+	value := CFMotionValue value: 0.0.
+	timeline := CFMotionTimeline new.
+	track := CFMotionTimelineTrack on: (value transitionTo: 10.0) in: timeline.
+	track duration: 1 second; easing: BlEasing linear.
+	timeline repeat; prepareForPlayback; seekTo: 3 seconds.
+	self assert: timeline duration equals: 1 second.
+	self assert: timeline cycleDuration equals: 1 second.
+	self assert: timeline elapsedTime equals: 3 seconds.
+	self assert: timeline currentPosition equals: 0 milliSeconds.
+	self assert: timeline isFinite.
+	self deny: timeline isIndefinite.
+	self assert: timeline isRepeating.
+	^ timeline
+]

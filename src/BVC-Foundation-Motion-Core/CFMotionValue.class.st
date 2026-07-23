@@ -41,3 +41,18 @@ CFMotionValue >> transitionFrom: aStartValue to: anEndValue [
 CFMotionValue >> transitionTo: anEndValue [
 	^ self transitionFrom: value to: anEndValue
 ]
+
+
+{ #category : 'motion' }
+CFMotionValue >> transitionFrom: aStartValue to: anEndValue using: anInterpolator [
+	^ CFMotionValueTransition
+		on: self
+		from: aStartValue
+		to: anEndValue
+		using: anInterpolator
+]
+
+{ #category : 'motion' }
+CFMotionValue >> transitionTo: anEndValue using: anInterpolator [
+	^ self transitionFrom: value to: anEndValue using: anInterpolator
+]

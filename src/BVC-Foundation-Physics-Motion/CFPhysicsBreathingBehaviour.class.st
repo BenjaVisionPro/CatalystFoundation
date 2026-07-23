@@ -9,8 +9,8 @@ Class {
 	#name : 'CFPhysicsBreathingBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [ 'forceDirected', 'origin', 'intensity', 'cohorts', 'springDistances', 'repulsionDistances' ],
-	#category : 'BVC-Foundation-Physics-Core-Behaviours',
-	#package : 'BVC-Foundation-Physics-Core'
+	#category : 'BVC-Foundation-Physics-Motion-Behaviours',
+	#package : 'BVC-Foundation-Physics-Motion'
 }
 
 { #category : 'initialization' }
