@@ -71,12 +71,12 @@ CFPhysicsJumpingBeanBehaviour >> affecting: aCollectionOrProvider [
 
 { #category : 'accessing' }
 CFPhysicsJumpingBeanBehaviour >> participants [
-	^ self resolvedParticipantsFrom: participants default: [ { element } ]
+	^ self resolvedParticipantsFrom: participants default: [ { self element } ]
 ]
 
 { #category : 'accessing' }
 CFPhysicsJumpingBeanBehaviour >> nextJoltTime [
-	^ self nextJoltTimeFor: element
+	^ self nextJoltTimeFor: self element
 ]
 
 { #category : 'accessing' }

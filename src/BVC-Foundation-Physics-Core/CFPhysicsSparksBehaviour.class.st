@@ -170,13 +170,13 @@ CFPhysicsSparksBehaviour >> emitSparkExpiringAfter: simulationTime [
 	| spark container sourceBody sparkBody launchDirection magnitude impulse angularImpulse |
 	spark := sparkFactory value.
 	spark ifNil: [ self error: 'A spark factory must answer an element' ].
-	spark == element ifTrue: [ self error: 'A spark factory must not answer the source element' ].
+	spark == self element ifTrue: [ self error: 'A spark factory must not answer the source element' ].
 	(liveSparks includesKey: spark) ifTrue: [ self error: 'A spark factory must answer a fresh element' ].
 	spark hasParent ifTrue: [ self error: 'A spark factory must answer an unparented element' ].
-	container := element parent ifNil: [ world owner ].
+	container := self element parent ifNil: [ world owner ].
 	container addChild: spark.
 	world synchroniseMembership.
-	sourceBody := element physics requireBodyState.
+	sourceBody := self element physics requireBodyState.
 	sparkBody := spark physics requireBodyState.
 	sparkBody position: sourceBody centre - (sparkBody extent / 2.0).
 	launchDirection := self randomLaunchDirection.

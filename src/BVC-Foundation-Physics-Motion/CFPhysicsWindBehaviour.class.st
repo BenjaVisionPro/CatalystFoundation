@@ -51,9 +51,9 @@ CFPhysicsWindBehaviour >> affecting: aCollectionOrProvider [
 { #category : 'accessing' }
 CFPhysicsWindBehaviour >> participants [
 	^ self resolvedParticipantsFrom: participants default: [
-		element physics existingWorld == world
+		self element physics existingWorld == world
 			ifTrue: [ world members ]
-			ifFalse: [ { element } ] ]
+			ifFalse: [ { self element } ] ]
 ]
 
 { #category : 'accessing' }
