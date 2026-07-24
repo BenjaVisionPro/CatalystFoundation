@@ -58,6 +58,8 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringActsOnlyOnItsAttach
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
+	first physics position: 40 @ 100.
+	second physics position: 240 @ 100.
 	behaviour := first physics restoreOrientation.
 	world step.
 	first physics rotation: 0.8.
