@@ -65,7 +65,11 @@ CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
 
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> translationFor: aBodyState at: aPhysicsPosition [
-	^ aPhysicsPosition
+	"Physics positions are absolute in the world owner's local coordinates, while
+	Motion translation is applied on top of the element's existing Bloc position.
+	Translate only by the difference so the displayed top-left remains equal to
+	the Physics position."
+	^ aPhysicsPosition - aBodyState element position
 ]
 
 { #category : 'private - presenting' }

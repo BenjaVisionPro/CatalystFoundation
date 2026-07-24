@@ -231,3 +231,28 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 	self assert: overlay contactPass elements isEmpty.
 	^ overlay
 ]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsPresentationAndWorldCoordinatesAgreeForPositionedElements [
+	<gtExample>
+	| host overlay world body element physicsPosition displayedTopLeft context |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	element := host children first.
+	element relocate: 35 @ 25.
+	body := world bodyStateFor: element.
+	physicsPosition := 140 @ 90.
+	body position: physicsPosition.
+	(CFPhysicsWorldPresentation on: world in: host space cfMotionCoordinator)
+		presentAtAlpha: 1.0.
+	host space pulse.
+	displayedTopLeft := overlay root globalPointToLocal:
+		(element localPointToGlobal: 0 @ 0).
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	self
+		assert: displayedTopLeft
+		equals: (context overlayPointFromWorld: physicsPosition).
+	^ overlay
+]
