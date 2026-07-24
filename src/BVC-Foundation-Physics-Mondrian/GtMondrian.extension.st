@@ -17,3 +17,14 @@ GtMondrian >> physics [
 		at: CFPhysicsMondrian
 		ifAbsentPut: [ CFPhysicsMondrian on: self ]
 ]
+
+{ #category : '*BVC-Foundation-Physics-Mondrian' }
+GtMondrian >> physicsOverlayHost [
+	^ self root
+]
+
+{ #category : '*BVC-Foundation-Physics-Mondrian' }
+GtMondrian >> gtTogglePhysicsOverlayFor: anAction [
+	<gtAction>
+	^ CFPhysicsOverlay gtToggleActionFor: self action: anAction
+]

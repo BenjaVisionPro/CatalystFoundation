@@ -127,3 +127,24 @@ CFPhysicsOverlayTests >> physicsOverlayCanBeToggledRepeatedly [
 	self assert: secondOverlay ~~ firstOverlay.
 	^ host
 ]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayCapabilityResolvesAnElementHost [
+	<gtExample>
+	| host |
+	host := self physicsHost.
+	self assert: (CFPhysicsOverlay hostFor: host) == host.
+	self assert: (CFPhysicsOverlay hasWorldFor: host).
+	^ host
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayCapabilityRejectsAnObjectWithoutAHost [
+	<gtExample>
+	| object |
+	object := Object new.
+	self assert: (CFPhysicsOverlay hostFor: object) isNil.
+	self assert: (CFPhysicsOverlay hasWorldFor: object) not.
+	^ object
+]

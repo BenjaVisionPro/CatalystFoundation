@@ -34,12 +34,12 @@ BlElement >> togglePhysicsOverlay [
 ]
 
 { #category : '*BVC-Foundation-Physics-Tools' }
+BlElement >> physicsOverlayHost [
+	^ self
+]
+
+{ #category : '*BVC-Foundation-Physics-Tools' }
 BlElement >> gtTogglePhysicsOverlayFor: anAction [
 	<gtAction>
-	(self existingPhysics notNil and: [ self existingPhysics isWorld ])
-		ifFalse: [ ^ anAction noAction ].
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		tooltip: 'Toggle physics overlay';
-		action: [ self togglePhysicsOverlay ]
+	^ CFPhysicsOverlay gtToggleActionFor: self action: anAction
 ]

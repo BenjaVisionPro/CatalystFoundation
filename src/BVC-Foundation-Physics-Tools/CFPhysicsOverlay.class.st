@@ -97,3 +97,38 @@ CFPhysicsOverlay >> release [
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ]
 ]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> hostFor: anObject [
+	^ (anObject respondsTo: #physicsOverlayHost)
+		ifTrue: [ anObject physicsOverlayHost ]
+		ifFalse: [ nil ]
+]
+
+{ #category : 'testing' }
+CFPhysicsOverlay class >> hasWorldFor: anObject [
+	| aHost physics |
+	aHost := self hostFor: anObject.
+	aHost ifNil: [ ^ false ].
+	physics := aHost existingPhysics.
+	^ physics notNil and: [ physics isWorld ]
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> toggleFor: anObject [
+	| aHost |
+	aHost := self hostFor: anObject.
+	(self hasWorldFor: anObject)
+		ifFalse: [ ^ nil ].
+	^ aHost togglePhysicsOverlay
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> gtToggleActionFor: anObject action: anAction [
+	(self hasWorldFor: anObject)
+		ifFalse: [ ^ anAction noAction ].
+	^ anAction button
+		icon: BrGlamorousVectorIcons inspect;
+		tooltip: 'Toggle physics overlay';
+		action: [ self toggleFor: anObject ]
+]
