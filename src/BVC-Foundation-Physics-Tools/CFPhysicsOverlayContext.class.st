@@ -35,11 +35,11 @@ CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
-	"Convert displayed geometry from an element's local coordinates into the
-	Physics host's coordinates, then use the one host-to-overlay boundary shared
-	by all diagnostics."
-	^ self overlayPointInHost:
-		(host globalPointToLocal: (anElement localPointToGlobal: aPoint))
+	"Convert displayed element geometry directly through Bloc's element-to-global
+	transform. Mondrian may apply child presentation transforms that are not
+	represented as ordinary coordinates in the Physics host, so this path must not
+	round-trip through the host's local coordinate system."
+	^ overlay root globalPointToLocal: (anElement localPointToGlobal: aPoint)
 ]
 
 { #category : 'geometry' }
@@ -52,7 +52,8 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointInHost: aPoint [
-	"The single conversion from Physics-host coordinates into overlay-local
-	coordinates. Both displayed element geometry and world geometry finish here."
+	"Convert a point already expressed in the Physics host's local coordinates
+	into overlay-local coordinates. This is the correct entry path for world
+	diagnostics, but not for displayed child geometry."
 	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
 ]
