@@ -149,7 +149,6 @@ CFPhysicsMondrianExampleGraphBuilder >> newNodeElementFor: aModel [
 		border: (BlBorder paint: (Color white alpha: 0.28) width: 1);
 		addEventHandler: BlPullHandler new;
 		yourself.
-	element physics excludeDescendantsFromWorld.
 	^ element
 ]
 

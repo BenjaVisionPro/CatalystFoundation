@@ -21,6 +21,71 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipExcludesNodePresentationChildren [
+	<gtExample>
+	| mondrian nodes world |
+	mondrian := GtMondrian new.
+	mondrian nodes
+		stencil: [ :each |
+			BlElement new
+				size: 40 @ 30;
+				addChild: BlElement new;
+				yourself ];
+		with: #(one two).
+	nodes := mondrian nodeElements.
+	world := mondrian physics beWorld.
+	self assert: world members size equals: 2.
+	nodes do: [ :each |
+		self assert: (world includes: each).
+		self assert: (world includes: each children first) not ].
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipIsConfigurable [
+	<gtExample>
+	| mondrian nodes world |
+	mondrian := GtMondrian new.
+	nodes := mondrian nodes with: #(one two three).
+	world := (mondrian physics
+		bodyElements: [ { nodes second. nodes third } ];
+		beWorld).
+	self assert: world members size equals: 2.
+	self assert: (world includes: nodes first) not.
+	self assert: (world includes: nodes second).
+	self assert: (world includes: nodes third).
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
+	<gtExample>
+	| mondrian world |
+	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
+	world := mondrian physics beWorld.
+	self assert: world members size equals: mondrian nodeElements size.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsDisplayedGeometryUsesSiblingCoordinates [
+	<gtExample>
+	| mondrian node geometry |
+	mondrian := GtMondrian new.
+	node := (mondrian nodes with: #(one)) first.
+	node
+		size: 40 @ 30;
+		relocate: 25 @ 35.
+	mondrian root
+		childrenScaleFactor: 2;
+		childrenTranslationFactor: 90 @ 70.
+	geometry := CFPhysicsMondrianDisplayedGeometry on: node.
+	self assert: (geometry positionOfLocalPoint: 0 @ 0) equals: 25 @ 35.
+	self assert: (geometry positionOfLocalPoint: 40 @ 30) equals: 65 @ 65.
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	<gtExample>
 	| mondrian initial added world |
@@ -93,6 +158,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareAnchors [
 	self assert: edge toAnchor class equals: CFPhysicsMondrianPresentationAnchor.
 	self assert: edge fromAnchor anchor class equals: BlNearestPositionLooseCircleAnchor.
 	self assert: edge toAnchor anchor class equals: BlNearestPositionLooseCircleAnchor.
+	self assert: (CFPhysicsMondrianPresentationAnchor on: edge fromAnchor) == edge fromAnchor.
 	^ mondrian
 ]
 
@@ -172,6 +238,24 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnection
 	mondrian edges connectAssociations: { #two -> #three }.
 	world step.
 	self assert: behaviour springsByConnection size equals: 2.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesConfiguredBodyElements [
+	<gtExample>
+	| mondrian nodes world behaviour |
+	mondrian := GtMondrian new.
+	nodes := mondrian nodes with: #(one two three).
+	mondrian edges connectAssociations: { #one -> #two. #two -> #three }.
+	world := (mondrian physics
+		bodyElements: [ { nodes second. nodes third } ];
+		beWorld).
+	world gravity: 0 @ 0.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	self assert: behaviour springsByConnection size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1.
 	^ mondrian
 ]
 

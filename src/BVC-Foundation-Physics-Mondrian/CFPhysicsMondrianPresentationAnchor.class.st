@@ -16,6 +16,7 @@ Class {
 
 { #category : 'instance creation' }
 CFPhysicsMondrianPresentationAnchor class >> on: aGeometryAnchor [
+	(aGeometryAnchor isKindOf: self) ifTrue: [ ^ aGeometryAnchor ].
 	^ self new
 		anchor: aGeometryAnchor;
 		yourself
@@ -51,19 +52,18 @@ CFPhysicsMondrianPresentationAnchor >> detachFromAnchoredElement: anAnchoredElem
 ]
 
 { #category : 'private - geometry' }
-CFPhysicsMondrianPresentationAnchor >> displayedBoundsOf: anElement in: aCommonParent [
-	^ Rectangle encompassing: {
-		self displayedPositionOf: anElement localPoint: 0 @ 0.
-		self displayedPositionOf: anElement localPoint: anElement extent x @ 0.
-		self displayedPositionOf: anElement localPoint: anElement extent x @ anElement extent y.
-		self displayedPositionOf: anElement localPoint: 0 @ anElement extent y }
+CFPhysicsMondrianPresentationAnchor >> displayedBoundsOf: anElement [
+	^ (self displayedGeometryOf: anElement) bounds
+]
+
+{ #category : 'private - geometry' }
+CFPhysicsMondrianPresentationAnchor >> displayedGeometryOf: anElement [
+	^ CFPhysicsMondrianDisplayedGeometry on: anElement
 ]
 
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> displayedPositionOf: anElement localPoint: aPoint [
-	"An edge and its nodes are siblings. Return their shared child coordinates;
-	the canvas applies its scale and translation to both exactly once."
-	^ (anElement transformation transformPoint: aPoint) + anElement position
+	^ (self displayedGeometryOf: anElement) positionOfLocalPoint: aPoint
 ]
 
 { #category : 'testing - self anchors' }
@@ -95,8 +95,8 @@ CFPhysicsMondrianPresentationAnchor >> positionForAnchoredElement: anAnchoredEle
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> positionForNearestBounds: anAnchoredElement within: aCommonParent [
 	| referenceBounds nearestBounds edges path result |
-	referenceBounds := self displayedBoundsOf: anchor referenceElement in: aCommonParent.
-	nearestBounds := self displayedBoundsOf: anchor nearestToElement in: aCommonParent.
+	referenceBounds := self displayedBoundsOf: anchor referenceElement.
+	nearestBounds := self displayedBoundsOf: anchor nearestToElement.
 	edges := {
 		(BlLineGeometry from: referenceBounds topLeft to: referenceBounds topRight).
 		(BlLineGeometry from: referenceBounds topRight to: referenceBounds bottomRight).
@@ -114,8 +114,8 @@ CFPhysicsMondrianPresentationAnchor >> positionForNearestBounds: anAnchoredEleme
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> positionForNearestCircle: anAnchoredElement within: aCommonParent [
 	| referenceBounds nearestBounds direction radius |
-	referenceBounds := self displayedBoundsOf: anchor referenceElement in: aCommonParent.
-	nearestBounds := self displayedBoundsOf: anchor nearestToElement in: aCommonParent.
+	referenceBounds := self displayedBoundsOf: anchor referenceElement.
+	nearestBounds := self displayedBoundsOf: anchor nearestToElement.
 	direction := (nearestBounds center - referenceBounds center) asBlocVector.
 	radius := ((referenceBounds extent r / 2.0) min: direction length).
 	direction := direction length isZero
@@ -127,8 +127,8 @@ CFPhysicsMondrianPresentationAnchor >> positionForNearestCircle: anAnchoredEleme
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> positionForNearestEllipse: anAnchoredElement within: aCommonParent [
 	| major minor referenceBounds nearestBounds direction metric k x y intersection |
-	referenceBounds := self displayedBoundsOf: anchor referenceElement in: aCommonParent.
-	nearestBounds := self displayedBoundsOf: anchor nearestToElement in: aCommonParent.
+	referenceBounds := self displayedBoundsOf: anchor referenceElement.
+	nearestBounds := self displayedBoundsOf: anchor nearestToElement.
 	direction := (nearestBounds center - referenceBounds center) asBlocVector.
 	major := referenceBounds width / 2.0.
 	minor := referenceBounds height / 2.0.
@@ -148,8 +148,8 @@ CFPhysicsMondrianPresentationAnchor >> positionForNearestEllipse: anAnchoredElem
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> positionForNearestTightCircle: anAnchoredElement within: aCommonParent [
 	| referenceBounds nearestBounds direction radius |
-	referenceBounds := self displayedBoundsOf: anchor referenceElement in: aCommonParent.
-	nearestBounds := self displayedBoundsOf: anchor nearestToElement in: aCommonParent.
+	referenceBounds := self displayedBoundsOf: anchor referenceElement.
+	nearestBounds := self displayedBoundsOf: anchor nearestToElement.
 	direction := (nearestBounds center - referenceBounds center) asBlocVector.
 	radius := (referenceBounds extent max / 2.0) min: direction length.
 	direction := direction length isZero
@@ -188,8 +188,7 @@ CFPhysicsMondrianPresentationAnchor >> positionForRelativeToElement: anAnchoredE
 	^ self transformPosition: (anchor
 		positionForAnchoredElement: anAnchoredElement
 		within: aCommonParent)
-	of: anchor referenceElement
-	in: aCommonParent
+		of: anchor referenceElement
 ]
 
 { #category : 'geometry' }
@@ -201,7 +200,7 @@ CFPhysicsMondrianPresentationAnchor >> selfPositionsForAnchoredElement: anAnchor
 ]
 
 { #category : 'private - geometry' }
-CFPhysicsMondrianPresentationAnchor >> transformPosition: aPoint of: anElement in: aCommonParent [
+CFPhysicsMondrianPresentationAnchor >> transformPosition: aPoint of: anElement [
 	| layoutOrigin localPosition |
 	layoutOrigin := anElement position.
 	localPosition := aPoint - layoutOrigin.

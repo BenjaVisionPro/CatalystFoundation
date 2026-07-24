@@ -13,8 +13,6 @@ CFPhysicsMondrianEdgeBuilder >> connect: aCollection from: aFromBlock to: aToBlo
 		from: aFromBlock
 		to: aToBlock.
 	edges do: [ :each |
-		each physics excludeFromWorld.
-		each fromAnchor: (CFPhysicsMondrianPresentationAnchor on: each fromAnchor).
-		each toAnchor: (CFPhysicsMondrianPresentationAnchor on: each toAnchor) ].
+		mondrian physics preparePhysicsPresentationOf: each ].
 	^ edges
 ]

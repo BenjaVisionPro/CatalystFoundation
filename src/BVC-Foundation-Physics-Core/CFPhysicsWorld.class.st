@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -160,6 +160,20 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 { #category : 'membership' }
 CFPhysicsWorld >> members [ ^ members asArray ]
 
+{ #category : 'membership' }
+CFPhysicsWorld >> membershipProvider [
+	^ membershipProvider
+]
+
+{ #category : 'membership' }
+CFPhysicsWorld >> membershipProvider: aCollectionOrProvider [
+	"A collection or zero-argument block that supplies exactly the elements that
+	should become bodies. Nil retains the default recursive membership of my owner."
+	membershipProvider := aCollectionOrProvider.
+	self synchroniseMembership.
+	^ self
+]
+
 { #category : 'testing' }
 CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 
@@ -175,11 +189,22 @@ CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 ]
 
 { #category : 'membership' }
+CFPhysicsWorld >> collectProvidedMembersInto: aSet [
+	membershipProvider value do: [ :each |
+		| physics |
+		physics := each physics.
+		(physics owningWorld == self and: [ physics isExcludedFromWorld not ])
+			ifTrue: [ aSet add: each ] ]
+]
+
+{ #category : 'membership' }
 CFPhysicsWorld >> synchroniseMembership [
 	| currentMembers |
 	currentMembers := IdentitySet new.
-	owner children do: [ :each |
-		self collectMembersFrom: each into: currentMembers ].
+	membershipProvider
+		ifNil: [ owner children do: [ :each |
+			self collectMembersFrom: each into: currentMembers ] ]
+		ifNotNil: [ self collectProvidedMembersInto: currentMembers ].
 	self retireBodiesAbsentFrom: currentMembers.
 	currentMembers do: [ :each |
 		bodyStates at: each ifAbsentPut: [ self registerBodyFor: each ] ].
