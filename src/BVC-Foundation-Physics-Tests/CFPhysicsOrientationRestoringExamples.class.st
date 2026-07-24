@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsABodyToItsCapturedRotation [
+CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsItsElementToCapturedRotation [
 	<gtExample>
 	| owner element world behaviour target |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -17,16 +17,10 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsABodyToItsCa
 	world synchroniseMembership.
 	target := 0.35.
 	element physics rotation: target.
-	behaviour := owner physics restoreOrientations.
-	behaviour
-		nodes: { element };
-		stiffness: 36.0;
-		damping: 6.0;
-		angularDamping: 8.0.
+	behaviour := element physics restoreOrientation.
+	behaviour stiffness: 36.0; damping: 6.0.
 	world step.
-	element physics
-		rotation: target + 0.8;
-		angularVelocity: 4.0.
+	element physics rotation: target + 0.8; angularVelocity: 4.0.
 	1 to: 360 do: [ :index | world step ].
 	self assert: ((element physics rotation - target) abs < 0.003).
 	self assert: (element physics angularVelocity abs < 0.02).
@@ -44,8 +38,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringUsesTheShortestAngu
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics rotation: Float pi - 0.1.
-	behaviour := owner physics restoreOrientations.
-	behaviour nodes: { element }.
+	behaviour := element physics restoreOrientation.
 	world step.
 	element physics rotation: Float pi negated + 0.1.
 	world step.
@@ -55,31 +48,27 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringUsesTheShortestAngu
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringRestoresBodyConfigurationWhenRemoved [
+CFPhysicsOrientationRestoringExamples >> orientationRestoringActsOnlyOnItsAttachedElement [
 	<gtExample>
-	| owner element world behaviour |
+	| owner first second world behaviour secondRotation |
 	owner := BlElement new size: 400 @ 300; yourself.
-	element := BlElement new size: 80 @ 40; yourself.
-	owner addChild: element.
+	first := BlElement new size: 80 @ 40; yourself.
+	second := BlElement new size: 80 @ 40; yourself.
+	owner addChildren: { first. second }.
 	world := owner physics beWorld.
+	world gravity: 0 @ 0.
 	world synchroniseMembership.
-	element physics
-		density: 1.25;
-		angularDamping: 2.0.
-	behaviour := owner physics restoreOrientations.
-	behaviour
-		nodes: { element };
-		density: 2.5;
-		angularDamping: 8.0.
+	behaviour := first physics restoreOrientation.
 	world step.
-	self assert: element physics density equals: 2.5.
-	self assert: element physics angularDamping equals: 8.0.
-	behaviour remove.
-	self assert: element physics density equals: 1.25.
-	self assert: element physics angularDamping equals: 2.0.
-	^ element
+	first physics rotation: 0.8.
+	secondRotation := 0.6.
+	second physics rotation: secondRotation.
+	world step.
+	self assert: first physics angularVelocity isZero not.
+	self assert: second physics rotation equals: secondRotation.
+	self assert: second physics angularVelocity isZero.
+	^ behaviour
 ]
-
 
 { #category : 'examples - orientation restoring' }
 CFPhysicsOrientationRestoringExamples >> orientationRestoringAllowsFastCollisionSpinToDecayNaturally [

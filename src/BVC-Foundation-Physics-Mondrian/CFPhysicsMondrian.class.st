@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsMondrian',
 	#superclass : 'Object',
-	#instVars : [ 'mondrian', 'world', 'bodyElements', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
+	#instVars : [ 'mondrian', 'world', 'behaviours', 'bodyElements', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
 	#category : 'BVC-Foundation-Physics-Mondrian',
 	#package : 'BVC-Foundation-Physics-Mondrian'
 }
@@ -11,6 +11,38 @@ CFPhysicsMondrian class >> on: aMondrian [
 	^ self new
 		mondrian: aMondrian;
 		yourself
+]
+
+
+{ #category : 'initialization' }
+CFPhysicsMondrian >> initialize [
+	super initialize.
+	behaviours := OrderedCollection new
+]
+
+{ #category : 'behaviours' }
+CFPhysicsMondrian >> behaviours [
+	^ behaviours copy
+]
+
+{ #category : 'behaviours' }
+CFPhysicsMondrian >> addBehaviour: aBehaviour [
+	self beWorld.
+	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
+		self error: 'The Mondrian Physics Behaviour already belongs to another facade' ].
+	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
+	aBehaviour
+		physics: self;
+		world: world.
+	behaviours add: aBehaviour.
+	world addBehaviour: aBehaviour.
+	^ aBehaviour
+]
+
+{ #category : 'behaviours' }
+CFPhysicsMondrian >> removeBehaviour: aBehaviour [
+	behaviours remove: aBehaviour ifAbsent: [ ].
+	^ aBehaviour
 ]
 
 { #category : 'accessing' }
@@ -61,6 +93,7 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 	| formerWorld |
 	world ifNil: [ ^ self ].
 	formerWorld := world.
+	behaviours copy do: [ :each | each remove ].
 	self removePlaybackLifecycle.
 	formerWorld stopStepping.
 	self restoreGraphPresentation.
@@ -73,35 +106,10 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 
 { #category : 'behaviours' }
 CFPhysicsMondrian >> forceDirected [
-	| behaviour hierarchy orientation |
-	self beWorld.
-	behaviour := mondrian root physics forceDirected.
-	behaviour
-		nodes: [ self bodyElements ];
-		connections: [ self forceDirectedConnections ];
-		restLength: 104.0;
-		stiffness: 480.0;
-		damping: 520.0;
-		repulsion: 72000.0;
-		repulsionSofteningDistance: 58.0;
-		maximumRepulsionDistance: 175.0;
-		velocityDamping: 10.0.
-	hierarchy := mondrian root physics addBehaviour:
-		(CFPhysicsMondrianHierarchyBehaviour physics: mondrian root physics).
-	hierarchy
-		nodes: [ self bodyElements ];
-		connections: [ self forceDirectedConnections ];
-		centre: [ mondrian root extent / 2.0 ].
-	orientation := mondrian root physics restoreOrientations.
-	orientation
-		nodes: [ self bodyElements ];
-		density: 2.5;
-		angularDamping: 3.0;
-		stiffness: 36.0;
-		damping: 6.0;
-		angularResponseVelocityScale: 4.0;
-		maximumAngularAcceleration: 30.0.
-	^ behaviour
+	| behaviour |
+	behaviour := self addBehaviour:
+		(CFPhysicsMondrianForceDirectedBehaviour physics: self).
+	^ behaviour install
 ]
 
 { #category : 'private - behaviours' }

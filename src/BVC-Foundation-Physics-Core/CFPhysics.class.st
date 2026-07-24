@@ -746,6 +746,6 @@ CFPhysics >> forceDirected [
 ]
 
 { #category : 'behaviours' }
-CFPhysics >> restoreOrientations [
+CFPhysics >> restoreOrientation [
 	^ self addBehaviour: (CFPhysicsOrientationRestoringBehaviour physics: self)
 ]
