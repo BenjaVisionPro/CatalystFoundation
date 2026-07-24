@@ -72,6 +72,31 @@ CFPhysicsWorld >> owner: anElement [
 	owner := anElement
 ]
 
+{ #category : 'lifecycle' }
+CFPhysicsWorld >> release [
+	"Release every resource owned by this world. My owner remains structurally
+	unchanged; its Physics facade removes the world association separately."
+	behaviours copy do: [ :each | each remove ].
+	pointerConstraints copy do: [ :each | self removePointerConstraint: each ].
+	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
+	repulsionConstraints copy do: [ :each | self removeRepulsionConstraint: each ].
+	springConstraints copy do: [ :each | self removeSpringConstraint: each ].
+	distanceJoints copy do: [ :each | self removeDistanceJoint: each ].
+	revoluteJoints copy do: [ :each | self removeRevoluteJoint: each ].
+	fixedJoints copy do: [ :each | self removeFixedJoint: each ].
+	railJoints copy do: [ :each | self removeRailJoint: each ].
+	containmentConstraints copy do: [ :each | self removeContainmentConstraint: each ].
+	bodyStates keys do: [ :each |
+		each existingPhysics ifNotNil: [ :physics |
+			physics retireBodyFromWorld: self ] ].
+	bodyStates removeAll.
+	members removeAll.
+	activeContacts := #().
+	membershipProvider := nil.
+	self owner: nil.
+	^ self
+]
+
 { #category : 'accessing' }
 CFPhysicsWorld >> gravity [ ^ gravity ]
 

@@ -5484,6 +5484,26 @@ CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
 	self assert: behaviour velocityDamping equals: 8.0
 ]
 
+{ #category : 'tests - worlds' }
+CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
+	| root first second world spring repulsion |
+	root := BlElement new.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	world synchroniseMembership.
+	spring := first physics springTo: second.
+	repulsion := first physics repel: second.
+	root physics ceaseBeingWorld.
+	self assert: root physics existingWorld isNil.
+	self assert: world members isEmpty.
+	self assert: world springConstraints isEmpty.
+	self assert: world repulsionConstraints isEmpty.
+	self deny: spring isActive.
+	self deny: repulsion isActive
+]
+
 { #category : 'tests - behaviours' }
 CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnectionOrder [
 	| root first second third world edge behaviour |
@@ -5626,4 +5646,3 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed connection endpoint must occur in the selected nodes' ]
 ]
-

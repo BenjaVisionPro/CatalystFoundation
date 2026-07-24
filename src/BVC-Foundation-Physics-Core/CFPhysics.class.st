@@ -75,6 +75,16 @@ CFPhysics >> beWorld [
 		ifAbsentPut: [ CFPhysicsWorld on: element ]
 ]
 
+{ #category : 'worlds' }
+CFPhysics >> ceaseBeingWorld [
+	| existingWorld |
+	existingWorld := self existingWorld.
+	existingWorld ifNil: [ ^ self ].
+	existingWorld release.
+	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
+	^ self
+]
+
 { #category : 'bodies' }
 CFPhysics >> bodyState [
 	^ body

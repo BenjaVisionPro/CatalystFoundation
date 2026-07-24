@@ -112,6 +112,89 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldRestoresTheOriginalGraph [
+	<gtExample>
+	| mondrian nodes edge originalLayout originalAutoScale originalScale originalTranslation physics world |
+	mondrian := GtMondrian new.
+	nodes := mondrian nodes with: #(one two).
+	edge := (mondrian edges
+		fromNearestCircle;
+		toNearestCircle;
+		connectAssociations: { #one -> #two }) first.
+	originalLayout := mondrian root layout.
+	originalAutoScale := mondrian root autoScaleEnabled.
+	originalScale := mondrian root childrenScaleFactor.
+	originalTranslation := mondrian root childrenTranslationFactor.
+	physics := mondrian physics.
+	world := physics beWorld.
+	physics ceaseBeingWorld.
+	self assert: physics world isNil.
+	self assert: mondrian root layout == originalLayout.
+	self assert: mondrian root autoScaleEnabled equals: originalAutoScale.
+	self assert: mondrian root childrenScaleFactor equals: originalScale.
+	self assert: mondrian root childrenTranslationFactor equals: originalTranslation.
+	self assert: edge fromAnchor class equals: BlNearestPositionLooseCircleAnchor.
+	self assert: edge toAnchor class equals: BlNearestPositionLooseCircleAnchor.
+	self assert: mondrian edges class equals: GtMondrianEdgeBuilder.
+	self assert: mondrian root existingPhysics isNil.
+	nodes do: [ :each | self assert: each existingPhysics isNil ].
+	self assert: edge existingPhysics isNil.
+	self assert: world members isEmpty.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldIsIdempotent [
+	<gtExample>
+	| mondrian physics |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two).
+	physics := mondrian physics.
+	physics beWorld.
+	physics ceaseBeingWorld.
+	physics ceaseBeingWorld.
+	self assert: physics world isNil.
+	self assert: mondrian root existingPhysics isNil.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldPreservesPreexistingPhysics [
+	<gtExample>
+	| mondrian node preexistingPhysics physics |
+	mondrian := GtMondrian new.
+	node := (mondrian nodes with: #(one)) first.
+	preexistingPhysics := node physics.
+	physics := mondrian physics.
+	physics beWorld.
+	physics ceaseBeingWorld.
+	self assert: node existingPhysics == preexistingPhysics.
+	self assert: node existingPhysics existingWorld isNil.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNodes [
+	<gtExample>
+	| mondrian initial added members physics world |
+	mondrian := GtMondrian new.
+	initial := (mondrian nodes with: #(one)) first.
+	members := OrderedCollection with: initial.
+	physics := mondrian physics.
+	physics bodyElements: [ members ].
+	world := physics beWorld.
+	added := (mondrian nodes with: #(two)) first.
+	members add: added.
+	world synchroniseMembership.
+	members remove: added.
+	mondrian root removeChild: added.
+	world synchroniseMembership.
+	physics ceaseBeingWorld.
+	self assert: added existingPhysics isNil.
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
 	<gtExample>
 	| mondrian space world |
