@@ -2158,16 +2158,16 @@ CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics distanceJointTo: second.
-	self assert: joint collideConnected.
-	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
-	self assert: pairs size equals: 1.
-	joint collideConnected: false.
+	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics bodyState.
 		second physics bodyState }.
 	self assert: pairs isEmpty.
+	joint collideConnected: true.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs size equals: 1.
 	^ joint
 ]
 
@@ -2184,16 +2184,16 @@ CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics revoluteJointTo: second.
-	self assert: joint collideConnected.
-	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
-	self assert: pairs size equals: 1.
-	joint collideConnected: false.
+	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics bodyState.
 		second physics bodyState }.
 	self assert: pairs isEmpty.
+	joint collideConnected: true.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs size equals: 1.
 	^ joint
 ]
 
@@ -2210,16 +2210,16 @@ CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics fixedJointTo: second.
-	self assert: joint collideConnected.
-	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
-	self assert: pairs size equals: 1.
-	joint collideConnected: false.
+	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics bodyState.
 		second physics bodyState }.
 	self assert: pairs isEmpty.
+	joint collideConnected: true.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs size equals: 1.
 	^ joint
 ]
 
@@ -2236,16 +2236,16 @@ CFPhysicsCleanSlateTests >> railJointCanSuppressCollisionBetweenItsEndpoints [
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics railJointTo: second along: 1 @ 0.
-	self assert: joint collideConnected.
-	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
-	self assert: pairs size equals: 1.
-	joint collideConnected: false.
+	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics bodyState.
 		second physics bodyState }.
 	self assert: pairs isEmpty.
+	joint collideConnected: true.
+	pairs := CFPhysicsPairFinder new pairsAmong: {
+		first physics bodyState.
+		second physics bodyState }.
+	self assert: pairs size equals: 1.
 	^ joint
 ]
 
@@ -5645,4 +5645,35 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 		withExceptionDo: [ :error |
 			self assert: error messageText equals:
 				'Every force-directed connection endpoint must occur in the selected nodes' ]
+]
+
+
+{ #category : 'examples - hierarchy collision diagnosis' }
+CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCentre [
+	<gtExample>
+	| owner elements world centreAnchor joints result |
+	owner := BlElement new size: 500 @ 360; yourself.
+	elements := (1 to: 3) collect: [ :index |
+		BlElement new
+			size: 60 @ 40;
+			background: (Color lightBlue alpha: 0.65);
+			yourself ].
+	owner addChildren: elements.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	elements do: [ :element | element physics position: 220 @ 160 ].
+	centreAnchor := world anchorAt: 250 @ 180.
+	joints := elements collect: [ :element |
+		| joint |
+		joint := (element physics localAnchorAt: 30 @ 20)
+			distanceJointTo: centreAnchor.
+		joint restLength: 0.0.
+		joint ].
+	result := world step.
+	self assert: joints size equals: 3.
+	self assert: world distanceJoints size equals: 3.
+	self assert: result activeContacts isEmpty not.
+	self assert: result constraints size >= 3.
+	^ owner
 ]

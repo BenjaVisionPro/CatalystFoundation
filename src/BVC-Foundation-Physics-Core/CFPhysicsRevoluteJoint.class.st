@@ -47,7 +47,7 @@ CFPhysicsRevoluteJoint >> initialize [
 	motorSpeed := 0.0.
 	maximumMotorImpulse := 0.0.
 	motorImpulse := 0.0.
-	collideConnected := true
+	collideConnected := false
 ]
 
 { #category : 'accessing' }

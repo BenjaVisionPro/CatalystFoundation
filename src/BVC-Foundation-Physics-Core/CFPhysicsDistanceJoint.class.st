@@ -42,7 +42,7 @@ CFPhysicsDistanceJoint >> initialize [
 	active := true.
 	sequence := 0.
 	accumulatedImpulse := 0.0.
-	collideConnected := true
+	collideConnected := false
 ]
 
 { #category : 'accessing' }

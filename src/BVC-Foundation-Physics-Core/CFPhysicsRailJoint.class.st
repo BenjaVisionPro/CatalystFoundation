@@ -62,7 +62,7 @@ CFPhysicsRailJoint >> initialize [
 	sequence := 0.
 	accumulatedPerpendicularImpulse := 0.0.
 	accumulatedAngularImpulse := 0.0.
-	collideConnected := true
+	collideConnected := false
 ]
 
 { #category : 'accessing' }

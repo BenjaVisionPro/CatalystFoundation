@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -37,6 +37,9 @@ CFPhysicsOverlay >> root [ ^ root ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> bodyElements [ ^ bodyElements values asArray ]
 
+{ #category : 'accessing' }
+CFPhysicsOverlay >> contactPass [ ^ contactPass ]
+
 { #category : 'initialization' }
 CFPhysicsOverlay >> initializeOverlay [
 	bodyElements := IdentityDictionary new.
@@ -46,7 +49,8 @@ CFPhysicsOverlay >> initializeOverlay [
 		zIndex: (host elevation relatedTo: 0) + 1;
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
-	context := CFPhysicsOverlayContext host: host world: world overlay: self
+	context := CFPhysicsOverlayContext host: host world: world overlay: self.
+	contactPass := CFPhysicsContactOverlayPass in: root context: context
 ]
 
 { #category : 'testing' }
@@ -88,11 +92,13 @@ CFPhysicsOverlay >> refresh [
 				root addChild: created.
 				created ].
 		anElement refresh ].
+	contactPass refresh.
 	^ self
 ]
 
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
+	contactPass ifNotNil: #release.
 	bodyElements valuesDo: [ :each | each release ].
 	bodyElements removeAll.
 	root detach.

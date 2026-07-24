@@ -183,3 +183,29 @@ CFPhysicsOverlayTests >> physicsOverlayActionTracksWorldLifecycle [
 	self assert: button visibility equals: BlVisibility gone.
 	^ button
 ]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayOwnsOneContactRenderingPass [
+	<gtExample>
+	| host overlay |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	self assert: overlay contactPass notNil.
+	self assert: overlay contactPass elements isEmpty.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayWorldCoordinatesResolveThroughItsHost [
+	<gtExample>
+	| host overlay context point |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	context := CFPhysicsOverlayContext host: host world: overlay world overlay: overlay.
+	point := 75 @ 55.
+	self
+		assert: (context overlayPointFromWorld: point)
+		equals: (overlay root globalPointToLocal: (host localPointToGlobal: point)).
+	^ overlay
+]

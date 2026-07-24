@@ -37,3 +37,8 @@ CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay ]
 CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
 	^ overlay root globalPointToLocal: (anElement localPointToGlobal: aPoint)
 ]
+
+{ #category : 'geometry' }
+CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
+	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
+]
