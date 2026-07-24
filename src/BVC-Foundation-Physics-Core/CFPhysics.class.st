@@ -68,6 +68,11 @@ CFPhysics >> beStatic [
 	self requireBodyState beStatic
 ]
 
+{ #category : 'body type' }
+CFPhysics >> bodyType [
+	^ self requireBodyState bodyType
+]
+
 { #category : 'worlds' }
 CFPhysics >> beWorld [
 	| aWorld |

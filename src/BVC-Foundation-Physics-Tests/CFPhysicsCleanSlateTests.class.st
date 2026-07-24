@@ -5301,6 +5301,25 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 ]
 
 { #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
+	<gtExample>
+	| owner element world physics |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	physics := element physics.
+	self assert: physics bodyType identicalTo: physics bodyState bodyType.
+	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
+	physics beKinematic.
+	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
+	physics beStatic.
+	self assert: physics bodyType class equals: CFPhysicsStaticBodyType.
+	^ physics
+]
+
+{ #category : 'examples - body types' }
 CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
 	<gtExample>
 	| first second contact |
