@@ -82,7 +82,7 @@ CFPhysicsMondrianExampleGraphBuilder >> rootCountFrom: aMinimum to: aMaximum [
 CFPhysicsMondrianExampleGraphBuilder >> configureRoot: aRoot [
 	aRoot
 		size: 920 @ 620;
-		background: (Color veryVeryDarkGray alpha: 0.96)
+		background: Color veryVeryLightGray
 ]
 
 { #category : 'private - building' }
@@ -146,7 +146,6 @@ CFPhysicsMondrianExampleGraphBuilder >> newNodeElementFor: aModel [
 		size: 62 @ 34;
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 10));
 		background: Color blue muchDarker;
-		border: (BlBorder paint: (Color white alpha: 0.28) width: 1);
 		addEventHandler: BlPullHandler new;
 		yourself.
 	^ element
