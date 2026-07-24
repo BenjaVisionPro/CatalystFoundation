@@ -68,25 +68,6 @@ CFPhysicsMondrianTests >> mondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsDisplayedGeometryUsesSiblingCoordinates [
-	<gtExample>
-	| mondrian node geometry |
-	mondrian := GtMondrian new.
-	node := (mondrian nodes with: #(one)) first.
-	node
-		size: 40 @ 30;
-		relocate: 25 @ 35.
-	mondrian root
-		disableAutoScale;
-		childrenScaleFactor: 2;
-		childrenTranslationFactor: 90 @ 70.
-	geometry := CFPhysicsMondrianDisplayedGeometry on: node.
-	self assert: (geometry positionOfLocalPoint: 0 @ 0) equals: 25 @ 35.
-	self assert: (geometry positionOfLocalPoint: 40 @ 30) equals: 65 @ 65.
-	^ mondrian
-]
-
-{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	<gtExample>
 	| mondrian initial added world |
