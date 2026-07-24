@@ -379,7 +379,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 { #category : 'examples - physics overlay' }
 CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgree [
 	<gtExample>
-	| space mondrian node world overlay body physicsPosition presentation context displayedPoint worldPoint |
+	| space mondrian node world overlay body physicsPosition context displayedPoint worldPoint |
 	space := BlSpace new.
 	space time: BlTime simulated.
 	mondrian := GtMondrian new.
@@ -387,14 +387,14 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgre
 	space root addChild: mondrian root.
 	space pulse.
 	world := mondrian physics beWorld.
+	world stopStepping.
+	space pulse.
+	self deny: world isStepping.
 	overlay := mondrian root showPhysicsOverlay.
 	body := world bodyStateFor: node.
 	physicsPosition := 180 @ 120.
 	body position: physicsPosition.
-	presentation := CFPhysicsWorldPresentation
-		on: world
-		in: space cfMotionCoordinator.
-	presentation presentAtAlpha: 1.0.
+	world presentAtAlpha: 1.0.
 	space pulse.
 	context := CFPhysicsOverlayContext
 		host: mondrian root

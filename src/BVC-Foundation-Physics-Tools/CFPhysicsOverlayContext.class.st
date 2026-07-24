@@ -44,18 +44,16 @@ CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
-	"Physics body and contact positions use the coordinate system shared by the
-	host's children. Apply the host's children transformation before converting
-	through the host and into the overlay. This matters for Mondrian canvases,
-	whose children transformation is distinct from the root's own transform."
-	^ self overlayPointInHost: (host childrenPointToLocal: aPoint)
+	"Convert a Physics-world point from the world owner's local coordinate system
+	into overlay-local coordinates. Mondrian fixes its root children presentation
+	to identity while Physics is active, so no children transformation belongs in
+	this path."
+	^ self overlayPointInHost: aPoint
 ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointInHost: aPoint [
-	"Convert a point expressed in the Physics host's own local coordinates into
-	overlay-local coordinates. Callers holding body/contact coordinates must first
-	apply #childrenPointToLocal:, because those coordinates belong to the host's
-	children coordinate system."
+	"Convert a point expressed in the Physics host's local coordinates into
+	overlay-local coordinates."
 	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
 ]
