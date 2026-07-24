@@ -43,6 +43,7 @@ CFPhysicsOverlay >> initializeOverlay [
 	root := BlOverlayElement on: host.
 	root
 		id: #cfPhysicsOverlay;
+		zIndex: (host elevation relatedTo: 0) + 1;
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self

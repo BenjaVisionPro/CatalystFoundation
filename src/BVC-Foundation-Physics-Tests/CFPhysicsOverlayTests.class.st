@@ -57,6 +57,21 @@ CFPhysicsOverlayTests >> physicsOverlayCanBeInstalled [
 	^ host
 ]
 
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayRendersAboveItsHost [
+	<gtExample>
+	| host overlay |
+	host := self physicsHost.
+	host zIndex: 7.
+	overlay := host showPhysicsOverlay.
+	host space pulse.
+	self
+		assert: (overlay root elevation relatedTo: 0)
+		equals: (host elevation relatedTo: 0) + 1.
+	^ host
+]
+
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsOverlayCanBeRemovedWithoutChangingTheHost [
 	<gtExample>
