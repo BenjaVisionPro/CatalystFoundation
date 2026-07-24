@@ -389,7 +389,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgre
 	world := mondrian physics beWorld.
 	world stopStepping.
 	space pulse.
-	self deny: world isStepping.
+	self assert: world isStepping not.
 	overlay := mondrian root showPhysicsOverlay.
 	body := world bodyStateFor: node.
 	physicsPosition := 180 @ 120.
