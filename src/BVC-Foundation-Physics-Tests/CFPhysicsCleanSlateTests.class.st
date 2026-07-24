@@ -2284,6 +2284,7 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 	world := owner physics beWorld.
 	world synchroniseMembership.
 	joint := first physics distanceJointTo: second.
+	joint collideConnected: true.
 	first physics bodyState sleep.
 	second physics bodyState sleep.
 	joint collideConnected: false.

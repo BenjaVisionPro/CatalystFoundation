@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'framePresentedHandler' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -50,7 +50,10 @@ CFPhysicsOverlay >> initializeOverlay [
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
-	contactPass := CFPhysicsContactOverlayPass in: root context: context
+	contactPass := CFPhysicsContactOverlayPass in: root context: context.
+	framePresentedHandler := BlEventHandler
+		on: CFPhysicsFramePresentedEvent
+		do: [ :anEvent | self refresh ]
 ]
 
 { #category : 'testing' }
@@ -66,6 +69,7 @@ CFPhysicsOverlay >> install [
 	(container notNil and: [ host isAttachedToSceneGraph ])
 		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
+	host addEventHandler: framePresentedHandler.
 	self refresh.
 	^ self
 ]
@@ -98,6 +102,7 @@ CFPhysicsOverlay >> refresh [
 
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
+	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactPass ifNotNil: #release.
 	bodyElements valuesDo: [ :each | each release ].
 	bodyElements removeAll.

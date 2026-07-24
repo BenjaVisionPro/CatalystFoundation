@@ -32,7 +32,9 @@ CFPhysicsWorldPresentation >> initialize [
 
 { #category : 'consuming frames' }
 CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
-	self presentAtAlpha: aNumber
+	self presentAtAlpha: aNumber.
+	world owner ifNotNil: [ :anOwner |
+		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ]
 ]
 
 { #category : 'presenting' }

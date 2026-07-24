@@ -209,3 +209,25 @@ CFPhysicsOverlayTests >> physicsOverlayWorldCoordinatesResolveThroughItsHost [
 		equals: (overlay root globalPointToLocal: (host localPointToGlobal: point)).
 	^ overlay
 ]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame [
+	<gtExample>
+	| host overlay world first second |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	self assert: overlay contactPass elements isNotEmpty.
+	second physics position: 260 @ 180.
+	world step.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	self assert: overlay contactPass elements isEmpty.
+	^ overlay
+]
