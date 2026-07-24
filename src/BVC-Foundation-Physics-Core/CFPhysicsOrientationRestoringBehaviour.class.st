@@ -62,7 +62,7 @@ CFPhysicsOrientationRestoringBehaviour >> maximumAngularAcceleration [ ^ maximum
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringBehaviour >> angularResponseVelocityScale: aNumberOrSharedScalar [
-	angularResponseVelocityScale := self scalarFrom: aNumberOrSharedScalar minimum: Float epsilon.
+	angularResponseVelocityScale := self scalarFrom: aNumberOrSharedScalar minimum: Float machineEpsilon.
 	^ self
 ]
 

@@ -3468,7 +3468,7 @@ CFPhysicsCleanSlateTests >> aabbMergesBothBounds [
 CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
 	<gtExample>
 	| element body bounds |
-	element := BlElement new extent: 20 @ 10.
+	element := BlElement new size: 20 @ 10.
 	body := CFPhysicsBody element: element world: nil.
 	body
 		position: 10 @ 20;
@@ -3485,7 +3485,7 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
 CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 	<gtExample>
 	| element body bounds previousBounds currentBounds |
-	element := BlElement new extent: 40 @ 10.
+	element := BlElement new size: 40 @ 10.
 	body := CFPhysicsBody element: element world: nil.
 	body
 		position: 10 @ 20;
