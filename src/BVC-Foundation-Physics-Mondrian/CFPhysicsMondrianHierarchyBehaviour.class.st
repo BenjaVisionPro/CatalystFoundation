@@ -1,16 +1,15 @@
 "
-I guide a directed Mondrian graph into a layered radial shape without replacing
-ordinary Physics. Springs, repulsion and collision remain owned by the generic
-force-directed behaviour and the world.
+I keep the first layer of a directed Mondrian graph anchored near the canvas
+centre without prescribing the placement of descendants.
 
-Roots settle onto a compact ring around the canvas centre. Each child is given
-a target on an outward-facing arc relative to its parent, so every generation
-continues away from the centre instead of being pulled back through the graph.
+A single root is anchored exactly at the centre. Multiple roots are assigned
+deterministic positions on a compact central ring. Dynamic roots drift back to
+their assigned anchor after being moved.
 "
 Class {
 	#name : 'CFPhysicsMondrianHierarchyBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
-	#instVars : [ 'nodes', 'connections', 'centre', 'rootRadius', 'layerDistance', 'siblingArc', 'restoringStrength', 'velocityDamping' ],
+	#instVars : [ 'nodes', 'connections', 'centre', 'rootRadius', 'restoringStrength', 'velocityDamping' ],
 	#category : 'BVC-Foundation-Physics-Mondrian',
 	#package : 'BVC-Foundation-Physics-Mondrian'
 }
@@ -19,10 +18,8 @@ Class {
 CFPhysicsMondrianHierarchyBehaviour >> initialize [
 	super initialize.
 	rootRadius := 42.0.
-	layerDistance := 118.0.
-	siblingArc := Float pi * 0.62.
-	restoringStrength := 5.5.
-	velocityDamping := 2.5
+	restoringStrength := 12.0.
+	velocityDamping := 4.0
 ]
 
 { #category : 'configuration' }
@@ -59,7 +56,9 @@ CFPhysicsMondrianHierarchyBehaviour >> centre [
 ]
 
 { #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> rootRadius [ ^ rootRadius ]
+CFPhysicsMondrianHierarchyBehaviour >> rootRadius [
+	^ rootRadius
+]
 
 { #category : 'configuration' }
 CFPhysicsMondrianHierarchyBehaviour >> rootRadius: aNumber [
@@ -67,23 +66,9 @@ CFPhysicsMondrianHierarchyBehaviour >> rootRadius: aNumber [
 ]
 
 { #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> layerDistance [ ^ layerDistance ]
-
-{ #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> layerDistance: aNumber [
-	layerDistance := aNumber asFloat max: 0.0
+CFPhysicsMondrianHierarchyBehaviour >> restoringStrength [
+	^ restoringStrength
 ]
-
-{ #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> siblingArc [ ^ siblingArc ]
-
-{ #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> siblingArc: aNumber [
-	siblingArc := aNumber asFloat max: 0.0
-]
-
-{ #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> restoringStrength [ ^ restoringStrength ]
 
 { #category : 'configuration' }
 CFPhysicsMondrianHierarchyBehaviour >> restoringStrength: aNumber [
@@ -91,7 +76,9 @@ CFPhysicsMondrianHierarchyBehaviour >> restoringStrength: aNumber [
 ]
 
 { #category : 'configuration' }
-CFPhysicsMondrianHierarchyBehaviour >> velocityDamping [ ^ velocityDamping ]
+CFPhysicsMondrianHierarchyBehaviour >> velocityDamping [
+	^ velocityDamping
+]
 
 { #category : 'configuration' }
 CFPhysicsMondrianHierarchyBehaviour >> velocityDamping: aNumber [
@@ -100,100 +87,53 @@ CFPhysicsMondrianHierarchyBehaviour >> velocityDamping: aNumber [
 
 { #category : 'updating' }
 CFPhysicsMondrianHierarchyBehaviour >> updateForStep: aPhysicsStep [
-	| currentNodes currentConnections targets |
+	| currentNodes roots targets |
 	currentNodes := self nodes.
 	currentNodes isEmpty ifTrue: [ ^ self ].
-	currentConnections := self connections.
-	targets := self
-		targetCentresFor: currentNodes
-		connections: currentConnections.
-	self
-		guide: currentNodes
-		towards: targets
-		over: aPhysicsStep timeStep
+	roots := self rootsAmong: currentNodes connections: self connections.
+	targets := self rootTargetsFor: roots.
+	self guideRoots: roots towards: targets over: aPhysicsStep timeStep
 ]
 
-{ #category : 'private - targets' }
-CFPhysicsMondrianHierarchyBehaviour >> targetCentresFor: currentNodes connections: currentConnections [
-	| nodeSet incoming childrenByParent roots targets queue |
+{ #category : 'private - roots' }
+CFPhysicsMondrianHierarchyBehaviour >> rootsAmong: currentNodes connections: currentConnections [
+	| nodeSet incoming roots |
 	nodeSet := currentNodes asIdentitySet.
-	incoming := IdentityDictionary new.
-	childrenByParent := IdentityDictionary new.
+	incoming := IdentitySet new.
 	currentConnections do: [ :connection |
-		((nodeSet includes: connection key) and: [ nodeSet includes: connection value ]) ifTrue: [
-			incoming at: connection value ifAbsentPut: [ connection key ].
-			(childrenByParent at: connection key ifAbsentPut: [ OrderedCollection new ])
-				add: connection value ] ].
-	roots := currentNodes reject: [ :node | incoming includesKey: node ].
-	roots isEmpty ifTrue: [ roots := { currentNodes first } ].
-	targets := IdentityDictionary new.
-	queue := OrderedCollection new.
-	self placeRoots: roots into: targets queue: queue.
-	[ queue isEmpty ] whileFalse: [
-		| parent children |
-		parent := queue removeFirst.
-		children := childrenByParent at: parent ifAbsent: [ #() ].
-		self
-			placeChildren: children
-			of: parent
-			into: targets
-			queue: queue ].
-	currentNodes do: [ :node |
-		targets at: node ifAbsentPut: [ self centre ] ].
-	^ targets
+		((nodeSet includes: connection key) and: [ nodeSet includes: connection value ])
+			ifTrue: [ incoming add: connection value ] ].
+	roots := currentNodes reject: [ :node | incoming includes: node ].
+	^ roots isEmpty
+		ifTrue: [ { currentNodes first } ]
+		ifFalse: [ roots ]
 ]
 
-{ #category : 'private - targets' }
-CFPhysicsMondrianHierarchyBehaviour >> placeRoots: roots into: targets queue: queue [
-	| count radius |
+{ #category : 'private - roots' }
+CFPhysicsMondrianHierarchyBehaviour >> rootTargetsFor: roots [
+	| targets count radius |
+	targets := IdentityDictionary new.
 	count := roots size.
 	radius := count = 1 ifTrue: [ 0.0 ] ifFalse: [ rootRadius ].
 	roots withIndexDo: [ :root :index |
-		| angle target |
+		| angle direction |
 		angle := (Float twoPi * (index - 1) / count) - (Float pi / 2.0).
-		target := self centre + ((angle cos @ angle sin) * radius).
-		targets at: root put: target.
-		queue add: root ]
-]
-
-{ #category : 'private - targets' }
-CFPhysicsMondrianHierarchyBehaviour >> placeChildren: children of: parent into: targets queue: queue [
-	| parentTarget outwardAngle count |
-	children isEmpty ifTrue: [ ^ self ].
-	parentTarget := targets at: parent.
-	outwardAngle := self outwardAngleFromCentreTo: parentTarget for: parent.
-	count := children size.
-	children withIndexDo: [ :child :index |
-		(targets includesKey: child) ifFalse: [
-			| offset angle target |
-			offset := count = 1
-				ifTrue: [ 0.0 ]
-				ifFalse: [ siblingArc * ((index - 1) / (count - 1) - 0.5) ].
-			angle := outwardAngle + offset.
-			target := parentTarget + ((angle cos @ angle sin) * layerDistance).
-			targets at: child put: target.
-			queue add: child ] ]
-]
-
-{ #category : 'private - targets' }
-CFPhysicsMondrianHierarchyBehaviour >> outwardAngleFromCentreTo: parentTarget for: parent [
-	| displacement |
-	displacement := parentTarget - self centre.
-	displacement r > 0.001 ifTrue: [ ^ displacement theta ].
-	^ (Float twoPi * ((self nodes identityIndexOf: parent ifAbsent: [ 1 ]) - 1)
-		/ (self nodes size max: 1)) - (Float pi / 2.0)
+		direction := angle cos @ angle sin.
+		targets at: root put: self centre + (direction * radius) ].
+	^ targets
 ]
 
 { #category : 'private - forces' }
-CFPhysicsMondrianHierarchyBehaviour >> guide: currentNodes towards: targets over: seconds [
+CFPhysicsMondrianHierarchyBehaviour >> guideRoots: roots towards: targets over: seconds [
 	| dampingFactor |
 	dampingFactor := 1.0 / (1.0 + (seconds * velocityDamping)).
-	currentNodes do: [ :element |
-		| body targetPosition displacement velocity |
+	roots do: [ :element |
+		| body targetPosition displacement restoredVelocity |
 		body := element physics requireBodyState.
 		body isDynamic ifTrue: [
 			targetPosition := (targets at: element) - (body extent / 2.0).
 			displacement := targetPosition - body position.
-			velocity := body velocity + (displacement * (restoringStrength * seconds)).
-			body velocity: velocity * dampingFactor ] ]
+			restoredVelocity := body velocity
+				+ (displacement * (restoringStrength * seconds)).
+			body velocity: restoredVelocity * dampingFactor ] ]
 ]
