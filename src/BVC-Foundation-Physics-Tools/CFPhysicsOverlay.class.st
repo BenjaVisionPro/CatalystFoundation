@@ -143,11 +143,8 @@ CFPhysicsOverlay class >> toggleButtonFor: anObject [
 		^ aButton ].
 
 	aWorldChangedHandler := BlEventHandler
-		on: CFPhysicsWorldChangedEvent
-		do: [ :anEvent |
-			aButton visibility: ((self hasWorldFor: anObject)
-				ifTrue: [ BlVisibility visible ]
-				ifFalse: [ BlVisibility gone ]) ].
+		on: CFPhysicsWorldAttachmentChanged
+		do: [ :anEvent | aButton phlow fireToolUpdateWish ].
 	aHost addEventHandler: aWorldChangedHandler.
 	aButton
 		when: BlElementRemovedFromParentEvent

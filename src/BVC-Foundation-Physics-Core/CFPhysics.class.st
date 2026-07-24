@@ -76,7 +76,7 @@ CFPhysics >> beWorld [
 		ifAbsent: [
 			aWorld := CFPhysicsWorld on: element.
 			element userData at: CFPhysicsWorld put: aWorld.
-			element fireEvent: CFPhysicsWorldChangedEvent new.
+			element fireEvent: CFPhysicsWorldAttachmentChanged new.
 			aWorld ].
 	^ aWorld
 ]
@@ -88,7 +88,7 @@ CFPhysics >> ceaseBeingWorld [
 	existingWorld ifNil: [ ^ self ].
 	existingWorld release.
 	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
-	element fireEvent: CFPhysicsWorldChangedEvent new.
+	element fireEvent: CFPhysicsWorldAttachmentChanged new.
 	^ self
 ]
 
