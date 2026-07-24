@@ -32,3 +32,13 @@ CFPhysicsOverlayContext >> overlay [ ^ overlay ]
 
 { #category : 'accessing' }
 CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay ]
+
+{ #category : 'geometry' }
+CFPhysicsOverlayContext >> displayedBoundsFor: anElement [
+	^ anElement
+		firstCommonParent: overlay root
+		ifFound: [ :aCommonParent |
+			(anElement bounds inParent: aCommonParent)
+				inChild: overlay root ]
+		ifNone: [ BlBounds new ]
+]

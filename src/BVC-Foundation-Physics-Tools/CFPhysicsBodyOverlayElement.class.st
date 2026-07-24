@@ -38,12 +38,13 @@ CFPhysicsBodyOverlayElement >> initializeRepresentation [
 
 { #category : 'updating' }
 CFPhysicsBodyOverlayElement >> refresh [
-	| shape |
+	| shape displayedBounds |
 	shape := body shapeState.
+	displayedBounds := context displayedBoundsFor: shape element.
 	self
 		geometry: shape element geometry;
-		size: shape extent;
-		relocate: body position;
+		size: displayedBounds extent;
+		relocate: displayedBounds position;
 		transformDo: [ :aTransform |
 			aTransform
 				centerOrigin;
