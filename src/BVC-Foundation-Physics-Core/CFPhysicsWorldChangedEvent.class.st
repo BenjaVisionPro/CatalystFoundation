@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsWorldChangedEvent',
-	#superclass : 'BlElementEvent',
+	#superclass : 'BlEvent',
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }

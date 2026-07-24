@@ -148,3 +148,17 @@ CFPhysicsOverlayTests >> physicsOverlayCapabilityRejectsAnObjectWithoutAHost [
 	self assert: (CFPhysicsOverlay hasWorldFor: object) not.
 	^ object
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayActionTracksWorldLifecycle [
+	<gtExample>
+	| host button |
+	host := BlElement new.
+	button := CFPhysicsOverlay toggleButtonFor: host.
+	self assert: button visibility equals: BlVisibility gone.
+	host physics beWorld.
+	self assert: button visibility equals: BlVisibility visible.
+	host physics ceaseBeingWorld.
+	self assert: button visibility equals: BlVisibility gone.
+	^ button
+]
