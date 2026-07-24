@@ -96,9 +96,10 @@ CFPhysicsMondrian >> forceDirected [
 	orientation
 		nodes: [ self bodyElements ];
 		density: 2.5;
-		angularDamping: 8.0;
+		angularDamping: 3.0;
 		stiffness: 36.0;
 		damping: 6.0;
+		angularResponseVelocityScale: 4.0;
 		maximumAngularAcceleration: 30.0.
 	^ behaviour
 ]

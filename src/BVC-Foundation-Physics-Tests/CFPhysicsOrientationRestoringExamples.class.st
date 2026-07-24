@@ -79,3 +79,19 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringRestoresBodyConfigu
 	self assert: element physics angularDamping equals: 2.0.
 	^ element
 ]
+
+
+{ #category : 'examples - orientation restoring' }
+CFPhysicsOrientationRestoringExamples >> orientationRestoringAllowsFastCollisionSpinToDecayNaturally [
+	<gtExample>
+	| behaviour slowResponse fastResponse |
+	behaviour := CFPhysicsOrientationRestoringBehaviour new
+		angularResponseVelocityScale: 4.0;
+		yourself.
+	slowResponse := behaviour responseFactorForAngularVelocity: 1.0.
+	fastResponse := behaviour responseFactorForAngularVelocity: 12.0.
+	self assert: fastResponse < slowResponse.
+	self assert: fastResponse > 0.0.
+	self assert: slowResponse < 1.0.
+	^ behaviour
+]

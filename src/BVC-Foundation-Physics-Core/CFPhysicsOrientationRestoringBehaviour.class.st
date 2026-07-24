@@ -20,6 +20,7 @@ Class {
 		'stiffness',
 		'damping',
 		'maximumAngularAcceleration',
+		'angularResponseVelocityScale',
 		'angleTolerance',
 		'angularVelocityTolerance'
 	],
@@ -38,6 +39,7 @@ CFPhysicsOrientationRestoringBehaviour >> initialize [
 	stiffness := 36.0.
 	damping := 6.0.
 	maximumAngularAcceleration := 30.0.
+	angularResponseVelocityScale := 4.0.
 	angleTolerance := 0.002.
 	angularVelocityTolerance := 0.01
 ]
@@ -109,6 +111,20 @@ CFPhysicsOrientationRestoringBehaviour >> maximumAngularAcceleration [
 ]
 
 { #category : 'configuration' }
+CFPhysicsOrientationRestoringBehaviour >> angularResponseVelocityScale: aNumber [
+	"Set the angular speed at which the restoring controller contributes half of
+	its configured response. Faster spins retain more collision momentum; the
+	controller progressively regains authority as the body slows."
+	angularResponseVelocityScale := aNumber asFloat max: Float epsilon.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsOrientationRestoringBehaviour >> angularResponseVelocityScale [
+	^ angularResponseVelocityScale
+]
+
+{ #category : 'configuration' }
 CFPhysicsOrientationRestoringBehaviour >> angleTolerance: aNumber [
 	angleTolerance := aNumber asFloat max: 0.0.
 	^ self
@@ -173,13 +189,23 @@ CFPhysicsOrientationRestoringBehaviour >> restoreOrientationOf: aNode over: aTim
 			error isZero ifFalse: [ body rotation: target ].
 			body angularVelocity isZero ifFalse: [ body angularVelocity: 0.0 ].
 			^ self ].
-	angularAcceleration := (stiffness * error) - (damping * body angularVelocity).
+	angularAcceleration := ((stiffness * error) - (damping * body angularVelocity))
+		* (self responseFactorForAngularVelocity: body angularVelocity).
 	angularAcceleration := (angularAcceleration max: maximumAngularAcceleration negated)
 		min: maximumAngularAcceleration.
 	inverseInertia := body inverseInertia.
 	inverseInertia isZero ifTrue: [ ^ self ].
 	torque := angularAcceleration / inverseInertia.
 	body applyTorque: torque
+]
+
+{ #category : 'private - restoring' }
+CFPhysicsOrientationRestoringBehaviour >> responseFactorForAngularVelocity: anAngularVelocity [
+	"Answer a smooth 0..1 controller authority. At high spin speeds the collision
+	keeps more of its angular momentum. As the body slows, self-righting and
+	damping progressively take over."
+	^ angularResponseVelocityScale
+		/ (angularResponseVelocityScale + anAngularVelocity abs)
 ]
 
 { #category : 'private - geometry' }
