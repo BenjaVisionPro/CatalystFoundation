@@ -53,10 +53,17 @@ CFPhysicsMondrianPresentationAnchor >> detachFromAnchoredElement: anAnchoredElem
 { #category : 'private - geometry' }
 CFPhysicsMondrianPresentationAnchor >> displayedBoundsOf: anElement in: aCommonParent [
 	^ Rectangle encompassing: {
-		aCommonParent localPointToMine: 0 @ 0 fromChild: anElement.
-		aCommonParent localPointToMine: anElement extent x @ 0 fromChild: anElement.
-		aCommonParent localPointToMine: anElement extent x @ anElement extent y fromChild: anElement.
-		aCommonParent localPointToMine: 0 @ anElement extent y fromChild: anElement }
+		self displayedPositionOf: anElement localPoint: 0 @ 0.
+		self displayedPositionOf: anElement localPoint: anElement extent x @ 0.
+		self displayedPositionOf: anElement localPoint: anElement extent x @ anElement extent y.
+		self displayedPositionOf: anElement localPoint: 0 @ anElement extent y }
+]
+
+{ #category : 'private - geometry' }
+CFPhysicsMondrianPresentationAnchor >> displayedPositionOf: anElement localPoint: aPoint [
+	"An edge and its nodes are siblings. Return their shared child coordinates;
+	the canvas applies its scale and translation to both exactly once."
+	^ (anElement transformation transformPoint: aPoint) + anElement position
 ]
 
 { #category : 'testing - self anchors' }
@@ -175,9 +182,9 @@ CFPhysicsMondrianPresentationAnchor >> positionForRelativeToElement: anAnchoredE
 	(anchor isKindOf: BlNearestPositionEllipseAnchor) ifTrue: [
 		^ self positionForNearestEllipse: anAnchoredElement within: aCommonParent ].
 	(anchor isKindOf: BlAnchorRelativeToElementBounds) ifTrue: [
-		^ aCommonParent
-			localPointToMine: (anchor positionWithinBounds: anchor referenceElement bounds inLocal)
-			fromChild: anchor referenceElement ].
+		^ self
+			displayedPositionOf: anchor referenceElement
+			localPoint: (anchor positionWithinBounds: anchor referenceElement bounds inLocal) ].
 	^ self transformPosition: (anchor
 		positionForAnchoredElement: anAnchoredElement
 		within: aCommonParent)
@@ -198,7 +205,7 @@ CFPhysicsMondrianPresentationAnchor >> transformPosition: aPoint of: anElement i
 	| layoutOrigin localPosition |
 	layoutOrigin := anElement position.
 	localPosition := aPoint - layoutOrigin.
-	^ aCommonParent localPointToMine: localPosition fromChild: anElement
+	^ self displayedPositionOf: anElement localPoint: localPosition
 ]
 
 { #category : 'private - accessing' }
