@@ -131,6 +131,24 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> mondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
+	<gtExample>
+	| mondrian space world |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two).
+	world := mondrian physics beWorld.
+	[
+		space root addChild: mondrian root.
+		space pulse.
+		self assert: world isStepping ] ensure: [
+		world stopStepping ].
+	self assert: world isStepping not.
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 	<gtExample>
 	| mondrian |

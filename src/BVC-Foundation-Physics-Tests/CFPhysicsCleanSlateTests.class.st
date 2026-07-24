@@ -5471,6 +5471,19 @@ CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
 
 
 { #category : 'tests - behaviours' }
+CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
+	| behaviour |
+	behaviour := CFPhysicsForceDirectedBehaviour new.
+	self assert: behaviour restLength equals: 120.0.
+	self assert: behaviour stiffness equals: 10000.0.
+	self assert: behaviour damping equals: 4000.0.
+	self assert: behaviour maximumSpringForce equals: 500000.0.
+	self assert: behaviour repulsion equals: 8000.0.
+	self assert: behaviour maximumRepulsionDistance equals: 300.0.
+	self assert: behaviour velocityDamping equals: 12.0
+]
+
+{ #category : 'tests - behaviours' }
 CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnectionOrder [
 	| root first second third world edge behaviour |
 	root := BlElement new.
@@ -5551,13 +5564,15 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 		damping: 4;
 		maximumSpringForce: 500;
 		repulsion: 700;
-		maximumRepulsionDistance: 250.
+		maximumRepulsionDistance: 250;
+		velocityDamping: 12.
 	self assert: spring restLength value equals: 175.0.
 	self assert: spring stiffness value equals: 25.0.
 	self assert: spring damping value equals: 4.0.
 	self assert: spring maximumForce value equals: 500.0.
 	self assert: repulsion force value equals: 700.0.
-	self assert: repulsion maximumDistance value equals: 250.0
+	self assert: repulsion maximumDistance value equals: 250.0.
+	self assert: behaviour velocityDamping equals: 12.0
 ]
 
 { #category : 'tests - behaviours' }
@@ -5607,8 +5622,6 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed connection endpoint must occur in the selected nodes' ]
 ]
-
-
 
 
 

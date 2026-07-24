@@ -9,11 +9,9 @@ Class {
 CFPhysicsMondrianShowcaseExamples >> defaultPhysicsGraph [
 	<gtExample>
 	<return: #GtMondrian>
-	| mondrian world |
+	| mondrian |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
-	world := mondrian physics beWorld.
-	mondrian root when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
-		world startStepping ].
+	mondrian physics beWorld.
 	^ mondrian
 ]
 
@@ -26,8 +24,6 @@ CFPhysicsMondrianShowcaseExamples >> forceDirectedGraph [
 	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
 	mondrian physics forceDirected.
-	mondrian root when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
-		world startStepping ].
 	^ mondrian
 ]
 

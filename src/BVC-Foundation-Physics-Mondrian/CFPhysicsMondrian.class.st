@@ -48,6 +48,7 @@ CFPhysicsMondrian >> beWorld [
 	self prepareGraphElements.
 	self adoptCurrentNodePositions.
 	self configureRootForPhysicsPresentation.
+	self installPlaybackLifecycle.
 	^ world
 ]
 
@@ -79,6 +80,13 @@ CFPhysicsMondrian >> configureRootForPhysicsPresentation [
 		childrenScaleFactor: 1;
 		childrenTranslationFactor: 0 @ 0;
 		layout: BlBasicLayout new
+]
+
+{ #category : 'private - world setup' }
+CFPhysicsMondrian >> installPlaybackLifecycle [
+	mondrian root when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
+		world startStepping ].
+	mondrian root isAddedToSceneGraph ifTrue: [ world startStepping ]
 ]
 
 { #category : 'private - world setup' }

@@ -2,6 +2,8 @@
 I maintain force-directed springs and repulsions between ordinary Physics bodies.
 
 My participants and connections may be fixed collections or providers, so I can be used by any Physics world whose bodies have relationships. A connection is an Association from one participating element to another; I do not know about graphs or graph adapters.
+
+I apply velocity damping to my selected nodes on each step. This lets disconnected components settle after repulsion has separated them without changing the Physics configuration of bodies outside this behaviour.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
@@ -9,7 +11,7 @@ Class {
 	#instVars : [
 		'nodes', 'connections', 'springsByConnection', 'repulsionsByPair',
 		'restLength', 'stiffness', 'damping', 'maximumSpringForce',
-		'repulsion', 'maximumRepulsionDistance'
+		'repulsion', 'maximumRepulsionDistance', 'velocityDamping'
 	],
 	#category : 'BVC-Foundation-Physics-Core-Behaviours',
 	#package : 'BVC-Foundation-Physics-Core'
@@ -20,12 +22,13 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByConnection := Dictionary new.
 	repulsionsByPair := Dictionary new.
-	restLength := CFPhysicsSharedScalar value: 100.0.
-	stiffness := CFPhysicsSharedScalar value: 40.0.
-	damping := CFPhysicsSharedScalar value: 8.0.
-	maximumSpringForce := CFPhysicsSharedScalar value: 100000.0.
-	repulsion := CFPhysicsSharedScalar value: 1000.0.
-	maximumRepulsionDistance := CFPhysicsSharedScalar value: 300.0
+	restLength := CFPhysicsSharedScalar value: 120.0.
+	stiffness := CFPhysicsSharedScalar value: 10000.0.
+	damping := CFPhysicsSharedScalar value: 4000.0.
+	maximumSpringForce := CFPhysicsSharedScalar value: 500000.0.
+	repulsion := CFPhysicsSharedScalar value: 8000.0.
+	maximumRepulsionDistance := CFPhysicsSharedScalar value: 300.0.
+	velocityDamping := CFPhysicsSharedScalar value: 12.0
 ]
 
 { #category : 'configuration' }
@@ -92,6 +95,14 @@ CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance [ ^ maximumRepulsion
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance: aNumber [ maximumRepulsionDistance value: aNumber ]
 
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> velocityDamping [ ^ velocityDamping value ]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> velocityDamping: aNumber [
+	velocityDamping value: (aNumber asFloat max: 0.0)
+]
+
 { #category : 'updating' }
 CFPhysicsForceDirectedBehaviour >> updateForStep: aPhysicsStep [
 	| currentNodes currentConnections desiredConnections desiredPairs |
@@ -103,7 +114,17 @@ CFPhysicsForceDirectedBehaviour >> updateForStep: aPhysicsStep [
 	self removeObsoleteSpringsExcept: desiredConnections.
 	self removeObsoleteRepulsionsExcept: desiredPairs asSet.
 	currentConnections do: [ :each | self ensureSpringFor: each ].
-	desiredPairs do: [ :each | self ensureRepulsionFor: each ]
+	desiredPairs do: [ :each | self ensureRepulsionFor: each ].
+	self dampVelocitiesOf: currentNodes over: aPhysicsStep timeStep
+]
+
+{ #category : 'private - updating' }
+CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentNodes over: aTimeStep [
+	| factor |
+	velocityDamping value isZero ifTrue: [ ^ self ].
+	factor := 1.0 / (1.0 + (aTimeStep * velocityDamping value)).
+	currentNodes do: [ :each |
+		each physics velocity: each physics velocity * factor ]
 ]
 
 { #category : 'private - validation' }
