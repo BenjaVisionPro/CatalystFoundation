@@ -22,13 +22,13 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByConnection := Dictionary new.
 	repulsionsByPair := Dictionary new.
-	restLength := CFPhysicsSharedScalar value: 120.0.
-	stiffness := CFPhysicsSharedScalar value: 10000.0.
-	damping := CFPhysicsSharedScalar value: 4000.0.
+	restLength := CFPhysicsSharedScalar value: 90.0.
+	stiffness := CFPhysicsSharedScalar value: 15000.0.
+	damping := CFPhysicsSharedScalar value: 1200.0.
 	maximumSpringForce := CFPhysicsSharedScalar value: 500000.0.
-	repulsion := CFPhysicsSharedScalar value: 8000.0.
-	maximumRepulsionDistance := CFPhysicsSharedScalar value: 300.0.
-	velocityDamping := CFPhysicsSharedScalar value: 12.0
+	repulsion := CFPhysicsSharedScalar value: 2000.0.
+	maximumRepulsionDistance := CFPhysicsSharedScalar value: 180.0.
+	velocityDamping := CFPhysicsSharedScalar value: 3.0
 ]
 
 { #category : 'configuration' }

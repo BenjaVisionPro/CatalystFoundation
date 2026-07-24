@@ -5474,13 +5474,13 @@ CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
 CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
 	| behaviour |
 	behaviour := CFPhysicsForceDirectedBehaviour new.
-	self assert: behaviour restLength equals: 120.0.
-	self assert: behaviour stiffness equals: 10000.0.
-	self assert: behaviour damping equals: 4000.0.
+	self assert: behaviour restLength equals: 90.0.
+	self assert: behaviour stiffness equals: 15000.0.
+	self assert: behaviour damping equals: 1200.0.
 	self assert: behaviour maximumSpringForce equals: 500000.0.
-	self assert: behaviour repulsion equals: 8000.0.
-	self assert: behaviour maximumRepulsionDistance equals: 300.0.
-	self assert: behaviour velocityDamping equals: 12.0
+	self assert: behaviour repulsion equals: 2000.0.
+	self assert: behaviour maximumRepulsionDistance equals: 180.0.
+	self assert: behaviour velocityDamping equals: 3.0
 ]
 
 { #category : 'tests - behaviours' }
@@ -5622,6 +5622,5 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed connection endpoint must occur in the selected nodes' ]
 ]
-
 
 
