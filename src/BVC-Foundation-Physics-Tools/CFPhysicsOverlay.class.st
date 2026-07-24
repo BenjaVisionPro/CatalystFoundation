@@ -125,10 +125,35 @@ CFPhysicsOverlay class >> toggleFor: anObject [
 
 { #category : 'actions' }
 CFPhysicsOverlay class >> gtToggleActionFor: anObject action: anAction [
-	(self hasWorldFor: anObject)
-		ifFalse: [ ^ anAction noAction ].
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		tooltip: 'Toggle physics overlay';
-		action: [ self toggleFor: anObject ]
+	^ anAction explicit stencil: [ self toggleButtonFor: anObject ]
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> toggleButtonFor: anObject [
+	| aButton aHost aWorldChangedHandler |
+	aHost := self hostFor: anObject.
+	aButton := BrButton new
+		aptitude: BrGlamorousButtonWithIconAptitude;
+		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) height: 16 ] asStencil);
+		label: 'Toggle physics overlay';
+		action: [ self toggleFor: anObject ].
+
+	aHost ifNil: [
+		aButton visibility: BlVisibility gone.
+		^ aButton ].
+
+	aWorldChangedHandler := BlEventHandler
+		on: CFPhysicsWorldChangedEvent
+		do: [ :anEvent |
+			aButton visibility: ((self hasWorldFor: anObject)
+				ifTrue: [ BlVisibility visible ]
+				ifFalse: [ BlVisibility gone ]) ].
+	aHost addEventHandler: aWorldChangedHandler.
+	aButton
+		when: BlElementRemovedFromParentEvent
+		do: [ :anEvent | aHost removeEventHandler: aWorldChangedHandler ].
+	aButton visibility: ((self hasWorldFor: anObject)
+		ifTrue: [ BlVisibility visible ]
+		ifFalse: [ BlVisibility gone ]).
+	^ aButton
 ]

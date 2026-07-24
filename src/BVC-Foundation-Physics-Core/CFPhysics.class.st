@@ -70,9 +70,15 @@ CFPhysics >> beStatic [
 
 { #category : 'worlds' }
 CFPhysics >> beWorld [
-	^ element userData
+	| aWorld |
+	aWorld := element userData
 		at: CFPhysicsWorld
-		ifAbsentPut: [ CFPhysicsWorld on: element ]
+		ifAbsent: [
+			aWorld := CFPhysicsWorld on: element.
+			element userData at: CFPhysicsWorld put: aWorld.
+			element fireEvent: CFPhysicsWorldChangedEvent new.
+			aWorld ].
+	^ aWorld
 ]
 
 { #category : 'worlds' }
@@ -82,6 +88,7 @@ CFPhysics >> ceaseBeingWorld [
 	existingWorld ifNil: [ ^ self ].
 	existingWorld release.
 	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
+	element fireEvent: CFPhysicsWorldChangedEvent new.
 	^ self
 ]
 
