@@ -11,7 +11,7 @@ Class {
 	#instVars : [
 		'nodes', 'connections', 'springsByConnection', 'repulsionsByPair',
 		'restLength', 'stiffness', 'damping', 'maximumSpringForce',
-		'repulsion', 'maximumRepulsionDistance', 'velocityDamping'
+		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'velocityDamping'
 	],
 	#category : 'BVC-Foundation-Physics-Core-Behaviours',
 	#package : 'BVC-Foundation-Physics-Core'
@@ -22,13 +22,14 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByConnection := Dictionary new.
 	repulsionsByPair := Dictionary new.
-	restLength := CFPhysicsSharedScalar value: 90.0.
-	stiffness := CFPhysicsSharedScalar value: 15000.0.
-	damping := CFPhysicsSharedScalar value: 1200.0.
-	maximumSpringForce := CFPhysicsSharedScalar value: 500000.0.
-	repulsion := CFPhysicsSharedScalar value: 2000.0.
-	maximumRepulsionDistance := CFPhysicsSharedScalar value: 180.0.
-	velocityDamping := CFPhysicsSharedScalar value: 3.0
+	restLength := CFPhysicsSharedScalar value: 80.0.
+	stiffness := CFPhysicsSharedScalar value: 600.0.
+	damping := CFPhysicsSharedScalar value: 400.0.
+	maximumSpringForce := CFPhysicsSharedScalar value: 250000.0.
+	repulsion := CFPhysicsSharedScalar value: 100000.0.
+	repulsionSofteningDistance := CFPhysicsSharedScalar value: 50.0.
+	maximumRepulsionDistance := CFPhysicsSharedScalar value: 200.0.
+	velocityDamping := CFPhysicsSharedScalar value: 8.0
 ]
 
 { #category : 'configuration' }
@@ -88,6 +89,14 @@ CFPhysicsForceDirectedBehaviour >> repulsion [ ^ repulsion value ]
 
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> repulsion: aNumber [ repulsion value: aNumber ]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> repulsionSofteningDistance [ ^ repulsionSofteningDistance value ]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> repulsionSofteningDistance: aNumber [
+	repulsionSofteningDistance value: (aNumber asFloat max: 0.0)
+]
 
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance [ ^ maximumRepulsionDistance value ]
@@ -191,9 +200,11 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 		constraint := CFPhysicsRepulsionConstraint
 			between: pair first physics requireBodyState
 			and: pair second physics requireBodyState.
-		constraint
+		constraint distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
 			force: repulsion;
-			maximumDistance: maximumRepulsionDistance.
+			softeningDistance: repulsionSofteningDistance;
+			maximumDistance: maximumRepulsionDistance;
+			yourself).
 		world addRepulsionConstraint: constraint ]
 ]
 

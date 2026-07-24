@@ -28,8 +28,12 @@ CFPhysicsSoftenedInverseSquareResponse >> force [
 ]
 
 { #category : 'accessing' }
-CFPhysicsSoftenedInverseSquareResponse >> force: aNumber [
-	force := aNumber asFloat max: 0.0
+CFPhysicsSoftenedInverseSquareResponse >> force: aValue [
+	aValue isNumber
+		ifTrue: [ force := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue value asFloat.
+			force := aValue ]
 ]
 
 { #category : 'accessing' }
@@ -38,11 +42,15 @@ CFPhysicsSoftenedInverseSquareResponse >> maximumDistance [
 ]
 
 { #category : 'accessing' }
-CFPhysicsSoftenedInverseSquareResponse >> maximumDistance: aNumber [
-	aNumber ifNil: [
+CFPhysicsSoftenedInverseSquareResponse >> maximumDistance: aValue [
+	aValue ifNil: [
 		maximumDistance := nil.
 		^ self ].
-	maximumDistance := aNumber asFloat max: 0.0
+	aValue isNumber
+		ifTrue: [ maximumDistance := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue value asFloat.
+			maximumDistance := aValue ]
 ]
 
 { #category : 'accessing' }
@@ -51,17 +59,24 @@ CFPhysicsSoftenedInverseSquareResponse >> softeningDistance [
 ]
 
 { #category : 'accessing' }
-CFPhysicsSoftenedInverseSquareResponse >> softeningDistance: aNumber [
-	softeningDistance := aNumber asFloat max: 0.0
+CFPhysicsSoftenedInverseSquareResponse >> softeningDistance: aValue [
+	aValue isNumber
+		ifTrue: [ softeningDistance := aValue asFloat max: 0.0 ]
+		ifFalse: [
+			aValue value asFloat.
+			softeningDistance := aValue ]
 ]
 
 { #category : 'evaluating' }
 CFPhysicsSoftenedInverseSquareResponse >> forceMagnitudeAtDistance: aNumber [
-	| distanceSquared softeningSquared |
-	(maximumDistance notNil and: [ aNumber > maximumDistance ])
+	| distanceSquared resolvedForce resolvedMaximumDistance resolvedSofteningDistance softeningSquared |
+	resolvedMaximumDistance := maximumDistance ifNil: [ nil ] ifNotNil: [ maximumDistance value ].
+	(maximumDistance notNil and: [ aNumber > resolvedMaximumDistance ])
 		ifTrue: [ ^ 0.0 ].
-	softeningDistance = 0.0 ifTrue: [ ^ 0.0 ].
+	resolvedSofteningDistance := softeningDistance value.
+	resolvedSofteningDistance = 0.0 ifTrue: [ ^ 0.0 ].
 	distanceSquared := aNumber asFloat squared.
-	softeningSquared := softeningDistance squared.
-	^ force * softeningSquared / (distanceSquared + softeningSquared)
+	softeningSquared := resolvedSofteningDistance squared.
+	resolvedForce := force value.
+	^ resolvedForce * softeningSquared / (distanceSquared + softeningSquared)
 ]

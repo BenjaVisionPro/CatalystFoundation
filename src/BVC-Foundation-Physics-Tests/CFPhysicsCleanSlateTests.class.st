@@ -5474,13 +5474,14 @@ CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
 CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
 	| behaviour |
 	behaviour := CFPhysicsForceDirectedBehaviour new.
-	self assert: behaviour restLength equals: 90.0.
-	self assert: behaviour stiffness equals: 15000.0.
-	self assert: behaviour damping equals: 1200.0.
-	self assert: behaviour maximumSpringForce equals: 500000.0.
-	self assert: behaviour repulsion equals: 2000.0.
-	self assert: behaviour maximumRepulsionDistance equals: 180.0.
-	self assert: behaviour velocityDamping equals: 3.0
+	self assert: behaviour restLength equals: 80.0.
+	self assert: behaviour stiffness equals: 600.0.
+	self assert: behaviour damping equals: 400.0.
+	self assert: behaviour maximumSpringForce equals: 250000.0.
+	self assert: behaviour repulsion equals: 100000.0.
+	self assert: behaviour repulsionSofteningDistance equals: 50.0.
+	self assert: behaviour maximumRepulsionDistance equals: 200.0.
+	self assert: behaviour velocityDamping equals: 8.0
 ]
 
 { #category : 'tests - behaviours' }
@@ -5564,6 +5565,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 		damping: 4;
 		maximumSpringForce: 500;
 		repulsion: 700;
+		repulsionSofteningDistance: 35;
 		maximumRepulsionDistance: 250;
 		velocityDamping: 12.
 	self assert: spring restLength value equals: 175.0.
@@ -5571,6 +5573,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 	self assert: spring damping value equals: 4.0.
 	self assert: spring maximumForce value equals: 500.0.
 	self assert: repulsion force value equals: 700.0.
+	self assert: repulsion distanceResponse class equals: CFPhysicsSoftenedInverseSquareResponse.
+	self assert: repulsion distanceResponse softeningDistance value equals: 35.0.
 	self assert: repulsion maximumDistance value equals: 250.0.
 	self assert: behaviour velocityDamping equals: 12.0
 ]
@@ -5622,5 +5626,4 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 			self assert: error messageText equals:
 				'Every force-directed connection endpoint must occur in the selected nodes' ]
 ]
-
 
