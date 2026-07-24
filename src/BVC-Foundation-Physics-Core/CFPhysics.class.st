@@ -744,3 +744,8 @@ CFPhysics >> applyAngularImpulse: aNumber [
 CFPhysics >> forceDirected [
 	^ self addBehaviour: (CFPhysicsForceDirectedBehaviour physics: self)
 ]
+
+{ #category : 'behaviours' }
+CFPhysics >> restoreOrientations [
+	^ self addBehaviour: (CFPhysicsOrientationRestoringBehaviour physics: self)
+]
