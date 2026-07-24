@@ -73,12 +73,25 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 
 { #category : 'behaviours' }
 CFPhysicsMondrian >> forceDirected [
-	| behaviour |
+	| behaviour hierarchy |
 	self beWorld.
 	behaviour := mondrian root physics forceDirected.
 	behaviour
 		nodes: [ self bodyElements ];
-		connections: [ self forceDirectedConnections ].
+		connections: [ self forceDirectedConnections ];
+		restLength: 104.0;
+		stiffness: 480.0;
+		damping: 520.0;
+		repulsion: 72000.0;
+		repulsionSofteningDistance: 58.0;
+		maximumRepulsionDistance: 175.0;
+		velocityDamping: 10.0.
+	hierarchy := mondrian root physics addBehaviour:
+		(CFPhysicsMondrianHierarchyBehaviour physics: mondrian root physics).
+	hierarchy
+		nodes: [ self bodyElements ];
+		connections: [ self forceDirectedConnections ];
+		centre: [ mondrian root extent / 2.0 ].
 	^ behaviour
 ]
 
