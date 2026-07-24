@@ -139,13 +139,14 @@ CFPhysicsMondrianExampleGraphBuilder >> newEdgeElement [
 CFPhysicsMondrianExampleGraphBuilder >> newNodeElementFor: aModel [
 	| aptitude element |
 	aptitude := BrGlamorousLabelAptitude new.
-	aptitude foreground: Color white.
+	aptitude foreground: Color darkGray.
 	element := BrLabel new
 		aptitude: aptitude;
 		text: 'Node ' , aModel asString;
 		size: 62 @ 34;
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 10));
-		background: Color blue muchDarker;
+		background: Color white;
+		border: BlBorder empty;
 		addEventHandler: BlPullHandler new;
 		yourself.
 	^ element
