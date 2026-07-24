@@ -77,6 +77,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedGeometryUsesSiblingCoordinates
 		size: 40 @ 30;
 		relocate: 25 @ 35.
 	mondrian root
+		disableAutoScale;
 		childrenScaleFactor: 2;
 		childrenTranslationFactor: 90 @ 70.
 	geometry := CFPhysicsMondrianDisplayedGeometry on: node.
