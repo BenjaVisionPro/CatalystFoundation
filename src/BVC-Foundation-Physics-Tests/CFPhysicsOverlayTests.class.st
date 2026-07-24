@@ -106,7 +106,7 @@ CFPhysicsOverlayTests >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 		equals: (overlay root globalPointToLocal:
 			(body shapeState element localPointToGlobal: 0 @ 0)).
 	self assert: representation extent equals: body shapeState extent.
-	self deny: representation geometry == body shapeState element geometry.
+	self assert: (representation geometry == body shapeState element geometry) not.
 	^ host
 ]
 
@@ -176,8 +176,10 @@ CFPhysicsOverlayTests >> physicsOverlayActionTracksWorldLifecycle [
 	button := CFPhysicsOverlay toggleButtonFor: host.
 	self assert: button visibility equals: BlVisibility gone.
 	host physics beWorld.
+	button := CFPhysicsOverlay toggleButtonFor: host.
 	self assert: button visibility equals: BlVisibility visible.
 	host physics ceaseBeingWorld.
+	button := CFPhysicsOverlay toggleButtonFor: host.
 	self assert: button visibility equals: BlVisibility gone.
 	^ button
 ]
