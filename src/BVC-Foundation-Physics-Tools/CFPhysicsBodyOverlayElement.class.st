@@ -38,17 +38,33 @@ CFPhysicsBodyOverlayElement >> initializeRepresentation [
 
 { #category : 'updating' }
 CFPhysicsBodyOverlayElement >> refresh [
-	| shape displayedBounds |
+	| shape source sourceExtent origin xAxis yAxis xVector yVector scale rotation |
 	shape := body shapeState.
-	displayedBounds := context displayedBoundsFor: shape element.
+	source := shape element.
+	sourceExtent := source extent.
+	origin := context overlayPoint: 0 @ 0 from: source.
+	xAxis := context overlayPoint: sourceExtent x @ 0 from: source.
+	yAxis := context overlayPoint: 0 @ sourceExtent y from: source.
+	xVector := xAxis - origin.
+	yVector := yAxis - origin.
+	scale :=
+		(sourceExtent x isZero
+			ifTrue: [ 1.0 ]
+			ifFalse: [ xVector r / sourceExtent x ])
+		@
+		(sourceExtent y isZero
+			ifTrue: [ 1.0 ]
+			ifFalse: [ yVector r / sourceExtent y ]).
+	rotation := xVector theta radiansToDegrees.
 	self
-		geometry: shape element geometry;
-		size: displayedBounds extent;
-		relocate: displayedBounds position;
+		geometry: source geometry copy;
+		size: sourceExtent;
+		relocate: origin;
 		transformDo: [ :aTransform |
 			aTransform
-				centerOrigin;
-				rotateBy: body rotation radiansToDegrees ].
+				topLeftOrigin;
+				scaleBy: scale;
+				rotateBy: rotation ].
 	self border: (BlBorder
 		paint: ((body isSensor ifTrue: [ Color orange ] ifFalse: [ Color blue ]) alpha: 0.65)
 		width: 1)

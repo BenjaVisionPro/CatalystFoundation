@@ -101,8 +101,12 @@ CFPhysicsOverlayTests >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 	overlay refresh.
 	host space pulse.
 	self assert: (overlay bodyElements includes: representation).
-	self assert: representation position equals: 85 @ 70.
+	self
+		assert: representation position
+		equals: (overlay root globalPointToLocal:
+			(body shapeState element localPointToGlobal: 0 @ 0)).
 	self assert: representation extent equals: body shapeState extent.
+	self deny: representation geometry == body shapeState element geometry.
 	^ host
 ]
 
