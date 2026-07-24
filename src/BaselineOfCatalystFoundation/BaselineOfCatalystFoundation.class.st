@@ -113,7 +113,7 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Physics-Mondrian'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-Physics-Tools'
-		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Pipeline') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Pipeline' 'BVC-Foundation-Physics-Motion') ].
 	spec package: 'BVC-Foundation-Physics-Examples'
 		with: [ spec requires: #('BVC-Foundation-Physics-Core' 'BVC-Foundation-Physics-Motion' 'BVC-Foundation-Physics-Mondrian' 'BVC-Foundation-Physics-Tools') ].
 	spec package: 'BVC-Foundation-Physics-Tests'

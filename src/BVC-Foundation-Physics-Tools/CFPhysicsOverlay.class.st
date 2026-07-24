@@ -53,7 +53,7 @@ CFPhysicsOverlay >> initializeOverlay [
 	contactPass := CFPhysicsContactOverlayPass in: root context: context.
 	framePresentedHandler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
-		do: [ :anEvent | self refresh ]
+		do: [ :anEvent | self refreshFrameDiagnostics ]
 ]
 
 { #category : 'testing' }
@@ -71,6 +71,15 @@ CFPhysicsOverlay >> install [
 	container addChild: root.
 	host addEventHandler: framePresentedHandler.
 	self refresh.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsOverlay >> refreshFrameDiagnostics [
+	"Refresh diagnostics whose geometry or lifetime may change on every
+	presented Physics frame. Structural body membership is deliberately left to
+	#refresh so frame presentation cannot mutate the world membership."
+	contactPass refresh.
 	^ self
 ]
 

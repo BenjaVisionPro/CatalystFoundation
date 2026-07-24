@@ -35,10 +35,15 @@ CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
+	"Convert geometry expressed in an element's local coordinates after all
+	active presentation transforms. Use this for displayed body geometry."
 	^ overlay root globalPointToLocal: (anElement localPointToGlobal: aPoint)
 ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
+	"Convert geometry already expressed in the Physics world owner's local
+	coordinates. Use this for contacts, joints and other world diagnostics; do
+	not route such points through either participating body."
 	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
 ]

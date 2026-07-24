@@ -32,9 +32,10 @@ CFPhysicsWorldPresentation >> initialize [
 
 { #category : 'consuming frames' }
 CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
-	self presentAtAlpha: aNumber.
+	(self tryPresentAtAlpha: aNumber) ifFalse: [ ^ self ].
 	world owner ifNotNil: [ :anOwner |
-		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ]
+		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ].
+	^ self
 ]
 
 { #category : 'presenting' }
@@ -50,17 +51,25 @@ CFPhysicsWorldPresentation >> present [
 
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
-	self prepare ifFalse: [ ^ self ].
+	self tryPresentAtAlpha: aNumber.
+	^ self
+]
+
+{ #category : 'private - presenting' }
+CFPhysicsWorldPresentation >> tryPresentAtAlpha: aNumber [
+	| alpha |
+	self prepare ifFalse: [ ^ false ].
 	world synchroniseMembership.
 	self synchronisePresentations.
+	alpha := (aNumber max: 0.0) min: 1.0.
 	world bodyStatesInOrder do: [ :each |
-		| alpha presentedPosition presentedRotation |
-		alpha := (aNumber max: 0.0) min: 1.0.
+		| presentedPosition presentedRotation |
 		presentedPosition := each previousPosition + ((each position - each previousPosition) * alpha).
 		presentedRotation := each previousRotation + ((each rotation - each previousRotation) * alpha).
 		(self presentationFor: each)
 			translation: (self translationFor: each at: presentedPosition)
-			rotation: presentedRotation radiansToDegrees ]
+			rotation: presentedRotation radiansToDegrees ].
+	^ true
 ]
 
 { #category : 'private - presenting' }

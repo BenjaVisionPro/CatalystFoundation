@@ -256,3 +256,55 @@ CFPhysicsOverlayTests >> physicsPresentationAndWorldCoordinatesAgreeForPositione
 		equals: (context overlayPointFromWorld: physicsPosition).
 	^ overlay
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsPresentationAnnouncesOnlySuccessfullyPresentedFrames [
+	<gtExample>
+	| host world presentation handler presentedCount |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	presentedCount := 0.
+	handler := BlEventHandler
+		on: CFPhysicsFramePresentedEvent
+		do: [ :anEvent | presentedCount := presentedCount + 1 ].
+	host addEventHandler: handler.
+	presentation := CFPhysicsWorldPresentation
+		on: world
+		in: host space cfMotionCoordinator.
+	presentation frameReadyAtAlpha: 0.5.
+	self assert: presentedCount equals: 1.
+	presentation release.
+	host removeFromParent.
+	(CFPhysicsWorldPresentation on: world) frameReadyAtAlpha: 0.5.
+	self assert: presentedCount equals: 1.
+	host removeEventHandler: handler.
+	^ host
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayFrameHandlerFollowsShowHideShowLifecycle [
+	<gtExample>
+	| host world first second firstOverlay secondOverlay |
+	host := self physicsOverlayCanBeInstalled.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	firstOverlay := host existingPhysicsOverlay.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	self assert: firstOverlay contactPass elements isNotEmpty.
+	host hidePhysicsOverlay.
+	self assert: firstOverlay contactPass elements isEmpty.
+	secondOverlay := host showPhysicsOverlay.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	self assert: secondOverlay contactPass elements isNotEmpty.
+	self assert: firstOverlay contactPass elements isEmpty.
+	second physics position: 260 @ 180.
+	world step.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	self assert: secondOverlay contactPass elements isEmpty.
+	self assert: firstOverlay contactPass elements isEmpty.
+	^ host
+]
