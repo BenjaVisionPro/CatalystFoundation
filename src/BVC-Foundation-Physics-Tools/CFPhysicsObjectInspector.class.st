@@ -71,12 +71,13 @@ CFPhysicsObjectInspector >> newPanel [
 	| anElement |
 	anElement := BrVerticalPane new
 		id: #cfPhysicsObjectInspectorPanel;
-		hExact: 260;
+		hExact: 300;
 		vFitContent;
-		cellSpacing: 10;
-		padding: (BlInsets all: 12);
-		background: Color white;
+		cellSpacing: 6;
+		padding: (BlInsets all: 8);
+		background: (Color black alpha: 0.1);
 		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
+		effect: (BlBlurBelowEffect radius: 14);
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
@@ -84,6 +85,16 @@ CFPhysicsObjectInspector >> newPanel [
 		margin: (BlInsets all: 10);
 		yourself.
 	anElement addChild: (self newTitle: 'PHYSICS OBJECT').
+	anElement addChild: (self
+		newVectorRowWithIcon: #arrows
+		xKey: #positionX
+		yKey: #positionY
+		rotationKey: #rotation).
+	anElement addChild: (self
+		newVectorRowWithIcon: #tachometer
+		xKey: #velocityX
+		yKey: #velocityY
+		rotationKey: #angularVelocity).
 	anElement addChild: (self newGroup: 'State' fields: {
 		#bodyType -> 'Body type'.
 		#awake -> 'Awake'.
@@ -92,11 +103,47 @@ CFPhysicsObjectInspector >> newPanel [
 		#density -> 'Density'.
 		#friction -> 'Friction'.
 		#restitution -> 'Restitution' }).
-	anElement addChild: (self newGroup: 'Motion' fields: {
-		#velocityX -> 'Velocity X'.
-		#velocityY -> 'Velocity Y'.
-		#angularVelocity -> 'Angular velocity' }).
 	^ anElement
+]
+
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newIconNamed: anIconName [
+	^ (FontAwesomeIcons defaultStyle icon: anIconName)
+		size: 14 @ 14;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newVectorValueFor: aKey [
+	| valueElement |
+	valueElement := BrLabel new
+		hExact: 68;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: Color black);
+		text: '';
+		yourself.
+	valueElements at: aKey put: valueElement.
+	^ valueElement
+]
+
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newVectorRowWithIcon: anIconName xKey: anXKey yKey: aYKey rotationKey: aRotationKey [
+	^ BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 5;
+		addChild: (self newIconNamed: anIconName);
+		addChild: (self newVectorValueFor: anXKey);
+		addChild: (BrLabel new
+			fitContent;
+			aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.48));
+			text: '@';
+			yourself);
+		addChild: (self newVectorValueFor: aYKey);
+		addChild: (self newIconNamed: #angleLeft);
+		addChild: (self newVectorValueFor: aRotationKey);
+		yourself
 ]
 
 { #category : 'private - building' }
@@ -199,20 +246,30 @@ CFPhysicsObjectInspector >> includesEventTarget: anElement [
 	^ false
 ]
 
+{ #category : 'private - formatting' }
+CFPhysicsObjectInspector >> formatDiagnosticNumber: aNumber [
+	^ aNumber asFloat printShowingDecimalPlaces: 4
+]
+
 { #category : 'updating' }
 CFPhysicsObjectInspector >> refresh [
-	| physics |
+	| physics position velocity |
 	physics := selectedPhysics.
 	physics ifNil: [ ^ self ].
+	position := physics position.
+	velocity := physics velocity.
+	(self valueElementAt: #positionX) text: (self formatDiagnosticNumber: position x).
+	(self valueElementAt: #positionY) text: (self formatDiagnosticNumber: position y).
+	(self valueElementAt: #rotation) text: (self formatDiagnosticNumber: physics rotation).
+	(self valueElementAt: #velocityX) text: (self formatDiagnosticNumber: velocity x).
+	(self valueElementAt: #velocityY) text: (self formatDiagnosticNumber: velocity y).
+	(self valueElementAt: #angularVelocity) text: (self formatDiagnosticNumber: physics angularVelocity).
 	(self valueElementAt: #bodyType) text: physics bodyTypeName.
 	(self valueElementAt: #awake) text: physics isAwake printString.
 	(self valueElementAt: #sensor) text: physics isSensor printString.
 	(self valueElementAt: #density) text: physics density printString.
 	(self valueElementAt: #friction) text: physics friction printString.
 	(self valueElementAt: #restitution) text: physics restitution printString.
-	(self valueElementAt: #velocityX) text: physics velocityX printString.
-	(self valueElementAt: #velocityY) text: physics velocityY printString.
-	(self valueElementAt: #angularVelocity) text: physics angularVelocity printString.
 	^ self
 ]
 

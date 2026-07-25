@@ -507,14 +507,17 @@ CFPhysicsOverlayTests >> physicsObjectInspectorRefreshesSynchronously [
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector inspect: physics.
-	physics velocity: 17.5 @ -3.25.
+	physics
+		translation: -12.1234 @ 34.4566 rotation: 123.1234;
+		velocity: 12.3456 @ -34.5678;
+		angularVelocity: 123.1234.
 	inspector refresh.
-	self
-		assert: (inspector valueElementAt: #velocityX) text asString
-		equals: physics velocityX printString.
-	self
-		assert: (inspector valueElementAt: #velocityY) text asString
-		equals: physics velocityY printString.
+	self assert: (inspector valueElementAt: #positionX) text asString equals: '-12.1234'.
+	self assert: (inspector valueElementAt: #positionY) text asString equals: '34.4566'.
+	self assert: (inspector valueElementAt: #rotation) text asString equals: '123.1234'.
+	self assert: (inspector valueElementAt: #velocityX) text asString equals: '12.3456'.
+	self assert: (inspector valueElementAt: #velocityY) text asString equals: '-34.5678'.
+	self assert: (inspector valueElementAt: #angularVelocity) text asString equals: '123.1234'.
 	^ inspector
 ]
 
