@@ -41,7 +41,11 @@ CFPhysicsTelemetryStatisticsElement >> mapFor: root statistic: statistic title: 
 		margin: (BlInsets top: 12);
 		cellSpacing: 4;
 		yourself.
-	pane addChild: (self subtitle: aTitle, ' — ', ((self durationOf: root statistic: statistic) / 1000.0) printShowingDecimalPlaces: 3, ' ms').
+	pane addChild: (self subtitle:
+		aTitle, ' — ',
+		(((self durationOf: root statistic: statistic) / 1000.0)
+			printShowingDecimalPlaces: 3),
+		' ms').
 	depths := self spansByDepthFrom: root.
 	depths keys sorted do: [ :depth |
 		pane addChild: (self rowFor: (depths at: depth) root: root statistic: statistic) ].
@@ -83,7 +87,9 @@ CFPhysicsTelemetryStatisticsElement >> blockFor: span duration: duration statist
 			fitContent;
 			padding: (BlInsets all: 4);
 			aptitude: (BrGlamorousLabelAptitude new foreground: Color black);
-			text: span name asString, ' ', ((duration / 1000.0) printShowingDecimalPlaces: 3), 'ms';
+			text: span name asString, ' ',
+			(((duration / 1000.0) printShowingDecimalPlaces: 3)),
+			'ms';
 			constraintsDo: [ :c | c frame horizontal alignCenter. c frame vertical alignCenter ];
 			yourself);
 		yourself
