@@ -1,6 +1,6 @@
 Extension { #name : 'CFPhysics' }
 
-{ #category : '*BVC-Foundation-Physics-Tools - accessing' }
+{ #category : '*bvc-foundation-physics-tools - accessing' }
 CFPhysics >> bodyTypeName [
 	self isDynamic ifTrue: [ ^ 'Dynamic' ].
 	self isKinematic ifTrue: [ ^ 'Kinematic' ].
@@ -8,7 +8,7 @@ CFPhysics >> bodyTypeName [
 	^ self bodyType class name
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionAngularVelocity [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -20,7 +20,7 @@ CFPhysics >> descriptionAngularVelocity [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionAwake [
 	<magritteDescription>
 	^ MABooleanDescription new
@@ -32,7 +32,7 @@ CFPhysics >> descriptionAwake [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionBodyType [
 	<magritteDescription>
 	^ MAStringDescription new
@@ -44,7 +44,7 @@ CFPhysics >> descriptionBodyType [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionDensity [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -56,7 +56,7 @@ CFPhysics >> descriptionDensity [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionFriction [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -68,7 +68,7 @@ CFPhysics >> descriptionFriction [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionRestitution [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -80,7 +80,7 @@ CFPhysics >> descriptionRestitution [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionSensor [
 	<magritteDescription>
 	^ MABooleanDescription new
@@ -92,7 +92,7 @@ CFPhysics >> descriptionSensor [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionVelocityX [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -104,7 +104,7 @@ CFPhysics >> descriptionVelocityX [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - descriptions' }
+{ #category : '*bvc-foundation-physics-tools - descriptions' }
 CFPhysics >> descriptionVelocityY [
 	<magritteDescription>
 	^ MANumberDescription new
@@ -116,12 +116,12 @@ CFPhysics >> descriptionVelocityY [
 		yourself
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - accessing' }
+{ #category : '*bvc-foundation-physics-tools - accessing' }
 CFPhysics >> velocityX [
 	^ self velocity x
 ]
 
-{ #category : '*BVC-Foundation-Physics-Tools - accessing' }
+{ #category : '*bvc-foundation-physics-tools - accessing' }
 CFPhysics >> velocityY [
 	^ self velocity y
 ]
