@@ -77,6 +77,18 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		stepBodies: bodies
+		fromContacts: previousContacts
+		joints: joints
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+		telemetryEnabled: false
+]
+
+{ #category : 'stepping' }
+CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold telemetryEnabled: telemetryEnabled [
 	| result |
 	result := CFPhysicsStepPipelineResult new
 		step: step;
@@ -90,9 +102,12 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		restitutionThreshold: restitutionThreshold;
 		yourself.
 	stages do: [ :stage |
-		| output |
+		| output started |
+		started := telemetryEnabled ifTrue: [ Time millisecondClockValue ].
 		output := stage executeOn: result.
-		result recordStage: stage output: output ].
+		telemetryEnabled
+			ifTrue: [ result recordStage: stage output: output durationMilliseconds: Time millisecondClockValue - started ]
+			ifFalse: [ result recordStage: stage output: output ] ].
 	^ result
 ]
 

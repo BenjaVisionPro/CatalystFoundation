@@ -97,6 +97,11 @@ CFPhysicsStepPipelineResult >> recordStage: aStage output: anObject [
 ]
 
 { #category : 'stages' }
+CFPhysicsStepPipelineResult >> recordStage: aStage output: anObject durationMilliseconds: aNumber [
+	stageExecutions add: (CFPhysicsStepStageExecution stage: aStage output: anObject durationMilliseconds: aNumber)
+]
+
+{ #category : 'stages' }
 CFPhysicsStepPipelineResult >> stageExecutions [ ^ stageExecutions asArray ]
 
 { #category : 'stages' }

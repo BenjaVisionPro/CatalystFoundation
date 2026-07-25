@@ -544,3 +544,37 @@ CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 	self assert: motion isCancelled.
 	^ world
 ]
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsWorldTelemetryIsOptionalAndBounded [
+	<gtExample>
+	| host world telemetry |
+	host := BlElement new size: 320 @ 200; yourself.
+	host addChild: (BlElement new size: 20 @ 20; yourself).
+	world := host physics beWorld.
+	self assert: world telemetryEnabled not.
+	world step.
+	self assert: world existingTelemetry isNil.
+	telemetry := world telemetry capacity: 2.
+	world step: 3.
+	self assert: telemetry sampleCount equals: 2.
+	self assert: telemetry latest stepNumber equals: world stepNumber.
+	^ telemetry
+]
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsWorldTelemetryRecordsPipelineStages [
+	<gtExample>
+	| host world sample |
+	host := BlElement new size: 320 @ 200; yourself.
+	host addChild: (BlElement new size: 20 @ 20; yourself).
+	world := host physics beWorld.
+	world telemetryEnabled: true.
+	world step.
+	sample := world telemetry latest.
+	self assert: sample notNil.
+	self assert: sample bodyCount equals: 1.
+	self assert: sample stageExecutions size equals: world stepPipeline stages size.
+	self assert: (sample stageExecutions allSatisfy: [ :each | each durationMilliseconds notNil ]).
+	^ sample
+]
