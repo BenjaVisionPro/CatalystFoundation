@@ -32,3 +32,23 @@ TelemetrySignal >> gtPhysicsDataFor: aView [
 		object: [ self physicsData ];
 		view: #gtItemsFor:
 ]
+
+{ #category : '*BVC-Foundation-Physics-Tools' }
+TelemetrySignal >> gtMapFor: aView [
+	"Forward to the Map view supplied by the installed Pharo Telemetry/GT integration.
+	The public tab is titled Map, but its defining selector is not part of the
+	Telemetry model API and differs from the selector assumed by the Physics view."
+	| mapView |
+	self class allMethods do: [ :method |
+		(mapView isNil
+			and: [ method selector ~= #gtMapFor:
+			and: [ method numArgs = 1
+			and: [ method hasPragmaNamed: #gtView ] ] ]) ifTrue: [
+			[ | candidate |
+			candidate := self perform: method selector with: aView.
+			(candidate notNil and: [ candidate title = 'Map' ])
+				ifTrue: [ mapView := candidate ] ]
+				on: Error
+				do: [ :error | "A different GT view may not be applicable to this signal." ] ] ].
+	^ mapView ifNil: [ aView empty ]
+]
