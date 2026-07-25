@@ -309,3 +309,73 @@ CFPhysicsOverlayTests >> physicsOverlayFrameHandlerFollowsShowHideShowLifecycle 
 	self assert: firstOverlay contactPass elements isEmpty.
 	^ host
 ]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorCanBeInstalledAndReleased [
+	<gtExample>
+	| host inspector |
+	host := self physicsHost.
+	inspector := CFPhysicsObjectInspector on: host.
+	self assert: inspector isInstalled not.
+	inspector install.
+	self assert: inspector isInstalled.
+	self assert: inspector root parent == host parent.
+	inspector release.
+	self assert: inspector isInstalled not.
+	^ inspector
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorBuildsTheStandardMagritteForm [
+	<gtExample>
+	| host inspector physics |
+	host := self physicsHost.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector inspect: physics.
+	self assert: inspector selectedPhysics == physics.
+	self assert: inspector form notNil.
+	self assert: inspector form parent == inspector root.
+	self assert: (inspector includesEventTarget: inspector form).
+	^ inspector
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorIgnoresStaleFormCompletion [
+	<gtExample>
+	| host inspector firstPhysics secondPhysics staleFrame staleMemento generation |
+	host := self physicsHost.
+	firstPhysics := host children first existingPhysics.
+	secondPhysics := host children second existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector inspect: firstPhysics.
+	generation := inspector formGeneration.
+	staleFrame := inspector form.
+	staleMemento := Object new.
+	staleFrame userData at: GtMagritteViewModel gtMementoSymbol put: staleMemento.
+	inspector inspect: secondPhysics.
+	inspector
+		formCreated: staleFrame
+		for: firstPhysics
+		generation: generation.
+	self assert: inspector selectedPhysics == secondPhysics.
+	self assert: inspector memento isNil.
+	^ inspector
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorCanClearItsObject [
+	<gtExample>
+	| host inspector physics previousForm |
+	host := self physicsHost.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector inspect: physics.
+	previousForm := inspector form.
+	inspector clear.
+	self assert: inspector selectedPhysics isNil.
+	self assert: inspector form isNil.
+	self assert: inspector memento isNil.
+	self assert: previousForm hasParent not.
+	^ inspector
+]
