@@ -412,18 +412,29 @@ CFPhysicsWorld >> telemetryEnabled: aBoolean [
 ]
 
 { #category : 'private - telemetry' }
-CFPhysicsWorld >> startTelemetry [
-	ProcessTelemetry defaultTelemetryClass == MemoryTelemetry ifFalse: [
-		ProcessTelemetry defaultTelemetryClass: MemoryTelemetry ].
+CFPhysicsWorld >> ensureTelemetryLogger [
 	telemetryLogger ifNil: [
 		telemetryLogger := CFPhysicsTelemetryLogger on: self.
 		telemetryLogger capacity: telemetryCapacity ].
-	telemetryLogger start
+	^ telemetryLogger
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> startTelemetry [
+	ProcessTelemetry defaultTelemetryClass == MemoryTelemetry ifFalse: [
+		ProcessTelemetry defaultTelemetryClass: MemoryTelemetry ].
+	self ensureTelemetryLogger start
 ]
 
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> stopTelemetry [
 	telemetryLogger ifNotNil: [ telemetryLogger stop ]
+]
+
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryAnnouncer [
+	^ self ensureTelemetryLogger announcer
 ]
 
 { #category : 'telemetry' }

@@ -50,3 +50,28 @@ CFPhysicsWorld >> gtLatestTelemetryTreeFor: aView [
 		send: [ :ping | ping ];
 		actionUpdateButton
 ]
+
+
+{ #category : '*BVC-Foundation-Physics-Tools' }
+CFPhysicsWorld >> gtTelemetryAverageMapFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Step average';
+		priority: 21;
+		object: [ (CFPhysicsTelemetryAnalysis world: self statistic: #average) aggregateSignal ];
+		view: #gtMapFor:;
+		updateWhen: Announcement in: [ self telemetryAnnouncer ];
+		actionUpdateButtonTooltip: 'Refresh average telemetry map'
+]
+
+{ #category : '*BVC-Foundation-Physics-Tools' }
+CFPhysicsWorld >> gtTelemetryP95MapFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Step p95';
+		priority: 22;
+		object: [ (CFPhysicsTelemetryAnalysis world: self statistic: #p95) aggregateSignal ];
+		view: #gtMapFor:;
+		updateWhen: Announcement in: [ self telemetryAnnouncer ];
+		actionUpdateButtonTooltip: 'Refresh p95 telemetry map'
+]
