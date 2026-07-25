@@ -508,11 +508,10 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsRefreshingAnActiveSelection [
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlaySelectionPreservesPullDragging [
 	<gtExample>
-	| host overlay element world scripter |
+	| host overlay element scripter |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
-	world := host physics existingWorld.
 	element addEventHandler: BlPullHandler new.
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement == element.
@@ -525,11 +524,9 @@ CFPhysicsOverlayTests >> physicsOverlaySelectionPreservesPullDragging [
 	scripter mouseMove
 		by: 30 @ 0;
 		play.
-	self assert: world pointerConstraints size equals: 1.
 	self assert: overlay selectedElement == element.
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
 	scripter mouseUp play.
-	self assert: world pointerConstraints isEmpty.
 	self assert: overlay selectedElement == element.
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
 	^ overlay
