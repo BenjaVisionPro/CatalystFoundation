@@ -49,7 +49,12 @@ CFPhysicsTelemetryPipelineElement >> build [
 		self addChild: (self label: 'No Pipeline span was found in the recorded Physics steps.' emphasis: false).
 		^ self ].
 	origin := 0.
-	scale := pipeline p95Duration max: 1.
+	"P95 duration and P95 end are independent percentiles. Use the
+	latest right edge needed by any candle so interval geometry is not clipped."
+	scale := pipeline children
+		inject: pipeline p95Duration
+		into: [ :maximum :span | maximum max: span p95End ].
+	scale := scale max: 1.
 	self addChild: (self headerFor: analysis pipeline: pipeline).
 	self addChild: (self legendForScale: scale).
 	pipeline children do: [ :span |

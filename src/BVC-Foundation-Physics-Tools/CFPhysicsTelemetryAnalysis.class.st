@@ -70,11 +70,11 @@ CFPhysicsTelemetryAnalysis >> statisticsForPings: pings rootPings: roots depth: 
 				ifNone: [ nil ].
 			matchedChild ifNotNil: [
 				matching add: matchedChild.
-				matchingRoots add: (roots at: sampleIndex) ] ].
+				matchingRoots add: ping ] ].
 		matching ifNotEmpty: [
 			children add: (self
 				statisticsForPings: matching
-				rootPings: pings
+				rootPings: matchingRoots
 				depth: aDepth + 1) ] ].
 	node children: children.
 	^ node
