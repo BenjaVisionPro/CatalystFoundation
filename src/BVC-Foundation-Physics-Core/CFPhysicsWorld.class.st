@@ -347,21 +347,21 @@ CFPhysicsWorld >> newStep [
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
 	| bodies step explicitlyContainedBodies totalStarted membershipStarted preparationStarted pipelineStarted boundaryStarted frameMetrics |
-	totalStarted := telemetry ifNotNil: [ Time millisecondClockValue ].
-	membershipStarted := telemetry ifNotNil: [ Time millisecondClockValue ].
+	totalStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
+	membershipStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
 	self synchroniseMembership.
 	self retireInvalidBehaviours.
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
-	preparationStarted := telemetry ifNotNil: [ Time millisecondClockValue ].
+	preparationStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
 	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
 	self prepareSpringConstraintsForStep: step timeStep.
 	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
-	pipelineStarted := telemetry ifNotNil: [ Time millisecondClockValue ].
+	pipelineStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
 	lastStepResult := stepPipeline
 		stepBodies: bodies
 		fromContacts: activeContacts
@@ -371,7 +371,7 @@ CFPhysicsWorld >> step [
 		restitutionThreshold: restitutionThreshold
 		telemetryEnabled: telemetry notNil.
 	activeContacts := lastStepResult activeContacts.
-	boundaryStarted := telemetry ifNotNil: [ Time millisecondClockValue ].
+	boundaryStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
 	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
@@ -380,11 +380,11 @@ CFPhysicsWorld >> step [
 		frameMetrics := CFPhysicsFrameMetrics new
 			stepNumber: stepNumber;
 			simulationTime: simulationTime;
-			membershipMilliseconds: preparationStarted - membershipStarted;
-			preparationMilliseconds: pipelineStarted - preparationStarted;
-			pipelineMilliseconds: boundaryStarted - pipelineStarted;
-			boundaryMilliseconds: Time millisecondClockValue - boundaryStarted;
-			totalMilliseconds: Time millisecondClockValue - totalStarted;
+			membershipMilliseconds: (preparationStarted - membershipStarted) / 1000.0;
+			preparationMilliseconds: (pipelineStarted - preparationStarted) / 1000.0;
+			pipelineMilliseconds: (boundaryStarted - pipelineStarted) / 1000.0;
+			boundaryMilliseconds: (Time microsecondClockValue - boundaryStarted) / 1000.0;
+			totalMilliseconds: (Time microsecondClockValue - totalStarted) / 1000.0;
 			bodyCount: bodies size;
 			activeBodyCount: (bodies count: #isAwake);
 			contactCount: activeContacts size;

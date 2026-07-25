@@ -60,38 +60,73 @@ CFPhysicsWorldTelemetry >> percentile: aFraction of: aSelector [
 { #category : 'statistics' }
 CFPhysicsWorldTelemetry >> p95Of: aSelector [ ^ self percentile: 0.95 of: aSelector ]
 { #category : 'statistics' }
-CFPhysicsWorldTelemetry >> averageStageDurations [
-	| totals counts |
-	totals := Dictionary new.
-	counts := Dictionary new.
+CFPhysicsWorldTelemetry >> stageNames [
+	| names |
+	names := OrderedCollection new.
 	samples do: [ :sample |
 		sample stageExecutions do: [ :execution |
-			| key duration |
-			key := execution name asString.
-			duration := execution durationMilliseconds.
-			duration ifNotNil: [
-				totals at: key put: (totals at: key ifAbsent: [ 0 ]) + duration.
-				counts at: key put: (counts at: key ifAbsent: [ 0 ]) + 1 ] ] ].
-	^ totals associations collect: [ :association |
-		association key -> (association value / (counts at: association key)) asFloat ]
+			(names includes: execution name asString)
+				ifFalse: [ names add: execution name asString ] ] ].
+	^ names asArray
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> stageValuesNamed: aString [
+	^ samples collect: [ :sample |
+		(sample durationForStageNamed: aString) ifNil: [ 0.0 ] ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> averageStageDurationNamed: aString [
+	| values |
+	values := self stageValuesNamed: aString.
+	^ values ifEmpty: [ 0.0 ] ifNotEmpty: [ values average asFloat ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> maximumStageDurationNamed: aString [
+	| values |
+	values := self stageValuesNamed: aString.
+	^ values ifEmpty: [ 0.0 ] ifNotEmpty: [ values max ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> p95StageDurationNamed: aString [
+	| values index |
+	values := (self stageValuesNamed: aString) sorted.
+	values ifEmpty: [ ^ 0.0 ].
+	index := ((values size * 0.95) ceiling max: 1) min: values size.
+	^ values at: index
 ]
 
 { #category : 'statistics' }
 CFPhysicsWorldTelemetry >> formattedMilliseconds: aNumber [
-	^ (aNumber roundTo: 0.01) printString
+	^ (aNumber roundTo: 0.001) printString
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> formattedPercent: aNumber [
+	^ ((aNumber * 100.0) roundTo: 0.1) printString , '%'
 ]
 
 { #category : 'statistics' }
 CFPhysicsWorldTelemetry >> timingRowNamed: aString selector: aSelector [
-	| latestValue |
+	| latestValue latestTotal share |
 	latestValue := self latest
-		ifNil: [ 0 ]
+		ifNil: [ 0.0 ]
 		ifNotNil: [ :sample | sample perform: aSelector ].
+	latestTotal := self latest
+		ifNil: [ 0.0 ]
+		ifNotNil: [ :sample | sample totalMilliseconds ].
+	share := latestTotal = 0.0
+		ifTrue: [ 0.0 ]
+		ifFalse: [ latestValue / latestTotal ].
 	^ aString -> {
 		self formattedMilliseconds: latestValue.
 		self formattedMilliseconds: (self averageOf: aSelector).
 		self formattedMilliseconds: (self p95Of: aSelector).
-		self formattedMilliseconds: (self maximumOf: aSelector) }
+		self formattedMilliseconds: (self maximumOf: aSelector).
+		self formattedPercent: share }
 ]
 
 { #category : 'statistics' }
@@ -104,7 +139,8 @@ CFPhysicsWorldTelemetry >> countRowNamed: aString selector: aSelector [
 		latestValue.
 		(self averageOf: aSelector) roundTo: 0.01.
 		self p95Of: aSelector.
-		self maximumOf: aSelector }
+		self maximumOf: aSelector.
+		'' }
 ]
 
 { #category : 'statistics' }
@@ -115,6 +151,7 @@ CFPhysicsWorldTelemetry >> performanceRows [
 		self timingRowNamed: 'Preparation (ms)' selector: #preparationMilliseconds.
 		self timingRowNamed: 'Pipeline (ms)' selector: #pipelineMilliseconds.
 		self timingRowNamed: 'Boundary (ms)' selector: #boundaryMilliseconds.
+		self timingRowNamed: 'Unaccounted (ms)' selector: #unaccountedMilliseconds.
 		self countRowNamed: 'Bodies' selector: #bodyCount.
 		self countRowNamed: 'Active bodies' selector: #activeBodyCount.
 		self countRowNamed: 'Sleeping bodies' selector: #sleepingBodyCount.
@@ -125,15 +162,29 @@ CFPhysicsWorldTelemetry >> performanceRows [
 
 { #category : 'statistics' }
 CFPhysicsWorldTelemetry >> stageRows [
-	| latest averages |
+	| latest latestPipeline rows |
 	latest := self latest.
-	averages := self averageStageDurations asDictionary.
 	latest ifNil: [ ^ #() ].
-	^ latest stageExecutions collect: [ :execution |
-		| name duration |
+	latestPipeline := latest pipelineMilliseconds.
+	rows := latest stageExecutions collect: [ :execution |
+		| name duration share |
 		name := execution name asString.
-		duration := execution durationMilliseconds ifNil: [ 0 ].
-		name -> {
+		duration := execution durationMilliseconds ifNil: [ 0.0 ].
+		share := latestPipeline = 0.0
+			ifTrue: [ 0.0 ]
+			ifFalse: [ duration / latestPipeline ].
+		execution -> {
 			self formattedMilliseconds: duration.
-			self formattedMilliseconds: (averages at: name ifAbsent: [ 0 ]) } ]
+			self formattedMilliseconds: (self averageStageDurationNamed: name).
+			self formattedMilliseconds: (self p95StageDurationNamed: name).
+			self formattedMilliseconds: (self maximumStageDurationNamed: name).
+			self formattedPercent: share } ].
+	^ rows
+]
+
+{ #category : 'statistics' }
+CFPhysicsWorldTelemetry >> hotspotRows [
+	^ self stageRows sorted: [ :left :right |
+		(self averageStageDurationNamed: left key name asString)
+			> (self averageStageDurationNamed: right key name asString) ]
 ]

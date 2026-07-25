@@ -103,10 +103,10 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		yourself.
 	stages do: [ :stage |
 		| output started |
-		started := telemetryEnabled ifTrue: [ Time millisecondClockValue ].
+		started := telemetryEnabled ifTrue: [ Time microsecondClockValue ].
 		output := stage executeOn: result.
 		telemetryEnabled
-			ifTrue: [ result recordStage: stage output: output durationMilliseconds: Time millisecondClockValue - started ]
+			ifTrue: [ result recordStage: stage output: output durationMilliseconds: (Time microsecondClockValue - started) / 1000.0 ]
 			ifFalse: [ result recordStage: stage output: output ] ].
 	^ result
 ]

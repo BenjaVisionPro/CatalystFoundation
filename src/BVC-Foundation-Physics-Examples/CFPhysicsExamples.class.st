@@ -578,3 +578,28 @@ CFPhysicsExamples >> physicsWorldTelemetryRecordsPipelineStages [
 	self assert: (sample stageExecutions allSatisfy: [ :each | each durationMilliseconds notNil ]).
 	^ sample
 ]
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsWorldTelemetryProvidesStageStatisticsAndHotspots [
+	<gtExample>
+	| host world telemetry stageRows hotspots sample |
+	host := BlElement new size: 320 @ 200; yourself.
+	host addChild: (BlElement new size: 20 @ 20; yourself).
+	world := host physics beWorld.
+	world telemetryEnabled: true.
+	world step: 5.
+	telemetry := world telemetry.
+	sample := telemetry latest.
+	stageRows := telemetry stageRows.
+	hotspots := telemetry hotspotRows.
+	self assert: sample totalMilliseconds isFloat.
+	self assert: sample unaccountedMilliseconds >= 0.0.
+	self assert: stageRows size equals: world stepPipeline stages size.
+	self assert: (stageRows allSatisfy: [ :row | row value size = 5 ]).
+	self assert: hotspots size equals: stageRows size.
+	hotspots size > 1 ifTrue: [
+		self assert:
+			(telemetry averageStageDurationNamed: hotspots first key name asString)
+				>= (telemetry averageStageDurationNamed: hotspots last key name asString) ].
+	^ telemetry
+]

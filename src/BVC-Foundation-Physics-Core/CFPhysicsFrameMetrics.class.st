@@ -67,3 +67,19 @@ CFPhysicsFrameMetrics >> durationForStageNamed: aString [
 		ifFound: [ :each | each durationMilliseconds ]
 		ifNone: [ nil ]
 ]
+
+{ #category : 'derived metrics' }
+CFPhysicsFrameMetrics >> stageMilliseconds [
+	^ self stageExecutions
+		inject: 0.0
+		into: [ :sum :each | sum + (each durationMilliseconds ifNil: [ 0.0 ]) ]
+]
+
+{ #category : 'derived metrics' }
+CFPhysicsFrameMetrics >> unaccountedMilliseconds [
+	^ (totalMilliseconds
+		- membershipMilliseconds
+		- preparationMilliseconds
+		- pipelineMilliseconds
+		- boundaryMilliseconds) max: 0.0
+]
