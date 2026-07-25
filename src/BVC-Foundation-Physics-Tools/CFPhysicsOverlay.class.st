@@ -52,6 +52,7 @@ CFPhysicsOverlay >> selectedElement [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
 	| anElement |
+	(objectInspector includesEventTarget: anEvent target) ifTrue: [ ^ self ].
 	anElement := self physicalElementFrom: anEvent target.
 	anElement ifNil: [ ^ self clearSelection ].
 	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
@@ -115,7 +116,7 @@ CFPhysicsOverlay >> install [
 		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
 	objectInspector install.
-	host addEventHandler: selectionHandler.
+	host addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
 	self refresh.
 	^ self
@@ -176,7 +177,7 @@ CFPhysicsOverlay >> refresh [
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
 	self clearSelection.
-	selectionHandler ifNotNil: [ host removeEventHandler: selectionHandler ].
+	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactPass ifNotNil: #release.
 	objectInspector ifNotNil: #release.

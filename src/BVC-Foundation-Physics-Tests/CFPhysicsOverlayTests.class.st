@@ -561,3 +561,52 @@ CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheBackgroundIsClicked
 	self assert: overlay objectInspector selectedPhysics isNil.
 	^ overlay
 ]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayObservesConsumedButtonClicks [
+	<gtExample>
+	| space host button overlay scripter actionCount |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	host := BlElement new
+		size: 400 @ 300;
+		yourself.
+	button := BrButton new
+		label: 'Physical';
+		size: 100 @ 40;
+		addEventHandler: BlPullHandler new;
+		yourself.
+	actionCount := 0.
+	button action: [ actionCount := actionCount + 1 ].
+	host addChild: button.
+	space root addChild: host.
+	space pulse.
+	host physics beWorld synchroniseMembership.
+	overlay := host showPhysicsOverlay.
+	scripter := BlScripter new.
+	scripter element: host.
+	scripter click
+		onChildAt: 1;
+		play.
+	self assert: actionCount equals: 1.
+	self assert: overlay selectedElement == button.
+	self assert: overlay objectInspector selectedPhysics == button existingPhysics.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
+	<gtExample>
+	| host overlay element event |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == element.
+	event := BlClickEvent new.
+	event target: overlay objectInspector form.
+	overlay clickEvent: event.
+	self assert: overlay selectedElement == element.
+	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
+	^ overlay
+]
