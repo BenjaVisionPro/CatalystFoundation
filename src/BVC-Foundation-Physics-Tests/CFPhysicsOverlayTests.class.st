@@ -468,3 +468,39 @@ CFPhysicsOverlayTests >> physicsOverlayDoesNotCreatePhysicsWhenAPlainElementIsCl
 	self assert: overlay objectInspector selectedPhysics isNil.
 	^ overlay
 ]
+
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheSelectedBodyRetires [
+	<gtExample>
+	| host overlay element physics |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	physics := element existingPhysics.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == element.
+	self assert: overlay objectInspector selectedPhysics == physics.
+	element removeFromParent.
+	overlay refresh.
+	self assert: physics bodyState world isNil.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay objectInspector selectedPhysics isNil.
+	self assert: overlay objectInspector form isNil.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayKeepsRefreshingAnActiveSelection [
+	<gtExample>
+	| host overlay element physics |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	physics := element existingPhysics.
+	element fireEvent: BlClickEvent new.
+	overlay refreshFrameDiagnostics.
+	self assert: overlay selectedElement == element.
+	self assert: overlay objectInspector selectedPhysics == physics.
+	^ overlay
+]

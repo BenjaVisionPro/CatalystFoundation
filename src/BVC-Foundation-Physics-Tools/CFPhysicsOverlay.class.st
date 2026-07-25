@@ -127,6 +127,21 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 	presented Physics frame. Structural body membership is deliberately left to
 	#refresh so frame presentation cannot mutate the world membership."
 	contactPass refresh.
+	self refreshSelectedObject.
+	^ self
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> refreshSelectedObject [
+	| physics body |
+	selectedElement ifNil: [ ^ self ].
+	physics := selectedElement existingPhysics.
+	physics ifNil: [ ^ self clearSelection ].
+	body := physics bodyState.
+	(body isNil or: [ body world ~~ world ])
+		ifTrue: [ ^ self clearSelection ].
+	objectInspector selectedPhysics == physics
+		ifFalse: [ objectInspector inspect: physics ].
 	objectInspector refresh.
 	^ self
 ]
@@ -154,6 +169,7 @@ CFPhysicsOverlay >> refresh [
 				created ].
 		anElement refresh ].
 	contactPass refresh.
+	self refreshSelectedObject.
 	^ self
 ]
 
