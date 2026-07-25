@@ -159,20 +159,17 @@ CFPhysicsTelemetryPipelineElement >> timelineFor: span pipeline: pipeline scale:
 		background: (Color gray alpha: 0.10);
 		yourself.
 	leading := BlElement new
-		hExact: offset;
-		vExact: 14;
+		size: offset @ 14;
 		yourself.
 	bar := BlElement new
-		hExact: width;
-		vExact: 14;
+		size: width @ 14;
 		background: (statistic = #average
 			ifTrue: [ Color gray alpha: 0.48 ]
 			ifFalse: [ Color gray alpha: 0.78 ]);
 		border: (BlBorder paint: (Color gray alpha: 0.65) width: 1);
 		yourself.
 	trailing := BlElement new
-		hExact: remainder;
-		vExact: 14;
+		size: remainder @ 14;
 		yourself.
 	track
 		addChild: leading;
