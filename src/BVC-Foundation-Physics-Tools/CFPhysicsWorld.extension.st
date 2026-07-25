@@ -52,13 +52,29 @@ CFPhysicsWorld >> gtLatestTelemetryTreeFor: aView [
 ]
 
 { #category : '*BVC-Foundation-Physics-Tools' }
-CFPhysicsWorld >> gtTelemetryStatisticsMapFor: aView [
+CFPhysicsWorld >> gtTelemetryStatisticsFor: aView [
 	<gtView>
-	^ aView explicit
+	^ aView columnedTree
 		title: 'Step statistics';
 		priority: 21;
-		disableAsync;
-		stencil: [ CFPhysicsTelemetryStatisticsElement world: self ];
+		items: [
+			| root |
+			root := (CFPhysicsTelemetryAnalysis world: self) rootStatistics.
+			root ifNil: [ #() ] ifNotNil: [ { root } ] ];
+		children: #children;
+		column: 'Pipeline span' text: [ :span | span readableName ];
+		column: 'Average (ms)' text: [ :span | span averageMilliseconds ];
+		column: 'P95 (ms)' text: [ :span | span p95Milliseconds ];
+		column: 'P95 / Avg' text: [ :span | span p95ToAverageRatio ];
+		column: 'Average share' text: [ :span |
+			| root |
+			root := (CFPhysicsTelemetryAnalysis world: self) rootStatistics.
+			root ifNil: [ 0 ] ifNotNil: [ span averageShareOf: root ] ];
+		column: 'P95 share' text: [ :span |
+			| root |
+			root := (CFPhysicsTelemetryAnalysis world: self) rootStatistics.
+			root ifNil: [ 0 ] ifNotNil: [ span p95ShareOf: root ] ];
+		send: [ :span | span ];
 		updateWhen: Announcement in: [ self telemetryAnnouncer ];
-		actionUpdateButtonTooltip: 'Refresh average and p95 telemetry maps'
+		actionUpdateButtonTooltip: 'Refresh step statistics'
 ]

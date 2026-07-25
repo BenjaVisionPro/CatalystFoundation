@@ -53,3 +53,44 @@ CFPhysicsTelemetrySpanStatistics >> allSpansDo: aBlock [
 	aBlock value: self.
 	self children do: [ :each | each allSpansDo: aBlock ]
 ]
+
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> readableName [
+	| value |
+	value := self name asString.
+	value := value copyReplaceAll: 'CFPhysics' with: ''.
+	value := value copyReplaceAll: 'Stage' with: ''.
+	^ value
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> averageMilliseconds [
+	^ self averageDuration / 1000.0
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> p95Milliseconds [
+	^ self p95Duration / 1000.0
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> p95ToAverageRatio [
+	^ self averageDuration = 0
+		ifTrue: [ 0 ]
+		ifFalse: [ self p95Duration / self averageDuration ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> averageShareOf: aRootSpan [
+	^ aRootSpan averageDuration = 0
+		ifTrue: [ 0 ]
+		ifFalse: [ self averageDuration / aRootSpan averageDuration ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> p95ShareOf: aRootSpan [
+	^ aRootSpan p95Duration = 0
+		ifTrue: [ 0 ]
+		ifFalse: [ self p95Duration / aRootSpan p95Duration ]
+]
