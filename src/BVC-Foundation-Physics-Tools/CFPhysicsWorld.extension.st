@@ -12,7 +12,25 @@ CFPhysicsWorld >> gtTelemetryFor: aView [
 		column: 'Duration (ms)' text: [ :signal | signal duration / 1000.0 ];
 		column: 'Bodies' text: [ :signal | signal physicsData at: #bodyCount ifAbsent: [ '' ] ];
 		send: [ :signal | signal ];
-		actionUpdateButton
+		actionButtonIcon: BrGlamorousVectorIcons play
+			label: 'Start recording'
+			tooltip: 'Start recording Physics and Motion telemetry'
+			action: [ :aButton :aTab |
+				self telemetryEnabled: true.
+				aTab viewContentElement phlow update ];
+		actionButtonIcon: BrGlamorousVectorIcons stop
+			label: 'Stop recording'
+			tooltip: 'Stop recording telemetry and retain the recorded results'
+			action: [ :aButton :aTab |
+				self telemetryEnabled: false.
+				aTab viewContentElement phlow update ];
+		actionButtonIcon: BrGlamorousVectorIcons bin
+			label: 'Clear recordings'
+			tooltip: 'Clear all retained telemetry recordings'
+			action: [ :aButton :aTab |
+				self resetTelemetry.
+				aTab viewContentElement phlow update ];
+		actionUpdateButtonTooltip: 'Refresh recordings'
 ]
 
 { #category : '*BVC-Foundation-Physics-Tools' }
