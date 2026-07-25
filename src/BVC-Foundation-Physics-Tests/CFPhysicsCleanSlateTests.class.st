@@ -5301,25 +5301,6 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
-	<gtExample>
-	| owner element world physics |
-	owner := BlElement new size: 400 @ 300; yourself.
-	element := BlElement new size: 20 @ 20; yourself.
-	owner addChild: element.
-	world := owner physics beWorld.
-	world synchroniseMembership.
-	physics := element physics.
-	self assert: physics bodyType == physics bodyState bodyType.
-	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
-	physics beKinematic.
-	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
-	physics beStatic.
-	self assert: physics bodyType class equals: CFPhysicsStaticBodyType.
-	^ physics
-]
-
-{ #category : 'examples - body types' }
 CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
 	<gtExample>
 	| first second contact |
@@ -5696,4 +5677,47 @@ CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCe
 	self assert: result activeContacts isEmpty not.
 	self assert: result constraints size >= 3.
 	^ owner
+]
+
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
+	<gtExample>
+	| owner element world physics |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	physics := element physics.
+	self assert: physics bodyType == physics bodyState bodyType.
+	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
+	physics beKinematic.
+	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
+	physics beStatic.
+	self assert: physics bodyType class equals: CFPhysicsStaticBodyType.
+	^ physics
+]
+
+
+{ #category : 'examples - inspection' }
+CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
+	<gtExample>
+	| owner element world physics descriptions expectedAccessors |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	physics := element physics.
+	descriptions := physics magritteDescription children.
+	expectedAccessors := #(bodyTypeName isAwake isSensor density friction restitution velocityX velocityY angularVelocity).
+	self assert: descriptions size equals: expectedAccessors size.
+	self assert: (descriptions collect: [ :each | each accessor selector ]) asArray equals: expectedAccessors.
+	self assert: (descriptions allSatisfy: #isReadOnly).
+	self assert: (descriptions collect: #priority) asArray equals: #(10 20 30 40 50 60 70 80 90).
+	self assert: physics bodyTypeName equals: 'Dynamic'.
+	self assert: physics velocityX equals: physics velocity x.
+	self assert: physics velocityY equals: physics velocity y.
+	^ descriptions
 ]

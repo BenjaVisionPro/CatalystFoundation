@@ -68,11 +68,6 @@ CFPhysics >> beStatic [
 	self requireBodyState beStatic
 ]
 
-{ #category : 'body type' }
-CFPhysics >> bodyType [
-	^ self requireBodyState bodyType
-]
-
 { #category : 'worlds' }
 CFPhysics >> beWorld [
 	| aWorld |
@@ -95,6 +90,11 @@ CFPhysics >> ceaseBeingWorld [
 	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
 	element fireEvent: CFPhysicsWorldAttachmentChanged new.
 	^ self
+]
+
+{ #category : 'body type' }
+CFPhysics >> bodyType [
+	^ self requireBodyState bodyType
 ]
 
 { #category : 'bodies' }
