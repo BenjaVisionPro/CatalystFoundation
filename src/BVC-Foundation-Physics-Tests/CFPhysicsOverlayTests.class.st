@@ -409,3 +409,62 @@ CFPhysicsOverlayTests >> physicsOverlayReleasesItsObjectInspector [
 	^ host
 ]
 
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlaySelectsAnActivePhysicalElementOnClick [
+	<gtExample>
+	| host overlay element physics |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	physics := element existingPhysics.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == element.
+	self assert: overlay objectInspector selectedPhysics == physics.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayReplacesTheSelectedPhysicalElement [
+	<gtExample>
+	| host overlay first second |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	first := host children first.
+	second := host children second.
+	first fireEvent: BlClickEvent new.
+	second fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == second.
+	self assert: overlay objectInspector selectedPhysics == second existingPhysics.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheSelectedElementIsClickedAgain [
+	<gtExample>
+	| host overlay element |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	element fireEvent: BlClickEvent new.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay objectInspector selectedPhysics isNil.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayDoesNotCreatePhysicsWhenAPlainElementIsClicked [
+	<gtExample>
+	| host overlay element |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := BlElement new size: 20 @ 20.
+	host addChild: element.
+	self assert: element existingPhysics isNil.
+	element fireEvent: BlClickEvent new.
+	self assert: element existingPhysics isNil.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay objectInspector selectedPhysics isNil.
+	^ overlay
+]

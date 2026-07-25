@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'framePresentedHandler' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -43,6 +43,44 @@ CFPhysicsOverlay >> contactPass [ ^ contactPass ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
 
+
+{ #category : 'accessing' }
+CFPhysicsOverlay >> selectedElement [
+	^ selectedElement
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> clickEvent: anEvent [
+	| anElement |
+	anElement := self physicalElementFrom: anEvent target.
+	anElement ifNil: [ ^ self clearSelection ].
+	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
+	selectedElement := anElement.
+	objectInspector inspect: anElement existingPhysics.
+	^ self
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> physicalElementFrom: anElement [
+	| current physics body |
+	current := anElement.
+	[ current notNil ] whileTrue: [
+		physics := current existingPhysics.
+		physics ifNotNil: [
+			body := physics bodyState.
+			(body notNil and: [ body world == world ]) ifTrue: [ ^ current ] ].
+		current == host ifTrue: [ ^ nil ].
+		current := current parent ].
+	^ nil
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> clearSelection [
+	selectedElement := nil.
+	objectInspector clear.
+	^ self
+]
+
 { #category : 'initialization' }
 CFPhysicsOverlay >> initializeOverlay [
 	bodyElements := IdentityDictionary new.
@@ -55,6 +93,9 @@ CFPhysicsOverlay >> initializeOverlay [
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	contactPass := CFPhysicsContactOverlayPass in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
+	selectionHandler := BlEventHandler
+		on: BlClickEvent
+		do: [ :anEvent | self clickEvent: anEvent ].
 	framePresentedHandler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
 		do: [ :anEvent | self refreshFrameDiagnostics ]
@@ -74,6 +115,7 @@ CFPhysicsOverlay >> install [
 		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
 	objectInspector install.
+	host addEventHandler: selectionHandler.
 	host addEventHandler: framePresentedHandler.
 	self refresh.
 	^ self
@@ -117,6 +159,8 @@ CFPhysicsOverlay >> refresh [
 
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
+	self clearSelection.
+	selectionHandler ifNotNil: [ host removeEventHandler: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactPass ifNotNil: #release.
 	objectInspector ifNotNil: #release.
