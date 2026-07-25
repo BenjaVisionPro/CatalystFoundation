@@ -325,8 +325,8 @@ CFPhysicsOverlayTests >> physicsObjectInspectorCanBeInstalledAndReleased [
 	^ inspector
 ]
 
-{ #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> physicsObjectInspectorBuildsTheStandardMagritteForm [
+ { #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorBuildsItsSynchronousPanel [
 	<gtExample>
 	| host inspector physics |
 	host := self physicsHost.
@@ -334,49 +334,44 @@ CFPhysicsOverlayTests >> physicsObjectInspectorBuildsTheStandardMagritteForm [
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector inspect: physics.
 	self assert: inspector selectedPhysics == physics.
-	self assert: inspector form notNil.
-	self assert: inspector form parent == inspector root.
-	self assert: (inspector includesEventTarget: inspector form).
+	self assert: inspector panel notNil.
+	self assert: inspector panel parent == inspector root.
+	self assert: (inspector includesEventTarget: inspector panel).
+	self assert: inspector panel visibility equals: BlVisibility visible.
 	^ inspector
 ]
 
-{ #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> physicsObjectInspectorIgnoresStaleFormCompletion [
+ { #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorReusesItsPanelWhenSelectionChanges [
 	<gtExample>
-	| host inspector firstPhysics secondPhysics staleFrame staleMemento generation |
+	| host inspector firstPhysics secondPhysics originalPanel |
 	host := self physicsHost.
 	firstPhysics := host children first existingPhysics.
 	secondPhysics := host children second existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
+	originalPanel := inspector panel.
 	inspector inspect: firstPhysics.
-	generation := inspector formGeneration.
-	staleFrame := inspector form.
-	staleMemento := Object new.
-	staleFrame userData at: GtMagritteViewModel gtMementoSymbol put: staleMemento.
 	inspector inspect: secondPhysics.
-	inspector
-		formCreated: staleFrame
-		for: firstPhysics
-		generation: generation.
 	self assert: inspector selectedPhysics == secondPhysics.
-	self assert: inspector memento isNil.
+	self assert: inspector panel == originalPanel.
+	self assert: inspector root children size equals: 1.
 	^ inspector
 ]
 
-{ #category : 'examples - physics object inspector' }
+ { #category : 'examples - physics object inspector' }
 CFPhysicsOverlayTests >> physicsObjectInspectorCanClearItsObject [
 	<gtExample>
-	| host inspector physics previousForm |
+	| host inspector physics panel |
 	host := self physicsHost.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
+	panel := inspector panel.
 	inspector inspect: physics.
-	previousForm := inspector form.
 	inspector clear.
 	self assert: inspector selectedPhysics isNil.
-	self assert: inspector form isNil.
-	self assert: inspector memento isNil.
-	self assert: previousForm hasParent not.
+	self assert: inspector panel == panel.
+	self assert: inspector panel visibility equals: BlVisibility gone.
+	self assert: (inspector valueElementAt: #bodyType) text asString equals: ''.
 	^ inspector
 ]
 
@@ -394,7 +389,7 @@ CFPhysicsOverlayTests >> physicsOverlayOwnsAndInstallsItsObjectInspector [
 	^ overlay
 ]
 
-{ #category : 'examples - physics overlay' }
+ { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsOverlayReleasesItsObjectInspector [
 	<gtExample>
 	| host overlay inspector |
@@ -404,8 +399,7 @@ CFPhysicsOverlayTests >> physicsOverlayReleasesItsObjectInspector [
 	host hidePhysicsOverlay.
 	self assert: inspector isInstalled not.
 	self assert: inspector selectedPhysics isNil.
-	self assert: inspector form isNil.
-	self assert: inspector memento isNil.
+	self assert: inspector panel visibility equals: BlVisibility gone.
 	^ host
 ]
 
@@ -486,7 +480,7 @@ CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheSelectedBodyRetires
 	self assert: physics bodyState world isNil.
 	self assert: overlay selectedElement isNil.
 	self assert: overlay objectInspector selectedPhysics isNil.
-	self assert: overlay objectInspector form isNil.
+	self assert: overlay objectInspector panel visibility equals: BlVisibility gone.
 	^ overlay
 ]
 
@@ -503,6 +497,25 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsRefreshingAnActiveSelection [
 	self assert: overlay selectedElement == element.
 	self assert: overlay objectInspector selectedPhysics == physics.
 	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorRefreshesSynchronously [
+	<gtExample>
+	| host inspector physics |
+	host := self physicsHost.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector inspect: physics.
+	physics velocity: 17.5 @ -3.25.
+	inspector refresh.
+	self
+		assert: (inspector valueElementAt: #velocityX) text asString
+		equals: physics velocityX printString.
+	self
+		assert: (inspector valueElementAt: #velocityY) text asString
+		equals: physics velocityY printString.
+	^ inspector
 ]
 
 { #category : 'examples - physics object selection' }
@@ -533,8 +546,8 @@ CFPhysicsOverlayTests >> physicsOverlaySelectionPreservesPullDragging [
 ]
 
 
-{ #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> physicsObjectInspectorOnlyHandlesMouseEventsInItsForm [
+ { #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorOnlyHandlesMouseEventsInItsPanel [
 	<gtExample>
 	| host inspector physics |
 	host := self physicsHost.
@@ -543,7 +556,7 @@ CFPhysicsOverlayTests >> physicsObjectInspectorOnlyHandlesMouseEventsInItsForm [
 	inspector inspect: physics.
 	self assert: inspector root shouldHandleMouseEvents not.
 	self assert: inspector root shouldChildrenHandleMouseEvents.
-	self assert: inspector form shouldHandleMouseEvents.
+	self assert: inspector panel shouldHandleMouseEvents.
 	^ inspector
 ]
 
@@ -594,7 +607,7 @@ CFPhysicsOverlayTests >> physicsOverlayObservesConsumedButtonClicks [
 	^ overlay
 ]
 
-{ #category : 'examples - physics object selection' }
+ { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
 	<gtExample>
 	| host overlay element event |
@@ -604,7 +617,7 @@ CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement == element.
 	event := BlClickEvent new.
-	event target: overlay objectInspector form.
+	event target: overlay objectInspector panel.
 	overlay clickEvent: event.
 	self assert: overlay selectedElement == element.
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
