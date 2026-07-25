@@ -61,11 +61,18 @@ CFPhysicsFrameMetrics >> stageExecutions [ ^ stageExecutions ifNil: [ #() ] ]
 { #category : 'accessing' }
 CFPhysicsFrameMetrics >> stageExecutions: aCollection [ stageExecutions := aCollection asArray ]
 { #category : 'accessing' }
-CFPhysicsFrameMetrics >> durationForStageNamed: aString [
+CFPhysicsFrameMetrics >> stageExecutionForClass: aStageClass [
 	^ self stageExecutions
-		detect: [ :each | each name asString = aString ]
-		ifFound: [ :each | each durationMilliseconds ]
+		detect: [ :each | each stage class == aStageClass ]
+		ifFound: [ :each | each ]
 		ifNone: [ nil ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsFrameMetrics >> durationForStageClass: aStageClass [
+	^ (self stageExecutionForClass: aStageClass)
+		ifNil: [ nil ]
+		ifNotNil: [ :execution | execution durationMilliseconds ]
 ]
 
 { #category : 'derived metrics' }

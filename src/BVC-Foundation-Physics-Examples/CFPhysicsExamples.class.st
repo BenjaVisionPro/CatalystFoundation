@@ -582,7 +582,7 @@ CFPhysicsExamples >> physicsWorldTelemetryRecordsPipelineStages [
 { #category : 'examples - telemetry' }
 CFPhysicsExamples >> physicsWorldTelemetryProvidesStageStatisticsAndHotspots [
 	<gtExample>
-	| host world telemetry stageRows hotspots sample |
+	| host world telemetry stageMetrics hotspots sample totalMetric |
 	host := BlElement new size: 320 @ 200; yourself.
 	host addChild: (BlElement new size: 20 @ 20; yourself).
 	world := host physics beWorld.
@@ -590,16 +590,20 @@ CFPhysicsExamples >> physicsWorldTelemetryProvidesStageStatisticsAndHotspots [
 	world step: 5.
 	telemetry := world telemetry.
 	sample := telemetry latest.
-	stageRows := telemetry stageRows.
-	hotspots := telemetry hotspotRows.
+	stageMetrics := telemetry stageMetrics.
+	hotspots := telemetry hotspots.
+	totalMetric := telemetry metricAt: #totalMilliseconds.
 	self assert: sample totalMilliseconds isFloat.
 	self assert: sample unaccountedMilliseconds >= 0.0.
-	self assert: stageRows size equals: world stepPipeline stages size.
-	self assert: (stageRows allSatisfy: [ :row | row value size = 5 ]).
-	self assert: hotspots size equals: stageRows size.
+	self assert: telemetry samples noneSatisfy: #isNil.
+	self assert: totalMetric sampleCount equals: telemetry sampleCount.
+	self assert: totalMetric latest equals: sample totalMilliseconds.
+	self assert: stageMetrics size equals: world stepPipeline stages size.
+	self assert: (stageMetrics allSatisfy: [ :metric |
+		metric sampleCount = telemetry sampleCount
+			and: [ metric latestExecution notNil ] ]).
+	self assert: hotspots size equals: stageMetrics size.
 	hotspots size > 1 ifTrue: [
-		self assert:
-			(telemetry averageStageDurationNamed: hotspots first key name asString)
-				>= (telemetry averageStageDurationNamed: hotspots last key name asString) ].
+		self assert: hotspots first average >= hotspots last average ].
 	^ telemetry
 ]

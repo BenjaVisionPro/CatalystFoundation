@@ -4,7 +4,6 @@ Extension { #name : 'CFPhysicsWorld' }
 CFPhysicsWorld >> gtLivePhysicsFor: aView [
 	<gtView>
 	owner ifNil: [ ^ aView empty ].
-	self telemetry.
 	^ aView forward
 		title: 'Live Physics';
 		priority: 1;
@@ -18,13 +17,21 @@ CFPhysicsWorld >> gtPerformanceFor: aView [
 	^ aView columnedList
 		title: 'Performance';
 		priority: 2;
-		items: [ self telemetry performanceRows ];
-		column: 'Metric' text: #key;
-		column: 'Latest' text: [ :row | row value first ];
-		column: 'Average' text: [ :row | row value second ];
-		column: 'P95' text: [ :row | row value third ];
-		column: 'Maximum' text: [ :row | row value fourth ];
-		column: 'Frame share' text: [ :row | row value fifth ];
+		items: [ self telemetry metrics ];
+		column: 'Metric' text: #name;
+		column: 'Latest' text: [ :metric |
+			self telemetry formattedValueOf: metric value: metric latest ];
+		column: 'Average' text: [ :metric |
+			self telemetry formattedValueOf: metric value: metric average ];
+		column: 'P95' text: [ :metric |
+			self telemetry formattedValueOf: metric value: metric p95 ];
+		column: 'Maximum' text: [ :metric |
+			self telemetry formattedValueOf: metric value: metric maximum ];
+		column: 'Frame share' text: [ :metric |
+			(self telemetry latestFrameShareOf: metric)
+				ifNil: [ '' ]
+				ifNotNil: [ :share | self telemetry formattedPercent: share ] ];
+		send: [ :metric | metric ];
 		actionUpdateButton
 ]
 
@@ -34,14 +41,19 @@ CFPhysicsWorld >> gtStageTimingsFor: aView [
 	^ aView columnedList
 		title: 'Stage timings';
 		priority: 3;
-		items: [ self telemetry stageRows ];
-		column: 'Stage' text: [ :row | row key name ];
-		column: 'Latest (ms)' text: [ :row | row value first ];
-		column: 'Average (ms)' text: [ :row | row value second ];
-		column: 'P95 (ms)' text: [ :row | row value third ];
-		column: 'Maximum (ms)' text: [ :row | row value fourth ];
-		column: 'Pipeline share' text: [ :row | row value fifth ];
-		send: #key;
+		items: [ self telemetry stageMetrics ];
+		column: 'Stage' text: #name;
+		column: 'Latest (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric latest ];
+		column: 'Average (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric average ];
+		column: 'P95 (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric p95 ];
+		column: 'Maximum (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric maximum ];
+		column: 'Pipeline share' text: [ :metric |
+			self telemetry formattedPercent: (self telemetry latestPipelineShareOf: metric) ];
+		send: [ :metric | metric ];
 		actionUpdateButton
 ]
 
@@ -51,14 +63,19 @@ CFPhysicsWorld >> gtHotspotsFor: aView [
 	^ aView columnedList
 		title: 'Hotspots';
 		priority: 4;
-		items: [ self telemetry hotspotRows ];
-		column: 'Stage' text: [ :row | row key name ];
-		column: 'Average (ms)' text: [ :row | row value second ];
-		column: 'P95 (ms)' text: [ :row | row value third ];
-		column: 'Maximum (ms)' text: [ :row | row value fourth ];
-		column: 'Latest (ms)' text: [ :row | row value first ];
-		column: 'Latest share' text: [ :row | row value fifth ];
-		send: #key;
+		items: [ self telemetry hotspots ];
+		column: 'Stage' text: #name;
+		column: 'Average (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric average ];
+		column: 'P95 (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric p95 ];
+		column: 'Maximum (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric maximum ];
+		column: 'Latest (ms)' text: [ :metric |
+			self telemetry formattedMilliseconds: metric latest ];
+		column: 'Latest share' text: [ :metric |
+			self telemetry formattedPercent: (self telemetry latestPipelineShareOf: metric) ];
+		send: [ :metric | metric ];
 		actionUpdateButton
 ]
 
