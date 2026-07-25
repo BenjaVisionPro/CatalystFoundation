@@ -5310,7 +5310,7 @@ CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
 	world := owner physics beWorld.
 	world synchroniseMembership.
 	physics := element physics.
-	self assert: (physics bodyType identicalTo: physics bodyState bodyType).
+	self assert: physics bodyType == physics bodyState bodyType.
 	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
 	physics beKinematic.
 	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
