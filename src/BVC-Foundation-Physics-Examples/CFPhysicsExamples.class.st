@@ -577,14 +577,16 @@ CFPhysicsExamples >> physicsWorldTelemetryCanBeReset [
 
 
 { #category : 'examples - telemetry' }
-CFPhysicsExamples >> physicsWorldTelemetryAverageAndP95Signals [
+CFPhysicsExamples >> physicsWorldTelemetryStatisticsElement [
 	<gtExample>
-	| world average p95 |
+	| world analysis root element |
 	world := self physicsWorldRecordsPharoTelemetry.
-	average := (CFPhysicsTelemetryAnalysis world: world statistic: #average) aggregateSignal.
-	p95 := (CFPhysicsTelemetryAnalysis world: world statistic: #p95) aggregateSignal.
-	self assert: average ping tasks isNotEmpty.
-	self assert: p95 ping durationInMicroseconds >= average ping durationInMicroseconds.
+	analysis := CFPhysicsTelemetryAnalysis world: world.
+	root := analysis rootStatistics.
+	self assert: root notNil.
+	self assert: root children isNotEmpty.
+	element := CFPhysicsTelemetryStatisticsElement world: world.
+	self assert: element childrenCount > 0.
 	world telemetryEnabled: false.
-	^ { average. p95 }
+	^ element
 ]

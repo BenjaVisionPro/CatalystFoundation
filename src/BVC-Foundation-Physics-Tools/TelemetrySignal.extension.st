@@ -32,26 +32,3 @@ TelemetrySignal >> gtPhysicsDataFor: aView [
 		object: [ self physicsData ];
 		view: #gtItemsFor:
 ]
-
-{ #category : '*BVC-Foundation-Physics-Tools' }
-TelemetrySignal >> gtMapFor: aView [
-	"Forward to the Map view supplied by the installed Pharo Telemetry/GT integration.
-	Probe each GT view with an independent builder. A GtPhlowView is mutable, so
-	probing candidates with the inspector's builder empties or corrupts the final
-	forwarded view."
-	| mapView |
-	self class allMethods do: [ :method |
-		(mapView isNil
-			and: [ method selector ~= #gtMapFor:
-			and: [ method numArgs = 1
-			and: [ method hasPragmaNamed: #gtView ] ] ]) ifTrue: [
-			[ | candidate |
-			  candidate := self
-				perform: method selector
-				with: GtPhlowView empty.
-			  (candidate notNil and: [ candidate title = 'Map' ])
-				ifTrue: [ mapView := candidate ] ]
-				on: Error
-				do: [ :error | "A different GT view may not be applicable to this signal." ] ] ].
-	^ mapView ifNil: [ aView empty ]
-]

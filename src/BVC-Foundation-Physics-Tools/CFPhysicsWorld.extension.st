@@ -51,15 +51,14 @@ CFPhysicsWorld >> gtLatestTelemetryTreeFor: aView [
 		actionUpdateButton
 ]
 
-
 { #category : '*BVC-Foundation-Physics-Tools' }
 CFPhysicsWorld >> gtTelemetryStatisticsMapFor: aView [
 	<gtView>
-	^ aView forward
+	^ aView explicit
 		title: 'Step statistics';
 		priority: 21;
-		object: [ (CFPhysicsTelemetryAnalysis world: self statistic: #average) comparisonSignal ];
-		view: #gtMapFor:;
+		disableAsync;
+		stencil: [ CFPhysicsTelemetryStatisticsElement world: self ];
 		updateWhen: Announcement in: [ self telemetryAnnouncer ];
-		actionUpdateButtonTooltip: 'Refresh average and p95 telemetry map'
+		actionUpdateButtonTooltip: 'Refresh average and p95 telemetry maps'
 ]
