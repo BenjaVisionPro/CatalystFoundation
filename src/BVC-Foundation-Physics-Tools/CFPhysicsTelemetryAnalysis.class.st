@@ -71,9 +71,13 @@ CFPhysicsTelemetryAnalysis >> comparisonSignal [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryAnalysis >> signalForRoot: root sampleCount: sampleCount [
-	^ TelemetrySignal new
+	| recordings signal |
+	recordings := self stepRecordings.
+	signal := recordings
+		ifEmpty: [ TelemetrySignal new telemetry: ProcessTelemetry soleInstance; yourself ]
+		ifNotEmpty: [ recordings last copy ].
+	^ signal
 		task: root;
-		telemetry: ProcessTelemetry soleInstance;
 		data: (Dictionary new
 			at: #physicsTelemetryAggregate put: (Dictionary new
 				at: #physicsWorld put: world;
