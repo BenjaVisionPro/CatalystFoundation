@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyOverlayElement',
 	#superclass : 'BlElement',
-	#instVars : [ 'body', 'context', 'listener' ],
+	#instVars : [ 'body', 'context', 'listener', 'selected' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -24,8 +24,21 @@ CFPhysicsBodyOverlayElement >> body: aBodyState [ body := aBodyState ]
 { #category : 'accessing' }
 CFPhysicsBodyOverlayElement >> context: aContext [ context := aContext ]
 
+{ #category : 'testing' }
+CFPhysicsBodyOverlayElement >> isSelected [
+	^ selected
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyOverlayElement >> selected: aBoolean [
+	selected := aBoolean.
+	self refreshBorder.
+	^ self
+]
+
 { #category : 'initialization' }
 CFPhysicsBodyOverlayElement >> initializeRepresentation [
+	selected := false.
 	self
 		constraintsDo: [ :c | c ignoreByLayout ];
 		background: Color transparent;
@@ -65,9 +78,19 @@ CFPhysicsBodyOverlayElement >> refresh [
 				topLeftOrigin;
 				scaleBy: scale;
 				rotateBy: rotation ].
-	self border: (BlBorder
-		paint: ((body isSensor ifTrue: [ Color orange ] ifFalse: [ Color blue ]) alpha: 0.65)
-		width: 1)
+	self refreshBorder
+]
+
+{ #category : 'private - styling' }
+CFPhysicsBodyOverlayElement >> refreshBorder [
+	selected
+		ifTrue: [
+			self border: (BlBorder paint: (Color red alpha: 0.9) width: 3) ]
+		ifFalse: [
+			self border: (BlBorder
+				paint: ((body isSensor ifTrue: [ Color orange ] ifFalse: [ Color blue ]) alpha: 0.65)
+				width: 1) ].
+	^ self
 ]
 
 { #category : 'updating' }

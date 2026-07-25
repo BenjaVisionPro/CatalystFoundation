@@ -623,3 +623,56 @@ CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
 	^ overlay
 ]
+
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayHighlightsTheSelectedBody [
+	<gtExample>
+	| host overlay element bodyOverlay |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	bodyOverlay := overlay bodyElements
+		detect: [ :each | each body == element existingPhysics bodyState ].
+	self assert: bodyOverlay isSelected not.
+	element fireEvent: BlClickEvent new.
+	self assert: bodyOverlay isSelected.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayMovesTheSelectionHighlight [
+	<gtExample>
+	| host overlay first second firstOverlay secondOverlay |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	first := host children first.
+	second := host children second.
+	firstOverlay := overlay bodyElements
+		detect: [ :each | each body == first existingPhysics bodyState ].
+	secondOverlay := overlay bodyElements
+		detect: [ :each | each body == second existingPhysics bodyState ].
+	first fireEvent: BlClickEvent new.
+	self assert: firstOverlay isSelected.
+	self assert: secondOverlay isSelected not.
+	second fireEvent: BlClickEvent new.
+	self assert: firstOverlay isSelected not.
+	self assert: secondOverlay isSelected.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
+	<gtExample>
+	| host overlay element bodyOverlay |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	bodyOverlay := overlay bodyElements
+		detect: [ :each | each body == element existingPhysics bodyState ].
+	element fireEvent: BlClickEvent new.
+	self assert: bodyOverlay isSelected.
+	element fireEvent: BlClickEvent new.
+	self assert: bodyOverlay isSelected not.
+	^ overlay
+]

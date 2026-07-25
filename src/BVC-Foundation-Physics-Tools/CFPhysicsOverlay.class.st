@@ -57,6 +57,7 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 	anElement ifNil: [ ^ self clearSelection ].
 	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
 	selectedElement := anElement.
+	self refreshSelectionHighlight.
 	objectInspector inspect: anElement existingPhysics.
 	^ self
 ]
@@ -78,7 +79,23 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clearSelection [
 	selectedElement := nil.
+	self refreshSelectionHighlight.
 	objectInspector clear.
+	^ self
+]
+
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> refreshSelectionHighlight [
+	| selectedBody |
+	selectedBody := selectedElement
+		ifNil: [ nil ]
+		ifNotNil: [
+			| physics |
+			physics := selectedElement existingPhysics.
+			physics ifNotNil: [ physics bodyState ] ].
+	bodyElements keysAndValuesDo: [ :body :overlayElement |
+		overlayElement selected: body == selectedBody ].
 	^ self
 ]
 
@@ -171,6 +188,7 @@ CFPhysicsOverlay >> refresh [
 		anElement refresh ].
 	contactPass refresh.
 	self refreshSelectedObject.
+	self refreshSelectionHighlight.
 	^ self
 ]
 
