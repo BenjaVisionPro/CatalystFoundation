@@ -531,3 +531,33 @@ CFPhysicsOverlayTests >> physicsOverlaySelectionPreservesPullDragging [
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
 	^ overlay
 ]
+
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorOnlyHandlesMouseEventsInItsForm [
+	<gtExample>
+	| host inspector physics |
+	host := self physicsHost.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector inspect: physics.
+	self assert: inspector root shouldHandleMouseEvents not.
+	self assert: inspector root shouldChildrenHandleMouseEvents.
+	self assert: inspector form shouldHandleMouseEvents.
+	^ inspector
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheBackgroundIsClicked [
+	<gtExample>
+	| host overlay element |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == element.
+	host fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay objectInspector selectedPhysics isNil.
+	^ overlay
+]

@@ -57,7 +57,8 @@ CFPhysicsObjectInspector >> initializeInspector [
 	root
 		id: #cfPhysicsObjectInspector;
 		zIndex: (host elevation relatedTo: 0) + 2;
-		clipChildren: false
+		clipChildren: false;
+		preventMouseEvents
 ]
 
 { #category : 'testing' }
