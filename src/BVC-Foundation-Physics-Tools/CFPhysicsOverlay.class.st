@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'hostRemovalHandler' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -99,10 +99,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		do: [ :anEvent | self clickEvent: anEvent ].
 	framePresentedHandler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
-		do: [ :anEvent | self refreshFrameDiagnostics ].
-	hostRemovalHandler := BlEventHandler
-		on: BlElementRemovedFromSceneGraphEvent
-		do: [ :anEvent | self hostRemovedFromSceneGraph: anEvent ]
+		do: [ :anEvent | self refreshFrameDiagnostics ]
 ]
 
 { #category : 'testing' }
@@ -121,15 +118,8 @@ CFPhysicsOverlay >> install [
 	objectInspector install.
 	host addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
-	host addEventHandler: hostRemovalHandler.
 	self refresh.
 	^ self
-]
-
-
-{ #category : 'private - lifecycle' }
-CFPhysicsOverlay >> hostRemovedFromSceneGraph: anEvent [
-	host hidePhysicsOverlay
 ]
 
 { #category : 'updating' }
@@ -189,7 +179,6 @@ CFPhysicsOverlay >> release [
 	self clearSelection.
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
-	hostRemovalHandler ifNotNil: [ host removeEventHandler: hostRemovalHandler ].
 	contactPass ifNotNil: #release.
 	objectInspector ifNotNil: #release.
 	bodyElements valuesDo: [ :each | each release ].
