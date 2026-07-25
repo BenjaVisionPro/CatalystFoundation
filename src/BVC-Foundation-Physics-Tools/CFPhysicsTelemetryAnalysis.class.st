@@ -31,34 +31,51 @@ CFPhysicsTelemetryAnalysis >> rootStatistics [
 	| recordings |
 	recordings := self stepRecordings.
 	recordings ifEmpty: [ ^ nil ].
-	^ self statisticsForPings: (recordings collect: #ping) rootPings: (recordings collect: #ping) depth: 0
+	^ self
+		statisticsForPings: (recordings collect: #ping)
+		rootPings: (recordings collect: #ping)
+		depth: 0
 ]
 
 { #category : 'private - aggregation' }
 CFPhysicsTelemetryAnalysis >> statisticsForPings: pings rootPings: roots depth: aDepth [
-	| template node children |
+	| template node starts ends durations children |
 	template := pings first.
+	starts := pings with: roots collect: [ :ping :root | ping startTime - root startTime ].
+	ends := pings with: roots collect: [ :ping :root | ping endTime - root startTime ].
+	durations := pings collect: [ :ping | ping endTime - ping startTime ].
 	node := CFPhysicsTelemetrySpanStatistics new
 		name: template name;
 		depth: aDepth;
-		averageStart: (self averageOf: (pings with: roots collect: [ :ping :root | ping startTime - root startTime ]));
-		averageDuration: (self averageOf: (pings collect: [ :ping | ping endTime - ping startTime ]));
-		p95Start: (self p95Of: (pings with: roots collect: [ :ping :root | ping startTime - root startTime ]));
-		p95Duration: (self p95Of: (pings collect: [ :ping | ping endTime - ping startTime ]));
+		averageStart: (self averageOf: starts);
+		averageEnd: (self averageOf: ends);
+		averageDuration: (self averageOf: durations);
+		p05Start: (self percentile: 0.05 of: starts);
+		p25Start: (self percentile: 0.25 of: starts);
+		p75End: (self percentile: 0.75 of: ends);
+		p95Start: (self percentile: 0.95 of: starts);
+		p95End: (self percentile: 0.95 of: ends);
+		p95Duration: (self percentile: 0.95 of: durations);
 		yourself.
 	children := OrderedCollection new.
-	1 to: template tasks size do: [ :index |
+	template tasks do: [ :templateChild |
 		| matching matchingRoots |
 		matching := OrderedCollection new.
 		matchingRoots := OrderedCollection new.
 		1 to: pings size do: [ :sampleIndex |
-			| ping |
+			| ping matchedChild |
 			ping := pings at: sampleIndex.
-			ping tasks size >= index ifTrue: [
-				matching add: (ping tasks at: index).
+			matchedChild := ping tasks
+				detect: [ :candidate | candidate name = templateChild name ]
+				ifNone: [ nil ].
+			matchedChild ifNotNil: [
+				matching add: matchedChild.
 				matchingRoots add: (roots at: sampleIndex) ] ].
 		matching ifNotEmpty: [
-			children add: (self statisticsForPings: matching rootPings: matchingRoots depth: aDepth + 1) ] ].
+			children add: (self
+				statisticsForPings: matching
+				rootPings: matchingRoots
+				depth: aDepth + 1) ] ].
 	node children: children.
 	^ node
 ]
@@ -69,10 +86,15 @@ CFPhysicsTelemetryAnalysis >> averageOf: numbers [
 ]
 
 { #category : 'private - statistics' }
-CFPhysicsTelemetryAnalysis >> p95Of: numbers [
+CFPhysicsTelemetryAnalysis >> percentile: aFraction of: numbers [
 	| sorted rank |
 	numbers ifEmpty: [ ^ 0 ].
 	sorted := numbers sorted.
-	rank := ((sorted size * 0.95) ceiling max: 1) min: sorted size.
+	rank := ((sorted size * aFraction) ceiling max: 1) min: sorted size.
 	^ sorted at: rank
+]
+
+{ #category : 'private - statistics' }
+CFPhysicsTelemetryAnalysis >> p95Of: numbers [
+	^ self percentile: 0.95 of: numbers
 ]

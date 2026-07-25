@@ -587,6 +587,8 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	self assert: root children isNotEmpty.
 	self assert: root averageMilliseconds > 0.
 	self assert: root p95Milliseconds > 0.
+	self assert: root averageEnd >= root averageStart.
+	self assert: root p95End >= root p05Start.
 	element := CFPhysicsTelemetryPipelineElement world: world.
 	self assert: element children isNotEmpty.
 	world telemetryEnabled: false.
