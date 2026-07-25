@@ -1,6 +1,6 @@
 "I am the bounded Pharo Telemetry logger owned by one Physics world.
 
-I do not define a telemetry model. I only select TelemetrySignal instances whose #physicsWorld metadata identifies my world, and bound the retained Beacon recordings so a diagnostic session cannot grow without limit."
+I do not define a telemetry model. I record ProcessTelemetry signals whose #physicsWorld metadata identifies my world, and bound the retained Beacon recordings so a diagnostic session cannot grow without limit."
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
@@ -17,6 +17,7 @@ CFPhysicsTelemetryLogger class >> on: aWorld [
 { #category : 'initialization' }
 CFPhysicsTelemetryLogger >> initialize [
 	super initialize.
+	self telemetryClass: ProcessTelemetry.
 	capacity := 300
 ]
 
