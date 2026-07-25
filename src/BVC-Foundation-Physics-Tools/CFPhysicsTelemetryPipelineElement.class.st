@@ -20,7 +20,7 @@ CFPhysicsTelemetryPipelineElement class >> world: aWorld [
 { #category : 'initialization' }
 CFPhysicsTelemetryPipelineElement >> initialize [
 	super initialize.
-	trackWidth := 520.
+	trackWidth := 500.
 	self
 		hMatchParent;
 		vFitContent;
@@ -48,8 +48,8 @@ CFPhysicsTelemetryPipelineElement >> build [
 	pipeline ifNil: [
 		self addChild: (self label: 'No Pipeline span was found in the recorded Physics steps.' emphasis: false).
 		^ self ].
-	origin := pipeline p05Start.
-	scale := (pipeline p95End - origin) max: 1.
+	origin := 0.
+	scale := pipeline p95Duration max: 1.
 	self addChild: (self headerFor: analysis pipeline: pipeline).
 	self addChild: (self legendForScale: scale).
 	pipeline children do: [ :span |
@@ -71,7 +71,7 @@ CFPhysicsTelemetryPipelineElement >> headerFor: analysis pipeline: pipeline [
 		(pipeline p95Milliseconds printShowingDecimalPlaces: 3), ' ms'
 		emphasis: false).
 	pane addChild: (self label:
-		'Whiskers: P05 start to P95 end  ·  Candle: P25 start to P75 end  ·  Dark bar: average interval'
+		'All positions are relative to Pipeline start  ·  Whiskers: P05 start to P95 end  ·  Candle: P25 start to P75 end  ·  Dark bar: average interval'
 		emphasis: false).
 	^ pane
 ]
@@ -85,7 +85,7 @@ CFPhysicsTelemetryPipelineElement >> legendForScale: scale [
 		cellSpacing: 8;
 		yourself.
 	nameSpace := self label: 'Stage' emphasis: true.
-	nameSpace hExact: 165.
+	nameSpace hExact: 155.
 	timeline := BrVerticalPane new
 		hExact: trackWidth;
 		vFitContent;
@@ -99,7 +99,7 @@ CFPhysicsTelemetryPipelineElement >> legendForScale: scale [
 			yourself);
 		yourself.
 	statistics := self label: 'Average       P95       Ratio       Start jitter' emphasis: true.
-	statistics hExact: 310.
+	statistics hExact: 330.
 	row
 		addChild: nameSpace;
 		addChild: timeline;
@@ -117,10 +117,10 @@ CFPhysicsTelemetryPipelineElement >> stageRowFor: span origin: origin scale: sca
 		padding: (BlInsets top: 4 right: 0 bottom: 4 left: 0);
 		yourself.
 	name := self label: span readableName emphasis: false.
-	name hExact: 165.
+	name hExact: 155.
 	candle := self candleFor: span origin: origin scale: scale.
 	statistics := self statisticsFor: span.
-	statistics hExact: 310.
+	statistics hExact: 330.
 	row
 		addChild: name;
 		addChild: candle;
