@@ -579,7 +579,7 @@ CFPhysicsExamples >> physicsWorldTelemetryCanBeReset [
 { #category : 'examples - telemetry' }
 CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	<gtExample>
-	| world analysis root |
+	| world analysis root element |
 	world := self physicsWorldRecordsPharoTelemetry.
 	analysis := CFPhysicsTelemetryAnalysis world: world.
 	root := analysis rootStatistics.
@@ -587,6 +587,8 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	self assert: root children isNotEmpty.
 	self assert: root averageMilliseconds > 0.
 	self assert: root p95Milliseconds > 0.
+	element := CFPhysicsTelemetryPipelineElement world: world.
+	self assert: element children isNotEmpty.
 	world telemetryEnabled: false.
 	^ root
 ]
