@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld', 'behaviours' ],
+	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld', 'behaviours', 'worldRemovalHandler' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -78,6 +78,7 @@ CFPhysics >> beWorld [
 			element userData at: CFPhysicsWorld put: aWorld.
 			element fireEvent: CFPhysicsWorldAttachmentChanged new.
 			aWorld ].
+	self installWorldRemovalHandler.
 	^ aWorld
 ]
 
@@ -85,11 +86,38 @@ CFPhysics >> beWorld [
 CFPhysics >> ceaseBeingWorld [
 	| existingWorld |
 	existingWorld := self existingWorld.
-	existingWorld ifNil: [ ^ self ].
+	existingWorld ifNil: [
+		self removeWorldRemovalHandler.
+		^ self ].
+	self removeWorldRemovalHandler.
 	existingWorld release.
 	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
 	element fireEvent: CFPhysicsWorldAttachmentChanged new.
 	^ self
+]
+
+
+{ #category : 'private - lifecycle' }
+CFPhysics >> installWorldRemovalHandler [
+	worldRemovalHandler ifNotNil: [ ^ self ].
+	worldRemovalHandler := BlEventHandler
+		on: BlElementRemovedFromSceneGraphEvent
+		do: [ :anEvent | self worldOwnerRemovedFromSceneGraph: anEvent ].
+	element addEventHandler: worldRemovalHandler.
+	^ self
+]
+
+{ #category : 'private - lifecycle' }
+CFPhysics >> removeWorldRemovalHandler [
+	worldRemovalHandler ifNil: [ ^ self ].
+	element removeEventHandler: worldRemovalHandler.
+	worldRemovalHandler := nil.
+	^ self
+]
+
+{ #category : 'private - lifecycle' }
+CFPhysics >> worldOwnerRemovedFromSceneGraph: anEvent [
+	self ceaseBeingWorld
 ]
 
 { #category : 'body type' }

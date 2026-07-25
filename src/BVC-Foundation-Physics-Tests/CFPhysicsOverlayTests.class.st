@@ -623,3 +623,41 @@ CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
 	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
 	^ overlay
 ]
+
+{ #category : 'examples - lifecycle' }
+CFPhysicsOverlayTests >> physicsWorldReleasesWhenItsHostLeavesTheSceneGraph [
+	<gtExample>
+	| host world bodyStates parent |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	bodyStates := world bodyStatesInOrder.
+	parent := host parent.
+
+	parent removeChild: host.
+
+	self assert: host isRemovedFromSceneGraph.
+	self assert: host physics existingWorld isNil.
+	self assert: world owner isNil.
+	self assert: world bodyStatesInOrder isEmpty.
+	bodyStates do: [ :each | self assert: each world isNil ].
+	^ host
+]
+
+{ #category : 'examples - lifecycle' }
+CFPhysicsOverlayTests >> physicsOverlayReleasesWhenItsHostLeavesTheSceneGraph [
+	<gtExample>
+	| host overlay world parent |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	parent := host parent.
+
+	parent removeChild: host.
+
+	self assert: host isRemovedFromSceneGraph.
+	self assert: host existingPhysicsOverlay isNil.
+	self assert: overlay isInstalled not.
+	self assert: host physics existingWorld isNil.
+	self assert: world owner isNil.
+	^ host
+]
