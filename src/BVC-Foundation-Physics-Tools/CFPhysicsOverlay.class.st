@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'framePresentedHandler' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'framePresentedHandler' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -40,6 +40,9 @@ CFPhysicsOverlay >> bodyElements [ ^ bodyElements values asArray ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> contactPass [ ^ contactPass ]
 
+{ #category : 'accessing' }
+CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
+
 { #category : 'initialization' }
 CFPhysicsOverlay >> initializeOverlay [
 	bodyElements := IdentityDictionary new.
@@ -51,6 +54,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	contactPass := CFPhysicsContactOverlayPass in: root context: context.
+	objectInspector := CFPhysicsObjectInspector on: host.
 	framePresentedHandler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
 		do: [ :anEvent | self refreshFrameDiagnostics ]
@@ -69,6 +73,7 @@ CFPhysicsOverlay >> install [
 	(container notNil and: [ host isAttachedToSceneGraph ])
 		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
+	objectInspector install.
 	host addEventHandler: framePresentedHandler.
 	self refresh.
 	^ self
@@ -80,6 +85,7 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 	presented Physics frame. Structural body membership is deliberately left to
 	#refresh so frame presentation cannot mutate the world membership."
 	contactPass refresh.
+	objectInspector refresh.
 	^ self
 ]
 
@@ -113,6 +119,7 @@ CFPhysicsOverlay >> refresh [
 CFPhysicsOverlay >> release [
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactPass ifNotNil: #release.
+	objectInspector ifNotNil: #release.
 	bodyElements valuesDo: [ :each | each release ].
 	bodyElements removeAll.
 	root detach.

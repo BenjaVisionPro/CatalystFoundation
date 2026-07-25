@@ -141,6 +141,13 @@ CFPhysicsObjectInspector >> includesEventTarget: anElement [
 	^ false
 ]
 
+
+{ #category : 'updating' }
+CFPhysicsObjectInspector >> refresh [
+	memento ifNotNil: #reset.
+	^ self
+]
+
 { #category : 'controlling' }
 CFPhysicsObjectInspector >> release [
 	released ifTrue: [ ^ self ].

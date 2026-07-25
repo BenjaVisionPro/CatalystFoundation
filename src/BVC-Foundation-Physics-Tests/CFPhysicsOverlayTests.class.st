@@ -379,3 +379,33 @@ CFPhysicsOverlayTests >> physicsObjectInspectorCanClearItsObject [
 	self assert: previousForm hasParent not.
 	^ inspector
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayOwnsAndInstallsItsObjectInspector [
+	<gtExample>
+	| host overlay inspector |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	inspector := overlay objectInspector.
+	self assert: inspector notNil.
+	self assert: inspector isInstalled.
+	self assert: inspector host == host.
+	self assert: inspector root parent == host parent.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayReleasesItsObjectInspector [
+	<gtExample>
+	| host overlay inspector |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	inspector := overlay objectInspector.
+	host hidePhysicsOverlay.
+	self assert: inspector isInstalled not.
+	self assert: inspector selectedPhysics isNil.
+	self assert: inspector form isNil.
+	self assert: inspector memento isNil.
+	^ host
+]
+
