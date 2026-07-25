@@ -450,7 +450,7 @@ CFPhysicsWorld >> latestTelemetryRecording [
 
 { #category : 'telemetry' }
 CFPhysicsWorld >> resetTelemetry [
-	telemetryLogger ifNotNil: [ telemetryLogger recordings removeAll ]
+	telemetryLogger ifNotNil: [ telemetryLogger reset ]
 ]
 
 { #category : 'stepping' }
