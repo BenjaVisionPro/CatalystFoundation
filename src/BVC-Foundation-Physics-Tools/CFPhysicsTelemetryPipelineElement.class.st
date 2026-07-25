@@ -2,8 +2,7 @@ Class {
 	#name : 'CFPhysicsTelemetryPipelineElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'world',
-		'trackWidth'
+		'world'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -20,11 +19,10 @@ CFPhysicsTelemetryPipelineElement class >> world: aWorld [
 { #category : 'initialization' }
 CFPhysicsTelemetryPipelineElement >> initialize [
 	super initialize.
-	trackWidth := 500.
 	self
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 8;
+		cellSpacing: 4;
 		padding: (BlInsets all: 12)
 ]
 
@@ -35,189 +33,203 @@ CFPhysicsTelemetryPipelineElement >> world: aWorld [
 
 { #category : 'building' }
 CFPhysicsTelemetryPipelineElement >> build [
-	| analysis root pipeline origin scale |
+	| analysis root pipeline maximumEnd scale |
 	self removeChildren.
 	analysis := CFPhysicsTelemetryAnalysis world: world.
 	root := analysis rootStatistics.
 	root ifNil: [
-		self addChild: (self label: 'Record at least one Physics step to see pipeline statistics.' emphasis: false).
+		self addChild: (self emptyLabel: 'Record at least one Physics step to see pipeline statistics.').
 		^ self ].
 	pipeline := root children
 		detect: [ :each | each name asString = 'Pipeline' ]
 		ifNone: [ nil ].
 	pipeline ifNil: [
-		self addChild: (self label: 'No Pipeline span was found in the recorded Physics steps.' emphasis: false).
+		self addChild: (self emptyLabel: 'No Pipeline span was found in the recorded Physics steps.').
 		^ self ].
-	origin := 0.
-	"P95 duration and P95 end are independent percentiles. Use the
-	latest right edge needed by any candle so interval geometry is not clipped."
-	scale := pipeline children
+	maximumEnd := pipeline children
 		inject: pipeline p95Duration
 		into: [ :maximum :span | maximum max: span p95End ].
-	scale := scale max: 1.
-	self addChild: (self headerFor: analysis pipeline: pipeline).
-	self addChild: (self legendForScale: scale).
+	maximumEnd := maximumEnd max: 1.
+	scale := GtPlotterLinearScale new
+		domainFrom: 0 to: maximumEnd;
+		rangeFrom: 0 to: 1;
+		tickFormat: [ :value |
+			(value / 1000.0) printShowingDecimalPlaces: 2 ];
+		yourself.
+	self addChild: (self axisRowFor: scale).
 	pipeline children do: [ :span |
-		self addChild: (self stageRowFor: span origin: origin scale: scale) ]
+		self addChild: (self stageRowFor: span scale: scale) ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> headerFor: analysis pipeline: pipeline [
-	| pane |
-	pane := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 3;
-		yourself.
-	pane addChild: (self label: 'Physics pipeline interval distribution' emphasis: true).
-	pane addChild: (self label:
-		analysis sampleCount asString, ' steps  ·  Average ',
-		(pipeline averageMilliseconds printShowingDecimalPlaces: 3), ' ms  ·  P95 ',
-		(pipeline p95Milliseconds printShowingDecimalPlaces: 3), ' ms'
-		emphasis: false).
-	pane addChild: (self label:
-		'All positions are relative to Pipeline start  ·  Whiskers: P05 start to P95 end  ·  Candle: P25 start to P75 end  ·  Dark bar: average interval'
-		emphasis: false).
-	^ pane
-]
-
-{ #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> legendForScale: scale [
-	| row nameSpace timeline statistics |
+CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
+	| row axis statisticsSpace labels |
 	row := BrHorizontalPane new
 		hMatchParent;
-		vFitContent;
-		cellSpacing: 8;
+		vExact: 34;
+		cellSpacing: 12;
 		yourself.
-	nameSpace := self label: 'Stage' emphasis: true.
-	nameSpace hExact: 155.
-	timeline := BrVerticalPane new
-		hExact: trackWidth;
-		vFitContent;
-		cellSpacing: 2;
-		addChild: (self label: 'Pipeline interval candle' emphasis: true);
-		addChild: (BrHorizontalPane new
-			hExact: trackWidth;
-			vFitContent;
-			addChild: ((self label: '0 ms' emphasis: false) hExact: trackWidth / 2; yourself);
-			addChild: ((self label: ((scale / 1000.0) printShowingDecimalPlaces: 3), ' ms' emphasis: false) hExact: trackWidth / 2; yourself);
-			yourself);
+	axis := BrFrame new
+		hMatchParent;
+		vExact: 34;
+		clipChildren: false;
 		yourself.
-	statistics := self label: 'Average       P95       Ratio       Start jitter' emphasis: true.
-	statistics hExact: 330.
+	labels := GtPlotterHorizontalTickLabelsElement new
+		scale: scale;
+		labels: 8;
+		labelFormat: [ :value |
+			((value / 1000.0) printShowingDecimalPlaces: 2), ' ms' ];
+		labelStyle: [ :anElement |
+			anElement constraintsDo: [ :c |
+				c frame vertical alignBottom.
+				c horizontal fitContent.
+				c vertical fitContent ] ];
+		yourself.
+	axis addChild: labels.
+	statisticsSpace := BlElement new
+		size: 300 @ 1;
+		yourself.
 	row
-		addChild: nameSpace;
-		addChild: timeline;
-		addChild: statistics.
+		addChild: axis;
+		addChild: statisticsSpace.
 	^ row
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> stageRowFor: span origin: origin scale: scale [
-	| row name candle statistics |
+CFPhysicsTelemetryPipelineElement >> stageRowFor: span scale: scale [
+	| row chart statistics |
 	row := BrHorizontalPane new
 		hMatchParent;
-		vFitContent;
-		cellSpacing: 8;
-		padding: (BlInsets top: 4 right: 0 bottom: 4 left: 0);
+		vExact: 34;
+		cellSpacing: 12;
 		yourself.
-	name := self label: span readableName emphasis: false.
-	name hExact: 155.
-	candle := self candleFor: span origin: origin scale: scale.
+	chart := self candleFor: span scale: scale.
 	statistics := self statisticsFor: span.
-	statistics hExact: 330.
 	row
-		addChild: name;
-		addChild: candle;
+		addChild: chart;
 		addChild: statistics.
 	^ row
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> candleFor: span origin: origin scale: scale [
-	| frame p05X p25X p75X p95X averageStartX averageEndX wick candle averageBar leftCap rightCap averageMarker |
-	p05X := self xFor: span p05Start origin: origin scale: scale.
-	p25X := self xFor: span p25Start origin: origin scale: scale.
-	p75X := self xFor: span p75End origin: origin scale: scale.
-	p95X := self xFor: span p95End origin: origin scale: scale.
-	averageStartX := self xFor: span averageStart origin: origin scale: scale.
-	averageEndX := self xFor: span averageEnd origin: origin scale: scale.
-	p25X := p25X max: p05X.
-	p75X := p75X max: p25X + 1.
-	p95X := p95X max: p75X.
-	averageEndX := averageEndX max: averageStartX + 1.
+CFPhysicsTelemetryPipelineElement >> candleFor: span scale: scale [
+	| frame grid wick candle averageBar averageMarker leftCap rightCap p05 p25 p75 p95 averageStart averageEnd |
+	p05 := scale map: span p05Start.
+	p25 := scale map: span p25Start.
+	p75 := scale map: span p75End.
+	p95 := scale map: span p95End.
+	averageStart := scale map: span averageStart.
+	averageEnd := scale map: span averageEnd.
+	p25 := p25 max: p05.
+	p75 := p75 max: p25.
+	p95 := p95 max: p75.
+	averageEnd := averageEnd max: averageStart.
 	frame := BrFrame new
-		hExact: trackWidth;
-		vExact: 26;
+		hMatchParent;
+		vExact: 30;
 		layout: BlFrameLayout new;
-		background: (Color gray alpha: 0.08);
+		background: (Color gray alpha: 0.035);
+		clipChildren: false;
 		yourself.
-	wick := BlElement new
-		size: ((p95X - p05X) max: 1) @ 1;
-		relocate: p05X @ 13;
-		background: (Color gray alpha: 0.65);
+	grid := GtPlotterHorizontalTicksElement new
+		scale: scale;
+		ticks: 8;
+		weight: 1;
+		tickStyle: [ :anElement |
+			anElement
+				background: (Color gray alpha: 0.12);
+				width: 1 ];
 		yourself.
-	leftCap := BlElement new
-		size: 1 @ 12;
-		relocate: p05X @ 7;
-		background: (Color gray alpha: 0.65);
-		yourself.
-	rightCap := BlElement new
-		size: 1 @ 12;
-		relocate: p95X @ 7;
-		background: (Color gray alpha: 0.65);
-		yourself.
-	candle := BlElement new
-		size: ((p75X - p25X) max: 2) @ 14;
-		relocate: p25X @ 6;
-		background: (Color gray alpha: 0.28);
-		border: (BlBorder paint: (Color gray alpha: 0.55) width: 1);
-		yourself.
-	averageBar := BlElement new
-		size: ((averageEndX - averageStartX) max: 2) @ 8;
-		relocate: averageStartX @ 9;
-		background: (Color gray alpha: 0.78);
-		yourself.
-	averageMarker := BlElement new
-		size: 2 @ 18;
-		relocate: averageStartX @ 4;
-		background: (Color black alpha: 0.55);
-		yourself.
+	wick := self horizontalElementFrom: p05 to: p95 height: 1 color: (Color gray alpha: 0.65) verticalCenter: 0.5.
+	candle := self horizontalElementFrom: p25 to: p75 height: 14 color: (Color gray alpha: 0.24) verticalCenter: 0.5.
+	candle border: (BlBorder paint: (Color gray alpha: 0.5) width: 1).
+	averageBar := self horizontalElementFrom: averageStart to: averageEnd height: 7 color: (Color gray alpha: 0.78) verticalCenter: 0.5.
+	leftCap := self verticalMarkerAt: p05 height: 12 color: (Color gray alpha: 0.65).
+	rightCap := self verticalMarkerAt: p95 height: 12 color: (Color gray alpha: 0.65).
+	averageMarker := self verticalMarkerAt: averageStart height: 18 color: (Color black alpha: 0.55).
 	frame
+		addChild: grid;
 		addChild: wick;
 		addChild: leftCap;
 		addChild: rightCap;
 		addChild: candle;
 		addChild: averageBar;
-		addChild: averageMarker.
+		addChild: averageMarker;
+		addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: (self tooltipFor: span));
+		when: BlClickEvent do: [ :event |
+			event consumed: true.
+			event currentTarget phlow spawnObject: span ].
 	^ frame
 ]
 
-{ #category : 'private - geometry' }
-CFPhysicsTelemetryPipelineElement >> xFor: aTime origin: origin scale: scale [
-	| relative |
-	relative := (aTime - origin) max: 0.
-	^ (((relative / scale) * trackWidth) min: trackWidth) asFloat
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> horizontalElementFrom: startPercentage to: endPercentage height: aHeight color: aColor verticalCenter: verticalPercentage [
+	| safeStart safeEnd |
+	safeStart := startPercentage max: 0.
+	safeEnd := (endPercentage max: safeStart + 0.0005) min: 1.
+	^ BlElement new
+		background: aColor;
+		constraintsDo: [ :c |
+			c vertical exact: aHeight.
+			c horizontal matchParent.
+			c frame vertical alignCenterAt: verticalPercentage.
+			c frame horizontal alignLeftAt: safeStart.
+			c frame horizontal weight: safeEnd - safeStart ];
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> verticalMarkerAt: aPercentage height: aHeight color: aColor [
+	^ BlElement new
+		background: aColor;
+		constraintsDo: [ :c |
+			c horizontal exact: 1.
+			c vertical exact: aHeight.
+			c frame vertical alignCenterAt: 0.5.
+			c frame horizontal alignCenterAt: (aPercentage max: 0) min: 1 ];
+		yourself
 ]
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> statisticsFor: span [
-	^ self label:
-		'Avg ', (span averageMilliseconds printShowingDecimalPlaces: 3), ' ms    ',
-		'P95 ', (span p95Milliseconds printShowingDecimalPlaces: 3), ' ms    ',
-		(span p95ToAverageRatio printShowingDecimalPlaces: 2), 'x    ',
-		'Jitter ', (span startJitterMilliseconds printShowingDecimalPlaces: 3), ' ms'
-		emphasis: false
+	| pane |
+	pane := BrHorizontalPane new
+		hExact: 300;
+		vExact: 30;
+		cellSpacing: 8;
+		yourself.
+	pane
+		addChild: (self numericLabel: span averageMilliseconds width: 62 decimals: 3 suffix: '');
+		addChild: (self numericLabel: span p95Milliseconds width: 62 decimals: 3 suffix: '');
+		addChild: (self numericLabel: span p95ToAverageRatio width: 58 decimals: 2 suffix: 'x');
+		addChild: (self numericLabel: span startJitterMilliseconds width: 62 decimals: 3 suffix: '').
+	^ pane
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> label: aString emphasis: isEmphasized [
+CFPhysicsTelemetryPipelineElement >> numericLabel: aNumber width: aWidth decimals: decimalPlaces suffix: suffixString [
+	^ BrLabel new
+		hExact: aWidth;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.75));
+		text: (aNumber printShowingDecimalPlaces: decimalPlaces), suffixString;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> tooltipFor: span [
+	^ span readableName, String cr,
+		'Average ', (span averageMilliseconds printShowingDecimalPlaces: 3), ' ms', String cr,
+		'P95 ', (span p95Milliseconds printShowingDecimalPlaces: 3), ' ms', String cr,
+		'P95 / average ', (span p95ToAverageRatio printShowingDecimalPlaces: 2), 'x', String cr,
+		'Start jitter ', (span startJitterMilliseconds printShowingDecimalPlaces: 3), ' ms'
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> emptyLabel: aString [
 	^ BrLabel new
 		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (isEmphasized
-				ifTrue: [ Color black ]
-				ifFalse: [ Color black alpha: 0.70 ]));
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.70));
 		text: aString;
 		yourself
 ]
