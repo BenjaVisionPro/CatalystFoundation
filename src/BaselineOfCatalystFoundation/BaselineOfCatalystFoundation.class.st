@@ -94,6 +94,9 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec
+		baseline: 'Telemetry'
+		with: [ spec repository: 'github://feenkcom/pharo-telemetry:main/src' ].
+	spec
 		baseline: 'Gt4FontAwesome'
 		with: [ spec repository: 'git@github.com:BenjaVisionPro/gt4FontAwesome.git' ].
 	spec package: 'BVC-Foundation-Motion-Core'.
@@ -103,7 +106,7 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Physics-Collision'.
 	spec package: 'BVC-Foundation-Physics-Core'
-		with: [ spec requires: #('BVC-Foundation-Physics-Collision') ].
+		with: [ spec requires: #('BVC-Foundation-Physics-Collision' 'Telemetry') ].
 	spec package: 'BVC-Foundation-Physics-Pipeline'
 		with: [ spec requires: #('BVC-Foundation-Physics-Collision' 'BVC-Foundation-Physics-Core') ].
 	spec package: 'BVC-Foundation-Physics-Bloc'

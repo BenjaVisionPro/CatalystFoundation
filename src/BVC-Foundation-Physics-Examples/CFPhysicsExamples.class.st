@@ -545,65 +545,32 @@ CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 	^ world
 ]
 
-{ #category : 'examples - telemetry' }
-CFPhysicsExamples >> physicsWorldTelemetryIsOptionalAndBounded [
-	<gtExample>
-	| host world telemetry |
-	host := BlElement new size: 320 @ 200; yourself.
-	host addChild: (BlElement new size: 20 @ 20; yourself).
-	world := host physics beWorld.
-	self assert: world telemetryEnabled not.
-	world step.
-	self assert: world existingTelemetry isNil.
-	telemetry := world telemetry capacity: 2.
-	world step: 3.
-	self assert: telemetry sampleCount equals: 2.
-	self assert: telemetry latest stepNumber equals: world stepNumber.
-	^ telemetry
-]
 
 { #category : 'examples - telemetry' }
-CFPhysicsExamples >> physicsWorldTelemetryRecordsPipelineStages [
+CFPhysicsExamples >> physicsWorldRecordsPharoTelemetry [
 	<gtExample>
-	| host world sample |
+	| host world |
 	host := BlElement new size: 320 @ 200; yourself.
 	host addChild: (BlElement new size: 20 @ 20; yourself).
 	world := host physics beWorld.
 	world telemetryEnabled: true.
 	world step.
-	sample := world telemetry latest.
-	self assert: sample notNil.
-	self assert: sample bodyCount equals: 1.
-	self assert: sample stageExecutions size equals: world stepPipeline stages size.
-	self assert: (sample stageExecutions allSatisfy: [ :each | each durationMilliseconds notNil ]).
-	^ sample
+	self assert: world telemetryRecordings isNotEmpty.
+	self assert: (world latestTelemetryRecording data includesKey: #physicsFrame).
+	self assert: world latestTelemetryRecording ping tasks isNotEmpty.
+	world telemetryEnabled: false.
+	self assert: world telemetryRecordings isNotEmpty.
+	^ world
 ]
 
 { #category : 'examples - telemetry' }
-CFPhysicsExamples >> physicsWorldTelemetryProvidesStageStatisticsAndHotspots [
+CFPhysicsExamples >> physicsWorldTelemetryCanBeReset [
 	<gtExample>
-	| host world telemetry stageMetrics hotspots sample totalMetric |
-	host := BlElement new size: 320 @ 200; yourself.
-	host addChild: (BlElement new size: 20 @ 20; yourself).
-	world := host physics beWorld.
+	| world |
+	world := self physicsWorldRecordsPharoTelemetry.
 	world telemetryEnabled: true.
-	world step: 5.
-	telemetry := world telemetry.
-	sample := telemetry latest.
-	stageMetrics := telemetry stageMetrics.
-	hotspots := telemetry hotspots.
-	totalMetric := telemetry metricAt: #totalMilliseconds.
-	self assert: sample totalMilliseconds isFloat.
-	self assert: sample unaccountedMilliseconds >= 0.0.
-	self assert: telemetry samples noneSatisfy: #isNil.
-	self assert: totalMetric sampleCount equals: telemetry sampleCount.
-	self assert: totalMetric latest equals: sample totalMilliseconds.
-	self assert: stageMetrics size equals: world stepPipeline stages size.
-	self assert: (stageMetrics allSatisfy: [ :metric |
-		metric sampleCount = telemetry sampleCount
-			and: [ metric latestExecution notNil ] ]).
-	self assert: hotspots size equals: stageMetrics size.
-	hotspots size > 1 ifTrue: [
-		self assert: hotspots first average >= hotspots last average ].
-	^ telemetry
+	world resetTelemetry.
+	self assert: world telemetryRecordings isEmpty.
+	world telemetryEnabled: false.
+	^ world
 ]

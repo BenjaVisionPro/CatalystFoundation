@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetry' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -49,6 +49,9 @@ CFPhysicsWorld >> initialize [
 	simulationTime := 0.0.
 	stepNumber := 0.
 	behaviours := OrderedCollection new.
+	telemetryEnabled := false.
+	telemetryLogger := nil.
+	telemetryCapacity := 300.
 	containmentConstraints := IdentitySet new.
 	boundary := CFPhysicsWorldBoundary new.
 	distanceJoints := IdentitySet new.
@@ -76,6 +79,8 @@ CFPhysicsWorld >> owner: anElement [
 CFPhysicsWorld >> release [
 	"Release every resource owned by this world. My owner remains structurally
 	unchanged; its Physics facade removes the world association separately."
+	self telemetryEnabled: false.
+	telemetryLogger := nil.
 	behaviours copy do: [ :each | each remove ].
 	pointerConstraints copy do: [ :each | self removePointerConstraint: each ].
 	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
@@ -148,29 +153,6 @@ CFPhysicsWorld >> stepPipeline: aStepPipeline [ stepPipeline := aStepPipeline ]
 
 { #category : 'pipeline' }
 CFPhysicsWorld >> lastStepResult [ ^ lastStepResult ]
-
-{ #category : 'telemetry' }
-CFPhysicsWorld >> existingTelemetry [
-	^ telemetry
-]
-
-{ #category : 'telemetry' }
-CFPhysicsWorld >> telemetry [
-	^ telemetry ifNil: [ telemetry := CFPhysicsWorldTelemetry new ]
-]
-
-{ #category : 'telemetry' }
-CFPhysicsWorld >> telemetryEnabled [
-	^ telemetry notNil
-]
-
-{ #category : 'telemetry' }
-CFPhysicsWorld >> telemetryEnabled: aBoolean [
-	aBoolean
-		ifTrue: [ self telemetry ]
-		ifFalse: [ telemetry := nil ].
-	^ self
-]
 
 { #category : 'collision' }
 CFPhysicsWorld >> contacts [ ^ activeContacts ]
@@ -346,54 +328,129 @@ CFPhysicsWorld >> newStep [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
-	| bodies step explicitlyContainedBodies totalStarted membershipStarted preparationStarted pipelineStarted boundaryStarted frameMetrics |
-	totalStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
-	membershipStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
-	self synchroniseMembership.
-	self retireInvalidBehaviours.
+	telemetryEnabled ifFalse: [ ^ self stepRecordingTelemetry: false ].
+	^ ProcessTelemetry
+		rootTimeSync: [ 'Physics step' ]
+		during: [
+			ProcessTelemetry
+				profile: [ self stepRecordingTelemetry: true ]
+				executing: [ :run |
+					| result |
+					result := run value.
+					self telemetryDataForStepResult: result ]
+				as: #physicsFrame ]
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> stepRecordingTelemetry: shouldRecordTelemetry [
+	| bodies step explicitlyContainedBodies |
+	self telemetryTime: 'Membership synchronisation' enabled: shouldRecordTelemetry during: [
+		self synchroniseMembership.
+		self retireInvalidBehaviours ].
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
-	preparationStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
-	self updateBehavioursForStep: step.
-	self prepareAttractionConstraintsForStep: step timeStep.
-	self prepareRepulsionConstraintsForStep: step timeStep.
-	self prepareSpringConstraintsForStep: step timeStep.
-	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
-	self preparePointerConstraintsForStep: step timeStep.
-	pipelineStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
-	lastStepResult := stepPipeline
-		stepBodies: bodies
-		fromContacts: activeContacts
-		joints: self joints
-		step: step
-		gravity: gravity
-		restitutionThreshold: restitutionThreshold
-		telemetryEnabled: telemetry notNil.
+	self telemetryTime: 'Preparation' enabled: shouldRecordTelemetry during: [
+		self updateBehavioursForStep: step.
+		self prepareAttractionConstraintsForStep: step timeStep.
+		self prepareRepulsionConstraintsForStep: step timeStep.
+		self prepareSpringConstraintsForStep: step timeStep.
+		explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
+		self preparePointerConstraintsForStep: step timeStep ].
+	lastStepResult := self telemetryTime: 'Pipeline' enabled: shouldRecordTelemetry during: [
+		stepPipeline
+			stepBodies: bodies
+			fromContacts: activeContacts
+			joints: self joints
+			step: step
+			gravity: gravity
+			restitutionThreshold: restitutionThreshold
+			telemetryEnabled: shouldRecordTelemetry ].
 	activeContacts := lastStepResult activeContacts.
-	boundaryStarted := telemetry ifNotNil: [ Time microsecondClockValue ].
-	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
+	self telemetryTime: 'Boundary' enabled: shouldRecordTelemetry during: [
+		self applyDefaultBoundaryExcept: explicitlyContainedBodies ].
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
-	telemetry ifNotNil: [
-		frameMetrics := CFPhysicsFrameMetrics new
-			stepNumber: stepNumber;
-			simulationTime: simulationTime;
-			membershipMilliseconds: (preparationStarted - membershipStarted) / 1000.0;
-			preparationMilliseconds: (pipelineStarted - preparationStarted) / 1000.0;
-			pipelineMilliseconds: (boundaryStarted - pipelineStarted) / 1000.0;
-			boundaryMilliseconds: (Time microsecondClockValue - boundaryStarted) / 1000.0;
-			totalMilliseconds: (Time microsecondClockValue - totalStarted) / 1000.0;
-			bodyCount: bodies size;
-			activeBodyCount: (bodies count: #isAwake);
-			contactCount: activeContacts size;
-			constraintCount: pointerConstraints size + springConstraints size + attractionConstraints size + repulsionConstraints size + containmentConstraints size;
-			jointCount: self joints size;
-			stageExecutions: lastStepResult stageExecutions;
-			yourself.
-		telemetry record: frameMetrics ].
 	^ lastStepResult
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> telemetryTime: aString enabled: aBoolean during: aBlock [
+	^ aBoolean
+		ifTrue: [ ProcessTelemetry time: [ aString ] during: aBlock ]
+		ifFalse: [ aBlock value ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
+	^ Dictionary new
+		at: #physicsWorld put: self;
+		at: #kind put: #step;
+		at: #stepNumber put: stepNumber;
+		at: #simulationTime put: simulationTime;
+		at: #bodyCount put: bodyStates size;
+		at: #activeBodyCount put: (bodyStates values count: #isAwake);
+		at: #sleepingBodyCount put: (bodyStates values count: [ :each | each isAwake not ]);
+		at: #contactCount put: activeContacts size;
+		at: #constraintCount put: pointerConstraints size + springConstraints size + attractionConstraints size + repulsionConstraints size + containmentConstraints size;
+		at: #jointCount put: self joints size;
+		at: #stepResult put: aStepResult;
+		yourself
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryEnabled [
+	^ telemetryEnabled
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryEnabled: aBoolean [
+	telemetryEnabled = aBoolean ifTrue: [ ^ self ].
+	telemetryEnabled := aBoolean.
+	aBoolean ifTrue: [ self startTelemetry ] ifFalse: [ self stopTelemetry ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> startTelemetry [
+	ProcessTelemetry defaultTelemetryClass == MemoryTelemetry ifFalse: [
+		ProcessTelemetry defaultTelemetryClass: MemoryTelemetry ].
+	telemetryLogger ifNil: [
+		telemetryLogger := CFPhysicsTelemetryLogger on: self.
+		telemetryLogger capacity: telemetryCapacity ].
+	telemetryLogger start
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> stopTelemetry [
+	telemetryLogger ifNotNil: [ telemetryLogger stop ]
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryRecordings [
+	telemetryLogger ifNil: [ ^ #() ].
+	^ telemetryLogger recordings asArray
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryCapacity [
+	^ telemetryCapacity
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryCapacity: anInteger [
+	telemetryCapacity := anInteger max: 1.
+	telemetryLogger ifNotNil: [ telemetryLogger capacity: telemetryCapacity ]
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> latestTelemetryRecording [
+	^ self telemetryRecordings ifEmpty: [ nil ] ifNotEmpty: [ :recordings | recordings last ]
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> resetTelemetry [
+	telemetryLogger ifNotNil: [ telemetryLogger recordings removeAll ]
 ]
 
 { #category : 'stepping' }

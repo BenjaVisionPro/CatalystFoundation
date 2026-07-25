@@ -102,12 +102,11 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		restitutionThreshold: restitutionThreshold;
 		yourself.
 	stages do: [ :stage |
-		| output started |
-		started := telemetryEnabled ifTrue: [ Time microsecondClockValue ].
-		output := stage executeOn: result.
-		telemetryEnabled
-			ifTrue: [ result recordStage: stage output: output durationMilliseconds: (Time microsecondClockValue - started) / 1000.0 ]
-			ifFalse: [ result recordStage: stage output: output ] ].
+		| output |
+		output := telemetryEnabled
+			ifTrue: [ ProcessTelemetry time: [ stage class name asString ] during: [ stage executeOn: result ] ]
+			ifFalse: [ stage executeOn: result ].
+		result recordStage: stage output: output ].
 	^ result
 ]
 

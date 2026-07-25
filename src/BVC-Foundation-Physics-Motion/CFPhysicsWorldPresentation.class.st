@@ -32,7 +32,7 @@ CFPhysicsWorldPresentation >> initialize [
 
 { #category : 'consuming frames' }
 CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
-	(self tryPresentAtAlpha: aNumber) ifFalse: [ ^ self ].
+	(self tryPresentAtAlphaRecordingTelemetry: aNumber) ifFalse: [ ^ self ].
 	world owner ifNotNil: [ :anOwner |
 		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ].
 	^ self
@@ -40,6 +40,20 @@ CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
 
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> present [
+	world telemetryEnabled ifFalse: [ ^ self presentWithoutTelemetry ].
+	^ ProcessTelemetry
+		rootTimeSync: [ 'Physics presentation' ]
+		during: [
+			ProcessTelemetry
+				profile: [ self presentWithoutTelemetry ]
+				executing: [ :run |
+					run value.
+					self telemetryDataAtAlpha: 1.0 ]
+				as: #physicsPresentation ]
+]
+
+{ #category : 'private - presenting' }
+CFPhysicsWorldPresentation >> presentWithoutTelemetry [
 	self prepare ifFalse: [ ^ self ].
 	world synchroniseMembership.
 	self synchronisePresentations.
@@ -51,8 +65,33 @@ CFPhysicsWorldPresentation >> present [
 
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
-	self tryPresentAtAlpha: aNumber.
+	self tryPresentAtAlphaRecordingTelemetry: aNumber.
 	^ self
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorldPresentation >> tryPresentAtAlphaRecordingTelemetry: aNumber [
+	world telemetryEnabled ifFalse: [ ^ self tryPresentAtAlpha: aNumber ].
+	^ ProcessTelemetry
+		rootTimeSync: [ 'Physics presentation' ]
+		during: [
+			ProcessTelemetry
+				profile: [ self tryPresentAtAlpha: aNumber ]
+				executing: [ :run |
+					run value.
+					self telemetryDataAtAlpha: aNumber ]
+				as: #physicsPresentation ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorldPresentation >> telemetryDataAtAlpha: aNumber [
+	^ Dictionary new
+		at: #physicsWorld put: world;
+		at: #kind put: #presentation;
+		at: #stepNumber put: world stepNumber;
+		at: #bodyCount put: world bodyStatesInOrder size;
+		at: #alpha put: aNumber;
+		yourself
 ]
 
 { #category : 'private - presenting' }
