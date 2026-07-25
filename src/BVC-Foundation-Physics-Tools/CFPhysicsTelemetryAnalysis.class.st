@@ -1,4 +1,4 @@
-"I derive an aggregate Pharo Telemetry signal from the bounded recordings of one Physics world. I retain no measurements; every result is rebuilt from the source TelemetrySignal objects."
+"I derive aggregate Pharo Telemetry signals from the bounded recordings of one Physics world. I retain no measurements; every result is rebuilt from the source TelemetrySignal objects."
 Class {
 	#name : 'CFPhysicsTelemetryAnalysis',
 	#superclass : 'Object',
@@ -33,24 +33,69 @@ CFPhysicsTelemetryAnalysis >> aggregateSignal [
 	root := recordings
 		ifEmpty: [ self emptyPing ]
 		ifNotEmpty: [ self aggregatePings: (recordings collect: #ping) ].
-	signal := TelemetrySignal new.
-	signal task: root.
-	signal telemetry: ProcessTelemetry.
-	signal data: (Dictionary new
-		at: #physicsTelemetryAggregate put: (Dictionary new
-			at: #physicsWorld put: world;
-			at: #statistic put: statistic;
-			at: #sampleCount put: recordings size;
-			yourself);
-		yourself).
+	signal := self signalForRoot: root sampleCount: recordings size.
 	^ signal
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetryAnalysis >> comparisonSignal [
+	| recordings averageRoot p95Root averageGroup p95Group root gap signal |
+	recordings := self stepRecordings.
+	recordings ifEmpty: [ ^ self signalForRoot: self emptyPing sampleCount: 0 ].
+
+	statistic := #average.
+	averageRoot := self aggregatePings: (recordings collect: #ping).
+	averageGroup := self groupNamed: 'Average' containing: averageRoot.
+
+	statistic := #p95.
+	p95Root := self aggregatePings: (recordings collect: #ping).
+	gap := ((averageGroup endTime - averageGroup startTime) * 0.03) ceiling max: 1.
+	self shiftPing: p95Root by: averageGroup endTime + gap.
+	p95Group := self groupNamed: 'P95' containing: p95Root.
+
+	root := TelemetryPing new
+		name: 'Physics step statistics';
+		startTime: averageGroup startTime;
+		endTime: p95Group endTime;
+		realStartTime: averageGroup startTime;
+		realEndTime: p95Group endTime;
+		instVarNamed: 'gcStartTime' put: 0;
+		instVarNamed: 'gcEndTime' put: 0;
+		tasks: { averageGroup. p95Group };
+		yourself.
+	averageGroup sender: root.
+	p95Group sender: root.
+	signal := self signalForRoot: root sampleCount: recordings size.
+	^ signal
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryAnalysis >> signalForRoot: root sampleCount: sampleCount [
+	^ TelemetrySignal new
+		task: root;
+		telemetry: ProcessTelemetry soleInstance;
+		data: (Dictionary new
+			at: #physicsTelemetryAggregate put: (Dictionary new
+				at: #physicsWorld put: world;
+				at: #statistic put: statistic;
+				at: #sampleCount put: sampleCount;
+				yourself);
+			yourself);
+		yourself
 ]
 
 { #category : 'private - aggregation' }
 CFPhysicsTelemetryAnalysis >> aggregatePings: pings [
-	| template aggregate children |
+	^ self aggregatePings: pings templateRoot: pings first
+]
+
+{ #category : 'private - aggregation' }
+CFPhysicsTelemetryAnalysis >> aggregatePings: pings templateRoot: templateRoot [
+	| template aggregate children startOffset elapsed |
 	template := pings first.
-	aggregate := self newPingNamed: template name duration: (self statisticOf: (pings collect: #durationInMicroseconds)).
+	startOffset := template startTime - templateRoot startTime.
+	elapsed := self statisticOf: (pings collect: [ :ping | ping endTime - ping startTime ]).
+	aggregate := self newPingNamed: template name start: startOffset elapsed: elapsed.
 	children := OrderedCollection new.
 	1 to: template tasks size do: [ :index |
 		| matching child |
@@ -58,7 +103,7 @@ CFPhysicsTelemetryAnalysis >> aggregatePings: pings [
 			select: [ :ping | ping tasks size >= index ]
 			thenCollect: [ :ping | ping tasks at: index ].
 		matching ifNotEmpty: [
-			child := self aggregatePings: matching.
+			child := self aggregatePings: matching templateRoot: templateRoot.
 			child sender: aggregate.
 			children add: child ] ].
 	aggregate tasks: children.
@@ -77,19 +122,41 @@ CFPhysicsTelemetryAnalysis >> statisticOf: numbers [
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryAnalysis >> newPingNamed: aName duration: microseconds [
+CFPhysicsTelemetryAnalysis >> newPingNamed: aName start: start elapsed: elapsed [
 	^ TelemetryPing new
 		name: aName;
-		startTime: 0;
-		endTime: microseconds;
-		realStartTime: 0;
-		realEndTime: microseconds;
+		startTime: start;
+		endTime: start + elapsed;
+		realStartTime: start;
+		realEndTime: start + elapsed;
 		instVarNamed: 'gcStartTime' put: 0;
 		instVarNamed: 'gcEndTime' put: 0;
 		yourself
 ]
 
 { #category : 'private - building' }
+CFPhysicsTelemetryAnalysis >> groupNamed: aName containing: aPing [
+	| group |
+	group := self
+		newPingNamed: aName
+		start: aPing startTime
+		elapsed: aPing endTime - aPing startTime.
+	group tasks: { aPing }.
+	aPing sender: group.
+	^ group
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryAnalysis >> shiftPing: aPing by: anOffset [
+	aPing
+		startTime: aPing startTime + anOffset;
+		endTime: aPing endTime + anOffset;
+		realStartTime: aPing realStartTime + anOffset;
+		realEndTime: aPing realEndTime + anOffset.
+	aPing tasks do: [ :child | self shiftPing: child by: anOffset ]
+]
+
+{ #category : 'private - building' }
 CFPhysicsTelemetryAnalysis >> emptyPing [
-	^ self newPingNamed: 'No Physics step recordings' duration: 1
+	^ self newPingNamed: 'No Physics step recordings' start: 0 elapsed: 1
 ]
