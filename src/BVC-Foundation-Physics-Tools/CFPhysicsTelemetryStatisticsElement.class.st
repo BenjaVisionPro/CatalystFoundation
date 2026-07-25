@@ -16,7 +16,7 @@ CFPhysicsTelemetryStatisticsElement >> world: aWorld [ world := aWorld ]
 
 { #category : 'building' }
 CFPhysicsTelemetryStatisticsElement >> build [
-	| analysis root spans |
+	| analysis root spans scale maps |
 	self removeChildren.
 	self
 		layout: BlLinearLayout vertical;
@@ -28,10 +28,19 @@ CFPhysicsTelemetryStatisticsElement >> build [
 		self addChild: (self label: 'No Physics step recordings yet. Start telemetry recording and let the world run.').
 		^ self ].
 	spans := self pipelineSpansFrom: root.
+	scale := (spans collect: #p95Duration) max max: 1.
 	self addChild: (self title: 'Physics step statistics — ', analysis sampleCount asString, ' samples').
-	self addChild: (self mapFor: spans root: root statistic: #average title: 'Average').
-	self addChild: (self mapFor: spans root: root statistic: #p95 title: 'P95').
-	self addChild: (self stageTableFor: spans)
+	self addChild: (self summaryFor: root).
+	maps := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		margin: (BlInsets top: 12);
+		cellSpacing: 16;
+		yourself.
+	maps addChild: (self timingMapFor: spans statistic: #average title: 'Average' scale: scale).
+	maps addChild: (self timingMapFor: spans statistic: #p95 title: 'P95' scale: scale).
+	self addChild: maps.
+	self addChild: (self hotspotTableFor: spans)
 ]
 
 { #category : 'private - accessing' }
@@ -46,77 +55,94 @@ CFPhysicsTelemetryStatisticsElement >> pipelineSpansFrom: root [
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryStatisticsElement >> mapFor: spans root: root statistic: statistic title: aTitle [
-	| pane row total index |
-	pane := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		margin: (BlInsets top: 12);
-		cellSpacing: 5;
-		yourself.
-	pane addChild: (self subtitle:
-		aTitle, ' step — ',
-		(((self durationOf: root statistic: statistic) / 1000.0)
-			printShowingDecimalPlaces: 3),
-		' ms').
+CFPhysicsTelemetryStatisticsElement >> summaryFor: root [
+	| row average p95 ratio |
+	average := root averageDuration / 1000.0.
+	p95 := root p95Duration / 1000.0.
+	ratio := average = 0 ifTrue: [ 0 ] ifFalse: [ p95 / average ].
 	row := BrHorizontalPane new
 		hMatchParent;
-		vExact: 42;
-		cellSpacing: 2;
+		vFitContent;
+		margin: (BlInsets top: 8);
+		cellSpacing: 18;
 		yourself.
-	total := (spans sum: [ :span | self durationOf: span statistic: statistic ]) max: 1.
-	index := 0.
-	spans do: [ :span |
-		| duration block |
-		index := index + 1.
-		duration := self durationOf: span statistic: statistic.
-		block := self mapBlockFor: span index: index duration: duration.
-		block constraintsDo: [ :c |
-			c vertical matchParent.
-			c linear weight: (duration max: 1) / total ].
-		row addChild: block ].
-	pane addChild: row.
-	^ pane
+	row addChild: (self metricLabel: 'Average step' value: (average printShowingDecimalPlaces: 3), ' ms').
+	row addChild: (self metricLabel: 'P95 step' value: (p95 printShowingDecimalPlaces: 3), ' ms').
+	row addChild: (self metricLabel: 'P95 / average' value: (ratio printShowingDecimalPlaces: 2), '×').
+	^ row
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryStatisticsElement >> mapBlockFor: span index: index duration: duration [
-	^ BlElement new
-		layout: BlFrameLayout new;
-		background: (Color gray alpha: 0.22 + ((index \ 4) * 0.08));
-		border: (BlBorder paint: (Color gray alpha: 0.45) width: 1);
-		addChild: (BrLabel new
-			fitContent;
-			padding: (BlInsets all: 4);
-			aptitude: (BrGlamorousLabelAptitude new foreground: Color black);
-			text: index asString;
-			constraintsDo: [ :c |
-				c frame horizontal alignCenter.
-				c frame vertical alignCenter ];
-			yourself);
-		yourself
-]
-
-{ #category : 'private - building' }
-CFPhysicsTelemetryStatisticsElement >> stageTableFor: spans [
-	| pane index |
+CFPhysicsTelemetryStatisticsElement >> timingMapFor: spans statistic: statistic title: aTitle scale: scale [
+	| pane |
 	pane := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets top: 16);
-		cellSpacing: 3;
+		cellSpacing: 4;
 		yourself.
-	pane addChild: (self subtitle: 'Pipeline stages').
-	pane addChild: self stageTableHeader.
-	index := 0.
+	pane addChild: (self subtitle: aTitle, ' pipeline — shared P95 scale').
 	spans do: [ :span |
-		index := index + 1.
-		pane addChild: (self stageRowFor: span index: index) ].
+		pane addChild: (self timingRowFor: span statistic: statistic scale: scale) ].
 	^ pane
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryStatisticsElement >> stageTableHeader [
+CFPhysicsTelemetryStatisticsElement >> timingRowFor: span statistic: statistic scale: scale [
+	| row duration nameLabel track fill remainder valueLabel |
+	duration := self durationOf: span statistic: statistic.
+	row := BrHorizontalPane new
+		hMatchParent;
+		vExact: 28;
+		cellSpacing: 6;
+		yourself.
+	nameLabel := self tableLabel: (self readableNameOf: span) width: 170 bold: false.
+	track := BrHorizontalPane new
+		hMatchParent;
+		vExact: 18;
+		background: (Color gray alpha: 0.08);
+		yourself.
+	fill := BlElement new
+		background: (Color gray alpha: 0.42);
+		border: (BlBorder paint: (Color gray alpha: 0.5) width: 1);
+		yourself.
+	remainder := BlElement new yourself.
+	fill constraintsDo: [ :c |
+		c vertical matchParent.
+		c linear weight: duration max: 0.0001 ].
+	remainder constraintsDo: [ :c |
+		c vertical matchParent.
+		c linear weight: (scale - duration) max: 0.0001 ].
+	track addChild: fill.
+	track addChild: remainder.
+	valueLabel := self tableLabel:
+		((duration / 1000.0) printShowingDecimalPlaces: 3), ' ms'
+		width: 78
+		bold: false.
+	row addChild: nameLabel.
+	row addChild: track.
+	row addChild: valueLabel.
+	^ row
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryStatisticsElement >> hotspotTableFor: spans [
+	| pane ordered |
+	ordered := spans sorted: [ :left :right | left p95Duration > right p95Duration ].
+	pane := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: (BlInsets top: 18);
+		cellSpacing: 3;
+		yourself.
+	pane addChild: (self subtitle: 'P95 hotspots').
+	pane addChild: self hotspotTableHeader.
+	ordered withIndexDo: [ :span :index |
+		pane addChild: (self hotspotRowFor: span index: index) ].
+	^ pane
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryStatisticsElement >> hotspotTableHeader [
 	| row |
 	row := BrHorizontalPane new hMatchParent; vExact: 28; yourself.
 	row addChild: (self tableLabel: '#' width: 34 bold: true).
@@ -128,13 +154,11 @@ CFPhysicsTelemetryStatisticsElement >> stageTableHeader [
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryStatisticsElement >> stageRowFor: span index: index [
+CFPhysicsTelemetryStatisticsElement >> hotspotRowFor: span index: index [
 	| row average p95 ratio |
 	average := span averageDuration / 1000.0.
 	p95 := span p95Duration / 1000.0.
-	ratio := average = 0
-		ifTrue: [ 0 ]
-		ifFalse: [ p95 / average ].
+	ratio := average = 0 ifTrue: [ 0 ] ifFalse: [ p95 / average ].
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 30;
@@ -155,6 +179,19 @@ CFPhysicsTelemetryStatisticsElement >> readableNameOf: span [
 	name := name copyReplaceAll: 'CFPhysics' with: ''.
 	name := name copyReplaceAll: 'Stage' with: ''.
 	^ name
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryStatisticsElement >> metricLabel: aName value: aValue [
+	| text |
+	text := aName, ': ', aValue.
+	^ BrLabel new
+		fitContent;
+		padding: (BlInsets top: 4 right: 8 bottom: 4 left: 8);
+		background: (Color gray alpha: 0.08);
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color black);
+		text: text;
+		yourself
 ]
 
 { #category : 'private - building' }
