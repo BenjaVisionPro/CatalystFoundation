@@ -444,6 +444,16 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #solverRailJointConstraintCount put: aStepResult solver railJointConstraintCount;
 		at: #solverRevoluteJointConstraintCount put: aStepResult solver revoluteJointConstraintCount;
 		at: #solverFixedJointConstraintCount put: aStepResult solver fixedJointConstraintCount;
+		at: #preparedContactConstraintCount put: self constraintPreparationMeasurements preparedContactConstraintCount;
+		at: #continuedPreparedContactConstraintCount put: self constraintPreparationMeasurements continuedContactConstraintCount;
+		at: #beganPreparedContactConstraintCount put: self constraintPreparationMeasurements beganContactConstraintCount;
+		at: #preparedContactPointCount put: self constraintPreparationMeasurements preparedContactPointCount;
+		at: #reusablePreparedContactPointCount put: self constraintPreparationMeasurements reusableContactPointCount;
+		at: #newPreparedContactPointCount put: self constraintPreparationMeasurements newContactPointCount;
+		at: #stablePreparedManifoldCount put: self constraintPreparationMeasurements stableManifoldCount;
+		at: #changedPreparedManifoldCount put: self constraintPreparationMeasurements changedManifoldCount;
+		at: #preparedJointConstraintCount put: self constraintPreparationMeasurements preparedJointConstraintCount;
+		at: #preparedConstraintObjectCount put: self constraintPreparationMeasurements preparedObjectCount;
 		at: #stepResult put: aStepResult;
 		yourself
 ]
@@ -452,6 +462,12 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> pairFinderMeasurements [
 	^ (stepPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder
+]
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> constraintPreparationMeasurements [
+	^ stepPipeline stageOfType: CFPhysicsConstraintPreparationStage
 ]
 
 { #category : 'private - telemetry' }

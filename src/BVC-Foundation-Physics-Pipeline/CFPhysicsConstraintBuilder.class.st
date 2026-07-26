@@ -12,12 +12,20 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates [
 
 { #category : 'building' }
 CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	^ (contacts reject: [ :contact | contact isSensor ]) collect: [ :contact |
-		self
-			constraintFrom: contact
-			bodyStateA: (bodyStates at: contact firstBody)
-			bodyStateB: (bodyStates at: contact secondBody)
-			warmStartRatio: warmStartRatio ]
+	| constraints index |
+	constraints := Array new: (contacts count: [ :contact | contact isSensor not ]).
+	index := 1.
+	contacts do: [ :contact |
+		contact isSensor ifFalse: [
+			constraints
+				at: index
+				put: (self
+					constraintFrom: contact
+					bodyStateA: (bodyStates at: contact firstBody)
+					bodyStateB: (bodyStates at: contact secondBody)
+					warmStartRatio: warmStartRatio).
+			index := index + 1 ] ].
+	^ constraints
 ]
 
 { #category : 'private - building' }

@@ -647,3 +647,89 @@ CFPhysicsTelemetrySpanStatistics >> gtPairFinderActiveSetCorrelationFor: aView [
 				titleX: 'Maximum active entries' ]
 ]
 
+
+
+{ #category : 'testing' }
+CFPhysicsTelemetrySpanStatistics >> isConstraintPreparationSpan [
+	^ self name asString = CFPhysicsConstraintPreparationStage name asString
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtConstraintPreparationEvidenceFor: aView [
+	<gtView>
+	self isConstraintPreparationSpan ifFalse: [ ^ aView empty ].
+	^ aView columnedList
+		title: 'Preparation evidence';
+		priority: 17;
+		items: [ {
+			'Average prepared contact constraints' -> (self averageSampleValue: #preparedContactConstraintCount).
+			'Average continued contact constraints' -> (self averageSampleValue: #continuedPreparedContactConstraintCount).
+			'Average began contact constraints' -> (self averageSampleValue: #beganPreparedContactConstraintCount).
+			'Average prepared contact points' -> (self averageSampleValue: #preparedContactPointCount).
+			'Average reusable contact points' -> (self averageSampleValue: #reusablePreparedContactPointCount).
+			'Average new contact points' -> (self averageSampleValue: #newPreparedContactPointCount).
+			'Average stable manifolds' -> (self averageSampleValue: #stablePreparedManifoldCount).
+			'Average changed manifolds' -> (self averageSampleValue: #changedPreparedManifoldCount).
+			'Average prepared joint constraints' -> (self averageSampleValue: #preparedJointConstraintCount).
+			'Average prepared objects created' -> (self averageSampleValue: #preparedConstraintObjectCount).
+			'Maximum prepared objects created' -> (self maximumSampleValue: #preparedConstraintObjectCount) } ];
+		column: 'Measured fact' text: #key;
+		column: 'Value' text: #value;
+		send: #value
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPreparedObjectsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isConstraintPreparationSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample preparedConstraintObjectCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Prepared objects';
+		priority: 18;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #preparedConstraintObjectCount titleX: 'Prepared constraint objects created' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPreparedContactPointsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isConstraintPreparationSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample preparedContactPointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Prepared points';
+		priority: 19;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #preparedContactPointCount titleX: 'Contact points prepared' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtReusableContactPointsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isConstraintPreparationSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample reusablePreparedContactPointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Reusable points';
+		priority: 20;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #reusablePreparedContactPointCount titleX: 'Structurally reusable contact points' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtNewContactPointsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isConstraintPreparationSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample newPreparedContactPointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'New points';
+		priority: 21;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #newPreparedContactPointCount titleX: 'New or changed contact points' ]
+]

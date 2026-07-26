@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder', 'railJointConstraintBuilder' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder', 'railJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -39,33 +39,60 @@ CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder: anObject [ ra
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
-	| constraints jointConstraints |
-	constraints := constraintBuilder
+	| contactConstraints jointConstraints |
+	contactConstraints := constraintBuilder
 		constraintsFrom: aStepResult activeContacts
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio.
-	jointConstraints := distanceJointConstraintBuilder
-		constraintsFrom: aStepResult joints
-		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio.
-	jointConstraints := jointConstraints asOrderedCollection
-		addAll: (revoluteJointConstraintBuilder
-			constraintsFrom: aStepResult joints
-			bodyStates: aStepResult bodyStates
-			warmStartRatio: aStepResult step warmStartRatio);
-		yourself.
-	jointConstraints addAll: (fixedJointConstraintBuilder
-		constraintsFrom: aStepResult joints
-		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio).
-	jointConstraints addAll: (railJointConstraintBuilder
-		constraintsFrom: aStepResult joints
-		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio).
-	jointConstraints := self orderedJointConstraints: jointConstraints.
-	constraints := constraints asOrderedCollection addAll: jointConstraints; yourself.
-	aStepResult constraints: constraints.
+	jointConstraints := self jointConstraintsFor: aStepResult.
+	preparedJointConstraintCount := jointConstraints size.
+	aStepResult constraints: (self
+		contactConstraints: contactConstraints
+		followedBy: jointConstraints).
 	^ aStepResult constraints
+]
+
+{ #category : 'private - building' }
+CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
+	| constraints |
+	constraints := OrderedCollection new: aStepResult joints size.
+	constraints addAll: (distanceJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
+	constraints addAll: (revoluteJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
+	constraints addAll: (fixedJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
+	constraints addAll: (railJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		warmStartRatio: aStepResult step warmStartRatio).
+	^ self orderedJointConstraints: constraints
+]
+
+{ #category : 'private - building' }
+CFPhysicsConstraintPreparationStage >> contactConstraints: contactConstraints followedBy: jointConstraints [
+	| result index |
+	result := Array new: contactConstraints size + jointConstraints size.
+	index := 1.
+	contactConstraints do: [ :constraint |
+		result at: index put: constraint.
+		index := index + 1 ].
+	jointConstraints do: [ :constraint |
+		result at: index put: constraint.
+		index := index + 1 ].
+	^ result
+]
+
+{ #category : 'executing' }
+CFPhysicsConstraintPreparationStage >> executeOnWithTelemetry: aStepResult [
+	self measureContacts: aStepResult activeContacts.
+	^ self executeOn: aStepResult
 ]
 
 { #category : 'private - ordering' }
@@ -74,4 +101,77 @@ CFPhysicsConstraintPreparationStage >> orderedJointConstraints: jointConstraints
 		first joint orderingKey = second joint orderingKey
 			ifTrue: [ first joint class name asString < second joint class name asString ]
 			ifFalse: [ first joint orderingKey < second joint orderingKey ] ]
+]
+
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> measureContacts: contacts [
+	| solidContacts |
+	preparedContactConstraintCount := 0.
+	preparedContactPointCount := 0.
+	continuedContactConstraintCount := 0.
+	beganContactConstraintCount := 0.
+	reusableContactPointCount := 0.
+	newContactPointCount := 0.
+	stableManifoldCount := 0.
+	changedManifoldCount := 0.
+	preparedJointConstraintCount := 0.
+	solidContacts := contacts reject: #isSensor.
+	solidContacts do: [ :contact | self measureContact: contact ].
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> measureContact: contact [
+	| pointCount reusableCount stable |
+	preparedContactConstraintCount := preparedContactConstraintCount + 1.
+	pointCount := contact manifold contactPoints size.
+	preparedContactPointCount := preparedContactPointCount + pointCount.
+	contact began ifTrue: [ beganContactConstraintCount := beganContactConstraintCount + 1 ].
+	contact continued ifFalse: [
+		newContactPointCount := newContactPointCount + pointCount.
+		^ self ].
+	continuedContactConstraintCount := continuedContactConstraintCount + 1.
+	reusableCount := self reusablePointCountFor: contact.
+	reusableContactPointCount := reusableContactPointCount + reusableCount.
+	newContactPointCount := newContactPointCount + pointCount - reusableCount.
+	stable := reusableCount = pointCount
+		and: [ contact previousManifold contactPoints size = pointCount ].
+	stable
+		ifTrue: [ stableManifoldCount := stableManifoldCount + 1 ]
+		ifFalse: [ changedManifoldCount := changedManifoldCount + 1 ]
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> reusablePointCountFor: contact [
+	| previous current |
+	previous := contact previousManifold.
+	current := contact manifold.
+	(previous isNil or: [ (current hasCompatibleNormalWith: previous) not ]) ifTrue: [ ^ 0 ].
+	^ current contactPoints count: [ :point |
+		point featureId notNil and: [
+			previous contactPoints anySatisfy: [ :oldPoint |
+				oldPoint featureId = point featureId ] ] ]
+]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> preparedContactConstraintCount [ ^ preparedContactConstraintCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> preparedContactPointCount [ ^ preparedContactPointCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> continuedContactConstraintCount [ ^ continuedContactConstraintCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> beganContactConstraintCount [ ^ beganContactConstraintCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> reusableContactPointCount [ ^ reusableContactPointCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> newContactPointCount [ ^ newContactPointCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> stableManifoldCount [ ^ stableManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> changedManifoldCount [ ^ changedManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> preparedJointConstraintCount [ ^ preparedJointConstraintCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> preparedObjectCount [
+	^ self preparedContactConstraintCount + self preparedContactPointCount + self preparedJointConstraintCount
 ]

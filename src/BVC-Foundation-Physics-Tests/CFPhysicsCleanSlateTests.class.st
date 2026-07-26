@@ -368,6 +368,54 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 ]
 
 { #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
+	<gtExample>
+	| first second pair updater firstBatch secondBatch stage |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
+		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	firstBatch := updater updatePairs: { pair } fromContacts: #().
+	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
+	stage := CFPhysicsConstraintPreparationStage new.
+	stage measureContacts: secondBatch activeContacts.
+	self assert: stage preparedContactConstraintCount equals: 1.
+	self assert: stage continuedContactConstraintCount equals: 1.
+	self assert: stage beganContactConstraintCount equals: 0.
+	self assert: stage preparedContactPointCount equals: 1.
+	self assert: stage reusableContactPointCount equals: 1.
+	self assert: stage newContactPointCount equals: 0.
+	self assert: stage stableManifoldCount equals: 1.
+	self assert: stage changedManifoldCount equals: 0.
+	self assert: stage preparedObjectCount equals: 2.
+	^ stage
+]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintPreparationMeasuresChangedContactWork [
+	<gtExample>
+	| first second pair updater firstBatch secondBatch stage |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
+		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	firstBatch := updater updatePairs: { pair } fromContacts: #().
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
+		self cleanSlateManifoldWithFeatureIndex: 2 ].
+	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
+	stage := CFPhysicsConstraintPreparationStage new.
+	stage measureContacts: secondBatch activeContacts.
+	self assert: stage preparedContactPointCount equals: 1.
+	self assert: stage reusableContactPointCount equals: 0.
+	self assert: stage newContactPointCount equals: 1.
+	self assert: stage stableManifoldCount equals: 0.
+	self assert: stage changedManifoldCount equals: 1.
+	^ stage
+]
+
+{ #category : 'examples - constraints' }
 CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	<gtExample>
 	| first second pair manifold contact bodyStates constraints constraint point |

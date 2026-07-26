@@ -14,3 +14,9 @@ CFPhysicsStepStage >> executeOn: aStepResult [
 CFPhysicsStepStage >> name [
 	^ self class name
 ]
+
+
+{ #category : 'executing' }
+CFPhysicsStepStage >> executeOnWithTelemetry: aStepResult [
+	^ self executeOn: aStepResult
+]

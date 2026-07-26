@@ -177,6 +177,28 @@ CFPhysicsTelemetrySpanSample >> solverRevoluteJointConstraintCount [ ^ self phys
 { #category : 'accessing - solver work evidence' }
 CFPhysicsTelemetrySpanSample >> solverFixedJointConstraintCount [ ^ self physicsDataAt: #solverFixedJointConstraintCount ]
 
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedContactConstraintCount [ ^ self physicsDataAt: #preparedContactConstraintCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> continuedPreparedContactConstraintCount [ ^ self physicsDataAt: #continuedPreparedContactConstraintCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> beganPreparedContactConstraintCount [ ^ self physicsDataAt: #beganPreparedContactConstraintCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedContactPointCount [ ^ self physicsDataAt: #preparedContactPointCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> reusablePreparedContactPointCount [ ^ self physicsDataAt: #reusablePreparedContactPointCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> newPreparedContactPointCount [ ^ self physicsDataAt: #newPreparedContactPointCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> stablePreparedManifoldCount [ ^ self physicsDataAt: #stablePreparedManifoldCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> changedPreparedManifoldCount [ ^ self physicsDataAt: #changedPreparedManifoldCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedJointConstraintCount [ ^ self physicsDataAt: #preparedJointConstraintCount ]
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedConstraintObjectCount [ ^ self physicsDataAt: #preparedConstraintObjectCount ]
+
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanSample >> sender [
 	^ ping sender
@@ -228,7 +250,17 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'Distance joint constraints' -> self solverDistanceJointConstraintCount.
 			'Rail joint constraints' -> self solverRailJointConstraintCount.
 			'Revolute joint constraints' -> self solverRevoluteJointConstraintCount.
-			'Fixed joint constraints' -> self solverFixedJointConstraintCount } ];
+			'Fixed joint constraints' -> self solverFixedJointConstraintCount.
+			'Prepared contact constraints' -> self preparedContactConstraintCount.
+			'Continued prepared contacts' -> self continuedPreparedContactConstraintCount.
+			'Began prepared contacts' -> self beganPreparedContactConstraintCount.
+			'Prepared contact points' -> self preparedContactPointCount.
+			'Reusable prepared contact points' -> self reusablePreparedContactPointCount.
+			'New prepared contact points' -> self newPreparedContactPointCount.
+			'Stable prepared manifolds' -> self stablePreparedManifoldCount.
+			'Changed prepared manifolds' -> self changedPreparedManifoldCount.
+			'Prepared joint constraints' -> self preparedJointConstraintCount.
+			'Prepared constraint objects' -> self preparedConstraintObjectCount } ];
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;
 		send: #value

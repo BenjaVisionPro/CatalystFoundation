@@ -104,7 +104,7 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 		| output |
 		output := ProcessTelemetry
 			time: [ stage class name asString ]
-			during: [ stage executeOn: result ].
+			during: [ stage executeOnWithTelemetry: result ].
 		result recordStage: stage output: output ].
 	^ result
 ]
