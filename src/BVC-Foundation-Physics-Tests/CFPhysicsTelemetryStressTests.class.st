@@ -41,6 +41,7 @@ CFPhysicsTelemetryStressTests >> assertAnalysis: anAnalysis measuredSteps: measu
 
 { #category : 'tests - lifecycle' }
 CFPhysicsTelemetryStressTests >> testTelemetryRecordingLifecycleIsAutomatable [
+	<gtExample>
 	| world |
 	world := CFPhysicsTelemetryStressScenarios sleepingBodies: 8.
 	self assert: world hasTelemetryLogger not.
@@ -57,6 +58,7 @@ CFPhysicsTelemetryStressTests >> testTelemetryRecordingLifecycleIsAutomatable [
 
 { #category : 'tests - stress' }
 CFPhysicsTelemetryStressTests >> testSleepingBodiesTelemetry [
+	<gtExample>
 	| world analysis |
 	world := CFPhysicsTelemetryStressScenarios sleepingBodies: 40.
 	self assert: (world bodyStatesInOrder allSatisfy: [ :body | body isAwake not ]).
@@ -67,6 +69,7 @@ CFPhysicsTelemetryStressTests >> testSleepingBodiesTelemetry [
 
 { #category : 'tests - stress' }
 CFPhysicsTelemetryStressTests >> testDensePileTelemetry [
+	<gtExample>
 	| world analysis |
 	world := CFPhysicsTelemetryStressScenarios densePileRows: 6 columns: 6.
 	analysis := self record: world warmupSteps: 4 measuredSteps: 16.
@@ -78,6 +81,7 @@ CFPhysicsTelemetryStressTests >> testDensePileTelemetry [
 
 { #category : 'tests - stress' }
 CFPhysicsTelemetryStressTests >> testIndependentIslandsTelemetry [
+	<gtExample>
 	| world analysis |
 	world := CFPhysicsTelemetryStressScenarios independentIslands: 4 bodiesPerIsland: 4.
 	analysis := self record: world warmupSteps: 4 measuredSteps: 16.
