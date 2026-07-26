@@ -40,9 +40,9 @@ CFPhysicsTelemetryBenchmarkSuite >> gtScenarioFocusFor: aView [
 		column: 'Share' text: [ :result |
 			result topFocusSpan
 				ifNil: [ '' ]
-				ifNotNil: [ :span | ((result averageShareFor: span) * 100) printShowingDecimalPlaces: 1 , '%' ] ];
-		column: 'Average step (ms)' text: [ :result | result averageStepMilliseconds printShowingDecimalPlaces: 3 ];
-		column: 'P95 step (ms)' text: [ :result | result p95StepMilliseconds printShowingDecimalPlaces: 3 ];
+				ifNotNil: [ :span | ((result averageShareFor: span) * 100) asFloat printShowingDecimalPlaces: 1 , '%' ] ];
+		column: 'Average step (ms)' text: [ :result | result averageStepMilliseconds asFloat printShowingDecimalPlaces: 3 ];
+		column: 'P95 step (ms)' text: [ :result | result p95StepMilliseconds asFloat printShowingDecimalPlaces: 3 ];
 		column: 'Samples' text: [ :result | result analysis sampleCount ];
 		send: [ :result | result ]
 ]
@@ -60,8 +60,8 @@ CFPhysicsTelemetryBenchmarkSuite >> gtAllMeasuredSpansFor: aView [
 		items: [ rows ];
 		column: 'Scenario' text: [ :row | row first scenarioName ];
 		column: 'Span' text: [ :row | row second readableName ];
-		column: 'Average (ms)' text: [ :row | row second averageMilliseconds printShowingDecimalPlaces: 3 ];
-		column: 'P95 (ms)' text: [ :row | row second p95Milliseconds printShowingDecimalPlaces: 3 ];
-		column: 'Share' text: [ :row | ((row first averageShareFor: row second) * 100) printShowingDecimalPlaces: 1 , '%' ];
+		column: 'Average (ms)' text: [ :row | row second averageMilliseconds asFloat printShowingDecimalPlaces: 3 ];
+		column: 'P95 (ms)' text: [ :row | row second p95Milliseconds asFloat printShowingDecimalPlaces: 3 ];
+		column: 'Share' text: [ :row | ((row first averageShareFor: row second) * 100) asFloat printShowingDecimalPlaces: 1 , '%' ];
 		send: [ :row | row second ]
 ]
