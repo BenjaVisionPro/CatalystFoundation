@@ -590,6 +590,9 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	self assert: root averageEnd >= root averageStart.
 	self assert: root p95End >= root p05Start.
 	pipeline := root children detect: [ :each | each name asString = 'Pipeline' ].
+	self assert: pipeline samples size = analysis sampleCount.
+	self assert: pipeline children first samples isNotEmpty.
+	self assert: pipeline children first executionsByDuration first signal notNil.
 	previousStart := -1.
 	pipeline children do: [ :span |
 		self assert: span averageStart >= previousStart.

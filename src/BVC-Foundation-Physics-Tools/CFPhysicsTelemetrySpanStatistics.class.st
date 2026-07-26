@@ -15,6 +15,7 @@ Class {
 		'p95Start',
 		'p95End',
 		'p95Duration',
+		'samples',
 		'children'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
@@ -63,7 +64,6 @@ CFPhysicsTelemetrySpanStatistics >> p25Start [ ^ p25Start ]
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanStatistics >> p25Start: aNumber [ p25Start := aNumber ]
 
-
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanStatistics >> medianStart [ ^ medianStart ]
 
@@ -101,6 +101,12 @@ CFPhysicsTelemetrySpanStatistics >> p95Duration [ ^ p95Duration ]
 CFPhysicsTelemetrySpanStatistics >> p95Duration: aNumber [ p95Duration := aNumber ]
 
 { #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> samples [ ^ samples ifNil: [ #() ] ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> samples: aCollection [ samples := aCollection ]
+
+{ #category : 'accessing' }
 CFPhysicsTelemetrySpanStatistics >> children [ ^ children ifNil: [ #() ] ]
 
 { #category : 'accessing' }
@@ -122,13 +128,39 @@ CFPhysicsTelemetrySpanStatistics >> readableName [
 ]
 
 { #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> sampleCount [ ^ self samples size ]
+
+{ #category : 'statistics' }
 CFPhysicsTelemetrySpanStatistics >> averageMilliseconds [
 	^ self averageDuration / 1000.0
 ]
 
 { #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> medianMilliseconds [
+	| sorted rank |
+	self samples ifEmpty: [ ^ 0 ].
+	sorted := (self samples collect: #duration) sorted.
+	rank := ((sorted size * 0.5) ceiling max: 1) min: sorted size.
+	^ (sorted at: rank) / 1000.0
+]
+
+{ #category : 'statistics' }
 CFPhysicsTelemetrySpanStatistics >> p95Milliseconds [
 	^ self p95Duration / 1000.0
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> minimumMilliseconds [
+	| durations |
+	durations := self samples collect: #duration.
+	^ durations ifEmpty: [ 0 ] ifNotEmpty: [ durations min / 1000.0 ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> maximumMilliseconds [
+	| durations |
+	durations := self samples collect: #duration.
+	^ durations ifEmpty: [ 0 ] ifNotEmpty: [ durations max / 1000.0 ]
 ]
 
 { #category : 'statistics' }
@@ -155,4 +187,83 @@ CFPhysicsTelemetrySpanStatistics >> p95ShareOf: aRootSpan [
 	^ aRootSpan p95Duration = 0
 		ifTrue: [ 0 ]
 		ifFalse: [ self p95Duration / aRootSpan p95Duration ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> executionsByDuration [
+	^ self samples sorted: [ :a :b | a duration > b duration ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSummaryFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Summary';
+		priority: 10;
+		items: [ {
+			'Span' -> self readableName.
+			'Samples' -> self sampleCount.
+			'Average (ms)' -> self averageMilliseconds.
+			'Median (ms)' -> self medianMilliseconds.
+			'P95 (ms)' -> self p95Milliseconds.
+			'Minimum (ms)' -> self minimumMilliseconds.
+			'Maximum (ms)' -> self maximumMilliseconds.
+			'P95 / average' -> self p95ToAverageRatio.
+			'Start jitter (ms)' -> self startJitterMilliseconds } ];
+		column: 'Statistic' text: #key;
+		column: 'Value' text: #value;
+		send: #value
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtDurationTrendFor: aView [
+	<gtView>
+	^ aView explicit
+		title: 'Duration trend';
+		priority: 11;
+		disableAsync;
+		stencil: [
+			| values data chart |
+			values := self samples collect: [ :sample | sample sequence -> sample durationMilliseconds ].
+			data := GtPlotterDataGroup new values: values.
+			chart := GtPlotterLineChart new
+				with: data;
+				valueX: #key;
+				scaleX: GtPlotterLinearScale new;
+				titleX: 'Recorded step';
+				valueY: #value;
+				scaleY: GtPlotterLinearScale new;
+				titleY: 'Duration (ms)';
+				ticksX: 8;
+				ticksY: 6.
+			chart asElement ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtExecutionsFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Executions';
+		priority: 12;
+		items: [ self executionsByDuration ];
+		column: 'Step' text: [ :sample | sample stepNumber ifNil: [ sample sequence ] ];
+		column: 'Duration (ms)' text: [ :sample | sample durationMilliseconds ];
+		column: 'Start (ms)' text: [ :sample | sample startMilliseconds ];
+		column: 'End (ms)' text: [ :sample | sample endMilliseconds ];
+		column: 'GC (ms)' text: [ :sample | sample ping gcDurationInMilliseconds ];
+		column: 'Bodies' text: [ :sample | sample bodyCount ifNil: [ '' ] ];
+		column: 'Contacts' text: [ :sample | sample contactCount ifNil: [ '' ] ];
+		send: [ :sample | sample signal ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSourcesFor: aView [
+	<gtView>
+	| methods |
+	methods := (self samples collect: #sender) reject: #isNil.
+	methods := methods asSet asArray.
+	^ aView list
+		title: 'Sources';
+		priority: 13;
+		items: [ methods ]
 ]
