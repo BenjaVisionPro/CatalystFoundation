@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -13,6 +13,14 @@ CFPhysicsSoftStepSolver class >> step: aStep bodyStates: aDictionary constraints
 		bodyStates: aDictionary;
 		constraints: aCollection;
 		yourself
+]
+
+{ #category : 'initialization' }
+CFPhysicsSoftStepSolver >> initialize [
+	super initialize.
+	constraints := #().
+	contactConstraints := #().
+	orderedJointConstraints := #()
 ]
 
 { #category : 'solving' }
@@ -430,7 +438,7 @@ CFPhysicsSoftStepSolver >> distanceJointDeltaRotationFor: aState [
 
 { #category : 'private - accessing' }
 CFPhysicsSoftStepSolver >> contactConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedConstraint ]
+	^ contactConstraints
 ]
 
 { #category : 'private - accessing' }
@@ -455,10 +463,7 @@ CFPhysicsSoftStepSolver >> fixedJointConstraints [
 
 { #category : 'private - accessing' }
 CFPhysicsSoftStepSolver >> orderedJointConstraints [
-	^ ((self distanceJointConstraints, self revoluteJointConstraints, self railJointConstraints) asArray sorted: [ :first :second |
-		first joint orderingKey = second joint orderingKey
-			ifTrue: [ first joint class name asString < second joint class name asString ]
-			ifFalse: [ first joint orderingKey < second joint orderingKey ] ])
+	^ orderedJointConstraints
 ]
 
 { #category : 'private - solving' }
@@ -518,4 +523,18 @@ CFPhysicsSoftStepSolver >> step: anObject [ step := anObject ]
 { #category : 'accessing' }
 CFPhysicsSoftStepSolver >> bodyStates: aDictionary [ bodyStates := aDictionary ]
 { #category : 'accessing' }
-CFPhysicsSoftStepSolver >> constraints: aCollection [ constraints := aCollection ]
+CFPhysicsSoftStepSolver >> constraints: aCollection [
+	constraints := aCollection asArray.
+	contactConstraints := constraints select: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedConstraint ].
+	orderedJointConstraints := ((constraints select: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedDistanceJoint ]),
+		(constraints select: [ :constraint |
+			constraint isKindOf: CFPhysicsPreparedRevoluteJoint ]),
+		(constraints select: [ :constraint |
+			constraint isKindOf: CFPhysicsPreparedRailJoint ]))
+		asArray sorted: [ :first :second |
+			first joint orderingKey = second joint orderingKey
+				ifTrue: [ first joint class name asString < second joint class name asString ]
+				ifFalse: [ first joint orderingKey < second joint orderingKey ] ]
+]
