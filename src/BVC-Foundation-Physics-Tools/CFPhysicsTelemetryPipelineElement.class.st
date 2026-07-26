@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'world',
-		'stageLabelWidth'
+		'stageLabelWidth',
+		'telemetryUpdatesStream'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -29,7 +30,18 @@ CFPhysicsTelemetryPipelineElement >> initialize [
 
 { #category : 'accessing' }
 CFPhysicsTelemetryPipelineElement >> world: aWorld [
-	world := aWorld
+	world := aWorld.
+	telemetryUpdatesStream := CFPhysicsTelemetryUpdatesStream on: world.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink | anElement updateFromTelemetryStream ];
+			forwardStream: telemetryUpdatesStream ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsTelemetryPipelineElement >> updateFromTelemetryStream [
+	self build
 ]
 
 { #category : 'building' }
