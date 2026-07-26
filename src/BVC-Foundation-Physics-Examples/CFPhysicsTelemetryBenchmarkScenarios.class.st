@@ -1,12 +1,13 @@
+"I build controlled, repeatable Physics workloads used only as inputs to telemetry benchmarks."
 Class {
-	#name : 'CFPhysicsTelemetryStressScenarios',
+	#name : 'CFPhysicsTelemetryBenchmarkScenarios',
 	#superclass : 'Object',
-	#category : 'BVC-Foundation-Physics-Tests-Telemetry',
-	#package : 'BVC-Foundation-Physics-Tests'
+	#category : 'BVC-Foundation-Physics-Examples-Telemetry',
+	#package : 'BVC-Foundation-Physics-Examples'
 }
 
 { #category : 'private - construction' }
-CFPhysicsTelemetryStressScenarios class >> boxElement [
+CFPhysicsTelemetryBenchmarkScenarios class >> boxElement [
 	^ BlElement new
 		geometry: BlRoundedRectangleGeometry new;
 		size: 20 @ 20;
@@ -14,7 +15,7 @@ CFPhysicsTelemetryStressScenarios class >> boxElement [
 ]
 
 { #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> sleepingBodies: aBodyCount [
+CFPhysicsTelemetryBenchmarkScenarios class >> sleepingBodies: aBodyCount [
 	| host elements world columns |
 	host := BlElement new size: 1200 @ 800; yourself.
 	elements := (1 to: aBodyCount) collect: [ :index |
@@ -33,7 +34,7 @@ CFPhysicsTelemetryStressScenarios class >> sleepingBodies: aBodyCount [
 ]
 
 { #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> densePileRows: rowCount columns: columnCount [
+CFPhysicsTelemetryBenchmarkScenarios class >> densePileRows: rowCount columns: columnCount [
 	| host elements world |
 	host := BlElement new size: 1200 @ 800; yourself.
 	elements := OrderedCollection new.
@@ -52,7 +53,7 @@ CFPhysicsTelemetryStressScenarios class >> densePileRows: rowCount columns: colu
 ]
 
 { #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> independentIslands: islandCount bodiesPerIsland: bodiesPerIsland [
+CFPhysicsTelemetryBenchmarkScenarios class >> independentIslands: islandCount bodiesPerIsland: bodiesPerIsland [
 	| host entries world |
 	host := BlElement new size: 1600 @ 900; yourself.
 	entries := OrderedCollection new.
@@ -74,9 +75,9 @@ CFPhysicsTelemetryStressScenarios class >> independentIslands: islandCount bodie
 ]
 
 { #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> singleIslandBodies: aBodyCount [
+CFPhysicsTelemetryBenchmarkScenarios class >> singleIslandBodies: aBodyCount [
 	| host elements world |
-	host := BlElement new size: 1600 @ 400; yourself.
+	host := BlElement new size: 2000 @ 400; yourself.
 	elements := (1 to: aBodyCount) collect: [ :index |
 		| element |
 		element := self boxElement.
@@ -91,9 +92,9 @@ CFPhysicsTelemetryStressScenarios class >> singleIslandBodies: aBodyCount [
 ]
 
 { #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> sensorOverlapPairs: aPairCount [
+CFPhysicsTelemetryBenchmarkScenarios class >> sensorOverlapPairs: aPairCount [
 	| host entries world |
-	host := BlElement new size: 1600 @ 500; yourself.
+	host := BlElement new size: 2400 @ 500; yourself.
 	entries := OrderedCollection new.
 	1 to: aPairCount do: [ :index |
 		| sensorElement solidElement |
@@ -114,32 +115,5 @@ CFPhysicsTelemetryStressScenarios class >> sensorOverlapPairs: aPairCount [
 			beSensor.
 		(world bodyStateFor: entry second)
 			position: position ].
-	^ world
-]
-
-{ #category : 'scenarios' }
-CFPhysicsTelemetryStressScenarios class >> continuousCollisionBodies: aBodyCount [
-	| host entries world |
-	host := BlElement new size: 2000 @ 800; yourself.
-	entries := OrderedCollection new.
-	1 to: aBodyCount do: [ :index |
-		| movingElement wallElement |
-		movingElement := self boxElement.
-		wallElement := self boxElement.
-		host
-			addChild: movingElement;
-			addChild: wallElement.
-		entries add: { movingElement. wallElement. index } ].
-	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
-	entries do: [ :entry |
-		| rowY |
-		rowY := entry third * 35.
-		(world bodyStateFor: entry first)
-			position: 0 @ rowY;
-			velocity: 20000 @ 0.
-		(world bodyStateFor: entry second)
-			position: 150 @ rowY;
-			beStatic ].
 	^ world
 ]
