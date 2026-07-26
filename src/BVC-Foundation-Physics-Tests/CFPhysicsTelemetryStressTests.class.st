@@ -89,3 +89,40 @@ CFPhysicsTelemetryStressTests >> testIndependentIslandsTelemetry [
 	self assert: world lastStepResult bodies size equals: 16.
 	self assert: world lastStepResult islands size >= 4
 ]
+
+{ #category : 'tests - stress' }
+CFPhysicsTelemetryStressTests >> testSinglePathologicalIslandTelemetry [
+	<gtExample>
+	| world analysis |
+	world := CFPhysicsTelemetryStressScenarios singleIslandBodies: 20.
+	analysis := self record: world warmupSteps: 4 measuredSteps: 16.
+	self assertAnalysis: analysis measuredSteps: 16.
+	self assert: world lastStepResult bodies size equals: 20.
+	self assert: world lastStepResult islands size equals: 1
+]
+
+{ #category : 'tests - stress' }
+CFPhysicsTelemetryStressTests >> testSensorOverlapTelemetry [
+	<gtExample>
+	| world analysis contacts |
+	world := CFPhysicsTelemetryStressScenarios sensorOverlapPairs: 12.
+	analysis := self record: world warmupSteps: 2 measuredSteps: 12.
+	self assertAnalysis: analysis measuredSteps: 12.
+	self assert: world lastStepResult bodies size equals: 24.
+	contacts := world lastStepResult contactResult activeContacts.
+	self assert: contacts size equals: 12.
+	self assert: (contacts allSatisfy: [ :contact | contact isSensor ])
+]
+
+{ #category : 'tests - stress' }
+CFPhysicsTelemetryStressTests >> testContinuousCollisionTelemetry [
+	<gtExample>
+	| world analysis continuousResult |
+	world := CFPhysicsTelemetryStressScenarios continuousCollisionBodies: 8.
+	analysis := self record: world warmupSteps: 0 measuredSteps: 1.
+	self assertAnalysis: analysis measuredSteps: 1.
+	self assert: world lastStepResult bodies size equals: 16.
+	continuousResult := world lastStepResult continuousStepResult.
+	self assert: continuousResult notNil.
+	self assert: continuousResult impacts size equals: 8
+]
