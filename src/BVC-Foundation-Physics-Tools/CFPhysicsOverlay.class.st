@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -42,6 +42,12 @@ CFPhysicsOverlay >> contactPass [ ^ contactPass ]
 
 { #category : 'accessing' }
 CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
+
+{ #category : 'accessing' }
+CFPhysicsOverlay >> controlRoot [ ^ controlRoot ]
+
+{ #category : 'accessing' }
+CFPhysicsOverlay >> worldInspectorButton [ ^ worldInspectorButton ]
 
 
 { #category : 'accessing' }
@@ -111,12 +117,46 @@ CFPhysicsOverlay >> initializeOverlay [
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	contactPass := CFPhysicsContactOverlayPass in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
+	self initializeWorldInspectorControl.
 	selectionHandler := BlEventHandler
 		on: BlClickEvent
 		do: [ :anEvent | self clickEvent: anEvent ].
 	framePresentedHandler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
 		do: [ :anEvent | self refreshFrameDiagnostics ]
+]
+
+
+
+{ #category : 'initialization' }
+CFPhysicsOverlay >> initializeWorldInspectorControl [
+	controlRoot := BlOverlayElement on: host.
+	controlRoot
+		id: #cfPhysicsWorldInspectorControl;
+		zIndex: (host elevation relatedTo: 0) + 3;
+		clipChildren: false;
+		preventMouseEvents.
+	worldInspectorButton := self newWorldInspectorButton.
+	controlRoot addChild: worldInspectorButton
+]
+
+{ #category : 'private - building' }
+CFPhysicsOverlay >> newWorldInspectorButton [
+	^ BrButton new
+		id: #cfPhysicsWorldInspectorButton;
+		size: 64 @ 64;
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) size: 48 @ 48 ] asStencil);
+		label: 'Inspect Physics world';
+		background: (Color black alpha: 0.08);
+		effect: (BlBlurBelowEffect radius: 14);
+		geometry: BlCircleGeometry new;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ];
+		margin: (BlInsets all: 10);
+		action: [ :aButton | aButton phlow spawnObject: world ];
+		yourself
 ]
 
 { #category : 'testing' }
@@ -132,6 +172,7 @@ CFPhysicsOverlay >> install [
 	(container notNil and: [ host isAttachedToSceneGraph ])
 		ifFalse: [ self error: 'The physics host must be attached to a Bloc space before its overlay can be shown' ].
 	container addChild: root.
+	container addChild: controlRoot.
 	objectInspector install.
 	host addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
@@ -199,6 +240,9 @@ CFPhysicsOverlay >> release [
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactPass ifNotNil: #release.
 	objectInspector ifNotNil: #release.
+	controlRoot ifNotNil: [
+		controlRoot detach.
+		controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
 	bodyElements valuesDo: [ :each | each release ].
 	bodyElements removeAll.
 	root detach.

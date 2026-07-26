@@ -37,6 +37,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	| analysis root pipeline maximumEnd scale |
 	self removeChildren.
 	analysis := CFPhysicsTelemetryAnalysis world: world.
+	self addChild: (self controlsFor: analysis).
 	root := analysis rootStatistics.
 	root ifNil: [
 		self addChild: (self emptyLabel: 'Record at least one Physics step to see pipeline statistics.').
@@ -297,4 +298,46 @@ CFPhysicsTelemetryPipelineElement >> emptyLabel: aString [
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.70));
 		text: aString;
 		yourself
+]
+
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> controlsFor: analysis [
+	| row liveLabel samplesLabel |
+	row := BrHorizontalPane new
+		hMatchParent;
+		vExact: 32;
+		cellSpacing: 6;
+		yourself.
+	liveLabel := BrLabel new
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
+		text: 'Rolling window';
+		yourself.
+	row addChild: liveLabel.
+	#(1 5 10 30) do: [ :seconds |
+		row addChild: (self windowButtonForSeconds: seconds) ].
+	samplesLabel := BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
+		text: analysis sampleCount asString, ' samples';
+		yourself.
+	row addChild: samplesLabel.
+	^ row
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> windowButtonForSeconds: seconds [
+	| selected button |
+	selected := world telemetryAnalysisWindowSeconds = seconds.
+	button := BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		label: seconds asString, ' s';
+		action: [
+			world telemetryAnalysisWindowSeconds: seconds.
+			self build ];
+		yourself.
+	selected ifTrue: [ button disable ].
+	^ button
 ]

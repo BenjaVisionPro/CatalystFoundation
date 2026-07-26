@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -51,7 +51,8 @@ CFPhysicsWorld >> initialize [
 	behaviours := OrderedCollection new.
 	telemetryEnabled := false.
 	telemetryLogger := nil.
-	telemetryCapacity := 300.
+	telemetryCapacity := 3600.
+	telemetryAnalysisWindowSeconds := 5.
 	telemetryAnnouncer := Announcer new.
 	containmentConstraints := IdentitySet new.
 	boundary := CFPhysicsWorldBoundary new.
@@ -555,6 +556,18 @@ CFPhysicsWorld >> telemetryCapacity [
 CFPhysicsWorld >> telemetryCapacity: anInteger [
 	telemetryCapacity := anInteger max: 1.
 	telemetryLogger ifNotNil: [ telemetryLogger capacity: telemetryCapacity ]
+]
+
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryAnalysisWindowSeconds [
+	^ telemetryAnalysisWindowSeconds
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryAnalysisWindowSeconds: aNumber [
+	telemetryAnalysisWindowSeconds := aNumber max: 1.
+	self announceTelemetryChanged
 ]
 
 { #category : 'telemetry' }

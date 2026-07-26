@@ -630,3 +630,29 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	world telemetryEnabled: false.
 	^ root
 ]
+
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsTelemetryRingBufferOverwritesOldest [
+	<gtExample>
+	| buffer |
+	buffer := CFPhysicsTelemetryRingBuffer capacity: 3.
+	buffer add: 1; add: 2; add: 3; add: 4.
+	self assert: buffer size = 3.
+	self assert: buffer asArray = #(2 3 4).
+	buffer capacity: 2.
+	self assert: buffer asArray = #(3 4).
+	^ buffer
+]
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsTelemetryAnalysisWindowCanChangeLive [
+	<gtExample>
+	| world |
+	world := self physicsWorldRecordsPharoTelemetry.
+	self assert: world telemetryAnalysisWindowSeconds = 5.
+	world telemetryAnalysisWindowSeconds: 1.
+	self assert: world telemetryAnalysisWindowSeconds = 1.
+	self assert: (CFPhysicsTelemetryAnalysis world: world) sampleCount > 0.
+	^ world
+]

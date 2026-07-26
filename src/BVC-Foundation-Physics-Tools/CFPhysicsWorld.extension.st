@@ -57,7 +57,6 @@ CFPhysicsWorld >> gtTelemetryStatisticsFor: aView [
 	^ aView explicit
 		title: 'Step statistics';
 		priority: 21;
-		disableAsync;
 		stencil: [ CFPhysicsTelemetryPipelineElement world: self ];
 		updateWhen: Announcement in: [ self telemetryAnnouncer ];
 		actionUpdateButtonTooltip: 'Refresh step statistics'

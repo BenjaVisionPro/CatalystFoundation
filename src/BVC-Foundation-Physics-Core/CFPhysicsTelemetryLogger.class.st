@@ -1,10 +1,10 @@
 "I am the bounded Pharo Telemetry logger owned by one Physics world.
 
-I do not define a telemetry model. I record ProcessTelemetry signals whose #physicsWorld metadata identifies my world, and bound the retained Beacon recordings so a diagnostic session cannot grow without limit."
+I record ProcessTelemetry signals whose Physics metadata identifies my world. My recordings use a true circular buffer, so a live diagnostic session has constant retained-memory use. I coalesce view announcements to a presentation rate while recording every accepted signal."
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
-	#instVars : [ 'world', 'capacity' ],
+	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -18,7 +18,10 @@ CFPhysicsTelemetryLogger class >> on: aWorld [
 CFPhysicsTelemetryLogger >> initialize [
 	super initialize.
 	self telemetryClass: ProcessTelemetry.
-	capacity := 300
+	capacity := 3600.
+	recordings := CFPhysicsTelemetryRingBuffer capacity: capacity.
+	lastAnnouncementMilliseconds := 0.
+	announcementIntervalMilliseconds := 250
 ]
 
 { #category : 'accessing' }
@@ -27,7 +30,15 @@ CFPhysicsTelemetryLogger >> capacity [ ^ capacity ]
 { #category : 'accessing' }
 CFPhysicsTelemetryLogger >> capacity: anInteger [
 	capacity := anInteger max: 1.
-	self trimRecordings
+	recordings capacity: capacity
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetryLogger >> announcementIntervalMilliseconds [ ^ announcementIntervalMilliseconds ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetryLogger >> announcementIntervalMilliseconds: anInteger [
+	announcementIntervalMilliseconds := anInteger max: 1
 ]
 
 { #category : 'accessing' }
@@ -42,12 +53,17 @@ CFPhysicsTelemetryLogger >> nextPut: aSignal [
 		ifAbsent: [ aSignal data at: #physicsPresentation ifAbsent: [ nil ] ].
 	(physicsData notNil and: [ (physicsData at: #physicsWorld ifAbsent: [ nil ]) == world ])
 		ifFalse: [ ^ self ].
+	physicsData at: #telemetryRecordedAt put: DateAndTime now.
 	super nextPut: aSignal.
-	self trimRecordings.
-	world announceTelemetryChanged
+	self announceIfDue
 ]
 
-{ #category : 'private - accessing' }
-CFPhysicsTelemetryLogger >> trimRecordings [
-	[ recordings size > capacity ] whileTrue: [ recordings removeFirst ]
+{ #category : 'private - announcing' }
+CFPhysicsTelemetryLogger >> announceIfDue [
+	| now |
+	now := Time millisecondClockValue.
+	(now - lastAnnouncementMilliseconds >= announcementIntervalMilliseconds
+		or: [ now < lastAnnouncementMilliseconds ]) ifFalse: [ ^ self ].
+	lastAnnouncementMilliseconds := now.
+	world announceTelemetryChanged
 ]
