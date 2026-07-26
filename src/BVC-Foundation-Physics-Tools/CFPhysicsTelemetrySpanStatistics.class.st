@@ -230,9 +230,13 @@ CFPhysicsTelemetrySpanStatistics >> gtDurationTrendFor: aView [
 				with: data;
 				valueX: #key;
 				scaleX: GtPlotterLinearScale new;
+				labelFormatX: [ :aSequence |
+					aSequence asInteger asString asRopedText foreground: Color darkGray ];
 				titleX: 'Recorded step';
 				valueY: #value;
 				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :aDuration |
+					(aDuration printShowingDecimalPlaces: 3) asRopedText foreground: Color darkGray ];
 				titleY: 'Duration (ms)';
 				ticksX: 8;
 				ticksY: 6.
@@ -339,10 +343,14 @@ CFPhysicsTelemetrySpanStatistics >> correlationChartFor: samples valueX: xBlock 
 		with: data;
 		valueX: xBlock;
 		scaleX: GtPlotterLinearScale new;
+		labelFormatX: [ :aCount |
+			aCount asInteger asString asRopedText foreground: Color darkGray ];
 		titleX: xTitle;
 		ticksX: 8;
 		valueY: #durationMilliseconds;
 		scaleY: GtPlotterLinearScale new;
+		labelFormatY: [ :aDuration |
+			(aDuration printShowingDecimalPlaces: 3) asRopedText foreground: Color darkGray ];
 		titleY: 'Duration (ms)';
 		ticksY: 8;
 		withProjectionAxis;
