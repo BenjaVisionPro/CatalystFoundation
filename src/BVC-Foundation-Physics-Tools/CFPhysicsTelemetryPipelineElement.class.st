@@ -63,11 +63,14 @@ CFPhysicsTelemetryPipelineElement >> build [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
-	| row axis statisticsSpace labels |
+	| row stageSpace axis statisticsSpace labels |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 34;
 		cellSpacing: 12;
+		yourself.
+	stageSpace := BlElement new
+		size: 210 @ 1;
 		yourself.
 	axis := BrFrame new
 		hMatchParent;
@@ -90,6 +93,7 @@ CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
 		size: 300 @ 1;
 		yourself.
 	row
+		addChild: stageSpace;
 		addChild: axis;
 		addChild: statisticsSpace.
 	^ row
@@ -97,18 +101,31 @@ CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> stageRowFor: span scale: scale [
-	| row chart statistics |
+	| row stageLabel chart statistics |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 34;
 		cellSpacing: 12;
 		yourself.
+	stageLabel := self stageLabelFor: span.
 	chart := self candleFor: span scale: scale.
 	statistics := self statisticsFor: span.
 	row
+		addChild: stageLabel;
 		addChild: chart;
 		addChild: statistics.
 	^ row
+]
+
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> stageLabelFor: span [
+	^ BrLabel new
+		hExact: 210;
+		vExact: 30;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
+		text: span readableName;
+		yourself
 ]
 
 { #category : 'private - building' }
