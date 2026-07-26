@@ -257,6 +257,9 @@ CFPhysicsTelemetrySpanStatistics >> gtExecutionsFor: aView [
 		column: 'GC (ms)' text: [ :sample | sample ping gcDurationInMilliseconds ];
 		column: 'Bodies' text: [ :sample | sample bodyCount ifNil: [ '' ] ];
 		column: 'Contacts' text: [ :sample | sample contactCount ifNil: [ '' ] ];
+		column: 'Solved islands' text: [ :sample | sample solvedIslandCount ifNil: [ '' ] ];
+		column: 'Largest island bodies' text: [ :sample | sample largestSolvedIslandBodyCount ifNil: [ '' ] ];
+		column: 'Largest island constraints' text: [ :sample | sample largestSolvedIslandConstraintCount ifNil: [ '' ] ];
 		send: [ :sample | sample signal ]
 ]
 
@@ -394,4 +397,101 @@ CFPhysicsTelemetrySpanStatistics >> gtContactsCorrelationFor: aView [
 		priority: 14;
 		disableAsync;
 		stencil: [ self correlationChartFor: available valueX: #contactCount titleX: 'Contact count' ]
+]
+
+
+{ #category : 'testing' }
+CFPhysicsTelemetrySpanStatistics >> isIslandSolverSpan [
+	^ self name asString = CFPhysicsIslandSolverStage name asString
+]
+
+{ #category : 'private - solver evidence' }
+CFPhysicsTelemetrySpanStatistics >> averageSampleValue: aBlock [
+	| values |
+	values := (self samples collect: aBlock) reject: #isNil.
+	^ values ifEmpty: [ 0 ] ifNotEmpty: [ values average ]
+]
+
+{ #category : 'private - solver evidence' }
+CFPhysicsTelemetrySpanStatistics >> maximumSampleValue: aBlock [
+	| values |
+	values := (self samples collect: aBlock) reject: #isNil.
+	^ values ifEmpty: [ 0 ] ifNotEmpty: [ values max ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtIslandSolverEvidenceFor: aView [
+	<gtView>
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	^ aView columnedList
+		title: 'Solver evidence';
+		priority: 17;
+		items: [ {
+			'Average solved islands' -> (self averageSampleValue: #solvedIslandCount).
+			'Maximum solved islands' -> (self maximumSampleValue: #solvedIslandCount).
+			'Average largest island bodies' -> (self averageSampleValue: #largestSolvedIslandBodyCount).
+			'Maximum largest island bodies' -> (self maximumSampleValue: #largestSolvedIslandBodyCount).
+			'Average largest island dynamic bodies' -> (self averageSampleValue: #largestSolvedIslandDynamicBodyCount).
+			'Maximum largest island dynamic bodies' -> (self maximumSampleValue: #largestSolvedIslandDynamicBodyCount).
+			'Average largest island constraints' -> (self averageSampleValue: #largestSolvedIslandConstraintCount).
+			'Maximum largest island constraints' -> (self maximumSampleValue: #largestSolvedIslandConstraintCount).
+			'Average solved-island constraints' -> (self averageSampleValue: #solvedIslandConstraintCount).
+			'Maximum solved-island constraints' -> (self maximumSampleValue: #solvedIslandConstraintCount) } ];
+		column: 'Measured fact' text: #key;
+		column: 'Value' text: #value;
+		send: #value
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtLargestIslandBodiesCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample largestSolvedIslandBodyCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Largest island bodies';
+		priority: 18;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #largestSolvedIslandBodyCount
+				titleX: 'Largest solved island body count' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtLargestIslandConstraintsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample largestSolvedIslandConstraintCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Largest island constraints';
+		priority: 19;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #largestSolvedIslandConstraintCount
+				titleX: 'Largest solved island constraint count' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSolvedIslandConstraintsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample solvedIslandConstraintCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Solver constraints';
+		priority: 20;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #solvedIslandConstraintCount
+				titleX: 'Solved-island constraint count' ]
 ]

@@ -98,6 +98,43 @@ CFPhysicsTelemetrySpanSample >> contactCount [
 	^ data ifNil: [ nil ] ifNotNil: [ data at: #contactCount ifAbsent: [ nil ] ]
 ]
 
+{ #category : 'private - accessing' }
+CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
+	| data |
+	data := signal physicsData.
+	^ data ifNil: [ nil ] ifNotNil: [ data at: aKey ifAbsent: [ nil ] ]
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> islandCount [
+	^ self physicsDataAt: #islandCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> solvedIslandCount [
+	^ self physicsDataAt: #solvedIslandCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandBodyCount [
+	^ self physicsDataAt: #largestSolvedIslandBodyCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandDynamicBodyCount [
+	^ self physicsDataAt: #largestSolvedIslandDynamicBodyCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandConstraintCount [
+	^ self physicsDataAt: #largestSolvedIslandConstraintCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> solvedIslandConstraintCount [
+	^ self physicsDataAt: #solvedIslandConstraintCount
+]
+
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanSample >> sender [
 	^ ping sender
@@ -130,7 +167,13 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'Start (ms)' -> self startMilliseconds.
 			'End (ms)' -> self endMilliseconds.
 			'Bodies' -> self bodyCount.
-			'Contacts' -> self contactCount } ];
+			'Contacts' -> self contactCount.
+			'Islands' -> self islandCount.
+			'Solved islands' -> self solvedIslandCount.
+			'Largest solved island bodies' -> self largestSolvedIslandBodyCount.
+			'Largest solved island dynamic bodies' -> self largestSolvedIslandDynamicBodyCount.
+			'Largest solved island constraints' -> self largestSolvedIslandConstraintCount.
+			'Solved island constraints' -> self solvedIslandConstraintCount } ];
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;
 		send: #value

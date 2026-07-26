@@ -411,6 +411,9 @@ CFPhysicsWorld >> stepRecordingTelemetry [
 
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
+	| solvedIslands |
+	solvedIslands := aStepResult islands select: [ :island |
+		island dynamicBodies anySatisfy: #isAwake ].
 	^ Dictionary new
 		at: #physicsWorld put: self;
 		at: #kind put: #step;
@@ -420,10 +423,37 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #activeBodyCount put: (bodyStates values count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates values count: [ :each | each isAwake not ]);
 		at: #contactCount put: activeContacts size;
-		at: #constraintCount put: pointerConstraints size + springConstraints size + attractionConstraints size + repulsionConstraints size + containmentConstraints size;
+		at: #constraintCount put: aStepResult constraints size;
 		at: #jointCount put: self joints size;
+		at: #islandCount put: aStepResult islands size;
+		at: #solvedIslandCount put: solvedIslands size;
+		at: #largestSolvedIslandBodyCount put: (self largestBodyCountIn: solvedIslands);
+		at: #largestSolvedIslandDynamicBodyCount put: (self largestDynamicBodyCountIn: solvedIslands);
+		at: #largestSolvedIslandConstraintCount put: (self largestConstraintCountIn: solvedIslands);
+		at: #solvedIslandConstraintCount put: (solvedIslands inject: 0 into: [ :total :island | total + island constraints size ]);
 		at: #stepResult put: aStepResult;
 		yourself
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> largestBodyCountIn: islands [
+	^ islands
+		ifEmpty: [ 0 ]
+		ifNotEmpty: [ (islands collect: [ :island | island bodies size ]) max ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> largestDynamicBodyCountIn: islands [
+	^ islands
+		ifEmpty: [ 0 ]
+		ifNotEmpty: [ (islands collect: [ :island | island dynamicBodies size ]) max ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> largestConstraintCountIn: islands [
+	^ islands
+		ifEmpty: [ 0 ]
+		ifNotEmpty: [ (islands collect: [ :island | island constraints size ]) max ]
 ]
 
 { #category : 'telemetry' }
