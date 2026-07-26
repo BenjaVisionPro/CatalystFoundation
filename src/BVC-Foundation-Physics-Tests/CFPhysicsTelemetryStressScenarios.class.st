@@ -27,7 +27,7 @@ CFPhysicsTelemetryStressScenarios class >> sleepingBodies: aBodyCount [
 	columns := 20.
 	elements withIndexDo: [ :element :index |
 		(world bodyStateFor: element)
-			position: (((index - 1) \ columns) * 30) @ (((index - 1) // columns) * 30);
+			position: (((index - 1) \\ columns) * 30) @ (((index - 1) // columns) * 30);
 			sleep ].
 	^ world
 ]
@@ -69,6 +69,6 @@ CFPhysicsTelemetryStressScenarios class >> independentIslands: islandCount bodie
 		islandOrigin := ((entry second - 1) * 120) @ 0.
 		localIndex := entry third - 1.
 		(world bodyStateFor: entry first)
-			position: islandOrigin + ((localIndex \ 2) * 18 @ ((localIndex // 2) * 18)) ].
+			position: islandOrigin + ((localIndex \\ 2) * 18 @ ((localIndex // 2) * 18)) ].
 	^ world
 ]
