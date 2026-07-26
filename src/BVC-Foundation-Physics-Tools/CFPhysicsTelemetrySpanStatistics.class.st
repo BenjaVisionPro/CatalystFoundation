@@ -9,6 +9,8 @@ Class {
 		'averageDuration',
 		'p05Start',
 		'p25Start',
+		'medianStart',
+		'medianEnd',
 		'p75End',
 		'p95Start',
 		'p95End',
@@ -60,6 +62,19 @@ CFPhysicsTelemetrySpanStatistics >> p25Start [ ^ p25Start ]
 
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanStatistics >> p25Start: aNumber [ p25Start := aNumber ]
+
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> medianStart [ ^ medianStart ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> medianStart: aNumber [ medianStart := aNumber ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> medianEnd [ ^ medianEnd ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanStatistics >> medianEnd: aNumber [ medianEnd := aNumber ]
 
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanStatistics >> p75End [ ^ p75End ]

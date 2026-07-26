@@ -594,6 +594,12 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	pipeline children do: [ :span |
 		self assert: span averageStart >= previousStart.
 		self assert: span averageEnd >= span averageStart.
+		self assert: span p05Start <= span p25Start.
+		self assert: span p25Start <= span medianStart.
+		self assert: span medianStart <= span p95Start.
+		self assert: span medianStart <= span medianEnd.
+		self assert: span medianEnd <= span p75End.
+		self assert: span p75End <= span p95End.
 		previousStart := span averageStart ].
 	element := CFPhysicsTelemetryPipelineElement world: world.
 	self assert: element children isNotEmpty.

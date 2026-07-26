@@ -130,17 +130,19 @@ CFPhysicsTelemetryPipelineElement >> stageLabelFor: span [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> candleFor: span scale: scale [
-	| frame grid wick candle averageBar averageMarker leftCap rightCap p05 p25 p75 p95 averageStart averageEnd |
+	| frame grid wick candle medianBar averageMarker leftCap rightCap p05 p25 medianStart medianEnd p75 p95 averageMidpoint |
 	p05 := scale map: span p05Start.
 	p25 := scale map: span p25Start.
 	p75 := scale map: span p75End.
 	p95 := scale map: span p95End.
-	averageStart := scale map: span averageStart.
-	averageEnd := scale map: span averageEnd.
+	medianStart := scale map: span medianStart.
+	medianEnd := scale map: span medianEnd.
+	averageMidpoint := scale map: ((span averageStart + span averageEnd) / 2).
 	p25 := p25 max: p05.
 	p75 := p75 max: p25.
 	p95 := p95 max: p75.
-	averageEnd := averageEnd max: averageStart.
+	medianStart := medianStart max: p25.
+	medianEnd := (medianEnd max: medianStart) min: p75.
 	frame := BrFrame new
 		hMatchParent;
 		vExact: 30;
@@ -160,17 +162,17 @@ CFPhysicsTelemetryPipelineElement >> candleFor: span scale: scale [
 	wick := self horizontalElementFrom: p05 to: p95 height: 1 color: (Color gray alpha: 0.65) verticalCenter: 0.5.
 	candle := self horizontalElementFrom: p25 to: p75 height: 14 color: (Color gray alpha: 0.24) verticalCenter: 0.5.
 	candle border: (BlBorder paint: (Color gray alpha: 0.5) width: 1).
-	averageBar := self horizontalElementFrom: averageStart to: averageEnd height: 7 color: (Color gray alpha: 0.78) verticalCenter: 0.5.
+	medianBar := self horizontalElementFrom: medianStart to: medianEnd height: 7 color: (Color gray alpha: 0.78) verticalCenter: 0.5.
 	leftCap := self verticalMarkerAt: p05 height: 12 color: (Color gray alpha: 0.65).
 	rightCap := self verticalMarkerAt: p95 height: 12 color: (Color gray alpha: 0.65).
-	averageMarker := self verticalMarkerAt: averageStart height: 18 color: (Color black alpha: 0.55).
+	averageMarker := self verticalMarkerAt: averageMidpoint height: 18 color: (Color black alpha: 0.55).
 	frame
 		addChild: grid;
 		addChild: wick;
 		addChild: leftCap;
 		addChild: rightCap;
 		addChild: candle;
-		addChild: averageBar;
+		addChild: medianBar;
 		addChild: averageMarker;
 		addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: (self tooltipFor: span));
 		when: BlClickEvent do: [ :event |
@@ -239,6 +241,8 @@ CFPhysicsTelemetryPipelineElement >> tooltipFor: span [
 		'Average ', (span averageMilliseconds printShowingDecimalPlaces: 3), ' ms', String cr,
 		'P95 ', (span p95Milliseconds printShowingDecimalPlaces: 3), ' ms', String cr,
 		'P95 / average ', (span p95ToAverageRatio printShowingDecimalPlaces: 2), 'x', String cr,
+		'Median interval ', (((span medianEnd - span medianStart) / 1000.0) printShowingDecimalPlaces: 3), ' ms', String cr,
+		'Average midpoint ', ((((span averageStart + span averageEnd) / 2) / 1000.0) printShowingDecimalPlaces: 3), ' ms', String cr,
 		'Start jitter ', (span startJitterMilliseconds printShowingDecimalPlaces: 3), ' ms'
 ]
 

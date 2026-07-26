@@ -39,19 +39,23 @@ CFPhysicsTelemetryAnalysis >> rootStatistics [
 
 { #category : 'private - aggregation' }
 CFPhysicsTelemetryAnalysis >> statisticsForPings: pings rootPings: roots depth: aDepth [
-	| template node starts ends durations children |
+	| template node starts ends durations children averageStart averageEnd |
 	template := pings first.
 	starts := pings with: roots collect: [ :ping :root | ping startTime - root startTime ].
 	ends := pings with: roots collect: [ :ping :root | ping endTime - root startTime ].
 	durations := pings collect: [ :ping | ping endTime - ping startTime ].
+	averageStart := self averageOf: starts.
+	averageEnd := self averageOf: ends.
 	node := CFPhysicsTelemetrySpanStatistics new
 		name: template name;
 		depth: aDepth;
-		averageStart: (self averageOf: starts);
-		averageEnd: (self averageOf: ends);
-		averageDuration: (self averageOf: durations);
+		averageStart: averageStart;
+		averageEnd: averageEnd;
+		averageDuration: averageEnd - averageStart;
 		p05Start: (self percentile: 0.05 of: starts);
 		p25Start: (self percentile: 0.25 of: starts);
+		medianStart: (self percentile: 0.50 of: starts);
+		medianEnd: (self percentile: 0.50 of: ends);
 		p75End: (self percentile: 0.75 of: ends);
 		p95Start: (self percentile: 0.95 of: starts);
 		p95End: (self percentile: 0.95 of: ends);
