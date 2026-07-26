@@ -435,6 +435,15 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #largestSolvedIslandDynamicBodyCount put: (self largestDynamicBodyCountIn: solvedIslands);
 		at: #largestSolvedIslandConstraintCount put: (self largestConstraintCountIn: solvedIslands);
 		at: #solvedIslandConstraintCount put: (solvedIslands inject: 0 into: [ :total :island | total + island constraints size ]);
+		at: #solverContactConstraintCount put: aStepResult solver contactConstraintCount;
+		at: #solverContactPointCount put: aStepResult solver contactPointCount;
+		at: #solverWarmStartedContactPointCount put: aStepResult solver warmStartedContactPointCount;
+		at: #solverRestitutionCandidatePointCount put: aStepResult solver restitutionCandidatePointCount;
+		at: #solverJointConstraintCount put: aStepResult solver jointConstraintCount;
+		at: #solverDistanceJointConstraintCount put: aStepResult solver distanceJointConstraintCount;
+		at: #solverRailJointConstraintCount put: aStepResult solver railJointConstraintCount;
+		at: #solverRevoluteJointConstraintCount put: aStepResult solver revoluteJointConstraintCount;
+		at: #solverFixedJointConstraintCount put: aStepResult solver fixedJointConstraintCount;
 		at: #stepResult put: aStepResult;
 		yourself
 ]

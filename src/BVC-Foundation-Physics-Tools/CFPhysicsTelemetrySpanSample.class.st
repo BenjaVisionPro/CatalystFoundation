@@ -156,6 +156,27 @@ CFPhysicsTelemetrySpanSample >> solvedIslandConstraintCount [
 	^ self physicsDataAt: #solvedIslandConstraintCount
 ]
 
+
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverContactConstraintCount [ ^ self physicsDataAt: #solverContactConstraintCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverContactPointCount [ ^ self physicsDataAt: #solverContactPointCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverWarmStartedContactPointCount [ ^ self physicsDataAt: #solverWarmStartedContactPointCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverRestitutionCandidatePointCount [ ^ self physicsDataAt: #solverRestitutionCandidatePointCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverJointConstraintCount [ ^ self physicsDataAt: #solverJointConstraintCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverDistanceJointConstraintCount [ ^ self physicsDataAt: #solverDistanceJointConstraintCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverRailJointConstraintCount [ ^ self physicsDataAt: #solverRailJointConstraintCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverRevoluteJointConstraintCount [ ^ self physicsDataAt: #solverRevoluteJointConstraintCount ]
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverFixedJointConstraintCount [ ^ self physicsDataAt: #solverFixedJointConstraintCount ]
+
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanSample >> sender [
 	^ ping sender
@@ -198,7 +219,16 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'Largest solved island bodies' -> self largestSolvedIslandBodyCount.
 			'Largest solved island dynamic bodies' -> self largestSolvedIslandDynamicBodyCount.
 			'Largest solved island constraints' -> self largestSolvedIslandConstraintCount.
-			'Solved island constraints' -> self solvedIslandConstraintCount } ];
+			'Solved island constraints' -> self solvedIslandConstraintCount.
+			'Solver contact constraints' -> self solverContactConstraintCount.
+			'Solver contact points' -> self solverContactPointCount.
+			'Warm-started contact points' -> self solverWarmStartedContactPointCount.
+			'Restitution candidate points' -> self solverRestitutionCandidatePointCount.
+			'Solver joint constraints' -> self solverJointConstraintCount.
+			'Distance joint constraints' -> self solverDistanceJointConstraintCount.
+			'Rail joint constraints' -> self solverRailJointConstraintCount.
+			'Revolute joint constraints' -> self solverRevoluteJointConstraintCount.
+			'Fixed joint constraints' -> self solverFixedJointConstraintCount } ];
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;
 		send: #value

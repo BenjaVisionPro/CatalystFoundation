@@ -436,7 +436,21 @@ CFPhysicsTelemetrySpanStatistics >> gtIslandSolverEvidenceFor: aView [
 			'Average largest island constraints' -> (self averageSampleValue: #largestSolvedIslandConstraintCount).
 			'Maximum largest island constraints' -> (self maximumSampleValue: #largestSolvedIslandConstraintCount).
 			'Average solved-island constraints' -> (self averageSampleValue: #solvedIslandConstraintCount).
-			'Maximum solved-island constraints' -> (self maximumSampleValue: #solvedIslandConstraintCount) } ];
+			'Maximum solved-island constraints' -> (self maximumSampleValue: #solvedIslandConstraintCount).
+			'Average contact constraints' -> (self averageSampleValue: #solverContactConstraintCount).
+			'Maximum contact constraints' -> (self maximumSampleValue: #solverContactConstraintCount).
+			'Average contact points' -> (self averageSampleValue: #solverContactPointCount).
+			'Maximum contact points' -> (self maximumSampleValue: #solverContactPointCount).
+			'Average warm-started points' -> (self averageSampleValue: #solverWarmStartedContactPointCount).
+			'Maximum warm-started points' -> (self maximumSampleValue: #solverWarmStartedContactPointCount).
+			'Average restitution candidates' -> (self averageSampleValue: #solverRestitutionCandidatePointCount).
+			'Maximum restitution candidates' -> (self maximumSampleValue: #solverRestitutionCandidatePointCount).
+			'Average joint constraints' -> (self averageSampleValue: #solverJointConstraintCount).
+			'Maximum joint constraints' -> (self maximumSampleValue: #solverJointConstraintCount).
+			'Average distance joints' -> (self averageSampleValue: #solverDistanceJointConstraintCount).
+			'Average rail joints' -> (self averageSampleValue: #solverRailJointConstraintCount).
+			'Average revolute joints' -> (self averageSampleValue: #solverRevoluteJointConstraintCount).
+			'Average fixed joints' -> (self averageSampleValue: #solverFixedJointConstraintCount) } ];
 		column: 'Measured fact' text: #key;
 		column: 'Value' text: #value;
 		send: #value
@@ -494,6 +508,63 @@ CFPhysicsTelemetrySpanStatistics >> gtSolvedIslandConstraintsCorrelationFor: aVi
 				correlationChartFor: available
 				valueX: #solvedIslandConstraintCount
 				titleX: 'Solved-island constraint count' ]
+]
+
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSolverContactPointsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample solverContactPointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Contact points';
+		priority: 21;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #solverContactPointCount titleX: 'Contact points solved' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSolverWarmStartedPointsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample solverWarmStartedContactPointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Warm-started points';
+		priority: 22;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #solverWarmStartedContactPointCount titleX: 'Warm-started contact points' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSolverRestitutionCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample solverRestitutionCandidatePointCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Restitution';
+		priority: 23;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #solverRestitutionCandidatePointCount titleX: 'Restitution candidate points' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtSolverJointConstraintsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isIslandSolverSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample solverJointConstraintCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Joint constraints';
+		priority: 24;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #solverJointConstraintCount titleX: 'Joint constraints solved' ]
 ]
 
 { #category : 'testing' }

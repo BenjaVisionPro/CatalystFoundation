@@ -52,3 +52,23 @@ CFPhysicsIslandSolver >> islands: aCollection [ islands := aCollection asArray ]
 CFPhysicsIslandSolver >> islands [ ^ islands ]
 { #category : 'accessing' }
 CFPhysicsIslandSolver >> softStepSolvers [ ^ softStepSolvers ]
+
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> contactConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver contactConstraintCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> contactPointCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver contactPointCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> warmStartedContactPointCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver warmStartedContactPointCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> restitutionCandidatePointCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver restitutionCandidatePointCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> jointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver jointConstraintCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> distanceJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver distanceJointConstraintCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> railJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver railJointConstraintCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> revoluteJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver revoluteJointConstraintCount ] ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> fixedJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver fixedJointConstraintCount ] ]

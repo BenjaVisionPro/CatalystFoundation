@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'railJointConstraintCount', 'revoluteJointConstraintCount', 'fixedJointConstraintCount' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -20,7 +20,14 @@ CFPhysicsSoftStepSolver >> initialize [
 	super initialize.
 	constraints := #().
 	contactConstraints := #().
-	orderedJointConstraints := #()
+	orderedJointConstraints := #().
+	contactPointCount := 0.
+	warmStartedContactPointCount := 0.
+	restitutionCandidatePointCount := 0.
+	distanceJointConstraintCount := 0.
+	railJointConstraintCount := 0.
+	revoluteJointConstraintCount := 0.
+	fixedJointConstraintCount := 0
 ]
 
 { #category : 'solving' }
@@ -314,10 +321,12 @@ CFPhysicsSoftStepSolver >> solveTangentAt: point constraint: constraint [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
+	restitutionCandidatePointCount := 0.
 	self contactConstraints do: [ :constraint |
 		constraint points do: [ :point |
 			point relativeNormalVelocity < threshold negated ifTrue: [
 				| normalVelocity increment oldImpulse newImpulse |
+				restitutionCandidatePointCount := restitutionCandidatePointCount + 1.
 				normalVelocity := self dot: (self relativeVelocityAt: point constraint: constraint) with: constraint normal.
 				increment := point normalMass
 					* (normalVelocity + (constraint restitution * point relativeNormalVelocity)) negated.
@@ -536,5 +545,47 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 		asArray sorted: [ :first :second |
 			first joint orderingKey = second joint orderingKey
 				ifTrue: [ first joint class name asString < second joint class name asString ]
-				ifFalse: [ first joint orderingKey < second joint orderingKey ] ]
+				ifFalse: [ first joint orderingKey < second joint orderingKey ] ].
+	self measurePreparedWork
 ]
+
+{ #category : 'private - telemetry' }
+CFPhysicsSoftStepSolver >> measurePreparedWork [
+	contactPointCount := contactConstraints
+		inject: 0
+		into: [ :total :constraint | total + constraint points size ].
+	warmStartedContactPointCount := contactConstraints
+		inject: 0
+		into: [ :total :constraint |
+			total + (constraint points count: [ :point |
+				point normalImpulse ~= 0.0 or: [ point tangentImpulse ~= 0.0 ] ]) ].
+	distanceJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedDistanceJoint ].
+	railJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedRailJoint ].
+	fixedJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedFixedJoint ].
+	revoluteJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		(constraint isKindOf: CFPhysicsPreparedRevoluteJoint)
+			and: [ (constraint isKindOf: CFPhysicsPreparedFixedJoint) not ] ]
+]
+
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> contactConstraintCount [ ^ contactConstraints size ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> contactPointCount [ ^ contactPointCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> warmStartedContactPointCount [ ^ warmStartedContactPointCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> restitutionCandidatePointCount [ ^ restitutionCandidatePointCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> jointConstraintCount [ ^ orderedJointConstraints size ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> distanceJointConstraintCount [ ^ distanceJointConstraintCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> railJointConstraintCount [ ^ railJointConstraintCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> revoluteJointConstraintCount [ ^ revoluteJointConstraintCount ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> fixedJointConstraintCount [ ^ fixedJointConstraintCount ]
