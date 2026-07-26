@@ -409,7 +409,7 @@ CFPhysicsTelemetrySpanStatistics >> isIslandSolverSpan [
 CFPhysicsTelemetrySpanStatistics >> averageSampleValue: aBlock [
 	| values |
 	values := (self samples collect: aBlock) reject: #isNil.
-	^ values ifEmpty: [ 0 ] ifNotEmpty: [ values average ]
+	^ values ifEmpty: [ 0.0 ] ifNotEmpty: [ values average asFloat ]
 ]
 
 { #category : 'private - solver evidence' }

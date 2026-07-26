@@ -13,11 +13,10 @@ CFPhysicsPairFinder >> pairsAmong: bodies [
 	entries := (bodies collect: [ :body | { body. body sweptAABB. body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
 	entryCount := entries size.
-	active := OrderedCollection new.
-	pairs := OrderedCollection new.
+	active := OrderedCollection new: entries size.
+	pairs := OrderedCollection new: entries size.
 	entries do: [ :entry |
-		active := active reject: [ :other |
-			other second maximum x < entry second minimum x ].
+		self expireEntriesBefore: entry second minimum x from: active.
 		active do: [ :other |
 			comparisonCount := comparisonCount + 1.
 			(self
@@ -66,11 +65,10 @@ CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
 	entries := (stepStates collect: [ :state |
 		{ state. state solvedSweptAABB. state body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
-	active := OrderedCollection new.
-	pairs := OrderedCollection new.
+	active := OrderedCollection new: entries size.
+	pairs := OrderedCollection new: entries size.
 	entries do: [ :entry |
-		active := active reject: [ :other |
-			other second maximum x < entry second minimum x ].
+		self expireEntriesBefore: entry second minimum x from: active.
 		active do: [ :other |
 			(self
 				shouldConsiderStepState: other first
@@ -105,11 +103,10 @@ CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds [
 	entries := (stepStates collect: [ :state |
 		{ state. state predictedSweptAABBFor: seconds. state body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
-	active := OrderedCollection new.
-	pairs := OrderedCollection new.
+	active := OrderedCollection new: entries size.
+	pairs := OrderedCollection new: entries size.
 	entries do: [ :entry |
-		active := active reject: [ :other |
-			other second maximum x < entry second minimum x ].
+		self expireEntriesBefore: entry second minimum x from: active.
 		active do: [ :other |
 			(self
 				shouldConsiderStepState: other first
@@ -139,6 +136,14 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: fi
 	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
 	(self jointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
+]
+
+
+{ #category : 'private - sweep' }
+CFPhysicsPairFinder >> expireEntriesBefore: minimumX from: activeEntries [
+	activeEntries size to: 1 by: -1 do: [ :index |
+		((activeEntries at: index) second maximum x < minimumX) ifTrue: [
+			activeEntries removeAt: index ] ]
 ]
 
 { #category : 'private - filtering' }

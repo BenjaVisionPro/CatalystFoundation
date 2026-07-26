@@ -450,6 +450,23 @@ CFPhysicsCleanSlateTests >> pairFinderReturnsOverlappingPairsInSequenceOrder [
 	^ pairs
 ]
 
+
+{ #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateTests >> pairFinderExpiresInactiveSweepEntriesInPlace [
+	<gtExample>
+	| first second third pairFinder pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 10 @ 10.
+	third := self cleanSlateBodyWithSequence: 3 position: 105 @ 0 extent: 10 @ 10.
+	pairFinder := CFPhysicsPairFinder new.
+	pairs := pairFinder pairsAmong: { third. first. second }.
+	self assert: pairFinder comparisonCount equals: 1.
+	self assert: pairs size equals: 1.
+	self assert: pairs first firstBody equals: second.
+	self assert: pairs first secondBody equals: third.
+	^ pairs
+]
+
 { #category : 'examples - pair discovery' }
 CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedBodies [
 	<gtExample>
