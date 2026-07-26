@@ -2,7 +2,8 @@ Class {
 	#name : 'CFPhysicsTelemetryPipelineElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'world'
+		'world',
+		'stageLabelWidth'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -46,6 +47,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	pipeline ifNil: [
 		self addChild: (self emptyLabel: 'No Pipeline span was found in the recorded Physics steps.').
 		^ self ].
+	stageLabelWidth := self stageLabelWidthFor: pipeline children.
 	maximumEnd := pipeline children
 		inject: pipeline p95Duration
 		into: [ :maximum :span | maximum max: span p95End ].
@@ -53,8 +55,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	scale := GtPlotterLinearScale new
 		domainFrom: 0 to: maximumEnd;
 		rangeFrom: 0 to: 1;
-		tickFormat: [ :value |
-			(value / 1000.0) printShowingDecimalPlaces: 2 ];
+		tickFormat: [ :value | self formattedMillisecondsForMicroseconds: value ];
 		yourself.
 	self addChild: (self axisRowFor: scale).
 	pipeline children do: [ :span |
@@ -63,14 +64,14 @@ CFPhysicsTelemetryPipelineElement >> build [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
-	| row stageSpace axis statisticsSpace labels |
+	| row stageSpace axis statisticsHeadings labels |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 34;
-		cellSpacing: 12;
+		cellSpacing: 6;
 		yourself.
 	stageSpace := BlElement new
-		size: 210 @ 1;
+		size: stageLabelWidth @ 1;
 		yourself.
 	axis := BrFrame new
 		hMatchParent;
@@ -81,7 +82,7 @@ CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
 		scale: scale;
 		labels: 8;
 		labelFormat: [ :value |
-			((value / 1000.0) printShowingDecimalPlaces: 2), ' ms' ];
+			(self formattedMillisecondsForMicroseconds: value), ' ms' ];
 		labelStyle: [ :anElement |
 			anElement constraintsDo: [ :c |
 				c frame vertical alignBottom.
@@ -89,13 +90,11 @@ CFPhysicsTelemetryPipelineElement >> axisRowFor: scale [
 				c vertical fitContent ] ];
 		yourself.
 	axis addChild: labels.
-	statisticsSpace := BlElement new
-		size: 300 @ 1;
-		yourself.
+	statisticsHeadings := self statisticsHeadings.
 	row
 		addChild: stageSpace;
 		addChild: axis;
-		addChild: statisticsSpace.
+		addChild: statisticsHeadings.
 	^ row
 ]
 
@@ -105,7 +104,7 @@ CFPhysicsTelemetryPipelineElement >> stageRowFor: span scale: scale [
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 34;
-		cellSpacing: 12;
+		cellSpacing: 6;
 		yourself.
 	stageLabel := self stageLabelFor: span.
 	chart := self candleFor: span scale: scale.
@@ -121,7 +120,7 @@ CFPhysicsTelemetryPipelineElement >> stageRowFor: span scale: scale [
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> stageLabelFor: span [
 	^ BrLabel new
-		hExact: 210;
+		hExact: stageLabelWidth;
 		vExact: 30;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
 		text: span readableName;
@@ -206,6 +205,51 @@ CFPhysicsTelemetryPipelineElement >> verticalMarkerAt: aPercentage height: aHeig
 			c vertical exact: aHeight.
 			c frame vertical alignCenterAt: 0.5.
 			c frame horizontal alignCenterAt: ((aPercentage max: 0) min: 1) ];
+		yourself
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsTelemetryPipelineElement >> formattedMillisecondsForMicroseconds: microseconds [
+	| milliseconds rounded |
+	milliseconds := microseconds / 1000.0.
+	rounded := milliseconds rounded.
+	^ milliseconds = rounded
+		ifTrue: [ rounded asString ]
+		ifFalse: [ milliseconds printShowingDecimalPlaces: 1 ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> stageLabelWidthFor: spans [
+	| longestCharacterCount |
+	longestCharacterCount := spans
+		inject: 0
+		into: [ :maximum :span | maximum max: span readableName size ].
+	^ ((longestCharacterCount * 8) + 8) max: 96
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> statisticsHeadings [
+	| pane |
+	pane := BrHorizontalPane new
+		hExact: 300;
+		vExact: 30;
+		cellSpacing: 8;
+		yourself.
+	pane
+		addChild: (self statisticsHeading: 'Avg' width: 62);
+		addChild: (self statisticsHeading: 'P95' width: 62);
+		addChild: (self statisticsHeading: 'P95/Avg' width: 58);
+		addChild: (self statisticsHeading: 'Jitter' width: 62).
+	^ pane
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> statisticsHeading: aString width: aWidth [
+	^ BrLabel new
+		hExact: aWidth;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
+		text: aString;
 		yourself
 ]
 
