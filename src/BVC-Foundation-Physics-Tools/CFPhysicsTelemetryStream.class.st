@@ -1,11 +1,10 @@
-"I adapt one Physics world's telemetry announcer to GT's asynchronous stream protocol.
+"A TAsyncStream source for one Physics world telemetry announcer.
 
-I retain at most the latest pending update. This prevents a live Physics world from
-building a backlog when telemetry is produced faster than Bloc can redraw the
-statistics element. The element sink owns consumption; finalization removes the
-announcer subscription."
+The single pending slot is the producer-side equivalent of BlEventsStream>>keepOnlyLast:
+it prevents announcements from accumulating before the sink polls. AsyncPeekSink then owns
+the latest received value on the element side."
 Class {
-	#name : 'CFPhysicsTelemetryUpdatesStream',
+	#name : 'CFPhysicsTelemetryStream',
 	#superclass : 'Object',
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
@@ -19,21 +18,21 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsTelemetryUpdatesStream class >> on: aWorld [
+CFPhysicsTelemetryStream class >> on: aWorld [
 	^ self new
 		registerOn: aWorld;
 		yourself
 ]
 
 { #category : 'initialization' }
-CFPhysicsTelemetryUpdatesStream >> initialize [
+CFPhysicsTelemetryStream >> initialize [
 	super initialize.
 	updates := AsyncMutex for: LinkedList new.
 	waker := AsyncFutureExecutionAtomicWaker new
 ]
 
 { #category : 'initialization' }
-CFPhysicsTelemetryUpdatesStream >> registerOn: aWorld [
+CFPhysicsTelemetryStream >> registerOn: aWorld [
 	world := aWorld.
 	world telemetryAnnouncer weak
 		when: Announcement
@@ -43,7 +42,7 @@ CFPhysicsTelemetryUpdatesStream >> registerOn: aWorld [
 ]
 
 { #category : 'private - announcements' }
-CFPhysicsTelemetryUpdatesStream >> onTelemetryChanged: anAnnouncement [
+CFPhysicsTelemetryStream >> onTelemetryChanged: anAnnouncement [
 	updates lock: [ :pendingUpdates |
 		pendingUpdates removeAll.
 		pendingUpdates addLast: anAnnouncement.
@@ -51,7 +50,7 @@ CFPhysicsTelemetryUpdatesStream >> onTelemetryChanged: anAnnouncement [
 ]
 
 { #category : 'api - stream' }
-CFPhysicsTelemetryUpdatesStream >> pollNext: anAsynchronousContext [
+CFPhysicsTelemetryStream >> pollNext: anAsynchronousContext [
 	<return: #AsyncPoll>
 	^ updates lock: [ :pendingUpdates |
 		pendingUpdates
@@ -63,13 +62,13 @@ CFPhysicsTelemetryUpdatesStream >> pollNext: anAsynchronousContext [
 ]
 
 { #category : 'finalization' }
-CFPhysicsTelemetryUpdatesStream >> finalize [
+CFPhysicsTelemetryStream >> finalize [
 	super finalize.
 	world ifNotNil: [ world telemetryAnnouncer unsubscribe: self ]
 ]
 
 { #category : 'api - stream copy' }
-CFPhysicsTelemetryUpdatesStream >> postSimilarCopy [
+CFPhysicsTelemetryStream >> postSimilarCopy [
 	updates := AsyncMutex for: LinkedList new.
 	waker := AsyncFutureExecutionAtomicWaker new.
 	self registerOn: world

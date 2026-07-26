@@ -4,7 +4,11 @@ Class {
 	#instVars : [
 		'world',
 		'stageLabelWidth',
-		'telemetryUpdatesStream'
+		'telemetryUpdatesStream',
+		'controls',
+		'windowToggleGroup',
+		'samplesLabel',
+		'graph'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -31,34 +35,45 @@ CFPhysicsTelemetryPipelineElement >> initialize [
 { #category : 'accessing' }
 CFPhysicsTelemetryPipelineElement >> world: aWorld [
 	world := aWorld.
-	telemetryUpdatesStream := CFPhysicsTelemetryUpdatesStream on: world.
+	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
 	self withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
-			whenUpdate: [ :anElement :aSink | anElement updateFromTelemetryStream ];
+			whenUpdate: [ :anElement :aSink |
+				aSink peek ifSome: [ anElement updateGraph ] ];
 			forwardStream: telemetryUpdatesStream ]
-]
-
-{ #category : 'private - updating' }
-CFPhysicsTelemetryPipelineElement >> updateFromTelemetryStream [
-	self build
 ]
 
 { #category : 'building' }
 CFPhysicsTelemetryPipelineElement >> build [
-	| analysis root pipeline maximumEnd scale |
 	self removeChildren.
+	controls := self buildControls.
+	graph := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 4;
+		yourself.
+	self
+		addChild: controls;
+		addChild: graph.
+	self updateGraph
+]
+
+{ #category : 'private - updating' }
+CFPhysicsTelemetryPipelineElement >> updateGraph [
+	| analysis root pipeline maximumEnd scale |
 	analysis := CFPhysicsTelemetryAnalysis world: world.
-	self addChild: (self controlsFor: analysis).
+	samplesLabel text: analysis sampleCount asString, ' samples'.
+	graph removeChildren.
 	root := analysis rootStatistics.
 	root ifNil: [
-		self addChild: (self emptyLabel: 'Record at least one Physics step to see pipeline statistics.').
+		graph addChild: (self emptyLabel: 'Record at least one Physics step to see pipeline statistics.').
 		^ self ].
 	pipeline := root children
 		detect: [ :each | each name asString = 'Pipeline' ]
 		ifNone: [ nil ].
 	pipeline ifNil: [
-		self addChild: (self emptyLabel: 'No Pipeline span was found in the recorded Physics steps.').
+		graph addChild: (self emptyLabel: 'No Pipeline span was found in the recorded Physics steps.').
 		^ self ].
 	stageLabelWidth := self stageLabelWidthFor: pipeline children.
 	maximumEnd := pipeline children
@@ -70,9 +85,9 @@ CFPhysicsTelemetryPipelineElement >> build [
 		rangeFrom: 0 to: 1;
 		tickFormat: [ :value | self formattedMillisecondsForMicroseconds: value ];
 		yourself.
-	self addChild: (self axisRowFor: scale).
+	graph addChild: (self axisRowFor: scale).
 	pipeline children do: [ :span |
-		self addChild: (self stageRowFor: span scale: scale) ]
+		graph addChild: (self stageRowFor: span scale: scale) ]
 ]
 
 { #category : 'private - building' }
@@ -314,8 +329,8 @@ CFPhysicsTelemetryPipelineElement >> emptyLabel: aString [
 
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> controlsFor: analysis [
-	| row liveLabel samplesLabel |
+CFPhysicsTelemetryPipelineElement >> buildControls [
+	| row liveLabel |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 32;
@@ -326,30 +341,45 @@ CFPhysicsTelemetryPipelineElement >> controlsFor: analysis [
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
 		text: 'Rolling window';
 		yourself.
-	row addChild: liveLabel.
-	#(1 5 10 30) do: [ :seconds |
-		row addChild: (self windowButtonForSeconds: seconds) ].
+	windowToggleGroup := self buildWindowToggleGroup.
 	samplesLabel := BrLabel new
 		hMatchParent;
 		vFitContent;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
-		text: analysis sampleCount asString, ' samples';
+		text: '0 samples';
 		yourself.
-	row addChild: samplesLabel.
+	row
+		addChild: liveLabel;
+		addChild: windowToggleGroup;
+		addChild: samplesLabel.
 	^ row
 ]
 
 { #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> windowButtonForSeconds: seconds [
-	| selected button |
-	selected := world telemetryAnalysisWindowSeconds = seconds.
-	button := BrButton new
-		aptitude: BrGlamorousButtonWithLabelAptitude new;
-		label: seconds asString, ' s';
-		action: [
-			world telemetryAnalysisWindowSeconds: seconds.
-			self build ];
+CFPhysicsTelemetryPipelineElement >> buildWindowToggleGroup [
+	| toggleGroup |
+	toggleGroup := BrToggleGroup new
+		aptitude: BrGlamorousToggleGroupAptitude new;
 		yourself.
-	selected ifTrue: [ button disable ].
-	^ button
+	#(1 5 10 30) do: [ :seconds |
+		toggleGroup addToggle: (self windowToggleForSeconds: seconds) ].
+	^ toggleGroup
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> windowToggleForSeconds: seconds [
+	| toggle |
+	toggle := BrToggle new
+		aptitude: BrGlamorousToggleWithLabelAptitude new;
+		label: seconds asString, ' s';
+		yourself.
+	toggle viewModel model: seconds.
+	world telemetryAnalysisWindowSeconds = seconds
+		ifTrue: [ toggle activate ].
+	toggle
+		when: BrToggleActivatedEvent
+		do: [ :anEvent |
+			world telemetryAnalysisWindowSeconds: anEvent model.
+			self updateGraph ].
+	^ toggle
 ]
