@@ -593,6 +593,9 @@ CFPhysicsExamples >> physicsWorldTelemetryStatistics [
 	self assert: pipeline samples size = analysis sampleCount.
 	self assert: pipeline children first samples isNotEmpty.
 	self assert: pipeline children first executionsByDuration first signal notNil.
+	self assert: (pipeline children first durationHistogramWithBins: 12) isNotEmpty.
+	self assert: pipeline children first samples first bodyCount notNil.
+	self assert: pipeline children first samples first contactCount notNil.
 	previousStart := -1.
 	pipeline children do: [ :span |
 		self assert: span averageStart >= previousStart.

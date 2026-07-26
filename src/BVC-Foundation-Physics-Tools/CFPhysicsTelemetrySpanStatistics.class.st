@@ -244,7 +244,7 @@ CFPhysicsTelemetrySpanStatistics >> gtExecutionsFor: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Executions';
-		priority: 12;
+		priority: 15;
 		items: [ self executionsByDuration ];
 		column: 'Step' text: [ :sample | sample stepNumber ifNil: [ sample sequence ] ];
 		column: 'Duration (ms)' text: [ :sample | sample durationMilliseconds ];
@@ -264,6 +264,126 @@ CFPhysicsTelemetrySpanStatistics >> gtSourcesFor: aView [
 	methods := methods asSet asArray.
 	^ aView list
 		title: 'Sources';
-		priority: 13;
+		priority: 16;
 		items: [ methods ]
+]
+
+{ #category : 'statistics' }
+CFPhysicsTelemetrySpanStatistics >> durationHistogramWithBins: requestedBinCount [
+	| durations minimum maximum binCount width counts |
+	durations := self samples collect: #durationMilliseconds.
+	durations ifEmpty: [ ^ #() ].
+	minimum := durations min.
+	maximum := durations max.
+	binCount := (requestedBinCount min: durations size) max: 1.
+	width := maximum = minimum
+		ifTrue: [ 1.0 ]
+		ifFalse: [ (maximum - minimum) / binCount ].
+	counts := Array new: binCount withAll: 0.
+	durations do: [ :duration |
+		| index |
+		index := maximum = minimum
+			ifTrue: [ 1 ]
+			ifFalse: [ (((duration - minimum) / width) floor + 1) min: binCount ].
+		counts at: index put: (counts at: index) + 1 ].
+	^ (1 to: binCount) collect: [ :index |
+		| lower upper |
+		lower := minimum + ((index - 1) * width).
+		upper := index = binCount
+			ifTrue: [ maximum ]
+			ifFalse: [ lower + width ].
+		{ lower. upper. counts at: index } ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtDurationDistributionFor: aView [
+	<gtView>
+	^ aView explicit
+		title: 'Distribution';
+		priority: 12;
+		disableAsync;
+		stencil: [
+			| bins data maximumCount chart |
+			bins := self durationHistogramWithBins: 12.
+			bins ifEmpty: [
+				BrLabel new
+					aptitude: BrGlamorousLabelAptitude;
+					text: 'No recorded executions.';
+					yourself ]
+			ifNotEmpty: [
+				data := GtPlotterDataGroup new values: bins.
+				data := data labelled: [ :bin |
+					(bin first printShowingDecimalPlaces: 3), '–',
+					(bin second printShowingDecimalPlaces: 3) ].
+				maximumCount := bins inject: 1 into: [ :maximum :bin | maximum max: bin third ].
+				chart := GtPlotterVerticalBarChart new.
+				chart
+					barElement: [ :context |
+						BlElement new
+							aptitude: (BrGlamorousWithExplicitTooltipAptitude
+								text: context originalValue third asString, ' executions');
+							yourself ];
+					barHeightScale: (GtPlotterLinearScale new domainFrom: 0 to: maximumCount);
+					barWidthScale: (GtPlotterConstantScale new constant: 24);
+					barHeightData: [ :bin | bin third ];
+					amountOfTicks: 6;
+					with: data.
+				chart create ] ]
+]
+
+{ #category : 'private - gt views' }
+CFPhysicsTelemetrySpanStatistics >> correlationChartFor: samples valueX: xBlock titleX: xTitle [
+	| data chart |
+	data := GtPlotterDataGroup new values: samples.
+	chart := GtPlotterScatterChart new
+		with: data;
+		valueX: xBlock;
+		scaleX: GtPlotterLinearScale new;
+		titleX: xTitle;
+		ticksX: 8;
+		valueY: #durationMilliseconds;
+		scaleY: GtPlotterLinearScale new;
+		titleY: 'Duration (ms)';
+		ticksY: 8;
+		withProjectionAxis;
+		dotElement: [ :context |
+			| sample |
+			sample := context originalValue.
+			BlElement new
+				geometry: BlEllipseGeometry new;
+				size: 7 asPoint;
+				aptitude: (BrGlamorousWithExplicitTooltipAptitude
+					text: 'Step ', (sample stepNumber ifNil: [ sample sequence ]) asString,
+						' · ', (sample durationMilliseconds printShowingDecimalPlaces: 3), ' ms');
+				when: BlClickEvent do: [ :event |
+					event consumed: true.
+					event currentTarget phlow spawnObject: sample signal ];
+				yourself ].
+	^ chart create
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtBodiesCorrelationFor: aView [
+	<gtView>
+	| available |
+	available := self samples reject: [ :sample | sample bodyCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Bodies';
+		priority: 13;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #bodyCount titleX: 'Body count' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtContactsCorrelationFor: aView [
+	<gtView>
+	| available |
+	available := self samples reject: [ :sample | sample contactCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Contacts';
+		priority: 14;
+		disableAsync;
+		stencil: [ self correlationChartFor: available valueX: #contactCount titleX: 'Contact count' ]
 ]
