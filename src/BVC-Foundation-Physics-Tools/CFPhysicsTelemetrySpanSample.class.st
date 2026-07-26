@@ -105,6 +105,27 @@ CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
 	^ data ifNil: [ nil ] ifNotNil: [ data at: aKey ifAbsent: [ nil ] ]
 ]
 
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderEntryCount [
+	^ self physicsDataAt: #pairFinderEntryCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderComparisonCount [
+	^ self physicsDataAt: #pairFinderComparisonCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderAcceptedPairCount [
+	^ self physicsDataAt: #pairFinderAcceptedPairCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderMaximumActiveCount [
+	^ self physicsDataAt: #pairFinderMaximumActiveCount
+]
+
 { #category : 'accessing - solver evidence' }
 CFPhysicsTelemetrySpanSample >> islandCount [
 	^ self physicsDataAt: #islandCount
@@ -168,6 +189,10 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'End (ms)' -> self endMilliseconds.
 			'Bodies' -> self bodyCount.
 			'Contacts' -> self contactCount.
+			'Pair finder entries' -> self pairFinderEntryCount.
+			'Pair finder comparisons' -> self pairFinderComparisonCount.
+			'Pair finder accepted pairs' -> self pairFinderAcceptedPairCount.
+			'Pair finder maximum active entries' -> self pairFinderMaximumActiveCount.
 			'Islands' -> self islandCount.
 			'Solved islands' -> self solvedIslandCount.
 			'Largest solved island bodies' -> self largestSolvedIslandBodyCount.

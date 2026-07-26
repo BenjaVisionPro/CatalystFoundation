@@ -495,3 +495,84 @@ CFPhysicsTelemetrySpanStatistics >> gtSolvedIslandConstraintsCorrelationFor: aVi
 				valueX: #solvedIslandConstraintCount
 				titleX: 'Solved-island constraint count' ]
 ]
+
+{ #category : 'testing' }
+CFPhysicsTelemetrySpanStatistics >> isPairFinderSpan [
+	^ self name asString = CFPhysicsPairFinderStage name asString
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPairFinderEvidenceFor: aView [
+	<gtView>
+	self isPairFinderSpan ifFalse: [ ^ aView empty ].
+	^ aView columnedList
+		title: 'Pair finder evidence';
+		priority: 17;
+		items: [ {
+			'Average bodies entered' -> (self averageSampleValue: #pairFinderEntryCount).
+			'Maximum bodies entered' -> (self maximumSampleValue: #pairFinderEntryCount).
+			'Average active-set comparisons' -> (self averageSampleValue: #pairFinderComparisonCount).
+			'Maximum active-set comparisons' -> (self maximumSampleValue: #pairFinderComparisonCount).
+			'Average accepted pairs' -> (self averageSampleValue: #pairFinderAcceptedPairCount).
+			'Maximum accepted pairs' -> (self maximumSampleValue: #pairFinderAcceptedPairCount).
+			'Average maximum active entries' -> (self averageSampleValue: #pairFinderMaximumActiveCount).
+			'Maximum active entries' -> (self maximumSampleValue: #pairFinderMaximumActiveCount) } ];
+		column: 'Measured fact' text: #key;
+		column: 'Value' text: #value;
+		send: #value
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPairFinderComparisonsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isPairFinderSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample pairFinderComparisonCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Pair comparisons';
+		priority: 18;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #pairFinderComparisonCount
+				titleX: 'Active-set comparisons' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPairFinderAcceptedPairsCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isPairFinderSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample pairFinderAcceptedPairCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Accepted pairs';
+		priority: 19;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #pairFinderAcceptedPairCount
+				titleX: 'Accepted pair count' ]
+]
+
+{ #category : 'gt - views' }
+CFPhysicsTelemetrySpanStatistics >> gtPairFinderActiveSetCorrelationFor: aView [
+	<gtView>
+	| available |
+	self isPairFinderSpan ifFalse: [ ^ aView empty ].
+	available := self samples reject: [ :sample | sample pairFinderMaximumActiveCount isNil ].
+	available size < 2 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Active set';
+		priority: 20;
+		disableAsync;
+		stencil: [
+			self
+				correlationChartFor: available
+				valueX: #pairFinderMaximumActiveCount
+				titleX: 'Maximum active entries' ]
+]
+

@@ -423,6 +423,10 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #activeBodyCount put: (bodyStates values count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates values count: [ :each | each isAwake not ]);
 		at: #contactCount put: activeContacts size;
+		at: #pairFinderEntryCount put: self pairFinderMeasurements entryCount;
+		at: #pairFinderComparisonCount put: self pairFinderMeasurements comparisonCount;
+		at: #pairFinderAcceptedPairCount put: self pairFinderMeasurements acceptedPairCount;
+		at: #pairFinderMaximumActiveCount put: self pairFinderMeasurements maximumActiveCount;
 		at: #constraintCount put: aStepResult constraints size;
 		at: #jointCount put: self joints size;
 		at: #islandCount put: aStepResult islands size;
@@ -433,6 +437,12 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #solvedIslandConstraintCount put: (solvedIslands inject: 0 into: [ :total :island | total + island constraints size ]);
 		at: #stepResult put: aStepResult;
 		yourself
+]
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> pairFinderMeasurements [
+	^ (stepPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder
 ]
 
 { #category : 'private - telemetry' }

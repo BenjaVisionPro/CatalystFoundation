@@ -1,6 +1,7 @@
 Class {
 	#name : 'CFPhysicsPairFinder',
 	#superclass : 'Object',
+	#instVars : [ 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -8,23 +9,55 @@ Class {
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmong: bodies [
 	| entries active pairs |
+	self resetMeasurements.
 	entries := (bodies collect: [ :body | { body. body sweptAABB. body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
+	entryCount := entries size.
 	active := OrderedCollection new.
 	pairs := OrderedCollection new.
 	entries do: [ :entry |
 		active := active reject: [ :other |
 			other second maximum x < entry second minimum x ].
 		active do: [ :other |
+			comparisonCount := comparisonCount + 1.
 			(self
 				shouldConsider: other first
 				with: entry first
 				firstAABB: other second
 				secondAABB: entry second) ifTrue: [
-					pairs add: (CFPhysicsPair first: other first second: entry first) ] ].
-		active add: entry ].
+					pairs add: (CFPhysicsPair first: other first second: entry first).
+					acceptedPairCount := acceptedPairCount + 1 ] ].
+		active add: entry.
+		maximumActiveCount := maximumActiveCount max: active size ].
 	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
 ]
+
+
+{ #category : 'initialization' }
+CFPhysicsPairFinder >> initialize [
+	super initialize.
+	self resetMeasurements
+]
+
+{ #category : 'private - measurements' }
+CFPhysicsPairFinder >> resetMeasurements [
+	entryCount := 0.
+	comparisonCount := 0.
+	acceptedPairCount := 0.
+	maximumActiveCount := 0
+]
+
+{ #category : 'measurements' }
+CFPhysicsPairFinder >> entryCount [ ^ entryCount ]
+
+{ #category : 'measurements' }
+CFPhysicsPairFinder >> comparisonCount [ ^ comparisonCount ]
+
+{ #category : 'measurements' }
+CFPhysicsPairFinder >> acceptedPairCount [ ^ acceptedPairCount ]
+
+{ #category : 'measurements' }
+CFPhysicsPairFinder >> maximumActiveCount [ ^ maximumActiveCount ]
 
 
 { #category : 'finding' }
