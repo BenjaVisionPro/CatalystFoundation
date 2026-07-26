@@ -186,7 +186,7 @@ CFPhysicsTelemetryPipelineElement >> verticalMarkerAt: aPercentage height: aHeig
 			c horizontal exact: 1.
 			c vertical exact: aHeight.
 			c frame vertical alignCenterAt: 0.5.
-			c frame horizontal alignCenterAt: (aPercentage max: 0) min: 1 ];
+			c frame horizontal alignCenterAt: ((aPercentage max: 0) min: 1) ];
 		yourself
 ]
 
