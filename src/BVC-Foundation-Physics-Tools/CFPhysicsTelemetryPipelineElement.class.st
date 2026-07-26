@@ -52,7 +52,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	maximumEnd := pipeline children
 		inject: pipeline p95Duration
 		into: [ :maximum :span | maximum max: span p95End ].
-	maximumEnd := maximumEnd max: 1.
+	maximumEnd := world telemetryStepStatisticsMaximumMicrosecondsFor: (maximumEnd max: 1).
 	scale := GtPlotterLinearScale new
 		domainFrom: 0 to: maximumEnd;
 		rangeFrom: 0 to: 1;

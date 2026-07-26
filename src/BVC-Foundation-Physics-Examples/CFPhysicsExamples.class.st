@@ -656,3 +656,17 @@ CFPhysicsExamples >> physicsTelemetryAnalysisWindowCanChangeLive [
 	self assert: (CFPhysicsTelemetryAnalysis world: world) sampleCount > 0.
 	^ world
 ]
+
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsTelemetryStepStatisticsScaleDoesNotContract [
+	<gtExample>
+	| world firstMaximum secondMaximum |
+	world := CFPhysicsWorld new.
+	firstMaximum := world telemetryStepStatisticsMaximumMicrosecondsFor: 4200.
+	secondMaximum := world telemetryStepStatisticsMaximumMicrosecondsFor: 1800.
+	self assert: firstMaximum = secondMaximum.
+	world telemetryAnalysisWindowSeconds: 1.
+	self assert: (world telemetryStepStatisticsMaximumMicrosecondsFor: 1800) < firstMaximum.
+	^ world
+]
