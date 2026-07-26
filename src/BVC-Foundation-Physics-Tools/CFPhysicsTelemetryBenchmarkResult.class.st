@@ -144,7 +144,7 @@ CFPhysicsTelemetryBenchmarkResult >> gtOptimisationFocusFor: aView [
 		column: 'Average (ms)' text: [ :span | span averageMilliseconds asFloat printShowingDecimalPlaces: 3 ];
 		column: 'Median (ms)' text: [ :span | span medianMilliseconds asFloat printShowingDecimalPlaces: 3 ];
 		column: 'P95 (ms)' text: [ :span | span p95Milliseconds asFloat printShowingDecimalPlaces: 3 ];
-		column: 'Average share' text: [ :span | ((self averageShareFor: span) * 100) asFloat printShowingDecimalPlaces: 1 , '%' ];
+		column: 'Average share' text: [ :span | (((self averageShareFor: span) * 100) asFloat printShowingDecimalPlaces: 1), '%' ];
 		column: 'Samples' text: #sampleCount;
 		send: [ :span | span ]
 ]
