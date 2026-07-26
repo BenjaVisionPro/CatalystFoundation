@@ -388,7 +388,7 @@ CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
 	self assert: stage newContactPointCount equals: 0.
 	self assert: stage stableManifoldCount equals: 1.
 	self assert: stage changedManifoldCount equals: 0.
-	self assert: stage preparedObjectCount equals: 2.
+	self assert: stage preparedObjectCount equals: 0.
 	^ stage
 ]
 
@@ -5785,4 +5785,41 @@ CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
 	self assert: physics velocityX equals: physics velocity x.
 	self assert: physics velocityY equals: physics velocity y.
 	^ descriptions
+]
+
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintBuilderReusesPreparedContactObjects [
+	<gtExample>
+	| first second pair updater firstBatch secondBatch bodyStates builder firstConstraint secondConstraint firstPoint secondPoint |
+	first := self cleanSlateBodyWithSequence: 1.
+	first beStatic.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
+		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	firstBatch := updater updatePairs: { pair } fromContacts: #().
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	builder := CFPhysicsConstraintBuilder new.
+	firstConstraint := (builder
+		constraintsFrom: firstBatch activeContacts
+		bodyStates: bodyStates) first.
+	firstPoint := firstConstraint points first.
+	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
+	secondConstraint := (builder
+		constraintsFrom: secondBatch activeContacts
+		bodyStates: bodyStates) first.
+	secondPoint := secondConstraint points first.
+	self assert: secondConstraint == firstConstraint.
+	self assert: secondPoint == firstPoint.
+	self assert: secondConstraint contact == secondBatch activeContacts first.
+	self assert: secondPoint manifoldPoint == secondBatch activeContacts first manifold contactPoints first.
+	self assert: builder createdConstraintCount equals: 0.
+	self assert: builder reusedConstraintCount equals: 1.
+	self assert: builder createdPointCount equals: 0.
+	self assert: builder reusedPointCount equals: 1.
+	^ secondConstraint
 ]

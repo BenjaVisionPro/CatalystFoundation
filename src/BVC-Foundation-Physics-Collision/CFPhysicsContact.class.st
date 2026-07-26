@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',
-	#instVars : [ 'pair', 'manifold', 'previousManifold' ],
+	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
@@ -35,6 +35,12 @@ CFPhysicsContact >> manifold: aManifold [ manifold := aManifold ]
 { #category : 'accessing' }
 CFPhysicsContact >> previousManifold [ ^ previousManifold ]
 
+{ #category : 'accessing' }
+CFPhysicsContact >> preparedConstraint [ ^ preparedConstraint ]
+
+{ #category : 'accessing' }
+CFPhysicsContact >> preparedConstraint: anObject [ preparedConstraint := anObject ]
+
 { #category : 'testing' }
 CFPhysicsContact >> began [ ^ previousManifold isNil and: [ manifold notNil ] ]
 
@@ -61,6 +67,7 @@ CFPhysicsContact >> copyForUpdate [
 	^ self class new
 		pair: pair;
 		manifold: manifold;
+		preparedConstraint: preparedConstraint;
 		yourself
 ]
 

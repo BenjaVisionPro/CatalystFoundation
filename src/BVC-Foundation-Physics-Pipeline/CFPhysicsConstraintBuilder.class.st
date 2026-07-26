@@ -1,6 +1,7 @@
 Class {
 	#name : 'CFPhysicsConstraintBuilder',
 	#superclass : 'Object',
+	#instVars : [ 'createdConstraintCount', 'reusedConstraintCount', 'createdPointCount', 'reusedPointCount' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -13,6 +14,7 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates [
 { #category : 'building' }
 CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	| constraints index |
+	self resetReuseMeasurements.
 	constraints := Array new: (contacts count: [ :contact | contact isSensor not ]).
 	index := 1.
 	contacts do: [ :contact |
@@ -30,33 +32,77 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates w
 
 { #category : 'private - building' }
 CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
-	| normal tangent constraint |
+	| normal tangent constraint previousPoints |
 	normal := contact manifold normal.
 	tangent := normal y negated @ normal x.
-	constraint := CFPhysicsPreparedConstraint new
+	constraint := contact preparedConstraint.
+	constraint
+		ifNil: [
+			constraint := CFPhysicsPreparedConstraint new.
+			createdConstraintCount := createdConstraintCount + 1 ]
+		ifNotNil: [ reusedConstraintCount := reusedConstraintCount + 1 ].
+	previousPoints := constraint points ifNil: [ #() ].
+	constraint
 		contact: contact;
 		bodyStateA: stateA;
 		bodyStateB: stateB;
 		normal: normal;
 		tangent: tangent;
 		friction: (contact firstBody friction * contact secondBody friction) sqrt;
-		restitution: (contact firstBody restitution max: contact secondBody restitution);
-		yourself.
-	constraint points: (contact manifold contactPoints collect: [ :manifoldPoint |
-		self
-			pointFrom: manifoldPoint
-			contact: contact
-			bodyStateA: stateA
-			bodyStateB: stateB
-			normal: normal
-			tangent: tangent
-			warmStartRatio: warmStartRatio ]).
+		restitution: (contact firstBody restitution max: contact secondBody restitution).
+	constraint points: (self
+		pointsFrom: contact manifold contactPoints
+		previousPoints: previousPoints
+		contact: contact
+		bodyStateA: stateA
+		bodyStateB: stateB
+		normal: normal
+		tangent: tangent
+		warmStartRatio: warmStartRatio).
+	contact preparedConstraint: constraint.
 	^ constraint
 ]
 
 { #category : 'private - building' }
-CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
-	| point anchorA anchorB rnA rnB rtA rtB normalDenominator tangentDenominator relativeVelocity |
+CFPhysicsConstraintBuilder >> pointsFrom: manifoldPoints previousPoints: previousPoints contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
+	| result index reusablePoint |
+	result := Array new: manifoldPoints size.
+	index := 1.
+	manifoldPoints do: [ :manifoldPoint |
+		reusablePoint := self reusablePointFor: manifoldPoint among: previousPoints contact: contact.
+		reusablePoint
+			ifNil: [
+				reusablePoint := CFPhysicsConstraintPoint new.
+				createdPointCount := createdPointCount + 1 ]
+			ifNotNil: [ reusedPointCount := reusedPointCount + 1 ].
+		result
+			at: index
+			put: (self
+				updatePoint: reusablePoint
+				from: manifoldPoint
+				contact: contact
+				bodyStateA: stateA
+				bodyStateB: stateB
+				normal: normal
+				tangent: tangent
+				warmStartRatio: warmStartRatio).
+		index := index + 1 ].
+	^ result
+]
+
+{ #category : 'private - building' }
+CFPhysicsConstraintBuilder >> reusablePointFor: manifoldPoint among: previousPoints contact: contact [
+	manifoldPoint featureId ifNil: [ ^ nil ].
+	(contact previousManifold isNil or: [
+		(contact manifold hasCompatibleNormalWith: contact previousManifold) not ]) ifTrue: [ ^ nil ].
+	^ previousPoints
+		detect: [ :point | point featureId = manifoldPoint featureId ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsConstraintBuilder >> updatePoint: point from: manifoldPoint contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
+	| anchorA anchorB rnA rnB rtA rtB normalDenominator tangentDenominator relativeVelocity |
 	anchorA := self rotatedAnchorFor: manifoldPoint localAnchorA bodyState: stateA.
 	anchorB := self rotatedAnchorFor: manifoldPoint localAnchorB bodyState: stateB.
 	rnA := self cross: anchorA with: normal.
@@ -71,7 +117,7 @@ CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStat
 		+ (contact secondBody inverseInertia * rtB squared).
 	relativeVelocity := (stateB linearVelocity + (self crossScalar: stateB angularVelocity with: anchorB))
 		- (stateA linearVelocity + (self crossScalar: stateA angularVelocity with: anchorA)).
-	point := CFPhysicsConstraintPoint new
+	point
 		manifoldPoint: manifoldPoint;
 		featureId: manifoldPoint featureId;
 		anchorA: anchorA;
@@ -81,10 +127,29 @@ CFPhysicsConstraintBuilder >> pointFrom: manifoldPoint contact: contact bodyStat
 		tangentMass: (tangentDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / tangentDenominator ]);
 		relativeNormalVelocity: (self dot: relativeVelocity with: normal);
 		normalImpulse: manifoldPoint normalImpulse * warmStartRatio;
-		tangentImpulse: manifoldPoint tangentImpulse * warmStartRatio;
-		yourself.
+		tangentImpulse: manifoldPoint tangentImpulse * warmStartRatio.
 	^ point
 ]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintBuilder >> resetReuseMeasurements [
+	createdConstraintCount := 0.
+	reusedConstraintCount := 0.
+	createdPointCount := 0.
+	reusedPointCount := 0
+]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintBuilder >> createdConstraintCount [ ^ createdConstraintCount ifNil: [ 0 ] ]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintBuilder >> reusedConstraintCount [ ^ reusedConstraintCount ifNil: [ 0 ] ]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintBuilder >> createdPointCount [ ^ createdPointCount ifNil: [ 0 ] ]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintBuilder >> reusedPointCount [ ^ reusedPointCount ifNil: [ 0 ] ]
 
 { #category : 'private - geometry' }
 CFPhysicsConstraintBuilder >> rotatedAnchorFor: localAnchor bodyState: bodyState [

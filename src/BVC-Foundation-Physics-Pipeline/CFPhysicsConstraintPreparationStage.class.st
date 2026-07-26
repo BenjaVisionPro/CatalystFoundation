@@ -173,5 +173,12 @@ CFPhysicsConstraintPreparationStage >> changedManifoldCount [ ^ changedManifoldC
 CFPhysicsConstraintPreparationStage >> preparedJointConstraintCount [ ^ preparedJointConstraintCount ifNil: [ 0 ] ]
 { #category : 'accessing - measurement' }
 CFPhysicsConstraintPreparationStage >> preparedObjectCount [
-	^ self preparedContactConstraintCount + self preparedContactPointCount + self preparedJointConstraintCount
+	^ constraintBuilder createdConstraintCount
+		+ constraintBuilder createdPointCount
+		+ self preparedJointConstraintCount
+]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> reusedPreparedObjectCount [
+	^ constraintBuilder reusedConstraintCount + constraintBuilder reusedPointCount
 ]
