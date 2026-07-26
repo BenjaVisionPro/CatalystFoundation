@@ -546,6 +546,24 @@ CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 ]
 
 
+
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsWorldDoesNoTelemetryWorkWhenDisabled [
+	<gtExample>
+	| host world announcer |
+	host := BlElement new size: 320 @ 200; yourself.
+	host addChild: (BlElement new size: 20 @ 20; yourself).
+	world := host physics beWorld.
+	self deny: world hasTelemetryLogger.
+	announcer := world telemetryAnnouncer.
+	self assert: announcer notNil.
+	self deny: world hasTelemetryLogger.
+	world step.
+	self deny: world hasTelemetryLogger.
+	self assert: world telemetryRecordings isEmpty.
+	^ world
+]
 { #category : 'examples - telemetry' }
 CFPhysicsExamples >> physicsWorldRecordsPharoTelemetry [
 	<gtExample>

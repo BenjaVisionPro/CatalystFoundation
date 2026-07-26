@@ -77,20 +77,41 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	^ self
-		stepBodies: bodies
+	| result |
+	result := self
+		newResultForBodies: bodies
 		fromContacts: previousContacts
 		joints: joints
 		step: step
 		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold
-		telemetryEnabled: false
+		restitutionThreshold: restitutionThreshold.
+	stages do: [ :stage |
+		result recordStage: stage output: (stage executeOn: result) ].
+	^ result
 ]
 
 { #category : 'stepping' }
-CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold telemetryEnabled: telemetryEnabled [
+CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	| result |
-	result := CFPhysicsStepPipelineResult new
+	result := self
+		newResultForBodies: bodies
+		fromContacts: previousContacts
+		joints: joints
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold.
+	stages do: [ :stage |
+		| output |
+		output := ProcessTelemetry
+			time: [ stage class name asString ]
+			during: [ stage executeOn: result ].
+		result recordStage: stage output: output ].
+	^ result
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ CFPhysicsStepPipelineResult new
 		step: step;
 		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
 		previousContacts: previousContacts;
@@ -100,14 +121,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 				ifFalse: [ left orderingKey < right orderingKey ] ]);
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
-		yourself.
-	stages do: [ :stage |
-		| output |
-		output := telemetryEnabled
-			ifTrue: [ ProcessTelemetry time: [ stage class name asString ] during: [ stage executeOn: result ] ]
-			ifFalse: [ stage executeOn: result ].
-		result recordStage: stage output: output ].
-	^ result
+		yourself
 ]
 
 { #category : 'accessing' }

@@ -43,7 +43,8 @@ CFPhysicsTelemetryLogger >> nextPut: aSignal [
 	(physicsData notNil and: [ (physicsData at: #physicsWorld ifAbsent: [ nil ]) == world ])
 		ifFalse: [ ^ self ].
 	super nextPut: aSignal.
-	self trimRecordings
+	self trimRecordings.
+	world announceTelemetryChanged
 ]
 
 { #category : 'private - accessing' }

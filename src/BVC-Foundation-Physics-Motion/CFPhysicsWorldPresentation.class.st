@@ -32,7 +32,11 @@ CFPhysicsWorldPresentation >> initialize [
 
 { #category : 'consuming frames' }
 CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
-	(self tryPresentAtAlphaRecordingTelemetry: aNumber) ifFalse: [ ^ self ].
+	| didPresent |
+	didPresent := world telemetryEnabled
+		ifTrue: [ self tryPresentAtAlphaWithTelemetry: aNumber ]
+		ifFalse: [ self tryPresentAtAlpha: aNumber ].
+	didPresent ifFalse: [ ^ self ].
 	world owner ifNotNil: [ :anOwner |
 		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ].
 	^ self
@@ -65,13 +69,14 @@ CFPhysicsWorldPresentation >> presentWithoutTelemetry [
 
 { #category : 'presenting' }
 CFPhysicsWorldPresentation >> presentAtAlpha: aNumber [
-	self tryPresentAtAlphaRecordingTelemetry: aNumber.
+	world telemetryEnabled
+		ifTrue: [ self tryPresentAtAlphaWithTelemetry: aNumber ]
+		ifFalse: [ self tryPresentAtAlpha: aNumber ].
 	^ self
 ]
 
 { #category : 'private - telemetry' }
-CFPhysicsWorldPresentation >> tryPresentAtAlphaRecordingTelemetry: aNumber [
-	world telemetryEnabled ifFalse: [ ^ self tryPresentAtAlpha: aNumber ].
+CFPhysicsWorldPresentation >> tryPresentAtAlphaWithTelemetry: aNumber [
 	^ ProcessTelemetry
 		rootTimeSync: [ 'Physics presentation' ]
 		during: [
