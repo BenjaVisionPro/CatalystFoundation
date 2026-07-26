@@ -555,12 +555,12 @@ CFPhysicsExamples >> physicsWorldDoesNoTelemetryWorkWhenDisabled [
 	host := BlElement new size: 320 @ 200; yourself.
 	host addChild: (BlElement new size: 20 @ 20; yourself).
 	world := host physics beWorld.
-	self deny: world hasTelemetryLogger.
+	self assert: world hasTelemetryLogger not.
 	announcer := world telemetryAnnouncer.
 	self assert: announcer notNil.
-	self deny: world hasTelemetryLogger.
+	self assert: world hasTelemetryLogger not.
 	world step.
-	self deny: world hasTelemetryLogger.
+	self assert: world hasTelemetryLogger not.
 	self assert: world telemetryRecordings isEmpty.
 	^ world
 ]
