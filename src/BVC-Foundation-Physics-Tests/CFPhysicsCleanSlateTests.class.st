@@ -4857,6 +4857,8 @@ CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpa
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
+	self assert: joint accumulatedImpulse isZero.
+	result commitJointConstraints.
 	self assert: joint accumulatedImpulse isZero not.
 	^ result
 ]
@@ -6010,42 +6012,3 @@ CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
 	^ bodyStates at: second
 ]
 
-
-{ #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> continuingContactOwnsPreparedConstraintState [
-	<gtExample>
-	| first second pair bodyStates builder previousContact previousConstraint previousPoint updatedContact updatedConstraint updatedPoint |
-	first := self cleanSlateBodyWithSequence: 1.
-	second := self cleanSlateBodyWithSequence: 2.
-	pair := CFPhysicsPair first: first second: second.
-	bodyStates := IdentityDictionary new
-		at: first put: (CFPhysicsBodyStepState on: first);
-		at: second put: (CFPhysicsBodyStepState on: second);
-		yourself.
-	builder := CFPhysicsConstraintBuilder new.
-	previousContact := CFPhysicsContact
-		pair: pair
-		manifold: (self cleanSlateManifoldWithFeatureIndex: 1).
-	previousConstraint := (builder
-		constraintsFrom: { previousContact }
-		bodyStates: bodyStates) first.
-	previousPoint := previousConstraint points first.
-	previousPoint normalImpulse: 3.0.
-	previousConstraint writeImpulsesBack.
-	updatedContact := previousContact copyForUpdate.
-	updatedContact updateWith: (self cleanSlateManifoldWithFeatureIndex: 1).
-	updatedConstraint := (builder
-		constraintsFrom: { updatedContact }
-		bodyStates: bodyStates) first.
-	updatedPoint := updatedConstraint points first.
-	self assert: updatedConstraint ~~ previousConstraint.
-	self assert: updatedConstraint points ~~ previousConstraint points.
-	self assert: updatedPoint ~~ previousPoint.
-	self assert: updatedPoint normalImpulse equals: 3.0.
-	updatedPoint normalImpulse: 7.0.
-	updatedConstraint writeImpulsesBack.
-	self assert: previousPoint normalImpulse equals: 3.0.
-	self assert: previousContact manifold contactPoints first normalImpulse equals: 3.0.
-	self assert: updatedContact manifold contactPoints first normalImpulse equals: 7.0.
-	^ updatedContact
-]

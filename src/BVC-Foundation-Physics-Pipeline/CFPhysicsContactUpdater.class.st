@@ -37,7 +37,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 			contact continued ifTrue: [ continued add: contact ] ] ].
 	previousByKey valuesDo: [ :previous |
 		| endedContact |
-		endedContact := previous copyForEnding.
+		endedContact := previous copyForUpdate.
 		endedContact updateWith: nil.
 		ended add: endedContact ].
 	ended := ended asArray sorted: [ :left :right | left pair comesBefore: right pair ].
@@ -69,7 +69,7 @@ CFPhysicsContactUpdater >> updateImpactContact: impactContact fromContacts: prev
 		contact continued ifTrue: [ continued add: contact ] ].
 	previousByKey valuesDo: [ :each |
 		| endedContact |
-		endedContact := each copyForEnding.
+		endedContact := each copyForUpdate.
 		endedContact updateWith: nil.
 		ended add: endedContact ].
 	ended := ended asArray sorted: [ :left :right |
@@ -106,7 +106,7 @@ CFPhysicsContactUpdater >> updateImpactContacts: impactContacts fromContacts: pr
 		contact continued ifTrue: [ continued add: contact ] ].
 	previousByKey valuesDo: [ :each |
 		| endedContact |
-		endedContact := each copyForEnding.
+		endedContact := each copyForUpdate.
 		endedContact updateWith: nil.
 		ended add: endedContact ].
 	ended := ended asArray sorted: [ :left :right |
@@ -151,7 +151,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 			contact continued ifTrue: [ continued add: contact ] ] ].
 	previousByKey valuesDo: [ :previous |
 		| endedContact |
-		endedContact := previous copyForEnding.
+		endedContact := previous copyForUpdate.
 		endedContact updateWith: nil.
 		ended add: endedContact ].
 	ended := ended asArray sorted: [ :left :right |

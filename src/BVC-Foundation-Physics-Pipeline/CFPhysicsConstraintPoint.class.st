@@ -53,10 +53,3 @@ CFPhysicsConstraintPoint >> normalImpulse: aNumber [ normalImpulse := aNumber ]
 CFPhysicsConstraintPoint >> tangentImpulse [ ^ tangentImpulse ]
 { #category : 'accessing' }
 CFPhysicsConstraintPoint >> tangentImpulse: aNumber [ tangentImpulse := aNumber ]
-
-{ #category : 'copying' }
-CFPhysicsConstraintPoint >> copyForContactUpdate [
-	^ self class new
-		featureId: featureId;
-		yourself
-]
