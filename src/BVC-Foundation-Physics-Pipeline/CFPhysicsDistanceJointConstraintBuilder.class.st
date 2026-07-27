@@ -17,8 +17,8 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 	| stateA stateB centreA centreB anchorA anchorB displacement distance direction rnA rnB inverseMass |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	centreA := self centreFor: joint firstBody state: stateA.
-	centreB := self centreFor: joint secondBody state: stateB.
+	centreA := self centreForState: stateA.
+	centreB := self centreForState: stateB.
 	anchorA := joint endpointPair worldPointA - centreA.
 	anchorB := joint endpointPair worldPointB - centreB.
 	displacement := (centreB + anchorB) - (centreA + anchorA).
@@ -26,8 +26,8 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 	direction := distance = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ displacement / distance ].
 	rnA := self cross: anchorA with: direction.
 	rnB := self cross: anchorB with: direction.
-	inverseMass := (self inverseMassFor: joint firstBody cross: rnA)
-		+ (self inverseMassFor: joint secondBody cross: rnB).
+	inverseMass := (self inverseMassForState: stateA cross: rnA)
+		+ (self inverseMassForState: stateB cross: rnB).
 	^ CFPhysicsPreparedDistanceJoint new
 		joint: joint;
 		bodyStateA: stateA;
@@ -47,15 +47,15 @@ CFPhysicsDistanceJointConstraintBuilder >> cross: first with: second [
 ]
 
 { #category : 'private - building' }
-CFPhysicsDistanceJointConstraintBuilder >> centreFor: aBody state: aState [
-	^ aBody
+CFPhysicsDistanceJointConstraintBuilder >> centreForState: aState [
+	^ aState
 		ifNil: [ 0 @ 0 ]
-		ifNotNil: [ aState currentTransform position + (aBody extent / 2.0) ]
+		ifNotNil: [ aState currentTransform position + aState localCentre ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsDistanceJointConstraintBuilder >> inverseMassFor: aBody cross: aCross [
-	^ aBody
+CFPhysicsDistanceJointConstraintBuilder >> inverseMassForState: aState cross: aCross [
+	^ aState
 		ifNil: [ 0.0 ]
-		ifNotNil: [ aBody inverseMass + (aBody inverseInertia * aCross squared) ]
+		ifNotNil: [ aState inverseMass + (aState inverseInertia * aCross squared) ]
 ]

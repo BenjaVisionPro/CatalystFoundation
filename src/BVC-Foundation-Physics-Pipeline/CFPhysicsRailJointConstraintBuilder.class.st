@@ -17,8 +17,8 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 	| stateA stateB centreA centreB anchorA anchorB displacement axis normal crossA crossB axisCrossA axisCrossB inversePerpendicularMass inverseTranslationMass inverseAngularMass angleA angleB |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	centreA := self centreFor: joint firstBody state: stateA.
-	centreB := self centreFor: joint secondBody state: stateB.
+	centreA := self centreForState: stateA.
+	centreB := self centreForState: stateB.
 	anchorA := joint endpointPair worldPointA - centreA.
 	anchorB := joint endpointPair worldPointB - centreB.
 	displacement := (centreB + anchorB) - (centreA + anchorA).
@@ -26,14 +26,14 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 	normal := joint normal.
 	crossA := self cross: anchorA with: normal.
 	crossB := self cross: anchorB with: normal.
-	inversePerpendicularMass := (self inverseMassFor: joint firstBody cross: crossA)
-		+ (self inverseMassFor: joint secondBody cross: crossB).
+	inversePerpendicularMass := (self inverseMassForState: stateA cross: crossA)
+		+ (self inverseMassForState: stateB cross: crossB).
 	axisCrossA := self cross: anchorA with: axis.
 	axisCrossB := self cross: anchorB with: axis.
-	inverseTranslationMass := (self inverseMassFor: joint firstBody cross: axisCrossA)
-		+ (self inverseMassFor: joint secondBody cross: axisCrossB).
-	inverseAngularMass := (self inverseInertiaFor: joint firstBody)
-		+ (self inverseInertiaFor: joint secondBody).
+	inverseTranslationMass := (self inverseMassForState: stateA cross: axisCrossA)
+		+ (self inverseMassForState: stateB cross: axisCrossB).
+	inverseAngularMass := (self inverseInertiaForState: stateA)
+		+ (self inverseInertiaForState: stateB).
 	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].
 	angleB := stateB ifNil: [ 0.0 ] ifNotNil: [ stateB currentTransform rotation ].
 	^ CFPhysicsPreparedRailJoint new
@@ -70,20 +70,20 @@ CFPhysicsRailJointConstraintBuilder >> dot: first with: second [
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> centreFor: aBody state: aState [
-	^ aBody
+CFPhysicsRailJointConstraintBuilder >> centreForState: aState [
+	^ aState
 		ifNil: [ 0 @ 0 ]
-		ifNotNil: [ aState currentTransform position + (aBody extent / 2.0) ]
+		ifNotNil: [ aState currentTransform position + aState localCentre ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> inverseMassFor: aBody cross: aCross [
-	^ aBody
+CFPhysicsRailJointConstraintBuilder >> inverseMassForState: aState cross: aCross [
+	^ aState
 		ifNil: [ 0.0 ]
-		ifNotNil: [ aBody inverseMass + (aBody inverseInertia * aCross squared) ]
+		ifNotNil: [ aState inverseMass + (aState inverseInertia * aCross squared) ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> inverseInertiaFor: aBody [
-	^ aBody ifNil: [ 0.0 ] ifNotNil: [ aBody inverseInertia ]
+CFPhysicsRailJointConstraintBuilder >> inverseInertiaForState: aState [
+	^ aState ifNil: [ 0.0 ] ifNotNil: [ aState inverseInertia ]
 ]

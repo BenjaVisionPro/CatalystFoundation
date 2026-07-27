@@ -18,8 +18,8 @@ CFPhysicsFixedJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySt
 	positional := super constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio.
 	stateA := positional bodyStateA.
 	stateB := positional bodyStateB.
-	inverseInertia := (self inverseInertiaFor: joint firstBody)
-		+ (self inverseInertiaFor: joint secondBody).
+	inverseInertia := (self inverseInertiaForState: stateA)
+		+ (self inverseInertiaForState: stateB).
 	inverseAngularMass := inverseInertia = 0.0
 		ifTrue: [ 0.0 ]
 		ifFalse: [ 1.0 / inverseInertia ].
