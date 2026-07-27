@@ -25,7 +25,9 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 		updatePairs: aStepResult pairs
 		includingImpactContacts: #()
 		fromContacts: aStepResult previousContacts.
-	self wakeBodiesForEndedContacts: batch endedContacts.
+	self
+		wakeBodiesForEndedContacts: batch endedContacts
+		bodyStates: aStepResult bodyStates.
 	contactResult := CFPhysicsContactPipelineResult
 		pairs: aStepResult pairs
 		contactBatch: batch.
@@ -34,8 +36,8 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 ]
 
 { #category : 'private - waking' }
-CFPhysicsContactUpdateStage >> wakeBodiesForEndedContacts: contacts [
+CFPhysicsContactUpdateStage >> wakeBodiesForEndedContacts: contacts bodyStates: bodyStates [
 	contacts do: [ :contact |
-		contact firstBody wake.
-		contact secondBody wake ]
+		(bodyStates at: contact firstBody) wake.
+		(bodyStates at: contact secondBody) wake ]
 ]

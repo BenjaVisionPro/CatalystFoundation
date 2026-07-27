@@ -980,7 +980,7 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
 	<gtExample>
-	| first second pair manifold previousContact batch stage result |
+	| first second pair manifold previousContact batch stage result bodyStates |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
 	pair := CFPhysicsPair first: first second: second.
@@ -988,14 +988,28 @@ CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
 	previousContact := CFPhysicsContact pair: pair manifold: manifold.
 	first sleep.
 	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
 	batch := CFPhysicsContactUpdater new
 		updatePairs: #()
 		includingImpactContacts: #()
 		fromContacts: { previousContact }.
 	stage := CFPhysicsContactUpdateStage new.
-	stage wakeBodiesForEndedContacts: batch endedContacts.
+	stage
+		wakeBodiesForEndedContacts: batch endedContacts
+		bodyStates: bodyStates.
 	result := batch endedContacts first.
 	self assert: result ended.
+	self assert: (bodyStates at: first) isAwake.
+	self assert: (bodyStates at: second) isAwake.
+	self assert: (bodyStates at: first) sleepTime equals: 0.0.
+	self assert: (bodyStates at: second) sleepTime equals: 0.0.
+	self assert: first isSleeping.
+	self assert: second isSleeping.
+	(bodyStates at: first) commit.
+	(bodyStates at: second) commit.
 	self assert: first isAwake.
 	self assert: second isAwake.
 	^ result

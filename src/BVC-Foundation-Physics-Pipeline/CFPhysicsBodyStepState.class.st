@@ -122,7 +122,8 @@ CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 
 { #category : 'waking' }
 CFPhysicsBodyStepState >> wake [
-	awake := true
+	awake := true.
+	sleepTime := 0.0
 ]
 
 { #category : 'testing' }
