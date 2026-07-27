@@ -36,10 +36,7 @@ CFPhysicsIslandSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 
 { #category : 'private - solving' }
 CFPhysicsIslandSolver >> bodyStatesFor: island [
-	| result |
-	result := IdentityDictionary new.
-	island bodies do: [ :body | result at: body put: (bodyStates at: body) ].
-	^ result
+	^ island bodies collect: [ :body | bodyStates at: body ]
 ]
 
 { #category : 'accessing' }

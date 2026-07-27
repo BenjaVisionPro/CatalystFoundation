@@ -7,10 +7,10 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsSoftStepSolver class >> step: aStep bodyStates: aDictionary constraints: aCollection [
+CFPhysicsSoftStepSolver class >> step: aStep bodyStates: anOrderedCollection constraints: aCollection [
 	^ self new
 		step: aStep;
-		bodyStates: aDictionary;
+		bodyStates: anOrderedCollection;
 		constraints: aCollection;
 		yourself
 ]
@@ -18,6 +18,7 @@ CFPhysicsSoftStepSolver class >> step: aStep bodyStates: aDictionary constraints
 { #category : 'initialization' }
 CFPhysicsSoftStepSolver >> initialize [
 	super initialize.
+	bodyStates := #().
 	constraints := #().
 	contactConstraints := #().
 	orderedJointConstraints := #().
@@ -36,7 +37,7 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
-		bodyStates valuesDo: [ :state | state integratePositionBy: step substepTime ].
+		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
 		self solveContactsWithBias: false.
 		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
@@ -530,7 +531,7 @@ CFPhysicsSoftStepSolver >> crossScalar: scalar with: vector [ ^ (scalar * vector
 { #category : 'accessing' }
 CFPhysicsSoftStepSolver >> step: anObject [ step := anObject ]
 { #category : 'accessing' }
-CFPhysicsSoftStepSolver >> bodyStates: aDictionary [ bodyStates := aDictionary ]
+CFPhysicsSoftStepSolver >> bodyStates: anOrderedCollection [ bodyStates := anOrderedCollection ]
 { #category : 'accessing' }
 CFPhysicsSoftStepSolver >> constraints: aCollection [
 	constraints := aCollection asArray.
