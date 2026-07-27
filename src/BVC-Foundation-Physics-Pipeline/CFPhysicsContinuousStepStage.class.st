@@ -18,9 +18,9 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	| solvedPairs solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
 	solvedPairs := pairFinder pairsAmongSolvedStepStates: aStepResult orderedBodyStates.
 	solidPairs := solvedPairs reject: [ :pair |
-		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+		self pairIsSensor: pair bodyStates: aStepResult bodyStates ].
 	sensorPairs := solvedPairs select: [ :pair |
-		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+		self pairIsSensor: pair bodyStates: aStepResult bodyStates ].
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
 	sensorContactsByKey := Dictionary new.
@@ -83,14 +83,16 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 
 { #category : 'private - contacts' }
 CFPhysicsContinuousStepStage >> contactForImpact: impact bodyStates: bodyStates [
-	| pair firstSweep secondSweep manifold |
+	| pair firstState secondState firstSweep secondSweep manifold |
 	pair := impact pair.
-	firstSweep := (bodyStates at: pair firstBody) solvedSweep.
-	secondSweep := (bodyStates at: pair secondBody) solvedSweep.
+	firstState := bodyStates at: pair firstBody.
+	secondState := bodyStates at: pair secondBody.
+	firstSweep := firstState solvedSweep.
+	secondSweep := secondState solvedSweep.
 	manifold := CFPhysicsCollision
-		manifoldBetweenShapeState: pair firstBody shapeState
+		manifoldBetweenShapeState: firstState shapeState
 		transform: (firstSweep transformAt: impact fraction)
-		andShapeState: pair secondBody shapeState
+		andShapeState: secondState shapeState
 		transform: (secondSweep transformAt: impact fraction).
 	manifold ifNil: [ ^ nil ].
 	^ CFPhysicsContact pair: pair manifold: manifold
@@ -106,6 +108,12 @@ CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bod
 			| contact |
 			contact := self contactForImpact: impact bodyStates: bodyStates.
 			contact ifNotNil: [ contactsByKey at: contact key ifAbsentPut: [ contact ] ] ] ]
+]
+
+{ #category : 'private - testing' }
+CFPhysicsContinuousStepStage >> pairIsSensor: pair bodyStates: bodyStates [
+	^ (bodyStates at: pair firstBody) isSensor or: [
+		(bodyStates at: pair secondBody) isSensor ]
 ]
 
 { #category : 'private - testing' }

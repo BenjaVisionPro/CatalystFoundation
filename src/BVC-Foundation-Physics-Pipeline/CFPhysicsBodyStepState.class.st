@@ -113,6 +113,12 @@ CFPhysicsBodyStepState >> inverseInertia [ ^ inverseInertia ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> localCentre [ ^ localCentre ]
 
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
+
+{ #category : 'testing' }
+CFPhysicsBodyStepState >> isSensor [ ^ sensor ]
+
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
 	bodyType isStatic ifTrue: [ ^ self currentTransform ].
