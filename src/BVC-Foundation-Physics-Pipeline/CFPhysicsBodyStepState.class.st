@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'sequence', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'sequence', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'broadphaseAABB', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -32,6 +32,7 @@ CFPhysicsBodyStepState >> capture [
 	collisionCategoryBits := body collisionCategoryBits.
 	collisionMaskBits := body collisionMaskBits.
 	collisionGroupIndex := body collisionGroupIndex.
+	broadphaseAABB := body sweptAABB.
 	awake := body isAwake.
 	sensor := body isSensor.
 	deltaPosition := 0 @ 0.
@@ -100,7 +101,7 @@ CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 
 { #category : 'collision' }
 CFPhysicsBodyStepState >> broadphaseAABB [
-	^ shapeState aabbAt: position rotation: rotation
+	^ broadphaseAABB
 ]
 
 { #category : 'collision filtering' }
