@@ -5497,6 +5497,26 @@ CFPhysicsCleanSlateTests >> islandRebuildSplitsRemovedConnectivityDeterministica
 ]
 
 { #category : 'examples - constraint preparation' }
+CFPhysicsCleanSlateTests >> preparedJointImpulseRemainsDetachedUntilPipelineResultCommit [
+	<gtExample>
+	| first second joint prepared result |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	prepared := CFPhysicsPreparedDistanceJoint new
+		joint: joint;
+		impulse: 3.0;
+		yourself.
+	result := CFPhysicsStepPipelineResult new
+		jointConstraints: { prepared };
+		yourself.
+	self assert: joint accumulatedImpulse equals: 0.0.
+	result commitJointConstraints.
+	self assert: joint accumulatedImpulse equals: 3.0.
+	^ result
+]
+
+{ #category : 'examples - constraint preparation' }
 CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract [
 	<gtExample>
 	self assert: CFPhysicsPreparedDistanceJoint superclass equals: CFPhysicsPreparedJointConstraint.

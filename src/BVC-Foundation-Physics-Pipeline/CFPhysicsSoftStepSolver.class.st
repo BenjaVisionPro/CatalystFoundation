@@ -41,7 +41,7 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: false.
 		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
-	constraints do: [ :constraint | constraint writeImpulsesBack ]
+	contactConstraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
 
 { #category : 'solving' }
@@ -51,7 +51,7 @@ CFPhysicsSoftStepSolver >> solveImpactWithRestitutionThreshold: restitutionThres
 		self solveContactsWithBias: false.
 		self solveJointConstraintsWithBias: true ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
-	constraints do: [ :constraint | constraint writeImpulsesBack ]
+	contactConstraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
 
 { #category : 'private - solving' }

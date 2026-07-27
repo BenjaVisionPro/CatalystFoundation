@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -22,7 +22,8 @@ CFPhysicsStepPipelineResult >> initialize [
 	stageExecutions := OrderedCollection new.
 	orderedBodyStates := #().
 	continuousStepResult := nil.
-	continuousSensorContacts := #()
+	continuousSensorContacts := #().
+	jointConstraints := #()
 ]
 
 { #category : 'accessing' }
@@ -58,6 +59,17 @@ CFPhysicsStepPipelineResult >> orderedBodyStates: aCollection [ orderedBodyState
 CFPhysicsStepPipelineResult >> constraints [ ^ constraints ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> constraints: aCollection [ constraints := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> jointConstraints [ ^ jointConstraints ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> jointConstraints: aCollection [ jointConstraints := aCollection asArray ]
+
+{ #category : 'committing' }
+CFPhysicsStepPipelineResult >> commitJointConstraints [
+	jointConstraints do: #writeImpulsesBack
+]
+
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> joints [ ^ joints ]
 { #category : 'accessing' }

@@ -384,6 +384,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	| pipelineResult step |
 	pipelineResult := aWorldSolution pipelineResult.
 	step := pipelineResult step.
+	pipelineResult commitJointConstraints.
 	lastStepResult := pipelineResult.
 	activeContacts := pipelineResult activeContacts.
 	self applyDefaultBoundaryExcept: aWorldSolution explicitlyContainedBodies.
