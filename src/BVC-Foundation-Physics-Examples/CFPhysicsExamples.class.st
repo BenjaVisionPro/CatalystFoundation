@@ -676,7 +676,7 @@ CFPhysicsExamples >> physicsTelemetryAnalysisCanRunInBackground [
 	<gtExample>
 	| world |
 	world := CFPhysicsWorld new.
-	self deny: world telemetryAnalysisInBackground.
+	self assert: world telemetryAnalysisInBackground not.
 	world telemetryAnalysisInBackground: true.
 	self assert: world telemetryAnalysisInBackground.
 	^ world

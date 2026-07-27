@@ -144,10 +144,10 @@ CFPhysicsOverlay >> initializeWorldInspectorControl [
 CFPhysicsOverlay >> newWorldInspectorButton [
 	^ BrButton new
 		id: #cfPhysicsWorldInspectorButton;
-		size: 64 @ 64;
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
 		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) size: 48 @ 48 ] asStencil);
 		label: 'Inspect Physics world';
+		size: 64 @ 64;
 		background: (Color black alpha: 0.08);
 		effect: (BlBlurBelowEffect radius: 14);
 		geometry: BlCircleGeometry new;
