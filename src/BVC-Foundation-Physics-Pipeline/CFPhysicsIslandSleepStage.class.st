@@ -63,7 +63,7 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 		yourself.
 	dynamicBodies isEmpty ifTrue: [ ^ decision ].
 
-	(dynamicBodies allSatisfy: [ :body | body isSleeping ]) ifTrue: [
+	(dynamicBodies allSatisfy: [ :body | (bodyStates at: body) isAwake not ]) ifTrue: [
 		^ decision
 			eligible: true;
 			minimumSleepTime: configuration timeToSleep;
@@ -71,26 +71,32 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 
 	eligible := dynamicBodies allSatisfy: [ :body |
 		| state |
-		body allowsSleeping and: [
-			state := bodyStates at: body.
+		state := bodyStates at: body.
+		state allowsSleeping and: [
 			configuration acceptsStepState: state elapsed: seconds ] ].
 
 	eligible
 		ifTrue: [
 			minimum := Float infinity.
 			dynamicBodies do: [ :body |
+				| state |
+				state := bodyStates at: body.
+				state advanceSleepTimeBy: seconds.
 				body advanceSleepTimeBy: seconds.
-				minimum := minimum min: body sleepTime ].
+				minimum := minimum min: state sleepTime ].
 			slept := minimum >= configuration timeToSleep.
 			slept ifTrue: [
+				dynamicBodies do: [ :body |
+					| state |
+					state := bodyStates at: body.
+					state sleep.
+					body sleep ] ] ]
+		ifFalse: [
 			dynamicBodies do: [ :body |
 				| state |
 				state := bodyStates at: body.
-				state linearVelocity: 0 @ 0.
-				state angularVelocity: 0.0.
-				body sleep ] ] ]
-		ifFalse: [
-			dynamicBodies do: [ :body |
+				state resetSleepTime.
+				state wake.
 				body resetSleepTime.
 				body wake ].
 			minimum := 0.0.

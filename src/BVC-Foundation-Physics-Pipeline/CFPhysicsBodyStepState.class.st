@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'sensor', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -30,6 +30,8 @@ CFPhysicsBodyStepState >> capture [
 	restitution := body restitution.
 	localCentre := shapeState extent / 2.0.
 	awake := body isAwake.
+	sleepingAllowed := body allowsSleeping.
+	sleepTime := body sleepTime.
 	sensor := body isSensor.
 	deltaPosition := 0 @ 0.
 	deltaRotation := 0.0
@@ -207,3 +209,28 @@ CFPhysicsBodyStepState >> isFastForContinuousCollision [
 	^ self maximumPointMotion > (0.5 * shapeState minimumExtent)
 ]
 
+
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> allowsSleeping [ ^ sleepingAllowed ]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> sleepTime [ ^ sleepTime ]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> advanceSleepTimeBy: seconds [
+	sleepTime := sleepTime + seconds
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> resetSleepTime [
+	sleepTime := 0.0
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> sleep [
+	awake := false.
+	sleepTime := 0.0.
+	linearVelocity := 0 @ 0.
+	angularVelocity := 0.0
+]
