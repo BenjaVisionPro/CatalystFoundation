@@ -117,6 +117,9 @@ CFPhysicsBodyStepState >> localCentre [ ^ localCentre ]
 CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 
 { #category : 'testing' }
+CFPhysicsBodyStepState >> isAwake [ ^ awake ]
+
+{ #category : 'testing' }
 CFPhysicsBodyStepState >> isSensor [ ^ sensor ]
 
 { #category : 'prediction' }

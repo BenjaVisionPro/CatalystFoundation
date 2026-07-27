@@ -24,7 +24,7 @@ CFPhysicsIslandSolver >> initialize [
 { #category : 'solving' }
 CFPhysicsIslandSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	softStepSolvers := (islands select: [ :island |
-		island dynamicBodies anySatisfy: [ :body | body isAwake ] ]) collect: [ :island |
+		island dynamicBodies anySatisfy: [ :body | (bodyStates at: body) isAwake ] ]) collect: [ :island |
 		| solver |
 		solver := CFPhysicsSoftStepSolver
 			step: step
