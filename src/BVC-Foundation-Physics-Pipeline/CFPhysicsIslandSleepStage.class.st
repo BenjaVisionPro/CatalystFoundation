@@ -102,3 +102,35 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 		slept: slept;
 		yourself
 ]
+
+{ #category : 'waking' }
+CFPhysicsIslandSleepStage >> propagateWakeAcross: islands bodyStates: bodyStates [
+	wokenBodiesByIsland removeAll.
+	islands do: [ :island |
+		| dynamicBodies |
+		dynamicBodies := island dynamicBodies.
+		wokenBodiesByIsland
+			at: island
+			put: ((dynamicBodies anySatisfy: [ :body | (bodyStates at: body) isAwake ])
+				ifTrue: [ self wakeSleepingBodiesIn: dynamicBodies bodyStates: bodyStates ]
+				ifFalse: [ #() ]) ]
+]
+
+{ #category : 'private - waking' }
+CFPhysicsIslandSleepStage >> wakeSleepingBodiesIn: dynamicBodies bodyStates: bodyStates [
+	| sleepingCount woken index |
+	sleepingCount := dynamicBodies count: [ :body | (bodyStates at: body) isAwake not ].
+	sleepingCount = 0 ifTrue: [ ^ #() ].
+	woken := Array new: sleepingCount.
+	index := 1.
+	dynamicBodies do: [ :body |
+		| state |
+		state := bodyStates at: body.
+		state isAwake ifFalse: [
+			state wake.
+			body wake.
+			woken at: index put: body.
+			index := index + 1 ] ].
+	^ woken
+]
+

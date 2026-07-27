@@ -13,6 +13,8 @@ CFPhysicsIslandWakeStage >> sleepBehaviour: anObject [ sleepBehaviour := anObjec
 
 { #category : 'executing' }
 CFPhysicsIslandWakeStage >> executeOn: aStepResult [
-	sleepBehaviour propagateWakeAcross: aStepResult islands.
+	sleepBehaviour
+		propagateWakeAcross: aStepResult islands
+		bodyStates: aStepResult bodyStates.
 	^ aStepResult islands
 ]

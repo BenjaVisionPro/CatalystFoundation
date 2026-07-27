@@ -5935,3 +5935,27 @@ CFPhysicsCleanSlateTests >> constraintBuilderReusesPreparedContactObjects [
 	self assert: builder reusedPointCount equals: 1.
 	^ secondConstraint
 ]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
+	<gtExample>
+	| first second island stage bodyStates |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	island := CFPhysicsIsland new
+		addBody: first;
+		addBody: second;
+		yourself.
+	stage := CFPhysicsIslandSleepStage new.
+	stage propagateWakeAcross: { island } bodyStates: bodyStates.
+	self assert: (bodyStates at: first) isAwake.
+	self assert: (bodyStates at: second) isAwake.
+	self assert: second isAwake.
+	^ bodyStates at: second
+]
+

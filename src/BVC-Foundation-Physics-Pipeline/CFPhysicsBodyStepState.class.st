@@ -116,6 +116,12 @@ CFPhysicsBodyStepState >> localCentre [ ^ localCentre ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 
+
+{ #category : 'waking' }
+CFPhysicsBodyStepState >> wake [
+	awake := true
+]
+
 { #category : 'testing' }
 CFPhysicsBodyStepState >> isAwake [ ^ awake ]
 
