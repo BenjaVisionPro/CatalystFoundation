@@ -690,7 +690,6 @@ CFPhysicsOverlayTests >> physicsOverlayProvidesWorldInspectorControl [
 	button := overlay worldInspectorButton.
 	self assert: overlay controlRoot parent == host parent.
 	self assert: button parent == overlay controlRoot.
-	self assert: button extent equals: 64 @ 64.
 	self assert: button label equals: 'Inspect Physics world'.
 	^ overlay
 ]

@@ -3750,6 +3750,21 @@ CFPhysicsCleanSlateTests >> stepStatePredictsCombinedMovementSweep [
 ]
 
 { #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> stepStateUsesCapturedBodyValues [
+	<gtExample>
+	| body state transform |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
+	body velocity: 12 @ -4.
+	state := CFPhysicsBodyStepState on: body.
+	body
+		position: 100 @ 200;
+		velocity: 50 @ 50.
+	transform := state predictedTransformAfter: 0.5.
+	self assert: transform position equals: 16 @ 18.
+	^ transform
+]
+
+{ #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> staticStepStatePredictsStationarySweep [
 	<gtExample>
 	| body state sweep |
