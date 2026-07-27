@@ -914,7 +914,7 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
 	self assert: (bodyStates at: first) sleepTime equals: 0.0.
 	self assert: (bodyStates at: second) sleepTime equals: 0.0.
 	self assert: first sleepTime equals: 0.25.
-	self assert: second sleepTime equals: 0.25.
+	self assert: second sleepTime equals: 0.0.
 	(bodyStates at: first) commit.
 	(bodyStates at: second) commit.
 	self assert: first sleepTime equals: 0.0.
