@@ -122,13 +122,6 @@ CFPhysicsStepPipelineResult >> wokenBodies [
 	^ sleepDecisions flatCollect: [ :decision | decision wokeBodies ]
 ]
 
-
-{ #category : 'committing' }
-CFPhysicsStepPipelineResult >> commitBodyStates [
-	bodies do: [ :body |
-		(bodyStates at: body) commit ]
-]
-
 { #category : 'contacts' }
 CFPhysicsStepPipelineResult >> activeContacts [ ^ contactResult activeContacts ]
 { #category : 'contacts' }
