@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -20,6 +20,7 @@ CFPhysicsStepPipelineResult >> initialize [
 	hitEvents := #().
 	contactEvents := #().
 	stageExecutions := OrderedCollection new.
+	orderedBodyStates := #().
 	continuousStepResult := nil.
 	continuousSensorContacts := #()
 ]
@@ -48,6 +49,11 @@ CFPhysicsStepPipelineResult >> contactResult: anObject [ contactResult := anObje
 CFPhysicsStepPipelineResult >> bodyStates [ ^ bodyStates ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> bodyStates: aDictionary [ bodyStates := aDictionary ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> orderedBodyStates [ ^ orderedBodyStates ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> orderedBodyStates: aCollection [ orderedBodyStates := aCollection asArray ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> constraints [ ^ constraints ]
 { #category : 'accessing' }

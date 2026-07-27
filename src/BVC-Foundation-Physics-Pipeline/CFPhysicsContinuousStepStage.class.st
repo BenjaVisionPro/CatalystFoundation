@@ -16,7 +16,7 @@ CFPhysicsContinuousStepStage >> initialize [
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	| solvedPairs solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
-	solvedPairs := pairFinder pairsAmongSolvedStepStates: aStepResult bodyStates values.
+	solvedPairs := pairFinder pairsAmongSolvedStepStates: aStepResult orderedBodyStates.
 	solidPairs := solvedPairs reject: [ :pair |
 		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
 	sensorPairs := solvedPairs select: [ :pair |
@@ -24,8 +24,7 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
 	sensorContactsByKey := Dictionary new.
-	((aStepResult bodyStates values select: #isFastForContinuousCollision) asArray
-		sorted: [ :first :second | first body sequence < second body sequence ]) do: [ :state |
+	(aStepResult orderedBodyStates select: #isFastForContinuousCollision) do: [ :state |
 		self
 			clampSolvedState: state
 			amongSolidPairs: solidPairs

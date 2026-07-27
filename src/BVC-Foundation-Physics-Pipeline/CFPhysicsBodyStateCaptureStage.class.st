@@ -7,10 +7,17 @@ Class {
 
 { #category : 'executing' }
 CFPhysicsBodyStateCaptureStage >> executeOn: aStepResult [
-	| states |
+	| states orderedStates index |
 	states := IdentityDictionary new.
+	orderedStates := Array new: aStepResult bodies size.
+	index := 0.
 	aStepResult bodies do: [ :body |
-		states at: body put: (CFPhysicsBodyStepState on: body) ].
-	aStepResult bodyStates: states.
+		| state |
+		state := CFPhysicsBodyStepState on: body.
+		states at: body put: state.
+		orderedStates at: (index := index + 1) put: state ].
+	aStepResult
+		bodyStates: states;
+		orderedBodyStates: orderedStates.
 	^ states
 ]

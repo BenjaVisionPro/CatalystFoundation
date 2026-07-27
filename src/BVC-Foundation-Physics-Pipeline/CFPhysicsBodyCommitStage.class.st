@@ -7,9 +7,6 @@ Class {
 
 { #category : 'executing' }
 CFPhysicsBodyCommitStage >> executeOn: aStepResult [
-	| states |
-	states := aStepResult bodyStates values sorted: [ :first :second |
-		first body sequence < second body sequence ].
-	states do: #commit.
-	^ states
+	aStepResult orderedBodyStates do: #commit.
+	^ aStepResult orderedBodyStates
 ]
