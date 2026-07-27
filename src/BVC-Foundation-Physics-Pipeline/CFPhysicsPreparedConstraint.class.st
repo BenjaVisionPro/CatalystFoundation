@@ -47,3 +47,12 @@ CFPhysicsPreparedConstraint >> restitution: aNumber [ restitution := aNumber ]
 CFPhysicsPreparedConstraint >> points [ ^ points ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> points: aCollection [ points := aCollection ]
+
+{ #category : 'copying' }
+CFPhysicsPreparedConstraint >> copyForContactUpdate [
+	^ self class new
+		points: (points
+			ifNil: [ #() ]
+			ifNotNil: [ points collect: [ :point | point copyForContactUpdate ] ]);
+		yourself
+]

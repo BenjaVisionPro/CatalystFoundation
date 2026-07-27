@@ -67,7 +67,17 @@ CFPhysicsContact >> copyForUpdate [
 	^ self class new
 		pair: pair;
 		manifold: manifold;
-		preparedConstraint: preparedConstraint;
+		preparedConstraint: (preparedConstraint
+			ifNil: [ nil ]
+			ifNotNil: [ preparedConstraint copyForContactUpdate ]);
+		yourself
+]
+
+{ #category : 'copying' }
+CFPhysicsContact >> copyForEnding [
+	^ self class new
+		pair: pair;
+		manifold: manifold;
 		yourself
 ]
 
