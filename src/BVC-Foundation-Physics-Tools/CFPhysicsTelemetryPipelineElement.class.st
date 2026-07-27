@@ -8,7 +8,8 @@ Class {
 		'controls',
 		'windowToggleGroup',
 		'samplesLabel',
-		'graph'
+		'graph',
+		'backgroundToggle'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -53,6 +54,11 @@ CFPhysicsTelemetryPipelineElement >> build [
 		vFitContent;
 		cellSpacing: 4;
 		yourself.
+	graph withAsyncFutureDo: [ :anElementFuture |
+		anElementFuture
+			cancelSoft;
+			whenSuccess: [ :anElement :analysis | self renderAnalysis: analysis ];
+			whenError: [ :anElement :anError | anElement showNotification: anError asNotification ] ].
 	self
 		addChild: controls;
 		addChild: graph.
@@ -61,8 +67,25 @@ CFPhysicsTelemetryPipelineElement >> build [
 
 { #category : 'private - updating' }
 CFPhysicsTelemetryPipelineElement >> updateGraph [
-	| analysis root pipeline maximumEnd scale |
-	analysis := CFPhysicsTelemetryAnalysis world: world.
+	| recordings windowSeconds |
+	recordings := world telemetryRecordings.
+	windowSeconds := world telemetryAnalysisWindowSeconds.
+	world telemetryAnalysisInBackground
+		ifTrue: [
+			graph asyncFuture future: [
+				CFPhysicsTelemetryAnalysis
+					recordings: recordings
+					windowSeconds: windowSeconds ] asAsyncFuture ]
+		ifFalse: [
+			graph asyncFuture interrupt.
+			self renderAnalysis: (CFPhysicsTelemetryAnalysis
+				recordings: recordings
+				windowSeconds: windowSeconds) ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsTelemetryPipelineElement >> renderAnalysis: analysis [
+	| root pipeline maximumEnd scale |
 	samplesLabel text: analysis sampleCount asString, ' samples'.
 	graph removeChildren.
 	root := analysis rootStatistics.
@@ -330,7 +353,7 @@ CFPhysicsTelemetryPipelineElement >> emptyLabel: aString [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> buildControls [
-	| row liveLabel |
+	| row liveLabel backgroundLabel |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 32;
@@ -342,6 +365,12 @@ CFPhysicsTelemetryPipelineElement >> buildControls [
 		text: 'Rolling window';
 		yourself.
 	windowToggleGroup := self buildWindowToggleGroup.
+	backgroundLabel := BrLabel new
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
+		text: 'Analysis';
+		yourself.
+	backgroundToggle := self buildBackgroundToggle.
 	samplesLabel := BrLabel new
 		hMatchParent;
 		vFitContent;
@@ -351,6 +380,8 @@ CFPhysicsTelemetryPipelineElement >> buildControls [
 	row
 		addChild: liveLabel;
 		addChild: windowToggleGroup;
+		addChild: backgroundLabel;
+		addChild: backgroundToggle;
 		addChild: samplesLabel.
 	^ row
 ]
@@ -380,6 +411,27 @@ CFPhysicsTelemetryPipelineElement >> windowToggleForSeconds: seconds [
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
 			world telemetryAnalysisWindowSeconds: anEvent model.
+			self updateGraph ].
+	^ toggle
+]
+
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> buildBackgroundToggle [
+	| toggle |
+	toggle := BrToggle new
+		aptitude: BrGlamorousToggleWithLabelAptitude new;
+		label: 'Background';
+		yourself.
+	world telemetryAnalysisInBackground ifTrue: [ toggle activate ].
+	toggle
+		when: BrToggleActivatedEvent
+		do: [
+			world telemetryAnalysisInBackground: true.
+			self updateGraph ];
+		when: BrToggleDeactivatedEvent
+		do: [
+			world telemetryAnalysisInBackground: false.
 			self updateGraph ].
 	^ toggle
 ]

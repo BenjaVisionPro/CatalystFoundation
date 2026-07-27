@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -54,6 +54,7 @@ CFPhysicsWorld >> initialize [
 	telemetryCapacity := 3600.
 	telemetryAnalysisWindowSeconds := 5.
 	telemetryStepStatisticsMaximumMicroseconds := nil.
+	telemetryAnalysisInBackground := false.
 	telemetryAnnouncer := Announcer new.
 	containmentConstraints := IdentitySet new.
 	boundary := CFPhysicsWorldBoundary new.
@@ -559,6 +560,18 @@ CFPhysicsWorld >> telemetryCapacity: anInteger [
 	telemetryLogger ifNotNil: [ telemetryLogger capacity: telemetryCapacity ]
 ]
 
+
+
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryAnalysisInBackground [
+	^ telemetryAnalysisInBackground
+]
+
+{ #category : 'telemetry' }
+CFPhysicsWorld >> telemetryAnalysisInBackground: aBoolean [
+	telemetryAnalysisInBackground := aBoolean
+]
 
 { #category : 'telemetry' }
 CFPhysicsWorld >> telemetryAnalysisWindowSeconds [

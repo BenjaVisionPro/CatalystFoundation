@@ -670,3 +670,14 @@ CFPhysicsExamples >> physicsTelemetryStepStatisticsScaleDoesNotContract [
 	self assert: (world telemetryStepStatisticsMaximumMicrosecondsFor: 1800) < firstMaximum.
 	^ world
 ]
+
+{ #category : 'examples - telemetry' }
+CFPhysicsExamples >> physicsTelemetryAnalysisCanRunInBackground [
+	<gtExample>
+	| world |
+	world := CFPhysicsWorld new.
+	self deny: world telemetryAnalysisInBackground.
+	world telemetryAnalysisInBackground: true.
+	self assert: world telemetryAnalysisInBackground.
+	^ world
+]
