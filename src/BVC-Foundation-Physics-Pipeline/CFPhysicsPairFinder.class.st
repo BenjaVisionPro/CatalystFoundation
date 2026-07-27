@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPairFinder',
 	#superclass : 'Object',
-	#instVars : [ 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount' ],
+	#instVars : [ 'collisionDisabledBodySequences', 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -35,6 +35,7 @@ CFPhysicsPairFinder >> pairsAmong: bodies [
 { #category : 'initialization' }
 CFPhysicsPairFinder >> initialize [
 	super initialize.
+	collisionDisabledBodySequences := Dictionary new.
 	self resetMeasurements
 ]
 
@@ -136,6 +137,53 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: fi
 	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
 	(self jointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
+]
+
+
+{ #category : 'finding' }
+CFPhysicsPairFinder >> pairsAmongCapturedStepStates: stepStates collisionDisabledBodySequences: disabledBodySequences [
+	| entries active pairs |
+	self resetMeasurements.
+	collisionDisabledBodySequences := disabledBodySequences.
+	entries := (stepStates collect: [ :state |
+		{ state. state sweptAABB. state sequence } ]) asArray.
+	entries := self entriesSortedByMinimumX: entries.
+	entryCount := entries size.
+	active := OrderedCollection new: entries size.
+	pairs := OrderedCollection new: entries size.
+	entries do: [ :entry |
+		self expireEntriesBefore: entry second minimum x from: active.
+		active do: [ :other |
+			comparisonCount := comparisonCount + 1.
+			(self
+				shouldConsiderCapturedState: other first
+				with: entry first
+				firstAABB: other second
+				secondAABB: entry second) ifTrue: [
+				pairs add: (CFPhysicsPair firstState: other first secondState: entry first).
+				acceptedPairCount := acceptedPairCount + 1 ] ].
+		active add: entry.
+		maximumActiveCount := maximumActiveCount max: active size ].
+	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
+]
+
+{ #category : 'testing' }
+CFPhysicsPairFinder >> shouldConsiderCapturedState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
+	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
+	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
+	(self collisionDisabledBetween: first and: second) ifTrue: [ ^ false ].
+	^ firstAABB overlaps: secondAABB
+]
+
+{ #category : 'private - filtering' }
+CFPhysicsPairFinder >> collisionDisabledBetween: firstState and: secondState [
+	| firstSequence secondSequence lowerSequence higherSequence |
+	firstSequence := firstState sequence.
+	secondSequence := secondState sequence.
+	lowerSequence := firstSequence min: secondSequence.
+	higherSequence := firstSequence max: secondSequence.
+	^ (collisionDisabledBodySequences at: lowerSequence ifAbsent: [ ^ false ])
+		includes: higherSequence
 ]
 
 

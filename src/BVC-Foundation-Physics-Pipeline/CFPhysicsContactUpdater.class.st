@@ -31,7 +31,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 		manifold ifNotNil: [
 			contact := previous
 				ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
-				ifNotNil: [ previous copyForUpdate updateWith: manifold; yourself ].
+				ifNotNil: [ previous copyForUpdateWithPair: pair; updateWith: manifold; yourself ].
 			active add: contact.
 			contact began ifTrue: [ began add: contact ].
 			contact continued ifTrue: [ continued add: contact ] ] ].
@@ -63,7 +63,7 @@ CFPhysicsContactUpdater >> updateImpactContact: impactContact fromContacts: prev
 		previous := previousByKey removeKey: contact key ifAbsent: [ nil ].
 		contact := previous
 			ifNil: [ contact ]
-			ifNotNil: [ previous copyForUpdate updateWith: contact manifold; yourself ].
+			ifNotNil: [ previous copyForUpdateWithPair: contact pair; updateWith: contact manifold; yourself ].
 		active add: contact.
 		contact began ifTrue: [ began add: contact ].
 		contact continued ifTrue: [ continued add: contact ] ].
@@ -100,7 +100,7 @@ CFPhysicsContactUpdater >> updateImpactContacts: impactContacts fromContacts: pr
 		previous := previousByKey removeKey: impactContact key ifAbsent: [ nil ].
 		contact := previous
 			ifNil: [ impactContact ]
-			ifNotNil: [ previous copyForUpdate updateWith: impactContact manifold; yourself ].
+			ifNotNil: [ previous copyForUpdateWithPair: impactContact pair; updateWith: impactContact manifold; yourself ].
 		active add: contact.
 		contact began ifTrue: [ began add: contact ].
 		contact continued ifTrue: [ continued add: contact ] ].
@@ -145,7 +145,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 					impactContact
 						ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
 						ifNotNil: [ impactContact ] ]
-				ifNotNil: [ previous copyForUpdate updateWith: manifold; yourself ].
+				ifNotNil: [ previous copyForUpdateWithPair: pair; updateWith: manifold; yourself ].
 			active add: contact.
 			contact began ifTrue: [ began add: contact ].
 			contact continued ifTrue: [ continued add: contact ] ] ].

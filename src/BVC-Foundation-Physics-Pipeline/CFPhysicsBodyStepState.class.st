@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'sequence', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'sweptAABB', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -13,6 +13,7 @@ CFPhysicsBodyStepState class >> on: aBody [
 
 { #category : 'initialization' }
 CFPhysicsBodyStepState >> capture [
+	sequence := body sequence.
 	bodyType := body bodyType.
 	position := body position.
 	rotation := body rotation.
@@ -26,6 +27,12 @@ CFPhysicsBodyStepState >> capture [
 	angularDamping := body angularDamping.
 	gravityScale := body gravityScale.
 	shapeState := body shapeState.
+	friction := body friction.
+	restitution := body restitution.
+	collisionCategoryBits := body collisionCategoryBits.
+	collisionMaskBits := body collisionMaskBits.
+	collisionGroupIndex := body collisionGroupIndex.
+	sweptAABB := body sweptAABB.
 	awake := body isAwake.
 	sensor := body isSensor.
 	deltaPosition := 0 @ 0.
@@ -80,6 +87,58 @@ CFPhysicsBodyStepState >> commit [
 		velocity: linearVelocity
 		angularVelocity: angularVelocity
 ]
+
+
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> sequence [ ^ sequence ]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> bodyType [ ^ bodyType ]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
+
+{ #category : 'collision' }
+CFPhysicsBodyStepState >> sweptAABB [ ^ sweptAABB ]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> formsCollisionPairWith: anotherState [
+	^ bodyType formsCollisionPairWith: anotherState bodyType
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> allowsCollisionWith: anotherState [
+	(collisionGroupIndex ~= 0 and: [ collisionGroupIndex = anotherState collisionGroupIndex ])
+		ifTrue: [ ^ collisionGroupIndex > 0 ].
+	^ ((collisionMaskBits bitAnd: anotherState collisionCategoryBits) ~= 0)
+		and: [ (anotherState collisionMaskBits bitAnd: collisionCategoryBits) ~= 0 ]
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionCategoryBits [ ^ collisionCategoryBits ]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionMaskBits [ ^ collisionMaskBits ]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionGroupIndex [ ^ collisionGroupIndex ]
+
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> friction [ ^ friction ]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> restitution [ ^ restitution ]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> inverseMass [ ^ inverseMass ]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> inverseInertia [ ^ inverseInertia ]
+
+{ #category : 'testing' }
+CFPhysicsBodyStepState >> isSensor [ ^ sensor ]
 
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> body [ ^ body ]

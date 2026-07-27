@@ -26,6 +26,13 @@ CFPhysicsContact >> firstBody [ ^ pair firstBody ]
 { #category : 'accessing' }
 CFPhysicsContact >> secondBody [ ^ pair secondBody ]
 
+
+{ #category : 'accessing' }
+CFPhysicsContact >> firstState [ ^ pair firstStateOrNil ]
+
+{ #category : 'accessing' }
+CFPhysicsContact >> secondState [ ^ pair secondStateOrNil ]
+
 { #category : 'accessing' }
 CFPhysicsContact >> manifold [ ^ manifold ]
 
@@ -72,8 +79,20 @@ CFPhysicsContact >> copyForUpdate [
 ]
 
 
+{ #category : 'copying' }
+CFPhysicsContact >> copyForUpdateWithPair: aPair [
+	^ self class new
+		pair: aPair;
+		manifold: manifold;
+		preparedConstraint: preparedConstraint;
+		yourself
+]
+
+
 { #category : 'testing' }
 CFPhysicsContact >> isSensor [
+	pair hasStepStates ifTrue: [
+		^ self firstState isSensor or: [ self secondState isSensor ] ].
 	^ self firstBody isSensor or: [ self secondBody isSensor ]
 ]
 

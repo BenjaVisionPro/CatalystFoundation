@@ -19,12 +19,15 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates w
 	index := 1.
 	contacts do: [ :contact |
 		contact isSensor ifFalse: [
+			| stateA stateB |
+			stateA := contact firstState ifNil: [ bodyStates at: contact firstBody ].
+			stateB := contact secondState ifNil: [ bodyStates at: contact secondBody ].
 			constraints
 				at: index
 				put: (self
 					constraintFrom: contact
-					bodyStateA: (bodyStates at: contact firstBody)
-					bodyStateB: (bodyStates at: contact secondBody)
+					bodyStateA: stateA
+					bodyStateB: stateB
 					warmStartRatio: warmStartRatio).
 			index := index + 1 ] ].
 	^ constraints
@@ -48,8 +51,8 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 		bodyStateB: stateB;
 		normal: normal;
 		tangent: tangent;
-		friction: (contact firstBody friction * contact secondBody friction) sqrt;
-		restitution: (contact firstBody restitution max: contact secondBody restitution).
+		friction: (stateA friction * stateB friction) sqrt;
+		restitution: (stateA restitution max: stateB restitution).
 	constraint points: (self
 		pointsFrom: contact manifold contactPoints
 		previousPoints: previousPoints
@@ -107,14 +110,14 @@ CFPhysicsConstraintBuilder >> updatePoint: point from: manifoldPoint contact: co
 	anchorB := self rotatedAnchorFor: manifoldPoint localAnchorB bodyState: stateB.
 	rnA := self cross: anchorA with: normal.
 	rnB := self cross: anchorB with: normal.
-	normalDenominator := contact firstBody inverseMass + contact secondBody inverseMass
-		+ (contact firstBody inverseInertia * rnA squared)
-		+ (contact secondBody inverseInertia * rnB squared).
+	normalDenominator := stateA inverseMass + stateB inverseMass
+		+ (stateA inverseInertia * rnA squared)
+		+ (stateB inverseInertia * rnB squared).
 	rtA := self cross: anchorA with: tangent.
 	rtB := self cross: anchorB with: tangent.
-	tangentDenominator := contact firstBody inverseMass + contact secondBody inverseMass
-		+ (contact firstBody inverseInertia * rtA squared)
-		+ (contact secondBody inverseInertia * rtB squared).
+	tangentDenominator := stateA inverseMass + stateB inverseMass
+		+ (stateA inverseInertia * rtA squared)
+		+ (stateB inverseInertia * rtB squared).
 	relativeVelocity := (stateB linearVelocity + (self crossScalar: stateB angularVelocity with: anchorB))
 		- (stateA linearVelocity + (self crossScalar: stateA angularVelocity with: anchorA)).
 	point
@@ -154,7 +157,7 @@ CFPhysicsConstraintBuilder >> reusedPointCount [ ^ reusedPointCount ifNil: [ 0 ]
 { #category : 'private - geometry' }
 CFPhysicsConstraintBuilder >> rotatedAnchorFor: localAnchor bodyState: bodyState [
 	| localCentre relative rotation cosine sine |
-	localCentre := bodyState body shapeState extent / 2.0.
+	localCentre := bodyState shapeState extent / 2.0.
 	relative := localAnchor - localCentre.
 	rotation := bodyState currentTransform rotation.
 	cosine := rotation cos.
