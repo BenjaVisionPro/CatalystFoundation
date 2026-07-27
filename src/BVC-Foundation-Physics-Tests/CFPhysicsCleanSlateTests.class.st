@@ -449,6 +449,46 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 ]
 
 { #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintBuilderUsesCapturedBodyProperties [
+	<gtExample>
+	| first second pair manifold bodyStates builder initialConstraint capturedConstraint |
+	first := self cleanSlateBodyWithSequence: 1.
+	first
+		friction: 0.25;
+		restitution: 0.2.
+	second := self cleanSlateBodyWithSequence: 2.
+	second
+		friction: 0.81;
+		restitution: 0.6.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	builder := CFPhysicsConstraintBuilder new.
+	initialConstraint := (builder
+		constraintsFrom: { CFPhysicsContact pair: pair manifold: manifold }
+		bodyStates: bodyStates) first.
+	first
+		friction: 1.0;
+		restitution: 1.0;
+		density: 10.0.
+	second
+		friction: 1.0;
+		restitution: 0.0;
+		density: 20.0.
+	capturedConstraint := (builder
+		constraintsFrom: { CFPhysicsContact pair: pair manifold: manifold }
+		bodyStates: bodyStates) first.
+	self assert: capturedConstraint friction equals: initialConstraint friction.
+	self assert: capturedConstraint restitution equals: initialConstraint restitution.
+	self assert: capturedConstraint points first normalMass equals: initialConstraint points first normalMass.
+	self assert: capturedConstraint points first tangentMass equals: initialConstraint points first tangentMass.
+	^ capturedConstraint
+]
+
+{ #category : 'examples - constraints' }
 CFPhysicsCleanSlateTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly [
 	<gtExample>
 	| constraint manifoldPoint preparedPoint |

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sensor', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -26,6 +26,9 @@ CFPhysicsBodyStepState >> capture [
 	angularDamping := body angularDamping.
 	gravityScale := body gravityScale.
 	shapeState := body shapeState.
+	friction := body friction.
+	restitution := body restitution.
+	localCentre := shapeState extent / 2.0.
 	awake := body isAwake.
 	sensor := body isSensor.
 	deltaPosition := 0 @ 0.
@@ -97,6 +100,18 @@ CFPhysicsBodyStepState >> angularVelocity: aNumber [ angularVelocity := aNumber 
 CFPhysicsBodyStepState >> deltaPosition [ ^ deltaPosition ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> deltaRotation [ ^ deltaRotation ]
+
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> friction [ ^ friction ]
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> restitution [ ^ restitution ]
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> inverseMass [ ^ inverseMass ]
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> inverseInertia [ ^ inverseInertia ]
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> localCentre [ ^ localCentre ]
 
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
