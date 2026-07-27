@@ -4757,7 +4757,7 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopUsesCapturedSensorState [
 		executeBodyStates: bodyStates
 		step: step
 		restitutionThreshold: 1.0.
-	self deny: result impacts isEmpty.
+	self assert: result impacts isEmpty not.
 	self assert: result sensorContacts isEmpty.
 	^ result
 ]

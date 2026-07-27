@@ -15,10 +15,11 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates [
 CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	| constraints index |
 	self resetReuseMeasurements.
-	constraints := Array new: (contacts count: [ :contact | contact isSensor not ]).
+	constraints := Array new: (contacts count: [ :contact |
+		(self isSensorContact: contact bodyStates: bodyStates) not ]).
 	index := 1.
 	contacts do: [ :contact |
-		contact isSensor ifFalse: [
+		(self isSensorContact: contact bodyStates: bodyStates) ifFalse: [
 			constraints
 				at: index
 				put: (self
@@ -28,6 +29,13 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates w
 					warmStartRatio: warmStartRatio).
 			index := index + 1 ] ].
 	^ constraints
+]
+
+
+{ #category : 'private - testing' }
+CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
+	^ (bodyStates at: contact firstBody) isSensor or: [
+		(bodyStates at: contact secondBody) isSensor ]
 ]
 
 { #category : 'private - building' }
