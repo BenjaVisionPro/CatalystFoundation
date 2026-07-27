@@ -21,17 +21,30 @@ CFPhysicsIslandSleepStage >> configuration: aConfiguration [ configuration := aC
 
 { #category : 'waking' }
 CFPhysicsIslandSleepStage >> propagateWakeAcross: islands [
-	wokenBodiesByIsland := IdentityDictionary new.
+	wokenBodiesByIsland removeAll.
 	islands do: [ :island |
-		| dynamicBodies woken |
+		| dynamicBodies |
 		dynamicBodies := island dynamicBodies.
-		woken := OrderedCollection new.
-		(dynamicBodies anySatisfy: [ :body | body isAwake ]) ifTrue: [
-			dynamicBodies do: [ :body |
-				body isSleeping ifTrue: [
-					body wake.
-					woken add: body ] ] ].
-		wokenBodiesByIsland at: island put: woken asArray ]
+		wokenBodiesByIsland
+			at: island
+			put: ((dynamicBodies anySatisfy: [ :body | body isAwake ])
+				ifTrue: [ self wakeSleepingBodiesIn: dynamicBodies ]
+				ifFalse: [ #() ]) ]
+]
+
+{ #category : 'private - waking' }
+CFPhysicsIslandSleepStage >> wakeSleepingBodiesIn: dynamicBodies [
+	| sleepingCount woken index |
+	sleepingCount := dynamicBodies count: #isSleeping.
+	sleepingCount = 0 ifTrue: [ ^ #() ].
+	woken := Array new: sleepingCount.
+	index := 1.
+	dynamicBodies do: [ :body |
+		body isSleeping ifTrue: [
+			body wake.
+			woken at: index put: body.
+			index := index + 1 ] ].
+	^ woken
 ]
 
 { #category : 'sleeping' }
@@ -64,8 +77,10 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 
 	eligible
 		ifTrue: [
-			dynamicBodies do: [ :body | body advanceSleepTimeBy: seconds ].
-			minimum := (dynamicBodies collect: #sleepTime) min.
+			minimum := Float infinity.
+			dynamicBodies do: [ :body |
+				body advanceSleepTimeBy: seconds.
+				minimum := minimum min: body sleepTime ].
 			slept := minimum >= configuration timeToSleep.
 			slept ifTrue: [
 			dynamicBodies do: [ :body |
