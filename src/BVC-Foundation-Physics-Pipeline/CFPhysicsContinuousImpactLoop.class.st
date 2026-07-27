@@ -52,9 +52,11 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints st
 			pairsAmongStepStates: bodyStates values
 			for: remainingTime.
 		solidPairs := pairs reject: [ :pair |
-			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+			(bodyStates at: pair firstBody) isSensor or: [
+				(bodyStates at: pair secondBody) isSensor ] ].
 		sensorPairs := pairs select: [ :pair |
-			pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+			(bodyStates at: pair firstBody) isSensor or: [
+				(bodyStates at: pair secondBody) isSensor ] ].
 		impactsAtEarliestTime := impactFinder
 			impactsAtEarliestTimeAmong: solidPairs
 			bodyStates: bodyStates

@@ -20,7 +20,8 @@ CFPhysicsContinuousStepExecutor >> executePairs: pairs bodyStates: bodyStates st
 	| impact advancement impactStep solveResult solidPairs tolerance |
 	tolerance := 1.0e-9.
 	solidPairs := pairs reject: [ :pair |
-		pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+		(bodyStates at: pair firstBody) isSensor or: [
+			(bodyStates at: pair secondBody) isSensor ] ].
 	impact := impactFinder
 		earliestAmong: solidPairs
 		bodyStates: bodyStates

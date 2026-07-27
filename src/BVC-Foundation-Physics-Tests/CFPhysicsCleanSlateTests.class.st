@@ -4705,6 +4705,63 @@ CFPhysicsCleanSlateTests >> continuousStepExecutorLeavesSeparatedStatesUncommitt
 ]
 
 
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousStepExecutorUsesCapturedSensorState [
+	<gtExample>
+	| moving obstacle bodyStates pair step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	obstacle beSensor.
+	pair := CFPhysicsPair first: moving second: obstacle.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousStepExecutor new
+		executePairs: { pair }
+		bodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self assert: result hasImpact.
+	self assert: (moving position closeTo: 10 @ 0).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousImpactLoopUsesCapturedSensorState [
+	<gtExample>
+	| moving obstacle bodyStates step result |
+	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	obstacle := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	obstacle beStatic.
+	bodyStates := IdentityDictionary new
+		at: moving put: (CFPhysicsBodyStepState on: moving);
+		at: obstacle put: (CFPhysicsBodyStepState on: obstacle);
+		yourself.
+	(bodyStates at: moving) linearVelocity: 40 @ 0.
+	obstacle beSensor.
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := CFPhysicsContinuousImpactLoop new
+		executeBodyStates: bodyStates
+		step: step
+		restitutionThreshold: 1.0.
+	self deny: result impacts isEmpty.
+	self assert: result sensorContacts isEmpty.
+	^ result
+]
+
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 	<gtExample>
