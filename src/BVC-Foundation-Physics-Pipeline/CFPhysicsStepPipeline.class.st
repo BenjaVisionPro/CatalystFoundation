@@ -77,18 +77,6 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	^ self
-		stepBodies: bodies
-		fromContacts: previousContacts
-		joints: joints
-		step: step
-		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold
-		collisionDisabledBodySequences: #()
-]
-
-{ #category : 'stepping' }
-CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold collisionDisabledBodySequences: disabledBodySequences [
 	| result |
 	result := self
 		newResultForBodies: bodies
@@ -96,8 +84,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		joints: joints
 		step: step
 		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold
-		collisionDisabledBodySequences: disabledBodySequences.
+		restitutionThreshold: restitutionThreshold.
 	stages do: [ :stage |
 		result recordStage: stage output: (stage executeOn: result) ].
 	^ result
@@ -105,18 +92,6 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	^ self
-		stepBodiesWithTelemetry: bodies
-		fromContacts: previousContacts
-		joints: joints
-		step: step
-		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold
-		collisionDisabledBodySequences: #()
-]
-
-{ #category : 'stepping' }
-CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold collisionDisabledBodySequences: disabledBodySequences [
 	| result |
 	result := self
 		newResultForBodies: bodies
@@ -124,8 +99,7 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 		joints: joints
 		step: step
 		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold
-		collisionDisabledBodySequences: disabledBodySequences.
+		restitutionThreshold: restitutionThreshold.
 	stages do: [ :stage |
 		| output |
 		output := ProcessTelemetry
@@ -136,7 +110,7 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 ]
 
 { #category : 'private - stepping' }
-CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold collisionDisabledBodySequences: disabledBodySequences [
+CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	^ CFPhysicsStepPipelineResult new
 		step: step;
 		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
@@ -147,7 +121,6 @@ CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContac
 				ifFalse: [ left orderingKey < right orderingKey ] ]);
 		gravity: gravityVector;
 		restitutionThreshold: restitutionThreshold;
-		collisionDisabledBodySequences: disabledBodySequences;
 		yourself
 ]
 
@@ -160,8 +133,7 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 		joints: aWorldState joints
 		step: aWorldState step
 		gravity: aWorldState gravity
-		restitutionThreshold: aWorldState restitutionThreshold
-		collisionDisabledBodySequences: aWorldState collisionDisabledBodySequences.
+		restitutionThreshold: aWorldState restitutionThreshold.
 	^ CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies
@@ -176,8 +148,7 @@ CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 		joints: aWorldState joints
 		step: aWorldState step
 		gravity: aWorldState gravity
-		restitutionThreshold: aWorldState restitutionThreshold
-		collisionDisabledBodySequences: aWorldState collisionDisabledBodySequences.
+		restitutionThreshold: aWorldState restitutionThreshold.
 	^ CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies

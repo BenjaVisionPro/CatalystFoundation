@@ -63,19 +63,9 @@ CFPhysicsWorld >> initialize [
 	fixedJoints := IdentitySet new.
 	railJoints := IdentitySet new.
 	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		pair hasStepStates
-			ifTrue: [
-				CFPhysicsBlocManifoldBuilder
-					manifoldBetweenShapeState: pair firstState shapeState
-					position: pair firstState currentTransform position
-					rotation: pair firstState currentTransform rotation
-					andShapeState: pair secondState shapeState
-					position: pair secondState currentTransform position
-					rotation: pair secondState currentTransform rotation ]
-			ifFalse: [
-				CFPhysicsBlocManifoldBuilder
-					manifoldBetweenBody: pair firstBody
-					andBody: pair secondBody ] ]
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBody: pair firstBody
+			andBody: pair secondBody ]
 ]
 
 { #category : 'accessing' }
@@ -368,7 +358,7 @@ CFPhysicsWorld >> synchroniseForStateCapture [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureStateAfterSynchronisation [
-	| bodies step explicitlyContainedBodies joints |
+	| bodies step explicitlyContainedBodies |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
@@ -378,12 +368,10 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 	self prepareSpringConstraintsForStep: step timeStep.
 	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
-	joints := self joints.
 	^ CFPhysicsWorldState new
 		bodies: bodies;
 		contacts: activeContacts;
-		joints: joints;
-		collisionDisabledBodySequences: (self collisionDisabledBodySequencesFor: joints);
+		joints: self joints;
 		step: step;
 		gravity: gravity;
 		restitutionThreshold: restitutionThreshold;
@@ -889,25 +877,6 @@ CFPhysicsWorld >> joints [
 		first orderingKey = second orderingKey
 			ifTrue: [ first class name asString < second class name asString ]
 			ifFalse: [ first orderingKey < second orderingKey ] ]
-]
-
-
-
-{ #category : 'private - collision filtering' }
-CFPhysicsWorld >> collisionDisabledBodySequencesFor: joints [
-	| sequences |
-	sequences := Dictionary new.
-	joints do: [ :joint |
-		(joint isActive and: [ joint collideConnected not ]) ifTrue: [
-			| firstBody secondBody lowerSequence higherSequence |
-			firstBody := joint firstBody.
-			secondBody := joint secondBody.
-			(firstBody notNil and: [ secondBody notNil ]) ifTrue: [
-				lowerSequence := firstBody sequence min: secondBody sequence.
-				higherSequence := firstBody sequence max: secondBody sequence.
-				(sequences at: lowerSequence ifAbsentPut: [ Set new ])
-					add: higherSequence ] ] ].
-	^ sequences
 ]
 
 { #category : 'collision filtering' }
