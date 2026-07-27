@@ -168,14 +168,16 @@ CFPhysicsContinuousImpactLoop >> recordSensorContactsAmong: pairs bodyStates: bo
 
 { #category : 'private - sensors' }
 CFPhysicsContinuousImpactLoop >> contactForSensorImpact: impact bodyStates: bodyStates for: seconds [
-	| pair firstSweep secondSweep manifold |
+	| pair firstState secondState firstSweep secondSweep manifold |
 	pair := impact pair.
-	firstSweep := (bodyStates at: pair firstBody) predictedSweepFor: seconds.
-	secondSweep := (bodyStates at: pair secondBody) predictedSweepFor: seconds.
+	firstState := bodyStates at: pair firstBody.
+	secondState := bodyStates at: pair secondBody.
+	firstSweep := firstState predictedSweepFor: seconds.
+	secondSweep := secondState predictedSweepFor: seconds.
 	manifold := CFPhysicsCollision
-		manifoldBetweenShapeState: pair firstBody shapeState
+		manifoldBetweenShapeState: firstState shapeState
 		transform: (firstSweep transformAt: impact fraction)
-		andShapeState: pair secondBody shapeState
+		andShapeState: secondState shapeState
 		transform: (secondSweep transformAt: impact fraction).
 	manifold ifNil: [ ^ nil ].
 	^ CFPhysicsContact pair: pair manifold: manifold

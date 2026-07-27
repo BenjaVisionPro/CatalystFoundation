@@ -37,9 +37,9 @@ CFPhysicsEarliestImpactFinder >> timeOfImpactFor: pair bodyStates: bodyStates fo
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
 	result := CFPhysicsConservativeAdvancement
-		betweenShapeState: pair firstBody shapeState
+		betweenShapeState: firstState shapeState
 		sweep: (firstState predictedSweepFor: seconds)
-		andShapeState: pair secondBody shapeState
+		andShapeState: secondState shapeState
 		sweep: (secondState predictedSweepFor: seconds).
 	^ CFPhysicsPairTimeOfImpact pair: pair result: result
 ]
@@ -122,9 +122,9 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
 	result := CFPhysicsConservativeAdvancement
-		betweenShapeState: pair firstBody shapeState
+		betweenShapeState: firstState shapeState
 		sweep: firstState solvedSweep
-		andShapeState: pair secondBody shapeState
+		andShapeState: secondState shapeState
 		sweep: secondState solvedSweep.
 	^ CFPhysicsPairTimeOfImpact pair: pair result: result
 ]

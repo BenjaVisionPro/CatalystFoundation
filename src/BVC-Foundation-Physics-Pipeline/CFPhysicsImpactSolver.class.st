@@ -55,9 +55,9 @@ CFPhysicsImpactSolver >> resultForAdvancement: advancement bodyStates: bodyState
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
 	manifold := CFPhysicsCollision
-		manifoldBetweenShapeState: pair firstBody shapeState
+		manifoldBetweenShapeState: firstState shapeState
 		transform: firstState currentTransform
-		andShapeState: pair secondBody shapeState
+		andShapeState: secondState shapeState
 		transform: secondState currentTransform.
 	manifold ifNil: [
 		^ CFPhysicsImpactSolveResult
