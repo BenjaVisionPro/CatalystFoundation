@@ -58,7 +58,9 @@ CFPhysicsTelemetryPipelineElement >> build [
 		anElementFuture
 			cancelSoft;
 			whenSuccess: [ :anElement :analysis | self renderAnalysis: analysis ];
-			whenError: [ :anElement :anError | anElement showNotification: anError asNotification ] ].
+			whenError: [ :anElement :anError |
+				anError class = AsyncFutureCancelled
+					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
 	self
 		addChild: controls;
 		addChild: graph.

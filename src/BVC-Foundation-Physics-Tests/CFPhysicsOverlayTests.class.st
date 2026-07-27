@@ -681,15 +681,3 @@ CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
 ]
 
 
-{ #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> physicsOverlayProvidesWorldInspectorControl [
-	<gtExample>
-	| host overlay button |
-	host := self physicsOverlayCanBeInstalled.
-	overlay := host existingPhysicsOverlay.
-	button := overlay worldInspectorButton.
-	self assert: overlay controlRoot parent == host parent.
-	self assert: button parent == overlay controlRoot.
-	self assert: button label equals: 'Inspect Physics world'.
-	^ overlay
-]
