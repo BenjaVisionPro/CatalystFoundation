@@ -343,14 +343,14 @@ CFPhysicsSoftStepSolver >> applyDistanceJointImpulse: impulse constraint: constr
 	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
 	constraint bodyStateA ifNotNil: [ :state |
 		state linearVelocity:
-			state linearVelocity - (impulse * constraint firstBody inverseMass).
+			state linearVelocity - (impulse * state inverseMass).
 		state angularVelocity:
-			state angularVelocity - ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia) ].
+			state angularVelocity - ((self cross: anchorA with: impulse) * state inverseInertia) ].
 	constraint bodyStateB ifNotNil: [ :state |
 		state linearVelocity:
-			state linearVelocity + (impulse * constraint secondBody inverseMass).
+			state linearVelocity + (impulse * state inverseMass).
 		state angularVelocity:
-			state angularVelocity + ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia) ]
+			state angularVelocity + ((self cross: anchorB with: impulse) * state inverseInertia) ]
 ]
 
 { #category : 'private - solving' }
@@ -360,24 +360,24 @@ CFPhysicsSoftStepSolver >> applyRevoluteJointImpulse: impulse constraint: constr
 	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
 	constraint bodyStateA ifNotNil: [ :state |
 		state linearVelocity:
-			state linearVelocity - (impulse * constraint firstBody inverseMass).
+			state linearVelocity - (impulse * state inverseMass).
 		state angularVelocity:
-			state angularVelocity - ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia) ].
+			state angularVelocity - ((self cross: anchorA with: impulse) * state inverseInertia) ].
 	constraint bodyStateB ifNotNil: [ :state |
 		state linearVelocity:
-			state linearVelocity + (impulse * constraint secondBody inverseMass).
+			state linearVelocity + (impulse * state inverseMass).
 		state angularVelocity:
-			state angularVelocity + ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia) ]
+			state angularVelocity + ((self cross: anchorB with: impulse) * state inverseInertia) ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyFixedJointAngularImpulse: impulse constraint: constraint [
 	constraint bodyStateA ifNotNil: [ :state |
 		state angularVelocity:
-			state angularVelocity - (impulse * constraint firstBody inverseInertia) ].
+			state angularVelocity - (impulse * state inverseInertia) ].
 	constraint bodyStateB ifNotNil: [ :state |
 		state angularVelocity:
-			state angularVelocity + (impulse * constraint secondBody inverseInertia) ]
+			state angularVelocity + (impulse * state inverseInertia) ]
 ]
 
 { #category : 'private - solving' }
@@ -500,15 +500,15 @@ CFPhysicsSoftStepSolver >> applyImpulse: impulse at: point constraint: constrain
 	anchorA := self rotated: point anchorA by: constraint bodyStateA deltaRotation.
 	anchorB := self rotated: point anchorB by: constraint bodyStateB deltaRotation.
 	constraint bodyStateA linearVelocity:
-		constraint bodyStateA linearVelocity - (impulse * constraint firstBody inverseMass).
+		constraint bodyStateA linearVelocity - (impulse * constraint bodyStateA inverseMass).
 	constraint bodyStateA angularVelocity:
 		constraint bodyStateA angularVelocity
-			- ((self cross: anchorA with: impulse) * constraint firstBody inverseInertia).
+			- ((self cross: anchorA with: impulse) * constraint bodyStateA inverseInertia).
 	constraint bodyStateB linearVelocity:
-		constraint bodyStateB linearVelocity + (impulse * constraint secondBody inverseMass).
+		constraint bodyStateB linearVelocity + (impulse * constraint bodyStateB inverseMass).
 	constraint bodyStateB angularVelocity:
 		constraint bodyStateB angularVelocity
-			+ ((self cross: anchorB with: impulse) * constraint secondBody inverseInertia)
+			+ ((self cross: anchorB with: impulse) * constraint bodyStateB inverseInertia)
 ]
 
 { #category : 'private - mathematics' }
