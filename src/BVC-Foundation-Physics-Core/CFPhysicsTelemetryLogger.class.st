@@ -21,7 +21,7 @@ CFPhysicsTelemetryLogger >> initialize [
 	capacity := 3600.
 	recordings := CFPhysicsTelemetryRingBuffer capacity: capacity.
 	lastAnnouncementMilliseconds := 0.
-	announcementIntervalMilliseconds := 50
+	announcementIntervalMilliseconds := 250
 ]
 
 { #category : 'accessing' }
