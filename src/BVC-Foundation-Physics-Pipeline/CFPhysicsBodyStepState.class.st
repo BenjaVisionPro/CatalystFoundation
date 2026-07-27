@@ -176,6 +176,15 @@ CFPhysicsBodyStepState >> clampSolvedTransformToFraction: aFraction [
 	deltaRotation := deltaRotation * fraction
 ]
 
+
+{ #category : 'continuous collision' }
+CFPhysicsBodyStepState >> requiresContinuousCollisionAgainst: anotherStepState [
+	^ bodyType requiresContinuousCollisionAgainst: anotherStepState bodyType
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> bodyType [ ^ bodyType ]
+
 { #category : 'continuous collision' }
 CFPhysicsBodyStepState >> maximumPointMotion [
 	^ deltaPosition r + (deltaRotation abs * shapeState boundingRadius)
