@@ -152,6 +152,8 @@ CFPhysicsOverlay >> newWorldInspectorButton [
 		effect: (BlBlurBelowEffect radius: 14);
 		geometry: BlCircleGeometry new;
 		constraintsDo: [ :c |
+			c horizontal exact: 64.
+			c vertical exact: 64.
 			c frame horizontal alignRight.
 			c frame vertical alignTop ];
 		margin: (BlInsets all: 10);
