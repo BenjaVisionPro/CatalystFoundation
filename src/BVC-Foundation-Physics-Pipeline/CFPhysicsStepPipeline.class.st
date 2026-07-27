@@ -124,6 +124,36 @@ CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContac
 		yourself
 ]
 
+{ #category : 'solving' }
+CFPhysicsStepPipeline >> solve: aWorldState [
+	| pipelineResult |
+	pipelineResult := self
+		stepBodies: aWorldState bodies
+		fromContacts: aWorldState contacts
+		joints: aWorldState joints
+		step: aWorldState step
+		gravity: aWorldState gravity
+		restitutionThreshold: aWorldState restitutionThreshold.
+	^ CFPhysicsWorldSolution
+		pipelineResult: pipelineResult
+		explicitlyContainedBodies: aWorldState explicitlyContainedBodies
+]
+
+{ #category : 'solving' }
+CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
+	| pipelineResult |
+	pipelineResult := self
+		stepBodiesWithTelemetry: aWorldState bodies
+		fromContacts: aWorldState contacts
+		joints: aWorldState joints
+		step: aWorldState step
+		gravity: aWorldState gravity
+		restitutionThreshold: aWorldState restitutionThreshold.
+	^ CFPhysicsWorldSolution
+		pipelineResult: pipelineResult
+		explicitlyContainedBodies: aWorldState explicitlyContainedBodies
+]
+
 { #category : 'accessing' }
 CFPhysicsStepPipeline >> postSolveStage [
 	^ self stageOfType: CFPhysicsPostSolveStage

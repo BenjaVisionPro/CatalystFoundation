@@ -338,9 +338,27 @@ CFPhysicsWorld >> step [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> stepWithoutTelemetry [
-	| bodies step explicitlyContainedBodies |
+	| state solution |
+	state := self captureState.
+	solution := stepPipeline solve: state.
+	^ self commit: solution
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> captureState [
+	self synchroniseForStateCapture.
+	^ self captureStateAfterSynchronisation
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> synchroniseForStateCapture [
 	self synchroniseMembership.
-	self retireInvalidBehaviours.
+	self retireInvalidBehaviours
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> captureStateAfterSynchronisation [
+	| bodies step explicitlyContainedBodies |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
@@ -350,19 +368,29 @@ CFPhysicsWorld >> stepWithoutTelemetry [
 	self prepareSpringConstraintsForStep: step timeStep.
 	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
-	lastStepResult := stepPipeline
-		stepBodies: bodies
-		fromContacts: activeContacts
-		joints: self joints
-		step: step
-		gravity: gravity
-		restitutionThreshold: restitutionThreshold.
-	activeContacts := lastStepResult activeContacts.
-	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
+	^ CFPhysicsWorldState new
+		bodies: bodies;
+		contacts: activeContacts;
+		joints: self joints;
+		step: step;
+		gravity: gravity;
+		restitutionThreshold: restitutionThreshold;
+		explicitlyContainedBodies: explicitlyContainedBodies;
+		yourself
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> commit: aWorldSolution [
+	| pipelineResult step |
+	pipelineResult := aWorldSolution pipelineResult.
+	step := pipelineResult step.
+	lastStepResult := pipelineResult.
+	activeContacts := pipelineResult activeContacts.
+	self applyDefaultBoundaryExcept: aWorldSolution explicitlyContainedBodies.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
-	^ lastStepResult
+	^ pipelineResult
 ]
 
 { #category : 'private - telemetry' }
@@ -381,35 +409,15 @@ CFPhysicsWorld >> stepWithTelemetry [
 
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> stepRecordingTelemetry [
-	| bodies step explicitlyContainedBodies |
+	| state solution |
 	ProcessTelemetry time: [ 'Membership synchronisation' ] during: [
-		self synchroniseMembership.
-		self retireInvalidBehaviours ].
-	bodies := self bodyStatesInOrder.
-	bodies do: #beginStep.
-	step := self newStep.
-	ProcessTelemetry time: [ 'Preparation' ] during: [
-		self updateBehavioursForStep: step.
-		self prepareAttractionConstraintsForStep: step timeStep.
-		self prepareRepulsionConstraintsForStep: step timeStep.
-		self prepareSpringConstraintsForStep: step timeStep.
-		explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
-		self preparePointerConstraintsForStep: step timeStep ].
-	lastStepResult := ProcessTelemetry time: [ 'Pipeline' ] during: [
-		stepPipeline
-			stepBodiesWithTelemetry: bodies
-			fromContacts: activeContacts
-			joints: self joints
-			step: step
-			gravity: gravity
-			restitutionThreshold: restitutionThreshold ].
-	activeContacts := lastStepResult activeContacts.
-	ProcessTelemetry time: [ 'Boundary' ] during: [
-		self applyDefaultBoundaryExcept: explicitlyContainedBodies ].
-	previousTimeStep := step timeStep.
-	simulationTime := simulationTime + step timeStep.
-	stepNumber := step stepNumber.
-	^ lastStepResult
+		self synchroniseForStateCapture ].
+	state := ProcessTelemetry time: [ 'Preparation' ] during: [
+		self captureStateAfterSynchronisation ].
+	solution := ProcessTelemetry time: [ 'Pipeline' ] during: [
+		stepPipeline solveWithTelemetry: state ].
+	^ ProcessTelemetry time: [ 'Boundary' ] during: [
+		self commit: solution ]
 ]
 
 { #category : 'private - telemetry' }
