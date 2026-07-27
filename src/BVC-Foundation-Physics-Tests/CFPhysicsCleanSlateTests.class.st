@@ -5955,6 +5955,8 @@ CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
 	stage propagateWakeAcross: { island } bodyStates: bodyStates.
 	self assert: (bodyStates at: first) isAwake.
 	self assert: (bodyStates at: second) isAwake.
+	self assert: second isAwake not.
+	(bodyStates at: second) commit.
 	self assert: second isAwake.
 	^ bodyStates at: second
 ]

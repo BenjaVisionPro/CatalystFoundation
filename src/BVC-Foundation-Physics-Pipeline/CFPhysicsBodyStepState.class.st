@@ -83,7 +83,8 @@ CFPhysicsBodyStepState >> commit [
 		commitPosition: position + deltaPosition
 		rotation: rotation + deltaRotation
 		velocity: linearVelocity
-		angularVelocity: angularVelocity
+		angularVelocity: angularVelocity.
+	body commitAwake: awake sleepTime: sleepTime
 ]
 
 { #category : 'accessing' }

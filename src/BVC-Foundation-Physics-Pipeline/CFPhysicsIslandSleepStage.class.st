@@ -82,23 +82,19 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 				| state |
 				state := bodyStates at: body.
 				state advanceSleepTimeBy: seconds.
-				body advanceSleepTimeBy: seconds.
 				minimum := minimum min: state sleepTime ].
 			slept := minimum >= configuration timeToSleep.
 			slept ifTrue: [
 				dynamicBodies do: [ :body |
 					| state |
 					state := bodyStates at: body.
-					state sleep.
-					body sleep ] ] ]
+					state sleep ] ] ]
 		ifFalse: [
 			dynamicBodies do: [ :body |
 				| state |
 				state := bodyStates at: body.
 				state resetSleepTime.
-				state wake.
-				body resetSleepTime.
-				body wake ].
+				state wake ].
 			minimum := 0.0.
 			slept := false ].
 
@@ -134,7 +130,6 @@ CFPhysicsIslandSleepStage >> wakeSleepingBodiesIn: dynamicBodies bodyStates: bod
 		state := bodyStates at: body.
 		state isAwake ifFalse: [
 			state wake.
-			body wake.
 			woken at: index put: body.
 			index := index + 1 ] ].
 	^ woken

@@ -544,6 +544,12 @@ CFPhysicsBody >> commitVelocity: aVelocity angularVelocity: anAngularVelocity [
 ]
 
 { #category : 'stepping' }
+CFPhysicsBody >> commitAwake: aBoolean sleepTime: aNumber [
+	awake := aBoolean.
+	sleepTime := aNumber
+]
+
+{ #category : 'stepping' }
 CFPhysicsBody >> stopMotion [
 	velocity := 0 @ 0.
 	angularVelocity := 0.0
