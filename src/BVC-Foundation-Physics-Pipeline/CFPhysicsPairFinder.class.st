@@ -146,7 +146,7 @@ CFPhysicsPairFinder >> pairsAmongCapturedStepStates: stepStates collisionDisable
 	self resetMeasurements.
 	collisionDisabledBodySequences := disabledBodySequences.
 	entries := (stepStates collect: [ :state |
-		{ state. state sweptAABB. state sequence } ]) asArray.
+		{ state. state broadphaseAABB. state sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
 	entryCount := entries size.
 	active := OrderedCollection new: entries size.
