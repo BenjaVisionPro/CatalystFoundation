@@ -877,6 +877,12 @@ CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
 	secondDecision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.01) first.
 	self assert: secondDecision eligible.
 	self assert: secondDecision slept.
+	self assert: (bodyStates at: first) isAwake not.
+	self assert: (bodyStates at: second) isAwake not.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	(bodyStates at: first) commit.
+	(bodyStates at: second) commit.
 	self assert: first isSleeping.
 	self assert: second isSleeping.
 	^ secondDecision
@@ -903,8 +909,14 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
 	stage propagateWakeAcross: { island }.
 	decision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.016) first.
 	self assert: decision eligible not.
-	self assert: first isAwake.
-	self assert: second isAwake.
+	self assert: (bodyStates at: first) isAwake.
+	self assert: (bodyStates at: second) isAwake.
+	self assert: (bodyStates at: first) sleepTime equals: 0.0.
+	self assert: (bodyStates at: second) sleepTime equals: 0.0.
+	self assert: first sleepTime equals: 0.25.
+	self assert: second sleepTime equals: 0.25.
+	(bodyStates at: first) commit.
+	(bodyStates at: second) commit.
 	self assert: first sleepTime equals: 0.0.
 	self assert: second sleepTime equals: 0.0.
 	^ decision
@@ -957,6 +969,9 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 		elapsed: 0.02) first.
 	self assert: decision eligible.
 	self assert: decision slept not.
+	self assert: (state sleepTime closeTo: 0.02).
+	self assert: body sleepTime equals: 0.0.
+	state commit.
 	self assert: (body sleepTime closeTo: 0.02).
 	^ decision
 ]
