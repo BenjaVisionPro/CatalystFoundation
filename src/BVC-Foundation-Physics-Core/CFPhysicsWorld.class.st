@@ -56,6 +56,7 @@ CFPhysicsWorld >> initialize [
 	telemetryAnalysisWindowSeconds := 5.
 	telemetryStepStatisticsMaximumMicroseconds := nil.
 	telemetryAnalysisInBackground := false.
+	backgroundStepping := false.
 	telemetryAnnouncer := Announcer new.
 	lifetimeGeneration := 1.
 	topologyRevision := 0.

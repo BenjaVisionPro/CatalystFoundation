@@ -722,3 +722,13 @@ CFPhysicsExamples >> physicsTelemetryAnalysisCanRunInBackground [
 	self assert: world telemetryAnalysisInBackground.
 	^ world
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> physicsWorldDefaultsToSynchronousStepping [
+	<gtExample>
+	| owner world |
+	owner := BlElement new size: 320 @ 200.
+	world := owner physics beWorld.
+	self assert: world backgroundStepping not.
+	^ world
+]
