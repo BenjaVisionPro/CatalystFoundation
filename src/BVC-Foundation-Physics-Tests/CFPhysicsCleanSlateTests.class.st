@@ -6227,3 +6227,46 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	self assert: joint accumulatedImpulse equals: solvedPrepared impulse.
 	^ solution
 ]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> solvingCapturedStateDoesNotRetargetCommittedPreparedConstraint [
+	<gtExample>
+	| world committedContact committedConstraint state solution calculationContact calculationConstraint |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	committedContact := world activeContacts first.
+	committedConstraint := committedContact preparedConstraint.
+	self assert: committedConstraint notNil.
+	self assert: committedConstraint contact == committedContact.
+	state := world captureStateAfterSynchronisation.
+	solution := world stepPipeline solve: state.
+	calculationContact := solution pipelineResult activeContacts first.
+	calculationConstraint := calculationContact preparedConstraint.
+	self assert: world activeContacts first == committedContact.
+	self assert: committedContact preparedConstraint == committedConstraint.
+	self assert: committedConstraint contact == committedContact.
+	self assert: calculationContact ~~ committedContact.
+	self assert: calculationConstraint ~~ committedConstraint.
+	^ solution
+]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> solvingCapturedStateDoesNotRetargetCommittedConstraintPoint [
+	<gtExample>
+	| world committedContact committedConstraint committedPoint committedManifoldPoint state solution calculationContact calculationPoint |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	committedContact := world activeContacts first.
+	committedConstraint := committedContact preparedConstraint.
+	committedPoint := committedConstraint points first.
+	committedManifoldPoint := committedContact manifold contactPoints first.
+	self assert: committedPoint manifoldPoint == committedManifoldPoint.
+	state := world captureStateAfterSynchronisation.
+	solution := world stepPipeline solve: state.
+	calculationContact := solution pipelineResult activeContacts first.
+	calculationPoint := calculationContact preparedConstraint points first.
+	self assert: world activeContacts first == committedContact.
+	self assert: committedConstraint points first == committedPoint.
+	self assert: committedPoint manifoldPoint == committedManifoldPoint.
+	self assert: calculationPoint ~~ committedPoint.
+	self assert: calculationPoint manifoldPoint == calculationContact manifold contactPoints first.
+	^ solution
+]
