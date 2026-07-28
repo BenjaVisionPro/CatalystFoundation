@@ -556,6 +556,25 @@ CFPhysicsCleanSlateTests >> pairFinderExpiresInactiveSweepEntriesInPlace [
 ]
 
 { #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedBodyState [
+	<gtExample>
+	| first second result stage pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	result := CFPhysicsStepPipelineResult new bodies: { first. second }; yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	second
+		position: 100 @ 0;
+		collisionMaskBits: 0.
+	stage := CFPhysicsPairFinderStage new.
+	pairs := stage executeOn: result.
+	self assert: pairs size equals: 1.
+	self assert: pairs first firstBody equals: first.
+	self assert: pairs first secondBody equals: second.
+	^ pairs
+]
+
+{ #category : 'examples - pair discovery' }
 CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedBodies [
 	<gtExample>
 	| first second pairs |

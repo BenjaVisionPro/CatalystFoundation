@@ -236,3 +236,14 @@ CFPhysicsBodyStepState >> sleep [
 	linearVelocity := 0 @ 0.
 	angularVelocity := 0.0
 ]
+
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> formsCollisionPairWith: anotherStepState [
+	^ bodyType formsCollisionPairWith: anotherStepState bodyType
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> allowsCollisionWith: anotherStepState [
+	^ shapeState allowsCollisionWith: anotherStepState shapeState
+]

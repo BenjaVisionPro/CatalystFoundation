@@ -62,21 +62,26 @@ CFPhysicsPairFinder >> maximumActiveCount [ ^ maximumActiveCount ]
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
 	| entries active pairs |
+	self resetMeasurements.
 	entries := (stepStates collect: [ :state |
 		{ state. state solvedSweptAABB. state body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
+	entryCount := entries size.
 	active := OrderedCollection new: entries size.
 	pairs := OrderedCollection new: entries size.
 	entries do: [ :entry |
 		self expireEntriesBefore: entry second minimum x from: active.
 		active do: [ :other |
+			comparisonCount := comparisonCount + 1.
 			(self
 				shouldConsiderStepState: other first
 				with: entry first
 				firstAABB: other second
 				secondAABB: entry second) ifTrue: [
-				pairs add: (CFPhysicsPair first: other first body second: entry first body) ] ].
-		active add: entry ].
+				pairs add: (CFPhysicsPair first: other first body second: entry first body).
+				acceptedPairCount := acceptedPairCount + 1 ] ].
+		active add: entry.
+		maximumActiveCount := maximumActiveCount max: active size ].
 	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
 ]
 
@@ -129,12 +134,9 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second for: seconds 
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
-	| firstBody secondBody |
-	firstBody := first body.
-	secondBody := second body.
-	(firstBody formsCollisionPairWith: secondBody) ifFalse: [ ^ false ].
-	(firstBody allowsCollisionWith: secondBody) ifFalse: [ ^ false ].
-	(self jointPreventsCollisionBetween: firstBody and: secondBody) ifTrue: [ ^ false ].
+	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
+	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
+	(self jointPreventsCollisionBetween: first body and: second body) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
 ]
 
