@@ -808,6 +808,34 @@ CFPhysicsCleanSlateTests >> worldCarriesActiveContactsExplicitlyBetweenSteps [
 	^ secondResult
 ]
 
+{ #category : 'examples - world cutover' }
+CFPhysicsCleanSlateTests >> persistentContactStorageAlternatesBetweenTwoGenerations [
+	<gtExample>
+	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint thirdContact fourthContact |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstContact := world activeContacts first.
+	firstConstraint := firstContact preparedConstraint.
+	firstPoint := firstConstraint points first.
+	world step.
+	secondContact := world activeContacts first.
+	secondConstraint := secondContact preparedConstraint.
+	secondPoint := secondConstraint points first.
+	self assert: secondContact ~~ firstContact.
+	self assert: secondConstraint ~~ firstConstraint.
+	self assert: secondPoint ~~ firstPoint.
+	world step.
+	thirdContact := world activeContacts first.
+	self assert: thirdContact == firstContact.
+	self assert: thirdContact preparedConstraint == firstConstraint.
+	self assert: thirdContact preparedConstraint points first == firstPoint.
+	world step.
+	fourthContact := world activeContacts first.
+	self assert: fourthContact == secondContact.
+	self assert: fourthContact preparedConstraint == secondConstraint.
+	self assert: fourthContact preparedConstraint points first == secondPoint.
+	^ fourthContact
+]
+
 { #category : 'examples - islands' }
 CFPhysicsCleanSlateTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
 	<gtExample>
