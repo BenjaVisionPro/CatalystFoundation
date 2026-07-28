@@ -840,7 +840,7 @@ CFPhysicsCleanSlateTests >> persistentContactStorageAlternatesBetweenTwoGenerati
 { #category : 'examples - world cutover' }
 CFPhysicsCleanSlateTests >> disappearingContactReusesItsGenerationWhenItReturns [
 	<gtExample>
-	| world movingBody contact constraint point returnedContact |
+	| world movingBody contact constraint point returnedContact returnedPoint returnedManifoldPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	movingBody := world bodyStatesInOrder second.
 	contact := world activeContacts first.
@@ -853,9 +853,15 @@ CFPhysicsCleanSlateTests >> disappearingContactReusesItsGenerationWhenItReturns 
 	world step.
 	self assert: world activeContacts size equals: 1.
 	returnedContact := world activeContacts first.
+	returnedPoint := returnedContact preparedConstraint points first.
+	returnedManifoldPoint := returnedContact manifold contactPoints first.
 	self assert: returnedContact == contact.
 	self assert: returnedContact preparedConstraint == constraint.
-	self assert: returnedContact preparedConstraint points first == point.
+	self assert: returnedPoint ~~ point.
+	self assert: returnedPoint manifoldPoint == returnedManifoldPoint.
+	self assert: returnedPoint featureId equals: returnedManifoldPoint featureId.
+	self assert: returnedPoint normalImpulse equals: returnedManifoldPoint normalImpulse.
+	self assert: returnedPoint tangentImpulse equals: returnedManifoldPoint tangentImpulse.
 	^ returnedContact
 ]
 
