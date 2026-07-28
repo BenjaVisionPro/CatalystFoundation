@@ -14,6 +14,16 @@ CFPhysicsContactUpdater class >> manifoldBuilder: aBlock [
 { #category : 'accessing' }
 CFPhysicsContactUpdater >> manifoldBuilder: aBlock [ manifoldBuilder := aBlock ]
 
+
+{ #category : 'private - collision' }
+CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates [
+	manifoldBuilder numArgs = 2 ifTrue: [
+		^ manifoldBuilder
+			value: (bodyStates at: pair firstBody)
+			value: (bodyStates at: pair secondBody) ].
+	^ manifoldBuilder value: pair
+]
+
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 	| previousByKey active began continued ended orderedPairs |
@@ -121,6 +131,15 @@ CFPhysicsContactUpdater >> updateImpactContacts: impactContacts fromContacts: pr
 
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts [
+	^ self
+		updatePairs: pairs
+		includingImpactContacts: impactContacts
+		fromContacts: previousContacts
+		bodyStates: nil
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts bodyStates: bodyStates [
 	| previousByKey active began continued ended impactByKey orderedPairs |
 	previousByKey := Dictionary new.
 	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
@@ -134,7 +153,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	orderedPairs do: [ :pair |
 		| manifold impactContact contact previous |
-		manifold := manifoldBuilder value: pair.
+		manifold := self manifoldForPair: pair bodyStates: bodyStates.
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
 		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
 			manifold := impactContact manifold ].

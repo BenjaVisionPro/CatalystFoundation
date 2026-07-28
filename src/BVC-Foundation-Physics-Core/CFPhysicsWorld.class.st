@@ -62,10 +62,10 @@ CFPhysicsWorld >> initialize [
 	revoluteJoints := IdentitySet new.
 	fixedJoints := IdentitySet new.
 	railJoints := IdentitySet new.
-	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
+	stepPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :firstBodyState :secondBodyState |
 		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ]
+			manifoldBetweenBodyState: firstBodyState
+			andBodyState: secondBodyState ]
 ]
 
 { #category : 'accessing' }

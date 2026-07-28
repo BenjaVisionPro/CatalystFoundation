@@ -6065,3 +6065,27 @@ CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
 	^ bodyStates at: second
 ]
 
+
+
+{ #category : 'examples - contacts' }
+CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds [
+	<gtExample>
+	| first second result stage contacts |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	result := CFPhysicsStepPipelineResult new
+		bodies: { first. second };
+		previousContacts: #();
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	result pairs: { CFPhysicsPair first: first second: second }.
+	second position: 100 @ 0.
+	stage := CFPhysicsContactUpdateStage manifoldBuilder: [ :firstBodyState :secondBodyState |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBodyState: firstBodyState
+			andBodyState: secondBodyState ].
+	contacts := stage executeOn: result.
+	self assert: contacts activeContacts size equals: 1.
+	self assert: second position equals: 100 @ 0.
+	^ contacts
+]

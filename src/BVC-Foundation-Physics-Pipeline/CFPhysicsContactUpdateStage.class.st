@@ -24,7 +24,8 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 	batch := contactUpdater
 		updatePairs: aStepResult pairs
 		includingImpactContacts: #()
-		fromContacts: aStepResult previousContacts.
+		fromContacts: aStepResult previousContacts
+		bodyStates: aStepResult bodyStates.
 	self
 		wakeBodiesForEndedContacts: batch endedContacts
 		bodyStates: aStepResult bodyStates.

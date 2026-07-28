@@ -17,6 +17,20 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBody: bodyA andBody: bodyB 
 ]
 
 { #category : 'collision' }
+CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBodyState: bodyStateB [
+	| firstTransform secondTransform |
+	firstTransform := bodyStateA currentTransform.
+	secondTransform := bodyStateB currentTransform.
+	^ self
+		manifoldBetweenShapeState: bodyStateA shapeState
+		position: firstTransform position
+		rotation: firstTransform rotation
+		andShapeState: bodyStateB shapeState
+		position: secondTransform position
+		rotation: secondTransform rotation
+]
+
+{ #category : 'collision' }
 CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA position: positionA rotation: rotationA andShapeState: shapeStateB position: positionB rotation: rotationB [
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
