@@ -6132,14 +6132,14 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 	| first second result stage contacts |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
-	first isSensor: true.
+	first beSensor.
 	result := CFPhysicsStepPipelineResult new
 		bodies: { first. second };
 		previousContacts: #();
 		yourself.
 	CFPhysicsBodyStateCaptureStage new executeOn: result.
 	result pairs: { CFPhysicsPair first: first second: second }.
-	first isSensor: false.
+	first beSolid.
 	stage := CFPhysicsContactUpdateStage manifoldBuilder: [ :firstBodyState :secondBodyState |
 		CFPhysicsBlocManifoldBuilder
 			manifoldBetweenBodyState: firstBodyState

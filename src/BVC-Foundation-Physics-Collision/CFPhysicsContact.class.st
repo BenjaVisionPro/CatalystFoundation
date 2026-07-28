@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',
-	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint', 'sensor' ],
+	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint', 'firstShapeState', 'secondShapeState' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
@@ -9,15 +9,6 @@ Class {
 { #category : 'instance creation' }
 CFPhysicsContact class >> pair: aPair manifold: aManifold [
 	^ self new pair: aPair; manifold: aManifold; yourself
-]
-
-{ #category : 'instance creation' }
-CFPhysicsContact class >> pair: aPair manifold: aManifold sensor: aBoolean [
-	^ self new
-		pair: aPair;
-		manifold: aManifold;
-		sensor: aBoolean;
-		yourself
 ]
 
 { #category : 'accessing' }
@@ -51,7 +42,10 @@ CFPhysicsContact >> preparedConstraint [ ^ preparedConstraint ]
 CFPhysicsContact >> preparedConstraint: anObject [ preparedConstraint := anObject ]
 
 { #category : 'accessing' }
-CFPhysicsContact >> sensor: aBoolean [ sensor := aBoolean ]
+CFPhysicsContact >> shapeStatesFromBodyStates: bodyStates [
+	firstShapeState := (bodyStates at: self firstBody) shapeState.
+	secondShapeState := (bodyStates at: self secondBody) shapeState
+]
 
 { #category : 'testing' }
 CFPhysicsContact >> began [ ^ previousManifold isNil and: [ manifold notNil ] ]
@@ -80,14 +74,24 @@ CFPhysicsContact >> copyForUpdate [
 		pair: pair;
 		manifold: manifold;
 		preparedConstraint: preparedConstraint;
-		sensor: sensor;
+		firstShapeState: firstShapeState;
+		secondShapeState: secondShapeState;
 		yourself
 ]
 
 
+
+{ #category : 'private - accessing' }
+CFPhysicsContact >> firstShapeState: aShapeState [ firstShapeState := aShapeState ]
+
+{ #category : 'private - accessing' }
+CFPhysicsContact >> secondShapeState: aShapeState [ secondShapeState := aShapeState ]
+
 { #category : 'testing' }
 CFPhysicsContact >> isSensor [
-	^ sensor ifNil: [ self firstBody isSensor or: [ self secondBody isSensor ] ]
+	firstShapeState ifNotNil: [
+		^ firstShapeState isSensor or: [ secondShapeState isSensor ] ].
+	^ self firstBody isSensor or: [ self secondBody isSensor ]
 ]
 
 { #category : 'testing' }

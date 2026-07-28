@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'sensor', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -32,7 +32,6 @@ CFPhysicsBodyStepState >> capture [
 	awake := body isAwake.
 	sleepingAllowed := body allowsSleeping.
 	sleepTime := body sleepTime.
-	sensor := body isSensor.
 	collisionCategoryBits := body collisionCategoryBits.
 	collisionMaskBits := body collisionMaskBits.
 	collisionGroupIndex := body collisionGroupIndex.
@@ -133,7 +132,7 @@ CFPhysicsBodyStepState >> wake [
 CFPhysicsBodyStepState >> isAwake [ ^ awake ]
 
 { #category : 'testing' }
-CFPhysicsBodyStepState >> isSensor [ ^ sensor ]
+CFPhysicsBodyStepState >> isSensor [ ^ shapeState isSensor ]
 
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
@@ -210,7 +209,7 @@ CFPhysicsBodyStepState >> maximumPointMotion [
 CFPhysicsBodyStepState >> isFastForContinuousCollision [
 	bodyType isDynamic ifFalse: [ ^ false ].
 	awake ifFalse: [ ^ false ].
-	sensor ifTrue: [ ^ false ].
+	self isSensor ifTrue: [ ^ false ].
 	^ self maximumPointMotion > (0.5 * shapeState minimumExtent)
 ]
 

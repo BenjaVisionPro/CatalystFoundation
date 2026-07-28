@@ -195,7 +195,9 @@ CFPhysicsContinuousImpactLoop >> contactForSensorImpact: impact bodyStates: body
 		andShapeState: secondState shapeState
 		transform: (secondSweep transformAt: impact fraction).
 	manifold ifNil: [ ^ nil ].
-	^ CFPhysicsContact pair: pair manifold: manifold sensor: true
+	^ (CFPhysicsContact pair: pair manifold: manifold)
+		shapeStatesFromBodyStates: bodyStates;
+		yourself
 ]
 
 { #category : 'private - sensors' }
