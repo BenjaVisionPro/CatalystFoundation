@@ -97,7 +97,7 @@ CFPhysicsContinuousStepStage >> contactForImpact: impact bodyStates: bodyStates 
 		andShapeState: secondState shapeState
 		transform: (secondSweep transformAt: impact fraction).
 	manifold ifNil: [ ^ nil ].
-	^ CFPhysicsContact pair: pair manifold: manifold
+	^ CFPhysicsContact pair: pair manifold: manifold sensor: true
 ]
 
 { #category : 'private - sensors' }

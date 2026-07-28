@@ -24,6 +24,14 @@ CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates [
 	^ manifoldBuilder value: pair
 ]
 
+{ #category : 'private - contacts' }
+CFPhysicsContactUpdater >> sensorForPair: pair bodyStates: bodyStates [
+	bodyStates ifNil: [
+		^ pair firstBody isSensor or: [ pair secondBody isSensor ] ].
+	^ (bodyStates at: pair firstBody) isSensor or: [
+		(bodyStates at: pair secondBody) isSensor ]
+]
+
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 	| previousByKey active began continued ended orderedPairs |
@@ -162,9 +170,18 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 			contact := previous
 				ifNil: [
 					impactContact
-						ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
-						ifNotNil: [ impactContact ] ]
-				ifNotNil: [ previous copyForUpdate updateWith: manifold; yourself ].
+						ifNil: [
+							CFPhysicsContact
+								pair: pair
+								manifold: manifold
+								sensor: (self sensorForPair: pair bodyStates: bodyStates) ]
+						ifNotNil: [
+							impactContact sensor: (self sensorForPair: pair bodyStates: bodyStates); yourself ] ]
+				ifNotNil: [
+					previous copyForUpdate
+						sensor: (self sensorForPair: pair bodyStates: bodyStates);
+						updateWith: manifold;
+						yourself ].
 			active add: contact.
 			contact began ifTrue: [ began add: contact ].
 			contact continued ifTrue: [ continued add: contact ] ] ].

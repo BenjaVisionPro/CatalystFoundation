@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',
-	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint' ],
+	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint', 'sensor' ],
 	#category : 'BVC-Foundation-Physics-Collision',
 	#package : 'BVC-Foundation-Physics-Collision'
 }
@@ -9,6 +9,15 @@ Class {
 { #category : 'instance creation' }
 CFPhysicsContact class >> pair: aPair manifold: aManifold [
 	^ self new pair: aPair; manifold: aManifold; yourself
+]
+
+{ #category : 'instance creation' }
+CFPhysicsContact class >> pair: aPair manifold: aManifold sensor: aBoolean [
+	^ self new
+		pair: aPair;
+		manifold: aManifold;
+		sensor: aBoolean;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -41,6 +50,9 @@ CFPhysicsContact >> preparedConstraint [ ^ preparedConstraint ]
 { #category : 'accessing' }
 CFPhysicsContact >> preparedConstraint: anObject [ preparedConstraint := anObject ]
 
+{ #category : 'accessing' }
+CFPhysicsContact >> sensor: aBoolean [ sensor := aBoolean ]
+
 { #category : 'testing' }
 CFPhysicsContact >> began [ ^ previousManifold isNil and: [ manifold notNil ] ]
 
@@ -68,13 +80,14 @@ CFPhysicsContact >> copyForUpdate [
 		pair: pair;
 		manifold: manifold;
 		preparedConstraint: preparedConstraint;
+		sensor: sensor;
 		yourself
 ]
 
 
 { #category : 'testing' }
 CFPhysicsContact >> isSensor [
-	^ self firstBody isSensor or: [ self secondBody isSensor ]
+	^ sensor ifNil: [ self firstBody isSensor or: [ self secondBody isSensor ] ]
 ]
 
 { #category : 'testing' }

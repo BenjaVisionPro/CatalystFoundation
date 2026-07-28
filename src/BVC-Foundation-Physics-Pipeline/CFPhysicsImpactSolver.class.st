@@ -64,7 +64,10 @@ CFPhysicsImpactSolver >> resultForAdvancement: advancement bodyStates: bodyState
 			advancement: advancement
 			contact: nil
 			constraints: #() ].
-	contact := CFPhysicsContact pair: pair manifold: manifold.
+	contact := CFPhysicsContact
+		pair: pair
+		manifold: manifold
+		sensor: (firstState isSensor or: [ secondState isSensor ]).
 	constraints := constraintBuilder
 		constraintsFrom: { contact }
 		bodyStates: bodyStates

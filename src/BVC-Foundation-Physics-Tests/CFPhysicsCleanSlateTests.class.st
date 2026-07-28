@@ -6124,3 +6124,30 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds
 	self assert: second position equals: 100 @ 0.
 	^ contacts
 ]
+
+
+{ #category : 'examples - contacts' }
+CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
+	<gtExample>
+	| first second result stage contacts |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	first isSensor: true.
+	result := CFPhysicsStepPipelineResult new
+		bodies: { first. second };
+		previousContacts: #();
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	result pairs: { CFPhysicsPair first: first second: second }.
+	first isSensor: false.
+	stage := CFPhysicsContactUpdateStage manifoldBuilder: [ :firstBodyState :secondBodyState |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBodyState: firstBodyState
+			andBodyState: secondBodyState ].
+	contacts := stage executeOn: result.
+	self assert: contacts activeContacts size equals: 1.
+	self assert: contacts activeContacts first isSensor.
+	self assert: contacts beganContacts first isSensor.
+	self assert: first isSensor not.
+	^ contacts
+]
