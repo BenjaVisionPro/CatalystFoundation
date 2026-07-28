@@ -575,6 +575,21 @@ CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedBodyState [
 ]
 
 { #category : 'examples - pair discovery' }
+CFPhysicsCleanSlateTests >> bodyStepStateCapturesBlocGeometry [
+	<gtExample>
+	| first second result pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	result := CFPhysicsStepPipelineResult new bodies: { first. second }; yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	second element size: 1 @ 1.
+	pairs := CFPhysicsPairFinderStage new executeOn: result.
+	self assert: pairs size equals: 1.
+	self assert: (result bodyStates at: second) shapeState extent equals: 20 @ 20.
+	^ pairs
+]
+
+{ #category : 'examples - pair discovery' }
 CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedBodies [
 	<gtExample>
 	| first second pairs |

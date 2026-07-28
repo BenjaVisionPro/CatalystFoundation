@@ -25,7 +25,7 @@ CFPhysicsBodyStepState >> capture [
 	linearDamping := body linearDamping.
 	angularDamping := body angularDamping.
 	gravityScale := body gravityScale.
-	shapeState := body shapeState.
+	shapeState := body shapeState capturedForStep.
 	friction := body friction.
 	restitution := body restitution.
 	localCentre := shapeState extent / 2.0.
