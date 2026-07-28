@@ -81,6 +81,7 @@ CFPhysicsWorldMotionBehaviour >> playbackStartedIn: aCoordinator [
 
 { #category : 'playing' }
 CFPhysicsWorldMotionBehaviour >> playbackEndedWith: aMotionState [
+	world abandonActiveSolve.
 	active := false.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds

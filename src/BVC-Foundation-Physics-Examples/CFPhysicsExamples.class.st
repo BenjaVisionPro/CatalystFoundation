@@ -129,6 +129,7 @@ CFPhysicsExamples >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
 	self assert: world backgroundStepCount equals: 2.
 	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
 	motion cancel.
+	self assert: world hasSolveInFlight not.
 	^ behaviour
 ]
 

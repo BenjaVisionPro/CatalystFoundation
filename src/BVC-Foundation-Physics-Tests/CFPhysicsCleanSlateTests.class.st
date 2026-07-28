@@ -6332,6 +6332,21 @@ CFPhysicsCleanSlateTests >> worldCapturesAtMostOneSolveAtATime [
 ]
 
 { #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> abandoningTheActiveSolveAllowsImmediateRecapture [
+	<gtExample>
+	| world firstState secondState |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstState := world captureStateIfIdle.
+	self assert: world hasSolveInFlight.
+	world abandonActiveSolve.
+	self assert: world hasSolveInFlight not.
+	secondState := world captureStateIfIdle.
+	self assert: secondState notNil.
+	self assert: secondState solveTicket ~= firstState solveTicket.
+	^ secondState
+]
+
+{ #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 	<gtExample>
 	| world firstState secondState |

@@ -1217,6 +1217,12 @@ CFPhysicsWorld >> hasSolveInFlight [
 	^ activeSolveTicket notNil
 ]
 
+
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> abandonActiveSolve [
+	activeSolveTicket := nil
+]
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> abandonSolveTicket: aSolveTicket [
 	activeSolveTicket = aSolveTicket ifTrue: [

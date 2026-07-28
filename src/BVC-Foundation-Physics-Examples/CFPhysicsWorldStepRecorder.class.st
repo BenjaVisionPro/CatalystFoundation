@@ -74,3 +74,9 @@ CFPhysicsWorldStepRecorder >> completeBackgroundStep [
 CFPhysicsWorldStepRecorder >> hasSolveInFlight [
 	^ solveInFlight
 ]
+
+{ #category : 'controlling' }
+CFPhysicsWorldStepRecorder >> abandonActiveSolve [
+	solveInFlight := false
+]
+
