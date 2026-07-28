@@ -3,7 +3,7 @@ I advance one CFPhysicsWorld as an indefinite Motion Behaviour.
 
 My playback lifetime is explicit. I become active when Motion starts me and inactive when that playback ends by completion or cancellation. Pause and resume preserve that same lifetime. Once inactive I retain no presentation-frame remainder, so a later playback always begins from a clean fixed-step boundary.
 
-I adapt Motion's presentation-frame cadence to Physics' deterministic fixed step. Each evaluation contributes the increase in local Motion time to an accumulator. I advance the world in whole #stepDuration increments and retain any remainder for a later frame. A zero-time initial Motion frame performs no Physics step; a long presentation frame may perform several fixed steps.
+I adapt Motion's presentation-frame cadence to Physics' deterministic fixed step. Each evaluation contributes the increase in local Motion time to an accumulator. Synchronous playback preserves the existing whole-step catch-up semantics. Background playback retains at most one pending step, starts at most one solve per presentation frame and never waits for that solve.
 
 I own no frame scheduling, timeline placement, frame-consumer lifetime, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
 
@@ -34,7 +34,7 @@ CFPhysicsWorldMotionBehaviour >> animationTarget [
 
 { #category : 'evaluating' }
 CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
-	| elapsed stepDuration |
+	| elapsed stepDuration alpha |
 	active ifFalse: [ self error: 'A Physics world Behaviour cannot evaluate outside its playback lifetime' ].
 	elapsed := anEvaluation localTime - previousLocalTime.
 	elapsed < (0 milliSeconds) ifTrue: [
@@ -42,11 +42,26 @@ CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
 	previousLocalTime := anEvaluation localTime.
 	accumulatedTime := accumulatedTime + elapsed.
 	stepDuration := world stepDuration.
-	[ accumulatedTime >= stepDuration ] whileTrue: [
+	world backgroundStepping
+		ifTrue: [ self startBackgroundStepFor: stepDuration ]
+		ifFalse: [ self performSynchronousStepsFor: stepDuration ].
+	alpha := accumulatedTime asMilliSeconds / stepDuration asMilliSeconds.
+	frameConsumer frameReadyAtAlpha: (alpha min: 1.0)
+]
+
+{ #category : 'private - evaluating' }
+CFPhysicsWorldMotionBehaviour >> performSynchronousStepsFor: aStepDuration [
+	[ accumulatedTime >= aStepDuration ] whileTrue: [
 		world step.
-		accumulatedTime := accumulatedTime - stepDuration ].
-	frameConsumer
-		frameReadyAtAlpha: (accumulatedTime asMilliSeconds / stepDuration asMilliSeconds)
+		accumulatedTime := accumulatedTime - aStepDuration ]
+]
+
+{ #category : 'private - evaluating' }
+CFPhysicsWorldMotionBehaviour >> startBackgroundStepFor: aStepDuration [
+	accumulatedTime := accumulatedTime min: aStepDuration.
+	accumulatedTime >= aStepDuration ifFalse: [ ^ self ].
+	world startBackgroundStep ifTrue: [
+		accumulatedTime := accumulatedTime - aStepDuration ]
 ]
 
 { #category : 'initialization' }

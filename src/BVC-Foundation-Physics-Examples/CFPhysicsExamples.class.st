@@ -92,6 +92,47 @@ CFPhysicsExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 ]
 
 { #category : 'examples - motion integration' }
+CFPhysicsExamples >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
+	<gtExample>
+	| space owner world presentation behaviour timeline motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		backgroundStepping: true;
+		yourself.
+	presentation := CFPhysicsFrameConsumerRecorder new.
+	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepCount equals: 1.
+	self assert: world stepCount equals: 0.
+	self assert: world hasSolveInFlight.
+	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
+	self assert: presentation lastPresentationAlpha equals: 0.0.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepCount equals: 1.
+	self assert: behaviour accumulatedTime equals: 10 milliSeconds.
+	self assert: presentation lastPresentationAlpha equals: 1.0.
+	world completeBackgroundStep.
+	space time wait: 1 milliSecond.
+	space pulse.
+	self assert: world backgroundStepCount equals: 2.
+	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
+	motion cancel.
+	^ behaviour
+]
+
+{ #category : 'examples - motion integration' }
 CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	<gtExample>
 	| space host body world initialPosition motion |
