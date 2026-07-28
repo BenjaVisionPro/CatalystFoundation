@@ -6561,12 +6561,18 @@ CFPhysicsCleanSlateTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
 { #category : 'examples - background telemetry' }
 CFPhysicsCleanSlateTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
 	<gtExample>
-	| world state solution committed |
+	| world state backgroundStep solution committed |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	world telemetryEnabled: true.
 	world resetTelemetry.
 	state := world captureStateIfIdle.
-	solution := world stepPipeline solveWithTelemetry: state.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: world stepPipeline;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: true;
+		instVarNamed: 'telemetryContext' put: (world telemetryContextForState: state).
+	solution := backgroundStep solveCapturedState.
 	self assert: world telemetryRecordings isEmpty.
 	committed := world commit: solution.
 	self assert: committed notNil.
@@ -6580,12 +6586,18 @@ CFPhysicsCleanSlateTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
 { #category : 'examples - background telemetry' }
 CFPhysicsCleanSlateTests >> staleDetachedSolvePublishesNoTelemetry [
 	<gtExample>
-	| world state solution |
+	| world state backgroundStep solution |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	world telemetryEnabled: true.
 	world resetTelemetry.
 	state := world captureStateIfIdle.
-	solution := world stepPipeline solveWithTelemetry: state.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: world stepPipeline;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: true;
+		instVarNamed: 'telemetryContext' put: (world telemetryContextForState: state).
+	solution := backgroundStep solveCapturedState.
 	world invalidateTopology.
 	self assert: (world commit: solution) isNil.
 	self assert: world telemetryRecordings isEmpty.

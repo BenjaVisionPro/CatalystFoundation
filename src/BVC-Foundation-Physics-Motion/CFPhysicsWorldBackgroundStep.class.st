@@ -6,7 +6,7 @@ Capture and commit remain on the Bloc process. Only #solve: executes in the futu
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'task' ],
+	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'telemetryContext', 'task' ],
 	#category : 'BVC-Foundation-Physics-Motion',
 	#package : 'BVC-Foundation-Physics-Motion'
 }
@@ -54,12 +54,11 @@ CFPhysicsWorldBackgroundStep >> start [
 	telemetryEnabled := world telemetryEnabled.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
+	telemetryEnabled ifTrue: [
+		telemetryContext := world telemetryContextForState: state ].
 	task := BlEnqueuedFutureAction new
 		name: 'Physics solve';
-		action: [
-			telemetryEnabled
-				ifTrue: [ pipeline solveWithTelemetry: state ]
-				ifFalse: [ pipeline solve: state ] ];
+		action: [ self solveCapturedState ];
 		futureConfiguration: self futureConfiguration;
 		onSuccessEnqueueAction: [ :solution |
 			world commit: solution ];
@@ -77,4 +76,22 @@ CFPhysicsWorldBackgroundStep >> start [
 { #category : 'private - initialization' }
 CFPhysicsWorldBackgroundStep >> world: aPhysicsWorld [
 	world := aPhysicsWorld
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsWorldBackgroundStep >> solveCapturedState [
+	telemetryEnabled ifFalse: [ ^ pipeline solve: state ].
+	^ ProcessTelemetry
+		rootTimeSync: [ 'Physics step' ]
+		during: [
+			ProcessTelemetry
+				profile: [ pipeline solveWithTelemetry: state ]
+				executing: [ :run |
+					| solution |
+					solution := run value.
+					telemetryContext
+						dataForSolution: solution
+						pipeline: pipeline ]
+				as: #physicsFrame ]
 ]

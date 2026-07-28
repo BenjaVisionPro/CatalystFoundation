@@ -4,7 +4,7 @@ I record ProcessTelemetry signals whose Physics metadata identifies my world. My
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
-	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds' ],
+	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'pendingSolveSignals', 'rejectedSolveTickets' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -21,7 +21,9 @@ CFPhysicsTelemetryLogger >> initialize [
 	capacity := 3600.
 	recordings := CFPhysicsTelemetryRingBuffer capacity: capacity.
 	lastAnnouncementMilliseconds := 0.
-	announcementIntervalMilliseconds := 250
+	announcementIntervalMilliseconds := 250.
+	pendingSolveSignals := Dictionary new.
+	rejectedSolveTickets := Set new
 ]
 
 { #category : 'accessing' }
@@ -54,8 +56,35 @@ CFPhysicsTelemetryLogger >> nextPut: aSignal [
 	(physicsData notNil and: [ (physicsData at: #physicsWorld ifAbsent: [ nil ]) == world ])
 		ifFalse: [ ^ self ].
 	physicsData at: #telemetryRecordedAt put: DateAndTime now.
+	(physicsData at: #solveTicket ifAbsent: [ nil ]) ifNotNil: [ :solveTicket |
+		(rejectedSolveTickets remove: solveTicket ifAbsent: [ nil ])
+			ifNotNil: [ ^ self ].
+		pendingSolveSignals at: solveTicket put: aSignal.
+		^ self ].
+	self publish: aSignal
+]
+
+{ #category : 'private - recording' }
+CFPhysicsTelemetryLogger >> publish: aSignal [
 	super nextPut: aSignal.
 	self announceIfDue
+]
+
+{ #category : 'detached stepping' }
+CFPhysicsTelemetryLogger >> commitSolveTicket: aSolveTicket [
+	| signal |
+	rejectedSolveTickets remove: aSolveTicket ifAbsent: [ ].
+	signal := pendingSolveSignals removeKey: aSolveTicket ifAbsent: [ nil ].
+	signal ifNotNil: [ self publish: signal ]
+]
+
+{ #category : 'detached stepping' }
+CFPhysicsTelemetryLogger >> rejectSolveTicket: aSolveTicket [
+	aSolveTicket ifNil: [ ^ self ].
+	pendingSolveSignals removeKey: aSolveTicket ifAbsent: [ ].
+	rejectedSolveTickets size >= capacity ifTrue: [
+		rejectedSolveTickets remove: rejectedSolveTickets anyOne ].
+	rejectedSolveTickets add: aSolveTicket
 ]
 
 { #category : 'private - announcing' }

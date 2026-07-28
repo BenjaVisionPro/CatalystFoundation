@@ -431,7 +431,9 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 { #category : 'private - stepping' }
 CFPhysicsWorld >> commit: aWorldSolution [
 	| pipelineResult step previousCommittedContacts |
-	(self canCommit: aWorldSolution) ifFalse: [ ^ nil ].
+	(self canCommit: aWorldSolution) ifFalse: [
+		self rejectTelemetrySolveTicket: aWorldSolution solveTicket.
+		^ nil ].
 	pipelineResult := aWorldSolution pipelineResult.
 	step := pipelineResult step.
 	pipelineResult commitBodyStates.
@@ -445,6 +447,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
 	activeSolveTicket := nil.
+	self commitTelemetrySolveTicket: aWorldSolution solveTicket.
 	^ pipelineResult
 ]
 
@@ -1194,12 +1197,14 @@ CFPhysicsWorld >> canCommit: aWorldSolution [
 
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> invalidateLifetime [
+	self rejectTelemetrySolveTicket: activeSolveTicket.
 	lifetimeGeneration := lifetimeGeneration + 1.
 	activeSolveTicket := nil
 ]
 
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> invalidateTopology [
+	self rejectTelemetrySolveTicket: activeSolveTicket.
 	topologyRevision := topologyRevision + 1.
 	activeSolveTicket := nil
 ]
@@ -1222,11 +1227,29 @@ CFPhysicsWorld >> hasSolveInFlight [
 
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> abandonActiveSolve [
+	self rejectTelemetrySolveTicket: activeSolveTicket.
 	activeSolveTicket := nil
 ]
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> abandonSolveTicket: aSolveTicket [
+	self rejectTelemetrySolveTicket: aSolveTicket.
 	activeSolveTicket = aSolveTicket ifTrue: [
 		activeSolveTicket := nil ]
 ]
 
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> telemetryContextForState: aWorldState [
+	^ CFPhysicsStepTelemetryContext world: self state: aWorldState
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> commitTelemetrySolveTicket: aSolveTicket [
+	telemetryLogger ifNotNil: [ telemetryLogger commitSolveTicket: aSolveTicket ]
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> rejectTelemetrySolveTicket: aSolveTicket [
+	telemetryLogger ifNotNil: [ telemetryLogger rejectSolveTicket: aSolveTicket ]
+]
