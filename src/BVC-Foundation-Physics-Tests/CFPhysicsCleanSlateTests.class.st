@@ -6425,9 +6425,29 @@ CFPhysicsCleanSlateTests >> topologyInvalidationReleasesTheSolveSlotImmediately 
 { #category : 'examples - background stepping' }
 CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	<gtExample>
-	| synchronousWorld detachedWorld synchronousResult state solution detachedResult |
-	synchronousWorld := self worldDelegatesOneStepToTheExplicitPipeline.
-	detachedWorld := self worldDelegatesOneStepToTheExplicitPipeline.
+	| synchronousOwner detachedOwner synchronousElement detachedElement synchronousWorld detachedWorld synchronousBody detachedBody synchronousResult state solution detachedResult |
+	synchronousOwner := BlElement new.
+	detachedOwner := BlElement new.
+	synchronousElement := BlElement new size: 20 @ 20; yourself.
+	detachedElement := BlElement new size: 20 @ 20; yourself.
+	synchronousOwner addChild: synchronousElement.
+	detachedOwner addChild: detachedElement.
+	synchronousWorld := synchronousOwner physics beWorld.
+	detachedWorld := detachedOwner physics beWorld.
+	synchronousWorld
+		gravity: 0 @ 10;
+		synchroniseMembership.
+	detachedWorld
+		gravity: 0 @ 10;
+		synchroniseMembership.
+	synchronousBody := synchronousWorld bodyStateFor: synchronousElement.
+	detachedBody := detachedWorld bodyStateFor: detachedElement.
+	synchronousBody
+		position: 12 @ 18;
+		velocity: 3 @ -2.
+	detachedBody
+		position: 12 @ 18;
+		velocity: 3 @ -2.
 	synchronousResult := synchronousWorld step.
 	state := detachedWorld captureStateIfIdle.
 	solution := detachedWorld stepPipeline solve: state.
@@ -6439,7 +6459,8 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	self
 		assert: (detachedResult bodies collect: #velocity)
 		equals: (synchronousResult bodies collect: #velocity).
-	self assert: detachedResult activeContacts size equals: synchronousResult activeContacts size.
+	self assert: detachedResult activeContacts isEmpty.
+	self assert: synchronousResult activeContacts isEmpty.
 	self assert: detachedWorld stepNumber equals: synchronousWorld stepNumber.
 	self assert: detachedWorld simulationTime equals: synchronousWorld simulationTime.
 	^ detachedResult
