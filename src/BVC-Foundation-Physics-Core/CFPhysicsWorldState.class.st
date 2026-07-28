@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates' ],
+	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -91,3 +91,28 @@ CFPhysicsWorldState >> orderedBodyStates [ ^ orderedBodyStates ]
 CFPhysicsWorldState >> orderedBodyStates: aCollection [
 	orderedBodyStates := aCollection asArray
 ]
+
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> world [ ^ world ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> world: aWorld [ world := aWorld ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> lifetimeGeneration [ ^ lifetimeGeneration ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> lifetimeGeneration: anInteger [ lifetimeGeneration := anInteger ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> topologyRevision [ ^ topologyRevision ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> topologyRevision: anInteger [ topologyRevision := anInteger ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> solveTicket [ ^ solveTicket ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldState >> solveTicket: anInteger [ solveTicket := anInteger ]

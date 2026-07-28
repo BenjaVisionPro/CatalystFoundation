@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldSolution',
 	#superclass : 'Object',
-	#instVars : [ 'pipelineResult', 'explicitlyContainedBodies' ],
+	#instVars : [ 'pipelineResult', 'explicitlyContainedBodies', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -33,3 +33,28 @@ CFPhysicsWorldSolution >> explicitlyContainedBodies [ ^ explicitlyContainedBodie
 CFPhysicsWorldSolution >> explicitlyContainedBodies: aCollection [
 	explicitlyContainedBodies := aCollection asArray
 ]
+
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> world [ ^ world ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> world: aWorld [ world := aWorld ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> lifetimeGeneration [ ^ lifetimeGeneration ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> lifetimeGeneration: anInteger [ lifetimeGeneration := anInteger ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> topologyRevision [ ^ topologyRevision ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> topologyRevision: anInteger [ topologyRevision := anInteger ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> solveTicket [ ^ solveTicket ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorldSolution >> solveTicket: anInteger [ solveTicket := anInteger ]

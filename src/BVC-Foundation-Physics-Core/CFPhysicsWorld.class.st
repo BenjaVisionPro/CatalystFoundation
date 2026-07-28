@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -57,6 +57,10 @@ CFPhysicsWorld >> initialize [
 	telemetryStepStatisticsMaximumMicroseconds := nil.
 	telemetryAnalysisInBackground := false.
 	telemetryAnnouncer := Announcer new.
+	lifetimeGeneration := 1.
+	topologyRevision := 0.
+	nextSolveTicket := 1.
+	activeSolveTicket := nil.
 	containmentConstraints := IdentitySet new.
 	boundary := CFPhysicsWorldBoundary new.
 	distanceJoints := IdentitySet new.
@@ -82,6 +86,7 @@ CFPhysicsWorld >> owner: anElement [
 
 { #category : 'lifecycle' }
 CFPhysicsWorld >> release [
+	self invalidateLifetime.
 	"Release every resource owned by this world. My owner remains structurally
 	unchanged; its Physics facade removes the world association separately."
 	self telemetryEnabled: false.
@@ -188,6 +193,7 @@ CFPhysicsWorld >> bodyStatesInOrder [
 CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
 	body := anElement physics ensureBodyInWorld: self.
+	self invalidateTopology.
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
 	^ body
@@ -250,7 +256,10 @@ CFPhysicsWorld >> synchroniseMembership [
 
 { #category : 'membership' }
 CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
-	(bodyStates keys reject: [ :each | currentMembers includes: each ]) do: [ :each |
+	| retiredElements |
+	retiredElements := bodyStates keys reject: [ :each | currentMembers includes: each ].
+	retiredElements ifNotEmpty: [ self invalidateTopology ].
+	retiredElements do: [ :each |
 		| body |
 		body := bodyStates removeKey: each.
 		each physics retireBodyFromWorld: self.
@@ -362,7 +371,7 @@ CFPhysicsWorld >> synchroniseForStateCapture [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureStateAfterSynchronisation [
-	| bodies step explicitlyContainedBodies capturedBodyStates orderedBodyStates capturedJoints index |
+	| bodies step explicitlyContainedBodies capturedBodyStates orderedBodyStates capturedJoints index solveTicket |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
@@ -381,7 +390,12 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		bodyState := CFPhysicsBodyStepState on: body.
 		capturedBodyStates at: body put: bodyState.
 		orderedBodyStates at: (index := index + 1) put: bodyState ].
+	solveTicket := self beginSolveTicket.
 	^ CFPhysicsWorldState new
+		world: self;
+		lifetimeGeneration: lifetimeGeneration;
+		topologyRevision: topologyRevision;
+		solveTicket: solveTicket;
 		bodies: bodies;
 		bodyStates: capturedBodyStates;
 		orderedBodyStates: orderedBodyStates;
@@ -399,6 +413,7 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 { #category : 'private - stepping' }
 CFPhysicsWorld >> commit: aWorldSolution [
 	| pipelineResult step previousCommittedContacts |
+	(self canCommit: aWorldSolution) ifFalse: [ ^ nil ].
 	pipelineResult := aWorldSolution pipelineResult.
 	step := pipelineResult step.
 	pipelineResult commitBodyStates.
@@ -411,6 +426,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
+	activeSolveTicket := nil.
 	^ pipelineResult
 ]
 
@@ -880,6 +896,7 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
 	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
 		ifFalse: [ self error: 'A distance joint requires at least one body endpoint' ].
+	self invalidateTopology.
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.
@@ -920,6 +937,7 @@ CFPhysicsWorld >> jointPreventsCollisionBetween: firstBody and: secondBody [
 { #category : 'distance joints' }
 CFPhysicsWorld >> removeDistanceJoint: aJoint [
 	(distanceJoints includes: aJoint) ifTrue: [
+		self invalidateTopology.
 		aJoint release.
 		distanceJoints remove: aJoint ].
 	^ aJoint
@@ -943,6 +961,7 @@ CFPhysicsWorld >> addRevoluteJoint: aJoint [
 		ifFalse: [ self error: 'Revolute joint endpoints must belong to this physics world' ].
 	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
 		ifFalse: [ self error: 'A revolute joint requires at least one body endpoint' ].
+	self invalidateTopology.
 	aJoint sequence: nextRevoluteJointSequence.
 	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
 	revoluteJoints add: aJoint.
@@ -958,6 +977,7 @@ CFPhysicsWorld >> revoluteJointsUsingBody: aBodyState [
 { #category : 'revolute joints' }
 CFPhysicsWorld >> removeRevoluteJoint: aJoint [
 	(revoluteJoints includes: aJoint) ifTrue: [
+		self invalidateTopology.
 		aJoint release.
 		revoluteJoints remove: aJoint ].
 	^ aJoint
@@ -981,6 +1001,7 @@ CFPhysicsWorld >> addFixedJoint: aJoint [
 		ifFalse: [ self error: 'Fixed joint endpoints must belong to this physics world' ].
 	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
 		ifFalse: [ self error: 'A fixed joint requires at least one body endpoint' ].
+	self invalidateTopology.
 	aJoint sequence: nextFixedJointSequence.
 	nextFixedJointSequence := nextFixedJointSequence + 1.
 	fixedJoints add: aJoint.
@@ -996,6 +1017,7 @@ CFPhysicsWorld >> fixedJointsUsingBody: aBodyState [
 { #category : 'fixed joints' }
 CFPhysicsWorld >> removeFixedJoint: aJoint [
 	(fixedJoints includes: aJoint) ifTrue: [
+		self invalidateTopology.
 		aJoint release.
 		fixedJoints remove: aJoint ].
 	^ aJoint
@@ -1019,6 +1041,7 @@ CFPhysicsWorld >> addRailJoint: aJoint [
 		ifFalse: [ self error: 'Rail joint endpoints must belong to this physics world' ].
 	(aJoint firstBody notNil or: [ aJoint secondBody notNil ])
 		ifFalse: [ self error: 'A rail joint requires at least one body endpoint' ].
+	self invalidateTopology.
 	aJoint sequence: nextRailJointSequence.
 	nextRailJointSequence := nextRailJointSequence + 1.
 	railJoints add: aJoint.
@@ -1034,6 +1057,7 @@ CFPhysicsWorld >> railJointsUsingBody: aBodyState [
 { #category : 'rail joints' }
 CFPhysicsWorld >> removeRailJoint: aJoint [
 	(railJoints includes: aJoint) ifTrue: [
+		self invalidateTopology.
 		aJoint release.
 		railJoints remove: aJoint ].
 	^ aJoint
@@ -1131,3 +1155,41 @@ CFPhysicsWorld >> prepareContainmentConstraintsForStep [
 CFPhysicsWorld >> anchorAt: aPoint [
 	^ CFPhysicsWorldAnchor in: self at: aPoint
 ]
+
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> beginSolveTicket [
+	| ticket |
+	ticket := nextSolveTicket.
+	nextSolveTicket := nextSolveTicket + 1.
+	activeSolveTicket := ticket.
+	^ ticket
+]
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> canCommit: aWorldSolution [
+	^ aWorldSolution world == self
+		and: [ aWorldSolution lifetimeGeneration = lifetimeGeneration
+		and: [ aWorldSolution topologyRevision = topologyRevision
+		and: [ aWorldSolution solveTicket = activeSolveTicket ] ] ]
+]
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> invalidateLifetime [
+	lifetimeGeneration := lifetimeGeneration + 1.
+	activeSolveTicket := nil
+]
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> invalidateTopology [
+	topologyRevision := topologyRevision + 1
+]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorld >> lifetimeGeneration [ ^ lifetimeGeneration ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorld >> topologyRevision [ ^ topologyRevision ]
+
+{ #category : 'accessing - solution identity' }
+CFPhysicsWorld >> activeSolveTicket [ ^ activeSolveTicket ]

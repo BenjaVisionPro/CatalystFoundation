@@ -6270,3 +6270,45 @@ CFPhysicsCleanSlateTests >> solvingCapturedStateDoesNotRetargetCommittedConstrai
 	self assert: calculationPoint manifoldPoint == calculationContact manifold contactPoints first.
 	^ solution
 ]
+
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> worldSolutionCarriesCommitIdentity [
+	<gtExample>
+	| world state solution |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	state := world captureStateAfterSynchronisation.
+	solution := world stepPipeline solve: state.
+	self assert: solution world == world.
+	self assert: solution lifetimeGeneration equals: state lifetimeGeneration.
+	self assert: solution topologyRevision equals: state topologyRevision.
+	self assert: solution solveTicket equals: state solveTicket.
+	^ solution
+]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> newerCaptureRejectsOlderSolution [
+	<gtExample>
+	| world firstState firstSolution stepBefore |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstState := world captureStateAfterSynchronisation.
+	firstSolution := world stepPipeline solve: firstState.
+	stepBefore := world stepNumber.
+	world captureStateAfterSynchronisation.
+	self assert: (world commit: firstSolution) isNil.
+	self assert: world stepNumber equals: stepBefore.
+	^ world
+]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> releasedWorldRejectsCapturedSolution [
+	<gtExample>
+	| world state solution |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	state := world captureStateAfterSynchronisation.
+	solution := world stepPipeline solve: state.
+	world release.
+	self assert: (world commit: solution) isNil.
+	self assert: world activeSolveTicket isNil.
+	^ world
+]
