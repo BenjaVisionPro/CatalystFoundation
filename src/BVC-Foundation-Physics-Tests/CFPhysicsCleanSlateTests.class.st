@@ -6421,3 +6421,26 @@ CFPhysicsCleanSlateTests >> topologyInvalidationReleasesTheSolveSlotImmediately 
 	self assert: world activeSolveTicket equals: secondState solveTicket.
 	^ secondState
 ]
+
+{ #category : 'examples - background stepping' }
+CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
+	<gtExample>
+	| synchronousWorld detachedWorld synchronousResult state solution detachedResult |
+	synchronousWorld := self worldDelegatesOneStepToTheExplicitPipeline.
+	detachedWorld := self worldDelegatesOneStepToTheExplicitPipeline.
+	synchronousResult := synchronousWorld step.
+	state := detachedWorld captureStateIfIdle.
+	solution := detachedWorld stepPipeline solve: state.
+	detachedResult := detachedWorld commit: solution.
+	self assert: detachedResult notNil.
+	self
+		assert: (detachedResult bodies collect: #position)
+		equals: (synchronousResult bodies collect: #position).
+	self
+		assert: (detachedResult bodies collect: #velocity)
+		equals: (synchronousResult bodies collect: #velocity).
+	self assert: detachedResult activeContacts size equals: synchronousResult activeContacts size.
+	self assert: detachedWorld stepNumber equals: synchronousWorld stepNumber.
+	self assert: detachedWorld simulationTime equals: synchronousWorld simulationTime.
+	^ detachedResult
+]

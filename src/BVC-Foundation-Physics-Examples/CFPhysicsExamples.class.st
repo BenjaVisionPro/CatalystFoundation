@@ -733,3 +733,39 @@ CFPhysicsExamples >> physicsWorldDefaultsToSynchronousStepping [
 	self assert: world backgroundStepping not.
 	^ world
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsExamples >> backgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
+	<gtExample>
+	| space owner world presentation behaviour timeline motion initialPresentationCount |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		backgroundStepping: true;
+		yourself.
+	presentation := CFPhysicsFrameConsumerRecorder new.
+	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 10 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepCount equals: 1.
+	self assert: world hasSolveInFlight.
+	initialPresentationCount := presentation presentationCount.
+	3 timesRepeat: [
+		space time wait: 5 milliSeconds.
+		space pulse ].
+	self assert: presentation presentationCount equals: initialPresentationCount + 3.
+	self assert: world backgroundStepCount equals: 1.
+	self assert: world hasSolveInFlight.
+	self assert: presentation lastPresentationAlpha equals: 1.0.
+	motion cancel.
+	^ behaviour
+]
