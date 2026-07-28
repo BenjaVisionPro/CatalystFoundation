@@ -51,3 +51,8 @@ CFPhysicsWorld >> isStepping [
 CFPhysicsWorld >> physicsOwnerWillChange [
 	CFPhysicsWorldMotionIntegration releaseFor: self
 ]
+
+{ #category : '*BVC-Foundation-Physics-Motion' }
+CFPhysicsWorld >> startBackgroundStep [
+	^ (CFPhysicsWorldMotionIntegration for: self) startBackgroundStep
+]

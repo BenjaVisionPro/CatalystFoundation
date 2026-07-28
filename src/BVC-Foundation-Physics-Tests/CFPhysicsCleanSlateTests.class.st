@@ -6347,3 +6347,15 @@ CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve 
 	^ world
 ]
 
+
+{ #category : 'examples - background stepping' }
+CFPhysicsCleanSlateTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
+	<gtExample>
+	| world startedAgain |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	self assert: world startBackgroundStep.
+	self assert: world hasSolveInFlight.
+	startedAgain := world startBackgroundStep.
+	self assert: startedAgain not.
+	^ world
+]
