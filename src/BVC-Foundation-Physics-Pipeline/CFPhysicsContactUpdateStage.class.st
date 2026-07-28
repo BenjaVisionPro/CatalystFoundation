@@ -25,6 +25,7 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 		updatePairs: aStepResult pairs
 		includingImpactContacts: #()
 		fromContacts: aStepResult previousContacts
+		reusingContacts: aStepResult calculationContacts
 		bodyStates: aStepResult bodyStates.
 	self
 		wakeBodiesForEndedContacts: batch endedContacts

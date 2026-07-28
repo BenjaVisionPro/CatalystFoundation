@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates' ],
+	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -11,6 +11,7 @@ CFPhysicsWorldState >> initialize [
 	super initialize.
 	bodies := #().
 	contacts := #().
+	calculationContacts := #().
 	joints := #().
 	explicitlyContainedBodies := #().
 	collisionSuppressedBodyPairs := #().
@@ -29,6 +30,13 @@ CFPhysicsWorldState >> contacts [ ^ contacts ]
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> contacts: aCollection [ contacts := aCollection asArray ]
+
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> calculationContacts [ ^ calculationContacts ]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> calculationContacts: aCollection [ calculationContacts := aCollection asArray ]
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> joints [ ^ joints ]

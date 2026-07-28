@@ -140,9 +140,21 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts bodyStates: bodyStates [
-	| previousByKey active began continued ended impactByKey orderedPairs |
+	^ self
+		updatePairs: pairs
+		includingImpactContacts: impactContacts
+		fromContacts: previousContacts
+		reusingContacts: #()
+		bodyStates: bodyStates
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates [
+	| previousByKey reusableByKey active began continued ended impactByKey orderedPairs |
 	previousByKey := Dictionary new.
 	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
+	reusableByKey := Dictionary new.
+	reusableContacts do: [ :contact | reusableByKey at: contact key put: contact ].
 	impactByKey := Dictionary new.
 	impactContacts do: [ :contact |
 		contact ifNotNil: [ impactByKey at: contact key put: contact ] ].
@@ -159,21 +171,25 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 			manifold := impactContact manifold ].
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
 		manifold ifNotNil: [
-			contact := previous
-				ifNil: [
+			contact := reusableByKey
+				removeKey: pair key
+				ifAbsent: [
 					impactContact
-						ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
-						ifNotNil: [ impactContact ] ]
-				ifNotNil: [ previous copyForUpdate ].
-			bodyStates ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
-			previous ifNotNil: [ contact updateWith: manifold ].
+						ifNil: [ CFPhysicsContact pair: pair manifold: nil ]
+						ifNotNil: [ impactContact ] ].
+			contact pair: pair.
+		bodyStates ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
+			contact updateFromPreviousContact: previous with: manifold.
 			active add: contact.
 			contact began ifTrue: [ began add: contact ].
 			contact continued ifTrue: [ continued add: contact ] ] ].
 	previousByKey valuesDo: [ :previous |
 		| endedContact |
-		endedContact := previous copyForUpdate.
-		endedContact updateWith: nil.
+		endedContact := reusableByKey
+			removeKey: previous key
+			ifAbsent: [ CFPhysicsContact pair: previous pair manifold: nil ].
+		endedContact pair: previous pair.
+		endedContact updateFromPreviousContact: previous with: nil.
 		ended add: endedContact ].
 	ended := ended asArray sorted: [ :left :right |
 		left pair comesBefore: right pair ].

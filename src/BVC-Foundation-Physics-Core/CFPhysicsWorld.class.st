@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -33,6 +33,7 @@ CFPhysicsWorld >> initialize [
 	contactHertz := 30.0.
 	contactDampingRatio := 10.0.
 	activeContacts := #().
+	calculationContacts := #().
 	pointerConstraints := IdentitySet new.
 	springConstraints := IdentitySet new.
 	attractionConstraints := IdentitySet new.
@@ -101,6 +102,7 @@ CFPhysicsWorld >> release [
 	bodyStates removeAll.
 	members removeAll.
 	activeContacts := #().
+	calculationContacts := #().
 	membershipProvider := nil.
 	self owner: nil.
 	^ self
@@ -261,6 +263,8 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeRailJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
+			contact firstBody == body or: [ contact secondBody == body ] ].
+		calculationContacts := calculationContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ] ]
 ]
 
@@ -382,6 +386,7 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		bodyStates: capturedBodyStates;
 		orderedBodyStates: orderedBodyStates;
 		contacts: activeContacts;
+		calculationContacts: calculationContacts;
 		joints: capturedJoints;
 		collisionSuppressedBodyPairs: self collisionSuppressedBodyPairs;
 		step: step;
@@ -393,13 +398,15 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> commit: aWorldSolution [
-	| pipelineResult step |
+	| pipelineResult step previousCommittedContacts |
 	pipelineResult := aWorldSolution pipelineResult.
 	step := pipelineResult step.
 	pipelineResult commitBodyStates.
 	pipelineResult commitJointConstraints.
-	lastStepResult := pipelineResult.
+	previousCommittedContacts := activeContacts.
 	activeContacts := pipelineResult activeContacts.
+	calculationContacts := previousCommittedContacts.
+	lastStepResult := pipelineResult.
 	self applyDefaultBoundaryExcept: aWorldSolution explicitlyContainedBodies.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.

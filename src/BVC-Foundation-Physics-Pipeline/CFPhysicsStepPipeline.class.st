@@ -182,6 +182,7 @@ CFPhysicsStepPipeline >> newResultForWorldState: aWorldState [
 		gravity: aWorldState gravity
 		restitutionThreshold: aWorldState restitutionThreshold)
 		bodyStates: aWorldState bodyStates;
+		calculationContacts: aWorldState calculationContacts;
 		orderedBodyStates: aWorldState orderedBodyStates;
 		yourself
 ]

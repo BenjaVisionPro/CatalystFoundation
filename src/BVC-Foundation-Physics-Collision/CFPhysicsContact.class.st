@@ -68,6 +68,18 @@ CFPhysicsContact >> updateWith: aManifold [
 	manifold := aManifold
 ]
 
+
+{ #category : 'updating' }
+CFPhysicsContact >> updateFromPreviousContact: aPreviousContact with: aManifold [
+	previousManifold := aPreviousContact
+		ifNil: [ nil ]
+		ifNotNil: [ aPreviousContact manifold ].
+	aManifold ifNotNil: [
+		aManifold preserveImpulsesFrom: previousManifold.
+		self isSensor ifTrue: [ aManifold clearImpulses ] ].
+	manifold := aManifold
+]
+
 { #category : 'copying' }
 CFPhysicsContact >> copyForUpdate [
 	^ self class new

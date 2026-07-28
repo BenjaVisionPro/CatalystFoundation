@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -11,6 +11,7 @@ CFPhysicsStepPipelineResult >> initialize [
 	super initialize.
 	bodies := #().
 	previousContacts := #().
+	calculationContacts := #().
 	pairs := #().
 	constraints := #().
 	joints := #().
@@ -48,6 +49,11 @@ CFPhysicsStepPipelineResult >> bodies: aCollection [ bodies := aCollection asArr
 CFPhysicsStepPipelineResult >> previousContacts [ ^ previousContacts ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> previousContacts: aCollection [ previousContacts := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> calculationContacts [ ^ calculationContacts ]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> calculationContacts: aCollection [ calculationContacts := aCollection asArray ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> pairs [ ^ pairs ]
 { #category : 'accessing' }
