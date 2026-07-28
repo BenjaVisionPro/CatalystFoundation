@@ -2298,7 +2298,9 @@ CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 	revolute := bodyAnchor revoluteJointTo: revoluteAnchor.
 	distance := bodyAnchor distanceJointTo: distanceAnchor.
 	result := world step.
-	self assert: result joints equals: { distance. revolute }.
+	self
+		assert: (result joints collect: #solverCommitTarget)
+		equals: { distance. revolute }.
 	self assert: (result constraints collect: #joint) equals: result joints.
 	self assert: (result constraints collect: #class) equals: {
 		CFPhysicsPreparedDistanceJoint.
@@ -6180,7 +6182,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 { #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve [
 	<gtExample>
-	| owner firstElement secondElement world first second joint state capturedJoint solution prepared |
+	| owner firstElement secondElement world first second joint state capturedJoint prepared solution solvedPrepared |
 	owner := BlElement new size: 200 @ 200; yourself.
 	firstElement := BlElement new
 		geometry: BlRoundedRectangleGeometry new;
@@ -6207,14 +6209,21 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	joint
 		restLength: 100;
 		accumulatedImpulse: 0.0.
-	solution := world stepPipeline solve: state.
-	prepared := solution pipelineResult jointConstraints first.
+	prepared := (CFPhysicsDistanceJointConstraintBuilder new
+		constraintsFrom: state joints
+		bodyStates: state bodyStates
+		warmStartRatio: state step warmStartRatio) first.
 	self assert: capturedJoint ~~ joint.
 	self assert: capturedJoint solverCommitTarget == joint.
+	self assert: capturedJoint restLength equals: 25.
+	self assert: capturedJoint accumulatedImpulse equals: 3.0.
 	self assert: prepared baseSeparation equals: 15.0.
 	self assert: prepared impulse equals: 3.0 * state step warmStartRatio.
 	self assert: joint accumulatedImpulse equals: 0.0.
+	solution := world stepPipeline solve: state.
+	solvedPrepared := solution pipelineResult jointConstraints first.
+	self assert: joint accumulatedImpulse equals: 0.0.
 	solution pipelineResult commitJointConstraints.
-	self assert: joint accumulatedImpulse equals: prepared impulse.
+	self assert: joint accumulatedImpulse equals: solvedPrepared impulse.
 	^ solution
 ]
