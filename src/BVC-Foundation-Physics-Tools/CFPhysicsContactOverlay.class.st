@@ -24,12 +24,6 @@ CFPhysicsContactOverlay >> initializeOverlay [
 
 { #category : 'accessing' }
 CFPhysicsContactOverlay >> visuals [ ^ visualsByKey values asArray ]
-{ #category : 'accessing' }
-CFPhysicsContactOverlay >> elements [
-	"Compatibility for existing inspector/tests: answer the retained contact visuals."
-	^ self visuals
-]
-
 { #category : 'updating' }
 CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
 	| live |
@@ -46,9 +40,16 @@ CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
 	^ self
 ]
 
+
 { #category : 'controlling' }
-CFPhysicsContactOverlay >> release [
+CFPhysicsContactOverlay >> clear [
 	visualsByKey valuesDo: #remove.
 	visualsByKey removeAll.
-	lastVisualState := nil
+	lastVisualState := nil.
+	^ self
+]
+
+{ #category : 'controlling' }
+CFPhysicsContactOverlay >> release [
+	self clear
 ]

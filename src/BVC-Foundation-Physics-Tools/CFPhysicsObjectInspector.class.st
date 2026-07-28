@@ -7,7 +7,8 @@ Class {
 		'panel',
 		'selectedPhysics',
 		'valueElements',
-		'released'
+		'released',
+		'visibilityMotion'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -80,8 +81,8 @@ CFPhysicsObjectInspector >> newPanel [
 		effect: (BlBlurBelowEffect radius: 14);
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
 		constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignTop ];
+			c frame horizontal alignLeft.
+			c frame vertical alignCenter ];
 		margin: (BlInsets all: 10);
 		yourself.
 	anElement addChild: (self newTitle: 'PHYSICS OBJECT').
@@ -223,7 +224,7 @@ CFPhysicsObjectInspector >> install [
 CFPhysicsObjectInspector >> inspect: aPhysics [
 	released ifTrue: [ ^ self ].
 	selectedPhysics := aPhysics.
-	panel visibility: BlVisibility visible.
+	self showPanel.
 	self refresh.
 	^ self
 ]
@@ -232,7 +233,26 @@ CFPhysicsObjectInspector >> inspect: aPhysics [
 CFPhysicsObjectInspector >> clear [
 	selectedPhysics := nil.
 	valueElements valuesDo: [ :each | each text: '' ].
-	panel visibility: BlVisibility gone.
+	self hidePanel.
+	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> showPanel [
+	visibilityMotion ifNotNil: #cancel.
+	panel visibility: BlVisibility visible.
+	panel opacity: 0.0.
+	visibilityMotion := panel motion duration: 180 milliSeconds; fadeIn.
+	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> hidePanel [
+	panel visibility == BlVisibility gone ifTrue: [ ^ self ].
+	visibilityMotion ifNotNil: #cancel.
+	visibilityMotion := panel motion duration: 140 milliSeconds; fadeOut.
+	visibilityMotion onTerminalDo: [ :aMotion |
+		selectedPhysics ifNil: [ panel visibility: BlVisibility gone ] ].
 	^ self
 ]
 
@@ -277,6 +297,7 @@ CFPhysicsObjectInspector >> refresh [
 CFPhysicsObjectInspector >> release [
 	released ifTrue: [ ^ self ].
 	released := true.
+	visibilityMotion ifNotNil: #cancel.
 	self clear.
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ].
