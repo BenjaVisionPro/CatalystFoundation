@@ -6444,3 +6444,23 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	self assert: detachedWorld simulationTime equals: synchronousWorld simulationTime.
 	^ detachedResult
 ]
+
+
+{ #category : 'examples - background stepping' }
+CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
+	<gtExample>
+	| world backgroundStep capturedPipeline replacementPipeline |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	capturedPipeline := world stepPipeline.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	self assert: backgroundStep start.
+	self assert: backgroundStep pipeline == capturedPipeline.
+	replacementPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :firstBodyState :secondBodyState |
+		CFPhysicsBlocManifoldBuilder
+			manifoldBetweenBodyState: firstBodyState
+			andBodyState: secondBodyState ].
+	world stepPipeline: replacementPipeline.
+	self assert: backgroundStep pipeline == capturedPipeline.
+	self assert: backgroundStep pipeline ~~ world stepPipeline.
+	^ backgroundStep
+]

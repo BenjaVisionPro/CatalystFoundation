@@ -6,7 +6,7 @@ Capture and commit remain on the Bloc process. Only #solve: executes in the futu
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'state', 'task' ],
+	#instVars : [ 'world', 'state', 'pipeline', 'task' ],
 	#category : 'BVC-Foundation-Physics-Motion',
 	#package : 'BVC-Foundation-Physics-Motion'
 }
@@ -25,6 +25,11 @@ CFPhysicsWorldBackgroundStep >> futureConfiguration [
 ]
 
 { #category : 'accessing' }
+CFPhysicsWorldBackgroundStep >> pipeline [
+	^ pipeline
+]
+
+{ #category : 'accessing' }
 CFPhysicsWorldBackgroundStep >> state [
 	^ state
 ]
@@ -39,11 +44,12 @@ CFPhysicsWorldBackgroundStep >> start [
 	| owner |
 	owner := world owner.
 	owner ifNil: [ ^ false ].
+	pipeline := world stepPipeline.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
 	task := BlEnqueuedFutureAction new
 		name: 'Physics solve';
-		action: [ world stepPipeline solve: state ];
+		action: [ pipeline solve: state ];
 		futureConfiguration: self futureConfiguration;
 		onSuccessEnqueueAction: [ :solution |
 			world commit: solution ];
