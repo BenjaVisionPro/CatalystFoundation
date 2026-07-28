@@ -6,7 +6,7 @@ Capture and commit remain on the Bloc process. Only #solve: executes in the futu
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'state', 'pipeline', 'task' ],
+	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'task' ],
 	#category : 'BVC-Foundation-Physics-Motion',
 	#package : 'BVC-Foundation-Physics-Motion'
 }
@@ -34,6 +34,12 @@ CFPhysicsWorldBackgroundStep >> state [
 	^ state
 ]
 
+
+{ #category : 'accessing' }
+CFPhysicsWorldBackgroundStep >> telemetryEnabled [
+	^ telemetryEnabled
+]
+
 { #category : 'accessing' }
 CFPhysicsWorldBackgroundStep >> task [
 	^ task
@@ -45,11 +51,15 @@ CFPhysicsWorldBackgroundStep >> start [
 	owner := world owner.
 	(owner notNil and: [ owner isAttachedToSceneGraph ]) ifFalse: [ ^ false ].
 	pipeline := world stepPipeline.
+	telemetryEnabled := world telemetryEnabled.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
 	task := BlEnqueuedFutureAction new
 		name: 'Physics solve';
-		action: [ pipeline solve: state ];
+		action: [
+			telemetryEnabled
+				ifTrue: [ pipeline solveWithTelemetry: state ]
+				ifFalse: [ pipeline solve: state ] ];
 		futureConfiguration: self futureConfiguration;
 		onSuccessEnqueueAction: [ :solution |
 			world commit: solution ];

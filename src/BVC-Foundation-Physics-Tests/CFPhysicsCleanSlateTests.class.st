@@ -6556,3 +6556,70 @@ CFPhysicsCleanSlateTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
 	self assert: world hasSolveInFlight not.
 	^ world
 ]
+
+
+{ #category : 'examples - background telemetry' }
+CFPhysicsCleanSlateTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
+	<gtExample>
+	| world state solution committed |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world telemetryEnabled: true.
+	world resetTelemetry.
+	state := world captureStateIfIdle.
+	solution := world stepPipeline solveWithTelemetry: state.
+	self assert: world telemetryRecordings isEmpty.
+	committed := world commit: solution.
+	self assert: committed notNil.
+	self assert: world telemetryRecordings isNotEmpty.
+	self assert: (world latestTelemetryRecording data includesKey: #physicsFrame).
+	world telemetryEnabled: false.
+	^ committed
+]
+
+
+{ #category : 'examples - background telemetry' }
+CFPhysicsCleanSlateTests >> staleDetachedSolvePublishesNoTelemetry [
+	<gtExample>
+	| world state solution |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world telemetryEnabled: true.
+	world resetTelemetry.
+	state := world captureStateIfIdle.
+	solution := world stepPipeline solveWithTelemetry: state.
+	world invalidateTopology.
+	self assert: (world commit: solution) isNil.
+	self assert: world telemetryRecordings isEmpty.
+	world telemetryEnabled: false.
+	^ world
+]
+
+
+{ #category : 'examples - background telemetry' }
+CFPhysicsCleanSlateTests >> backgroundStepCapturesTelemetryModeBeforeDispatch [
+	<gtExample>
+	| world space backgroundStep |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	space := BlSpace new.
+	space root addChild: world owner.
+	world telemetryEnabled: true.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	self assert: backgroundStep start.
+	self assert: backgroundStep telemetryEnabled.
+	world telemetryEnabled: false.
+	self assert: backgroundStep telemetryEnabled.
+	^ backgroundStep
+]
+
+{ #category : 'examples - background telemetry' }
+CFPhysicsCleanSlateTests >> backgroundStepDefaultsToTheUnmeasuredSolver [
+	<gtExample>
+	| world space backgroundStep |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	space := BlSpace new.
+	space root addChild: world owner.
+	self assert: world telemetryEnabled not.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	self assert: backgroundStep start.
+	self assert: backgroundStep telemetryEnabled not.
+	^ backgroundStep
+]
