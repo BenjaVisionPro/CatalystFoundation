@@ -20,7 +20,9 @@ CFPhysicsPairFinderStage >> pairFinder: anObject [ pairFinder := anObject ]
 { #category : 'executing' }
 CFPhysicsPairFinderStage >> executeOn: aStepResult [
 	| pairs |
-	pairs := pairFinder pairsAmongSolvedStepStates: aStepResult orderedBodyStates.
+	pairs := pairFinder
+		pairsAmongSolvedStepStates: aStepResult orderedBodyStates
+		collisionSuppressedBodyPairs: aStepResult collisionSuppressedBodyPairs.
 	aStepResult pairs: pairs.
 	^ pairs
 ]

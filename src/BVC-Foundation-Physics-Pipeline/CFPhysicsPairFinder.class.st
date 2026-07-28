@@ -61,6 +61,11 @@ CFPhysicsPairFinder >> maximumActiveCount [ ^ maximumActiveCount ]
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
+	^ self pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: #()
+]
+
+{ #category : 'finding' }
+CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	| entries active pairs |
 	self resetMeasurements.
 	entries := (stepStates collect: [ :state |
@@ -77,7 +82,8 @@ CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
 				shouldConsiderStepState: other first
 				with: entry first
 				firstAABB: other second
-				secondAABB: entry second) ifTrue: [
+				secondAABB: entry second
+				collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) ifTrue: [
 				pairs add: (CFPhysicsPair first: other first body second: entry first body).
 				acceptedPairCount := acceptedPairCount + 1 ] ].
 		active add: entry.
@@ -134,10 +140,30 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second for: seconds 
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
+	^ self
+		shouldConsiderStepState: first
+		with: second
+		firstAABB: firstAABB
+		secondAABB: secondAABB
+		collisionSuppressedBodyPairs: #()
+]
+
+{ #category : 'testing' }
+CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
 	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
-	(self jointPreventsCollisionBetween: first body and: second body) ifTrue: [ ^ false ].
+	(self
+		collisionSuppressedBetween: first body
+		and: second body
+		in: collisionSuppressedBodyPairs) ifTrue: [ ^ false ].
 	^ firstAABB overlaps: secondAABB
+]
+
+{ #category : 'private - filtering' }
+CFPhysicsPairFinder >> collisionSuppressedBetween: firstBody and: secondBody in: bodyPairs [
+	^ bodyPairs anySatisfy: [ :bodyPair |
+		(bodyPair first == firstBody and: [ bodyPair second == secondBody ]) or: [
+			bodyPair first == secondBody and: [ bodyPair second == firstBody ] ] ]
 ]
 
 

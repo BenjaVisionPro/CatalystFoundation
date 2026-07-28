@@ -574,6 +574,26 @@ CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedBodyState [
 	^ pairs
 ]
 
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedJointCollisionPolicy [
+	<gtExample>
+	| first second result pairs |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	result := CFPhysicsStepPipelineResult new
+		bodies: { first. second };
+		collisionSuppressedBodyPairs: { { first. second } };
+		yourself.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
+	pairs := CFPhysicsPairFinderStage new executeOn: result.
+	self assert: pairs isEmpty.
+	result collisionSuppressedBodyPairs: #().
+	pairs := CFPhysicsPairFinderStage new executeOn: result.
+	self assert: pairs size equals: 1.
+	^ pairs
+]
+
 { #category : 'examples - pair discovery' }
 CFPhysicsCleanSlateTests >> bodyStepStateCapturesBlocGeometry [
 	<gtExample>

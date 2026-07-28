@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies' ],
+	#instVars : [ 'bodies', 'contacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -12,7 +12,8 @@ CFPhysicsWorldState >> initialize [
 	bodies := #().
 	contacts := #().
 	joints := #().
-	explicitlyContainedBodies := #()
+	explicitlyContainedBodies := #().
+	collisionSuppressedBodyPairs := #()
 ]
 
 { #category : 'accessing' }
@@ -57,4 +58,12 @@ CFPhysicsWorldState >> explicitlyContainedBodies [ ^ explicitlyContainedBodies ]
 { #category : 'accessing' }
 CFPhysicsWorldState >> explicitlyContainedBodies: aCollection [
 	explicitlyContainedBodies := aCollection asArray
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> collisionSuppressedBodyPairs [ ^ collisionSuppressedBodyPairs ]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> collisionSuppressedBodyPairs: aCollection [
+	collisionSuppressedBodyPairs := aCollection asArray
 ]

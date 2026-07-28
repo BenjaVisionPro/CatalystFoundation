@@ -372,6 +372,7 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		bodies: bodies;
 		contacts: activeContacts;
 		joints: self joints;
+		collisionSuppressedBodyPairs: self collisionSuppressedBodyPairs;
 		step: step;
 		gravity: gravity;
 		restitutionThreshold: restitutionThreshold;
@@ -879,6 +880,14 @@ CFPhysicsWorld >> joints [
 		first orderingKey = second orderingKey
 			ifTrue: [ first class name asString < second class name asString ]
 			ifFalse: [ first orderingKey < second orderingKey ] ]
+]
+
+
+{ #category : 'collision filtering' }
+CFPhysicsWorld >> collisionSuppressedBodyPairs [
+	^ (self joints
+		select: [ :joint | joint isActive and: [ joint collideConnected not ] ])
+		collect: [ :joint | { joint firstBody. joint secondBody } ]
 ]
 
 { #category : 'collision filtering' }

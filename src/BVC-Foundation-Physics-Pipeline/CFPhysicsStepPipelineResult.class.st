@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -23,7 +23,17 @@ CFPhysicsStepPipelineResult >> initialize [
 	orderedBodyStates := #().
 	continuousStepResult := nil.
 	continuousSensorContacts := #().
-	jointConstraints := #()
+	jointConstraints := #().
+	collisionSuppressedBodyPairs := #()
+]
+
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> collisionSuppressedBodyPairs [ ^ collisionSuppressedBodyPairs ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> collisionSuppressedBodyPairs: aCollection [
+	collisionSuppressedBodyPairs := aCollection asArray
 ]
 
 { #category : 'accessing' }

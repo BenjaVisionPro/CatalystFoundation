@@ -76,11 +76,24 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step:
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		stepBodies: bodies
+		fromContacts: previousContacts
+		joints: joints
+		collisionSuppressedBodyPairs: (self collisionSuppressedBodyPairsFrom: joints)
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'stepping' }
+CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	| result |
 	result := self
 		newResultForBodies: bodies
 		fromContacts: previousContacts
 		joints: joints
+		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
 		step: step
 		gravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
@@ -91,11 +104,24 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		stepBodiesWithTelemetry: bodies
+		fromContacts: previousContacts
+		joints: joints
+		collisionSuppressedBodyPairs: (self collisionSuppressedBodyPairsFrom: joints)
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'stepping' }
+CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	| result |
 	result := self
 		newResultForBodies: bodies
 		fromContacts: previousContacts
 		joints: joints
+		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
 		step: step
 		gravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
@@ -110,10 +136,23 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 
 { #category : 'private - stepping' }
 CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContacts joints: joints step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		newResultForBodies: bodies
+		fromContacts: previousContacts
+		joints: joints
+		collisionSuppressedBodyPairs: (self collisionSuppressedBodyPairsFrom: joints)
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	^ CFPhysicsStepPipelineResult new
 		step: step;
 		bodies: (bodies asArray sorted: [ :left :right | left sequence < right sequence ]);
 		previousContacts: previousContacts;
+		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs;
 		joints: (joints asArray sorted: [ :left :right |
 			left orderingKey = right orderingKey
 				ifTrue: [ left class name asString < right class name asString ]
@@ -123,6 +162,14 @@ CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContac
 		yourself
 ]
 
+
+{ #category : 'private - collision filtering' }
+CFPhysicsStepPipeline >> collisionSuppressedBodyPairsFrom: joints [
+	^ (joints select: [ :joint |
+		joint isActive and: [ joint collideConnected not ] ])
+		collect: [ :joint | { joint firstBody. joint secondBody } ]
+]
+
 { #category : 'solving' }
 CFPhysicsStepPipeline >> solve: aWorldState [
 	| pipelineResult |
@@ -130,6 +177,7 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 		stepBodies: aWorldState bodies
 		fromContacts: aWorldState contacts
 		joints: aWorldState joints
+		collisionSuppressedBodyPairs: aWorldState collisionSuppressedBodyPairs
 		step: aWorldState step
 		gravity: aWorldState gravity
 		restitutionThreshold: aWorldState restitutionThreshold.
@@ -145,6 +193,7 @@ CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 		stepBodiesWithTelemetry: aWorldState bodies
 		fromContacts: aWorldState contacts
 		joints: aWorldState joints
+		collisionSuppressedBodyPairs: aWorldState collisionSuppressedBodyPairs
 		step: aWorldState step
 		gravity: aWorldState gravity
 		restitutionThreshold: aWorldState restitutionThreshold.
