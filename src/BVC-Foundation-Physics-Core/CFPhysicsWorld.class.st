@@ -1200,7 +1200,8 @@ CFPhysicsWorld >> invalidateLifetime [
 
 { #category : 'private - solution identity' }
 CFPhysicsWorld >> invalidateTopology [
-	topologyRevision := topologyRevision + 1
+	topologyRevision := topologyRevision + 1.
+	activeSolveTicket := nil
 ]
 
 { #category : 'accessing - solution identity' }

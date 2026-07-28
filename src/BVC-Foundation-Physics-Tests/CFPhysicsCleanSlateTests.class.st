@@ -6374,3 +6374,22 @@ CFPhysicsCleanSlateTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting
 	self assert: startedAgain not.
 	^ world
 ]
+
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> topologyInvalidationReleasesTheSolveSlotImmediately [
+	<gtExample>
+	| world firstState firstSolution secondState |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstState := world captureStateIfIdle.
+	firstSolution := world stepPipeline solve: firstState.
+	self assert: world hasSolveInFlight.
+	world invalidateTopology.
+	self assert: world hasSolveInFlight not.
+	secondState := world captureStateIfIdle.
+	self assert: secondState notNil.
+	self assert: secondState solveTicket ~= firstState solveTicket.
+	self assert: (world commit: firstSolution) isNil.
+	self assert: world activeSolveTicket equals: secondState solveTicket.
+	^ secondState
+]
