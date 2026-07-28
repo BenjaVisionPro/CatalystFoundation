@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'sensor', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'sensor', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -33,6 +33,9 @@ CFPhysicsBodyStepState >> capture [
 	sleepingAllowed := body allowsSleeping.
 	sleepTime := body sleepTime.
 	sensor := body isSensor.
+	collisionCategoryBits := body collisionCategoryBits.
+	collisionMaskBits := body collisionMaskBits.
+	collisionGroupIndex := body collisionGroupIndex.
 	deltaPosition := 0 @ 0.
 	deltaRotation := 0.0
 ]
@@ -245,5 +248,24 @@ CFPhysicsBodyStepState >> formsCollisionPairWith: anotherStepState [
 
 { #category : 'collision filtering' }
 CFPhysicsBodyStepState >> allowsCollisionWith: anotherStepState [
-	^ shapeState allowsCollisionWith: anotherStepState shapeState
+	(collisionGroupIndex ~= 0 and: [
+		collisionGroupIndex = anotherStepState collisionGroupIndex ]) ifTrue: [
+		^ collisionGroupIndex > 0 ].
+	^ ((collisionMaskBits bitAnd: anotherStepState collisionCategoryBits) ~= 0)
+		and: [ (anotherStepState collisionMaskBits bitAnd: collisionCategoryBits) ~= 0 ]
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionCategoryBits [
+	^ collisionCategoryBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionMaskBits [
+	^ collisionMaskBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsBodyStepState >> collisionGroupIndex [
+	^ collisionGroupIndex
 ]
