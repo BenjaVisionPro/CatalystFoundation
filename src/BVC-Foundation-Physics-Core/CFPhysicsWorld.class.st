@@ -8,7 +8,7 @@ Motion-backed presentation and continuous playback are optional integration capa
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'pointerConstraints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'fixedJoints', 'railJoints', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextFixedJointSequence', 'nextRailJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -62,6 +62,9 @@ CFPhysicsWorld >> initialize [
 	topologyRevision := 0.
 	nextSolveTicket := 1.
 	activeSolveTicket := nil.
+	visualStateConsumers := 0.
+	committedVisualState := CFPhysicsWorldVisualState new.
+	calculationVisualState := CFPhysicsWorldVisualState new.
 	containmentConstraints := IdentitySet new.
 	boundary := CFPhysicsWorldBoundary new.
 	distanceJoints := IdentitySet new.
@@ -425,6 +428,9 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		gravity: gravity;
 		restitutionThreshold: restitutionThreshold;
 		explicitlyContainedBodies: explicitlyContainedBodies;
+		calculationVisualState: (visualStateConsumers > 0
+			ifTrue: [ calculationVisualState ]
+			ifFalse: [ nil ]);
 		yourself
 ]
 
@@ -446,6 +452,11 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
+	(visualStateConsumers > 0 and: [ aWorldSolution visualState notNil ]) ifTrue: [
+		| previousVisualState |
+		previousVisualState := committedVisualState.
+		committedVisualState := aWorldSolution visualState.
+		calculationVisualState := previousVisualState ].
 	activeSolveTicket := nil.
 	self commitTelemetrySolveTicket: aWorldSolution solveTicket.
 	^ pipelineResult
@@ -1257,4 +1268,32 @@ CFPhysicsWorld >> commitTelemetrySolveTicket: aSolveTicket [
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> rejectTelemetrySolveTicket: aSolveTicket [
 	telemetryLogger ifNotNil: [ telemetryLogger rejectSolveTicket: aSolveTicket ]
+]
+
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorld >> committedVisualState [
+	^ committedVisualState
+]
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorld >> enableVisualState [
+	visualStateConsumers = 0 ifTrue: [
+		committedVisualState updateFromContacts: activeContacts ].
+	visualStateConsumers := visualStateConsumers + 1.
+	^ self
+]
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorld >> disableVisualState [
+	visualStateConsumers := (visualStateConsumers - 1) max: 0.
+	visualStateConsumers = 0 ifTrue: [
+		committedVisualState clear.
+		calculationVisualState clear ].
+	^ self
+]
+
+{ #category : 'testing' }
+CFPhysicsWorld >> visualStateEnabled [
+	^ visualStateConsumers > 0
 ]

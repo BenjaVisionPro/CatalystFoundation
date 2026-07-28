@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactPass', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -38,7 +38,10 @@ CFPhysicsOverlay >> root [ ^ root ]
 CFPhysicsOverlay >> bodyElements [ ^ bodyElements values asArray ]
 
 { #category : 'accessing' }
-CFPhysicsOverlay >> contactPass [ ^ contactPass ]
+CFPhysicsOverlay >> contactOverlay [ ^ contactOverlay ]
+
+{ #category : 'accessing' }
+CFPhysicsOverlay >> contactPass [ ^ contactOverlay ]
 
 { #category : 'accessing' }
 CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
@@ -115,7 +118,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
-	contactPass := CFPhysicsContactOverlayPass in: root context: context.
+	contactOverlay := CFPhysicsContactOverlay in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
 	self initializeWorldInspectorControl.
 	selectionHandler := BlEventHandler
@@ -178,6 +181,7 @@ CFPhysicsOverlay >> install [
 	objectInspector install.
 	host addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
+	world enableVisualState.
 	self refresh.
 	^ self
 ]
@@ -187,7 +191,7 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 	"Refresh diagnostics whose geometry or lifetime may change on every
 	presented Physics frame. Structural body membership is deliberately left to
 	#refresh so frame presentation cannot mutate the world membership."
-	contactPass refresh.
+	contactOverlay updateFrom: world committedVisualState.
 	self refreshSelectedObject.
 	^ self
 ]
@@ -210,7 +214,6 @@ CFPhysicsOverlay >> refreshSelectedObject [
 { #category : 'updating' }
 CFPhysicsOverlay >> refresh [
 	| bodies live |
-	world synchroniseMembership.
 	bodies := world bodyStatesInOrder.
 	live := IdentitySet new.
 	live addAll: bodies.
@@ -229,7 +232,7 @@ CFPhysicsOverlay >> refresh [
 				root addChild: created.
 				created ].
 		anElement refresh ].
-	contactPass refresh.
+	contactOverlay updateFrom: world committedVisualState.
 	self refreshSelectedObject.
 	self refreshSelectionHighlight.
 	^ self
@@ -240,7 +243,8 @@ CFPhysicsOverlay >> release [
 	self clearSelection.
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
-	contactPass ifNotNil: #release.
+	contactOverlay ifNotNil: #release.
+	world ifNotNil: #disableVisualState.
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [
 		controlRoot detach.

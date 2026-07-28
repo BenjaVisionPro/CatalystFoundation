@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldSolution',
 	#superclass : 'Object',
-	#instVars : [ 'pipelineResult', 'explicitlyContainedBodies', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket' ],
+	#instVars : [ 'pipelineResult', 'explicitlyContainedBodies', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'visualState' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -58,3 +58,14 @@ CFPhysicsWorldSolution >> solveTicket [ ^ solveTicket ]
 
 { #category : 'accessing - solution identity' }
 CFPhysicsWorldSolution >> solveTicket: anInteger [ solveTicket := anInteger ]
+
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorldSolution >> visualState [
+	^ visualState
+]
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorldSolution >> visualState: aVisualState [
+	visualState := aVisualState
+]

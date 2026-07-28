@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket' ],
+	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'calculationVisualState' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -116,3 +116,14 @@ CFPhysicsWorldState >> solveTicket [ ^ solveTicket ]
 
 { #category : 'accessing - solution identity' }
 CFPhysicsWorldState >> solveTicket: anInteger [ solveTicket := anInteger ]
+
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorldState >> calculationVisualState [
+	^ calculationVisualState
+]
+
+{ #category : 'accessing - visual state' }
+CFPhysicsWorldState >> calculationVisualState: aVisualState [
+	calculationVisualState := aVisualState
+]

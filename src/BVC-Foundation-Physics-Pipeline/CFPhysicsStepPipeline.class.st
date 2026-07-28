@@ -193,6 +193,8 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 	pipelineResult := self newResultForWorldState: aWorldState.
 	stages do: [ :stage |
 		pipelineResult recordStage: stage output: (stage executeOn: pipelineResult) ].
+	aWorldState calculationVisualState ifNotNil: [ :visualState |
+		visualState updateFromContacts: pipelineResult activeContacts ].
 	^ (CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies)
@@ -200,6 +202,7 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 		lifetimeGeneration: aWorldState lifetimeGeneration;
 		topologyRevision: aWorldState topologyRevision;
 		solveTicket: aWorldState solveTicket;
+		visualState: aWorldState calculationVisualState;
 		yourself
 ]
 
@@ -213,6 +216,8 @@ CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 			time: [ stage class name asString ]
 			during: [ stage executeOnWithTelemetry: pipelineResult ].
 		pipelineResult recordStage: stage output: output ].
+	aWorldState calculationVisualState ifNotNil: [ :visualState |
+		visualState updateFromContacts: pipelineResult activeContacts ].
 	^ (CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies)
@@ -220,6 +225,7 @@ CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 		lifetimeGeneration: aWorldState lifetimeGeneration;
 		topologyRevision: aWorldState topologyRevision;
 		solveTicket: aWorldState solveTicket;
+		visualState: aWorldState calculationVisualState;
 		yourself
 ]
 
