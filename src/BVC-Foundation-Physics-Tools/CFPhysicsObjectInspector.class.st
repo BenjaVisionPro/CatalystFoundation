@@ -64,7 +64,7 @@ CFPhysicsObjectInspector >> initializeInspector [
 		preventMouseEvents.
 	panel := self newPanel.
 	root addChild: panel.
-	self clear
+	self clearWithoutMotion
 ]
 
 { #category : 'private - building' }
@@ -238,45 +238,58 @@ CFPhysicsObjectInspector >> clear [
 ]
 
 { #category : 'private - visibility' }
-CFPhysicsObjectInspector >> showPanel [
+CFPhysicsObjectInspector >> clearWithoutMotion [
+	selectedPhysics := nil.
+	valueElements valuesDo: [ :each | each text: '' ].
 	visibilityMotion ifNotNil: [
 		visibilityMotion cancelPreservingCurrentPresentation.
 		visibilityMotion := nil ].
+	panel
+		opacity: 0.0;
+		visibility: BlVisibility gone.
+	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> showPanel [
 	panel visibility: BlVisibility visible.
 	panel isAttachedToSceneGraph ifFalse: [
 		panel opacity: 1.0.
 		^ self ].
-	panel opacity = 1.0 ifTrue: [ ^ self ].
-	visibilityMotion := panel motion
-		duration: 180 milliSeconds;
-		fadeIn.
-	visibilityMotion onTerminalDo: [ :aMotion |
-		visibilityMotion == aMotion ifTrue: [ visibilityMotion := nil ] ].
+	self animateOpacityTo: 1.0 duration: 180 milliSeconds.
 	^ self
 ]
 
 { #category : 'private - visibility' }
 CFPhysicsObjectInspector >> hidePanel [
 	panel visibility == BlVisibility gone ifTrue: [ ^ self ].
-	visibilityMotion ifNotNil: [
-		visibilityMotion cancelPreservingCurrentPresentation.
-		visibilityMotion := nil ].
 	panel isAttachedToSceneGraph ifFalse: [
-		panel
-			opacity: 0.0;
-			visibility: BlVisibility gone.
-		^ self ].
+		^ self clearWithoutMotion ].
 	panel opacity = 0.0 ifTrue: [
 		panel visibility: BlVisibility gone.
 		^ self ].
-	visibilityMotion := panel motion
-		duration: 140 milliSeconds;
-		fadeOut.
-	visibilityMotion onTerminalDo: [ :aMotion |
-		visibilityMotion == aMotion ifTrue: [ visibilityMotion := nil ].
-		(selectedPhysics isNil and: [ aMotion isCompleted ]) ifTrue: [
-			panel visibility: BlVisibility gone ] ].
+	self animateOpacityTo: 0.0 duration: 140 milliSeconds.
 	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> animateOpacityTo: anOpacity duration: aDuration [
+	| aMotion |
+	aMotion := panel space cfMotionCoordinator
+		retarget: (CFMotionPropertyTrack
+			on: panel
+			property: CFMotionOpacityProperty uniqueInstance
+			target: anOpacity)
+		duration: aDuration
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	visibilityMotion := aMotion.
+	aMotion onTerminalDo: [ :completedMotion |
+		visibilityMotion == completedMotion ifTrue: [ visibilityMotion := nil ].
+		(selectedPhysics isNil
+			and: [ completedMotion isCompleted
+			and: [ panel opacity = 0.0 ] ]) ifTrue: [
+			panel visibility: BlVisibility gone ] ].
+	^ aMotion
 ]
 
 { #category : 'testing' }
@@ -321,7 +334,7 @@ CFPhysicsObjectInspector >> release [
 	released ifTrue: [ ^ self ].
 	released := true.
 	visibilityMotion ifNotNil: #cancel.
-	self clear.
+	self clearWithoutMotion.
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self

@@ -74,5 +74,6 @@ CFPhysicsOverlayControls >> unavailableToggleLabel: aString [
 
 { #category : 'controlling' }
 CFPhysicsOverlayControls >> release [
-	element ifNotNil: [ element detach ]
+	element ifNotNil: [
+		element hasParent ifTrue: [ element removeFromParent ] ]
 ]

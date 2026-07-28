@@ -190,6 +190,10 @@ CFPhysicsOverlay >> refreshSelectedObject [
 { #category : 'updating' }
 CFPhysicsOverlay >> refresh [
 	| bodies live |
+	"A structural refresh is the explicit boundary at which Bloc membership
+	changes are reconciled with the Physics world. Frame diagnostics deliberately
+	do not perform this work."
+	world synchroniseMembership.
 	bodies := world bodyStatesInOrder.
 	live := IdentitySet new.
 	live addAll: bodies.
@@ -197,7 +201,7 @@ CFPhysicsOverlay >> refresh [
 		| anElement |
 		anElement := bodyElements removeKey: body.
 		anElement release.
-		anElement removeFromParent ].
+		anElement hasParent ifTrue: [ anElement removeFromParent ] ].
 	bodies do: [ :body |
 		| anElement |
 		anElement := bodyElements at: body ifAbsentPut: [ | created |
@@ -225,18 +229,20 @@ CFPhysicsOverlay >> contactsEnabled: aBoolean [
 
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
+	| contactsWereEnabled |
+	contactsWereEnabled := controls notNil and: [ controls contactsEnabled ].
 	self clearSelection.
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
+	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
 	controls ifNotNil: #release.
 	contactOverlay ifNotNil: #release.
-	controls contactsEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
 	objectInspector ifNotNil: #release.
-	controlRoot ifNotNil: [ controlRoot detach. controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
+	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
 	bodyElements valuesDo: [ :each | each release ].
 	bodyElements removeAll.
-	root detach.
-	root hasParent ifTrue: [ root removeFromParent ]
+	root hasParent ifTrue: [ root removeFromParent ].
+	^ self
 ]
 
 { #category : 'actions' }
