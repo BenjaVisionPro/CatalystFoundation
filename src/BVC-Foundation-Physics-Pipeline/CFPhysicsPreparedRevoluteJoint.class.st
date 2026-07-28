@@ -81,7 +81,7 @@ CFPhysicsPreparedRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumbe
 
 { #category : 'writing back' }
 CFPhysicsPreparedRevoluteJoint >> writeImpulsesBack [
-	joint
+	joint solverCommitTarget
 		accumulatedImpulse: impulse;
 		motorImpulse: motorImpulse
 ]

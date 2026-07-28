@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs' ],
+	#instVars : [ 'bodies', 'contacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -13,7 +13,9 @@ CFPhysicsWorldState >> initialize [
 	contacts := #().
 	joints := #().
 	explicitlyContainedBodies := #().
-	collisionSuppressedBodyPairs := #()
+	collisionSuppressedBodyPairs := #().
+	bodyStates := IdentityDictionary new.
+	orderedBodyStates := #()
 ]
 
 { #category : 'accessing' }
@@ -66,4 +68,18 @@ CFPhysicsWorldState >> collisionSuppressedBodyPairs [ ^ collisionSuppressedBodyP
 { #category : 'accessing' }
 CFPhysicsWorldState >> collisionSuppressedBodyPairs: aCollection [
 	collisionSuppressedBodyPairs := aCollection asArray
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> bodyStates [ ^ bodyStates ]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> bodyStates: aDictionary [ bodyStates := aDictionary ]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> orderedBodyStates [ ^ orderedBodyStates ]
+
+{ #category : 'accessing' }
+CFPhysicsWorldState >> orderedBodyStates: aCollection [
+	orderedBodyStates := aCollection asArray
 ]

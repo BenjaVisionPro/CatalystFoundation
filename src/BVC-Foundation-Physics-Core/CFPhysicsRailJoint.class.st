@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRailJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceTranslation', 'referenceAngle', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse', 'collideConnected' ],
+	#instVars : [ 'endpointPair', 'axis', 'normal', 'referenceTranslation', 'referenceAngle', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'active', 'sequence', 'accumulatedPerpendicularImpulse', 'accumulatedAngularImpulse', 'collideConnected', 'sourceJoint' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -183,3 +183,20 @@ CFPhysicsRailJoint >> wakeBodies [
 
 { #category : 'controlling' }
 CFPhysicsRailJoint >> release [ active := false ]
+
+
+{ #category : 'capturing' }
+CFPhysicsRailJoint >> capturedForStep [
+	| captured |
+	captured := self shallowCopy.
+	captured
+		endpointPair: (CFPhysicsCapturedEndpointPair from: endpointPair);
+		sourceJoint: self.
+	^ captured
+]
+
+{ #category : 'private - capturing' }
+CFPhysicsRailJoint >> sourceJoint: aJoint [ sourceJoint := aJoint ]
+
+{ #category : 'committing' }
+CFPhysicsRailJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]

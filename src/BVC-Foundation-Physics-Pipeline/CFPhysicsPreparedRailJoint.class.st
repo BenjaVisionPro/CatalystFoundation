@@ -73,7 +73,7 @@ CFPhysicsPreparedRailJoint >> angularImpulse: aNumber [ angularImpulse := aNumbe
 
 { #category : 'writing back' }
 CFPhysicsPreparedRailJoint >> writeImpulsesBack [
-	joint
+	joint solverCommitTarget
 		accumulatedPerpendicularImpulse: perpendicularImpulse;
 		accumulatedAngularImpulse: angularImpulse
 ]

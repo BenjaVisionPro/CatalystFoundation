@@ -1209,7 +1209,6 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	| result expectedTypes |
 	result := self stepPipelineExposesTheComposedStep.
 	expectedTypes := {
-		CFPhysicsBodyStateCaptureStage.
 		CFPhysicsVelocityIntegrationStage.
 		CFPhysicsPairFinderStage.
 		CFPhysicsContactUpdateStage.
@@ -1225,15 +1224,14 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	expectedTypes withIndexDo: [ :stageType :index |
 		self assert: ((result executedStages at: index) isKindOf: stageType) ].
 	self assert: result stageExecutions first output == result bodyStates.
-	self assert: result stageExecutions second output == result bodyStates.
-	self assert: result stageExecutions third output equals: result pairs.
-	self assert: result stageExecutions fourth output == result contactResult.
-	self assert: result stageExecutions fifth output equals: result constraints.
-	self assert: result stageExecutions sixth output equals: result islands.
-	self assert: (result stageExecutions at: 8) output == result solver.
-	self assert: (result stageExecutions at: 9) output contactResults equals: result contactSolveResults.
-	self assert: (result stageExecutions at: 9) output hitEvents equals: result hitEvents.
-	self assert: (result stageExecutions at: 12) output equals: result contactEvents.
+	self assert: result stageExecutions second output equals: result pairs.
+	self assert: result stageExecutions third output == result contactResult.
+	self assert: result stageExecutions fourth output equals: result constraints.
+	self assert: result stageExecutions fifth output equals: result islands.
+	self assert: (result stageExecutions at: 7) output == result solver.
+	self assert: (result stageExecutions at: 8) output contactResults equals: result contactSolveResults.
+	self assert: (result stageExecutions at: 8) output hitEvents equals: result hitEvents.
+	self assert: (result stageExecutions at: 11) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -1246,14 +1244,13 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 12.
-	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
-	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
-	self assert: stages third class equals: CFPhysicsPairFinderStage.
-	self assert: (stages at: 10) class equals: CFPhysicsContinuousStepStage.
-	self assert: (stages at: 11) class equals: CFPhysicsIslandSleepingStage.
+	self assert: stages size equals: 11.
+	self assert: stages first class equals: CFPhysicsVelocityIntegrationStage.
+	self assert: stages second class equals: CFPhysicsPairFinderStage.
+	self assert: (stages at: 9) class equals: CFPhysicsContinuousStepStage.
+	self assert: (stages at: 10) class equals: CFPhysicsIslandSleepingStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
-	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 5).
+	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 4).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
 ]
@@ -6150,4 +6147,59 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 	self assert: contacts beganContacts first isSensor.
 	self assert: first isSensor not.
 	^ contacts
+]
+
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
+	<gtExample>
+	| world body state solution |
+	world := CFPhysicsWorld new.
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	world instVarNamed: #bodyStates put: (IdentityDictionary new at: body put: body; yourself).
+	state := world captureStateAfterSynchronisation.
+	body
+		position: 100 @ 0;
+		velocity: 50 @ 0.
+	solution := world stepPipeline solve: state.
+	self assert: state orderedBodyStates size equals: 1.
+	self assert: (state bodyStates at: body) == state orderedBodyStates first.
+	self assert: state orderedBodyStates first startTransform position equals: 0 @ 0.
+	self assert: body position equals: 100 @ 0.
+	^ solution
+]
+
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve [
+	<gtExample>
+	| world first second joint state capturedJoint solution prepared |
+	world := CFPhysicsWorld new.
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 40 @ 0 extent: 20 @ 20.
+	world instVarNamed: #bodyStates put: (IdentityDictionary new
+		at: first put: first;
+		at: second put: second;
+		yourself).
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	joint
+		sequence: 1;
+		restLength: 25;
+		accumulatedImpulse: 3.0.
+	world addDistanceJoint: joint.
+	state := world captureStateAfterSynchronisation.
+	capturedJoint := state joints first.
+	joint
+		restLength: 100;
+		accumulatedImpulse: 0.0.
+	solution := world stepPipeline solve: state.
+	prepared := solution pipelineResult jointConstraints first.
+	self assert: capturedJoint ~~ joint.
+	self assert: capturedJoint solverCommitTarget == joint.
+	self assert: prepared baseSeparation equals: 15.0.
+	self assert: prepared impulse equals: 3.0 * state step warmStartRatio.
+	self assert: joint accumulatedImpulse equals: 0.0.
+	solution pipelineResult commitJointConstraints.
+	self assert: joint accumulatedImpulse equals: prepared impulse.
+	^ solution
 ]

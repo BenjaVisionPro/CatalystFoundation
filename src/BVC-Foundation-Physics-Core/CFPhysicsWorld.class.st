@@ -358,7 +358,7 @@ CFPhysicsWorld >> synchroniseForStateCapture [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureStateAfterSynchronisation [
-	| bodies step explicitlyContainedBodies |
+	| bodies step explicitlyContainedBodies capturedBodyStates orderedBodyStates capturedJoints index |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
@@ -368,10 +368,21 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 	self prepareSpringConstraintsForStep: step timeStep.
 	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	self preparePointerConstraintsForStep: step timeStep.
+	capturedBodyStates := IdentityDictionary new.
+	orderedBodyStates := Array new: bodies size.
+	capturedJoints := self joints collect: #capturedForStep.
+	index := 0.
+	bodies do: [ :body |
+		| bodyState |
+		bodyState := CFPhysicsBodyStepState on: body.
+		capturedBodyStates at: body put: bodyState.
+		orderedBodyStates at: (index := index + 1) put: bodyState ].
 	^ CFPhysicsWorldState new
 		bodies: bodies;
+		bodyStates: capturedBodyStates;
+		orderedBodyStates: orderedBodyStates;
 		contacts: activeContacts;
-		joints: self joints;
+		joints: capturedJoints;
 		collisionSuppressedBodyPairs: self collisionSuppressedBodyPairs;
 		step: step;
 		gravity: gravity;

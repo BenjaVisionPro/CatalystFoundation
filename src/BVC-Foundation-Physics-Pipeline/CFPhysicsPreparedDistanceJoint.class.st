@@ -33,5 +33,5 @@ CFPhysicsPreparedDistanceJoint >> impulse: aNumber [ impulse := aNumber ]
 
 { #category : 'writing back' }
 CFPhysicsPreparedDistanceJoint >> writeImpulsesBack [
-	joint accumulatedImpulse: impulse
+	joint solverCommitTarget accumulatedImpulse: impulse
 ]

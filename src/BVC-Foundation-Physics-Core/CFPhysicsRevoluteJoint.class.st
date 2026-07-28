@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'collideConnected' ],
+	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'collideConnected', 'sourceJoint' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -170,3 +170,20 @@ CFPhysicsRevoluteJoint >> wakeBodies [
 
 { #category : 'controlling' }
 CFPhysicsRevoluteJoint >> release [ active := false ]
+
+
+{ #category : 'capturing' }
+CFPhysicsRevoluteJoint >> capturedForStep [
+	| captured |
+	captured := self shallowCopy.
+	captured
+		endpointPair: (CFPhysicsCapturedEndpointPair from: endpointPair);
+		sourceJoint: self.
+	^ captured
+]
+
+{ #category : 'private - capturing' }
+CFPhysicsRevoluteJoint >> sourceJoint: aJoint [ sourceJoint := aJoint ]
+
+{ #category : 'committing' }
+CFPhysicsRevoluteJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsDistanceJoint',
 	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'restLength', 'active', 'sequence', 'accumulatedImpulse', 'collideConnected' ],
+	#instVars : [ 'endpointPair', 'restLength', 'active', 'sequence', 'accumulatedImpulse', 'collideConnected', 'sourceJoint' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -110,3 +110,20 @@ CFPhysicsDistanceJoint >> wakeBodies [
 
 { #category : 'controlling' }
 CFPhysicsDistanceJoint >> release [ active := false ]
+
+
+{ #category : 'capturing' }
+CFPhysicsDistanceJoint >> capturedForStep [
+	| captured |
+	captured := self shallowCopy.
+	captured
+		endpointPair: (CFPhysicsCapturedEndpointPair from: endpointPair);
+		sourceJoint: self.
+	^ captured
+]
+
+{ #category : 'private - capturing' }
+CFPhysicsDistanceJoint >> sourceJoint: aJoint [ sourceJoint := aJoint ]
+
+{ #category : 'committing' }
+CFPhysicsDistanceJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]

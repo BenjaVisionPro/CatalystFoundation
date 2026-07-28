@@ -12,7 +12,6 @@ CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
 	sleepBehaviour := CFPhysicsIslandSleepStage new.
 	^ self new
 		stages: {
-			CFPhysicsBodyStateCaptureStage new.
 			CFPhysicsVelocityIntegrationStage new.
 			CFPhysicsPairFinderStage new.
 			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
@@ -97,6 +96,7 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 		step: step
 		gravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
 	stages do: [ :stage |
 		result recordStage: stage output: (stage executeOn: result) ].
 	^ result
@@ -125,6 +125,7 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 		step: step
 		gravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
+	CFPhysicsBodyStateCaptureStage new executeOn: result.
 	stages do: [ :stage |
 		| output |
 		output := ProcessTelemetry
@@ -170,17 +171,27 @@ CFPhysicsStepPipeline >> collisionSuppressedBodyPairsFrom: joints [
 		collect: [ :joint | { joint firstBody. joint secondBody } ]
 ]
 
-{ #category : 'solving' }
-CFPhysicsStepPipeline >> solve: aWorldState [
-	| pipelineResult |
-	pipelineResult := self
-		stepBodies: aWorldState bodies
+{ #category : 'private - stepping' }
+CFPhysicsStepPipeline >> newResultForWorldState: aWorldState [
+	^ (self
+		newResultForBodies: aWorldState bodies
 		fromContacts: aWorldState contacts
 		joints: aWorldState joints
 		collisionSuppressedBodyPairs: aWorldState collisionSuppressedBodyPairs
 		step: aWorldState step
 		gravity: aWorldState gravity
-		restitutionThreshold: aWorldState restitutionThreshold.
+		restitutionThreshold: aWorldState restitutionThreshold)
+		bodyStates: aWorldState bodyStates;
+		orderedBodyStates: aWorldState orderedBodyStates;
+		yourself
+]
+
+{ #category : 'solving' }
+CFPhysicsStepPipeline >> solve: aWorldState [
+	| pipelineResult |
+	pipelineResult := self newResultForWorldState: aWorldState.
+	stages do: [ :stage |
+		pipelineResult recordStage: stage output: (stage executeOn: pipelineResult) ].
 	^ CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies
@@ -189,14 +200,13 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 { #category : 'solving' }
 CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 	| pipelineResult |
-	pipelineResult := self
-		stepBodiesWithTelemetry: aWorldState bodies
-		fromContacts: aWorldState contacts
-		joints: aWorldState joints
-		collisionSuppressedBodyPairs: aWorldState collisionSuppressedBodyPairs
-		step: aWorldState step
-		gravity: aWorldState gravity
-		restitutionThreshold: aWorldState restitutionThreshold.
+	pipelineResult := self newResultForWorldState: aWorldState.
+	stages do: [ :stage |
+		| output |
+		output := ProcessTelemetry
+			time: [ stage class name asString ]
+			during: [ stage executeOnWithTelemetry: pipelineResult ].
+		pipelineResult recordStage: stage output: output ].
 	^ CFPhysicsWorldSolution
 		pipelineResult: pipelineResult
 		explicitlyContainedBodies: aWorldState explicitlyContainedBodies
