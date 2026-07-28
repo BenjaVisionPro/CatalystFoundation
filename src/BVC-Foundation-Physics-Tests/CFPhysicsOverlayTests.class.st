@@ -191,8 +191,8 @@ CFPhysicsOverlayTests >> physicsOverlayOwnsOneContactRenderingPass [
 	| host overlay |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	self assert: overlay contactPass notNil.
-	self assert: overlay contactPass elements isEmpty.
+	self assert: overlay contactOverlay notNil.
+	self assert: overlay contactOverlay visuals isEmpty.
 	^ overlay
 ]
 
@@ -224,11 +224,11 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 	second physics position: 80 @ 80.
 	world step.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
-	self assert: overlay contactPass elements isNotEmpty.
+	self assert: overlay contactOverlay visuals isNotEmpty.
 	second physics position: 260 @ 180.
 	world step.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
-	self assert: overlay contactPass elements isEmpty.
+	self assert: overlay contactOverlay visuals isEmpty.
 	^ overlay
 ]
 
@@ -295,18 +295,18 @@ CFPhysicsOverlayTests >> physicsOverlayFrameHandlerFollowsShowHideShowLifecycle 
 	world step.
 	firstOverlay := host existingPhysicsOverlay.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
-	self assert: firstOverlay contactPass elements isNotEmpty.
+	self assert: firstOverlay contactOverlay visuals isNotEmpty.
 	host hidePhysicsOverlay.
-	self assert: firstOverlay contactPass elements isEmpty.
+	self assert: firstOverlay contactOverlay visuals isEmpty.
 	secondOverlay := host showPhysicsOverlay.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
-	self assert: secondOverlay contactPass elements isNotEmpty.
-	self assert: firstOverlay contactPass elements isEmpty.
+	self assert: secondOverlay contactOverlay visuals isNotEmpty.
+	self assert: firstOverlay contactOverlay visuals isEmpty.
 	second physics position: 260 @ 180.
 	world step.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
-	self assert: secondOverlay contactPass elements isEmpty.
-	self assert: firstOverlay contactPass elements isEmpty.
+	self assert: secondOverlay contactOverlay visuals isEmpty.
+	self assert: firstOverlay contactOverlay visuals isEmpty.
 	^ host
 ]
 

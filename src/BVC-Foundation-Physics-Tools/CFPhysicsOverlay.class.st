@@ -243,5 +243,52 @@ CFPhysicsOverlay >> release [
 CFPhysicsOverlay class >> hostFor: anObject [
 	^ (anObject respondsTo: #physicsOverlayHost)
 		ifTrue: [ anObject physicsOverlayHost ]
-		ifFalse: [ anObject ]
+		ifFalse: [ nil ]
+]
+
+{ #category : 'testing' }
+CFPhysicsOverlay class >> hasWorldFor: anObject [
+	| aHost physics |
+	aHost := self hostFor: anObject.
+	aHost ifNil: [ ^ false ].
+	physics := aHost existingPhysics.
+	^ physics notNil and: [ physics isWorld ]
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> toggleFor: anObject [
+	| aHost |
+	aHost := self hostFor: anObject.
+	(self hasWorldFor: anObject) ifFalse: [ ^ nil ].
+	^ aHost togglePhysicsOverlay
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> gtToggleActionFor: anObject action: anAction [
+	^ anAction explicit stencil: [ self toggleButtonFor: anObject ]
+]
+
+{ #category : 'actions' }
+CFPhysicsOverlay class >> toggleButtonFor: anObject [
+	| aButton aHost aWorldChangedHandler |
+	aHost := self hostFor: anObject.
+	aButton := BrButton new
+		aptitude: BrGlamorousButtonWithIconAptitude;
+		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) height: 16 ] asStencil);
+		label: 'Toggle physics overlay';
+		action: [ self toggleFor: anObject ].
+	aHost ifNil: [
+		aButton visibility: BlVisibility gone.
+		^ aButton ].
+	aWorldChangedHandler := BlEventHandler
+		on: CFPhysicsWorldAttachmentChanged
+		do: [ :anEvent | aButton phlow fireToolUpdateWish ].
+	aHost addEventHandler: aWorldChangedHandler.
+	aButton
+		when: BlElementRemovedFromParentEvent
+		do: [ :anEvent | aHost removeEventHandler: aWorldChangedHandler ].
+	aButton visibility: ((self hasWorldFor: anObject)
+		ifTrue: [ BlVisibility visible ]
+		ifFalse: [ BlVisibility gone ]).
+	^ aButton
 ]

@@ -239,20 +239,43 @@ CFPhysicsObjectInspector >> clear [
 
 { #category : 'private - visibility' }
 CFPhysicsObjectInspector >> showPanel [
-	visibilityMotion ifNotNil: #cancel.
+	visibilityMotion ifNotNil: [
+		visibilityMotion cancelPreservingCurrentPresentation.
+		visibilityMotion := nil ].
 	panel visibility: BlVisibility visible.
-	panel opacity: 0.0.
-	visibilityMotion := panel motion duration: 180 milliSeconds; fadeIn.
+	panel isAttachedToSceneGraph ifFalse: [
+		panel opacity: 1.0.
+		^ self ].
+	panel opacity = 1.0 ifTrue: [ ^ self ].
+	visibilityMotion := panel motion
+		duration: 180 milliSeconds;
+		fadeIn.
+	visibilityMotion onTerminalDo: [ :aMotion |
+		visibilityMotion == aMotion ifTrue: [ visibilityMotion := nil ] ].
 	^ self
 ]
 
 { #category : 'private - visibility' }
 CFPhysicsObjectInspector >> hidePanel [
 	panel visibility == BlVisibility gone ifTrue: [ ^ self ].
-	visibilityMotion ifNotNil: #cancel.
-	visibilityMotion := panel motion duration: 140 milliSeconds; fadeOut.
+	visibilityMotion ifNotNil: [
+		visibilityMotion cancelPreservingCurrentPresentation.
+		visibilityMotion := nil ].
+	panel isAttachedToSceneGraph ifFalse: [
+		panel
+			opacity: 0.0;
+			visibility: BlVisibility gone.
+		^ self ].
+	panel opacity = 0.0 ifTrue: [
+		panel visibility: BlVisibility gone.
+		^ self ].
+	visibilityMotion := panel motion
+		duration: 140 milliSeconds;
+		fadeOut.
 	visibilityMotion onTerminalDo: [ :aMotion |
-		selectedPhysics ifNil: [ panel visibility: BlVisibility gone ] ].
+		visibilityMotion == aMotion ifTrue: [ visibilityMotion := nil ].
+		(selectedPhysics isNil and: [ aMotion isCompleted ]) ifTrue: [
+			panel visibility: BlVisibility gone ] ].
 	^ self
 ]
 
