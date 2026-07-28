@@ -6485,3 +6485,27 @@ CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
 	self assert: backgroundStep pipeline ~~ world stepPipeline.
 	^ backgroundStep
 ]
+
+{ #category : 'examples - background stepping' }
+CFPhysicsCleanSlateTests >> staleSolveCannotCompeteWithRestartedWorldProgress [
+	<gtExample>
+	| world oldState oldSolution newState newSolution committed |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	oldState := world captureStateIfIdle.
+	self assert: oldState notNil.
+	oldSolution := world stepPipeline solve: oldState.
+	world invalidateTopology.
+	self assert: world hasSolveInFlight not.
+	world abandonActiveSolve.
+	newState := world captureStateIfIdle.
+	self assert: newState notNil.
+	newSolution := world stepPipeline solve: newState.
+	self assert: (world commit: oldSolution) isNil.
+	self assert: world hasSolveInFlight.
+	committed := world commit: newSolution.
+	self assert: committed notNil.
+	self assert: world hasSolveInFlight not.
+	self assert: world lastStepResult == committed.
+	self assert: world stepNumber equals: newState step stepNumber.
+	^ committed
+]
