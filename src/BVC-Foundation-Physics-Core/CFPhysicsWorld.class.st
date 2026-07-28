@@ -1240,6 +1240,11 @@ CFPhysicsWorld >> abandonSolveTicket: aSolveTicket [
 
 
 { #category : 'private - telemetry' }
+CFPhysicsWorld >> discardDetachedTelemetrySignals [
+	telemetryLogger ifNotNil: [ telemetryLogger discardDetachedSignals ]
+]
+
+{ #category : 'private - telemetry' }
 CFPhysicsWorld >> telemetryContextForState: aWorldState [
 	^ CFPhysicsStepTelemetryContext world: self state: aWorldState
 ]

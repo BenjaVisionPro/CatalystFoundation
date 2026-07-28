@@ -50,6 +50,7 @@ CFPhysicsWorldBackgroundStep >> start [
 	| owner |
 	owner := world owner.
 	(owner notNil and: [ owner isAttachedToSceneGraph ]) ifFalse: [ ^ false ].
+	world discardDetachedTelemetrySignals.
 	pipeline := world stepPipeline.
 	telemetryEnabled := world telemetryEnabled.
 	state := world captureStateIfIdle.

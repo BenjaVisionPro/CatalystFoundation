@@ -4,7 +4,7 @@ I record ProcessTelemetry signals whose Physics metadata identifies my world. My
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
-	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'pendingSolveSignals', 'rejectedSolveTickets' ],
+	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'detachedSignals' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -22,8 +22,7 @@ CFPhysicsTelemetryLogger >> initialize [
 	recordings := CFPhysicsTelemetryRingBuffer capacity: capacity.
 	lastAnnouncementMilliseconds := 0.
 	announcementIntervalMilliseconds := 250.
-	pendingSolveSignals := Dictionary new.
-	rejectedSolveTickets := Set new
+	detachedSignals := SharedQueue new
 ]
 
 { #category : 'accessing' }
@@ -56,10 +55,8 @@ CFPhysicsTelemetryLogger >> nextPut: aSignal [
 	(physicsData notNil and: [ (physicsData at: #physicsWorld ifAbsent: [ nil ]) == world ])
 		ifFalse: [ ^ self ].
 	physicsData at: #telemetryRecordedAt put: DateAndTime now.
-	(physicsData at: #solveTicket ifAbsent: [ nil ]) ifNotNil: [ :solveTicket |
-		(rejectedSolveTickets remove: solveTicket ifAbsent: [ nil ])
-			ifNotNil: [ ^ self ].
-		pendingSolveSignals at: solveTicket put: aSignal.
+	(physicsData at: #solveTicket ifAbsent: [ nil ]) ifNotNil: [
+		detachedSignals nextPut: aSignal.
 		^ self ].
 	self publish: aSignal
 ]
@@ -72,19 +69,21 @@ CFPhysicsTelemetryLogger >> publish: aSignal [
 
 { #category : 'detached stepping' }
 CFPhysicsTelemetryLogger >> commitSolveTicket: aSolveTicket [
-	| signal |
-	rejectedSolveTickets remove: aSolveTicket ifAbsent: [ ].
-	signal := pendingSolveSignals removeKey: aSolveTicket ifAbsent: [ nil ].
-	signal ifNotNil: [ self publish: signal ]
+	| signal matchingSignal |
+	[ (signal := detachedSignals nextOrNil) isNotNil ] whileTrue: [
+		((signal data at: #physicsFrame) at: #solveTicket) = aSolveTicket
+			ifTrue: [ matchingSignal := signal ] ].
+	matchingSignal ifNotNil: [ self publish: matchingSignal ]
 ]
 
 { #category : 'detached stepping' }
 CFPhysicsTelemetryLogger >> rejectSolveTicket: aSolveTicket [
-	aSolveTicket ifNil: [ ^ self ].
-	pendingSolveSignals removeKey: aSolveTicket ifAbsent: [ ].
-	rejectedSolveTickets size >= capacity ifTrue: [
-		rejectedSolveTickets remove: rejectedSolveTickets anyOne ].
-	rejectedSolveTickets add: aSolveTicket
+	self discardDetachedSignals
+]
+
+{ #category : 'detached stepping' }
+CFPhysicsTelemetryLogger >> discardDetachedSignals [
+	[ detachedSignals nextOrNil isNotNil ] whileTrue
 ]
 
 { #category : 'private - announcing' }
