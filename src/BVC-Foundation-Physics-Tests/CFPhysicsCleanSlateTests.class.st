@@ -836,6 +836,29 @@ CFPhysicsCleanSlateTests >> persistentContactStorageAlternatesBetweenTwoGenerati
 	^ fourthContact
 ]
 
+
+{ #category : 'examples - world cutover' }
+CFPhysicsCleanSlateTests >> disappearingContactReusesItsGenerationWhenItReturns [
+	<gtExample>
+	| world movingBody contact constraint point returnedContact |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	movingBody := world bodyStatesInOrder second.
+	contact := world activeContacts first.
+	constraint := contact preparedConstraint.
+	point := constraint points first.
+	movingBody position: 20 @ 100.
+	world step.
+	self assert: world activeContacts isEmpty.
+	movingBody position: 20 @ 15.
+	world step.
+	self assert: world activeContacts size equals: 1.
+	returnedContact := world activeContacts first.
+	self assert: returnedContact == contact.
+	self assert: returnedContact preparedConstraint == constraint.
+	self assert: returnedContact preparedConstraint points first == point.
+	^ returnedContact
+]
+
 { #category : 'examples - islands' }
 CFPhysicsCleanSlateTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
 	<gtExample>
@@ -6394,8 +6417,10 @@ CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve 
 { #category : 'examples - background stepping' }
 CFPhysicsCleanSlateTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
 	<gtExample>
-	| world startedAgain |
+	| world space startedAgain |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	space := BlSpace new.
+	space root addChild: world owner.
 	self assert: world startBackgroundStep.
 	self assert: world hasSolveInFlight.
 	startedAgain := world startBackgroundStep.
@@ -6470,8 +6495,10 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 { #category : 'examples - background stepping' }
 CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
 	<gtExample>
-	| world backgroundStep capturedPipeline replacementPipeline |
+	| world space backgroundStep capturedPipeline replacementPipeline |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	space := BlSpace new.
+	space root addChild: world owner.
 	capturedPipeline := world stepPipeline.
 	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
 	self assert: backgroundStep start.
@@ -6508,4 +6535,18 @@ CFPhysicsCleanSlateTests >> staleSolveCannotCompeteWithRestartedWorldProgress [
 	self assert: world lastStepResult == committed.
 	self assert: world stepNumber equals: newState step stepNumber.
 	^ committed
+]
+
+
+{ #category : 'examples - background stepping' }
+CFPhysicsCleanSlateTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
+	<gtExample>
+	| world backgroundStep |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	self assert: world owner isAttachedToSceneGraph not.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	self assert: backgroundStep start not.
+	self assert: backgroundStep state isNil.
+	self assert: world hasSolveInFlight not.
+	^ world
 ]

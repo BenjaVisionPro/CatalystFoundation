@@ -43,7 +43,7 @@ CFPhysicsWorldBackgroundStep >> task [
 CFPhysicsWorldBackgroundStep >> start [
 	| owner |
 	owner := world owner.
-	owner ifNil: [ ^ false ].
+	(owner notNil and: [ owner isAttachedToSceneGraph ]) ifFalse: [ ^ false ].
 	pipeline := world stepPipeline.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
