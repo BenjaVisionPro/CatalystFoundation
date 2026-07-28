@@ -5072,6 +5072,7 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrd
 	self assert: result continuousStepResult impacts size equals: 2.
 	self assert: result continuousStepResult impacts first pair firstBody equals: firstMoving.
 	self assert: result continuousStepResult impacts second pair firstBody equals: secondMoving.
+	result commitBodyStates.
 	self assert: (firstMoving position closeTo: 10 @ 0).
 	self assert: (secondMoving position closeTo: 20 @ 100).
 	self assert: result activeContacts isEmpty.
@@ -5108,6 +5109,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExi
 	self assert: result hasContinuousImpact not.
 	self assert: result continuousStepResult isNil.
 	self assert: result solver notNil.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 10 @ 0).
 	^ result
 ]
@@ -5177,6 +5179,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	self assert: result activeContacts first pair firstBody equals: overlapping.
 	self assert: result activeContacts first pair secondBody equals: obstacle.
 	self assert: result solver notNil.
+	result commitBodyStates.
 	self assert: overlapping position x < 0.0.
 	^ result
 ]
@@ -5208,6 +5211,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMoving
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
+	result commitBodyStates.
 	self assert: separate position x equals: 5.0.
 	^ result
 ]
@@ -5302,6 +5306,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 60 @ 0).
 	self assert: result contactBeganEvents isEmpty.
 	^ result
@@ -5342,6 +5347,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 10 @ 0).
 	^ result
 ]
@@ -5382,6 +5388,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 	self assert: result continuousSensorContacts first isSensor.
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 50 @ 0).
 	^ result
 ]
@@ -5420,6 +5427,7 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	self assert: secondResult contactBeganEvents isEmpty.
 	self assert: secondResult contactEndedEvents isEmpty.
 	self assert: secondResult continuousSensorContacts isEmpty.
+	secondResult commitBodyStates.
 	self assert: (moving position closeTo: 60 @ 0).
 	^ secondResult
 ]
