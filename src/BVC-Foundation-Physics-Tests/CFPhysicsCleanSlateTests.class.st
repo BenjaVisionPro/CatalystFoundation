@@ -6312,3 +6312,38 @@ CFPhysicsCleanSlateTests >> releasedWorldRejectsCapturedSolution [
 	self assert: world activeSolveTicket isNil.
 	^ world
 ]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> worldCapturesAtMostOneSolveAtATime [
+	<gtExample>
+	| world firstState secondState thirdState |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstState := world captureStateIfIdle.
+	secondState := world captureStateIfIdle.
+	self assert: firstState notNil.
+	self assert: world hasSolveInFlight.
+	self assert: secondState isNil.
+	world abandonSolveTicket: firstState solveTicket.
+	self assert: world hasSolveInFlight not.
+	thirdState := world captureStateIfIdle.
+	self assert: thirdState notNil.
+	self assert: thirdState solveTicket > firstState solveTicket.
+	^ thirdState
+]
+
+{ #category : 'examples - world state capture' }
+CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
+	<gtExample>
+	| world firstState secondState |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	firstState := world captureStateAfterSynchronisation.
+	secondState := world captureStateAfterSynchronisation.
+	self assert: secondState solveTicket > firstState solveTicket.
+	world abandonSolveTicket: firstState solveTicket.
+	self assert: world hasSolveInFlight.
+	self assert: world activeSolveTicket equals: secondState solveTicket.
+	world abandonSolveTicket: secondState solveTicket.
+	self assert: world hasSolveInFlight not.
+	^ world
+]
+

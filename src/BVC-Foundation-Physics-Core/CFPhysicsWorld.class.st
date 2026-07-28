@@ -357,6 +357,13 @@ CFPhysicsWorld >> stepWithoutTelemetry [
 	^ self commit: solution
 ]
 
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> captureStateIfIdle [
+	self hasSolveInFlight ifTrue: [ ^ nil ].
+	^ self captureState
+]
+
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureState [
 	self synchroniseForStateCapture.
@@ -1193,3 +1200,15 @@ CFPhysicsWorld >> topologyRevision [ ^ topologyRevision ]
 
 { #category : 'accessing - solution identity' }
 CFPhysicsWorld >> activeSolveTicket [ ^ activeSolveTicket ]
+
+{ #category : 'testing - solution identity' }
+CFPhysicsWorld >> hasSolveInFlight [
+	^ activeSolveTicket notNil
+]
+
+{ #category : 'private - solution identity' }
+CFPhysicsWorld >> abandonSolveTicket: aSolveTicket [
+	activeSolveTicket = aSolveTicket ifTrue: [
+		activeSolveTicket := nil ]
+]
+
