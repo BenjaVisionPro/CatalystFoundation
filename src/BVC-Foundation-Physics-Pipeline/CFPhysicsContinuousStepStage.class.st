@@ -16,7 +16,9 @@ CFPhysicsContinuousStepStage >> initialize [
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	| solvedPairs solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
-	solvedPairs := pairFinder pairsAmongSolvedStepStates: aStepResult orderedBodyStates.
+	solvedPairs := pairFinder
+		pairsAmongSolvedStepStates: aStepResult orderedBodyStates
+		collisionSuppressedBodyPairs: aStepResult collisionSuppressedBodyPairs.
 	solidPairs := solvedPairs reject: [ :pair |
 		self pairIsSensor: pair bodyStates: aStepResult bodyStates ].
 	sensorPairs := solvedPairs select: [ :pair |

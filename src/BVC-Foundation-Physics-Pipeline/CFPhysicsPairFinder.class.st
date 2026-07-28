@@ -110,6 +110,16 @@ CFPhysicsPairFinder >> shouldConsider: first with: second firstAABB: firstAABB s
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds [
+	| bodyPairs |
+	bodyPairs := stepStates collect: [ :state | state body ].
+	^ self
+		pairsAmongStepStates: stepStates
+		for: seconds
+		collisionSuppressedBodyPairs: (self collisionSuppressedBodyPairsAmong: bodyPairs)
+]
+
+{ #category : 'finding' }
+CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	| entries active pairs |
 	entries := (stepStates collect: [ :state |
 		{ state. state predictedSweptAABBFor: seconds. state body sequence } ]) asArray.
@@ -123,7 +133,8 @@ CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds [
 				shouldConsiderStepState: other first
 				with: entry first
 				firstAABB: other second
-				secondAABB: entry second) ifTrue: [
+				secondAABB: entry second
+				collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) ifTrue: [
 					pairs add: (CFPhysicsPair first: other first body second: entry first body) ] ].
 		active add: entry ].
 	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
@@ -140,12 +151,10 @@ CFPhysicsPairFinder >> shouldConsiderStepState: first with: second for: seconds 
 
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
-	^ self
-		shouldConsiderStepState: first
-		with: second
-		firstAABB: firstAABB
-		secondAABB: secondAABB
-		collisionSuppressedBodyPairs: #()
+	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
+	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
+	(self jointPreventsCollisionBetween: first body and: second body) ifTrue: [ ^ false ].
+	^ firstAABB overlaps: secondAABB
 ]
 
 { #category : 'testing' }
@@ -172,6 +181,15 @@ CFPhysicsPairFinder >> expireEntriesBefore: minimumX from: activeEntries [
 	activeEntries size to: 1 by: -1 do: [ :index |
 		((activeEntries at: index) second maximum x < minimumX) ifTrue: [
 			activeEntries removeAt: index ] ]
+]
+
+
+{ #category : 'private - filtering' }
+CFPhysicsPairFinder >> collisionSuppressedBodyPairsAmong: bodies [
+	bodies ifEmpty: [ ^ #() ].
+	^ bodies first world
+		ifNil: [ #() ]
+		ifNotNil: [ :world | world collisionSuppressedBodyPairs ]
 ]
 
 { #category : 'private - filtering' }

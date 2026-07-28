@@ -31,6 +31,18 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates step: step restit
 
 { #category : 'executing' }
 CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints step: step restitutionThreshold: restitutionThreshold [
+	^ self
+		executeBodyStates: bodyStates
+		joints: joints
+		collisionSuppressedBodyPairs: ((joints select: [ :joint |
+			joint isActive and: [ joint collideConnected not ] ])
+			collect: [ :joint | { joint firstBody. joint secondBody } ])
+		step: step
+		restitutionThreshold: restitutionThreshold
+]
+
+{ #category : 'executing' }
+CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step restitutionThreshold: restitutionThreshold [
 	| impacts impactSolveResults sensorContactsByKey remainingTime tolerance iterationLimitReached |
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
@@ -50,7 +62,8 @@ CFPhysicsContinuousImpactLoop >> executeBodyStates: bodyStates joints: joints st
 				iterationLimitReached: false ].
 		pairs := pairFinder
 			pairsAmongStepStates: bodyStates values
-			for: remainingTime.
+			for: remainingTime
+			collisionSuppressedBodyPairs: collisionSuppressedBodyPairs.
 		solidPairs := pairs reject: [ :pair |
 			(bodyStates at: pair firstBody) isSensor or: [
 				(bodyStates at: pair secondBody) isSensor ] ].
