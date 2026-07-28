@@ -6153,10 +6153,17 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 { #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 	<gtExample>
-	| world body state solution |
-	world := CFPhysicsWorld new.
-	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	world instVarNamed: #bodyStates put: (IdentityDictionary new at: body put: body; yourself).
+	| owner element world body state solution |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 20 @ 20;
+		yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	body := element physics bodyState.
+	body position: 0 @ 0.
 	state := world captureStateAfterSynchronisation.
 	body
 		position: 100 @ 0;
@@ -6173,17 +6180,25 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 { #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve [
 	<gtExample>
-	| world first second joint state capturedJoint solution prepared |
-	world := CFPhysicsWorld new.
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 40 @ 0 extent: 20 @ 20.
-	world instVarNamed: #bodyStates put: (IdentityDictionary new
-		at: first put: first;
-		at: second put: second;
-		yourself).
+	| owner firstElement secondElement world first second joint state capturedJoint solution prepared |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 20 @ 20;
+		yourself.
+	secondElement := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 20 @ 20;
+		yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	first := firstElement physics bodyState.
+	second := secondElement physics bodyState.
+	first position: 0 @ 0.
+	second position: 40 @ 0.
 	joint := CFPhysicsDistanceJoint between: first and: second.
 	joint
-		sequence: 1;
 		restLength: 25;
 		accumulatedImpulse: 3.0.
 	world addDistanceJoint: joint.
