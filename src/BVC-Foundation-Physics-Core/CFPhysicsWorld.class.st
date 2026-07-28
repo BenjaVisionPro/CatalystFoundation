@@ -384,6 +384,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	| pipelineResult step |
 	pipelineResult := aWorldSolution pipelineResult.
 	step := pipelineResult step.
+	pipelineResult commitBodyStates.
 	pipelineResult commitJointConstraints.
 	lastStepResult := pipelineResult.
 	activeContacts := pipelineResult activeContacts.

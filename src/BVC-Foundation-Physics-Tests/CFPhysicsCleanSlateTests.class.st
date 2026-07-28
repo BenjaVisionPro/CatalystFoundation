@@ -675,6 +675,8 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 		manifoldBetweenBody: ground
 		andBody: box.
 	self assert: result activeContacts size equals: 1.
+	self assert: box position y equals: 15.0.
+	result commitBodyStates.
 	self assert: box position y > 15.0.
 	self assert: manifold notNil.
 	self assert: manifold contactPoints first separation > -5.0.
@@ -686,6 +688,7 @@ CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 	<gtExample>
 	| firstResult ground box step pipeline secondResult |
 	firstResult := self stepPipelineExposesTheComposedStep.
+	firstResult commitBodyStates.
 	ground := firstResult bodies first.
 	box := firstResult bodies second.
 	step := CFPhysicsStep
@@ -1163,7 +1166,6 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 		CFPhysicsPostSolveStage.
 		CFPhysicsContinuousStepStage.
 		CFPhysicsIslandSleepingStage.
-		CFPhysicsBodyCommitStage.
 		CFPhysicsContactEventsStage }.
 	self assert: result executedStages size equals: expectedTypes size.
 	expectedTypes withIndexDo: [ :stageType :index |
@@ -1177,7 +1179,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: (result stageExecutions at: 8) output == result solver.
 	self assert: (result stageExecutions at: 9) output contactResults equals: result contactSolveResults.
 	self assert: (result stageExecutions at: 9) output hitEvents equals: result hitEvents.
-	self assert: (result stageExecutions at: 13) output equals: result contactEvents.
+	self assert: (result stageExecutions at: 12) output equals: result contactEvents.
 	^ result stageExecutions
 ]
 
@@ -1190,12 +1192,12 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 			manifoldBetweenBody: pair firstBody
 			andBody: pair secondBody ].
 	stages := pipeline stages.
-	self assert: stages size equals: 13.
+	self assert: stages size equals: 12.
 	self assert: stages first class equals: CFPhysicsBodyStateCaptureStage.
 	self assert: stages second class equals: CFPhysicsVelocityIntegrationStage.
 	self assert: stages third class equals: CFPhysicsPairFinderStage.
 	self assert: (stages at: 10) class equals: CFPhysicsContinuousStepStage.
-	self assert: (stages at: 12) class equals: CFPhysicsBodyCommitStage.
+	self assert: (stages at: 11) class equals: CFPhysicsIslandSleepingStage.
 	self assert: stages last class equals: CFPhysicsContactEventsStage.
 	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 5).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
@@ -4818,6 +4820,8 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
 	self assert: (result continuousStepResult fraction closeTo: 0.25).
+	self assert: moving position equals: 0 @ 0.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 10 @ 0).
 	self assert: (moving velocity closeTo: 40 @ 0).
 	self assert: result activeContacts isEmpty.
@@ -4889,6 +4893,8 @@ CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact not.
+	self assert: moving position equals: 0 @ 0.
+	result commitBodyStates.
 	self assert: (moving position closeTo: 10 @ 0).
 	self assert: result solver notNil.
 	^ result
@@ -5496,6 +5502,26 @@ CFPhysicsCleanSlateTests >> islandRebuildSplitsRemovedConnectivityDeterministica
 	self assert: (split first dynamicBodies collect: #sequence) equals: #(1 2).
 	self assert: (split second dynamicBodies collect: #sequence) equals: #(3).
 	^ split
+]
+
+{ #category : 'examples - step pipeline' }
+CFPhysicsCleanSlateTests >> solvedBodyStateRemainsDetachedUntilPipelineResultCommit [
+	<gtExample>
+	| body state result |
+	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 30 @ 40.
+	state := CFPhysicsBodyStepState on: body.
+	state
+		translateBy: 60 @ 60;
+		linearVelocity: 3 @ 4.
+	result := CFPhysicsStepPipelineResult new
+		orderedBodyStates: { state };
+		yourself.
+	self assert: body position equals: 10 @ 20.
+	self assert: body velocity equals: 0 @ 0.
+	result commitBodyStates.
+	self assert: body position equals: 70 @ 80.
+	self assert: body velocity equals: 3 @ 4.
+	^ result
 ]
 
 { #category : 'examples - constraint preparation' }

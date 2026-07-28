@@ -66,6 +66,11 @@ CFPhysicsStepPipelineResult >> jointConstraints [ ^ jointConstraints ]
 CFPhysicsStepPipelineResult >> jointConstraints: aCollection [ jointConstraints := aCollection asArray ]
 
 { #category : 'committing' }
+CFPhysicsStepPipelineResult >> commitBodyStates [
+	orderedBodyStates do: #commit
+]
+
+{ #category : 'committing' }
 CFPhysicsStepPipelineResult >> commitJointConstraints [
 	jointConstraints do: #writeImpulsesBack
 ]
