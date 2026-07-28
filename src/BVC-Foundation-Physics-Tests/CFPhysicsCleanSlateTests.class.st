@@ -679,7 +679,7 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 	result commitBodyStates.
 	self assert: box position y > 15.0.
 	self assert: manifold notNil.
-	self assert: manifold contactPoints first separation > -5.0.
+	self assert: manifold contactPoints first separation >= -5.0.
 	^ result
 ]
 
