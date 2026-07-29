@@ -45,15 +45,16 @@ CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
 	"Convert a Physics-world point from the world owner's local coordinate system
-	into overlay-local coordinates. Mondrian fixes its root children presentation
-	to identity while Physics is active, so no children transformation belongs in
-	this path."
-	^ self overlayPointInHost: aPoint
+	into overlay-local coordinates. Physics positions describe the owner's child
+	coordinate system; a Mondrian root may scale or translate that system for its
+	graph presentation. Apply that children transformation before crossing into
+	the overlay's sibling coordinate system."
+	^ self overlayPointInHost: (host childrenPointToLocal: aPoint)
 ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointInHost: aPoint [
-	"Convert a point expressed in the Physics host's local coordinates into
+	"Convert a point expressed in the displayed Physics host child coordinates into
 	overlay-local coordinates."
 	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
 ]

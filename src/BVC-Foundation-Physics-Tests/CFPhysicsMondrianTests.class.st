@@ -410,3 +410,43 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgre
 	world stopStepping.
 	^ mondrian
 ]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsMondrianTests >> mondrianPhysicsWorldOverlayCoordinatesFollowGraphScaleAndTranslation [
+	<gtExample>
+	| space mondrian node world overlay body physicsPosition context displayedPoint worldPoint directHostPoint |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	mondrian := GtMondrian new.
+	node := (mondrian nodes with: #(one)) first.
+	space root addChild: mondrian root.
+	space pulse.
+	world := mondrian physics beWorld.
+	world stopStepping.
+	mondrian root
+		childrenScaleFactor: 1.5;
+		childrenTranslationFactor: 70 @ 45.
+	space pulse.
+	overlay := mondrian root showPhysicsOverlay.
+	body := world bodyStateFor: node.
+	physicsPosition := 180 @ 120.
+	body position: physicsPosition.
+	world presentAtAlpha: 1.0.
+	space pulse.
+	context := CFPhysicsOverlayContext
+		host: mondrian root
+		world: world
+		overlay: overlay.
+	displayedPoint := context overlayPoint: 0 @ 0 from: node.
+	worldPoint := context overlayPointFromWorld: physicsPosition.
+	directHostPoint := overlay root globalPointToLocal: (mondrian root localPointToGlobal: physicsPosition).
+	self assert: displayedPoint equals: worldPoint.
+	self
+		assert: worldPoint
+		equals: (overlay root globalPointToLocal: (mondrian root localPointToGlobal: (mondrian root childrenPointToLocal: physicsPosition))).
+	self deny: worldPoint equals: directHostPoint.
+	mondrian root hidePhysicsOverlay.
+	world stopStepping.
+	^ mondrian
+]
