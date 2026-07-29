@@ -189,13 +189,19 @@ CFPhysicsOverlay >> refreshSelectedObject [
 	^ self
 ]
 
-{ #category : 'updating' }
-CFPhysicsOverlay >> refresh [
+
+{ #category : 'private - bodies' }
+CFPhysicsOverlay >> clearBodyElements [
+	bodyElements valuesDo: [ :each |
+		each release.
+		each hasParent ifTrue: [ each removeFromParent ] ].
+	bodyElements removeAll.
+	^ self
+]
+
+{ #category : 'private - bodies' }
+CFPhysicsOverlay >> refreshBodyElements [
 	| bodies live |
-	"A structural refresh is the explicit boundary at which Bloc membership
-	changes are reconciled with the Physics world. Frame diagnostics deliberately
-	do not perform this work."
-	world synchroniseMembership.
 	bodies := world bodyStatesInOrder.
 	live := IdentitySet new.
 	live addAll: bodies.
@@ -211,9 +217,33 @@ CFPhysicsOverlay >> refresh [
 			root addChild: created.
 			created ].
 		anElement refresh ].
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsOverlay >> refresh [
+	"A structural refresh is the explicit boundary at which Bloc membership
+	changes are reconciled with the Physics world. Frame diagnostics deliberately
+	do not perform this work."
+	world synchroniseMembership.
+	controls bodiesEnabled
+		ifTrue: [ self refreshBodyElements ]
+		ifFalse: [ self clearBodyElements ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectedObject.
 	self refreshSelectionHighlight.
+	^ self
+]
+
+
+{ #category : 'controlling - diagnostics' }
+CFPhysicsOverlay >> bodiesEnabled: aBoolean [
+	aBoolean
+		ifTrue: [
+			world synchroniseMembership.
+			self refreshBodyElements.
+			self refreshSelectionHighlight ]
+		ifFalse: [ self clearBodyElements ].
 	^ self
 ]
 
@@ -241,8 +271,7 @@ CFPhysicsOverlay >> release [
 	contactOverlay ifNotNil: #release.
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
-	bodyElements valuesDo: [ :each | each release ].
-	bodyElements removeAll.
+	self clearBodyElements.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self
 ]

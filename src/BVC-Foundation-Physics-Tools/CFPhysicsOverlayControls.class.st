@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlayControls',
 	#superclass : 'Object',
-	#instVars : [ 'overlay', 'element', 'contactsToggle' ],
+	#instVars : [ 'overlay', 'element', 'bodiesToggle', 'contactsToggle' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -16,6 +16,9 @@ CFPhysicsOverlayControls >> overlay: anOverlay [ overlay := anOverlay ]
 
 { #category : 'accessing' }
 CFPhysicsOverlayControls >> element [ ^ element ]
+
+{ #category : 'testing' }
+CFPhysicsOverlayControls >> bodiesEnabled [ ^ bodiesToggle isActivated ]
 
 { #category : 'testing' }
 CFPhysicsOverlayControls >> contactsEnabled [ ^ contactsToggle isActivated ]
@@ -36,13 +39,30 @@ CFPhysicsOverlayControls >> initializeControls [
 			c frame vertical alignCenter ];
 		margin: (BlInsets right: 14);
 		yourself.
-	element addChild: (self unavailableToggleLabel: 'Bodies').
+	bodiesToggle := self bodiesToggle.
+	element addChild: bodiesToggle.
 	contactsToggle := self contactsToggle.
 	element addChild: contactsToggle.
 	element addChild: (self unavailableToggleLabel: 'Springs').
 	element addChild: (self unavailableToggleLabel: 'Forces').
 	element addChild: (self unavailableToggleLabel: 'Anchors').
 	element addChild: (self unavailableToggleLabel: 'Joints')
+]
+
+
+{ #category : 'private - building' }
+CFPhysicsOverlayControls >> bodiesToggle [
+	| toggle |
+	toggle := BrToggle new
+		id: #cfPhysicsBodiesOverlayToggle;
+		aptitude: BrGlamorousToggleWithLabelAptitude new;
+		label: 'Bodies';
+		activate;
+		yourself.
+	toggle
+		when: BrToggleActivatedEvent do: [ overlay bodiesEnabled: true ];
+		when: BrToggleDeactivatedEvent do: [ overlay bodiesEnabled: false ].
+	^ toggle
 ]
 
 { #category : 'private - building' }
