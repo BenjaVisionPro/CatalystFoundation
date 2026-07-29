@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlayControls',
 	#superclass : 'Object',
-	#instVars : [ 'overlay', 'element', 'bodiesToggle', 'contactsToggle' ],
+	#instVars : [ 'overlay', 'element', 'bodiesToggle', 'contactsToggle', 'springsToggle' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -23,6 +23,9 @@ CFPhysicsOverlayControls >> bodiesEnabled [ ^ bodiesToggle isActivated ]
 { #category : 'testing' }
 CFPhysicsOverlayControls >> contactsEnabled [ ^ contactsToggle isActivated ]
 
+{ #category : 'testing' }
+CFPhysicsOverlayControls >> springsEnabled [ ^ springsToggle isActivated ]
+
 { #category : 'initialization' }
 CFPhysicsOverlayControls >> initializeControls [
 	element := BrVerticalPane new
@@ -43,7 +46,8 @@ CFPhysicsOverlayControls >> initializeControls [
 	element addChild: bodiesToggle.
 	contactsToggle := self contactsToggle.
 	element addChild: contactsToggle.
-	element addChild: (self unavailableToggleLabel: 'Springs').
+	springsToggle := self springsToggle.
+	element addChild: springsToggle.
 	element addChild: (self unavailableToggleLabel: 'Forces').
 	element addChild: (self unavailableToggleLabel: 'Anchors').
 	element addChild: (self unavailableToggleLabel: 'Joints')
@@ -77,6 +81,22 @@ CFPhysicsOverlayControls >> contactsToggle [
 	toggle
 		when: BrToggleActivatedEvent do: [ overlay contactsEnabled: true ];
 		when: BrToggleDeactivatedEvent do: [ overlay contactsEnabled: false ].
+	^ toggle
+]
+
+
+{ #category : 'private - building' }
+CFPhysicsOverlayControls >> springsToggle [
+	| toggle |
+	toggle := BrToggle new
+		id: #cfPhysicsSpringsOverlayToggle;
+		aptitude: BrGlamorousToggleWithLabelAptitude new;
+		label: 'Springs';
+		activate;
+		yourself.
+	toggle
+		when: BrToggleActivatedEvent do: [ overlay springsEnabled: true ];
+		when: BrToggleDeactivatedEvent do: [ overlay springsEnabled: false ].
 	^ toggle
 ]
 

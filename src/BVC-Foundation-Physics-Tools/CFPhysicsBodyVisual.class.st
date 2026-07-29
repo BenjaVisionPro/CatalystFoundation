@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyVisual',
-	#superclass : 'Object',
-	#instVars : [ 'body', 'context', 'element', 'listener', 'presentationRole' ],
+	#superclass : 'BlElement',
+	#instVars : [ 'body', 'context', 'listener', 'presentationRole' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -36,9 +36,6 @@ CFPhysicsBodyVisual >> body: aBody [ body := aBody ]
 CFPhysicsBodyVisual >> context: aContext [ context := aContext ]
 
 { #category : 'accessing' }
-CFPhysicsBodyVisual >> element [ ^ element ]
-
-{ #category : 'accessing' }
 CFPhysicsBodyVisual >> presentationRole [ ^ presentationRole ]
 
 { #category : 'accessing' }
@@ -52,12 +49,11 @@ CFPhysicsBodyVisual >> isSelection [ ^ presentationRole = #selection ]
 
 { #category : 'initialization' }
 CFPhysicsBodyVisual >> initializeVisual [
-	element := BlElement new
+	self
 		constraintsDo: [ :c | c ignoreByLayout ];
 		background: Color transparent;
-		preventMeAndChildrenMouseEvents;
-		yourself.
-	self isSelection ifTrue: [ element zIndex: 2 ].
+		preventMeAndChildrenMouseEvents.
+	self isSelection ifTrue: [ self zIndex: 2 ].
 	listener := CFPhysicsBodyVisualListener for: self.
 	body shapeState element addEventHandler: listener.
 	self update
@@ -65,7 +61,7 @@ CFPhysicsBodyVisual >> initializeVisual [
 
 { #category : 'installing' }
 CFPhysicsBodyVisual >> addTo: aParentElement [
-	aParentElement addChild: element.
+	aParentElement addChild: self.
 	^ self
 ]
 
@@ -89,7 +85,7 @@ CFPhysicsBodyVisual >> update [
 			ifTrue: [ 1.0 ]
 			ifFalse: [ yVector r / sourceExtent y ]).
 	rotation := xVector theta radiansToDegrees.
-	element
+	self
 		geometry: source geometry copy;
 		size: sourceExtent;
 		relocate: origin;
@@ -104,8 +100,8 @@ CFPhysicsBodyVisual >> update [
 { #category : 'private - styling' }
 CFPhysicsBodyVisual >> updateBorder [
 	self isSelection
-		ifTrue: [ element border: (BlBorder paint: (Color red alpha: 0.9) width: 3) ]
-		ifFalse: [ element border: (BlBorder
+		ifTrue: [ self border: (BlBorder paint: (Color red alpha: 0.9) width: 3) ]
+		ifFalse: [ self border: (BlBorder
 			paint: ((body isSensor ifTrue: [ Color orange ] ifFalse: [ Color blue ]) alpha: 0.65)
 			width: 1) ].
 	^ self
@@ -116,7 +112,7 @@ CFPhysicsBodyVisual >> refreshOverlay [ context overlay refresh ]
 
 { #category : 'removing' }
 CFPhysicsBodyVisual >> remove [
-	element hasParent ifTrue: [ element removeFromParent ].
+	self hasParent ifTrue: [ self removeFromParent ].
 	^ self
 ]
 
