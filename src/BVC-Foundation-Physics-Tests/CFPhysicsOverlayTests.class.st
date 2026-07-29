@@ -380,13 +380,16 @@ CFPhysicsOverlayTests >> physicsObjectInspectorContentTransition [
 	self assert: motion notNil.
 	self assert: motion isRunning.
 	self assert: motion tracks size equals: 3.
-	self assert: inspector panel children size equals: 2.
+	self assert: inspector panel extent equals: motion tracks third sourceExtent.
+	self assert: inspector panel children size equals: 1.
+	self assert: inspector contentContainer children size equals: 2.
 	self assert: outgoingElement opacity equals: 1.0.
 	self assert: inspector content element opacity equals: 0.0.
 	host space time wait: 200 milliSeconds.
 	host space pulse.
 	self assert: motion isCompleted.
 	self assert: inspector panel children size equals: 1.
+	self assert: inspector contentContainer children size equals: 1.
 	self assert: inspector content element opacity equals: 1.0.
 	^ inspector
 ]

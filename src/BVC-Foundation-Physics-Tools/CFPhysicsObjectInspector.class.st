@@ -5,6 +5,7 @@ Class {
 		'host',
 		'root',
 		'panel',
+		'contentContainer',
 		'content',
 		'selectedObject',
 		'released',
@@ -40,6 +41,9 @@ CFPhysicsObjectInspector >> root [ ^ root ]
 CFPhysicsObjectInspector >> content [ ^ content ]
 
 { #category : 'accessing' }
+CFPhysicsObjectInspector >> contentContainer [ ^ contentContainer ]
+
+{ #category : 'accessing' }
 CFPhysicsObjectInspector >> contentTransitionMotion [ ^ contentTransitionMotion ]
 
 { #category : 'accessing' }
@@ -64,7 +68,9 @@ CFPhysicsObjectInspector >> initializeInspector [
 		clipChildren: false;
 		preventMouseEvents.
 	panel := self newPanel.
+	contentContainer := self newContentContainer.
 	content := nil.
+	panel addChild: contentContainer.
 	root addChild: panel.
 	self clearWithoutMotion
 ]
@@ -84,6 +90,15 @@ CFPhysicsObjectInspector >> newPanel [
 			c frame horizontal alignLeft.
 			c frame vertical alignCenter ];
 		margin: (BlInsets all: 10);
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newContentContainer [
+	^ BlElement new
+		layout: BlFrameLayout new;
+		hMatchParent;
+		vFitContent;
 		yourself
 ]
 
@@ -121,18 +136,17 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 	outgoingElement := content ifNotNil: [ content element ].
 	selectedObject := anObject.
 	content := aContent.
+	content inspect: anObject.
 	shouldAnimate
 		ifTrue: [
+			targetExtent := self measurePanelExtentFor: content element.
 			self prepareOutgoingContent: outgoingElement.
-			content element opacity: 0.0 ]
-		ifFalse: [ outgoingElement ifNotNil: [ outgoingElement removeFromParent ] ].
-	panel addChild: content element.
-	content inspect: anObject.
+			content element opacity: 0.0.
+			self addContentElement: content element ]
+		ifFalse: [
+			outgoingElement ifNotNil: [ outgoingElement removeFromParent ].
+			self addContentElement: content element ].
 	shouldAnimate ifTrue: [
-		panel constraintsDo: [ :c | c vertical fitContent ].
-		panel requestLayout.
-		panel space pulse.
-		targetExtent := panel extent.
 		self
 			animateContentTransitionFrom: sourceExtent
 			to: targetExtent
@@ -147,6 +161,7 @@ CFPhysicsObjectInspector >> clear [
 	selectedObject := nil.
 	self cancelContentTransition.
 	content ifNotNil: [ content clear ].
+	panel constraintsDo: [ :c | c vertical fitContent ].
 	self hidePanel.
 	^ self
 ]
@@ -156,12 +171,22 @@ CFPhysicsObjectInspector >> clearWithoutMotion [
 	selectedObject := nil.
 	content ifNotNil: [ content clear ].
 	self cancelContentTransition.
+	panel constraintsDo: [ :c | c vertical fitContent ].
 	visibilityMotion ifNotNil: [
 		visibilityMotion cancelPreservingCurrentPresentation.
 		visibilityMotion := nil ].
 	panel
 		opacity: 0.0;
 		visibility: BlVisibility gone.
+	^ self
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> addContentElement: anElement [
+	anElement constraintsDo: [ :c |
+		c frame horizontal alignLeft.
+		c frame vertical alignTop ].
+	contentContainer addChild: anElement.
 	^ self
 ]
 
@@ -176,6 +201,25 @@ CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
 ]
 
 { #category : 'private - content transition' }
+CFPhysicsObjectInspector >> measurePanelExtentFor: anElement [
+	| measurementPanel targetExtent |
+	measurementPanel := self newPanel.
+	measurementPanel
+		visibility: BlVisibility hidden;
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c ignored horizontal alignLeft.
+			c ignored vertical alignTop ].
+	measurementPanel addChild: anElement.
+	root addChild: measurementPanel.
+	root space pulse.
+	targetExtent := measurementPanel extent.
+	anElement removeFromParent.
+	measurementPanel removeFromParent.
+	^ targetExtent
+]
+
+{ #category : 'private - content transition' }
 CFPhysicsObjectInspector >> cancelContentTransition [
 	| aMotion |
 	aMotion := contentTransitionMotion.
@@ -184,7 +228,6 @@ CFPhysicsObjectInspector >> cancelContentTransition [
 	outgoingContentElement ifNotNil: [ :anElement |
 		anElement removeFromParent.
 		outgoingContentElement := nil ].
-	panel constraintsDo: [ :c | c vertical fitContent ].
 	content ifNotNil: [ content element opacity: 1.0 ].
 	^ self
 ]
