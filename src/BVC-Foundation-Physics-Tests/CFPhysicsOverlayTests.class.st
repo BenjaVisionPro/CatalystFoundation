@@ -768,7 +768,7 @@ CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	world removeSpringConstraint: spring.
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
-	self deny: visual hasParent.
+	self assert: visual hasParent not.
 	^ overlay
 ]
 
@@ -783,7 +783,8 @@ CFPhysicsOverlayTests >> physicsSpringOverlayIsEmptyWhileDisabled [
 		and: world bodyStatesInOrder second.
 	world addSpringConstraint: spring.
 	overlay := host showPhysicsOverlay.
-	overlay springsEnabled: false.
+	overlay controls element children third deactivate.
+	self assert: overlay controls springsEnabled not.
 	self assert: overlay springOverlay visuals isEmpty.
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
