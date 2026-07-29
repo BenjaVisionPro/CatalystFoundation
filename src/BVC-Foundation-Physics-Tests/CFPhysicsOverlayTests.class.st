@@ -699,59 +699,72 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden 
 
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> physicsOverlayVisualisesSprings [
+CFPhysicsOverlayTests >> physicsOverlayCreatesOneRetainedVisualPerSpring [
 	<gtExample>
-	| host world spring overlay visual points |
+	| host world spring overlay |
 	host := self physicsHost.
 	world := host physics existingWorld.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	spring restLength: 90.0.
 	world addSpringConstraint: spring.
 	overlay := host showPhysicsOverlay.
-	host space pulse.
 	self assert: overlay springOverlay visuals size equals: 1.
-	visual := overlay springOverlay visuals first.
-	self assert: visual spring == spring.
-	points := spring endpointPair worldPoints.
-	self
-		assert: visual firstPoint
-		equals: (CFPhysicsOverlayContext host: host world: world overlay: overlay)
-			overlayPointFromWorld: points first.
-	self assert: visual firstAnchorMarker hasParent.
-	self assert: visual secondAnchorMarker hasParent.
-	self assert: visual restMarker hasParent.
+	self assert: overlay springOverlay visuals first spring == spring.
+	self assert: overlay springOverlay visuals first hasParent.
 	^ overlay
 ]
 
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringOverlayPreservesVisualIdentity [
 	<gtExample>
-	| overlay host world spring visual firstBody secondBody |
-	overlay := self physicsOverlayVisualisesSprings.
-	host := overlay host.
-	world := overlay world.
-	spring := world springConstraints first.
+	| host world spring overlay visual |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
-	firstBody := spring firstBody.
-	secondBody := spring secondBody.
-	firstBody position: 70 @ 60.
-	secondBody position: 250 @ 150.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	overlay refresh.
 	self assert: overlay springOverlay visuals first == visual.
-	self assert: visual firstPoint equals: (CFPhysicsOverlayContext host: host world: world overlay: overlay) overlayPointFromWorld: spring endpointPair worldPoints first.
 	^ overlay
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> physicsSpringOverlayDoesNoWorkWhileDisabled [
+CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
-	| overlay |
-	overlay := self physicsOverlayVisualisesSprings.
+	| host world spring overlay visual |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	world removeSpringConstraint: spring.
+	overlay refresh.
+	self assert: overlay springOverlay visuals isEmpty.
+	self deny: visual hasParent.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsSpringOverlayIsEmptyWhileDisabled [
+	<gtExample>
+	| host world spring overlay |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
 	overlay springsEnabled: false.
 	self assert: overlay springOverlay visuals isEmpty.
-	overlay refreshFrameDiagnostics.
+	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
 	^ overlay
 ]
