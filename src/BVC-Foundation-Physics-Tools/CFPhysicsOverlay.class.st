@@ -217,6 +217,7 @@ CFPhysicsOverlay >> install [
 	container addChild: controlRoot.
 	objectInspector install.
 	host addEventFilter: selectionHandler.
+	root addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
 	controls contactsEnabled ifTrue: [ world enableVisualState ].
 	self refresh.
@@ -307,6 +308,7 @@ CFPhysicsOverlay >> release [
 	contactsWereEnabled := controls notNil and: [ controls contactsEnabled ].
 	self clearSelection.
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
+	selectionHandler ifNotNil: [ root removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
 	controls ifNotNil: #release.

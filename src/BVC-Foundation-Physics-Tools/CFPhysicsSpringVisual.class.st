@@ -38,6 +38,9 @@ CFPhysicsSpringVisual >> context: aContext [ context := aContext ]
 { #category : 'accessing' }
 CFPhysicsSpringVisual >> restLengthMarker [ ^ restLengthMarker ]
 
+{ #category : 'testing' }
+CFPhysicsSpringVisual >> hitTarget [ ^ hitTarget ]
+
 { #category : 'accessing' }
 CFPhysicsSpringVisual >> presentationRole [ ^ presentationRole ]
 

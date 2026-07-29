@@ -774,6 +774,26 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	^ overlay
 ]
 
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
+	<gtExample>
+	| host world spring overlay visual |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	BlSpace simulateClickOn: visual hitTarget.
+	self assert: overlay selectedSpring == spring.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectionVisual isSelection.
+	self assert: overlay selectionVisual spring == spring.
+	^ overlay
+]
+
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
