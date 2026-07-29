@@ -8,7 +8,9 @@ Class {
 		'content',
 		'selectedObject',
 		'released',
-		'visibilityMotion'
+		'visibilityMotion',
+		'contentTransitionMotion',
+		'outgoingContentElement'
 	],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
@@ -36,6 +38,9 @@ CFPhysicsObjectInspector >> root [ ^ root ]
 
 { #category : 'accessing' }
 CFPhysicsObjectInspector >> content [ ^ content ]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> contentTransitionMotion [ ^ contentTransitionMotion ]
 
 { #category : 'accessing' }
 CFPhysicsObjectInspector >> selectedObject [ ^ selectedObject ]
@@ -107,12 +112,32 @@ CFPhysicsObjectInspector >> inspect: aPhysics [
 
 { #category : 'inspecting' }
 CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
+	| shouldAnimate sourceExtent outgoingElement targetExtent |
 	released ifTrue: [ ^ self ].
+	shouldAnimate := selectedObject notNil
+		and: [ content notNil and: [ panel isAttachedToSceneGraph ] ].
+	sourceExtent := shouldAnimate ifTrue: [ panel extent ].
+	self cancelContentTransition.
+	outgoingElement := content ifNotNil: [ content element ].
 	selectedObject := anObject.
-	content ifNotNil: [ content element removeFromParent ].
 	content := aContent.
+	shouldAnimate
+		ifTrue: [
+			self prepareOutgoingContent: outgoingElement.
+			content element opacity: 0.0 ]
+		ifFalse: [ outgoingElement ifNotNil: [ outgoingElement removeFromParent ] ].
 	panel addChild: content element.
 	content inspect: anObject.
+	shouldAnimate ifTrue: [
+		panel constraintsDo: [ :c | c vertical fitContent ].
+		panel requestLayout.
+		panel space pulse.
+		targetExtent := panel extent.
+		self
+			animateContentTransitionFrom: sourceExtent
+			to: targetExtent
+			outgoing: outgoingElement
+			incoming: content element ].
 	self showPanel.
 	^ self
 ]
@@ -120,6 +145,7 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 { #category : 'clearing' }
 CFPhysicsObjectInspector >> clear [
 	selectedObject := nil.
+	self cancelContentTransition.
 	content ifNotNil: [ content clear ].
 	self hidePanel.
 	^ self
@@ -129,6 +155,7 @@ CFPhysicsObjectInspector >> clear [
 CFPhysicsObjectInspector >> clearWithoutMotion [
 	selectedObject := nil.
 	content ifNotNil: [ content clear ].
+	self cancelContentTransition.
 	visibilityMotion ifNotNil: [
 		visibilityMotion cancelPreservingCurrentPresentation.
 		visibilityMotion := nil ].
@@ -136,6 +163,64 @@ CFPhysicsObjectInspector >> clearWithoutMotion [
 		opacity: 0.0;
 		visibility: BlVisibility gone.
 	^ self
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
+	anElement constraintsDo: [ :c |
+		c ignoreByLayout.
+		c ignored horizontal alignLeft.
+		c ignored vertical alignTop ].
+	outgoingContentElement := anElement.
+	^ self
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> cancelContentTransition [
+	| aMotion |
+	aMotion := contentTransitionMotion.
+	contentTransitionMotion := nil.
+	aMotion ifNotNil: [ aMotion cancelPreservingCurrentPresentation ].
+	outgoingContentElement ifNotNil: [ :anElement |
+		anElement removeFromParent.
+		outgoingContentElement := nil ].
+	panel constraintsDo: [ :c | c vertical fitContent ].
+	content ifNotNil: [ content element opacity: 1.0 ].
+	^ self
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTargetExtent outgoing: anOutgoingElement incoming: anIncomingElement [
+	| tracks aMotion |
+	tracks := {
+		CFMotionPropertyTrack
+			on: anOutgoingElement
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0.
+		CFMotionPropertyTrack
+			on: anIncomingElement
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0.
+		(CFMotionExtentTrack
+			on: panel
+			from: aSourceExtent
+			to: aTargetExtent)
+			fitContentAtDestination }.
+	aMotion := CFMotion
+		coordinator: panel space cfMotionCoordinator
+		tracks: tracks.
+	contentTransitionMotion := aMotion.
+	aMotion
+		duration: 180 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		onTerminalDo: [ :aCompletedMotion |
+			contentTransitionMotion == aCompletedMotion ifTrue: [
+				outgoingContentElement ifNotNil: [ :anElement |
+					anElement removeFromParent ].
+				outgoingContentElement := nil.
+				contentTransitionMotion := nil ] ];
+		start.
+	^ aMotion
 ]
 
 { #category : 'private - visibility' }

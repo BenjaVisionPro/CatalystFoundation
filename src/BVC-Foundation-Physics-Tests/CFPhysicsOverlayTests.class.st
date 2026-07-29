@@ -358,6 +358,39 @@ CFPhysicsOverlayTests >> physicsObjectInspectorReusesItsPanelWhenSelectionChange
 	^ inspector
 ]
 
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorContentTransition [
+	<gtExample>
+	| host world spring inspector physics outgoingElement motion |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector install.
+	host space time: BlTime simulated.
+	physics := host children first existingPhysics.
+	inspector inspect: physics.
+	host space pulse.
+	outgoingElement := inspector content element.
+	inspector inspect: spring.
+	motion := inspector contentTransitionMotion.
+	self assert: motion notNil.
+	self assert: motion isRunning.
+	self assert: motion tracks size equals: 3.
+	self assert: inspector panel children size equals: 2.
+	self assert: outgoingElement opacity equals: 1.0.
+	self assert: inspector content element opacity equals: 0.0.
+	host space time wait: 200 milliSeconds.
+	host space pulse.
+	self assert: motion isCompleted.
+	self assert: inspector panel children size equals: 1.
+	self assert: inspector content element opacity equals: 1.0.
+	^ inspector
+]
+
  { #category : 'examples - physics object inspector' }
 CFPhysicsOverlayTests >> physicsObjectInspectorCanClearItsObject [
 	<gtExample>
