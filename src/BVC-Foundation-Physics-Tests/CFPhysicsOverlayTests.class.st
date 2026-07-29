@@ -733,6 +733,27 @@ CFPhysicsOverlayTests >> physicsSpringOverlayPreservesVisualIdentity [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
+	<gtExample>
+	| host world first second spring overlay visual firstPoint secondPoint |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	spring := CFPhysicsSpringConstraint
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	firstPoint := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointA).
+	secondPoint := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointB).
+	self assert: visual fromPosition equals: firstPoint.
+	self assert: visual toPosition equals: secondPoint.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
 	| host world spring overlay visual |

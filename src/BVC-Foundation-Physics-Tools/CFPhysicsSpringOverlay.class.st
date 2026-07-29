@@ -1,16 +1,17 @@
 Class {
 	#name : 'CFPhysicsSpringOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'world', 'visualsBySpring' ],
+	#instVars : [ 'root', 'world', 'context', 'visualsBySpring' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
 
 { #category : 'instance creation' }
-CFPhysicsSpringOverlay class >> in: aRoot world: aWorld [
+CFPhysicsSpringOverlay class >> in: aRoot world: aWorld context: aContext [
 	^ self new
 		root: aRoot;
 		world: aWorld;
+		context: aContext;
 		initializeOverlay;
 		yourself
 ]
@@ -20,6 +21,9 @@ CFPhysicsSpringOverlay >> root: anElement [ root := anElement ]
 
 { #category : 'accessing' }
 CFPhysicsSpringOverlay >> world: aWorld [ world := aWorld ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringOverlay >> context: aContext [ context := aContext ]
 
 { #category : 'accessing' }
 CFPhysicsSpringOverlay >> visuals [ ^ visualsBySpring values asArray ]
@@ -36,10 +40,12 @@ CFPhysicsSpringOverlay >> update [
 	(visualsBySpring keys reject: [ :each | live includes: each ]) do: [ :spring |
 		(visualsBySpring removeKey: spring) release ].
 	springs do: [ :spring |
-		visualsBySpring at: spring ifAbsentPut: [
-			(CFPhysicsSpringVisual diagnosticOn: spring)
+		| visual |
+		visual := visualsBySpring at: spring ifAbsentPut: [
+			(CFPhysicsSpringVisual diagnosticOn: spring context: context)
 				addTo: root;
-				yourself ] ].
+				yourself ].
+		visual update ].
 	^ self
 ]
 

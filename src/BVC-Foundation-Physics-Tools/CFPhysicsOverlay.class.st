@@ -125,7 +125,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	bodyOverlay := CFPhysicsBodyOverlay in: root world: world context: context.
-	springOverlay := CFPhysicsSpringOverlay in: root world: world.
+	springOverlay := CFPhysicsSpringOverlay in: root world: world context: context.
 	contactOverlay := CFPhysicsContactOverlay in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
 	self initializeControls.
