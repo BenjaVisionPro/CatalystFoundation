@@ -127,12 +127,3 @@ CFPhysicsBodyVisual >> release [
 	^ self
 ]
 
-"Compatibility forwarding for examples and focused inspection."
-{ #category : 'accessing - element' }
-CFPhysicsBodyVisual >> position [ ^ element position ]
-
-{ #category : 'accessing - element' }
-CFPhysicsBodyVisual >> extent [ ^ element extent ]
-
-{ #category : 'accessing - element' }
-CFPhysicsBodyVisual >> geometry [ ^ element geometry ]

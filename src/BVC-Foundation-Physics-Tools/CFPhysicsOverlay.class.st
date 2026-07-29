@@ -48,7 +48,7 @@ CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectionVisual [ ^ selectionVisual ]
 { #category : 'accessing' }
-CFPhysicsOverlay >> selectionElement [ ^ selectionVisual ifNotNil: #element ]
+CFPhysicsOverlay >> selectionElement [ ^ selectionVisual ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
@@ -114,7 +114,7 @@ CFPhysicsOverlay >> refreshSelectionVisual [
 
 { #category : 'initialization' }
 CFPhysicsOverlay >> initializeOverlay [
-	root := BlOverlayElement on: host.
+		root := BlOverlayElement on: host.
 	root
 		id: #cfPhysicsOverlay;
 		layout: BlFrameLayout new;
@@ -260,6 +260,7 @@ CFPhysicsOverlay >> release [
 	contactOverlay ifNotNil: #release.
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
+	bodyOverlay clear.
 	self clearSelectionVisual.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self
