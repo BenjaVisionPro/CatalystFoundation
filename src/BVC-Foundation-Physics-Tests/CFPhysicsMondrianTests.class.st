@@ -445,7 +445,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsWorldOverlayCoordinatesFollowGraphScale
 	self
 		assert: worldPoint
 		equals: (overlay root globalPointToLocal: (mondrian root localPointToGlobal: (mondrian root childrenPointToLocal: physicsPosition))).
-	self deny: worldPoint equals: directHostPoint.
+	self assert: (worldPoint = directHostPoint) not.
 	mondrian root hidePhysicsOverlay.
 	world stopStepping.
 	^ mondrian
