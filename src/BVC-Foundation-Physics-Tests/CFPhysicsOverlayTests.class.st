@@ -51,7 +51,7 @@ CFPhysicsOverlayTests >> physicsOverlayCanBeInstalled [
 	host space pulse.
 	self assert: overlay isInstalled.
 	self assert: host existingPhysicsOverlay == overlay.
-	self assert: overlay bodyElements size equals: 2.
+	self assert: overlay bodyOverlay visuals size equals: 2.
 	self assert: host children size equals: 2.
 	self assert: overlay root parent == host parent.
 	^ host
@@ -93,14 +93,14 @@ CFPhysicsOverlayTests >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 	overlay := host existingPhysicsOverlay.
 	world := host physics existingWorld.
 	body := world bodyStatesInOrder first.
-	representation := overlay bodyElements
+	representation := overlay bodyOverlay visuals
 		detect: [ :each | each body == body ].
 	body
 		position: 85 @ 70;
 		rotation: Float pi / 4.0.
 	overlay refresh.
 	host space pulse.
-	self assert: (overlay bodyElements includes: representation).
+	self assert: (overlay bodyOverlay visuals includes: representation).
 	self
 		assert: representation position
 		equals: (overlay root globalPointToLocal:
@@ -122,8 +122,8 @@ CFPhysicsOverlayTests >> physicsOverlayRemovesRetiredBodyRepresentations [
 	retiredElement removeFromParent.
 	overlay refresh.
 	self assert: (world bodyStatesInOrder includes: retiredBody) not.
-	self assert: (overlay bodyElements anySatisfy: [ :each | each body == retiredBody ]) not.
-	self assert: overlay bodyElements size equals: 1.
+	self assert: (overlay bodyOverlay visuals anySatisfy: [ :each | each body == retiredBody ]) not.
+	self assert: overlay bodyOverlay visuals size equals: 1.
 	^ host
 ]
 
@@ -636,10 +636,10 @@ CFPhysicsOverlayTests >> physicsOverlayHighlightsTheSelectedBody [
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	selectedBody := element existingPhysics bodyState.
-	self assert: overlay selectionElement isNil.
+	self assert: overlay selectionVisual isNil.
 	element fireEvent: BlClickEvent new.
-	self assert: overlay selectionElement notNil.
-	self assert: overlay selectionElement body == selectedBody.
+	self assert: overlay selectionVisual notNil.
+	self assert: overlay selectionVisual body == selectedBody.
 	^ overlay
 ]
 
@@ -654,11 +654,11 @@ CFPhysicsOverlayTests >> physicsOverlayMovesTheSelectionHighlight [
 	firstBody := first existingPhysics bodyState.
 	secondBody := second existingPhysics bodyState.
 	first fireEvent: BlClickEvent new.
-	selection := overlay selectionElement.
+	selection := overlay selectionVisual.
 	self assert: selection body == firstBody.
 	second fireEvent: BlClickEvent new.
-	self assert: overlay selectionElement ~~ selection.
-	self assert: overlay selectionElement body == secondBody.
+	self assert: overlay selectionVisual ~~ selection.
+	self assert: overlay selectionVisual body == secondBody.
 	^ overlay
 ]
 
@@ -670,9 +670,9 @@ CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
-	self assert: overlay selectionElement notNil.
+	self assert: overlay selectionVisual notNil.
 	element fireEvent: BlClickEvent new.
-	self assert: overlay selectionElement isNil.
+	self assert: overlay selectionVisual isNil.
 	^ overlay
 ]
 
@@ -690,9 +690,9 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden 
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement == element.
 	overlay bodiesEnabled: false.
-	self assert: overlay bodyElements isEmpty.
+	self assert: overlay bodyOverlay visuals isEmpty.
 	self assert: overlay selectedElement == element.
-	self assert: overlay selectionElement notNil.
-	self assert: overlay selectionElement body == selectedBody.
+	self assert: overlay selectionVisual notNil.
+	self assert: overlay selectionVisual body == selectedBody.
 	^ overlay
 ]

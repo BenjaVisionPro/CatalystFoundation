@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionElement' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -30,7 +30,9 @@ CFPhysicsOverlay >> world: aWorld [ world := aWorld ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> root [ ^ root ]
 { #category : 'accessing' }
-CFPhysicsOverlay >> bodyElements [ ^ bodyElements values asArray ]
+CFPhysicsOverlay >> bodyOverlay [ ^ bodyOverlay ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> bodyElements [ ^ bodyOverlay visuals ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> contactOverlay [ ^ contactOverlay ]
 { #category : 'accessing' }
@@ -44,7 +46,9 @@ CFPhysicsOverlay >> controls [ ^ controls ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
 { #category : 'accessing' }
-CFPhysicsOverlay >> selectionElement [ ^ selectionElement ]
+CFPhysicsOverlay >> selectionVisual [ ^ selectionVisual ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> selectionElement [ ^ selectionVisual ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
@@ -55,7 +59,7 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
 	selectedElement := anElement.
 	physics := anElement existingPhysics.
-	self refreshSelectionHighlight.
+	self refreshSelectionVisual.
 	objectInspector inspect: physics.
 	"Use Phlow's normal selection event. In an existing inspector this selects
 	the object; without one it does not invent or open a separate inspector."
@@ -80,39 +84,37 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clearSelection [
 	selectedElement := nil.
-	self refreshSelectionHighlight.
+	self refreshSelectionVisual.
 	objectInspector clear.
 	^ self
 ]
 
 { #category : 'private - selection' }
-CFPhysicsOverlay >> clearSelectionElement [
-	selectionElement ifNil: [ ^ self ].
-	selectionElement release.
-	selectionElement hasParent ifTrue: [ selectionElement removeFromParent ].
-	selectionElement := nil.
+CFPhysicsOverlay >> clearSelectionVisual [
+	selectionVisual ifNil: [ ^ self ].
+	selectionVisual release.
+	selectionVisual := nil.
 	^ self
 ]
 
 { #category : 'private - selection' }
-CFPhysicsOverlay >> refreshSelectionHighlight [
+CFPhysicsOverlay >> refreshSelectionVisual [
 	| selectedBody |
 	selectedBody := selectedElement
 		ifNil: [ nil ]
 		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyState ] ].
-	selectedBody ifNil: [ ^ self clearSelectionElement ].
-	(selectionElement notNil and: [ selectionElement body == selectedBody ])
-		ifTrue: [ selectionElement refresh. ^ self ].
-	self clearSelectionElement.
-	selectionElement := CFPhysicsSelectionOverlayElement on: selectedBody context: context.
-	root addChild: selectionElement.
+	selectedBody ifNil: [ ^ self clearSelectionVisual ].
+	(selectionVisual notNil and: [ selectionVisual body == selectedBody ])
+		ifTrue: [ selectionVisual update. ^ self ].
+	self clearSelectionVisual.
+	selectionVisual := CFPhysicsBodyVisual selectionOn: selectedBody context: context.
+	selectionVisual addTo: root.
 	^ self
 ]
 
 { #category : 'initialization' }
 CFPhysicsOverlay >> initializeOverlay [
-	bodyElements := IdentityDictionary new.
-	root := BlOverlayElement on: host.
+		root := BlOverlayElement on: host.
 	root
 		id: #cfPhysicsOverlay;
 		layout: BlFrameLayout new;
@@ -120,6 +122,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
+	bodyOverlay := CFPhysicsBodyOverlay in: root world: world context: context.
 	contactOverlay := CFPhysicsContactOverlay in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
 	self initializeControls.
@@ -205,36 +208,6 @@ CFPhysicsOverlay >> refreshSelectedObject [
 ]
 
 
-{ #category : 'private - bodies' }
-CFPhysicsOverlay >> clearBodyElements [
-	bodyElements valuesDo: [ :each |
-		each release.
-		each hasParent ifTrue: [ each removeFromParent ] ].
-	bodyElements removeAll.
-	^ self
-]
-
-{ #category : 'private - bodies' }
-CFPhysicsOverlay >> refreshBodyElements [
-	| bodies live |
-	bodies := world bodyStatesInOrder.
-	live := IdentitySet new.
-	live addAll: bodies.
-	(bodyElements keys reject: [ :each | live includes: each ]) do: [ :body |
-		| anElement |
-		anElement := bodyElements removeKey: body.
-		anElement release.
-		anElement hasParent ifTrue: [ anElement removeFromParent ] ].
-	bodies do: [ :body |
-		| anElement |
-		anElement := bodyElements at: body ifAbsentPut: [ | created |
-			created := body physicsOverlayElementIn: context.
-			root addChild: created.
-			created ].
-		anElement refresh ].
-	^ self
-]
-
 { #category : 'updating' }
 CFPhysicsOverlay >> refresh [
 	"A structural refresh is the explicit boundary at which Bloc membership
@@ -242,11 +215,11 @@ CFPhysicsOverlay >> refresh [
 	do not perform this work."
 	world synchroniseMembership.
 	controls bodiesEnabled
-		ifTrue: [ self refreshBodyElements ]
-		ifFalse: [ self clearBodyElements ].
+		ifTrue: [ bodyOverlay update ]
+		ifFalse: [ bodyOverlay clear ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectedObject.
-	self refreshSelectionHighlight.
+	self refreshSelectionVisual.
 	^ self
 ]
 
@@ -256,9 +229,9 @@ CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
 			world synchroniseMembership.
-			self refreshBodyElements.
-			self refreshSelectionHighlight ]
-		ifFalse: [ self clearBodyElements ].
+			bodyOverlay update.
+			self refreshSelectionVisual ]
+		ifFalse: [ bodyOverlay clear ].
 	^ self
 ]
 
@@ -283,11 +256,12 @@ CFPhysicsOverlay >> release [
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
 	controls ifNotNil: #release.
+	bodyOverlay ifNotNil: #release.
 	contactOverlay ifNotNil: #release.
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
-	self clearBodyElements.
-	self clearSelectionElement.
+	bodyOverlay clear.
+	self clearSelectionVisual.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self
 ]
