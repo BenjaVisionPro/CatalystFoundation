@@ -775,6 +775,32 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
+	<gtExample>
+	| host world first second spring overlay visual firstPoint secondPoint direction expectedMarkerPosition |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	spring := CFPhysicsSpringConstraint
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
+	spring restLength: 24.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	host space pulse.
+	firstPoint := spring endpointPair worldPointA.
+	secondPoint := spring endpointPair worldPointB.
+	direction := secondPoint - firstPoint.
+	expectedMarkerPosition := overlay root globalPointToLocal: (host localPointToGlobal:
+		(firstPoint + ((direction / direction r) * spring restLength value asFloat))) - (4 @ 4).
+	self assert: visual restLengthMarker hasParent.
+	self assert: visual restLengthMarker position equals: expectedMarkerPosition.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
 	| host world spring overlay visual |

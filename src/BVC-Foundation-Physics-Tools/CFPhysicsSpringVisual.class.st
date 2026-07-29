@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsSpringVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'spring', 'context', 'presentationRole' ],
+	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -36,6 +36,9 @@ CFPhysicsSpringVisual >> spring: aSpring [ spring := aSpring ]
 CFPhysicsSpringVisual >> context: aContext [ context := aContext ]
 
 { #category : 'accessing' }
+CFPhysicsSpringVisual >> restLengthMarker [ ^ restLengthMarker ]
+
+{ #category : 'accessing' }
 CFPhysicsSpringVisual >> presentationRole [ ^ presentationRole ]
 
 { #category : 'accessing' }
@@ -58,6 +61,7 @@ CFPhysicsSpringVisual >> initializeVisual [
 	self
 		fromHead: self newEndpointMarker;
 		toHead: self newEndpointMarker.
+	restLengthMarker := self newRestLengthMarker.
 	self isSelection ifTrue: [ self zIndex: 2 ]
 ]
 
@@ -70,27 +74,51 @@ CFPhysicsSpringVisual >> newEndpointMarker [
 		yourself
 ]
 
+{ #category : 'private - building' }
+CFPhysicsSpringVisual >> newRestLengthMarker [
+	^ BlElement new
+		geometry: (BlPolygonGeometry vertices: { 4 @ 0. 8 @ 4. 4 @ 8. 0 @ 4 });
+		size: 8 @ 8;
+		background: (Color darkGray alpha: 0.9);
+		constraintsDo: [ :c | c ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		zIndex: 1;
+		yourself
+]
+
 { #category : 'installing' }
 CFPhysicsSpringVisual >> addTo: aParentElement [
-	aParentElement addChild: self.
+	aParentElement
+		addChild: self;
+		addChild: restLengthMarker.
 	^ self
 ]
 
 { #category : 'updating' }
 CFPhysicsSpringVisual >> update [
-	| points firstPoint secondPoint |
+	| points firstPoint secondPoint displacement distance restPoint |
 	points := spring endpointPair worldPoints.
 	firstPoint := context overlayPointFromWorld: points first.
 	secondPoint := context overlayPointFromWorld: points second.
 	self
 		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
+	displacement := points second - points first.
+	distance := displacement r.
+	distance isZero
+		ifTrue: [ restLengthMarker visibility: BlVisibility gone ]
+		ifFalse: [
+			restPoint := points first + ((displacement / distance) * spring restLength value asFloat).
+			restLengthMarker
+				relocate: (context overlayPointFromWorld: restPoint) - (4 @ 4);
+				visibility: BlVisibility visible ].
 	^ self
 ]
 
 { #category : 'removing' }
 CFPhysicsSpringVisual >> remove [
 	self hasParent ifTrue: [ self removeFromParent ].
+	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
 	^ self
 ]
 
