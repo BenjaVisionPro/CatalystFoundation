@@ -66,17 +66,29 @@ CFPhysicsContactVisual >> update [
 	state ifNil: [ ^ self ].
 	state pointCount > 0
 		ifTrue: [
-			first := context overlayPoint: state firstPointInFirstBody from: state firstBody element.
+			first := context
+				overlayPointFromWorld: state firstPoint
+				attachedTo: state firstBody.
 			self showMarker: firstPointMarker at: first.
-			self showLine: firstNormalLine from: first to: (context overlayPoint: state firstNormalPointInFirstBody from: state firstBody element).
-			self updateSeparationLine: firstSeparationLine from: first to: (context overlayPoint: state firstSeparationPointInFirstBody from: state firstBody element) separation: state firstSeparation ]
+			self showLine: firstNormalLine from: first to: (context
+				overlayPointFromWorld: state firstPoint + (state normal * 24.0)
+				attachedTo: state firstBody).
+			self updateSeparationLine: firstSeparationLine from: first to: (context
+				overlayPointFromWorld: state firstPoint + (state normal * state firstSeparation)
+				attachedTo: state firstBody) separation: state firstSeparation ]
 		ifFalse: [ self hideFirstPoint ].
 	state pointCount > 1
 		ifTrue: [
-			second := context overlayPoint: state secondPointInFirstBody from: state firstBody element.
+			second := context
+				overlayPointFromWorld: state secondPoint
+				attachedTo: state firstBody.
 			self showMarker: secondPointMarker at: second.
-			self showLine: secondNormalLine from: second to: (context overlayPoint: state secondNormalPointInFirstBody from: state firstBody element).
-			self updateSeparationLine: secondSeparationLine from: second to: (context overlayPoint: state secondSeparationPointInFirstBody from: state firstBody element) separation: state secondSeparation.
+			self showLine: secondNormalLine from: second to: (context
+				overlayPointFromWorld: state secondPoint + (state normal * 24.0)
+				attachedTo: state firstBody).
+			self updateSeparationLine: secondSeparationLine from: second to: (context
+				overlayPointFromWorld: state secondPoint + (state normal * state secondSeparation)
+				attachedTo: state firstBody) separation: state secondSeparation.
 			self showLine: contactLine from: first to: second ]
 		ifFalse: [ self hideSecondPoint. contactLine visibility: BlVisibility gone ].
 	^ self
