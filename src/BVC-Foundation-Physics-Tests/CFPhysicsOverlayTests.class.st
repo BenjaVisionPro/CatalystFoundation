@@ -631,52 +631,48 @@ CFPhysicsOverlayTests >> physicsOverlayIgnoresClicksInsideItsObjectInspector [
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayHighlightsTheSelectedBody [
 	<gtExample>
-	| host overlay element bodyOverlay |
+	| host overlay element selectedBody |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
-	bodyOverlay := overlay bodyElements
-		detect: [ :each | each body == element existingPhysics bodyState ].
-	self assert: bodyOverlay isSelected not.
+	selectedBody := element existingPhysics bodyState.
+	self assert: overlay selectionElement isNil.
 	element fireEvent: BlClickEvent new.
-	self assert: bodyOverlay isSelected.
+	self assert: overlay selectionElement notNil.
+	self assert: overlay selectionElement body == selectedBody.
 	^ overlay
 ]
 
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayMovesTheSelectionHighlight [
 	<gtExample>
-	| host overlay first second firstOverlay secondOverlay |
+	| host overlay first second firstBody secondBody selection |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	first := host children first.
 	second := host children second.
-	firstOverlay := overlay bodyElements
-		detect: [ :each | each body == first existingPhysics bodyState ].
-	secondOverlay := overlay bodyElements
-		detect: [ :each | each body == second existingPhysics bodyState ].
+	firstBody := first existingPhysics bodyState.
+	secondBody := second existingPhysics bodyState.
 	first fireEvent: BlClickEvent new.
-	self assert: firstOverlay isSelected.
-	self assert: secondOverlay isSelected not.
+	selection := overlay selectionElement.
+	self assert: selection body == firstBody.
 	second fireEvent: BlClickEvent new.
-	self assert: firstOverlay isSelected not.
-	self assert: secondOverlay isSelected.
+	self assert: overlay selectionElement ~~ selection.
+	self assert: overlay selectionElement body == secondBody.
 	^ overlay
 ]
 
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
 	<gtExample>
-	| host overlay element bodyOverlay |
+	| host overlay element |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
-	bodyOverlay := overlay bodyElements
-		detect: [ :each | each body == element existingPhysics bodyState ].
 	element fireEvent: BlClickEvent new.
-	self assert: bodyOverlay isSelected.
+	self assert: overlay selectionElement notNil.
 	element fireEvent: BlClickEvent new.
-	self assert: bodyOverlay isSelected not.
+	self assert: overlay selectionElement isNil.
 	^ overlay
 ]
 
@@ -696,7 +692,7 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden 
 	overlay bodiesEnabled: false.
 	self assert: overlay bodyElements isEmpty.
 	self assert: overlay selectedElement == element.
-	self assert: (overlay root children anySatisfy: [ :each |
-		each isKindOf: CFPhysicsSelectionOverlayElement and: [ each body == selectedBody ] ]).
+	self assert: overlay selectionElement notNil.
+	self assert: overlay selectionElement body == selectedBody.
 	^ overlay
 ]

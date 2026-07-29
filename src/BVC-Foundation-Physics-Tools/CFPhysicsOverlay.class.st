@@ -43,6 +43,8 @@ CFPhysicsOverlay >> worldInspectorButton [ ^ worldInspectorButton ]
 CFPhysicsOverlay >> controls [ ^ controls ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> selectionElement [ ^ selectionElement ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
