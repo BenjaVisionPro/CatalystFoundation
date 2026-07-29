@@ -55,7 +55,19 @@ CFPhysicsSpringVisual >> initializeVisual [
 		border: (BlBorder paint: (Color darkGray alpha: 0.75) width: 1);
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents.
+	self
+		fromHead: self newEndpointMarker;
+		toHead: self newEndpointMarker.
 	self isSelection ifTrue: [ self zIndex: 2 ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsSpringVisual >> newEndpointMarker [
+	^ BlArrowheadCircle new
+		scale: 6.0;
+		background: (Color darkGray alpha: 0.9);
+		border: (BlBorder paint: (Color darkGray alpha: 0.9) width: 1);
+		yourself
 ]
 
 { #category : 'installing' }
@@ -66,11 +78,13 @@ CFPhysicsSpringVisual >> addTo: aParentElement [
 
 { #category : 'updating' }
 CFPhysicsSpringVisual >> update [
-	| points |
+	| points firstPoint secondPoint |
 	points := spring endpointPair worldPoints.
+	firstPoint := context overlayPointFromWorld: points first.
+	secondPoint := context overlayPointFromWorld: points second.
 	self
-		fromAnchor: (BlAbsolutePositionAnchor position: (context overlayPointFromWorld: points first));
-		toAnchor: (BlAbsolutePositionAnchor position: (context overlayPointFromWorld: points second)).
+		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
+		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
 	^ self
 ]
 

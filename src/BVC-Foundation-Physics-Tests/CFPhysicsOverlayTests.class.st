@@ -754,6 +754,27 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
+	<gtExample>
+	| host world first second spring overlay visual |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	spring := CFPhysicsSpringConstraint
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	self assert: visual fromHead class equals: BlArrowheadCircle.
+	self assert: visual toHead class equals: BlArrowheadCircle.
+	self assert: visual fromHead parent == visual.
+	self assert: visual toHead parent == visual.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
 	| host world spring overlay visual |
