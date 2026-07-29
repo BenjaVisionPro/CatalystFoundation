@@ -76,11 +76,11 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> springFrom: anElement [
-	| visual |
-	visual := (selectionVisual isKindOf: CFPhysicsSpringVisual)
-		ifTrue: [ selectionVisual includesEventTarget: anElement ifTrue: [ selectionVisual ] ifFalse: [ nil ] ]
-		ifFalse: [ springOverlay visualForEventTarget: anElement ].
-	^ visual ifNil: [ nil ] ifNotNil: [ visual spring ]
+	| resolvedSpring |
+	resolvedSpring := selectionVisual
+		ifNil: [ nil ]
+		ifNotNil: [ selectionVisual springForEventTarget: anElement ].
+	^ resolvedSpring ifNil: [ springOverlay springForEventTarget: anElement ]
 ]
 
 { #category : 'private - selection' }
@@ -129,7 +129,7 @@ CFPhysicsOverlay >> clearSelectionVisual [
 CFPhysicsOverlay >> refreshSelectionVisual [
 	| selectedBody |
 	selectedSpring ifNotNil: [
-		(selectionVisual notNil and: [ selectionVisual isKindOf: CFPhysicsSpringVisual and: [ selectionVisual spring == selectedSpring ]])
+		(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedSpring ])
 			ifTrue: [ selectionVisual update. ^ self ].
 		self clearSelectionVisual.
 		selectionVisual := CFPhysicsSpringVisual selectionOn: selectedSpring context: context.
@@ -139,7 +139,7 @@ CFPhysicsOverlay >> refreshSelectionVisual [
 		ifNil: [ nil ]
 		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyState ] ].
 	selectedBody ifNil: [ ^ self clearSelectionVisual ].
-	(selectionVisual notNil and: [ selectionVisual body == selectedBody ])
+	(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedBody ])
 		ifTrue: [ selectionVisual update. ^ self ].
 	self clearSelectionVisual.
 	selectionVisual := CFPhysicsBodyVisual selectionOn: selectedBody context: context.

@@ -47,6 +47,16 @@ CFPhysicsBodyVisual >> isDiagnostic [ ^ presentationRole = #diagnostic ]
 { #category : 'testing' }
 CFPhysicsBodyVisual >> isSelection [ ^ presentationRole = #selection ]
 
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> matchesSelection: anObject [
+	^ self isSelection and: [ body == anObject ]
+]
+
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> springForEventTarget: anElement [
+	^ nil
+]
+
 { #category : 'initialization' }
 CFPhysicsBodyVisual >> initializeVisual [
 	self
@@ -122,4 +132,3 @@ CFPhysicsBodyVisual >> release [
 	self remove.
 	^ self
 ]
-

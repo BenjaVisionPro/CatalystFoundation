@@ -35,6 +35,13 @@ CFPhysicsSpringOverlay >> visualForEventTarget: anElement [
 		ifNone: [ nil ]
 ]
 
+{ #category : 'testing' }
+CFPhysicsSpringOverlay >> springForEventTarget: anElement [
+	| visual |
+	visual := self visualForEventTarget: anElement.
+	^ visual ifNil: [ nil ] ifNotNil: [ visual spring ]
+]
+
 { #category : 'initialization' }
 CFPhysicsSpringOverlay >> initializeOverlay [ visualsBySpring := IdentityDictionary new ]
 

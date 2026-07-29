@@ -53,6 +53,18 @@ CFPhysicsSpringVisual >> isDiagnostic [ ^ presentationRole = #diagnostic ]
 { #category : 'testing' }
 CFPhysicsSpringVisual >> isSelection [ ^ presentationRole = #selection ]
 
+{ #category : 'testing' }
+CFPhysicsSpringVisual >> matchesSelection: anObject [
+	^ self isSelection and: [ spring == anObject ]
+]
+
+{ #category : 'testing' }
+CFPhysicsSpringVisual >> springForEventTarget: anElement [
+	^ (self includesEventTarget: anElement)
+		ifTrue: [ spring ]
+		ifFalse: [ nil ]
+]
+
 { #category : 'initialization' }
 CFPhysicsSpringVisual >> initializeVisual [
 	self
