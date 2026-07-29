@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -159,7 +159,10 @@ CFPhysicsOverlay >> initializeOverlay [
 	objectInspector := CFPhysicsObjectInspector on: host.
 	self initializeControls.
 	selectionHandler := BlEventHandler on: BlClickEvent do: [ :anEvent | self clickEvent: anEvent ].
-	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnostics ]
+	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnostics ].
+	hostTransformationHandler := BlEventHandler
+		on: BlElementTransformationChangedEvent
+		do: [ :anEvent | self refreshPresentationGeometry ]
 ]
 
 { #category : 'initialization' }
@@ -215,6 +218,7 @@ CFPhysicsOverlay >> install [
 	host addEventFilter: selectionHandler.
 	root addEventFilter: selectionHandler.
 	host addEventHandler: framePresentedHandler.
+	host addEventHandler: hostTransformationHandler.
 	controls contactsEnabled ifTrue: [ world enableVisualState ].
 	self refresh.
 	^ self
@@ -222,9 +226,18 @@ CFPhysicsOverlay >> install [
 
 { #category : 'updating' }
 CFPhysicsOverlay >> refreshFrameDiagnostics [
+	self refreshPresentationGeometry.
+	self refreshSelectedObject.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsOverlay >> refreshPresentationGeometry [
+	"Physics frames and camera transforms both alter the displayed coordinate
+	system. Body visuals observe their source elements directly; the aggregate
+	spring and contact diagnostics refresh here once for the owning host."
 	controls springsEnabled ifTrue: [ springOverlay update ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
-	self refreshSelectedObject.
 	self refreshSelectionVisual.
 	^ self
 ]
@@ -311,6 +324,7 @@ CFPhysicsOverlay >> release [
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
 	selectionHandler ifNotNil: [ root removeEventFilter: selectionHandler ].
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
+	hostTransformationHandler ifNotNil: [ host removeEventHandler: hostTransformationHandler ].
 	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
 	controls ifNotNil: #release.
 	bodyOverlay ifNotNil: #release.

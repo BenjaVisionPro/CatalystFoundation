@@ -43,6 +43,42 @@ CFPhysicsOverlayTests >> physicsHost [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsCanvassableHost [
+	<gtExample>
+	| space container host first second world |
+	space := BlSpace new.
+	container := BlElement new
+		size: 500 @ 320;
+		yourself.
+	host := BlCanvassableElement new
+		size: 420 @ 260;
+		disableAutoScale;
+		yourself.
+	first := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 40 @ 40;
+		background: Color lightBlue;
+		yourself.
+	second := BlElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
+		size: 90 @ 50;
+		background: Color lightGreen;
+		yourself.
+	space root addChild: container.
+	container addChild: host.
+	host addChild: first.
+	host addChild: second.
+	world := host physics beWorld.
+	world synchroniseMembership.
+	(world bodyStateFor: first) position: 40 @ 50.
+	(world bodyStateFor: second)
+		position: 180 @ 120;
+		rotation: Float pi / 8.0.
+	space pulse.
+	^ host
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsOverlayCanBeInstalled [
 	<gtExample>
 	| host overlay |
@@ -76,8 +112,8 @@ CFPhysicsOverlayTests >> physicsOverlayRendersAboveItsHost [
 CFPhysicsOverlayTests >> physicsOverlayCanBeRemovedWithoutChangingTheHost [
 	<gtExample>
 	| host overlay |
-	host := self physicsOverlayCanBeInstalled.
-	overlay := host existingPhysicsOverlay.
+	host := self physicsCanvassableHost.
+	overlay := host showPhysicsOverlay.
 	host hidePhysicsOverlay.
 	self assert: host existingPhysicsOverlay isNil.
 	self assert: overlay isInstalled not.
@@ -860,6 +896,32 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 		attachedTo: spring endpointPair bodyA.
 	self assert: (visual fromPosition = originalPosition) not.
 	self assert: visual fromPosition equals: expectedPosition.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransformation [
+	<gtExample>
+	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	spring := CFPhysicsSpringConstraint between: first physics bodyState and: second physics bodyState.
+	world addSpringConstraint: spring.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	springVisual := overlay springOverlay visuals first.
+	contactVisual := overlay contactOverlay visuals first.
+	initialSpringPoint := springVisual fromPosition.
+	initialContactPoint := contactVisual firstPointPosition.
+	host childrenTranslationFactor: 70 @ 45.
+	host space pulse.
+	self assert: springVisual fromPosition equals: initialSpringPoint + (70 @ 45).
+	self assert: contactVisual firstPointPosition equals: initialContactPoint + (70 @ 45).
 	^ overlay
 ]
 
