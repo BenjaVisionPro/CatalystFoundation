@@ -813,7 +813,7 @@ CFPhysicsOverlayTests >> physicsSpringOverlayPreservesVisualIdentity [
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 	<gtExample>
-	| host world first second spring overlay visual firstPoint secondPoint |
+	| host world first second spring overlay visual firstPoint secondPoint context |
 	host := self physicsHost.
 	world := host physics existingWorld.
 	first := world bodyStatesInOrder first.
@@ -824,8 +824,13 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 	world addSpringConstraint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
-	firstPoint := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointA).
-	secondPoint := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointB).
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	firstPoint := context
+		overlayPointFromWorld: spring endpointPair worldPointA
+		attachedTo: spring endpointPair bodyA.
+	secondPoint := context
+		overlayPointFromWorld: spring endpointPair worldPointB
+		attachedTo: spring endpointPair bodyB.
 	self assert: visual fromPosition equals: firstPoint.
 	self assert: visual toPosition equals: secondPoint.
 	^ overlay
@@ -834,7 +839,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	<gtExample>
-	| host world first second spring overlay visual originalPosition expectedPosition |
+	| host world first second spring overlay visual originalPosition expectedPosition context |
 	host := self physicsHost.
 	world := host physics existingWorld.
 	first := world bodyStatesInOrder first.
@@ -844,9 +849,15 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	originalPosition := visual fromPosition.
-	first position: first position + (45 @ 30).
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
-	expectedPosition := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointA).
+	first beginStep.
+	first translateBy: 45 @ 30.
+	(CFPhysicsWorldPresentation on: world in: host space cfMotionCoordinator) presentAtAlpha: 0.5.
+	host space pulse.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	expectedPosition := context
+		overlayPointFromWorld: spring endpointPair worldPointA
+		attachedTo: spring endpointPair bodyA.
 	self assert: (visual fromPosition = originalPosition) not.
 	self assert: visual fromPosition equals: expectedPosition.
 	^ overlay
@@ -910,11 +921,12 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	host space pulse.
-	firstPoint := spring endpointPair worldPointA.
-	secondPoint := spring endpointPair worldPointB.
+	firstPoint := visual fromPosition.
+	secondPoint := visual toPosition.
 	direction := secondPoint - firstPoint.
-	expectedMarkerPosition := overlay root globalPointToLocal: (host localPointToGlobal:
-		(firstPoint + ((direction / direction r) * spring restLength value asFloat))) - (4 @ 4).
+	expectedMarkerPosition := firstPoint
+		+ (direction * (spring restLength value asFloat / (spring endpointPair worldPointB - spring endpointPair worldPointA) r))
+		- (4 @ 4).
 	self assert: visual restLengthMarker hasParent.
 	self assert: visual restLengthMarker position equals: expectedMarkerPosition.
 	^ overlay

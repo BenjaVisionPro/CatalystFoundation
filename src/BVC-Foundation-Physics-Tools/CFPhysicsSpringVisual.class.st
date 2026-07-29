@@ -134,8 +134,12 @@ CFPhysicsSpringVisual >> addTo: aParentElement [
 CFPhysicsSpringVisual >> update [
 	| points firstPoint secondPoint displacement distance restPoint |
 	points := spring endpointPair worldPoints.
-	firstPoint := context overlayPointFromWorld: points first.
-	secondPoint := context overlayPointFromWorld: points second.
+	firstPoint := context
+		overlayPointFromWorld: points first
+		attachedTo: spring endpointPair bodyA.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: spring endpointPair bodyB.
 	self
 		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
@@ -149,9 +153,9 @@ CFPhysicsSpringVisual >> update [
 	distance isZero
 		ifTrue: [ restLengthMarker visibility: BlVisibility gone ]
 		ifFalse: [
-			restPoint := points first + ((displacement / distance) * spring restLength value asFloat).
+			restPoint := firstPoint + ((secondPoint - firstPoint) * (spring restLength value asFloat / distance)).
 			restLengthMarker
-				relocate: (context overlayPointFromWorld: restPoint) - (4 @ 4);
+				relocate: restPoint - (4 @ 4);
 				visibility: BlVisibility visible ].
 	^ self
 ]

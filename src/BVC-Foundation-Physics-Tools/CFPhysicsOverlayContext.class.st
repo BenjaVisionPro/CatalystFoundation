@@ -53,6 +53,21 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
 ]
 
 { #category : 'geometry' }
+CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint attachedTo: aBody [
+	"Resolve a solver-world point through the body that owns it when one is
+	available. The body element carries the current Motion presentation, so this
+	keeps diagnostics on the same interpolated geometry as the rendered body.
+	World anchors deliberately remain in world coordinates."
+	aBody ifNil: [ ^ self overlayPointFromWorld: aPoint ].
+	^ self
+		overlayPoint: (aBody shapeState
+			localPointForWorldPoint: aPoint
+			position: aBody position
+			rotation: aBody rotation)
+		from: aBody element
+]
+
+{ #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointInHost: aPoint [
 	"Convert a point expressed in the displayed Physics host child coordinates into
 	overlay-local coordinates."
