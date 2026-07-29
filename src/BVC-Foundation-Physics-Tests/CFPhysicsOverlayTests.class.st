@@ -257,6 +257,23 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	^ visual
 ]
 
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayNodeSelectionLeavesPhlowToTheNode [
+	<gtExample>
+	| host overlay node clickEvent phlowSelectionRequested |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	node := host children first.
+	phlowSelectionRequested := false.
+	node when: GtPhlowObjectToSelect do: [ :anEvent | phlowSelectionRequested := true ].
+	clickEvent := BlClickEvent new.
+	node fireEvent: clickEvent.
+	self assert: overlay selectedElement == node.
+	self assert: clickEvent isConsumed not.
+	self assert: phlowSelectionRequested not.
+	^ overlay
+]
+
 
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsPresentationAndWorldCoordinatesAgreeForPositionedElements [

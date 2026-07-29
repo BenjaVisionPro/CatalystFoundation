@@ -68,9 +68,6 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 	physics := anElement existingPhysics.
 	self refreshSelectionVisual.
 	objectInspector inspect: physics.
-	"Use Phlow's normal selection event. In an existing inspector this selects
-	the object; without one it does not invent or open a separate inspector."
-	anElement phlow selectObject: physics.
 	^ self
 ]
 
@@ -90,7 +87,6 @@ CFPhysicsOverlay >> selectSpring: aSpring [
 	selectedSpring := aSpring.
 	self refreshSelectionVisual.
 	objectInspector inspect: aSpring.
-	host phlow selectObject: aSpring.
 	^ self
 ]
 
