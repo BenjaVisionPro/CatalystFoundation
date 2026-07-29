@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsSpringVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker' ],
+	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker', 'hitTarget' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -62,7 +62,20 @@ CFPhysicsSpringVisual >> initializeVisual [
 		fromHead: self newEndpointMarker;
 		toHead: self newEndpointMarker.
 	restLengthMarker := self newRestLengthMarker.
+	hitTarget := self newHitTarget.
+	self updateBorder.
 	self isSelection ifTrue: [ self zIndex: 2 ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsSpringVisual >> newHitTarget [
+	^ BlLineElement new
+		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		border: (BlBorder paint: Color transparent width: 12);
+		constraintsDo: [ :c | c ignoreByLayout ];
+		preventChildrenMouseEvents;
+		yourself
 ]
 
 { #category : 'private - building' }
@@ -86,11 +99,19 @@ CFPhysicsSpringVisual >> newRestLengthMarker [
 		yourself
 ]
 
+{ #category : 'private - styling' }
+CFPhysicsSpringVisual >> updateBorder [
+	self isSelection
+		ifTrue: [ self border: (BlBorder paint: (Color red alpha: 0.9) width: 3) ]
+		ifFalse: [ self border: (BlBorder paint: (Color darkGray alpha: 0.75) width: 1) ]
+]
+
 { #category : 'installing' }
 CFPhysicsSpringVisual >> addTo: aParentElement [
 	aParentElement
 		addChild: self;
-		addChild: restLengthMarker.
+		addChild: restLengthMarker;
+		addChild: hitTarget.
 	^ self
 ]
 
@@ -101,6 +122,9 @@ CFPhysicsSpringVisual >> update [
 	firstPoint := context overlayPointFromWorld: points first.
 	secondPoint := context overlayPointFromWorld: points second.
 	self
+		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
+		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
+	hitTarget
 		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
 	displacement := points second - points first.
@@ -115,10 +139,16 @@ CFPhysicsSpringVisual >> update [
 	^ self
 ]
 
+{ #category : 'testing' }
+CFPhysicsSpringVisual >> includesEventTarget: anElement [
+	^ anElement == self or: [ anElement == hitTarget ]
+]
+
 { #category : 'removing' }
 CFPhysicsSpringVisual >> remove [
 	self hasParent ifTrue: [ self removeFromParent ].
 	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
+	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
 	^ self
 ]
 

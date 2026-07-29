@@ -28,6 +28,13 @@ CFPhysicsSpringOverlay >> context: aContext [ context := aContext ]
 { #category : 'accessing' }
 CFPhysicsSpringOverlay >> visuals [ ^ visualsBySpring values asArray ]
 
+{ #category : 'testing' }
+CFPhysicsSpringOverlay >> visualForEventTarget: anElement [
+	^ visualsBySpring values
+		detect: [ :each | each includesEventTarget: anElement ]
+		ifNone: [ nil ]
+]
+
 { #category : 'initialization' }
 CFPhysicsSpringOverlay >> initializeOverlay [ visualsBySpring := IdentityDictionary new ]
 

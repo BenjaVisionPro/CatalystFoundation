@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -48,17 +48,22 @@ CFPhysicsOverlay >> controls [ ^ controls ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
 { #category : 'accessing' }
+CFPhysicsOverlay >> selectedSpring [ ^ selectedSpring ]
+{ #category : 'accessing' }
 CFPhysicsOverlay >> selectionVisual [ ^ selectionVisual ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectionElement [ ^ selectionVisual ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
-	| anElement physics |
+	| anElement physics spring |
 	(objectInspector includesEventTarget: anEvent target) ifTrue: [ ^ self ].
+	spring := self springFrom: anEvent target.
+	spring ifNotNil: [ ^ self selectSpring: spring ].
 	anElement := self physicalElementFrom: anEvent target.
 	anElement ifNil: [ ^ self clearSelection ].
 	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
+	selectedSpring := nil.
 	selectedElement := anElement.
 	physics := anElement existingPhysics.
 	self refreshSelectionVisual.
@@ -66,6 +71,26 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 	"Use Phlow's normal selection event. In an existing inspector this selects
 	the object; without one it does not invent or open a separate inspector."
 	anElement phlow selectObject: physics.
+	^ self
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> springFrom: anElement [
+	| visual |
+	visual := (selectionVisual isKindOf: CFPhysicsSpringVisual)
+		ifTrue: [ selectionVisual includesEventTarget: anElement ifTrue: [ selectionVisual ] ifFalse: [ nil ] ]
+		ifFalse: [ springOverlay visualForEventTarget: anElement ].
+	^ visual ifNil: [ nil ] ifNotNil: [ visual spring ]
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> selectSpring: aSpring [
+	selectedSpring == aSpring ifTrue: [ ^ self clearSelection ].
+	selectedElement := nil.
+	selectedSpring := aSpring.
+	self refreshSelectionVisual.
+	objectInspector clear.
+	aSpring phlow selectObject: aSpring.
 	^ self
 ]
 
@@ -86,6 +111,7 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clearSelection [
 	selectedElement := nil.
+	selectedSpring := nil.
 	self refreshSelectionVisual.
 	objectInspector clear.
 	^ self
@@ -102,6 +128,13 @@ CFPhysicsOverlay >> clearSelectionVisual [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectionVisual [
 	| selectedBody |
+	selectedSpring ifNotNil: [
+		(selectionVisual notNil and: [ selectionVisual isKindOf: CFPhysicsSpringVisual and: [ selectionVisual spring == selectedSpring ]])
+			ifTrue: [ selectionVisual update. ^ self ].
+		self clearSelectionVisual.
+		selectionVisual := CFPhysicsSpringVisual selectionOn: selectedSpring context: context.
+		selectionVisual addTo: root.
+		^ self ].
 	selectedBody := selectedElement
 		ifNil: [ nil ]
 		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyState ] ].
@@ -122,7 +155,7 @@ CFPhysicsOverlay >> initializeOverlay [
 		layout: BlFrameLayout new;
 		zIndex: (host elevation relatedTo: 0) + 1;
 		clipChildren: false;
-		preventMeAndChildrenMouseEvents.
+		preventMouseEvents.
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	bodyOverlay := CFPhysicsBodyOverlay in: root world: world context: context.
 	springOverlay := CFPhysicsSpringOverlay in: root world: world context: context.
@@ -200,6 +233,9 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectedObject [
 	| physics body |
+	selectedSpring ifNotNil: [
+		(world springConstraints includes: selectedSpring) ifFalse: [ self clearSelection ].
+		^ self ].
 	selectedElement ifNil: [ ^ self ].
 	physics := selectedElement existingPhysics.
 	physics ifNil: [ ^ self clearSelection ].
