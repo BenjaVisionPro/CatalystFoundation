@@ -232,6 +232,31 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 	^ overlay
 ]
 
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBody [
+	<gtExample>
+	| host overlay world first second firstBody visual initialPosition |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	visual := overlay contactOverlay visuals first.
+	initialPosition := visual firstPointPosition.
+	firstBody := world activeContacts first firstBody.
+	firstBody beginStep.
+	firstBody translateBy: 100 @ 0.
+	world presentAtAlpha: 0.5.
+	host space pulse.
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
+	self assert: visual firstPointPosition equals: initialPosition + (50 @ 0).
+	^ visual
+]
+
 
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsPresentationAndWorldCoordinatesAgreeForPositionedElements [

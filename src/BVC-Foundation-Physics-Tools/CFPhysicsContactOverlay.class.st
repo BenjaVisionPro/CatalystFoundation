@@ -27,7 +27,9 @@ CFPhysicsContactOverlay >> visuals [ ^ visualsByKey values asArray ]
 { #category : 'updating' }
 CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
 	| live |
-	lastVisualState == aWorldVisualState ifTrue: [ ^ self ].
+	lastVisualState == aWorldVisualState ifTrue: [
+		visualsByKey valuesDo: #update.
+		^ self ].
 	lastVisualState := aWorldVisualState.
 	live := Set new.
 	aWorldVisualState contacts do: [ :state |

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsContactVisual',
 	#superclass : 'Object',
-	#instVars : [ 'context', 'root', 'contactLine', 'firstPointMarker', 'secondPointMarker', 'firstNormalLine', 'secondNormalLine', 'firstSeparationLine', 'secondSeparationLine' ],
+	#instVars : [ 'context', 'root', 'state', 'contactLine', 'firstPointMarker', 'secondPointMarker', 'firstNormalLine', 'secondNormalLine', 'firstSeparationLine', 'secondSeparationLine' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -56,24 +56,35 @@ CFPhysicsContactVisual >> newLinePaint: aPaint width: aNumber [
 
 { #category : 'updating' }
 CFPhysicsContactVisual >> updateFrom: aState [
-	| first second normal |
-	normal := aState normal.
-	aState pointCount > 0
+	state := aState.
+	^ self update
+]
+
+{ #category : 'updating' }
+CFPhysicsContactVisual >> update [
+	| first second |
+	state ifNil: [ ^ self ].
+	state pointCount > 0
 		ifTrue: [
-			first := context overlayPointFromWorld: aState firstPoint.
+			first := context overlayPoint: state firstPointInFirstBody from: state firstBody element.
 			self showMarker: firstPointMarker at: first.
-			self showLine: firstNormalLine from: first to: (context overlayPointFromWorld: aState firstPoint + (normal * 24.0)).
-			self updateSeparationLine: firstSeparationLine from: first point: aState firstPoint normal: normal separation: aState firstSeparation ]
+			self showLine: firstNormalLine from: first to: (context overlayPoint: state firstNormalPointInFirstBody from: state firstBody element).
+			self updateSeparationLine: firstSeparationLine from: first to: (context overlayPoint: state firstSeparationPointInFirstBody from: state firstBody element) separation: state firstSeparation ]
 		ifFalse: [ self hideFirstPoint ].
-	aState pointCount > 1
+	state pointCount > 1
 		ifTrue: [
-			second := context overlayPointFromWorld: aState secondPoint.
+			second := context overlayPoint: state secondPointInFirstBody from: state firstBody element.
 			self showMarker: secondPointMarker at: second.
-			self showLine: secondNormalLine from: second to: (context overlayPointFromWorld: aState secondPoint + (normal * 24.0)).
-			self updateSeparationLine: secondSeparationLine from: second point: aState secondPoint normal: normal separation: aState secondSeparation.
+			self showLine: secondNormalLine from: second to: (context overlayPoint: state secondNormalPointInFirstBody from: state firstBody element).
+			self updateSeparationLine: secondSeparationLine from: second to: (context overlayPoint: state secondSeparationPointInFirstBody from: state firstBody element) separation: state secondSeparation.
 			self showLine: contactLine from: first to: second ]
 		ifFalse: [ self hideSecondPoint. contactLine visibility: BlVisibility gone ].
 	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactVisual >> firstPointPosition [
+	^ firstPointMarker position + (3 @ 3)
 ]
 
 { #category : 'private - updating' }
@@ -90,12 +101,12 @@ CFPhysicsContactVisual >> showLine: aLine from: firstPoint to: secondPoint [
 ]
 
 { #category : 'private - updating' }
-CFPhysicsContactVisual >> updateSeparationLine: aLine from: displayedPoint point: worldPoint normal: normal separation: separation [
+CFPhysicsContactVisual >> updateSeparationLine: aLine from: displayedPoint to: separationPoint separation: separation [
 	separation isZero ifTrue: [ ^ aLine visibility: BlVisibility gone ].
 	aLine border: (BlBorder
 		paint: ((separation < 0 ifTrue: [ Color red ] ifFalse: [ Color yellow ]) alpha: 0.8)
 		width: 2).
-	self showLine: aLine from: displayedPoint to: (context overlayPointFromWorld: worldPoint + (normal * separation))
+	self showLine: aLine from: displayedPoint to: separationPoint
 ]
 
 { #category : 'private - updating' }
