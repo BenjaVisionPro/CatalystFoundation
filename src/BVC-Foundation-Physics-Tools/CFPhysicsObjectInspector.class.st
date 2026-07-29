@@ -97,7 +97,7 @@ CFPhysicsObjectInspector >> newPanel [
 CFPhysicsObjectInspector >> newContentContainer [
 	^ BlElement new
 		layout: BlFrameLayout new;
-		hMatchParent;
+		hMatch;
 		vFitContent;
 		yourself
 ]
