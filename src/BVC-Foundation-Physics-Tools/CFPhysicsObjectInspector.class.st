@@ -59,6 +59,7 @@ CFPhysicsObjectInspector >> initializeInspector [
 	root := BlOverlayElement on: host.
 	root
 		id: #cfPhysicsObjectInspector;
+		layout: BlFrameLayout new;
 		zIndex: (host elevation relatedTo: 0) + 2;
 		clipChildren: false;
 		preventMouseEvents.

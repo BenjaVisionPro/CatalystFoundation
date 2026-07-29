@@ -22,7 +22,6 @@ CFPhysicsOverlayControls >> contactsEnabled [ ^ contactsToggle isActivated ]
 
 { #category : 'initialization' }
 CFPhysicsOverlayControls >> initializeControls [
-	| group |
 	element := BrVerticalPane new
 		id: #cfPhysicsOverlayFilterControls;
 		fitContent;
@@ -37,15 +36,13 @@ CFPhysicsOverlayControls >> initializeControls [
 			c frame vertical alignCenter ];
 		margin: (BlInsets right: 14);
 		yourself.
-	group := BrToggleGroup new aptitude: BrGlamorousToggleGroupAptitude new; yourself.
-	group addToggle: (self unavailableToggleLabel: 'Bodies').
+	element addChild: (self unavailableToggleLabel: 'Bodies').
 	contactsToggle := self contactsToggle.
-	group addToggle: contactsToggle.
-	group addToggle: (self unavailableToggleLabel: 'Springs').
-	group addToggle: (self unavailableToggleLabel: 'Forces').
-	group addToggle: (self unavailableToggleLabel: 'Anchors').
-	group addToggle: (self unavailableToggleLabel: 'Joints').
-	element addChild: group
+	element addChild: contactsToggle.
+	element addChild: (self unavailableToggleLabel: 'Springs').
+	element addChild: (self unavailableToggleLabel: 'Forces').
+	element addChild: (self unavailableToggleLabel: 'Anchors').
+	element addChild: (self unavailableToggleLabel: 'Joints')
 ]
 
 { #category : 'private - building' }

@@ -100,6 +100,7 @@ CFPhysicsOverlay >> initializeOverlay [
 	root := BlOverlayElement on: host.
 	root
 		id: #cfPhysicsOverlay;
+		layout: BlFrameLayout new;
 		zIndex: (host elevation relatedTo: 0) + 1;
 		clipChildren: false;
 		preventMeAndChildrenMouseEvents.
@@ -116,6 +117,7 @@ CFPhysicsOverlay >> initializeControls [
 	controlRoot := BlOverlayElement on: host.
 	controlRoot
 		id: #cfPhysicsOverlayControls;
+		layout: BlFrameLayout new;
 		zIndex: (host elevation relatedTo: 0) + 3;
 		clipChildren: false;
 		preventMouseEvents.
