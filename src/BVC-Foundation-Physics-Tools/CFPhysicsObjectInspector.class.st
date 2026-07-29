@@ -6,7 +6,7 @@ Class {
 		'root',
 		'panel',
 		'content',
-		'selectedPhysics',
+		'selectedObject',
 		'released',
 		'visibilityMotion'
 	],
@@ -38,7 +38,10 @@ CFPhysicsObjectInspector >> root [ ^ root ]
 CFPhysicsObjectInspector >> content [ ^ content ]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> selectedPhysics [ ^ selectedPhysics ]
+CFPhysicsObjectInspector >> selectedObject [ ^ selectedObject ]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> selectedPhysics [ ^ selectedObject ]
 
 { #category : 'accessing' }
 CFPhysicsObjectInspector >> valueElementAt: aKey [
@@ -56,8 +59,7 @@ CFPhysicsObjectInspector >> initializeInspector [
 		clipChildren: false;
 		preventMouseEvents.
 	panel := self newPanel.
-	content := CFPhysicsBodyInspectorContent newContent.
-	panel addChild: content element.
+	content := nil.
 	root addChild: panel.
 	self clearWithoutMotion
 ]
@@ -99,24 +101,34 @@ CFPhysicsObjectInspector >> install [
 { #category : 'inspecting' }
 CFPhysicsObjectInspector >> inspect: aPhysics [
 	released ifTrue: [ ^ self ].
-	selectedPhysics := aPhysics.
-	content inspect: aPhysics.
+	aPhysics inspectInPhysicsOverlay: self.
+	^ self
+]
+
+{ #category : 'inspecting' }
+CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
+	released ifTrue: [ ^ self ].
+	selectedObject := anObject.
+	content ifNotNil: [ content element removeFromParent ].
+	content := aContent.
+	panel addChild: content element.
+	content inspect: anObject.
 	self showPanel.
 	^ self
 ]
 
 { #category : 'clearing' }
 CFPhysicsObjectInspector >> clear [
-	selectedPhysics := nil.
-	content clear.
+	selectedObject := nil.
+	content ifNotNil: [ content clear ].
 	self hidePanel.
 	^ self
 ]
 
 { #category : 'private - visibility' }
 CFPhysicsObjectInspector >> clearWithoutMotion [
-	selectedPhysics := nil.
-	content clear.
+	selectedObject := nil.
+	content ifNotNil: [ content clear ].
 	visibilityMotion ifNotNil: [
 		visibilityMotion cancelPreservingCurrentPresentation.
 		visibilityMotion := nil ].
@@ -160,7 +172,7 @@ CFPhysicsObjectInspector >> animateOpacityTo: anOpacity duration: aDuration [
 	visibilityMotion := aMotion.
 	aMotion onTerminalDo: [ :completedMotion |
 		visibilityMotion == completedMotion ifTrue: [ visibilityMotion := nil ].
-		(selectedPhysics isNil
+		(selectedObject isNil
 			and: [ completedMotion isCompleted
 			and: [ panel opacity = 0.0 ] ]) ifTrue: [
 			panel visibility: BlVisibility gone ] ].
@@ -179,7 +191,7 @@ CFPhysicsObjectInspector >> includesEventTarget: anElement [
 
 { #category : 'updating' }
 CFPhysicsObjectInspector >> refresh [
-	selectedPhysics ifNil: [ ^ self ].
+	selectedObject ifNil: [ ^ self ].
 	content refresh.
 	^ self
 ]

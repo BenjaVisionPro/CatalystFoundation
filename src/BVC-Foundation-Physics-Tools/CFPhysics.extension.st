@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysics' }
 
 { #category : '*bvc-foundation-physics-tools' }
+CFPhysics >> inspectInPhysicsOverlay: anInspector [
+	anInspector inspect: self usingContent: CFPhysicsBodyInspectorContent newContent
+]
+
+{ #category : '*bvc-foundation-physics-tools' }
 CFPhysics >> bodyTypeName [
 	self isDynamic ifTrue: [ ^ 'Dynamic' ].
 	self isKinematic ifTrue: [ ^ 'Kinematic' ].

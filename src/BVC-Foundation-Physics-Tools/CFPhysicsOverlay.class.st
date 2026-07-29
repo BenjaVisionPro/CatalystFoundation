@@ -89,7 +89,7 @@ CFPhysicsOverlay >> selectSpring: aSpring [
 	selectedElement := nil.
 	selectedSpring := aSpring.
 	self refreshSelectionVisual.
-	objectInspector clear.
+	objectInspector inspect: aSpring.
 	host phlow selectObject: aSpring.
 	^ self
 ]
@@ -237,14 +237,19 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 CFPhysicsOverlay >> refreshSelectedObject [
 	| physics body |
 	selectedSpring ifNotNil: [
-		(world springConstraints includes: selectedSpring) ifFalse: [ self clearSelection ].
+		(world springConstraints includes: selectedSpring)
+			ifFalse: [ self clearSelection ]
+			ifTrue: [
+				objectInspector selectedObject == selectedSpring
+					ifFalse: [ objectInspector inspect: selectedSpring ].
+				objectInspector refresh ].
 		^ self ].
 	selectedElement ifNil: [ ^ self ].
 	physics := selectedElement existingPhysics.
 	physics ifNil: [ ^ self clearSelection ].
 	body := physics bodyState.
 	(body isNil or: [ body world ~~ world ]) ifTrue: [ ^ self clearSelection ].
-	objectInspector selectedPhysics == physics ifFalse: [ objectInspector inspect: physics ].
+	objectInspector selectedObject == physics ifFalse: [ objectInspector inspect: physics ].
 	objectInspector refresh.
 	^ self
 ]
