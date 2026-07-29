@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyElements', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectionHandler', 'framePresentedHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionElement' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -84,13 +84,26 @@ CFPhysicsOverlay >> clearSelection [
 ]
 
 { #category : 'private - selection' }
+CFPhysicsOverlay >> clearSelectionElement [
+	selectionElement ifNil: [ ^ self ].
+	selectionElement release.
+	selectionElement hasParent ifTrue: [ selectionElement removeFromParent ].
+	selectionElement := nil.
+	^ self
+]
+
+{ #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectionHighlight [
 	| selectedBody |
 	selectedBody := selectedElement
 		ifNil: [ nil ]
 		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyState ] ].
-	bodyElements keysAndValuesDo: [ :body :overlayElement |
-		overlayElement selected: body == selectedBody ].
+	selectedBody ifNil: [ ^ self clearSelectionElement ].
+	(selectionElement notNil and: [ selectionElement body == selectedBody ])
+		ifTrue: [ selectionElement refresh. ^ self ].
+	self clearSelectionElement.
+	selectionElement := CFPhysicsSelectionOverlayElement on: selectedBody context: context.
+	root addChild: selectionElement.
 	^ self
 ]
 
@@ -272,6 +285,7 @@ CFPhysicsOverlay >> release [
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].
 	self clearBodyElements.
+	self clearSelectionElement.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self
 ]

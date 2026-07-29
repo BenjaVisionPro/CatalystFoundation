@@ -681,3 +681,22 @@ CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
 ]
 
 
+
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden [
+	<gtExample>
+	| host overlay element selectedBody |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	element := host children first.
+	selectedBody := element existingPhysics bodyState.
+	element fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == element.
+	overlay bodiesEnabled: false.
+	self assert: overlay bodyElements isEmpty.
+	self assert: overlay selectedElement == element.
+	self assert: (overlay root children anySatisfy: [ :each |
+		each isKindOf: CFPhysicsSelectionOverlayElement and: [ each body == selectedBody ] ]).
+	^ overlay
+]
