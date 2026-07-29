@@ -97,8 +97,9 @@ CFPhysicsObjectInspector >> newPanel [
 CFPhysicsObjectInspector >> newContentContainer [
 	^ BlElement new
 		layout: BlFrameLayout new;
-		hMatch;
-		vFitContent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
 		yourself
 ]
 
