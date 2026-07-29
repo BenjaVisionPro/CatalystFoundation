@@ -785,6 +785,7 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 		and: world bodyStatesInOrder second.
 	world addSpringConstraint: spring.
 	overlay := host showPhysicsOverlay.
+	host space pulse.
 	visual := overlay springOverlay visuals first.
 	BlSpace simulateClickOn: visual hitTarget.
 	self assert: overlay selectedSpring == spring.

@@ -90,7 +90,7 @@ CFPhysicsOverlay >> selectSpring: aSpring [
 	selectedSpring := aSpring.
 	self refreshSelectionVisual.
 	objectInspector clear.
-	aSpring phlow selectObject: aSpring.
+	host phlow selectObject: aSpring.
 	^ self
 ]
 

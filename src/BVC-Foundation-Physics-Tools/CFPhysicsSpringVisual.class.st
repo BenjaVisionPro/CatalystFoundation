@@ -142,6 +142,8 @@ CFPhysicsSpringVisual >> update [
 	hitTarget
 		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
+	self requestLayout.
+	hitTarget requestLayout.
 	displacement := points second - points first.
 	distance := displacement r.
 	distance isZero
