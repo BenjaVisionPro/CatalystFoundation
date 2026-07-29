@@ -225,8 +225,10 @@ CFPhysicsOverlay >> install [
 
 { #category : 'updating' }
 CFPhysicsOverlay >> refreshFrameDiagnostics [
+	controls springsEnabled ifTrue: [ springOverlay update ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectedObject.
+	self refreshSelectionVisual.
 	^ self
 ]
 

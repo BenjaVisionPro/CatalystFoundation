@@ -754,6 +754,27 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
+	<gtExample>
+	| host world first second spring overlay visual originalPosition expectedPosition |
+	host := self physicsHost.
+	world := host physics existingWorld.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	spring := CFPhysicsSpringConstraint between: first and: second.
+	world addSpringConstraint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	originalPosition := visual fromPosition.
+	first position: first position + (45 @ 30).
+	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	expectedPosition := overlay root globalPointToLocal: (host localPointToGlobal: spring endpointPair worldPointA).
+	self assert: (visual fromPosition = originalPosition) not.
+	self assert: visual fromPosition equals: expectedPosition.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
 	| host world first second spring overlay visual |
