@@ -1354,3 +1354,147 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	^ visual
 ]
 
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsRailJointVisualShowsItsAxisAndLimits [
+	<gtExample>
+	| host overlay world first joint visual points context secondPoint axisStart axisEnd displayedAxis expectedStart expectedEnd normal |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		railJointTo: (world anchorAt: 180 @ 80)
+		along: 1 @ 0.
+	joint
+		limitTranslationFrom: -30 to: 50;
+		limitsEnabled: true.
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: joint bodyB.
+	axisStart := context overlayPointFromWorld: points second.
+	axisEnd := context overlayPointFromWorld: points second + joint axis.
+	displayedAxis := axisEnd - axisStart.
+	displayedAxis := displayedAxis / displayedAxis r.
+	expectedStart := secondPoint + (displayedAxis * (joint referenceTranslation + joint lowerTranslation)).
+	expectedEnd := secondPoint + (displayedAxis * (joint referenceTranslation + joint upperTranslation)).
+	normal := displayedAxis y negated @ displayedAxis x.
+	self assert: visual rail visibility equals: BlVisibility visible.
+	self assert: visual rail fromPosition equals: expectedStart.
+	self assert: visual rail toPosition equals: expectedEnd.
+	self assert: visual lowerLimitMarker visibility equals: BlVisibility visible.
+	self assert: visual lowerLimitMarker fromPosition equals: expectedStart - (normal * 6.0).
+	self assert: visual lowerLimitMarker toPosition equals: expectedStart + (normal * 6.0).
+	self assert: visual upperLimitMarker visibility equals: BlVisibility visible.
+	self assert: visual upperLimitMarker fromPosition equals: expectedEnd - (normal * 6.0).
+	self assert: visual upperLimitMarker toPosition equals: expectedEnd + (normal * 6.0).
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsRailJointVisualHidesLimitMarkersWhenLimitsAreDisabled [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		railJointTo: (world anchorAt: 180 @ 80)
+		along: 1 @ 0.
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	self assert: visual rail visibility equals: BlVisibility visible.
+	self assert: visual lowerLimitMarker visibility equals: BlVisibility gone.
+	self assert: visual upperLimitMarker visibility equals: BlVisibility gone.
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsPivotAndReferenceDirection [
+	<gtExample>
+	| host overlay world first joint visual points context firstPoint secondPoint pivotPoint |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		revoluteJointTo: (world anchorAt: 180 @ 80).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	firstPoint := context
+		overlayPointFromWorld: points first
+		attachedTo: joint bodyA.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: joint bodyB.
+	pivotPoint := (firstPoint + secondPoint) / 2.0.
+	self assert: visual pivotMarker visibility equals: BlVisibility visible.
+	self assert: visual pivotMarker position equals: pivotPoint - (5 @ 5).
+	self assert: visual referenceRay visibility equals: BlVisibility visible.
+	self assert: visual referenceRay fromPosition equals: pivotPoint.
+	self assert: visual lowerAngleMarker visibility equals: BlVisibility gone.
+	self assert: visual upperAngleMarker visibility equals: BlVisibility gone.
+	self assert: visual allowedAngleArc visibility equals: BlVisibility gone.
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsConfiguredAngularLimits [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		revoluteJointTo: (world anchorAt: 180 @ 80).
+	joint
+		limitAnglesFrom: Float pi negated / 4.0 to: Float pi / 3.0;
+		limitsEnabled: true.
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	self assert: visual lowerAngleMarker visibility equals: BlVisibility visible.
+	self assert: visual upperAngleMarker visibility equals: BlVisibility visible.
+	self assert: visual allowedAngleArc visibility equals: BlVisibility visible.
+	self assert: visual allowedAngleArc geometry startAngle < visual allowedAngleArc geometry endAngle.
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEnabled [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		revoluteJointTo: (world anchorAt: 180 @ 80).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	self assert: visual motorCue visibility equals: BlVisibility gone.
+	joint
+		motorSpeed: 1.5;
+		maximumMotorImpulse: 2.0;
+		motorEnabled: true.
+	overlay refreshPresentationGeometry.
+	host space pulse.
+	self assert: visual motorCue visibility equals: BlVisibility visible.
+	joint motorEnabled: false.
+	overlay refreshPresentationGeometry.
+	host space pulse.
+	self assert: visual motorCue visibility equals: BlVisibility gone.
+	^ visual
+]
