@@ -14,14 +14,14 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: b
 
 { #category : 'private - building' }
 CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB |
+	| stateA stateB originA originB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	centreA := self centreForState: stateA.
-	centreB := self centreForState: stateB.
-	anchorA := joint endpointPair worldPointA - centreA.
-	anchorB := joint endpointPair worldPointB - centreB.
-	baseSeparation := (centreB + anchorB) - (centreA + anchorA).
+	originA := self originForState: stateA.
+	originB := self originForState: stateB.
+	anchorA := joint endpointPair worldPointA - originA.
+	anchorB := joint endpointPair worldPointB - originB.
+	baseSeparation := (originB + anchorB) - (originA + anchorA).
 	inverseMassA := self inverseMassForState: stateA.
 	inverseMassB := self inverseMassForState: stateB.
 	inverseInertiaA := self inverseInertiaForState: stateA.
@@ -70,7 +70,7 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 ]
 
 { #category : 'private - building' }
-CFPhysicsRevoluteJointConstraintBuilder >> centreForState: aState [
+CFPhysicsRevoluteJointConstraintBuilder >> originForState: aState [
 	^ aState
 		ifNil: [ 0 @ 0 ]
 		ifNotNil: [ aState currentBodyOrigin ]

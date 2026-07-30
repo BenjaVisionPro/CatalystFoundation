@@ -14,14 +14,14 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintsFrom: joints bodyStates: b
 
 { #category : 'private - building' }
 CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB displacement distance direction rnA rnB inverseMass |
+	| stateA stateB originA originB anchorA anchorB displacement distance direction rnA rnB inverseMass |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	centreA := self centreForState: stateA.
-	centreB := self centreForState: stateB.
-	anchorA := joint endpointPair worldPointA - centreA.
-	anchorB := joint endpointPair worldPointB - centreB.
-	displacement := (centreB + anchorB) - (centreA + anchorA).
+	originA := self originForState: stateA.
+	originB := self originForState: stateB.
+	anchorA := joint endpointPair worldPointA - originA.
+	anchorB := joint endpointPair worldPointB - originB.
+	displacement := (originB + anchorB) - (originA + anchorA).
 	distance := displacement r.
 	direction := distance = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ displacement / distance ].
 	rnA := self cross: anchorA with: direction.
@@ -47,7 +47,7 @@ CFPhysicsDistanceJointConstraintBuilder >> cross: first with: second [
 ]
 
 { #category : 'private - building' }
-CFPhysicsDistanceJointConstraintBuilder >> centreForState: aState [
+CFPhysicsDistanceJointConstraintBuilder >> originForState: aState [
 	^ aState
 		ifNil: [ 0 @ 0 ]
 		ifNotNil: [ aState currentBodyOrigin ]

@@ -14,14 +14,14 @@ CFPhysicsRailJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyS
 
 { #category : 'private - building' }
 CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB centreA centreB anchorA anchorB displacement axis normal crossA crossB axisCrossA axisCrossB inversePerpendicularMass inverseTranslationMass inverseAngularMass angleA angleB |
+	| stateA stateB originA originB anchorA anchorB displacement axis normal crossA crossB axisCrossA axisCrossB inversePerpendicularMass inverseTranslationMass inverseAngularMass angleA angleB |
 	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	centreA := self centreForState: stateA.
-	centreB := self centreForState: stateB.
-	anchorA := joint endpointPair worldPointA - centreA.
-	anchorB := joint endpointPair worldPointB - centreB.
-	displacement := (centreB + anchorB) - (centreA + anchorA).
+	originA := self originForState: stateA.
+	originB := self originForState: stateB.
+	anchorA := joint endpointPair worldPointA - originA.
+	anchorB := joint endpointPair worldPointB - originB.
+	displacement := (originB + anchorB) - (originA + anchorA).
 	axis := joint axis.
 	normal := joint normal.
 	crossA := self cross: anchorA with: normal.
@@ -70,7 +70,7 @@ CFPhysicsRailJointConstraintBuilder >> dot: first with: second [
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> centreForState: aState [
+CFPhysicsRailJointConstraintBuilder >> originForState: aState [
 	^ aState
 		ifNil: [ 0 @ 0 ]
 		ifNotNil: [ aState currentBodyOrigin ]
