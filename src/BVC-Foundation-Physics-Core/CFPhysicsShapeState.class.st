@@ -501,34 +501,6 @@ CFPhysicsShapeState >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin r
 
 
 { #category : 'geometry queries' }
-CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint at: aPosition rotation: anAngle [
-	| centre direction vertices best bestDistance candidate distance localPoint collisionRotation |
-	self isCircle ifTrue: [
-		centre := self centreAt: aPosition.
-		direction := aWorldPoint - centre.
-		direction r = 0 ifTrue: [ direction := 1 @ 0 ].
-		^ centre + ((direction / direction r) * self radius) ].
-	collisionRotation := self collisionRotationFor: anAngle.
-	self isRoundedRectangle ifTrue: [
-		localPoint := self rotate: (aWorldPoint - aPosition) around: self extent / 2.0 by: collisionRotation negated.
-		localPoint := self nearestRoundedRectangleBoundaryPointTo: localPoint.
-		^ aPosition + (self rotate: localPoint around: self extent / 2.0 by: collisionRotation) ].
-	vertices := self collisionVerticesAt: aPosition rotation: anAngle.
-	best := nil.
-	bestDistance := Float infinity.
-	1 to: vertices size do: [ :index |
-		candidate := self
-			closestPointTo: aWorldPoint
-			onSegmentFrom: (vertices at: index)
-			to: (vertices at: (index = vertices size ifTrue: [ 1 ] ifFalse: [ index + 1 ])).
-		distance := ((candidate x - aWorldPoint x) squared + (candidate y - aWorldPoint y) squared).
-		distance < bestDistance ifTrue: [
-			best := candidate.
-			bestDistance := distance ] ].
-	^ best
-]
-
-{ #category : 'geometry queries' }
 CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint atBodyOrigin: aBodyOrigin rotation: anAngle [
 	| direction vertices best bestDistance candidate distance localPoint bodyLocalPoint collisionRotation |
 	self isCircle ifTrue: [
