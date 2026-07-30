@@ -1498,3 +1498,55 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEn
 	self assert: visual motorCue visibility equals: BlVisibility gone.
 	^ visual
 ]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsFixedJointVisualShowsItsLockedReferenceOrientation [
+	<gtExample>
+	| host overlay world first second joint visual points context firstPoint secondPoint pivotPoint |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	firstPoint := context
+		overlayPointFromWorld: points first
+		attachedTo: joint bodyA.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: joint bodyB.
+	pivotPoint := (firstPoint + secondPoint) / 2.0.
+	self assert: visual pivotMarker visibility equals: BlVisibility visible.
+	self assert: visual pivotMarker position equals: pivotPoint - (5 @ 5).
+	self assert: visual referenceRay visibility equals: BlVisibility visible.
+	self assert: visual referenceRay fromPosition equals: pivotPoint.
+	self assert: visual lowerAngleMarker visibility equals: BlVisibility visible.
+	self assert: visual upperAngleMarker visibility equals: BlVisibility visible.
+	self assert: visual allowedAngleArc visibility equals: BlVisibility gone.
+	self assert: visual motorCue visibility equals: BlVisibility gone.
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsFixedJointVisualTracksReferenceAngleChanges [
+	<gtExample>
+	| visual overlay joint initialEnd |
+	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	overlay := visual context overlay.
+	joint := visual joint.
+	initialEnd := visual referenceRay toPosition.
+	joint referenceAngle: joint referenceAngle + (Float pi / 4.0).
+	overlay refreshPresentationGeometry.
+	overlay host space pulse.
+	self assert: visual referenceRay toPosition ~= initialEnd.
+	self assert: visual lowerAngleMarker visibility equals: BlVisibility visible.
+	self assert: visual upperAngleMarker visibility equals: BlVisibility visible.
+	^ visual
+]
+

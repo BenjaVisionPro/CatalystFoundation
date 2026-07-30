@@ -7,6 +7,24 @@ CFPhysicsFixedJoint >> inspectInPhysicsOverlay: anInspector [
 
 { #category : '*bvc-foundation-physics-tools' }
 CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
-	aVisual hideRestLengthMarker
+	| pivotPoint pivotWorld bodyAAngle referenceWorldAngle referenceDirection referenceEnd |
+	aVisual
+		hideRestLengthMarker;
+		hideRail;
+		hideRevoluteDecoration.
+	pivotPoint := (firstPoint + secondPoint) / 2.0.
+	pivotWorld := (worldPoints first + worldPoints second) / 2.0.
+	aVisual showPivotAt: pivotPoint.
+	bodyAAngle := self bodyA ifNil: [ 0.0 ] ifNotNil: [ :body | body rotation ].
+	referenceWorldAngle := bodyAAngle + self referenceAngle.
+	referenceDirection := (aVisual context
+		overlayPointFromWorld: pivotWorld + (referenceWorldAngle cos @ referenceWorldAngle sin)) -
+		(aVisual context overlayPointFromWorld: pivotWorld).
+	referenceDirection r isZero ifTrue: [ ^ aVisual hideRevoluteDecoration ].
+	referenceDirection := referenceDirection / referenceDirection r.
+	referenceEnd := pivotPoint + (referenceDirection * 28.0).
+	aVisual
+		showFixedLockFrom: pivotPoint
+		to: referenceEnd
+		direction: referenceDirection
 ]
-

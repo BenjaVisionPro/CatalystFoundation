@@ -370,6 +370,25 @@ CFPhysicsJointVisual >> showMotorCueFrom: firstPoint to: secondPoint [
 	motorCue requestLayout
 ]
 
+
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showFixedLockFrom: firstPoint to: secondPoint direction: aDirection [
+	| normal innerPoint outerPoint halfWidth |
+	self showReferenceRayFrom: firstPoint to: secondPoint.
+	normal := aDirection y negated @ aDirection x.
+	halfWidth := 5.0.
+	innerPoint := firstPoint + (aDirection * 12.0).
+	outerPoint := secondPoint.
+	self
+		showAngleLimitFrom: innerPoint - (normal * halfWidth)
+		to: innerPoint + (normal * halfWidth)
+		on: lowerAngleMarker;
+		showAngleLimitFrom: outerPoint - (normal * halfWidth)
+		to: outerPoint + (normal * halfWidth)
+		on: upperAngleMarker
+]
+
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> hideRestLengthMarker [
 	restLengthMarker visibility: BlVisibility gone
