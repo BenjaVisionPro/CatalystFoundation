@@ -1149,11 +1149,10 @@ CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> impulseWakesSleepingBody [
 	<gtExample>
-	| body centre |
+	| body |
 	body := self cleanSlateBodyWithSequence: 1.
 	body sleep.
-	centre := body centre.
-	body applyImpulse: 10 @ 0 atWorldPoint: centre.
+	body applyImpulse: 10 @ 0 atWorldPoint: body worldBodyOrigin.
 	self assert: body isAwake.
 	self assert: body velocity equals: 10 @ 0 * body inverseMass.
 	^ body

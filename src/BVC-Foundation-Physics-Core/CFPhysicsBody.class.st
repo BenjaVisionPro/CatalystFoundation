@@ -494,15 +494,10 @@ CFPhysicsBody >> calculatedInverseInertia [
 	^ inertia > 0 ifTrue: [ 1.0 / inertia ] ifFalse: [ 0.0 ]
 ]
 
-{ #category : 'geometry' }
-CFPhysicsBody >> centre [
-	^ bodyOrigin
-]
-
 { #category : 'angular dynamics' }
 CFPhysicsBody >> velocityAtWorldPoint: aPoint [
 	| radiusVector |
-	radiusVector := aPoint - self centre.
+	radiusVector := aPoint - self worldBodyOrigin.
 	^ velocity + ((angularVelocity * radiusVector y negated) @ (angularVelocity * radiusVector x))
 ]
 
@@ -516,7 +511,7 @@ CFPhysicsBody >> applyImpulse: anImpulse atWorldPoint: aPoint [
 CFPhysicsBody >> accumulateImpulse: anImpulse atWorldPoint: aPoint [
 	| radiusVector cross |
 	self accumulateVelocity: anImpulse * self calculatedInverseMass.
-	radiusVector := aPoint - self centre.
+	radiusVector := aPoint - self worldBodyOrigin.
 	cross := (radiusVector x * anImpulse y) - (radiusVector y * anImpulse x).
 	self accumulateAngularVelocity: cross * self calculatedInverseInertia
 ]
