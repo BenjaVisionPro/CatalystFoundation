@@ -60,12 +60,12 @@ CFPhysicsCollision class >> ensureLocalAnchorsOn: manifold between: firstBody an
 		point localAnchorA ifNil: [
 			point localAnchorA: (firstBody shapeState
 				localPointForWorldPoint: point position
-				position: firstBody position
+				bodyOrigin: firstBody worldBodyOrigin
 				rotation: firstBody rotation) ].
 		point localAnchorB ifNil: [
 			point localAnchorB: (secondBody shapeState
 				localPointForWorldPoint: point position
-				position: secondBody position
+				bodyOrigin: secondBody worldBodyOrigin
 				rotation: secondBody rotation) ] ].
 	^ manifold
 ]

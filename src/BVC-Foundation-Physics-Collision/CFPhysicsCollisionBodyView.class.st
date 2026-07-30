@@ -19,11 +19,6 @@ CFPhysicsCollisionBodyView >> aabb [
 	^ shapeState aabbAtBodyOrigin: self worldBodyOrigin rotation: self rotation
 ]
 
-{ #category : 'accessing' }
-CFPhysicsCollisionBodyView >> position [
-	^ shapeState elementPositionForBodyOrigin: transform bodyOrigin
-]
-
 { #category : 'geometry - coordinates' }
 CFPhysicsCollisionBodyView >> worldBodyOrigin [
 	^ transform bodyOrigin

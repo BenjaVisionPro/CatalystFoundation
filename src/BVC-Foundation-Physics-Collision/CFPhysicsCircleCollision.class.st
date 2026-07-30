@@ -13,8 +13,8 @@ CFPhysicsCircleCollision class >> clamp: aNumber between: aMinimum and: aMaximum
 { #category : 'collision' }
 CFPhysicsCircleCollision class >> manifoldBetweenCircle: firstBody andCircle: secondBody [
 	| firstCentre secondCentre delta distanceSquared radiusSum distance normal penetration point |
-	firstCentre := firstBody shapeState circleCentreAt: firstBody position.
-	secondCentre := secondBody shapeState circleCentreAt: secondBody position.
+	firstCentre := firstBody worldBodyOrigin.
+	secondCentre := secondBody worldBodyOrigin.
 	delta := secondCentre - firstCentre.
 	distanceSquared := delta x squared + delta y squared.
 	radiusSum := firstBody shapeState radius + secondBody shapeState radius.
@@ -33,7 +33,7 @@ CFPhysicsCircleCollision class >> manifoldBetweenCircle: firstBody andCircle: se
 { #category : 'collision' }
 CFPhysicsCircleCollision class >> manifoldBetweenCircle: circleBody andRectangle: rectangleBody [
 	| centre bounds closest delta distanceSquared radius distance normal penetration point leftDistance rightDistance topDistance bottomDistance minimumDistance |
-	centre := circleBody shapeState circleCentreAt: circleBody position.
+	centre := circleBody worldBodyOrigin.
 	bounds := rectangleBody aabb.
 	closest :=
 		(self clamp: centre x between: bounds minimum x and: bounds maximum x)

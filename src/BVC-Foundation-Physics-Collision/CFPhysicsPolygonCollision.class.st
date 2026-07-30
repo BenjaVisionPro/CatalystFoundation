@@ -9,10 +9,10 @@ Class {
 CFPhysicsPolygonCollision class >> manifoldBetween: firstBody and: secondBody [
 	| firstVertices secondVertices bestAxis bestOverlap result point |
 	firstVertices := firstBody shapeState
-		collisionVerticesAt: firstBody position
+		collisionVerticesAtBodyOrigin: firstBody worldBodyOrigin
 		rotation: firstBody rotation.
 	secondVertices := secondBody shapeState
-		collisionVerticesAt: secondBody position
+		collisionVerticesAtBodyOrigin: secondBody worldBodyOrigin
 		rotation: secondBody rotation.
 	result := self separatingAxisBetween: firstVertices and: secondVertices.
 	result ifNil: [ ^ nil ].
@@ -29,10 +29,10 @@ CFPhysicsPolygonCollision class >> manifoldBetween: firstBody and: secondBody [
 { #category : 'collision' }
 CFPhysicsPolygonCollision class >> manifoldBetweenCircle: circleBody andPolygon: polygonBody [
 	| circleCentre radius vertices axes closestVertex closestDistance axis result normal penetration point |
-	circleCentre := circleBody shapeState circleCentreAt: circleBody position.
+	circleCentre := circleBody worldBodyOrigin.
 	radius := circleBody shapeState radius.
 	vertices := polygonBody shapeState
-		collisionVerticesAt: polygonBody position
+		collisionVerticesAtBodyOrigin: polygonBody worldBodyOrigin
 		rotation: polygonBody rotation.
 	axes := self axesFor: vertices.
 	closestVertex := vertices first.

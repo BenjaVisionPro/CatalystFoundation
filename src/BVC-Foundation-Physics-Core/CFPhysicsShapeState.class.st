@@ -406,6 +406,22 @@ CFPhysicsShapeState >> supportFeatureAt: aPosition rotation: anAngle inDirection
 ]
 
 { #category : 'collision features' }
+CFPhysicsShapeState >> supportFeatureAtBodyOrigin: aBodyOrigin rotation: anAngle inDirection: aDirection [
+	| direction collisionRotation localDirection localFeature centre |
+	direction := aDirection r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ aDirection / aDirection r ].
+	self isCircle ifTrue: [
+		^ { aBodyOrigin + (direction * self radius) } ].
+	collisionRotation := self collisionRotationFor: anAngle.
+	localDirection := self rotateVector: direction by: collisionRotation negated.
+	localFeature := self localSupportFeatureInDirection: localDirection.
+	centre := self extent / 2.0.
+	^ localFeature collect: [ :each |
+		aBodyOrigin + (self rotateVector: each - centre by: collisionRotation) ]
+]
+
+{ #category : 'collision features' }
 CFPhysicsShapeState >> localSupportFeatureInDirection: aDirection [
 	self isRoundedRectangle ifTrue: [
 		^ self roundedRectangleLocalSupportFeatureInDirection: aDirection ].

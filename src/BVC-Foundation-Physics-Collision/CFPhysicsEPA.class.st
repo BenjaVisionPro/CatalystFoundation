@@ -40,11 +40,11 @@ CFPhysicsEPA class >> manifoldBetween: firstBody and: secondBody fromSimplex: si
 CFPhysicsEPA class >> contactPointsBetween: firstBody and: secondBody normal: aNormal [
 	| firstFeature secondFeature tangent firstMinimum firstMaximum secondMinimum secondMaximum overlapMinimum overlapMaximum projections |
 	firstFeature := firstBody shapeState
-		supportFeatureAt: firstBody position
+		supportFeatureAtBodyOrigin: firstBody worldBodyOrigin
 		rotation: firstBody rotation
 		inDirection: aNormal.
 	secondFeature := secondBody shapeState
-		supportFeatureAt: secondBody position
+		supportFeatureAtBodyOrigin: secondBody worldBodyOrigin
 		rotation: secondBody rotation
 		inDirection: aNormal negated.
 	(firstFeature isEmpty or: [ secondFeature isEmpty ]) ifTrue: [ ^ #() ].
