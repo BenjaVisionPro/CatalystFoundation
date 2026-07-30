@@ -1152,3 +1152,114 @@ CFPhysicsOverlayTests >> physicsJointOverlayClearsWhenDisabled [
 	self assert: visual hitTarget hasParent not.
 	^ host
 ]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlaySelectsAJointFromItsOverlayHitTarget [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 240 @ 40).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	BlSpace simulateClickOn: visual hitTarget.
+	self assert: overlay selectedJoint == joint.
+	self assert: overlay selectedSpring isNil.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectionVisual isSelection.
+	self assert: overlay selectionVisual joint == joint.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayKeepsSelectedJointWhenClickedAgain [
+	<gtExample>
+	| overlay diagnostic joint selectionVisual |
+	overlay := self physicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	diagnostic := overlay jointOverlay visuals first.
+	joint := overlay selectedJoint.
+	selectionVisual := overlay selectionVisual.
+	BlSpace simulateClickOn: diagnostic hitTarget.
+	self assert: overlay selectedJoint == joint.
+	self assert: overlay selectionVisual == selectionVisual.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenSelectedJointIsRemoved [
+	<gtExample>
+	| overlay world joint |
+	overlay := self physicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	world := overlay world.
+	joint := overlay selectedJoint.
+	world removeDistanceJoint: joint.
+	overlay refresh.
+	self assert: overlay selectedJoint isNil.
+	self assert: overlay selectionVisual isNil.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectedJointWhenJointsAreDisabled [
+	<gtExample>
+	| overlay |
+	overlay := self physicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	overlay jointsEnabled: false.
+	self assert: overlay selectedJoint isNil.
+	self assert: overlay selectionVisual isNil.
+	self assert: overlay jointOverlay visuals isEmpty.
+	^ overlay
+]
+
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayInspectsSelectedJoint [
+	<gtExample>
+	| overlay joint inspector content |
+	overlay := self physicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	joint := overlay selectedJoint.
+	inspector := overlay objectInspector.
+	content := inspector content.
+	self assert: inspector selectedObject == joint.
+	self assert: content class equals: CFPhysicsJointInspectorContent.
+	self assert: content joint == joint.
+	self assert: (content valueElementAt: #jointType) text asString equals: 'Distance'.
+	self assert: (content valueElementAt: #active) text asString equals: joint isActive printString.
+	self assert: (content valueElementAt: #sequence) text asString equals: joint sequence printString.
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayRefreshesSelectedJointInspector [
+	<gtExample>
+	| overlay joint content initialAnchor |
+	overlay := self physicsOverlayInspectsSelectedJoint.
+	joint := overlay selectedJoint.
+	content := overlay objectInspector content.
+	initialAnchor := (content valueElementAt: #anchorA) text asString.
+	joint bodyA beginStep.
+	joint bodyA translateBy: 40 @ 0.
+	overlay world presentAtAlpha: 1.0.
+	overlay host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	self assert: ((content valueElementAt: #anchorA) text asString = initialAnchor) not.
+	self assert: overlay objectInspector selectedObject == joint.
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayClearsJointInspectorWhenJointIsRemoved [
+	<gtExample>
+	| overlay world joint |
+	overlay := self physicsOverlayInspectsSelectedJoint.
+	world := overlay world.
+	joint := overlay selectedJoint.
+	world removeDistanceJoint: joint.
+	overlay refresh.
+	self assert: overlay objectInspector selectedObject isNil.
+	self assert: overlay objectInspector content joint isNil.
+	^ overlay
+]

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -52,24 +52,53 @@ CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectedSpring [ ^ selectedSpring ]
 { #category : 'accessing' }
+CFPhysicsOverlay >> selectedJoint [ ^ selectedJoint ]
+{ #category : 'accessing' }
 CFPhysicsOverlay >> selectionVisual [ ^ selectionVisual ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectionElement [ ^ selectionVisual ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> clickEvent: anEvent [
-	| anElement physics spring |
+	| anElement physics joint spring |
 	(objectInspector includesEventTarget: anEvent target) ifTrue: [ ^ self ].
+	joint := self jointFrom: anEvent target.
+	joint ifNotNil: [ ^ self selectJoint: joint ].
 	spring := self springFrom: anEvent target.
 	spring ifNotNil: [ ^ self selectSpring: spring ].
 	anElement := self physicalElementFrom: anEvent target.
 	anElement ifNil: [ ^ self clearSelection ].
-	selectedElement == anElement ifTrue: [ ^ self clearSelection ].
+	selectedElement == anElement ifTrue: [ ^ self ].
 	selectedSpring := nil.
+	selectedJoint := nil.
 	selectedElement := anElement.
 	physics := anElement existingPhysics.
 	self refreshSelectionVisual.
 	objectInspector inspect: physics.
+	^ self
+]
+
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> jointFrom: anElement [
+	| resolvedJoint |
+	resolvedJoint := selectionVisual
+		ifNil: [ nil ]
+		ifNotNil: [
+			(selectionVisual respondsTo: #jointForEventTarget:)
+				ifTrue: [ selectionVisual jointForEventTarget: anElement ]
+				ifFalse: [ nil ] ].
+	^ resolvedJoint ifNil: [ jointOverlay jointForEventTarget: anElement ]
+]
+
+{ #category : 'private - selection' }
+CFPhysicsOverlay >> selectJoint: aJoint [
+	selectedJoint == aJoint ifTrue: [ ^ self ].
+	selectedElement := nil.
+	selectedSpring := nil.
+	selectedJoint := aJoint.
+	self refreshSelectionVisual.
+	objectInspector inspect: aJoint.
 	^ self
 ]
 
@@ -78,14 +107,18 @@ CFPhysicsOverlay >> springFrom: anElement [
 	| resolvedSpring |
 	resolvedSpring := selectionVisual
 		ifNil: [ nil ]
-		ifNotNil: [ selectionVisual springForEventTarget: anElement ].
+		ifNotNil: [
+			(selectionVisual respondsTo: #springForEventTarget:)
+				ifTrue: [ selectionVisual springForEventTarget: anElement ]
+				ifFalse: [ nil ] ].
 	^ resolvedSpring ifNil: [ springOverlay springForEventTarget: anElement ]
 ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> selectSpring: aSpring [
-	selectedSpring == aSpring ifTrue: [ ^ self clearSelection ].
+	selectedSpring == aSpring ifTrue: [ ^ self ].
 	selectedElement := nil.
+	selectedJoint := nil.
 	selectedSpring := aSpring.
 	self refreshSelectionVisual.
 	objectInspector inspect: aSpring.
@@ -110,6 +143,7 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 CFPhysicsOverlay >> clearSelection [
 	selectedElement := nil.
 	selectedSpring := nil.
+	selectedJoint := nil.
 	self refreshSelectionVisual.
 	objectInspector clear.
 	^ self
@@ -126,6 +160,13 @@ CFPhysicsOverlay >> clearSelectionVisual [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectionVisual [
 	| selectedBody |
+	selectedJoint ifNotNil: [
+		(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedJoint ])
+			ifTrue: [ selectionVisual update. ^ self ].
+		self clearSelectionVisual.
+		selectionVisual := CFPhysicsJointVisual selectionOn: selectedJoint context: context.
+		selectionVisual addTo: root.
+		^ self ].
 	selectedSpring ifNotNil: [
 		(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedSpring ])
 			ifTrue: [ selectionVisual update. ^ self ].
@@ -249,6 +290,14 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectedObject [
 	| physics body |
+	selectedJoint ifNotNil: [
+		(world joints includes: selectedJoint)
+			ifFalse: [ self clearSelection ]
+			ifTrue: [
+				objectInspector selectedObject == selectedJoint
+					ifFalse: [ objectInspector inspect: selectedJoint ].
+				objectInspector refresh ].
+		^ self ].
 	selectedSpring ifNotNil: [
 		(world springConstraints includes: selectedSpring)
 			ifFalse: [ self clearSelection ]
@@ -318,7 +367,9 @@ CFPhysicsOverlay >> jointsEnabled: aBoolean [
 		ifTrue: [
 			world synchroniseMembership.
 			jointOverlay update ]
-		ifFalse: [ jointOverlay clear ].
+		ifFalse: [
+			selectedJoint ifNotNil: [ self clearSelection ].
+			jointOverlay clear ].
 	^ self
 ]
 
