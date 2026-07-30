@@ -24,6 +24,11 @@ CFPhysicsCollisionBodyView >> position [
 	^ shapeState elementPositionForBodyOrigin: transform bodyOrigin
 ]
 
+{ #category : 'geometry - coordinates' }
+CFPhysicsCollisionBodyView >> worldBodyOrigin [
+	^ transform bodyOrigin
+]
+
 { #category : 'accessing' }
 CFPhysicsCollisionBodyView >> rotation [
 	^ transform rotation

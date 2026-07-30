@@ -3821,9 +3821,9 @@ CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
 		angularVelocity: Float pi;
 		advanceBy: 0.5 gravity: 0 @ 0.
 	sweep := body sweep.
-	self assert: sweep startTransform bodyOrigin equals: 10 @ 20.
+	self assert: sweep startTransform bodyOrigin equals: 15 @ 25.
 	self assert: sweep startTransform rotation equals: 0.
-	self assert: sweep endTransform bodyOrigin equals: 20 @ 20.
+	self assert: sweep endTransform bodyOrigin equals: 25 @ 25.
 	self assert: (sweep endTransform rotation closeTo: Float pi / 2.0).
 	^ sweep
 ]
@@ -3837,8 +3837,8 @@ CFPhysicsCleanSlateTests >> beginningStepProducesStationarySweep [
 		rotation: Float pi / 3.0;
 		beginStep.
 	sweep := body sweep.
-	self assert: sweep startTransform bodyOrigin equals: 10 @ 20.
-	self assert: sweep endTransform bodyOrigin equals: 10 @ 20.
+	self assert: sweep startTransform bodyOrigin equals: 15 @ 25.
+	self assert: sweep endTransform bodyOrigin equals: 15 @ 25.
 	self assert: (sweep startTransform rotation closeTo: Float pi / 3.0).
 	self assert: (sweep endTransform rotation closeTo: Float pi / 3.0).
 	^ sweep
@@ -3856,8 +3856,8 @@ CFPhysicsCleanSlateTests >> settingTransformResetsSweepEndpoints [
 		advanceBy: 0.5 gravity: 0 @ 0;
 		translation: 40 @ 50 rotation: Float pi / 4.0.
 	sweep := body sweep.
-	self assert: sweep startTransform bodyOrigin equals: 40 @ 50.
-	self assert: sweep endTransform bodyOrigin equals: 40 @ 50.
+	self assert: sweep startTransform bodyOrigin equals: 45 @ 55.
+	self assert: sweep endTransform bodyOrigin equals: 45 @ 55.
 	self assert: (sweep startTransform rotation closeTo: Float pi / 4.0).
 	self assert: (sweep endTransform rotation closeTo: Float pi / 4.0).
 	^ sweep
@@ -3912,7 +3912,7 @@ CFPhysicsCleanSlateTests >> stepStatePredictsLinearMovement [
 	body velocity: 12 @ -4.
 	state := CFPhysicsBodyStepState on: body.
 	transform := state predictedTransformAfter: 0.5.
-	self assert: transform bodyOrigin equals: 16 @ 18.
+	self assert: transform bodyOrigin equals: 21 @ 23.
 	self assert: transform rotation equals: 0.
 	self assert: body position equals: 10 @ 20.
 	^ transform
@@ -3926,7 +3926,7 @@ CFPhysicsCleanSlateTests >> stepStatePredictsAngularMovement [
 	body angularVelocity: Float pi.
 	state := CFPhysicsBodyStepState on: body.
 	transform := state predictedTransformAfter: 0.5.
-	self assert: transform bodyOrigin equals: 10 @ 20.
+	self assert: transform bodyOrigin equals: 15 @ 25.
 	self assert: (transform rotation closeTo: Float pi / 2.0).
 	self assert: body rotation equals: 0.
 	^ transform
@@ -3943,9 +3943,9 @@ CFPhysicsCleanSlateTests >> stepStatePredictsCombinedMovementSweep [
 		angularVelocity: Float pi / 2.0.
 	state := CFPhysicsBodyStepState on: body.
 	sweep := state predictedSweepFor: 2.0.
-	self assert: sweep startTransform bodyOrigin equals: 10 @ 20.
+	self assert: sweep startTransform bodyOrigin equals: 15 @ 25.
 	self assert: (sweep startTransform rotation closeTo: Float pi / 4.0).
-	self assert: sweep endTransform bodyOrigin equals: 26 @ 32.
+	self assert: sweep endTransform bodyOrigin equals: 31 @ 37.
 	self assert: (sweep endTransform rotation closeTo: Float pi * 1.25).
 	^ sweep
 ]
@@ -3961,7 +3961,7 @@ CFPhysicsCleanSlateTests >> stepStateUsesCapturedBodyValues [
 		position: 100 @ 200;
 		velocity: 50 @ 50.
 	transform := state predictedTransformAfter: 0.5.
-	self assert: transform bodyOrigin equals: 16 @ 18.
+	self assert: transform bodyOrigin equals: 21 @ 23.
 	^ transform
 ]
 
@@ -3976,8 +3976,8 @@ CFPhysicsCleanSlateTests >> staticStepStatePredictsStationarySweep [
 		linearVelocity: 100 @ 50;
 		angularVelocity: Float pi.
 	sweep := state predictedSweepFor: 1.0.
-	self assert: sweep startTransform bodyOrigin equals: 10 @ 20.
-	self assert: sweep endTransform bodyOrigin equals: 10 @ 20.
+	self assert: sweep startTransform bodyOrigin equals: 15 @ 25.
+	self assert: sweep endTransform bodyOrigin equals: 15 @ 25.
 	self assert: sweep startTransform rotation equals: 0.
 	self assert: sweep endTransform rotation equals: 0.
 	^ sweep
@@ -3994,8 +3994,8 @@ CFPhysicsCleanSlateTests >> sleepingStepStatePredictsStationarySweep [
 		linearVelocity: 100 @ 50;
 		angularVelocity: Float pi.
 	sweep := state predictedSweepFor: 1.0.
-	self assert: sweep startTransform bodyOrigin equals: 10 @ 20.
-	self assert: sweep endTransform bodyOrigin equals: 10 @ 20.
+	self assert: sweep startTransform bodyOrigin equals: 15 @ 25.
+	self assert: sweep endTransform bodyOrigin equals: 15 @ 25.
 	self assert: sweep startTransform rotation equals: 0.
 	self assert: sweep endTransform rotation equals: 0.
 	^ sweep
@@ -4686,7 +4686,7 @@ CFPhysicsCleanSlateTests >> impactSolverDoesNotCommitAuthoritativeBodies [
 		restitutionThreshold: 1.0.
 	self assert: moving position equals: 0 @ 0.
 	self assert: obstacle position equals: 30 @ 0.
-	self assert: ((bodyStates at: moving) currentTransform bodyOrigin closeTo: 10 @ 0).
+	self assert: ((bodyStates at: moving) currentTransform bodyOrigin closeTo: 20 @ 10).
 	^ result
 ]
 
@@ -4726,7 +4726,7 @@ CFPhysicsCleanSlateTests >> remainingTimeIntegrationUsesPostImpactVelocity [
 		integrateBodyStates: bodyStates
 		after: solveResult.
 	self assert: (movingState linearVelocity x abs < 1.0e-6).
-	self assert: (movingState currentTransform bodyOrigin closeTo: 10 @ 0).
+	self assert: (movingState currentTransform bodyOrigin closeTo: 20 @ 10).
 	self assert: moving position equals: 0 @ 0.
 	^ solveResult
 ]
@@ -4769,7 +4769,7 @@ CFPhysicsCleanSlateTests >> remainingTimeIntegrationAdvancesOtherBodiesThroughFu
 	CFPhysicsRemainingTimeIntegrator new
 		integrateBodyStates: bodyStates
 		after: solveResult.
-	self assert: (otherState currentTransform bodyOrigin closeTo: 8 @ 100).
+	self assert: (otherState currentTransform bodyOrigin closeTo: 18 @ 110).
 	self assert: other position equals: 0 @ 100.
 	^ solveResult
 ]
@@ -5039,8 +5039,8 @@ CFPhysicsCleanSlateTests >> predictedSweepContinuesFromAdvancedStepState [
 	state linearVelocity: 40 @ 0.
 	state integratePositionBy: 0.25.
 	sweep := state predictedSweepFor: 0.75.
-	self assert: (sweep startTransform bodyOrigin closeTo: 10 @ 0).
-	self assert: (sweep endTransform bodyOrigin closeTo: 40 @ 0).
+	self assert: (sweep startTransform bodyOrigin closeTo: 20 @ 10).
+	self assert: (sweep endTransform bodyOrigin closeTo: 50 @ 10).
 	self assert: body position equals: 0 @ 0.
 	^ sweep
 ]
@@ -5078,8 +5078,8 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopSolvesMultipleImpactsInTimeOrder
 	self assert: result impacts first pair secondBody equals: firstObstacle.
 	self assert: result impacts second pair firstBody equals: secondMoving.
 	self assert: result impacts second pair secondBody equals: secondObstacle.
-	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 10 @ 0).
-	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 20 @ 100).
+	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 20 @ 10).
+	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 30 @ 110).
 	self assert: ((bodyStates at: firstMoving) linearVelocity x abs < 1.0e-6).
 	self assert: ((bodyStates at: secondMoving) linearVelocity x abs < 1.0e-6).
 	self assert: (result remainingTime closeTo: 0.0).
@@ -5119,8 +5119,8 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopSolvesSimultaneousImpactsAsOneTi
 	self assert: result impacts size equals: 2.
 	self assert: result impacts first pair firstBody equals: firstMoving.
 	self assert: result impacts second pair firstBody equals: secondMoving.
-	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 10 @ 0).
-	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 10 @ 100).
+	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 20 @ 10).
+	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 20 @ 110).
 	self assert: ((bodyStates at: firstMoving) linearVelocity x abs < 1.0e-6).
 	self assert: ((bodyStates at: secondMoving) linearVelocity x abs < 1.0e-6).
 	self assert: (result remainingTime closeTo: 0.0).
@@ -5160,8 +5160,8 @@ CFPhysicsCleanSlateTests >> continuousImpactLoopLeavesRemainderExplicitAtIterati
 	self assert: result impacts size equals: 1.
 	self assert: result iterationLimitReached.
 	self assert: (result remainingTime closeTo: 0.75).
-	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 10 @ 0).
-	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 10 @ 100).
+	self assert: ((bodyStates at: firstMoving) currentTransform bodyOrigin closeTo: 20 @ 10).
+	self assert: ((bodyStates at: secondMoving) currentTransform bodyOrigin closeTo: 20 @ 110).
 	self assert: firstMoving position equals: 0 @ 0.
 	self assert: secondMoving position equals: 0 @ 100.
 	^ result
@@ -6250,7 +6250,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 	solution := world stepPipeline solve: state.
 	self assert: state orderedBodyStates size equals: 1.
 	self assert: (state bodyStates at: body) == state orderedBodyStates first.
-	self assert: state orderedBodyStates first startTransform bodyOrigin equals: 0 @ 0.
+	self assert: state orderedBodyStates first startTransform bodyOrigin equals: 10 @ 10.
 	self assert: body position equals: 100 @ 0.
 	^ solution
 ]
@@ -6782,9 +6782,26 @@ CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransf
 	state := CFPhysicsBodyStepState on: body.
 	self assert: state startBodyOrigin equals: 120 @ 60.
 	self assert: state currentBodyOrigin equals: 120 @ 60.
-	self assert: state currentTransform bodyOrigin equals: 100 @ 50.
+	self assert: state currentTransform bodyOrigin equals: 120 @ 60.
 	state translateBy: 10 @ 5.
 	self assert: state currentBodyOrigin equals: 130 @ 65.
-	self assert: state currentTransform bodyOrigin equals: 110 @ 55.
+	self assert: state currentTransform bodyOrigin equals: 130 @ 65.
 	^ state
+]
+
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> collisionBodyViewPreservesBodyOriginAndExposesElementPosition [
+	<gtExample>
+	| body transform view |
+	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
+	transform := CFPhysicsTransform
+		bodyOrigin: body worldBodyOrigin
+		rotation: body rotation.
+	view := CFPhysicsCollisionBodyView
+		shapeState: body shapeState
+		transform: transform.
+	self assert: view worldBodyOrigin equals: 120 @ 60.
+	self assert: view position equals: 100 @ 50.
+	^ view
 ]
