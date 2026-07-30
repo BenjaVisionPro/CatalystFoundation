@@ -1,15 +1,15 @@
 Class {
 	#name : 'CFPhysicsTransform',
 	#superclass : 'Object',
-	#instVars : [ 'position', 'rotation' ],
+	#instVars : [ 'bodyOrigin', 'rotation' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
 
 { #category : 'instance creation' }
-CFPhysicsTransform class >> position: aPoint rotation: aNumber [
+CFPhysicsTransform class >> bodyOrigin: aPoint rotation: aNumber [
 	^ self new
-		position: aPoint;
+		bodyOrigin: aPoint;
 		rotation: aNumber;
 		yourself
 ]
@@ -17,18 +17,18 @@ CFPhysicsTransform class >> position: aPoint rotation: aNumber [
 { #category : 'interpolating' }
 CFPhysicsTransform >> interpolatedTo: anotherTransform at: alpha [
 	^ self class
-		position: position + ((anotherTransform position - position) * alpha)
+		bodyOrigin: bodyOrigin + ((anotherTransform bodyOrigin - bodyOrigin) * alpha)
 		rotation: rotation + ((anotherTransform rotation - rotation) * alpha)
 ]
 
 { #category : 'accessing' }
-CFPhysicsTransform >> position [
-	^ position
+CFPhysicsTransform >> bodyOrigin [
+	^ bodyOrigin
 ]
 
 { #category : 'accessing' }
-CFPhysicsTransform >> position: aPoint [
-	position := aPoint
+CFPhysicsTransform >> bodyOrigin: aPoint [
+	bodyOrigin := aPoint
 ]
 
 { #category : 'accessing' }

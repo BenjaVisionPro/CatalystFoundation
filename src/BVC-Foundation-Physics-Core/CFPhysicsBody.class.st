@@ -673,8 +673,8 @@ CFPhysicsBody >> allowsCollisionWith: anotherBody [
 { #category : 'continuous collision' }
 CFPhysicsBody >> sweep [
 	^ CFPhysicsSweep
-		from: (CFPhysicsTransform position: self previousPosition rotation: previousRotation)
-		to: (CFPhysicsTransform position: self position rotation: rotation)
+		from: (CFPhysicsTransform bodyOrigin: previousBodyOrigin rotation: previousRotation)
+		to: (CFPhysicsTransform bodyOrigin: bodyOrigin rotation: rotation)
 ]
 
 { #category : 'collision' }

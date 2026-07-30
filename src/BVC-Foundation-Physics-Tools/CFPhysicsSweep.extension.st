@@ -7,9 +7,9 @@ CFPhysicsSweep >> gtMotionFor: aView [
 		title: 'Motion';
 		priority: 1;
 		items: [ {
-			'Start position' -> self startTransform position.
+			'Start position' -> self startTransform bodyOrigin.
 			'Start rotation' -> self startTransform rotation.
-			'End position' -> self endTransform position.
+			'End position' -> self endTransform bodyOrigin.
 			'End rotation' -> self endTransform rotation } ];
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;

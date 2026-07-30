@@ -58,8 +58,8 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 { #category : 'private' }
 CFPhysicsConservativeAdvancement class >> closingSpeedBetweenShapeState: firstShapeState sweep: firstSweep andShapeState: secondShapeState sweep: secondSweep along: axis [
 	| firstTranslation secondTranslation relativeTranslation linearClosing firstRotation secondRotation angularClosing |
-	firstTranslation := firstSweep endTransform position - firstSweep startTransform position.
-	secondTranslation := secondSweep endTransform position - secondSweep startTransform position.
+	firstTranslation := firstSweep endTransform bodyOrigin - firstSweep startTransform bodyOrigin.
+	secondTranslation := secondSweep endTransform bodyOrigin - secondSweep startTransform bodyOrigin.
 	relativeTranslation := firstTranslation - secondTranslation.
 	linearClosing := self dot: relativeTranslation with: axis.
 	firstRotation := (firstSweep endTransform rotation - firstSweep startTransform rotation) abs.

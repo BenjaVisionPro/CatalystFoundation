@@ -21,7 +21,7 @@ CFPhysicsCollisionBodyView >> aabb [
 
 { #category : 'accessing' }
 CFPhysicsCollisionBodyView >> position [
-	^ transform position
+	^ shapeState elementPositionForBodyOrigin: transform bodyOrigin
 ]
 
 { #category : 'accessing' }

@@ -10,19 +10,19 @@ CFPhysicsGJK class >> simplexBetween: firstBody and: secondBody [
 	^ self
 		simplexBetweenShapeState: firstBody shapeState
 		transform: (CFPhysicsTransform
-			position: firstBody position
+			bodyOrigin: firstBody worldBodyOrigin
 			rotation: firstBody rotation)
 		andShapeState: secondBody shapeState
 		transform: (CFPhysicsTransform
-			position: secondBody position
+			bodyOrigin: secondBody worldBodyOrigin
 			rotation: secondBody rotation)
 ]
 
 { #category : 'collision' }
 CFPhysicsGJK class >> simplexBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support result |
-	direction := (secondShapeState centreAt: secondTransform position)
-		- (firstShapeState centreAt: firstTransform position).
+	direction := (secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin))
+		- (firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)).
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection new.
 	support := self
@@ -54,11 +54,11 @@ CFPhysicsGJK class >> supportBetween: firstBody and: secondBody inDirection: dir
 	^ self
 		supportBetweenShapeState: firstBody shapeState
 		transform: (CFPhysicsTransform
-			position: firstBody position
+			bodyOrigin: firstBody worldBodyOrigin
 			rotation: firstBody rotation)
 		andShapeState: secondBody shapeState
 		transform: (CFPhysicsTransform
-			position: secondBody position
+			bodyOrigin: secondBody worldBodyOrigin
 			rotation: secondBody rotation)
 		inDirection: direction
 ]
@@ -67,11 +67,11 @@ CFPhysicsGJK class >> supportBetween: firstBody and: secondBody inDirection: dir
 CFPhysicsGJK class >> supportBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform inDirection: direction [
 	| firstPoint secondPoint |
 	firstPoint := firstShapeState
-		supportPointAt: firstTransform position
+		supportPointAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
 		rotation: firstTransform rotation
 		inDirection: direction.
 	secondPoint := secondShapeState
-		supportPointAt: secondTransform position
+		supportPointAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
 		rotation: secondTransform rotation
 		inDirection: direction negated.
 	^ CFPhysicsSupportPoint
@@ -139,11 +139,11 @@ CFPhysicsGJK class >> distanceBetween: firstBody and: secondBody [
 	^ self
 		distanceBetweenShapeState: firstBody shapeState
 		transform: (CFPhysicsTransform
-			position: firstBody position
+			bodyOrigin: firstBody worldBodyOrigin
 			rotation: firstBody rotation)
 		andShapeState: secondBody shapeState
 		transform: (CFPhysicsTransform
-			position: secondBody position
+			bodyOrigin: secondBody worldBodyOrigin
 			rotation: secondBody rotation)
 ]
 
@@ -151,8 +151,8 @@ CFPhysicsGJK class >> distanceBetween: firstBody and: secondBody [
 CFPhysicsGJK class >> distanceBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support state closest previousDistanceSquared progress tolerance |
 	tolerance := 1.0e-9.
-	direction := (secondShapeState centreAt: secondTransform position)
-		- (firstShapeState centreAt: firstTransform position).
+	direction := (secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin))
+		- (firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)).
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection with: (self
 		supportBetweenShapeState: firstShapeState

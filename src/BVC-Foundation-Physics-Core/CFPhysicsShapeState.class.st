@@ -84,22 +84,33 @@ CFPhysicsShapeState >> sweptAABBAlong: aSweep [
 	startTransform := aSweep startTransform.
 	endTransform := aSweep endTransform.
 	startBounds := self
-		aabbAt: startTransform position
+		aabbAt: (self elementPositionForBodyOrigin: startTransform bodyOrigin)
 		rotation: startTransform rotation.
 	endBounds := self
-		aabbAt: endTransform position
+		aabbAt: (self elementPositionForBodyOrigin: endTransform bodyOrigin)
 		rotation: endTransform rotation.
 	startTransform rotation = endTransform rotation ifTrue: [
 		^ startBounds mergedWith: endBounds ].
 
 	radius := self boundingRadius.
-	startCentre := self centreAt: startTransform position.
-	endCentre := self centreAt: endTransform position.
+	startCentre := startTransform bodyOrigin.
+	endCentre := endTransform bodyOrigin.
 	minimum := ((startCentre x min: endCentre x) - radius)
 		@ ((startCentre y min: endCentre y) - radius).
 	maximum := ((startCentre x max: endCentre x) + radius)
 		@ ((startCentre y max: endCentre y) + radius).
 	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsShapeState >> bodyOriginForElementPosition: aPoint [
+	^ aPoint + (self extent / 2.0)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsShapeState >> elementPositionForBodyOrigin: aPoint [
+	^ aPoint - (self extent / 2.0)
 ]
 
 { #category : 'circle' }

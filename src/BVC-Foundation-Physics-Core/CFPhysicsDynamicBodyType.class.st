@@ -85,7 +85,7 @@ CFPhysicsDynamicBodyType >> predictedTransformOf: aStepState after: seconds [
 	body isAwake ifFalse: [ ^ aStepState currentTransform ].
 	currentTransform := aStepState currentTransform.
 	^ CFPhysicsTransform
-		position: currentTransform position + (aStepState linearVelocity * seconds)
+		bodyOrigin: currentTransform bodyOrigin + (aStepState linearVelocity * seconds)
 		rotation: currentTransform rotation + (aStepState angularVelocity * seconds)
 ]
 

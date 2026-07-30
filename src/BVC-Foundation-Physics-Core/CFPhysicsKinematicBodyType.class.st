@@ -37,7 +37,7 @@ CFPhysicsKinematicBodyType >> predictedTransformOf: aStepState after: seconds [
 	| currentTransform |
 	currentTransform := aStepState currentTransform.
 	^ CFPhysicsTransform
-		position: currentTransform position + (aStepState linearVelocity * seconds)
+		bodyOrigin: currentTransform bodyOrigin + (aStepState linearVelocity * seconds)
 		rotation: currentTransform rotation + (aStepState angularVelocity * seconds)
 ]
 

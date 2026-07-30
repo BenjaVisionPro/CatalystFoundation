@@ -23,10 +23,10 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBo
 	secondTransform := bodyStateB currentTransform.
 	^ self
 		manifoldBetweenShapeState: bodyStateA shapeState
-		position: firstTransform position
+		position: (bodyStateA shapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
 		rotation: firstTransform rotation
 		andShapeState: bodyStateB shapeState
-		position: secondTransform position
+		position: (bodyStateB shapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
 		rotation: secondTransform rotation
 ]
 

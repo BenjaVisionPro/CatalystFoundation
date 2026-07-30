@@ -135,7 +135,7 @@ CFPhysicsBodyStepState >> predictedTransformAfter: seconds [
 	bodyType isStatic ifTrue: [ ^ self currentTransform ].
 	(bodyType isDynamic and: [ awake not ]) ifTrue: [ ^ self currentTransform ].
 	^ CFPhysicsTransform
-		position: self currentTransform position + (linearVelocity * seconds)
+		bodyOrigin: self currentTransform bodyOrigin + (linearVelocity * seconds)
 		rotation: self currentTransform rotation + (angularVelocity * seconds)
 ]
 
@@ -178,14 +178,14 @@ CFPhysicsBodyStepState >> bodyLocalPointForElementLocalPoint: aPoint [
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> currentTransform [
 	^ CFPhysicsTransform
-		position: self currentElementPosition
+		bodyOrigin: self currentBodyOrigin
 		rotation: rotation + deltaRotation
 ]
 
 
 { #category : 'continuous collision' }
 CFPhysicsBodyStepState >> startTransform [
-	^ CFPhysicsTransform position: self startElementPosition rotation: rotation
+	^ CFPhysicsTransform bodyOrigin: self startBodyOrigin rotation: rotation
 ]
 
 { #category : 'continuous collision' }
