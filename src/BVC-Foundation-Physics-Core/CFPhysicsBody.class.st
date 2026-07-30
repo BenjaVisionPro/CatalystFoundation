@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'position', 'previousPosition', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -31,7 +31,7 @@ CFPhysicsBody >> advanceDynamicBy: seconds gravity: gravityVector [
 
 { #category : 'private - stepping' }
 CFPhysicsBody >> advanceUsingCurrentVelocityBy: seconds [
-	position := position + (velocity * seconds).
+	bodyOrigin := bodyOrigin + (velocity * seconds).
 	rotation := rotation + (angularVelocity * seconds).
 	self clearForces
 ]
@@ -64,7 +64,7 @@ CFPhysicsBody >> removeContact: aContact [
 
 { #category : 'collision' }
 CFPhysicsBody >> aabb [
-	^ self shapeState aabbAt: position rotation: rotation
+	^ self shapeState aabbAt: self position rotation: rotation
 ]
 
 { #category : 'body type' }
@@ -109,7 +109,10 @@ CFPhysicsBody >> element [
 { #category : 'accessing' }
 CFPhysicsBody >> element: anElement [
 	element := anElement.
-	shapeState := CFPhysicsShapeState on: anElement
+	shapeState := CFPhysicsShapeState on: anElement.
+	bodyOrigin ifNil: [
+		bodyOrigin := shapeState extent / 2.0.
+		previousBodyOrigin := bodyOrigin ]
 ]
 
 
@@ -164,8 +167,8 @@ CFPhysicsBody >> density: aNumber [
 { #category : 'initialization' }
 CFPhysicsBody >> initialize [
 	super initialize.
-	position := 0 @ 0.
-	previousPosition := position.
+	bodyOrigin := nil.
+	previousBodyOrigin := nil.
 	rotation := 0.
 	previousRotation := rotation.
 	velocity := 0 @ 0.
@@ -210,14 +213,14 @@ CFPhysicsBody >> isStatic [
 
 { #category : 'stepping' }
 CFPhysicsBody >> beginStep [
-	previousPosition := position.
+	previousBodyOrigin := bodyOrigin.
 	previousRotation := rotation
 ]
 
 
 { #category : 'accessing' }
 CFPhysicsBody >> previousPosition [
-	^ previousPosition
+	^ previousBodyOrigin - (self extent / 2.0)
 ]
 
 { #category : 'accessing' }
@@ -228,13 +231,13 @@ CFPhysicsBody >> previousRotation [
 
 { #category : 'accessing' }
 CFPhysicsBody >> position [
-	^ position
+	^ bodyOrigin - (self extent / 2.0)
 ]
 
 { #category : 'accessing' }
 CFPhysicsBody >> position: aPoint [
-	previousPosition := aPoint.
-	position := aPoint.
+	bodyOrigin := aPoint + (self extent / 2.0).
+	previousBodyOrigin := bodyOrigin.
 	self wake
 ]
 
@@ -275,13 +278,13 @@ CFPhysicsBody >> sequence: anInteger [
 
 { #category : 'collision' }
 CFPhysicsBody >> translateBy: aPoint [
-	position := position + aPoint
+	bodyOrigin := bodyOrigin + aPoint
 ]
 
 { #category : 'presenting' }
 CFPhysicsBody >> translation: aPoint rotation: aNumber [
-	previousPosition := aPoint.
-	position := aPoint.
+	bodyOrigin := aPoint + (self extent / 2.0).
+	previousBodyOrigin := bodyOrigin.
 	previousRotation := aNumber.
 	rotation := aNumber.
 	self wake
@@ -493,7 +496,7 @@ CFPhysicsBody >> calculatedInverseInertia [
 
 { #category : 'geometry' }
 CFPhysicsBody >> centre [
-	^ self shapeState centreAt: position
+	^ bodyOrigin
 ]
 
 { #category : 'angular dynamics' }
@@ -530,7 +533,7 @@ CFPhysicsBody >> torque [
 
 { #category : 'stepping' }
 CFPhysicsBody >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
-	position := aPosition.
+	bodyOrigin := aPosition + (self extent / 2.0).
 	rotation := anAngle.
 	bodyType commitVelocity: aVelocity angularVelocity: anAngularVelocity.
 	force := 0 @ 0.
@@ -670,8 +673,8 @@ CFPhysicsBody >> allowsCollisionWith: anotherBody [
 { #category : 'continuous collision' }
 CFPhysicsBody >> sweep [
 	^ CFPhysicsSweep
-		from: (CFPhysicsTransform position: previousPosition rotation: previousRotation)
-		to: (CFPhysicsTransform position: position rotation: rotation)
+		from: (CFPhysicsTransform position: self previousPosition rotation: previousRotation)
+		to: (CFPhysicsTransform position: self position rotation: rotation)
 ]
 
 { #category : 'collision' }
@@ -747,10 +750,7 @@ CFPhysicsBody >> bodyLocalPointForWorldPoint: aPoint [
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBody >> worldBodyOrigin [
-	"The body-local frame is centred on the element geometry. Until the stored
-	position migration is complete, position remains the element's unrotated
-	top-left and the body origin is derived without allocating a transform."
-	^ position + (self extent / 2.0)
+	^ bodyOrigin
 ]
 
 { #category : 'geometry - coordinates' }

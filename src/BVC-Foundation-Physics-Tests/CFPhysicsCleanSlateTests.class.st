@@ -6753,3 +6753,22 @@ CFPhysicsCleanSlateTests >> equivalentLocalAndNormalisedAnchorsShareTheCoordinat
 	self assert: (centreAnchor worldPoint closeTo: body worldBodyOrigin).
 	^ { localAnchor. normalisedAnchor. centreAnchor }
 ]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> bodyStoresItsWorldOriginWithoutChangingTheElementPositionContract [
+	<gtExample>
+	| body |
+	body := CFPhysicsBody
+		element: (BlElement new size: 80 @ 30; yourself)
+		world: nil.
+	self assert: body position equals: 0 @ 0.
+	self assert: body worldBodyOrigin equals: 40.0 @ 15.0.
+	body position: 120 @ 75.
+	self assert: body position equals: 120.0 @ 75.0.
+	self assert: body previousPosition equals: 120.0 @ 75.0.
+	self assert: body worldBodyOrigin equals: 160.0 @ 90.0.
+	body translateBy: 15 @ -10.
+	self assert: body position equals: 135.0 @ 65.0.
+	self assert: body worldBodyOrigin equals: 175.0 @ 80.0.
+	^ body
+]
