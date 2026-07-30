@@ -26,7 +26,10 @@ CFPhysicsRevoluteJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint t
 	referenceDirection := referenceDirection / referenceDirection r.
 	radius := 28.0.
 	referenceEnd := pivotPoint + (referenceDirection * radius).
-	aVisual showReferenceRayFrom: pivotPoint to: referenceEnd.
+	aVisual
+		showReferenceRayFrom: pivotPoint to: referenceEnd;
+		showHitTargetFrom: pivotPoint - (referenceDirection * 10.0)
+		to: referenceEnd + (referenceDirection * 6.0).
 	self limitsEnabled
 		ifTrue: [
 			lowerDirection := rotate value: referenceDirection value: self lowerAngle.

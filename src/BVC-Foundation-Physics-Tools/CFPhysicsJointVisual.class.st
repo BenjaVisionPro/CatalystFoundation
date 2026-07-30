@@ -291,6 +291,14 @@ CFPhysicsJointVisual >> update [
 
 
 { #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showHitTargetFrom: firstPoint to: secondPoint [
+	hitTarget
+		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
+		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
+	hitTarget requestLayout
+]
+
+{ #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> hideRail [
 	rail visibility: BlVisibility gone.
 	lowerLimitMarker visibility: BlVisibility gone.

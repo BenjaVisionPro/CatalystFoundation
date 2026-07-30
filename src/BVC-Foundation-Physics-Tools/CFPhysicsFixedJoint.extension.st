@@ -27,7 +27,9 @@ CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: 
 	aVisual
 		showFixedLockFrom: pivotPoint
 		to: referenceEnd
-		direction: referenceDirection
+		direction: referenceDirection;
+		showHitTargetFrom: pivotPoint - (referenceDirection * 10.0)
+		to: referenceEnd + (referenceDirection * 6.0)
 ]
 
 { #category : '*bvc-foundation-physics-tools' }

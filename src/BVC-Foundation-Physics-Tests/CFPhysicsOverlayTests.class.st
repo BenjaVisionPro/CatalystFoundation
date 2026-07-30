@@ -1550,6 +1550,34 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualTracksReferenceAngleChanges [
 	^ visual
 ]
 
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlaySelectsAFixedJointAcrossItsVisibleGlyph [
+	<gtExample>
+	| visual overlay joint |
+	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	overlay := visual context overlay.
+	joint := visual joint.
+	BlSpace simulateClickOn: visual hitTarget.
+	self assert: overlay selectedJoint == joint.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectedSpring isNil.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlaySelectsARevoluteJointAcrossItsVisibleGlyph [
+	<gtExample>
+	| visual overlay joint |
+	visual := self physicsRevoluteJointVisualShowsPivotAndReferenceDirection.
+	overlay := visual context overlay.
+	joint := visual joint.
+	BlSpace simulateClickOn: visual hitTarget.
+	self assert: overlay selectedJoint == joint.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectedSpring isNil.
+	^ overlay
+]
+
 { #category : 'examples - physics object inspector' }
 CFPhysicsOverlayTests >> physicsOverlayDistanceJointInspectorShowsConfigurationAndSolverState [
 	<gtExample>
