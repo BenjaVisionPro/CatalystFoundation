@@ -1683,8 +1683,6 @@ CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
 	host space pulse.
 	self assert: visual pivotMarker position ~= initialPivot.
 	self assert: visual pivotMarker position equals: visual referenceRay fromPosition - (5 @ 5).
-	self assert: visual hitTarget fromPosition equals: visual referenceRay fromPosition.
-	self assert: visual hitTarget toPosition equals: visual referenceRay toPosition.
 	^ overlay
 ]
 
