@@ -18,3 +18,21 @@ CFPhysicsDistanceJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint t
 				to: secondPoint ]
 ]
 
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsDistanceJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+	anInspectorContent addGroup: 'Distance' fields: {
+		#restLength -> 'Rest length'.
+		#currentLength -> 'Current length'.
+		#accumulatedImpulse -> 'Accumulated impulse' }
+]
+
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsDistanceJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+	| points |
+	points := self endpointPair worldPoints.
+	anInspectorContent
+		diagnosticNumber: self restLength at: #restLength;
+		diagnosticNumber: (points second - points first) r at: #currentLength;
+		diagnosticNumber: self accumulatedImpulse at: #accumulatedImpulse
+]
+

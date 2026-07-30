@@ -24,6 +24,9 @@ CFPhysicsJointInspectorContent >> valueElementAt: aKey [
 	^ valueElements at: aKey
 ]
 
+{ #category : 'accessing' }
+CFPhysicsJointInspectorContent >> valueElements [ ^ valueElements ]
+
 { #category : 'initialization' }
 CFPhysicsJointInspectorContent >> initializeContent [
 	valueElements := Dictionary new.
@@ -99,9 +102,32 @@ CFPhysicsJointInspectorContent >> newRowFor: aKey label: aString [
 	^ row
 ]
 
+{ #category : 'building' }
+CFPhysicsJointInspectorContent >> addGroup: aName fields: associations [
+	element addChild: (self newGroup: aName fields: associations).
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsJointInspectorContent >> text: aString at: aKey [
+	(self valueElementAt: aKey) text: aString.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsJointInspectorContent >> diagnosticNumber: aNumber at: aKey [
+	^ self text: (self formatDiagnosticNumber: aNumber) at: aKey
+]
+
+{ #category : 'updating' }
+CFPhysicsJointInspectorContent >> diagnosticPoint: aPoint at: aKey [
+	^ self text: (self formatPoint: aPoint) at: aKey
+]
+
 { #category : 'inspecting' }
 CFPhysicsJointInspectorContent >> inspect: aJoint [
 	joint := aJoint.
+	joint addPhysicsOverlayInspectorGroupsTo: self.
 	self refresh.
 	^ self
 ]
@@ -152,5 +178,6 @@ CFPhysicsJointInspectorContent >> refresh [
 	(self valueElementAt: #bodyB) text: (self labelForBody: joint bodyB).
 	(self valueElementAt: #anchorA) text: (self formatPoint: points first).
 	(self valueElementAt: #anchorB) text: (self formatPoint: points second).
+	joint refreshPhysicsOverlayInspector: self.
 	^ self
 ]

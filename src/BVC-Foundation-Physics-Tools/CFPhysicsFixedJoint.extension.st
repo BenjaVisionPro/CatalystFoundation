@@ -28,3 +28,22 @@ CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: 
 		to: referenceEnd
 		direction: referenceDirection
 ]
+
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsFixedJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+	anInspectorContent
+		addGroup: 'Fixed' fields: {
+			#referenceAngle -> 'Reference angle' };
+		addGroup: 'Solver' fields: {
+			#accumulatedImpulse -> 'Linear impulse'.
+			#accumulatedAngularImpulse -> 'Angular impulse' }
+]
+
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsFixedJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+	anInspectorContent
+		diagnosticNumber: self referenceAngle at: #referenceAngle;
+		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
+		diagnosticNumber: self accumulatedAngularImpulse at: #accumulatedAngularImpulse
+]
+

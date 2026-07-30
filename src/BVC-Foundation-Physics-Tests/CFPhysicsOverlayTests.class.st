@@ -1550,3 +1550,87 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualTracksReferenceAngleChanges [
 	^ visual
 ]
 
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayDistanceJointInspectorShowsConfigurationAndSolverState [
+	<gtExample>
+	| overlay joint content points |
+	overlay := self physicsOverlayInspectsSelectedJoint.
+	joint := overlay selectedJoint.
+	content := overlay objectInspector content.
+	points := joint endpointPair worldPoints.
+	self assert: (content valueElementAt: #restLength) text asString equals: (content formatDiagnosticNumber: joint restLength).
+	self assert: (content valueElementAt: #currentLength) text asString equals: (content formatDiagnosticNumber: (points second - points first) r).
+	self assert: (content valueElementAt: #accumulatedImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedImpulse).
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayRevoluteJointInspectorShowsLimitsAndMotor [
+	<gtExample>
+	| host overlay world first joint content |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		revoluteJointTo: (world anchorAt: 180 @ 80).
+	joint
+		limitAnglesFrom: -0.4 to: 0.7;
+		limitsEnabled: true;
+		motorSpeed: 1.5;
+		maximumMotorImpulse: 2.0;
+		motorEnabled: true.
+	overlay refresh.
+	overlay selectJoint: joint.
+	content := overlay objectInspector content.
+	self assert: (content valueElementAt: #limitsEnabled) text asString equals: 'true'.
+	self assert: (content valueElementAt: #lowerAngle) text asString equals: (content formatDiagnosticNumber: joint lowerAngle).
+	self assert: (content valueElementAt: #upperAngle) text asString equals: (content formatDiagnosticNumber: joint upperAngle).
+	self assert: (content valueElementAt: #motorEnabled) text asString equals: 'true'.
+	self assert: (content valueElementAt: #motorSpeed) text asString equals: (content formatDiagnosticNumber: joint motorSpeed).
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayRailJointInspectorShowsAxisLimitsAndSolverState [
+	<gtExample>
+	| host overlay world first joint content |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		railJointTo: (world anchorAt: 180 @ 80)
+		along: 1 @ 0.
+	joint
+		limitTranslationFrom: -25.0 to: 40.0;
+		limitsEnabled: true.
+	overlay refresh.
+	overlay selectJoint: joint.
+	content := overlay objectInspector content.
+	self assert: (content valueElementAt: #axis) text asString equals: (content formatPoint: joint axis).
+	self assert: (content valueElementAt: #limitsEnabled) text asString equals: 'true'.
+	self assert: (content valueElementAt: #lowerTranslation) text asString equals: (content formatDiagnosticNumber: joint lowerTranslation).
+	self assert: (content valueElementAt: #upperTranslation) text asString equals: (content formatDiagnosticNumber: joint upperTranslation).
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteMotorFields [
+	<gtExample>
+	| host overlay world first joint content |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		fixedJointTo: (world anchorAt: 180 @ 80).
+	overlay refresh.
+	overlay selectJoint: joint.
+	content := overlay objectInspector content.
+	self assert: (content valueElementAt: #referenceAngle) text asString equals: (content formatDiagnosticNumber: joint referenceAngle).
+	self assert: (content valueElementAt: #accumulatedAngularImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedAngularImpulse).
+	self assert: (content valueElements includesKey: #motorEnabled) not.
+	^ overlay
+]
+

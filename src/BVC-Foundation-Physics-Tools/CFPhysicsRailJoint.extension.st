@@ -39,3 +39,33 @@ CFPhysicsRailJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: s
 		to: upperPoint + (normal * tickHalfLength)
 		on: aVisual upperLimitMarker
 ]
+
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsRailJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+	anInspectorContent
+		addGroup: 'Rail' fields: {
+			#axis -> 'Axis'.
+			#referenceTranslation -> 'Reference translation'.
+			#referenceAngle -> 'Reference angle' };
+		addGroup: 'Limits' fields: {
+			#limitsEnabled -> 'Enabled'.
+			#lowerTranslation -> 'Lower translation'.
+			#upperTranslation -> 'Upper translation' };
+		addGroup: 'Solver' fields: {
+			#accumulatedPerpendicularImpulse -> 'Perpendicular impulse'.
+			#accumulatedAngularImpulse -> 'Angular impulse' }
+]
+
+{ #category : '*bvc-foundation-physics-tools' }
+CFPhysicsRailJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+	anInspectorContent
+		diagnosticPoint: self axis at: #axis;
+		diagnosticNumber: self referenceTranslation at: #referenceTranslation;
+		diagnosticNumber: self referenceAngle at: #referenceAngle;
+		text: self limitsEnabled printString at: #limitsEnabled;
+		diagnosticNumber: self lowerTranslation at: #lowerTranslation;
+		diagnosticNumber: self upperTranslation at: #upperTranslation;
+		diagnosticNumber: self accumulatedPerpendicularImpulse at: #accumulatedPerpendicularImpulse;
+		diagnosticNumber: self accumulatedAngularImpulse at: #accumulatedAngularImpulse
+]
+
