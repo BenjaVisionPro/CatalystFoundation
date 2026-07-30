@@ -89,13 +89,13 @@ CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform
 	distanceResult distance > 1.0e-7 ifTrue: [ ^ nil ].
 	normal := distanceResult axis.
 	normal r = 0 ifTrue: [
-		centreDelta := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
-			- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
+		centreDelta := secondTransform bodyOrigin
+			- firstTransform bodyOrigin.
 		normal := centreDelta r = 0
 			ifTrue: [ 1 @ 0 ]
 			ifFalse: [ centreDelta / centreDelta r ] ].
-	firstCentre := firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin.
-	secondCentre := secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin.
+	firstCentre := firstTransform bodyOrigin.
+	secondCentre := secondTransform bodyOrigin.
 	firstBoundary := firstShapeState
 		nearestBoundaryPointTo: secondCentre
 		atBodyOrigin: firstTransform bodyOrigin

@@ -21,8 +21,8 @@ CFPhysicsGJK class >> simplexBetween: firstBody and: secondBody [
 { #category : 'collision' }
 CFPhysicsGJK class >> simplexBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support result |
-	direction := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
-		- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
+	direction := secondTransform bodyOrigin
+		- firstTransform bodyOrigin.
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection new.
 	support := self
@@ -151,8 +151,8 @@ CFPhysicsGJK class >> distanceBetween: firstBody and: secondBody [
 CFPhysicsGJK class >> distanceBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support state closest previousDistanceSquared progress tolerance |
 	tolerance := 1.0e-9.
-	direction := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
-		- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
+	direction := secondTransform bodyOrigin
+		- firstTransform bodyOrigin.
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection with: (self
 		supportBetweenShapeState: firstShapeState

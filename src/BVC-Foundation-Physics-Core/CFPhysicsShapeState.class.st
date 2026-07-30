@@ -261,11 +261,6 @@ CFPhysicsShapeState >> centreAt: aPosition [
 ]
 
 { #category : 'convex support' }
-CFPhysicsShapeState >> centreAtBodyOrigin: aPoint [
-	^ aPoint
-]
-
-{ #category : 'convex support' }
 CFPhysicsShapeState >> supportPointAt: aPosition inDirection: aDirection [
 	^ self supportPointAt: aPosition rotation: 0 inDirection: aDirection
 ]
