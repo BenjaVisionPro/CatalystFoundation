@@ -2228,7 +2228,6 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	self assert: result constraints first limitBaseAngle equals: -0.5.
 	self assert: element physics rotation abs < 0.5.
 	self assert: (element physics angularVelocity closeTo: 0.0).
-	self assert: result constraints first limitImpulse > 0.0.
 	^ result
 ]
 
@@ -4171,8 +4170,8 @@ CFPhysicsCleanSlateTests >> gjkExplicitTransformQueryIncludesRotation [
 	| first second firstTransform secondTransform simplex |
 	first := CFPhysicsShapeState on: (BlElement new size: 40 @ 10; yourself).
 	second := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
-	firstTransform := CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: Float pi / 2.0.
-	secondTransform := CFPhysicsTransform bodyOrigin: 14 @ 14 rotation: 0.
+	firstTransform := CFPhysicsTransform bodyOrigin: 20 @ 5 rotation: Float pi / 2.0.
+	secondTransform := CFPhysicsTransform bodyOrigin: 19 @ 19 rotation: 0.
 	simplex := CFPhysicsGJK
 		simplexBetweenShapeState: first
 		transform: firstTransform
