@@ -89,20 +89,20 @@ CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform
 	distanceResult distance > 1.0e-7 ifTrue: [ ^ nil ].
 	normal := distanceResult axis.
 	normal r = 0 ifTrue: [
-		centreDelta := (secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin))
-			- (firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)).
+		centreDelta := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
+			- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
 		normal := centreDelta r = 0
 			ifTrue: [ 1 @ 0 ]
 			ifFalse: [ centreDelta / centreDelta r ] ].
-	firstCentre := firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin).
-	secondCentre := secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin).
+	firstCentre := firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin.
+	secondCentre := secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin.
 	firstBoundary := firstShapeState
 		nearestBoundaryPointTo: secondCentre
-		at: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
+		atBodyOrigin: firstTransform bodyOrigin
 		rotation: firstTransform rotation.
 	secondBoundary := secondShapeState
 		nearestBoundaryPointTo: firstCentre
-		at: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
+		atBodyOrigin: secondTransform bodyOrigin
 		rotation: secondTransform rotation.
 	worldPoint := (firstBoundary + secondBoundary) / 2.0.
 	point := CFPhysicsManifoldPoint at: worldPoint.
@@ -110,11 +110,11 @@ CFPhysicsCollision class >> manifoldBetweenShapeState: firstShapeState transform
 		separation: 0.0;
 		localAnchorA: (firstShapeState
 			localPointForWorldPoint: worldPoint
-			position: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
+			bodyOrigin: firstTransform bodyOrigin
 			rotation: firstTransform rotation);
 		localAnchorB: (secondShapeState
 			localPointForWorldPoint: worldPoint
-			position: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
+			bodyOrigin: secondTransform bodyOrigin
 			rotation: secondTransform rotation).
 	^ (CFPhysicsManifold normal: normal penetration: 0.0)
 		contactPoints: { point };

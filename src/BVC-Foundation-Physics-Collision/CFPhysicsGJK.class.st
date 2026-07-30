@@ -21,8 +21,8 @@ CFPhysicsGJK class >> simplexBetween: firstBody and: secondBody [
 { #category : 'collision' }
 CFPhysicsGJK class >> simplexBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support result |
-	direction := (secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin))
-		- (firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)).
+	direction := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
+		- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection new.
 	support := self
@@ -67,11 +67,11 @@ CFPhysicsGJK class >> supportBetween: firstBody and: secondBody inDirection: dir
 CFPhysicsGJK class >> supportBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform inDirection: direction [
 	| firstPoint secondPoint |
 	firstPoint := firstShapeState
-		supportPointAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
+		supportPointAtBodyOrigin: firstTransform bodyOrigin
 		rotation: firstTransform rotation
 		inDirection: direction.
 	secondPoint := secondShapeState
-		supportPointAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
+		supportPointAtBodyOrigin: secondTransform bodyOrigin
 		rotation: secondTransform rotation
 		inDirection: direction negated.
 	^ CFPhysicsSupportPoint
@@ -151,8 +151,8 @@ CFPhysicsGJK class >> distanceBetween: firstBody and: secondBody [
 CFPhysicsGJK class >> distanceBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	| simplex direction support state closest previousDistanceSquared progress tolerance |
 	tolerance := 1.0e-9.
-	direction := (secondShapeState centreAt: (secondShapeState elementPositionForBodyOrigin: secondTransform bodyOrigin))
-		- (firstShapeState centreAt: (firstShapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)).
+	direction := (secondShapeState centreAtBodyOrigin: secondTransform bodyOrigin)
+		- (firstShapeState centreAtBodyOrigin: firstTransform bodyOrigin).
 	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 	simplex := OrderedCollection with: (self
 		supportBetweenShapeState: firstShapeState

@@ -78,16 +78,28 @@ CFPhysicsShapeState >> aabbAt: aPosition rotation: anAngle [
 	^ CFPhysicsAABB position: minimum extent: maximum - minimum
 ]
 
+{ #category : 'collision' }
+CFPhysicsShapeState >> aabbAtBodyOrigin: aPoint rotation: anAngle [
+	| left right top bottom minimum maximum |
+	left := self supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: -1 @ 0.
+	right := self supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: 1 @ 0.
+	top := self supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: 0 @ -1.
+	bottom := self supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: 0 @ 1.
+	minimum := left x @ top y.
+	maximum := right x @ bottom y.
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
 { #category : 'continuous collision' }
 CFPhysicsShapeState >> sweptAABBAlong: aSweep [
 	| startTransform endTransform startBounds endBounds radius startCentre endCentre minimum maximum |
 	startTransform := aSweep startTransform.
 	endTransform := aSweep endTransform.
 	startBounds := self
-		aabbAt: (self elementPositionForBodyOrigin: startTransform bodyOrigin)
+		aabbAtBodyOrigin: startTransform bodyOrigin
 		rotation: startTransform rotation.
 	endBounds := self
-		aabbAt: (self elementPositionForBodyOrigin: endTransform bodyOrigin)
+		aabbAtBodyOrigin: endTransform bodyOrigin
 		rotation: endTransform rotation.
 	startTransform rotation = endTransform rotation ifTrue: [
 		^ startBounds mergedWith: endBounds ].
@@ -194,6 +206,15 @@ CFPhysicsShapeState >> collisionVerticesAt: aPosition rotation: anAngle [
 ]
 
 { #category : 'polygon' }
+CFPhysicsShapeState >> collisionVerticesAtBodyOrigin: aPoint rotation: anAngle [
+	| centre collisionRotation |
+	centre := self extent / 2.0.
+	collisionRotation := self collisionRotationFor: anAngle.
+	^ self localCollisionVertices collect: [ :each |
+		aPoint + (self rotateVector: each - centre by: collisionRotation) ]
+]
+
+{ #category : 'polygon' }
 CFPhysicsShapeState >> localCollisionVertices [
 	| geometry anExtent |
 	capturedVertices ifNotNil: [ ^ capturedVertices ].
@@ -245,6 +266,11 @@ CFPhysicsShapeState >> centreAt: aPosition [
 ]
 
 { #category : 'convex support' }
+CFPhysicsShapeState >> centreAtBodyOrigin: aPoint [
+	^ aPoint
+]
+
+{ #category : 'convex support' }
 CFPhysicsShapeState >> supportPointAt: aPosition inDirection: aDirection [
 	^ self supportPointAt: aPosition rotation: 0 inDirection: aDirection
 ]
@@ -262,6 +288,20 @@ CFPhysicsShapeState >> supportPointAt: aPosition rotation: anAngle inDirection: 
 	localPoint := self localSupportPointInDirection: localDirection.
 	centre := self extent / 2.0.
 	^ aPosition + (self rotate: localPoint around: centre by: collisionRotation)
+]
+
+{ #category : 'convex support' }
+CFPhysicsShapeState >> supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: aDirection [
+	| direction localDirection localPoint bodyLocalPoint collisionRotation |
+	direction := aDirection r = 0
+		ifTrue: [ 1 @ 0 ]
+		ifFalse: [ aDirection / aDirection r ].
+	self isCircle ifTrue: [ ^ aPoint + (direction * self radius) ].
+	collisionRotation := self collisionRotationFor: anAngle.
+	localDirection := self rotateVector: direction by: collisionRotation negated.
+	localPoint := self localSupportPointInDirection: localDirection.
+	bodyLocalPoint := localPoint - (self extent / 2.0).
+	^ aPoint + (self rotateVector: bodyLocalPoint by: collisionRotation)
 ]
 
 { #category : 'convex support' }
@@ -488,6 +528,12 @@ CFPhysicsShapeState >> localPointForWorldPoint: aPoint position: aPosition rotat
 		by: (self collisionRotationFor: anAngle) negated
 ]
 
+{ #category : 'geometry' }
+CFPhysicsShapeState >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
+	^ (self rotateVector: aPoint - aBodyOrigin by: (self collisionRotationFor: anAngle) negated)
+		+ (self extent / 2.0)
+]
+
 
 { #category : 'geometry queries' }
 CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint at: aPosition rotation: anAngle [
@@ -503,6 +549,34 @@ CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint at: aPosition rotatio
 		localPoint := self nearestRoundedRectangleBoundaryPointTo: localPoint.
 		^ aPosition + (self rotate: localPoint around: self extent / 2.0 by: collisionRotation) ].
 	vertices := self collisionVerticesAt: aPosition rotation: anAngle.
+	best := nil.
+	bestDistance := Float infinity.
+	1 to: vertices size do: [ :index |
+		candidate := self
+			closestPointTo: aWorldPoint
+			onSegmentFrom: (vertices at: index)
+			to: (vertices at: (index = vertices size ifTrue: [ 1 ] ifFalse: [ index + 1 ])).
+		distance := ((candidate x - aWorldPoint x) squared + (candidate y - aWorldPoint y) squared).
+		distance < bestDistance ifTrue: [
+			best := candidate.
+			bestDistance := distance ] ].
+	^ best
+]
+
+{ #category : 'geometry queries' }
+CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint atBodyOrigin: aBodyOrigin rotation: anAngle [
+	| direction vertices best bestDistance candidate distance localPoint bodyLocalPoint collisionRotation |
+	self isCircle ifTrue: [
+		direction := aWorldPoint - aBodyOrigin.
+		direction r = 0 ifTrue: [ direction := 1 @ 0 ].
+		^ aBodyOrigin + ((direction / direction r) * self radius) ].
+	collisionRotation := self collisionRotationFor: anAngle.
+	self isRoundedRectangle ifTrue: [
+		bodyLocalPoint := self rotateVector: aWorldPoint - aBodyOrigin by: collisionRotation negated.
+		localPoint := bodyLocalPoint + (self extent / 2.0).
+		localPoint := self nearestRoundedRectangleBoundaryPointTo: localPoint.
+		^ aBodyOrigin + (self rotateVector: localPoint - (self extent / 2.0) by: collisionRotation) ].
+	vertices := self collisionVerticesAtBodyOrigin: aBodyOrigin rotation: anAngle.
 	best := nil.
 	bestDistance := Float infinity.
 	1 to: vertices size do: [ :index |
