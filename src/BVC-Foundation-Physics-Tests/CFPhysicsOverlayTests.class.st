@@ -289,7 +289,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	world presentAtAlpha: 0.5.
 	host space pulse.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
-	state := world committedVisualState contacts first.
+	state := visual state.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedPosition := context
 		overlayPointFromWorld: state firstPoint
@@ -908,7 +908,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransformation [
 	<gtExample>
-	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint |
+	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint context contactState expectedSpringPoint expectedContactPoint |
 	host := self physicsCanvassableHost.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
@@ -928,8 +928,18 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	initialContactPoint := contactVisual firstPointPosition.
 	host childrenTranslationFactor: 70 @ 45.
 	host space pulse.
-	self assert: springVisual fromPosition equals: initialSpringPoint + (70 @ 45).
-	self assert: contactVisual firstPointPosition equals: initialContactPoint + (70 @ 45).
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	expectedSpringPoint := context
+		overlayPointFromWorld: spring endpointPair worldPointA
+		attachedTo: spring endpointPair bodyA.
+	contactState := contactVisual state.
+	expectedContactPoint := context
+		overlayPointFromWorld: contactState firstPoint
+		attachedTo: contactState firstBody.
+	self assert: (springVisual fromPosition = initialSpringPoint) not.
+	self assert: (contactVisual firstPointPosition = initialContactPoint) not.
+	self assert: springVisual fromPosition equals: expectedSpringPoint.
+	self assert: contactVisual firstPointPosition equals: expectedContactPoint.
 	^ overlay
 ]
 

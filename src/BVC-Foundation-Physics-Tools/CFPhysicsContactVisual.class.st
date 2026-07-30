@@ -95,6 +95,11 @@ CFPhysicsContactVisual >> update [
 ]
 
 { #category : 'accessing' }
+CFPhysicsContactVisual >> state [
+	^ state
+]
+
+{ #category : 'accessing' }
 CFPhysicsContactVisual >> firstPointPosition [
 	^ firstPointMarker position + (3 @ 3)
 ]
