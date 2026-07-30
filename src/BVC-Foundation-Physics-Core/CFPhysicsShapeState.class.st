@@ -57,11 +57,6 @@ CFPhysicsShapeState >> captureGeometry [
 
 
 { #category : 'collision' }
-CFPhysicsShapeState >> aabb [
-	^ self aabbAt: 0 @ 0
-]
-
-{ #category : 'collision' }
 CFPhysicsShapeState >> aabbAt: aPosition [
 	^ self aabbAt: aPosition rotation: 0
 ]
@@ -118,11 +113,6 @@ CFPhysicsShapeState >> sweptAABBAlong: aSweep [
 { #category : 'geometry - coordinates' }
 CFPhysicsShapeState >> elementPositionForBodyOrigin: aPoint [
 	^ aPoint - (self extent / 2.0)
-]
-
-{ #category : 'circle' }
-CFPhysicsShapeState >> circleCentreAt: aPosition [
-	^ aPosition + (self extent / 2.0)
 ]
 
 { #category : 'accessing' }
@@ -262,7 +252,7 @@ CFPhysicsShapeState >> supportPointAt: aPosition rotation: anAngle inDirection: 
 		ifTrue: [ 1 @ 0 ]
 		ifFalse: [ aDirection / aDirection r ].
 	self isCircle ifTrue: [
-		^ (self circleCentreAt: aPosition) + (direction * self radius) ].
+		^ (self centreAt: aPosition) + (direction * self radius) ].
 	collisionRotation := self collisionRotationFor: anAngle.
 	localDirection := self rotateVector: direction by: collisionRotation negated.
 	localPoint := self localSupportPointInDirection: localDirection.
@@ -337,11 +327,6 @@ CFPhysicsShapeState >> roundedRectangleRadius [
 			and: [ radii bottomLeft = radius ] ])
 		ifFalse: [ self error: 'Physics currently requires equal rounded-rectangle corner radii' ].
 	^ radius min: (self extent min / 2.0)
-]
-
-{ #category : 'rounded rectangle' }
-CFPhysicsShapeState >> roundedRectangleSupportPointAt: aPosition inDirection: direction [
-	^ aPosition + (self roundedRectangleLocalSupportPointInDirection: direction)
 ]
 
 { #category : 'rounded rectangle' }
@@ -519,7 +504,7 @@ CFPhysicsShapeState >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin r
 CFPhysicsShapeState >> nearestBoundaryPointTo: aWorldPoint at: aPosition rotation: anAngle [
 	| centre direction vertices best bestDistance candidate distance localPoint collisionRotation |
 	self isCircle ifTrue: [
-		centre := self circleCentreAt: aPosition.
+		centre := self centreAt: aPosition.
 		direction := aWorldPoint - centre.
 		direction r = 0 ifTrue: [ direction := 1 @ 0 ].
 		^ centre + ((direction / direction r) * self radius) ].
