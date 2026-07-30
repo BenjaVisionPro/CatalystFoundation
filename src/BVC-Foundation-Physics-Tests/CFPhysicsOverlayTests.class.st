@@ -1303,3 +1303,54 @@ CFPhysicsOverlayTests >> physicsOverlayClearsJointInspectorWhenJointIsRemoved [
 	self assert: overlay objectInspector content joint isNil.
 	^ overlay
 ]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsDistanceJointVisualShowsItsRestLength [
+	<gtExample>
+	| host overlay world first joint visual points context firstPoint secondPoint distance expectedPosition |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 10 @ 12)
+		distanceJointTo: (world anchorAt: 280 @ 60).
+	joint restLength: 120.0.
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	firstPoint := context
+		overlayPointFromWorld: points first
+		attachedTo: joint bodyA.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: joint bodyB.
+	distance := (points second - points first) r.
+	expectedPosition := firstPoint
+		+ ((secondPoint - firstPoint) * (joint restLength / distance))
+		- (4 @ 4).
+	self assert: visual restLengthMarker visibility equals: BlVisibility visible.
+	self assert: visual restLengthMarker position equals: expectedPosition.
+	^ visual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
+	<gtExample>
+	| host overlay world first second joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	self assert: visual joint == joint.
+	self assert: visual restLengthMarker visibility equals: BlVisibility gone.
+	^ visual
+]
+

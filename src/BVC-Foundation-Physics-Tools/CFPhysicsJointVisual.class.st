@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsJointVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget' ],
+	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -55,6 +55,9 @@ CFPhysicsJointVisual >> matchesSelection: anObject [
 { #category : 'testing' }
 CFPhysicsJointVisual >> hitTarget [ ^ hitTarget ]
 
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> restLengthMarker [ ^ restLengthMarker ]
+
 { #category : 'testing' }
 CFPhysicsJointVisual >> includesEventTarget: anElement [
 	^ anElement == self or: [ anElement == hitTarget ]
@@ -77,6 +80,7 @@ CFPhysicsJointVisual >> initializeVisual [
 		preventMeAndChildrenMouseEvents;
 		fromHead: self newEndpointMarker;
 		toHead: self newEndpointMarker.
+	restLengthMarker := self newRestLengthMarker.
 	hitTarget := self newHitTarget.
 	self isSelection ifTrue: [
 		self
@@ -90,6 +94,25 @@ CFPhysicsJointVisual >> newEndpointMarker [
 		scale: 6.0;
 		background: (Color blue muchDarker alpha: 0.9);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 1);
+		yourself
+]
+
+
+
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newRestLengthMarker [
+	| markerColor |
+	markerColor := self isSelection
+		ifTrue: [ Color red alpha: 0.9 ]
+		ifFalse: [ Color blue muchDarker alpha: 0.9 ].
+	^ BlElement new
+		geometry: (BlPolygonGeometry vertices: { 4 @ 0. 8 @ 4. 4 @ 8. 0 @ 4 });
+		size: 8 @ 8;
+		background: markerColor;
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		visibility: BlVisibility gone;
+		zIndex: 1;
 		yourself
 ]
 
@@ -108,6 +131,7 @@ CFPhysicsJointVisual >> newHitTarget [
 CFPhysicsJointVisual >> addTo: aParentElement [
 	aParentElement
 		addChild: self;
+		addChild: restLengthMarker;
 		addChild: hitTarget.
 	^ self
 ]
@@ -130,12 +154,34 @@ CFPhysicsJointVisual >> update [
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
 	self requestLayout.
 	hitTarget requestLayout.
+	joint
+		updatePhysicsOverlayVisual: self
+		from: firstPoint
+		to: secondPoint
+		worldPoints: points.
 	^ self
+]
+
+
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> hideRestLengthMarker [
+	restLengthMarker visibility: BlVisibility gone
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showRestLengthMarkerAtFraction: aNumber from: firstPoint to: secondPoint [
+	| restPoint |
+	restPoint := firstPoint + ((secondPoint - firstPoint) * aNumber).
+	restLengthMarker
+		relocate: restPoint - (4 @ 4);
+		visibility: BlVisibility visible
 ]
 
 { #category : 'removing' }
 CFPhysicsJointVisual >> remove [
 	self hasParent ifTrue: [ self removeFromParent ].
+	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
 	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
 	^ self
 ]
