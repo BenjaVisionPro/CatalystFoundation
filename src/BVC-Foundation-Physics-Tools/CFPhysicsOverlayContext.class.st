@@ -55,16 +55,16 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint attachedTo: aBody [
 	"Resolve a solver-world point through the body that owns it when one is
-	available. The body element carries the current Motion presentation, so this
-	keeps diagnostics on the same interpolated geometry as the rendered body.
+	available. Invert CFPhysicsBody>>worldPointForLocalPoint: exactly here rather
+	than using the shape-state collision-space conversion, which rotates around
+	the shape centre and causes retained diagnostics to drift as the body rotates.
 	World anchors deliberately remain in world coordinates."
+	| localPoint |
 	aBody ifNil: [ ^ self overlayPointFromWorld: aPoint ].
-	^ self
-		overlayPoint: (aBody shapeState
-			localPointForWorldPoint: aPoint
-			position: aBody position
-			rotation: aBody rotation)
-		from: aBody element
+	localPoint := aBody shapeState
+		rotateVector: aPoint - aBody position
+		by: aBody rotation negated.
+	^ self overlayPoint: localPoint from: aBody element
 ]
 
 { #category : 'geometry' }
