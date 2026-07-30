@@ -10,9 +10,9 @@ CFPhysicsStepPipelineResult >> gtPredictedBodiesFor: aView [
 		items: [ self bodies collect: [ :body | self bodyStates at: body ] ];
 		column: 'Sequence' text: [ :state | state body sequence ];
 		column: 'Body' text: [ :state | state body ];
-		column: 'Start' text: [ :state | state body position ];
-		column: 'Predicted end' text: [ :state |
-			(state predictedTransformAfter: self step timeStep) position ];
+		column: 'Start body origin' text: [ :state | state startBodyOrigin ];
+		column: 'Predicted body origin' text: [ :state |
+			(state predictedTransformAfter: self step timeStep) bodyOrigin ];
 		column: 'Velocity' text: #linearVelocity;
 		column: 'Angular velocity' text: #angularVelocity;
 		column: 'Swept bounds' text: [ :state |

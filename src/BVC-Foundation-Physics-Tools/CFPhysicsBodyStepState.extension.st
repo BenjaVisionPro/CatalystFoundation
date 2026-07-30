@@ -8,11 +8,11 @@ CFPhysicsBodyStepState >> gtStepStateFor: aView [
 		priority: 1;
 		items: [ {
 			'Body' -> self body.
-			'Position' -> self body position.
+			'Body origin' -> self currentBodyOrigin.
 			'Rotation' -> self body rotation.
 			'Linear velocity' -> self linearVelocity.
 			'Angular velocity' -> self angularVelocity.
-			'Position delta' -> self deltaPosition.
+			'Body-origin delta' -> self deltaPosition.
 			'Rotation delta' -> self deltaRotation } ];
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;
