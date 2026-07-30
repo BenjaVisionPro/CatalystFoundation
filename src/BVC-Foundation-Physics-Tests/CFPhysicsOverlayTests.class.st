@@ -289,6 +289,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	world presentAtAlpha: 0.5.
 	host space pulse.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
+	host space pulse.
 	state := visual state.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedPosition := context
@@ -927,6 +928,8 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	initialSpringPoint := springVisual fromPosition.
 	initialContactPoint := contactVisual firstPointPosition.
 	host childrenTranslationFactor: 70 @ 45.
+	host space pulse.
+	"The transformation event relocates contact markers during this pulse; commit those relocations before reading their positions."
 	host space pulse.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedSpringPoint := context
