@@ -569,3 +569,18 @@ CFPhysicsShapeState >> boundingRadius [
 	^ (self localCollisionVertices
 		collect: [ :vertex | (vertex - centre) r ]) max
 ]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsShapeState >> bodyLocalPointForElementLocalPoint: aPoint [
+	^ aPoint - (self extent / 2.0)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsShapeState >> elementLocalPointForBodyLocalPoint: aPoint [
+	^ aPoint + (self extent / 2.0)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsShapeState >> bodyLocalPointForNormalisedPoint: aPoint [
+	^ self bodyLocalPointForElementLocalPoint: aPoint * self extent
+]

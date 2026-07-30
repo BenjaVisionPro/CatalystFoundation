@@ -744,3 +744,25 @@ CFPhysicsBody >> applyAngularImpulse: aNumber [
 CFPhysicsBody >> accumulateAngularImpulse: aNumber [
 	self accumulateAngularVelocity: aNumber * self calculatedInverseInertia
 ]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBody >> worldPointForBodyLocalPoint: aPoint [
+	^ position + (self shapeState rotateVector: aPoint by: rotation)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBody >> bodyLocalPointForWorldPoint: aPoint [
+	^ self shapeState
+		rotateVector: aPoint - position
+		by: rotation negated
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBody >> worldVectorForBodyLocalVector: aPoint [
+	^ self shapeState rotateVector: aPoint by: rotation
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBody >> bodyLocalVectorForWorldVector: aPoint [
+	^ self shapeState rotateVector: aPoint by: rotation negated
+]

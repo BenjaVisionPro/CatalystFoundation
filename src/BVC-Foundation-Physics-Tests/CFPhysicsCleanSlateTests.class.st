@@ -6635,3 +6635,86 @@ CFPhysicsCleanSlateTests >> backgroundStepDefaultsToTheUnmeasuredSolver [
 	self assert: backgroundStep telemetryEnabled not.
 	^ backgroundStep
 ]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> bodyLocalPointRoundTripsThroughWorld [
+	<gtExample>
+	| body localPoint worldPoint recoveredPoint |
+	body := CFPhysicsBody
+		element: (BlElement new size: 80 @ 30; yourself)
+		world: nil.
+	body
+		position: 120 @ 75;
+		rotation: Float pi / 3.0.
+	localPoint := 30 @ -12.
+	worldPoint := body worldPointForBodyLocalPoint: localPoint.
+	recoveredPoint := body bodyLocalPointForWorldPoint: worldPoint.
+	self assert: (recoveredPoint closeTo: localPoint).
+	^ body
+]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> bodyLocalVectorRoundTripsWithoutTranslation [
+	<gtExample>
+	| body localVector worldVector recoveredVector |
+	body := CFPhysicsBody
+		element: (BlElement new size: 80 @ 30; yourself)
+		world: nil.
+	body
+		position: 120 @ 75;
+		rotation: Float pi / 3.0.
+	localVector := 14 @ -9.
+	worldVector := body worldVectorForBodyLocalVector: localVector.
+	recoveredVector := body bodyLocalVectorForWorldVector: worldVector.
+	self assert: (recoveredVector closeTo: localVector).
+	body position: 900 @ -240.
+	self assert: ((body worldVectorForBodyLocalVector: localVector) closeTo: worldVector).
+	^ body
+]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> bodyAndCapturedStateUseTheSameCoordinateContract [
+	<gtExample>
+	| body state localPoint localVector |
+	body := CFPhysicsBody
+		element: (BlElement new size: 80 @ 30; yourself)
+		world: nil.
+	body
+		position: 120 @ 75;
+		rotation: Float pi / 3.0.
+	state := CFPhysicsBodyStepState on: body.
+	localPoint := 30 @ -12.
+	localVector := 14 @ -9.
+	self assert: ((state worldPointForBodyLocalPoint: localPoint)
+		closeTo: (body worldPointForBodyLocalPoint: localPoint)).
+	self assert: ((state worldVectorForBodyLocalVector: localVector)
+		closeTo: (body worldVectorForBodyLocalVector: localVector)).
+	^ state
+]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> elementLocalAndBodyLocalPointsRoundTrip [
+	<gtExample>
+	| shapeState elementPoint bodyPoint recoveredPoint |
+	shapeState := CFPhysicsShapeState on: (BlElement new size: 80 @ 30; yourself).
+	elementPoint := 70 @ 10.
+	bodyPoint := shapeState bodyLocalPointForElementLocalPoint: elementPoint.
+	recoveredPoint := shapeState elementLocalPointForBodyLocalPoint: bodyPoint.
+	self assert: bodyPoint equals: 30.0 @ -5.0.
+	self assert: recoveredPoint equals: elementPoint.
+	^ shapeState
+]
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> normalisedPointsResolveIntoTheBodyLocalFrame [
+	<gtExample>
+	| shapeState |
+	shapeState := CFPhysicsShapeState on: (BlElement new size: 80 @ 30; yourself).
+	self assert: (shapeState bodyLocalPointForNormalisedPoint: 0 @ 0)
+		equals: -40.0 @ -15.0.
+	self assert: (shapeState bodyLocalPointForNormalisedPoint: 0.5 @ 0.5)
+		equals: 0.0 @ 0.0.
+	self assert: (shapeState bodyLocalPointForNormalisedPoint: 1 @ 1)
+		equals: 40.0 @ 15.0.
+	^ shapeState
+]

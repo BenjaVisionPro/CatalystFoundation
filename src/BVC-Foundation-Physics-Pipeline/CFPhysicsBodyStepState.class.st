@@ -268,3 +268,32 @@ CFPhysicsBodyStepState >> collisionMaskBits [
 CFPhysicsBodyStepState >> collisionGroupIndex [
 	^ collisionGroupIndex
 ]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> worldPointForBodyLocalPoint: aPoint [
+	^ position + deltaPosition
+		+ (shapeState
+			rotateVector: aPoint
+			by: rotation + deltaRotation)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> bodyLocalPointForWorldPoint: aPoint [
+	^ shapeState
+		rotateVector: aPoint - (position + deltaPosition)
+		by: (rotation + deltaRotation) negated
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> worldVectorForBodyLocalVector: aPoint [
+	^ shapeState
+		rotateVector: aPoint
+		by: rotation + deltaRotation
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> bodyLocalVectorForWorldVector: aPoint [
+	^ shapeState
+		rotateVector: aPoint
+		by: (rotation + deltaRotation) negated
+]
