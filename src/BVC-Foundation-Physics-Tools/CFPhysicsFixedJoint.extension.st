@@ -18,8 +18,9 @@ CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: 
 	bodyAAngle := self bodyA ifNil: [ 0.0 ] ifNotNil: [ :body | body rotation ].
 	referenceWorldAngle := bodyAAngle + self referenceAngle.
 	referenceDirection := (aVisual context
-		overlayPointFromWorld: pivotWorld + (referenceWorldAngle cos @ referenceWorldAngle sin)) -
-		(aVisual context overlayPointFromWorld: pivotWorld).
+		overlayPointFromWorld: pivotWorld + (referenceWorldAngle cos @ referenceWorldAngle sin)
+		attachedTo: self bodyA) -
+		(aVisual context overlayPointFromWorld: pivotWorld attachedTo: self bodyA).
 	referenceDirection r isZero ifTrue: [ ^ aVisual hideRevoluteDecoration ].
 	referenceDirection := referenceDirection / referenceDirection r.
 	referenceEnd := pivotPoint + (referenceDirection * 28.0).
