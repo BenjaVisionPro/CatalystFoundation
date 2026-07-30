@@ -532,8 +532,8 @@ CFPhysicsBody >> torque [
 ]
 
 { #category : 'stepping' }
-CFPhysicsBody >> commitPosition: aPosition rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
-	bodyOrigin := aPosition + (self extent / 2.0).
+CFPhysicsBody >> commitBodyOrigin: aPoint rotation: anAngle velocity: aVelocity angularVelocity: anAngularVelocity [
+	bodyOrigin := aPoint.
 	rotation := anAngle.
 	bodyType commitVelocity: aVelocity angularVelocity: anAngularVelocity.
 	force := 0 @ 0.

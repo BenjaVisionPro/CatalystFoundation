@@ -6772,3 +6772,19 @@ CFPhysicsCleanSlateTests >> bodyStoresItsWorldOriginWithoutChangingTheElementPos
 	self assert: body worldBodyOrigin equals: 175.0 @ 80.0.
 	^ body
 ]
+
+
+{ #category : 'examples - coordinates' }
+CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransformContract [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
+	state := CFPhysicsBodyStepState on: body.
+	self assert: state startBodyOrigin equals: 120 @ 60.
+	self assert: state currentBodyOrigin equals: 120 @ 60.
+	self assert: state currentTransform position equals: 100 @ 50.
+	state translateBy: 10 @ 5.
+	self assert: state currentBodyOrigin equals: 130 @ 65.
+	self assert: state currentTransform position equals: 110 @ 55.
+	^ state
+]

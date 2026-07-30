@@ -161,9 +161,8 @@ CFPhysicsConstraintBuilder >> reusedPointCount [ ^ reusedPointCount ifNil: [ 0 ]
 
 { #category : 'private - geometry' }
 CFPhysicsConstraintBuilder >> rotatedAnchorFor: localAnchor bodyState: bodyState [
-	| localCentre relative rotation cosine sine |
-	localCentre := bodyState localCentre.
-	relative := localAnchor - localCentre.
+	| relative rotation cosine sine |
+	relative := bodyState bodyLocalPointForElementLocalPoint: localAnchor.
 	rotation := bodyState currentTransform rotation.
 	cosine := rotation cos.
 	sine := rotation sin.

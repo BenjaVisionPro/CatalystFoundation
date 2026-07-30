@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'position', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'localCentre', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Foundation-Physics-Pipeline',
 	#package : 'BVC-Foundation-Physics-Pipeline'
 }
@@ -14,7 +14,7 @@ CFPhysicsBodyStepState class >> on: aBody [
 { #category : 'initialization' }
 CFPhysicsBodyStepState >> capture [
 	bodyType := body bodyType.
-	position := body position.
+	bodyOrigin := body worldBodyOrigin.
 	rotation := body rotation.
 	linearVelocity := body velocity.
 	angularVelocity := body angularVelocity.
@@ -28,7 +28,6 @@ CFPhysicsBodyStepState >> capture [
 	shapeState := body shapeState capturedForStep.
 	friction := body friction.
 	restitution := body restitution.
-	localCentre := shapeState extent / 2.0.
 	awake := body isAwake.
 	sleepingAllowed := body allowsSleeping.
 	sleepTime := body sleepTime.
@@ -82,7 +81,7 @@ CFPhysicsBodyStepState >> accumulateTranslation: aPoint [
 { #category : 'committing' }
 CFPhysicsBodyStepState >> commit [
 	body
-		commitPosition: position + deltaPosition
+		commitBodyOrigin: bodyOrigin + deltaPosition
 		rotation: rotation + deltaRotation
 		velocity: linearVelocity
 		angularVelocity: angularVelocity.
@@ -115,9 +114,6 @@ CFPhysicsBodyStepState >> restitution [ ^ restitution ]
 CFPhysicsBodyStepState >> inverseMass [ ^ inverseMass ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> inverseInertia [ ^ inverseInertia ]
-{ #category : 'accessing' }
-CFPhysicsBodyStepState >> localCentre [ ^ localCentre ]
-
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 
@@ -154,17 +150,42 @@ CFPhysicsBodyStepState >> predictedSweptAABBFor: seconds [
 	^ shapeState sweptAABBAlong: (self predictedSweepFor: seconds)
 ]
 
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> currentBodyOrigin [
+	^ bodyOrigin + deltaPosition
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> currentElementPosition [
+	^ self currentBodyOrigin - (shapeState extent / 2.0)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> startBodyOrigin [
+	^ bodyOrigin
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> startElementPosition [
+	^ bodyOrigin - (shapeState extent / 2.0)
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> bodyLocalPointForElementLocalPoint: aPoint [
+	^ aPoint - (shapeState extent / 2.0)
+]
+
 { #category : 'prediction' }
 CFPhysicsBodyStepState >> currentTransform [
 	^ CFPhysicsTransform
-		position: position + deltaPosition
+		position: self currentElementPosition
 		rotation: rotation + deltaRotation
 ]
 
 
 { #category : 'continuous collision' }
 CFPhysicsBodyStepState >> startTransform [
-	^ CFPhysicsTransform position: position rotation: rotation
+	^ CFPhysicsTransform position: self startElementPosition rotation: rotation
 ]
 
 { #category : 'continuous collision' }

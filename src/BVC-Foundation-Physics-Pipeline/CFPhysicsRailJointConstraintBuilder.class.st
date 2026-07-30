@@ -73,7 +73,7 @@ CFPhysicsRailJointConstraintBuilder >> dot: first with: second [
 CFPhysicsRailJointConstraintBuilder >> centreForState: aState [
 	^ aState
 		ifNil: [ 0 @ 0 ]
-		ifNotNil: [ aState currentTransform position + aState localCentre ]
+		ifNotNil: [ aState currentBodyOrigin ]
 ]
 
 { #category : 'private - building' }
