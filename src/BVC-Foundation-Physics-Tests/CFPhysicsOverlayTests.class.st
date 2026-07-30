@@ -271,7 +271,7 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBody [
 	<gtExample>
-	| host overlay world first second firstBody visual initialPosition |
+	| host overlay world first second firstBody visual initialPosition state expectedPosition context |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	world := host physics existingWorld.
@@ -289,7 +289,13 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	world presentAtAlpha: 0.5.
 	host space pulse.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
-	self assert: visual firstPointPosition equals: initialPosition + (50 @ 0).
+	state := world committedVisualState contacts first.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	expectedPosition := context
+		overlayPointFromWorld: state firstPoint
+		attachedTo: state firstBody.
+	self assert: visual firstPointPosition equals: expectedPosition.
+	self assert: (visual firstPointPosition = initialPosition) not.
 	^ visual
 ]
 
@@ -903,7 +909,9 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransformation [
 	<gtExample>
 	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint |
-	host := self physicsOverlayCanBeInstalled.
+	host := self physicsCanvassableHost.
+	overlay := host showPhysicsOverlay.
+	host space pulse.
 	overlay := host existingPhysicsOverlay.
 	world := host physics existingWorld.
 	first := host children first.
