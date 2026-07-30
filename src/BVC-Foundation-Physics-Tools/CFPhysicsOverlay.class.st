@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
 	#category : 'BVC-Foundation-Physics-Tools',
 	#package : 'BVC-Foundation-Physics-Tools'
 }
@@ -35,6 +35,8 @@ CFPhysicsOverlay >> bodyOverlay [ ^ bodyOverlay ]
 CFPhysicsOverlay >> bodyElements [ ^ bodyOverlay visuals ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> springOverlay [ ^ springOverlay ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> jointOverlay [ ^ jointOverlay ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> contactOverlay [ ^ contactOverlay ]
 { #category : 'accessing' }
@@ -155,6 +157,7 @@ CFPhysicsOverlay >> initializeOverlay [
 	context := CFPhysicsOverlayContext host: host world: world overlay: self.
 	bodyOverlay := CFPhysicsBodyOverlay in: root world: world context: context.
 	springOverlay := CFPhysicsSpringOverlay in: root world: world context: context.
+	jointOverlay := CFPhysicsJointOverlay in: root world: world context: context.
 	contactOverlay := CFPhysicsContactOverlay in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
 	self initializeControls.
@@ -237,6 +240,7 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 	system. Body visuals observe their source elements directly; the aggregate
 	spring and contact diagnostics refresh here once for the owning host."
 	controls springsEnabled ifTrue: [ springOverlay update ].
+	controls jointsEnabled ifTrue: [ jointOverlay update ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectionVisual.
 	^ self
@@ -276,6 +280,9 @@ CFPhysicsOverlay >> refresh [
 	controls springsEnabled
 		ifTrue: [ springOverlay update ]
 		ifFalse: [ springOverlay clear ].
+	controls jointsEnabled
+		ifTrue: [ jointOverlay update ]
+		ifFalse: [ jointOverlay clear ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectedObject.
 	self refreshSelectionVisual.
@@ -304,6 +311,17 @@ CFPhysicsOverlay >> springsEnabled: aBoolean [
 	^ self
 ]
 
+
+{ #category : 'controlling - diagnostics' }
+CFPhysicsOverlay >> jointsEnabled: aBoolean [
+	aBoolean
+		ifTrue: [
+			world synchroniseMembership.
+			jointOverlay update ]
+		ifFalse: [ jointOverlay clear ].
+	^ self
+]
+
 { #category : 'controlling - diagnostics' }
 CFPhysicsOverlay >> contactsEnabled: aBoolean [
 	aBoolean
@@ -329,6 +347,7 @@ CFPhysicsOverlay >> release [
 	controls ifNotNil: #release.
 	bodyOverlay ifNotNil: #release.
 	springOverlay ifNotNil: #release.
+	jointOverlay ifNotNil: #release.
 	contactOverlay ifNotNil: #release.
 	objectInspector ifNotNil: #release.
 	controlRoot ifNotNil: [ controlRoot hasParent ifTrue: [ controlRoot removeFromParent ] ].

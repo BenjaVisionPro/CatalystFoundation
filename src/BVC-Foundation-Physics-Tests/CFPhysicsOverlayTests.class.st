@@ -289,7 +289,6 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	world presentAtAlpha: 0.5.
 	host space pulse.
 	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
-	host space pulse.
 	state := visual state.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedPosition := context
@@ -929,8 +928,6 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	initialContactPoint := contactVisual firstPointPosition.
 	host childrenTranslationFactor: 70 @ 45.
 	host space pulse.
-	"The transformation event relocates contact markers during this pulse; commit those relocations before reading their positions."
-	host space pulse.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedSpringPoint := context
 		overlayPointFromWorld: spring endpointPair worldPointA
@@ -1051,4 +1048,104 @@ CFPhysicsOverlayTests >> physicsSpringOverlayIsEmptyWhileDisabled [
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
 	^ overlay
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointOverlayCreatesVisualsForWorldJoints [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refresh.
+	host space pulse.
+	self assert: overlay jointOverlay visuals size equals: 1.
+	visual := overlay jointOverlay visuals first.
+	self assert: visual joint == joint.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointOverlayPreservesVisualIdentity [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refresh.
+	visual := overlay jointOverlay visuals first.
+	overlay refresh.
+	self assert: overlay jointOverlay visuals first == visual.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointOverlayRemovesRetiredVisuals [
+	<gtExample>
+	| host overlay world first joint visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refresh.
+	visual := overlay jointOverlay visuals first.
+	world removeDistanceJoint: joint.
+	overlay refresh.
+	self assert: overlay jointOverlay visuals isEmpty.
+	self assert: visual hasParent not.
+	self assert: visual hitTarget hasParent not.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointOverlayUsesDisplayedAnchorCoordinates [
+	<gtExample>
+	| host overlay world first joint visual context points expectedFirst expectedSecond |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	joint := (first physics localAnchorAt: 10 @ 12)
+		distanceJointTo: (world anchorAt: 280 @ 60).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	expectedFirst := context
+		overlayPointFromWorld: points first
+		attachedTo: joint endpointPair bodyA.
+	expectedSecond := context
+		overlayPointFromWorld: points second
+		attachedTo: joint endpointPair bodyB.
+	self assert: visual fromPosition equals: expectedFirst.
+	self assert: visual toPosition equals: expectedSecond.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointOverlayClearsWhenDisabled [
+	<gtExample>
+	| host overlay world first visual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	(first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refresh.
+	visual := overlay jointOverlay visuals first.
+	overlay jointsEnabled: false.
+	self assert: overlay jointOverlay visuals isEmpty.
+	self assert: visual hasParent not.
+	self assert: visual hitTarget hasParent not.
+	^ host
 ]
