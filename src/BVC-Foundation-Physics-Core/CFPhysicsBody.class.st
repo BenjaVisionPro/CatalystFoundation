@@ -747,14 +747,25 @@ CFPhysicsBody >> accumulateAngularImpulse: aNumber [
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBody >> worldPointForBodyLocalPoint: aPoint [
-	^ position + (self shapeState rotateVector: aPoint by: rotation)
+	^ self worldBodyOrigin
+		+ (self shapeState rotateVector: aPoint by: rotation)
 ]
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBody >> bodyLocalPointForWorldPoint: aPoint [
 	^ self shapeState
-		rotateVector: aPoint - position
+		rotateVector: aPoint - self worldBodyOrigin
 		by: rotation negated
+]
+
+
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBody >> worldBodyOrigin [
+	"The body-local frame is centred on the element geometry. Until the stored
+	position migration is complete, position remains the element's unrotated
+	top-left and the body origin is derived without allocating a transform."
+	^ position + (self extent / 2.0)
 ]
 
 { #category : 'geometry - coordinates' }

@@ -271,7 +271,7 @@ CFPhysicsBodyStepState >> collisionGroupIndex [
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBodyStepState >> worldPointForBodyLocalPoint: aPoint [
-	^ position + deltaPosition
+	^ self worldBodyOrigin
 		+ (shapeState
 			rotateVector: aPoint
 			by: rotation + deltaRotation)
@@ -280,8 +280,16 @@ CFPhysicsBodyStepState >> worldPointForBodyLocalPoint: aPoint [
 { #category : 'geometry - coordinates' }
 CFPhysicsBodyStepState >> bodyLocalPointForWorldPoint: aPoint [
 	^ shapeState
-		rotateVector: aPoint - (position + deltaPosition)
+		rotateVector: aPoint - self worldBodyOrigin
 		by: (rotation + deltaRotation) negated
+]
+
+
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsBodyStepState >> worldBodyOrigin [
+	"Mirror CFPhysicsBody's body-local frame using captured geometry only."
+	^ position + deltaPosition + (shapeState extent / 2.0)
 ]
 
 { #category : 'geometry - coordinates' }

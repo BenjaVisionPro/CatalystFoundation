@@ -7,5 +7,5 @@ Class {
 
 { #category : 'geometry' }
 CFPhysicsBodyCentreAnchor >> worldPoint [
-	^ self body position + (self body extent / 2.0)
+	^ self body worldPointForBodyLocalPoint: 0 @ 0
 ]

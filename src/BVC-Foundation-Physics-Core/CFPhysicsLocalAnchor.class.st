@@ -26,5 +26,7 @@ CFPhysicsLocalAnchor >> localPoint: aPoint [
 
 { #category : 'geometry' }
 CFPhysicsLocalAnchor >> worldPoint [
-	^ self body worldPointForLocalPoint: localPoint
+	^ self body
+		worldPointForBodyLocalPoint:
+			(self body shapeState bodyLocalPointForElementLocalPoint: localPoint)
 ]

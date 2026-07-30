@@ -26,5 +26,7 @@ CFPhysicsNormalisedAnchor >> normalisedPoint: aPoint [
 
 { #category : 'geometry' }
 CFPhysicsNormalisedAnchor >> worldPoint [
-	^ self body worldPointForNormalisedPoint: normalisedPoint
+	^ self body
+		worldPointForBodyLocalPoint:
+			(self body shapeState bodyLocalPointForNormalisedPoint: normalisedPoint)
 ]

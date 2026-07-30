@@ -3137,7 +3137,7 @@ CFPhysicsCleanSlateTests >> localAnchorFollowsBodyTranslationAndRotation [
 	body position: 110 @ 60.
 	self assert: anchor worldPoint equals: 130 @ 60.
 	body rotation: Float pi / 2.
-	self assert: (anchor worldPoint closeTo: 110 @ 80).
+	self assert: (anchor worldPoint closeTo: 140 @ 70).
 	^ anchor
 ]
 
@@ -3188,11 +3188,11 @@ CFPhysicsCleanSlateTests >> normalisedAnchorFollowsBodyGeometry [
 	anchor := CFPhysicsNormalisedAnchor on: body at: 1 @ 0.5.
 	self assert: anchor body == body.
 	self assert: anchor normalisedPoint equals: 1 @ 0.5.
-	self assert: anchor worldPoint equals: 120 @ 50.
+	self assert: anchor worldPoint equals: 140 @ 60.
 	body element size: 80 @ 40.
-	self assert: anchor worldPoint equals: 140 @ 50.
+	self assert: anchor worldPoint equals: 180 @ 70.
 	body rotation: Float pi / 2.
-	self assert: (anchor worldPoint closeTo: 100 @ 90).
+	self assert: (anchor worldPoint closeTo: 140 @ 110).
 	^ anchor
 ]
 
@@ -3209,7 +3209,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateANormalisedAnchor [
 	anchor := element physics normalisedAnchorAt: 1 @ 1.
 	self assert: anchor class equals: CFPhysicsNormalisedAnchor.
 	self assert: anchor body == element physics bodyState.
-	self assert: anchor worldPoint equals: 120 @ 60.
+	self assert: anchor worldPoint equals: 140 @ 70.
 	^ anchor
 ]
 
@@ -3227,8 +3227,8 @@ CFPhysicsCleanSlateTests >> relationshipsCanResolveNormalisedAnchors [
 	self assert: spring anchorA == anchorA.
 	self assert: attraction anchorA == anchorA.
 	self assert: repulsion anchorA == anchorA.
-	self assert: anchorA worldPoint equals: 10 @ 0.
-	self assert: anchorB worldPoint equals: 80 @ 0.
+	self assert: anchorA worldPoint equals: 20 @ 10.
+	self assert: anchorB worldPoint equals: 100 @ 10.
 	^ { spring. attraction. repulsion }
 ]
 
@@ -6717,4 +6717,19 @@ CFPhysicsCleanSlateTests >> normalisedPointsResolveIntoTheBodyLocalFrame [
 	self assert: (shapeState bodyLocalPointForNormalisedPoint: 1 @ 1)
 		equals: 40.0 @ 15.0.
 	^ shapeState
+]
+
+
+{ #category : 'examples - coordinate contract' }
+CFPhysicsCleanSlateTests >> equivalentLocalAndNormalisedAnchorsShareTheCoordinateContract [
+	<gtExample>
+	| body localAnchor normalisedAnchor centreAnchor |
+	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
+	body rotation: Float pi / 3.0.
+	localAnchor := CFPhysicsLocalAnchor on: body at: 40 @ 10.
+	normalisedAnchor := CFPhysicsNormalisedAnchor on: body at: 1 @ 0.5.
+	centreAnchor := CFPhysicsBodyCentreAnchor on: body.
+	self assert: (localAnchor worldPoint closeTo: normalisedAnchor worldPoint).
+	self assert: (centreAnchor worldPoint closeTo: body worldBodyOrigin).
+	^ { localAnchor. normalisedAnchor. centreAnchor }
 ]
