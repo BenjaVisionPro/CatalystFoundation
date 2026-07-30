@@ -969,7 +969,6 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 	^ overlay
 ]
 
-{ #category : 'examples - physics overlay' }
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSpringsAndJoints [
 	<gtExample>
