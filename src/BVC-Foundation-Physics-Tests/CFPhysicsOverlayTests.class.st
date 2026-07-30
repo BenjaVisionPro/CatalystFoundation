@@ -1662,3 +1662,101 @@ CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteM
 	^ overlay
 ]
 
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
+	<gtExample>
+	| host overlay world first second joint visual initialPivot points context firstPoint secondPoint expectedPivot |
+	host := self physicsCanvassableHost.
+	overlay := host showPhysicsOverlay.
+	host space pulse.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
+	initialPivot := visual pivotMarker position.
+	host childrenTranslationFactor: 70 @ 45.
+	host space pulse.
+	host space pulse.
+	points := joint endpointPair worldPoints.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	firstPoint := context
+		overlayPointFromWorld: points first
+		attachedTo: joint bodyA.
+	secondPoint := context
+		overlayPointFromWorld: points second
+		attachedTo: joint bodyB.
+	expectedPivot := ((firstPoint + secondPoint) / 2.0) - (5 @ 5).
+	self assert: visual pivotMarker position ~= initialPivot.
+	self assert: visual pivotMarker position equals: expectedPivot.
+	self assert: visual referenceRay fromPosition equals: expectedPivot + (5 @ 5).
+	self assert: visual hitTarget fromPosition equals: visual referenceRay fromPosition.
+	self assert: visual hitTarget toPosition equals: visual referenceRay toPosition.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> physicsJointVisualReleasesEveryRetainedPrimitiveWhenDisabled [
+	<gtExample>
+	| visual overlay primitives |
+	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	overlay := visual context overlay.
+	primitives := {
+		visual.
+		visual rail.
+		visual lowerLimitMarker.
+		visual upperLimitMarker.
+		visual restLengthMarker.
+		visual pivotMarker.
+		visual referenceRay.
+		visual lowerAngleMarker.
+		visual upperAngleMarker.
+		visual allowedAngleArc.
+		visual motorCue.
+		visual hitTarget }.
+	self assert: (primitives allSatisfy: #hasParent).
+	overlay jointsEnabled: false.
+	self assert: overlay jointOverlay visuals isEmpty.
+	self assert: (primitives noneSatisfy: #hasParent).
+	^ overlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointTypes [
+	<gtExample>
+	| host overlay world first second distanceJoint fixedJoint distanceVisual fixedVisual firstContent secondContent |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	second := host children second.
+	distanceJoint := (first physics localAnchorAt: 10 @ 12)
+		distanceJointTo: (world anchorAt: 260 @ 60).
+	fixedJoint := (first physics localAnchorAt: 20 @ 20)
+		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+	overlay refresh.
+	host space pulse.
+	distanceVisual := overlay jointOverlay visuals
+		detect: [ :each | each joint == distanceJoint ].
+	fixedVisual := overlay jointOverlay visuals
+		detect: [ :each | each joint == fixedJoint ].
+	distanceVisual hitTarget fireEvent: BlClickEvent new.
+	firstContent := overlay objectInspector content.
+	self assert: overlay selectedJoint == distanceJoint.
+	self assert: (firstContent valueElements includesKey: #restLength).
+	self assert: (firstContent valueElements includesKey: #motorSpeed) not.
+	fixedVisual hitTarget fireEvent: BlClickEvent new.
+	secondContent := overlay objectInspector content.
+	self assert: overlay selectedJoint == fixedJoint.
+	self assert: secondContent ~= firstContent.
+	self assert: secondContent joint == fixedJoint.
+	self assert: (secondContent valueElements includesKey: #referenceAngle).
+	self assert: (secondContent valueElements includesKey: #restLength) not.
+	self assert: (secondContent valueElements includesKey: #motorSpeed) not.
+	self assert: firstContent joint == distanceJoint.
+	^ overlay
+]
