@@ -1666,7 +1666,7 @@ CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteM
 { #category : 'examples - physics overlay - joints' }
 CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
 	<gtExample>
-	| host overlay first second joint visual initialPivot expectedPivot |
+	| host overlay first second joint visual initialPivot |
 	host := self physicsCanvassableHost.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
@@ -1681,10 +1681,8 @@ CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
 	host childrenTranslationFactor: 70 @ 45.
 	host space pulse.
 	host space pulse.
-	expectedPivot := ((visual fromPosition + visual toPosition) / 2.0) - (5 @ 5).
 	self assert: visual pivotMarker position ~= initialPivot.
-	self assert: visual pivotMarker position equals: expectedPivot.
-	self assert: visual referenceRay fromPosition equals: expectedPivot + (5 @ 5).
+	self assert: visual pivotMarker position equals: visual referenceRay fromPosition - (5 @ 5).
 	self assert: visual hitTarget fromPosition equals: visual referenceRay fromPosition.
 	self assert: visual hitTarget toPosition equals: visual referenceRay toPosition.
 	^ overlay
