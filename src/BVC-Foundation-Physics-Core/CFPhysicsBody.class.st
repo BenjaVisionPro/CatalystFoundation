@@ -64,7 +64,7 @@ CFPhysicsBody >> removeContact: aContact [
 
 { #category : 'collision' }
 CFPhysicsBody >> aabb [
-	^ self shapeState aabbAt: self position rotation: rotation
+	^ self shapeState aabbAtBodyOrigin: self worldBodyOrigin rotation: rotation
 ]
 
 { #category : 'body type' }

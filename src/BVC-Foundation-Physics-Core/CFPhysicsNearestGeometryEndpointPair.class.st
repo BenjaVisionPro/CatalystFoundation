@@ -47,26 +47,25 @@ CFPhysicsNearestGeometryEndpointPair >> worldPoints [
 	manifold := CFPhysicsCollision manifoldBetween: bodyA and: bodyB.
 	manifold ifNotNil: [
 		point := manifold points isEmpty
-			ifTrue: [ ((bodyA shapeState centreAt: bodyA position)
-				+ (bodyB shapeState centreAt: bodyB position)) / 2.0 ]
+			ifTrue: [ (bodyA worldBodyOrigin + bodyB worldBodyOrigin) / 2.0 ]
 			ifFalse: [ manifold points first ].
 		^ { point. point } ].
 	pointA := bodyA shapeState
-		nearestBoundaryPointTo: (bodyB shapeState centreAt: bodyB position)
-		at: bodyA position
+		nearestBoundaryPointTo: bodyB worldBodyOrigin
+		atBodyOrigin: bodyA worldBodyOrigin
 		rotation: bodyA rotation.
 	pointB := bodyB shapeState
 		nearestBoundaryPointTo: pointA
-		at: bodyB position
+		atBodyOrigin: bodyB worldBodyOrigin
 		rotation: bodyB rotation.
 	1 to: 16 do: [ :iteration |
 		newPointA := bodyA shapeState
 			nearestBoundaryPointTo: pointB
-			at: bodyA position
+			atBodyOrigin: bodyA worldBodyOrigin
 			rotation: bodyA rotation.
 		newPointB := bodyB shapeState
 			nearestBoundaryPointTo: newPointA
-			at: bodyB position
+			atBodyOrigin: bodyB worldBodyOrigin
 			rotation: bodyB rotation.
 		(((newPointA - pointA) r <= 0.000001)
 			and: [ (newPointB - pointB) r <= 0.000001 ])

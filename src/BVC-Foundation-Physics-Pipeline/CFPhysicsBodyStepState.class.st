@@ -162,7 +162,7 @@ CFPhysicsBodyStepState >> startBodyOrigin [
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBodyStepState >> bodyLocalPointForElementLocalPoint: aPoint [
-	^ aPoint - (shapeState extent / 2.0)
+	^ shapeState bodyLocalPointForElementLocalPoint: aPoint
 ]
 
 { #category : 'prediction' }

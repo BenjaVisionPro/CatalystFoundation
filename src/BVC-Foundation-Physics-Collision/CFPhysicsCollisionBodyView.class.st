@@ -16,7 +16,7 @@ CFPhysicsCollisionBodyView class >> shapeState: aShapeState transform: aTransfor
 
 { #category : 'geometry' }
 CFPhysicsCollisionBodyView >> aabb [
-	^ shapeState aabbAt: self position rotation: self rotation
+	^ shapeState aabbAtBodyOrigin: self worldBodyOrigin rotation: self rotation
 ]
 
 { #category : 'accessing' }

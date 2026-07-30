@@ -116,11 +116,6 @@ CFPhysicsShapeState >> sweptAABBAlong: aSweep [
 
 
 { #category : 'geometry - coordinates' }
-CFPhysicsShapeState >> bodyOriginForElementPosition: aPoint [
-	^ aPoint + (self extent / 2.0)
-]
-
-{ #category : 'geometry - coordinates' }
 CFPhysicsShapeState >> elementPositionForBodyOrigin: aPoint [
 	^ aPoint - (self extent / 2.0)
 ]
