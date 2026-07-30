@@ -156,18 +156,8 @@ CFPhysicsBodyStepState >> currentBodyOrigin [
 ]
 
 { #category : 'geometry - coordinates' }
-CFPhysicsBodyStepState >> currentElementPosition [
-	^ self currentBodyOrigin - (shapeState extent / 2.0)
-]
-
-{ #category : 'geometry - coordinates' }
 CFPhysicsBodyStepState >> startBodyOrigin [
 	^ bodyOrigin
-]
-
-{ #category : 'geometry - coordinates' }
-CFPhysicsBodyStepState >> startElementPosition [
-	^ bodyOrigin - (shapeState extent / 2.0)
 ]
 
 { #category : 'geometry - coordinates' }
