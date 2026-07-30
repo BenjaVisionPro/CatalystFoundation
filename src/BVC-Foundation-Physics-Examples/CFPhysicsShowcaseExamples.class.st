@@ -136,8 +136,8 @@ CFPhysicsShowcaseExamples >> joints [
 		fixedJointTo: (fixedPartner physics localAnchorAt: 0 @ 17).
 	fixedBody physics angularVelocity: 0.8.
 
-	host showPhysicsOverlay.
 	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
+		host showPhysicsOverlay.
 		world startStepping ].
 	^ host
 ]
