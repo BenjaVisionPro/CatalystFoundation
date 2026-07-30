@@ -1702,7 +1702,7 @@ CFPhysicsCleanSlateTests >> pointerConstraintReleasePreservesSimulatedVelocityWi
 ]
 
 { #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheGrabOffset [
+CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheBodyLocalGrabPoint [
 	<gtExample>
 	| body constraint timestamp |
 	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
@@ -1711,12 +1711,32 @@ CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheGrabOffset [
 		body: body
 		pointerPosition: 35 @ 42
 		timestamp: timestamp.
-	self assert: constraint grabOffset equals: 15 @ 12.
+	self assert: constraint grabLocalPoint equals: -5 @ -8.
 	constraint updatePointerPosition: 75 @ 62 timestamp: timestamp + 20 milliSeconds.
 	constraint prepareForStep: 0.016.
 	self assert: body velocity x > 0.
 	self assert: body velocity y > 0.
 	self assert: body position equals: 20 @ 30.
+	^ constraint
+]
+
+
+{ #category : 'examples - pointer interaction' }
+CFPhysicsCleanSlateTests >> pointerConstraintTracksTheGrabPointWhenTheBodyRotates [
+	<gtExample>
+	| body constraint timestamp grabPoint |
+	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
+	grabPoint := body worldPointForBodyLocalPoint: 10 @ 0.
+	timestamp := DateAndTime now.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: grabPoint
+		timestamp: timestamp.
+	self assert: constraint grabLocalPoint equals: 10 @ 0.
+	body rotation: Float pi / 2.0.
+	constraint prepareForStep: 0.016.
+	self assert: body velocity x > 0.
+	self assert: body velocity y < 0.
 	^ constraint
 ]
 

@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPointerConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'pointerPosition', 'previousPointerPosition', 'previousTimestamp', 'pointerVelocity', 'grabOffset', 'responsiveness', 'velocityRetention', 'maximumSpeed', 'active' ],
+	#instVars : [ 'body', 'pointerPosition', 'previousPointerPosition', 'previousTimestamp', 'pointerVelocity', 'grabLocalPoint', 'responsiveness', 'velocityRetention', 'maximumSpeed', 'active' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -49,7 +49,7 @@ CFPhysicsPointerConstraint >> beginAt: aPoint timestamp: aDateAndTime [
 	previousPointerPosition := aPoint.
 	previousTimestamp := aDateAndTime ifNil: [ self currentTimestamp ].
 	pointerVelocity := 0 @ 0.
-	grabOffset := aPoint - body position.
+	grabLocalPoint := body bodyLocalPointForWorldPoint: aPoint.
 	active := true.
 	body wake
 ]
@@ -102,9 +102,9 @@ CFPhysicsPointerConstraint >> prepareForStep: seconds [
 
 { #category : 'stepping' }
 CFPhysicsPointerConstraint >> prepareDynamicBodyBy: seconds [
-	| desiredPosition correction desiredVelocity blendedVelocity |
-	desiredPosition := pointerPosition - grabOffset.
-	correction := desiredPosition - body position.
+	| currentGrabPoint correction desiredVelocity blendedVelocity |
+	currentGrabPoint := body worldPointForBodyLocalPoint: grabLocalPoint.
+	correction := pointerPosition - currentGrabPoint.
 	desiredVelocity := (correction * responsiveness) + pointerVelocity.
 	blendedVelocity := (body velocity * velocityRetention)
 		+ (desiredVelocity * (1.0 - velocityRetention)).
@@ -154,7 +154,7 @@ CFPhysicsPointerConstraint >> pointerPosition [ ^ pointerPosition ]
 CFPhysicsPointerConstraint >> pointerVelocity [ ^ pointerVelocity ]
 
 { #category : 'accessing' }
-CFPhysicsPointerConstraint >> grabOffset [ ^ grabOffset ]
+CFPhysicsPointerConstraint >> grabLocalPoint [ ^ grabLocalPoint ]
 
 { #category : 'configuration' }
 CFPhysicsPointerConstraint >> responsiveness [ ^ responsiveness ]
