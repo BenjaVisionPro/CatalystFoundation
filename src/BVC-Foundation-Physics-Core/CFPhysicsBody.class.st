@@ -667,21 +667,6 @@ CFPhysicsBody >> allowsCollisionWith: anotherBody [
 	^ self shapeState allowsCollisionWith: anotherBody shapeState
 ]
 
-{ #category : 'geometry' }
-CFPhysicsBody >> worldPointForLocalPoint: aPoint [
-	^ position + (self shapeState rotateVector: aPoint by: rotation)
-]
-
-{ #category : 'geometry' }
-CFPhysicsBody >> localPointForNormalisedPoint: aPoint [
-	^ (aPoint - (0.5 @ 0.5)) * self extent
-]
-
-{ #category : 'geometry' }
-CFPhysicsBody >> worldPointForNormalisedPoint: aPoint [
-	^ self worldPointForLocalPoint: (self localPointForNormalisedPoint: aPoint)
-]
-
 { #category : 'continuous collision' }
 CFPhysicsBody >> sweep [
 	^ CFPhysicsSweep
