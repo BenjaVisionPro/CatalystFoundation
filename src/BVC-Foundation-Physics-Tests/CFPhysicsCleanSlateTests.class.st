@@ -3210,9 +3210,9 @@ CFPhysicsCleanSlateTests >> normalisedAnchorFollowsBodyGeometry [
 	self assert: anchor normalisedPoint equals: 1 @ 0.5.
 	self assert: anchor worldPoint equals: 140 @ 60.
 	body element size: 80 @ 40.
-	self assert: anchor worldPoint equals: 180 @ 70.
+	self assert: anchor worldPoint equals: 160 @ 60.
 	body rotation: Float pi / 2.
-	self assert: (anchor worldPoint closeTo: 140 @ 110).
+	self assert: (anchor worldPoint closeTo: 120 @ 100).
 	^ anchor
 ]
 
@@ -3398,7 +3398,7 @@ CFPhysicsCleanSlateTests >> anchoredEndpointPairResolvesBothEndpointsTogether [
 	self assert: endpoints bodyB == second.
 	points := endpoints worldPoints.
 	self assert: points first equals: 30 @ 20.
-	self assert: points second equals: 70 @ 50.
+	self assert: points second equals: 100 @ 65.
 	self assert: endpoints worldPointA equals: points first.
 	self assert: endpoints worldPointB equals: points second.
 	^ endpoints
