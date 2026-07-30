@@ -309,8 +309,7 @@ CFPhysicsBodyStepState >> bodyLocalPointForWorldPoint: aPoint [
 
 { #category : 'geometry - coordinates' }
 CFPhysicsBodyStepState >> worldBodyOrigin [
-	"Mirror CFPhysicsBody's body-local frame using captured geometry only."
-	^ position + deltaPosition + (shapeState extent / 2.0)
+	^ self currentBodyOrigin
 ]
 
 { #category : 'geometry - coordinates' }
