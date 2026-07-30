@@ -6800,6 +6800,6 @@ CFPhysicsCleanSlateTests >> collisionBodyViewPreservesBodyOriginAndExposesElemen
 		shapeState: body shapeState
 		transform: transform.
 	self assert: view worldBodyOrigin equals: 120 @ 60.
-	self assert: view position equals: 100 @ 50.
+	self assert: (view shapeState elementPositionForBodyOrigin: view worldBodyOrigin) equals: 100 @ 50.
 	^ view
 ]
