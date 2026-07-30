@@ -555,16 +555,18 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesTheSelectedPhysicalElement [
 ]
 
 { #category : 'examples - physics object selection' }
-CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheSelectedElementIsClickedAgain [
+CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionWhenTheSelectedElementIsClickedAgain [
 	<gtExample>
-	| host overlay element |
+	| host overlay element selectionVisual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
+	selectionVisual := overlay selectionVisual.
 	element fireEvent: BlClickEvent new.
-	self assert: overlay selectedElement isNil.
-	self assert: overlay objectInspector selectedPhysics isNil.
+	self assert: overlay selectedElement == element.
+	self assert: overlay objectInspector selectedPhysics == element existingPhysics.
+	self assert: overlay selectionVisual == selectionVisual.
 	^ overlay
 ]
 
@@ -784,7 +786,7 @@ CFPhysicsOverlayTests >> physicsOverlayMovesTheSelectionHighlight [
 ]
 
 { #category : 'examples - physics object selection' }
-CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
+CFPhysicsOverlayTests >> physicsOverlayClearsSelectionHighlightWhenTheBackgroundIsClicked [
 	<gtExample>
 	| host overlay element |
 	host := self physicsOverlayCanBeInstalled.
@@ -792,7 +794,7 @@ CFPhysicsOverlayTests >> physicsOverlayClearsTheSelectionHighlight [
 	element := host children first.
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectionVisual notNil.
-	element fireEvent: BlClickEvent new.
+	host fireEvent: BlClickEvent new.
 	self assert: overlay selectionVisual isNil.
 	^ overlay
 ]
@@ -968,6 +970,45 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 ]
 
 { #category : 'examples - physics overlay' }
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSpringsAndJoints [
+	<gtExample>
+	| host overlay world first spring joint springVisual jointVisual |
+	host := self physicsOverlayCanBeInstalled.
+	overlay := host existingPhysicsOverlay.
+	world := host physics existingWorld.
+	first := host children first.
+	spring := CFPhysicsSpringConstraint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	world addSpringConstraint: spring.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 240 @ 40).
+	overlay refresh.
+	host space pulse.
+	first fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement == first.
+	self assert: overlay selectedSpring isNil.
+	self assert: overlay selectedJoint isNil.
+	springVisual := overlay springOverlay visuals first.
+	BlSpace simulateClickOn: springVisual hitTarget.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectedSpring == spring.
+	self assert: overlay selectedJoint isNil.
+	jointVisual := overlay jointOverlay visuals first.
+	BlSpace simulateClickOn: jointVisual hitTarget.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectedSpring isNil.
+	self assert: overlay selectedJoint == joint.
+	host fireEvent: BlClickEvent new.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectedSpring isNil.
+	self assert: overlay selectedJoint isNil.
+	self assert: overlay selectionVisual isNil.
+	self assert: overlay objectInspector selectedObject isNil.
+	^ overlay
+]
+
 CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
 	| host world first second spring overlay visual |
