@@ -990,12 +990,12 @@ CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSprin
 	self assert: overlay selectedSpring isNil.
 	self assert: overlay selectedJoint isNil.
 	springVisual := overlay springOverlay visuals first.
-	BlSpace simulateClickOn: springVisual hitTarget.
+	springVisual hitTarget fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement isNil.
 	self assert: overlay selectedSpring == spring.
 	self assert: overlay selectedJoint isNil.
 	jointVisual := overlay jointOverlay visuals first.
-	BlSpace simulateClickOn: jointVisual hitTarget.
+	jointVisual hitTarget fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement isNil.
 	self assert: overlay selectedSpring isNil.
 	self assert: overlay selectedJoint == joint.
