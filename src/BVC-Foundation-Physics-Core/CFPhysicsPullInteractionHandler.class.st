@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsPullInteractionHandler',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'constraint', 'startHandler', 'pullHandler', 'endHandler', 'enabled', 'responsiveness', 'velocityRetention', 'maximumSpeed' ],
+	#instVars : [ 'element', 'constraint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'responsiveness', 'velocityRetention', 'maximumSpeed' ],
 	#category : 'BVC-Foundation-Physics-Core',
 	#package : 'BVC-Foundation-Physics-Core'
 }
@@ -25,6 +25,10 @@ CFPhysicsPullInteractionHandler >> initialize [
 { #category : 'lifecycle' }
 CFPhysicsPullInteractionHandler >> installOn: anElement [
 	element := anElement.
+	dragStartFilter := BlEventHandler on: BlDragStartEvent do: [ :anEvent |
+		self captureInitialPointerPositionFrom: anEvent ].
+	dragFilter := BlEventHandler on: BlDragEvent do: [ :anEvent |
+		self capturePointerPositionFrom: anEvent ].
 	startHandler := BlEventHandler on: BlPullStartEvent do: [ :anEvent |
 		self beginFrom: anEvent ].
 	pullHandler := BlEventHandler on: BlPullEvent do: [ :anEvent |
@@ -32,6 +36,8 @@ CFPhysicsPullInteractionHandler >> installOn: anElement [
 	endHandler := BlEventHandler on: BlPullEndEvent do: [ :anEvent |
 		self endFrom: anEvent ].
 	element
+		addEventFilter: dragStartFilter;
+		addEventFilter: dragFilter;
 		addEventHandler: startHandler;
 		addEventHandler: pullHandler;
 		addEventHandler: endHandler
@@ -47,7 +53,7 @@ CFPhysicsPullInteractionHandler >> beginFrom: anEvent [
 CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
 	constraint
 		ifNil: [ self beginConstraintFrom: anEvent ]
-		ifNotNil: [ constraint updatePointerPosition: anEvent newPosition ].
+		ifNotNil: [ constraint updatePointerPosition: pointerPosition ].
 	constraint ifNil: [ ^ self ].
 	self restorePositionFrom: anEvent
 ]
@@ -56,6 +62,23 @@ CFPhysicsPullInteractionHandler >> continueFrom: anEvent [
 CFPhysicsPullInteractionHandler >> endFrom: anEvent [
 	constraint ifNil: [ ^ self ].
 	self finishConstraint
+]
+
+
+{ #category : 'private' }
+CFPhysicsPullInteractionHandler >> captureInitialPointerPositionFrom: anEvent [
+	initialPointerPosition := self worldPointFromGlobalPoint: anEvent position.
+	pointerPosition := initialPointerPosition
+]
+
+{ #category : 'private' }
+CFPhysicsPullInteractionHandler >> capturePointerPositionFrom: anEvent [
+	pointerPosition := self worldPointFromGlobalPoint: anEvent position
+]
+
+{ #category : 'private' }
+CFPhysicsPullInteractionHandler >> worldPointFromGlobalPoint: aPoint [
+	^ element globalPointToParentChildren: aPoint
 ]
 
 { #category : 'private' }
@@ -71,6 +94,7 @@ CFPhysicsPullInteractionHandler >> restorePositionFrom: anEvent [
 { #category : 'private' }
 CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 	| world body |
+	(initialPointerPosition isNil or: [ pointerPosition isNil ]) ifTrue: [ ^ self ].
 	world := element physics world.
 	world ifNil: [ ^ self ].
 	world synchroniseMembership.
@@ -78,12 +102,12 @@ CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 	(body isNil or: [ body acceptsPointerConstraint not ]) ifTrue: [ ^ self ].
 	constraint := CFPhysicsPointerConstraint
 		body: body
-		pointerPosition: anEvent oldPosition.
+		pointerPosition: initialPointerPosition.
 	constraint
 		responsiveness: responsiveness;
 		velocityRetention: velocityRetention;
 		maximumSpeed: maximumSpeed;
-		movePointerPositionTo: anEvent newPosition.
+		movePointerPositionTo: pointerPosition.
 	world addPointerConstraint: constraint
 ]
 
