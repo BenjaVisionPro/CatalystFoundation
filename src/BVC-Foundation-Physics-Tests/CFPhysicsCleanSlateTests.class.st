@@ -185,7 +185,7 @@ CFPhysicsCleanSlateTests >> polygonWorldAndLocalTransformsRoundTripAroundCentre 
 		+ (shape rotate: localPoint around: shape rotationCentre by: Float pi / 3.0).
 	recoveredPoint := shape
 		localPointForWorldPoint: worldPoint
-		position: 100 @ 50
+		bodyOrigin: 140 @ 65
 		rotation: Float pi / 3.0.
 	self assert: (recoveredPoint closeTo: localPoint).
 	^ shape
