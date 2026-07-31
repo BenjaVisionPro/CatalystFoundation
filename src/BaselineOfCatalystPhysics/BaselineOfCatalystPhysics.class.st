@@ -87,6 +87,6 @@ BaselineOfCatalystPhysics >> defineGroupsOn: spec [
 		'BVC-Physics-Tests-Behaviours'
 		'BVC-Physics-Tests-Mondrian'
 		'BVC-Physics-Tests-Tools').
-	spec group: 'default' with: #('runtime').
-	spec group: 'all' with: #('examples' 'tests')
+	spec group: 'all' with: #('examples' 'tests').
+	spec group: 'default' with: #('all')
 ]
