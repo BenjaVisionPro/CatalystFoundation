@@ -30,17 +30,6 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBo
 		rotation: secondTransform rotation
 ]
 
-{ #category : 'collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA position: positionA rotation: rotationA andShapeState: shapeStateB position: positionB rotation: rotationB [
-	^ self
-		manifoldBetweenShapeState: shapeStateA
-		bodyOrigin: positionA + (shapeStateA extent / 2.0)
-		rotation: rotationA
-		andShapeState: shapeStateB
-		bodyOrigin: positionB + (shapeStateB extent / 2.0)
-		rotation: rotationB
-]
-
 { #category : 'private - collision' }
 CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [

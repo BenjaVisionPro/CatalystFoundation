@@ -6,17 +6,6 @@ Class {
 }
 
 { #category : 'collision' }
-CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA position: positionA rotation: rotationA andShape: shapeB position: positionB rotation: rotationB [
-	^ self
-		manifoldBetweenShape: shapeA
-		bodyOrigin: positionA + shapeA rotationCentre
-		rotation: rotationA
-		andShape: shapeB
-		bodyOrigin: positionB + shapeB rotationCentre
-		rotation: rotationB
-]
-
-{ #category : 'collision' }
 CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin: bodyOriginA rotation: rotationA andShape: shapeB bodyOrigin: bodyOriginB rotation: rotationB [
 	| verticesA normalsA verticesB normalsB separationA separationB referenceIsA referenceShape referenceRotation referenceVertices referenceNormals incidentShape incidentRotation incidentVertices incidentNormals referenceIndex referenceNormal referenceVertex1 referenceVertex2 tangent incidentEdge clipped totalRadius points manifoldNormal penetration |
 	verticesA := shapeA worldVerticesAtBodyOrigin: bodyOriginA rotation: rotationA.

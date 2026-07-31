@@ -97,8 +97,8 @@ CFPhysicsCleanSlateTests >> faceContactProducesTwoPoints [
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
 	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
 	manifold := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
-		andShape: box position: 20 @ 15 rotation: 0.
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (20 @ 15) + box rotationCentre rotation: 0.
 	self assert: manifold notNil.
 	self assert: manifold contactPoints size equals: 2.
 	self assert: manifold normal equals: 0 @ 1.
@@ -117,11 +117,11 @@ CFPhysicsCleanSlateTests >> faceContactIdentityPersistsAcrossTangentialMotion [
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
 	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
 	first := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
-		andShape: box position: 20 @ 15 rotation: 0.
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (20 @ 15) + box rotationCentre rotation: 0.
 	second := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
-		andShape: box position: 21 @ 15 rotation: 0.
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (21 @ 15) + box rotationCentre rotation: 0.
 	firstIds := first contactPoints collect: [ :point | point featureId ].
 	secondIds := second contactPoints collect: [ :point | point featureId ].
 	self assert: firstIds asSet equals: secondIds asSet.
@@ -135,8 +135,8 @@ CFPhysicsCleanSlateTests >> roundedPolygonUsesCoreAndRadius [
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
 	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20 radius: 5.
 	manifold := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: ground position: 0 @ 0 rotation: 0
-		andShape: box position: 20 @ 15 rotation: 0.
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (20 @ 15) + box rotationCentre rotation: 0.
 	self assert: manifold notNil.
 	self assert: manifold contactPoints size equals: 2.
 	manifold contactPoints do: [ :point |
@@ -151,11 +151,11 @@ CFPhysicsCleanSlateTests >> separatedPolygonCoresRespectCombinedRadius [
 	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
 	second := CFPhysicsPolygonShape rectangleExtent: 60 @ 20 radius: 5.
 	touching := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: first position: 0 @ 0 rotation: 0
-		andShape: second position: 20 @ 20 rotation: 0.
+		manifoldBetweenShape: first bodyOrigin: first rotationCentre rotation: 0
+		andShape: second bodyOrigin: (20 @ 20) + second rotationCentre rotation: 0.
 	separated := CFPhysicsPolygonManifoldBuilder
-		manifoldBetweenShape: first position: 0 @ 0 rotation: 0
-		andShape: second position: 20 @ 21 rotation: 0.
+		manifoldBetweenShape: first bodyOrigin: first rotationCentre rotation: 0
+		andShape: second bodyOrigin: (20 @ 21) + second rotationCentre rotation: 0.
 	self assert: touching notNil.
 	self assert: separated isNil.
 	^ touching
@@ -262,8 +262,8 @@ CFPhysicsCleanSlateTests >> BlocGeometryRoutesToPolygonManifold [
 		size: 60 @ 20;
 		yourself).
 	manifold := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: ground position: 0 @ 0 rotation: 0
-		andShapeState: box position: 20 @ 15 rotation: 0.
+		manifoldBetweenShapeState: ground bodyOrigin: (0 @ 0) + (ground extent / 2.0) rotation: 0
+		andShapeState: box bodyOrigin: (20 @ 15) + (box extent / 2.0) rotation: 0.
 	self assert: manifold notNil.
 	self assert: manifold contactPoints size equals: 2.
 	self assert: manifold normal equals: 0 @ 1.
@@ -1556,11 +1556,11 @@ CFPhysicsCleanSlateTests >> overlappingCirclesProducePersistentSinglePointManifo
 		size: 30 @ 30;
 		yourself).
 	firstManifold := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: first position: 0 @ 0 rotation: 0
-		andShapeState: second position: 25 @ 0 rotation: 0.
+		manifoldBetweenShapeState: first bodyOrigin: (0 @ 0) + (first extent / 2.0) rotation: 0
+		andShapeState: second bodyOrigin: (25 @ 0) + (second extent / 2.0) rotation: 0.
 	secondManifold := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: first position: 1 @ 0 rotation: 0
-		andShapeState: second position: 25 @ 0 rotation: 0.
+		manifoldBetweenShapeState: first bodyOrigin: (1 @ 0) + (first extent / 2.0) rotation: 0
+		andShapeState: second bodyOrigin: (25 @ 0) + (second extent / 2.0) rotation: 0.
 	self assert: firstManifold notNil.
 	self assert: firstManifold contactPoints size equals: 1.
 	self assert: firstManifold normal equals: 1 @ 0.
@@ -1576,8 +1576,8 @@ CFPhysicsCleanSlateTests >> separatedCirclesDoNotProduceAManifold [
 	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
 	second := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
 	manifold := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: first position: 0 @ 0 rotation: 0
-		andShapeState: second position: 31 @ 0 rotation: 0.
+		manifoldBetweenShapeState: first bodyOrigin: (0 @ 0) + (first extent / 2.0) rotation: 0
+		andShapeState: second bodyOrigin: (31 @ 0) + (second extent / 2.0) rotation: 0.
 	self assert: manifold isNil.
 	^ manifold
 ]
@@ -1589,8 +1589,8 @@ CFPhysicsCleanSlateTests >> circleAgainstRectangleProducesMixedShapeManifold [
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
 	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
 	manifold := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: circle position: 30 @ 12 rotation: 0
-		andShapeState: rectangle position: 0 @ 20 rotation: 0.
+		manifoldBetweenShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0
+		andShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0.
 	self assert: manifold notNil.
 	self assert: manifold contactPoints size equals: 1.
 	self assert: manifold normal equals: 0 @ 1.
@@ -1607,11 +1607,11 @@ CFPhysicsCleanSlateTests >> mixedShapeOrderingReversesOnlyTheManifoldOrientation
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
 	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
 	circleFirst := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: circle position: 30 @ 12 rotation: 0
-		andShapeState: rectangle position: 0 @ 20 rotation: 0.
+		manifoldBetweenShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0
+		andShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0.
 	polygonFirst := CFPhysicsBlocManifoldBuilder
-		manifoldBetweenShapeState: rectangle position: 0 @ 20 rotation: 0
-		andShapeState: circle position: 30 @ 12 rotation: 0.
+		manifoldBetweenShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0
+		andShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0.
 	self assert: polygonFirst notNil.
 	self assert: polygonFirst normal equals: circleFirst normal negated.
 	self assert: polygonFirst contactPoints first position equals: circleFirst contactPoints first position.
