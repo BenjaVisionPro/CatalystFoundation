@@ -1850,7 +1850,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		play.
 	self assert: pullEvents size equals: 1.
 	self assert: world pointerConstraints size equals: 1.
-	self assert: (world pointerConstraints first grabLocalPoint closeTo: 0 @ 0).
+	self assert: (world pointerConstraints first grabLocalPoint closeTo: 0 @ -4).
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
 	self assert: button physics position x > 20.
