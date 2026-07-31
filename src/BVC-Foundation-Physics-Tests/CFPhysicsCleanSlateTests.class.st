@@ -166,7 +166,7 @@ CFPhysicsCleanSlateTests >> polygonRotationUsesItsCentre [
 	<gtExample>
 	| shape vertices |
 	shape := CFPhysicsPolygonShape rectangleExtent: 80 @ 30.
-	vertices := shape worldVerticesAt: 100 @ 50 rotation: Float pi / 2.0.
+	vertices := shape worldVerticesAtBodyOrigin: 140 @ 65 rotation: Float pi / 2.0.
 	self assert: shape rotationCentre equals: 40.0 @ 15.0.
 	self assert: (vertices first closeTo: 155.0 @ 25.0).
 	self assert: (vertices second closeTo: 155.0 @ 105.0).

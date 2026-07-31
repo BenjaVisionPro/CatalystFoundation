@@ -124,12 +124,6 @@ CFPhysicsPolygonShape >> worldVerticesAtBodyOrigin: aBodyOrigin rotation: anAngl
 ]
 
 { #category : 'geometry' }
-CFPhysicsPolygonShape >> worldVerticesAt: aPosition rotation: anAngle [
-	^ vertices collect: [ :vertex |
-		aPosition + (self rotate: vertex around: rotationCentre by: anAngle) ]
-]
-
-{ #category : 'geometry' }
 CFPhysicsPolygonShape >> worldNormalsAtRotation: anAngle [
 	^ normals collect: [ :normal | self rotate: normal by: anAngle ]
 ]
