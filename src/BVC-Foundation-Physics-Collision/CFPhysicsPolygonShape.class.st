@@ -139,13 +139,6 @@ CFPhysicsPolygonShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin
 	^ rotationCentre + (self rotate: aPoint - aBodyOrigin by: anAngle negated)
 ]
 
-{ #category : 'geometry' }
-CFPhysicsPolygonShape >> localPointForWorldPoint: aPoint position: aPosition rotation: anAngle [
-	^ self
-		rotate: aPoint - aPosition
-		around: rotationCentre
-		by: anAngle negated
-]
 
 { #category : 'geometry' }
 CFPhysicsPolygonShape >> rotate: aPoint by: anAngle [
