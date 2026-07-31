@@ -9,10 +9,10 @@ Class {
 CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBody: bodyA andBody: bodyB [
 	^ self
 		manifoldBetweenShapeState: bodyA shapeState
-		position: bodyA position
+		bodyOrigin: bodyA worldBodyOrigin
 		rotation: bodyA rotation
 		andShapeState: bodyB shapeState
-		position: bodyB position
+		bodyOrigin: bodyB worldBodyOrigin
 		rotation: bodyB rotation
 ]
 
@@ -23,45 +23,56 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBo
 	secondTransform := bodyStateB currentTransform.
 	^ self
 		manifoldBetweenShapeState: bodyStateA shapeState
-		position: (bodyStateA shapeState elementPositionForBodyOrigin: firstTransform bodyOrigin)
+		bodyOrigin: firstTransform bodyOrigin
 		rotation: firstTransform rotation
 		andShapeState: bodyStateB shapeState
-		position: (bodyStateB shapeState elementPositionForBodyOrigin: secondTransform bodyOrigin)
+		bodyOrigin: secondTransform bodyOrigin
 		rotation: secondTransform rotation
 ]
 
 { #category : 'collision' }
 CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA position: positionA rotation: rotationA andShapeState: shapeStateB position: positionB rotation: rotationB [
+	^ self
+		manifoldBetweenShapeState: shapeStateA
+		bodyOrigin: positionA + (shapeStateA extent / 2.0)
+		rotation: rotationA
+		andShapeState: shapeStateB
+		bodyOrigin: positionB + (shapeStateB extent / 2.0)
+		rotation: rotationB
+]
+
+{ #category : 'private - collision' }
+CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
-			position: positionA
+			bodyOrigin: bodyOriginA
 			rotation: rotationA
 			andCircleShapeState: shapeStateB
-			position: positionB
+			bodyOrigin: bodyOriginB
 			rotation: rotationB ].
 	shapeStateA isCircle ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
-			position: positionA
+			bodyOrigin: bodyOriginA
 			rotation: rotationA
 			andPolygonShapeState: shapeStateB
-			position: positionB
+			bodyOrigin: bodyOriginB
 			rotation: rotationB ].
 	shapeStateB isCircle ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenPolygonShapeState: shapeStateA
-			position: positionA
+			bodyOrigin: bodyOriginA
 			rotation: rotationA
 			andCircleShapeState: shapeStateB
-			position: positionB
+			bodyOrigin: bodyOriginB
 			rotation: rotationB ].
 	^ self
 		manifoldBetweenPolygonShapeState: shapeStateA
-		position: positionA
+		position: (shapeStateA elementPositionForBodyOrigin: bodyOriginA)
 		rotation: rotationA
 		andPolygonShapeState: shapeStateB
-		position: positionB
+		position: (shapeStateB elementPositionForBodyOrigin: bodyOriginB)
 		rotation: rotationB
 ]
 

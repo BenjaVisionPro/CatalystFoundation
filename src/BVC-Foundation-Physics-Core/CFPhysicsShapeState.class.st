@@ -215,11 +215,6 @@ CFPhysicsShapeState >> isRectangle [
 ]
 
 { #category : 'convex support' }
-CFPhysicsShapeState >> centreAt: aPosition [
-	^ aPosition + (self extent / 2.0)
-]
-
-{ #category : 'convex support' }
 CFPhysicsShapeState >> supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: aDirection [
 	| direction localDirection localPoint bodyLocalPoint collisionRotation |
 	direction := aDirection r = 0

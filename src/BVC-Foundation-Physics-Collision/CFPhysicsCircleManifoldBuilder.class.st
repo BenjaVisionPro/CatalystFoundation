@@ -6,36 +6,35 @@ Class {
 }
 
 { #category : 'collision' }
-CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA position: positionA rotation: rotationA andCircleShapeState: circleB position: positionB rotation: rotationB [
-	| centreA centreB delta distance radiusSum normal separation worldPoint point |
-	centreA := circleA centreAt: positionA.
-	centreB := circleB centreAt: positionB.
-	delta := centreB - centreA.
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA bodyOrigin: bodyOriginA rotation: rotationA andCircleShapeState: circleB bodyOrigin: bodyOriginB rotation: rotationB [
+	| delta distance radiusSum normal separation worldPoint point |
+	delta := bodyOriginB - bodyOriginA.
 	distance := delta r.
 	radiusSum := circleA radius + circleB radius.
 	distance > radiusSum ifTrue: [ ^ nil ].
 	normal := distance = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ delta / distance ].
 	separation := distance - radiusSum.
-	worldPoint := centreA + (normal * (circleA radius + (separation / 2.0))).
+	worldPoint := bodyOriginA + (normal * (circleA radius + (separation / 2.0))).
 	point := CFPhysicsManifoldPoint at: worldPoint.
 	point
 		separation: separation;
 		featureId: (CFPhysicsContactFeatureId
 			featureA: #circle index: 1
 			featureB: #circle index: 1);
-		localAnchorA: (circleA localPointForWorldPoint: worldPoint position: positionA rotation: rotationA);
-		localAnchorB: (circleB localPointForWorldPoint: worldPoint position: positionB rotation: rotationB).
+		localAnchorA: (circleA localPointForWorldPoint: worldPoint bodyOrigin: bodyOriginA rotation: rotationA);
+		localAnchorB: (circleB localPointForWorldPoint: worldPoint bodyOrigin: bodyOriginB rotation: rotationB).
 	^ (CFPhysicsManifold normal: normal penetration: separation negated)
 		contactPoints: { point };
 		yourself
 ]
 
 { #category : 'collision' }
-CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle position: circlePosition rotation: circleRotation andPolygonShapeState: polygonState position: polygonPosition rotation: polygonRotation [
-	| polygon centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex |
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation [
+	| polygon polygonPosition centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex |
 	polygon := polygonState polygonShape.
 	polygon ifNil: [ ^ nil ].
-	centre := circle centreAt: circlePosition.
+	polygonPosition := polygonState elementPositionForBodyOrigin: polygonBodyOrigin.
+	centre := circleBodyOrigin.
 	vertices := polygon worldVerticesAt: polygonPosition rotation: polygonRotation.
 	normals := polygon worldNormalsAtRotation: polygonRotation.
 	radiusSum := circle radius + polygon radius.
@@ -83,22 +82,22 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle 
 		featureId: (CFPhysicsContactFeatureId
 			featureA: #circle index: 1
 			featureB: polygonFeatureKind index: polygonFeatureIndex);
-		localAnchorA: (circle localPointForWorldPoint: worldPoint position: circlePosition rotation: circleRotation);
-		localAnchorB: (polygon localPointForWorldPoint: worldPoint position: polygonPosition rotation: polygonRotation).
+		localAnchorA: (circle localPointForWorldPoint: worldPoint bodyOrigin: circleBodyOrigin rotation: circleRotation);
+		localAnchorB: (polygonState localPointForWorldPoint: worldPoint bodyOrigin: polygonBodyOrigin rotation: polygonRotation).
 	^ (CFPhysicsManifold normal: normal penetration: separation negated)
 		contactPoints: { point };
 		yourself
 ]
 
 { #category : 'collision' }
-CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygonState position: polygonPosition rotation: polygonRotation andCircleShapeState: circle position: circlePosition rotation: circleRotation [
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation andCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation [
 	| manifold point oldFeature |
 	manifold := self
 		manifoldBetweenCircleShapeState: circle
-		position: circlePosition
+		bodyOrigin: circleBodyOrigin
 		rotation: circleRotation
 		andPolygonShapeState: polygonState
-		position: polygonPosition
+		bodyOrigin: polygonBodyOrigin
 		rotation: polygonRotation.
 	manifold ifNil: [ ^ nil ].
 	manifold normal: manifold normal negated.
@@ -108,8 +107,8 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygo
 		featureId: (CFPhysicsContactFeatureId
 			featureA: oldFeature featureB index: oldFeature indexB
 			featureB: oldFeature featureA index: oldFeature indexA);
-		localAnchorA: (polygonState localPointForWorldPoint: point position position: polygonPosition rotation: polygonRotation);
-		localAnchorB: (circle localPointForWorldPoint: point position position: circlePosition rotation: circleRotation).
+		localAnchorA: (polygonState localPointForWorldPoint: point position bodyOrigin: polygonBodyOrigin rotation: polygonRotation);
+		localAnchorB: (circle localPointForWorldPoint: point position bodyOrigin: circleBodyOrigin rotation: circleRotation).
 	^ manifold
 ]
 
