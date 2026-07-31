@@ -21,7 +21,7 @@ CFPhysicsWorldBackgroundStep class >> on: aPhysicsWorld [
 { #category : 'private - configuration' }
 CFPhysicsWorldBackgroundStep >> futureConfiguration [
 	^ AsyncFutureExecutionConfiguration new
-		customGroup: #Physics
+		customGroup: #'Physics Pipeline'
 ]
 
 { #category : 'accessing' }
@@ -58,7 +58,7 @@ CFPhysicsWorldBackgroundStep >> start [
 	telemetryEnabled ifTrue: [
 		telemetryContext := world telemetryContextForState: state ].
 	task := BlEnqueuedFutureAction new
-		name: 'Physics solve';
+		name: 'Physics Pipeline';
 		action: [ self solveCapturedState ];
 		futureConfiguration: self futureConfiguration;
 		onSuccessEnqueueAction: [ :solution |
@@ -82,6 +82,7 @@ CFPhysicsWorldBackgroundStep >> world: aPhysicsWorld [
 
 { #category : 'private - solving' }
 CFPhysicsWorldBackgroundStep >> solveCapturedState [
+	Processor activeProcess name: 'Physics Pipeline'.
 	telemetryEnabled ifFalse: [ ^ pipeline solve: state ].
 	^ ProcessTelemetry
 		rootTimeSync: [ 'Physics step' ]

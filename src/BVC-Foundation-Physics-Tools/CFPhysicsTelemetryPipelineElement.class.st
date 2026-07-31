@@ -56,6 +56,8 @@ CFPhysicsTelemetryPipelineElement >> build [
 		yourself.
 	graph withAsyncFutureDo: [ :anElementFuture |
 		anElementFuture
+			executionConfiguration: (AsyncFutureExecutionConfiguration new
+				customGroup: #'Physics Telemetry Inspector');
 			cancelSoft;
 			whenSuccess: [ :anElement :analysis | self renderAnalysis: analysis ];
 			whenError: [ :anElement :anError |
@@ -75,6 +77,7 @@ CFPhysicsTelemetryPipelineElement >> updateGraph [
 	world telemetryAnalysisInBackground
 		ifTrue: [
 			graph asyncFuture future: [
+				Processor activeProcess name: 'Physics Telemetry Inspector'.
 				CFPhysicsTelemetryAnalysis
 					recordings: recordings
 					windowSeconds: windowSeconds ] asAsyncFuture ]

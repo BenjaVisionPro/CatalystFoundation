@@ -82,103 +82,59 @@ CFPhysicsShowcaseExamples >> randomPositionFor: aButton in: aHost using: aRandom
 CFPhysicsShowcaseExamples >> joints [
 	<gtExample>
 	<return: #BlElement>
-	| host world crank slider hammer pendulum payload crankJoint connectingJoint railJoint pendulumJoint payloadJoint |
+	| host world distanceBody revoluteBody railBody fixedBody fixedPartner distanceJoint revoluteJoint railJoint |
 	host := BlElement new
-		size: 900 @ 500;
+		size: 760 @ 420;
 		background: Color veryVeryLightGray;
-		constraintsDo: [ :constraints | constraints minHeight: 380 ];
+		constraintsDo: [ :constraints | constraints minHeight: 320 ];
 		yourself.
 	world := host physics beWorld.
 	world
-		gravity: 0 @ 180;
+		gravity: 0 @ 240;
 		contactHertz: 120.0;
 		contactDampingRatio: 1.0.
 
-	"A motorised crank drives a slider through a distance joint."
-	crank := self
-		jointShowcaseBodyWithExtent: 110 @ 18
-		color: Color orange muchLighter.
-	slider := self
-		jointShowcaseBodyWithExtent: 70 @ 34
-		color: Color green muchLighter.
-
-	"The fixed partner extends the slider into a hammer without merging bodies."
-	hammer := self
-		jointShowcaseBodyWithExtent: 70 @ 34
-		color: Color purple muchLighter.
-
-	"The hammer strikes a limited pendulum, which transfers motion onwards."
-	pendulum := self
-		jointShowcaseBodyWithExtent: 120 @ 20
-		color: Color blue muchLighter.
-	payload := self
-		jointShowcaseBodyWithExtent: 50 @ 30
-		color: Color yellow muchLighter.
-
+	distanceBody := self jointShowcaseBodyWithExtent: 64 @ 34 color: Color blue muchLighter.
+	revoluteBody := self jointShowcaseBodyWithExtent: 82 @ 24 color: Color orange muchLighter.
+	railBody := self jointShowcaseBodyWithExtent: 62 @ 34 color: Color green muchLighter.
+	fixedBody := self jointShowcaseBodyWithExtent: 54 @ 34 color: Color purple muchLighter.
+	fixedPartner := self jointShowcaseBodyWithExtent: 54 @ 34 color: Color purple muchLighter.
 	host addChildren: {
-		crank.
-		slider.
-		hammer.
-		pendulum.
-		payload }.
+		distanceBody.
+		revoluteBody.
+		railBody.
+		fixedBody.
+		fixedPartner }.
 	world synchroniseMembership.
 
-	crank physics
-		position: 100 @ 111;
-		friction: 0.25;
-		restitution: 0.15.
-	slider physics
-		position: 320 @ 203;
-		friction: 0.35;
-		restitution: 0.1.
-	hammer physics
-		position: 390 @ 203;
-		friction: 0.25;
-		restitution: 0.55.
-	pendulum physics
-		position: 560 @ 110;
-		friction: 0.2;
-		restitution: 0.45.
-	payload physics
-		position: 690 @ 220;
-		friction: 0.25;
-		restitution: 0.35.
+	distanceBody physics position: 72 @ 118.
+	revoluteBody physics position: 225 @ 112.
+	railBody physics position: 390 @ 170.
+	fixedBody physics position: 555 @ 115.
+	fixedPartner physics position: 625 @ 160.
 
-	crankJoint := (crank physics localAnchorAt: 10 @ 9)
-		revoluteJointTo: (world anchorAt: 110 @ 120).
-	crankJoint
-		motorEnabled: true;
-		motorSpeed: 1.8;
-		maximumMotorImpulse: 1800.0.
+	distanceJoint := (distanceBody physics localAnchorAt: 32 @ 0)
+		distanceJointTo: (world anchorAt: 104 @ 54).
+	distanceJoint restLength: 82.
 
-	connectingJoint := (crank physics localAnchorAt: 100 @ 9)
-		distanceJointTo: (slider physics localAnchorAt: 0 @ 17).
-	connectingJoint restLength: 156.0.
+	revoluteJoint := (revoluteBody physics localAnchorAt: 12 @ 12)
+		revoluteJointTo: (world anchorAt: 237 @ 124).
+	revoluteJoint
+		limitsEnabled: true;
+		limitAnglesFrom: Float pi negated / 2.0 to: Float pi / 2.0.
+	revoluteBody physics angularVelocity: 1.5.
 
-	railJoint := (slider physics localAnchorAt: 35 @ 17)
-		railJointTo: (world anchorAt: 355 @ 220)
+	railJoint := (railBody physics localAnchorAt: 31 @ 17)
+		railJointTo: (world anchorAt: 421 @ 187)
 		along: 1 @ 0.
 	railJoint
 		limitsEnabled: true;
-		limitTranslationFrom: -80 to: 120.
+		limitTranslationFrom: -90 to: 90.
+	railBody physics velocity: 90 @ 0.
 
-	(slider physics localAnchorAt: 70 @ 17)
-		fixedJointTo: (hammer physics localAnchorAt: 0 @ 17).
-
-	pendulumJoint := (pendulum physics localAnchorAt: 10 @ 10)
-		revoluteJointTo: (world anchorAt: 570 @ 120).
-	pendulumJoint
-		limitsEnabled: true;
-		limitAnglesFrom: Float pi negated / 2.0 to: Float pi / 2.0.
-
-	payloadJoint := (payload physics localAnchorAt: 25 @ 0)
-		distanceJointTo: (world anchorAt: 715 @ 90).
-	payloadJoint restLength: 145.0.
-
-	{ crank. slider. hammer. pendulum. payload } do: [ :each |
-		| containment |
-		containment := each physics containWithinWorld.
-		containment restitution: 0.4 ].
+	(fixedBody physics localAnchorAt: 54 @ 17)
+		fixedJointTo: (fixedPartner physics localAnchorAt: 0 @ 17).
+	fixedBody physics angularVelocity: 0.8.
 
 	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
 		host showPhysicsOverlay.

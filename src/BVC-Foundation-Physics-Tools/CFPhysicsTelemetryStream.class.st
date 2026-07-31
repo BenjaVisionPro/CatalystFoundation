@@ -52,6 +52,7 @@ CFPhysicsTelemetryStream >> onTelemetryChanged: anAnnouncement [
 { #category : 'api - stream' }
 CFPhysicsTelemetryStream >> pollNext: anAsynchronousContext [
 	<return: #AsyncPoll>
+	Processor activeProcess name: 'Physics Telemetry'.
 	^ updates lock: [ :pendingUpdates |
 		pendingUpdates
 			ifEmpty: [
