@@ -3756,7 +3756,9 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 		beginStep;
 		addAngularVelocity: Float pi / 2.0;
 		advanceBy: 1.0 gravity: 0 @ 0.
-	previousBounds := body shapeState aabbAt: body previousPosition rotation: body previousRotation.
+	previousBounds := body shapeState
+		aabbAtBodyOrigin: body sweep startTransform bodyOrigin
+		rotation: body previousRotation.
 	currentBounds := body aabb.
 	bounds := body sweptAABB.
 	self assert: (bounds overlaps: previousBounds).
@@ -4039,9 +4041,9 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	predictedEndBounds := moving shapeState
-		aabbAt: 100 @ 0
+		aabbAtBodyOrigin: 105 @ 5
 		rotation: moving rotation.
-	self assert: ((moving shapeState aabbAt: 0 @ 0 rotation: 0.0) overlaps: obstacle aabb) not.
+	self assert: ((moving shapeState aabbAtBodyOrigin: 5 @ 5 rotation: 0.0) overlaps: obstacle aabb) not.
 	self assert: (predictedEndBounds overlaps: obstacle aabb) not.
 	self assert: result pairs isEmpty.
 	self assert: result activeContacts isEmpty.

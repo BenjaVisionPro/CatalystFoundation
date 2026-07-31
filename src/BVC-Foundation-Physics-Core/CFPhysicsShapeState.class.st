@@ -57,23 +57,6 @@ CFPhysicsShapeState >> captureGeometry [
 
 
 { #category : 'collision' }
-CFPhysicsShapeState >> aabbAt: aPosition [
-	^ self aabbAt: aPosition rotation: 0
-]
-
-{ #category : 'collision' }
-CFPhysicsShapeState >> aabbAt: aPosition rotation: anAngle [
-	| left right top bottom minimum maximum |
-	left := self supportPointAt: aPosition rotation: anAngle inDirection: -1 @ 0.
-	right := self supportPointAt: aPosition rotation: anAngle inDirection: 1 @ 0.
-	top := self supportPointAt: aPosition rotation: anAngle inDirection: 0 @ -1.
-	bottom := self supportPointAt: aPosition rotation: anAngle inDirection: 0 @ 1.
-	minimum := left x @ top y.
-	maximum := right x @ bottom y.
-	^ CFPhysicsAABB position: minimum extent: maximum - minimum
-]
-
-{ #category : 'collision' }
 CFPhysicsShapeState >> aabbAtBodyOrigin: aPoint rotation: anAngle [
 	| left right top bottom minimum maximum |
 	left := self supportPointAtBodyOrigin: aPoint rotation: anAngle inDirection: -1 @ 0.
