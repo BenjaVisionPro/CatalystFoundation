@@ -26,7 +26,7 @@ BaselineOfCatalystPhysics >> defineDependenciesOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystPhysics >> definePackagesOn: spec [
-	"Foundation dependencies remain here temporarily until Motion and the GT support packages are migrated."
+	"Foundation dependencies remain temporary until Motion and GT support migrate."
 	spec package: 'BVC-Foundation-Core'.
 	spec package: 'BVC-Foundation-Magritte-Core'
 		with: [ spec requires: #('BVC-Foundation-Core') ].
@@ -34,15 +34,22 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
 	spec package: 'BVC-Foundation-Motion-Core'.
 
-	spec package: 'BVC-Physics-Collision'.
+	spec package: 'BVC-Physics-Model'.
+	spec package: 'BVC-Physics-Collision'
+		with: [ spec requires: #('BVC-Physics-Model') ].
+	spec package: 'BVC-Physics-Pipeline'
+		with: [ spec requires: #('BVC-Physics-Model' 'BVC-Physics-Collision') ].
+	spec package: 'BVC-Physics-Bloc'
+		with: [ spec requires: #('BVC-Physics-Model' 'BVC-Physics-Collision') ].
 	spec package: 'BVC-Physics-Core'
-		with: [ spec requires: #('BVC-Physics-Collision' 'Telemetry') ].
+		with: [ spec requires: #(
+			'BVC-Physics-Model'
+			'BVC-Physics-Collision'
+			'BVC-Physics-Pipeline'
+			'BVC-Physics-Bloc'
+			'Telemetry') ].
 	spec package: 'BVC-Physics-Behaviours'
 		with: [ spec requires: #('BVC-Physics-Core') ].
-	spec package: 'BVC-Physics-Pipeline'
-		with: [ spec requires: #('BVC-Physics-Collision' 'BVC-Physics-Core') ].
-	spec package: 'BVC-Physics-Bloc'
-		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Collision') ].
 	spec package: 'BVC-Physics-Motion'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Physics-Core') ].
 	spec package: 'BVC-Physics-Tools'
@@ -53,7 +60,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Motion' 'BVC-Physics-Mondrian' 'BVC-Physics-Tools') ].
 
 	spec package: 'BVC-Physics-Tests-Core'
-		with: [ spec requires: #('BVC-Physics-Pipeline' 'BVC-Physics-Bloc' 'BVC-Physics-Motion' 'BVC-Physics-Tools') ].
+		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Pipeline' 'BVC-Physics-Bloc' 'BVC-Physics-Motion' 'BVC-Physics-Tools') ].
 	spec package: 'BVC-Physics-Tests-Behaviours'
 		with: [ spec requires: #('BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion') ].
 	spec package: 'BVC-Physics-Tests-Mondrian'
@@ -64,15 +71,14 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystPhysics >> defineGroupsOn: spec [
+	spec group: 'model' with: #('BVC-Physics-Model' 'BVC-Physics-Collision').
 	spec group: 'core' with: #(
-		'BVC-Physics-Collision'
-		'BVC-Physics-Core'
-		'BVC-Physics-Behaviours').
-	spec group: 'runtime' with: #(
-		'core'
+		'model'
 		'BVC-Physics-Pipeline'
 		'BVC-Physics-Bloc'
-		'BVC-Physics-Motion').
+		'BVC-Physics-Core'
+		'BVC-Physics-Behaviours').
+	spec group: 'runtime' with: #('core' 'BVC-Physics-Motion').
 	spec group: 'tools' with: #('runtime' 'BVC-Physics-Tools').
 	spec group: 'mondrian' with: #('tools' 'BVC-Physics-Mondrian').
 	spec group: 'examples' with: #('mondrian' 'BVC-Physics-Examples').
