@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsNearestGeometryEndpointPair',
 	#superclass : 'CFPhysicsEndpointPair',
 	#instVars : [ 'bodyA', 'bodyB' ],
-	#category : 'BVC-Physics-Model',
-	#package : 'BVC-Physics-Model'
+	#category : 'BVC-Physics-Collision',
+	#package : 'BVC-Physics-Collision'
 }
 
 { #category : 'instance creation' }

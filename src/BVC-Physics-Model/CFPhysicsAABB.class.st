@@ -2,8 +2,8 @@ Class {
 	#name : 'CFPhysicsAABB',
 	#superclass : 'Object',
 	#instVars : [ 'minimum', 'maximum' ],
-	#category : 'BVC-Physics-Collision',
-	#package : 'BVC-Physics-Collision'
+	#category : 'BVC-Physics-Model',
+	#package : 'BVC-Physics-Model'
 }
 
 { #category : 'instance creation' }
