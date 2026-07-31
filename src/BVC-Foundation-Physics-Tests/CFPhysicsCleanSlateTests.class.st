@@ -6791,7 +6791,7 @@ CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransf
 
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> collisionBodyViewPreservesBodyOriginAndExposesElementPosition [
+CFPhysicsCleanSlateTests >> collisionBodyViewPreservesBodyOrigin [
 	<gtExample>
 	| body transform view |
 	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
@@ -6802,6 +6802,6 @@ CFPhysicsCleanSlateTests >> collisionBodyViewPreservesBodyOriginAndExposesElemen
 		shapeState: body shapeState
 		transform: transform.
 	self assert: view worldBodyOrigin equals: 120 @ 60.
-	self assert: (view shapeState elementPositionForBodyOrigin: view worldBodyOrigin) equals: 100 @ 50.
+	self assert: view rotation equals: body rotation.
 	^ view
 ]

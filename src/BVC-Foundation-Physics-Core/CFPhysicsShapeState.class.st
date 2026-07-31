@@ -92,12 +92,6 @@ CFPhysicsShapeState >> sweptAABBAlong: aSweep [
 	^ CFPhysicsAABB position: minimum extent: maximum - minimum
 ]
 
-
-{ #category : 'geometry - coordinates' }
-CFPhysicsShapeState >> elementPositionForBodyOrigin: aPoint [
-	^ aPoint - (self extent / 2.0)
-]
-
 { #category : 'accessing' }
 CFPhysicsShapeState >> element [
 	^ element
