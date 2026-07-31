@@ -1,0 +1,18 @@
+Class {
+	#name : 'CFPhysicsMondrianEdgeBuilder',
+	#superclass : 'GtMondrianEdgeBuilder',
+	#category : 'BVC-Physics-Mondrian',
+	#package : 'BVC-Physics-Mondrian'
+}
+
+{ #category : 'scripting' }
+CFPhysicsMondrianEdgeBuilder >> connect: aCollection from: aFromBlock to: aToBlock [
+	| edges |
+	edges := super
+		connect: aCollection
+		from: aFromBlock
+		to: aToBlock.
+	edges do: [ :each |
+		mondrian physics preparePhysicsPresentationOf: each ].
+	^ edges
+]

@@ -1,0 +1,41 @@
+Class {
+	#name : 'CFPhysicsWorldAnchor',
+	#superclass : 'CFPhysicsAnchor',
+	#instVars : [ 'world', 'point' ],
+	#category : 'BVC-Physics-Core',
+	#package : 'BVC-Physics-Core'
+}
+
+{ #category : 'instance creation' }
+CFPhysicsWorldAnchor class >> in: aWorld at: aPoint [
+	^ self new
+		world: aWorld;
+		point: aPoint;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldAnchor >> point [
+	^ point
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldAnchor >> point: aPoint [
+	point := aPoint.
+	world ifNotNil: [ world wakeJointsUsingAnchor: self ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldAnchor >> world [
+	^ world
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorldAnchor >> world: aWorld [
+	world := aWorld
+]
+
+{ #category : 'geometry' }
+CFPhysicsWorldAnchor >> worldPoint [
+	^ point
+]

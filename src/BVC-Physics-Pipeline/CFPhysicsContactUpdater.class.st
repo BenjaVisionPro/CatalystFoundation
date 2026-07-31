@@ -1,0 +1,201 @@
+Class {
+	#name : 'CFPhysicsContactUpdater',
+	#superclass : 'Object',
+	#instVars : [ 'manifoldBuilder' ],
+	#category : 'BVC-Physics-Pipeline',
+	#package : 'BVC-Physics-Pipeline'
+}
+
+{ #category : 'instance creation' }
+CFPhysicsContactUpdater class >> manifoldBuilder: aBlock [
+	^ self new manifoldBuilder: aBlock; yourself
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdater >> manifoldBuilder: aBlock [ manifoldBuilder := aBlock ]
+
+
+{ #category : 'private - collision' }
+CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates [
+	manifoldBuilder numArgs = 2 ifTrue: [
+		^ manifoldBuilder
+			value: (bodyStates at: pair firstBody)
+			value: (bodyStates at: pair secondBody) ].
+	^ manifoldBuilder value: pair
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
+	| previousByKey active began continued ended orderedPairs |
+	previousByKey := Dictionary new.
+	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
+	active := OrderedCollection new.
+	began := OrderedCollection new.
+	continued := OrderedCollection new.
+	ended := OrderedCollection new.
+	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
+	orderedPairs do: [ :pair |
+		| manifold contact previous |
+		manifold := manifoldBuilder value: pair.
+		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		manifold ifNotNil: [
+			contact := previous
+				ifNil: [ CFPhysicsContact pair: pair manifold: manifold ]
+				ifNotNil: [ previous copyForUpdate updateWith: manifold; yourself ].
+			active add: contact.
+			contact began ifTrue: [ began add: contact ].
+			contact continued ifTrue: [ continued add: contact ] ] ].
+	previousByKey valuesDo: [ :previous |
+		| endedContact |
+		endedContact := previous copyForUpdate.
+		endedContact updateWith: nil.
+		ended add: endedContact ].
+	ended := ended asArray sorted: [ :left :right | left pair comesBefore: right pair ].
+	^ CFPhysicsContactUpdateBatch
+		active: active
+		began: began
+		continued: continued
+		ended: ended
+]
+
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updateImpactContact: impactContact fromContacts: previousContacts [
+	| previousByKey active began continued ended contact previous |
+	previousByKey := Dictionary new.
+	previousContacts do: [ :each | previousByKey at: each key put: each ].
+	active := OrderedCollection new.
+	began := OrderedCollection new.
+	continued := OrderedCollection new.
+	ended := OrderedCollection new.
+	contact := impactContact.
+	contact ifNotNil: [
+		previous := previousByKey removeKey: contact key ifAbsent: [ nil ].
+		contact := previous
+			ifNil: [ contact ]
+			ifNotNil: [ previous copyForUpdate updateWith: contact manifold; yourself ].
+		active add: contact.
+		contact began ifTrue: [ began add: contact ].
+		contact continued ifTrue: [ continued add: contact ] ].
+	previousByKey valuesDo: [ :each |
+		| endedContact |
+		endedContact := each copyForUpdate.
+		endedContact updateWith: nil.
+		ended add: endedContact ].
+	ended := ended asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ].
+	^ CFPhysicsContactUpdateBatch
+		active: active
+		began: began
+		continued: continued
+		ended: ended
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updateImpactContacts: impactContacts fromContacts: previousContacts [
+	| previousByKey active began continued ended contactsByKey orderedContacts |
+	previousByKey := Dictionary new.
+	previousContacts do: [ :each | previousByKey at: each key put: each ].
+	contactsByKey := Dictionary new.
+	impactContacts do: [ :each |
+		each ifNotNil: [ contactsByKey at: each key put: each ] ].
+	orderedContacts := contactsByKey values asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ].
+	active := OrderedCollection new.
+	began := OrderedCollection new.
+	continued := OrderedCollection new.
+	ended := OrderedCollection new.
+	orderedContacts do: [ :impactContact |
+		| contact previous |
+		previous := previousByKey removeKey: impactContact key ifAbsent: [ nil ].
+		contact := previous
+			ifNil: [ impactContact ]
+			ifNotNil: [ previous copyForUpdate updateWith: impactContact manifold; yourself ].
+		active add: contact.
+		contact began ifTrue: [ began add: contact ].
+		contact continued ifTrue: [ continued add: contact ] ].
+	previousByKey valuesDo: [ :each |
+		| endedContact |
+		endedContact := each copyForUpdate.
+		endedContact updateWith: nil.
+		ended add: endedContact ].
+	ended := ended asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ].
+	^ CFPhysicsContactUpdateBatch
+		active: active
+		began: began
+		continued: continued
+		ended: ended
+]
+
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts [
+	^ self
+		updatePairs: pairs
+		includingImpactContacts: impactContacts
+		fromContacts: previousContacts
+		bodyStates: nil
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts bodyStates: bodyStates [
+	^ self
+		updatePairs: pairs
+		includingImpactContacts: impactContacts
+		fromContacts: previousContacts
+		reusingContacts: #()
+		bodyStates: bodyStates
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates [
+	| previousByKey reusableByKey active began continued ended impactByKey orderedPairs |
+	previousByKey := Dictionary new.
+	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
+	reusableByKey := Dictionary new.
+	reusableContacts do: [ :contact | reusableByKey at: contact key put: contact ].
+	impactByKey := Dictionary new.
+	impactContacts do: [ :contact |
+		contact ifNotNil: [ impactByKey at: contact key put: contact ] ].
+	active := OrderedCollection new.
+	began := OrderedCollection new.
+	continued := OrderedCollection new.
+	ended := OrderedCollection new.
+	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
+	orderedPairs do: [ :pair |
+		| manifold impactContact contact previous |
+		manifold := self manifoldForPair: pair bodyStates: bodyStates.
+		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
+		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
+			manifold := impactContact manifold ].
+		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		manifold ifNotNil: [
+			contact := reusableByKey
+				removeKey: pair key
+				ifAbsent: [
+					impactContact
+						ifNil: [ CFPhysicsContact pair: pair manifold: nil ]
+						ifNotNil: [ impactContact ] ].
+			contact pair: pair.
+		bodyStates ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
+			contact updateFromPreviousContact: previous with: manifold.
+			active add: contact.
+			contact began ifTrue: [ began add: contact ].
+			contact continued ifTrue: [ continued add: contact ] ] ].
+	previousByKey valuesDo: [ :previous |
+		| endedContact |
+		endedContact := reusableByKey
+			removeKey: previous key
+			ifAbsent: [ CFPhysicsContact pair: previous pair manifold: nil ].
+		endedContact pair: previous pair.
+		endedContact updateFromPreviousContact: previous with: nil.
+		ended add: endedContact ].
+	ended := ended asArray sorted: [ :left :right |
+		left pair comesBefore: right pair ].
+	^ CFPhysicsContactUpdateBatch
+		active: active
+		began: began
+		continued: continued
+		ended: ended
+]
