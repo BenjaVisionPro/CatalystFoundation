@@ -230,18 +230,6 @@ CFPhysicsShapeState >> localSupportPointInDirection: direction [
 ]
 
 { #category : 'geometry' }
-CFPhysicsShapeState >> rotate: aPoint around: aCentre by: anAngle [
-	| translated cosine sine |
-	anAngle = 0 ifTrue: [ ^ aPoint ].
-	translated := aPoint - aCentre.
-	cosine := anAngle cos.
-	sine := anAngle sin.
-	^ aCentre +
-		(((translated x * cosine) - (translated y * sine))
-		@ ((translated x * sine) + (translated y * cosine)))
-]
-
-{ #category : 'geometry' }
 CFPhysicsShapeState >> rotateVector: aPoint by: anAngle [
 	| cosine sine |
 	anAngle = 0 ifTrue: [ ^ aPoint ].
