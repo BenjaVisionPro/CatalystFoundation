@@ -169,15 +169,6 @@ CFPhysicsShapeState >> collisionVerticesAtBodyOrigin: aPoint rotation: anAngle [
 ]
 
 { #category : 'polygon' }
-CFPhysicsShapeState >> collisionVerticesAt: aPosition rotation: anAngle [
-	| centre collisionRotation |
-	centre := self extent / 2.0.
-	collisionRotation := self collisionRotationFor: anAngle.
-	^ self localCollisionVertices collect: [ :each |
-		aPosition + (self rotate: each around: centre by: collisionRotation) ]
-]
-
-{ #category : 'polygon' }
 CFPhysicsShapeState >> localCollisionVertices [
 	| geometry anExtent |
 	capturedVertices ifNotNil: [ ^ capturedVertices ].
@@ -226,21 +217,6 @@ CFPhysicsShapeState >> isRectangle [
 { #category : 'convex support' }
 CFPhysicsShapeState >> centreAt: aPosition [
 	^ aPosition + (self extent / 2.0)
-]
-
-{ #category : 'convex support' }
-CFPhysicsShapeState >> supportPointAt: aPosition rotation: anAngle inDirection: aDirection [
-	| direction localDirection localPoint centre collisionRotation |
-	direction := aDirection r = 0
-		ifTrue: [ 1 @ 0 ]
-		ifFalse: [ aDirection / aDirection r ].
-	self isCircle ifTrue: [
-		^ (self centreAt: aPosition) + (direction * self radius) ].
-	collisionRotation := self collisionRotationFor: anAngle.
-	localDirection := self rotateVector: direction by: collisionRotation negated.
-	localPoint := self localSupportPointInDirection: localDirection.
-	centre := self extent / 2.0.
-	^ aPosition + (self rotate: localPoint around: centre by: collisionRotation)
 ]
 
 { #category : 'convex support' }
