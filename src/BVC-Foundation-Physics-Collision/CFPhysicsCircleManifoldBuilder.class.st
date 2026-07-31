@@ -30,12 +30,11 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA
 
 { #category : 'collision' }
 CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation [
-	| polygon polygonPosition centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex |
+	| polygon centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex |
 	polygon := polygonState polygonShape.
 	polygon ifNil: [ ^ nil ].
-	polygonPosition := polygonState elementPositionForBodyOrigin: polygonBodyOrigin.
 	centre := circleBodyOrigin.
-	vertices := polygon worldVerticesAt: polygonPosition rotation: polygonRotation.
+	vertices := polygon worldVerticesAtBodyOrigin: polygonBodyOrigin rotation: polygonRotation.
 	normals := polygon worldNormalsAtRotation: polygonRotation.
 	radiusSum := circle radius + polygon radius.
 	faceIndex := 1.

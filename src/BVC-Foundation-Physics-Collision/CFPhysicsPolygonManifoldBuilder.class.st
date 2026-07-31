@@ -7,10 +7,21 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA position: positionA rotation: rotationA andShape: shapeB position: positionB rotation: rotationB [
-	| verticesA normalsA verticesB normalsB separationA separationB referenceIsA referenceShape referencePosition referenceRotation referenceVertices referenceNormals incidentShape incidentPosition incidentRotation incidentVertices incidentNormals referenceIndex referenceNormal referenceVertex1 referenceVertex2 tangent incidentEdge clipped totalRadius points manifoldNormal penetration |
-	verticesA := shapeA worldVerticesAt: positionA rotation: rotationA.
+	^ self
+		manifoldBetweenShape: shapeA
+		bodyOrigin: positionA + shapeA rotationCentre
+		rotation: rotationA
+		andShape: shapeB
+		bodyOrigin: positionB + shapeB rotationCentre
+		rotation: rotationB
+]
+
+{ #category : 'collision' }
+CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin: bodyOriginA rotation: rotationA andShape: shapeB bodyOrigin: bodyOriginB rotation: rotationB [
+	| verticesA normalsA verticesB normalsB separationA separationB referenceIsA referenceShape referenceRotation referenceVertices referenceNormals incidentShape incidentRotation incidentVertices incidentNormals referenceIndex referenceNormal referenceVertex1 referenceVertex2 tangent incidentEdge clipped totalRadius points manifoldNormal penetration |
+	verticesA := shapeA worldVerticesAtBodyOrigin: bodyOriginA rotation: rotationA.
 	normalsA := shapeA worldNormalsAtRotation: rotationA.
-	verticesB := shapeB worldVerticesAt: positionB rotation: rotationB.
+	verticesB := shapeB worldVerticesAtBodyOrigin: bodyOriginB rotation: rotationB.
 	normalsB := shapeB worldNormalsAtRotation: rotationB.
 	totalRadius := shapeA radius + shapeB radius.
 
@@ -23,24 +34,20 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA position: 
 	referenceIsA
 		ifTrue: [
 			referenceShape := shapeA.
-			referencePosition := positionA.
 			referenceRotation := rotationA.
 			referenceVertices := verticesA.
 			referenceNormals := normalsA.
 			incidentShape := shapeB.
-			incidentPosition := positionB.
 			incidentRotation := rotationB.
 			incidentVertices := verticesB.
 			incidentNormals := normalsB.
 			referenceIndex := separationA first ]
 		ifFalse: [
 			referenceShape := shapeB.
-			referencePosition := positionB.
 			referenceRotation := rotationB.
 			referenceVertices := verticesB.
 			referenceNormals := normalsB.
 			incidentShape := shapeA.
-			incidentPosition := positionA.
 			incidentRotation := rotationA.
 			incidentVertices := verticesA.
 			incidentNormals := normalsA.
@@ -76,8 +83,8 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA position: 
 			point
 				separation: separation;
 				featureId: featureId;
-				localAnchorA: (shapeA localPointForWorldPoint: worldPoint position: positionA rotation: rotationA);
-				localAnchorB: (shapeB localPointForWorldPoint: worldPoint position: positionB rotation: rotationB).
+				localAnchorA: (shapeA localPointForWorldPoint: worldPoint bodyOrigin: bodyOriginA rotation: rotationA);
+				localAnchorB: (shapeB localPointForWorldPoint: worldPoint bodyOrigin: bodyOriginB rotation: rotationB).
 			points add: point ] ].
 	points isEmpty ifTrue: [ ^ nil ].
 	manifoldNormal := referenceIsA ifTrue: [ referenceNormal ] ifFalse: [ referenceNormal negated ].
@@ -86,7 +93,6 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA position: 
 		contactPoints: points;
 		yourself
 ]
-
 { #category : 'private' }
 CFPhysicsPolygonManifoldBuilder class >> maximumSeparationOf: referenceVertices normals: referenceNormals from: incidentVertices [
 	| bestIndex bestSeparation |

@@ -69,24 +69,24 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA bod
 			rotation: rotationB ].
 	^ self
 		manifoldBetweenPolygonShapeState: shapeStateA
-		position: (shapeStateA elementPositionForBodyOrigin: bodyOriginA)
+		bodyOrigin: bodyOriginA
 		rotation: rotationA
 		andPolygonShapeState: shapeStateB
-		position: (shapeStateB elementPositionForBodyOrigin: bodyOriginB)
+		bodyOrigin: bodyOriginB
 		rotation: rotationB
 ]
 
 { #category : 'private - collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenPolygonShapeState: shapeStateA position: positionA rotation: rotationA andPolygonShapeState: shapeStateB position: positionB rotation: rotationB [
+CFPhysicsBlocManifoldBuilder class >> manifoldBetweenPolygonShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andPolygonShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	| shapeA shapeB |
 	shapeA := shapeStateA polygonShape.
 	shapeB := shapeStateB polygonShape.
 	(shapeA isNil or: [ shapeB isNil ]) ifTrue: [ ^ nil ].
 	^ CFPhysicsPolygonManifoldBuilder
 		manifoldBetweenShape: shapeA
-		position: positionA
+		bodyOrigin: bodyOriginA
 		rotation: rotationA
 		andShape: shapeB
-		position: positionB
+		bodyOrigin: bodyOriginB
 		rotation: rotationB
 ]

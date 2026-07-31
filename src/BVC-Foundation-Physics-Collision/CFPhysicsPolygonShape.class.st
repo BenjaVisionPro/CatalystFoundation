@@ -118,6 +118,12 @@ CFPhysicsPolygonShape >> inferredRotationCentre [
 ]
 
 { #category : 'geometry' }
+CFPhysicsPolygonShape >> worldVerticesAtBodyOrigin: aBodyOrigin rotation: anAngle [
+	^ vertices collect: [ :vertex |
+		aBodyOrigin + (self rotate: vertex - rotationCentre by: anAngle) ]
+]
+
+{ #category : 'geometry' }
 CFPhysicsPolygonShape >> worldVerticesAt: aPosition rotation: anAngle [
 	^ vertices collect: [ :vertex |
 		aPosition + (self rotate: vertex around: rotationCentre by: anAngle) ]
@@ -126,6 +132,11 @@ CFPhysicsPolygonShape >> worldVerticesAt: aPosition rotation: anAngle [
 { #category : 'geometry' }
 CFPhysicsPolygonShape >> worldNormalsAtRotation: anAngle [
 	^ normals collect: [ :normal | self rotate: normal by: anAngle ]
+]
+
+{ #category : 'geometry' }
+CFPhysicsPolygonShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
+	^ rotationCentre + (self rotate: aPoint - aBodyOrigin by: anAngle negated)
 ]
 
 { #category : 'geometry' }
