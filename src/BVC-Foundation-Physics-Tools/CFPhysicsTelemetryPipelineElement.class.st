@@ -440,3 +440,9 @@ CFPhysicsTelemetryPipelineElement >> buildBackgroundToggle [
 			self updateGraph ].
 	^ toggle
 ]
+
+{ #category : 'hooks - scene graph' }
+CFPhysicsTelemetryPipelineElement >> onRemovedFromSceneGraph [
+	super onRemovedFromSceneGraph.
+	graph ifNotNil: [ graph asyncFuture interrupt ]
+]
