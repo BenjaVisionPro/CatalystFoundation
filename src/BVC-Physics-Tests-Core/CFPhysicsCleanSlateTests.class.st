@@ -1912,7 +1912,7 @@ CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
 	self assert: result constraints size equals: 1.
 	self assert: result constraints first class equals: CFPhysicsPreparedRevoluteJoint.
 	self assert: result islands size equals: 1.
-	self assert: first physics velocity x abs < 1.0e-6.
+	self assert: (first physics velocity x closeTo: 0.0).
 	^ result
 ]
 
@@ -1936,7 +1936,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
 	self assert: joint bodyB isNil.
 	self assert: result constraints size equals: 1.
 	self assert: result islands size equals: 1.
-	self assert: element physics velocity x abs < 1.0e-6.
+	self assert: (element physics velocity x closeTo: 0.0).
 	^ result
 ]
 
@@ -2036,7 +2036,7 @@ CFPhysicsCleanSlateTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
 	self assert: world prismaticJoints equals: { joint }.
 	self assert: result constraints size equals: 1.
 	self assert: result constraints first class equals: CFPhysicsPreparedPrismaticJoint.
-	self assert: element physics velocity y abs < 1.0e-6.
+	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: element physics angularVelocity abs < 1.0e-6.
 	^ result
 ]
@@ -2062,8 +2062,8 @@ CFPhysicsCleanSlateTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
 	result := world step.
 	self assert: result constraints first limitsEnabled.
 	self assert: result constraints first baseTranslation equals: 20.0.
-	self assert: element physics position x <= (10.0 + 1.0e-6).
-	self assert: element physics velocity x abs < 1.0e-6.
+	self assert: (element physics position x closeTo: 10.0).
+	self assert: (element physics velocity x closeTo: 0.0).
 	^ result
 ]
 
@@ -2092,7 +2092,7 @@ CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
 	result := world step.
 	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: element physics position y abs < element physics position x abs.
-	self assert: element physics position x <= (10.0 + 1.0e-6).
+	self assert: (element physics position x closeTo: 10.0).
 	^ result
 ]
 
@@ -6056,7 +6056,7 @@ CFPhysicsCleanSlateTests >> prismaticJointMotorDrivesAlongItsLocalAxis [
 	joint motorEnabled: true; motorSpeed: 100.0; maximumMotorForce: 100000.0.
 	world step.
 	self assert: element physics velocity x > 0.0.
-	self assert: element physics velocity y abs < 1.0e-6.
+	self assert: (element physics velocity y closeTo: 0.0).
 	^ joint
 ]
 
