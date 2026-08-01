@@ -1,7 +1,7 @@
 "
-I am a live physical performer owned by one CFPhysics facade and updated by one CFPhysicsWorld.
+I represent a reusable orchestration of Physics across one or more bodies.
 
-Concrete subclasses retain only the state and physical structures required by their mechanism. I provide the common ownership, update and idempotent removal lifecycle.
+My responsibility is to participate in a world step and manage my ownership and removal lifecycle. Subclasses define the physical mechanism I apply.
 "
 Class {
 	#name : 'CFPhysicsBehaviour',

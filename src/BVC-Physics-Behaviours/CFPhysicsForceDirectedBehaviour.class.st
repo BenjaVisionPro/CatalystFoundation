@@ -1,9 +1,7 @@
 "
-I maintain force-directed springs and repulsions between ordinary Physics bodies.
+I orchestrate a force-directed arrangement of participating bodies.
 
-My participants and connections may be fixed collections or providers, so I can be used by any Physics world whose bodies have relationships. A connection is an Association from one participating element to another; I do not know about graphs or graph adapters.
-
-I apply velocity damping to my selected nodes on each step. This lets disconnected components settle after repulsion has separated them without changing the Physics configuration of bodies outside this behaviour.
+My responsibility is to reconcile springs and repulsions from the current connections and damp the participating bodies as the arrangement settles.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',

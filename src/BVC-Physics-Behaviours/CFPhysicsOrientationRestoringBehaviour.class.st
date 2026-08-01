@@ -1,10 +1,7 @@
 "
-I restore the orientation of the single Physics element to which I am attached.
+I restore the initial orientation of my attached Physics body.
 
-I capture that body's rotation when I first update and apply a damped restoring
-torque before each Physics step. I know only my attached Physics body, its target
-orientation, and the scalar values required to restore it. I do not select,
-configure, distribute, retire, or restore any other Physics element.
+My responsibility is to apply a bounded damped torque before each step until the body returns to that orientation.
 "
 Class {
 	#name : 'CFPhysicsOrientationRestoringBehaviour',
