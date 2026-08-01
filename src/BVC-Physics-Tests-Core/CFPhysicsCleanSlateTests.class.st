@@ -2108,7 +2108,7 @@ CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 	self assert: joint bodyA == first.
 	self assert: joint bodyB == second.
 	self assert: joint referenceAngle equals: 0.5.
-	self assert: joint angularImpulse equals: 0.0.
+	self assert: joint accumulatedAngularImpulse equals: 0.0.
 	^ joint
 ]
 

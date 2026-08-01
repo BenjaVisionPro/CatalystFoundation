@@ -261,8 +261,22 @@ CFPhysicsSoftStepSolver >> prismaticJointAxisFor: constraint [
 ]
 
 { #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> prismaticJointSeparationFor: constraint [
+	| anchorA anchorB baseSeparation |
+	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	baseSeparation := (constraint axis * constraint baseTranslation)
+		+ (constraint normal * constraint basePerpendicularSeparation).
+	^ baseSeparation
+		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+		+ anchorB - constraint anchorB
+		- anchorA + constraint anchorA
+]
+
+{ #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> prismaticJointTranslationFor: constraint [
-	^ self dot: (self distanceJointSeparationFor: constraint) with: (self prismaticJointAxisFor: constraint)
+	^ self dot: (self prismaticJointSeparationFor: constraint) with: (self prismaticJointAxisFor: constraint)
 ]
 
 { #category : 'private - solving' }
@@ -276,7 +290,7 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled
 	axis := self prismaticJointAxisFor: constraint.
 	normal := axis y negated @ axis x.
 	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: normal.
-	separation := self dot: (self distanceJointSeparationFor: constraint) with: normal.
+	separation := self dot: (self prismaticJointSeparationFor: constraint) with: normal.
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
 	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].

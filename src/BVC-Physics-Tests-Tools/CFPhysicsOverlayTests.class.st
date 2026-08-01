@@ -1674,7 +1674,7 @@ CFPhysicsOverlayTests >> physicsOverlayWeldJointInspectorDoesNotExposeRevoluteMo
 	overlay selectJoint: joint.
 	content := overlay objectInspector content.
 	self assert: (content valueElementAt: #referenceAngle) text asString equals: (content formatDiagnosticNumber: joint referenceAngle).
-	self assert: (content valueElementAt: #accumulatedAngularImpulse) text asString equals: (content formatDiagnosticNumber: joint angularImpulse).
+	self assert: (content valueElementAt: #accumulatedAngularImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedAngularImpulse).
 	self assert: (content valueElements includesKey: #motorEnabled) not.
 	^ overlay
 ]
