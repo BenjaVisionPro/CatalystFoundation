@@ -49,7 +49,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipIsConfigurable [
 	nodes := mondrian nodes with: #(one two three).
 	world := (mondrian physics
 		bodyElements: [ { nodes second. nodes third } ];
-		world).
+		beWorld).
 	self assert: world members size equals: 2.
 	self assert: (world includes: nodes first) not.
 	self assert: (world includes: nodes second).
@@ -334,7 +334,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesConfiguredBodyElements
 	mondrian edges connectAssociations: { #one -> #two. #two -> #three }.
 	world := (mondrian physics
 		bodyElements: [ { nodes second. nodes third } ];
-		world).
+		beWorld).
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
 	genericBehaviour := behaviour forceDirectedBehaviour.
