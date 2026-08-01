@@ -168,6 +168,17 @@ CFPhysics >> friction: aNumber [
 	self body friction: aNumber
 ]
 
+
+{ #category : 'material' }
+CFPhysics >> tangentSpeed [
+	^ self body tangentSpeed
+]
+
+{ #category : 'material' }
+CFPhysics >> tangentSpeed: aNumber [
+	self body tangentSpeed: aNumber
+]
+
 { #category : 'material' }
 CFPhysics >> restitution [
 	^ self body restitution

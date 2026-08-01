@@ -6,7 +6,7 @@ My responsibility is to describe density, friction and restitution for mass calc
 Class {
 	#name : 'CFPhysicsMaterial',
 	#superclass : 'Object',
-	#instVars : [ 'density', 'friction', 'restitution' ],
+	#instVars : [ 'density', 'friction', 'restitution', 'tangentSpeed' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -36,7 +36,8 @@ CFPhysicsMaterial >> initialize [
 	super initialize.
 	density := 1.0.
 	friction := 0.3.
-	restitution := 0.0
+	restitution := 0.0.
+	tangentSpeed := 0.0
 ]
 
 { #category : 'accessing' }
@@ -47,4 +48,15 @@ CFPhysicsMaterial >> restitution [
 { #category : 'accessing' }
 CFPhysicsMaterial >> restitution: aNumber [
 	restitution := aNumber asFloat
+]
+
+
+{ #category : 'accessing' }
+CFPhysicsMaterial >> tangentSpeed [
+	^ tangentSpeed
+]
+
+{ #category : 'accessing' }
+CFPhysicsMaterial >> tangentSpeed: aNumber [
+	tangentSpeed := aNumber asFloat
 ]

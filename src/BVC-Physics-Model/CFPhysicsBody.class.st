@@ -159,6 +159,17 @@ CFPhysicsBody >> restitution: aNumber [
 	self shapeState material restitution: aNumber
 ]
 
+
+{ #category : 'material' }
+CFPhysicsBody >> tangentSpeed [
+	^ self shapeState material tangentSpeed
+]
+
+{ #category : 'material' }
+CFPhysicsBody >> tangentSpeed: aNumber [
+	self shapeState material tangentSpeed: aNumber
+]
+
 { #category : 'material' }
 CFPhysicsBody >> density [
 	^ self shapeState material density

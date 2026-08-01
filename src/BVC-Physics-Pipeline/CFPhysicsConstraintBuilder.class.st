@@ -61,7 +61,8 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 		normal: normal;
 		tangent: tangent;
 		friction: (stateA friction * stateB friction) sqrt;
-		restitution: (stateA restitution max: stateB restitution).
+		restitution: (stateA restitution max: stateB restitution);
+		tangentSpeed: stateA tangentSpeed + stateB tangentSpeed.
 	constraint points: (self
 		pointsFrom: contact manifold contactPoints
 		previousPoints: previousPoints

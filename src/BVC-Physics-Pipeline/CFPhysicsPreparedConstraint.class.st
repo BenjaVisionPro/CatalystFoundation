@@ -5,7 +5,7 @@ I represent a contact constraint prepared for one solver step. I bind a contact 
 Class {
 	#name : 'CFPhysicsPreparedConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'contact', 'bodyStateA', 'bodyStateB', 'normal', 'tangent', 'friction', 'restitution', 'points' ],
+	#instVars : [ 'contact', 'bodyStateA', 'bodyStateB', 'normal', 'tangent', 'friction', 'restitution', 'tangentSpeed', 'points' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -47,6 +47,10 @@ CFPhysicsPreparedConstraint >> friction: aNumber [ friction := aNumber ]
 CFPhysicsPreparedConstraint >> restitution [ ^ restitution ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> restitution: aNumber [ restitution := aNumber ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> tangentSpeed [ ^ tangentSpeed ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> tangentSpeed: aNumber [ tangentSpeed := aNumber ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> points [ ^ points ]
 { #category : 'accessing' }

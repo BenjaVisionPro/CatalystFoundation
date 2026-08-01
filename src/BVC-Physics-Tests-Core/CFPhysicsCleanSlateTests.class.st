@@ -452,11 +452,13 @@ CFPhysicsCleanSlateTests >> constraintBuilderUsesCapturedBodyProperties [
 	first := self cleanSlateBodyWithSequence: 1.
 	first
 		friction: 0.25;
-		restitution: 0.2.
+		restitution: 0.2;
+		tangentSpeed: 2.0.
 	second := self cleanSlateBodyWithSequence: 2.
 	second
 		friction: 0.81;
-		restitution: 0.6.
+		restitution: 0.6;
+		tangentSpeed: -0.5.
 	pair := CFPhysicsPair first: first second: second.
 	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
 	bodyStates := IdentityDictionary new
@@ -470,19 +472,32 @@ CFPhysicsCleanSlateTests >> constraintBuilderUsesCapturedBodyProperties [
 	first
 		friction: 1.0;
 		restitution: 1.0;
+		tangentSpeed: 10.0;
 		density: 10.0.
 	second
 		friction: 1.0;
 		restitution: 0.0;
+		tangentSpeed: 20.0;
 		density: 20.0.
 	capturedConstraint := (builder
 		constraintsFrom: { CFPhysicsContact pair: pair manifold: manifold }
 		bodyStates: bodyStates) first.
 	self assert: capturedConstraint friction equals: initialConstraint friction.
 	self assert: capturedConstraint restitution equals: initialConstraint restitution.
+	self assert: capturedConstraint tangentSpeed equals: initialConstraint tangentSpeed.
+	self assert: initialConstraint tangentSpeed equals: 1.5.
 	self assert: capturedConstraint points first normalMass equals: initialConstraint points first normalMass.
 	self assert: capturedConstraint points first tangentMass equals: initialConstraint points first tangentMass.
 	^ capturedConstraint
+]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> contactTangentSpeedDefaultsToZero [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	self assert: body tangentSpeed equals: 0.0.
+	^ body
 ]
 
 { #category : 'examples - constraints' }

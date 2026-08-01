@@ -654,7 +654,7 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 CFPhysicsSoftStepSolver >> solveTangentAt: point constraint: constraint [
 	| relativeVelocity tangentVelocity increment oldImpulse maximum newImpulse |
 	relativeVelocity := self relativeVelocityAt: point constraint: constraint.
-	tangentVelocity := self dot: relativeVelocity with: constraint tangent.
+	tangentVelocity := (self dot: relativeVelocity with: constraint tangent) - constraint tangentSpeed.
 	increment := point tangentMass * tangentVelocity negated.
 	oldImpulse := point tangentImpulse.
 	maximum := constraint friction * point normalImpulse.
