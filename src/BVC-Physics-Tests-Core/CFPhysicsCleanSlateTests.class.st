@@ -5930,11 +5930,19 @@ CFPhysicsCleanSlateTests >> testPullInteractionPreservesBodyVelocityWhenReleased
 
 { #category : 'examples - motor joints' }
 CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
-	<gtExample> | world first second joint |
-	world := CFPhysicsWorld new.
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 40 @ 0 extent: 20 @ 20.
-	first world: world. second world: world.
+	<gtExample>
+	| owner firstElement secondElement world first second joint |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	first position: 0 @ 0.
+	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	joint maximumForce: 100000.0; maximumTorque: 100000.0.
 	world addMotorJoint: joint.
