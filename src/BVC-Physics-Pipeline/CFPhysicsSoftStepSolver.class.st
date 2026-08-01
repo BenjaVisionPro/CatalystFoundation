@@ -632,7 +632,9 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 	contactConstraints := constraints select: [ :constraint |
 		constraint isKindOf: CFPhysicsPreparedConstraint ].
 	orderedJointConstraints := ((constraints select: [ :constraint |
-		constraint isKindOf: CFPhysicsPreparedMouseJoint ]),
+		constraint isKindOf: CFPhysicsPreparedMotorJoint ]),
+		(constraints select: [ :constraint |
+			constraint isKindOf: CFPhysicsPreparedMouseJoint ]),
 		(constraints select: [ :constraint |
 			constraint isKindOf: CFPhysicsPreparedDistanceJoint ]),
 		(constraints select: [ :constraint |
@@ -656,6 +658,8 @@ CFPhysicsSoftStepSolver >> measurePreparedWork [
 		into: [ :total :constraint |
 			total + (constraint points count: [ :point |
 				point normalImpulse ~= 0.0 or: [ point tangentImpulse ~= 0.0 ] ]) ].
+	motorJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedMotorJoint ].
 	mouseJointConstraintCount := orderedJointConstraints count: [ :constraint |
 		constraint isKindOf: CFPhysicsPreparedMouseJoint ].
 	distanceJointConstraintCount := orderedJointConstraints count: [ :constraint |
@@ -691,6 +695,9 @@ CFPhysicsSoftStepSolver >> weldJointConstraintCount [ ^ weldJointConstraintCount
 
 { #category : 'accessing - telemetry' }
 CFPhysicsSoftStepSolver >> mouseJointConstraintCount [ ^ mouseJointConstraintCount ]
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> motorJointConstraintCount [ ^ motorJointConstraintCount ]
 
 
 { #category : 'private - solving' }
