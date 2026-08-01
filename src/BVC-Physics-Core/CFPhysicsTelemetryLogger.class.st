@@ -1,6 +1,8 @@
-"I am the bounded Pharo Telemetry logger owned by one Physics world.
+"
+I record telemetry signals for one Physics world.
 
-I record ProcessTelemetry signals whose Physics metadata identifies my world. My recordings use a true circular buffer, so a live diagnostic session has constant retained-memory use. I coalesce view announcements to a presentation rate while recording every accepted signal."
+My responsibility is to retain accepted signals in a bounded ring buffer, defer background-solve signals until commit and throttle change announcements for live tools.
+"
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',

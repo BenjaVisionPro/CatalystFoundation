@@ -1,3 +1,8 @@
+"
+I am the Physics facade attached to one Bloc element.
+
+My responsibility is to expose element-oriented access to body, world, interaction, membership and Behaviour capabilities while keeping simulation objects behind the Bloc API. I create or locate the Physics state associated with my element.
+"
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',

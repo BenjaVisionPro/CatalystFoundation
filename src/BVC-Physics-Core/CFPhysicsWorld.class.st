@@ -1,9 +1,7 @@
 "
-I am the deterministic Physics simulation owned by one Bloc element.
+I represent a Physics world.
 
-I own body membership, solver configuration, constraints, contacts and the explicit #step operation. A step synchronises membership and advances the pipeline by one fixed #stepDuration. I do not schedule frames or own visual presentation resources.
-
-Motion-backed presentation and continuous playback are optional integration capabilities supplied by BVC-Physics-Motion.
+My responsibility is to own authoritative simulation state and advance it through the configured step pipeline. I coordinate bodies, constraints, joints, contacts, Behaviours, telemetry and committed solutions for my member elements.
 "
 Class {
 	#name : 'CFPhysicsWorld',

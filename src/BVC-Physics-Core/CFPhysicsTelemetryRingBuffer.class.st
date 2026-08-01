@@ -1,6 +1,8 @@
-"I am the fixed-capacity chronological storage used by Physics telemetry.
+"
+I store a fixed-capacity sequence of Physics telemetry recordings.
 
-Appending when full overwrites the oldest recording without shifting the retained collection. #asArray always answers the retained recordings from oldest to newest."
+I overwrite the oldest recording when full and enumerate retained recordings in chronological order.
+"
 Class {
 	#name : 'CFPhysicsTelemetryRingBuffer',
 	#superclass : 'Object',
