@@ -5942,6 +5942,7 @@ CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0.
+	first beStatic.
 	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	joint maximumForce: 100000.0; maximumTorque: 100000.0.
@@ -5949,5 +5950,31 @@ CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
 	second position: 80 @ 0.
 	10 timesRepeat: [ world step ].
 	self assert: second position x < 80.
+	^ joint
+]
+
+{ #category : 'examples - motor joints' }
+CFPhysicsCleanSlateTests >> motorJointPreservesRelativeTransformBetweenDynamicBodies [
+	<gtExample>
+	| owner firstElement secondElement world first second joint initialCentre |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	first position: 0 @ 0.
+	second position: 40 @ 0.
+	initialCentre := (first position + second position) / 2.0.
+	joint := CFPhysicsMotorJoint between: first and: second.
+	joint maximumForce: 100000.0; maximumTorque: 100000.0.
+	world addMotorJoint: joint.
+	second position: 80 @ 0.
+	10 timesRepeat: [ world step ].
+	self assert: ((second position - first position) x closeTo: 40.0).
+	self assert: (((first position + second position) / 2.0) x closeTo: initialCentre x + 20.0).
 	^ joint
 ]

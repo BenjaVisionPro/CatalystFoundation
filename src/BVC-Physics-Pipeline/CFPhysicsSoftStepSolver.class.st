@@ -695,32 +695,85 @@ CFPhysicsSoftStepSolver >> mouseJointConstraintCount [ ^ mouseJointConstraintCou
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartMotorJointConstraint: constraint [
-	| stateA stateB | stateA := constraint bodyStateA. stateB := constraint bodyStateB.
-	stateA linearVelocity: stateA linearVelocity - (constraint linearImpulse * stateA inverseMass).
-	stateA angularVelocity: stateA angularVelocity - (constraint angularImpulse * stateA inverseInertia).
-	stateB linearVelocity: stateB linearVelocity + (constraint linearImpulse * stateB inverseMass).
-	stateB angularVelocity: stateB angularVelocity + (constraint angularImpulse * stateB inverseInertia)
+	| stateA stateB anchorA anchorB linearImpulse angularImpulse |
+	stateA := constraint bodyStateA.
+	stateB := constraint bodyStateB.
+	anchorA := self rotate: constraint anchorA by: stateA deltaRotation.
+	anchorB := self rotate: constraint anchorB by: stateB deltaRotation.
+	linearImpulse := constraint linearImpulse.
+	angularImpulse := constraint angularImpulse.
+	stateA linearVelocity: stateA linearVelocity - (linearImpulse * stateA inverseMass).
+	stateA angularVelocity: stateA angularVelocity
+		- (((self cross: anchorA with: linearImpulse) + angularImpulse) * stateA inverseInertia).
+	stateB linearVelocity: stateB linearVelocity + (linearImpulse * stateB inverseMass).
+	stateB angularVelocity: stateB angularVelocity
+		+ (((self cross: anchorB with: linearImpulse) + angularImpulse) * stateB inverseInertia)
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveMotorJointConstraint: constraint biasEnabled: biasEnabled [
-	| stateA stateB angularSeparation angularBias increment oldImpulse newImpulse linearSeparation linearBias relativeVelocity vectorIncrement oldVector newVector magnitude |
-	stateA := constraint bodyStateA. stateB := constraint bodyStateB.
+	| stateA stateB angularSeparation angularBias increment oldImpulse newImpulse anchorA anchorB displacement linearSeparation linearBias velocityA velocityB relativeVelocity massResult vectorIncrement oldVector newVector magnitude |
+	stateA := constraint bodyStateA.
+	stateB := constraint bodyStateB.
 	angularSeparation := constraint baseAngularSeparation + stateB deltaRotation - stateA deltaRotation.
 	angularBias := (1.0 / step substepTime) * constraint joint correctionFactor * angularSeparation.
-	increment := (constraint angularMass * ((stateB angularVelocity - stateA angularVelocity) + angularBias)) negated.
+	increment := (constraint angularMass
+		* ((stateB angularVelocity - stateA angularVelocity) + angularBias)) negated.
 	oldImpulse := constraint angularImpulse.
-	newImpulse := (oldImpulse + increment max: constraint maximumAngularImpulse negated) min: constraint maximumAngularImpulse.
-	constraint angularImpulse: newImpulse. increment := newImpulse - oldImpulse.
+	newImpulse := (oldImpulse + increment max: constraint maximumAngularImpulse negated)
+		min: constraint maximumAngularImpulse.
+	constraint angularImpulse: newImpulse.
+	increment := newImpulse - oldImpulse.
 	stateA angularVelocity: stateA angularVelocity - (increment * stateA inverseInertia).
 	stateB angularVelocity: stateB angularVelocity + (increment * stateB inverseInertia).
-	linearSeparation := constraint baseLinearSeparation + stateB deltaPosition - stateA deltaPosition.
+
+	anchorA := self rotate: constraint anchorA by: stateA deltaRotation.
+	anchorB := self rotate: constraint anchorB by: stateB deltaRotation.
+	displacement := stateB deltaPosition - stateA deltaPosition + anchorB - anchorA.
+	linearSeparation := constraint baseLinearSeparation + displacement.
 	linearBias := linearSeparation * ((1.0 / step substepTime) * constraint joint correctionFactor).
-	relativeVelocity := stateB linearVelocity - stateA linearVelocity.
-	vectorIncrement := (relativeVelocity + linearBias) * constraint linearMass negated.
-	oldVector := constraint linearImpulse. newVector := oldVector + vectorIncrement. magnitude := newVector r.
-	(magnitude > constraint maximumLinearImpulse and: [ magnitude > 0.0 ]) ifTrue: [ newVector := newVector * (constraint maximumLinearImpulse / magnitude) ].
-	constraint linearImpulse: newVector. vectorIncrement := newVector - oldVector.
+	velocityA := stateA linearVelocity + (self crossScalar: stateA angularVelocity withVector: anchorA).
+	velocityB := stateB linearVelocity + (self crossScalar: stateB angularVelocity withVector: anchorB).
+	relativeVelocity := velocityB - velocityA.
+	massResult := self
+		multiplyXX: constraint effectiveMassXX
+		xy: constraint effectiveMassXY
+		yy: constraint effectiveMassYY
+		by: relativeVelocity + linearBias.
+	vectorIncrement := massResult negated.
+	oldVector := constraint linearImpulse.
+	newVector := oldVector + vectorIncrement.
+	magnitude := newVector r.
+	(magnitude > constraint maximumLinearImpulse and: [ magnitude > 0.0 ]) ifTrue: [
+		newVector := newVector * (constraint maximumLinearImpulse / magnitude) ].
+	constraint linearImpulse: newVector.
+	vectorIncrement := newVector - oldVector.
 	stateA linearVelocity: stateA linearVelocity - (vectorIncrement * stateA inverseMass).
-	stateB linearVelocity: stateB linearVelocity + (vectorIncrement * stateB inverseMass)
+	stateA angularVelocity: stateA angularVelocity
+		- ((self cross: anchorA with: vectorIncrement) * stateA inverseInertia).
+	stateB linearVelocity: stateB linearVelocity + (vectorIncrement * stateB inverseMass).
+	stateB angularVelocity: stateB angularVelocity
+		+ ((self cross: anchorB with: vectorIncrement) * stateB inverseInertia)
+]
+
+
+
+{ #category : 'private - geometry' }
+CFPhysicsSoftStepSolver >> rotate: aPoint by: anAngle [
+	| cosine sine |
+	cosine := anAngle cos.
+	sine := anAngle sin.
+	^ ((aPoint x * cosine) - (aPoint y * sine))
+		@ ((aPoint x * sine) + (aPoint y * cosine))
+]
+
+{ #category : 'private - geometry' }
+CFPhysicsSoftStepSolver >> crossScalar: aScalar withVector: aPoint [
+	^ (aScalar * aPoint y negated) @ (aScalar * aPoint x)
+]
+
+{ #category : 'private - geometry' }
+CFPhysicsSoftStepSolver >> multiplyXX: xx xy: xy yy: yy by: aPoint [
+	^ ((xx * aPoint x) + (xy * aPoint y))
+		@ ((xy * aPoint x) + (yy * aPoint y))
 ]
