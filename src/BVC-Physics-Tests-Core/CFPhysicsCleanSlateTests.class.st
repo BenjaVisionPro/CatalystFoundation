@@ -6254,3 +6254,16 @@ CFPhysicsCleanSlateTests >> prismaticJointAxisRotatesWithBodyA [
 	self assert: (prepared axis closeTo: 0 @ 1).
 	^ prepared
 ]
+
+
+{ #category : 'examples - contact solver' }
+CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
+	<gtExample>
+	| world step |
+	world := CFPhysicsWorld new.
+	self assert: (world maximumContactPushSpeed closeTo: 3.0).
+	world maximumContactPushSpeed: 7.5.
+	step := world newStep.
+	self assert: (step maximumContactPushSpeed closeTo: 7.5).
+	^ step
+]

@@ -5,7 +5,7 @@ I describe the numerical configuration and identity of one simulation step. I de
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'maximumContactPushSpeed', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -25,6 +25,7 @@ CFPhysicsStep class >> timeStep: seconds substeps: anInteger contactHertz: hertz
 CFPhysicsStep >> prepare [
 	| omega a1 a2 a3 |
 	warmStartRatio ifNil: [ warmStartRatio := 1.0 ].
+	maximumContactPushSpeed ifNil: [ maximumContactPushSpeed := 3.0 ].
 	substepCount := substepCount max: 1.
 	substepTime := timeStep / substepCount.
 	inverseSubstepTime := substepTime = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / substepTime ].
@@ -63,6 +64,12 @@ CFPhysicsStep >> biasRate [ ^ biasRate ]
 CFPhysicsStep >> massCoefficient [ ^ massCoefficient ]
 { #category : 'accessing' }
 CFPhysicsStep >> impulseCoefficient [ ^ impulseCoefficient ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> maximumContactPushSpeed [ ^ maximumContactPushSpeed ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> maximumContactPushSpeed: aNumber [ maximumContactPushSpeed := aNumber asFloat max: 0.0 ]
 
 { #category : 'warm starting' }
 CFPhysicsStep >> warmStartRatio [ ^ warmStartRatio ]

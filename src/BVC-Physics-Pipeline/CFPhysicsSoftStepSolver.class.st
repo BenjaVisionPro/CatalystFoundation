@@ -637,7 +637,7 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 	separation > 0.0
 		ifTrue: [ bias := separation * step inverseSubstepTime ]
 		ifFalse: [ biasEnabled ifTrue: [
-			bias := step biasRate * separation.
+			bias := (step biasRate * separation) max: step maximumContactPushSpeed negated.
 			massCoefficient := step massCoefficient.
 			impulseCoefficient := step impulseCoefficient ] ].
 	increment := (massCoefficient * point normalMass * (normalVelocity + bias)) negated
