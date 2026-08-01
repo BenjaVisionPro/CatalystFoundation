@@ -77,7 +77,7 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
 		^ self warmStartMouseJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
-		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
+		^ self applyDistanceJointImpulse: (self distanceJointAxisFor: constraint) * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		self applyDistanceJointImpulse: constraint normal * constraint perpendicularImpulse constraint: constraint.
 		self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint. ].
@@ -196,22 +196,48 @@ CFPhysicsSoftStepSolver >> applyMouseJointLinearImpulse: impulse constraint: con
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
-	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint direction.
-	separation := constraint baseSeparation
-		+ (self dot: (self distanceJointDeltaPositionFor: constraint bodyStateB)
-			- (self distanceJointDeltaPositionFor: constraint bodyStateA)
-			with: constraint direction).
-	separation := separation
-		+ (self dot: (self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)) - constraint anchorB with: constraint direction)
-		- (self dot: (self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)) - constraint anchorA with: constraint direction).
-	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
-	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	| axis relativeVelocity separation bias massCoefficient impulseCoefficient increment |
+	axis := self distanceJointAxisFor: constraint.
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
+	separation := (self distanceJointLengthFor: constraint) - constraint joint length.
+	constraint springEnabled
+		ifTrue: [
+			bias := constraint biasRate * separation.
+			massCoefficient := constraint massCoefficient.
+			impulseCoefficient := constraint impulseCoefficient ]
+		ifFalse: [
+			bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+			massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+			impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
 	increment := (massCoefficient * constraint effectiveMass * (relativeVelocity + bias)) negated
 		- (impulseCoefficient * constraint impulse).
 	constraint impulse: constraint impulse + increment.
-	self applyDistanceJointImpulse: constraint direction * increment constraint: constraint
+	self applyDistanceJointImpulse: axis * increment constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointSeparationFor: constraint [
+	| anchorA anchorB |
+	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	^ (constraint direction * constraint baseLength)
+		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+		+ anchorB - constraint anchorB
+		- anchorA + constraint anchorA
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointLengthFor: constraint [
+	^ (self distanceJointSeparationFor: constraint) r
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> distanceJointAxisFor: constraint [
+	| separation length |
+	separation := self distanceJointSeparationFor: constraint.
+	length := separation r.
+	^ length = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ separation / length ]
 ]
 
 { #category : 'private - solving' }

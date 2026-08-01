@@ -1688,75 +1688,33 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 ]
 
 
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> springAtItsRestLengthDoesNotChangeVelocity [
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointSpringUsesBox2DSoftConstraint [
 	<gtExample>
-	| first second spring |
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	spring prepareForStep: 0.016.
-	self assert: first velocity equals: 0 @ 0.
-	self assert: second velocity equals: 0 @ 0.
-	^ spring
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> stretchedSpringPullsBodiesTogether [
-	<gtExample>
-	| first second spring |
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	spring restLength: 50.
-	spring stiffness: 100.
-	spring damping: 0.
-	spring prepareForStep: 0.016.
-	self assert: first velocity x > 0.
-	self assert: second velocity x < 0.
-	self assert: first velocity y equals: 0.
-	self assert: second velocity y equals: 0.
-	^ spring
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> springCanConnectADynamicElementToAStaticAnchor [
-	<gtExample>
-	| first second spring |
-	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	first beStatic.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	spring restLength: 50.
-	spring prepareForStep: 0.016.
-	self assert: first velocity equals: 0 @ 0.
-	self assert: second velocity x < 0.
-	^ spring
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> springsAreInstalledThroughBlocElements [
-	<gtExample>
-	| owner first second world spring |
+	| owner first second world joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
-	owner addChild: first.
-	owner addChild: second.
+	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
-	spring := first physics springTo: second.
-	spring restLength: 50.
-	world step.
-	self assert: world springs size equals: 1.
-	self assert: first physics velocity x > 0.
-	self assert: second physics velocity x < 0.
-	first physics removeSpring: spring.
-	self assert: world springs isEmpty.
-	^ world
+	joint := first physics distanceJointTo: second.
+	joint
+		length: 50;
+		springEnabled: true;
+		hertz: 3;
+		dampingRatio: 1.
+	result := world step.
+	prepared := result constraints first.
+	self assert: prepared springEnabled.
+	self assert: prepared biasRate > 0.0.
+	self assert: prepared massCoefficient > 0.0.
+	self assert: first physics velocity x > 0.0.
+	self assert: second physics velocity x < 0.0.
+	^ result
 ]
 
 { #category : 'examples - distance joints' }
@@ -1770,7 +1728,7 @@ CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
 	self assert: joint anchorB class equals: CFPhysicsBodyCentreAnchor.
 	self assert: joint bodyA == first.
 	self assert: joint bodyB == second.
-	self assert: joint restLength equals: 100.0.
+	self assert: joint length equals: 100.0.
 	^ joint
 ]
 
@@ -1811,7 +1769,7 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	joint := first physics distanceJointTo: second.
-	joint restLength: 50.
+	joint length: 50.
 	result := world step.
 	self assert: result constraints size equals: 1.
 	self assert: result constraints first class equals: CFPhysicsPreparedDistanceJoint.
@@ -1838,7 +1796,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 100 @ 10.
 	joint := bodyAnchor distanceJointTo: worldAnchor.
-	joint restLength: 50.
+	joint length: 50.
 	result := world step.
 	self assert: joint bodyA == element physics body.
 	self assert: joint bodyB isNil.
@@ -1862,7 +1820,7 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody 
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
 	joint := bodyAnchor distanceJointTo: worldAnchor.
-	joint restLength: 0.
+	joint length: 0.
 	element physics body sleep.
 	worldAnchor point: 110 @ 10.
 	self assert: element physics body isAwake.
@@ -1884,7 +1842,7 @@ CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpo
 	joint := first physics distanceJointTo: second.
 	first physics body sleep.
 	second physics body sleep.
-	joint restLength: joint restLength + 10.
+	joint length: joint length + 10.
 	self assert: first physics body isAwake.
 	self assert: second physics body isAwake.
 	^ joint
@@ -1907,7 +1865,7 @@ CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
 	firstAnchor := first physics localAnchorAt: 20 @ 0.
 	secondAnchor := second physics localAnchorAt: 0 @ 20.
 	joint := firstAnchor distanceJointTo: secondAnchor.
-	joint restLength: 20.
+	joint length: 20.
 	world step.
 	self assert: first physics angularVelocity abs > 0.0.
 	self assert: second physics angularVelocity equals: 0.0.
@@ -2590,7 +2548,8 @@ CFPhysicsCleanSlateTests >> springEndpointsAreResolvedThroughAnchors [
 	| first second spring |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	spring := CFPhysicsSpringConstraint between: first and: second.
+	spring := CFPhysicsDistanceJoint between: first and: second.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	self assert: spring anchorA class equals: CFPhysicsBodyCentreAnchor.
 	self assert: spring anchorB class equals: CFPhysicsBodyCentreAnchor.
 	self assert: spring anchorA worldPoint equals: 10 @ 10.
@@ -2598,74 +2557,6 @@ CFPhysicsCleanSlateTests >> springEndpointsAreResolvedThroughAnchors [
 	self assert: spring bodyA == first.
 	self assert: spring bodyB == second.
 	^ spring
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> oneElementCanOwnManyIndependentSpringRelationships [
-	<gtExample>
-	| owner first second third fourth world firstSpring secondSpring thirdSpring |
-	owner := BlElement new size: 400 @ 300; yourself.
-	first := BlElement new size: 20 @ 20; yourself.
-	second := BlElement new size: 20 @ 20; yourself.
-	third := BlElement new size: 20 @ 20; yourself.
-	fourth := BlElement new size: 20 @ 20; yourself.
-	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
-	world synchroniseMembership.
-	firstSpring := first physics springTo: second.
-	secondSpring := first physics springTo: third.
-	thirdSpring := first physics springTo: fourth.
-	self assert: first physics springs equals: { firstSpring. secondSpring. thirdSpring }.
-	self assert: second physics springs equals: { firstSpring }.
-	first physics removeSpring: secondSpring.
-	self assert: first physics springs equals: { firstSpring. thirdSpring }.
-	self assert: world springs equals: { firstSpring. thirdSpring }.
-	^ world
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> duplicateSpringEndpointsRemainIndependent [
-	<gtExample>
-	| owner first second world firstSpring secondSpring |
-	owner := BlElement new size: 400 @ 300; yourself.
-	first := BlElement new size: 20 @ 20; yourself.
-	second := BlElement new size: 20 @ 20; yourself.
-	owner addChildren: { first. second }.
-	world := owner physics beWorld.
-	world synchroniseMembership.
-	firstSpring := first physics springTo: second.
-	secondSpring := first physics springTo: second.
-	self assert: (firstSpring == secondSpring) not.
-	self assert: first physics springs equals: { firstSpring. secondSpring }.
-	first physics removeSpring: firstSpring.
-	self assert: first physics springs equals: { secondSpring }.
-	self assert: secondSpring isActive.
-	^ world
-]
-
-{ #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsSprings [
-	<gtExample>
-	| owner first second third fourth world attachedA attachedB unrelated |
-	owner := BlElement new size: 400 @ 300; yourself.
-	first := BlElement new size: 20 @ 20; yourself.
-	second := BlElement new size: 20 @ 20; yourself.
-	third := BlElement new size: 20 @ 20; yourself.
-	fourth := BlElement new size: 20 @ 20; yourself.
-	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
-	world synchroniseMembership.
-	attachedA := first physics springTo: second.
-	attachedB := first physics springTo: third.
-	unrelated := third physics springTo: fourth.
-	owner removeChild: first.
-	world synchroniseMembership.
-	self assert: world springs equals: { unrelated }.
-	self assert: attachedA isActive not.
-	self assert: attachedB isActive not.
-	self assert: unrelated isActive.
-	self assert: third physics springs equals: { unrelated }.
-	^ world
 ]
 
 { #category : 'examples - attraction interaction' }
@@ -3006,7 +2897,8 @@ CFPhysicsCleanSlateTests >> relationshipsCanResolveBodyLocalAnchors [
 	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
 	anchorA := CFPhysicsLocalAnchor on: first at: 20 @ 10.
 	anchorB := CFPhysicsLocalAnchor on: second at: 0 @ 10.
-	spring := CFPhysicsSpringConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	spring := CFPhysicsDistanceJoint betweenAnchor: anchorA andAnchor: anchorB.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
 	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
 	self assert: spring anchorA == anchorA.
@@ -3061,7 +2953,8 @@ CFPhysicsCleanSlateTests >> relationshipsCanResolveNormalisedAnchors [
 	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 40 @ 20.
 	anchorA := CFPhysicsNormalisedAnchor on: first at: 1 @ 0.5.
 	anchorB := CFPhysicsNormalisedAnchor on: second at: 0 @ 0.5.
-	spring := CFPhysicsSpringConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	spring := CFPhysicsDistanceJoint betweenAnchor: anchorA andAnchor: anchorB.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
 	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
 	self assert: spring anchorA == anchorA.
@@ -3086,7 +2979,8 @@ CFPhysicsCleanSlateTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
 	second physics position: 200 @ 80.
 	anchorA := first physics localAnchorAt: 40 @ 10.
 	anchorB := second physics normalisedAnchorAt: 0 @ 0.5.
-	spring := anchorA springTo: anchorB.
+	spring := anchorA distanceJointTo: anchorB.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	attraction := anchorA attract: anchorB.
 	repulsion := anchorA repel: anchorB.
 	self assert: spring anchorA == anchorA.
@@ -3233,13 +3127,14 @@ CFPhysicsCleanSlateTests >> relationshipsResolveThroughAnEndpointPair [
 	endpoints := CFPhysicsAnchoredEndpointPair
 		anchorA: (CFPhysicsLocalAnchor on: first at: 10 @ 0)
 		anchorB: (CFPhysicsLocalAnchor on: second at: -10 @ 0).
-	spring := CFPhysicsSpringConstraint betweenEndpoints: endpoints.
+	spring := CFPhysicsDistanceJoint betweenEndpoints: endpoints.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	attraction := CFPhysicsAttractionConstraint betweenEndpoints: endpoints.
 	repulsion := CFPhysicsRepulsionConstraint betweenEndpoints: endpoints.
 	self assert: spring endpointPair == endpoints.
 	self assert: attraction endpointPair == endpoints.
 	self assert: repulsion endpointPair == endpoints.
-	self assert: spring restLength equals: 80.0.
+	self assert: spring length equals: 80.0.
 	self assert: spring bodyA == first.
 	self assert: spring bodyB == second.
 	self assert: attraction bodyA == first.
@@ -3260,24 +3155,6 @@ CFPhysicsCleanSlateTests >> worldAnchorRemainsAtItsWorldPoint [
 	anchor point: 90 @ 55.
 	self assert: anchor worldPoint equals: 90 @ 55.
 	^ anchor
-]
-
-{ #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> springCanAttachABodyToAWorldPoint [
-	<gtExample>
-	| world body bodyAnchor worldAnchor spring |
-	world := CFPhysicsWorld new.
-	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	body world: world.
-	bodyAnchor := CFPhysicsBodyCentreAnchor on: body.
-	worldAnchor := world anchorAt: 110 @ 10.
-	spring := bodyAnchor springTo: worldAnchor.
-	spring restLength: 50; damping: 0.
-	spring prepareForStep: 0.1.
-	self assert: spring bodyA == body.
-	self assert: spring bodyB isNil.
-	self assert: body velocity x > 0.
-	^ spring
 ]
 
 { #category : 'examples - anchors' }
@@ -3308,8 +3185,9 @@ CFPhysicsCleanSlateTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	body world: world.
 	spring := (CFPhysicsBodyCentreAnchor on: body)
-		springTo: (world anchorAt: 100 @ 10).
-	world removeSpringsUsingBody: body.
+		distanceJointTo: (world anchorAt: 100 @ 10).
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world removeDistanceJointsUsingBody: body.
 	self assert: world springs isEmpty.
 	self assert: spring isActive not.
 	^ spring
@@ -4364,7 +4242,7 @@ CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpa
 	obstacle beginStep.
 	tether beginStep.
 	joint := CFPhysicsDistanceJoint between: moving and: tether.
-	joint restLength: 50.
+	joint length: 50.
 	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
@@ -5089,10 +4967,9 @@ CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
 CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
 	| behaviour |
 	behaviour := CFPhysicsForceDirectedBehaviour new.
-	self assert: behaviour restLength equals: 80.0.
-	self assert: behaviour stiffness equals: 600.0.
-	self assert: behaviour damping equals: 400.0.
-	self assert: behaviour maximumSpringForce equals: 250000.0.
+	self assert: behaviour length equals: 80.0.
+	self assert: behaviour hertz equals: 3.0.
+	self assert: behaviour dampingRatio equals: 1.0.
 	self assert: behaviour repulsion equals: 100000.0.
 	self assert: behaviour repulsionSofteningDistance equals: 50.0.
 	self assert: behaviour maximumRepulsionDistance equals: 200.0.
@@ -5108,7 +4985,8 @@ CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
 	root addChildren: { first. second }.
 	world := root physics beWorld.
 	world synchroniseMembership.
-	spring := first physics springTo: second.
+	spring := first physics distanceJointTo: second.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	repulsion := first physics repel: second.
 	root physics ceaseBeingWorld.
 	self assert: root physics world isNil.
@@ -5195,18 +5073,17 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 	spring := behaviour springsByConnection at: connection.
 	repulsion := behaviour repulsionsByPair values anyOne.
 	behaviour
-		restLength: 175;
-		stiffness: 25;
-		damping: 4;
-		maximumSpringForce: 500;
+		length: 175;
+		hertz: 25;
+		dampingRatio: 4;
 		repulsion: 700;
 		repulsionSofteningDistance: 35;
 		maximumRepulsionDistance: 250;
 		velocityDamping: 12.
-	self assert: spring restLength value equals: 175.0.
-	self assert: spring stiffness value equals: 25.0.
-	self assert: spring damping value equals: 4.0.
-	self assert: spring maximumForce value equals: 500.0.
+	world step.
+	self assert: spring length equals: 175.0.
+	self assert: spring hertz equals: 25.0.
+	self assert: spring dampingRatio equals: 4.0.
 	self assert: repulsion force value equals: 700.0.
 	self assert: repulsion distanceResponse class equals: CFPhysicsSoftenedInverseSquareResponse.
 	self assert: repulsion distanceResponse softeningDistance value equals: 35.0.
@@ -5283,7 +5160,7 @@ CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCe
 		| joint |
 		joint := (element physics localAnchorAt: 30 @ 20)
 			distanceJointTo: centreAnchor.
-		joint restLength: 0.0.
+		joint length: 0.0.
 		joint ].
 	result := world step.
 	self assert: joints size equals: 3.
@@ -5493,13 +5370,13 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	second position: 40 @ 0.
 	joint := CFPhysicsDistanceJoint between: first and: second.
 	joint
-		restLength: 25;
+		length: 25;
 		accumulatedImpulse: 3.0.
 	world addDistanceJoint: joint.
 	state := world captureStateAfterSynchronisation.
 	capturedJoint := state joints first.
 	joint
-		restLength: 100;
+		length: 100;
 		accumulatedImpulse: 0.0.
 	prepared := (CFPhysicsDistanceJointConstraintBuilder new
 		constraintsFrom: state joints
@@ -5507,7 +5384,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 		warmStartRatio: state step warmStartRatio) first.
 	self assert: capturedJoint ~~ joint.
 	self assert: capturedJoint solverCommitTarget == joint.
-	self assert: capturedJoint restLength equals: 25.
+	self assert: capturedJoint length equals: 25.
 	self assert: capturedJoint accumulatedImpulse equals: 3.0.
 	self assert: prepared baseSeparation equals: 15.0.
 	self assert: prepared impulse equals: 3.0 * state step warmStartRatio.

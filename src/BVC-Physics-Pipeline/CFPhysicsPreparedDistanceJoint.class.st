@@ -1,11 +1,8 @@
-"
-I represent a distance joint prepared for one solver step. I hold its anchors, direction, effective mass, separation and accumulated impulse.
-"
-
+"I represent a Box2D 3.1.1 distance joint prepared for one solver step."
 Class {
 	#name : 'CFPhysicsPreparedDistanceJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',
-	#instVars : [ 'anchorA', 'anchorB', 'direction', 'baseSeparation', 'effectiveMass', 'impulse' ],
+	#instVars : [ 'anchorA', 'anchorB', 'direction', 'baseLength', 'effectiveMass', 'springEnabled', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'impulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -13,29 +10,54 @@ Class {
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> anchorA [ ^ anchorA ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> anchorA: aPoint [ anchorA := aPoint ]
+CFPhysicsPreparedDistanceJoint >> anchorA: anObject [ anchorA := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> anchorB [ ^ anchorB ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> anchorB: aPoint [ anchorB := aPoint ]
+CFPhysicsPreparedDistanceJoint >> anchorB: anObject [ anchorB := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> direction [ ^ direction ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> direction: aPoint [ direction := aPoint ]
+CFPhysicsPreparedDistanceJoint >> direction: anObject [ direction := anObject ]
+
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> baseSeparation [ ^ baseSeparation ]
+CFPhysicsPreparedDistanceJoint >> baseLength [ ^ baseLength ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> baseSeparation: aNumber [ baseSeparation := aNumber ]
+CFPhysicsPreparedDistanceJoint >> baseLength: anObject [ baseLength := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> effectiveMass [ ^ effectiveMass ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> effectiveMass: aNumber [ effectiveMass := aNumber ]
+CFPhysicsPreparedDistanceJoint >> effectiveMass: anObject [ effectiveMass := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> springEnabled [ ^ springEnabled ]
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> springEnabled: anObject [ springEnabled := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> biasRate [ ^ biasRate ]
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> biasRate: anObject [ biasRate := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> massCoefficient [ ^ massCoefficient ]
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> massCoefficient: anObject [ massCoefficient := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> impulseCoefficient [ ^ impulseCoefficient ]
+{ #category : 'accessing' }
+CFPhysicsPreparedDistanceJoint >> impulseCoefficient: anObject [ impulseCoefficient := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedDistanceJoint >> impulse [ ^ impulse ]
 { #category : 'accessing' }
-CFPhysicsPreparedDistanceJoint >> impulse: aNumber [ impulse := aNumber ]
+CFPhysicsPreparedDistanceJoint >> impulse: anObject [ impulse := anObject ]
 
 { #category : 'writing back' }
 CFPhysicsPreparedDistanceJoint >> writeImpulsesBack [
-	joint solverCommitTarget accumulatedImpulse: impulse
+	joint solverCommitTarget impulse: impulse
 ]

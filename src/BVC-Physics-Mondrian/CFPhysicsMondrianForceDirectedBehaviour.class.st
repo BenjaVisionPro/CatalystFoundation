@@ -48,9 +48,9 @@ CFPhysicsMondrianForceDirectedBehaviour >> install [
 	forceDirectedBehaviour
 		nodes: [ physics bodyElements ];
 		connections: [ physics forceDirectedConnections ];
-		restLength: 104.0;
-		stiffness: 480.0;
-		damping: 520.0;
+		length: 104.0;
+		hertz: 3.0;
+		dampingRatio: 1.0;
 		repulsion: 72000.0;
 		repulsionSofteningDistance: 58.0;
 		maximumRepulsionDistance: 175.0;

@@ -25,60 +25,6 @@ CFPhysicsSharedScalarExamples >> ordinaryPhysicsValuesResolveWithoutWrapping [
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> springObservesSharedValuesAtEachPreparation [
-	<gtExample>
-	| first second spring restLength stiffness damping maximumForce firstVelocity |
-	first := CFPhysicsCleanSlateTests new
-		cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := CFPhysicsCleanSlateTests new
-		cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	restLength := CFPhysicsSharedScalar value: 50.
-	stiffness := CFPhysicsSharedScalar value: 10.
-	damping := CFPhysicsSharedScalar value: 0.
-	maximumForce := CFPhysicsSharedScalar value: 100000.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	spring
-		restLength: restLength;
-		stiffness: stiffness;
-		damping: damping;
-		maximumForce: maximumForce.
-	self assert: spring restLength == restLength.
-	self assert: spring stiffness == stiffness.
-	spring prepareForStep: 0.01.
-	firstVelocity := first velocity x.
-	first velocity: 0 @ 0.
-	second velocity: 0 @ 0.
-	stiffness value: 20.
-	spring prepareForStep: 0.01.
-	self assert: (first velocity x closeTo: firstVelocity * 2).
-	^ spring
-]
-
-{ #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> springStillAcceptsAndClampsOrdinaryNumbers [
-	<gtExample>
-	| first second spring |
-	first := CFPhysicsCleanSlateTests new
-		cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
-	second := CFPhysicsCleanSlateTests new
-		cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	spring
-		restLength: -10;
-		stiffness: -20;
-		damping: -30;
-		maximumForce: -40.
-	self assert: spring restLength equals: 0.0.
-	self assert: spring stiffness equals: 0.0.
-	self assert: spring damping equals: 0.0.
-	self assert: spring maximumForce equals: 0.0.
-	spring prepareForStep: 0.01.
-	self assert: first velocity equals: 0 @ 0.
-	self assert: second velocity equals: 0 @ 0.
-	^ spring
-]
-
-{ #category : 'examples - shared scalar' }
 CFPhysicsSharedScalarExamples >> constantForceResponseObservesSharedForceAndDistance [
 	<gtExample>
 	| force maximumDistance response |

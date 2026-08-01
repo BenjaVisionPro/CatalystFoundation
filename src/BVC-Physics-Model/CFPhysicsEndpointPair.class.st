@@ -50,11 +50,6 @@ CFPhysicsEndpointPair >> includesBody: aBodyState [
 
 
 { #category : 'relationships' }
-CFPhysicsEndpointPair >> spring [
-	^ self world addSpringConstraint: (CFPhysicsSpringConstraint betweenEndpoints: self)
-]
-
-{ #category : 'relationships' }
 CFPhysicsEndpointPair >> distanceJoint [
 	^ self world addDistanceJoint: (CFPhysicsDistanceJoint betweenEndpoints: self)
 ]

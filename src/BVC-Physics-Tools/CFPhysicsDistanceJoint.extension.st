@@ -18,7 +18,7 @@ CFPhysicsDistanceJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint t
 		ifTrue: [ aVisual hideRestLengthMarker ]
 		ifFalse: [
 			aVisual
-				showRestLengthMarkerAtFraction: self restLength / distance
+				showRestLengthMarkerAtFraction: self length / distance
 				from: firstPoint
 				to: secondPoint ]
 ]
@@ -26,9 +26,12 @@ CFPhysicsDistanceJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint t
 { #category : '*bvc-physics-tools' }
 CFPhysicsDistanceJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 	anInspectorContent addGroup: 'Distance' fields: {
-		#restLength -> 'Rest length'.
+		#length -> 'Length'.
 		#currentLength -> 'Current length'.
-		#accumulatedImpulse -> 'Accumulated impulse' }
+		#springEnabled -> 'Spring enabled'.
+		#hertz -> 'Hertz'.
+		#dampingRatio -> 'Damping ratio'.
+		#impulse -> 'Impulse' }
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -36,8 +39,11 @@ CFPhysicsDistanceJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	| points |
 	points := self endpointPair worldPoints.
 	anInspectorContent
-		diagnosticNumber: self restLength at: #restLength;
+		diagnosticNumber: self length at: #length;
 		diagnosticNumber: (points second - points first) r at: #currentLength;
-		diagnosticNumber: self accumulatedImpulse at: #accumulatedImpulse
+		text: self springEnabled printString at: #springEnabled;
+		diagnosticNumber: self hertz at: #hertz;
+		diagnosticNumber: self dampingRatio at: #dampingRatio;
+		diagnosticNumber: self impulse at: #impulse
 ]
 

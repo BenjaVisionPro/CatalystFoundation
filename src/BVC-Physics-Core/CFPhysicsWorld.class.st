@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'springConstraints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'nextMouseJointSequence', 'nextSpringSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'nextMouseJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -33,11 +33,9 @@ CFPhysicsWorld >> initialize [
 	activeContacts := #().
 	calculationContacts := #().
 	mouseJoints := IdentitySet new.
-	springConstraints := IdentitySet new.
 	attractionConstraints := IdentitySet new.
 	repulsionConstraints := IdentitySet new.
 	nextMouseJointSequence := 1.
-	nextSpringSequence := 1.
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
 	nextDistanceJointSequence := 1.
@@ -100,7 +98,6 @@ CFPhysicsWorld >> release [
 	mouseJoints copy do: [ :each | self removeMouseJoint: each ].
 	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
 	repulsionConstraints copy do: [ :each | self removeRepulsionConstraint: each ].
-	springConstraints copy do: [ :each | self removeSpringConstraint: each ].
 	distanceJoints copy do: [ :each | self removeDistanceJoint: each ].
 	revoluteJoints copy do: [ :each | self removeRevoluteJoint: each ].
 	weldJoints copy do: [ :each | self removeWeldJoint: each ].
@@ -266,7 +263,6 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		| body |
 		body := bodyStates removeKey: each.
 		each physics retireBodyFromWorld: self.
-		self removeSpringsUsingBody: body.
 		self removeAttractionsUsingBody: body.
 		self removeRepulsionsUsingBody: body.
 		self removeMouseJointsUsingBody: body.
@@ -399,7 +395,6 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
-	self prepareSpringConstraintsForStep: step timeStep.
 	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
 	capturedBodyStates := IdentityDictionary new.
 	orderedBodyStates := Array new: bodies size.
@@ -856,49 +851,16 @@ CFPhysicsWorld >> prepareRepulsionConstraintsForStep: seconds [
 ]
 
 
-{ #category : 'spring interaction' }
+{ #category : 'distance joints' }
 CFPhysicsWorld >> springs [
-	^ springConstraints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self distanceJoints select: #springEnabled
 ]
 
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> addSpringConstraint: aConstraint [
-	aConstraint endpointPair world == self
-		ifFalse: [ self error: 'Spring endpoints must belong to this physics world' ].
-	aConstraint sequence: nextSpringSequence.
-	nextSpringSequence := nextSpringSequence + 1.
-	springConstraints add: aConstraint.
-	^ aConstraint
+{ #category : 'distance joints' }
+CFPhysicsWorld >> springsUsingBody: aBody [
+	^ self springs select: [ :each | each includesBody: aBody ]
 ]
 
-
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> springsUsingBody: aBodyState [
-	^ self springs select: [ :each | each includesBody: aBodyState ]
-]
-
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> removeSpringConstraint: aConstraint [
-	(springConstraints includes: aConstraint) ifTrue: [
-		aConstraint release.
-		springConstraints remove: aConstraint ].
-	^ aConstraint
-]
-
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> removeSpringsUsingBody: aBodyState [
-	(springConstraints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeSpringConstraint: each ]
-]
-
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> prepareSpringConstraintsForStep: seconds [
-	springConstraints copy do: [ :each |
-		each isActive
-			ifTrue: [ each prepareForStep: seconds ]
-			ifFalse: [ springConstraints remove: each ifAbsent: [ ] ] ]
-]
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> distanceJoints [

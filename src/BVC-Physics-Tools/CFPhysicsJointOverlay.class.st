@@ -51,7 +51,8 @@ CFPhysicsJointOverlay >> initializeOverlay [
 { #category : 'updating' }
 CFPhysicsJointOverlay >> update [
 	| joints live |
-	joints := world joints.
+	joints := world joints reject: [ :joint |
+		(joint isKindOf: CFPhysicsDistanceJoint) and: [ joint springEnabled ] ].
 	live := IdentitySet new.
 	live addAll: joints.
 	(visualsByJoint keys reject: [ :each | live includes: each ]) do: [ :joint |

@@ -8,7 +8,7 @@ Class {
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
 		'nodes', 'connections', 'springsByConnection', 'repulsionsByPair',
-		'restLength', 'stiffness', 'damping', 'maximumSpringForce',
+		'length', 'hertz', 'dampingRatio',
 		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'velocityDamping'
 	],
 	#category : 'BVC-Physics-Behaviours',
@@ -20,10 +20,9 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByConnection := Dictionary new.
 	repulsionsByPair := Dictionary new.
-	restLength := CFPhysicsSharedScalar value: 80.0.
-	stiffness := CFPhysicsSharedScalar value: 600.0.
-	damping := CFPhysicsSharedScalar value: 400.0.
-	maximumSpringForce := CFPhysicsSharedScalar value: 250000.0.
+	length := CFPhysicsSharedScalar value: 80.0.
+	hertz := CFPhysicsSharedScalar value: 3.0.
+	dampingRatio := CFPhysicsSharedScalar value: 1.0.
 	repulsion := CFPhysicsSharedScalar value: 100000.0.
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 50.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 200.0.
@@ -59,28 +58,23 @@ CFPhysicsForceDirectedBehaviour >> springsByConnection [ ^ springsByConnection c
 CFPhysicsForceDirectedBehaviour >> repulsionsByPair [ ^ repulsionsByPair copy ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> restLength [ ^ restLength value ]
+CFPhysicsForceDirectedBehaviour >> length [ ^ length value ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> restLength: aNumber [ restLength value: aNumber ]
+CFPhysicsForceDirectedBehaviour >> length: aNumber [ length value: aNumber ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> stiffness [ ^ stiffness value ]
+CFPhysicsForceDirectedBehaviour >> hertz [ ^ hertz value ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> stiffness: aNumber [ stiffness value: aNumber ]
+CFPhysicsForceDirectedBehaviour >> hertz: aNumber [ hertz value: (aNumber asFloat max: 0.0) ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> damping [ ^ damping value ]
+CFPhysicsForceDirectedBehaviour >> dampingRatio [ ^ dampingRatio value ]
 
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> damping: aNumber [ damping value: aNumber ]
+CFPhysicsForceDirectedBehaviour >> dampingRatio: aNumber [ dampingRatio value: (aNumber asFloat max: 0.0) ]
 
-{ #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> maximumSpringForce [ ^ maximumSpringForce value ]
-
-{ #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> maximumSpringForce: aNumber [ maximumSpringForce value: aNumber ]
 
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> repulsion [ ^ repulsion value ]
@@ -163,7 +157,7 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredConnectio
 	(springsByConnection associations sorted: [ :first :second |
 		first value sequence < second value sequence ]) do: [ :association |
 		(desiredConnections includes: association key) ifFalse: [
-			world removeSpringConstraint: association value.
+			world removeDistanceJoint: association value.
 			springsByConnection removeKey: association key ] ]
 ]
 
@@ -178,17 +172,17 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs 
 
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> ensureSpringFor: aConnection [
-	^ springsByConnection at: aConnection ifAbsentPut: [
-		| spring sourceBody targetBody |
-		sourceBody := aConnection key physics body.
-		targetBody := aConnection value physics body.
-		spring := CFPhysicsSpringConstraint between: sourceBody and: targetBody.
-		spring
-			restLength: restLength;
-			stiffness: stiffness;
-			damping: damping;
-			maximumForce: maximumSpringForce.
-		world addSpringConstraint: spring ]
+	| spring |
+	spring := springsByConnection at: aConnection ifAbsentPut: [
+		world addDistanceJoint: (CFPhysicsDistanceJoint
+			between: aConnection key physics body
+			and: aConnection value physics body) ].
+	spring
+		length: length value;
+		springEnabled: true;
+		hertz: hertz value;
+		dampingRatio: dampingRatio value.
+	^ spring
 ]
 
 { #category : 'private - reconciliation' }
@@ -208,7 +202,7 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 
 { #category : 'removing' }
 CFPhysicsForceDirectedBehaviour >> removing [
-	springsByConnection values copy do: [ :each | world removeSpringConstraint: each ].
+	springsByConnection values copy do: [ :each | world removeDistanceJoint: each ].
 	repulsionsByPair values copy do: [ :each | world removeRepulsionConstraint: each ].
 	springsByConnection removeAll.
 	repulsionsByPair removeAll

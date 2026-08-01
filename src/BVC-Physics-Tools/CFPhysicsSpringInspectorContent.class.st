@@ -38,13 +38,13 @@ CFPhysicsSpringInspectorContent >> initializeContent [
 		#bodyA -> 'First body'.
 		#bodyB -> 'Second body' }).
 	element addChild: (self newGroup: 'Geometry' fields: {
-		#restLength -> 'Rest length'.
+		#length -> 'Length'.
 		#currentLength -> 'Current length'.
 		#extension -> 'Extension' }).
 	element addChild: (self newGroup: 'Response' fields: {
-		#stiffness -> 'Stiffness'.
-		#damping -> 'Damping'.
-		#maximumForce -> 'Maximum force'.
+		#hertz -> 'Hertz'.
+		#dampingRatio -> 'Damping ratio'.
+		#springEnabled -> 'Spring enabled'.
 		#active -> 'Active' })
 ]
 
@@ -128,19 +128,19 @@ CFPhysicsSpringInspectorContent >> labelForBody: aBody [
 
 { #category : 'updating' }
 CFPhysicsSpringInspectorContent >> refresh [
-	| points currentLength restLength |
+	| points currentLength length |
 	spring ifNil: [ ^ self ].
 	points := spring endpointPair worldPoints.
 	currentLength := (points second - points first) r.
-	restLength := spring restLength value asFloat.
+	length := spring length asFloat.
 	(self valueElementAt: #bodyA) text: (self labelForBody: spring bodyA).
 	(self valueElementAt: #bodyB) text: (self labelForBody: spring bodyB).
-	(self valueElementAt: #restLength) text: (self formatDiagnosticNumber: restLength).
+	(self valueElementAt: #length) text: (self formatDiagnosticNumber: length).
 	(self valueElementAt: #currentLength) text: (self formatDiagnosticNumber: currentLength).
-	(self valueElementAt: #extension) text: (self formatDiagnosticNumber: currentLength - restLength).
-	(self valueElementAt: #stiffness) text: (self formatDiagnosticNumber: spring stiffness value).
-	(self valueElementAt: #damping) text: (self formatDiagnosticNumber: spring damping value).
-	(self valueElementAt: #maximumForce) text: (self formatDiagnosticNumber: spring maximumForce value).
+	(self valueElementAt: #extension) text: (self formatDiagnosticNumber: currentLength - length).
+	(self valueElementAt: #hertz) text: (self formatDiagnosticNumber: spring hertz).
+	(self valueElementAt: #dampingRatio) text: (self formatDiagnosticNumber: spring dampingRatio).
+	(self valueElementAt: #springEnabled) text: spring springEnabled printString.
 	(self valueElementAt: #active) text: spring isActive printString.
 	^ self
 ]

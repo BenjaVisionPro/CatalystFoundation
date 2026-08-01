@@ -185,10 +185,10 @@ CFPhysicsMondrianHierarchyBehaviour >> removeJoints [
 
 { #category : 'private - joints' }
 CFPhysicsMondrianHierarchyBehaviour >> tuneRadialJointsTo: radius rootCount: count [
-	| restLength |
-	restLength := count = 1 ifTrue: [ 0.0 ] ifFalse: [ radius ].
+	| length |
+	length := count = 1 ifTrue: [ 0.0 ] ifFalse: [ radius ].
 	radialJoints values do: [ :joint |
-		joint restLength = restLength ifFalse: [ joint restLength: restLength ] ]
+		joint length = length ifFalse: [ joint length: length ] ]
 ]
 
 { #category : 'private - joints' }
@@ -199,7 +199,7 @@ CFPhysicsMondrianHierarchyBehaviour >> tuneRingJointsTo: radius rootCount: count
 		ifTrue: [ radius * 2.0 ]
 		ifFalse: [ radius * 2.0 * (Float pi / count) sin ].
 	ringJoints do: [ :joint |
-		joint restLength = chordLength ifFalse: [ joint restLength: chordLength ] ]
+		joint length = chordLength ifFalse: [ joint length: chordLength ] ]
 ]
 
 { #category : 'private - geometry' }

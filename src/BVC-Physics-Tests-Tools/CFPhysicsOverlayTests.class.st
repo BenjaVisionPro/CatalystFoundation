@@ -449,10 +449,11 @@ CFPhysicsOverlayTests >> physicsObjectInspectorContentTransition [
 	| host world spring inspector physics outgoingElement motion |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector install.
 	host space time: BlTime simulated.
@@ -827,10 +828,11 @@ CFPhysicsOverlayTests >> physicsOverlayCreatesOneRetainedVisualPerSpring [
 	| host world spring overlay |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	self assert: overlay springOverlay visuals size equals: 1.
 	self assert: overlay springOverlay visuals first spring == spring.
@@ -844,10 +846,11 @@ CFPhysicsOverlayTests >> physicsSpringOverlayPreservesVisualIdentity [
 	| host world spring overlay visual |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	overlay refresh.
@@ -863,10 +866,11 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
 		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
@@ -889,8 +893,9 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
-	spring := CFPhysicsSpringConstraint between: first and: second.
-	world addSpringConstraint: spring.
+	spring := CFPhysicsDistanceJoint between: first and: second.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	originalPosition := visual fromPosition.
@@ -919,8 +924,9 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	world := host physics world.
 	first := host children first.
 	second := host children second.
-	spring := CFPhysicsSpringConstraint between: first physics body and: second physics body.
-	world addSpringConstraint: spring.
+	spring := CFPhysicsDistanceJoint between: first physics body and: second physics body.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.
 	world step.
@@ -954,10 +960,11 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 	| host world spring overlay visual |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
 	visual := overlay springOverlay visuals first.
@@ -977,10 +984,11 @@ CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSprin
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 240 @ 40).
 	overlay refresh.
@@ -1015,10 +1023,11 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
 		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	self assert: visual fromHead class equals: BlArrowheadCircle.
@@ -1036,11 +1045,12 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
 		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
-	spring restLength: 24.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	spring length: 24.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
 	host space pulse.
@@ -1048,10 +1058,10 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
 	secondPoint := visual toPosition.
 	direction := secondPoint - firstPoint.
 	expectedMarkerPosition := firstPoint
-		+ (direction * (spring restLength value asFloat / (spring endpointPair worldPointB - spring endpointPair worldPointA) r))
+		+ (direction * (spring length asFloat / (spring endpointPair worldPointB - spring endpointPair worldPointA) r))
 		- (4 @ 4).
-	self assert: visual restLengthMarker hasParent.
-	self assert: visual restLengthMarker position equals: expectedMarkerPosition.
+	self assert: visual lengthMarker hasParent.
+	self assert: visual lengthMarker position equals: expectedMarkerPosition.
 	^ overlay
 ]
 
@@ -1061,13 +1071,14 @@ CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	| host world spring overlay visual |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
-	world removeSpringConstraint: spring.
+	world removeDistanceJoint: spring.
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
 	self assert: visual hasParent not.
@@ -1080,10 +1091,11 @@ CFPhysicsOverlayTests >> physicsSpringOverlayIsEmptyWhileDisabled [
 	| host world spring overlay |
 	host := self physicsHost.
 	world := host physics world.
-	spring := CFPhysicsSpringConstraint
+	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
-	world addSpringConstraint: spring.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	overlay controls element children third deactivate.
 	self assert: overlay controls springsEnabled not.
@@ -1314,7 +1326,7 @@ CFPhysicsOverlayTests >> physicsDistanceJointVisualShowsItsRestLength [
 	first := host children first.
 	joint := (first physics localAnchorAt: 10 @ 12)
 		distanceJointTo: (world anchorAt: 280 @ 60).
-	joint restLength: 120.0.
+	joint length: 120.0.
 	overlay refresh.
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
@@ -1328,10 +1340,10 @@ CFPhysicsOverlayTests >> physicsDistanceJointVisualShowsItsRestLength [
 		attachedTo: joint bodyB.
 	distance := (points second - points first) r.
 	expectedPosition := firstPoint
-		+ ((secondPoint - firstPoint) * (joint restLength / distance))
+		+ ((secondPoint - firstPoint) * (joint length / distance))
 		- (4 @ 4).
-	self assert: visual restLengthMarker visibility equals: BlVisibility visible.
-	self assert: visual restLengthMarker position equals: expectedPosition.
+	self assert: visual lengthMarker visibility equals: BlVisibility visible.
+	self assert: visual lengthMarker position equals: expectedPosition.
 	^ visual
 ]
 
@@ -1350,7 +1362,7 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
 	self assert: visual joint == joint.
-	self assert: visual restLengthMarker visibility equals: BlVisibility gone.
+	self assert: visual lengthMarker visibility equals: BlVisibility gone.
 	^ visual
 ]
 
@@ -1586,7 +1598,7 @@ CFPhysicsOverlayTests >> physicsOverlayDistanceJointInspectorShowsConfigurationA
 	joint := overlay selectedJoint.
 	content := overlay objectInspector content.
 	points := joint endpointPair worldPoints.
-	self assert: (content valueElementAt: #restLength) text asString equals: (content formatDiagnosticNumber: joint restLength).
+	self assert: (content valueElementAt: #length) text asString equals: (content formatDiagnosticNumber: joint length).
 	self assert: (content valueElementAt: #currentLength) text asString equals: (content formatDiagnosticNumber: (points second - points first) r).
 	self assert: (content valueElementAt: #accumulatedImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedImpulse).
 	^ overlay
@@ -1697,7 +1709,7 @@ CFPhysicsOverlayTests >> physicsJointVisualReleasesEveryRetainedPrimitiveWhenDis
 		visual rail.
 		visual lowerLimitMarker.
 		visual upperLimitMarker.
-		visual restLengthMarker.
+		visual lengthMarker.
 		visual pivotMarker.
 		visual referenceRay.
 		visual lowerAngleMarker.
@@ -1734,7 +1746,7 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	distanceVisual hitTarget fireEvent: BlClickEvent new.
 	firstContent := overlay objectInspector content.
 	self assert: overlay selectedJoint == distanceJoint.
-	self assert: (firstContent valueElements includesKey: #restLength).
+	self assert: (firstContent valueElements includesKey: #length).
 	self assert: (firstContent valueElements includesKey: #motorSpeed) not.
 	fixedVisual hitTarget fireEvent: BlClickEvent new.
 	secondContent := overlay objectInspector content.
@@ -1742,7 +1754,7 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	self assert: secondContent ~= firstContent.
 	self assert: secondContent joint == weldJoint.
 	self assert: (secondContent valueElements includesKey: #referenceAngle).
-	self assert: (secondContent valueElements includesKey: #restLength) not.
+	self assert: (secondContent valueElements includesKey: #length) not.
 	self assert: (secondContent valueElements includesKey: #motorSpeed) not.
 	self assert: firstContent joint == distanceJoint.
 	^ overlay

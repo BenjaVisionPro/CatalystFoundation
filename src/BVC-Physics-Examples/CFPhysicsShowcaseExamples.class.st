@@ -120,7 +120,7 @@ CFPhysicsShowcaseExamples >> joints [
 
 	distanceJoint := (distanceBody physics localAnchorAt: 32 @ 0)
 		distanceJointTo: (world anchorAt: 104 @ 54).
-	distanceJoint restLength: 82.
+	distanceJoint length: 82.
 
 	revoluteJoint := (revoluteBody physics localAnchorAt: 12 @ 12)
 		revoluteJointTo: (world anchorAt: 237 @ 124).

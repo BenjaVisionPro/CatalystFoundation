@@ -403,39 +403,6 @@ CFPhysics >> pointerJointHandler [
 	^ pointerJointHandler
 ]
 
-{ #category : 'spring interaction' }
-CFPhysics >> springTo: anotherElement [
-	| aWorld otherWorld spring |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
-	spring := CFPhysicsSpringConstraint
-		between: self body
-		and: anotherElement physics body.
-	^ aWorld addSpringConstraint: spring
-]
-
-
-{ #category : 'spring interaction' }
-CFPhysics >> springs [
-	| aWorld body |
-	aWorld := self world.
-	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
-	body := aWorld bodyStateFor: element.
-	body ifNil: [ ^ #() ].
-	^ aWorld springsUsingBody: body
-]
-
-{ #category : 'spring interaction' }
-CFPhysics >> removeSpring: aSpringConstraint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
-]
-
 { #category : 'distance joints' }
 CFPhysics >> distanceJointTo: anotherElement [
 	| aWorld otherWorld joint |
