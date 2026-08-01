@@ -1,17 +1,17 @@
 "
-I build collision manifolds from the shape state owned by Physics bodies.
+I generate collision manifolds from the shape state owned by Physics bodies.
 
-My responsibility is to dispatch Bloc-derived shapes to the appropriate collision manifold builder while preserving body-origin transforms.
+My responsibility is to derive authoritative contact geometry from Physics bodies, captured body states, or shape states at explicit transforms.
 "
 Class {
-	#name : 'CFPhysicsBlocManifoldBuilder',
+	#name : 'CFPhysicsManifoldGenerator',
 	#superclass : 'Object',
 	#category : 'BVC-Physics-Bloc',
 	#package : 'BVC-Physics-Bloc'
 }
 
 { #category : 'collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBody: bodyA andBody: bodyB [
+CFPhysicsManifoldGenerator >> manifoldBetweenBody: bodyA andBody: bodyB [
 	^ self
 		manifoldBetweenShapeState: bodyA shapeState
 		bodyOrigin: bodyA worldBodyOrigin
@@ -22,7 +22,7 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBody: bodyA andBody: bodyB 
 ]
 
 { #category : 'collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBodyState: bodyStateB [
+CFPhysicsManifoldGenerator >> manifoldBetweenBodyState: bodyStateA andBodyState: bodyStateB [
 	| firstTransform secondTransform |
 	firstTransform := bodyStateA currentTransform.
 	secondTransform := bodyStateB currentTransform.
@@ -35,8 +35,19 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenBodyState: bodyStateA andBo
 		rotation: secondTransform rotation
 ]
 
+{ #category : 'collision' }
+CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: transformA andShapeState: shapeStateB transform: transformB [
+	^ self
+		manifoldBetweenShapeState: shapeStateA
+		bodyOrigin: transformA bodyOrigin
+		rotation: transformA rotation
+		andShapeState: shapeStateB
+		bodyOrigin: transformB bodyOrigin
+		rotation: transformB rotation
+]
+
 { #category : 'private - collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
+CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
@@ -71,7 +82,7 @@ CFPhysicsBlocManifoldBuilder class >> manifoldBetweenShapeState: shapeStateA bod
 ]
 
 { #category : 'private - collision' }
-CFPhysicsBlocManifoldBuilder class >> manifoldBetweenPolygonShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andPolygonShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
+CFPhysicsManifoldGenerator >> manifoldBetweenPolygonShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andPolygonShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	| shapeA shapeB |
 	shapeA := shapeStateA polygonShape.
 	shapeB := shapeStateB polygonShape.

@@ -11,10 +11,10 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsContactPipeline class >> manifoldBuilder: aBlock [
+CFPhysicsContactPipeline class >> manifoldGenerator: aManifoldGenerator [
 	^ self new
 		pairFinder: CFPhysicsPairFinder new;
-		contactUpdater: (CFPhysicsContactUpdater manifoldBuilder: aBlock);
+		contactUpdater: (CFPhysicsContactUpdater manifoldGenerator: aManifoldGenerator);
 		yourself
 ]
 

@@ -11,9 +11,9 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsContactUpdateStage class >> manifoldBuilder: aBlock [
+CFPhysicsContactUpdateStage class >> manifoldGenerator: aManifoldGenerator [
 	^ self new
-		contactUpdater: (CFPhysicsContactUpdater manifoldBuilder: aBlock);
+		contactUpdater: (CFPhysicsContactUpdater manifoldGenerator: aManifoldGenerator);
 		yourself
 ]
 

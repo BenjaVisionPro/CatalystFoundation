@@ -5,27 +5,27 @@ I reconcile collision pairs with the previous contact set. I preserve contact id
 Class {
 	#name : 'CFPhysicsContactUpdater',
 	#superclass : 'Object',
-	#instVars : [ 'manifoldBuilder' ],
+	#instVars : [ 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
-CFPhysicsContactUpdater class >> manifoldBuilder: aBlock [
-	^ self new manifoldBuilder: aBlock; yourself
+CFPhysicsContactUpdater class >> manifoldGenerator: aManifoldGenerator [
+	^ self new manifoldGenerator: aManifoldGenerator; yourself
 ]
 
 { #category : 'accessing' }
-CFPhysicsContactUpdater >> manifoldBuilder: aBlock [ manifoldBuilder := aBlock ]
+CFPhysicsContactUpdater >> manifoldGenerator: aManifoldGenerator [ manifoldGenerator := aManifoldGenerator ]
 
 
 { #category : 'private - collision' }
 CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates [
-	manifoldBuilder numArgs = 2 ifTrue: [
-		^ manifoldBuilder
-			value: (bodyStates at: pair firstBody)
-			value: (bodyStates at: pair secondBody) ].
-	^ manifoldBuilder value: pair
+	^ bodyStates
+		ifNil: [ manifoldGenerator manifoldBetweenBody: pair firstBody andBody: pair secondBody ]
+		ifNotNil: [ manifoldGenerator
+			manifoldBetweenBodyState: (bodyStates at: pair firstBody)
+			andBodyState: (bodyStates at: pair secondBody) ]
 ]
 
 { #category : 'updating' }
@@ -40,7 +40,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs fromContacts: previousContacts [
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	orderedPairs do: [ :pair |
 		| manifold contact previous |
-		manifold := manifoldBuilder value: pair.
+		manifold := self manifoldForPair: pair bodyStates: nil.
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
 		manifold ifNotNil: [
 			contact := previous

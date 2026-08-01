@@ -5,7 +5,7 @@ I apply continuous-collision handling within the main step pipeline. I find impa
 Class {
 	#name : 'CFPhysicsContinuousStepStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'impactFinder', 'pairFinder' ],
+	#instVars : [ 'impactFinder', 'pairFinder', 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -95,7 +95,7 @@ CFPhysicsContinuousStepStage >> contactForImpact: impact bodyStates: bodyStates 
 	secondState := bodyStates at: pair secondBody.
 	firstSweep := firstState solvedSweep.
 	secondSweep := secondState solvedSweep.
-	manifold := CFPhysicsCollision
+	manifold := manifoldGenerator
 		manifoldBetweenShapeState: firstState shapeState
 		transform: (firstSweep transformAt: impact fraction)
 		andShapeState: secondState shapeState
@@ -143,6 +143,11 @@ CFPhysicsContinuousStepStage >> pair: pair requiresContinuousCollisionFor: body 
 CFPhysicsContinuousStepStage >> orderedContactsFrom: contactsByKey [
 	^ contactsByKey values asArray sorted: [ :left :right |
 		left pair comesBefore: right pair ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsContinuousStepStage >> manifoldGenerator: aManifoldGenerator [
+	manifoldGenerator := aManifoldGenerator
 ]
 
 { #category : 'accessing' }

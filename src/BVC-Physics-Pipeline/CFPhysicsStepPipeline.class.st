@@ -11,20 +11,22 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsStepPipeline class >> manifoldBuilder: aBlock [
+CFPhysicsStepPipeline class >> manifoldGenerator: aManifoldGenerator [
 	| sleepBehaviour |
 	sleepBehaviour := CFPhysicsIslandSleepStage new.
 	^ self new
 		stages: {
 			CFPhysicsVelocityIntegrationStage new.
 			CFPhysicsPairFinderStage new.
-			CFPhysicsContactUpdateStage manifoldBuilder: aBlock.
+			CFPhysicsContactUpdateStage manifoldGenerator: aManifoldGenerator.
 			CFPhysicsConstraintPreparationStage new.
 			CFPhysicsIslandBuilderStage new.
 			CFPhysicsIslandWakeStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsIslandSolverStage new.
 			CFPhysicsPostSolveStage new.
-			CFPhysicsContinuousStepStage new.
+			CFPhysicsContinuousStepStage new
+				manifoldGenerator: aManifoldGenerator;
+				yourself.
 			CFPhysicsIslandSleepingStage new sleepBehaviour: sleepBehaviour; yourself.
 			CFPhysicsContactEventsStage new };
 		yourself

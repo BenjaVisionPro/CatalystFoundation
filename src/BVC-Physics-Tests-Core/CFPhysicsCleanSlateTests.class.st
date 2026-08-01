@@ -261,7 +261,7 @@ CFPhysicsCleanSlateTests >> BlocGeometryRoutesToPolygonManifold [
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 5));
 		size: 60 @ 20;
 		yourself).
-	manifold := CFPhysicsBlocManifoldBuilder
+	manifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: ground bodyOrigin: (0 @ 0) + (ground extent / 2.0) rotation: 0
 		andShapeState: box bodyOrigin: (20 @ 15) + (box extent / 2.0) rotation: 0.
 	self assert: manifold notNil.
@@ -308,7 +308,7 @@ CFPhysicsCleanSlateTests >> contactPipelineReportsBeginContinueAndEnd [
 	second := self cleanSlateBodyWithSequence: 2.
 	pair := CFPhysicsPair first: first second: second.
 	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | manifold ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: manifold).
 	firstBatch := updater updatePairs: { pair } fromContacts: #().
 	self assert: firstBatch beganContacts size equals: 1.
 	self assert: firstBatch continuedContacts isEmpty.
@@ -331,10 +331,10 @@ CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	oldManifold := self cleanSlateManifoldWithFeatureIndex: 1.
 	oldPoint := oldManifold contactPoints first.
 	oldPoint normalImpulse: 7.0; tangentImpulse: 2.0.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | oldManifold ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: oldManifold).
 	initial := updater updatePairs: { pair } fromContacts: #().
 	newManifold := self cleanSlateManifoldWithFeatureIndex: 1.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | newManifold ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: newManifold).
 	next := updater updatePairs: { pair } fromContacts: initial activeContacts.
 	newPoint := next activeContacts first manifold contactPoints first.
 	self assert: newPoint normalImpulse equals: 7.0.
@@ -353,12 +353,12 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 	oldManifold contactPoints first
 		normalImpulse: 7.0;
 		tangentImpulse: 2.0.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | oldManifold ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: oldManifold).
 	initial := updater updatePairs: { pair } fromContacts: #().
 
 	second beSensor.
 	newManifold := self cleanSlateManifoldWithFeatureIndex: 1.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each | newManifold ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: newManifold).
 	next := updater updatePairs: { pair } fromContacts: initial activeContacts.
 	point := next activeContacts first manifold contactPoints first.
 
@@ -374,8 +374,7 @@ CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
 	first := self cleanSlateBodyWithSequence: 1.
 	second := self cleanSlateBodyWithSequence: 2.
 	pair := CFPhysicsPair first: first second: second.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
-		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
 	firstBatch := updater updatePairs: { pair } fromContacts: #().
 	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
 	stage := CFPhysicsConstraintPreparationStage new.
@@ -399,11 +398,9 @@ CFPhysicsCleanSlateTests >> constraintPreparationMeasuresChangedContactWork [
 	first := self cleanSlateBodyWithSequence: 1.
 	second := self cleanSlateBodyWithSequence: 2.
 	pair := CFPhysicsPair first: first second: second.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
-		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
 	firstBatch := updater updatePairs: { pair } fromContacts: #().
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
-		self cleanSlateManifoldWithFeatureIndex: 2 ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 2)).
 	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
 	stage := CFPhysicsConstraintPreparationStage new.
 	stage measureContacts: secondBatch activeContacts.
@@ -640,10 +637,7 @@ CFPhysicsCleanSlateTests >> contactPipelineFeedsDiscoveredPairsThroughBlocManifo
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
 	ground beStatic.
 	box := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
-	pipeline := CFPhysicsContactPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsContactPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	firstResult := pipeline updateBodies: { box. ground } fromContacts: #().
 	self assert: firstResult pairs size equals: 1.
 	self assert: firstResult beganContacts size equals: 1.
@@ -681,10 +675,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesTheComposedStep [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { box. ground }
 		fromContacts: #()
@@ -715,17 +706,14 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { box. ground }
 		fromContacts: #()
 		step: step
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
-	manifold := CFPhysicsBlocManifoldBuilder
+	manifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenBody: ground
 		andBody: box.
 	self assert: result activeContacts size equals: 1.
@@ -750,10 +738,7 @@ CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	secondResult := pipeline
 		stepBodies: { box. ground }
 		fromContacts: firstResult activeContacts
@@ -1295,10 +1280,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 	<gtExample>
 	| pipeline stages |
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	stages := pipeline stages.
 	self assert: stages size equals: 11.
 	self assert: stages first class equals: CFPhysicsVelocityIntegrationStage.
@@ -1383,10 +1365,7 @@ CFPhysicsCleanSlateTests >> sensorContactParticipatesInLifecycleButNotSolving [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { sensor. ground }
 		fromContacts: #()
@@ -1417,10 +1396,7 @@ CFPhysicsCleanSlateTests >> sensorContactDoesNotJoinDynamicBodiesIntoOneIsland [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { second. sensor. first }
 		fromContacts: #()
@@ -1450,10 +1426,7 @@ CFPhysicsCleanSlateTests >> sensorContactPublishesEndedEventWithoutSolveData [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	secondResult := pipeline
 		stepBodies: { sensor. ground }
 		fromContacts: firstResult activeContacts
@@ -1555,10 +1528,10 @@ CFPhysicsCleanSlateTests >> overlappingCirclesProducePersistentSinglePointManifo
 		geometry: BlCircleGeometry new;
 		size: 30 @ 30;
 		yourself).
-	firstManifold := CFPhysicsBlocManifoldBuilder
+	firstManifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: first bodyOrigin: (0 @ 0) + (first extent / 2.0) rotation: 0
 		andShapeState: second bodyOrigin: (25 @ 0) + (second extent / 2.0) rotation: 0.
-	secondManifold := CFPhysicsBlocManifoldBuilder
+	secondManifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: first bodyOrigin: (1 @ 0) + (first extent / 2.0) rotation: 0
 		andShapeState: second bodyOrigin: (25 @ 0) + (second extent / 2.0) rotation: 0.
 	self assert: firstManifold notNil.
@@ -1575,7 +1548,7 @@ CFPhysicsCleanSlateTests >> separatedCirclesDoNotProduceAManifold [
 	| first second manifold |
 	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
 	second := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
-	manifold := CFPhysicsBlocManifoldBuilder
+	manifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: first bodyOrigin: (0 @ 0) + (first extent / 2.0) rotation: 0
 		andShapeState: second bodyOrigin: (31 @ 0) + (second extent / 2.0) rotation: 0.
 	self assert: manifold isNil.
@@ -1588,7 +1561,7 @@ CFPhysicsCleanSlateTests >> circleAgainstRectangleProducesMixedShapeManifold [
 	| circle rectangle manifold |
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
 	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
-	manifold := CFPhysicsBlocManifoldBuilder
+	manifold := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0
 		andShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0.
 	self assert: manifold notNil.
@@ -1606,10 +1579,10 @@ CFPhysicsCleanSlateTests >> mixedShapeOrderingReversesOnlyTheManifoldOrientation
 	| circle rectangle circleFirst polygonFirst |
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
 	rectangle := CFPhysicsShapeState on: (BlElement new geometry: BlRoundedRectangleGeometry new; size: 80 @ 20; yourself).
-	circleFirst := CFPhysicsBlocManifoldBuilder
+	circleFirst := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0
 		andShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0.
-	polygonFirst := CFPhysicsBlocManifoldBuilder
+	polygonFirst := CFPhysicsManifoldGenerator new
 		manifoldBetweenShapeState: rectangle bodyOrigin: (0 @ 20) + (rectangle extent / 2.0) rotation: 0
 		andShapeState: circle bodyOrigin: (30 @ 12) + (circle extent / 2.0) rotation: 0.
 	self assert: polygonFirst notNil.
@@ -1632,8 +1605,7 @@ CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder manifoldBetweenBody: pair firstBody andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { second. first }
 		fromContacts: #()
@@ -4031,10 +4003,7 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 		substeps: 1
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBody: pair firstBody
-			andBody: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	result := pipeline
 		stepBodies: { obstacle. moving }
 		fromContacts: #()
@@ -4728,10 +4697,7 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 	moving velocity: 40 @ 0.
 	moving beginStep.
 	obstacle beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -4769,10 +4735,7 @@ CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpa
 	tether beginStep.
 	joint := CFPhysicsDistanceJoint between: moving and: tether.
 	joint restLength: 50.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -4802,10 +4765,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 	moving velocity: 10 @ 0.
 	moving beginStep.
 	obstacle beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -4978,10 +4938,7 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrd
 	firstObstacle beginStep.
 	secondMoving beginStep.
 	secondObstacle beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5016,10 +4973,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExi
 	moving velocity: 10 @ 0.
 	moving beginStep.
 	obstacle beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5049,10 +5003,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
 	moving velocity: 10 @ 0.
 	moving beginStep.
 	obstacle beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5084,10 +5035,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 	obstacle beStatic.
 	moving velocity: 40 @ 0.
 	{ moving. wall. overlapping. obstacle } do: #beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5120,10 +5068,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMoving
 	moving velocity: 40 @ 0.
 	separate velocity: 5 @ 0.
 	{ moving. wall. separate } do: #beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5151,10 +5096,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
 	moving velocity: 10 @ 0.
 	moving beginStep.
 	sensor beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5211,10 +5153,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 	moving velocity: 60 @ 0.
 	moving beginStep.
 	sensor beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5250,10 +5189,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 	moving beginStep.
 	wall beginStep.
 	sensor beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5290,10 +5226,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 	moving beginStep.
 	sensor beginStep.
 	wall beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5328,10 +5261,7 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	moving velocity: 0 @ 0.
 	moving beginStep.
 	sensor beginStep.
-	pipeline := CFPhysicsStepPipeline manifoldBuilder: [ :pair |
-		CFPhysicsCollision
-			manifoldBetween: pair firstBody
-			and: pair secondBody ].
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	step := CFPhysicsStep
 		timeStep: 1.0
 		substeps: 4
@@ -5918,8 +5848,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderReusesPreparedContactObjects [
 	first beStatic.
 	second := self cleanSlateBodyWithSequence: 2.
 	pair := CFPhysicsPair first: first second: second.
-	updater := CFPhysicsContactUpdater manifoldBuilder: [ :each |
-		self cleanSlateManifoldWithFeatureIndex: 1 ].
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
 	firstBatch := updater updatePairs: { pair } fromContacts: #().
 	bodyStates := IdentityDictionary new
 		at: first put: (CFPhysicsBodyStepState on: first);
@@ -5986,10 +5915,7 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds
 	CFPhysicsBodyStateCaptureStage new executeOn: result.
 	result pairs: { CFPhysicsPair first: first second: second }.
 	second position: 100 @ 0.
-	stage := CFPhysicsContactUpdateStage manifoldBuilder: [ :firstBodyState :secondBodyState |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBodyState: firstBodyState
-			andBodyState: secondBodyState ].
+	stage := CFPhysicsContactUpdateStage manifoldGenerator: CFPhysicsManifoldGenerator new.
 	contacts := stage executeOn: result.
 	self assert: contacts activeContacts size equals: 1.
 	self assert: second position equals: 100 @ 0.
@@ -6011,10 +5937,7 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 	CFPhysicsBodyStateCaptureStage new executeOn: result.
 	result pairs: { CFPhysicsPair first: first second: second }.
 	first beSolid.
-	stage := CFPhysicsContactUpdateStage manifoldBuilder: [ :firstBodyState :secondBodyState |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBodyState: firstBodyState
-			andBodyState: secondBodyState ].
+	stage := CFPhysicsContactUpdateStage manifoldGenerator: CFPhysicsManifoldGenerator new.
 	contacts := stage executeOn: result.
 	self assert: contacts activeContacts size equals: 1.
 	self assert: contacts activeContacts first isSensor.
@@ -6324,10 +6247,7 @@ CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
 	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
 	self assert: backgroundStep start.
 	self assert: backgroundStep pipeline == capturedPipeline.
-	replacementPipeline := CFPhysicsStepPipeline manifoldBuilder: [ :firstBodyState :secondBodyState |
-		CFPhysicsBlocManifoldBuilder
-			manifoldBetweenBodyState: firstBodyState
-			andBodyState: secondBodyState ].
+	replacementPipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
 	world stepPipeline: replacementPipeline.
 	self assert: backgroundStep pipeline == capturedPipeline.
 	self assert: backgroundStep pipeline ~~ world stepPipeline.
