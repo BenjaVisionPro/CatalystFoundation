@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -32,7 +32,8 @@ CFPhysicsSoftStepSolver >> initialize [
 	distanceJointConstraintCount := 0.
 	prismaticJointConstraintCount := 0.
 	revoluteJointConstraintCount := 0.
-	weldJointConstraintCount := 0
+	weldJointConstraintCount := 0.
+	mouseJointConstraintCount := 0
 ]
 
 { #category : 'solving' }
@@ -73,6 +74,8 @@ CFPhysicsSoftStepSolver >> warmStart [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
+	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
+		^ self applyMouseJointImpulse: constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
 		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
@@ -123,6 +126,8 @@ CFPhysicsSoftStepSolver >> solveJointConstraintsWithBias: biasEnabled [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEnabled [
+	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
+		^ self solveMouseJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
 		^ self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
@@ -131,6 +136,41 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled.
 		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
 			self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ] ]
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveMouseJointConstraint: constraint biasEnabled: biasEnabled [
+	| anchor velocity separation bias massCoefficient impulseCoefficient vector increment oldImpulse newImpulse magnitude |
+	anchor := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	velocity := self distanceJointVelocityFor: constraint bodyStateB anchor: anchor.
+	separation := constraint baseSeparation
+		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		+ anchor - constraint anchorB.
+	bias := biasEnabled ifTrue: [ separation * constraint biasRate ] ifFalse: [ 0 @ 0 ].
+	massCoefficient := biasEnabled ifTrue: [ constraint massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ constraint impulseCoefficient ] ifFalse: [ 0.0 ].
+	vector := (velocity + bias) * massCoefficient.
+	increment := (((constraint effectiveMassXX * vector x) + (constraint effectiveMassXY * vector y)) negated
+		@ ((constraint effectiveMassXY * vector x) + (constraint effectiveMassYY * vector y)) negated)
+		- (constraint impulse * impulseCoefficient).
+	oldImpulse := constraint impulse.
+	newImpulse := oldImpulse + increment.
+	magnitude := newImpulse r.
+	(magnitude > constraint maximumImpulse and: [ magnitude > 0.0 ]) ifTrue: [
+		newImpulse := newImpulse * (constraint maximumImpulse / magnitude) ].
+	constraint impulse: newImpulse.
+	self applyMouseJointImpulse: newImpulse - oldImpulse constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyMouseJointImpulse: impulse constraint: constraint [
+	| anchor state |
+	state := constraint bodyStateB.
+	state ifNil: [ ^ self ].
+	anchor := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: state).
+	state linearVelocity: state linearVelocity + (impulse * state inverseMass).
+	state angularVelocity: state angularVelocity + ((self cross: anchor with: impulse) * state inverseInertia)
 ]
 
 { #category : 'private - solving' }
@@ -542,7 +582,9 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 	contactConstraints := constraints select: [ :constraint |
 		constraint isKindOf: CFPhysicsPreparedConstraint ].
 	orderedJointConstraints := ((constraints select: [ :constraint |
-		constraint isKindOf: CFPhysicsPreparedDistanceJoint ]),
+		constraint isKindOf: CFPhysicsPreparedMouseJoint ]),
+		(constraints select: [ :constraint |
+			constraint isKindOf: CFPhysicsPreparedDistanceJoint ]),
 		(constraints select: [ :constraint |
 			constraint isKindOf: CFPhysicsPreparedRevoluteJoint ]),
 		(constraints select: [ :constraint |
@@ -564,6 +606,8 @@ CFPhysicsSoftStepSolver >> measurePreparedWork [
 		into: [ :total :constraint |
 			total + (constraint points count: [ :point |
 				point normalImpulse ~= 0.0 or: [ point tangentImpulse ~= 0.0 ] ]) ].
+	mouseJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedMouseJoint ].
 	distanceJointConstraintCount := orderedJointConstraints count: [ :constraint |
 		constraint isKindOf: CFPhysicsPreparedDistanceJoint ].
 	prismaticJointConstraintCount := orderedJointConstraints count: [ :constraint |
@@ -594,3 +638,6 @@ CFPhysicsSoftStepSolver >> prismaticJointConstraintCount [ ^ prismaticJointConst
 CFPhysicsSoftStepSolver >> revoluteJointConstraintCount [ ^ revoluteJointConstraintCount ]
 { #category : 'accessing - telemetry' }
 CFPhysicsSoftStepSolver >> weldJointConstraintCount [ ^ weldJointConstraintCount ]
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> mouseJointConstraintCount [ ^ mouseJointConstraintCount ]

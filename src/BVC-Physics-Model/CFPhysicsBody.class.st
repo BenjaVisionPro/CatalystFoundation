@@ -697,20 +697,8 @@ CFPhysicsBody >> propagatesSolverIsland [
 	^ bodyType propagatesSolverIsland
 ]
 
-{ #category : 'pointer constraints' }
-CFPhysicsBody >> acceptsPointerConstraint [
-	^ bodyType acceptsPointerConstraint
-]
 
-{ #category : 'pointer constraints' }
-CFPhysicsBody >> prepareForPointerConstraint: aConstraint by: seconds [
-	bodyType prepareForPointerConstraint: aConstraint by: seconds
-]
 
-{ #category : 'pointer constraints' }
-CFPhysicsBody >> releaseFromPointerConstraint: aConstraint [
-	bodyType releaseFromPointerConstraint: aConstraint
-]
 
 { #category : 'containment' }
 CFPhysicsBody >> applyContainmentConstraint: aConstraint bounds: aRectangle [

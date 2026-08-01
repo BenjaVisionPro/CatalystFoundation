@@ -1601,146 +1601,20 @@ CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 
 
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintOwnsTimingWhenNoEventTimestampExists [
-	<gtExample>
-	| body constraint |
-	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 10 @ 10.
-	constraint updatePointerPosition: 30 @ 10.
-	self assert: constraint isActive.
-	self assert: constraint pointerPosition equals: 30 @ 10.
-	^ constraint
-]
-
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintInitialTargetMovementDoesNotCreateVelocity [
-	<gtExample>
-	| body constraint timestamp |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 25 @ 35
-		timestamp: timestamp.
-	constraint
-		movePointerPositionTo: 80 @ 90
-		timestamp: timestamp + 1 milliSecond.
-	self assert: constraint pointerPosition equals: 80 @ 90.
-	self assert: constraint pointerVelocity equals: 0 @ 0.
-	constraint release.
-	self assert: body velocity equals: 0 @ 0.
-	^ constraint
-]
-
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintReleasePreservesSimulatedVelocityWithoutAPointerSample [
-	<gtExample>
-	| body constraint timestamp |
-	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 10 @ 10
-		timestamp: timestamp.
-	constraint movePointerPositionTo: 30 @ 10 timestamp: timestamp + 1 milliSecond.
-	body velocity: 420 @ 35.
-	constraint release.
-	self assert: body velocity equals: 420 @ 35.
-	^ constraint
-]
-
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintPreservesTheBodyLocalGrabPoint [
-	<gtExample>
-	| body constraint timestamp |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 35 @ 42
-		timestamp: timestamp.
-	self assert: constraint grabLocalPoint equals: -5 @ -8.
-	constraint updatePointerPosition: 75 @ 62 timestamp: timestamp + 20 milliSeconds.
-	constraint prepareForStep: 0.016.
-	self assert: body velocity x > 0.
-	self assert: body velocity y > 0.
-	self assert: body position equals: 20 @ 30.
-	^ constraint
-]
 
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintTracksTheGrabPointWhenTheBodyRotates [
-	<gtExample>
-	| body constraint timestamp grabPoint |
-	body := self cleanSlateBodyWithSequence: 1 position: 20 @ 30 extent: 40 @ 40.
-	grabPoint := body worldPointForBodyLocalPoint: 10 @ 0.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: grabPoint
-		timestamp: timestamp.
-	self assert: constraint grabLocalPoint equals: 10 @ 0.
-	body rotation: Float pi / 2.0.
-	constraint prepareForStep: 0.016.
-	self assert: body velocity x > 0.
-	self assert: body velocity y < 0.
-	^ constraint
-]
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> pointerConstraintReleasesWithPointerVelocity [
-	<gtExample>
-	| body constraint timestamp |
-	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 10 @ 10
-		timestamp: timestamp.
-	constraint updatePointerPosition: 30 @ 10 timestamp: timestamp + 20 milliSeconds.
-	constraint release.
-	self assert: constraint isActive not.
-	self assert: body velocity equals: 1000 @ 0.
-	^ constraint
-]
 
-{ #category : 'examples - pointer interaction' }
-CFPhysicsCleanSlateTests >> worldPreparesPointerConstraintsBeforeSolving [
-	<gtExample>
-	| owner child world body constraint timestamp |
-	owner := BlElement new size: 400 @ 300; yourself.
-	child := BlElement new size: 40 @ 40; yourself.
-	owner addChild: child.
-	world := owner physics beWorld.
-	world gravity: 0 @ 0.
-	world synchroniseMembership.
-	body := world bodyStateFor: child.
-	body position: 20 @ 20.
-	timestamp := DateAndTime now.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 30 @ 30
-		timestamp: timestamp.
-	constraint updatePointerPosition: 90 @ 30 timestamp: timestamp + 20 milliSeconds.
-	world addPointerConstraint: constraint.
-	world step.
-	self assert: body position x > 20.
-	self assert: world pointerConstraints size equals: 1.
-	world removePointerConstraint: constraint.
-	self assert: world pointerConstraints isEmpty.
-	^ world
-]
+
+
+
 
 { #category : 'examples - pull interaction' }
 CFPhysicsCleanSlateTests >> pullInteractionIsInstalledThroughThePhysicsFacade [
 	<gtExample>
 	| element handler |
 	element := BlElement new size: 40 @ 40; yourself.
-	handler := element physics pullInteractionHandler.
+	handler := element physics pointerJointHandler.
 	self assert: handler element equals: element.
 	self assert: element physics isPullInteractionEnabled.
 	element physics disablePullInteraction.
@@ -1801,13 +1675,13 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		by: 30 @ 0;
 		play.
 	self assert: pullEvents size equals: 1.
-	self assert: world pointerConstraints size equals: 1.
-	self assert: (world pointerConstraints first grabLocalPoint closeTo: 0 @ -4).
+	self assert: world mouseJoints size equals: 1.
+	self assert: (world mouseJoints first localAnchorB closeTo: 0 @ -4).
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
 	self assert: button physics position x > 20.
 	scripter mouseUp play.
-	self assert: world pointerConstraints isEmpty.
+	self assert: world mouseJoints isEmpty.
 	self assert: button physics body velocity x > 0.
 	^ button
 ]
@@ -2235,9 +2109,9 @@ CFPhysicsCleanSlateTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
+CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
 	<gtExample>
-	| owner element world bodyAnchor worldAnchor joint timestamp pointerConstraint result |
+	| owner element world bodyAnchor worldAnchor joint mouseJoint result |
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
@@ -2251,20 +2125,12 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	joint
 		limitTranslationFrom: -10 to: 10;
 		limitsEnabled: true.
-	timestamp := DateAndTime now.
-	pointerConstraint := CFPhysicsPointerConstraint
-		body: element physics body
-		pointerPosition: 10 @ 10
-		timestamp: timestamp.
-	pointerConstraint
-		updatePointerPosition: 1000 @ 1000
-		timestamp: timestamp + 20 milliSeconds.
-	world addPointerConstraint: pointerConstraint.
+	mouseJoint := CFPhysicsMouseJoint body: element physics body target: 1000 @ 1000.
+	mouseJoint maximumForce: 100000.0.
+	world addMouseJoint: mouseJoint.
 	result := world step.
-	self assert: result constraints first class equals: CFPhysicsPreparedPrismaticJoint.
 	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: element physics position y abs < element physics position x abs.
-	self assert: result constraints first perpendicularImpulse abs > 0.0.
 	self assert: element physics position x <= (10.0 + 1.0e-6).
 	^ result
 ]
@@ -6144,15 +6010,13 @@ CFPhysicsCleanSlateTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
 	world := root physics beWorld.
 	world synchroniseMembership.
 	body := child physics body.
-	handler := child physics pullInteractionHandler.
-	constraint := CFPhysicsPointerConstraint
-		body: body
-		pointerPosition: 10 @ 10.
-	world addPointerConstraint: constraint.
-	handler instVarNamed: 'constraint' put: constraint.
+	handler := child physics pointerJointHandler.
+	constraint := CFPhysicsMouseJoint body: body target: 10 @ 10.
+	world addMouseJoint: constraint.
+	handler instVarNamed: 'mouseJoint' put: constraint.
 	root physics ceaseBeingWorld.
 	self assert: body world isNil.
 	self deny: constraint isActive.
 	handler endFrom: nil.
-	self assert: handler constraint isNil
+	self assert: handler mouseJoint isNil
 ]

@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented access to body, world, interacti
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pullInteractionHandler', 'excludedFromWorld', 'behaviours' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler', 'excludedFromWorld', 'behaviours' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -121,7 +121,7 @@ CFPhysics >> element [
 { #category : 'accessing' }
 CFPhysics >> element: anElement [
 	element := anElement.
-	pullInteractionHandler := CFPhysicsPullInteractionHandler on: element
+	pointerJointHandler := CFPhysicsPointerJointHandler on: element
 ]
 
 { #category : 'world membership' }
@@ -384,23 +384,23 @@ CFPhysics >> collisionGroupIndex: anInteger [
 
 { #category : 'pull interaction' }
 CFPhysics >> enablePullInteraction [
-	pullInteractionHandler enable.
-	^ pullInteractionHandler
+	pointerJointHandler enable.
+	^ pointerJointHandler
 ]
 
 { #category : 'pull interaction' }
 CFPhysics >> disablePullInteraction [
-	pullInteractionHandler disable
+	pointerJointHandler disable
 ]
 
 { #category : 'pull interaction' }
 CFPhysics >> isPullInteractionEnabled [
-	^ pullInteractionHandler isEnabled
+	^ pointerJointHandler isEnabled
 ]
 
 { #category : 'pull interaction' }
-CFPhysics >> pullInteractionHandler [
-	^ pullInteractionHandler
+CFPhysics >> pointerJointHandler [
+	^ pointerJointHandler
 ]
 
 { #category : 'spring interaction' }
