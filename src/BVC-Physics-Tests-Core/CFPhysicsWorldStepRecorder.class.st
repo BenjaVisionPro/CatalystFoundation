@@ -7,8 +7,8 @@ Class {
 	#name : 'CFPhysicsWorldStepRecorder',
 	#superclass : 'Object',
 	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'backgroundStepping', 'backgroundStepCount', 'solveInFlight' ],
-	#category : 'BVC-Physics-Examples',
-	#package : 'BVC-Physics-Examples'
+	#category : 'BVC-Physics-Tests-Core',
+	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'initialization' }

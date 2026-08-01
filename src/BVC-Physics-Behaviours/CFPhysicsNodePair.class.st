@@ -5,8 +5,8 @@ Class {
 	#name : 'CFPhysicsNodePair',
 	#superclass : 'Object',
 	#instVars : [ 'first', 'second' ],
-	#category : 'BVC-Physics-Model',
-	#package : 'BVC-Physics-Model'
+	#category : 'BVC-Physics-Behaviours',
+	#package : 'BVC-Physics-Behaviours'
 }
 
 { #category : 'instance creation' }

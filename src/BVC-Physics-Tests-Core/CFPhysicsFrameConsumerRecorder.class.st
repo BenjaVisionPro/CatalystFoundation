@@ -7,8 +7,8 @@ Class {
 	#name : 'CFPhysicsFrameConsumerRecorder',
 	#superclass : 'Object',
 	#instVars : [ 'presentationCount', 'lastPresentationAlpha', 'releaseCount' ],
-	#category : 'BVC-Physics-Examples',
-	#package : 'BVC-Physics-Examples'
+	#category : 'BVC-Physics-Tests-Core',
+	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'initialization' }

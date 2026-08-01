@@ -3,8 +3,8 @@ Class {
 	#name : 'CFPhysicsTelemetryBenchmarkSuite',
 	#superclass : 'Object',
 	#instVars : [ 'results' ],
-	#category : 'BVC-Physics-Tools',
-	#package : 'BVC-Physics-Tools'
+	#category : 'BVC-Physics-Examples',
+	#package : 'BVC-Physics-Examples'
 }
 
 { #category : 'instance creation' }
