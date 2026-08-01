@@ -1,3 +1,8 @@
+"
+I build deterministic Mondrian graphs for Physics examples.
+
+My responsibility is to create repeatable graph structures and visual elements that exercise Mondrian Physics integration.
+"
 Class {
 	#name : 'CFPhysicsMondrianExampleGraphBuilder',
 	#superclass : 'Object',

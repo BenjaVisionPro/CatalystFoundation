@@ -1,4 +1,8 @@
-"I run controlled Physics telemetry measurements and answer inspectable results. I do not assert optimisation conclusions."
+"
+I run controlled Physics telemetry benchmarks.
+
+My responsibility is to execute repeatable workloads and answer inspectable measurements without asserting optimisation conclusions.
+"
 Class {
 	#name : 'CFPhysicsTelemetryBenchmarkExamples',
 	#superclass : 'Object',

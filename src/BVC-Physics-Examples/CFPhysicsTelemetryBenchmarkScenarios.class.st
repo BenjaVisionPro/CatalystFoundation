@@ -1,4 +1,8 @@
-"I build controlled, repeatable Physics workloads used only as inputs to telemetry benchmarks."
+"
+I build repeatable Physics workloads for telemetry benchmarks.
+
+My responsibility is to isolate representative simulation shapes so benchmark results can be compared consistently.
+"
 Class {
 	#name : 'CFPhysicsTelemetryBenchmarkScenarios',
 	#superclass : 'Object',

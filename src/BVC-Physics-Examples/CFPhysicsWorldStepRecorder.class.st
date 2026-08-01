@@ -1,7 +1,7 @@
 "
-I am a small executable-example collaborator for CFPhysicsWorldMotionBehaviour.
+I record the stepping protocol used by Physics Motion examples.
 
-I expose only the simulation protocol used by that Behaviour and record fixed-step calls. Presentation is supplied by a separate collaborator so the examples preserve the production boundary.
+My responsibility is to verify fixed-step and background-step coordination without constructing a complete Physics world.
 "
 Class {
 	#name : 'CFPhysicsWorldStepRecorder',

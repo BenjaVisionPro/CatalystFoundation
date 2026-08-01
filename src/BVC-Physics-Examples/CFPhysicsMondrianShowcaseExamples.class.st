@@ -1,3 +1,8 @@
+"
+I provide executable showcases of Physics integrated with Mondrian.
+
+My responsibility is to demonstrate world creation, force-directed Behaviour and Physics inspection on graph visualisations.
+"
 Class {
 	#name : 'CFPhysicsMondrianShowcaseExamples',
 	#superclass : 'Object',

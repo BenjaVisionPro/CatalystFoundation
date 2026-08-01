@@ -1,3 +1,8 @@
+"
+I provide interactive Physics showcases.
+
+My responsibility is to demonstrate supported controls, collisions and joints through complete Bloc scenes.
+"
 Class {
 	#name : 'CFPhysicsShowcaseExamples',
 	#superclass : 'Object',

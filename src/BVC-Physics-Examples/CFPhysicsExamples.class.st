@@ -1,3 +1,8 @@
+"
+I provide executable examples of the core Physics and Motion integration.
+
+My responsibility is to demonstrate supported world, body, stepping and playback behaviour while also serving as focused regression checks.
+"
 Class {
 	#name : 'CFPhysicsExamples',
 	#superclass : 'Object',

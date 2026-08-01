@@ -1,7 +1,7 @@
 "
-I record the frame-consumer protocol used by CFPhysicsWorldMotionBehaviour in executable examples.
+I record frame-consumer callbacks for executable examples.
 
-I am deliberately separate from CFPhysicsWorldStepRecorder so simulation stepping and frame consumption remain distinct collaborators.
+My responsibility is to verify presentation and release behaviour without introducing a real visual consumer.
 "
 Class {
 	#name : 'CFPhysicsFrameConsumerRecorder',
