@@ -118,18 +118,24 @@ CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 
 { #category : 'private' }
 CFPhysicsPullInteractionHandler >> finishConstraint [
+	| activeConstraint world |
 	constraint ifNil: [ ^ self ].
-	constraint release.
-	constraint body world removePointerConstraint: constraint.
-	constraint := nil
+	activeConstraint := constraint.
+	constraint := nil.
+	world := activeConstraint body world.
+	activeConstraint release.
+	world ifNotNil: [ world removePointerConstraint: activeConstraint ]
 ]
 
 { #category : 'private' }
 CFPhysicsPullInteractionHandler >> removeConstraint [
+	| activeConstraint world |
 	constraint ifNil: [ ^ self ].
-	constraint cancel.
-	constraint body world removePointerConstraint: constraint.
-	constraint := nil
+	activeConstraint := constraint.
+	constraint := nil.
+	world := activeConstraint body world.
+	activeConstraint cancel.
+	world ifNotNil: [ world removePointerConstraint: activeConstraint ]
 ]
 
 { #category : 'controlling' }

@@ -6133,3 +6133,26 @@ CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransf
 ]
 
 
+
+
+{ #category : 'tests - pull interaction' }
+CFPhysicsCleanSlateTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
+	| root child world body handler constraint |
+	root := BlElement new.
+	child := BlElement new extent: 20 @ 20.
+	root addChild: child.
+	world := root physics beWorld.
+	world synchroniseMembership.
+	body := child physics body.
+	handler := child physics pullInteractionHandler.
+	constraint := CFPhysicsPointerConstraint
+		body: body
+		pointerPosition: 10 @ 10.
+	world addPointerConstraint: constraint.
+	handler instVarNamed: 'constraint' put: constraint.
+	root physics ceaseBeingWorld.
+	self assert: body world isNil.
+	self deny: constraint isActive.
+	handler endFrom: nil.
+	self assert: handler constraint isNil
+]
