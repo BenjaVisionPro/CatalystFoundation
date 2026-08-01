@@ -1,9 +1,7 @@
 "
-I own continuous Motion playback for one CFPhysicsWorld.
+I manage continuous Motion playback for one Physics world.
 
-I am the explicit integration boundary between Physics simulation and Motion playback. The world asks me to start, pause, resume or stop; I assemble and retain the Motion timeline, Physics Behaviour and frame consumer needed for that playback. I own and release the continuous presentation together with its Motion; the Behaviour only advances simulation and requests presentation frames.
-
-One instance represents the reusable playback capability of one world. A running or paused Motion is one playback lifetime. Once that Motion reaches a terminal state I forget it, so a later #start creates a fresh Behaviour, presentation and fixed-step accumulator.
+My responsibility is to create, control, and release the Motion, Physics Behaviour, and presentation that make up one playback lifetime.
 "
 Class {
 	#name : 'CFPhysicsWorldPlayback',

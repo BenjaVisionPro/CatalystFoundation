@@ -1,15 +1,7 @@
 "
-I advance one CFPhysicsWorld as an indefinite Motion Behaviour.
+I adapt Motion playback frames to the fixed-step progression of one Physics world.
 
-My playback lifetime is explicit. I become active when Motion starts me and inactive when that playback ends by completion or cancellation. Pause and resume preserve that same lifetime. Once inactive I retain no presentation-frame remainder, so a later playback always begins from a clean fixed-step boundary.
-
-I adapt Motion's presentation-frame cadence to Physics' deterministic fixed step. Each evaluation contributes the increase in local Motion time to an accumulator. Synchronous playback preserves the existing whole-step catch-up semantics. Background playback retains at most one pending step, starts at most one solve per presentation frame and never waits for that solve.
-
-I own no frame scheduling, timeline placement, frame-consumer lifetime, Physics solver policy or visual property claim. CFMotionCoordinator supplies shared frames, CFMotionTimelineTrack places me in time, and CFPhysicsWorld owns its step configuration and simulation state. My propertyKey remains nil because a Physics world may present many elements rather than exclusively owning one Motion property.
-
-After stepping I publish the interpolation alpha through the small #frameReadyAtAlpha: consumer protocol. I do not know whether that consumer presents, records, profiles or ignores the frame.
-
-My animation target is the world's owner element. Normal Motion validity therefore cancels playback if that owner leaves or moves away from the coordinator's BlSpace.
+My responsibility is to accumulate elapsed Motion time, request synchronous or background simulation steps, and publish the presentation fraction for each frame.
 "
 Class {
 	#name : 'CFPhysicsWorldMotionBehaviour',

@@ -1,9 +1,7 @@
 "
-I own the optional Motion integration state associated with one CFPhysicsWorld.
+I coordinate the optional Motion facilities associated with one Physics world.
 
-The Physics world retains no Motion-specific instance variables. My class-side weak association supplies one integration per world while this package is loaded. I own both the reusable continuous playback capability and the lazily created manual presentation.
-
-Changing the world owner asks me to release the complete integration lifetime before the new owner is installed.
+My responsibility is to provide manual presentation and continuous playback without adding Motion-specific state to the world itself.
 "
 Class {
 	#name : 'CFPhysicsWorldMotionIntegration',

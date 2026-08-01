@@ -1,3 +1,8 @@
+"
+I present the bodies of one Physics world through Motion transform channels.
+
+My responsibility is to maintain per-body presentations, interpolate committed transforms for a frame, and release presentation resources when bodies or coordinators change.
+"
 Class {
 	#name : 'CFPhysicsWorldPresentation',
 	#superclass : 'Object',

@@ -1,7 +1,7 @@
 "
-I dispatch one captured Physics solve through GT's asynchronous future execution and return its publication to the owning Bloc element.
+I represent one asynchronous Physics solve for a world.
 
-Capture and commit remain on the Bloc process. Only #solve: executes in the future group. I never wait for the worker and I never queue more than one solve because CFPhysicsWorld>>#captureStateIfIdle owns that gate.
+My responsibility is to capture the configured pipeline task, execute its solve in the Physics Pipeline future group, and return the resulting solution to the owning Bloc element for commit.
 "
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',

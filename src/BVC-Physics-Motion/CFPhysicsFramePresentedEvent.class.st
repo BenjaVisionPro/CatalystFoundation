@@ -1,7 +1,7 @@
 "
-I announce that a Physics world presentation successfully committed one frame to its Motion transform channels.
+I announce that a Physics world has presented one frame through Motion.
 
-I am fired once after all body presentations have been updated. I am not a simulation-step, solver or raw-world-state event.
+My responsibility is to notify diagnostics and other observers after every body presentation has been updated.
 "
 Class {
 	#name : 'CFPhysicsFramePresentedEvent',
