@@ -925,7 +925,11 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	first := host children first.
 	second := host children second.
 	spring := CFPhysicsDistanceJoint between: first physics body and: second physics body.
-	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	spring
+		springEnabled: true;
+		hertz: 3.0;
+		dampingRatio: 1.0;
+		collideConnected: true.
 	world addDistanceJoint: spring.
 	overlay refresh.
 	first physics position: 80 @ 80.

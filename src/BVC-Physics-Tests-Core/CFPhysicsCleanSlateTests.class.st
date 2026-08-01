@@ -1676,7 +1676,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		play.
 	self assert: pullEvents size equals: 1.
 	self assert: world mouseJoints size equals: 1.
-	self assert: (world mouseJoints first maximumForce closeTo: button physics body mass * 10000.0).
+	self assert: (world mouseJoints first maximumForce closeTo: button physics body mass * 1000000.0).
 	self assert: (world mouseJoints first localAnchorB closeTo: 0 @ -4).
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
@@ -5389,7 +5389,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	self assert: capturedJoint solverCommitTarget == joint.
 	self assert: capturedJoint length equals: 25.
 	self assert: capturedJoint impulse equals: 3.0.
-	self assert: prepared baseSeparation equals: 15.0.
+	self assert: prepared baseLength equals: 40.0.
 	self assert: prepared impulse equals: 3.0 * state step warmStartRatio.
 	self assert: joint impulse equals: 0.0.
 	solution := world stepPipeline solve: state.
