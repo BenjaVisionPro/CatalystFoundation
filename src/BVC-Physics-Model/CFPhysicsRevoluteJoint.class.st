@@ -6,7 +6,7 @@ My responsibility is to retain its reference angle, limits, motor configuration 
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'CFPhysicsJoint',
-	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
+	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'lowerLimitImpulse', 'upperLimitImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -50,6 +50,8 @@ CFPhysicsRevoluteJoint >> initialize [
 	motorSpeed := 0.0.
 	maximumMotorImpulse := 0.0.
 	motorImpulse := 0.0.
+	lowerLimitImpulse := 0.0.
+	upperLimitImpulse := 0.0.
 ]
 
 { #category : 'accessing' }
@@ -87,6 +89,8 @@ CFPhysicsRevoluteJoint >> limitsEnabled [ ^ limitsEnabled ]
 CFPhysicsRevoluteJoint >> limitsEnabled: aBoolean [
 	limitsEnabled = aBoolean ifTrue: [ ^ self ].
 	limitsEnabled := aBoolean.
+	lowerLimitImpulse := 0.0.
+	upperLimitImpulse := 0.0.
 	self wakeBodies
 ]
 { #category : 'limits' }
@@ -101,11 +105,33 @@ CFPhysicsRevoluteJoint >> limitAnglesFrom: aLowerAngle to: anUpperAngle [
 	lower < upper ifFalse: [ self error: 'A revolute joint limit requires a lower angle smaller than its upper angle' ].
 	lowerAngle := lower.
 	upperAngle := upper.
+	lowerLimitImpulse := 0.0.
+	upperLimitImpulse := 0.0.
 	self wakeBodies
 ]
 
+
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> lowerLimitImpulse [ ^ lowerLimitImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> lowerLimitImpulse: aNumber [ lowerLimitImpulse := aNumber asFloat ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> upperLimitImpulse [ ^ upperLimitImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> upperLimitImpulse: aNumber [ upperLimitImpulse := aNumber asFloat ]
+
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
+
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> lowerLimitImpulse [ ^ lowerLimitImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> lowerLimitImpulse: aNumber [ lowerLimitImpulse := aNumber asFloat ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> upperLimitImpulse [ ^ upperLimitImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> upperLimitImpulse: aNumber [ upperLimitImpulse := aNumber asFloat ]
+
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorEnabled: aBoolean [
 	motorEnabled = aBoolean ifTrue: [ ^ self ].

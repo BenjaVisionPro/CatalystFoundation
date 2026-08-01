@@ -5,7 +5,7 @@ I represent a revolute joint prepared for one solver step. I hold its pivot cons
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',
-	#instVars : [ 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'limitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
+	#instVars : [ 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'lowerLimitImpulse', 'upperLimitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -59,9 +59,13 @@ CFPhysicsPreparedRevoluteJoint >> limitMass [ ^ limitMass ]
 { #category : 'limits' }
 CFPhysicsPreparedRevoluteJoint >> limitMass: aNumber [ limitMass := aNumber ]
 { #category : 'limits' }
-CFPhysicsPreparedRevoluteJoint >> limitImpulse [ ^ limitImpulse ]
+CFPhysicsPreparedRevoluteJoint >> lowerLimitImpulse [ ^ lowerLimitImpulse ]
 { #category : 'limits' }
-CFPhysicsPreparedRevoluteJoint >> limitImpulse: aNumber [ limitImpulse := aNumber ]
+CFPhysicsPreparedRevoluteJoint >> lowerLimitImpulse: aNumber [ lowerLimitImpulse := aNumber ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> upperLimitImpulse [ ^ upperLimitImpulse ]
+{ #category : 'limits' }
+CFPhysicsPreparedRevoluteJoint >> upperLimitImpulse: aNumber [ upperLimitImpulse := aNumber ]
 { #category : 'motor' }
 CFPhysicsPreparedRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
 { #category : 'motor' }
@@ -87,5 +91,7 @@ CFPhysicsPreparedRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumbe
 CFPhysicsPreparedRevoluteJoint >> writeImpulsesBack [
 	joint solverCommitTarget
 		accumulatedImpulse: impulse;
+		lowerLimitImpulse: lowerLimitImpulse;
+		upperLimitImpulse: upperLimitImpulse;
 		motorImpulse: motorImpulse
 ]

@@ -65,7 +65,8 @@ CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		lowerAngle: 0.0;
 		upperAngle: 0.0;
 		limitMass: 0.0;
-		limitImpulse: 0.0;
+		lowerLimitImpulse: 0.0;
+		upperLimitImpulse: 0.0;
 		motorEnabled: false;
 		motorSpeed: 0.0;
 		maximumMotorImpulse: 0.0;

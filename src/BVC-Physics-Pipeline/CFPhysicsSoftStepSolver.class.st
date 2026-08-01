@@ -83,8 +83,8 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self warmStartPrismaticJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
+		self warmStartRevoluteJointAxialConstraints: constraint.
 		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
-		self warmStartRevoluteJointMotor: constraint.
 		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
 			self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
 ]
@@ -441,6 +441,8 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointLimits: constraint biasEnabled: bi
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled [
 	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
+	self solveRevoluteJointMotor: constraint.
+	self solveRevoluteJointLimits: constraint biasEnabled: biasEnabled.
 	relativeVelocity := self revoluteJointRelativeVelocity: constraint.
 	separation := constraint baseSeparation
 		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
@@ -454,15 +456,16 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 		revoluteJointImpulseFor: (relativeVelocity + bias) * massCoefficient
 		constraint: constraint) - (constraint impulse * impulseCoefficient).
 	constraint impulse: constraint impulse + increment.
-	self applyRevoluteJointImpulse: increment constraint: constraint.
-	self solveRevoluteJointMotor: constraint.
-	self solveRevoluteJointLimit: constraint biasEnabled: biasEnabled
+	self applyRevoluteJointImpulse: increment constraint: constraint
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> warmStartRevoluteJointMotor: constraint [
-	(self isMotorJointConstraint: constraint) ifTrue: [
-		self applyWeldJointAngularImpulse: constraint motorImpulse constraint: constraint ]
+CFPhysicsSoftStepSolver >> warmStartRevoluteJointAxialConstraints: constraint [
+	| impulse |
+	impulse := constraint motorImpulse
+		+ constraint lowerLimitImpulse
+		- constraint upperLimitImpulse.
+	self applyWeldJointAngularImpulse: impulse constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -479,31 +482,47 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointMotor: constraint [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveRevoluteJointLimit: constraint biasEnabled: biasEnabled [
-	| angle relativeVelocity separation bias increment oldImpulse newImpulse |
+CFPhysicsSoftStepSolver >> solveRevoluteJointLimits: constraint biasEnabled: biasEnabled [
+	| angle relativeVelocity separation bias massCoefficient impulseCoefficient increment oldImpulse newImpulse |
 	(self isLimitedRevoluteJointConstraint: constraint) ifFalse: [ ^ self ].
 	angle := constraint limitBaseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
-	angle < constraint lowerAngle ifTrue: [
-		separation := angle - constraint lowerAngle.
-		relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint limitMass * (relativeVelocity + bias) negated.
-		oldImpulse := constraint limitImpulse max: 0.0.
-		newImpulse := (oldImpulse + increment) max: 0.0.
-		constraint limitImpulse: newImpulse.
-		^ self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
-	angle > constraint upperAngle ifTrue: [
-		separation := angle - constraint upperAngle.
-		relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
-		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-		increment := constraint limitMass * (relativeVelocity + bias) negated.
-		oldImpulse := constraint limitImpulse min: 0.0.
-		newImpulse := (oldImpulse + increment) min: 0.0.
-		constraint limitImpulse: newImpulse.
-		^ self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
-	constraint limitImpulse: 0.0
+	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
+
+	separation := angle - constraint lowerAngle.
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime ]
+		ifFalse: [ biasEnabled ifTrue: [
+			bias := step biasRate * separation.
+			massCoefficient := step massCoefficient.
+			impulseCoefficient := step impulseCoefficient ] ].
+	oldImpulse := constraint lowerLimitImpulse.
+	increment := (massCoefficient * constraint limitMass * (relativeVelocity + bias)) negated
+		- (impulseCoefficient * oldImpulse).
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint lowerLimitImpulse: newImpulse.
+	self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint.
+
+	separation := constraint upperAngle - angle.
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime ]
+		ifFalse: [ biasEnabled ifTrue: [
+			bias := step biasRate * separation.
+			massCoefficient := step massCoefficient.
+			impulseCoefficient := step impulseCoefficient ] ].
+	oldImpulse := constraint upperLimitImpulse.
+	increment := (massCoefficient * constraint limitMass * (relativeVelocity negated + bias)) negated
+		- (impulseCoefficient * oldImpulse).
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint upperLimitImpulse: newImpulse.
+	self applyWeldJointAngularImpulse: (newImpulse - oldImpulse) negated constraint: constraint
 ]
 
 { #category : 'private - solving' }
