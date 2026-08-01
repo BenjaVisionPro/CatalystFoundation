@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysicsWeldJoint' }
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsWeldJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsWeldJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]

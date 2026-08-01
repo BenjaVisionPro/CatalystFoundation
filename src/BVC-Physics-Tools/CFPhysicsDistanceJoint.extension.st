@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysicsDistanceJoint' }
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsDistanceJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsDistanceJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]

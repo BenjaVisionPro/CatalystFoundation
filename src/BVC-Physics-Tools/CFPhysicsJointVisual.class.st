@@ -266,13 +266,13 @@ CFPhysicsJointVisual >> addTo: aParentElement [
 { #category : 'updating' }
 CFPhysicsJointVisual >> update [
 	| points firstPoint secondPoint |
-	points := joint endpointPair worldPoints.
+	points := joint physicsOverlayWorldPoints.
 	firstPoint := context
 		overlayPointFromWorld: points first
-		attachedTo: joint endpointPair bodyA.
+		attachedTo: joint bodyA.
 	secondPoint := context
 		overlayPointFromWorld: points second
-		attachedTo: joint endpointPair bodyB.
+		attachedTo: joint bodyB.
 	self
 		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
 		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).

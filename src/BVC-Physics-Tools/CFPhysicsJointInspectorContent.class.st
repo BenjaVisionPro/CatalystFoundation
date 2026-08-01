@@ -170,7 +170,7 @@ CFPhysicsJointInspectorContent >> jointTypeName [
 CFPhysicsJointInspectorContent >> refresh [
 	| points |
 	joint ifNil: [ ^ self ].
-	points := joint endpointPair worldPoints.
+	points := joint physicsOverlayWorldPoints.
 	(self valueElementAt: #jointType) text: self jointTypeName.
 	(self valueElementAt: #active) text: joint isActive printString.
 	(self valueElementAt: #sequence) text: joint sequence printString.

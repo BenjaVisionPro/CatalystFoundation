@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysicsPrismaticJoint' }
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsPrismaticJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsPrismaticJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]

@@ -1,6 +1,11 @@
 Extension { #name : 'CFPhysicsRevoluteJoint' }
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsRevoluteJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsRevoluteJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]
