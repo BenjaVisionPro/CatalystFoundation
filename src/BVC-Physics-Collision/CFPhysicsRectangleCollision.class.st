@@ -1,3 +1,8 @@
+"
+I build a contact manifold for two unrotated axis-aligned rectangles.
+
+My responsibility is to provide the inexpensive AABB overlap path selected by CFPhysicsCollision.
+"
 Class {
 	#name : 'CFPhysicsRectangleCollision',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I adapt a shape state and transform to the body protocol required by collision algorithms.
+
+My responsibility is to let transform-based collision queries reuse body-oriented narrow-phase code without creating a simulation body.
+"
 Class {
 	#name : 'CFPhysicsCollisionBodyView',
 	#superclass : 'Object',

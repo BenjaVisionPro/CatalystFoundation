@@ -1,3 +1,8 @@
+"
+I represent the persistent contact relationship between a pair of bodies.
+
+I retain the current and previous manifolds, prepared solver state and shape snapshots needed to classify and continue the contact across steps.
+"
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',

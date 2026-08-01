@@ -1,3 +1,8 @@
+"
+I represent convex polygon geometry used by collision algorithms.
+
+I own local vertices, face normals, rounding radius and rotation centre, and derive their world-space forms from a body origin and rotation.
+"
 Class {
 	#name : 'CFPhysicsPolygonShape',
 	#superclass : 'Object',

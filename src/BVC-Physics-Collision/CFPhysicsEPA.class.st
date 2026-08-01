@@ -1,3 +1,8 @@
+"
+I recover penetration information from an intersecting GJK simplex.
+
+My responsibility is to expand the simplex to obtain a collision normal, penetration depth and representative contact points.
+"
 Class {
 	#name : 'CFPhysicsEPA',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I determine the earliest time at which two swept convex shapes may touch.
+
+My responsibility is to support continuous collision detection by advancing from distance queries until impact, separation or an iteration limit is established.
+"
 Class {
 	#name : 'CFPhysicsConservativeAdvancement',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I select and coordinate narrow-phase collision detection for two Physics bodies or shape transforms.
+
+My responsibility is to return a manifold with body-local contact anchors regardless of the specialised algorithm used.
+"
 Class {
 	#name : 'CFPhysicsCollision',
 	#superclass : 'Object',

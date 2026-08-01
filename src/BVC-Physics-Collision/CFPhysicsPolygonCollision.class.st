@@ -1,3 +1,8 @@
+"
+I build contact manifolds for unrounded polygon pairs and circle-polygon pairs using separating-axis tests.
+
+My responsibility is to provide the specialised narrow-phase path selected by CFPhysicsCollision for simple unrotated geometry.
+"
 Class {
 	#name : 'CFPhysicsPolygonCollision',
 	#superclass : 'Object',

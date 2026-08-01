@@ -1,3 +1,8 @@
+"
+I perform convex support-mapping queries between two shapes.
+
+My responsibility is to determine intersection simplices and closest-point distance results used by discrete and continuous collision detection.
+"
 Class {
 	#name : 'CFPhysicsGJK',
 	#superclass : 'Object',

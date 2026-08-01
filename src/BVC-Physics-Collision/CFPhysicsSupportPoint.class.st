@@ -1,3 +1,8 @@
+"
+I represent one Minkowski support point and the source point from each shape.
+
+My responsibility is to preserve the geometric witnesses used by GJK, EPA and closest-point calculations.
+"
 Class {
 	#name : 'CFPhysicsSupportPoint',
 	#superclass : 'Object',

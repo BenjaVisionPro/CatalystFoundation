@@ -1,3 +1,8 @@
+"
+I identify the pair of geometric features that produced a manifold point.
+
+My responsibility is to give contact points stable value identity for matching and impulse preservation across steps.
+"
 Class {
 	#name : 'CFPhysicsContactFeatureId',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent a polygon vertex while it is being clipped against a reference face.
+
+I retain the incident vertex index so the manifold builder can assign stable contact features.
+"
 Class {
 	#name : 'CFPhysicsClipVertex',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I describe the outcome of a continuous collision time-of-impact query.
+
+I record the status, swept fraction, final distance result and iteration count so the pipeline can distinguish impact, separation and exhaustion.
+"
 Class {
 	#name : 'CFPhysicsTimeOfImpactResult',
 	#superclass : 'Object',

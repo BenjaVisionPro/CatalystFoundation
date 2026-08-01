@@ -1,3 +1,8 @@
+"
+I represent one contact point within a collision manifold.
+
+I retain its world position, separation, feature identity, body-local anchors and accumulated solver impulses.
+"
 Class {
 	#name : 'CFPhysicsManifoldPoint',
 	#superclass : 'Object',

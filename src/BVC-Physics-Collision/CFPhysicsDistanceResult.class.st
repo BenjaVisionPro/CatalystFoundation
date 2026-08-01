@@ -1,3 +1,8 @@
+"
+I describe the closest-point result for two convex shapes.
+
+I record their separation, closest points, separating axis and whether the shapes overlap for continuous and discrete collision queries.
+"
 Class {
 	#name : 'CFPhysicsDistanceResult',
 	#superclass : 'Object',

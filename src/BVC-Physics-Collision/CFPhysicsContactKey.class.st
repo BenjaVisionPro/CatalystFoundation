@@ -1,3 +1,8 @@
+"
+I identify a body pair independently of encounter order.
+
+My responsibility is to provide stable equality and hashing for contact lookup and reconciliation.
+"
 Class {
 	#name : 'CFPhysicsContactKey',
 	#superclass : 'Object',

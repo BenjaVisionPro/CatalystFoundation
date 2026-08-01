@@ -1,3 +1,8 @@
+"
+I represent the contact geometry between two overlapping shapes.
+
+I own the collision normal, penetration depth and manifold points whose impulses may be preserved across simulation steps.
+"
 Class {
 	#name : 'CFPhysicsManifold',
 	#superclass : 'Object',

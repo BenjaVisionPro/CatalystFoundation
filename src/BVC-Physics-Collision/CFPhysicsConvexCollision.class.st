@@ -1,3 +1,8 @@
+"
+I build a contact manifold for a general convex body pair.
+
+My responsibility is to combine GJK intersection detection with EPA penetration recovery when specialised shape paths are unsuitable.
+"
 Class {
 	#name : 'CFPhysicsConvexCollision',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I resolve a pair of endpoints to the nearest points on two bodies' collision geometry.
+
+My responsibility is to provide geometry-aware world endpoints for constraints that should attach at facing boundaries rather than fixed anchors.
+"
 Class {
 	#name : 'CFPhysicsNearestGeometryEndpointPair',
 	#superclass : 'CFPhysicsEndpointPair',

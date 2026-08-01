@@ -1,3 +1,8 @@
+"
+I build contact manifolds for axis-aligned circle and rectangle pairs.
+
+My responsibility is to provide the specialised narrow-phase paths selected by CFPhysicsCollision when rotation and rounded geometry do not require the general convex solver.
+"
 Class {
 	#name : 'CFPhysicsCircleCollision',
 	#superclass : 'Object',

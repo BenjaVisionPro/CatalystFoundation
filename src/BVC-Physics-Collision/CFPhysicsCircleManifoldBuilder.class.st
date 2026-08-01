@@ -1,3 +1,8 @@
+"
+I build contact manifolds involving circles from explicit shape states and body transforms.
+
+My responsibility is to serve the Bloc manifold boundary without requiring full Physics body objects.
+"
 Class {
 	#name : 'CFPhysicsCircleManifoldBuilder',
 	#superclass : 'Object',

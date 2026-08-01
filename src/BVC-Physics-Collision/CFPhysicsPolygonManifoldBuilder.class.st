@@ -1,3 +1,8 @@
+"
+I build clipped contact manifolds between convex polygons from explicit geometry and transforms.
+
+My responsibility is to select reference and incident faces, clip their overlap and assign stable contact features.
+"
 Class {
 	#name : 'CFPhysicsPolygonManifoldBuilder',
 	#superclass : 'Object',
