@@ -11,10 +11,10 @@ CFPhysicsWheelJointExamples >> wheelJointDefaultsMatchBox2D [
 	<gtExample>
 	| joint |
 	joint := CFPhysicsWheelJoint new.
-	self assert: joint localAxisA equals: 1 @ 0.
-	self assert: joint springEnabled not.
-	self assert: (joint hertz closeTo: 0.0).
-	self assert: (joint dampingRatio closeTo: 0.0).
+	self assert: joint localAxisA equals: 0 @ 1.
+	self assert: joint springEnabled.
+	self assert: (joint hertz closeTo: 1.0).
+	self assert: (joint dampingRatio closeTo: 0.7).
 	self assert: joint limitsEnabled not.
 	self assert: (joint lowerTranslation closeTo: 0.0).
 	self assert: (joint upperTranslation closeTo: 0.0).

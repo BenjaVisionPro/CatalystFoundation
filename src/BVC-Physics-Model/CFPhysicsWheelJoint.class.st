@@ -37,10 +37,10 @@ CFPhysicsWheelJoint class >> betweenEndpoints: endpoints along: aWorldAxis [
 { #category : 'initialization' }
 CFPhysicsWheelJoint >> initialize [
 	super initialize.
-	localAxisA := 1 @ 0.
-	springEnabled := false.
-	hertz := 0.0.
-	dampingRatio := 0.0.
+	localAxisA := 0 @ 1.
+	springEnabled := true.
+	hertz := 1.0.
+	dampingRatio := 0.7.
 	limitsEnabled := false.
 	lowerTranslation := 0.0.
 	upperTranslation := 0.0.
