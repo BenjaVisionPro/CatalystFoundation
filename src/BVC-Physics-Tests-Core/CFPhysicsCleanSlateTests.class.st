@@ -2125,8 +2125,10 @@ CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
 	joint
 		limitTranslationFrom: -10 to: 10;
 		limitsEnabled: true.
-	mouseJoint := CFPhysicsMouseJoint body: element physics body target: 1000 @ 1000.
-	mouseJoint maximumForce: 100000.0.
+	mouseJoint := CFPhysicsMouseJoint body: element physics body target: 10 @ 10.
+	mouseJoint
+		target: 1000 @ 1000;
+		maximumForce: 100000.0.
 	world addMouseJoint: mouseJoint.
 	result := world step.
 	self assert: (element physics velocity y closeTo: 0.0).
