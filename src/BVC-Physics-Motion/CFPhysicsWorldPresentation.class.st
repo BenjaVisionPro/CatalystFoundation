@@ -38,7 +38,7 @@ CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
 		ifFalse: [ self tryPresentAtAlpha: aNumber ].
 	didPresent ifFalse: [ ^ self ].
 	world owner ifNotNil: [ :anOwner |
-		anOwner fireEvent: (CFPhysicsFramePresentedEvent new alpha: aNumber; yourself) ].
+		anOwner fireEvent: CFPhysicsFramePresentedEvent new ].
 	^ self
 ]
 

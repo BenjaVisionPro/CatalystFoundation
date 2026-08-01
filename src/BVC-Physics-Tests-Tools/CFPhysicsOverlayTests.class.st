@@ -259,11 +259,11 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.
 	world step.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: overlay contactOverlay visuals isNotEmpty.
 	second physics position: 260 @ 180.
 	world step.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: overlay contactOverlay visuals isEmpty.
 	^ overlay
 ]
@@ -280,7 +280,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.
 	world step.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	visual := overlay contactOverlay visuals first.
 	initialPosition := visual firstPointPosition.
 	firstBody := world activeContacts first firstBody.
@@ -288,7 +288,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	firstBody translateBy: 100 @ 0.
 	world presentAtAlpha: 0.5.
 	host space pulse.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	host space pulse.
 	state := visual state.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
@@ -379,17 +379,17 @@ CFPhysicsOverlayTests >> physicsOverlayFrameHandlerFollowsShowHideShowLifecycle 
 	second physics position: 80 @ 80.
 	world step.
 	firstOverlay := host existingPhysicsOverlay.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: firstOverlay contactOverlay visuals isNotEmpty.
 	host hidePhysicsOverlay.
 	self assert: firstOverlay contactOverlay visuals isEmpty.
 	secondOverlay := host showPhysicsOverlay.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: secondOverlay contactOverlay visuals isNotEmpty.
 	self assert: firstOverlay contactOverlay visuals isEmpty.
 	second physics position: 260 @ 180.
 	world step.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: secondOverlay contactOverlay visuals isEmpty.
 	self assert: firstOverlay contactOverlay visuals isEmpty.
 	^ host
@@ -898,7 +898,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	first translateBy: 45 @ 30.
 	(CFPhysicsWorldPresentation on: world in: host space cfMotionCoordinator) presentAtAlpha: 0.5.
 	host space pulse.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 0.5; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	expectedPosition := context
 		overlayPointFromWorld: spring endpointPair worldPointA
@@ -924,7 +924,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.
 	world step.
-	host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	host fireEvent: CFPhysicsFramePresentedEvent new.
 	springVisual := overlay springOverlay visuals first.
 	contactVisual := overlay contactOverlay visuals first.
 	initialSpringPoint := springVisual fromPosition.
@@ -1284,7 +1284,7 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesSelectedJointInspector [
 	joint bodyA beginStep.
 	joint bodyA translateBy: 40 @ 0.
 	overlay world presentAtAlpha: 1.0.
-	overlay host fireEvent: (CFPhysicsFramePresentedEvent new alpha: 1.0; yourself).
+	overlay host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: ((content valueElementAt: #anchorA) text asString = initialAnchor) not.
 	self assert: overlay objectInspector selectedObject == joint.
 	^ overlay
