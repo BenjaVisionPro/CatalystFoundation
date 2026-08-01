@@ -57,7 +57,7 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	contactConstraints := constraintBuilder
 		constraintsFrom: aStepResult activeContacts
 		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio.
+		step: aStepResult step.
 	jointConstraints := self jointConstraintsFor: aStepResult.
 	preparedJointConstraintCount := jointConstraints size.
 	aStepResult jointConstraints: jointConstraints.
@@ -90,7 +90,7 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 	constraints addAll: (weldJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio).
+		step: aStepResult step).
 	constraints addAll: (prismaticJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates

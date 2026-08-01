@@ -41,7 +41,11 @@ CFPhysicsWeldJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: s
 CFPhysicsWeldJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 	anInspectorContent
 		addGroup: 'Fixed' fields: {
-			#referenceAngle -> 'Reference angle' };
+			#referenceAngle -> 'Reference angle'.
+			#linearHertz -> 'Linear hertz'.
+			#linearDampingRatio -> 'Linear damping'.
+			#angularHertz -> 'Angular hertz'.
+			#angularDampingRatio -> 'Angular damping' };
 		addGroup: 'Solver' fields: {
 			#accumulatedImpulse -> 'Linear impulse'.
 			#accumulatedAngularImpulse -> 'Angular impulse' }
@@ -51,6 +55,10 @@ CFPhysicsWeldJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 CFPhysicsWeldJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	anInspectorContent
 		diagnosticNumber: self referenceAngle at: #referenceAngle;
+		diagnosticNumber: self linearHertz at: #linearHertz;
+		diagnosticNumber: self linearDampingRatio at: #linearDampingRatio;
+		diagnosticNumber: self angularHertz at: #angularHertz;
+		diagnosticNumber: self angularDampingRatio at: #angularDampingRatio;
 		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
 		diagnosticNumber: self accumulatedAngularImpulse at: #accumulatedAngularImpulse
 ]

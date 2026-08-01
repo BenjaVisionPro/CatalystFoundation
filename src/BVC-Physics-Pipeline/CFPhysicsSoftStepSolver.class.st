@@ -136,7 +136,6 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
-		self solveRevoluteJointPointConstraint: constraint biasEnabled: biasEnabled.
 		^ self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
 		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled ]
@@ -561,18 +560,65 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointLimits: constraint biasEnabled: bia
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveWeldJointConstraint: constraint biasEnabled: biasEnabled [
+	self solveWeldJointAngularConstraint: constraint biasEnabled: biasEnabled.
+	self solveWeldJointLinearConstraint: constraint biasEnabled: biasEnabled
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWeldJointAngularConstraint: constraint biasEnabled: biasEnabled [
 	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
-	separation := constraint baseAngle
-		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
-		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
-	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
-	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	(biasEnabled or: [ constraint angularSoftnessEnabled ]) ifTrue: [
+		separation := constraint baseAngle
+			+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
+			- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+		bias := constraint angularBiasRate * separation.
+		massCoefficient := constraint angularMassCoefficient.
+		impulseCoefficient := constraint angularImpulseCoefficient ].
 	increment := (massCoefficient * constraint angularMass * (relativeVelocity + bias)) negated
 		- (impulseCoefficient * constraint angularImpulse).
 	constraint angularImpulse: constraint angularImpulse + increment.
 	self applyWeldJointAngularImpulse: increment constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWeldJointLinearConstraint: constraint biasEnabled: biasEnabled [
+	| anchorA anchorB relativeVelocity separation bias massCoefficient impulseCoefficient inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant solved increment |
+	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
+	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	relativeVelocity := (self distanceJointVelocityFor: constraint bodyStateB anchor: anchorB)
+		- (self distanceJointVelocityFor: constraint bodyStateA anchor: anchorA).
+	bias := 0 @ 0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	(biasEnabled or: [ constraint linearSoftnessEnabled ]) ifTrue: [
+		separation := constraint baseSeparation
+			+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+			- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+			+ anchorB - constraint anchorB
+			- anchorA + constraint anchorA.
+		bias := separation * constraint linearBiasRate.
+		massCoefficient := constraint linearMassCoefficient.
+		impulseCoefficient := constraint linearImpulseCoefficient ].
+	inverseMassA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseMass ].
+	inverseMassB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseMass ].
+	inverseInertiaA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseInertia ].
+	inverseInertiaB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseInertia ].
+	kxx := inverseMassA + inverseMassB + (inverseInertiaA * anchorA y squared) + (inverseInertiaB * anchorB y squared).
+	kxy := (inverseInertiaA * anchorA x * anchorA y) negated - (inverseInertiaB * anchorB x * anchorB y).
+	kyy := inverseMassA + inverseMassB + (inverseInertiaA * anchorA x squared) + (inverseInertiaB * anchorB x squared).
+	determinant := (kxx * kyy) - (kxy * kxy).
+	solved := determinant = 0.0
+		ifTrue: [ 0 @ 0 ]
+		ifFalse: [
+			((kyy * (relativeVelocity x + bias x)) - (kxy * (relativeVelocity y + bias y))) / determinant
+				@ (((kxx * (relativeVelocity y + bias y)) - (kxy * (relativeVelocity x + bias x))) / determinant) ].
+	increment := (solved * massCoefficient) negated - (constraint impulse * impulseCoefficient).
+	constraint impulse: constraint impulse + increment.
+	self applyRevoluteJointImpulse: increment constraint: constraint
 ]
 
 { #category : 'private - solving' }

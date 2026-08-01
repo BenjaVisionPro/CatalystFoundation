@@ -2202,7 +2202,40 @@ CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 	self assert: joint bodyB == second.
 	self assert: joint referenceAngle equals: 0.5.
 	self assert: joint accumulatedAngularImpulse equals: 0.0.
+	self assert: joint linearHertz equals: 0.0.
+	self assert: joint linearDampingRatio equals: 0.0.
+	self assert: joint angularHertz equals: 0.0.
+	self assert: joint angularDampingRatio equals: 0.0.
 	^ joint
+]
+
+{ #category : 'examples - weld joints' }
+CFPhysicsCleanSlateTests >> weldJointPreparesIndependentLinearAndAngularSoftness [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint result prepared |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor weldJointTo: worldAnchor.
+	joint
+		linearHertz: 4.0;
+		linearDampingRatio: 0.5;
+		angularHertz: 7.0;
+		angularDampingRatio: 0.75.
+	result := world step.
+	prepared := result constraints first.
+	self assert: prepared linearSoftnessEnabled.
+	self assert: prepared angularSoftnessEnabled.
+	self assert: (prepared linearBiasRate > 0.0).
+	self assert: (prepared angularBiasRate > 0.0).
+	self assert: ((prepared linearBiasRate closeTo: prepared angularBiasRate) not).
+	^ prepared
 ]
 
 { #category : 'examples - weld joints' }

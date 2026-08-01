@@ -11,15 +11,15 @@ Class {
 }
 
 { #category : 'building' }
-CFPhysicsWeldJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
+CFPhysicsWeldJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates step: step [
 	^ (joints select: [ :joint |
 		joint class == CFPhysicsWeldJoint and: [ joint isActive ] ]) collect: [ :joint |
-			self constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio ]
+			self constraintFrom: joint bodyStates: bodyStates step: step ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB originA originB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB |
+CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates step: step [
+	| stateA stateB originA originB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB linearSoftness angularSoftness |
 	stateA := joint bodyA ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint bodyB ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	originA := self originForState: stateA.
@@ -49,6 +49,8 @@ CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 	inverseAngularMass := inverseInertiaA + inverseInertiaB.
 	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].
 	angleB := stateB ifNil: [ 0.0 ] ifNotNil: [ stateB currentTransform rotation ].
+	linearSoftness := self softnessForHertz: joint linearHertz dampingRatio: joint linearDampingRatio step: step.
+	angularSoftness := self softnessForHertz: joint angularHertz dampingRatio: joint angularDampingRatio step: step.
 	^ CFPhysicsPreparedWeldJoint new
 		joint: joint;
 		bodyStateA: stateA;
@@ -59,7 +61,7 @@ CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		effectiveMassXX: massXX;
 		effectiveMassXY: massXY;
 		effectiveMassYY: massYY;
-		impulse: joint accumulatedImpulse * warmStartRatio;
+		impulse: joint accumulatedImpulse * step warmStartRatio;
 		limitBaseAngle: 0.0;
 		limitsEnabled: false;
 		lowerAngle: 0.0;
@@ -74,8 +76,27 @@ CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		motorImpulse: 0.0;
 		baseAngle: (angleB - angleA - joint referenceAngle);
 		angularMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
-		angularImpulse: joint accumulatedAngularImpulse * warmStartRatio;
+		angularImpulse: joint accumulatedAngularImpulse * step warmStartRatio;
+		linearSoftnessEnabled: joint linearHertz > 0.0;
+		linearBiasRate: linearSoftness first;
+		linearMassCoefficient: linearSoftness second;
+		linearImpulseCoefficient: linearSoftness third;
+		angularSoftnessEnabled: joint angularHertz > 0.0;
+		angularBiasRate: angularSoftness first;
+		angularMassCoefficient: angularSoftness second;
+		angularImpulseCoefficient: angularSoftness third;
 		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsWeldJointConstraintBuilder >> softnessForHertz: hertz dampingRatio: dampingRatio step: step [
+	| omega a1 a2 a3 |
+	hertz = 0.0 ifTrue: [ ^ { step biasRate. step massCoefficient. step impulseCoefficient } ].
+	omega := 2.0 * Float pi * hertz.
+	a1 := (2.0 * dampingRatio) + (omega * step substepTime).
+	a2 := step substepTime * omega * a1.
+	a3 := 1.0 / (1.0 + a2).
+	^ { a1 = 0.0 ifTrue: [ 0.0 ] ifFalse: [ omega / a1 ]. a2 * a3. a3 }
 ]
 
 { #category : 'private - building' }

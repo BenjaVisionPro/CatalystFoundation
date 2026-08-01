@@ -6,7 +6,7 @@ My responsibility is to retain its reference relationship and accumulated linear
 Class {
 	#name : 'CFPhysicsWeldJoint',
 	#superclass : 'CFPhysicsJoint',
-	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'accumulatedAngularImpulse' ],
+	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'accumulatedAngularImpulse', 'linearHertz', 'linearDampingRatio', 'angularHertz', 'angularDampingRatio' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -43,7 +43,11 @@ CFPhysicsWeldJoint >> initialize [
 	super initialize.
 	accumulatedImpulse := 0 @ 0.
 	referenceAngle := 0.0.
-	accumulatedAngularImpulse := 0.0
+	accumulatedAngularImpulse := 0.0.
+	linearHertz := 0.0.
+	linearDampingRatio := 0.0.
+	angularHertz := 0.0.
+	angularDampingRatio := 0.0
 ]
 
 { #category : 'accessing' }
@@ -73,8 +77,76 @@ CFPhysicsWeldJoint >> referenceAngle: aNumber [
 	self wakeBodies
 ]
 
+
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearHertz [ ^ linearHertz ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearHertz: aNumber [
+	self assert: (aNumber >= 0.0).
+	linearHertz := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearDampingRatio [ ^ linearDampingRatio ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearDampingRatio: aNumber [
+	self assert: (aNumber >= 0.0).
+	linearDampingRatio := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularHertz [ ^ angularHertz ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularHertz: aNumber [
+	self assert: (aNumber >= 0.0).
+	angularHertz := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularDampingRatio [ ^ angularDampingRatio ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularDampingRatio: aNumber [
+	self assert: (aNumber >= 0.0).
+	angularDampingRatio := aNumber asFloat.
+	self wakeBodies
+]
+
 { #category : 'solver state' }
 CFPhysicsWeldJoint >> accumulatedAngularImpulse [ ^ accumulatedAngularImpulse ]
+
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearHertz [ ^ linearHertz ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearHertz: aNumber [
+	self assert: (aNumber >= 0.0).
+	linearHertz := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearDampingRatio [ ^ linearDampingRatio ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> linearDampingRatio: aNumber [
+	self assert: (aNumber >= 0.0).
+	linearDampingRatio := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularHertz [ ^ angularHertz ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularHertz: aNumber [
+	self assert: (aNumber >= 0.0).
+	angularHertz := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularDampingRatio [ ^ angularDampingRatio ]
+{ #category : 'configuration' }
+CFPhysicsWeldJoint >> angularDampingRatio: aNumber [
+	self assert: (aNumber >= 0.0).
+	angularDampingRatio := aNumber asFloat.
+	self wakeBodies
+]
+
 { #category : 'solver state' }
 CFPhysicsWeldJoint >> accumulatedAngularImpulse: aNumber [ accumulatedAngularImpulse := aNumber asFloat ]
 
