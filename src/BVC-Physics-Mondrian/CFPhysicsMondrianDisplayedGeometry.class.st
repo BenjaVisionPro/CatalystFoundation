@@ -1,7 +1,7 @@
 "
-I describe a Mondrian element in the coordinate system shared by its sibling
-edges. Motion transformations are already applied by Bloc during rendering, so
-I apply each element's local transformation and position exactly once.
+I describe a Mondrian element's displayed geometry in its parent's child coordinate system.
+
+My responsibility is to apply the element's position and local transformation once so Physics-aware edge anchors can follow Motion presentation.
 "
 Class {
 	#name : 'CFPhysicsMondrianDisplayedGeometry',

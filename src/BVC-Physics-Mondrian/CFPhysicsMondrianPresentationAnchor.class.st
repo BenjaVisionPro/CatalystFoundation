@@ -1,10 +1,7 @@
 "
-I preserve an existing Mondrian anchor while physics presents its reference
-elements through Motion transformations.
+I adapt an existing Bloc geometry anchor to Physics-driven Mondrian presentation.
 
-Mondrian graph authors continue to choose ordinary Bloc anchors. When physics
-is enabled, I evaluate those anchors in the displayed coordinate system so
-their edges remain attached to their moving nodes.
+My responsibility is to preserve the anchor's meaning while resolving its position from the displayed geometry of moving reference elements.
 "
 Class {
 	#name : 'CFPhysicsMondrianPresentationAnchor',

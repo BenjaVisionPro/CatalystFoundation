@@ -1,10 +1,7 @@
 "
-I orchestrate the complete force-directed Physics recipe for one Mondrian graph.
+I orchestrate force-directed Physics for one Mondrian graph.
 
-I own the generic root force-directed behaviour, the current hierarchy behaviour,
-and one generic orientation-restoring behaviour attached to each live node. I
-also own and restore the body profile I apply to those nodes. Removing me removes
-and restores everything I installed.
+My responsibility is to install, configure and remove the generic force-directed, hierarchy and orientation Behaviours and the body profile they require.
 "
 Class {
 	#name : 'CFPhysicsMondrianForceDirectedBehaviour',

@@ -1,3 +1,8 @@
+"
+I integrate one Mondrian graph with a Physics world.
+
+My responsibility is to manage the graph's participating bodies, Physics Behaviours, playback lifecycle and presentation changes, and to restore the original Mondrian state when the integration ends.
+"
 Class {
 	#name : 'CFPhysicsMondrian',
 	#superclass : 'Object',

@@ -1,12 +1,7 @@
 "
-I constrain the first layer of a directed Mondrian graph around one world-space
-anchor at the canvas centre.
+I arrange the root layer of a directed Mondrian graph around a central world anchor.
 
-A single root is joined directly to the centre with zero rest length. Multiple
-roots are joined to the same centre at one common radius and are also joined to
-their neighbours, forming a regular polygon that is free to rotate around the
-centre. Moving a root stretches those joints; the solver returns the root layer
-to its central formation.
+My responsibility is to maintain radial and neighbouring distance joints that keep the live roots in a rotatable central formation.
 "
 Class {
 	#name : 'CFPhysicsMondrianHierarchyBehaviour',

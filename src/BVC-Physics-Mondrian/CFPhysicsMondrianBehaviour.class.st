@@ -1,9 +1,7 @@
 "
-I am a behaviour attached to one CFPhysicsMondrian facade.
+I represent a graph-level Physics Behaviour owned by a CFPhysicsMondrian facade.
 
-I orchestrate graph-level Physics changes and own their complete lifecycle. I am
-updated by the facade's Physics world and remove every resource I installed when
-I am removed.
+My responsibility is to participate in world updates and remove every graph resource I install when my lifecycle ends.
 "
 Class {
 	#name : 'CFPhysicsMondrianBehaviour',
