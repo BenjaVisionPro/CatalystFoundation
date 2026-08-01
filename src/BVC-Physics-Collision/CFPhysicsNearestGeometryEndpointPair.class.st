@@ -49,9 +49,11 @@ CFPhysicsNearestGeometryEndpointPair >> world [
 { #category : 'geometry' }
 CFPhysicsNearestGeometryEndpointPair >> worldPoints [
 	| manifold point pointA pointB newPointA newPointB |
-	manifold := self world manifoldGenerator
-		manifoldBetweenBody: bodyA
-		andBody: bodyB.
+	manifold := (bodyA world notNil and: [ bodyA world == bodyB world ])
+		ifTrue: [ bodyA world manifoldGenerator
+			manifoldBetweenBody: bodyA
+			andBody: bodyB ]
+		ifFalse: [ nil ].
 	manifold ifNotNil: [
 		point := manifold points isEmpty
 			ifTrue: [ (bodyA worldBodyOrigin + bodyB worldBodyOrigin) / 2.0 ]

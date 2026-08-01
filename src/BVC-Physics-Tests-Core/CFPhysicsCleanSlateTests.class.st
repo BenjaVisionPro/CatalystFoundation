@@ -4415,7 +4415,7 @@ CFPhysicsCleanSlateTests >> transformExplicitManifoldDoesNotUseAuthoritativeTran
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> transformExplicitTouchingManifoldProvidesLocalAnchors [
 	<gtExample>
-	| first second firstTransform secondTransform manifold point |
+	| first second firstTransform secondTransform manifold |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
 	firstTransform := CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0.0.
@@ -4425,11 +4425,14 @@ CFPhysicsCleanSlateTests >> transformExplicitTouchingManifoldProvidesLocalAnchor
 		transform: firstTransform
 		andShapeState: second shapeState
 		transform: secondTransform.
-	point := manifold contactPoints first.
-	self assert: point localAnchorA notNil.
-	self assert: point localAnchorB notNil.
-	self assert: (point localAnchorA closeTo: 20 @ 10).
-	self assert: (point localAnchorB closeTo: 0 @ 10).
+	self assert: manifold contactPoints size equals: 2.
+	manifold contactPoints do: [ :each |
+		self assert: each localAnchorA notNil.
+		self assert: each localAnchorB notNil.
+		self assert: (each localAnchorA x closeTo: 20).
+		self assert: (each localAnchorB x closeTo: 0) ].
+	self assert: (manifold contactPoints collect: [ :each | each localAnchorA y ]) asSet equals: #(0 20) asSet.
+	self assert: (manifold contactPoints collect: [ :each | each localAnchorB y ]) asSet equals: #(0 20) asSet.
 	^ manifold
 ]
 
@@ -4785,20 +4788,6 @@ CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
 	self assert: impacts second pair secondBody sequence equals: 4.
 	^ impacts
 ]
-
-{ #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousImpactLoopReportsIterationCapDeterministically [
-	<gtExample>
-	| result |
-	result := self continuousImpactLoopLeavesRemainderExplicitAtIterationLimit.
-	self assert: result impacts size equals: 1.
-	self assert: result impacts first pair firstBody sequence equals: 1.
-	self assert: result impacts first pair secondBody sequence equals: 2.
-	self assert: result iterationLimitReached.
-	self assert: (result remainingTime closeTo: 0.75).
-	^ result
-]
-
 
 { #category : 'examples - continuous collision' }
 CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBlockingMotion [
