@@ -12,10 +12,10 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsMotorJoint class >> between: firstBody and: secondBody [
+CFPhysicsMotorJoint class >> between: bodyA and: bodyB [
 	^ self new
-		bodyA: firstBody;
-		bodyB: secondBody;
+		bodyA: bodyA;
+		bodyB: bodyB;
 		linearOffset: secondBody worldBodyOrigin - firstBody worldBodyOrigin;
 		angularOffset: secondBody rotation - firstBody rotation;
 		yourself

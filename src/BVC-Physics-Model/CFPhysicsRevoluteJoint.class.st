@@ -12,10 +12,10 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsRevoluteJoint class >> between: firstBodyState and: secondBodyState [
+CFPhysicsRevoluteJoint class >> between: bodyA and: bodyB [
 	^ self
-		betweenAnchor: (CFPhysicsBodyCentreAnchor on: firstBodyState)
-		andAnchor: (CFPhysicsBodyCentreAnchor on: secondBodyState)
+		betweenAnchor: (CFPhysicsBodyCentreAnchor on: bodyA)
+		andAnchor: (CFPhysicsBodyCentreAnchor on: bodyB)
 ]
 
 { #category : 'instance creation' }
