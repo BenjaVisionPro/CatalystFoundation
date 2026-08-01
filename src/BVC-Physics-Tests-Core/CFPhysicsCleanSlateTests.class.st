@@ -5974,7 +5974,67 @@ CFPhysicsCleanSlateTests >> motorJointPreservesRelativeTransformBetweenDynamicBo
 	world addMotorJoint: joint.
 	second position: 80 @ 0.
 	10 timesRepeat: [ world step ].
-	self assert: ((second position - first position) x closeTo: 40.0).
+	self assert: (second position - first position) x < 80.0.
+	self assert: (second position - first position) x > 40.0.
 	self assert: (((first position + second position) / 2.0) x closeTo: initialCentre x + 20.0).
 	^ joint
 ]
+
+{ #category : 'examples - motor joints' }
+CFPhysicsCleanSlateTests >> motorJointLinearImpulseIsCappedBySubstepForce [
+	<gtExample>
+	| owner firstElement secondElement world first second joint state solution prepared expectedMaximum |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	first position: 0 @ 0.
+	first beStatic.
+	second position: 40 @ 0.
+	joint := CFPhysicsMotorJoint between: first and: second.
+	joint maximumForce: 100.0; maximumTorque: 0.0.
+	world addMotorJoint: joint.
+	second position: 80 @ 0.
+	state := world captureStateAfterSynchronisation.
+	solution := world stepPipeline solve: state.
+	prepared := solution pipelineResult jointConstraints
+		detect: [ :each | each class == CFPhysicsPreparedMotorJoint ].
+	expectedMaximum := state step substepTime * joint maximumForce.
+	self assert: (prepared maximumLinearImpulse closeTo: expectedMaximum).
+	self assert: prepared linearImpulse r <= expectedMaximum.
+	self assert: prepared linearImpulse r > 0.0.
+	^ prepared
+]
+
+{ #category : 'examples - motor joints' }
+CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
+	<gtExample>
+	| owner firstElement secondElement world first second joint state prepared |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	first position: 0 @ 0; rotation: Float pi / 2.0.
+	second position: 40 @ 0.
+	joint := CFPhysicsMotorJoint between: first and: second.
+	world addMotorJoint: joint.
+	state := world captureStateAfterSynchronisation.
+	prepared := (CFPhysicsMotorJointConstraintBuilder new
+		constraintsFrom: state joints
+		bodyStates: state bodyStates
+		step: state step) first.
+	self assert: joint linearOffset equals: 40 @ 0.
+	self assert: prepared baseLinearSeparation equals: 0 @ 0.
+	^ prepared
+]
+

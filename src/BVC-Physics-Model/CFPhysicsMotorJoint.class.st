@@ -16,7 +16,7 @@ CFPhysicsMotorJoint class >> between: firstBody and: secondBody [
 	^ self new
 		bodyA: firstBody;
 		bodyB: secondBody;
-		linearOffset: (firstBody bodyLocalVectorForWorldVector: secondBody worldBodyOrigin - firstBody worldBodyOrigin);
+		linearOffset: secondBody worldBodyOrigin - firstBody worldBodyOrigin;
 		angularOffset: secondBody rotation - firstBody rotation;
 		yourself
 ]

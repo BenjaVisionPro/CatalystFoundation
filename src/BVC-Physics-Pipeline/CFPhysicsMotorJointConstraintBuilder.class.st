@@ -9,13 +9,12 @@ CFPhysicsMotorJointConstraintBuilder >> constraintsFrom: joints bodyStates: body
 
 { #category : 'private - building' }
 CFPhysicsMotorJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates step: step [
-	| stateA stateB anchorA anchorB worldOffset inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass |
+	| stateA stateB anchorA anchorB inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass |
 	stateA := bodyStates at: joint bodyA.
 	stateB := bodyStates at: joint bodyB.
 	"Box2D 3.1.1 motor joints use each body's origin as the local anchor. Catalyst body origins are the solver centres, so both lever arms begin at zero. Keeping them explicit preserves the complete point-constraint solve."
 	anchorA := 0 @ 0.
 	anchorB := 0 @ 0.
-	worldOffset := stateA worldVectorForBodyLocalVector: joint linearOffset.
 	inverseMassA := stateA inverseMass.
 	inverseMassB := stateB inverseMass.
 	inverseInertiaA := stateA inverseInertia.
@@ -42,7 +41,7 @@ CFPhysicsMotorJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySt
 		bodyStateB: stateB;
 		anchorA: anchorA;
 		anchorB: anchorB;
-		baseLinearSeparation: stateB currentBodyOrigin - stateA currentBodyOrigin - worldOffset;
+		baseLinearSeparation: stateB currentBodyOrigin - stateA currentBodyOrigin - joint linearOffset;
 		baseAngularSeparation: stateB currentTransform rotation - stateA currentTransform rotation - joint angularOffset;
 		effectiveMassXX: massXX;
 		effectiveMassXY: massXY;
