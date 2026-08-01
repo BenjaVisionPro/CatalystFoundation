@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsSpringVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'spring', 'context', 'presentationRole', 'lengthMarker', 'hitTarget' ],
+	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker', 'hitTarget' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -37,7 +37,7 @@ CFPhysicsSpringVisual >> spring: aSpring [ spring := aSpring ]
 CFPhysicsSpringVisual >> context: aContext [ context := aContext ]
 
 { #category : 'accessing' }
-CFPhysicsSpringVisual >> lengthMarker [ ^ lengthMarker ]
+CFPhysicsSpringVisual >> restLengthMarker [ ^ restLengthMarker ]
 
 { #category : 'testing' }
 CFPhysicsSpringVisual >> hitTarget [ ^ hitTarget ]
@@ -77,7 +77,7 @@ CFPhysicsSpringVisual >> initializeVisual [
 	self
 		fromHead: self newEndpointMarker;
 		toHead: self newEndpointMarker.
-	lengthMarker := self newRestLengthMarker.
+	restLengthMarker := self newRestLengthMarker.
 	hitTarget := self newHitTarget.
 	self updateBorder.
 	self isSelection ifTrue: [ self zIndex: 2 ]
@@ -126,7 +126,7 @@ CFPhysicsSpringVisual >> updateBorder [
 CFPhysicsSpringVisual >> addTo: aParentElement [
 	aParentElement
 		addChild: self;
-		addChild: lengthMarker;
+		addChild: restLengthMarker;
 		addChild: hitTarget.
 	^ self
 ]
@@ -152,10 +152,10 @@ CFPhysicsSpringVisual >> update [
 	displacement := points second - points first.
 	distance := displacement r.
 	distance isZero
-		ifTrue: [ lengthMarker visibility: BlVisibility gone ]
+		ifTrue: [ restLengthMarker visibility: BlVisibility gone ]
 		ifFalse: [
 			restPoint := firstPoint + ((secondPoint - firstPoint) * (spring length asFloat / distance)).
-			lengthMarker
+			restLengthMarker
 				relocate: restPoint - (4 @ 4);
 				visibility: BlVisibility visible ].
 	^ self
@@ -169,7 +169,7 @@ CFPhysicsSpringVisual >> includesEventTarget: anElement [
 { #category : 'removing' }
 CFPhysicsSpringVisual >> remove [
 	self hasParent ifTrue: [ self removeFromParent ].
-	lengthMarker hasParent ifTrue: [ lengthMarker removeFromParent ].
+	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
 	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
 	^ self
 ]

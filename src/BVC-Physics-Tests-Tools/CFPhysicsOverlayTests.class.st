@@ -927,6 +927,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	spring := CFPhysicsDistanceJoint between: first physics body and: second physics body.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addDistanceJoint: spring.
+	overlay refresh.
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.
 	world step.
