@@ -74,7 +74,7 @@ CFPhysicsWeldJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		maximumMotorImpulse: 0.0;
 		motorMass: 0.0;
 		motorImpulse: 0.0;
-		baseAngle: (angleB - angleA - joint referenceAngle);
+		baseAngle: (self unwoundAngle: angleB - angleA - joint referenceAngle);
 		angularMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
 		angularImpulse: joint accumulatedAngularImpulse * step warmStartRatio;
 		linearSoftnessEnabled: joint linearHertz > 0.0;
@@ -112,4 +112,11 @@ CFPhysicsWeldJointConstraintBuilder >> inverseMassForState: aState [
 { #category : 'private - building' }
 CFPhysicsWeldJointConstraintBuilder >> inverseInertiaForState: aState [
 	^ aState ifNil: [ 0.0 ] ifNotNil: [ aState inverseInertia ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsWeldJointConstraintBuilder >> unwoundAngle: anAngle [
+	| fullTurn |
+	fullTurn := 2.0 * Float pi.
+	^ anAngle - ((anAngle / fullTurn) rounded * fullTurn)
 ]

@@ -2262,6 +2262,33 @@ CFPhysicsCleanSlateTests >> weldJointAnchorsABodyOrientationToTheWorld [
 	^ result
 ]
 
+{ #category : 'examples - weld joints' }
+CFPhysicsCleanSlateTests >> weldJointPreparationUnwindsTheReferenceAngleError [
+	<gtExample>
+	| first second firstAnchor secondAnchor joint builder bodyStates step prepared |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 20 @ 0 extent: 20 @ 20.
+	first rotation: 3.1.
+	second rotation: -3.1.
+	firstAnchor := CFPhysicsLocalAnchor on: first at: 10 @ 10.
+	secondAnchor := CFPhysicsLocalAnchor on: second at: 10 @ 10.
+	joint := CFPhysicsWeldJoint betweenAnchor: firstAnchor andAnchor: secondAnchor.
+	joint referenceAngle: 0.0.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	step := CFPhysicsStep
+		timeStep: 1.0 / 60.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	builder := CFPhysicsWeldJointConstraintBuilder new.
+	prepared := builder constraintFrom: joint bodyStates: bodyStates step: step.
+	self assert: (prepared baseAngle closeTo: (2.0 * Float pi) - 6.2).
+	^ prepared
+]
+
 { #category : 'examples - constraint graph' }
 CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 	<gtExample>
