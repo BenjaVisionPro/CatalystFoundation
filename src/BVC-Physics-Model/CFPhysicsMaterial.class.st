@@ -1,12 +1,12 @@
 "
 I represent the physical material of a shape.
 
-My responsibility is to describe density, friction and restitution for mass calculation and contact response.
+My responsibility is to describe density, friction, restitution, rolling resistance and tangent speed for mass calculation and contact response.
 "
 Class {
 	#name : 'CFPhysicsMaterial',
 	#superclass : 'Object',
-	#instVars : [ 'density', 'friction', 'restitution', 'tangentSpeed' ],
+	#instVars : [ 'density', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -37,6 +37,7 @@ CFPhysicsMaterial >> initialize [
 	density := 1.0.
 	friction := 0.3.
 	restitution := 0.0.
+	rollingResistance := 0.0.
 	tangentSpeed := 0.0
 ]
 
@@ -59,4 +60,15 @@ CFPhysicsMaterial >> tangentSpeed [
 { #category : 'accessing' }
 CFPhysicsMaterial >> tangentSpeed: aNumber [
 	tangentSpeed := aNumber asFloat
+]
+
+
+{ #category : 'accessing' }
+CFPhysicsMaterial >> rollingResistance [
+	^ rollingResistance
+]
+
+{ #category : 'accessing' }
+CFPhysicsMaterial >> rollingResistance: aNumber [
+	rollingResistance := aNumber asFloat
 ]

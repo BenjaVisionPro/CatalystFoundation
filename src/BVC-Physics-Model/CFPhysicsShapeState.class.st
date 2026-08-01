@@ -540,3 +540,11 @@ CFPhysicsShapeState >> elementLocalPointForBodyLocalPoint: aPoint [
 CFPhysicsShapeState >> bodyLocalPointForNormalisedPoint: aPoint [
 	^ self bodyLocalPointForElementLocalPoint: aPoint * self extent
 ]
+
+
+{ #category : 'geometry' }
+CFPhysicsShapeState >> rollingResistanceRadius [
+	self isCircle ifTrue: [ ^ self radius ].
+	self isRoundedRectangle ifTrue: [ ^ self roundedRectangleRadius ].
+	^ 0.0
+]

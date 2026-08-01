@@ -68,7 +68,11 @@ CFPhysicsSoftStepSolver >> warmStart [
 				applyImpulse: (constraint normal * point normalImpulse)
 					+ (constraint tangent * point tangentImpulse)
 				at: point
-				constraint: constraint ] ].
+				constraint: constraint ].
+		constraint bodyStateA angularVelocity:
+			constraint bodyStateA angularVelocity - (constraint bodyStateA inverseInertia * constraint rollingImpulse).
+		constraint bodyStateB angularVelocity:
+			constraint bodyStateB angularVelocity + (constraint bodyStateB inverseInertia * constraint rollingImpulse) ].
 	self orderedJointConstraints do: [ :constraint |
 		self warmStartJointConstraint: constraint ]
 ]
@@ -98,7 +102,8 @@ CFPhysicsSoftStepSolver >> solveContactsWithBias: biasEnabled [
 		constraint points do: [ :point |
 			self solveNormalAt: point constraint: constraint biasEnabled: biasEnabled ].
 		constraint points do: [ :point |
-			self solveTangentAt: point constraint: constraint ] ]
+			self solveTangentAt: point constraint: constraint ].
+		self solveRollingResistanceFor: constraint ]
 ]
 
 { #category : 'private - solving' }
@@ -1202,4 +1207,24 @@ CFPhysicsSoftStepSolver >> solveWheelJointPerpendicularConstraint: constraint bi
 		- (impulseCoefficient * constraint perpendicularImpulse).
 	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
 	self applyWheelJointLinearImpulse: increment direction: normal leverA: leverA leverB: leverB constraint: constraint
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRollingResistanceFor: constraint [
+	| increment oldImpulse maximum newImpulse totalNormalImpulse |
+	totalNormalImpulse := constraint points
+		inject: 0.0
+		into: [ :sum :point | sum + point normalImpulse ].
+	increment := constraint rollingMass
+		* (constraint bodyStateB angularVelocity - constraint bodyStateA angularVelocity) negated.
+	oldImpulse := constraint rollingImpulse.
+	maximum := constraint rollingResistance * totalNormalImpulse.
+	newImpulse := ((oldImpulse + increment) max: maximum negated) min: maximum.
+	constraint rollingImpulse: newImpulse.
+	increment := newImpulse - oldImpulse.
+	constraint bodyStateA angularVelocity:
+		constraint bodyStateA angularVelocity - (constraint bodyStateA inverseInertia * increment).
+	constraint bodyStateB angularVelocity:
+		constraint bodyStateB angularVelocity + (constraint bodyStateB inverseInertia * increment)
 ]

@@ -6,7 +6,7 @@ I own the collision normal, penetration depth and manifold points whose impulses
 Class {
 	#name : 'CFPhysicsManifold',
 	#superclass : 'Object',
-	#instVars : [ 'normal', 'penetration', 'contactPoints' ],
+	#instVars : [ 'normal', 'penetration', 'contactPoints', 'rollingImpulse' ],
 	#category : 'BVC-Physics-Collision',
 	#package : 'BVC-Physics-Collision'
 }
@@ -29,7 +29,8 @@ CFPhysicsManifold >> contactPoints: aCollection [
 { #category : 'initialization' }
 CFPhysicsManifold >> initialize [
 	super initialize.
-	contactPoints := #()
+	contactPoints := #().
+	rollingImpulse := 0.0
 ]
 
 { #category : 'accessing' }
@@ -54,6 +55,7 @@ CFPhysicsManifold >> points: aCollection [
 
 { #category : 'updating' }
 CFPhysicsManifold >> clearImpulses [
+	rollingImpulse := 0.0.
 	contactPoints do: [ :point |
 		point
 			normalImpulse: 0.0;
@@ -63,6 +65,7 @@ CFPhysicsManifold >> clearImpulses [
 { #category : 'updating' }
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
 	anOldManifold ifNil: [ ^ self ].
+	rollingImpulse := anOldManifold rollingImpulse.
 	(self hasCompatibleNormalWith: anOldManifold) ifFalse: [ ^ self ].
 	contactPoints do: [ :point |
 		point featureId ifNotNil: [ :featureId |
@@ -79,3 +82,10 @@ CFPhysicsManifold >> hasCompatibleNormalWith: anotherManifold [
 	(normal isNil or: [ anotherManifold normal isNil ]) ifTrue: [ ^ true ].
 	^ (normal dotProduct: anotherManifold normal) > 0.0
 ]
+
+
+{ #category : 'accessing' }
+CFPhysicsManifold >> rollingImpulse [ ^ rollingImpulse ]
+
+{ #category : 'accessing' }
+CFPhysicsManifold >> rollingImpulse: aNumber [ rollingImpulse := aNumber asFloat ]

@@ -5,14 +5,15 @@ I represent a contact constraint prepared for one solver step. I bind a contact 
 Class {
 	#name : 'CFPhysicsPreparedConstraint',
 	#superclass : 'Object',
-	#instVars : [ 'contact', 'bodyStateA', 'bodyStateB', 'normal', 'tangent', 'friction', 'restitution', 'tangentSpeed', 'points' ],
+	#instVars : [ 'contact', 'bodyStateA', 'bodyStateB', 'normal', 'tangent', 'friction', 'restitution', 'rollingResistance', 'rollingMass', 'rollingImpulse', 'tangentSpeed', 'points' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'writing back' }
 CFPhysicsPreparedConstraint >> writeImpulsesBack [
-	points do: [ :point | point writeImpulsesBack ]
+	points do: [ :point | point writeImpulsesBack ].
+	contact manifold rollingImpulse: rollingImpulse
 ]
 
 { #category : 'accessing' }
@@ -55,3 +56,17 @@ CFPhysicsPreparedConstraint >> tangentSpeed: aNumber [ tangentSpeed := aNumber ]
 CFPhysicsPreparedConstraint >> points [ ^ points ]
 { #category : 'accessing' }
 CFPhysicsPreparedConstraint >> points: aCollection [ points := aCollection ]
+
+
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingResistance [ ^ rollingResistance ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingResistance: aNumber [ rollingResistance := aNumber ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingMass [ ^ rollingMass ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingMass: aNumber [ rollingMass := aNumber ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingImpulse [ ^ rollingImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedConstraint >> rollingImpulse: aNumber [ rollingImpulse := aNumber ]

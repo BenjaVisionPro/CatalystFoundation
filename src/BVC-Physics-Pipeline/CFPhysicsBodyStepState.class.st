@@ -5,7 +5,7 @@ I represent one body's mutable state during a simulation step. I isolate solver 
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
+	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -32,6 +32,7 @@ CFPhysicsBodyStepState >> capture [
 	shapeState := body shapeState capturedForStep.
 	friction := body friction.
 	restitution := body restitution.
+	rollingResistance := body rollingResistance.
 	tangentSpeed := body tangentSpeed.
 	awake := body isAwake.
 	sleepingAllowed := body allowsSleeping.
@@ -115,6 +116,8 @@ CFPhysicsBodyStepState >> deltaRotation [ ^ deltaRotation ]
 CFPhysicsBodyStepState >> friction [ ^ friction ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> restitution [ ^ restitution ]
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> rollingResistance [ ^ rollingResistance ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> tangentSpeed [ ^ tangentSpeed ]
 { #category : 'accessing' }

@@ -170,6 +170,16 @@ CFPhysics >> friction: aNumber [
 
 
 { #category : 'material' }
+CFPhysics >> rollingResistance [
+	^ self body rollingResistance
+]
+
+{ #category : 'material' }
+CFPhysics >> rollingResistance: aNumber [
+	self body rollingResistance: aNumber
+]
+
+{ #category : 'material' }
 CFPhysics >> tangentSpeed [
 	^ self body tangentSpeed
 ]

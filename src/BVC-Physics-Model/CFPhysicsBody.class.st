@@ -161,6 +161,16 @@ CFPhysicsBody >> restitution: aNumber [
 
 
 { #category : 'material' }
+CFPhysicsBody >> rollingResistance [
+	^ self shapeState material rollingResistance
+]
+
+{ #category : 'material' }
+CFPhysicsBody >> rollingResistance: aNumber [
+	self shapeState material rollingResistance: aNumber
+]
+
+{ #category : 'material' }
 CFPhysicsBody >> tangentSpeed [
 	^ self shapeState material tangentSpeed
 ]

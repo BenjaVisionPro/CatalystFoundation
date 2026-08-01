@@ -44,7 +44,7 @@ CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
 
 { #category : 'private - building' }
 CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
-	| normal tangent constraint previousPoints |
+	| normal tangent constraint previousPoints rollingDenominator maximumRadius |
 	normal := contact manifold normal.
 	tangent := normal y @ normal x negated.
 	constraint := contact preparedConstraint.
@@ -54,6 +54,8 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 			createdConstraintCount := createdConstraintCount + 1 ]
 		ifNotNil: [ reusedConstraintCount := reusedConstraintCount + 1 ].
 	previousPoints := constraint points ifNil: [ #() ].
+	rollingDenominator := stateA inverseInertia + stateB inverseInertia.
+	maximumRadius := stateA shapeState rollingResistanceRadius max: stateB shapeState rollingResistanceRadius.
 	constraint
 		contact: contact;
 		bodyStateA: stateA;
@@ -62,6 +64,9 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 		tangent: tangent;
 		friction: (stateA friction * stateB friction) sqrt;
 		restitution: (stateA restitution max: stateB restitution);
+		rollingResistance: (stateA rollingResistance max: stateB rollingResistance) * maximumRadius;
+		rollingMass: (rollingDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / rollingDenominator ]);
+		rollingImpulse: contact manifold rollingImpulse * warmStartRatio;
 		tangentSpeed: stateA tangentSpeed + stateB tangentSpeed.
 	constraint points: (self
 		pointsFrom: contact manifold contactPoints

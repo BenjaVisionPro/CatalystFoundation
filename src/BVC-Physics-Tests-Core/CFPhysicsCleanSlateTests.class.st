@@ -6282,3 +6282,47 @@ CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
 	self assert: (step maximumContactPushSpeed closeTo: 7.5).
 	^ step
 ]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> contactRollingResistanceDefaultsToZero [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	self assert: body rollingResistance equals: 0.0.
+	^ body
+]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintBuilderPreparesRollingResistance [
+	<gtExample>
+	| first second pair manifold bodyStates constraint |
+	first := self cleanSlateBodyWithSequence: 1.
+	first element geometry: BlCircleGeometry new; size: 20 @ 20.
+	first rollingResistance: 0.2.
+	second := self cleanSlateBodyWithSequence: 2.
+	second element geometry: BlCircleGeometry new; size: 40 @ 40.
+	second rollingResistance: 0.5.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	constraint := (CFPhysicsConstraintBuilder new
+		constraintsFrom: { CFPhysicsContact pair: pair manifold: manifold }
+		bodyStates: bodyStates) first.
+	self assert: (constraint rollingResistance closeTo: 10.0).
+	self assert: constraint rollingMass >= 0.0.
+	^ constraint
+]
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> preparedConstraintWritesRollingImpulseBack [
+	<gtExample>
+	| constraint |
+	constraint := self constraintBuilderPreparesSolverData.
+	constraint rollingImpulse: 2.5.
+	constraint writeImpulsesBack.
+	self assert: (constraint contact manifold rollingImpulse closeTo: 2.5).
+	^ constraint
+]
