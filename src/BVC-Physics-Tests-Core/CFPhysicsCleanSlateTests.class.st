@@ -437,11 +437,11 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	self assert: constraint bodyStateA == (bodyStates at: first).
 	self assert: constraint bodyStateB == (bodyStates at: second).
 	self assert: constraint normal equals: 0 @ 1.
-	self assert: constraint tangent equals: -1 @ 0.
+	self assert: constraint tangent equals: 1 @ 0.
 	self assert: point featureId equals: manifold contactPoints first featureId.
 	self assert: point normalMass > 0.0.
 	self assert: point tangentMass > 0.0.
-	self assert: point baseSeparation equals: -1.0.
+	self assert: (point baseSeparation closeTo: 4.0).
 	^ constraint
 ]
 

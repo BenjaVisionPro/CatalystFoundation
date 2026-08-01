@@ -46,7 +46,7 @@ CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
 CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
 	| normal tangent constraint previousPoints |
 	normal := contact manifold normal.
-	tangent := normal y negated @ normal x.
+	tangent := normal y @ normal x negated.
 	constraint := contact preparedConstraint.
 	constraint
 		ifNil: [
@@ -134,7 +134,7 @@ CFPhysicsConstraintBuilder >> updatePoint: point from: manifoldPoint contact: co
 		featureId: manifoldPoint featureId;
 		anchorA: anchorA;
 		anchorB: anchorB;
-		baseSeparation: manifoldPoint separation;
+		baseSeparation: manifoldPoint separation - (self dot: anchorB - anchorA with: normal);
 		normalMass: (normalDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / normalDenominator ]);
 		tangentMass: (tangentDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / tangentDenominator ]);
 		relativeNormalVelocity: (self dot: relativeVelocity with: normal);
