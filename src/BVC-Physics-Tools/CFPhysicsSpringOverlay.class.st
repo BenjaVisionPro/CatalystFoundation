@@ -1,3 +1,4 @@
+"I manage the retained spring diagnostics for one Physics overlay. My responsibility is to reconcile the world's springs with their visual representations and resolve spring selections from those visuals."
 Class {
 	#name : 'CFPhysicsSpringOverlay',
 	#superclass : 'Object',

@@ -1,3 +1,4 @@
+"I render one Physics joint inside an overlay. I show its anchors and the decorations required by its joint type for either diagnostic or selection presentation."
 Class {
 	#name : 'CFPhysicsJointVisual',
 	#superclass : 'BlLineElement',

@@ -1,4 +1,4 @@
-"I retain the measured telemetry and derived stage ranking for one controlled Physics workload. My conclusions are limited to this recorded run."
+"I represent the measured result of one Physics benchmark scenario. I retain its scenario metadata and telemetry analysis and expose focused views of the result."
 Class {
 	#name : 'CFPhysicsTelemetryBenchmarkResult',
 	#superclass : 'Object',

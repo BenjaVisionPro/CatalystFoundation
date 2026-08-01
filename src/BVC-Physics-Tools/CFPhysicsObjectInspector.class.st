@@ -1,3 +1,4 @@
+"I manage the floating inspector used by a Physics overlay. My responsibility is to present the appropriate content for the selected Physics object and animate transitions between selections."
 Class {
 	#name : 'CFPhysicsObjectInspector',
 	#superclass : 'Object',

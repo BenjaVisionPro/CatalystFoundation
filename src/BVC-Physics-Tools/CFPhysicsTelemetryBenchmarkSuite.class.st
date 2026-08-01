@@ -1,4 +1,4 @@
-"I collect benchmark results so optimisation focus can be compared across controlled workloads without claiming a universal hotspot."
+"I represent a collection of Physics benchmark results. My responsibility is to compare scenarios and expose their measured spans for inspection."
 Class {
 	#name : 'CFPhysicsTelemetryBenchmarkSuite',
 	#superclass : 'Object',

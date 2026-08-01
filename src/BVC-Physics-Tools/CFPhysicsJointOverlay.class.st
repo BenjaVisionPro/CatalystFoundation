@@ -1,3 +1,4 @@
+"I manage the retained joint diagnostics for one Physics overlay. My responsibility is to reconcile the world's joints with their visual representations and resolve joint selections from those visuals."
 Class {
 	#name : 'CFPhysicsJointOverlay',
 	#superclass : 'Object',

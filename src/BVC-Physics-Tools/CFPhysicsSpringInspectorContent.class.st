@@ -1,3 +1,4 @@
+"I present the live diagnostic state of one Physics spring. My responsibility is to keep the overlay inspector fields synchronised with the selected spring and its endpoints."
 Class {
 	#name : 'CFPhysicsSpringInspectorContent',
 	#superclass : 'Object',

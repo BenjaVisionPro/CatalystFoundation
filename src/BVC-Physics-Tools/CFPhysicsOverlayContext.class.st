@@ -1,3 +1,4 @@
+"I provide the coordinate context shared by Physics overlay visuals. My responsibility is to convert world, body and Bloc points into the overlay's coordinate space."
 Class {
 	#name : 'CFPhysicsOverlayContext',
 	#superclass : 'Object',

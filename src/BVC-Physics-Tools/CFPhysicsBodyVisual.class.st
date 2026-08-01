@@ -1,3 +1,4 @@
+"I render one Physics body inside an overlay. I use the body's displayed geometry for either diagnostic or selection presentation without participating in the simulation."
 Class {
 	#name : 'CFPhysicsBodyVisual',
 	#superclass : 'BlElement',

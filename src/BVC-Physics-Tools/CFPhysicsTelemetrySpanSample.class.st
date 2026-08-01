@@ -1,4 +1,4 @@
-"I preserve one real TelemetrySignal/TelemetryPing execution contributing to Physics span statistics."
+"I adapt one recorded telemetry span into a Physics measurement sample. My responsibility is to expose its timing, hierarchy and Physics-specific counters through a stable interface."
 Class {
 	#name : 'CFPhysicsTelemetrySpanSample',
 	#superclass : 'Object',

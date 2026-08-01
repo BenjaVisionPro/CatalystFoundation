@@ -1,3 +1,4 @@
+"I render one Physics spring inside an overlay. I show its endpoints and rest length for either diagnostic or selection presentation."
 Class {
 	#name : 'CFPhysicsSpringVisual',
 	#superclass : 'BlLineElement',

@@ -1,3 +1,4 @@
+"I present the diagnostic controls for a Physics overlay. My responsibility is to toggle the available body, spring, joint and contact visualisations."
 Class {
 	#name : 'CFPhysicsOverlayControls',
 	#superclass : 'Object',

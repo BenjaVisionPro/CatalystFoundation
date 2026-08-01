@@ -1,3 +1,4 @@
+"I observe the Bloc element represented by a body visual. My responsibility is to refresh or release that visual when the source element changes geometry or leaves the scene graph."
 Class {
 	#name : 'CFPhysicsBodyVisualListener',
 	#superclass : 'BlCustomEventHandler',

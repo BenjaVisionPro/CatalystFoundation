@@ -1,8 +1,4 @@
-"A TAsyncStream source for one Physics world telemetry announcer.
-
-The single pending slot is the producer-side equivalent of BlEventsStream>>keepOnlyLast:
-it prevents announcements from accumulating before the sink polls. AsyncPeekSink then owns
-the latest received value on the element side."
+"I stream the latest telemetry change from one Physics world. I keep at most one pending update so inspector consumers cannot accumulate stale announcements."
 Class {
 	#name : 'CFPhysicsTelemetryStream',
 	#superclass : 'Object',

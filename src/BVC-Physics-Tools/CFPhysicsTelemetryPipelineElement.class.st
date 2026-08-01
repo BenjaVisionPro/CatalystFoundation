@@ -1,3 +1,4 @@
+"I present the live telemetry analysis for one Physics world. I own the controls, asynchronous analysis and pipeline visualisation used by the telemetry inspector."
 Class {
 	#name : 'CFPhysicsTelemetryPipelineElement',
 	#superclass : 'BrVerticalPane',

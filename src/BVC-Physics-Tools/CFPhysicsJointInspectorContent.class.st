@@ -1,3 +1,4 @@
+"I present the live diagnostic state of one Physics joint. My responsibility is to show the values shared by all joints together with the details specific to the selected joint type."
 Class {
 	#name : 'CFPhysicsJointInspectorContent',
 	#superclass : 'Object',

@@ -1,3 +1,4 @@
+"I coordinate the diagnostic overlay for one Physics world host. I own the specialised overlays, controls, selection and inspector, and refresh them from presentation and camera changes."
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',

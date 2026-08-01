@@ -1,3 +1,4 @@
+"I render one committed contact state in a Physics overlay. I own the markers and lines that show its contact points, normal and separation."
 Class {
 	#name : 'CFPhysicsContactVisual',
 	#superclass : 'Object',

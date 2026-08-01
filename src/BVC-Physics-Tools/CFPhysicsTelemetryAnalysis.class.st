@@ -1,4 +1,4 @@
-"I analyse an immutable snapshot of the bounded Pharo Telemetry recordings of one Physics world. The selected rolling duration is measured backwards from the newest completed Physics step."
+"I analyse a snapshot of Physics telemetry recordings. My responsibility is to select a rolling window of completed steps and aggregate their nested pipeline spans into statistics."
 Class {
 	#name : 'CFPhysicsTelemetryAnalysis',
 	#superclass : 'Object',

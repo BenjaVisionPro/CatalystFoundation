@@ -1,3 +1,4 @@
+"I represent the aggregated measurements of one named telemetry span. I retain its samples, percentile statistics and child spans and provide the diagnostic views derived from them."
 Class {
 	#name : 'CFPhysicsTelemetrySpanStatistics',
 	#superclass : 'Object',

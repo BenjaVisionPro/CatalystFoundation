@@ -1,3 +1,4 @@
+"I manage the contact diagnostics for one Physics overlay. My responsibility is to reconcile transient committed contact state with the contact visuals shown for the current frame."
 Class {
 	#name : 'CFPhysicsContactOverlay',
 	#superclass : 'Object',

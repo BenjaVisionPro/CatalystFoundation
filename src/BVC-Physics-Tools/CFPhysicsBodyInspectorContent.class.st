@@ -1,3 +1,4 @@
+"I present the live diagnostic state of one Physics body. My responsibility is to keep the overlay inspector fields synchronised with the selected body's physical state."
 Class {
 	#name : 'CFPhysicsBodyInspectorContent',
 	#superclass : 'Object',
