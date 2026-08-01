@@ -22,9 +22,9 @@ CFPhysicsPointerJointHandler class >> on: anElement [
 CFPhysicsPointerJointHandler >> initialize [
 	super initialize.
 	enabled := true.
-	hertz := 10.0.
-	dampingRatio := 0.7.
-	maximumAcceleration := 10000.0
+	hertz := 30.0.
+	dampingRatio := 1.0.
+	maximumAcceleration := 1000000.0
 ]
 
 { #category : 'lifecycle' }
