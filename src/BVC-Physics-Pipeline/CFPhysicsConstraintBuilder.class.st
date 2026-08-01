@@ -134,7 +134,7 @@ CFPhysicsConstraintBuilder >> updatePoint: point from: manifoldPoint contact: co
 		featureId: manifoldPoint featureId;
 		anchorA: anchorA;
 		anchorB: anchorB;
-		baseSeparation: manifoldPoint separation - (self dot: anchorB - anchorA with: normal);
+		baseSeparation: manifoldPoint separation;
 		normalMass: (normalDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / normalDenominator ]);
 		tangentMass: (tangentDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / tangentDenominator ]);
 		relativeNormalVelocity: (self dot: relativeVelocity with: normal);
