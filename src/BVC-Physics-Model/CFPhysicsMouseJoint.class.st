@@ -6,7 +6,7 @@ My responsibility is to drive a body-local anchor toward a world-space target th
 Class {
 	#name : 'CFPhysicsMouseJoint',
 	#superclass : 'CFPhysicsJoint',
-	#instVars : [ 'bodyB', 'localAnchorB', 'target', 'hertz', 'dampingRatio', 'maximumForce', 'impulse' ],
+	#instVars : [ 'bodyB', 'localAnchorB', 'target', 'hertz', 'dampingRatio', 'maximumForce', 'linearImpulse', 'angularImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -26,7 +26,8 @@ CFPhysicsMouseJoint >> initialize [
 	hertz := 5.0.
 	dampingRatio := 0.7.
 	maximumForce := 1000.0.
-	impulse := 0 @ 0.
+	linearImpulse := 0 @ 0.
+	angularImpulse := 0.0.
 	collideConnected := true
 ]
 
@@ -53,7 +54,8 @@ CFPhysicsMouseJoint >> hertz [ ^ hertz ]
 { #category : 'configuration' }
 CFPhysicsMouseJoint >> hertz: aNumber [
 	hertz := aNumber asFloat max: 0.0.
-	impulse := 0 @ 0.
+	linearImpulse := 0 @ 0.
+	angularImpulse := 0.0.
 	self wakeBodies
 ]
 { #category : 'configuration' }
@@ -61,7 +63,8 @@ CFPhysicsMouseJoint >> dampingRatio [ ^ dampingRatio ]
 { #category : 'configuration' }
 CFPhysicsMouseJoint >> dampingRatio: aNumber [
 	dampingRatio := aNumber asFloat max: 0.0.
-	impulse := 0 @ 0.
+	linearImpulse := 0 @ 0.
+	angularImpulse := 0.0.
 	self wakeBodies
 ]
 { #category : 'configuration' }
@@ -72,9 +75,13 @@ CFPhysicsMouseJoint >> maximumForce: aNumber [
 	self wakeBodies
 ]
 { #category : 'solver state' }
-CFPhysicsMouseJoint >> impulse [ ^ impulse ]
+CFPhysicsMouseJoint >> linearImpulse [ ^ linearImpulse ]
 { #category : 'solver state' }
-CFPhysicsMouseJoint >> impulse: aPoint [ impulse := aPoint ]
+CFPhysicsMouseJoint >> linearImpulse: aPoint [ linearImpulse := aPoint ]
+{ #category : 'solver state' }
+CFPhysicsMouseJoint >> angularImpulse [ ^ angularImpulse ]
+{ #category : 'solver state' }
+CFPhysicsMouseJoint >> angularImpulse: aNumber [ angularImpulse := aNumber ]
 { #category : 'testing' }
 CFPhysicsMouseJoint >> includesBody: aBody [ ^ bodyB == aBody ]
 { #category : 'testing' }

@@ -75,7 +75,7 @@ CFPhysicsSoftStepSolver >> warmStart [
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
-		^ self applyMouseJointImpulse: constraint impulse constraint: constraint ].
+		^ self warmStartMouseJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
 		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
@@ -141,30 +141,51 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveMouseJointConstraint: constraint biasEnabled: biasEnabled [
-	| anchor velocity separation bias massCoefficient impulseCoefficient vector increment oldImpulse newImpulse magnitude |
-	anchor := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
-	velocity := self distanceJointVelocityFor: constraint bodyStateB anchor: anchor.
+	| state angularIncrement anchor velocity separation bias massVector increment oldImpulse newImpulse magnitude |
+	state := constraint bodyStateB.
+	state ifNil: [ ^ self ].
+	angularIncrement := (constraint angularMassCoefficient * constraint angularMass * state angularVelocity) negated
+		- (constraint angularImpulseCoefficient * constraint angularImpulse).
+	constraint angularImpulse: constraint angularImpulse + angularIncrement.
+	state angularVelocity: state angularVelocity + (angularIncrement * state inverseInertia).
+	anchor := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: state).
+	velocity := self distanceJointVelocityFor: state anchor: anchor.
 	separation := constraint baseSeparation
-		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		+ (self distanceJointDeltaPositionFor: state)
 		+ anchor - constraint anchorB.
-	bias := biasEnabled ifTrue: [ separation * constraint biasRate ] ifFalse: [ 0 @ 0 ].
-	massCoefficient := biasEnabled ifTrue: [ constraint massCoefficient ] ifFalse: [ 1.0 ].
-	impulseCoefficient := biasEnabled ifTrue: [ constraint impulseCoefficient ] ifFalse: [ 0.0 ].
-	vector := (velocity + bias) * massCoefficient.
-	increment := (((constraint effectiveMassXX * vector x) + (constraint effectiveMassXY * vector y)) negated
-		@ ((constraint effectiveMassXY * vector x) + (constraint effectiveMassYY * vector y)) negated)
-		- (constraint impulse * impulseCoefficient).
-	oldImpulse := constraint impulse.
+	bias := separation * constraint biasRate.
+	massVector :=
+		((constraint effectiveMassXX * (velocity x + bias x))
+			+ (constraint effectiveMassXY * (velocity y + bias y)))
+		@ ((constraint effectiveMassXY * (velocity x + bias x))
+			+ (constraint effectiveMassYY * (velocity y + bias y))).
+	increment := (massVector * constraint massCoefficient) negated
+		- (constraint linearImpulse * constraint impulseCoefficient).
+	oldImpulse := constraint linearImpulse.
 	newImpulse := oldImpulse + increment.
 	magnitude := newImpulse r.
 	(magnitude > constraint maximumImpulse and: [ magnitude > 0.0 ]) ifTrue: [
 		newImpulse := newImpulse * (constraint maximumImpulse / magnitude) ].
-	constraint impulse: newImpulse.
-	self applyMouseJointImpulse: newImpulse - oldImpulse constraint: constraint
+	constraint linearImpulse: newImpulse.
+	self applyMouseJointLinearImpulse: newImpulse - oldImpulse constraint: constraint
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> applyMouseJointImpulse: impulse constraint: constraint [
+CFPhysicsSoftStepSolver >> warmStartMouseJointConstraint: constraint [
+	| state anchor |
+	state := constraint bodyStateB.
+	state ifNil: [ ^ self ].
+	anchor := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: state).
+	state linearVelocity:
+		state linearVelocity + (constraint linearImpulse * state inverseMass).
+	state angularVelocity:
+		state angularVelocity
+			+ (((self cross: anchor with: constraint linearImpulse) + constraint angularImpulse)
+				* state inverseInertia)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyMouseJointLinearImpulse: impulse constraint: constraint [
 	| anchor state |
 	state := constraint bodyStateB.
 	state ifNil: [ ^ self ].

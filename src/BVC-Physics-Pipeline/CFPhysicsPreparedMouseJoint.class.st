@@ -4,7 +4,7 @@ I represent a mouse joint prepared for one solver step.
 Class {
 	#name : 'CFPhysicsPreparedMouseJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',
-	#instVars : [ 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'maximumImpulse', 'impulse' ],
+	#instVars : [ 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'angularMass', 'angularMassCoefficient', 'angularImpulseCoefficient', 'maximumImpulse', 'linearImpulse', 'angularImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -41,15 +41,33 @@ CFPhysicsPreparedMouseJoint >> massCoefficient: aNumber [ massCoefficient := aNu
 CFPhysicsPreparedMouseJoint >> impulseCoefficient [ ^ impulseCoefficient ]
 { #category : 'softness' }
 CFPhysicsPreparedMouseJoint >> impulseCoefficient: aNumber [ impulseCoefficient := aNumber ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularMass [ ^ angularMass ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularMass: aNumber [ angularMass := aNumber ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularMassCoefficient [ ^ angularMassCoefficient ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularMassCoefficient: aNumber [ angularMassCoefficient := aNumber ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularImpulseCoefficient [ ^ angularImpulseCoefficient ]
+{ #category : 'softness' }
+CFPhysicsPreparedMouseJoint >> angularImpulseCoefficient: aNumber [ angularImpulseCoefficient := aNumber ]
 { #category : 'limits' }
 CFPhysicsPreparedMouseJoint >> maximumImpulse [ ^ maximumImpulse ]
 { #category : 'limits' }
 CFPhysicsPreparedMouseJoint >> maximumImpulse: aNumber [ maximumImpulse := aNumber ]
 { #category : 'solver state' }
-CFPhysicsPreparedMouseJoint >> impulse [ ^ impulse ]
+CFPhysicsPreparedMouseJoint >> linearImpulse [ ^ linearImpulse ]
 { #category : 'solver state' }
-CFPhysicsPreparedMouseJoint >> impulse: aPoint [ impulse := aPoint ]
+CFPhysicsPreparedMouseJoint >> linearImpulse: aPoint [ linearImpulse := aPoint ]
+{ #category : 'solver state' }
+CFPhysicsPreparedMouseJoint >> angularImpulse [ ^ angularImpulse ]
+{ #category : 'solver state' }
+CFPhysicsPreparedMouseJoint >> angularImpulse: aNumber [ angularImpulse := aNumber ]
 { #category : 'writing back' }
 CFPhysicsPreparedMouseJoint >> writeImpulsesBack [
-	joint solverCommitTarget impulse: impulse
+	joint solverCommitTarget
+		linearImpulse: linearImpulse;
+		angularImpulse: angularImpulse
 ]
