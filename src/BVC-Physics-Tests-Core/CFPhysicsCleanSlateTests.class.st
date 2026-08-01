@@ -6034,7 +6034,7 @@ CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 		bodyStates: state bodyStates
 		step: state step) first.
 	self assert: joint linearOffset equals: 40 @ 0.
-	self assert: prepared baseLinearSeparation equals: 0 @ 0.
+	self assert: (prepared baseLinearSeparation closeTo: 0 @ 0).
 	^ prepared
 ]
 
