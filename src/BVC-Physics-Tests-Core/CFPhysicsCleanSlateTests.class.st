@@ -6023,3 +6023,24 @@ CFPhysicsCleanSlateTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
 	handler endFrom: nil.
 	self assert: handler mouseJoint isNil
 ]
+
+
+{ #category : 'tests - pull interaction' }
+CFPhysicsCleanSlateTests >> testPullInteractionAppliesFreshPointerVelocityWhenReleased [
+	| root child world body handler joint |
+	root := BlElement new.
+	child := BlElement new extent: 20 @ 20.
+	root addChild: child.
+	world := root physics beWorld.
+	world synchroniseMembership.
+	body := child physics body.
+	handler := child physics pointerJointHandler.
+	joint := CFPhysicsMouseJoint body: body target: 10 @ 10.
+	world addMouseJoint: joint.
+	handler instVarNamed: 'mouseJoint' put: joint.
+	handler instVarNamed: 'pointerVelocity' put: 800 @ -200.
+	handler instVarNamed: 'previousPointerTimestamp' put: DateAndTime now.
+	handler finishMouseJoint.
+	self assert: body velocity equals: 800 @ -200.
+	self assert: world mouseJoints isEmpty
+]
