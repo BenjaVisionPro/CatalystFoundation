@@ -402,18 +402,34 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointLimits: constraint biasEnabled: bi
 	leverA := self prismaticJointLeverAFor: constraint direction: axis.
 	leverB := self prismaticJointLeverBFor: constraint direction: axis.
 	velocity := self prismaticJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
+
 	separation := translation - constraint lowerTranslation.
-	bias := (biasEnabled and: [ separation < 0.0 ]) ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
-	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	separation > 0.0
+		ifTrue: [
+			bias := separation * step inverseSubstepTime.
+			massCoefficient := 1.0.
+			impulseCoefficient := 0.0 ]
+		ifFalse: [
+			bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+			massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+			impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
 	increment := (massCoefficient * constraint axialMass * (velocity + bias)) negated
 		- (impulseCoefficient * constraint lowerLimitImpulse).
 	oldImpulse := constraint lowerLimitImpulse.
 	newImpulse := (oldImpulse + increment) max: 0.0.
 	constraint lowerLimitImpulse: newImpulse.
 	self applyPrismaticJointImpulse: newImpulse - oldImpulse direction: axis leverA: leverA leverB: leverB constraint: constraint.
+
 	separation := constraint upperTranslation - translation.
-	bias := (biasEnabled and: [ separation < 0.0 ]) ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+	separation > 0.0
+		ifTrue: [
+			bias := separation * step inverseSubstepTime.
+			massCoefficient := 1.0.
+			impulseCoefficient := 0.0 ]
+		ifFalse: [
+			bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+			massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+			impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
 	increment := (massCoefficient * constraint axialMass * (velocity negated + bias)) negated
 		- (impulseCoefficient * constraint upperLimitImpulse).
 	oldImpulse := constraint upperLimitImpulse.
