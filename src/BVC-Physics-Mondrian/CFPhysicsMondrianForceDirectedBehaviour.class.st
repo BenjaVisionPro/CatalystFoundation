@@ -5,7 +5,7 @@ My responsibility is to install, configure and remove the generic force-directed
 "
 Class {
 	#name : 'CFPhysicsMondrianForceDirectedBehaviour',
-	#superclass : 'CFPhysicsMondrianBehaviour',
+	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
 		'forceDirectedBehaviour',
 		'hierarchyBehaviour',
@@ -22,6 +22,11 @@ Class {
 	#category : 'BVC-Physics-Mondrian',
 	#package : 'BVC-Physics-Mondrian'
 }
+
+{ #category : 'accessing' }
+CFPhysicsMondrianForceDirectedBehaviour >> mondrian [
+	^ physics mondrian
+]
 
 { #category : 'initialization' }
 CFPhysicsMondrianForceDirectedBehaviour >> initialize [

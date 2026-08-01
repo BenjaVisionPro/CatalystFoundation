@@ -12,7 +12,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
 	mondrian := GtMondrian new.
 	nodes := mondrian nodes with: #(one two three).
 	nodes withIndexDo: [ :each :index | each relocate: (index * 30) @ (index * 20) ].
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	self assert: world owner == mondrian root.
 	self assert: world members size equals: 3.
 	nodes do: [ :each |
@@ -33,7 +33,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipExcludesNodePresentationC
 				yourself ];
 		with: #(one two).
 	nodes := mondrian nodeElements.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	self assert: world members size equals: 2.
 	nodes do: [ :each |
 		self assert: (world includes: each).
@@ -49,7 +49,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipIsConfigurable [
 	nodes := mondrian nodes with: #(one two three).
 	world := (mondrian physics
 		bodyElements: [ { nodes second. nodes third } ];
-		beWorld).
+		world).
 	self assert: world members size equals: 2.
 	self assert: (world includes: nodes first) not.
 	self assert: (world includes: nodes second).
@@ -62,7 +62,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
 	<gtExample>
 	| mondrian world |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	self assert: world members size equals: mondrian nodeElements size.
 	^ mondrian
 ]
@@ -73,7 +73,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	| mondrian initial added world |
 	mondrian := GtMondrian new.
 	initial := mondrian nodes with: #(one two).
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	added := (mondrian nodes with: #(three)) first.
 	world synchroniseMembership.
 	self assert: (world includes: added).
@@ -91,7 +91,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldExcludesEdges [
 	mondrian nodes with: #(one two three).
 	edgeElements := mondrian edges
 		connectAssociations: { #one -> #two }.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	self assert: (world includes: edgeElements first) not.
 	mondrian edges connectAssociations: { #two -> #three }.
 	world synchroniseMembership.
@@ -105,8 +105,8 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 	| mondrian firstWorld secondWorld |
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
-	firstWorld := mondrian physics beWorld.
-	secondWorld := mondrian physics beWorld.
+	firstWorld := mondrian physics world.
+	secondWorld := mondrian physics world.
 	self assert: firstWorld == secondWorld.
 	^ mondrian
 ]
@@ -126,9 +126,9 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldRestoresTheOriginalGraph
 	originalScale := mondrian root childrenScaleFactor.
 	originalTranslation := mondrian root childrenTranslationFactor.
 	physics := mondrian physics.
-	world := physics beWorld.
+	world := physics world.
 	physics ceaseBeingWorld.
-	self assert: physics world isNil.
+	self assert: physics worldOrNil isNil.
 	self assert: mondrian root layout == originalLayout.
 	self assert: mondrian root autoScaleEnabled equals: originalAutoScale.
 	self assert: mondrian root childrenScaleFactor equals: originalScale.
@@ -150,10 +150,10 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldIsIdempotent [
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
 	physics := mondrian physics.
-	physics beWorld.
+	physics world.
 	physics ceaseBeingWorld.
 	physics ceaseBeingWorld.
-	self assert: physics world isNil.
+	self assert: physics worldOrNil isNil.
 	self assert: mondrian root existingPhysics isNil.
 	^ mondrian
 ]
@@ -166,10 +166,10 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldPreservesPreexistingPhys
 	node := (mondrian nodes with: #(one)) first.
 	preexistingPhysics := node physics.
 	physics := mondrian physics.
-	physics beWorld.
+	physics world.
 	physics ceaseBeingWorld.
 	self assert: node existingPhysics == preexistingPhysics.
-	self assert: node existingPhysics existingWorld isNil.
+	self assert: node existingPhysics worldOrNil isNil.
 	^ mondrian
 ]
 
@@ -182,7 +182,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNo
 	members := OrderedCollection with: initial.
 	physics := mondrian physics.
 	physics bodyElements: [ members ].
-	world := physics beWorld.
+	world := physics world.
 	added := (mondrian nodes with: #(two)) first.
 	members add: added.
 	world synchroniseMembership.
@@ -202,7 +202,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
 	space time: BlTime simulated.
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	[
 		space root addChild: mondrian root.
 		space pulse.
@@ -219,7 +219,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
 	self assert: mondrian root autoScaleEnabled.
-	mondrian physics beWorld.
+	mondrian physics world.
 	self assert: mondrian root autoScaleEnabled not.
 	^ mondrian
 ]
@@ -236,7 +236,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareAnchors [
 		connectAssociations: { #one -> #two }) first.
 	self assert: edge fromAnchor class equals: BlNearestPositionLooseCircleAnchor.
 	self assert: edge toAnchor class equals: BlNearestPositionLooseCircleAnchor.
-	mondrian physics beWorld.
+	mondrian physics world.
 	self assert: edge fromAnchor class equals: CFPhysicsMondrianPresentationAnchor.
 	self assert: edge toAnchor class equals: CFPhysicsMondrianPresentationAnchor.
 	self assert: edge fromAnchor anchor class equals: BlNearestPositionLooseCircleAnchor.
@@ -260,7 +260,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsPreservesStandardAndCustomAnchors [
 	customEdge
 		fromAnchor: (CFPhysicsMondrianTestAnchor element: customEdge graph model fromElement);
 		toAnchor: (CFPhysicsMondrianTestAnchor element: customEdge graph model toElement).
-	mondrian physics beWorld.
+	mondrian physics world.
 	self assert: standardEdge fromAnchor class equals: CFPhysicsMondrianPresentationAnchor.
 	self assert: standardEdge fromAnchor anchor class equals: BlElementTopCenterAnchor.
 	self assert: standardEdge toAnchor anchor class equals: BlElementCenterRightAnchor.
@@ -277,7 +277,7 @@ CFPhysicsMondrianTests >> mondrianUsesStandardEdgesUntilPhysicsIsEnabled [
 	self assert: mondrian edges class equals: GtMondrianEdgeBuilder.
 	mondrian physics.
 	self assert: mondrian edges class equals: GtMondrianEdgeBuilder.
-	mondrian physics beWorld.
+	mondrian physics world.
 	self assert: mondrian edges class equals: CFPhysicsMondrianEdgeBuilder.
 	^ mondrian
 ]
@@ -297,7 +297,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 			size: 62 @ 34;
 			relocate: 24 + ((index - 1) * 74) @ (28 + (index * 6)) ].
 	initialPositions := nodes collect: [ :each | each position ].
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	self assert: world gravity equals: 0 @ 1000.
 	world step: 80.
 	nodes with: initialPositions do: [ :each :initialPosition |
@@ -312,7 +312,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnection
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two three).
 	mondrian edges connectAssociations: { #one -> #two }.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
 	genericBehaviour := behaviour forceDirectedBehaviour.
@@ -334,7 +334,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesConfiguredBodyElements
 	mondrian edges connectAssociations: { #one -> #two. #two -> #three }.
 	world := (mondrian physics
 		bodyElements: [ { nodes second. nodes third } ];
-		beWorld).
+		world).
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
 	genericBehaviour := behaviour forceDirectedBehaviour.
@@ -351,7 +351,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
 	mondrian edges connectAssociations: { #one -> #two }.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
 	genericBehaviour := behaviour forceDirectedBehaviour.
@@ -389,7 +389,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgre
 	node := (mondrian nodes with: #(one)) first.
 	space root addChild: mondrian root.
 	space pulse.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	world stopStepping.
 	space pulse.
 	self assert: world isStepping not.
@@ -422,7 +422,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsWorldOverlayCoordinatesFollowGraphScale
 	node := (mondrian nodes with: #(one)) first.
 	space root addChild: mondrian root.
 	space pulse.
-	world := mondrian physics beWorld.
+	world := mondrian physics world.
 	world stopStepping.
 	mondrian root
 		childrenScaleFactor: 1.5;

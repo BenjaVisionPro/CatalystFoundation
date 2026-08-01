@@ -27,7 +27,7 @@ CFPhysicsTelemetryBenchmarkScenarios class >> sleepingBodies: aBodyCount [
 		element := self boxElement.
 		host addChild: element.
 		element ].
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0; synchroniseMembership.
 	columns := 20.
 	elements withIndexDo: [ :element :index |
@@ -48,7 +48,7 @@ CFPhysicsTelemetryBenchmarkScenarios class >> densePileRows: rowCount columns: c
 			element := self boxElement.
 			host addChild: element.
 			elements add: { element. column. row } ] ].
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0; synchroniseMembership.
 	elements do: [ :entry |
 		(world bodyStateFor: entry first)
@@ -67,7 +67,7 @@ CFPhysicsTelemetryBenchmarkScenarios class >> independentIslands: islandCount bo
 			element := self boxElement.
 			host addChild: element.
 			entries add: { element. islandIndex. bodyIndex } ] ].
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0; synchroniseMembership.
 	entries do: [ :entry |
 		| islandOrigin localIndex |
@@ -87,7 +87,7 @@ CFPhysicsTelemetryBenchmarkScenarios class >> singleIslandBodies: aBodyCount [
 		element := self boxElement.
 		host addChild: element.
 		element ].
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0; synchroniseMembership.
 	elements withIndexDo: [ :element :index |
 		(world bodyStateFor: element)
@@ -108,7 +108,7 @@ CFPhysicsTelemetryBenchmarkScenarios class >> sensorOverlapPairs: aPairCount [
 			addChild: sensorElement;
 			addChild: solidElement.
 		entries add: { sensorElement. solidElement. index } ].
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0; synchroniseMembership.
 	entries do: [ :entry |
 		| position |

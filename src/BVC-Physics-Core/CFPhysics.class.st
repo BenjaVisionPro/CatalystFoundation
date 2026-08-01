@@ -31,24 +31,19 @@ CFPhysics >> behaviours [
 ]
 
 { #category : 'behaviours' }
-CFPhysics >> behaviourWorld [
-	^ self existingWorld ifNil: [ self owningWorld ]
-]
-
-{ #category : 'behaviours' }
 CFPhysics >> addBehaviour: aBehaviour [
-	| behaviourWorld |
+	| aWorld |
 	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
 		self error: 'The Physics Behaviour already belongs to another Physics facade' ].
-	behaviourWorld := self behaviourWorld.
-	behaviourWorld ifNil: [
+	aWorld := self worldOrNil.
+	aWorld ifNil: [
 		self error: 'A Physics Behaviour requires an element belonging to a physics world' ].
 	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
 	aBehaviour
 		physics: self;
-		world: behaviourWorld.
+		world: aWorld.
 	behaviours add: aBehaviour.
-	behaviourWorld addBehaviour: aBehaviour.
+	aWorld addBehaviour: aBehaviour.
 	^ aBehaviour
 ]
 
@@ -74,24 +69,22 @@ CFPhysics >> beStatic [
 ]
 
 { #category : 'worlds' }
-CFPhysics >> beWorld [
+CFPhysics >> world [
 	| aWorld |
-	aWorld := element userData
-		at: CFPhysicsWorld
-		ifAbsent: [
-			aWorld := CFPhysicsWorld on: element.
-			element userData at: CFPhysicsWorld put: aWorld.
-			element fireEvent: CFPhysicsWorldAttachmentChanged new.
-			aWorld ].
+	aWorld := self worldOrNil.
+	aWorld ifNotNil: [ ^ aWorld ].
+	aWorld := CFPhysicsWorld on: element.
+	element userData at: CFPhysicsWorld put: aWorld.
+	element fireEvent: CFPhysicsWorldAttachmentChanged new.
 	^ aWorld
 ]
 
 { #category : 'worlds' }
 CFPhysics >> ceaseBeingWorld [
-	| existingWorld |
-	existingWorld := self existingWorld.
-	existingWorld ifNil: [ ^ self ].
-	existingWorld release.
+	| aWorld |
+	aWorld := element userData at: CFPhysicsWorld ifAbsent: [ nil ].
+	aWorld ifNil: [ ^ self ].
+	aWorld release.
 	element userData removeKey: CFPhysicsWorld ifAbsent: [ ].
 	element fireEvent: CFPhysicsWorldAttachmentChanged new.
 	^ self
@@ -185,18 +178,6 @@ CFPhysics >> restitution: aNumber [
 	self requireBodyState restitution: aNumber
 ]
 
-{ #category : 'worlds' }
-CFPhysics >> existingWorld [
-	^ element userData
-		at: CFPhysicsWorld
-		ifAbsent: [ nil ]
-]
-
-{ #category : 'worlds' }
-CFPhysics >> ownedWorld [
-	^ self existingWorld
-]
-
 { #category : 'body type' }
 CFPhysics >> isDynamic [
 	^ self requireBodyState isDynamic
@@ -214,20 +195,7 @@ CFPhysics >> isStatic [
 
 { #category : 'worlds' }
 CFPhysics >> isWorld [
-	^ self existingWorld notNil
-]
-
-{ #category : 'worlds' }
-CFPhysics >> owningWorld [
-	| ancestor physics |
-	ancestor := element parent.
-	[ ancestor notNil ] whileTrue: [
-		physics := ancestor existingPhysics.
-		physics ifNotNil: [
-			physics existingWorld ifNotNil: [ :anExistingWorld |
-				^ anExistingWorld ] ].
-		ancestor := ancestor parent ].
-	^ nil
+	^ element userData includesKey: CFPhysicsWorld
 ]
 
 { #category : 'bodies' }
@@ -243,11 +211,11 @@ CFPhysics >> position: aPoint [
 
 { #category : 'private - bodies' }
 CFPhysics >> requireBodyState [
-	| owningWorld |
+	| aWorld |
 	body ifNotNil: [ ^ body ].
-	owningWorld := self owningWorld.
-	owningWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	owningWorld synchroniseMembership.
+	aWorld := self worldOrNil.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aWorld synchroniseMembership.
 	body ifNil: [ self error: 'The element is not tracked by its physics world' ].
 	^ body
 ]
@@ -264,23 +232,24 @@ CFPhysics >> rotation: aNumber [
 
 
 { #category : 'worlds' }
-CFPhysics >> world [
-	^ element userData
-		at: CFPhysicsWorld
-		ifAbsent: [
-			element parent
-				ifNil: [ self beWorld ]
-				ifNotNil: [ :aParent | aParent physics world ] ]
+CFPhysics >> worldOrNil [
+	| ancestor |
+	(element userData at: CFPhysicsWorld ifAbsent: [ nil ])
+		ifNotNil: [ :aWorld | ^ aWorld ].
+	ancestor := element parent.
+	[ ancestor notNil ] whileTrue: [
+		(ancestor userData at: CFPhysicsWorld ifAbsent: [ nil ])
+			ifNotNil: [ :aWorld | ^ aWorld ].
+		ancestor := ancestor parent ].
+	^ nil
 ]
 
 { #category : 'worlds' }
 CFPhysics >> synchroniseWorldMembership [
-	| existingWorld owningWorld |
-	existingWorld := self existingWorld.
-	owningWorld := self owningWorld.
-	existingWorld ifNotNil: [ existingWorld synchroniseMembership ].
-	owningWorld ifNotNil: [ owningWorld synchroniseMembership ].
-	^ owningWorld
+	| aWorld |
+	aWorld := self worldOrNil.
+	aWorld ifNotNil: [ aWorld synchroniseMembership ].
+	^ aWorld
 ]
 
 { #category : 'bodies' }
@@ -461,8 +430,8 @@ CFPhysics >> pullInteractionHandler [
 { #category : 'spring interaction' }
 CFPhysics >> springTo: anotherElement [
 	| aWorld otherWorld spring |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -476,7 +445,7 @@ CFPhysics >> springTo: anotherElement [
 { #category : 'spring interaction' }
 CFPhysics >> springs [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -487,15 +456,15 @@ CFPhysics >> springs [
 { #category : 'spring interaction' }
 CFPhysics >> removeSpring: aSpringConstraint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeSpringConstraint: aSpringConstraint ]
 ]
 
 { #category : 'distance joints' }
 CFPhysics >> distanceJointTo: anotherElement [
 	| aWorld otherWorld joint |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -508,7 +477,7 @@ CFPhysics >> distanceJointTo: anotherElement [
 { #category : 'distance joints' }
 CFPhysics >> distanceJoints [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -519,15 +488,15 @@ CFPhysics >> distanceJoints [
 { #category : 'distance joints' }
 CFPhysics >> removeDistanceJoint: aJoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
 ]
 
 { #category : 'revolute joints' }
 CFPhysics >> revoluteJointTo: anotherElement [
 	| aWorld otherWorld joint |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -540,7 +509,7 @@ CFPhysics >> revoluteJointTo: anotherElement [
 { #category : 'revolute joints' }
 CFPhysics >> revoluteJoints [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -551,15 +520,15 @@ CFPhysics >> revoluteJoints [
 { #category : 'revolute joints' }
 CFPhysics >> removeRevoluteJoint: aJoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
 ]
 
 { #category : 'fixed joints' }
 CFPhysics >> fixedJointTo: anotherElement [
 	| aWorld otherWorld joint |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -572,7 +541,7 @@ CFPhysics >> fixedJointTo: anotherElement [
 { #category : 'fixed joints' }
 CFPhysics >> fixedJoints [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -583,15 +552,15 @@ CFPhysics >> fixedJoints [
 { #category : 'fixed joints' }
 CFPhysics >> removeFixedJoint: aJoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeFixedJoint: aJoint ]
 ]
 
 { #category : 'rail joints' }
 CFPhysics >> railJointTo: anotherElement along: anAxis [
 	| aWorld otherWorld joint |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -605,7 +574,7 @@ CFPhysics >> railJointTo: anotherElement along: anAxis [
 { #category : 'rail joints' }
 CFPhysics >> railJoints [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -616,7 +585,7 @@ CFPhysics >> railJoints [
 { #category : 'rail joints' }
 CFPhysics >> removeRailJoint: aJoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeRailJoint: aJoint ]
 ]
 
@@ -624,7 +593,7 @@ CFPhysics >> removeRailJoint: aJoint [
 { #category : 'containment interaction' }
 CFPhysics >> containWithinWorld [
 	| aWorld constraint |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	aWorld synchroniseMembership.
 	constraint := CFPhysicsContainmentConstraint on: self requireBodyState.
@@ -634,15 +603,15 @@ CFPhysics >> containWithinWorld [
 { #category : 'containment interaction' }
 CFPhysics >> removeContainment: aContainmentConstraint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeContainmentConstraint: aContainmentConstraint ]
 ]
 
 { #category : 'attraction interaction' }
 CFPhysics >> attract: anotherElement [
 	| aWorld otherWorld attraction |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -655,7 +624,7 @@ CFPhysics >> attract: anotherElement [
 { #category : 'attraction interaction' }
 CFPhysics >> attractions [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -666,7 +635,7 @@ CFPhysics >> attractions [
 { #category : 'attraction interaction' }
 CFPhysics >> removeAttraction: anAttractionConstraint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeAttractionConstraint: anAttractionConstraint ]
 ]
 
@@ -675,8 +644,8 @@ CFPhysics >> removeAttraction: anAttractionConstraint [
 { #category : 'repulsion interaction' }
 CFPhysics >> repel: anotherElement [
 	| aWorld otherWorld repulsion |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
@@ -689,7 +658,7 @@ CFPhysics >> repel: anotherElement [
 { #category : 'repulsion interaction' }
 CFPhysics >> repulsions [
 	| aWorld body |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
@@ -700,14 +669,14 @@ CFPhysics >> repulsions [
 { #category : 'repulsion interaction' }
 CFPhysics >> removeRepulsion: aRepulsionConstraint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNotNil: [ aWorld removeRepulsionConstraint: aRepulsionConstraint ]
 ]
 
 { #category : 'anchors' }
 CFPhysics >> localAnchorAt: aPoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	aWorld synchroniseMembership.
 	^ CFPhysicsLocalAnchor on: self requireBodyState at: aPoint
@@ -716,7 +685,7 @@ CFPhysics >> localAnchorAt: aPoint [
 { #category : 'anchors' }
 CFPhysics >> normalisedAnchorAt: aPoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	aWorld synchroniseMembership.
 	^ CFPhysicsNormalisedAnchor on: self requireBodyState at: aPoint
@@ -726,7 +695,7 @@ CFPhysics >> normalisedAnchorAt: aPoint [
 { #category : 'anchors' }
 CFPhysics >> worldAnchorAt: aPoint [
 	| aWorld |
-	aWorld := self owningWorld.
+	aWorld := self worldOrNil.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
 	^ aWorld anchorAt: aPoint
 ]
@@ -735,8 +704,8 @@ CFPhysics >> worldAnchorAt: aPoint [
 { #category : 'relationship endpoints' }
 CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
 	| aWorld otherWorld |
-	aWorld := self owningWorld.
-	otherWorld := anotherElement physics owningWorld.
+	aWorld := self worldOrNil.
+	otherWorld := anotherElement physics worldOrNil.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.

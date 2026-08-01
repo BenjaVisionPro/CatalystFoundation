@@ -6,7 +6,7 @@ GtMondrian >> edges [
 	physicsMondrian := self root userData
 		at: CFPhysicsMondrian
 		ifAbsent: [ nil ].
-	^ (physicsMondrian notNil and: [ physicsMondrian world notNil ])
+	^ (physicsMondrian notNil and: [ physicsMondrian worldOrNil notNil ])
 		ifTrue: [ CFPhysicsMondrianEdgeBuilder new mondrian: self ]
 		ifFalse: [ GtMondrianEdgeBuilder new mondrian: self ]
 ]

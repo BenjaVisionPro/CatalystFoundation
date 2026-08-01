@@ -30,7 +30,7 @@ CFPhysicsExamples >> bodies [
 		yourself.
 	host addChild: circle.
 	host addChild: rectangle.
-	world := host physics beWorld.
+	world := host physics world.
 	world synchroniseMembership.
 	(world bodyStateFor: circle)
 		position: 75 @ 65;
@@ -46,7 +46,7 @@ CFPhysicsExamples >> bodiesAfterStepping [
 	<gtExample>
 	| host world |
 	host := self bodies.
-	world := host physics existingWorld.
+	world := host physics worldOrNil.
 	world step: 30.
 	world present.
 	^ host
@@ -66,7 +66,7 @@ CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world gravity: 0 @ 0.
 	world stepDuration: 10 milliSeconds.
 	world synchroniseMembership.
@@ -97,7 +97,7 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	owner addChild: body.
 	space root addChild: owner.
 	space pulse.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world
 		gravity: 0 @ 0;
 		stepDuration: 10 milliSeconds;
@@ -138,7 +138,7 @@ CFPhysicsExamples >> startSteppingResumesTheExistingPausedMotion [
 	owner := BlElement new size: 320 @ 200.
 	space root addChild: owner.
 	space pulse.
-	world := owner physics beWorld.
+	world := owner physics world.
 	motion := world startStepping.
 	space pulse.
 	world pauseStepping.
@@ -158,7 +158,7 @@ CFPhysicsExamples >> physicsWorldRestartsAfterOwnerDetachment [
 	owner := BlElement new size: 320 @ 200.
 	space root addChild: owner.
 	space pulse.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world stepDuration: 10 milliSeconds.
 	firstMotion := world startStepping.
 	space pulse.
@@ -185,7 +185,7 @@ CFPhysicsExamples >> replacingPhysicsWorldOwnerStopsExistingPlayback [
 	space root addChild: firstOwner.
 	space root addChild: secondOwner.
 	space pulse.
-	world := firstOwner physics beWorld.
+	world := firstOwner physics world.
 	motion := world startStepping.
 	space pulse.
 	world owner: secondOwner.
@@ -204,7 +204,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
@@ -237,7 +237,7 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	space pulse.
 	body transformDo: [ :builder | builder translateBy: 8 @ 0 ].
 	applicationTransformation := body transformation.
-	world := host physics beWorld.
+	world := host physics world.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
@@ -264,7 +264,7 @@ CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
 	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state) not.
@@ -290,7 +290,7 @@ CFPhysicsExamples >> physicsPresentationConvertsPhysicsRotationToMotionDegrees [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world synchroniseMembership.
 	state := world bodyStateFor: body.
 	state rotation: Float pi / 2.0.
@@ -311,7 +311,7 @@ CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world
 		gravity: 0 @ 0;
 		stepDuration: 10 milliSeconds;
@@ -340,7 +340,7 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 	host addChild: body.
 	space root addChild: host.
 	space pulse.
-	world := host physics beWorld.
+	world := host physics world.
 	world
 		gravity: 0 @ 0;
 		stepDuration: 10 milliSeconds;
@@ -367,7 +367,7 @@ CFPhysicsExamples >> manualPresentationCannotCompeteWithContinuousPlayback [
 	owner := BlElement new size: 320 @ 200.
 	space root addChild: owner.
 	space pulse.
-	world := owner physics beWorld.
+	world := owner physics world.
 	motion := world startStepping.
 	space pulse.
 	stepResultBeforeAttempt := world lastStepResult.
@@ -401,7 +401,7 @@ CFPhysicsExamples >> physicsWorldDoesNoTelemetryWorkWhenDisabled [
 	| host world announcer |
 	host := BlElement new size: 320 @ 200; yourself.
 	host addChild: (BlElement new size: 20 @ 20; yourself).
-	world := host physics beWorld.
+	world := host physics world.
 	self assert: world hasTelemetryLogger not.
 	announcer := world telemetryAnnouncer.
 	self assert: announcer notNil.
@@ -417,7 +417,7 @@ CFPhysicsExamples >> physicsWorldRecordsPharoTelemetry [
 	| host world |
 	host := BlElement new size: 320 @ 200; yourself.
 	host addChild: (BlElement new size: 20 @ 20; yourself).
-	world := host physics beWorld.
+	world := host physics world.
 	world telemetryEnabled: true.
 	world step.
 	self assert: world telemetryRecordings isNotEmpty.
@@ -534,7 +534,7 @@ CFPhysicsExamples >> physicsWorldDefaultsToSynchronousStepping [
 	<gtExample>
 	| owner world |
 	owner := BlElement new size: 320 @ 200.
-	world := owner physics beWorld.
+	world := owner physics world.
 	self assert: world backgroundStepping not.
 	^ world
 ]

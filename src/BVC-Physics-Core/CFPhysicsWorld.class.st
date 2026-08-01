@@ -227,7 +227,7 @@ CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
 	physics := anElement physics.
-	(physics owningWorld == self and: [ physics isExcludedFromWorld not ])
+	(physics worldOrNil == self and: [ physics isExcludedFromWorld not ])
 		ifTrue: [ aSet add: anElement ].
 	physics isWorld ifTrue: [ ^ self ].
 	anElement children do: [ :each |
@@ -239,7 +239,7 @@ CFPhysicsWorld >> collectProvidedMembersInto: aSet [
 	membershipProvider value do: [ :each |
 		| physics |
 		physics := each physics.
-		(physics owningWorld == self and: [ physics isExcludedFromWorld not ])
+		(physics worldOrNil == self and: [ physics isExcludedFromWorld not ])
 			ifTrue: [ aSet add: each ] ]
 ]
 
@@ -305,7 +305,7 @@ CFPhysicsWorld >> removeBehaviour: aBehaviour [
 { #category : 'behaviours' }
 CFPhysicsWorld >> retireInvalidBehaviours [
 	behaviours copy do: [ :each |
-		each stillBelongsToWorld ifFalse: [ each remove ] ]
+		each belongsToWorld ifFalse: [ each remove ] ]
 ]
 
 { #category : 'behaviours' }

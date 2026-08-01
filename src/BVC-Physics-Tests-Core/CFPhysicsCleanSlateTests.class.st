@@ -760,7 +760,7 @@ CFPhysicsCleanSlateTests >> worldDelegatesOneStepToTheExplicitPipeline [
 	box := BlElement new size: 60 @ 20; yourself.
 	owner addChild: ground.
 	owner addChild: box.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world
 		gravity: 0 @ 0;
 		synchroniseMembership.
@@ -1503,7 +1503,7 @@ CFPhysicsCleanSlateTests >> elementFacingCollisionFilteringConfiguresItsBody [
 	owner := BlElement new size: 200 @ 200; yourself.
 	child := BlElement new size: 30 @ 30; yourself.
 	owner addChild: child.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	child physics
 		collisionCategoryBits: 2r0010;
@@ -1735,7 +1735,7 @@ CFPhysicsCleanSlateTests >> worldPreparesPointerConstraintsBeforeSolving [
 	owner := BlElement new size: 400 @ 300; yourself.
 	child := BlElement new size: 40 @ 40; yourself.
 	owner addChild: child.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	body := world bodyStateFor: child.
@@ -1782,7 +1782,7 @@ CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFr
 	label := button childWithId: #label.
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	self assert: world members size equals: 1.
 	self assert: (world includes: button).
@@ -1807,7 +1807,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		do: [ :anEvent | pullEvents add: anEvent ]).
 	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	button physics position: 20 @ 20.
@@ -1888,7 +1888,7 @@ CFPhysicsCleanSlateTests >> springsAreInstalledThroughBlocElements [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChild: first.
 	owner addChild: second.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -1928,7 +1928,7 @@ CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 	second := BlElement new size: 20 @ 20; yourself.
 	third := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	attached := first physics distanceJointTo: second.
 	unrelated := second physics distanceJointTo: third.
@@ -1950,7 +1950,7 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -1976,7 +1976,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2000,7 +2000,7 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody 
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2024,7 +2024,7 @@ CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpo
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	joint := first physics distanceJointTo: second.
 	first physics bodyState sleep.
@@ -2043,7 +2043,7 @@ CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -2084,7 +2084,7 @@ CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -2110,7 +2110,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2134,7 +2134,7 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody 
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2157,7 +2157,7 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -2184,7 +2184,7 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2210,7 +2210,7 @@ CFPhysicsCleanSlateTests >> railJointConstrainsAnAnchoredElementToItsAxis [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2235,7 +2235,7 @@ CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2261,7 +2261,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2312,7 +2312,7 @@ CFPhysicsCleanSlateTests >> fixedJointAnchorsABodyOrientationToTheWorld [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2336,7 +2336,7 @@ CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2366,7 +2366,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	third := BlElement new size: 20 @ 20; yourself.
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	revolute := first physics revoluteJointTo: second.
 	fixed := first physics fixedJointTo: third.
@@ -2390,7 +2390,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
@@ -2416,7 +2416,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
@@ -2442,7 +2442,7 @@ CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
@@ -2468,7 +2468,7 @@ CFPhysicsCleanSlateTests >> railJointCanSuppressCollisionBetweenItsEndpoints [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
@@ -2494,7 +2494,7 @@ CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -2518,7 +2518,7 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	joint := first physics distanceJointTo: second.
 	joint collideConnected: true.
@@ -2538,7 +2538,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryContainsBodiesByDefault [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 90 @ 90.
@@ -2555,7 +2555,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world boundary enabled: false.
 	world synchroniseMembership.
@@ -2572,7 +2572,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world boundary restitution: 0.5.
 	world synchroniseMembership.
@@ -2593,7 +2593,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryUsesItsMargin [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world boundary margin: 10.
 	world synchroniseMembership.
@@ -2610,7 +2610,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryUsesTheCurrentWorldExtent [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 130 @ 20.
@@ -2627,7 +2627,7 @@ CFPhysicsCleanSlateTests >> explicitContainmentOverridesTheWorldBoundary [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world boundary restitution: 0.0.
 	world synchroniseMembership.
@@ -2704,7 +2704,7 @@ CFPhysicsCleanSlateTests >> containmentIsInstalledThroughTheBlocElement [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 90 @ 90.
@@ -2724,7 +2724,7 @@ CFPhysicsCleanSlateTests >> containmentUsesTheCurrentWorldExtent [
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics containWithinWorld.
@@ -2761,7 +2761,7 @@ CFPhysicsCleanSlateTests >> oneElementCanOwnManyIndependentSpringRelationships [
 	third := BlElement new size: 20 @ 20; yourself.
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	firstSpring := first physics springTo: second.
 	secondSpring := first physics springTo: third.
@@ -2782,7 +2782,7 @@ CFPhysicsCleanSlateTests >> duplicateSpringEndpointsRemainIndependent [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	firstSpring := first physics springTo: second.
 	secondSpring := first physics springTo: second.
@@ -2804,7 +2804,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsSprings [
 	third := BlElement new size: 20 @ 20; yourself.
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	attachedA := first physics springTo: second.
 	attachedB := first physics springTo: third.
@@ -2890,7 +2890,7 @@ CFPhysicsCleanSlateTests >> attractionsAreInstalledAndDiscoveredThroughBlocEleme
 	second := BlElement new size: 20 @ 20; yourself.
 	third := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	firstAttraction := first physics attract: second.
@@ -2913,7 +2913,7 @@ CFPhysicsCleanSlateTests >> duplicateAttractionsRemainIndependent [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	firstAttraction := first physics attract: second.
 	secondAttraction := first physics attract: second.
@@ -2935,7 +2935,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsAttractions [
 	third := BlElement new size: 20 @ 20; yourself.
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	attachedA := first physics attract: second.
 	attachedB := first physics attract: third.
@@ -2958,7 +2958,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesAttractionBeforeIntegration [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -3032,7 +3032,7 @@ CFPhysicsCleanSlateTests >> repulsionsAreInstalledAndDiscoveredThroughBlocElemen
 	second := BlElement new size: 20 @ 20; yourself.
 	third := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	firstRepulsion := first physics repel: second.
@@ -3055,7 +3055,7 @@ CFPhysicsCleanSlateTests >> duplicateRepulsionsRemainIndependent [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	firstRepulsion := first physics repel: second.
 	secondRepulsion := first physics repel: second.
@@ -3077,7 +3077,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsRepulsions [
 	third := BlElement new size: 20 @ 20; yourself.
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	attachedA := first physics repel: second.
 	attachedB := first physics repel: third.
@@ -3100,7 +3100,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesRepulsionBeforeIntegration [
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world boundary enabled: false.
 	world synchroniseMembership.
@@ -3139,7 +3139,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateALocalAnchor [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 40 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	element physics position: 100 @ 50.
 	anchor := element physics localAnchorAt: 40 @ 10.
@@ -3194,7 +3194,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateANormalisedAnchor [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 40 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	element physics position: 100 @ 50.
 	anchor := element physics normalisedAnchorAt: 1 @ 1.
@@ -3231,7 +3231,7 @@ CFPhysicsCleanSlateTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
 	first := BlElement new size: 40 @ 20; yourself.
 	second := BlElement new size: 60 @ 30; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first physics position: 20 @ 30.
 	second physics position: 200 @ 80.
@@ -5151,12 +5151,12 @@ CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
 ]
 
 { #category : 'examples - worlds' }
-CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
+CFPhysicsCleanSlateTests >> worldInstallsWorldAlongsidePhysics [
 	<gtExample>
 	| element physics world |
 	element := BlElement new.
 	physics := element physics.
-	world := physics beWorld.
+	world := physics world.
 	self assert: (element userData at: CFPhysics) == physics.
 	self assert: (element userData at: CFPhysicsWorld) == world.
 	self assert: physics world == world.
@@ -5170,14 +5170,15 @@ CFPhysicsCleanSlateTests >> worldAnswersNearestExplicitWorld [
 	root := BlElement new.
 	child := BlElement new.
 	root addChild: child.
-	world := root physics beWorld.
+	world := root physics world.
+	self assert: child physics worldOrNil == world.
 	self assert: child physics world == world.
 	self assert: child physics isWorld not.
 	^ world
 ]
 
 { #category : 'examples - worlds' }
-CFPhysicsCleanSlateTests >> worldInstallsAtRootWhenNoWorldExists [
+CFPhysicsCleanSlateTests >> worldInstallsOnReceiverWhenNoWorldExists [
 	<gtExample>
 	| root parent child world |
 	root := BlElement new.
@@ -5186,9 +5187,10 @@ CFPhysicsCleanSlateTests >> worldInstallsAtRootWhenNoWorldExists [
 	root addChild: parent.
 	parent addChild: child.
 	world := child physics world.
-	self assert: root physics existingWorld == world.
-	self assert: parent physics existingWorld isNil.
-	self assert: child physics existingWorld isNil.
+	self assert: root physics worldOrNil isNil.
+	self assert: parent physics worldOrNil isNil.
+	self assert: child physics worldOrNil == world.
+	self assert: child physics isWorld.
 	^ world
 ]
 
@@ -5255,12 +5257,12 @@ CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
-	world := root physics beWorld.
+	world := root physics world.
 	world synchroniseMembership.
 	spring := first physics springTo: second.
 	repulsion := first physics repel: second.
 	root physics ceaseBeingWorld.
-	self assert: root physics existingWorld isNil.
+	self assert: root physics worldOrNil isNil.
 	self assert: world members isEmpty.
 	self assert: world springConstraints isEmpty.
 	self assert: world repulsionConstraints isEmpty.
@@ -5276,7 +5278,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnec
 	second := BlElement new extent: 20 @ 20.
 	third := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second. third }.
-	world := root physics beWorld.
+	world := root physics world.
 	world gravity: 0 @ 0.
 	edge := first -> second.
 	behaviour := root physics forceDirected.
@@ -5298,7 +5300,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedRetainsExistingConstraintsWhileReco
 	second := BlElement new extent: 20 @ 20.
 	third := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second. third }.
-	world := root physics beWorld.
+	world := root physics world.
 	world gravity: 0 @ 0.
 	nodes := OrderedCollection with: first with: second.
 	firstConnection := first -> second.
@@ -5334,7 +5336,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
-	world := root physics beWorld.
+	world := root physics world.
 	connection := first -> second.
 	behaviour := root physics forceDirected.
 	behaviour
@@ -5370,7 +5372,7 @@ CFPhysicsCleanSlateTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstrai
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
-	world := root physics beWorld.
+	world := root physics world.
 	connection := first -> second.
 	firstBehaviour := root physics forceDirected.
 	firstBehaviour
@@ -5397,7 +5399,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
-	world := root physics beWorld.
+	world := root physics world.
 	connection := first -> second.
 	behaviour := root physics forceDirected.
 	behaviour
@@ -5423,7 +5425,7 @@ CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCe
 			background: (Color lightBlue alpha: 0.65);
 			yourself ].
 	owner addChildren: elements.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	elements do: [ :element | element physics position: 220 @ 160 ].
@@ -5450,7 +5452,7 @@ CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	physics := element physics.
 	self assert: physics bodyType == physics bodyState bodyType.
@@ -5470,7 +5472,7 @@ CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	physics := element physics.
 	descriptions := physics magritteDescription children.
@@ -5603,7 +5605,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 		size: 20 @ 20;
 		yourself.
 	owner addChild: element.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	body := element physics bodyState.
 	body position: 0 @ 0.
@@ -5634,7 +5636,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 		size: 20 @ 20;
 		yourself.
 	owner addChildren: { firstElement. secondElement }.
-	world := owner physics beWorld.
+	world := owner physics world.
 	world synchroniseMembership.
 	first := firstElement physics bodyState.
 	second := secondElement physics bodyState.
@@ -5847,8 +5849,8 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	detachedElement := BlElement new size: 20 @ 20; yourself.
 	synchronousOwner addChild: synchronousElement.
 	detachedOwner addChild: detachedElement.
-	synchronousWorld := synchronousOwner physics beWorld.
-	detachedWorld := detachedOwner physics beWorld.
+	synchronousWorld := synchronousOwner physics world.
+	detachedWorld := detachedOwner physics world.
 	synchronousWorld
 		gravity: 0 @ 10;
 		synchroniseMembership.

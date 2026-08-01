@@ -100,7 +100,7 @@ CFPhysicsPullInteractionHandler >> restorePositionFrom: anEvent [
 CFPhysicsPullInteractionHandler >> beginConstraintFrom: anEvent [
 	| world body |
 	(initialPointerPosition isNil or: [ pointerPosition isNil ]) ifTrue: [ ^ self ].
-	world := element physics world.
+	world := element physics worldOrNil.
 	world ifNil: [ ^ self ].
 	world synchroniseMembership.
 	body := world bodyStateFor: element.
