@@ -853,7 +853,7 @@ CFPhysicsWorld >> prepareRepulsionConstraintsForStep: seconds [
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> springs [
-	^ self distanceJoints select: #springEnabled
+	^ self distanceJoints select: [ :each | each springEnabled ]
 ]
 
 { #category : 'distance joints' }

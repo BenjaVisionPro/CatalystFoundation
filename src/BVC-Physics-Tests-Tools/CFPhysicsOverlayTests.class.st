@@ -1060,8 +1060,8 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
 	expectedMarkerPosition := firstPoint
 		+ (direction * (spring length asFloat / (spring endpointPair worldPointB - spring endpointPair worldPointA) r))
 		- (4 @ 4).
-	self assert: visual lengthMarker hasParent.
-	self assert: visual lengthMarker position equals: expectedMarkerPosition.
+	self assert: visual restLengthMarker hasParent.
+	self assert: visual restLengthMarker position equals: expectedMarkerPosition.
 	^ overlay
 ]
 
@@ -1342,8 +1342,8 @@ CFPhysicsOverlayTests >> physicsDistanceJointVisualShowsItsRestLength [
 	expectedPosition := firstPoint
 		+ ((secondPoint - firstPoint) * (joint length / distance))
 		- (4 @ 4).
-	self assert: visual lengthMarker visibility equals: BlVisibility visible.
-	self assert: visual lengthMarker position equals: expectedPosition.
+	self assert: visual restLengthMarker visibility equals: BlVisibility visible.
+	self assert: visual restLengthMarker position equals: expectedPosition.
 	^ visual
 ]
 
@@ -1362,7 +1362,7 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
 	self assert: visual joint == joint.
-	self assert: visual lengthMarker visibility equals: BlVisibility gone.
+	self assert: visual restLengthMarker visibility equals: BlVisibility gone.
 	^ visual
 ]
 
@@ -1600,7 +1600,7 @@ CFPhysicsOverlayTests >> physicsOverlayDistanceJointInspectorShowsConfigurationA
 	points := joint endpointPair worldPoints.
 	self assert: (content valueElementAt: #length) text asString equals: (content formatDiagnosticNumber: joint length).
 	self assert: (content valueElementAt: #currentLength) text asString equals: (content formatDiagnosticNumber: (points second - points first) r).
-	self assert: (content valueElementAt: #accumulatedImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedImpulse).
+	self assert: (content valueElementAt: #impulse) text asString equals: (content formatDiagnosticNumber: joint impulse).
 	^ overlay
 ]
 
@@ -1709,7 +1709,7 @@ CFPhysicsOverlayTests >> physicsJointVisualReleasesEveryRetainedPrimitiveWhenDis
 		visual rail.
 		visual lowerLimitMarker.
 		visual upperLimitMarker.
-		visual lengthMarker.
+		visual restLengthMarker.
 		visual pivotMarker.
 		visual referenceRay.
 		visual lowerAngleMarker.

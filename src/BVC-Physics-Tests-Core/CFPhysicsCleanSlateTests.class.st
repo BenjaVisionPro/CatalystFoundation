@@ -3256,7 +3256,10 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationship
 	first world: world.
 	second world: world.
 	endpoints := CFPhysicsNearestGeometryEndpointPair between: first and: second.
-	spring := endpoints spring.
+	spring := (CFPhysicsDistanceJoint betweenEndpoints: endpoints)
+		springEnabled: true;
+		yourself.
+	world addDistanceJoint: spring.
 	attraction := endpoints attraction.
 	repulsion := endpoints repulsion.
 	self assert: spring endpointPair == endpoints.
@@ -4257,9 +4260,9 @@ CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpa
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
-	self assert: joint accumulatedImpulse isZero.
+	self assert: joint impulse isZero.
 	result commitJointConstraints.
-	self assert: joint accumulatedImpulse isZero not.
+	self assert: joint impulse isZero not.
 	^ result
 ]
 
@@ -4774,9 +4777,9 @@ CFPhysicsCleanSlateTests >> preparedJointImpulseRemainsDetachedUntilPipelineResu
 	result := CFPhysicsStepPipelineResult new
 		jointConstraints: { prepared };
 		yourself.
-	self assert: joint accumulatedImpulse equals: 0.0.
+	self assert: joint impulse equals: 0.0.
 	result commitJointConstraints.
-	self assert: joint accumulatedImpulse equals: 3.0.
+	self assert: joint impulse equals: 3.0.
 	^ result
 ]
 
@@ -5371,13 +5374,13 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	joint := CFPhysicsDistanceJoint between: first and: second.
 	joint
 		length: 25;
-		accumulatedImpulse: 3.0.
+		impulse: 3.0.
 	world addDistanceJoint: joint.
 	state := world captureStateAfterSynchronisation.
 	capturedJoint := state joints first.
 	joint
 		length: 100;
-		accumulatedImpulse: 0.0.
+		impulse: 0.0.
 	prepared := (CFPhysicsDistanceJointConstraintBuilder new
 		constraintsFrom: state joints
 		bodyStates: state bodyStates
@@ -5385,15 +5388,15 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	self assert: capturedJoint ~~ joint.
 	self assert: capturedJoint solverCommitTarget == joint.
 	self assert: capturedJoint length equals: 25.
-	self assert: capturedJoint accumulatedImpulse equals: 3.0.
+	self assert: capturedJoint impulse equals: 3.0.
 	self assert: prepared baseSeparation equals: 15.0.
 	self assert: prepared impulse equals: 3.0 * state step warmStartRatio.
-	self assert: joint accumulatedImpulse equals: 0.0.
+	self assert: joint impulse equals: 0.0.
 	solution := world stepPipeline solve: state.
 	solvedPrepared := solution pipelineResult jointConstraints first.
-	self assert: joint accumulatedImpulse equals: 0.0.
+	self assert: joint impulse equals: 0.0.
 	solution pipelineResult commitJointConstraints.
-	self assert: joint accumulatedImpulse equals: solvedPrepared impulse.
+	self assert: joint impulse equals: solvedPrepared impulse.
 	^ solution
 ]
 
