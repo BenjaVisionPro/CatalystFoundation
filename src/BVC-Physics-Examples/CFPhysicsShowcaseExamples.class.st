@@ -19,7 +19,7 @@ CFPhysicsShowcaseExamples >> clickMe [
 		background: Color veryVeryLightGray;
 		constraintsDo: [ :constraints | constraints minHeight: 250 ];
 		yourself.
-	world := host physics world.
+	world := host physics beWorld.
 	world
 		gravity: 0 @ 8;
 		contactHertz: 120.0;
@@ -93,7 +93,7 @@ CFPhysicsShowcaseExamples >> joints [
 		background: Color veryVeryLightGray;
 		constraintsDo: [ :constraints | constraints minHeight: 320 ];
 		yourself.
-	world := host physics world.
+	world := host physics beWorld.
 	world
 		gravity: 0 @ 240;
 		contactHertz: 120.0;

@@ -56,7 +56,7 @@ CFPhysicsBehaviour >> isRemoved [
 
 { #category : 'testing' }
 CFPhysicsBehaviour >> belongsToWorld [
-	^ physics notNil and: [ physics worldOrNil == world ]
+	^ physics notNil and: [ physics world == world ]
 ]
 
 { #category : 'updating' }

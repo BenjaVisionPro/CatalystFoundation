@@ -16,7 +16,7 @@ CFPhysicsMondrianShowcaseExamples >> defaultPhysicsGraph [
 	<return: #GtMondrian>
 	| mondrian |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
-	mondrian physics world.
+	mondrian physics beWorld.
 	^ mondrian
 ]
 
@@ -26,7 +26,7 @@ CFPhysicsMondrianShowcaseExamples >> forceDirectedGraph [
 	<return: #GtMondrian>
 	| mondrian world |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
-	world := mondrian physics world.
+	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
 	mondrian physics forceDirected.
 	^ mondrian
@@ -50,7 +50,7 @@ CFPhysicsMondrianShowcaseExamples >> physicsInspectorGraph [
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
 	space root addChild: mondrian root.
 	space pulse.
-	world := mondrian physics world.
+	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
 	mondrian physics forceDirected.
 	space pulse.

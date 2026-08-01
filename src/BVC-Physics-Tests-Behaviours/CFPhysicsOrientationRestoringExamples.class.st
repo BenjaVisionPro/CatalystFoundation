@@ -12,7 +12,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsItsElementTo
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 80 @ 40; yourself.
 	owner addChild: element.
-	world := owner physics world.
+	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	target := 0.35.
@@ -34,7 +34,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringUsesTheShortestAngu
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 80 @ 40; yourself.
 	owner addChild: element.
-	world := owner physics world.
+	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics rotation: Float pi - 0.1.
@@ -55,7 +55,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringActsOnlyOnItsAttach
 	first := BlElement new size: 80 @ 40; yourself.
 	second := BlElement new size: 80 @ 40; yourself.
 	owner addChildren: { first. second }.
-	world := owner physics world.
+	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 40 @ 100.

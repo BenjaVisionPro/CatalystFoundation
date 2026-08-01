@@ -15,7 +15,7 @@ CFPhysicsOverlay class >> on: aHostElement [
 		ifFalse: [ self error: 'A physics overlay requires an element that owns a physics world' ].
 	^ self new
 		host: aHostElement;
-		world: physics worldOrNil;
+		world: physics world;
 		initializeOverlay;
 		yourself
 ]

@@ -227,7 +227,7 @@ CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
 	physics := anElement physics.
-	(physics worldOrNil == self and: [ physics isExcludedFromWorld not ])
+	(physics world == self and: [ physics isExcludedFromWorld not ])
 		ifTrue: [ aSet add: anElement ].
 	physics isWorld ifTrue: [ ^ self ].
 	anElement children do: [ :each |
@@ -239,7 +239,7 @@ CFPhysicsWorld >> collectProvidedMembersInto: aSet [
 	membershipProvider value do: [ :each |
 		| physics |
 		physics := each physics.
-		(physics worldOrNil == self and: [ physics isExcludedFromWorld not ])
+		(physics world == self and: [ physics isExcludedFromWorld not ])
 			ifTrue: [ aSet add: each ] ]
 ]
 

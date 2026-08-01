@@ -30,7 +30,7 @@ CFPhysicsOverlayTests >> physicsHost [
 	container addChild: host.
 	host addChild: first.
 	host addChild: second.
-	world := host physics world.
+	world := host physics beWorld.
 	world synchroniseMembership.
 	(world bodyStateFor: first) position: 40 @ 50.
 	(world bodyStateFor: second)
@@ -68,7 +68,7 @@ CFPhysicsOverlayTests >> physicsCanvassableHost [
 	container addChild: host.
 	host addChild: first.
 	host addChild: second.
-	world := host physics world.
+	world := host physics beWorld.
 	world synchroniseMembership.
 	(world bodyStateFor: first) position: 40 @ 50.
 	(world bodyStateFor: second)
@@ -127,7 +127,7 @@ CFPhysicsOverlayTests >> physicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 	| host overlay world body representation |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	body := world bodyStatesInOrder first.
 	representation := overlay bodyOverlay visuals
 		detect: [ :each | each body == body ].
@@ -152,7 +152,7 @@ CFPhysicsOverlayTests >> physicsOverlayRemovesRetiredBodyRepresentations [
 	| host overlay world retiredElement retiredBody |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	retiredElement := host children first.
 	retiredBody := world bodyStateFor: retiredElement.
 	retiredElement removeFromParent.
@@ -211,7 +211,7 @@ CFPhysicsOverlayTests >> physicsOverlayActionTracksWorldLifecycle [
 	host := BlElement new.
 	button := CFPhysicsOverlay toggleButtonFor: host.
 	self assert: button visibility equals: BlVisibility gone.
-	host physics world.
+	host physics beWorld.
 	button := CFPhysicsOverlay toggleButtonFor: host.
 	self assert: button visibility equals: BlVisibility visible.
 	host physics ceaseBeingWorld.
@@ -253,7 +253,7 @@ CFPhysicsOverlayTests >> physicsOverlayRefreshesContactsAfterEachPresentedFrame 
 	| host overlay world first second |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	first physics position: 80 @ 80.
@@ -274,7 +274,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentsContactGeometryWithItsReferenceBo
 	| host overlay world first second firstBody visual initialPosition state expectedPosition context |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	first physics position: 80 @ 80.
@@ -324,7 +324,7 @@ CFPhysicsOverlayTests >> physicsPresentationAndWorldCoordinatesAgreeForPositione
 	| host overlay world body element physicsPosition displayedPoint worldPoint context |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	element := host children first.
 	element relocate: 35 @ 25.
 	"Commit the ordinary Bloc position before Physics calculates its Motion
@@ -348,7 +348,7 @@ CFPhysicsOverlayTests >> physicsPresentationAnnouncesOnlySuccessfullyPresentedFr
 	<gtExample>
 	| host world presentation handler presentedCount |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	presentedCount := 0.
 	handler := BlEventHandler
 		on: CFPhysicsFramePresentedEvent
@@ -372,7 +372,7 @@ CFPhysicsOverlayTests >> physicsOverlayFrameHandlerFollowsShowHideShowLifecycle 
 	<gtExample>
 	| host world first second firstOverlay secondOverlay |
 	host := self physicsOverlayCanBeInstalled.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	first physics position: 80 @ 80.
@@ -448,7 +448,7 @@ CFPhysicsOverlayTests >> physicsObjectInspectorContentTransition [
 	<gtExample>
 	| host world spring inspector physics outgoingElement motion |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -720,7 +720,7 @@ CFPhysicsOverlayTests >> physicsOverlayObservesConsumedButtonClicks [
 	host addChild: button.
 	space root addChild: host.
 	space pulse.
-	host physics world synchroniseMembership.
+	host physics beWorld synchroniseMembership.
 	overlay := host showPhysicsOverlay.
 	scripter := BlScripter new.
 	scripter element: host.
@@ -826,7 +826,7 @@ CFPhysicsOverlayTests >> physicsOverlayCreatesOneRetainedVisualPerSpring [
 	<gtExample>
 	| host world spring overlay |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -843,7 +843,7 @@ CFPhysicsOverlayTests >> physicsSpringOverlayPreservesVisualIdentity [
 	<gtExample>
 	| host world spring overlay visual |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -860,7 +860,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualUsesItsAnchoredEndpointPair [
 	<gtExample>
 	| host world first second spring overlay visual firstPoint secondPoint context |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
 	spring := CFPhysicsSpringConstraint
@@ -886,7 +886,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualRefreshesOnPresentedFrame [
 	<gtExample>
 	| host world first second spring overlay visual originalPosition expectedPosition context |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
 	spring := CFPhysicsSpringConstraint between: first and: second.
@@ -916,7 +916,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	overlay := host showPhysicsOverlay.
 	host space pulse.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	spring := CFPhysicsSpringConstraint between: first physics bodyState and: second physics bodyState.
@@ -953,7 +953,7 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 	<gtExample>
 	| host world spring overlay visual |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -975,7 +975,7 @@ CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSprin
 	| host overlay world first spring joint springVisual jointVisual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
@@ -1012,7 +1012,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
 	| host world first second spring overlay visual |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
 	spring := CFPhysicsSpringConstraint
@@ -1033,7 +1033,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksItsRestLength [
 	<gtExample>
 	| host world first second spring overlay visual firstPoint secondPoint direction expectedMarkerPosition |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
 	spring := CFPhysicsSpringConstraint
@@ -1060,7 +1060,7 @@ CFPhysicsOverlayTests >> physicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
 	| host world spring overlay visual |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -1079,7 +1079,7 @@ CFPhysicsOverlayTests >> physicsSpringOverlayIsEmptyWhileDisabled [
 	<gtExample>
 	| host world spring overlay |
 	host := self physicsHost.
-	world := host physics worldOrNil.
+	world := host physics world.
 	spring := CFPhysicsSpringConstraint
 		between: world bodyStatesInOrder first
 		and: world bodyStatesInOrder second.
@@ -1099,7 +1099,7 @@ CFPhysicsOverlayTests >> physicsJointOverlayCreatesVisualsForWorldJoints [
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 20 @ 20).
@@ -1117,7 +1117,7 @@ CFPhysicsOverlayTests >> physicsJointOverlayPreservesVisualIdentity [
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 20 @ 20).
@@ -1134,7 +1134,7 @@ CFPhysicsOverlayTests >> physicsJointOverlayRemovesRetiredVisuals [
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 20 @ 20).
@@ -1154,7 +1154,7 @@ CFPhysicsOverlayTests >> physicsJointOverlayUsesDisplayedAnchorCoordinates [
 	| host overlay world first joint visual context points expectedFirst expectedSecond |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 10 @ 12)
 		distanceJointTo: (world anchorAt: 280 @ 60).
@@ -1180,7 +1180,7 @@ CFPhysicsOverlayTests >> physicsJointOverlayClearsWhenDisabled [
 	| host overlay world first visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	(first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 20 @ 20).
@@ -1199,7 +1199,7 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsAJointFromItsOverlayHitTarget [
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 240 @ 40).
@@ -1310,7 +1310,7 @@ CFPhysicsOverlayTests >> physicsDistanceJointVisualShowsItsRestLength [
 	| host overlay world first joint visual points context firstPoint secondPoint distance expectedPosition |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 10 @ 12)
 		distanceJointTo: (world anchorAt: 280 @ 60).
@@ -1341,7 +1341,7 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	| host overlay world first second joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	joint := (first physics localAnchorAt: 20 @ 20)
@@ -1361,7 +1361,7 @@ CFPhysicsOverlayTests >> physicsRailJointVisualShowsItsAxisAndLimits [
 	| host overlay world first joint visual points context secondPoint axisStart axisEnd displayedAxis expectedStart expectedEnd normal |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		railJointTo: (world anchorAt: 180 @ 80)
@@ -1402,7 +1402,7 @@ CFPhysicsOverlayTests >> physicsRailJointVisualHidesLimitMarkersWhenLimitsAreDis
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		railJointTo: (world anchorAt: 180 @ 80)
@@ -1422,7 +1422,7 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsPivotAndReferenceDirecti
 	| host overlay world first joint visual points context firstPoint secondPoint pivotPoint |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		revoluteJointTo: (world anchorAt: 180 @ 80).
@@ -1454,7 +1454,7 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsConfiguredAngularLimits 
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		revoluteJointTo: (world anchorAt: 180 @ 80).
@@ -1477,7 +1477,7 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEn
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		revoluteJointTo: (world anchorAt: 180 @ 80).
@@ -1505,7 +1505,7 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualShowsItsLockedReferenceOrientati
 	| host overlay world first second joint visual points context firstPoint secondPoint pivotPoint |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	joint := (first physics localAnchorAt: 20 @ 20)
@@ -1598,7 +1598,7 @@ CFPhysicsOverlayTests >> physicsOverlayRevoluteJointInspectorShowsLimitsAndMotor
 	| host overlay world first joint content |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		revoluteJointTo: (world anchorAt: 180 @ 80).
@@ -1625,7 +1625,7 @@ CFPhysicsOverlayTests >> physicsOverlayRailJointInspectorShowsAxisLimitsAndSolve
 	| host overlay world first joint content |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		railJointTo: (world anchorAt: 180 @ 80)
@@ -1649,7 +1649,7 @@ CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteM
 	| host overlay world first joint content |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
 		fixedJointTo: (world anchorAt: 180 @ 80).
@@ -1718,7 +1718,7 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	| host overlay world first second distanceJoint fixedJoint distanceVisual fixedVisual firstContent secondContent |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
-	world := host physics worldOrNil.
+	world := host physics world.
 	first := host children first.
 	second := host children second.
 	distanceJoint := (first physics localAnchorAt: 10 @ 12)

@@ -139,7 +139,7 @@ CFPhysicsForceDirectedBehaviour >> validateNodes: currentNodes connections: curr
 	| nodeSet |
 	nodeSet := currentNodes asIdentitySet.
 	currentNodes do: [ :node |
-		(node physics worldOrNil == world) ifFalse: [
+		(node physics world == world) ifFalse: [
 			self error: 'Force-directed nodes must belong to the Behaviour physics world' ] ].
 	currentConnections do: [ :connection |
 		((nodeSet includes: connection key) and: [ nodeSet includes: connection value ]) ifFalse: [

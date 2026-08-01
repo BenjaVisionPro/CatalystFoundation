@@ -11,7 +11,7 @@ CFPhysicsBehaviourLifecycleTests >> testPhysicsOwnsAddedBehaviourAndWorldPartici
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
 	element physics addBehaviour: behaviour.
 	self assert: element physics behaviours equals: { behaviour }.
@@ -37,7 +37,7 @@ CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	order := OrderedCollection new.
 	first := CFPhysicsRecordingBehaviour physics: element physics.
@@ -59,7 +59,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourRemovalIsIdempotentAndClearsBot
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
 	element physics addBehaviour: behaviour.
 	behaviour remove; remove.
@@ -75,7 +75,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourCanRemoveItselfDuringWorldUpdat
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
 	behaviour updateBlock: [ :each :step | each remove ].
@@ -92,7 +92,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextSt
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	second := CFPhysicsRecordingBehaviour physics: element physics.
 	first := CFPhysicsRecordingBehaviour physics: element physics.
@@ -112,7 +112,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWo
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
-	world := root physics world.
+	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
 	element physics addBehaviour: behaviour.
@@ -128,7 +128,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWo
 CFPhysicsBehaviourLifecycleTests >> testWorldOwningElementCanOwnBehaviour [
 	| root world behaviour |
 	root := BlElement new.
-	world := root physics world.
+	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	behaviour := CFPhysicsRecordingBehaviour physics: root physics.
 	root physics addBehaviour: behaviour.

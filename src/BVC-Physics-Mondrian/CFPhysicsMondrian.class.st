@@ -32,7 +32,7 @@ CFPhysicsMondrian >> behaviours [
 
 { #category : 'behaviours' }
 CFPhysicsMondrian >> addBehaviour: aBehaviour [
-	self world.
+	self beWorld.
 	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
 		self error: 'The Mondrian Physics Behaviour already belongs to another facade' ].
 	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
@@ -76,15 +76,15 @@ CFPhysicsMondrian >> bodyElements: aCollectionOrProvider [
 ]
 
 { #category : 'worlds' }
-CFPhysicsMondrian >> worldOrNil [
+CFPhysicsMondrian >> world [
 	^ world
 ]
 
 { #category : 'worlds' }
-CFPhysicsMondrian >> world [
+CFPhysicsMondrian >> beWorld [
 	world ifNotNil: [ ^ world ].
 	self captureOriginalPresentation.
-	world := mondrian root physics world.
+	world := mondrian root physics beWorld.
 	world membershipProvider: [ self bodyElements ].
 	self prepareGraphElements.
 	self adoptCurrentNodePositions.
