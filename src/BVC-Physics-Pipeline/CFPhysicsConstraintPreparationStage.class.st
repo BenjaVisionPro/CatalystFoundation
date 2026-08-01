@@ -57,7 +57,7 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	contactConstraints := constraintBuilder
 		constraintsFrom: aStepResult activeContacts
 		bodyStates: aStepResult bodyStates
-		step: aStepResult step.
+		warmStartRatio: aStepResult step warmStartRatio.
 	jointConstraints := self jointConstraintsFor: aStepResult.
 	preparedJointConstraintCount := jointConstraints size.
 	aStepResult jointConstraints: jointConstraints.
