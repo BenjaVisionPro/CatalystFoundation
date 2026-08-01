@@ -49,7 +49,9 @@ CFPhysicsNearestGeometryEndpointPair >> world [
 { #category : 'geometry' }
 CFPhysicsNearestGeometryEndpointPair >> worldPoints [
 	| manifold point pointA pointB newPointA newPointB |
-	manifold := CFPhysicsCollision manifoldBetween: bodyA and: bodyB.
+	manifold := self world manifoldGenerator
+		manifoldBetweenBody: bodyA
+		andBody: bodyB.
 	manifold ifNotNil: [
 		point := manifold points isEmpty
 			ifTrue: [ (bodyA worldBodyOrigin + bodyB worldBodyOrigin) / 2.0 ]

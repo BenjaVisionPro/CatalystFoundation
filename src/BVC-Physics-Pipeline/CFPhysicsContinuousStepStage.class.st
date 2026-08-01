@@ -43,7 +43,7 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 	impacts ifEmpty: [
 		aStepResult continuousStepResult: nil.
 		^ nil ].
-	continuousResult := CFPhysicsContinuousImpactLoopResult
+	continuousResult := CFPhysicsContinuousStepResult
 		impacts: impacts
 		impactSolveResults: impactSolveResults
 		sensorContacts: aStepResult continuousSensorContacts
