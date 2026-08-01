@@ -1,3 +1,8 @@
+"
+I represent an interactive constraint between a pointer and a grabbed body point.
+
+My responsibility is to drive that body-local point toward the current pointer position.
+"
 Class {
 	#name : 'CFPhysicsPointerConstraint',
 	#superclass : 'Object',

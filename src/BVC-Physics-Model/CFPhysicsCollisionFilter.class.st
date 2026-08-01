@@ -1,3 +1,8 @@
+"
+I represent the collision membership and mask of a body.
+
+My responsibility is to decide whether two bodies are eligible to collide.
+"
 Class {
 	#name : 'CFPhysicsCollisionFilter',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent a softened inverse-square distance response.
+
+My responsibility is to provide strong nearby force without the singularity of a pure inverse-square law.
+"
 Class {
 	#name : 'CFPhysicsSoftenedInverseSquareResponse',
 	#superclass : 'CFPhysicsDistanceResponse',

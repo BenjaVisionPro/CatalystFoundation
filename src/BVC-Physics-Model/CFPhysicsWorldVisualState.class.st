@@ -1,3 +1,8 @@
+"
+I represent the committed diagnostic view of a world's contacts.
+
+My responsibility is to retain and reconcile contact presentation data independently of transient solver objects.
+"
 Class {
 	#name : 'CFPhysicsWorldVisualState',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent an axis-aligned bounding box in world coordinates.
+
+My responsibility is to describe spatial bounds used by shapes, broad-phase queries and containment checks.
+"
 Class {
 	#name : 'CFPhysicsAABB',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent a Physics world captured at one step boundary.
+
+My responsibility is to provide the isolated bodies, contacts, joints and configuration consumed by the pipeline.
+"
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',

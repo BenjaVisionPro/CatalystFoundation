@@ -1,3 +1,8 @@
+"
+I represent the collision-relevant geometry of a body's Bloc element.
+
+My responsibility is to bridge element-local shape information into body-origin and world-space queries.
+"
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',

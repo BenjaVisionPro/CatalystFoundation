@@ -1,3 +1,8 @@
+"
+I represent a body's origin and rotation.
+
+My responsibility is to carry rigid transforms consistently through capture, collision, solving and presentation.
+"
 Class {
 	#name : 'CFPhysicsTransform',
 	#superclass : 'Object',

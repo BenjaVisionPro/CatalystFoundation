@@ -1,3 +1,8 @@
+"
+I represent the presentation data retained for one contact.
+
+My responsibility is to copy the stable diagnostic facts needed after the solver's transient contact state has changed.
+"
 Class {
 	#name : 'CFPhysicsContactVisualState',
 	#superclass : 'Object',

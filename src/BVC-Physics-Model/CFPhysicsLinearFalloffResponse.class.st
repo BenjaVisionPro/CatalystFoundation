@@ -1,3 +1,8 @@
+"
+I represent a force response that decreases linearly with distance.
+
+My responsibility is to interpolate from full force to zero across a configured range.
+"
 Class {
 	#name : 'CFPhysicsLinearFalloffResponse',
 	#superclass : 'CFPhysicsDistanceResponse',

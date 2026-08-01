@@ -1,3 +1,8 @@
+"
+I represent an anchor fixed in world coordinates.
+
+My responsibility is to provide a stable endpoint that does not belong to a body.
+"
 Class {
 	#name : 'CFPhysicsWorldAnchor',
 	#superclass : 'CFPhysicsAnchor',

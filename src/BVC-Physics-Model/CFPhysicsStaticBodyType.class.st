@@ -1,3 +1,8 @@
+"
+I represent the static movement policy.
+
+My responsibility is to keep a body fixed with effectively infinite mass and inertia.
+"
 Class {
 	#name : 'CFPhysicsStaticBodyType',
 	#superclass : 'CFPhysicsBodyType',

@@ -1,3 +1,8 @@
+"
+I represent a joint that restricts relative movement to one axis.
+
+My responsibility is to retain its axis, limits, motor configuration and accumulated solver state.
+"
 Class {
 	#name : 'CFPhysicsRailJoint',
 	#superclass : 'Object',

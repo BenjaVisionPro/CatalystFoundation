@@ -1,3 +1,8 @@
+"
+I represent the physical material of a shape.
+
+My responsibility is to describe density, friction and restitution for mass calculation and contact response.
+"
 Class {
 	#name : 'CFPhysicsMaterial',
 	#superclass : 'Object',

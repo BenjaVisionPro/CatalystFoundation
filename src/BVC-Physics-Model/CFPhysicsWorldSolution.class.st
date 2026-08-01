@@ -1,3 +1,8 @@
+"
+I represent the solved result of one captured world state.
+
+My responsibility is to carry pipeline output and validation identity back to the world for commit.
+"
 Class {
 	#name : 'CFPhysicsWorldSolution',
 	#superclass : 'Object',

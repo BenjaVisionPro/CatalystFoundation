@@ -1,3 +1,8 @@
+"
+I represent the kinematic movement policy.
+
+My responsibility is to move a body from explicit velocity or transform changes without force-based acceleration.
+"
 Class {
 	#name : 'CFPhysicsKinematicBodyType',
 	#superclass : 'CFPhysicsBodyType',

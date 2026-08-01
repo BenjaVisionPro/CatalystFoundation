@@ -1,3 +1,8 @@
+"
+I represent the dynamic movement policy.
+
+My responsibility is to give a body finite mass and inertia and make it respond to forces, impulses and sleeping.
+"
 Class {
 	#name : 'CFPhysicsDynamicBodyType',
 	#superclass : 'CFPhysicsBodyType',

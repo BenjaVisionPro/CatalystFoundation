@@ -1,3 +1,8 @@
+"
+I represent an anchor at a body-local point.
+
+My responsibility is to transform that point into world coordinates as the body moves and rotates.
+"
 Class {
 	#name : 'CFPhysicsLocalAnchor',
 	#superclass : 'CFPhysicsAnchor',

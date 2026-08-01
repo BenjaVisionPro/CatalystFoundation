@@ -1,3 +1,8 @@
+"
+I represent one endpoint of a physical relationship.
+
+My responsibility is to resolve a world-space point while preserving whether that point belongs to a body or to the world.
+"
 Class {
 	#name : 'CFPhysicsAnchor',
 	#superclass : 'Object',

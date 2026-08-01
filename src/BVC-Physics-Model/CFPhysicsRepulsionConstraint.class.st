@@ -1,3 +1,8 @@
+"
+I represent a repulsive interaction between two bodies.
+
+My responsibility is to apply equal and opposite forces according to a distance response.
+"
 Class {
 	#name : 'CFPhysicsRepulsionConstraint',
 	#superclass : 'Object',

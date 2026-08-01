@@ -1,3 +1,8 @@
+"
+I represent a pair of explicit anchors.
+
+My responsibility is to provide the two bodies and world points used by constraints and joints.
+"
 Class {
 	#name : 'CFPhysicsAnchoredEndpointPair',
 	#superclass : 'CFPhysicsEndpointPair',

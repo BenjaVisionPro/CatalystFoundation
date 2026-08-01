@@ -1,3 +1,8 @@
+"
+I represent a body's transform across a simulation interval.
+
+My responsibility is to provide interpolated motion and swept bounds for continuous collision detection.
+"
 Class {
 	#name : 'CFPhysicsSweep',
 	#superclass : 'Object',

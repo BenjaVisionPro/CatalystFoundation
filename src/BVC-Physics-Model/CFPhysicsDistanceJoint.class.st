@@ -1,3 +1,8 @@
+"
+I represent a joint that maintains a target distance between two anchors.
+
+My responsibility is to retain its configuration and accumulated solver state across steps.
+"
 Class {
 	#name : 'CFPhysicsDistanceJoint',
 	#superclass : 'Object',

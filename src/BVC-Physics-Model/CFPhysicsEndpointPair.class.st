@@ -1,3 +1,8 @@
+"
+I represent two related endpoints in a Physics world.
+
+My responsibility is to provide their bodies and current world points to constraints and joints.
+"
 Class {
 	#name : 'CFPhysicsEndpointPair',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent an anchor at a normalised point within a body's shape.
+
+My responsibility is to preserve proportional placement when the shape's extent changes.
+"
 Class {
 	#name : 'CFPhysicsNormalisedAnchor',
 	#superclass : 'CFPhysicsAnchor',

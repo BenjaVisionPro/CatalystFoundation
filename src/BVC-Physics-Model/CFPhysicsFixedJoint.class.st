@@ -1,3 +1,8 @@
+"
+I represent a joint that preserves the relative transform of two bodies.
+
+My responsibility is to retain its reference relationship and accumulated linear and angular impulses.
+"
 Class {
 	#name : 'CFPhysicsFixedJoint',
 	#superclass : 'CFPhysicsRevoluteJoint',

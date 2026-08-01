@@ -1,3 +1,8 @@
+"
+I represent an attractive interaction between two bodies.
+
+My responsibility is to apply equal and opposite forces according to a distance response.
+"
 Class {
 	#name : 'CFPhysicsAttractionConstraint',
 	#superclass : 'Object',

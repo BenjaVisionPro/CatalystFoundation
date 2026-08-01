@@ -1,3 +1,8 @@
+"
+I represent a body's containment within bounds.
+
+My responsibility is to apply corrective forces when the body moves beyond its permitted region.
+"
 Class {
 	#name : 'CFPhysicsContainmentConstraint',
 	#superclass : 'Object',

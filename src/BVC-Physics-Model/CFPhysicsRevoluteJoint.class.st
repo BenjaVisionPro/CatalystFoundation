@@ -1,3 +1,8 @@
+"
+I represent a joint that keeps two anchors coincident while allowing relative rotation.
+
+My responsibility is to retain its reference angle, limits, motor configuration and accumulated solver state.
+"
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'Object',

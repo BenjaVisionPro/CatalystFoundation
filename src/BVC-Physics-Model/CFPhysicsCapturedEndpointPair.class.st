@@ -1,3 +1,8 @@
+"
+I represent an endpoint pair captured for one simulation step.
+
+My responsibility is to preserve the bodies and world points resolved at the capture boundary.
+"
 Class {
 	#name : 'CFPhysicsCapturedEndpointPair',
 	#superclass : 'CFPhysicsEndpointPair',

@@ -1,3 +1,8 @@
+"
+I represent the movement policy of a rigid body.
+
+My responsibility is to define how a body responds to forces, impulses, integration and sleeping.
+"
 Class {
 	#name : 'CFPhysicsBodyType',
 	#superclass : 'Object',

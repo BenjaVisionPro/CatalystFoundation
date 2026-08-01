@@ -1,3 +1,8 @@
+"
+I represent a damped spring between two endpoints.
+
+My responsibility is to retain its rest length and response parameters and prepare its force for each step.
+"
 Class {
 	#name : 'CFPhysicsSpringConstraint',
 	#superclass : 'Object',

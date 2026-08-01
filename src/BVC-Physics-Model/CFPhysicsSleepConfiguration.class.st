@@ -1,3 +1,8 @@
+"
+I represent the thresholds used to decide when bodies may sleep.
+
+My responsibility is to keep sleep timing and velocity criteria together as world configuration.
+"
 Class {
 	#name : 'CFPhysicsSleepConfiguration',
 	#superclass : 'Object',

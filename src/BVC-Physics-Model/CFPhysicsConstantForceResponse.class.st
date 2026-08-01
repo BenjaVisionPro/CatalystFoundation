@@ -1,3 +1,8 @@
+"
+I represent a constant-magnitude distance response.
+
+My responsibility is to answer the configured force while its distance limit is satisfied.
+"
 Class {
 	#name : 'CFPhysicsConstantForceResponse',
 	#superclass : 'CFPhysicsDistanceResponse',

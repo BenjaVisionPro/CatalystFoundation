@@ -1,3 +1,8 @@
+"
+I represent a rigid body in a Physics world.
+
+My responsibility is to own an element's physical state, material, shape and participation in contacts and constraints.
+"
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
