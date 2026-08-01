@@ -71,19 +71,19 @@ CFPhysicsAnchor >> revoluteJointTo: anotherAnchor [
 ]
 
 { #category : 'relationships' }
-CFPhysicsAnchor >> fixedJointTo: anotherAnchor [
+CFPhysicsAnchor >> weldJointTo: anotherAnchor [
 	| aWorld joint |
 	aWorld := self relationshipWorldWith: anotherAnchor.
-	joint := CFPhysicsFixedJoint betweenAnchor: self andAnchor: anotherAnchor.
-	^ aWorld addFixedJoint: joint
+	joint := CFPhysicsWeldJoint betweenAnchor: self andAnchor: anotherAnchor.
+	^ aWorld addWeldJoint: joint
 ]
 
 { #category : 'relationships' }
-CFPhysicsAnchor >> railJointTo: anotherAnchor along: anAxis [
+CFPhysicsAnchor >> prismaticJointTo: anotherAnchor along: anAxis [
 	| aWorld joint |
 	aWorld := self relationshipWorldWith: anotherAnchor.
-	joint := CFPhysicsRailJoint betweenAnchor: self andAnchor: anotherAnchor along: anAxis.
-	^ aWorld addRailJoint: joint
+	joint := CFPhysicsPrismaticJoint betweenAnchor: self andAnchor: anotherAnchor along: anAxis.
+	^ aWorld addPrismaticJoint: joint
 ]
 
 { #category : 'relationships' }

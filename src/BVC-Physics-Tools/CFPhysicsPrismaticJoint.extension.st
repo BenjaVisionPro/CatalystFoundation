@@ -1,12 +1,12 @@
-Extension { #name : 'CFPhysicsRailJoint' }
+Extension { #name : 'CFPhysicsPrismaticJoint' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsRailJoint >> inspectInPhysicsOverlay: anInspector [
+CFPhysicsPrismaticJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsRailJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
+CFPhysicsPrismaticJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
 	| axisStart axisEnd displayedAxis railStart railEnd normal lowerPoint upperPoint tickHalfLength |
 	aVisual hideRestLengthMarker.
 	axisStart := aVisual context overlayPointFromWorld: worldPoints second.
@@ -41,7 +41,7 @@ CFPhysicsRailJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: s
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsRailJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+CFPhysicsPrismaticJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 	anInspectorContent
 		addGroup: 'Rail' fields: {
 			#axis -> 'Axis'.
@@ -57,7 +57,7 @@ CFPhysicsRailJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsRailJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+CFPhysicsPrismaticJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	anInspectorContent
 		diagnosticPoint: self axis at: #axis;
 		diagnosticNumber: self referenceTranslation at: #referenceTranslation;

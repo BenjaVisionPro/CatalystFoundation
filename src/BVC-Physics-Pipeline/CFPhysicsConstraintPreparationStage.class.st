@@ -5,7 +5,7 @@ I prepare contact and joint constraints for the solver. I translate persistent c
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'fixedJointConstraintBuilder', 'railJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'weldJointConstraintBuilder', 'prismaticJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -16,8 +16,8 @@ CFPhysicsConstraintPreparationStage >> initialize [
 	constraintBuilder := CFPhysicsConstraintBuilder new.
 	distanceJointConstraintBuilder := CFPhysicsDistanceJointConstraintBuilder new.
 	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new.
-	fixedJointConstraintBuilder := CFPhysicsFixedJointConstraintBuilder new.
-	railJointConstraintBuilder := CFPhysicsRailJointConstraintBuilder new
+	weldJointConstraintBuilder := CFPhysicsWeldJointConstraintBuilder new.
+	prismaticJointConstraintBuilder := CFPhysicsPrismaticJointConstraintBuilder new
 ]
 
 { #category : 'accessing' }
@@ -33,13 +33,13 @@ CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder [ ^ revolu
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder: anObject [ revoluteJointConstraintBuilder := anObject ]
 { #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder [ ^ fixedJointConstraintBuilder ]
+CFPhysicsConstraintPreparationStage >> weldJointConstraintBuilder [ ^ weldJointConstraintBuilder ]
 { #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> fixedJointConstraintBuilder: anObject [ fixedJointConstraintBuilder := anObject ]
+CFPhysicsConstraintPreparationStage >> weldJointConstraintBuilder: anObject [ weldJointConstraintBuilder := anObject ]
 { #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder [ ^ railJointConstraintBuilder ]
+CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder [ ^ prismaticJointConstraintBuilder ]
 { #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> railJointConstraintBuilder: anObject [ railJointConstraintBuilder := anObject ]
+CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder: anObject [ prismaticJointConstraintBuilder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
@@ -69,11 +69,11 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio).
-	constraints addAll: (fixedJointConstraintBuilder
+	constraints addAll: (weldJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio).
-	constraints addAll: (railJointConstraintBuilder
+	constraints addAll: (prismaticJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio).

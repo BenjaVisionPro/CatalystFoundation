@@ -65,8 +65,8 @@ CFPhysicsEndpointPair >> revoluteJoint [
 ]
 
 { #category : 'relationships' }
-CFPhysicsEndpointPair >> fixedJoint [
-	^ self world addFixedJoint: (CFPhysicsFixedJoint betweenEndpoints: self)
+CFPhysicsEndpointPair >> weldJoint [
+	^ self world addWeldJoint: (CFPhysicsWeldJoint betweenEndpoints: self)
 ]
 
 { #category : 'relationships' }

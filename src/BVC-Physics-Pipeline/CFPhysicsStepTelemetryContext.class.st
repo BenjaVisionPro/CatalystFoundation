@@ -67,9 +67,9 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #solverRestitutionCandidatePointCount put: result solver restitutionCandidatePointCount;
 		at: #solverJointConstraintCount put: result solver jointConstraintCount;
 		at: #solverDistanceJointConstraintCount put: result solver distanceJointConstraintCount;
-		at: #solverRailJointConstraintCount put: result solver railJointConstraintCount;
+		at: #solverPrismaticJointConstraintCount put: result solver prismaticJointConstraintCount;
 		at: #solverRevoluteJointConstraintCount put: result solver revoluteJointConstraintCount;
-		at: #solverFixedJointConstraintCount put: result solver fixedJointConstraintCount;
+		at: #solverWeldJointConstraintCount put: result solver weldJointConstraintCount;
 		at: #preparedContactConstraintCount put: preparation preparedContactConstraintCount;
 		at: #continuedPreparedContactConstraintCount put: preparation continuedContactConstraintCount;
 		at: #beganPreparedContactConstraintCount put: preparation beganContactConstraintCount;

@@ -87,7 +87,7 @@ CFPhysicsShowcaseExamples >> randomPositionFor: aButton in: aHost using: aRandom
 CFPhysicsShowcaseExamples >> joints [
 	<gtExample>
 	<return: #BlElement>
-	| host world distanceBody revoluteBody railBody fixedBody fixedPartner distanceJoint revoluteJoint railJoint |
+	| host world distanceBody revoluteBody railBody fixedBody fixedPartner distanceJoint revoluteJoint prismaticJoint |
 	host := BlElement new
 		size: 760 @ 420;
 		background: Color veryVeryLightGray;
@@ -129,16 +129,16 @@ CFPhysicsShowcaseExamples >> joints [
 		limitAnglesFrom: Float pi negated / 2.0 to: Float pi / 2.0.
 	revoluteBody physics angularVelocity: 1.5.
 
-	railJoint := (railBody physics localAnchorAt: 31 @ 17)
-		railJointTo: (world anchorAt: 421 @ 187)
+	prismaticJoint := (railBody physics localAnchorAt: 31 @ 17)
+		prismaticJointTo: (world anchorAt: 421 @ 187)
 		along: 1 @ 0.
-	railJoint
+	prismaticJoint
 		limitsEnabled: true;
 		limitTranslationFrom: -90 to: 90.
 	railBody physics velocity: 90 @ 0.
 
 	(fixedBody physics localAnchorAt: 54 @ 17)
-		fixedJointTo: (fixedPartner physics localAnchorAt: 0 @ 17).
+		weldJointTo: (fixedPartner physics localAnchorAt: 0 @ 17).
 	fixedBody physics angularVelocity: 0.8.
 
 	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |

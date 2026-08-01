@@ -174,7 +174,7 @@ CFPhysicsStepPipeline >> newResultForBodies: bodies fromContacts: previousContac
 CFPhysicsStepPipeline >> collisionSuppressedBodyPairsFrom: joints [
 	^ (joints select: [ :joint |
 		joint isActive and: [ joint collideConnected not ] ])
-		collect: [ :joint | { joint firstBody. joint secondBody } ]
+		collect: [ :joint | { joint bodyA. joint bodyB } ]
 ]
 
 { #category : 'private - stepping' }

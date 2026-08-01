@@ -1,26 +1,26 @@
 "
-I prepare rail joints for one solver step. I derive the axis, limits, masses and impulses required by the rail-joint solver.
+I prepare prismatic joints for one solver step. I derive the axis, limits, masses and impulses required by the rail-joint solver.
 "
 
 Class {
-	#name : 'CFPhysicsRailJointConstraintBuilder',
+	#name : 'CFPhysicsPrismaticJointConstraintBuilder',
 	#superclass : 'Object',
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'building' }
-CFPhysicsRailJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
+CFPhysicsPrismaticJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	^ (joints select: [ :joint |
-		joint class == CFPhysicsRailJoint and: [ joint isActive ] ]) collect: [ :joint |
+		joint class == CFPhysicsPrismaticJoint and: [ joint isActive ] ]) collect: [ :joint |
 			self constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
+CFPhysicsPrismaticJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
 	| stateA stateB originA originB anchorA anchorB displacement axis normal crossA crossB axisCrossA axisCrossB inversePerpendicularMass inverseTranslationMass inverseAngularMass angleA angleB |
-	stateA := joint firstBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
-	stateB := joint secondBody ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
+	stateA := joint bodyA ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
+	stateB := joint bodyB ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	originA := self originForState: stateA.
 	originB := self originForState: stateB.
 	anchorA := joint endpointPair worldPointA - originA.
@@ -40,7 +40,7 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 		+ (self inverseInertiaForState: stateB).
 	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].
 	angleB := stateB ifNil: [ 0.0 ] ifNotNil: [ stateB currentTransform rotation ].
-	^ CFPhysicsPreparedRailJoint new
+	^ CFPhysicsPreparedPrismaticJoint new
 		joint: joint;
 		bodyStateA: stateA;
 		bodyStateB: stateB;
@@ -64,30 +64,30 @@ CFPhysicsRailJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySta
 ]
 
 { #category : 'private - mathematics' }
-CFPhysicsRailJointConstraintBuilder >> cross: first with: second [
+CFPhysicsPrismaticJointConstraintBuilder >> cross: first with: second [
 	^ (first x * second y) - (first y * second x)
 ]
 
 { #category : 'private - mathematics' }
-CFPhysicsRailJointConstraintBuilder >> dot: first with: second [
+CFPhysicsPrismaticJointConstraintBuilder >> dot: first with: second [
 	^ (first x * second x) + (first y * second y)
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> originForState: aState [
+CFPhysicsPrismaticJointConstraintBuilder >> originForState: aState [
 	^ aState
 		ifNil: [ 0 @ 0 ]
 		ifNotNil: [ aState currentBodyOrigin ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> inverseMassForState: aState cross: aCross [
+CFPhysicsPrismaticJointConstraintBuilder >> inverseMassForState: aState cross: aCross [
 	^ aState
 		ifNil: [ 0.0 ]
 		ifNotNil: [ aState inverseMass + (aState inverseInertia * aCross squared) ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRailJointConstraintBuilder >> inverseInertiaForState: aState [
+CFPhysicsPrismaticJointConstraintBuilder >> inverseInertiaForState: aState [
 	^ aState ifNil: [ 0.0 ] ifNotNil: [ aState inverseInertia ]
 ]

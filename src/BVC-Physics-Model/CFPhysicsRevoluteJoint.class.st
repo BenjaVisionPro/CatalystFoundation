@@ -5,8 +5,8 @@ My responsibility is to retain its reference angle, limits, motor configuration 
 "
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
-	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'active', 'sequence', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'collideConnected', 'sourceJoint' ],
+	#superclass : 'CFPhysicsJoint',
+	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -41,8 +41,6 @@ CFPhysicsRevoluteJoint class >> angleFor: aBody [
 { #category : 'initialization' }
 CFPhysicsRevoluteJoint >> initialize [
 	super initialize.
-	active := true.
-	sequence := 0.
 	accumulatedImpulse := 0 @ 0.
 	referenceAngle := 0.0.
 	limitsEnabled := false.
@@ -52,7 +50,6 @@ CFPhysicsRevoluteJoint >> initialize [
 	motorSpeed := 0.0.
 	maximumMotorImpulse := 0.0.
 	motorImpulse := 0.0.
-	collideConnected := false
 ]
 
 { #category : 'accessing' }
@@ -67,21 +64,9 @@ CFPhysicsRevoluteJoint >> anchorB [ ^ endpointPair anchorB ]
 CFPhysicsRevoluteJoint >> bodyA [ ^ endpointPair bodyA ]
 { #category : 'accessing' }
 CFPhysicsRevoluteJoint >> bodyB [ ^ endpointPair bodyB ]
-{ #category : 'accessing' }
-CFPhysicsRevoluteJoint >> firstBody [ ^ self bodyA ]
-{ #category : 'accessing' }
-CFPhysicsRevoluteJoint >> secondBody [ ^ self bodyB ]
 
 
-{ #category : 'configuration' }
-CFPhysicsRevoluteJoint >> collideConnected [ ^ collideConnected ]
 
-{ #category : 'configuration' }
-CFPhysicsRevoluteJoint >> collideConnected: aBoolean [
-	collideConnected = aBoolean ifTrue: [ ^ self ].
-	collideConnected := aBoolean.
-	self wakeBodies
-]
 
 { #category : 'solver state' }
 CFPhysicsRevoluteJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
@@ -149,15 +134,7 @@ CFPhysicsRevoluteJoint >> motorImpulse [ ^ motorImpulse ]
 { #category : 'solver state' }
 CFPhysicsRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumber asFloat ]
 
-{ #category : 'ordering' }
-CFPhysicsRevoluteJoint >> sequence [ ^ sequence ]
-{ #category : 'ordering' }
-CFPhysicsRevoluteJoint >> sequence: anInteger [ sequence := anInteger ]
-{ #category : 'ordering' }
-CFPhysicsRevoluteJoint >> orderingKey [ ^ sequence ]
 
-{ #category : 'testing' }
-CFPhysicsRevoluteJoint >> isActive [ ^ active ]
 { #category : 'testing' }
 CFPhysicsRevoluteJoint >> includesBody: aBodyState [ ^ endpointPair includesBody: aBodyState ]
 
@@ -167,14 +144,7 @@ CFPhysicsRevoluteJoint >> includesAnchor: anAnchor [
 	^ endpointPair anchorA == anAnchor or: [ endpointPair anchorB == anAnchor ]
 ]
 
-{ #category : 'waking' }
-CFPhysicsRevoluteJoint >> wakeBodies [
-	self firstBody ifNotNil: [ :body | body wake ].
-	self secondBody ifNotNil: [ :body | body wake ]
-]
 
-{ #category : 'controlling' }
-CFPhysicsRevoluteJoint >> release [ active := false ]
 
 
 { #category : 'capturing' }
@@ -187,8 +157,4 @@ CFPhysicsRevoluteJoint >> capturedForStep [
 	^ captured
 ]
 
-{ #category : 'private - capturing' }
-CFPhysicsRevoluteJoint >> sourceJoint: aJoint [ sourceJoint := aJoint ]
 
-{ #category : 'committing' }
-CFPhysicsRevoluteJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]

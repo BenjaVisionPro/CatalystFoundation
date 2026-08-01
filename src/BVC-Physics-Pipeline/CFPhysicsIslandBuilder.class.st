@@ -30,9 +30,9 @@ CFPhysicsIslandBuilder >> constraintsByBodyFrom: constraints [
 	| result |
 	result := IdentityDictionary new.
 	constraints do: [ :constraint |
-		constraint firstBody ifNotNil: [ :body |
+		constraint bodyA ifNotNil: [ :body |
 			self add: constraint for: body to: result ].
-		constraint secondBody ifNotNil: [ :body |
+		constraint bodyB ifNotNil: [ :body |
 			self add: constraint for: body to: result ] ].
 	^ result
 ]
@@ -59,8 +59,8 @@ CFPhysicsIslandBuilder >> islandFrom: seed constraintsByBody: constraintsByBody 
 					| first second |
 					visitedConstraints add: constraint.
 					island addConstraint: constraint.
-					first := constraint firstBody.
-					second := constraint secondBody.
+					first := constraint bodyA.
+					second := constraint bodyB.
 					first ifNotNil: [
 						island addBody: first.
 						(first propagatesSolverIsland and: [ (visited includes: first) not ]) ifTrue: [ pending add: first ] ].

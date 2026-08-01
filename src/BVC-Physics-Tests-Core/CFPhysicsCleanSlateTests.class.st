@@ -432,8 +432,8 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	constraint := constraints first.
 	point := constraint points first.
 	self assert: constraint contact == contact.
-	self assert: constraint firstBody == first.
-	self assert: constraint secondBody == second.
+	self assert: constraint bodyA == first.
+	self assert: constraint bodyB == second.
 	self assert: constraint bodyStateA == (bodyStates at: first).
 	self assert: constraint bodyStateB == (bodyStates at: second).
 	self assert: constraint normal equals: 0 @ 1.
@@ -1893,8 +1893,8 @@ CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
 	joint := CFPhysicsDistanceJoint between: first and: second.
 	self assert: joint anchorA class equals: CFPhysicsBodyCentreAnchor.
 	self assert: joint anchorB class equals: CFPhysicsBodyCentreAnchor.
-	self assert: joint firstBody == first.
-	self assert: joint secondBody == second.
+	self assert: joint bodyA == first.
+	self assert: joint bodyB == second.
 	self assert: joint restLength equals: 100.0.
 	^ joint
 ]
@@ -1965,8 +1965,8 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 	joint := bodyAnchor distanceJointTo: worldAnchor.
 	joint restLength: 50.
 	result := world step.
-	self assert: joint firstBody == element physics body.
-	self assert: joint secondBody isNil.
+	self assert: joint bodyA == element physics body.
+	self assert: joint bodyB isNil.
 	self assert: result constraints size equals: 1.
 	self assert: result islands size equals: 1.
 	self assert: element physics position x > 0.
@@ -2048,8 +2048,8 @@ CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
 	firstAnchor := CFPhysicsLocalAnchor on: first at: 30 @ 10.
 	secondAnchor := CFPhysicsLocalAnchor on: second at: 0 @ 10.
 	joint := CFPhysicsRevoluteJoint betweenAnchor: firstAnchor andAnchor: secondAnchor.
-	self assert: joint firstBody == first.
-	self assert: joint secondBody == second.
+	self assert: joint bodyA == first.
+	self assert: joint bodyB == second.
 	self assert: joint anchorA == firstAnchor.
 	self assert: joint anchorB == secondAnchor.
 	self assert: joint accumulatedImpulse equals: 0 @ 0.
@@ -2099,8 +2099,8 @@ CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
 	joint := bodyAnchor revoluteJointTo: worldAnchor.
 	element physics velocity: 100 @ 0.
 	result := world step.
-	self assert: joint firstBody == element physics body.
-	self assert: joint secondBody isNil.
+	self assert: joint bodyA == element physics body.
+	self assert: joint bodyB isNil.
 	self assert: result constraints size equals: 1.
 	self assert: result islands size equals: 1.
 	self assert: element physics velocity x abs < 1.0e-6.
@@ -2183,8 +2183,8 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	^ result
 ]
 
-{ #category : 'examples - rail joints' }
-CFPhysicsCleanSlateTests >> railJointConstrainsAnAnchoredElementToItsAxis [
+{ #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2196,20 +2196,20 @@ CFPhysicsCleanSlateTests >> railJointConstrainsAnAnchoredElementToItsAxis [
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
-	joint := bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	joint := bodyAnchor prismaticJointTo: worldAnchor along: 1 @ 0.
 	element physics velocity: 100 @ 100.
 	element physics angularVelocity: 10.0.
 	result := world step.
-	self assert: world railJoints equals: { joint }.
+	self assert: world prismaticJoints equals: { joint }.
 	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedRailJoint.
+	self assert: result constraints first class equals: CFPhysicsPreparedPrismaticJoint.
 	self assert: element physics velocity y abs < 1.0e-6.
 	self assert: element physics angularVelocity abs < 1.0e-6.
 	^ result
 ]
 
-{ #category : 'examples - rail joints' }
-CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
+{ #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2221,7 +2221,7 @@ CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
-	joint := bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	joint := bodyAnchor prismaticJointTo: worldAnchor along: 1 @ 0.
 	joint
 		limitTranslationFrom: -10 to: 10;
 		limitsEnabled: true.
@@ -2234,7 +2234,7 @@ CFPhysicsCleanSlateTests >> railJointLimitsBoundAnAnchoredElementTravel [
 	^ result
 ]
 
-{ #category : 'examples - rail joints' }
+{ #category : 'examples - prismatic joints' }
 CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint timestamp pointerConstraint result |
@@ -2247,7 +2247,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
-	joint := bodyAnchor railJointTo: worldAnchor along: 1 @ 0.
+	joint := bodyAnchor prismaticJointTo: worldAnchor along: 1 @ 0.
 	joint
 		limitTranslationFrom: -10 to: 10;
 		limitsEnabled: true.
@@ -2261,7 +2261,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 		timestamp: timestamp + 20 milliSeconds.
 	world addPointerConstraint: pointerConstraint.
 	result := world step.
-	self assert: result constraints first class equals: CFPhysicsPreparedRailJoint.
+	self assert: result constraints first class equals: CFPhysicsPreparedPrismaticJoint.
 	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: element physics position y abs < element physics position x abs.
 	self assert: result constraints first perpendicularImpulse abs > 0.0.
@@ -2269,24 +2269,24 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 	^ result
 ]
 
-{ #category : 'examples - fixed joints' }
-CFPhysicsCleanSlateTests >> fixedJointCapturesItsReferenceAngle [
+{ #category : 'examples - weld joints' }
+CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 	<gtExample>
 	| first second joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
 	first rotation: 0.25.
 	second rotation: 0.75.
-	joint := CFPhysicsFixedJoint between: first and: second.
-	self assert: joint firstBody == first.
-	self assert: joint secondBody == second.
+	joint := CFPhysicsWeldJoint between: first and: second.
+	self assert: joint bodyA == first.
+	self assert: joint bodyB == second.
 	self assert: joint referenceAngle equals: 0.5.
 	self assert: joint accumulatedAngularImpulse equals: 0.0.
 	^ joint
 ]
 
-{ #category : 'examples - fixed joints' }
-CFPhysicsCleanSlateTests >> fixedJointAnchorsABodyOrientationToTheWorld [
+{ #category : 'examples - weld joints' }
+CFPhysicsCleanSlateTests >> weldJointAnchorsABodyOrientationToTheWorld [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2298,12 +2298,12 @@ CFPhysicsCleanSlateTests >> fixedJointAnchorsABodyOrientationToTheWorld [
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
-	joint := bodyAnchor fixedJointTo: worldAnchor.
+	joint := bodyAnchor weldJointTo: worldAnchor.
 	element physics angularVelocity: 10.0.
 	result := world step.
-	self assert: world fixedJoints equals: { joint }.
+	self assert: world weldJoints equals: { joint }.
 	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedFixedJoint.
+	self assert: result constraints first class equals: CFPhysicsPreparedWeldJoint.
 	self assert: result islands size equals: 1.
 	self assert: element physics angularVelocity abs < 1.0e-6.
 	^ result
@@ -2349,12 +2349,12 @@ CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	world := owner physics beWorld.
 	world synchroniseMembership.
 	revolute := first physics revoluteJointTo: second.
-	fixed := first physics fixedJointTo: third.
+	fixed := first physics weldJointTo: third.
 	unrelated := second physics distanceJointTo: fourth.
 	owner removeChild: first.
 	world synchroniseMembership.
 	self assert: world revoluteJoints isEmpty.
-	self assert: world fixedJoints isEmpty.
+	self assert: world weldJoints isEmpty.
 	self assert: world distanceJoints equals: { unrelated }.
 	self assert: revolute isActive not.
 	self assert: fixed isActive not.
@@ -2415,7 +2415,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCleanSlateTests >> weldJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2426,7 +2426,7 @@ CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
-	joint := first physics fixedJointTo: second.
+	joint := first physics weldJointTo: second.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics body.
@@ -2441,7 +2441,7 @@ CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> railJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCleanSlateTests >> prismaticJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2452,7 +2452,7 @@ CFPhysicsCleanSlateTests >> railJointCanSuppressCollisionBetweenItsEndpoints [
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
-	joint := first physics railJointTo: second along: 1 @ 0.
+	joint := first physics prismaticJointTo: second along: 1 @ 0.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
 		first physics body.
@@ -5038,8 +5038,8 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 	<gtExample>
 	self assert: CFPhysicsPreparedDistanceJoint superclass equals: CFPhysicsPreparedJointConstraint.
 	self assert: CFPhysicsPreparedRevoluteJoint superclass equals: CFPhysicsPreparedJointConstraint.
-	self assert: CFPhysicsPreparedRailJoint superclass equals: CFPhysicsPreparedJointConstraint.
-	self assert: (CFPhysicsPreparedFixedJoint inheritsFrom: CFPhysicsPreparedJointConstraint).
+	self assert: CFPhysicsPreparedPrismaticJoint superclass equals: CFPhysicsPreparedJointConstraint.
+	self assert: (CFPhysicsPreparedWeldJoint inheritsFrom: CFPhysicsPreparedJointConstraint).
 	^ CFPhysicsPreparedJointConstraint
 ]
 

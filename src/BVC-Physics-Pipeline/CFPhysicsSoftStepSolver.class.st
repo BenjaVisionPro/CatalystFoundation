@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'railJointConstraintCount', 'revoluteJointConstraintCount', 'fixedJointConstraintCount' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -30,9 +30,9 @@ CFPhysicsSoftStepSolver >> initialize [
 	warmStartedContactPointCount := 0.
 	restitutionCandidatePointCount := 0.
 	distanceJointConstraintCount := 0.
-	railJointConstraintCount := 0.
+	prismaticJointConstraintCount := 0.
 	revoluteJointConstraintCount := 0.
-	fixedJointConstraintCount := 0
+	weldJointConstraintCount := 0
 ]
 
 { #category : 'solving' }
@@ -75,14 +75,14 @@ CFPhysicsSoftStepSolver >> warmStart [
 CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
 		^ self applyDistanceJointImpulse: constraint direction * constraint impulse constraint: constraint ].
-	(constraint isKindOf: CFPhysicsPreparedRailJoint) ifTrue: [
+	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		self applyDistanceJointImpulse: constraint normal * constraint perpendicularImpulse constraint: constraint.
-		self applyFixedJointAngularImpulse: constraint angularImpulse constraint: constraint. ].
+		self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint. ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
 		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
 		self warmStartRevoluteJointMotor: constraint.
-		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
-			self applyFixedJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
+		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
+			self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
 ]
 
 { #category : 'private - solving' }
@@ -109,10 +109,10 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointsWithBias: biasEnabled [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveFixedJointsWithBias: biasEnabled [
+CFPhysicsSoftStepSolver >> solveWeldJointsWithBias: biasEnabled [
 	self orderedJointConstraints do: [ :constraint |
-		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
-			self solveFixedJointConstraint: constraint biasEnabled: biasEnabled ] ]
+		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
+			self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ] ]
 ]
 
 { #category : 'private - solving' }
@@ -125,12 +125,12 @@ CFPhysicsSoftStepSolver >> solveJointConstraintsWithBias: biasEnabled [
 CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEnabled [
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
 		^ self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ].
-	(constraint isKindOf: CFPhysicsPreparedRailJoint) ifTrue: [
-		^ self solveRailJointConstraint: constraint biasEnabled: biasEnabled ].
+	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
+		^ self solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
 		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled.
-		(constraint isKindOf: CFPhysicsPreparedFixedJoint) ifTrue: [
-			self solveFixedJointConstraint: constraint biasEnabled: biasEnabled ] ]
+		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
+			self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ] ]
 ]
 
 { #category : 'private - solving' }
@@ -154,7 +154,7 @@ CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled:
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: biasEnabled [
+CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled [
 	| relativeVelocity separation bias massCoefficient impulseCoefficient increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
 	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: constraint normal.
 	separation := constraint basePerpendicularSeparation
@@ -171,7 +171,7 @@ CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: bia
 		- (impulseCoefficient * constraint perpendicularImpulse).
 	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
 	self applyDistanceJointImpulse: constraint normal * increment constraint: constraint.
-	angularRelativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+	angularRelativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 	angularSeparation := constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
@@ -179,14 +179,14 @@ CFPhysicsSoftStepSolver >> solveRailJointConstraint: constraint biasEnabled: bia
 	angularIncrement := (massCoefficient * constraint angularMass * (angularRelativeVelocity + angularBias)) negated
 		- (impulseCoefficient * constraint angularImpulse).
 	constraint angularImpulse: constraint angularImpulse + angularIncrement.
-	self applyFixedJointAngularImpulse: angularIncrement constraint: constraint.
-	self solveRailJointLimit: constraint biasEnabled: biasEnabled
+	self applyWeldJointAngularImpulse: angularIncrement constraint: constraint.
+	self solvePrismaticJointLimit: constraint biasEnabled: biasEnabled
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveRailJointLimit: constraint biasEnabled: biasEnabled [
+CFPhysicsSoftStepSolver >> solvePrismaticJointLimit: constraint biasEnabled: biasEnabled [
 	| translation relativeVelocity requiredVelocity increment oldImpulse newImpulse |
-	(self isLimitedRailJointConstraint: constraint) ifFalse: [ ^ self ].
+	(self isLimitedPrismaticJointConstraint: constraint) ifFalse: [ ^ self ].
 	translation := constraint baseTranslation
 		+ (self dot: ((self distanceJointDeltaPositionFor: constraint bodyStateB)
 			- (self distanceJointDeltaPositionFor: constraint bodyStateA)) negated with: constraint axis)
@@ -234,20 +234,20 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartRevoluteJointMotor: constraint [
 	(self isMotorJointConstraint: constraint) ifTrue: [
-		self applyFixedJointAngularImpulse: constraint motorImpulse constraint: constraint ]
+		self applyWeldJointAngularImpulse: constraint motorImpulse constraint: constraint ]
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointMotor: constraint [
 	| relativeVelocity increment oldImpulse newImpulse |
 	(self isMotorJointConstraint: constraint) ifFalse: [ ^ self ].
-	relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 	increment := constraint motorMass * (constraint motorSpeed - relativeVelocity).
 	oldImpulse := constraint motorImpulse.
 	newImpulse := ((oldImpulse + increment) max: constraint maximumMotorImpulse negated)
 		min: constraint maximumMotorImpulse.
 	constraint motorImpulse: newImpulse.
-	self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint
+	self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -259,29 +259,29 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointLimit: constraint biasEnabled: bias
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
 	angle < constraint lowerAngle ifTrue: [
 		separation := angle - constraint lowerAngle.
-		relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+		relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 		increment := constraint limitMass * (relativeVelocity + bias) negated.
 		oldImpulse := constraint limitImpulse max: 0.0.
 		newImpulse := (oldImpulse + increment) max: 0.0.
 		constraint limitImpulse: newImpulse.
-		^ self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
+		^ self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
 	angle > constraint upperAngle ifTrue: [
 		separation := angle - constraint upperAngle.
-		relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+		relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 		bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 		increment := constraint limitMass * (relativeVelocity + bias) negated.
 		oldImpulse := constraint limitImpulse min: 0.0.
 		newImpulse := (oldImpulse + increment) min: 0.0.
 		constraint limitImpulse: newImpulse.
-		^ self applyFixedJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
+		^ self applyWeldJointAngularImpulse: newImpulse - oldImpulse constraint: constraint ].
 	constraint limitImpulse: 0.0
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveFixedJointConstraint: constraint biasEnabled: biasEnabled [
+CFPhysicsSoftStepSolver >> solveWeldJointConstraint: constraint biasEnabled: biasEnabled [
 	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
-	relativeVelocity := self fixedJointRelativeAngularVelocity: constraint.
+	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 	separation := constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
@@ -291,7 +291,7 @@ CFPhysicsSoftStepSolver >> solveFixedJointConstraint: constraint biasEnabled: bi
 	increment := (massCoefficient * constraint angularMass * (relativeVelocity + bias)) negated
 		- (impulseCoefficient * constraint angularImpulse).
 	constraint angularImpulse: constraint angularImpulse + increment.
-	self applyFixedJointAngularImpulse: increment constraint: constraint
+	self applyWeldJointAngularImpulse: increment constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -376,7 +376,7 @@ CFPhysicsSoftStepSolver >> applyRevoluteJointImpulse: impulse constraint: constr
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> applyFixedJointAngularImpulse: impulse constraint: constraint [
+CFPhysicsSoftStepSolver >> applyWeldJointAngularImpulse: impulse constraint: constraint [
 	constraint bodyStateA ifNotNil: [ :state |
 		state angularVelocity:
 			state angularVelocity - (impulse * state inverseInertia) ].
@@ -404,7 +404,7 @@ CFPhysicsSoftStepSolver >> revoluteJointRelativeVelocity: constraint [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> fixedJointRelativeAngularVelocity: constraint [
+CFPhysicsSoftStepSolver >> weldJointRelativeAngularVelocity: constraint [
 	^ (constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ])
 		- (constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ])
 ]
@@ -422,8 +422,8 @@ CFPhysicsSoftStepSolver >> isLimitedRevoluteJointConstraint: constraint [
 ]
 
 { #category : 'private - testing' }
-CFPhysicsSoftStepSolver >> isLimitedRailJointConstraint: constraint [
-	^ constraint joint class == CFPhysicsRailJoint
+CFPhysicsSoftStepSolver >> isLimitedPrismaticJointConstraint: constraint [
+	^ constraint joint class == CFPhysicsPrismaticJoint
 		and: [ constraint limitsEnabled and: [ constraint translationMass > 0.0 ] ]
 ]
 
@@ -461,8 +461,8 @@ CFPhysicsSoftStepSolver >> distanceJointConstraints [
 ]
 
 { #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> railJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedRailJoint ]
+CFPhysicsSoftStepSolver >> prismaticJointConstraints [
+	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedPrismaticJoint ]
 ]
 
 { #category : 'private - accessing' }
@@ -471,8 +471,8 @@ CFPhysicsSoftStepSolver >> revoluteJointConstraints [
 ]
 
 { #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> fixedJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedFixedJoint ]
+CFPhysicsSoftStepSolver >> weldJointConstraints [
+	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedWeldJoint ]
 ]
 
 { #category : 'private - accessing' }
@@ -546,7 +546,7 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 		(constraints select: [ :constraint |
 			constraint isKindOf: CFPhysicsPreparedRevoluteJoint ]),
 		(constraints select: [ :constraint |
-			constraint isKindOf: CFPhysicsPreparedRailJoint ]))
+			constraint isKindOf: CFPhysicsPreparedPrismaticJoint ]))
 		asArray sorted: [ :first :second |
 			first joint orderingKey = second joint orderingKey
 				ifTrue: [ first joint class name asString < second joint class name asString ]
@@ -566,13 +566,13 @@ CFPhysicsSoftStepSolver >> measurePreparedWork [
 				point normalImpulse ~= 0.0 or: [ point tangentImpulse ~= 0.0 ] ]) ].
 	distanceJointConstraintCount := orderedJointConstraints count: [ :constraint |
 		constraint isKindOf: CFPhysicsPreparedDistanceJoint ].
-	railJointConstraintCount := orderedJointConstraints count: [ :constraint |
-		constraint isKindOf: CFPhysicsPreparedRailJoint ].
-	fixedJointConstraintCount := orderedJointConstraints count: [ :constraint |
-		constraint isKindOf: CFPhysicsPreparedFixedJoint ].
+	prismaticJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedPrismaticJoint ].
+	weldJointConstraintCount := orderedJointConstraints count: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedWeldJoint ].
 	revoluteJointConstraintCount := orderedJointConstraints count: [ :constraint |
 		(constraint isKindOf: CFPhysicsPreparedRevoluteJoint)
-			and: [ (constraint isKindOf: CFPhysicsPreparedFixedJoint) not ] ]
+			and: [ (constraint isKindOf: CFPhysicsPreparedWeldJoint) not ] ]
 ]
 
 
@@ -589,8 +589,8 @@ CFPhysicsSoftStepSolver >> jointConstraintCount [ ^ orderedJointConstraints size
 { #category : 'accessing - telemetry' }
 CFPhysicsSoftStepSolver >> distanceJointConstraintCount [ ^ distanceJointConstraintCount ]
 { #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> railJointConstraintCount [ ^ railJointConstraintCount ]
+CFPhysicsSoftStepSolver >> prismaticJointConstraintCount [ ^ prismaticJointConstraintCount ]
 { #category : 'accessing - telemetry' }
 CFPhysicsSoftStepSolver >> revoluteJointConstraintCount [ ^ revoluteJointConstraintCount ]
 { #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> fixedJointConstraintCount [ ^ fixedJointConstraintCount ]
+CFPhysicsSoftStepSolver >> weldJointConstraintCount [ ^ weldJointConstraintCount ]

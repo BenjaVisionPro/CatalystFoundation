@@ -1345,7 +1345,7 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	first := host children first.
 	second := host children second.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+		weldJointTo: (second physics localAnchorAt: 20 @ 20).
 	overlay refresh.
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
@@ -1356,7 +1356,7 @@ CFPhysicsOverlayTests >> physicsNonDistanceJointVisualHidesTheRestLengthMarker [
 
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> physicsRailJointVisualShowsItsAxisAndLimits [
+CFPhysicsOverlayTests >> physicsPrismaticJointVisualShowsItsAxisAndLimits [
 	<gtExample>
 	| host overlay world first joint visual points context secondPoint axisStart axisEnd displayedAxis expectedStart expectedEnd normal |
 	host := self physicsOverlayCanBeInstalled.
@@ -1364,7 +1364,7 @@ CFPhysicsOverlayTests >> physicsRailJointVisualShowsItsAxisAndLimits [
 	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		railJointTo: (world anchorAt: 180 @ 80)
+		prismaticJointTo: (world anchorAt: 180 @ 80)
 		along: 1 @ 0.
 	joint
 		limitTranslationFrom: -30 to: 50;
@@ -1397,7 +1397,7 @@ CFPhysicsOverlayTests >> physicsRailJointVisualShowsItsAxisAndLimits [
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> physicsRailJointVisualHidesLimitMarkersWhenLimitsAreDisabled [
+CFPhysicsOverlayTests >> physicsPrismaticJointVisualHidesLimitMarkersWhenLimitsAreDisabled [
 	<gtExample>
 	| host overlay world first joint visual |
 	host := self physicsOverlayCanBeInstalled.
@@ -1405,7 +1405,7 @@ CFPhysicsOverlayTests >> physicsRailJointVisualHidesLimitMarkersWhenLimitsAreDis
 	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		railJointTo: (world anchorAt: 180 @ 80)
+		prismaticJointTo: (world anchorAt: 180 @ 80)
 		along: 1 @ 0.
 	overlay refresh.
 	host space pulse.
@@ -1500,7 +1500,7 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEn
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> physicsFixedJointVisualShowsItsLockedReferenceOrientation [
+CFPhysicsOverlayTests >> physicsWeldJointVisualShowsItsLockedReferenceOrientation [
 	<gtExample>
 	| host overlay world first second joint visual points context firstPoint secondPoint pivotPoint |
 	host := self physicsOverlayCanBeInstalled.
@@ -1509,7 +1509,7 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualShowsItsLockedReferenceOrientati
 	first := host children first.
 	second := host children second.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+		weldJointTo: (second physics localAnchorAt: 20 @ 20).
 	overlay refresh.
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
@@ -1534,10 +1534,10 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualShowsItsLockedReferenceOrientati
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> physicsFixedJointVisualTracksReferenceAngleChanges [
+CFPhysicsOverlayTests >> physicsWeldJointVisualTracksReferenceAngleChanges [
 	<gtExample>
 	| visual overlay joint initialEnd |
-	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	visual := self physicsWeldJointVisualShowsItsLockedReferenceOrientation.
 	overlay := visual context overlay.
 	joint := visual joint.
 	initialEnd := visual referenceRay toPosition.
@@ -1551,10 +1551,10 @@ CFPhysicsOverlayTests >> physicsFixedJointVisualTracksReferenceAngleChanges [
 ]
 
 { #category : 'examples - physics object selection' }
-CFPhysicsOverlayTests >> physicsOverlaySelectsAFixedJointAcrossItsVisibleGlyph [
+CFPhysicsOverlayTests >> physicsOverlaySelectsAWeldJointAcrossItsVisibleGlyph [
 	<gtExample>
 	| visual overlay joint |
-	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	visual := self physicsWeldJointVisualShowsItsLockedReferenceOrientation.
 	overlay := visual context overlay.
 	joint := visual joint.
 	BlSpace simulateClickOn: visual hitTarget.
@@ -1620,7 +1620,7 @@ CFPhysicsOverlayTests >> physicsOverlayRevoluteJointInspectorShowsLimitsAndMotor
 ]
 
 { #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> physicsOverlayRailJointInspectorShowsAxisLimitsAndSolverState [
+CFPhysicsOverlayTests >> physicsOverlayPrismaticJointInspectorShowsAxisLimitsAndSolverState [
 	<gtExample>
 	| host overlay world first joint content |
 	host := self physicsOverlayCanBeInstalled.
@@ -1628,7 +1628,7 @@ CFPhysicsOverlayTests >> physicsOverlayRailJointInspectorShowsAxisLimitsAndSolve
 	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		railJointTo: (world anchorAt: 180 @ 80)
+		prismaticJointTo: (world anchorAt: 180 @ 80)
 		along: 1 @ 0.
 	joint
 		limitTranslationFrom: -25.0 to: 40.0;
@@ -1644,7 +1644,7 @@ CFPhysicsOverlayTests >> physicsOverlayRailJointInspectorShowsAxisLimitsAndSolve
 ]
 
 { #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteMotorFields [
+CFPhysicsOverlayTests >> physicsOverlayWeldJointInspectorDoesNotExposeRevoluteMotorFields [
 	<gtExample>
 	| host overlay world first joint content |
 	host := self physicsOverlayCanBeInstalled.
@@ -1652,7 +1652,7 @@ CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteM
 	world := host physics world.
 	first := host children first.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		fixedJointTo: (world anchorAt: 180 @ 80).
+		weldJointTo: (world anchorAt: 180 @ 80).
 	overlay refresh.
 	overlay selectJoint: joint.
 	content := overlay objectInspector content.
@@ -1664,7 +1664,7 @@ CFPhysicsOverlayTests >> physicsOverlayFixedJointInspectorDoesNotExposeRevoluteM
 
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
+CFPhysicsOverlayTests >> physicsWeldJointDiagnosticFollowsHostTransformation [
 	<gtExample>
 	| host overlay first second joint visual initialPivot |
 	host := self physicsCanvassableHost.
@@ -1673,7 +1673,7 @@ CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
 	first := host children first.
 	second := host children second.
 	joint := (first physics localAnchorAt: 20 @ 20)
-		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+		weldJointTo: (second physics localAnchorAt: 20 @ 20).
 	overlay refresh.
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
@@ -1690,7 +1690,7 @@ CFPhysicsOverlayTests >> physicsFixedJointDiagnosticFollowsHostTransformation [
 CFPhysicsOverlayTests >> physicsJointVisualReleasesEveryRetainedPrimitiveWhenDisabled [
 	<gtExample>
 	| visual overlay primitives |
-	visual := self physicsFixedJointVisualShowsItsLockedReferenceOrientation.
+	visual := self physicsWeldJointVisualShowsItsLockedReferenceOrientation.
 	overlay := visual context overlay.
 	primitives := {
 		visual.
@@ -1715,7 +1715,7 @@ CFPhysicsOverlayTests >> physicsJointVisualReleasesEveryRetainedPrimitiveWhenDis
 { #category : 'examples - physics object inspector' }
 CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointTypes [
 	<gtExample>
-	| host overlay world first second distanceJoint fixedJoint distanceVisual fixedVisual firstContent secondContent |
+	| host overlay world first second distanceJoint weldJoint distanceVisual fixedVisual firstContent secondContent |
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
@@ -1723,14 +1723,14 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	second := host children second.
 	distanceJoint := (first physics localAnchorAt: 10 @ 12)
 		distanceJointTo: (world anchorAt: 260 @ 60).
-	fixedJoint := (first physics localAnchorAt: 20 @ 20)
-		fixedJointTo: (second physics localAnchorAt: 20 @ 20).
+	weldJoint := (first physics localAnchorAt: 20 @ 20)
+		weldJointTo: (second physics localAnchorAt: 20 @ 20).
 	overlay refresh.
 	host space pulse.
 	distanceVisual := overlay jointOverlay visuals
 		detect: [ :each | each joint == distanceJoint ].
 	fixedVisual := overlay jointOverlay visuals
-		detect: [ :each | each joint == fixedJoint ].
+		detect: [ :each | each joint == weldJoint ].
 	distanceVisual hitTarget fireEvent: BlClickEvent new.
 	firstContent := overlay objectInspector content.
 	self assert: overlay selectedJoint == distanceJoint.
@@ -1738,9 +1738,9 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	self assert: (firstContent valueElements includesKey: #motorSpeed) not.
 	fixedVisual hitTarget fireEvent: BlClickEvent new.
 	secondContent := overlay objectInspector content.
-	self assert: overlay selectedJoint == fixedJoint.
+	self assert: overlay selectedJoint == weldJoint.
 	self assert: secondContent ~= firstContent.
-	self assert: secondContent joint == fixedJoint.
+	self assert: secondContent joint == weldJoint.
 	self assert: (secondContent valueElements includesKey: #referenceAngle).
 	self assert: (secondContent valueElements includesKey: #restLength) not.
 	self assert: (secondContent valueElements includesKey: #motorSpeed) not.

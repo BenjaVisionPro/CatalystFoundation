@@ -449,9 +449,9 @@ CFPhysicsTelemetrySpanStatistics >> gtIslandSolverEvidenceFor: aView [
 			'Average joint constraints' -> (self averageSampleValue: #solverJointConstraintCount).
 			'Maximum joint constraints' -> (self maximumSampleValue: #solverJointConstraintCount).
 			'Average distance joints' -> (self averageSampleValue: #solverDistanceJointConstraintCount).
-			'Average rail joints' -> (self averageSampleValue: #solverRailJointConstraintCount).
+			'Average prismatic joints' -> (self averageSampleValue: #solverPrismaticJointConstraintCount).
 			'Average revolute joints' -> (self averageSampleValue: #solverRevoluteJointConstraintCount).
-			'Average fixed joints' -> (self averageSampleValue: #solverFixedJointConstraintCount) } ];
+			'Average weld joints' -> (self averageSampleValue: #solverWeldJointConstraintCount) } ];
 		column: 'Measured fact' text: #key;
 		column: 'Value' text: #value;
 		send: #value

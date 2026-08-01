@@ -68,8 +68,8 @@ CFPhysicsIslandSolver >> jointConstraintCount [ ^ softStepSolvers inject: 0 into
 { #category : 'accessing - telemetry' }
 CFPhysicsIslandSolver >> distanceJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver distanceJointConstraintCount ] ]
 { #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> railJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver railJointConstraintCount ] ]
+CFPhysicsIslandSolver >> prismaticJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver prismaticJointConstraintCount ] ]
 { #category : 'accessing - telemetry' }
 CFPhysicsIslandSolver >> revoluteJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver revoluteJointConstraintCount ] ]
 { #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> fixedJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver fixedJointConstraintCount ] ]
+CFPhysicsIslandSolver >> weldJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver weldJointConstraintCount ] ]

@@ -5,8 +5,8 @@ My responsibility is to retain its configuration and accumulated solver state ac
 "
 Class {
 	#name : 'CFPhysicsDistanceJoint',
-	#superclass : 'Object',
-	#instVars : [ 'endpointPair', 'restLength', 'active', 'sequence', 'accumulatedImpulse', 'collideConnected', 'sourceJoint' ],
+	#superclass : 'CFPhysicsJoint',
+	#instVars : [ 'endpointPair', 'restLength', 'accumulatedImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -44,10 +44,7 @@ CFPhysicsDistanceJoint class >> distanceBetweenEndpoints: anEndpointPair [
 CFPhysicsDistanceJoint >> initialize [
 	super initialize.
 	restLength := 0.0.
-	active := true.
-	sequence := 0.
 	accumulatedImpulse := 0.0.
-	collideConnected := false
 ]
 
 { #category : 'accessing' }
@@ -62,10 +59,6 @@ CFPhysicsDistanceJoint >> anchorB [ ^ endpointPair anchorB ]
 CFPhysicsDistanceJoint >> bodyA [ ^ endpointPair bodyA ]
 { #category : 'accessing' }
 CFPhysicsDistanceJoint >> bodyB [ ^ endpointPair bodyB ]
-{ #category : 'accessing' }
-CFPhysicsDistanceJoint >> firstBody [ ^ self bodyA ]
-{ #category : 'accessing' }
-CFPhysicsDistanceJoint >> secondBody [ ^ self bodyB ]
 
 { #category : 'configuration' }
 CFPhysicsDistanceJoint >> restLength [ ^ restLength ]
@@ -80,24 +73,8 @@ CFPhysicsDistanceJoint >> accumulatedImpulse [ ^ accumulatedImpulse ]
 { #category : 'solver state' }
 CFPhysicsDistanceJoint >> accumulatedImpulse: aNumber [ accumulatedImpulse := aNumber asFloat ]
 
-{ #category : 'configuration' }
-CFPhysicsDistanceJoint >> collideConnected [ ^ collideConnected ]
-{ #category : 'configuration' }
-CFPhysicsDistanceJoint >> collideConnected: aBoolean [
-	collideConnected = aBoolean ifTrue: [ ^ self ].
-	collideConnected := aBoolean.
-	self wakeBodies
-]
 
-{ #category : 'ordering' }
-CFPhysicsDistanceJoint >> sequence [ ^ sequence ]
-{ #category : 'ordering' }
-CFPhysicsDistanceJoint >> sequence: anInteger [ sequence := anInteger ]
-{ #category : 'ordering' }
-CFPhysicsDistanceJoint >> orderingKey [ ^ sequence ]
 
-{ #category : 'testing' }
-CFPhysicsDistanceJoint >> isActive [ ^ active ]
 { #category : 'testing' }
 CFPhysicsDistanceJoint >> includesBody: aBodyState [ ^ endpointPair includesBody: aBodyState ]
 
@@ -107,14 +84,7 @@ CFPhysicsDistanceJoint >> includesAnchor: anAnchor [
 	^ endpointPair anchorA == anAnchor or: [ endpointPair anchorB == anAnchor ]
 ]
 
-{ #category : 'waking' }
-CFPhysicsDistanceJoint >> wakeBodies [
-	self firstBody ifNotNil: [ :body | body wake ].
-	self secondBody ifNotNil: [ :body | body wake ]
-]
 
-{ #category : 'controlling' }
-CFPhysicsDistanceJoint >> release [ active := false ]
 
 
 { #category : 'capturing' }
@@ -127,8 +97,4 @@ CFPhysicsDistanceJoint >> capturedForStep [
 	^ captured
 ]
 
-{ #category : 'private - capturing' }
-CFPhysicsDistanceJoint >> sourceJoint: aJoint [ sourceJoint := aJoint ]
 
-{ #category : 'committing' }
-CFPhysicsDistanceJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]

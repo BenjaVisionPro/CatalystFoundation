@@ -171,11 +171,11 @@ CFPhysicsTelemetrySpanSample >> solverJointConstraintCount [ ^ self physicsDataA
 { #category : 'accessing - solver work evidence' }
 CFPhysicsTelemetrySpanSample >> solverDistanceJointConstraintCount [ ^ self physicsDataAt: #solverDistanceJointConstraintCount ]
 { #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverRailJointConstraintCount [ ^ self physicsDataAt: #solverRailJointConstraintCount ]
+CFPhysicsTelemetrySpanSample >> solverPrismaticJointConstraintCount [ ^ self physicsDataAt: #solverPrismaticJointConstraintCount ]
 { #category : 'accessing - solver work evidence' }
 CFPhysicsTelemetrySpanSample >> solverRevoluteJointConstraintCount [ ^ self physicsDataAt: #solverRevoluteJointConstraintCount ]
 { #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverFixedJointConstraintCount [ ^ self physicsDataAt: #solverFixedJointConstraintCount ]
+CFPhysicsTelemetrySpanSample >> solverWeldJointConstraintCount [ ^ self physicsDataAt: #solverWeldJointConstraintCount ]
 
 
 { #category : 'accessing - constraint preparation evidence' }
@@ -248,9 +248,9 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'Restitution candidate points' -> self solverRestitutionCandidatePointCount.
 			'Solver joint constraints' -> self solverJointConstraintCount.
 			'Distance joint constraints' -> self solverDistanceJointConstraintCount.
-			'Rail joint constraints' -> self solverRailJointConstraintCount.
+			'Prismatic joint constraints' -> self solverPrismaticJointConstraintCount.
 			'Revolute joint constraints' -> self solverRevoluteJointConstraintCount.
-			'Fixed joint constraints' -> self solverFixedJointConstraintCount.
+			'Weld joint constraints' -> self solverWeldJointConstraintCount.
 			'Prepared contact constraints' -> self preparedContactConstraintCount.
 			'Continued prepared contacts' -> self continuedPreparedContactConstraintCount.
 			'Began prepared contacts' -> self beganPreparedContactConstraintCount.

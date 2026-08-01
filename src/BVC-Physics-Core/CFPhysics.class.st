@@ -500,69 +500,69 @@ CFPhysics >> removeRevoluteJoint: aJoint [
 	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
 ]
 
-{ #category : 'fixed joints' }
-CFPhysics >> fixedJointTo: anotherElement [
+{ #category : 'weld joints' }
+CFPhysics >> weldJointTo: anotherElement [
 	| aWorld otherWorld joint |
 	aWorld := self world.
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
-	joint := CFPhysicsFixedJoint
+	joint := CFPhysicsWeldJoint
 		between: self body
 		and: anotherElement physics body.
-	^ aWorld addFixedJoint: joint
+	^ aWorld addWeldJoint: joint
 ]
 
-{ #category : 'fixed joints' }
-CFPhysics >> fixedJoints [
+{ #category : 'weld joints' }
+CFPhysics >> weldJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
-	^ aWorld fixedJointsUsingBody: body
+	^ aWorld weldJointsUsingBody: body
 ]
 
-{ #category : 'fixed joints' }
-CFPhysics >> removeFixedJoint: aJoint [
+{ #category : 'weld joints' }
+CFPhysics >> removeWeldJoint: aJoint [
 	| aWorld |
 	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeFixedJoint: aJoint ]
+	aWorld ifNotNil: [ aWorld removeWeldJoint: aJoint ]
 ]
 
-{ #category : 'rail joints' }
-CFPhysics >> railJointTo: anotherElement along: anAxis [
+{ #category : 'prismatic joints' }
+CFPhysics >> prismaticJointTo: anotherElement along: anAxis [
 	| aWorld otherWorld joint |
 	aWorld := self world.
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
 	aWorld synchroniseMembership.
-	joint := CFPhysicsRailJoint
+	joint := CFPhysicsPrismaticJoint
 		between: self body
 		and: anotherElement physics body
 		along: anAxis.
-	^ aWorld addRailJoint: joint
+	^ aWorld addPrismaticJoint: joint
 ]
 
-{ #category : 'rail joints' }
-CFPhysics >> railJoints [
+{ #category : 'prismatic joints' }
+CFPhysics >> prismaticJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
 	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
-	^ aWorld railJointsUsingBody: body
+	^ aWorld prismaticJointsUsingBody: body
 ]
 
-{ #category : 'rail joints' }
-CFPhysics >> removeRailJoint: aJoint [
+{ #category : 'prismatic joints' }
+CFPhysics >> removePrismaticJoint: aJoint [
 	| aWorld |
 	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeRailJoint: aJoint ]
+	aWorld ifNotNil: [ aWorld removePrismaticJoint: aJoint ]
 ]
 
 

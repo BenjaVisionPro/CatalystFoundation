@@ -1,12 +1,12 @@
-Extension { #name : 'CFPhysicsFixedJoint' }
+Extension { #name : 'CFPhysicsWeldJoint' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsFixedJoint >> inspectInPhysicsOverlay: anInspector [
+CFPhysicsWeldJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
+CFPhysicsWeldJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
 	| pivotPoint pivotWorld bodyAAngle referenceWorldAngle referenceDirection referenceEnd |
 	aVisual
 		hideRestLengthMarker;
@@ -33,7 +33,7 @@ CFPhysicsFixedJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: 
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsFixedJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+CFPhysicsWeldJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 	anInspectorContent
 		addGroup: 'Fixed' fields: {
 			#referenceAngle -> 'Reference angle' };
@@ -43,7 +43,7 @@ CFPhysicsFixedJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsFixedJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+CFPhysicsWeldJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	anInspectorContent
 		diagnosticNumber: self referenceAngle at: #referenceAngle;
 		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;

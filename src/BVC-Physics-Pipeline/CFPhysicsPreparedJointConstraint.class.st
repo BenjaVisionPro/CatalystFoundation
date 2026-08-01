@@ -15,9 +15,9 @@ CFPhysicsPreparedJointConstraint >> joint [ ^ joint ]
 { #category : 'accessing' }
 CFPhysicsPreparedJointConstraint >> joint: anObject [ joint := anObject ]
 { #category : 'accessing' }
-CFPhysicsPreparedJointConstraint >> firstBody [ ^ joint firstBody ]
+CFPhysicsPreparedJointConstraint >> bodyA [ ^ joint bodyA ]
 { #category : 'accessing' }
-CFPhysicsPreparedJointConstraint >> secondBody [ ^ joint secondBody ]
+CFPhysicsPreparedJointConstraint >> bodyB [ ^ joint bodyB ]
 { #category : 'accessing' }
 CFPhysicsPreparedJointConstraint >> bodyStateA [ ^ bodyStateA ]
 { #category : 'accessing' }
