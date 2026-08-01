@@ -82,6 +82,8 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 		^ self applyDistanceJointImpulse: (self distanceJointAxisFor: constraint) * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self warmStartPrismaticJointConstraint: constraint ].
+	(constraint isKindOf: CFPhysicsPreparedWheelJoint) ifTrue: [
+		^ self warmStartWheelJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
 		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
 		^ self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint ].
@@ -135,6 +137,8 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 		^ self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled ].
+	(constraint isKindOf: CFPhysicsPreparedWheelJoint) ifTrue: [
+		^ self solveWheelJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
 		^ self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
@@ -877,7 +881,9 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 		(constraints select: [ :constraint |
 			constraint isKindOf: CFPhysicsPreparedRevoluteJoint ]),
 		(constraints select: [ :constraint |
-			constraint isKindOf: CFPhysicsPreparedPrismaticJoint ]))
+			constraint isKindOf: CFPhysicsPreparedPrismaticJoint ]),
+		(constraints select: [ :constraint |
+			constraint isKindOf: CFPhysicsPreparedWheelJoint ]))
 		asArray sorted: [ :first :second |
 			first joint orderingKey = second joint orderingKey
 				ifTrue: [ first joint class name asString < second joint class name asString ]
@@ -1020,4 +1026,169 @@ CFPhysicsSoftStepSolver >> crossScalar: aScalar withVector: aPoint [
 CFPhysicsSoftStepSolver >> multiplyXX: xx xy: xy yy: yy by: aPoint [
 	^ ((xx * aPoint x) + (xy * aPoint y))
 		@ ((xy * aPoint x) + (yy * aPoint y))
+]
+
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointAnchorAFor: constraint [
+	^ self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointAnchorBFor: constraint [
+	^ self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointAxisFor: constraint [
+	^ self rotated: constraint axis by: (self distanceJointDeltaRotationFor: constraint bodyStateA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointSeparationFor: constraint [
+	| anchorA anchorB baseSeparation |
+	anchorA := self wheelJointAnchorAFor: constraint.
+	anchorB := self wheelJointAnchorBFor: constraint.
+	baseSeparation := (constraint axis * constraint baseTranslation)
+		+ (constraint normal * constraint basePerpendicularSeparation).
+	^ baseSeparation
+		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)
+		- (self distanceJointDeltaPositionFor: constraint bodyStateA)
+		+ anchorB - constraint anchorB
+		- anchorA + constraint anchorA
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointLeverAFor: constraint direction: direction [
+	^ self cross: (self wheelJointSeparationFor: constraint) + (self wheelJointAnchorAFor: constraint) with: direction
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointLeverBFor: constraint direction: direction [
+	^ self cross: (self wheelJointAnchorBFor: constraint) with: direction
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> wheelJointVelocityFor: constraint direction: direction leverA: leverA leverB: leverB [
+	| velocityA velocityB angularA angularB |
+	velocityA := constraint bodyStateA ifNil: [ 0 @ 0 ] ifNotNil: [ :state | state linearVelocity ].
+	velocityB := constraint bodyStateB ifNil: [ 0 @ 0 ] ifNotNil: [ :state | state linearVelocity ].
+	angularA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	angularB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	^ (self dot: velocityB - velocityA with: direction) + (leverB * angularB) - (leverA * angularA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyWheelJointLinearImpulse: impulse direction: direction leverA: leverA leverB: leverB constraint: constraint [
+	^ self applyPrismaticJointImpulse: impulse direction: direction leverA: leverA leverB: leverB constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyWheelJointMotorImpulse: impulse constraint: constraint [
+	constraint bodyStateA ifNotNil: [ :state |
+		state angularVelocity: state angularVelocity - (impulse * state inverseInertia) ].
+	constraint bodyStateB ifNotNil: [ :state |
+		state angularVelocity: state angularVelocity + (impulse * state inverseInertia) ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartWheelJointConstraint: constraint [
+	| axis normal axialImpulse perpendicularLeverA perpendicularLeverB axialLeverA axialLeverB |
+	axis := self wheelJointAxisFor: constraint.
+	normal := axis y negated @ axis x.
+	perpendicularLeverA := self wheelJointLeverAFor: constraint direction: normal.
+	perpendicularLeverB := self wheelJointLeverBFor: constraint direction: normal.
+	axialLeverA := self wheelJointLeverAFor: constraint direction: axis.
+	axialLeverB := self wheelJointLeverBFor: constraint direction: axis.
+	axialImpulse := constraint springImpulse + constraint lowerLimitImpulse - constraint upperLimitImpulse.
+	self applyWheelJointLinearImpulse: constraint perpendicularImpulse direction: normal
+		leverA: perpendicularLeverA leverB: perpendicularLeverB constraint: constraint.
+	self applyWheelJointLinearImpulse: axialImpulse direction: axis
+		leverA: axialLeverA leverB: axialLeverB constraint: constraint.
+	self applyWheelJointMotorImpulse: constraint motorImpulse constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWheelJointConstraint: constraint biasEnabled: biasEnabled [
+	self solveWheelJointMotor: constraint.
+	self solveWheelJointSpring: constraint.
+	self solveWheelJointLimits: constraint biasEnabled: biasEnabled.
+	self solveWheelJointPerpendicularConstraint: constraint biasEnabled: biasEnabled
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWheelJointMotor: constraint [
+	| angularA angularB increment oldImpulse newImpulse |
+	constraint motorEnabled ifFalse: [ ^ self ].
+	angularA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	angularB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	increment := constraint motorMass * (constraint motorSpeed - (angularB - angularA)).
+	oldImpulse := constraint motorImpulse.
+	newImpulse := ((oldImpulse + increment) max: constraint maximumMotorImpulse negated)
+		min: constraint maximumMotorImpulse.
+	constraint motorImpulse: newImpulse.
+	self applyWheelJointMotorImpulse: newImpulse - oldImpulse constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWheelJointSpring: constraint [
+	| axis leverA leverB translation velocity increment |
+	constraint springEnabled ifFalse: [ ^ self ].
+	axis := self wheelJointAxisFor: constraint.
+	leverA := self wheelJointLeverAFor: constraint direction: axis.
+	leverB := self wheelJointLeverBFor: constraint direction: axis.
+	translation := self dot: (self wheelJointSeparationFor: constraint) with: axis.
+	velocity := self wheelJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
+	increment := (constraint springMassCoefficient * constraint axialMass
+		* (velocity + (constraint springBiasRate * translation))) negated
+		- (constraint springImpulseCoefficient * constraint springImpulse).
+	constraint springImpulse: constraint springImpulse + increment.
+	self applyWheelJointLinearImpulse: increment direction: axis leverA: leverA leverB: leverB constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWheelJointLimits: constraint biasEnabled: biasEnabled [
+	| translation axis leverA leverB velocity separation bias massCoefficient impulseCoefficient increment oldImpulse newImpulse |
+	constraint limitsEnabled ifFalse: [ ^ self ].
+	axis := self wheelJointAxisFor: constraint.
+	translation := self dot: (self wheelJointSeparationFor: constraint) with: axis.
+	leverA := self wheelJointLeverAFor: constraint direction: axis.
+	leverB := self wheelJointLeverBFor: constraint direction: axis.
+	velocity := self wheelJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
+	separation := translation - constraint lowerTranslation.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime. massCoefficient := 1.0. impulseCoefficient := 0.0 ]
+		ifFalse: [ bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ]. massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ]. impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
+	increment := (massCoefficient * constraint axialMass * (velocity + bias)) negated - (impulseCoefficient * constraint lowerLimitImpulse).
+	oldImpulse := constraint lowerLimitImpulse.
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint lowerLimitImpulse: newImpulse.
+	self applyWheelJointLinearImpulse: newImpulse - oldImpulse direction: axis leverA: leverA leverB: leverB constraint: constraint.
+	separation := constraint upperTranslation - translation.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime. massCoefficient := 1.0. impulseCoefficient := 0.0 ]
+		ifFalse: [ bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ]. massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ]. impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
+	increment := (massCoefficient * constraint axialMass * (velocity negated + bias)) negated - (impulseCoefficient * constraint upperLimitImpulse).
+	oldImpulse := constraint upperLimitImpulse.
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint upperLimitImpulse: newImpulse.
+	self applyWheelJointLinearImpulse: newImpulse - oldImpulse direction: axis negated leverA: leverA negated leverB: leverB negated constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveWheelJointPerpendicularConstraint: constraint biasEnabled: biasEnabled [
+	| axis normal leverA leverB velocity separation bias massCoefficient impulseCoefficient increment |
+	axis := self wheelJointAxisFor: constraint.
+	normal := axis y negated @ axis x.
+	leverA := self wheelJointLeverAFor: constraint direction: normal.
+	leverB := self wheelJointLeverBFor: constraint direction: normal.
+	velocity := self wheelJointVelocityFor: constraint direction: normal leverA: leverA leverB: leverB.
+	separation := self dot: (self wheelJointSeparationFor: constraint) with: normal.
+	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (massCoefficient * constraint perpendicularMass * (velocity + bias)) negated
+		- (impulseCoefficient * constraint perpendicularImpulse).
+	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
+	self applyWheelJointLinearImpulse: increment direction: normal leverA: leverA leverB: leverB constraint: constraint
 ]

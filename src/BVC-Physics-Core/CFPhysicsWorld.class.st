@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -44,6 +44,7 @@ CFPhysicsWorld >> initialize [
 	nextRevoluteJointSequence := 1.
 	nextWeldJointSequence := 1.
 	nextPrismaticJointSequence := 1.
+	nextWheelJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	simulationTime := 0.0.
@@ -70,6 +71,7 @@ CFPhysicsWorld >> initialize [
 	revoluteJoints := IdentitySet new.
 	weldJoints := IdentitySet new.
 	prismaticJoints := IdentitySet new.
+	wheelJoints := IdentitySet new.
 	manifoldGenerator := CFPhysicsManifoldGenerator new.
 	stepPipeline := CFPhysicsStepPipeline manifoldGenerator: manifoldGenerator
 ]
@@ -105,6 +107,7 @@ CFPhysicsWorld >> release [
 	revoluteJoints copy do: [ :each | self removeRevoluteJoint: each ].
 	weldJoints copy do: [ :each | self removeWeldJoint: each ].
 	prismaticJoints copy do: [ :each | self removePrismaticJoint: each ].
+	wheelJoints copy do: [ :each | self removeWheelJoint: each ].
 	containmentConstraints copy do: [ :each | self removeContainmentConstraint: each ].
 	bodyStates keys do: [ :each |
 		each existingPhysics ifNotNil: [ :physics |
@@ -273,6 +276,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeRevoluteJointsUsingBody: body.
 		self removeWeldJointsUsingBody: body.
 		self removePrismaticJointsUsingBody: body.
+		self removeWheelJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
@@ -906,7 +910,7 @@ CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 
 { #category : 'joints' }
 CFPhysicsWorld >> joints [
-	^ (self mouseJoints, self motorJoints, self distanceJoints, self revoluteJoints, self weldJoints, self prismaticJoints) asArray sorted: [ :first :second |
+	^ (self mouseJoints, self motorJoints, self distanceJoints, self revoluteJoints, self weldJoints, self prismaticJoints, self wheelJoints) asArray sorted: [ :first :second |
 		first orderingKey = second orderingKey
 			ifTrue: [ first class name asString < second class name asString ]
 			ifFalse: [ first orderingKey < second orderingKey ] ]
@@ -1259,4 +1263,45 @@ CFPhysicsWorld >> disableVisualState [
 { #category : 'testing' }
 CFPhysicsWorld >> visualStateEnabled [
 	^ visualStateConsumers > 0
+]
+
+
+{ #category : 'wheel joints' }
+CFPhysicsWorld >> wheelJoints [
+	^ wheelJoints asArray sorted: [ :first :second |
+		first orderingKey < second orderingKey ]
+]
+
+{ #category : 'wheel joints' }
+CFPhysicsWorld >> addWheelJoint: aJoint [
+	aJoint endpointPair world == self
+		ifFalse: [ self error: 'Wheel joint endpoints must belong to this physics world' ].
+	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
+		ifFalse: [ self error: 'A wheel joint requires at least one body endpoint' ].
+	self invalidateTopology.
+	aJoint sequence: nextWheelJointSequence.
+	nextWheelJointSequence := nextWheelJointSequence + 1.
+	wheelJoints add: aJoint.
+	aJoint wakeBodies.
+	^ aJoint
+]
+
+{ #category : 'wheel joints' }
+CFPhysicsWorld >> wheelJointsUsingBody: aBodyState [
+	^ self wheelJoints select: [ :each | each includesBody: aBodyState ]
+]
+
+{ #category : 'wheel joints' }
+CFPhysicsWorld >> removeWheelJoint: aJoint [
+	(wheelJoints includes: aJoint) ifTrue: [
+		self invalidateTopology.
+		aJoint release.
+		wheelJoints remove: aJoint ].
+	^ aJoint
+]
+
+{ #category : 'wheel joints' }
+CFPhysicsWorld >> removeWheelJointsUsingBody: aBodyState [
+	(wheelJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
+		self removeWheelJoint: each ]
 ]

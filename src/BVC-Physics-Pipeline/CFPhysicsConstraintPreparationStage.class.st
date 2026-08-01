@@ -5,7 +5,7 @@ I prepare contact and joint constraints for the solver. I translate persistent c
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'weldJointConstraintBuilder', 'prismaticJointConstraintBuilder', 'mouseJointConstraintBuilder', 'motorJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'weldJointConstraintBuilder', 'prismaticJointConstraintBuilder', 'wheelJointConstraintBuilder', 'mouseJointConstraintBuilder', 'motorJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -18,6 +18,7 @@ CFPhysicsConstraintPreparationStage >> initialize [
 	revoluteJointConstraintBuilder := CFPhysicsRevoluteJointConstraintBuilder new.
 	weldJointConstraintBuilder := CFPhysicsWeldJointConstraintBuilder new.
 	prismaticJointConstraintBuilder := CFPhysicsPrismaticJointConstraintBuilder new.
+	wheelJointConstraintBuilder := CFPhysicsWheelJointConstraintBuilder new.
 	mouseJointConstraintBuilder := CFPhysicsMouseJointConstraintBuilder new.
 	motorJointConstraintBuilder := CFPhysicsMotorJointConstraintBuilder new
 ]
@@ -42,8 +43,15 @@ CFPhysicsConstraintPreparationStage >> weldJointConstraintBuilder: anObject [ we
 CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder [ ^ prismaticJointConstraintBuilder ]
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder: anObject [ prismaticJointConstraintBuilder := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> wheelJointConstraintBuilder [ ^ wheelJointConstraintBuilder ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPreparationStage >> wheelJointConstraintBuilder: anObject [ wheelJointConstraintBuilder := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> mouseJointConstraintBuilder [ ^ mouseJointConstraintBuilder ]
+
 { #category : 'accessing' }
 CFPhysicsConstraintPreparationStage >> mouseJointConstraintBuilder: anObject [ mouseJointConstraintBuilder := anObject ]
 { #category : 'accessing' }
@@ -92,6 +100,10 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (prismaticJointConstraintBuilder
+		constraintsFrom: aStepResult joints
+		bodyStates: aStepResult bodyStates
+		step: aStepResult step).
+	constraints addAll: (wheelJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).

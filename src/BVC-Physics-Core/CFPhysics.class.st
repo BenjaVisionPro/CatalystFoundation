@@ -678,3 +678,32 @@ CFPhysics >> applyAngularImpulse: aNumber [
 	self body applyAngularImpulse: aNumber
 ]
 
+
+
+{ #category : 'wheel joints' }
+CFPhysics >> wheelJointTo: anotherElement along: anAxis [
+	| aWorld otherWorld joint |
+	aWorld := self world.
+	otherWorld := anotherElement physics world.
+	(aWorld notNil and: [ aWorld == otherWorld ])
+		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsWheelJoint between: self body and: anotherElement physics body along: anAxis.
+	^ aWorld addWheelJoint: joint
+]
+
+{ #category : 'wheel joints' }
+CFPhysics >> wheelJoints [
+	| aWorld body |
+	aWorld := self world.
+	aWorld ifNil: [ ^ #() ].
+	aWorld synchroniseMembership.
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld wheelJointsUsingBody: body
+]
+
+{ #category : 'wheel joints' }
+CFPhysics >> removeWheelJoint: aJoint [
+	self world ifNotNil: [ :aWorld | aWorld removeWheelJoint: aJoint ]
+]

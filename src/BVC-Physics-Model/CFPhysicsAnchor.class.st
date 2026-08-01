@@ -79,6 +79,14 @@ CFPhysicsAnchor >> prismaticJointTo: anotherAnchor along: anAxis [
 ]
 
 { #category : 'relationships' }
+CFPhysicsAnchor >> wheelJointTo: anotherAnchor along: anAxis [
+	| aWorld joint |
+	aWorld := self relationshipWorldWith: anotherAnchor.
+	joint := CFPhysicsWheelJoint betweenAnchor: self andAnchor: anotherAnchor along: anAxis.
+	^ aWorld addWheelJoint: joint
+]
+
+{ #category : 'relationships' }
 CFPhysicsAnchor >> attract: anotherAnchor [
 	| aWorld attraction |
 	aWorld := self relationshipWorldWith: anotherAnchor.
