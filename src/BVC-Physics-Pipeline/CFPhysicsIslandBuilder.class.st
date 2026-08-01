@@ -1,3 +1,7 @@
+"
+I build deterministic simulation islands from bodies and prepared constraints. I group connected components while keeping unrelated systems independent.
+"
+
 Class {
 	#name : 'CFPhysicsIslandBuilder',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I repeatedly find, advance and solve the earliest continuous-collision impacts in a substep. I coordinate impact handling until time is exhausted or the iteration limit is reached.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousImpactLoop',
 	#superclass : 'Object',

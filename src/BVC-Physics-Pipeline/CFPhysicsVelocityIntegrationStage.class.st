@@ -1,3 +1,7 @@
+"
+I integrate forces and velocities into the step-local body states. I am the first dynamic stage of the standard step pipeline.
+"
+
 Class {
 	#name : 'CFPhysicsVelocityIntegrationStage',
 	#superclass : 'CFPhysicsStepStage',

@@ -1,3 +1,7 @@
+"
+I build prepared contact constraints from active contacts and step-local body states. I also reuse constraint and point objects to reduce allocation during stepping.
+"
+
 Class {
 	#name : 'CFPhysicsConstraintBuilder',
 	#superclass : 'Object',

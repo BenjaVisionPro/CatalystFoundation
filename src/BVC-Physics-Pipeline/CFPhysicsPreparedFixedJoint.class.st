@@ -1,3 +1,7 @@
+"
+I represent a fixed joint prepared for one solver step. I extend the shared joint constraint with angular preservation state.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedFixedJoint',
 	#superclass : 'CFPhysicsPreparedRevoluteJoint',

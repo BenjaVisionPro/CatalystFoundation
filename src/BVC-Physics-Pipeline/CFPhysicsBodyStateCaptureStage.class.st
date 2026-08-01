@@ -1,3 +1,7 @@
+"
+I capture the current state of each body for one simulation step. I establish the step-local body states used by later pipeline stages.
+"
+
 Class {
 	#name : 'CFPhysicsBodyStateCaptureStage',
 	#superclass : 'CFPhysicsStepStage',

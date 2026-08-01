@@ -1,3 +1,7 @@
+"
+I build contact lifecycle events from a contact update batch. I distinguish contacts that began from contacts that ended during the step.
+"
+
 Class {
 	#name : 'CFPhysicsContactEventStage',
 	#superclass : 'Object',

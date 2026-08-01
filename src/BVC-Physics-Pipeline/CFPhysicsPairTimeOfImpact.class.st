@@ -1,3 +1,7 @@
+"
+I associate a collision pair with its time-of-impact result. I provide the impact fraction used to compare continuous-collision candidates.
+"
+
 Class {
 	#name : 'CFPhysicsPairTimeOfImpact',
 	#superclass : 'Object',

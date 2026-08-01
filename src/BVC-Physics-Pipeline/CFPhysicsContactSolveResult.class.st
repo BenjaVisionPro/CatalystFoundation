@@ -1,3 +1,7 @@
+"
+I represent the post-solve result for one contact. I collect the solved point results under the contact normal and contact identity.
+"
+
 Class {
 	#name : 'CFPhysicsContactSolveResult',
 	#superclass : 'Object',

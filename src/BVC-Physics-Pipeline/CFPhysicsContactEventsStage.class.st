@@ -1,3 +1,7 @@
+"
+I add contact lifecycle events to a completed pipeline result. I am the pipeline stage wrapper around contact-event construction.
+"
+
 Class {
 	#name : 'CFPhysicsContactEventsStage',
 	#superclass : 'CFPhysicsStepStage',

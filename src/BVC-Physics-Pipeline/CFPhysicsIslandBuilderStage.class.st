@@ -1,3 +1,7 @@
+"
+I build islands for the current pipeline result. I expose the island builder as one ordered step stage.
+"
+
 Class {
 	#name : 'CFPhysicsIslandBuilderStage',
 	#superclass : 'CFPhysicsStepStage',

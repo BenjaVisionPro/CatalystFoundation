@@ -1,3 +1,7 @@
+"
+I represent bodies advanced to a continuous-collision impact. I retain the impact together with the elapsed and remaining substep time.
+"
+
 Class {
 	#name : 'CFPhysicsImpactAdvancementResult',
 	#superclass : 'Object',

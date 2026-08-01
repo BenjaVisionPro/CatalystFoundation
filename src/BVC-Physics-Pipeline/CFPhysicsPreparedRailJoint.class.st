@@ -1,3 +1,7 @@
+"
+I represent a rail joint prepared for one solver step. I hold its axis, perpendicular constraint, translation limits and angular state.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedRailJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',

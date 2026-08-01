@@ -1,3 +1,7 @@
+"
+I solve each simulation island for one substep. I coordinate the soft-step solvers and exposes aggregate solver measurements.
+"
+
 Class {
 	#name : 'CFPhysicsIslandSolver',
 	#superclass : 'Object',

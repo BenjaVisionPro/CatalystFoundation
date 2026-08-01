@@ -1,3 +1,7 @@
+"
+I find potentially colliding body pairs from step-local bounds. I apply collision filtering, joint suppression and deterministic sweep ordering while recording broad-phase measurements.
+"
+
 Class {
 	#name : 'CFPhysicsPairFinder',
 	#superclass : 'Object',

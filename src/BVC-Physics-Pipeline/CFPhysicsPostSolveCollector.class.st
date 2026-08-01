@@ -1,3 +1,7 @@
+"
+I collect contact impulses and hit events from solved constraints. I convert solver state into stable post-solve observations.
+"
+
 Class {
 	#name : 'CFPhysicsPostSolveCollector',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I collect post-solve contact results for the current pipeline result. I am the pipeline stage that applies the configured hit threshold.
+"
+
 Class {
 	#name : 'CFPhysicsPostSolveStage',
 	#superclass : 'CFPhysicsStepStage',

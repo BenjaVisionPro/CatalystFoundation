@@ -1,3 +1,7 @@
+"
+I advance the affected body states to a selected time of impact. I produce the timing information needed by the impact solver and remaining-time integration.
+"
+
 Class {
 	#name : 'CFPhysicsImpactAdvancer',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I reconcile collision pairs with the previous contact set. I preserve contact identity where possible and build manifolds for new or changed contacts.
+"
+
 Class {
 	#name : 'CFPhysicsContactUpdater',
 	#superclass : 'Object',

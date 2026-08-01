@@ -1,3 +1,7 @@
+"
+I represent the outcome of reconciling candidate pairs with previous contacts. I separate active, began, continued and ended contacts for later stages.
+"
+
 Class {
 	#name : 'CFPhysicsContactUpdateBatch',
 	#superclass : 'Object',

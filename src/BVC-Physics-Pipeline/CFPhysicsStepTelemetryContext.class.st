@@ -1,6 +1,7 @@
-"I capture the immutable world-level values needed to describe one detached Physics step.
+"
+I capture the world and workload context associated with a telemetry-recorded solve. I combine pipeline measurements with stable world and solve identifiers.
+"
 
-The worker combines me with its calculation-owned pipeline result. I never inspect or mutate the live world."
 Class {
 	#name : 'CFPhysicsStepTelemetryContext',
 	#superclass : 'Object',

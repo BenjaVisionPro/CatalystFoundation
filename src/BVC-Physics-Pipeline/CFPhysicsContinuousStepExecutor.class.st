@@ -1,3 +1,7 @@
+"
+I execute one continuous-collision pass over a set of candidate pairs and body states. I coordinate impact finding, advancement, solving and remaining-time integration.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousStepExecutor',
 	#superclass : 'Object',

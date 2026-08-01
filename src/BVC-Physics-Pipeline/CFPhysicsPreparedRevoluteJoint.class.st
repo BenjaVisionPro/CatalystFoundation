@@ -1,3 +1,7 @@
+"
+I represent a revolute joint prepared for one solver step. I hold its pivot constraint together with optional limits and motor state.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',

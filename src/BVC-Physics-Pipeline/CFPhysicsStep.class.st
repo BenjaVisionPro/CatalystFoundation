@@ -1,3 +1,7 @@
+"
+I describe the numerical configuration and identity of one simulation step. I derive substep timing and soft-contact coefficients from world settings.
+"
+
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',

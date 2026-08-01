@@ -1,3 +1,7 @@
+"
+I update the world's contacts from the current collision pairs. I also wake bodies when ending contacts require the sleeping state to be reconsidered.
+"
+
 Class {
 	#name : 'CFPhysicsContactUpdateStage',
 	#superclass : 'CFPhysicsStepStage',

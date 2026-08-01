@@ -1,3 +1,7 @@
+"
+I prepare contact and joint constraints for the solver. I translate persistent contacts and joints into step-local constraint objects.
+"
+
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',

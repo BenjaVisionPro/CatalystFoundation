@@ -1,3 +1,7 @@
+"
+I represent an ordered pair of bodies considered for collision. I provide a stable key and deterministic ordering for broad-phase and contact processing.
+"
+
 Class {
 	#name : 'CFPhysicsPair',
 	#superclass : 'Object',

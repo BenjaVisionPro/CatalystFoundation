@@ -1,3 +1,7 @@
+"
+I record one pipeline stage and the output it produced. I support inspection and telemetry of a completed pipeline execution.
+"
+
 Class {
 	#name : 'CFPhysicsStepStageExecution',
 	#superclass : 'Object',

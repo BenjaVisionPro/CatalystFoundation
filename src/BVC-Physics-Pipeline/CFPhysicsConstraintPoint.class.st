@@ -1,3 +1,7 @@
+"
+I represent one prepared contact point within a contact constraint. I hold the effective masses, anchors, velocities and accumulated impulses used by the solver.
+"
+
 Class {
 	#name : 'CFPhysicsConstraintPoint',
 	#superclass : 'Object',

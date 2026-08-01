@@ -1,3 +1,7 @@
+"
+I represent a lifecycle event for a contact. I provide the shared protocol used by began and ended contact events.
+"
+
 Class {
 	#name : 'CFPhysicsContactEvent',
 	#superclass : 'Object',

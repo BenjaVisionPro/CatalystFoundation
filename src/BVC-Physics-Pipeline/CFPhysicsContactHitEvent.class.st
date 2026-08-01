@@ -1,3 +1,7 @@
+"
+I announce a contact impact that exceeded the configured hit threshold. I report the affected contact point, normal, approach speed and normal impulse.
+"
+
 Class {
 	#name : 'CFPhysicsContactHitEvent',
 	#superclass : 'Object',

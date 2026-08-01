@@ -1,3 +1,7 @@
+"
+I represent the accumulated result of a continuous-impact loop. I report impacts, solve results, sensor contacts, completed bodies and remaining time.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousImpactLoopResult',
 	#superclass : 'Object',

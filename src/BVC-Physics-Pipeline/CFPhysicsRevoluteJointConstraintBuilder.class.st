@@ -1,3 +1,7 @@
+"
+I prepare revolute joints for one solver step. I derive pivot, limit and motor data from the current body states.
+"
+
 Class {
 	#name : 'CFPhysicsRevoluteJointConstraintBuilder',
 	#superclass : 'Object',

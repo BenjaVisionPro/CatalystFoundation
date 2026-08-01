@@ -1,3 +1,7 @@
+"
+I record the sleeping decision for one island. I report eligibility, wake propagation, minimum quiet time and whether the island slept.
+"
+
 Class {
 	#name : 'CFPhysicsIslandSleepDecision',
 	#superclass : 'Object',

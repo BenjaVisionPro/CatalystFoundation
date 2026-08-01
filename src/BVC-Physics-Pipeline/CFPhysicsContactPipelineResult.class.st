@@ -1,3 +1,7 @@
+"
+I represent the result of running the contact pipeline. I contain the candidate pairs and the resulting contact update batch.
+"
+
 Class {
 	#name : 'CFPhysicsContactPipelineResult',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I run the pair-finding and contact-update portion of a simulation step. I provide a focused contact pipeline for callers that do not need the full step pipeline.
+"
+
 Class {
 	#name : 'CFPhysicsContactPipeline',
 	#superclass : 'Object',

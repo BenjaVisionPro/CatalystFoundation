@@ -1,3 +1,7 @@
+"
+I represent the result of solving one advanced impact. I contain the advancement, the generated contact and the prepared constraints.
+"
+
 Class {
 	#name : 'CFPhysicsImpactSolveResult',
 	#superclass : 'Object',

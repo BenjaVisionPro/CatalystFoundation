@@ -1,3 +1,7 @@
+"
+I coordinate the ordered stages that solve a captured world state. I produce a validated world solution without presenting or committing it to the live world.
+"
+
 Class {
 	#name : 'CFPhysicsStepPipeline',
 	#superclass : 'Object',

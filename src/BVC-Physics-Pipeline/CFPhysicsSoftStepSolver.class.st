@@ -1,3 +1,7 @@
+"
+I solve prepared contacts and joints using the soft-step formulation. I warm-start accumulated impulses, iterates constraints and writes solved impulses back to their persistent owners.
+"
+
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I represent one ordered operation in the Physics step pipeline. Subclasses transform or enrich a pipeline result while preserving deterministic stage order.
+"
+
 Class {
 	#name : 'CFPhysicsStepStage',
 	#superclass : 'Object',

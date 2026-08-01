@@ -1,3 +1,7 @@
+"
+I collect the bodies and joints connected to a continuous-collision impact. I define the connected component that must be advanced and solved together.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousComponentBuilder',
 	#superclass : 'Object',

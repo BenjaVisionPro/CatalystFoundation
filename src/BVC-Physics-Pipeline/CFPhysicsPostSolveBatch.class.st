@@ -1,3 +1,7 @@
+"
+I represent the observable results collected after constraint solving. I contain contact solve results and hit events for the completed step.
+"
+
 Class {
 	#name : 'CFPhysicsPostSolveBatch',
 	#superclass : 'Object',

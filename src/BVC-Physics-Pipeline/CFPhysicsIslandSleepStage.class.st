@@ -1,3 +1,7 @@
+"
+I decide which islands may sleep and propagate wake state across their connections. I own the shared sleeping configuration used by wake and sleep stages.
+"
+
 Class {
 	#name : 'CFPhysicsIslandSleepStage',
 	#superclass : 'Object',

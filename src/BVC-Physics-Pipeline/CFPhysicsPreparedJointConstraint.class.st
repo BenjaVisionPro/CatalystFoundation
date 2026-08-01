@@ -1,3 +1,7 @@
+"
+I represent the common step-local state of a prepared joint constraint. I bind a persistent joint to the two body states solved during the step.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedJointConstraint',
 	#superclass : 'Object',

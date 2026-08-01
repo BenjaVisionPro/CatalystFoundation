@@ -1,3 +1,7 @@
+"
+I prepare rail joints for one solver step. I derive the axis, limits, masses and impulses required by the rail-joint solver.
+"
+
 Class {
 	#name : 'CFPhysicsRailJointConstraintBuilder',
 	#superclass : 'Object',

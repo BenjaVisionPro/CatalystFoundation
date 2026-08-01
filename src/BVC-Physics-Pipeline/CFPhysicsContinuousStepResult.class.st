@@ -1,3 +1,7 @@
+"
+I represent the result of a single continuous-collision execution. I report the selected impact, its solve result and the resulting body states.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousStepResult',
 	#superclass : 'Object',

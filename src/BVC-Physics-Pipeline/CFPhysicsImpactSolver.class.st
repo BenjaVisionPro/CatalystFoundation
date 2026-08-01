@@ -1,3 +1,7 @@
+"
+I solve one or more advanced continuous-collision impacts. I prepare contact constraints and applies the soft-step solver at the impact time.
+"
+
 Class {
 	#name : 'CFPhysicsImpactSolver',
 	#superclass : 'Object',

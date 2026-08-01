@@ -1,3 +1,7 @@
+"
+I find candidate collision pairs for the current step. I expose the pair finder as an ordered pipeline stage.
+"
+
 Class {
 	#name : 'CFPhysicsPairFinderStage',
 	#superclass : 'CFPhysicsStepStage',

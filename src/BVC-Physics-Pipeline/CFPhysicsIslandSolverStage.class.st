@@ -1,3 +1,7 @@
+"
+I solve the islands in the current pipeline result. I am the pipeline stage that invokes the island solver.
+"
+
 Class {
 	#name : 'CFPhysicsIslandSolverStage',
 	#superclass : 'CFPhysicsStepStage',

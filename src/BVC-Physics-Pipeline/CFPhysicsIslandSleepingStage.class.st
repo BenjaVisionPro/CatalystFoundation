@@ -1,3 +1,7 @@
+"
+I apply sleeping decisions after solving and continuous-collision handling. I delegate the policy to the shared island sleep behaviour.
+"
+
 Class {
 	#name : 'CFPhysicsIslandSleepingStage',
 	#superclass : 'CFPhysicsStepStage',

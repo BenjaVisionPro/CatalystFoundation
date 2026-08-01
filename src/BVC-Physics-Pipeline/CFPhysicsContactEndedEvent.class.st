@@ -1,3 +1,7 @@
+"
+I announce that a contact has ended. I preserve the final contact identity for observers of the simulation.
+"
+
 Class {
 	#name : 'CFPhysicsContactEndedEvent',
 	#superclass : 'CFPhysicsContactEvent',

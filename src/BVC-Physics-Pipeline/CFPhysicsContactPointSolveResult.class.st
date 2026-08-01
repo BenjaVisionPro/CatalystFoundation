@@ -1,3 +1,7 @@
+"
+I represent the post-solve result for one contact point. I preserve the point identity, world position, approach speed and solved impulses.
+"
+
 Class {
 	#name : 'CFPhysicsContactPointSolveResult',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I propagate wake state across islands before solving. I share the same sleeping policy used by the final sleeping stage.
+"
+
 Class {
 	#name : 'CFPhysicsIslandWakeStage',
 	#superclass : 'CFPhysicsStepStage',

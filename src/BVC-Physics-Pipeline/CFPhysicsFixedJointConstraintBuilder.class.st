@@ -1,3 +1,7 @@
+"
+I prepare fixed joints for one solver step. I capture the relative translation and angle that the solver must preserve.
+"
+
 Class {
 	#name : 'CFPhysicsFixedJointConstraintBuilder',
 	#superclass : 'CFPhysicsRevoluteJointConstraintBuilder',

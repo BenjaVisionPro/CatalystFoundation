@@ -1,3 +1,7 @@
+"
+I carry the mutable working state of one pipeline execution. I connect stage outputs, step-local bodies, contacts, constraints, islands and observable results.
+"
+
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',

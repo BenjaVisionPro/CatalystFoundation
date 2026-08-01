@@ -1,3 +1,7 @@
+"
+I commit solved body step states back to their bodies. I am a pipeline stage for applying a completed step result.
+"
+
 Class {
 	#name : 'CFPhysicsBodyCommitStage',
 	#superclass : 'CFPhysicsStepStage',

@@ -1,3 +1,7 @@
+"
+I represent a distance joint prepared for one solver step. I hold its anchors, direction, effective mass, separation and accumulated impulse.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedDistanceJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',

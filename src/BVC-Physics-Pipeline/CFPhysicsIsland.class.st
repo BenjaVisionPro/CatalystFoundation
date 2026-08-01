@@ -1,3 +1,7 @@
+"
+I represent a connected group of bodies and constraints that can be solved together. I provide the body classifications and ordering needed by solving and sleeping.
+"
+
 Class {
 	#name : 'CFPhysicsIsland',
 	#superclass : 'Object',

@@ -1,3 +1,7 @@
+"
+I apply continuous-collision handling within the main step pipeline. I find impacts among solved states and integrates the affected bodies through the remaining substep time.
+"
+
 Class {
 	#name : 'CFPhysicsContinuousStepStage',
 	#superclass : 'CFPhysicsStepStage',

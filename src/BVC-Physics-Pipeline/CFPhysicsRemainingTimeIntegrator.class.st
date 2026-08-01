@@ -1,3 +1,7 @@
+"
+I integrate body states through the time left after continuous impacts are solved. I completes the substep for bodies not otherwise advanced to its end.
+"
+
 Class {
 	#name : 'CFPhysicsRemainingTimeIntegrator',
 	#superclass : 'Object',

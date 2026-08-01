@@ -1,3 +1,7 @@
+"
+I represent one body's mutable state during a simulation step. I isolate solver changes from the persistent body until the step is committed.
+"
+
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',

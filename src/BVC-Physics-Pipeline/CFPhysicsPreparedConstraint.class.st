@@ -1,3 +1,7 @@
+"
+I represent a contact constraint prepared for one solver step. I bind a contact to its body states, contact frame, material response and prepared points.
+"
+
 Class {
 	#name : 'CFPhysicsPreparedConstraint',
 	#superclass : 'Object',

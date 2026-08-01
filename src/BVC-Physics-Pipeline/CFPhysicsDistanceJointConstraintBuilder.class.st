@@ -1,3 +1,7 @@
+"
+I prepare distance joints for one solver step. I convert each active joint into a step-local distance constraint using the current body origins and masses.
+"
+
 Class {
 	#name : 'CFPhysicsDistanceJointConstraintBuilder',
 	#superclass : 'Object',

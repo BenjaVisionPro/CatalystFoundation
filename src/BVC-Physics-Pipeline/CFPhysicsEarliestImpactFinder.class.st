@@ -1,3 +1,7 @@
+"
+I find the earliest valid time of impact among collision pairs. I order competing impacts deterministically and ignore pairs that do not produce a solved impact.
+"
+
 Class {
 	#name : 'CFPhysicsEarliestImpactFinder',
 	#superclass : 'Object',
