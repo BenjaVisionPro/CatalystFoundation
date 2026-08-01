@@ -1,3 +1,8 @@
+"
+I connect Bloc pull gestures to a Physics pointer constraint.
+
+My responsibility is to track the pointer in world coordinates, preserve Physics ownership of body movement, and release the constraint when interaction ends.
+"
 Class {
 	#name : 'CFPhysicsPullInteractionHandler',
 	#superclass : 'Object',

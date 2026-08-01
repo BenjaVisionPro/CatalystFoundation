@@ -1,3 +1,8 @@
+"
+I build collision manifolds from the shape state owned by Physics bodies.
+
+My responsibility is to dispatch Bloc-derived shapes to the appropriate collision manifold builder while preserving body-origin transforms.
+"
 Class {
 	#name : 'CFPhysicsBlocManifoldBuilder',
 	#superclass : 'Object',

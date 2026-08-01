@@ -1,3 +1,8 @@
+"
+I convert Bloc-derived shape state into convex polygon geometry used by collision detection.
+
+My responsibility is to keep knowledge of Bloc shape representation at the integration boundary.
+"
 Class {
 	#name : 'CFPhysicsBlocShapeFactory',
 	#superclass : 'Object',
