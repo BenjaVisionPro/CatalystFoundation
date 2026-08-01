@@ -630,26 +630,6 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsStaticStaticPairs [
 	^ pairs
 ]
 
-{ #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> contactPipelineFeedsDiscoveredPairsThroughBlocManifolds [
-	<gtExample>
-	| ground box pipeline firstResult secondResult |
-	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
-	ground beStatic.
-	box := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
-	pipeline := CFPhysicsContactPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
-	firstResult := pipeline updateBodies: { box. ground } fromContacts: #().
-	self assert: firstResult pairs size equals: 1.
-	self assert: firstResult beganContacts size equals: 1.
-	self assert: firstResult activeContacts first manifold contactPoints size equals: 2.
-	box position: 20 @ 50.
-	secondResult := pipeline updateBodies: { ground. box } fromContacts: firstResult activeContacts.
-	self assert: secondResult pairs isEmpty.
-	self assert: secondResult activeContacts isEmpty.
-	self assert: secondResult endedContacts size equals: 1.
-	^ secondResult
-]
-
 { #category : 'private - pair discovery' }
 CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
 	^ (CFPhysicsBody
@@ -774,7 +754,7 @@ CFPhysicsCleanSlateTests >> worldDelegatesOneStepToTheExplicitPipeline [
 	self assert: result == world lastStepResult.
 	self assert: result bodies equals: world bodyStatesInOrder.
 	self assert: result activeContacts size equals: 1.
-	self assert: world contacts equals: result activeContacts.
+	self assert: world activeContacts equals: result activeContacts.
 	self assert: result step substepCount equals: world substepCount.
 	^ world
 ]
@@ -1201,8 +1181,8 @@ CFPhysicsCleanSlateTests >> contactEventStagePublishesLifecycleEvents [
 		began: { beganContact }
 		continued: #()
 		ended: { endedContact }.
-	result := CFPhysicsContactPipelineResult pairs: { pair } contactBatch: batch.
-	events := CFPhysicsContactEventStage new eventsFrom: result.
+	result := CFPhysicsContactUpdateResult pairs: { pair } contactBatch: batch.
+	events := CFPhysicsContactEventBuilder new eventsFrom: result.
 	self assert: events size equals: 2.
 	self assert: events first began.
 	self assert: events second ended.
@@ -1227,8 +1207,8 @@ CFPhysicsCleanSlateTests >> continuedContactsDoNotPublishLifecycleEvents [
 		began: #()
 		continued: { contact }
 		ended: #().
-	result := CFPhysicsContactPipelineResult pairs: { pair } contactBatch: batch.
-	events := CFPhysicsContactEventStage new eventsFrom: result.
+	result := CFPhysicsContactUpdateResult pairs: { pair } contactBatch: batch.
+	events := CFPhysicsContactEventBuilder new eventsFrom: result.
 	self assert: events isEmpty.
 	^ events
 ]
@@ -1260,7 +1240,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 		CFPhysicsPostSolveStage.
 		CFPhysicsContinuousStepStage.
 		CFPhysicsIslandSleepingStage.
-		CFPhysicsContactEventsStage }.
+		CFPhysicsContactEventStage }.
 	self assert: result executedStages size equals: expectedTypes size.
 	expectedTypes withIndexDo: [ :stageType :index |
 		self assert: ((result executedStages at: index) isKindOf: stageType) ].
@@ -1287,7 +1267,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 	self assert: stages second class equals: CFPhysicsPairFinderStage.
 	self assert: (stages at: 9) class equals: CFPhysicsContinuousStepStage.
 	self assert: (stages at: 10) class equals: CFPhysicsIslandSleepingStage.
-	self assert: stages last class equals: CFPhysicsContactEventsStage.
+	self assert: stages last class equals: CFPhysicsContactEventStage.
 	self assert: (pipeline stageOfType: CFPhysicsConstraintPreparationStage) == (stages at: 4).
 	self assert: pipeline sleepConfiguration == (pipeline stageOfType: CFPhysicsIslandSleepingStage) configuration.
 	^ pipeline
@@ -1896,11 +1876,11 @@ CFPhysicsCleanSlateTests >> springsAreInstalledThroughBlocElements [
 	spring := first physics springTo: second.
 	spring restLength: 50.
 	world step.
-	self assert: world springConstraints size equals: 1.
+	self assert: world springs size equals: 1.
 	self assert: first physics velocity x > 0.
 	self assert: second physics velocity x < 0.
 	first physics removeSpring: spring.
-	self assert: world springConstraints isEmpty.
+	self assert: world springs isEmpty.
 	^ world
 ]
 
@@ -2770,7 +2750,7 @@ CFPhysicsCleanSlateTests >> oneElementCanOwnManyIndependentSpringRelationships [
 	self assert: second physics springs equals: { firstSpring }.
 	first physics removeSpring: secondSpring.
 	self assert: first physics springs equals: { firstSpring. thirdSpring }.
-	self assert: world springConstraints equals: { firstSpring. thirdSpring }.
+	self assert: world springs equals: { firstSpring. thirdSpring }.
 	^ world
 ]
 
@@ -2811,7 +2791,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsSprings [
 	unrelated := third physics springTo: fourth.
 	owner removeChild: first.
 	world synchroniseMembership.
-	self assert: world springConstraints equals: { unrelated }.
+	self assert: world springs equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
 	self assert: unrelated isActive.
@@ -2897,7 +2877,7 @@ CFPhysicsCleanSlateTests >> attractionsAreInstalledAndDiscoveredThroughBlocEleme
 	secondAttraction := first physics attract: third.
 	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
 	self assert: second physics attractions equals: { firstAttraction }.
-	self assert: world attractionConstraints equals: { firstAttraction. secondAttraction }.
+	self assert: world attractions equals: { firstAttraction. secondAttraction }.
 	first physics removeAttraction: firstAttraction.
 	self assert: first physics attractions equals: { secondAttraction }.
 	self assert: firstAttraction isActive not.
@@ -2942,7 +2922,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsAttractions [
 	unrelated := third physics attract: fourth.
 	owner removeChild: first.
 	world synchroniseMembership.
-	self assert: world attractionConstraints equals: { unrelated }.
+	self assert: world attractions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
 	self assert: unrelated isActive.
@@ -3039,7 +3019,7 @@ CFPhysicsCleanSlateTests >> repulsionsAreInstalledAndDiscoveredThroughBlocElemen
 	secondRepulsion := first physics repel: third.
 	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
 	self assert: second physics repulsions equals: { firstRepulsion }.
-	self assert: world repulsionConstraints equals: { firstRepulsion. secondRepulsion }.
+	self assert: world repulsions equals: { firstRepulsion. secondRepulsion }.
 	first physics removeRepulsion: firstRepulsion.
 	self assert: first physics repulsions equals: { secondRepulsion }.
 	self assert: firstRepulsion isActive not.
@@ -3084,7 +3064,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsRepulsions [
 	unrelated := third physics repel: fourth.
 	owner removeChild: first.
 	world synchroniseMembership.
-	self assert: world repulsionConstraints equals: { unrelated }.
+	self assert: world repulsions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
 	self assert: unrelated isActive.
@@ -3246,9 +3226,9 @@ CFPhysicsCleanSlateTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
 	self assert: attraction anchorB == anchorB.
 	self assert: repulsion anchorA == anchorA.
 	self assert: repulsion anchorB == anchorB.
-	self assert: world springConstraints equals: { spring }.
-	self assert: world attractionConstraints equals: { attraction }.
-	self assert: world repulsionConstraints equals: { repulsion }.
+	self assert: world springs equals: { spring }.
+	self assert: world attractions equals: { attraction }.
+	self assert: world repulsions equals: { repulsion }.
 	^ { spring. attraction. repulsion }
 ]
 
@@ -3461,7 +3441,7 @@ CFPhysicsCleanSlateTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 	spring := (CFPhysicsBodyCentreAnchor on: body)
 		springTo: (world anchorAt: 100 @ 10).
 	world removeSpringsUsingBody: body.
-	self assert: world springConstraints isEmpty.
+	self assert: world springs isEmpty.
 	self assert: spring isActive not.
 	^ spring
 ]
@@ -3535,9 +3515,9 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationship
 	self assert: spring endpointPair == endpoints.
 	self assert: attraction endpointPair == endpoints.
 	self assert: repulsion endpointPair == endpoints.
-	self assert: world springConstraints equals: { spring }.
-	self assert: world attractionConstraints equals: { attraction }.
-	self assert: world repulsionConstraints equals: { repulsion }.
+	self assert: world springs equals: { spring }.
+	self assert: world attractions equals: { attraction }.
+	self assert: world repulsions equals: { repulsion }.
 	^ { spring. attraction. repulsion }
 ]
 
@@ -5264,8 +5244,8 @@ CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
 	root physics ceaseBeingWorld.
 	self assert: root physics world isNil.
 	self assert: world members isEmpty.
-	self assert: world springConstraints isEmpty.
-	self assert: world repulsionConstraints isEmpty.
+	self assert: world springs isEmpty.
+	self assert: world repulsions isEmpty.
 	self deny: spring isActive.
 	self deny: repulsion isActive
 ]
@@ -5288,8 +5268,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnec
 	world step.
 	self assert: behaviour springsByConnection size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 3.
-	self assert: world springConstraints size equals: 1.
-	self assert: world repulsionConstraints size equals: 3
+	self assert: world springs size equals: 1.
+	self assert: world repulsions size equals: 3
 ]
 
 { #category : 'tests - behaviours' }
@@ -5388,8 +5368,8 @@ CFPhysicsCleanSlateTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstrai
 	firstBehaviour remove.
 	self deny: firstSpring isActive.
 	self assert: secondSpring isActive.
-	self assert: world springConstraints equals: { secondSpring }.
-	self assert: world repulsionConstraints size equals: 1
+	self assert: world springs equals: { secondSpring }.
+	self assert: world repulsions size equals: 1
 ]
 
 { #category : 'tests - behaviours' }

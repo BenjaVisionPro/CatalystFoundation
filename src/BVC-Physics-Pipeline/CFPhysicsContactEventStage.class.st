@@ -1,21 +1,30 @@
 "
-I build contact lifecycle events from a contact update batch. I distinguish contacts that began from contacts that ended during the step.
+I add contact lifecycle events to a completed pipeline result. I am the pipeline stage wrapper around contact-event construction.
 "
 
 Class {
 	#name : 'CFPhysicsContactEventStage',
-	#superclass : 'Object',
+	#superclass : 'CFPhysicsStepStage',
+	#instVars : [ 'eventBuilder' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
-{ #category : 'building' }
-CFPhysicsContactEventStage >> eventsFrom: aContactResult [
-	| began ended |
-	began := aContactResult beganContacts collect: [ :contact |
-		CFPhysicsContactBeganEvent contact: contact ].
-	ended := aContactResult endedContacts collect: [ :contact |
-		CFPhysicsContactEndedEvent contact: contact ].
-	^ (began, ended) sorted: [ :left :right |
-		left comesBefore: right ]
+{ #category : 'initialization' }
+CFPhysicsContactEventStage >> initialize [
+	super initialize.
+	eventBuilder := CFPhysicsContactEventBuilder new
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactEventStage >> eventBuilder [ ^ eventBuilder ]
+{ #category : 'accessing' }
+CFPhysicsContactEventStage >> eventBuilder: anObject [ eventBuilder := anObject ]
+
+{ #category : 'executing' }
+CFPhysicsContactEventStage >> executeOn: aStepResult [
+	| events |
+	events := eventBuilder eventsFrom: aStepResult contactResult.
+	aStepResult contactEvents: events.
+	^ events
 ]

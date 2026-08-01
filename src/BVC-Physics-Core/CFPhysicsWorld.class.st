@@ -169,8 +169,6 @@ CFPhysicsWorld >> stepPipeline: aStepPipeline [ stepPipeline := aStepPipeline ]
 { #category : 'pipeline' }
 CFPhysicsWorld >> lastStepResult [ ^ lastStepResult ]
 
-{ #category : 'collision' }
-CFPhysicsWorld >> contacts [ ^ activeContacts ]
 
 { #category : 'collision' }
 CFPhysicsWorld >> activeContacts [ ^ activeContacts ]
@@ -771,11 +769,6 @@ CFPhysicsWorld >> preparePointerConstraintsForStep: seconds [
 
 { #category : 'attraction interaction' }
 CFPhysicsWorld >> attractions [
-	^ self attractionConstraints
-]
-
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> attractionConstraints [
 	^ attractionConstraints asArray sorted: [ :first :second |
 		first orderingKey < second orderingKey ]
 ]
@@ -792,7 +785,7 @@ CFPhysicsWorld >> addAttractionConstraint: aConstraint [
 
 { #category : 'attraction interaction' }
 CFPhysicsWorld >> attractionsUsingBody: aBodyState [
-	^ self attractionConstraints select: [ :each | each includesBody: aBodyState ]
+	^ self attractions select: [ :each | each includesBody: aBodyState ]
 ]
 
 { #category : 'attraction interaction' }
@@ -820,11 +813,6 @@ CFPhysicsWorld >> prepareAttractionConstraintsForStep: seconds [
 
 { #category : 'repulsion interaction' }
 CFPhysicsWorld >> repulsions [
-	^ self repulsionConstraints
-]
-
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> repulsionConstraints [
 	^ repulsionConstraints asArray sorted: [ :first :second |
 		first orderingKey < second orderingKey ]
 ]
@@ -841,7 +829,7 @@ CFPhysicsWorld >> addRepulsionConstraint: aConstraint [
 
 { #category : 'repulsion interaction' }
 CFPhysicsWorld >> repulsionsUsingBody: aBodyState [
-	^ self repulsionConstraints select: [ :each | each includesBody: aBodyState ]
+	^ self repulsions select: [ :each | each includesBody: aBodyState ]
 ]
 
 { #category : 'repulsion interaction' }
@@ -869,11 +857,6 @@ CFPhysicsWorld >> prepareRepulsionConstraintsForStep: seconds [
 
 { #category : 'spring interaction' }
 CFPhysicsWorld >> springs [
-	^ self springConstraints
-]
-
-{ #category : 'spring interaction' }
-CFPhysicsWorld >> springConstraints [
 	^ springConstraints asArray sorted: [ :first :second |
 		first orderingKey < second orderingKey ]
 ]
@@ -891,7 +874,7 @@ CFPhysicsWorld >> addSpringConstraint: aConstraint [
 
 { #category : 'spring interaction' }
 CFPhysicsWorld >> springsUsingBody: aBodyState [
-	^ self springConstraints select: [ :each | each includesBody: aBodyState ]
+	^ self springs select: [ :each | each includesBody: aBodyState ]
 ]
 
 { #category : 'spring interaction' }

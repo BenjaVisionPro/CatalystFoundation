@@ -34,7 +34,7 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 	self
 		wakeBodiesForEndedContacts: batch endedContacts
 		bodyStates: aStepResult bodyStates.
-	contactResult := CFPhysicsContactPipelineResult
+	contactResult := CFPhysicsContactUpdateResult
 		pairs: aStepResult pairs
 		contactBatch: batch.
 	aStepResult contactResult: contactResult.

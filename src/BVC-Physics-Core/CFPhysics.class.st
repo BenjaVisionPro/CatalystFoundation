@@ -318,23 +318,6 @@ CFPhysics >> gravityScale: aNumber [ self body gravityScale: aNumber ]
 { #category : 'angular dynamics' }
 CFPhysics >> angularVelocity [ ^ self body angularVelocity ]
 
-{ #category : 'linear dynamics' }
-CFPhysics >> applyForce: aPoint [ self body applyForce: aPoint ]
-
-{ #category : 'linear dynamics' }
-CFPhysics >> clearForces [ self body clearForces ]
-
-{ #category : 'linear dynamics' }
-CFPhysics >> linearDamping [ ^ self body linearDamping ]
-
-{ #category : 'linear dynamics' }
-CFPhysics >> linearDamping: aNumber [ self body linearDamping: aNumber ]
-
-{ #category : 'linear dynamics' }
-CFPhysics >> gravityScale [ ^ self body gravityScale ]
-
-{ #category : 'linear dynamics' }
-CFPhysics >> gravityScale: aNumber [ self body gravityScale: aNumber ]
 
 { #category : 'angular dynamics' }
 CFPhysics >> angularVelocity: aNumber [ self body angularVelocity: aNumber ]

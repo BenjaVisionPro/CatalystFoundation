@@ -28,7 +28,7 @@ CFPhysicsStepPipeline class >> manifoldGenerator: aManifoldGenerator [
 				manifoldGenerator: aManifoldGenerator;
 				yourself.
 			CFPhysicsIslandSleepingStage new sleepBehaviour: sleepBehaviour; yourself.
-			CFPhysicsContactEventsStage new };
+			CFPhysicsContactEventStage new };
 		yourself
 ]
 

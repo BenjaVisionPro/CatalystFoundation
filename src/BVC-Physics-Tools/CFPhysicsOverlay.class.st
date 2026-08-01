@@ -300,7 +300,7 @@ CFPhysicsOverlay >> refreshSelectedObject [
 				objectInspector refresh ].
 		^ self ].
 	selectedSpring ifNotNil: [
-		(world springConstraints includes: selectedSpring)
+		(world springs includes: selectedSpring)
 			ifFalse: [ self clearSelection ]
 			ifTrue: [
 				objectInspector selectedObject == selectedSpring

@@ -49,7 +49,7 @@ CFPhysicsSpringOverlay >> initializeOverlay [ visualsBySpring := IdentityDiction
 { #category : 'updating' }
 CFPhysicsSpringOverlay >> update [
 	| springs live |
-	springs := world springConstraints.
+	springs := world springs.
 	live := IdentitySet new.
 	live addAll: springs.
 	(visualsBySpring keys reject: [ :each | live includes: each ]) do: [ :spring |
