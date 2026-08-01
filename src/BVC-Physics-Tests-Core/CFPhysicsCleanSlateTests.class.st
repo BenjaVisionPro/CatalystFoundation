@@ -6293,12 +6293,14 @@ CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
 { #category : 'examples - contact solver' }
 CFPhysicsCleanSlateTests >> worldScaleConvertsMutableConfigurationWhenStateIsCaptured [
 	<gtExample>
-	| world state |
-	world := CFPhysicsWorld new.
+	| owner world state |
+	owner := BlElement new size: 200 @ 200; yourself.
+	world := owner physics beWorld.
 	world
 		lengthUnitsPerMetre: 200.0;
 		gravity: 0 @ 5.0;
 		restitutionThreshold: 2.0.
+	world synchroniseMembership.
 	state := world captureStateAfterSynchronisation.
 	self assert: (world gravity closeTo: 0 @ 5.0).
 	self assert: (world restitutionThreshold closeTo: 2.0).
