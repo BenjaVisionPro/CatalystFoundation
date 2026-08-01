@@ -17,9 +17,9 @@ CFPhysicsPrismaticJointConstraintBuilder >> constraintFrom: joint bodyStates: bo
 	displacement := (originB + anchorB) - (originA + anchorA).
 	axis := stateA ifNil: [ joint localAxisA ] ifNotNil: [ stateA worldVectorForBodyLocalVector: joint localAxisA ].
 	normal := axis y negated @ axis x.
-	crossA := self cross: anchorA with: normal. crossB := self cross: anchorB with: normal.
+	crossA := self cross: displacement + anchorA with: normal. crossB := self cross: anchorB with: normal.
 	inversePerpendicularMass := (self inverseMassForState: stateA cross: crossA) + (self inverseMassForState: stateB cross: crossB).
-	axisCrossA := self cross: anchorA with: axis. axisCrossB := self cross: anchorB with: axis.
+	axisCrossA := self cross: displacement + anchorA with: axis. axisCrossB := self cross: anchorB with: axis.
 	inverseAxialMass := (self inverseMassForState: stateA cross: axisCrossA) + (self inverseMassForState: stateB cross: axisCrossB).
 	inverseAngularMass := (self inverseInertiaForState: stateA) + (self inverseInertiaForState: stateB).
 	angleA := stateA ifNil: [ 0.0 ] ifNotNil: [ stateA currentTransform rotation ].

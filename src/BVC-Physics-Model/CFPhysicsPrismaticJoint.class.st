@@ -17,7 +17,11 @@ CFPhysicsPrismaticJoint class >> between: bodyA and: bodyB along: aWorldAxis [
 
 { #category : 'instance creation' }
 CFPhysicsPrismaticJoint class >> betweenAnchor: anchorA andAnchor: anchorB along: aWorldAxis [
-	^ self betweenEndpoints: (CFPhysicsAnchoredEndpointPair anchorA: anchorA anchorB: anchorB) along: aWorldAxis
+	| endpoints |
+	endpoints := (anchorA body notNil and: [ anchorB body isNil ])
+		ifTrue: [ CFPhysicsAnchoredEndpointPair anchorA: anchorB anchorB: anchorA ]
+		ifFalse: [ CFPhysicsAnchoredEndpointPair anchorA: anchorA anchorB: anchorB ].
+	^ self betweenEndpoints: endpoints along: aWorldAxis
 ]
 
 { #category : 'instance creation' }

@@ -243,16 +243,13 @@ CFPhysicsSoftStepSolver >> distanceJointAxisFor: constraint [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> warmStartPrismaticJointConstraint: constraint [
-	| axis normal axialImpulse |
-	axis := self prismaticJointAxisFor: constraint.
-	normal := axis y negated @ axis x.
-	axialImpulse := constraint springImpulse + constraint lowerLimitImpulse
-		- constraint upperLimitImpulse + constraint motorImpulse.
-	self applyDistanceJointImpulse:
-		(normal * constraint perpendicularImpulse) + (axis * axialImpulse)
-		constraint: constraint.
-	self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint
+CFPhysicsSoftStepSolver >> prismaticJointAnchorAFor: constraint [
+	^ self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> prismaticJointAnchorBFor: constraint [
+	^ self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB)
 ]
 
 { #category : 'private - solving' }
@@ -263,8 +260,8 @@ CFPhysicsSoftStepSolver >> prismaticJointAxisFor: constraint [
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> prismaticJointSeparationFor: constraint [
 	| anchorA anchorB baseSeparation |
-	anchorA := self rotated: constraint anchorA by: (self distanceJointDeltaRotationFor: constraint bodyStateA).
-	anchorB := self rotated: constraint anchorB by: (self distanceJointDeltaRotationFor: constraint bodyStateB).
+	anchorA := self prismaticJointAnchorAFor: constraint.
+	anchorB := self prismaticJointAnchorBFor: constraint.
 	baseSeparation := (constraint axis * constraint baseTranslation)
 		+ (constraint normal * constraint basePerpendicularSeparation).
 	^ baseSeparation
@@ -280,16 +277,68 @@ CFPhysicsSoftStepSolver >> prismaticJointTranslationFor: constraint [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> prismaticJointAxialVelocityFor: constraint [
-	^ self dot: (self distanceJointRelativeVelocity: constraint) with: (self prismaticJointAxisFor: constraint)
+CFPhysicsSoftStepSolver >> prismaticJointLeverAFor: constraint direction: direction [
+	^ self cross:
+		(self prismaticJointSeparationFor: constraint) + (self prismaticJointAnchorAFor: constraint)
+		with: direction
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> prismaticJointLeverBFor: constraint direction: direction [
+	^ self cross: (self prismaticJointAnchorBFor: constraint) with: direction
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> prismaticJointVelocityFor: constraint direction: direction leverA: leverA leverB: leverB [
+	| velocityA velocityB angularA angularB |
+	velocityA := constraint bodyStateA ifNil: [ 0 @ 0 ] ifNotNil: [ :state | state linearVelocity ].
+	velocityB := constraint bodyStateB ifNil: [ 0 @ 0 ] ifNotNil: [ :state | state linearVelocity ].
+	angularA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	angularB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state angularVelocity ].
+	^ (self dot: velocityB - velocityA with: direction)
+		+ (leverB * angularB) - (leverA * angularA)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyPrismaticJointImpulse: impulse direction: direction leverA: leverA leverB: leverB constraint: constraint [
+	| vector stateA stateB |
+	vector := direction * impulse.
+	stateA := constraint bodyStateA.
+	stateA ifNotNil: [
+		stateA linearVelocity: stateA linearVelocity - (vector * stateA inverseMass).
+		stateA angularVelocity: stateA angularVelocity - (impulse * leverA * stateA inverseInertia) ].
+	stateB := constraint bodyStateB.
+	stateB ifNotNil: [
+		stateB linearVelocity: stateB linearVelocity + (vector * stateB inverseMass).
+		stateB angularVelocity: stateB angularVelocity + (impulse * leverB * stateB inverseInertia) ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartPrismaticJointConstraint: constraint [
+	| axis normal axialImpulse perpendicularLeverA perpendicularLeverB axialLeverA axialLeverB |
+	axis := self prismaticJointAxisFor: constraint.
+	normal := axis y negated @ axis x.
+	perpendicularLeverA := self prismaticJointLeverAFor: constraint direction: normal.
+	perpendicularLeverB := self prismaticJointLeverBFor: constraint direction: normal.
+	axialLeverA := self prismaticJointLeverAFor: constraint direction: axis.
+	axialLeverB := self prismaticJointLeverBFor: constraint direction: axis.
+	axialImpulse := constraint springImpulse + constraint lowerLimitImpulse
+		- constraint upperLimitImpulse + constraint motorImpulse.
+	self applyPrismaticJointImpulse: constraint perpendicularImpulse direction: normal
+		leverA: perpendicularLeverA leverB: perpendicularLeverB constraint: constraint.
+	self applyPrismaticJointImpulse: axialImpulse direction: axis
+		leverA: axialLeverA leverB: axialLeverB constraint: constraint.
+	self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled [
-	| axis normal relativeVelocity separation bias massCoefficient impulseCoefficient increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
+	| axis normal leverA leverB relativeVelocity separation bias massCoefficient impulseCoefficient increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
 	axis := self prismaticJointAxisFor: constraint.
 	normal := axis y negated @ axis x.
-	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: normal.
+	leverA := self prismaticJointLeverAFor: constraint direction: normal.
+	leverB := self prismaticJointLeverBFor: constraint direction: normal.
+	relativeVelocity := self prismaticJointVelocityFor: constraint direction: normal leverA: leverA leverB: leverB.
 	separation := self dot: (self prismaticJointSeparationFor: constraint) with: normal.
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
@@ -297,7 +346,7 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled
 	increment := (massCoefficient * constraint perpendicularMass * (relativeVelocity + bias)) negated
 		- (impulseCoefficient * constraint perpendicularImpulse).
 	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
-	self applyDistanceJointImpulse: normal * increment constraint: constraint.
+	self applyPrismaticJointImpulse: increment direction: normal leverA: leverA leverB: leverB constraint: constraint.
 	angularRelativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 	angularSeparation := constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
@@ -314,51 +363,63 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solvePrismaticJointSpring: constraint [
-	| separation velocity increment |
+	| axis leverA leverB separation velocity increment |
 	constraint springEnabled ifFalse: [ ^ self ].
+	axis := self prismaticJointAxisFor: constraint.
+	leverA := self prismaticJointLeverAFor: constraint direction: axis.
+	leverB := self prismaticJointLeverBFor: constraint direction: axis.
 	separation := (self prismaticJointTranslationFor: constraint) - constraint joint targetTranslation.
-	velocity := self prismaticJointAxialVelocityFor: constraint.
+	velocity := self prismaticJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
 	increment := (constraint springMassCoefficient * constraint axialMass
 		* (velocity + (constraint springBiasRate * separation))) negated
 		- (constraint springImpulseCoefficient * constraint springImpulse).
 	constraint springImpulse: constraint springImpulse + increment.
-	self applyDistanceJointImpulse: (self prismaticJointAxisFor: constraint) * increment constraint: constraint
+	self applyPrismaticJointImpulse: increment direction: axis leverA: leverA leverB: leverB constraint: constraint
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solvePrismaticJointMotor: constraint [
-	| velocity increment oldImpulse newImpulse |
+	| axis leverA leverB velocity increment oldImpulse newImpulse |
 	constraint motorEnabled ifFalse: [ ^ self ].
-	velocity := self prismaticJointAxialVelocityFor: constraint.
+	axis := self prismaticJointAxisFor: constraint.
+	leverA := self prismaticJointLeverAFor: constraint direction: axis.
+	leverB := self prismaticJointLeverBFor: constraint direction: axis.
+	velocity := self prismaticJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
 	increment := constraint axialMass * (constraint motorSpeed - velocity).
 	oldImpulse := constraint motorImpulse.
 	newImpulse := ((oldImpulse + increment) max: constraint maximumMotorImpulse negated)
 		min: constraint maximumMotorImpulse.
 	constraint motorImpulse: newImpulse.
-	self applyDistanceJointImpulse: (self prismaticJointAxisFor: constraint) * (newImpulse - oldImpulse) constraint: constraint
+	self applyPrismaticJointImpulse: newImpulse - oldImpulse direction: axis leverA: leverA leverB: leverB constraint: constraint
 ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solvePrismaticJointLimits: constraint biasEnabled: biasEnabled [
-	| translation velocity axis separation bias increment oldImpulse newImpulse |
+	| translation axis leverA leverB velocity separation bias massCoefficient impulseCoefficient increment oldImpulse newImpulse |
 	constraint limitsEnabled ifFalse: [ ^ self ].
 	translation := self prismaticJointTranslationFor: constraint.
-	velocity := self prismaticJointAxialVelocityFor: constraint.
 	axis := self prismaticJointAxisFor: constraint.
+	leverA := self prismaticJointLeverAFor: constraint direction: axis.
+	leverB := self prismaticJointLeverBFor: constraint direction: axis.
+	velocity := self prismaticJointVelocityFor: constraint direction: axis leverA: leverA leverB: leverB.
 	separation := translation - constraint lowerTranslation.
 	bias := (biasEnabled and: [ separation < 0.0 ]) ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	increment := constraint axialMass * (velocity + bias) negated.
+	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
+	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+	increment := (massCoefficient * constraint axialMass * (velocity + bias)) negated
+		- (impulseCoefficient * constraint lowerLimitImpulse).
 	oldImpulse := constraint lowerLimitImpulse.
 	newImpulse := (oldImpulse + increment) max: 0.0.
 	constraint lowerLimitImpulse: newImpulse.
-	self applyDistanceJointImpulse: axis * (newImpulse - oldImpulse) constraint: constraint.
+	self applyPrismaticJointImpulse: newImpulse - oldImpulse direction: axis leverA: leverA leverB: leverB constraint: constraint.
 	separation := constraint upperTranslation - translation.
 	bias := (biasEnabled and: [ separation < 0.0 ]) ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
-	increment := constraint axialMass * (velocity negated + bias) negated.
+	increment := (massCoefficient * constraint axialMass * (velocity negated + bias)) negated
+		- (impulseCoefficient * constraint upperLimitImpulse).
 	oldImpulse := constraint upperLimitImpulse.
 	newImpulse := (oldImpulse + increment) max: 0.0.
 	constraint upperLimitImpulse: newImpulse.
-	self applyDistanceJointImpulse: axis negated * (newImpulse - oldImpulse) constraint: constraint
+	self applyPrismaticJointImpulse: newImpulse - oldImpulse direction: axis negated leverA: leverA negated leverB: leverB negated constraint: constraint
 ]
 
 { #category : 'private - solving' }
