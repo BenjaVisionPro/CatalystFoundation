@@ -1504,7 +1504,7 @@ CFPhysicsOverlayTests >> physicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEn
 	self assert: visual motorCue visibility equals: BlVisibility gone.
 	joint
 		motorSpeed: 1.5;
-		maximumMotorImpulse: 2.0;
+		maximumMotorTorque: 2.0;
 		motorEnabled: true.
 	overlay refreshPresentationGeometry.
 	host space pulse.
@@ -1623,7 +1623,7 @@ CFPhysicsOverlayTests >> physicsOverlayRevoluteJointInspectorShowsLimitsAndMotor
 		limitAnglesFrom: -0.4 to: 0.7;
 		limitsEnabled: true;
 		motorSpeed: 1.5;
-		maximumMotorImpulse: 2.0;
+		maximumMotorTorque: 2.0;
 		motorEnabled: true.
 	overlay refresh.
 	overlay selectJoint: joint.

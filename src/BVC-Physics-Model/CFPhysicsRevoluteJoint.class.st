@@ -6,7 +6,7 @@ My responsibility is to retain its reference angle, limits, motor configuration 
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'CFPhysicsJoint',
-	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'lowerLimitImpulse', 'upperLimitImpulse', 'springEnabled', 'hertz', 'dampingRatio', 'targetAngle', 'springImpulse' ],
+	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorTorque', 'motorImpulse', 'lowerLimitImpulse', 'upperLimitImpulse', 'springEnabled', 'hertz', 'dampingRatio', 'targetAngle', 'springImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -48,7 +48,7 @@ CFPhysicsRevoluteJoint >> initialize [
 	upperAngle := 0.0.
 	motorEnabled := false.
 	motorSpeed := 0.0.
-	maximumMotorImpulse := 0.0.
+	maximumMotorTorque := 0.0.
 	motorImpulse := 0.0.
 	lowerLimitImpulse := 0.0.
 	upperLimitImpulse := 0.0.
@@ -144,7 +144,7 @@ CFPhysicsRevoluteJoint >> limitAnglesFrom: aLowerAngle to: anUpperAngle [
 	| lower upper |
 	lower := aLowerAngle asFloat.
 	upper := anUpperAngle asFloat.
-	lower < upper ifFalse: [ self error: 'A revolute joint limit requires a lower angle smaller than its upper angle' ].
+	lower <= upper ifFalse: [ self error: 'A revolute joint limit requires a lower angle no greater than its upper angle' ].
 	lowerAngle := lower.
 	upperAngle := upper.
 	lowerLimitImpulse := 0.0.
@@ -177,15 +177,13 @@ CFPhysicsRevoluteJoint >> motorSpeed [ ^ motorSpeed ]
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorSpeed: aNumber [
 	motorSpeed := aNumber asFloat.
-	motorImpulse := 0.0.
 	self wakeBodies
 ]
 { #category : 'motor' }
-CFPhysicsRevoluteJoint >> maximumMotorImpulse [ ^ maximumMotorImpulse ]
+CFPhysicsRevoluteJoint >> maximumMotorTorque [ ^ maximumMotorTorque ]
 { #category : 'motor' }
-CFPhysicsRevoluteJoint >> maximumMotorImpulse: aNumber [
-	maximumMotorImpulse := aNumber asFloat max: 0.0.
-	motorImpulse := 0.0.
+CFPhysicsRevoluteJoint >> maximumMotorTorque: aNumber [
+	maximumMotorTorque := aNumber asFloat max: 0.0.
 	self wakeBodies
 ]
 { #category : 'solver state' }

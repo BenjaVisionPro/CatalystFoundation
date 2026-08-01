@@ -1987,12 +1987,70 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 	joint
 		motorEnabled: true;
 		motorSpeed: 10.0;
-		maximumMotorImpulse: 1000.0.
+		maximumMotorTorque: 1000.0.
 	result := world step.
 	self assert: result constraints first motorEnabled.
 	self assert: first physics angularVelocity < 0.0.
 	self assert: second physics angularVelocity equals: 0.0.
 	^ result
+]
+
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointMotorTorqueIsConvertedToASubstepImpulse [
+	<gtExample>
+	| owner first second world firstAnchor secondAnchor joint result prepared |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 30 @ 0.
+	second physics beStatic.
+	firstAnchor := first physics localAnchorAt: 30 @ 10.
+	secondAnchor := second physics localAnchorAt: 0 @ 10.
+	joint := firstAnchor revoluteJointTo: secondAnchor.
+	joint
+		motorEnabled: true;
+		motorSpeed: 10.0;
+		maximumMotorTorque: 1000.0.
+	result := world step.
+	prepared := result constraints first.
+	self assert: (prepared maximumMotorImpulse closeTo: 1000.0 * result step substepTime).
+	^ result
+]
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointMotorConfigurationPreservesItsAccumulatedImpulse [
+	<gtExample>
+	| first second joint |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsRevoluteJoint between: first and: second.
+	joint motorImpulse: 3.0.
+	joint motorSpeed: 7.0.
+	self assert: (joint motorImpulse closeTo: 3.0).
+	joint maximumMotorTorque: 11.0.
+	self assert: (joint motorImpulse closeTo: 3.0).
+	joint motorEnabled: true.
+	self assert: (joint motorImpulse closeTo: 0.0).
+	^ joint
+]
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointAllowsEqualLimitAngles [
+	<gtExample>
+	| first second joint |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsRevoluteJoint between: first and: second.
+	joint limitAnglesFrom: 0.25 to: 0.25.
+	self assert: (joint lowerAngle closeTo: 0.25).
+	self assert: (joint upperAngle closeTo: 0.25).
+	^ joint
 ]
 
 

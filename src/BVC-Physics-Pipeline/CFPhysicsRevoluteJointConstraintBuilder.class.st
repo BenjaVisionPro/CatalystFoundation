@@ -79,7 +79,7 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
 		motorEnabled: joint motorEnabled;
 		motorSpeed: joint motorSpeed;
-		maximumMotorImpulse: joint maximumMotorImpulse;
+		maximumMotorImpulse: joint maximumMotorTorque * step substepTime;
 		motorMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
 		motorImpulse: joint motorImpulse * step warmStartRatio;
 		yourself

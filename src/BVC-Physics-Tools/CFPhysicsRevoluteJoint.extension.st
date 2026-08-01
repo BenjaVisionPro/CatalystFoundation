@@ -75,7 +75,7 @@ CFPhysicsRevoluteJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent
 		addGroup: 'Motor' fields: {
 			#motorEnabled -> 'Enabled'.
 			#motorSpeed -> 'Speed'.
-			#maximumMotorImpulse -> 'Maximum impulse'.
+			#maximumMotorTorque -> 'Maximum torque'.
 			#motorImpulse -> 'Current impulse' }
 ]
 
@@ -89,7 +89,7 @@ CFPhysicsRevoluteJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 		diagnosticNumber: self upperAngle at: #upperAngle;
 		text: self motorEnabled printString at: #motorEnabled;
 		diagnosticNumber: self motorSpeed at: #motorSpeed;
-		diagnosticNumber: self maximumMotorImpulse at: #maximumMotorImpulse;
+		diagnosticNumber: self maximumMotorTorque at: #maximumMotorTorque;
 		diagnosticNumber: self motorImpulse at: #motorImpulse
 ]
 
