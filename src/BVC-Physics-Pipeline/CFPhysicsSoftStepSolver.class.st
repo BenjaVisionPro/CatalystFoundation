@@ -627,18 +627,26 @@ CFPhysicsSoftStepSolver >> solveWeldJointLinearConstraint: constraint biasEnable
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity normalVelocity separation bias increment oldImpulse newImpulse |
+	| relativeVelocity normalVelocity separation bias massCoefficient impulseCoefficient increment oldImpulse newImpulse |
 	relativeVelocity := self relativeVelocityAt: point constraint: constraint.
 	normalVelocity := self dot: relativeVelocity with: constraint normal.
 	separation := self contactSeparationAt: point constraint: constraint.
-	bias := biasEnabled
-		ifTrue: [ step biasRate * (separation min: 0.0) ]
-		ifFalse: [ 0.0 ].
-	increment := (step massCoefficient * point normalMass * (normalVelocity + bias)) negated
-		- (step impulseCoefficient * point normalImpulse).
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime ]
+		ifFalse: [ biasEnabled ifTrue: [
+			bias := step biasRate * separation.
+			massCoefficient := step massCoefficient.
+			impulseCoefficient := step impulseCoefficient ] ].
+	increment := (massCoefficient * point normalMass * (normalVelocity + bias)) negated
+		- (impulseCoefficient * point normalImpulse).
 	oldImpulse := point normalImpulse.
 	newImpulse := (oldImpulse + increment) max: 0.0.
-	point normalImpulse: newImpulse.
+	point
+		normalImpulse: newImpulse;
+		totalNormalImpulse: point totalNormalImpulse + newImpulse.
 	self applyImpulse: constraint normal * (newImpulse - oldImpulse) at: point constraint: constraint
 ]
 
@@ -660,16 +668,19 @@ CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 	restitutionCandidatePointCount := 0.
 	self contactConstraints do: [ :constraint |
 		constraint points do: [ :point |
-			point relativeNormalVelocity < threshold negated ifTrue: [
-				| normalVelocity increment oldImpulse newImpulse |
+			(point relativeNormalVelocity < threshold negated and: [ point totalNormalImpulse ~= 0.0 ]) ifTrue: [
+				| normalVelocity increment oldImpulse newImpulse appliedImpulse |
 				restitutionCandidatePointCount := restitutionCandidatePointCount + 1.
 				normalVelocity := self dot: (self relativeVelocityAt: point constraint: constraint) with: constraint normal.
 				increment := point normalMass
 					* (normalVelocity + (constraint restitution * point relativeNormalVelocity)) negated.
 				oldImpulse := point normalImpulse.
 				newImpulse := (oldImpulse + increment) max: 0.0.
-				point normalImpulse: newImpulse.
-				self applyImpulse: constraint normal * (newImpulse - oldImpulse) at: point constraint: constraint ] ] ]
+				appliedImpulse := newImpulse - oldImpulse.
+				point
+					normalImpulse: newImpulse;
+					totalNormalImpulse: point totalNormalImpulse + appliedImpulse.
+				self applyImpulse: constraint normal * appliedImpulse at: point constraint: constraint ] ] ]
 ]
 
 { #category : 'private - solving' }

@@ -139,7 +139,8 @@ CFPhysicsConstraintBuilder >> updatePoint: point from: manifoldPoint contact: co
 		tangentMass: (tangentDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / tangentDenominator ]);
 		relativeNormalVelocity: (self dot: relativeVelocity with: normal);
 		normalImpulse: manifoldPoint normalImpulse * warmStartRatio;
-		tangentImpulse: manifoldPoint tangentImpulse * warmStartRatio.
+		tangentImpulse: manifoldPoint tangentImpulse * warmStartRatio;
+		totalNormalImpulse: 0.0.
 	^ point
 ]
 

@@ -5,7 +5,7 @@ I represent one prepared contact point within a contact constraint. I hold the e
 Class {
 	#name : 'CFPhysicsConstraintPoint',
 	#superclass : 'Object',
-	#instVars : [ 'manifoldPoint', 'featureId', 'anchorA', 'anchorB', 'baseSeparation', 'normalMass', 'tangentMass', 'relativeNormalVelocity', 'normalImpulse', 'tangentImpulse' ],
+	#instVars : [ 'manifoldPoint', 'featureId', 'anchorA', 'anchorB', 'baseSeparation', 'normalMass', 'tangentMass', 'relativeNormalVelocity', 'normalImpulse', 'tangentImpulse', 'totalNormalImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -57,3 +57,8 @@ CFPhysicsConstraintPoint >> normalImpulse: aNumber [ normalImpulse := aNumber ]
 CFPhysicsConstraintPoint >> tangentImpulse [ ^ tangentImpulse ]
 { #category : 'accessing' }
 CFPhysicsConstraintPoint >> tangentImpulse: aNumber [ tangentImpulse := aNumber ]
+
+{ #category : 'accessing' }
+CFPhysicsConstraintPoint >> totalNormalImpulse [ ^ totalNormalImpulse ]
+{ #category : 'accessing' }
+CFPhysicsConstraintPoint >> totalNormalImpulse: aNumber [ totalNormalImpulse := aNumber ]
