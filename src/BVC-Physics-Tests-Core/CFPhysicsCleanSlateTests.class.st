@@ -441,7 +441,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	self assert: point featureId equals: manifold contactPoints first featureId.
 	self assert: point normalMass > 0.0.
 	self assert: point tangentMass > 0.0.
-	self assert: (point baseSeparation closeTo: 4.0).
+	self assert: (point baseSeparation closeTo: -1.0).
 	^ constraint
 ]
 
