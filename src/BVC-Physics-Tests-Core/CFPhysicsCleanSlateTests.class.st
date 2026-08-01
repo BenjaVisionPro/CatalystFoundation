@@ -2108,7 +2108,7 @@ CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 	self assert: joint bodyA == first.
 	self assert: joint bodyB == second.
 	self assert: joint referenceAngle equals: 0.5.
-	self assert: joint accumulatedAngularImpulse equals: 0.0.
+	self assert: joint angularImpulse equals: 0.0.
 	^ joint
 ]
 
@@ -6038,3 +6038,66 @@ CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	^ prepared
 ]
 
+
+
+{ #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointMotorDrivesAlongItsLocalAxis [
+	<gtExample>
+	| owner element world joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	joint := (element physics localAnchorAt: 10 @ 10)
+		prismaticJointTo: (world anchorAt: 10 @ 10)
+		along: 1 @ 0.
+	joint motorEnabled: true; motorSpeed: 100.0; maximumMotorForce: 100000.0.
+	world step.
+	self assert: element physics velocity x > 0.0.
+	self assert: element physics velocity y abs < 1.0e-6.
+	^ joint
+]
+
+{ #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointSpringTargetsTranslation [
+	<gtExample>
+	| owner element world joint initialError |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	joint := (element physics localAnchorAt: 10 @ 10)
+		prismaticJointTo: (world anchorAt: 10 @ 10)
+		along: 1 @ 0.
+	joint springEnabled: true; targetTranslation: 20.0; hertz: 5.0; dampingRatio: 1.0.
+	initialError := 20.0.
+	10 timesRepeat: [ world step ].
+	self assert: (20.0 - element physics position x) abs < initialError.
+	^ joint
+]
+
+{ #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointAxisRotatesWithBodyA [
+	<gtExample>
+	| owner firstElement secondElement world joint state prepared |
+	owner := BlElement new size: 400 @ 300; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstElement physics rotation: Float pi / 2.0.
+	joint := (firstElement physics localAnchorAt: 10 @ 10)
+		prismaticJointTo: (secondElement physics localAnchorAt: 10 @ 10)
+		along: 0 @ 1.
+	state := world captureStateAfterSynchronisation.
+	prepared := (CFPhysicsPrismaticJointConstraintBuilder new constraintsFrom: state joints bodyStates: state bodyStates step: state step) first.
+	self assert: (joint localAxisA closeTo: 1 @ 0).
+	self assert: (prepared axis closeTo: 0 @ 1).
+	^ prepared
+]

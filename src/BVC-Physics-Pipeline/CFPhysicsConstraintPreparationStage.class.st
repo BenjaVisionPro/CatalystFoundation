@@ -94,7 +94,7 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 	constraints addAll: (prismaticJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio).
+		step: aStepResult step).
 	^ self orderedJointConstraints: constraints
 ]
 

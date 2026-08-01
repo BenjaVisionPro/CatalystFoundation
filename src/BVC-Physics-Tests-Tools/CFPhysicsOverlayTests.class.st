@@ -1392,14 +1392,14 @@ CFPhysicsOverlayTests >> physicsPrismaticJointVisualShowsItsAxisAndLimits [
 	points := joint endpointPair worldPoints.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	secondPoint := context
-		overlayPointFromWorld: points second
-		attachedTo: joint bodyB.
-	axisStart := context overlayPointFromWorld: points second.
-	axisEnd := context overlayPointFromWorld: points second + joint axis.
+		overlayPointFromWorld: points first
+		attachedTo: joint bodyA.
+	axisStart := context overlayPointFromWorld: points first.
+	axisEnd := context overlayPointFromWorld: points first + joint physicsOverlayWorldAxis.
 	displayedAxis := axisEnd - axisStart.
 	displayedAxis := displayedAxis / displayedAxis r.
-	expectedStart := secondPoint + (displayedAxis * (joint referenceTranslation + joint lowerTranslation)).
-	expectedEnd := secondPoint + (displayedAxis * (joint referenceTranslation + joint upperTranslation)).
+	expectedStart := secondPoint + (displayedAxis * (joint lowerTranslation)).
+	expectedEnd := secondPoint + (displayedAxis * (joint upperTranslation)).
 	normal := displayedAxis y negated @ displayedAxis x.
 	self assert: visual rail visibility equals: BlVisibility visible.
 	self assert: visual rail fromPosition equals: expectedStart.
@@ -1653,7 +1653,7 @@ CFPhysicsOverlayTests >> physicsOverlayPrismaticJointInspectorShowsAxisLimitsAnd
 	overlay refresh.
 	overlay selectJoint: joint.
 	content := overlay objectInspector content.
-	self assert: (content valueElementAt: #axis) text asString equals: (content formatPoint: joint axis).
+	self assert: (content valueElementAt: #localAxisA) text asString equals: (content formatPoint: joint localAxisA).
 	self assert: (content valueElementAt: #limitsEnabled) text asString equals: 'true'.
 	self assert: (content valueElementAt: #lowerTranslation) text asString equals: (content formatDiagnosticNumber: joint lowerTranslation).
 	self assert: (content valueElementAt: #upperTranslation) text asString equals: (content formatDiagnosticNumber: joint upperTranslation).
@@ -1674,7 +1674,7 @@ CFPhysicsOverlayTests >> physicsOverlayWeldJointInspectorDoesNotExposeRevoluteMo
 	overlay selectJoint: joint.
 	content := overlay objectInspector content.
 	self assert: (content valueElementAt: #referenceAngle) text asString equals: (content formatDiagnosticNumber: joint referenceAngle).
-	self assert: (content valueElementAt: #accumulatedAngularImpulse) text asString equals: (content formatDiagnosticNumber: joint accumulatedAngularImpulse).
+	self assert: (content valueElementAt: #accumulatedAngularImpulse) text asString equals: (content formatDiagnosticNumber: joint angularImpulse).
 	self assert: (content valueElements includesKey: #motorEnabled) not.
 	^ overlay
 ]

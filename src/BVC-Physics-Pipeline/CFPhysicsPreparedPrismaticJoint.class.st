@@ -1,11 +1,8 @@
-"
-I represent a prismatic joint prepared for one solver step. I hold its axis, perpendicular constraint, translation limits and angular state.
-"
-
+"I represent a Box2D 3.1.1 prismatic joint prepared for one solver step."
 Class {
 	#name : 'CFPhysicsPreparedPrismaticJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',
-	#instVars : [ 'anchorA', 'anchorB', 'axis', 'normal', 'basePerpendicularSeparation', 'perpendicularMass', 'perpendicularImpulse', 'baseTranslation', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'translationMass', 'translationImpulse', 'baseAngle', 'angularMass', 'angularImpulse' ],
+	#instVars : [ 'anchorA', 'anchorB', 'axis', 'normal', 'basePerpendicularSeparation', 'perpendicularMass', 'perpendicularImpulse', 'baseTranslation', 'axialMass', 'springEnabled', 'springBiasRate', 'springMassCoefficient', 'springImpulseCoefficient', 'springImpulse', 'limitsEnabled', 'lowerTranslation', 'upperTranslation', 'lowerLimitImpulse', 'upperLimitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'baseAngle', 'angularMass', 'angularImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -13,71 +10,140 @@ Class {
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> anchorA [ ^ anchorA ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> anchorA: aPoint [ anchorA := aPoint ]
+CFPhysicsPreparedPrismaticJoint >> anchorA: anObject [ anchorA := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> anchorB [ ^ anchorB ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> anchorB: aPoint [ anchorB := aPoint ]
+CFPhysicsPreparedPrismaticJoint >> anchorB: anObject [ anchorB := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> axis [ ^ axis ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> axis: aPoint [ axis := aPoint ]
+CFPhysicsPreparedPrismaticJoint >> axis: anObject [ axis := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> normal [ ^ normal ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> normal: aPoint [ normal := aPoint ]
+CFPhysicsPreparedPrismaticJoint >> normal: anObject [ normal := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> basePerpendicularSeparation [ ^ basePerpendicularSeparation ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> basePerpendicularSeparation: aNumber [ basePerpendicularSeparation := aNumber ]
+CFPhysicsPreparedPrismaticJoint >> basePerpendicularSeparation: anObject [ basePerpendicularSeparation := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> perpendicularMass [ ^ perpendicularMass ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> perpendicularMass: aNumber [ perpendicularMass := aNumber ]
+CFPhysicsPreparedPrismaticJoint >> perpendicularMass: anObject [ perpendicularMass := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> perpendicularImpulse [ ^ perpendicularImpulse ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> perpendicularImpulse: aNumber [ perpendicularImpulse := aNumber ]
-{ #category : 'limits' }
+CFPhysicsPreparedPrismaticJoint >> perpendicularImpulse: anObject [ perpendicularImpulse := anObject ]
+
+{ #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> baseTranslation [ ^ baseTranslation ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> baseTranslation: aNumber [ baseTranslation := aNumber ]
-{ #category : 'limits' }
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> baseTranslation: anObject [ baseTranslation := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> axialMass [ ^ axialMass ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> axialMass: anObject [ axialMass := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springEnabled [ ^ springEnabled ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springEnabled: anObject [ springEnabled := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springBiasRate [ ^ springBiasRate ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springBiasRate: anObject [ springBiasRate := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springMassCoefficient [ ^ springMassCoefficient ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springMassCoefficient: anObject [ springMassCoefficient := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springImpulseCoefficient [ ^ springImpulseCoefficient ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springImpulseCoefficient: anObject [ springImpulseCoefficient := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springImpulse [ ^ springImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> springImpulse: anObject [ springImpulse := anObject ]
+
+{ #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> limitsEnabled [ ^ limitsEnabled ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> limitsEnabled: aBoolean [ limitsEnabled := aBoolean ]
-{ #category : 'limits' }
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> limitsEnabled: anObject [ limitsEnabled := anObject ]
+
+{ #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> lowerTranslation [ ^ lowerTranslation ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> lowerTranslation: aNumber [ lowerTranslation := aNumber ]
-{ #category : 'limits' }
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> lowerTranslation: anObject [ lowerTranslation := anObject ]
+
+{ #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> upperTranslation [ ^ upperTranslation ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> upperTranslation: aNumber [ upperTranslation := aNumber ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> translationMass [ ^ translationMass ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> translationMass: aNumber [ translationMass := aNumber ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> translationImpulse [ ^ translationImpulse ]
-{ #category : 'limits' }
-CFPhysicsPreparedPrismaticJoint >> translationImpulse: aNumber [ translationImpulse := aNumber ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> upperTranslation: anObject [ upperTranslation := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> lowerLimitImpulse [ ^ lowerLimitImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> lowerLimitImpulse: anObject [ lowerLimitImpulse := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> upperLimitImpulse [ ^ upperLimitImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> upperLimitImpulse: anObject [ upperLimitImpulse := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorEnabled [ ^ motorEnabled ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorEnabled: anObject [ motorEnabled := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorSpeed [ ^ motorSpeed ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorSpeed: anObject [ motorSpeed := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> maximumMotorImpulse [ ^ maximumMotorImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> maximumMotorImpulse: anObject [ maximumMotorImpulse := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorImpulse [ ^ motorImpulse ]
+{ #category : 'accessing' }
+CFPhysicsPreparedPrismaticJoint >> motorImpulse: anObject [ motorImpulse := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> baseAngle [ ^ baseAngle ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> baseAngle: aNumber [ baseAngle := aNumber ]
+CFPhysicsPreparedPrismaticJoint >> baseAngle: anObject [ baseAngle := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> angularMass [ ^ angularMass ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> angularMass: aNumber [ angularMass := aNumber ]
+CFPhysicsPreparedPrismaticJoint >> angularMass: anObject [ angularMass := anObject ]
+
 { #category : 'accessing' }
 CFPhysicsPreparedPrismaticJoint >> angularImpulse [ ^ angularImpulse ]
 { #category : 'accessing' }
-CFPhysicsPreparedPrismaticJoint >> angularImpulse: aNumber [ angularImpulse := aNumber ]
+CFPhysicsPreparedPrismaticJoint >> angularImpulse: anObject [ angularImpulse := anObject ]
 
 { #category : 'writing back' }
 CFPhysicsPreparedPrismaticJoint >> writeImpulsesBack [
 	joint solverCommitTarget
-		accumulatedPerpendicularImpulse: perpendicularImpulse;
-		accumulatedAngularImpulse: angularImpulse
+		perpendicularImpulse: perpendicularImpulse;
+		angularImpulse: angularImpulse;
+		springImpulse: springImpulse;
+		lowerLimitImpulse: lowerLimitImpulse;
+		upperLimitImpulse: upperLimitImpulse;
+		motorImpulse: motorImpulse
 ]
