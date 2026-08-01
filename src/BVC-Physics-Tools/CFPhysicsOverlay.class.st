@@ -133,7 +133,7 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 	[ current notNil ] whileTrue: [
 		physics := current existingPhysics.
 		physics ifNotNil: [
-			body := physics body.
+			body := physics bodyOrNil.
 			(body notNil and: [ body world == world ]) ifTrue: [ ^ current ] ].
 		current == host ifTrue: [ ^ nil ].
 		current := current parent ].
