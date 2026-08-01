@@ -54,5 +54,5 @@ CFPhysicsWorld >> physicsOwnerWillChange [
 
 { #category : '*BVC-Physics-Motion' }
 CFPhysicsWorld >> startBackgroundStep [
-	^ (CFPhysicsWorldMotionIntegration for: self) startBackgroundStep
+	^ (CFPhysicsWorldBackgroundStep on: self) start
 ]

@@ -111,8 +111,3 @@ CFPhysicsWorldMotionIntegration >> release [
 	playback := nil.
 	self releaseManualPresentation
 ]
-
-{ #category : 'private - continuous stepping' }
-CFPhysicsWorldMotionIntegration >> startBackgroundStep [
-	^ (CFPhysicsWorldBackgroundStep on: world) start
-]

@@ -1,8 +1,8 @@
 Class {
 	#name : 'CFPhysicsSharedScalarExamples',
 	#superclass : 'Object',
-	#category : 'BVC-Physics-Tests-Core',
-	#package : 'BVC-Physics-Tests-Core'
+	#category : 'BVC-Physics-Tests-Behaviours',
+	#package : 'BVC-Physics-Tests-Behaviours'
 }
 
 { #category : 'examples - shared scalar' }

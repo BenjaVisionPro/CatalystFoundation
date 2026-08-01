@@ -62,7 +62,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 	spec package: 'BVC-Physics-Tests-Core'
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Pipeline' 'BVC-Physics-Bloc' 'BVC-Physics-Motion' 'BVC-Physics-Tools') ].
 	spec package: 'BVC-Physics-Tests-Behaviours'
-		with: [ spec requires: #('BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion') ].
+		with: [ spec requires: #('BVC-Physics-Tests-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion') ].
 	spec package: 'BVC-Physics-Tests-Mondrian'
 		with: [ spec requires: #('BVC-Physics-Mondrian' 'BVC-Physics-Examples') ].
 	spec package: 'BVC-Physics-Tests-Tools'

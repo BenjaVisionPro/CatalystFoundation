@@ -7,8 +7,8 @@ Class {
 	#name : 'CFPhysicsSharedScalar',
 	#superclass : 'Object',
 	#instVars : [ 'value' ],
-	#category : 'BVC-Physics-Model',
-	#package : 'BVC-Physics-Model'
+	#category : 'BVC-Physics-Behaviours',
+	#package : 'BVC-Physics-Behaviours'
 }
 
 { #category : 'instance creation' }
