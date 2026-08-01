@@ -1,12 +1,12 @@
 "
 I connect Bloc pull gestures to a Physics mouse joint.
 
-My responsibility is to track the pointer in world coordinates, preserve Physics ownership of body movement, and release the mouse joint when interaction ends.
+My responsibility is to track the pointer in world coordinates, configure the Box2D mouse joint for responsive UI manipulation, preserve Physics ownership of body movement, and release the joint when interaction ends.
 "
 Class {
 	#name : 'CFPhysicsPointerJointHandler',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumForce' ],
+	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration' ],
 	#category : 'BVC-Physics-Bloc',
 	#package : 'BVC-Physics-Bloc'
 }
@@ -22,9 +22,9 @@ CFPhysicsPointerJointHandler class >> on: anElement [
 CFPhysicsPointerJointHandler >> initialize [
 	super initialize.
 	enabled := true.
-	hertz := 5.0.
+	hertz := 10.0.
 	dampingRatio := 0.7.
-	maximumForce := 1000.0
+	maximumAcceleration := 10000.0
 ]
 
 { #category : 'lifecycle' }
@@ -109,7 +109,7 @@ CFPhysicsPointerJointHandler >> beginMouseJointFrom: anEvent [
 	mouseJoint
 		hertz: hertz;
 		dampingRatio: dampingRatio;
-		maximumForce: maximumForce;
+		maximumForce: maximumAcceleration * body mass;
 		target: pointerPosition.
 	world addMouseJoint: mouseJoint
 ]
@@ -179,10 +179,11 @@ CFPhysicsPointerJointHandler >> dampingRatio: aNumber [
 ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumForce [ ^ maximumForce ]
+CFPhysicsPointerJointHandler >> maximumAcceleration [ ^ maximumAcceleration ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumForce: aNumber [
-	maximumForce := aNumber asFloat max: 0.0.
-	mouseJoint ifNotNil: [ mouseJoint maximumForce: maximumForce ]
+CFPhysicsPointerJointHandler >> maximumAcceleration: aNumber [
+	maximumAcceleration := aNumber asFloat max: 0.0.
+	mouseJoint ifNotNil: [
+		mouseJoint maximumForce: maximumAcceleration * mouseJoint bodyB mass ]
 ]

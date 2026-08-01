@@ -1676,6 +1676,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 		play.
 	self assert: pullEvents size equals: 1.
 	self assert: world mouseJoints size equals: 1.
+	self assert: world mouseJoints first maximumForce equals: button physics body mass * 10000.0.
 	self assert: (world mouseJoints first localAnchorB closeTo: 0 @ -4).
 	self assert: button constraints position equals: 20 @ 20.
 	world step.
