@@ -82,11 +82,12 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 		^ self applyDistanceJointImpulse: (self distanceJointAxisFor: constraint) * constraint impulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self warmStartPrismaticJointConstraint: constraint ].
+	(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
+		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
+		^ self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
 		self warmStartRevoluteJointAxialConstraints: constraint.
-		self applyRevoluteJointImpulse: constraint impulse constraint: constraint.
-		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
-			self applyWeldJointAngularImpulse: constraint angularImpulse constraint: constraint ] ]
+		self applyRevoluteJointImpulse: constraint impulse constraint: constraint ]
 ]
 
 { #category : 'private - solving' }
@@ -134,10 +135,11 @@ CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEna
 		^ self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled ].
+	(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
+		self solveRevoluteJointPointConstraint: constraint biasEnabled: biasEnabled.
+		^ self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
-		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled.
-		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
-			self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ] ]
+		self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled ]
 ]
 
 
@@ -440,10 +442,15 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointLimits: constraint biasEnabled: bi
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled [
-	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	self solveRevoluteJointSpring: constraint.
 	self solveRevoluteJointMotor: constraint.
 	self solveRevoluteJointLimits: constraint biasEnabled: biasEnabled.
+	self solveRevoluteJointPointConstraint: constraint biasEnabled: biasEnabled
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRevoluteJointPointConstraint: constraint biasEnabled: biasEnabled [
+	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
 	relativeVelocity := self revoluteJointRelativeVelocity: constraint.
 	separation := constraint baseSeparation
 		+ (self distanceJointDeltaPositionFor: constraint bodyStateB)

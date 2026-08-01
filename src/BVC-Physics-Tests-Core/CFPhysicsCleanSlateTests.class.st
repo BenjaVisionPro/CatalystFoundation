@@ -1886,7 +1886,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
 	self assert: joint anchorA == firstAnchor.
 	self assert: joint anchorB == secondAnchor.
 	self assert: joint accumulatedImpulse equals: 0 @ 0.
-	self deny: joint springEnabled.
+	self assert: joint springEnabled not.
 	self assert: joint hertz equals: 0.0.
 	self assert: joint dampingRatio equals: 0.0.
 	self assert: joint targetAngle equals: 0.0.
