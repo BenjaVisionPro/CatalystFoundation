@@ -10,15 +10,15 @@ Class {
 }
 
 { #category : 'building' }
-CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates warmStartRatio: warmStartRatio [
+CFPhysicsRevoluteJointConstraintBuilder >> constraintsFrom: joints bodyStates: bodyStates step: step [
 	^ (joints select: [ :joint |
 		joint class == CFPhysicsRevoluteJoint and: [ joint isActive ] ]) collect: [ :joint |
-			self constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio ]
+			self constraintFrom: joint bodyStates: bodyStates step: step ]
 ]
 
 { #category : 'private - building' }
-CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates warmStartRatio: warmStartRatio [
-	| stateA stateB originA originB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB |
+CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bodyStates step: step [
+	| stateA stateB originA originB anchorA anchorB baseSeparation inverseMassA inverseMassB inverseInertiaA inverseInertiaB kxx kxy kyy determinant massXX massXY massYY inverseAngularMass angleA angleB omega a1 a2 a3 |
 	stateA := joint bodyA ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	stateB := joint bodyB ifNil: [ nil ] ifNotNil: [ :body | bodyStates at: body ].
 	originA := self originForState: stateA.
@@ -48,6 +48,10 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 			massXY := kxy negated / determinant.
 			massYY := kxx / determinant ].
 	inverseAngularMass := inverseInertiaA + inverseInertiaB.
+	omega := 2.0 * Float pi * joint hertz.
+	a1 := (2.0 * joint dampingRatio) + (omega * step substepTime).
+	a2 := step substepTime * omega * a1.
+	a3 := 1.0 / (1.0 + a2).
 	^ CFPhysicsPreparedRevoluteJoint new
 		joint: joint;
 		bodyStateA: stateA;
@@ -58,19 +62,26 @@ CFPhysicsRevoluteJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		effectiveMassXX: massXX;
 		effectiveMassXY: massXY;
 		effectiveMassYY: massYY;
-		impulse: joint accumulatedImpulse * warmStartRatio;
+		impulse: joint accumulatedImpulse * step warmStartRatio;
+		springEnabled: joint springEnabled;
+		springBaseAngle: angleB - angleA;
+		targetAngle: joint targetAngle;
+		springBiasRate: (a1 = 0.0 ifTrue: [ 0.0 ] ifFalse: [ omega / a1 ]);
+		springMassCoefficient: a2 * a3;
+		springImpulseCoefficient: a3;
+		springImpulse: joint springImpulse * step warmStartRatio;
 		limitBaseAngle: angleB - angleA - joint referenceAngle;
 		limitsEnabled: joint limitsEnabled;
 		lowerAngle: joint lowerAngle;
 		upperAngle: joint upperAngle;
 		limitMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
-		lowerLimitImpulse: joint lowerLimitImpulse * warmStartRatio;
-		upperLimitImpulse: joint upperLimitImpulse * warmStartRatio;
+		lowerLimitImpulse: joint lowerLimitImpulse * step warmStartRatio;
+		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
 		motorEnabled: joint motorEnabled;
 		motorSpeed: joint motorSpeed;
 		maximumMotorImpulse: joint maximumMotorImpulse;
 		motorMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
-		motorImpulse: joint motorImpulse * warmStartRatio;
+		motorImpulse: joint motorImpulse * step warmStartRatio;
 		yourself
 ]
 

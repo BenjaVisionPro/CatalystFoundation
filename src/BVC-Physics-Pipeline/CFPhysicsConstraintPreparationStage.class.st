@@ -86,7 +86,7 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 	constraints addAll: (revoluteJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates
-		warmStartRatio: aStepResult step warmStartRatio).
+		step: aStepResult step).
 	constraints addAll: (weldJointConstraintBuilder
 		constraintsFrom: aStepResult joints
 		bodyStates: aStepResult bodyStates

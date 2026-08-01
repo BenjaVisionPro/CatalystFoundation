@@ -441,6 +441,7 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointLimits: constraint biasEnabled: bi
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled [
 	| relativeVelocity separation bias massCoefficient impulseCoefficient increment |
+	self solveRevoluteJointSpring: constraint.
 	self solveRevoluteJointMotor: constraint.
 	self solveRevoluteJointLimits: constraint biasEnabled: biasEnabled.
 	relativeVelocity := self revoluteJointRelativeVelocity: constraint.
@@ -462,10 +463,36 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointConstraint: constraint biasEnabled:
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartRevoluteJointAxialConstraints: constraint [
 	| impulse |
-	impulse := constraint motorImpulse
+	impulse := constraint springImpulse
+		+ constraint motorImpulse
 		+ constraint lowerLimitImpulse
 		- constraint upperLimitImpulse.
 	self applyWeldJointAngularImpulse: impulse constraint: constraint
+]
+
+
+
+{ #category : 'private - mathematics' }
+CFPhysicsSoftStepSolver >> unwoundAngle: anAngle [
+	| fullTurn |
+	fullTurn := 2.0 * Float pi.
+	^ anAngle - ((anAngle / fullTurn) rounded * fullTurn)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveRevoluteJointSpring: constraint [
+	| angle relativeVelocity increment |
+	constraint springEnabled ifFalse: [ ^ self ].
+	angle := self unwoundAngle: (constraint springBaseAngle
+		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
+		- (self distanceJointDeltaRotationFor: constraint bodyStateA)
+		- constraint targetAngle).
+	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
+	increment := (constraint springMassCoefficient * constraint limitMass
+		* (relativeVelocity + (constraint springBiasRate * angle))) negated
+		- (constraint springImpulseCoefficient * constraint springImpulse).
+	constraint springImpulse: constraint springImpulse + increment.
+	self applyWeldJointAngularImpulse: increment constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -485,9 +512,9 @@ CFPhysicsSoftStepSolver >> solveRevoluteJointMotor: constraint [
 CFPhysicsSoftStepSolver >> solveRevoluteJointLimits: constraint biasEnabled: biasEnabled [
 	| angle relativeVelocity separation bias massCoefficient impulseCoefficient increment oldImpulse newImpulse |
 	(self isLimitedRevoluteJointConstraint: constraint) ifFalse: [ ^ self ].
-	angle := constraint limitBaseAngle
+	angle := self unwoundAngle: (constraint limitBaseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
-		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+		- (self distanceJointDeltaRotationFor: constraint bodyStateA)).
 	relativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 
 	separation := angle - constraint lowerAngle.

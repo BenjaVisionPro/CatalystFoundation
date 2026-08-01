@@ -5,7 +5,7 @@ I represent a revolute joint prepared for one solver step. I hold its pivot cons
 Class {
 	#name : 'CFPhysicsPreparedRevoluteJoint',
 	#superclass : 'CFPhysicsPreparedJointConstraint',
-	#instVars : [ 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'lowerLimitImpulse', 'upperLimitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse' ],
+	#instVars : [ 'anchorA', 'anchorB', 'baseSeparation', 'effectiveMassXX', 'effectiveMassXY', 'effectiveMassYY', 'impulse', 'limitBaseAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'limitMass', 'lowerLimitImpulse', 'upperLimitImpulse', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorMass', 'motorImpulse', 'springEnabled', 'springBaseAngle', 'targetAngle', 'springBiasRate', 'springMassCoefficient', 'springImpulseCoefficient', 'springImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -38,8 +38,39 @@ CFPhysicsPreparedRevoluteJoint >> effectiveMassYY: aNumber [ effectiveMassYY := 
 CFPhysicsPreparedRevoluteJoint >> impulse [ ^ impulse ]
 { #category : 'accessing' }
 CFPhysicsPreparedRevoluteJoint >> impulse: aPoint [ impulse := aPoint ]
+
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springEnabled [ ^ springEnabled ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springEnabled: aBoolean [ springEnabled := aBoolean ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springBaseAngle [ ^ springBaseAngle ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springBaseAngle: aNumber [ springBaseAngle := aNumber ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> targetAngle [ ^ targetAngle ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> targetAngle: aNumber [ targetAngle := aNumber ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springBiasRate [ ^ springBiasRate ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springBiasRate: aNumber [ springBiasRate := aNumber ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springMassCoefficient [ ^ springMassCoefficient ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springMassCoefficient: aNumber [ springMassCoefficient := aNumber ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springImpulseCoefficient [ ^ springImpulseCoefficient ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springImpulseCoefficient: aNumber [ springImpulseCoefficient := aNumber ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springImpulse [ ^ springImpulse ]
+{ #category : 'spring' }
+CFPhysicsPreparedRevoluteJoint >> springImpulse: aNumber [ springImpulse := aNumber ]
+
 { #category : 'limits' }
 CFPhysicsPreparedRevoluteJoint >> limitBaseAngle [ ^ limitBaseAngle ]
+
 { #category : 'limits' }
 CFPhysicsPreparedRevoluteJoint >> limitBaseAngle: aNumber [ limitBaseAngle := aNumber ]
 { #category : 'limits' }
@@ -91,6 +122,7 @@ CFPhysicsPreparedRevoluteJoint >> motorImpulse: aNumber [ motorImpulse := aNumbe
 CFPhysicsPreparedRevoluteJoint >> writeImpulsesBack [
 	joint solverCommitTarget
 		accumulatedImpulse: impulse;
+		springImpulse: springImpulse;
 		lowerLimitImpulse: lowerLimitImpulse;
 		upperLimitImpulse: upperLimitImpulse;
 		motorImpulse: motorImpulse

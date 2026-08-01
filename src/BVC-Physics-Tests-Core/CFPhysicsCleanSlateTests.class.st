@@ -1886,6 +1886,11 @@ CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
 	self assert: joint anchorA == firstAnchor.
 	self assert: joint anchorB == secondAnchor.
 	self assert: joint accumulatedImpulse equals: 0 @ 0.
+	self deny: joint springEnabled.
+	self assert: joint hertz equals: 0.0.
+	self assert: joint dampingRatio equals: 0.0.
+	self assert: joint targetAngle equals: 0.0.
+	self assert: joint springImpulse equals: 0.0.
 	^ joint
 ]
 
@@ -1987,6 +1992,35 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 	self assert: result constraints first motorEnabled.
 	self assert: first physics angularVelocity < 0.0.
 	self assert: second physics angularVelocity equals: 0.0.
+	^ result
+]
+
+
+{ #category : 'examples - revolute joints' }
+CFPhysicsCleanSlateTests >> revoluteJointSpringDrivesRelativeAngleTowardItsTarget [
+	<gtExample>
+	| owner element world bodyAnchor worldAnchor joint initialRotation result |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics position: 0 @ 0.
+	element physics rotation: 0.5.
+	bodyAnchor := element physics localAnchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 10 @ 10.
+	joint := bodyAnchor revoluteJointTo: worldAnchor.
+	joint
+		springEnabled: true;
+		targetAngle: 0.0;
+		hertz: 5.0;
+		dampingRatio: 1.0.
+	initialRotation := element physics rotation abs.
+	result := world step.
+	self assert: result constraints first springEnabled.
+	self assert: joint springImpulse abs > 0.0.
+	self assert: element physics rotation abs < initialRotation.
 	^ result
 ]
 

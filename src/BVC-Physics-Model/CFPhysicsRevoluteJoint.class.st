@@ -6,7 +6,7 @@ My responsibility is to retain its reference angle, limits, motor configuration 
 Class {
 	#name : 'CFPhysicsRevoluteJoint',
 	#superclass : 'CFPhysicsJoint',
-	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'lowerLimitImpulse', 'upperLimitImpulse' ],
+	#instVars : [ 'endpointPair', 'accumulatedImpulse', 'referenceAngle', 'limitsEnabled', 'lowerAngle', 'upperAngle', 'motorEnabled', 'motorSpeed', 'maximumMotorImpulse', 'motorImpulse', 'lowerLimitImpulse', 'upperLimitImpulse', 'springEnabled', 'hertz', 'dampingRatio', 'targetAngle', 'springImpulse' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -52,6 +52,11 @@ CFPhysicsRevoluteJoint >> initialize [
 	motorImpulse := 0.0.
 	lowerLimitImpulse := 0.0.
 	upperLimitImpulse := 0.0.
+	springEnabled := false.
+	hertz := 0.0.
+	dampingRatio := 0.0.
+	targetAngle := 0.0.
+	springImpulse := 0.0.
 ]
 
 { #category : 'accessing' }
@@ -83,8 +88,45 @@ CFPhysicsRevoluteJoint >> referenceAngle: aNumber [
 	self wakeBodies
 ]
 
+
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> springEnabled [ ^ springEnabled ]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> springEnabled: aBoolean [
+	springEnabled = aBoolean ifTrue: [ ^ self ].
+	springEnabled := aBoolean.
+	springImpulse := 0.0.
+	self wakeBodies
+]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> hertz [ ^ hertz ]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> hertz: aNumber [
+	hertz := aNumber asFloat max: 0.0.
+	self wakeBodies
+]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> dampingRatio [ ^ dampingRatio ]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> dampingRatio: aNumber [
+	dampingRatio := aNumber asFloat max: 0.0.
+	self wakeBodies
+]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> targetAngle [ ^ targetAngle ]
+{ #category : 'spring' }
+CFPhysicsRevoluteJoint >> targetAngle: aNumber [
+	targetAngle := aNumber asFloat.
+	self wakeBodies
+]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> springImpulse [ ^ springImpulse ]
+{ #category : 'solver state' }
+CFPhysicsRevoluteJoint >> springImpulse: aNumber [ springImpulse := aNumber asFloat ]
+
 { #category : 'limits' }
 CFPhysicsRevoluteJoint >> limitsEnabled [ ^ limitsEnabled ]
+
 { #category : 'limits' }
 CFPhysicsRevoluteJoint >> limitsEnabled: aBoolean [
 	limitsEnabled = aBoolean ifTrue: [ ^ self ].
@@ -122,15 +164,6 @@ CFPhysicsRevoluteJoint >> upperLimitImpulse: aNumber [ upperLimitImpulse := aNum
 
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorEnabled [ ^ motorEnabled ]
-
-{ #category : 'solver state' }
-CFPhysicsRevoluteJoint >> lowerLimitImpulse [ ^ lowerLimitImpulse ]
-{ #category : 'solver state' }
-CFPhysicsRevoluteJoint >> lowerLimitImpulse: aNumber [ lowerLimitImpulse := aNumber asFloat ]
-{ #category : 'solver state' }
-CFPhysicsRevoluteJoint >> upperLimitImpulse [ ^ upperLimitImpulse ]
-{ #category : 'solver state' }
-CFPhysicsRevoluteJoint >> upperLimitImpulse: aNumber [ upperLimitImpulse := aNumber asFloat ]
 
 { #category : 'motor' }
 CFPhysicsRevoluteJoint >> motorEnabled: aBoolean [
