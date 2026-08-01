@@ -1,12 +1,12 @@
 "
 I connect Bloc pull gestures to a Physics mouse joint.
 
-My responsibility is to track the pointer in world coordinates, configure the Box2D mouse joint for responsive UI manipulation, preserve Physics ownership of body movement, transfer a fresh pointer velocity when released, and remove the joint when interaction ends.
+My responsibility is to track the pointer in world coordinates, configure the Box2D mouse joint for responsive UI manipulation, preserve Physics ownership of body movement, and remove the joint when interaction ends.
 "
 Class {
 	#name : 'CFPhysicsPointerJointHandler',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'previousPointerPosition', 'previousPointerTimestamp', 'pointerVelocity', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration', 'maximumThrowSpeed' ],
+	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration' ],
 	#category : 'BVC-Physics-Bloc',
 	#package : 'BVC-Physics-Bloc'
 }
@@ -24,9 +24,7 @@ CFPhysicsPointerJointHandler >> initialize [
 	enabled := true.
 	hertz := 30.0.
 	dampingRatio := 1.0.
-	maximumAcceleration := 1000000.0.
-	maximumThrowSpeed := 2400.0.
-	pointerVelocity := 0 @ 0
+	maximumAcceleration := 1000000.0
 ]
 
 { #category : 'lifecycle' }
@@ -75,24 +73,12 @@ CFPhysicsPointerJointHandler >> endFrom: anEvent [
 { #category : 'private' }
 CFPhysicsPointerJointHandler >> captureInitialPointerPositionFrom: anEvent [
 	initialPointerPosition := self worldPointFromGlobalPoint: anEvent position.
-	pointerPosition := initialPointerPosition.
-	previousPointerPosition := initialPointerPosition.
-	previousPointerTimestamp := self currentTimestamp.
-	pointerVelocity := 0 @ 0
+	pointerPosition := initialPointerPosition
 ]
 
 { #category : 'private' }
 CFPhysicsPointerJointHandler >> capturePointerPositionFrom: anEvent [
-	| newPosition timestamp seconds |
-	newPosition := self worldPointFromGlobalPoint: anEvent position.
-	timestamp := self currentTimestamp.
-	(previousPointerPosition notNil and: [ previousPointerTimestamp notNil ]) ifTrue: [
-		seconds := (timestamp - previousPointerTimestamp) asMilliSeconds / 1000.0.
-		seconds > 0.0 ifTrue: [
-			pointerVelocity := self limitedThrowVelocity: (newPosition - previousPointerPosition) / seconds ] ].
-	previousPointerPosition := newPosition.
-	previousPointerTimestamp := timestamp.
-	pointerPosition := newPosition
+	pointerPosition := self worldPointFromGlobalPoint: anEvent position
 ]
 
 { #category : 'private' }
@@ -134,7 +120,6 @@ CFPhysicsPointerJointHandler >> finishMouseJoint [
 	mouseJoint ifNil: [ ^ self ].
 	activeMouseJoint := mouseJoint.
 	mouseJoint := nil.
-	self applyThrowVelocityTo: activeMouseJoint bodyB.
 	world := activeMouseJoint bodyB world.
 	world ifNotNil: [ world removeMouseJoint: activeMouseJoint ]
 ]
@@ -147,29 +132,6 @@ CFPhysicsPointerJointHandler >> removeMouseJoint [
 	mouseJoint := nil.
 	world := activeMouseJoint bodyB world.
 	world ifNotNil: [ world removeMouseJoint: activeMouseJoint ]
-]
-
-{ #category : 'private' }
-CFPhysicsPointerJointHandler >> currentTimestamp [
-	^ DateAndTime now
-]
-
-{ #category : 'private' }
-CFPhysicsPointerJointHandler >> applyThrowVelocityTo: aBody [
-	| sampleAge |
-	previousPointerTimestamp ifNil: [ ^ self ].
-	sampleAge := (self currentTimestamp - previousPointerTimestamp) asMilliSeconds / 1000.0.
-	(sampleAge <= 0.12 and: [ pointerVelocity ~= (0 @ 0) ]) ifTrue: [
-		aBody velocity: pointerVelocity.
-		aBody wake ]
-]
-
-{ #category : 'private' }
-CFPhysicsPointerJointHandler >> limitedThrowVelocity: aVelocity [
-	| speed |
-	speed := aVelocity r.
-	(speed <= maximumThrowSpeed or: [ speed = 0.0 ]) ifTrue: [ ^ aVelocity ].
-	^ aVelocity * (maximumThrowSpeed / speed)
 ]
 
 { #category : 'controlling' }
@@ -224,16 +186,4 @@ CFPhysicsPointerJointHandler >> maximumAcceleration: aNumber [
 	maximumAcceleration := aNumber asFloat max: 0.0.
 	mouseJoint ifNotNil: [
 		mouseJoint maximumForce: maximumAcceleration * mouseJoint bodyB mass ]
-]
-
-
-{ #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumThrowSpeed [
-	^ maximumThrowSpeed
-]
-
-{ #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumThrowSpeed: aNumber [
-	maximumThrowSpeed := aNumber asFloat max: 0.0.
-	pointerVelocity := self limitedThrowVelocity: pointerVelocity
 ]
