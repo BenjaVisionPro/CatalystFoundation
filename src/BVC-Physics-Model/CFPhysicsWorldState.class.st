@@ -56,13 +56,19 @@ CFPhysicsWorldState >> step [ ^ step ]
 CFPhysicsWorldState >> step: aPhysicsStep [ step := aPhysicsStep ]
 
 { #category : 'accessing' }
-CFPhysicsWorldState >> gravity [ ^ gravity ]
+CFPhysicsWorldState >> gravity [
+	"Gravitational acceleration in physics length units per second squared."
+	^ gravity
+]
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> gravity: aPoint [ gravity := aPoint ]
 
 { #category : 'accessing' }
-CFPhysicsWorldState >> restitutionThreshold [ ^ restitutionThreshold ]
+CFPhysicsWorldState >> restitutionThreshold [
+	"Minimum collision speed for restitution in physics length units per second."
+	^ restitutionThreshold
+]
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> restitutionThreshold: aNumber [ restitutionThreshold := aNumber ]

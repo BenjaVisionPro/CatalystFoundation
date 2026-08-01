@@ -66,7 +66,10 @@ CFPhysicsStep >> massCoefficient [ ^ massCoefficient ]
 CFPhysicsStep >> impulseCoefficient [ ^ impulseCoefficient ]
 
 { #category : 'accessing' }
-CFPhysicsStep >> maximumContactPushSpeed [ ^ maximumContactPushSpeed ]
+CFPhysicsStep >> maximumContactPushSpeed [
+	"Maximum penetration recovery speed in physics length units per second."
+	^ maximumContactPushSpeed
+]
 
 { #category : 'accessing' }
 CFPhysicsStep >> maximumContactPushSpeed: aNumber [ maximumContactPushSpeed := aNumber asFloat max: 0.0 ]

@@ -5750,10 +5750,10 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	synchronousWorld := synchronousOwner physics beWorld.
 	detachedWorld := detachedOwner physics beWorld.
 	synchronousWorld
-		gravity: 0 @ 10;
+		gravity: 0 @ 0.1;
 		synchroniseMembership.
 	detachedWorld
-		gravity: 0 @ 10;
+		gravity: 0 @ 0.1;
 		synchroniseMembership.
 	synchronousBody := synchronousWorld bodyStateFor: synchronousElement.
 	detachedBody := detachedWorld bodyStateFor: detachedElement.
@@ -6277,11 +6277,34 @@ CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
 	<gtExample>
 	| world step |
 	world := CFPhysicsWorld new.
+	self assert: (world lengthUnitsPerMetre closeTo: 100.0).
 	self assert: (world maximumContactPushSpeed closeTo: 3.0).
-	world maximumContactPushSpeed: 7.5.
 	step := world newStep.
-	self assert: (step maximumContactPushSpeed closeTo: 7.5).
+	self assert: (step maximumContactPushSpeed closeTo: 300.0).
+	world
+		lengthUnitsPerMetre: 200.0;
+		maximumContactPushSpeed: 7.5.
+	step := world newStep.
+	self assert: (world maximumContactPushSpeed closeTo: 7.5).
+	self assert: (step maximumContactPushSpeed closeTo: 1500.0).
 	^ step
+]
+
+{ #category : 'examples - contact solver' }
+CFPhysicsCleanSlateTests >> worldScaleConvertsMutableConfigurationWhenStateIsCaptured [
+	<gtExample>
+	| world state |
+	world := CFPhysicsWorld new.
+	world
+		lengthUnitsPerMetre: 200.0;
+		gravity: 0 @ 5.0;
+		restitutionThreshold: 2.0.
+	state := world captureStateAfterSynchronisation.
+	self assert: (world gravity closeTo: 0 @ 5.0).
+	self assert: (world restitutionThreshold closeTo: 2.0).
+	self assert: (state gravity closeTo: 0 @ 1000.0).
+	self assert: (state restitutionThreshold closeTo: 400.0).
+	^ state
 ]
 
 { #category : 'examples - constraints' }

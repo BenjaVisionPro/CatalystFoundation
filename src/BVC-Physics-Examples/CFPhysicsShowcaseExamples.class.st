@@ -21,7 +21,7 @@ CFPhysicsShowcaseExamples >> clickMe [
 		yourself.
 	world := host physics beWorld.
 	world
-		gravity: 0 @ 8;
+		gravity: 0 @ 0.08;
 		contactHertz: 120.0;
 		contactDampingRatio: 1.0.
 	random := Random new.
@@ -95,7 +95,7 @@ CFPhysicsShowcaseExamples >> joints [
 		yourself.
 	world := host physics beWorld.
 	world
-		gravity: 0 @ 240;
+		gravity: 0 @ 2.4;
 		contactHertz: 120.0;
 		contactDampingRatio: 1.0.
 

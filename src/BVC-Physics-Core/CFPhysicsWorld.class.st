@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -24,7 +24,8 @@ CFPhysicsWorld >> initialize [
 	members := IdentitySet new.
 	bodyStates := IdentityDictionary new.
 	nextBodySequence := 1.
-	gravity := 0 @ 1000.
+	lengthUnitsPerMetre := 100.0.
+	gravity := 0 @ 10.0.
 	stepDuration := 16 milliseconds.
 	restitutionThreshold := 1.0.
 	maximumContactPushSpeed := 3.0.
@@ -122,11 +123,68 @@ CFPhysicsWorld >> release [
 	^ self
 ]
 
-{ #category : 'accessing' }
-CFPhysicsWorld >> gravity [ ^ gravity ]
+{ #category : 'units' }
+CFPhysicsWorld >> lengthUnitsPerMetre [
+	"Number of physics length units representing one metre.
+
+	The default is 100. Changing this value affects conversion of
+	metre-based world configuration into simulation units when each state
+	is captured. Existing body positions, shapes and transforms are not
+	modified. Mondrian canvas scaling is presentation-only and does not
+	change this value."
+	^ lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> lengthUnitsPerMetre: aNumber [
+	"Set the number of physics length units representing one metre.
+
+	The supplied value must be greater than zero. The new scale is used by
+	the next captured simulation state; no stored configuration values need
+	to be rewritten."
+	self assert: (aNumber > 0).
+	lengthUnitsPerMetre := aNumber asFloat
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> lengthUnitsForMetres: aNumber [
+	"Convert a length specified in metres into physics length units."
+	^ aNumber * lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> metresForLengthUnits: aNumber [
+	"Convert a length specified in physics length units into metres."
+	^ aNumber / lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> accelerationUnitsForMetresPerSecondSquared: aPoint [
+	"Convert an acceleration vector specified in metres per second squared
+	into physics length units per second squared."
+	^ aPoint * lengthUnitsPerMetre
+]
 
 { #category : 'accessing' }
-CFPhysicsWorld >> gravity: aPoint [ gravity := aPoint ]
+CFPhysicsWorld >> gravity [
+	"Gravitational acceleration.
+
+	The value is specified in metres per second squared. For Earth-like
+	gravity use, for example:
+
+		world gravity: 0 @ 9.81
+
+	It is converted into physics length units when a simulation state is
+	captured."
+	^ gravity
+]
+
+{ #category : 'accessing' }
+CFPhysicsWorld >> gravity: aPoint [
+	"Set gravitational acceleration. The supplied vector is specified in
+	metres per second squared, for example 0 @ 9.81."
+	gravity := aPoint
+]
 
 { #category : 'accessing' }
 CFPhysicsWorld >> stepDuration [ ^ stepDuration ]
@@ -135,16 +193,44 @@ CFPhysicsWorld >> stepDuration [ ^ stepDuration ]
 CFPhysicsWorld >> stepDuration: aDuration [ stepDuration := aDuration ]
 
 { #category : 'solver configuration' }
-CFPhysicsWorld >> restitutionThreshold [ ^ restitutionThreshold ]
+CFPhysicsWorld >> restitutionThreshold [
+	"Minimum collision speed at which restitution is applied.
+
+	The value is specified in metres per second. For example:
+
+		world restitutionThreshold: 1.0
+
+	It is converted into physics length units per second when a simulation
+	state is captured."
+	^ restitutionThreshold
+]
 
 { #category : 'solver configuration' }
-CFPhysicsWorld >> restitutionThreshold: aNumber [ restitutionThreshold := aNumber asFloat max: 0.0 ]
+CFPhysicsWorld >> restitutionThreshold: aNumber [
+	"Set the minimum collision speed for restitution. The supplied value is
+	specified in metres per second."
+	restitutionThreshold := aNumber asFloat max: 0.0
+]
 
 { #category : 'solver configuration' }
-CFPhysicsWorld >> maximumContactPushSpeed [ ^ maximumContactPushSpeed ]
+CFPhysicsWorld >> maximumContactPushSpeed [
+	"Maximum penetration recovery speed.
+
+	The value is specified in metres per second. For example:
+
+		world maximumContactPushSpeed: 3.0
+
+	It is converted into physics length units per second when a simulation
+	step is produced."
+	^ maximumContactPushSpeed
+]
 
 { #category : 'solver configuration' }
-CFPhysicsWorld >> maximumContactPushSpeed: aNumber [ maximumContactPushSpeed := aNumber asFloat max: 0.0 ]
+CFPhysicsWorld >> maximumContactPushSpeed: aNumber [
+	"Set the maximum penetration recovery speed. The supplied value is
+	specified in metres per second."
+	maximumContactPushSpeed := aNumber asFloat max: 0.0
+]
 
 { #category : 'solver configuration' }
 CFPhysicsWorld >> substepCount [ ^ substepCount ]
@@ -357,7 +443,7 @@ CFPhysicsWorld >> newStep [
 	step
 		simulationTime: simulationTime;
 		stepNumber: stepNumber + 1;
-		maximumContactPushSpeed: maximumContactPushSpeed;
+		maximumContactPushSpeed: (self lengthUnitsForMetres: maximumContactPushSpeed);
 		warmStartRatio: (warmStarting
 		ifFalse: [ 0.0 ]
 		ifTrue: [ previousTimeStep
@@ -434,8 +520,8 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		joints: capturedJoints;
 		collisionSuppressedBodyPairs: self collisionSuppressedBodyPairs;
 		step: step;
-		gravity: gravity;
-		restitutionThreshold: restitutionThreshold;
+		gravity: (self accelerationUnitsForMetresPerSecondSquared: gravity);
+		restitutionThreshold: (self lengthUnitsForMetres: restitutionThreshold);
 		explicitlyContainedBodies: explicitlyContainedBodies;
 		calculationVisualState: (visualStateConsumers > 0
 			ifTrue: [ calculationVisualState ]
