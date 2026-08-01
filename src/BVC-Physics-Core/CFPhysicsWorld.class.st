@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -28,6 +28,7 @@ CFPhysicsWorld >> initialize [
 	gravity := 0 @ 10.0.
 	stepDuration := 16 milliseconds.
 	restitutionThreshold := 1.0.
+	hitEventThreshold := 1.0.
 	maximumContactPushSpeed := 3.0.
 	substepCount := 4.
 	contactHertz := 30.0.
@@ -444,6 +445,7 @@ CFPhysicsWorld >> newStep [
 		simulationTime: simulationTime;
 		stepNumber: stepNumber + 1;
 		maximumContactPushSpeed: (self lengthUnitsForMetres: maximumContactPushSpeed);
+		hitEventThreshold: (self lengthUnitsForMetres: hitEventThreshold);
 		warmStartRatio: (warmStarting
 		ifFalse: [ 0.0 ]
 		ifTrue: [ previousTimeStep
@@ -823,10 +825,24 @@ CFPhysicsWorld >> wakeAll [
 ]
 
 { #category : 'events' }
-CFPhysicsWorld >> hitEventThreshold [ ^ stepPipeline hitEventThreshold ]
+CFPhysicsWorld >> hitEventThreshold [
+	"Minimum collision approach speed required to produce a hit event.
+
+	The value is specified in metres per second. For example:
+
+		world hitEventThreshold: 1.0
+
+	It is converted into physics length units per second when a simulation
+	step is produced."
+	^ hitEventThreshold
+]
 
 { #category : 'events' }
-CFPhysicsWorld >> hitEventThreshold: aNumber [ stepPipeline hitEventThreshold: aNumber ]
+CFPhysicsWorld >> hitEventThreshold: aNumber [
+	"Set the minimum collision approach speed for hit events. The supplied
+	value is specified in metres per second."
+	hitEventThreshold := aNumber asFloat max: 0.0
+]
 
 { #category : 'events' }
 CFPhysicsWorld >> hitEvents [

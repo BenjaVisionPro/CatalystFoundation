@@ -6299,13 +6299,16 @@ CFPhysicsCleanSlateTests >> worldScaleConvertsMutableConfigurationWhenStateIsCap
 	world
 		lengthUnitsPerMetre: 200.0;
 		gravity: 0 @ 5.0;
-		restitutionThreshold: 2.0.
+		restitutionThreshold: 2.0;
+		hitEventThreshold: 1.5.
 	world synchroniseMembership.
 	state := world captureStateAfterSynchronisation.
 	self assert: (world gravity closeTo: 0 @ 5.0).
 	self assert: (world restitutionThreshold closeTo: 2.0).
+	self assert: (world hitEventThreshold closeTo: 1.5).
 	self assert: (state gravity closeTo: 0 @ 1000.0).
 	self assert: (state restitutionThreshold closeTo: 400.0).
+	self assert: (state step hitEventThreshold closeTo: 300.0).
 	^ state
 ]
 
