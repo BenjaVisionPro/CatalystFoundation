@@ -1304,6 +1304,7 @@ CFPhysicsCleanSlateTests >> postSolveCollectorCapturesSolvedImpulses [
 	self assert: pointResult featureId equals: constraint points first featureId.
 	self assert: pointResult normalImpulse equals: constraint points first normalImpulse.
 	self assert: pointResult tangentImpulse equals: constraint points first tangentImpulse.
+	self assert: pointResult totalNormalImpulse equals: constraint points first totalNormalImpulse.
 	^ solveResult
 ]
 
@@ -6325,4 +6326,63 @@ CFPhysicsCleanSlateTests >> preparedConstraintWritesRollingImpulseBack [
 	constraint writeImpulsesBack.
 	self assert: (constraint contact manifold rollingImpulse closeTo: 2.5).
 	^ constraint
+]
+
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateTests >> hitEventsUseConfirmedImpulseRatherThanWarmStartedImpulse [
+	<gtExample>
+	| constraint point result collector |
+	point := CFPhysicsConstraintPoint new
+		featureId: 1;
+		manifoldPoint: (CFPhysicsManifoldPoint new position: 3 @ 4; yourself);
+		relativeNormalVelocity: -5.0;
+		normalImpulse: 2.0;
+		tangentImpulse: 0.0;
+		totalNormalImpulse: 0.0;
+		yourself.
+	constraint := CFPhysicsPreparedConstraint new
+		contact: Object new;
+		normal: 0 @ 1;
+		points: { point };
+		yourself.
+	collector := CFPhysicsPostSolveCollector new.
+	collector hitEventThreshold: 0.0.
+	result := collector collectFrom: { constraint }.
+	self assert: result hitEvents isEmpty.
+	^ result
+]
+
+{ #category : 'examples - post solve' }
+CFPhysicsCleanSlateTests >> hitEventsChooseFastestPointPerContact [
+	<gtExample>
+	| constraint firstPoint secondPoint result collector |
+	firstPoint := CFPhysicsConstraintPoint new
+		featureId: 1;
+		manifoldPoint: (CFPhysicsManifoldPoint new position: 1 @ 2; yourself);
+		relativeNormalVelocity: -3.0;
+		normalImpulse: 1.0;
+		tangentImpulse: 0.0;
+		totalNormalImpulse: 1.0;
+		yourself.
+	secondPoint := CFPhysicsConstraintPoint new
+		featureId: 2;
+		manifoldPoint: (CFPhysicsManifoldPoint new position: 5 @ 6; yourself);
+		relativeNormalVelocity: -7.0;
+		normalImpulse: 2.0;
+		tangentImpulse: 0.0;
+		totalNormalImpulse: 2.0;
+		yourself.
+	constraint := CFPhysicsPreparedConstraint new
+		contact: Object new;
+		normal: 0 @ 1;
+		points: { firstPoint. secondPoint };
+		yourself.
+	collector := CFPhysicsPostSolveCollector new.
+	collector hitEventThreshold: 0.0.
+	result := collector collectFrom: { constraint }.
+	self assert: result hitEvents size equals: 1.
+	self assert: result hitEvents first featureId equals: 2.
+	self assert: (result hitEvents first approachSpeed closeTo: 7.0).
+	^ result
 ]

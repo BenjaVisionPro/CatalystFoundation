@@ -5,7 +5,7 @@ I represent the post-solve result for one contact point. I preserve the point id
 Class {
 	#name : 'CFPhysicsContactPointSolveResult',
 	#superclass : 'Object',
-	#instVars : [ 'featureId', 'position', 'approachSpeed', 'normalImpulse', 'tangentImpulse' ],
+	#instVars : [ 'featureId', 'position', 'approachSpeed', 'normalImpulse', 'tangentImpulse', 'totalNormalImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -18,6 +18,7 @@ CFPhysicsContactPointSolveResult class >> fromConstraintPoint: aConstraintPoint 
 		approachSpeed: aConstraintPoint relativeNormalVelocity negated;
 		normalImpulse: aConstraintPoint normalImpulse;
 		tangentImpulse: aConstraintPoint tangentImpulse;
+		totalNormalImpulse: aConstraintPoint totalNormalImpulse;
 		yourself
 ]
 
@@ -41,3 +42,8 @@ CFPhysicsContactPointSolveResult >> normalImpulse: aNumber [ normalImpulse := aN
 CFPhysicsContactPointSolveResult >> tangentImpulse [ ^ tangentImpulse ]
 { #category : 'accessing' }
 CFPhysicsContactPointSolveResult >> tangentImpulse: aNumber [ tangentImpulse := aNumber ]
+
+{ #category : 'accessing' }
+CFPhysicsContactPointSolveResult >> totalNormalImpulse [ ^ totalNormalImpulse ]
+{ #category : 'accessing' }
+CFPhysicsContactPointSolveResult >> totalNormalImpulse: aNumber [ totalNormalImpulse := aNumber ]

@@ -25,12 +25,18 @@ CFPhysicsPostSolveCollector >> collectFrom: constraints [
 		CFPhysicsContactSolveResult fromConstraint: constraint ].
 	events := OrderedCollection new.
 	results do: [ :result |
+		| hitPoint |
+		hitPoint := nil.
 		result points do: [ :point |
-			((point approachSpeed > hitEventThreshold) and: [ point normalImpulse > 0.0 ]) ifTrue: [
-				events add: (CFPhysicsContactHitEvent
-					contact: result contact
-					normal: result normal
-					pointResult: point) ] ] ].
+			((point approachSpeed > hitEventThreshold)
+				and: [ point totalNormalImpulse > 0.0 ]) ifTrue: [
+				(hitPoint isNil or: [ point approachSpeed > hitPoint approachSpeed ])
+					ifTrue: [ hitPoint := point ] ] ].
+		hitPoint ifNotNil: [
+			events add: (CFPhysicsContactHitEvent
+				contact: result contact
+				normal: result normal
+				pointResult: hitPoint) ] ].
 	^ CFPhysicsPostSolveBatch contactResults: results hitEvents: events
 ]
 
