@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -33,7 +33,8 @@ CFPhysicsSoftStepSolver >> initialize [
 	prismaticJointConstraintCount := 0.
 	revoluteJointConstraintCount := 0.
 	weldJointConstraintCount := 0.
-	mouseJointConstraintCount := 0
+	mouseJointConstraintCount := 0.
+	motorJointConstraintCount := 0
 ]
 
 { #category : 'solving' }
@@ -74,6 +75,7 @@ CFPhysicsSoftStepSolver >> warmStart [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
+	(constraint isKindOf: CFPhysicsPreparedMotorJoint) ifTrue: [ ^ self warmStartMotorJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
 		^ self warmStartMouseJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
@@ -126,6 +128,7 @@ CFPhysicsSoftStepSolver >> solveJointConstraintsWithBias: biasEnabled [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveJointConstraint: constraint biasEnabled: biasEnabled [
+	(constraint isKindOf: CFPhysicsPreparedMotorJoint) ifTrue: [ ^ self solveMotorJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
 		^ self solveMouseJointConstraint: constraint biasEnabled: biasEnabled ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
@@ -688,3 +691,36 @@ CFPhysicsSoftStepSolver >> weldJointConstraintCount [ ^ weldJointConstraintCount
 
 { #category : 'accessing - telemetry' }
 CFPhysicsSoftStepSolver >> mouseJointConstraintCount [ ^ mouseJointConstraintCount ]
+
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartMotorJointConstraint: constraint [
+	| stateA stateB | stateA := constraint bodyStateA. stateB := constraint bodyStateB.
+	stateA linearVelocity: stateA linearVelocity - (constraint linearImpulse * stateA inverseMass).
+	stateA angularVelocity: stateA angularVelocity - (constraint angularImpulse * stateA inverseInertia).
+	stateB linearVelocity: stateB linearVelocity + (constraint linearImpulse * stateB inverseMass).
+	stateB angularVelocity: stateB angularVelocity + (constraint angularImpulse * stateB inverseInertia)
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveMotorJointConstraint: constraint biasEnabled: biasEnabled [
+	| stateA stateB angularSeparation angularBias increment oldImpulse newImpulse linearSeparation linearBias relativeVelocity vectorIncrement oldVector newVector magnitude |
+	stateA := constraint bodyStateA. stateB := constraint bodyStateB.
+	angularSeparation := constraint baseAngularSeparation + stateB deltaRotation - stateA deltaRotation.
+	angularBias := (1.0 / step substepTime) * constraint joint correctionFactor * angularSeparation.
+	increment := (constraint angularMass * ((stateB angularVelocity - stateA angularVelocity) + angularBias)) negated.
+	oldImpulse := constraint angularImpulse.
+	newImpulse := (oldImpulse + increment max: constraint maximumAngularImpulse negated) min: constraint maximumAngularImpulse.
+	constraint angularImpulse: newImpulse. increment := newImpulse - oldImpulse.
+	stateA angularVelocity: stateA angularVelocity - (increment * stateA inverseInertia).
+	stateB angularVelocity: stateB angularVelocity + (increment * stateB inverseInertia).
+	linearSeparation := constraint baseLinearSeparation + stateB deltaPosition - stateA deltaPosition.
+	linearBias := linearSeparation * ((1.0 / step substepTime) * constraint joint correctionFactor).
+	relativeVelocity := stateB linearVelocity - stateA linearVelocity.
+	vectorIncrement := (relativeVelocity + linearBias) * constraint linearMass negated.
+	oldVector := constraint linearImpulse. newVector := oldVector + vectorIncrement. magnitude := newVector r.
+	(magnitude > constraint maximumLinearImpulse and: [ magnitude > 0.0 ]) ifTrue: [ newVector := newVector * (constraint maximumLinearImpulse / magnitude) ].
+	constraint linearImpulse: newVector. vectorIncrement := newVector - oldVector.
+	stateA linearVelocity: stateA linearVelocity - (vectorIncrement * stateA inverseMass).
+	stateB linearVelocity: stateB linearVelocity + (vectorIncrement * stateB inverseMass)
+]

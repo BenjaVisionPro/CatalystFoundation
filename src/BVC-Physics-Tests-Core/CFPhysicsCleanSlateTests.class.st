@@ -5926,3 +5926,20 @@ CFPhysicsCleanSlateTests >> testPullInteractionPreservesBodyVelocityWhenReleased
 	self assert: body angularVelocity equals: 3.5.
 	self assert: world mouseJoints isEmpty
 ]
+
+
+{ #category : 'examples - motor joints' }
+CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
+	<gtExample> | world first second joint |
+	world := CFPhysicsWorld new.
+	first := self cleanStateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanStateBodyWithSequence: 2 position: 40 @ 0 extent: 20 @ 20.
+	first world: world. second world: world.
+	joint := CFPhysicsMotorJoint between: first and: second.
+	joint maximumForce: 100000.0; maximumTorque: 100000.0.
+	world addMotorJoint: joint.
+	second position: 80 @ 0.
+	10 timesRepeat: [ world step ].
+	self assert: second position x < 80.
+	^ joint
+]

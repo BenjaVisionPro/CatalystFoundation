@@ -435,6 +435,22 @@ CFPhysics >> removeDistanceJoint: aJoint [
 	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
 ]
 
+{ #category : 'motor joints' }
+CFPhysics >> motorJointTo: anotherElement [
+	| aWorld otherWorld joint |
+	aWorld := self world. otherWorld := anotherElement physics world.
+	(aWorld notNil and: [ aWorld == otherWorld ]) ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
+	aWorld synchroniseMembership.
+	joint := CFPhysicsMotorJoint between: self body and: anotherElement physics body.
+	^ aWorld addMotorJoint: joint
+]
+
+{ #category : 'motor joints' }
+CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. aWorld synchroniseMembership. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
+
+{ #category : 'motor joints' }
+CFPhysics >> removeMotorJoint: aJoint [ self world ifNotNil: [ :aWorld | aWorld removeMotorJoint: aJoint ] ]
+
 { #category : 'revolute joints' }
 CFPhysics >> revoluteJointTo: anotherElement [
 	| aWorld otherWorld joint |
