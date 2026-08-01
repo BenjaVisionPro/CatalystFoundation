@@ -63,7 +63,9 @@ CFPhysicsJointOverlay >> update [
 			(CFPhysicsJointVisual diagnosticOn: joint context: context)
 				addTo: root;
 				yourself ].
-		visual update ].
+		visual
+			joint: joint;
+			update ].
 	^ self
 ]
 
