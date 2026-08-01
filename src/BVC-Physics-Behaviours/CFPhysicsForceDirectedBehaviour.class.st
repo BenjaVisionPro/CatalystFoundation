@@ -180,8 +180,8 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs 
 CFPhysicsForceDirectedBehaviour >> ensureSpringFor: aConnection [
 	^ springsByConnection at: aConnection ifAbsentPut: [
 		| spring sourceBody targetBody |
-		sourceBody := aConnection key physics requireBodyState.
-		targetBody := aConnection value physics requireBodyState.
+		sourceBody := aConnection key physics body.
+		targetBody := aConnection value physics body.
 		spring := CFPhysicsSpringConstraint between: sourceBody and: targetBody.
 		spring
 			restLength: restLength;
@@ -196,8 +196,8 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 	^ repulsionsByPair at: pair ifAbsentPut: [
 		| constraint |
 		constraint := CFPhysicsRepulsionConstraint
-			between: pair first physics requireBodyState
-			and: pair second physics requireBodyState.
+			between: pair first physics body
+			and: pair second physics body.
 		constraint distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
 			force: repulsion;
 			softeningDistance: repulsionSofteningDistance;

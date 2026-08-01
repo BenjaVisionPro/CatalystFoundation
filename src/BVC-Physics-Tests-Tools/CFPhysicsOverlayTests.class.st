@@ -600,7 +600,7 @@ CFPhysicsOverlayTests >> physicsOverlayClearsSelectionWhenTheSelectedBodyRetires
 	self assert: overlay objectInspector selectedPhysics == physics.
 	element removeFromParent.
 	overlay refresh.
-	self assert: physics bodyState world isNil.
+	self assert: physics body world isNil.
 	self assert: overlay selectedElement isNil.
 	self assert: overlay objectInspector selectedPhysics isNil.
 	self assert: overlay objectInspector panel visibility equals: BlVisibility gone.
@@ -758,7 +758,7 @@ CFPhysicsOverlayTests >> physicsOverlayHighlightsTheSelectedBody [
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
-	selectedBody := element existingPhysics bodyState.
+	selectedBody := element existingPhysics bodyOrNil.
 	self assert: overlay selectionVisual isNil.
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectionVisual notNil.
@@ -774,8 +774,8 @@ CFPhysicsOverlayTests >> physicsOverlayMovesTheSelectionHighlight [
 	overlay := host existingPhysicsOverlay.
 	first := host children first.
 	second := host children second.
-	firstBody := first existingPhysics bodyState.
-	secondBody := second existingPhysics bodyState.
+	firstBody := first existingPhysics bodyOrNil.
+	secondBody := second existingPhysics bodyOrNil.
 	first fireEvent: BlClickEvent new.
 	selection := overlay selectionVisual.
 	self assert: selection body == firstBody.
@@ -809,7 +809,7 @@ CFPhysicsOverlayTests >> physicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden 
 	host := self physicsOverlayCanBeInstalled.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
-	selectedBody := element existingPhysics bodyState.
+	selectedBody := element existingPhysics bodyOrNil.
 	element fireEvent: BlClickEvent new.
 	self assert: overlay selectedElement == element.
 	overlay bodiesEnabled: false.
@@ -919,7 +919,7 @@ CFPhysicsOverlayTests >> physicsOverlayPresentationDiagnosticsFollowHostTransfor
 	world := host physics world.
 	first := host children first.
 	second := host children second.
-	spring := CFPhysicsSpringConstraint between: first physics bodyState and: second physics bodyState.
+	spring := CFPhysicsSpringConstraint between: first physics body and: second physics body.
 	world addSpringConstraint: spring.
 	first physics position: 80 @ 80.
 	second physics position: 80 @ 80.

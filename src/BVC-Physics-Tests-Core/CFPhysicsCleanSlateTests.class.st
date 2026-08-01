@@ -1828,7 +1828,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 	self assert: button physics position x > 20.
 	scripter mouseUp play.
 	self assert: world pointerConstraints isEmpty.
-	self assert: button physics bodyState velocity x > 0.
+	self assert: button physics body velocity x > 0.
 	^ button
 ]
 
@@ -1985,7 +1985,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 	joint := bodyAnchor distanceJointTo: worldAnchor.
 	joint restLength: 50.
 	result := world step.
-	self assert: joint firstBody == element physics bodyState.
+	self assert: joint firstBody == element physics body.
 	self assert: joint secondBody isNil.
 	self assert: result constraints size equals: 1.
 	self assert: result islands size equals: 1.
@@ -2008,9 +2008,9 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody 
 	worldAnchor := world anchorAt: 10 @ 10.
 	joint := bodyAnchor distanceJointTo: worldAnchor.
 	joint restLength: 0.
-	element physics bodyState sleep.
+	element physics body sleep.
 	worldAnchor point: 110 @ 10.
-	self assert: element physics bodyState isAwake.
+	self assert: element physics body isAwake.
 	world step.
 	self assert: element physics position x > 0.
 	^ joint
@@ -2027,11 +2027,11 @@ CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpo
 	world := owner physics beWorld.
 	world synchroniseMembership.
 	joint := first physics distanceJointTo: second.
-	first physics bodyState sleep.
-	second physics bodyState sleep.
+	first physics body sleep.
+	second physics body sleep.
 	joint restLength: joint restLength + 10.
-	self assert: first physics bodyState isAwake.
-	self assert: second physics bodyState isAwake.
+	self assert: first physics body isAwake.
+	self assert: second physics body isAwake.
 	^ joint
 ]
 
@@ -2119,7 +2119,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
 	joint := bodyAnchor revoluteJointTo: worldAnchor.
 	element physics velocity: 100 @ 0.
 	result := world step.
-	self assert: joint firstBody == element physics bodyState.
+	self assert: joint firstBody == element physics body.
 	self assert: joint secondBody isNil.
 	self assert: result constraints size equals: 1.
 	self assert: result islands size equals: 1.
@@ -2141,9 +2141,9 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody 
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
 	joint := bodyAnchor revoluteJointTo: worldAnchor.
-	element physics bodyState sleep.
+	element physics body sleep.
 	worldAnchor point: 110 @ 10.
-	self assert: element physics bodyState isAwake.
+	self assert: element physics body isAwake.
 	world step.
 	self assert: element physics position x > 0.
 	^ joint
@@ -2273,7 +2273,7 @@ CFPhysicsCleanSlateTests >> pointerDraggingRespectsARailAxis [
 		limitsEnabled: true.
 	timestamp := DateAndTime now.
 	pointerConstraint := CFPhysicsPointerConstraint
-		body: element physics bodyState
+		body: element physics body
 		pointerPosition: 10 @ 10
 		timestamp: timestamp.
 	pointerConstraint
@@ -2397,13 +2397,13 @@ CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints
 	joint := first physics distanceJointTo: second.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs isEmpty.
 	joint collideConnected: true.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs size equals: 1.
 	^ joint
 ]
@@ -2423,13 +2423,13 @@ CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints
 	joint := first physics revoluteJointTo: second.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs isEmpty.
 	joint collideConnected: true.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs size equals: 1.
 	^ joint
 ]
@@ -2449,13 +2449,13 @@ CFPhysicsCleanSlateTests >> fixedJointCanSuppressCollisionBetweenItsEndpoints [
 	joint := first physics fixedJointTo: second.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs isEmpty.
 	joint collideConnected: true.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs size equals: 1.
 	^ joint
 ]
@@ -2475,13 +2475,13 @@ CFPhysicsCleanSlateTests >> railJointCanSuppressCollisionBetweenItsEndpoints [
 	joint := first physics railJointTo: second along: 1 @ 0.
 	self assert: joint collideConnected not.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs isEmpty.
 	joint collideConnected: true.
 	pairs := CFPhysicsPairFinder new pairsAmong: {
-		first physics bodyState.
-		second physics bodyState }.
+		first physics body.
+		second physics body }.
 	self assert: pairs size equals: 1.
 	^ joint
 ]
@@ -2522,11 +2522,11 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 	world synchroniseMembership.
 	joint := first physics distanceJointTo: second.
 	joint collideConnected: true.
-	first physics bodyState sleep.
-	second physics bodyState sleep.
+	first physics body sleep.
+	second physics body sleep.
 	joint collideConnected: false.
-	self assert: first physics bodyState isAwake.
-	self assert: second physics bodyState isAwake.
+	self assert: first physics body isAwake.
+	self assert: second physics body isAwake.
 	^ joint
 ]
 
@@ -3144,7 +3144,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateALocalAnchor [
 	element physics position: 100 @ 50.
 	anchor := element physics localAnchorAt: 40 @ 10.
 	self assert: anchor class equals: CFPhysicsLocalAnchor.
-	self assert: anchor body == element physics bodyState.
+	self assert: anchor body == element physics body.
 	self assert: anchor worldPoint equals: 140 @ 60.
 	^ anchor
 ]
@@ -3199,7 +3199,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateANormalisedAnchor [
 	element physics position: 100 @ 50.
 	anchor := element physics normalisedAnchorAt: 1 @ 1.
 	self assert: anchor class equals: CFPhysicsNormalisedAnchor.
-	self assert: anchor body == element physics bodyState.
+	self assert: anchor body == element physics body.
 	self assert: anchor worldPoint equals: 140 @ 70.
 	^ anchor
 ]
@@ -5455,7 +5455,7 @@ CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
 	world := owner physics beWorld.
 	world synchroniseMembership.
 	physics := element physics.
-	self assert: physics bodyType == physics bodyState bodyType.
+	self assert: physics bodyType == physics body bodyType.
 	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
 	physics beKinematic.
 	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
@@ -5607,7 +5607,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world synchroniseMembership.
-	body := element physics bodyState.
+	body := element physics body.
 	body position: 0 @ 0.
 	state := world captureStateAfterSynchronisation.
 	body
@@ -5638,8 +5638,8 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world synchroniseMembership.
-	first := firstElement physics bodyState.
-	second := secondElement physics bodyState.
+	first := firstElement physics body.
+	second := secondElement physics body.
 	first position: 0 @ 0.
 	second position: 40 @ 0.
 	joint := CFPhysicsDistanceJoint between: first and: second.

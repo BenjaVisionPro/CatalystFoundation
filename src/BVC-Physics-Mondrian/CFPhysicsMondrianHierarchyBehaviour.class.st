@@ -151,7 +151,7 @@ CFPhysicsMondrianHierarchyBehaviour >> rebuildJointsFor: roots [
 	currentRoots := roots asArray.
 	currentRoots do: [ :root |
 		| bodyAnchor joint |
-		bodyAnchor := CFPhysicsBodyCentreAnchor on: root physics requireBodyState.
+		bodyAnchor := CFPhysicsBodyCentreAnchor on: root physics body.
 		joint := bodyAnchor distanceJointTo: centreAnchor.
 		radialJoints at: root put: joint ].
 	self buildRingJointsFor: currentRoots
@@ -163,15 +163,15 @@ CFPhysicsMondrianHierarchyBehaviour >> buildRingJointsFor: roots [
 	count := roots size.
 	count < 2 ifTrue: [ ^ self ].
 	count = 2 ifTrue: [
-		ringJoints add: ((CFPhysicsBodyCentreAnchor on: roots first physics requireBodyState)
-			distanceJointTo: (CFPhysicsBodyCentreAnchor on: roots second physics requireBodyState)).
+		ringJoints add: ((CFPhysicsBodyCentreAnchor on: roots first physics body)
+			distanceJointTo: (CFPhysicsBodyCentreAnchor on: roots second physics body)).
 		^ self ].
 	1 to: count do: [ :index |
 		| firstRoot secondRoot joint |
 		firstRoot := roots at: index.
 		secondRoot := roots at: (index \ count) + 1.
-		joint := (CFPhysicsBodyCentreAnchor on: firstRoot physics requireBodyState)
-			distanceJointTo: (CFPhysicsBodyCentreAnchor on: secondRoot physics requireBodyState).
+		joint := (CFPhysicsBodyCentreAnchor on: firstRoot physics body)
+			distanceJointTo: (CFPhysicsBodyCentreAnchor on: secondRoot physics body).
 		ringJoints add: joint ]
 ]
 
@@ -209,7 +209,7 @@ CFPhysicsMondrianHierarchyBehaviour >> radiusFor: roots [
 	count < 2 ifTrue: [ ^ 0.0 ].
 	clearance := (roots collect: [ :root |
 		| extent |
-		extent := root physics requireBodyState extent.
+		extent := root physics body extent.
 		extent x max: extent y ]) max + rootSpacing.
 	calculatedRadius := clearance / (2.0 * (Float pi / count) sin).
 	^ calculatedRadius max: minimumRootRadius

@@ -133,7 +133,7 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 	[ current notNil ] whileTrue: [
 		physics := current existingPhysics.
 		physics ifNotNil: [
-			body := physics bodyState.
+			body := physics body.
 			(body notNil and: [ body world == world ]) ifTrue: [ ^ current ] ].
 		current == host ifTrue: [ ^ nil ].
 		current := current parent ].
@@ -177,7 +177,7 @@ CFPhysicsOverlay >> refreshSelectionVisual [
 		^ self ].
 	selectedBody := selectedElement
 		ifNil: [ nil ]
-		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyState ] ].
+		ifNotNil: [ | physics | physics := selectedElement existingPhysics. physics ifNotNil: [ physics bodyOrNil ] ].
 	selectedBody ifNil: [ ^ self clearSelectionVisual ].
 	(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedBody ])
 		ifTrue: [ selectionVisual update. ^ self ].
@@ -310,7 +310,7 @@ CFPhysicsOverlay >> refreshSelectedObject [
 	selectedElement ifNil: [ ^ self ].
 	physics := selectedElement existingPhysics.
 	physics ifNil: [ ^ self clearSelection ].
-	body := physics bodyState.
+	body := physics body.
 	(body isNil or: [ body world ~~ world ]) ifTrue: [ ^ self clearSelection ].
 	objectInspector selectedObject == physics ifFalse: [ objectInspector inspect: physics ].
 	objectInspector refresh.

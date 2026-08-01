@@ -85,7 +85,7 @@ CFPhysicsMondrianForceDirectedBehaviour >> synchroniseNodeBehaviours [
 { #category : 'private - nodes' }
 CFPhysicsMondrianForceDirectedBehaviour >> installNode: node [
 	| body orientation |
-	body := node physics requireBodyState.
+	body := node physics body.
 	originalDensityByNode at: node put: body density.
 	originalAngularDampingByNode at: node put: body angularDamping.
 	body
@@ -105,7 +105,7 @@ CFPhysicsMondrianForceDirectedBehaviour >> removeNode: node [
 	| body |
 	(orientationBehavioursByNode removeKey: node ifAbsent: [ nil ])
 		ifNotNil: [ :orientation | orientation remove ].
-	body := node existingPhysics ifNil: [ nil ] ifNotNil: [ :each | each bodyState ].
+	body := node existingPhysics ifNil: [ nil ] ifNotNil: [ :each | each bodyOrNil ].
 	body ifNotNil: [
 		(originalDensityByNode removeKey: node ifAbsent: [ nil ])
 			ifNotNil: [ :value | body density: value ].
