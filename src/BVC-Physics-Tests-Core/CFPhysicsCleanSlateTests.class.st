@@ -6894,15 +6894,18 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIsla
 { #category : 'examples - telemetry testing' }
 CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
 	<gtExample>
-	| world run |
+	| world run initialStepNumber |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	initialStepNumber := world stepNumber.
 	run := CFPhysicsTelemetryTestRun
 		world: world
 		warmUpSteps: 2
 		measuredSteps: 3.
 	self assert: run sampleCount equals: 3.
 	self assert: (run physicsData allSatisfy: [ :each | (each at: #kind) = #step ]).
-	self assert: (run valuesAt: #stepNumber) equals: #(3 4 5).
+	self
+		assert: (run valuesAt: #stepNumber)
+		equals: (initialStepNumber + 3 to: initialStepNumber + 5) asArray.
 	self assert: run analysis sampleCount equals: 3.
 	self assert: world telemetryEnabled not.
 	^ run
@@ -6947,8 +6950,9 @@ CFPhysicsCleanSlateTests >> telemetryResetPreservesRecordingBuffer [
 { #category : 'examples - telemetry testing' }
 CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
 	<gtExample>
-	| world |
+	| world initialStepNumber |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	initialStepNumber := world stepNumber.
 	world
 		telemetryCapacity: 3;
 		telemetryEnabled: true;
@@ -6956,7 +6960,9 @@ CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
 		step: 5.
 	self assert: world telemetryCapacity equals: 3.
 	self assert: world telemetryRecordings size equals: 3.
-	self assert: ((world telemetryRecordings collect: [ :each | each physicsData at: #stepNumber ]) equals: #(3 4 5)).
+	self
+		assert: (world telemetryRecordings collect: [ :each | each physicsData at: #stepNumber ])
+		equals: (initialStepNumber + 3 to: initialStepNumber + 5) asArray.
 	world telemetryEnabled: false.
 	^ world
 ]
