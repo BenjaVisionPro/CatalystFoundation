@@ -77,3 +77,13 @@ CFPhysicsAABB >> mergedWith: anotherAABB [
 		position: mergedMinimum
 		extent: mergedMaximum - mergedMinimum
 ]
+
+
+{ #category : 'combining' }
+CFPhysicsAABB >> expandedBy: aNumber [
+	| distance |
+	distance := aNumber asFloat max: 0.0.
+	^ CFPhysicsAABB
+		position: minimum - (distance @ distance)
+		extent: self extent + ((distance * 2.0) @ (distance * 2.0))
+]

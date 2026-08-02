@@ -70,10 +70,18 @@ CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
+	^ self
+		pairsAmongSolvedStepStates: stepStates
+		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
+		step: nil
+]
+
+{ #category : 'finding' }
+CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step [
 	| entries active pairs |
 	self resetMeasurements.
 	entries := (stepStates collect: [ :state |
-		{ state. state solvedSweptAABB. state body sequence } ]) asArray.
+		{ state. (self broadphaseAABBFor: state step: step). state body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
 	entryCount := entries size.
 	active := OrderedCollection new: entries size.
@@ -210,4 +218,17 @@ CFPhysicsPairFinder >> entriesSortedByMinimumX: entries [
 		left second minimum x = right second minimum x
 			ifTrue: [ left third < right third ]
 			ifFalse: [ left second minimum x < right second minimum x ] ]
+]
+
+
+{ #category : 'private - bounds' }
+CFPhysicsPairFinder >> broadphaseAABBFor: aStepState step: aStep [
+	| speculativeDistance proxyMargin |
+	aStep ifNil: [ ^ aStepState solvedSweptAABB ].
+	speculativeDistance := aStep speculativeDistance.
+	proxyMargin := aStepState body isStatic
+		ifTrue: [ speculativeDistance ]
+		ifFalse: [ aStep broadphaseAABBMargin ].
+	^ (aStepState solvedSweptAABB expandedBy: speculativeDistance)
+		expandedBy: proxyMargin
 ]

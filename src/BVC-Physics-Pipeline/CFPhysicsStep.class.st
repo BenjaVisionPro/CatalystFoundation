@@ -5,7 +5,7 @@ I describe the numerical configuration and identity of one simulation step. I de
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'maximumContactPushSpeed', 'hitEventThreshold', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'maximumContactPushSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -27,6 +27,8 @@ CFPhysicsStep >> prepare [
 	warmStartRatio ifNil: [ warmStartRatio := 1.0 ].
 	maximumContactPushSpeed ifNil: [ maximumContactPushSpeed := 3.0 ].
 	hitEventThreshold ifNil: [ hitEventThreshold := 1.0 ].
+	speculativeDistance ifNil: [ speculativeDistance := 0.02 ].
+	broadphaseAABBMargin ifNil: [ broadphaseAABBMargin := 0.05 ].
 	substepCount := substepCount max: 1.
 	substepTime := timeStep / substepCount.
 	inverseSubstepTime := substepTime = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / substepTime ].
@@ -110,3 +112,26 @@ CFPhysicsStep >> stepNumber: anInteger [
 	stepNumber := anInteger
 ]
 
+
+
+{ #category : 'broadphase' }
+CFPhysicsStep >> speculativeDistance [
+	"Distance in physics length units added around shape bounds so contacts can be prepared before shapes overlap."
+	^ speculativeDistance
+]
+
+{ #category : 'broadphase' }
+CFPhysicsStep >> speculativeDistance: aNumber [
+	speculativeDistance := aNumber asFloat max: 0.0
+]
+
+{ #category : 'broadphase' }
+CFPhysicsStep >> broadphaseAABBMargin [
+	"Additional distance in physics length units used to enlarge moving-body broadphase bounds."
+	^ broadphaseAABBMargin
+]
+
+{ #category : 'broadphase' }
+CFPhysicsStep >> broadphaseAABBMargin: aNumber [
+	broadphaseAABBMargin := aNumber asFloat max: 0.0
+]

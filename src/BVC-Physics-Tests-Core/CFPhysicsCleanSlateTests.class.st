@@ -6479,3 +6479,32 @@ CFPhysicsCleanSlateTests >> continuousClampUsesTheSolvedSweepFraction [
 	self assert: (state currentTransform rotation closeTo: body rotation + 0.5).
 	^ state
 ]
+
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> aabbExpansionPreservesCentreAndAddsMargin [
+	<gtExample>
+	| bounds expanded |
+	bounds := CFPhysicsAABB position: 10 @ 20 extent: 30 @ 40.
+	expanded := bounds expandedBy: 5.0.
+	self assert: expanded minimum equals: 5 @ 15.
+	self assert: expanded maximum equals: 45 @ 65.
+	self assert: expanded centre equals: bounds centre.
+	^ expanded
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> worldScalesBroadphaseDistancesIntoEachStep [
+	<gtExample>
+	| owner world firstStep secondStep |
+	owner := BlElement new size: 100 @ 100.
+	world := owner physics beWorld.
+	firstStep := world newStep.
+	self assert: (firstStep speculativeDistance closeTo: 2.0).
+	self assert: (firstStep broadphaseAABBMargin closeTo: 5.0).
+	world lengthUnitsPerMetre: 200.0.
+	secondStep := world newStep.
+	self assert: (secondStep speculativeDistance closeTo: 4.0).
+	self assert: (secondStep broadphaseAABBMargin closeTo: 10.0).
+	^ secondStep
+]

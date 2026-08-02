@@ -446,6 +446,8 @@ CFPhysicsWorld >> newStep [
 		stepNumber: stepNumber + 1;
 		maximumContactPushSpeed: (self lengthUnitsForMetres: maximumContactPushSpeed);
 		hitEventThreshold: (self lengthUnitsForMetres: hitEventThreshold);
+		speculativeDistance: (self lengthUnitsForMetres: 0.02);
+		broadphaseAABBMargin: (self lengthUnitsForMetres: 0.05);
 		warmStartRatio: (warmStarting
 		ifFalse: [ 0.0 ]
 		ifTrue: [ previousTimeStep
