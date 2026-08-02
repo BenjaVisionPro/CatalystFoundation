@@ -11,6 +11,11 @@ Class {
 	#package : 'BVC-Physics-Core'
 }
 
+{ #category : 'configuration' }
+CFPhysicsTelemetryLogger class >> defaultCapacity [
+	^ 3600
+]
+
 { #category : 'instance creation' }
 CFPhysicsTelemetryLogger class >> on: aWorld [
 	^ self new world: aWorld; yourself
@@ -20,7 +25,6 @@ CFPhysicsTelemetryLogger class >> on: aWorld [
 CFPhysicsTelemetryLogger >> initialize [
 	super initialize.
 	self telemetryClass: ProcessTelemetry.
-	recordings := CFPhysicsTelemetryRingBuffer capacity: 3600.
 	lastAnnouncementMilliseconds := 0.
 	announcementIntervalMilliseconds := 250.
 	detachedSignals := SharedQueue new
@@ -37,7 +41,12 @@ CFPhysicsTelemetryLogger >> capacity: anInteger [
 
 { #category : 'initialization' }
 CFPhysicsTelemetryLogger >> reset [
-	recordings removeAll
+	| retainedCapacity |
+	retainedCapacity := recordings
+		ifNil: [ self class defaultCapacity ]
+		ifNotNil: [ recordings capacity ].
+	mutex critical: [
+		recordings := CFPhysicsTelemetryRingBuffer capacity: retainedCapacity ]
 ]
 
 { #category : 'accessing' }
