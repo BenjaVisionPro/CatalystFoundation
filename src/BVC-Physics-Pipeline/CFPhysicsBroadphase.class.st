@@ -10,7 +10,7 @@ contact as a broadphase candidate rather than as a persistent contact object.
 Class {
 	#name : 'CFPhysicsBroadphase',
 	#superclass : 'Object',
-	#instVars : [ 'staticTree', 'kinematicTree', 'dynamicTree', 'proxiesByBody', 'proxyTypesByBody', 'movedBodies', 'candidatePairsByKey', 'pairFilter', 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount', 'queryVisitCount', 'lastMovedProxyCount' ],
+	#instVars : [ 'staticTree', 'kinematicTree', 'dynamicTree', 'proxiesByBody', 'proxyTypesByBody', 'movedBodies', 'candidatePairsByKey', 'pairFilter', 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount', 'queryVisitCount', 'queryLeafVisitCount', 'lastMovedProxyCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -114,10 +114,7 @@ CFPhysicsBroadphase >> findNewPairsUsing: statesByBody collisionSuppressedBodyPa
 
 { #category : 'private - pairs' }
 CFPhysicsBroadphase >> queryTree: aTree bounds: bounds for: queryState statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	| bodies |
-	bodies := aTree query: bounds.
-	queryVisitCount := queryVisitCount + aTree queryVisitCount.
-	bodies do: [ :otherBody |
+	aTree query: bounds do: [ :otherBody |
 		| otherState pair |
 		otherBody == queryState body ifFalse: [
 			otherState := statesByBody at: otherBody ifAbsent: [ nil ].
@@ -128,7 +125,10 @@ CFPhysicsBroadphase >> queryTree: aTree bounds: bounds for: queryState statesByB
 					with: otherState
 					collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) ifTrue: [
 					pair := CFPhysicsPair first: queryState body second: otherBody.
-					candidatePairsByKey at: pair key put: pair ] ] ] ]
+					candidatePairsByKey at: pair key put: pair ] ] ].
+		true ].
+	queryVisitCount := queryVisitCount + aTree queryVisitCount.
+	queryLeafVisitCount := queryLeafVisitCount + aTree queryLeafVisitCount
 ]
 
 { #category : 'private - pairs' }
@@ -193,7 +193,8 @@ CFPhysicsBroadphase >> resetMeasurements [
 	comparisonCount := 0.
 	acceptedPairCount := 0.
 	maximumActiveCount := 0.
-	queryVisitCount := 0
+	queryVisitCount := 0.
+	queryLeafVisitCount := 0
 ]
 
 { #category : 'measurements' }
@@ -207,6 +208,8 @@ CFPhysicsBroadphase >> maximumActiveCount [ ^ maximumActiveCount ]
 { #category : 'measurements' }
 CFPhysicsBroadphase >> queryVisitCount [ ^ queryVisitCount ]
 { #category : 'measurements' }
+CFPhysicsBroadphase >> queryLeafVisitCount [ ^ queryLeafVisitCount ]
+{ #category : 'measurements' }
 CFPhysicsBroadphase >> movedProxyCount [ ^ lastMovedProxyCount ]
 { #category : 'measurements' }
 CFPhysicsBroadphase >> proxyCount [ ^ proxiesByBody size ]
@@ -216,3 +219,12 @@ CFPhysicsBroadphase >> staticTree [ ^ staticTree ]
 CFPhysicsBroadphase >> kinematicTree [ ^ kinematicTree ]
 { #category : 'accessing' }
 CFPhysicsBroadphase >> dynamicTree [ ^ dynamicTree ]
+
+{ #category : 'measurements' }
+CFPhysicsBroadphase >> dynamicTreeAreaRatio [ ^ dynamicTree areaRatio ]
+
+{ #category : 'measurements' }
+CFPhysicsBroadphase >> kinematicTreeAreaRatio [ ^ kinematicTree areaRatio ]
+
+{ #category : 'measurements' }
+CFPhysicsBroadphase >> staticTreeAreaRatio [ ^ staticTree areaRatio ]

@@ -6575,3 +6575,37 @@ CFPhysicsCleanSlateTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
 	self assert: tree proxyCount equals: 12.
 	^ tree
 ]
+
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeQueryCanTerminateWithoutCollectingResults [
+	<gtExample>
+	| tree visited completed |
+	tree := CFPhysicsDynamicTree new.
+	tree createProxyFor: #first aabb: (CFPhysicsAABB position: 0 @ 0 extent: 10 @ 10).
+	tree createProxyFor: #second aabb: (CFPhysicsAABB position: 5 @ 5 extent: 10 @ 10).
+	visited := 0.
+	completed := tree
+		query: (CFPhysicsAABB position: 0 @ 0 extent: 20 @ 20)
+		do: [ :each |
+			visited := visited + 1.
+			false ].
+	self assert: completed not.
+	self assert: visited equals: 1.
+	self assert: tree queryLeafVisitCount equals: 1.
+	^ tree
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeReportsBox2DAreaRatio [
+	<gtExample>
+	| tree |
+	tree := CFPhysicsDynamicTree new.
+	1 to: 8 do: [ :index |
+		tree
+			createProxyFor: index
+			aabb: (CFPhysicsAABB position: (index * 10) @ 0 extent: 8 @ 8) ].
+	self assert: tree areaRatio >= 0.0.
+	self assert: tree validate.
+	^ tree
+]

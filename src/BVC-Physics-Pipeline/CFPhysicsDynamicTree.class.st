@@ -8,7 +8,7 @@ My node pool reuses released node objects. Query result ordering is made determi
 Class {
 	#name : 'CFPhysicsDynamicTree',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount', 'rotationCount' ],
+	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount', 'queryLeafVisitCount', 'rotationCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -22,6 +22,7 @@ CFPhysicsDynamicTree >> initialize [
 	nextNodeIdentifier := 1.
 	proxyCount := 0.
 	queryVisitCount := 0.
+	queryLeafVisitCount := 0.
 	rotationCount := 0
 ]
 
@@ -78,6 +79,32 @@ CFPhysicsDynamicTree >> query: anAABB [
 						ifFalse: [ stack add: first; add: second ] ] ] ].
 	^ (leaves sorted: [ :left :right | left identifier < right identifier ])
 		collect: [ :leaf | leaf userData ]
+]
+
+
+
+{ #category : 'querying' }
+CFPhysicsDynamicTree >> query: anAABB do: aBlock [
+	"Visit overlapping proxy data using the Box2D 3.1.1 tree-query traversal.
+	Answer false when aBlock terminates the query by answering false."
+	| stack node |
+	queryVisitCount := 0.
+	queryLeafVisitCount := 0.
+	root ifNil: [ ^ true ].
+	stack := OrderedCollection with: root.
+	[ stack isEmpty ] whileFalse: [
+		node := stack removeLast.
+		queryVisitCount := queryVisitCount + 1.
+		(node aabb overlaps: anAABB) ifTrue: [
+			node isLeaf
+				ifTrue: [
+					queryLeafVisitCount := queryLeafVisitCount + 1.
+					(aBlock value: node userData) ifFalse: [ ^ false ] ]
+				ifFalse: [
+					stack
+						add: node firstChild;
+						add: node secondChild ] ] ].
+	^ true
 ]
 
 { #category : 'private - allocation' }
@@ -383,6 +410,24 @@ CFPhysicsDynamicTree >> validateNode: aNode [
 CFPhysicsDynamicTree >> leafCountBelow: aNode [
 	aNode isLeaf ifTrue: [ ^ 1 ].
 	^ (self leafCountBelow: aNode firstChild) + (self leafCountBelow: aNode secondChild)
+]
+
+{ #category : 'measurements' }
+CFPhysicsDynamicTree >> queryLeafVisitCount [ ^ queryLeafVisitCount ]
+
+{ #category : 'measurements' }
+CFPhysicsDynamicTree >> areaRatio [
+	"Answer the sum of internal-node perimeters divided by the root perimeter,
+	matching b2DynamicTree_GetAreaRatio in Box2D 3.1.1."
+	| rootPerimeter totalPerimeter |
+	root ifNil: [ ^ 0.0 ].
+	rootPerimeter := root aabb perimeter.
+	rootPerimeter = 0.0 ifTrue: [ ^ 0.0 ].
+	totalPerimeter := nodes inject: 0.0 into: [ :sum :node |
+		(node isAllocated and: [ node isLeaf not and: [ node ~~ root ] ])
+			ifTrue: [ sum + node aabb perimeter ]
+			ifFalse: [ sum ] ].
+	^ totalPerimeter / rootPerimeter
 ]
 
 { #category : 'measurements' }
