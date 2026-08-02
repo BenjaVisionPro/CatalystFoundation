@@ -6733,6 +6733,6 @@ CFPhysicsCleanSlateTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
 	self assert: rebuilt > 0.
 	self assert: rebuilt <= tree proxyCount.
 	self assert: tree validate.
-	self assert: (tree query: (CFPhysicsAABB position: 30 @ 0 extent: 5 @ 5)) includes: #moving.
+	self assert: ((tree query: (CFPhysicsAABB position: 30 @ 0 extent: 5 @ 5)) includes: #moving).
 	^ tree
 ]
