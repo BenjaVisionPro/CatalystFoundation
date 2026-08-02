@@ -80,7 +80,6 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #changedPreparedManifoldCount put: preparation changedManifoldCount;
 		at: #preparedJointConstraintCount put: preparation preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: preparation preparedObjectCount;
-		at: #stepResult put: result;
 		yourself
 ]
 

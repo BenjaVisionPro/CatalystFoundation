@@ -660,7 +660,6 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #changedPreparedManifoldCount put: self constraintPreparationMeasurements changedManifoldCount;
 		at: #preparedJointConstraintCount put: self constraintPreparationMeasurements preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: self constraintPreparationMeasurements preparedObjectCount;
-		at: #stepResult put: aStepResult;
 		yourself
 ]
 
