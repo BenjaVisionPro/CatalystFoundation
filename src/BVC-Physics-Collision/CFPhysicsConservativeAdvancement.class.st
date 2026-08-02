@@ -14,7 +14,7 @@ Class {
 CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState sweep: firstSweep andShapeState: secondShapeState sweep: secondSweep [
 	| fraction distanceResult closingSpeed advance nextFraction tolerance maximumIterations |
 	tolerance := 1.0e-7.
-	maximumIterations := 32.
+	maximumIterations := 20.
 	fraction := 0.0.
 	1 to: maximumIterations do: [ :iteration |
 		distanceResult := self
@@ -23,13 +23,18 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 			andShapeState: secondShapeState
 			sweep: secondSweep
 			at: fraction.
-		(distanceResult isOverlapping or: [ distanceResult distance <= tolerance ])
-			ifTrue: [
-				^ CFPhysicsTimeOfImpactResult
-					status: #impact
-					fraction: fraction
-					distanceResult: distanceResult
-					iterations: iteration ].
+		distanceResult isOverlapping ifTrue: [
+			^ CFPhysicsTimeOfImpactResult
+				status: #overlapped
+				fraction: fraction
+				distanceResult: distanceResult
+				iterations: iteration ].
+		distanceResult distance <= tolerance ifTrue: [
+			^ CFPhysicsTimeOfImpactResult
+				status: #impact
+				fraction: fraction
+				distanceResult: distanceResult
+				iterations: iteration ].
 		closingSpeed := self
 			closingSpeedBetweenShapeState: firstShapeState
 			sweep: firstSweep
@@ -45,16 +50,22 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 				iterations: iteration ].
 		advance := distanceResult distance / closingSpeed.
 		nextFraction := fraction + advance.
-		(nextFraction > 1.0 or: [ nextFraction <= (fraction + tolerance) ]) ifTrue: [
+		nextFraction > 1.0 ifTrue: [
 			^ self
 				separatedResultBetweenShapeState: firstShapeState
 				sweep: firstSweep
 				andShapeState: secondShapeState
 				sweep: secondSweep
 				iterations: iteration ].
+		nextFraction <= (fraction + tolerance) ifTrue: [
+			^ CFPhysicsTimeOfImpactResult
+				status: #failed
+				fraction: fraction
+				distanceResult: distanceResult
+				iterations: iteration ].
 		fraction := nextFraction ].
 	^ CFPhysicsTimeOfImpactResult
-		status: #iterationLimit
+		status: #failed
 		fraction: fraction
 		distanceResult: distanceResult
 		iterations: maximumIterations

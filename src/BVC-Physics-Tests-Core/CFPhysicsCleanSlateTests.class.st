@@ -4145,7 +4145,8 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementReportsInitialOverlap [
 		sweep: firstSweep
 		andShapeState: second
 		sweep: secondSweep.
-	self assert: result hasImpact.
+	self assert: result isOverlapped.
+	self assert: result hasImpact not.
 	self assert: (result fraction closeTo: 0.0).
 	^ result
 ]

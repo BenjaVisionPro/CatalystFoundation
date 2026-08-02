@@ -1,7 +1,7 @@
 "
 I describe the outcome of a continuous collision time-of-impact query.
 
-I record the status, swept fraction, final distance result and iteration count so the pipeline can distinguish impact, separation and exhaustion.
+I record the status, swept fraction, final distance result and iteration count so the pipeline can distinguish impact, overlap, separation and algorithm failure.
 "
 Class {
 	#name : 'CFPhysicsTimeOfImpactResult',
@@ -57,8 +57,19 @@ CFPhysicsTimeOfImpactResult >> iterations: anInteger [
 ]
 
 { #category : 'testing' }
+CFPhysicsTimeOfImpactResult >> isFailed [
+	^ status = #failed
+]
+
+{ #category : 'testing' }
 CFPhysicsTimeOfImpactResult >> isIterationLimit [
-	^ status = #iterationLimit
+	"Compatibility with the former result vocabulary. New results report #failed, matching Box2D 3.1.1."
+	^ self isFailed
+]
+
+{ #category : 'testing' }
+CFPhysicsTimeOfImpactResult >> isOverlapped [
+	^ status = #overlapped
 ]
 
 { #category : 'testing' }
