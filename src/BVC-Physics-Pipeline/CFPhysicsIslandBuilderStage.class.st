@@ -20,6 +20,7 @@ CFPhysicsIslandBuilderStage >> initialize [
 
 { #category : 'accessing' }
 CFPhysicsIslandBuilderStage >> islandBuilder [ ^ islandBuilder ]
+
 { #category : 'executing' }
 CFPhysicsIslandBuilderStage >> executeOn: aStepResult [
 	| islands |
