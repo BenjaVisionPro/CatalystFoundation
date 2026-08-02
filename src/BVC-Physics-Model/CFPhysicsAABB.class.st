@@ -102,3 +102,8 @@ CFPhysicsAABB >> perimeter [
 	size := self extent.
 	^ 2.0 * (size x + size y)
 ]
+
+{ #category : 'accessing' }
+CFPhysicsAABB >> halfExtent [
+	^ self extent / 2.0
+]

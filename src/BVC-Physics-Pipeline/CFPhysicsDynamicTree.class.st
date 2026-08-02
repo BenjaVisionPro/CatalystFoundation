@@ -432,3 +432,63 @@ CFPhysicsDynamicTree >> areaRatio [
 
 { #category : 'measurements' }
 CFPhysicsDynamicTree >> rotationCount [ ^ rotationCount ]
+
+{ #category : 'querying' }
+CFPhysicsDynamicTree >> rayCastFrom: anOrigin translation: aTranslation maxFraction: anInitialMaxFraction do: aBlock [
+	"Traverse proxies using the Box2D 3.1.1 b2DynamicTree_RayCast algorithm.
+
+	aBlock receives the proxy user data and the current maximum fraction. It must answer:
+	- zero to terminate the cast;
+	- a negative value to ignore that proxy;
+	- a positive fraction no greater than the current maximum to clip the cast.
+
+	Answer true when traversal completes and false when the callback terminates it."
+	| lengthSquared inverseLength direction perpendicular absolutePerpendicular maxFraction endPoint segmentAABB stack node centre halfExtent separation extentProjection first second firstDistance secondDistance value |
+	lengthSquared := (aTranslation x * aTranslation x) + (aTranslation y * aTranslation y).
+	self assert: lengthSquared > 0.0.
+	self assert: anInitialMaxFraction >= 0.0.
+	queryVisitCount := 0.
+	queryLeafVisitCount := 0.
+	root ifNil: [ ^ true ].
+	inverseLength := 1.0 / lengthSquared sqrt.
+	direction := (aTranslation x * inverseLength) @ (aTranslation y * inverseLength).
+	perpendicular := direction y negated @ direction x.
+	absolutePerpendicular := perpendicular x abs @ perpendicular y abs.
+	maxFraction := anInitialMaxFraction asFloat.
+	endPoint := anOrigin + (aTranslation * maxFraction).
+	segmentAABB := CFPhysicsAABB
+		position: ((anOrigin x min: endPoint x) @ (anOrigin y min: endPoint y))
+		extent: ((anOrigin x max: endPoint x) @ (anOrigin y max: endPoint y))
+			- ((anOrigin x min: endPoint x) @ (anOrigin y min: endPoint y)).
+	stack := OrderedCollection with: root.
+	[ stack isEmpty ] whileFalse: [
+		node := stack removeLast.
+		queryVisitCount := queryVisitCount + 1.
+		(node aabb overlaps: segmentAABB) ifTrue: [
+			centre := node aabb centre.
+			halfExtent := node aabb halfExtent.
+			separation := (perpendicular dotProduct: anOrigin - centre) abs.
+			extentProjection := absolutePerpendicular dotProduct: halfExtent.
+			separation <= extentProjection ifTrue: [
+				node isLeaf
+					ifTrue: [
+						queryLeafVisitCount := queryLeafVisitCount + 1.
+						value := aBlock value: node userData value: maxFraction.
+						value = 0.0 ifTrue: [ ^ false ].
+						(value > 0.0 and: [ value <= maxFraction ]) ifTrue: [
+							maxFraction := value.
+							endPoint := anOrigin + (aTranslation * maxFraction).
+							segmentAABB := CFPhysicsAABB
+								position: ((anOrigin x min: endPoint x) @ (anOrigin y min: endPoint y))
+								extent: ((anOrigin x max: endPoint x) @ (anOrigin y max: endPoint y))
+									- ((anOrigin x min: endPoint x) @ (anOrigin y min: endPoint y)) ] ]
+					ifFalse: [
+						first := node firstChild.
+						second := node secondChild.
+						firstDistance := ((first aabb centre x - anOrigin x) squared) + ((first aabb centre y - anOrigin y) squared).
+						secondDistance := ((second aabb centre x - anOrigin x) squared) + ((second aabb centre y - anOrigin y) squared).
+						firstDistance < secondDistance
+							ifTrue: [ stack add: second; add: first ]
+							ifFalse: [ stack add: first; add: second ] ] ] ] ].
+	^ true
+]
