@@ -6,7 +6,7 @@ My responsibility is to retain accepted signals in a bounded ring buffer, defer 
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
-	#instVars : [ 'world', 'capacity', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'detachedSignals' ],
+	#instVars : [ 'world', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'detachedSignals' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -20,24 +20,29 @@ CFPhysicsTelemetryLogger class >> on: aWorld [
 CFPhysicsTelemetryLogger >> initialize [
 	super initialize.
 	self telemetryClass: ProcessTelemetry.
-	capacity := 3600.
-	recordings := CFPhysicsTelemetryRingBuffer capacity: capacity.
+	recordings := CFPhysicsTelemetryRingBuffer capacity: 3600.
 	lastAnnouncementMilliseconds := 0.
 	announcementIntervalMilliseconds := 250.
 	detachedSignals := SharedQueue new
 ]
 
 { #category : 'accessing' }
-CFPhysicsTelemetryLogger >> capacity [ ^ capacity ]
+CFPhysicsTelemetryLogger >> capacity [ ^ recordings capacity ]
 
 { #category : 'accessing' }
 CFPhysicsTelemetryLogger >> capacity: anInteger [
-	capacity := anInteger max: 1.
-	recordings capacity: capacity
+	recordings capacity: anInteger
+]
+
+
+{ #category : 'initialization' }
+CFPhysicsTelemetryLogger >> reset [
+	recordings removeAll
 ]
 
 { #category : 'accessing' }
 CFPhysicsTelemetryLogger >> announcementIntervalMilliseconds [ ^ announcementIntervalMilliseconds ]
+
 
 { #category : 'accessing' }
 CFPhysicsTelemetryLogger >> announcementIntervalMilliseconds: anInteger [

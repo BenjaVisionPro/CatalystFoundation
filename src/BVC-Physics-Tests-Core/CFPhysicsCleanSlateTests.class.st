@@ -6926,3 +6926,37 @@ CFPhysicsCleanSlateTests >> telemetryTestRunRestoresWorldTelemetryConfiguration 
 	world telemetryEnabled: false.
 	^ run
 ]
+
+
+{ #category : 'examples - telemetry testing' }
+CFPhysicsCleanSlateTests >> telemetryResetPreservesRecordingBuffer [
+	<gtExample>
+	| world |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world telemetryEnabled: true.
+	world step.
+	self assert: world telemetryRecordings size equals: 1.
+	world resetTelemetry.
+	self assert: world telemetryRecordings isEmpty.
+	world step.
+	self assert: world telemetryRecordings size equals: 1.
+	world telemetryEnabled: false.
+	^ world
+]
+
+{ #category : 'examples - telemetry testing' }
+CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
+	<gtExample>
+	| world |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world
+		telemetryCapacity: 3;
+		telemetryEnabled: true;
+		resetTelemetry;
+		step: 5.
+	self assert: world telemetryCapacity equals: 3.
+	self assert: world telemetryRecordings size equals: 3.
+	self assert: ((world telemetryRecordings collect: [ :each | each physicsData at: #stepNumber ]) equals: #(3 4 5)).
+	world telemetryEnabled: false.
+	^ world
+]
