@@ -4,7 +4,7 @@ I connect Bloc pull gestures to a Physics mouse joint.
 My responsibility is to track the pointer in world coordinates, configure the Box2D mouse joint for responsive UI manipulation, preserve Physics ownership of body movement, and remove the joint when interaction ends.
 "
 Class {
-	#name : 'CFPhysicsPointerJointHandler',
+	#name : 'CFPhysicsMouseJointHandler',
 	#superclass : 'Object',
 	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration' ],
 	#category : 'BVC-Physics-Bloc',
@@ -12,14 +12,14 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsPointerJointHandler class >> on: anElement [
+CFPhysicsMouseJointHandler class >> on: anElement [
 	^ self new
 		installOn: anElement;
 		yourself
 ]
 
 { #category : 'initialization' }
-CFPhysicsPointerJointHandler >> initialize [
+CFPhysicsMouseJointHandler >> initialize [
 	super initialize.
 	enabled := true.
 	hertz := 30.0.
@@ -28,7 +28,7 @@ CFPhysicsPointerJointHandler >> initialize [
 ]
 
 { #category : 'lifecycle' }
-CFPhysicsPointerJointHandler >> installOn: anElement [
+CFPhysicsMouseJointHandler >> installOn: anElement [
 	element := anElement.
 	dragStartFilter := BlEventHandler on: BlDragStartEvent do: [ :anEvent |
 		self captureInitialPointerPositionFrom: anEvent ].
@@ -49,13 +49,13 @@ CFPhysicsPointerJointHandler >> installOn: anElement [
 ]
 
 { #category : 'events' }
-CFPhysicsPointerJointHandler >> beginFrom: anEvent [
+CFPhysicsMouseJointHandler >> beginFrom: anEvent [
 	(self shouldHandle: anEvent) ifFalse: [ ^ self ].
 	self removeMouseJoint
 ]
 
 { #category : 'events' }
-CFPhysicsPointerJointHandler >> continueFrom: anEvent [
+CFPhysicsMouseJointHandler >> continueFrom: anEvent [
 	mouseJoint
 		ifNil: [ self beginMouseJointFrom: anEvent ]
 		ifNotNil: [ mouseJoint target: pointerPosition ].
@@ -64,40 +64,40 @@ CFPhysicsPointerJointHandler >> continueFrom: anEvent [
 ]
 
 { #category : 'events' }
-CFPhysicsPointerJointHandler >> endFrom: anEvent [
+CFPhysicsMouseJointHandler >> endFrom: anEvent [
 	mouseJoint ifNil: [ ^ self ].
 	self finishMouseJoint
 ]
 
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> captureInitialPointerPositionFrom: anEvent [
+CFPhysicsMouseJointHandler >> captureInitialPointerPositionFrom: anEvent [
 	initialPointerPosition := self worldPointFromGlobalPoint: anEvent position.
 	pointerPosition := initialPointerPosition
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> capturePointerPositionFrom: anEvent [
+CFPhysicsMouseJointHandler >> capturePointerPositionFrom: anEvent [
 	pointerPosition := self worldPointFromGlobalPoint: anEvent position
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> worldPointFromGlobalPoint: aPoint [
+CFPhysicsMouseJointHandler >> worldPointFromGlobalPoint: aPoint [
 	^ element globalPointToParentChildren: aPoint
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> shouldHandle: anEvent [
+CFPhysicsMouseJointHandler >> shouldHandle: anEvent [
 	^ enabled and: [ anEvent target == element ]
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> restorePositionFrom: anEvent [
+CFPhysicsMouseJointHandler >> restorePositionFrom: anEvent [
 	element relocate: anEvent oldPosition
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> beginMouseJointFrom: anEvent [
+CFPhysicsMouseJointHandler >> beginMouseJointFrom: anEvent [
 	| world body |
 	(initialPointerPosition isNil or: [ pointerPosition isNil ]) ifTrue: [ ^ self ].
 	world := element physics world.
@@ -115,7 +115,7 @@ CFPhysicsPointerJointHandler >> beginMouseJointFrom: anEvent [
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> finishMouseJoint [
+CFPhysicsMouseJointHandler >> finishMouseJoint [
 	| activeMouseJoint world |
 	mouseJoint ifNil: [ ^ self ].
 	activeMouseJoint := mouseJoint.
@@ -125,7 +125,7 @@ CFPhysicsPointerJointHandler >> finishMouseJoint [
 ]
 
 { #category : 'private' }
-CFPhysicsPointerJointHandler >> removeMouseJoint [
+CFPhysicsMouseJointHandler >> removeMouseJoint [
 	| activeMouseJoint world |
 	mouseJoint ifNil: [ ^ self ].
 	activeMouseJoint := mouseJoint.
@@ -135,54 +135,54 @@ CFPhysicsPointerJointHandler >> removeMouseJoint [
 ]
 
 { #category : 'controlling' }
-CFPhysicsPointerJointHandler >> enable [
+CFPhysicsMouseJointHandler >> enable [
 	enabled := true
 ]
 
 { #category : 'controlling' }
-CFPhysicsPointerJointHandler >> disable [
+CFPhysicsMouseJointHandler >> disable [
 	enabled := false.
 	self removeMouseJoint
 ]
 
 { #category : 'testing' }
-CFPhysicsPointerJointHandler >> isEnabled [
+CFPhysicsMouseJointHandler >> isEnabled [
 	^ enabled
 ]
 
 { #category : 'accessing' }
-CFPhysicsPointerJointHandler >> element [
+CFPhysicsMouseJointHandler >> element [
 	^ element
 ]
 
 { #category : 'accessing' }
-CFPhysicsPointerJointHandler >> mouseJoint [
+CFPhysicsMouseJointHandler >> mouseJoint [
 	^ mouseJoint
 ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> hertz [ ^ hertz ]
+CFPhysicsMouseJointHandler >> hertz [ ^ hertz ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> hertz: aNumber [
+CFPhysicsMouseJointHandler >> hertz: aNumber [
 	hertz := aNumber asFloat max: 0.0.
 	mouseJoint ifNotNil: [ mouseJoint hertz: hertz ]
 ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> dampingRatio [ ^ dampingRatio ]
+CFPhysicsMouseJointHandler >> dampingRatio [ ^ dampingRatio ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> dampingRatio: aNumber [
+CFPhysicsMouseJointHandler >> dampingRatio: aNumber [
 	dampingRatio := aNumber asFloat max: 0.0.
 	mouseJoint ifNotNil: [ mouseJoint dampingRatio: dampingRatio ]
 ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumAcceleration [ ^ maximumAcceleration ]
+CFPhysicsMouseJointHandler >> maximumAcceleration [ ^ maximumAcceleration ]
 
 { #category : 'configuration' }
-CFPhysicsPointerJointHandler >> maximumAcceleration: aNumber [
+CFPhysicsMouseJointHandler >> maximumAcceleration: aNumber [
 	maximumAcceleration := aNumber asFloat max: 0.0.
 	mouseJoint ifNotNil: [
 		mouseJoint maximumForce: maximumAcceleration * mouseJoint bodyB mass ]

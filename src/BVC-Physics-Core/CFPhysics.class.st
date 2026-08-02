@@ -121,7 +121,7 @@ CFPhysics >> element [
 { #category : 'accessing' }
 CFPhysics >> element: anElement [
 	element := anElement.
-	pointerJointHandler := CFPhysicsPointerJointHandler on: element
+	pointerJointHandler := CFPhysicsMouseJointHandler on: element
 ]
 
 { #category : 'world membership' }
