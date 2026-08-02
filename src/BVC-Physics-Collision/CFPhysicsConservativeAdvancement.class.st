@@ -12,7 +12,7 @@ Class {
 
 { #category : 'querying' }
 CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState sweep: firstSweep andShapeState: secondShapeState sweep: secondSweep [
-	| fraction distanceResult closingSpeed advance nextFraction tolerance maximumIterations |
+	| fraction distanceResult closingSpeed advance nextFraction nextDistanceResult tolerance maximumIterations |
 	tolerance := 1.0e-7.
 	maximumIterations := 20.
 	fraction := 0.0.
@@ -65,6 +65,23 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 				fraction: fraction
 				distanceResult: distanceResult
 				iterations: iteration ].
+		nextDistanceResult := self
+			distanceBetweenShapeState: firstShapeState
+			sweep: firstSweep
+			andShapeState: secondShapeState
+			sweep: secondSweep
+			at: nextFraction.
+		(nextDistanceResult isOverlapping
+			or: [ nextDistanceResult distance <= tolerance ]) ifTrue: [
+			^ self
+				refinedImpactBetweenShapeState: firstShapeState
+				sweep: firstSweep
+				andShapeState: secondShapeState
+				sweep: secondSweep
+				from: fraction
+				to: nextFraction
+				tolerance: tolerance
+				iterations: iteration ].
 		fraction := nextFraction ].
 	^ CFPhysicsTimeOfImpactResult
 		status: #failed
@@ -99,6 +116,58 @@ CFPhysicsConservativeAdvancement class >> distanceBetweenShapeState: firstShapeS
 { #category : 'private' }
 CFPhysicsConservativeAdvancement class >> dot: first with: second [
 	^ (first x * second x) + (first y * second y)
+]
+
+{ #category : 'private' }
+CFPhysicsConservativeAdvancement class >> refinedImpactBetweenShapeState: firstShapeState sweep: firstSweep andShapeState: secondShapeState sweep: secondSweep from: lowerFraction to: upperFraction tolerance: tolerance iterations: iterationCount [
+	| lower upper lowerDistance upperDistance candidate candidateDistance denominator |
+	lower := lowerFraction.
+	upper := upperFraction.
+	lowerDistance := (self
+		distanceBetweenShapeState: firstShapeState
+		sweep: firstSweep
+		andShapeState: secondShapeState
+		sweep: secondSweep
+		at: lower) distance.
+	upperDistance := self
+		distanceBetweenShapeState: firstShapeState
+		sweep: firstSweep
+		andShapeState: secondShapeState
+		sweep: secondSweep
+		at: upper.
+	1 to: 50 do: [ :rootIteration |
+		denominator := lowerDistance - upperDistance distance.
+		candidate := (rootIteration odd and: [ denominator abs > tolerance ])
+			ifTrue: [
+				lower + ((lowerDistance - tolerance) * (upper - lower) / denominator) ]
+			ifFalse: [ (lower + upper) / 2.0 ].
+		candidate := (candidate max: lower) min: upper.
+		candidateDistance := self
+			distanceBetweenShapeState: firstShapeState
+			sweep: firstSweep
+			andShapeState: secondShapeState
+			sweep: secondSweep
+			at: candidate.
+		(candidateDistance isOverlapping
+			or: [ candidateDistance distance <= tolerance ])
+			ifTrue: [
+				upper := candidate.
+				upperDistance := candidateDistance ]
+			ifFalse: [
+				lower := candidate.
+				lowerDistance := candidateDistance distance ].
+		((upper - lower) <= tolerance
+			or: [ (upperDistance distance - tolerance) abs <= tolerance ]) ifTrue: [
+			^ CFPhysicsTimeOfImpactResult
+				status: #impact
+				fraction: upper
+				distanceResult: upperDistance
+				iterations: iterationCount ] ].
+	^ CFPhysicsTimeOfImpactResult
+		status: #impact
+		fraction: upper
+		distanceResult: upperDistance
+		iterations: iterationCount
 ]
 
 { #category : 'private' }
