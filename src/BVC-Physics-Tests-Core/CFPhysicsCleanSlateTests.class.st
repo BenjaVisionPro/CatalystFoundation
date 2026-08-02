@@ -6854,3 +6854,29 @@ CFPhysicsCleanSlateTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
 	^ result
 ]
 
+
+
+{ #category : 'examples - persistent islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyRemovedConnection [
+	<gtExample>
+	| first second third firstConstraint secondConstraint graph base islands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	firstConstraint := CFPhysicsTestConstraint new bodyA: first; bodyB: second; yourself.
+	secondConstraint := CFPhysicsTestConstraint new bodyA: second; bodyB: third; yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph linkConstraint: firstConstraint.
+	graph linkConstraint: secondConstraint.
+	graph mergeIslands.
+	base := graph islandForBody: first.
+	graph unlinkConstraint: secondConstraint.
+	islands := graph splitIsland: base.
+	self assert: islands size = 2.
+	self assert: ((islands collect: [ :island | island bodies size ]) sorted = #(1 2)).
+	self assert: (graph islandForBody: first) == (graph islandForBody: second).
+	self assert: (graph islandForBody: third) ~~ (graph islandForBody: second).
+	self assert: (graph islandForConstraint: firstConstraint) == (graph islandForBody: first).
+	self assert: (graph islandForConstraint: secondConstraint) isNil.
+	^ graph
+]

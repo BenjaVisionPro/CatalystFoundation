@@ -104,10 +104,14 @@ CFPhysicsPersistentIslandGraph >> rootOf: anIsland [
 
 { #category : 'unlinking' }
 CFPhysicsPersistentIslandGraph >> unlinkConstraint: aConstraint [
-	| island |
-	island := islandByConstraint removeKey: (self keyForConstraint: aConstraint) ifAbsent: [ ^ self ].
+	| key island storedConstraint |
+	key := self keyForConstraint: aConstraint.
+	island := islandByConstraint removeKey: key ifAbsent: [ ^ self ].
 	island := self rootOf: island.
-	island removeConstraint: aConstraint
+	storedConstraint := island constraints
+		detect: [ :each | (self keyForConstraint: each) = key ]
+		ifNone: [ nil ].
+	storedConstraint ifNotNil: [ island removeConstraint: storedConstraint ]
 ]
 
 
@@ -137,3 +141,62 @@ CFPhysicsPersistentIslandGraph >> solverBodyGroups [
 			island bodies asArray sorted: [ :left :right | left sequence < right sequence ] ]
 ]
 
+
+
+{ #category : 'splitting' }
+CFPhysicsPersistentIslandGraph >> splitIsland: anIsland [
+	"Split one persistent island by traversing only its remaining runtime constraints. This is the direct Catalyst equivalent of b2SplitIsland in Box2D 3.1.1. Static bodies remain constraint endpoints but never become persistent island members."
+	| baseIsland orderedBodies activeConstraints constraintsByBody visitedBodies visitedConstraints newIslands |
+	baseIsland := self rootOf: anIsland.
+	baseIsland constraintRemoveCount = 0 ifTrue: [ ^ { baseIsland } ].
+	orderedBodies := baseIsland bodies asArray sorted: [ :left :right | left sequence < right sequence ].
+	activeConstraints := baseIsland constraints select: [ :constraint |
+		| mappedIsland |
+		mappedIsland := islandByConstraint at: (self keyForConstraint: constraint) ifAbsent: [ nil ].
+		mappedIsland notNil and: [ (self rootOf: mappedIsland) == baseIsland ] ].
+	constraintsByBody := IdentityDictionary new.
+	activeConstraints do: [ :constraint |
+		constraint bodyA ifNotNil: [ :body |
+			body isStatic ifFalse: [ self addConstraint: constraint forBody: body to: constraintsByBody ] ].
+		constraint bodyB ifNotNil: [ :body |
+			body isStatic ifFalse: [ self addConstraint: constraint forBody: body to: constraintsByBody ] ] ].
+	islands remove: baseIsland ifAbsent: [ ].
+	visitedBodies := IdentitySet new.
+	visitedConstraints := Set new.
+	newIslands := OrderedCollection new.
+	orderedBodies do: [ :seed |
+		(visitedBodies includes: seed) ifFalse: [
+			| island pending |
+			island := CFPhysicsIsland new
+				identifier: nextIdentifier;
+				yourself.
+			nextIdentifier := nextIdentifier + 1.
+			pending := OrderedCollection with: seed.
+			visitedBodies add: seed.
+			[ pending isEmpty ] whileFalse: [
+				| body |
+				body := pending removeLast.
+				island addBody: body.
+				islandByBody at: body put: island.
+				(constraintsByBody at: body ifAbsent: [ #() ]) do: [ :constraint |
+					| key other |
+					key := self keyForConstraint: constraint.
+					(visitedConstraints includes: key) ifFalse: [
+						visitedConstraints add: key.
+						island addConstraint: constraint.
+						islandByConstraint at: key put: island ].
+					other := constraint bodyA == body
+						ifTrue: [ constraint bodyB ]
+						ifFalse: [ constraint bodyA ].
+					(other notNil and: [ other isStatic not and: [ (visitedBodies includes: other) not ] ]) ifTrue: [
+						visitedBodies add: other.
+						pending add: other ] ] ].
+			islands add: island.
+			newIslands add: island ] ].
+	^ newIslands asArray
+]
+
+{ #category : 'private - splitting' }
+CFPhysicsPersistentIslandGraph >> addConstraint: aConstraint forBody: aBody to: constraintsByBody [
+	(constraintsByBody at: aBody ifAbsentPut: [ OrderedCollection new ]) add: aConstraint
+]
