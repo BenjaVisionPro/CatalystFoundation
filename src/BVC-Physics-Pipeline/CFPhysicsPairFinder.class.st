@@ -1,5 +1,7 @@
 "
-I find potentially colliding body pairs from step-local bounds. I apply collision filtering, joint suppression and deterministic sweep ordering while recording broad-phase measurements.
+I provide the remaining step-local pair discovery used by continuous collision.
+
+The normal discrete pipeline uses CFPhysicsBroadphase and its persistent Box2D 3.1.1 dynamic trees. I retain only solved-sweep candidate discovery and the shared collision filtering needed by that path.
 "
 
 Class {
@@ -70,18 +72,10 @@ CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates [
 
 { #category : 'finding' }
 CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	^ self
-		pairsAmongSolvedStepStates: stepStates
-		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
-		step: nil
-]
-
-{ #category : 'finding' }
-CFPhysicsPairFinder >> pairsAmongSolvedStepStates: stepStates collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step [
 	| entries active pairs |
 	self resetMeasurements.
 	entries := (stepStates collect: [ :state |
-		{ state. (self broadphaseAABBFor: state step: step). state body sequence } ]) asArray.
+		{ state. state solvedSweptAABB. state body sequence } ]) asArray.
 	entries := self entriesSortedByMinimumX: entries.
 	entryCount := entries size.
 	active := OrderedCollection new: entries size.
@@ -120,55 +114,6 @@ CFPhysicsPairFinder >> shouldConsider: first with: second firstAABB: firstAABB s
 	^ firstAABB overlaps: secondAABB
 ]
 
-{ #category : 'finding' }
-CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds [
-	| bodyPairs |
-	bodyPairs := stepStates collect: [ :state | state body ].
-	^ self
-		pairsAmongStepStates: stepStates
-		for: seconds
-		collisionSuppressedBodyPairs: (self collisionSuppressedBodyPairsAmong: bodyPairs)
-]
-
-{ #category : 'finding' }
-CFPhysicsPairFinder >> pairsAmongStepStates: stepStates for: seconds collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	| entries active pairs |
-	entries := (stepStates collect: [ :state |
-		{ state. state predictedSweptAABBFor: seconds. state body sequence } ]) asArray.
-	entries := self entriesSortedByMinimumX: entries.
-	active := OrderedCollection new: entries size.
-	pairs := OrderedCollection new: entries size.
-	entries do: [ :entry |
-		self expireEntriesBefore: entry second minimum x from: active.
-		active do: [ :other |
-			(self
-				shouldConsiderStepState: other first
-				with: entry first
-				firstAABB: other second
-				secondAABB: entry second
-				collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) ifTrue: [
-					pairs add: (CFPhysicsPair first: other first body second: entry first body) ] ].
-		active add: entry ].
-	^ pairs asArray sorted: [ :left :right | left comesBefore: right ]
-]
-
-{ #category : 'testing' }
-CFPhysicsPairFinder >> shouldConsiderStepState: first with: second for: seconds [
-	^ self
-		shouldConsiderStepState: first
-		with: second
-		firstAABB: (first predictedSweptAABBFor: seconds)
-		secondAABB: (second predictedSweptAABBFor: seconds)
-]
-
-{ #category : 'testing' }
-CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB [
-	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
-	(first allowsCollisionWith: second) ifFalse: [ ^ false ].
-	(self jointPreventsCollisionBetween: first body and: second body) ifTrue: [ ^ false ].
-	^ firstAABB overlaps: secondAABB
-]
-
 { #category : 'testing' }
 CFPhysicsPairFinder >> shouldConsiderStepState: first with: second firstAABB: firstAABB secondAABB: secondAABB collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	(first formsCollisionPairWith: second) ifFalse: [ ^ false ].
@@ -197,14 +142,6 @@ CFPhysicsPairFinder >> expireEntriesBefore: minimumX from: activeEntries [
 
 
 { #category : 'private - filtering' }
-CFPhysicsPairFinder >> collisionSuppressedBodyPairsAmong: bodies [
-	bodies ifEmpty: [ ^ #() ].
-	^ bodies first world
-		ifNil: [ #() ]
-		ifNotNil: [ :world | world collisionSuppressedBodyPairs ]
-]
-
-{ #category : 'private - filtering' }
 CFPhysicsPairFinder >> jointPreventsCollisionBetween: firstBody and: secondBody [
 	| world |
 	world := firstBody world.
@@ -221,14 +158,3 @@ CFPhysicsPairFinder >> entriesSortedByMinimumX: entries [
 ]
 
 
-{ #category : 'private - bounds' }
-CFPhysicsPairFinder >> broadphaseAABBFor: aStepState step: aStep [
-	| speculativeDistance proxyMargin |
-	aStep ifNil: [ ^ aStepState solvedSweptAABB ].
-	speculativeDistance := aStep speculativeDistance.
-	proxyMargin := aStepState body isStatic
-		ifTrue: [ speculativeDistance ]
-		ifFalse: [ aStep broadphaseAABBMargin ].
-	^ (aStepState solvedSweptAABB expandedBy: speculativeDistance)
-		expandedBy: proxyMargin
-]
