@@ -154,10 +154,5 @@ CFPhysicsContinuousStepStage >> manifoldGenerator: aManifoldGenerator [
 CFPhysicsContinuousStepStage >> impactFinder [ ^ impactFinder ]
 
 { #category : 'accessing' }
-CFPhysicsContinuousStepStage >> impactFinder: anObject [ impactFinder := anObject ]
-
-{ #category : 'accessing' }
 CFPhysicsContinuousStepStage >> pairFinder [ ^ pairFinder ]
 
-{ #category : 'accessing' }
-CFPhysicsContinuousStepStage >> pairFinder: anObject [ pairFinder := anObject ]

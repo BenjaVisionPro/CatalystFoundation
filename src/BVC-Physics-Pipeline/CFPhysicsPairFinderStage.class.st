@@ -18,8 +18,6 @@ CFPhysicsPairFinderStage >> initialize [
 
 { #category : 'accessing' }
 CFPhysicsPairFinderStage >> pairFinder [ ^ pairFinder ]
-{ #category : 'accessing' }
-CFPhysicsPairFinderStage >> pairFinder: anObject [ pairFinder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsPairFinderStage >> executeOn: aStepResult [
