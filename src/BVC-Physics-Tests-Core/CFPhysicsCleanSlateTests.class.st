@@ -6414,3 +6414,38 @@ CFPhysicsCleanSlateTests >> hitEventsChooseFastestPointPerContact [
 	self assert: (result hitEvents first approachSpeed closeTo: 7.0).
 	^ result
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousCollisionUsesBox2DBodyTypePolicy [
+	<gtExample>
+	| dynamic static kinematic dynamicState staticState kinematicState |
+	dynamic := self cleanSlateBodyWithSequence: 1.
+	static := self cleanSlateBodyWithSequence: 2.
+	static beStatic.
+	kinematic := self cleanSlateBodyWithSequence: 3.
+	kinematic beKinematic.
+	dynamicState := CFPhysicsBodyStepState on: dynamic.
+	staticState := CFPhysicsBodyStepState on: static.
+	kinematicState := CFPhysicsBodyStepState on: kinematic.
+	self assert: (dynamicState requiresContinuousCollisionAgainst: staticState).
+	self assert: (dynamicState requiresContinuousCollisionAgainst: kinematicState) not.
+	^ dynamicState
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> bulletContinuousCollisionIncludesMovableNonBulletBodies [
+	<gtExample>
+	| bullet dynamic otherBullet bulletState dynamicState otherBulletState |
+	bullet := self cleanSlateBodyWithSequence: 1.
+	bullet beBullet.
+	dynamic := self cleanSlateBodyWithSequence: 2.
+	otherBullet := self cleanSlateBodyWithSequence: 3.
+	otherBullet beBullet.
+	bulletState := CFPhysicsBodyStepState on: bullet.
+	dynamicState := CFPhysicsBodyStepState on: dynamic.
+	otherBulletState := CFPhysicsBodyStepState on: otherBullet.
+	self assert: (bulletState requiresContinuousCollisionAgainst: dynamicState).
+	self assert: (bulletState requiresContinuousCollisionAgainst: otherBulletState) not.
+	^ bulletState
+]

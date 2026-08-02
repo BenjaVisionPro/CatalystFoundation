@@ -1,5 +1,5 @@
 "
-I apply continuous-collision handling within the main step pipeline. I find impacts among solved states and integrates the affected bodies through the remaining substep time.
+I apply continuous-collision handling within the main step pipeline. I find the earliest impact for each fast body and clamp its solved transform to that fraction, matching the Box2D 3.1.1 continuous-collision finalisation path.
 "
 
 Class {

@@ -6,7 +6,7 @@ My responsibility is to own an element's physical state, material, shape and par
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'bullet' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -208,6 +208,7 @@ CFPhysicsBody >> initialize [
 	angularDamping := 0.0.
 	gravityScale := 1.0.
 	sleepingAllowed := true.
+	bullet := false.
 	contacts := IdentitySet new
 ]
 
@@ -728,7 +729,25 @@ CFPhysicsBody >> applyContainmentConstraint: aConstraint bounds: aRectangle [
 
 { #category : 'continuous collision' }
 CFPhysicsBody >> requiresContinuousCollisionAgainst: anotherBody [
-	^ bodyType requiresContinuousCollisionAgainst: anotherBody bodyType
+	self isBullet ifTrue: [ ^ anotherBody isBullet not ].
+	^ anotherBody isStatic
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBody >> beBullet [
+	"Enable continuous collision against static, kinematic and non-bullet dynamic bodies."
+	bullet := true
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBody >> beNonBullet [
+	"Use normal continuous collision, which tests fast dynamic bodies against static bodies."
+	bullet := false
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsBody >> isBullet [
+	^ bullet
 ]
 
 { #category : 'angular dynamics' }
