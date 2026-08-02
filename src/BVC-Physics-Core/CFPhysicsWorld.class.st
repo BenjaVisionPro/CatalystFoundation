@@ -606,6 +606,9 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #pairFinderComparisonCount put: self pairFinderMeasurements comparisonCount;
 		at: #pairFinderAcceptedPairCount put: self pairFinderMeasurements acceptedPairCount;
 		at: #pairFinderMaximumActiveCount put: self pairFinderMeasurements maximumActiveCount;
+		at: #broadphaseProxyCount put: self pairFinderMeasurements proxyCount;
+		at: #broadphaseMovedProxyCount put: self pairFinderMeasurements movedProxyCount;
+		at: #broadphaseQueryVisitCount put: self pairFinderMeasurements queryVisitCount;
 		at: #constraintCount put: aStepResult constraints size;
 		at: #jointCount put: self joints size;
 		at: #islandCount put: aStepResult islands size;

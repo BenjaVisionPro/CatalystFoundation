@@ -1,5 +1,5 @@
 "
-I find candidate collision pairs for the current step. I expose the pair finder as an ordered pipeline stage.
+I update the persistent Box2D-style broadphase and expose its candidate pairs as an ordered pipeline stage.
 "
 
 Class {
@@ -13,7 +13,7 @@ Class {
 { #category : 'initialization' }
 CFPhysicsPairFinderStage >> initialize [
 	super initialize.
-	pairFinder := CFPhysicsPairFinder new
+	pairFinder := CFPhysicsBroadphase new
 ]
 
 { #category : 'accessing' }
