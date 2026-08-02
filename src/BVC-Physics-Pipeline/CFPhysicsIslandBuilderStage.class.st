@@ -24,9 +24,17 @@ CFPhysicsIslandBuilderStage >> islandBuilder: anObject [ islandBuilder := anObje
 { #category : 'executing' }
 CFPhysicsIslandBuilderStage >> executeOn: aStepResult [
 	| islands |
-	islands := islandBuilder
-		islandsFromBodies: aStepResult bodies
-		constraints: aStepResult constraints.
+	islands := aStepResult islandBodyGroups isEmpty
+		ifTrue: [
+			"Focused stage examples may construct a pipeline result without a captured world state."
+			islandBuilder
+				islandsFromBodies: aStepResult bodies
+				constraints: aStepResult constraints ]
+		ifFalse: [
+			islandBuilder
+				islandsFromPersistentBodyGroups: aStepResult islandBodyGroups
+				bodies: aStepResult bodies
+				constraints: aStepResult constraints ].
 	aStepResult islands: islands.
 	^ islands
 ]

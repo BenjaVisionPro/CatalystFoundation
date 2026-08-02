@@ -127,3 +127,13 @@ CFPhysicsPersistentIslandGraph >> removeBody: aBody [
 	island removeBody: aBody.
 	island bodies isEmpty ifTrue: [ islands remove: island ifAbsent: [ ] ]
 ]
+
+{ #category : 'solver snapshots' }
+CFPhysicsPersistentIslandGraph >> solverBodyGroups [
+	"Answer a detached, deterministic snapshot of the non-static body membership of each persistent island. The pipeline may consume this snapshot on a background process without reading or mutating the world-owned graph."
+	self mergeIslands.
+	^ (islands asArray sorted: [ :left :right | left identifier < right identifier ])
+		collect: [ :island |
+			island bodies asArray sorted: [ :left :right | left sequence < right sequence ] ]
+]
+

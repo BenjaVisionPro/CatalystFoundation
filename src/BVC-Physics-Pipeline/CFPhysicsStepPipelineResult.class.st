@@ -5,7 +5,7 @@ I carry the mutable working state of one pipeline execution. I connect stage out
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs', 'islandBodyGroups' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -29,7 +29,8 @@ CFPhysicsStepPipelineResult >> initialize [
 	continuousStepResult := nil.
 	continuousSensorContacts := #().
 	jointConstraints := #().
-	collisionSuppressedBodyPairs := #()
+	collisionSuppressedBodyPairs := #().
+	islandBodyGroups := #()
 ]
 
 
@@ -199,3 +200,14 @@ CFPhysicsStepPipelineResult >> continuousSensorContacts [ ^ continuousSensorCont
 
 { #category : 'continuous collision' }
 CFPhysicsStepPipelineResult >> continuousSensorContacts: aCollection [ continuousSensorContacts := aCollection asArray ]
+
+{ #category : 'accessing - islands' }
+CFPhysicsStepPipelineResult >> islandBodyGroups [
+	^ islandBodyGroups
+]
+
+{ #category : 'accessing - islands' }
+CFPhysicsStepPipelineResult >> islandBodyGroups: aCollection [
+	islandBodyGroups := aCollection collect: [ :group | group asArray ]
+]
+

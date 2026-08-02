@@ -537,6 +537,7 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		gravity: (self accelerationUnitsForMetresPerSecondSquared: gravity);
 		restitutionThreshold: (self lengthUnitsForMetres: restitutionThreshold);
 		explicitlyContainedBodies: explicitlyContainedBodies;
+		islandBodyGroups: persistentIslandGraph solverBodyGroups;
 		calculationVisualState: (visualStateConsumers > 0
 			ifTrue: [ calculationVisualState ]
 			ifFalse: [ nil ]);

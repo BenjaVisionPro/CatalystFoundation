@@ -190,6 +190,7 @@ CFPhysicsStepPipeline >> newResultForWorldState: aWorldState [
 		bodyStates: aWorldState bodyStates;
 		calculationContacts: aWorldState calculationContacts;
 		orderedBodyStates: aWorldState orderedBodyStates;
+		islandBodyGroups: aWorldState islandBodyGroups;
 		yourself
 ]
 
