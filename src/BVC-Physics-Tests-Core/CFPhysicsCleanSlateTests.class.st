@@ -6556,3 +6556,22 @@ CFPhysicsCleanSlateTests >> dynamicTreeReusesReleasedNodes [
 	self assert: first isLeaf.
 	^ tree
 ]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
+	<gtExample>
+	| tree proxies |
+	tree := CFPhysicsDynamicTree new.
+	proxies := (1 to: 24) collect: [ :index |
+		tree
+			createProxyFor: index
+			aabb: (CFPhysicsAABB
+				position: (index * 7) @ ((index \ 5) * 11)
+				extent: 12 @ 9) ].
+	self assert: tree validate.
+	proxies withIndexDo: [ :proxy :index |
+		index even ifTrue: [ tree destroyProxy: proxy ] ].
+	self assert: tree validate.
+	self assert: tree proxyCount equals: 12.
+	^ tree
+]

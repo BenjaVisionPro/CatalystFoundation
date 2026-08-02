@@ -8,7 +8,7 @@ My node pool reuses released node objects. Query result ordering is made determi
 Class {
 	#name : 'CFPhysicsDynamicTree',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount' ],
+	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount', 'rotationCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -21,7 +21,8 @@ CFPhysicsDynamicTree >> initialize [
 	freeNodes := OrderedCollection new.
 	nextNodeIdentifier := 1.
 	proxyCount := 0.
-	queryVisitCount := 0
+	queryVisitCount := 0.
+	rotationCount := 0
 ]
 
 { #category : 'proxies' }
@@ -32,7 +33,7 @@ CFPhysicsDynamicTree >> createProxyFor: anObject aabb: anAABB [
 		aabb: anAABB;
 		userData: anObject;
 		height: 0.
-	self insertLeaf: leaf.
+	self insertLeaf: leaf shouldRotate: true.
 	proxyCount := proxyCount + 1.
 	^ leaf
 ]
@@ -52,7 +53,7 @@ CFPhysicsDynamicTree >> moveProxy: aLeaf to: anAABB [
 	(aLeaf aabb contains: anAABB) ifTrue: [ ^ false ].
 	self removeLeaf: aLeaf.
 	aLeaf aabb: anAABB.
-	self insertLeaf: aLeaf.
+	self insertLeaf: aLeaf shouldRotate: false.
 	^ true
 ]
 
@@ -100,7 +101,7 @@ CFPhysicsDynamicTree >> releaseNode: aNode [
 ]
 
 { #category : 'private - insertion' }
-CFPhysicsDynamicTree >> insertLeaf: leaf [
+CFPhysicsDynamicTree >> insertLeaf: leaf shouldRotate: shouldRotate [
 	| sibling oldParent newParent ancestor |
 	root ifNil: [
 		root := leaf.
@@ -125,33 +126,73 @@ CFPhysicsDynamicTree >> insertLeaf: leaf [
 				ifFalse: [ oldParent secondChild: newParent ] ].
 	ancestor := newParent parent.
 	[ ancestor notNil ] whileTrue: [
-		ancestor := self balance: ancestor.
 		self refit: ancestor.
+		shouldRotate ifTrue: [ self balance: ancestor ].
 		ancestor := ancestor parent ]
 ]
 
 { #category : 'private - insertion' }
 CFPhysicsDynamicTree >> bestSiblingFor: anAABB [
-	| node first second firstCost secondCost |
+	| node centre area leafArea directCost inheritedCost bestSibling bestCost first second cost firstLeaf secondLeaf firstBox secondBox firstDirectCost secondDirectCost firstArea secondArea firstLowerCost secondLowerCost firstDistance secondDistance |
 	node := root.
-	[ node isLeaf ] whileFalse: [
+	centre := anAABB centre.
+	leafArea := anAABB perimeter.
+	area := node aabb perimeter.
+	directCost := (node aabb mergedWith: anAABB) perimeter.
+	inheritedCost := 0.0.
+	bestSibling := node.
+	bestCost := directCost.
+	[ node height > 0 ] whileTrue: [
 		first := node firstChild.
 		second := node secondChild.
-		firstCost := self insertionCostOf: anAABB beneath: first.
-		secondCost := self insertionCostOf: anAABB beneath: second.
-		firstCost = secondCost
-			ifTrue: [ node := first identifier < second identifier ifTrue: [ first ] ifFalse: [ second ] ]
-			ifFalse: [ node := firstCost < secondCost ifTrue: [ first ] ifFalse: [ second ] ] ].
-	^ node
-]
-
-{ #category : 'private - insertion' }
-CFPhysicsDynamicTree >> insertionCostOf: anAABB beneath: aNode [
-	| mergedCost existingCost |
-	mergedCost := (aNode aabb mergedWith: anAABB) perimeter.
-	aNode isLeaf ifTrue: [ ^ mergedCost ].
-	existingCost := aNode aabb perimeter.
-	^ mergedCost - existingCost
+		cost := directCost + inheritedCost.
+		cost < bestCost ifTrue: [
+			bestSibling := node.
+			bestCost := cost ].
+		inheritedCost := inheritedCost + directCost - area.
+		firstLeaf := first isLeaf.
+		secondLeaf := second isLeaf.
+		firstBox := first aabb.
+		secondBox := second aabb.
+		firstDirectCost := (firstBox mergedWith: anAABB) perimeter.
+		secondDirectCost := (secondBox mergedWith: anAABB) perimeter.
+		firstArea := firstLeaf ifTrue: [ 0.0 ] ifFalse: [ firstBox perimeter ].
+		secondArea := secondLeaf ifTrue: [ 0.0 ] ifFalse: [ secondBox perimeter ].
+		firstLowerCost := Float infinity.
+		secondLowerCost := Float infinity.
+		firstLeaf
+			ifTrue: [
+				cost := firstDirectCost + inheritedCost.
+				cost < bestCost ifTrue: [
+					bestSibling := first.
+					bestCost := cost ] ]
+			ifFalse: [
+				firstLowerCost := inheritedCost + firstDirectCost + ((leafArea - firstArea) min: 0.0) ].
+		secondLeaf
+			ifTrue: [
+				cost := secondDirectCost + inheritedCost.
+				cost < bestCost ifTrue: [
+					bestSibling := second.
+					bestCost := cost ] ]
+			ifFalse: [
+				secondLowerCost := inheritedCost + secondDirectCost + ((leafArea - secondArea) min: 0.0) ].
+		(firstLeaf and: [ secondLeaf ]) ifTrue: [ ^ bestSibling ].
+		(bestCost <= firstLowerCost and: [ bestCost <= secondLowerCost ]) ifTrue: [ ^ bestSibling ].
+		(firstLowerCost = secondLowerCost and: [ firstLeaf not ]) ifTrue: [
+			firstDistance := (firstBox centre - centre) dotProduct: (firstBox centre - centre).
+			secondDistance := (secondBox centre - centre) dotProduct: (secondBox centre - centre).
+			firstLowerCost := firstDistance.
+			secondLowerCost := secondDistance ].
+		(firstLowerCost < secondLowerCost and: [ firstLeaf not ])
+			ifTrue: [
+				node := first.
+				area := firstArea.
+				directCost := firstDirectCost ]
+			ifFalse: [
+				node := second.
+				area := secondArea.
+				directCost := secondDirectCost ] ].
+	^ bestSibling
 ]
 
 { #category : 'private - removal' }
@@ -179,66 +220,101 @@ CFPhysicsDynamicTree >> removeLeaf: leaf [
 	leaf parent: nil.
 	ancestor := grandParent.
 	[ ancestor notNil ] whileTrue: [
-		ancestor := self balance: ancestor.
 		self refit: ancestor.
 		ancestor := ancestor parent ]
 ]
 
 { #category : 'private - balancing' }
 CFPhysicsDynamicTree >> balance: nodeA [
-	| nodeB nodeC difference nodeF nodeG oldParent |
-	(nodeA isLeaf or: [ nodeA height < 2 ]) ifTrue: [ ^ nodeA ].
+	"Translate Box2D 3.1.1 b2RotateNodes:. Rotations are selected by AABB perimeter cost, not by height imbalance."
+	| nodeB nodeC nodeD nodeE nodeF nodeG baseCost firstCost secondCost thirdCost fourthCost bestCost bestRotation merged |
+	nodeA height < 2 ifTrue: [ ^ nodeA ].
 	nodeB := nodeA firstChild.
 	nodeC := nodeA secondChild.
-	difference := nodeC height - nodeB height.
-	difference > 1 ifTrue: [
+	nodeB isLeaf ifTrue: [
 		nodeF := nodeC firstChild.
 		nodeG := nodeC secondChild.
-		oldParent := nodeA parent.
-		nodeC parent: oldParent.
-		oldParent
-			ifNil: [ root := nodeC ]
-			ifNotNil: [ oldParent firstChild == nodeA
-				ifTrue: [ oldParent firstChild: nodeC ]
-				ifFalse: [ oldParent secondChild: nodeC ] ].
-		nodeC firstChild: nodeA.
-		nodeA parent: nodeC.
-		nodeF height > nodeG height
+		baseCost := nodeC aabb perimeter.
+		firstCost := (nodeB aabb mergedWith: nodeG aabb) perimeter.
+		secondCost := (nodeB aabb mergedWith: nodeF aabb) perimeter.
+		(baseCost < firstCost and: [ baseCost < secondCost ]) ifTrue: [ ^ nodeA ].
+		firstCost < secondCost
 			ifTrue: [
-				nodeC secondChild: nodeF.
-				nodeA secondChild: nodeG.
-				nodeG parent: nodeA ]
-			ifFalse: [
-				nodeC secondChild: nodeG.
-				nodeA secondChild: nodeF.
-				nodeF parent: nodeA ].
-		self refit: nodeA.
-		self refit: nodeC.
-		^ nodeC ].
-	difference < -1 ifTrue: [
-		nodeF := nodeB firstChild.
-		nodeG := nodeB secondChild.
-		oldParent := nodeA parent.
-		nodeB parent: oldParent.
-		oldParent
-			ifNil: [ root := nodeB ]
-			ifNotNil: [ oldParent firstChild == nodeA
-				ifTrue: [ oldParent firstChild: nodeB ]
-				ifFalse: [ oldParent secondChild: nodeB ] ].
-		nodeB firstChild: nodeA.
-		nodeA parent: nodeB.
-		nodeF height > nodeG height
-			ifTrue: [
-				nodeB secondChild: nodeF.
-				nodeA firstChild: nodeG.
-				nodeG parent: nodeA ]
-			ifFalse: [
-				nodeB secondChild: nodeG.
 				nodeA firstChild: nodeF.
-				nodeF parent: nodeA ].
+				nodeC firstChild: nodeB.
+				nodeB parent: nodeC.
+				nodeF parent: nodeA ]
+			ifFalse: [
+				nodeA firstChild: nodeG.
+				nodeC secondChild: nodeB.
+				nodeB parent: nodeC.
+				nodeG parent: nodeA ].
+		self refit: nodeC.
 		self refit: nodeA.
+		rotationCount := rotationCount + 1.
+		^ nodeA ].
+	nodeC isLeaf ifTrue: [
+		nodeD := nodeB firstChild.
+		nodeE := nodeB secondChild.
+		baseCost := nodeB aabb perimeter.
+		firstCost := (nodeC aabb mergedWith: nodeE aabb) perimeter.
+		secondCost := (nodeC aabb mergedWith: nodeD aabb) perimeter.
+		(baseCost < firstCost and: [ baseCost < secondCost ]) ifTrue: [ ^ nodeA ].
+		firstCost < secondCost
+			ifTrue: [
+				nodeA secondChild: nodeD.
+				nodeB firstChild: nodeC.
+				nodeC parent: nodeB.
+				nodeD parent: nodeA ]
+			ifFalse: [
+				nodeA secondChild: nodeE.
+				nodeB secondChild: nodeC.
+				nodeC parent: nodeB.
+				nodeE parent: nodeA ].
 		self refit: nodeB.
-		^ nodeB ].
+		self refit: nodeA.
+		rotationCount := rotationCount + 1.
+		^ nodeA ].
+	nodeD := nodeB firstChild.
+	nodeE := nodeB secondChild.
+	nodeF := nodeC firstChild.
+	nodeG := nodeC secondChild.
+	baseCost := nodeB aabb perimeter + nodeC aabb perimeter.
+	firstCost := nodeB aabb perimeter + (nodeB aabb mergedWith: nodeG aabb) perimeter.
+	secondCost := nodeB aabb perimeter + (nodeB aabb mergedWith: nodeF aabb) perimeter.
+	thirdCost := nodeC aabb perimeter + (nodeC aabb mergedWith: nodeE aabb) perimeter.
+	fourthCost := nodeC aabb perimeter + (nodeC aabb mergedWith: nodeD aabb) perimeter.
+	bestCost := baseCost.
+	bestRotation := #none.
+	firstCost < bestCost ifTrue: [ bestCost := firstCost. bestRotation := #swapBWithF ].
+	secondCost < bestCost ifTrue: [ bestCost := secondCost. bestRotation := #swapBWithG ].
+	thirdCost < bestCost ifTrue: [ bestCost := thirdCost. bestRotation := #swapCWithD ].
+	fourthCost < bestCost ifTrue: [ bestRotation := #swapCWithE ].
+	bestRotation = #none ifTrue: [ ^ nodeA ].
+	bestRotation = #swapBWithF ifTrue: [
+		nodeA firstChild: nodeF.
+		nodeC firstChild: nodeB.
+		nodeB parent: nodeC.
+		nodeF parent: nodeA ].
+	bestRotation = #swapBWithG ifTrue: [
+		nodeA firstChild: nodeG.
+		nodeC secondChild: nodeB.
+		nodeB parent: nodeC.
+		nodeG parent: nodeA ].
+	bestRotation = #swapCWithD ifTrue: [
+		nodeA secondChild: nodeD.
+		nodeB firstChild: nodeC.
+		nodeC parent: nodeB.
+		nodeD parent: nodeA ].
+	bestRotation = #swapCWithE ifTrue: [
+		nodeA secondChild: nodeE.
+		nodeB secondChild: nodeC.
+		nodeC parent: nodeB.
+		nodeE parent: nodeA ].
+	self refit: nodeB.
+	self refit: nodeC.
+	self refit: nodeA.
+	rotationCount := rotationCount + 1.
 	^ nodeA
 ]
 
@@ -269,3 +345,45 @@ CFPhysicsDynamicTree >> height [ ^ root ifNil: [ 0 ] ifNotNil: [ root height ] ]
 
 { #category : 'measurements' }
 CFPhysicsDynamicTree >> queryVisitCount [ ^ queryVisitCount ]
+
+
+{ #category : 'validation' }
+CFPhysicsDynamicTree >> validate [
+	root ifNil: [
+		self assert: proxyCount = 0.
+		^ true ].
+	self assert: root parent isNil.
+	self assert: (self validateNode: root) = root height.
+	self assert: (self leafCountBelow: root) = proxyCount.
+	^ true
+]
+
+{ #category : 'private - validation' }
+CFPhysicsDynamicTree >> validateNode: aNode [
+	| firstHeight secondHeight merged |
+	aNode isLeaf ifTrue: [
+		self assert: aNode height = 0.
+		self assert: aNode firstChild isNil.
+		self assert: aNode secondChild isNil.
+		^ 0 ].
+	self assert: aNode firstChild notNil.
+	self assert: aNode secondChild notNil.
+	self assert: aNode firstChild parent == aNode.
+	self assert: aNode secondChild parent == aNode.
+	firstHeight := self validateNode: aNode firstChild.
+	secondHeight := self validateNode: aNode secondChild.
+	self assert: aNode height = (1 + (firstHeight max: secondHeight)).
+	merged := aNode firstChild aabb mergedWith: aNode secondChild aabb.
+	self assert: aNode aabb minimum equals: merged minimum.
+	self assert: aNode aabb maximum equals: merged maximum.
+	^ aNode height
+]
+
+{ #category : 'private - validation' }
+CFPhysicsDynamicTree >> leafCountBelow: aNode [
+	aNode isLeaf ifTrue: [ ^ 1 ].
+	^ (self leafCountBelow: aNode firstChild) + (self leafCountBelow: aNode secondChild)
+]
+
+{ #category : 'measurements' }
+CFPhysicsDynamicTree >> rotationCount [ ^ rotationCount ]
