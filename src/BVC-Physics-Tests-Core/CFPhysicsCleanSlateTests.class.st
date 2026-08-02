@@ -6839,10 +6839,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
 	first := CFPhysicsBody new sequence: 1; beDynamic; yourself.
 	second := CFPhysicsBody new sequence: 2; beDynamic; yourself.
 	third := CFPhysicsBody new sequence: 3; beDynamic; yourself.
-	joint := CFPhysicsDistanceJoint new
-		bodyA: second;
-		bodyB: third;
-		yourself.
+	joint := CFPhysicsDistanceJoint between: second and: third.
 	prepared := CFPhysicsPreparedDistanceJoint new
 		joint: joint;
 		yourself.
