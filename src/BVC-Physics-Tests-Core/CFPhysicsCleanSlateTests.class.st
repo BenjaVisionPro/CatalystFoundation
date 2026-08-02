@@ -6566,7 +6566,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
 		tree
 			createProxyFor: index
 			aabb: (CFPhysicsAABB
-				position: (index * 7) @ ((index \ 5) * 11)
+				position: (index * 7) @ ((index \\ 5) * 11)
 				extent: 12 @ 9) ].
 	self assert: tree validate.
 	proxies withIndexDo: [ :proxy :index |
