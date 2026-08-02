@@ -6890,3 +6890,39 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIsla
 	self assert: (graph islandForBody: third) ~~ (graph islandForBody: fourth).
 	^ graph
 ]
+
+{ #category : 'examples - telemetry testing' }
+CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
+	<gtExample>
+	| world run |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	run := CFPhysicsTelemetryTestRun
+		world: world
+		warmUpSteps: 2
+		measuredSteps: 3.
+	self assert: run sampleCount equals: 3.
+	self assert: (run physicsData allSatisfy: [ :each | (each at: #kind) = #step ]).
+	self assert: (run valuesAt: #stepNumber) equals: #(3 4 5).
+	self assert: run analysis sampleCount equals: 3.
+	self assert: world telemetryEnabled not.
+	^ run
+]
+
+{ #category : 'examples - telemetry testing' }
+CFPhysicsCleanSlateTests >> telemetryTestRunRestoresWorldTelemetryConfiguration [
+	<gtExample>
+	| world run |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world
+		telemetryCapacity: 17;
+		telemetryEnabled: true.
+	run := CFPhysicsTelemetryTestRun
+		world: world
+		warmUpSteps: 0
+		measuredSteps: 2.
+	self assert: run sampleCount equals: 2.
+	self assert: world telemetryEnabled.
+	self assert: world telemetryCapacity equals: 17.
+	world telemetryEnabled: false.
+	^ run
+]
