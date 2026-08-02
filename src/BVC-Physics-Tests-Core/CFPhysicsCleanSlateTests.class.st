@@ -6772,14 +6772,8 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphLinksAndMergesLikeBox2D [
 	first := self cleanSlateBodyWithSequence: 1.
 	second := self cleanSlateBodyWithSequence: 2.
 	third := self cleanSlateBodyWithSequence: 3.
-	firstConstraint := CFPhysicsPreparedDistanceJoint new
-		bodyA: first;
-		bodyB: second;
-		yourself.
-	secondConstraint := CFPhysicsPreparedDistanceJoint new
-		bodyA: second;
-		bodyB: third;
-		yourself.
+	firstConstraint := CFPhysicsDistanceJoint between: first and: second.
+	secondConstraint := CFPhysicsDistanceJoint between: second and: third.
 	graph := CFPhysicsPersistentIslandGraph new.
 	graph
 		linkConstraint: firstConstraint;
@@ -6800,10 +6794,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphDefersSplitAfterConstraintRemov
 	| first second constraint graph island |
 	first := self cleanSlateBodyWithSequence: 1.
 	second := self cleanSlateBodyWithSequence: 2.
-	constraint := CFPhysicsPreparedDistanceJoint new
-		bodyA: first;
-		bodyB: second;
-		yourself.
+	constraint := CFPhysicsDistanceJoint between: first and: second.
 	graph := CFPhysicsPersistentIslandGraph new.
 	graph linkConstraint: constraint.
 	graph mergeIslands.
