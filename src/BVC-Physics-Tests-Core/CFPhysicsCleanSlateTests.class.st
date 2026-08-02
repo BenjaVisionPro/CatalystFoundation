@@ -6880,3 +6880,35 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyRemovedConnection [
 	self assert: (graph islandForConstraint: secondConstraint) isNil.
 	^ graph
 ]
+
+
+{ #category : 'examples - persistent islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIslandPerStep [
+	<gtExample>
+	| first second third fourth firstConstraint secondConstraint graph firstIsland secondIsland splitIslands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	fourth := self cleanSlateBodyWithSequence: 4.
+	firstConstraint := CFPhysicsTestConstraint new bodyA: first; bodyB: second; yourself.
+	secondConstraint := CFPhysicsTestConstraint new bodyA: third; bodyB: fourth; yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph linkConstraint: firstConstraint.
+	graph linkConstraint: secondConstraint.
+	graph mergeIslands.
+	firstIsland := graph islandForBody: first.
+	secondIsland := graph islandForBody: third.
+	graph unlinkConstraint: firstConstraint.
+	graph unlinkConstraint: secondConstraint.
+	first commitAwake: true sleepTime: 0.6.
+	second commitAwake: true sleepTime: 0.6.
+	third commitAwake: true sleepTime: 0.8.
+	fourth commitAwake: true sleepTime: 0.8.
+	splitIslands := graph splitSleepiestIslandEligibleAt: 0.5.
+	self assert: splitIslands size = 2.
+	self assert: (graph islands includes: firstIsland).
+	self assert: (graph islands includes: secondIsland) not.
+	self assert: (graph islandForBody: first) == (graph islandForBody: second).
+	self assert: (graph islandForBody: third) ~~ (graph islandForBody: fourth).
+	^ graph
+]

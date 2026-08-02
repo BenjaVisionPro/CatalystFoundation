@@ -580,7 +580,9 @@ CFPhysicsWorld >> updatePersistentIslandsFrom: aPipelineResult [
 		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ] ].
 	aPipelineResult beganContacts do: [ :contact |
 		contact isSolid ifTrue: [ persistentIslandGraph linkConstraint: contact ] ].
-	persistentIslandGraph mergeIslands
+	persistentIslandGraph mergeIslands.
+	"Box2D 3.1.1 splits at most one dirty island after sleep times have been committed. The sleepiest eligible body nominates its island."
+	persistentIslandGraph splitSleepiestIslandEligibleAt: self timeToSleep
 ]
 
 { #category : 'private - telemetry' }
