@@ -2,6 +2,8 @@
 I represent a body's transform across a simulation interval.
 
 My responsibility is to provide interpolated motion and swept bounds for continuous collision detection.
+
+Catalyst stores the body origin at the rotation centre used by its shapes. This is the equivalent of Box2D's swept centre for the current Catalyst mass model, so no separate local-centre offset is required here. Rotations are stored as unwrapped scalar angles and are interpolated directly along the solved angular displacement.
 "
 Class {
 	#name : 'CFPhysicsSweep',

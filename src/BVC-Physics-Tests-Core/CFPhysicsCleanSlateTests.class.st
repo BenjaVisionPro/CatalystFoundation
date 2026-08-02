@@ -6450,3 +6450,32 @@ CFPhysicsCleanSlateTests >> bulletContinuousCollisionIncludesMovableNonBulletBod
 	self assert: (bulletState requiresContinuousCollisionAgainst: otherBulletState) not.
 	^ bulletState
 ]
+
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> sweepInterpolatesSolvedBodyOriginAndRotation [
+	<gtExample>
+	| sweep midpoint |
+	sweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 10 @ 20 rotation: 3.0)
+		to: (CFPhysicsTransform bodyOrigin: 30 @ 60 rotation: 4.0).
+	midpoint := sweep transformAt: 0.5.
+	self assert: (midpoint bodyOrigin closeTo: 20 @ 40).
+	self assert: (midpoint rotation closeTo: 3.5).
+	^ midpoint
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> continuousClampUsesTheSolvedSweepFraction [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1.
+	state := CFPhysicsBodyStepState on: body.
+	state translateBy: 40 @ 20.
+	state angularVelocity: 2.0.
+	state integratePositionBy: 1.0.
+	state clampSolvedTransformToFraction: 0.25.
+	self assert: (state currentBodyOrigin closeTo: body worldBodyOrigin + (10 @ 5)).
+	self assert: (state currentTransform rotation closeTo: body rotation + 0.5).
+	^ state
+]

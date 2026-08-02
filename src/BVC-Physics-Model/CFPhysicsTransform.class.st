@@ -2,6 +2,8 @@
 I represent a body's origin and rotation.
 
 My responsibility is to carry rigid transforms consistently through capture, collision, solving and presentation.
+
+The body origin is the body's rotation centre. Rotation is an unwrapped angle in radians; interpolation must preserve the solved angular displacement rather than choosing an alternative wrapped path.
 "
 Class {
 	#name : 'CFPhysicsTransform',
