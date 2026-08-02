@@ -9,8 +9,7 @@ Class {
 		'controls',
 		'windowToggleGroup',
 		'samplesLabel',
-		'graph',
-		'backgroundToggle'
+		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
@@ -75,18 +74,11 @@ CFPhysicsTelemetryPipelineElement >> updateGraph [
 	| recordings windowSeconds |
 	recordings := world telemetryRecordings.
 	windowSeconds := world telemetryAnalysisWindowSeconds.
-	world telemetryAnalysisInBackground
-		ifTrue: [
-			graph asyncFuture future: [
-				Processor activeProcess name: 'Physics Telemetry Inspector'.
-				CFPhysicsTelemetryAnalysis
-					recordings: recordings
-					windowSeconds: windowSeconds ] asAsyncFuture ]
-		ifFalse: [
-			graph asyncFuture interrupt.
-			self renderAnalysis: (CFPhysicsTelemetryAnalysis
-				recordings: recordings
-				windowSeconds: windowSeconds) ]
+	graph asyncFuture future: [
+		Processor activeProcess name: 'Physics Profile Analysis'.
+		CFPhysicsTelemetryAnalysis
+			recordings: recordings
+			windowSeconds: windowSeconds ] asAsyncFuture
 ]
 
 { #category : 'private - updating' }
@@ -359,7 +351,7 @@ CFPhysicsTelemetryPipelineElement >> emptyLabel: aString [
 
 { #category : 'private - building' }
 CFPhysicsTelemetryPipelineElement >> buildControls [
-	| row liveLabel backgroundLabel |
+	| row liveLabel |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 32;
@@ -371,12 +363,6 @@ CFPhysicsTelemetryPipelineElement >> buildControls [
 		text: 'Rolling window';
 		yourself.
 	windowToggleGroup := self buildWindowToggleGroup.
-	backgroundLabel := BrLabel new
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
-		text: 'Analysis';
-		yourself.
-	backgroundToggle := self buildBackgroundToggle.
 	samplesLabel := BrLabel new
 		hMatchParent;
 		vFitContent;
@@ -386,8 +372,6 @@ CFPhysicsTelemetryPipelineElement >> buildControls [
 	row
 		addChild: liveLabel;
 		addChild: windowToggleGroup;
-		addChild: backgroundLabel;
-		addChild: backgroundToggle;
 		addChild: samplesLabel.
 	^ row
 ]
@@ -421,26 +405,6 @@ CFPhysicsTelemetryPipelineElement >> windowToggleForSeconds: seconds [
 	^ toggle
 ]
 
-
-{ #category : 'private - building' }
-CFPhysicsTelemetryPipelineElement >> buildBackgroundToggle [
-	| toggle |
-	toggle := BrToggle new
-		aptitude: BrGlamorousToggleWithLabelAptitude new;
-		label: 'Background';
-		yourself.
-	world telemetryAnalysisInBackground ifTrue: [ toggle activate ].
-	toggle
-		when: BrToggleActivatedEvent
-		do: [
-			world telemetryAnalysisInBackground: true.
-			self updateGraph ];
-		when: BrToggleDeactivatedEvent
-		do: [
-			world telemetryAnalysisInBackground: false.
-			self updateGraph ].
-	^ toggle
-]
 
 { #category : 'hooks - scene graph' }
 CFPhysicsTelemetryPipelineElement >> onRemovedFromSceneGraph [
