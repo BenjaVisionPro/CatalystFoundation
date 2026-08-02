@@ -95,6 +95,7 @@ CFPhysicsProfileElement >> buildTabs [
 CFPhysicsProfileElement >> startProfiling [
 	world resetTelemetry.
 	world telemetryEnabled: true.
+	health startProfiling.
 	startedRecording := true.
 	self updateStatus
 ]
@@ -102,6 +103,7 @@ CFPhysicsProfileElement >> startProfiling [
 { #category : 'actions' }
 CFPhysicsProfileElement >> stopProfiling [
 	world telemetryEnabled: false.
+	health stopProfiling.
 	startedRecording := false.
 	self updateStatus
 ]
@@ -117,5 +119,6 @@ CFPhysicsProfileElement >> updateStatus [
 { #category : 'hooks - scene graph' }
 CFPhysicsProfileElement >> onRemovedFromSceneGraph [
 	startedRecording ifTrue: [ world telemetryEnabled: false ].
+	health ifNotNil: [ health stopProfiling ].
 	super onRemovedFromSceneGraph
 ]
