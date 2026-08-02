@@ -492,3 +492,77 @@ CFPhysicsDynamicTree >> rayCastFrom: anOrigin translation: aTranslation maxFract
 							ifFalse: [ stack add: first; add: second ] ] ] ] ].
 	^ true
 ]
+
+{ #category : 'querying' }
+CFPhysicsDynamicTree >> shapeCast: aShapeCastInput do: aBlock [
+	"Traverse proxies using the Box2D 3.1.1 b2DynamicTree_ShapeCast algorithm.
+
+	aBlock receives the proxy user data and a clipped CFPhysicsShapeCastInput. It must answer:
+	- zero to terminate the cast;
+	- a negative value to ignore that proxy;
+	- a positive fraction smaller than the current maximum to clip the cast.
+
+	Answer true when traversal completes and false when the callback terminates it."
+	| points firstPoint minimum maximum radiusVector originAABB originCentre originHalfExtent translation perpendicular absolutePerpendicular maximumFraction translated totalMinimum totalMaximum totalAABB stack node centre halfExtent separation extentProjection first second firstDistance secondDistance clippedInput value |
+	points := aShapeCastInput points.
+	queryVisitCount := 0.
+	queryLeafVisitCount := 0.
+	(root isNil or: [ points isEmpty ]) ifTrue: [ ^ true ].
+	firstPoint := points first.
+	minimum := firstPoint.
+	maximum := firstPoint.
+	points allButFirstDo: [ :point |
+		minimum := (minimum x min: point x) @ (minimum y min: point y).
+		maximum := (maximum x max: point x) @ (maximum y max: point y) ].
+	radiusVector := aShapeCastInput radius @ aShapeCastInput radius.
+	originAABB := CFPhysicsAABB
+		position: minimum - radiusVector
+		extent: maximum - minimum + (radiusVector * 2.0).
+	originCentre := originAABB centre.
+	originHalfExtent := originAABB halfExtent.
+	translation := aShapeCastInput translation.
+	perpendicular := translation y negated @ translation x.
+	absolutePerpendicular := perpendicular x abs @ perpendicular y abs.
+	maximumFraction := aShapeCastInput maximumFraction.
+	translated := translation * maximumFraction.
+	totalMinimum := (originAABB minimum x min: originAABB minimum x + translated x)
+		@ (originAABB minimum y min: originAABB minimum y + translated y).
+	totalMaximum := (originAABB maximum x max: originAABB maximum x + translated x)
+		@ (originAABB maximum y max: originAABB maximum y + translated y).
+	totalAABB := CFPhysicsAABB position: totalMinimum extent: totalMaximum - totalMinimum.
+	stack := OrderedCollection with: root.
+	[ stack isEmpty ] whileFalse: [
+		node := stack removeLast.
+		queryVisitCount := queryVisitCount + 1.
+		(node aabb overlaps: totalAABB) ifTrue: [
+			centre := node aabb centre.
+			halfExtent := node aabb halfExtent + originHalfExtent.
+			separation := (perpendicular dotProduct: originCentre - centre) abs.
+			extentProjection := absolutePerpendicular dotProduct: halfExtent.
+			separation <= extentProjection ifTrue: [
+				node isLeaf
+					ifTrue: [
+						queryLeafVisitCount := queryLeafVisitCount + 1.
+						clippedInput := aShapeCastInput withMaximumFraction: maximumFraction.
+						value := aBlock value: node userData value: clippedInput.
+						value = 0.0 ifTrue: [ ^ false ].
+						(value > 0.0 and: [ value < maximumFraction ]) ifTrue: [
+							maximumFraction := value.
+							translated := translation * maximumFraction.
+							totalMinimum := (originAABB minimum x min: originAABB minimum x + translated x)
+								@ (originAABB minimum y min: originAABB minimum y + translated y).
+							totalMaximum := (originAABB maximum x max: originAABB maximum x + translated x)
+								@ (originAABB maximum y max: originAABB maximum y + translated y).
+							totalAABB := CFPhysicsAABB position: totalMinimum extent: totalMaximum - totalMinimum ] ]
+					ifFalse: [
+						first := node firstChild.
+						second := node secondChild.
+						firstDistance := ((first aabb centre x - originCentre x) squared)
+							+ ((first aabb centre y - originCentre y) squared).
+						secondDistance := ((second aabb centre x - originCentre x) squared)
+							+ ((second aabb centre y - originCentre y) squared).
+						firstDistance < secondDistance
+							ifTrue: [ stack add: second; add: first ]
+							ifFalse: [ stack add: first; add: second ] ] ] ] ].
+	^ true
+]

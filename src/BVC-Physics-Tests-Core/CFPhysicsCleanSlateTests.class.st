@@ -6650,3 +6650,49 @@ CFPhysicsCleanSlateTests >> dynamicTreeRayCastCallbackCanTerminateTraversal [
 	self assert: visited equals: 1.
 	^ tree
 ]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeShapeCastClipsAndVisitsNearestProxyFirst [
+	<gtExample>
+	| tree input visited completed |
+	tree := CFPhysicsDynamicTree new.
+	tree createProxyFor: #near aabb: (CFPhysicsAABB position: 10 @ -2 extent: 4 @ 4).
+	tree createProxyFor: #far aabb: (CFPhysicsAABB position: 30 @ -2 extent: 4 @ 4).
+	tree createProxyFor: #outside aabb: (CFPhysicsAABB position: 10 @ 20 extent: 4 @ 4).
+	input := CFPhysicsShapeCastInput new
+		points: { 0 @ -1. 0 @ 1 };
+		radius: 1.0;
+		translation: 50 @ 0;
+		maximumFraction: 1.0;
+		yourself.
+	visited := OrderedCollection new.
+	completed := tree shapeCast: input do: [ :each :clippedInput |
+		visited add: each.
+		self assert: (clippedInput maximumFraction closeTo: 1.0).
+		each = #near ifTrue: [ 0.3 ] ifFalse: [ clippedInput maximumFraction ] ].
+	self assert: completed.
+	self assert: visited asArray equals: #(near).
+	self assert: tree queryLeafVisitCount equals: 1.
+	^ tree
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeShapeCastCallbackCanTerminateTraversal [
+	<gtExample>
+	| tree input visited completed |
+	tree := CFPhysicsDynamicTree new.
+	tree createProxyFor: #body aabb: (CFPhysicsAABB position: 10 @ -2 extent: 4 @ 4).
+	input := CFPhysicsShapeCastInput new
+		points: { 0 @ 0 };
+		radius: 1.0;
+		translation: 50 @ 0;
+		maximumFraction: 1.0;
+		yourself.
+	visited := 0.
+	completed := tree shapeCast: input do: [ :each :clippedInput |
+		visited := visited + 1.
+		0.0 ].
+	self assert: completed not.
+	self assert: visited equals: 1.
+	^ tree
+]
