@@ -23,41 +23,9 @@ CFPhysicsConstraintPreparationStage >> initialize [
 	motorJointConstraintBuilder := CFPhysicsMotorJointConstraintBuilder new
 ]
 
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> constraintBuilder [ ^ constraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> constraintBuilder: anObject [ constraintBuilder := anObject ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> distanceJointConstraintBuilder [ ^ distanceJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> distanceJointConstraintBuilder: anObject [ distanceJointConstraintBuilder := anObject ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder [ ^ revoluteJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> revoluteJointConstraintBuilder: anObject [ revoluteJointConstraintBuilder := anObject ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> weldJointConstraintBuilder [ ^ weldJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> weldJointConstraintBuilder: anObject [ weldJointConstraintBuilder := anObject ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder [ ^ prismaticJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> prismaticJointConstraintBuilder: anObject [ prismaticJointConstraintBuilder := anObject ]
 
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> wheelJointConstraintBuilder [ ^ wheelJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> wheelJointConstraintBuilder: anObject [ wheelJointConstraintBuilder := anObject ]
 
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> mouseJointConstraintBuilder [ ^ mouseJointConstraintBuilder ]
 
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> mouseJointConstraintBuilder: anObject [ mouseJointConstraintBuilder := anObject ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> motorJointConstraintBuilder [ ^ motorJointConstraintBuilder ]
-{ #category : 'accessing' }
-CFPhysicsConstraintPreparationStage >> motorJointConstraintBuilder: anObject [ motorJointConstraintBuilder := anObject ]
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
