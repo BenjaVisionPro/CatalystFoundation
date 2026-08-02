@@ -31,9 +31,24 @@ CFPhysicsIslandSleepStage >> propagateWakeAcross: islands [
 		dynamicBodies := island dynamicBodies.
 		wokenBodiesByIsland
 			at: island
-			put: ((dynamicBodies anySatisfy: [ :body | body isAwake ])
+			put: ((self islandHasAwakeSolverBody: island)
 				ifTrue: [ self wakeSleepingBodiesIn: dynamicBodies ]
 				ifFalse: [ #() ]) ]
+]
+
+
+{ #category : 'private - waking' }
+CFPhysicsIslandSleepStage >> islandHasAwakeSolverBody: island [
+	"Answer whether an awake non-static body should wake the island's sleeping dynamic bodies. Kinematic bodies are always awake and participate in Box2D's awake solver set."
+	^ island bodies anySatisfy: [ :body |
+		body isStatic not and: [ body isAwake ] ]
+]
+
+{ #category : 'private - waking' }
+CFPhysicsIslandSleepStage >> islandHasAwakeSolverBody: island bodyStates: bodyStates [
+	"Answer whether an awake non-static step body should wake the island's sleeping dynamic bodies. Kinematic bodies are always awake and participate in Box2D's awake solver set."
+	^ island bodies anySatisfy: [ :body |
+		body isStatic not and: [ (bodyStates at: body) isAwake ] ]
 ]
 
 { #category : 'private - waking' }
@@ -117,7 +132,7 @@ CFPhysicsIslandSleepStage >> propagateWakeAcross: islands bodyStates: bodyStates
 		dynamicBodies := island dynamicBodies.
 		wokenBodiesByIsland
 			at: island
-			put: ((dynamicBodies anySatisfy: [ :body | (bodyStates at: body) isAwake ])
+			put: ((self islandHasAwakeSolverBody: island bodyStates: bodyStates)
 				ifTrue: [ self wakeSleepingBodiesIn: dynamicBodies bodyStates: bodyStates ]
 				ifFalse: [ #() ]) ]
 ]

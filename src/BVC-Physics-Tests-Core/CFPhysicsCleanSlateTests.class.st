@@ -915,6 +915,34 @@ CFPhysicsCleanSlateTests >> cleanSlateConstraintBetween: firstBody and: secondBo
 		yourself
 ]
 
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> awakeKinematicBodyWakesConnectedSleepingDynamicBody [
+	<gtExample>
+	| kinematic dynamic island stage bodyStates decision |
+	kinematic := self cleanSlateBodyWithSequence: 1.
+	kinematic beKinematic.
+	dynamic := self cleanSlateBodyWithSequence: 2.
+	dynamic sleep.
+	island := CFPhysicsIsland new
+		addBody: kinematic;
+		addBody: dynamic;
+		yourself.
+	bodyStates := IdentityDictionary new
+		at: kinematic put: (CFPhysicsBodyStepState on: kinematic);
+		at: dynamic put: (CFPhysicsBodyStepState on: dynamic);
+		yourself.
+	stage := CFPhysicsIslandSleepStage new.
+	stage propagateWakeAcross: { island } bodyStates: bodyStates.
+	decision := (stage
+		updateIslands: { island }
+		bodyStates: bodyStates
+		elapsed: 0.0) first.
+	self assert: (bodyStates at: dynamic) isAwake.
+	self assert: decision wokeBodies equals: { dynamic }.
+	^ decision
+]
+
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> islandWakePropagatesAcrossConnectedDynamicBodies [
 	<gtExample>
