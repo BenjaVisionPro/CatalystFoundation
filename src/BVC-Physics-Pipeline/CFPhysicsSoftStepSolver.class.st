@@ -107,27 +107,6 @@ CFPhysicsSoftStepSolver >> solveContactsWithBias: biasEnabled [
 ]
 
 { #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveDistanceJointsWithBias: biasEnabled [
-	self orderedJointConstraints do: [ :constraint |
-		(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
-			self solveDistanceJointConstraint: constraint biasEnabled: biasEnabled ] ]
-]
-
-{ #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveRevoluteJointsWithBias: biasEnabled [
-	self orderedJointConstraints do: [ :constraint |
-		(constraint isKindOf: CFPhysicsPreparedRevoluteJoint) ifTrue: [
-			self solveRevoluteJointConstraint: constraint biasEnabled: biasEnabled ] ]
-]
-
-{ #category : 'private - solving' }
-CFPhysicsSoftStepSolver >> solveWeldJointsWithBias: biasEnabled [
-	self orderedJointConstraints do: [ :constraint |
-		(constraint isKindOf: CFPhysicsPreparedWeldJoint) ifTrue: [
-			self solveWeldJointConstraint: constraint biasEnabled: biasEnabled ] ]
-]
-
-{ #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveJointConstraintsWithBias: biasEnabled [
 	self orderedJointConstraints do: [ :constraint |
 		self solveJointConstraint: constraint biasEnabled: biasEnabled ]
@@ -768,12 +747,6 @@ CFPhysicsSoftStepSolver >> isLimitedRevoluteJointConstraint: constraint [
 		and: [ constraint limitsEnabled and: [ constraint limitMass > 0.0 ] ]
 ]
 
-{ #category : 'private - testing' }
-CFPhysicsSoftStepSolver >> isLimitedPrismaticJointConstraint: constraint [
-	^ constraint joint class == CFPhysicsPrismaticJoint
-		and: [ constraint limitsEnabled and: [ constraint translationMass > 0.0 ] ]
-]
-
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> revoluteJointImpulseFor: vector constraint: constraint [
 	^ ((constraint effectiveMassXX * vector x) + (constraint effectiveMassXY * vector y)) negated
@@ -800,26 +773,6 @@ CFPhysicsSoftStepSolver >> distanceJointDeltaRotationFor: aState [
 { #category : 'private - accessing' }
 CFPhysicsSoftStepSolver >> contactConstraints [
 	^ contactConstraints
-]
-
-{ #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> distanceJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedDistanceJoint ]
-]
-
-{ #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> prismaticJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedPrismaticJoint ]
-]
-
-{ #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> revoluteJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedRevoluteJoint ]
-]
-
-{ #category : 'private - accessing' }
-CFPhysicsSoftStepSolver >> weldJointConstraints [
-	^ constraints select: [ :constraint | constraint isKindOf: CFPhysicsPreparedWeldJoint ]
 ]
 
 { #category : 'private - accessing' }
