@@ -6835,17 +6835,17 @@ CFPhysicsCleanSlateTests >> worldPersistentIslandGraphTracksRuntimeJointLifecycl
 { #category : 'examples - persistent islands' }
 CFPhysicsCleanSlateTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
 	<gtExample>
-	| first second third joint prepared result islands |
+	| first second third constraint result islands |
 	first := CFPhysicsBody new sequence: 1; beDynamic; yourself.
 	second := CFPhysicsBody new sequence: 2; beDynamic; yourself.
 	third := CFPhysicsBody new sequence: 3; beDynamic; yourself.
-	joint := CFPhysicsDistanceJoint between: second and: third.
-	prepared := CFPhysicsPreparedDistanceJoint new
-		joint: joint;
+	constraint := CFPhysicsTestConstraint new
+		bodyA: second;
+		bodyB: third;
 		yourself.
 	result := CFPhysicsStepPipelineResult new
 		bodies: { first. second. third };
-		constraints: { prepared };
+		constraints: { constraint };
 		islandBodyGroups: { { first }. { second }. { third } };
 		yourself.
 	islands := CFPhysicsIslandBuilderStage new executeOn: result.
