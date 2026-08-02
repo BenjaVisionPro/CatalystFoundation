@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -76,12 +76,19 @@ CFPhysicsWorld >> initialize [
 	prismaticJoints := IdentitySet new.
 	wheelJoints := IdentitySet new.
 	manifoldGenerator := CFPhysicsManifoldGenerator new.
+	persistentIslandGraph := CFPhysicsPersistentIslandGraph new.
 	stepPipeline := CFPhysicsStepPipeline manifoldGenerator: manifoldGenerator
 ]
 
 
 { #category : 'accessing' }
 CFPhysicsWorld >> manifoldGenerator [ ^ manifoldGenerator ]
+
+{ #category : 'islands' }
+CFPhysicsWorld >> persistentIslandGraph [
+	"Persistent runtime island connectivity. Solver islands continue to be built by the existing stage until this graph lifecycle is fully integrated."
+	^ persistentIslandGraph
+]
 
 { #category : 'accessing' }
 CFPhysicsWorld >> owner [ ^ owner ]
@@ -120,6 +127,7 @@ CFPhysicsWorld >> release [
 	activeContacts := #().
 	calculationContacts := #().
 	membershipProvider := nil.
+	persistentIslandGraph := CFPhysicsPersistentIslandGraph new.
 	self owner: nil.
 	^ self
 ]
@@ -296,6 +304,7 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 	self invalidateTopology.
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
+	persistentIslandGraph addBody: body.
 	^ body
 ]
 
@@ -375,7 +384,8 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
 		calculationContacts := calculationContacts reject: [ :contact |
-			contact firstBody == body or: [ contact secondBody == body ] ] ]
+			contact firstBody == body or: [ contact secondBody == body ] ].
+		persistentIslandGraph removeBody: body ]
 ]
 
 
@@ -544,6 +554,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	pipelineResult commitBodyStates.
 	pipelineResult commitJointConstraints.
 	previousCommittedContacts := activeContacts.
+	self updatePersistentIslandsFrom: pipelineResult.
 	activeContacts := pipelineResult activeContacts.
 	calculationContacts := previousCommittedContacts.
 	lastStepResult := pipelineResult.
@@ -559,6 +570,16 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	activeSolveTicket := nil.
 	self commitTelemetrySolveTicket: aWorldSolution solveTicket.
 	^ pipelineResult
+]
+
+{ #category : 'private - islands' }
+CFPhysicsWorld >> updatePersistentIslandsFrom: aPipelineResult [
+	"Maintain Box2D-style persistent connectivity from committed contact lifecycle changes. Sensors do not join solver islands."
+	aPipelineResult endedContacts do: [ :contact |
+		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ] ].
+	aPipelineResult beganContacts do: [ :contact |
+		contact isSolid ifTrue: [ persistentIslandGraph linkConstraint: contact ] ].
+	persistentIslandGraph mergeIslands
 ]
 
 { #category : 'private - telemetry' }
@@ -867,6 +888,7 @@ CFPhysicsWorld >> addMouseJoint: aJoint [
 	aJoint sequence: nextMouseJointSequence.
 	nextMouseJointSequence := nextMouseJointSequence + 1.
 	mouseJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -875,6 +897,7 @@ CFPhysicsWorld >> addMouseJoint: aJoint [
 CFPhysicsWorld >> removeMouseJoint: aJoint [
 	(mouseJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		mouseJoints remove: aJoint ].
 	^ aJoint
@@ -892,10 +915,10 @@ CFPhysicsWorld >> motorJoints [ ^ motorJoints asArray sorted: [ :first :second |
 { #category : 'motor joints' }
 CFPhysicsWorld >> addMotorJoint: aJoint [
 	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [ self error: 'Motor joint bodies must belong to this physics world' ].
-	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. aJoint wakeBodies. ^ aJoint
+	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. aJoint wakeBodies. ^ aJoint
 ]
 { #category : 'motor joints' }
-CFPhysicsWorld >> removeMotorJoint: aJoint [ (motorJoints includes: aJoint) ifTrue: [ self invalidateTopology. aJoint release. motorJoints remove: aJoint ]. ^ aJoint ]
+CFPhysicsWorld >> removeMotorJoint: aJoint [ (motorJoints includes: aJoint) ifTrue: [ self invalidateTopology. persistentIslandGraph unlinkConstraint: aJoint. aJoint release. motorJoints remove: aJoint ]. ^ aJoint ]
 { #category : 'motor joints' }
 CFPhysicsWorld >> removeMotorJointsUsingBody: aBody [ (motorJoints select: [ :each | each includesBody: aBody ]) copy do: [ :each | self removeMotorJoint: each ] ]
 
@@ -1014,6 +1037,7 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -1052,6 +1076,7 @@ CFPhysicsWorld >> jointPreventsCollisionBetween: firstBody and: secondBody [
 CFPhysicsWorld >> removeDistanceJoint: aJoint [
 	(distanceJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		distanceJoints remove: aJoint ].
 	^ aJoint
@@ -1079,6 +1104,7 @@ CFPhysicsWorld >> addRevoluteJoint: aJoint [
 	aJoint sequence: nextRevoluteJointSequence.
 	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
 	revoluteJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -1092,6 +1118,7 @@ CFPhysicsWorld >> revoluteJointsUsingBody: aBodyState [
 CFPhysicsWorld >> removeRevoluteJoint: aJoint [
 	(revoluteJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		revoluteJoints remove: aJoint ].
 	^ aJoint
@@ -1119,6 +1146,7 @@ CFPhysicsWorld >> addWeldJoint: aJoint [
 	aJoint sequence: nextWeldJointSequence.
 	nextWeldJointSequence := nextWeldJointSequence + 1.
 	weldJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -1132,6 +1160,7 @@ CFPhysicsWorld >> weldJointsUsingBody: aBodyState [
 CFPhysicsWorld >> removeWeldJoint: aJoint [
 	(weldJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		weldJoints remove: aJoint ].
 	^ aJoint
@@ -1159,6 +1188,7 @@ CFPhysicsWorld >> addPrismaticJoint: aJoint [
 	aJoint sequence: nextPrismaticJointSequence.
 	nextPrismaticJointSequence := nextPrismaticJointSequence + 1.
 	prismaticJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -1172,6 +1202,7 @@ CFPhysicsWorld >> prismaticJointsUsingBody: aBodyState [
 CFPhysicsWorld >> removePrismaticJoint: aJoint [
 	(prismaticJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		prismaticJoints remove: aJoint ].
 	^ aJoint
@@ -1397,6 +1428,7 @@ CFPhysicsWorld >> addWheelJoint: aJoint [
 	aJoint sequence: nextWheelJointSequence.
 	nextWheelJointSequence := nextWheelJointSequence + 1.
 	wheelJoints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
 	aJoint wakeBodies.
 	^ aJoint
 ]
@@ -1410,6 +1442,7 @@ CFPhysicsWorld >> wheelJointsUsingBody: aBodyState [
 CFPhysicsWorld >> removeWheelJoint: aJoint [
 	(wheelJoints includes: aJoint) ifTrue: [
 		self invalidateTopology.
+		persistentIslandGraph unlinkConstraint: aJoint.
 		aJoint release.
 		wheelJoints remove: aJoint ].
 	^ aJoint

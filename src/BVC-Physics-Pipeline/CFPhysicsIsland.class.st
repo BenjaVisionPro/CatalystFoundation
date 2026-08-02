@@ -100,3 +100,9 @@ CFPhysicsIsland >> mergeFrom: anIsland [
 CFPhysicsIsland >> removeConstraint: aConstraint [
 	(constraints remove: aConstraint ifAbsent: [ nil ]) ifNotNil: [ self noteConstraintRemoved ]
 ]
+
+
+{ #category : 'persistent islands' }
+CFPhysicsIsland >> removeBody: aBody [
+	bodies remove: aBody ifAbsent: [ ]
+]

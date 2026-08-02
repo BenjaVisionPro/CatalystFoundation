@@ -115,3 +115,16 @@ CFPhysicsContact >> isSensor [
 CFPhysicsContact >> isSolid [
 	^ self isSensor not
 ]
+
+
+{ #category : 'islands' }
+CFPhysicsContact >> bodyA [
+	"First body endpoint for persistent island graph linkage."
+	^ self firstBody
+]
+
+{ #category : 'islands' }
+CFPhysicsContact >> bodyB [
+	"Second body endpoint for persistent island graph linkage."
+	^ self secondBody
+]

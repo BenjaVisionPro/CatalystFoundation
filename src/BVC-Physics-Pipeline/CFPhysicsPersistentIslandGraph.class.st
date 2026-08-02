@@ -17,7 +17,7 @@ CFPhysicsPersistentIslandGraph >> initialize [
 	super initialize.
 	islands := OrderedCollection new.
 	islandByBody := IdentityDictionary new.
-	islandByConstraint := IdentityDictionary new.
+	islandByConstraint := Dictionary new.
 	nextIdentifier := 1
 ]
 
@@ -33,7 +33,7 @@ CFPhysicsPersistentIslandGraph >> islandForBody: aBody [
 
 { #category : 'accessing' }
 CFPhysicsPersistentIslandGraph >> islandForConstraint: aConstraint [
-	^ islandByConstraint at: aConstraint ifAbsent: [ nil ]
+	^ islandByConstraint at: (self keyForConstraint: aConstraint) ifAbsent: [ nil ]
 ]
 
 { #category : 'body lifecycle' }
@@ -54,7 +54,7 @@ CFPhysicsPersistentIslandGraph >> addBody: aBody [
 { #category : 'linking' }
 CFPhysicsPersistentIslandGraph >> linkConstraint: aConstraint [
 	| bodyA bodyB islandA islandB rootA rootB target |
-	(islandByConstraint includesKey: aConstraint) ifTrue: [ ^ self islandForConstraint: aConstraint ].
+	(islandByConstraint includesKey: (self keyForConstraint: aConstraint)) ifTrue: [ ^ self islandForConstraint: aConstraint ].
 	bodyA := aConstraint bodyA.
 	bodyB := aConstraint bodyB.
 	islandA := bodyA ifNil: [ nil ] ifNotNil: [ self addBody: bodyA ].
@@ -67,7 +67,7 @@ CFPhysicsPersistentIslandGraph >> linkConstraint: aConstraint [
 		"Box2D links the second root to the first root and merges awake islands later."
 		rootB parentIsland: rootA ].
 	target addConstraint: aConstraint.
-	islandByConstraint at: aConstraint put: target.
+	islandByConstraint at: (self keyForConstraint: aConstraint) put: target.
 	^ target
 ]
 
@@ -85,7 +85,7 @@ CFPhysicsPersistentIslandGraph >> mergeIslands [
 		root := child parentIsland.
 		root mergeFrom: child.
 		child bodies do: [ :body | islandByBody at: body put: root ].
-		child constraints do: [ :constraint | islandByConstraint at: constraint put: root ].
+		child constraints do: [ :constraint | islandByConstraint at: (self keyForConstraint: constraint) put: root ].
 		islands remove: child ifAbsent: [ ].
 		child parentIsland: nil ].
 	^ self islands
@@ -105,7 +105,25 @@ CFPhysicsPersistentIslandGraph >> rootOf: anIsland [
 { #category : 'unlinking' }
 CFPhysicsPersistentIslandGraph >> unlinkConstraint: aConstraint [
 	| island |
-	island := islandByConstraint removeKey: aConstraint ifAbsent: [ ^ self ].
+	island := islandByConstraint removeKey: (self keyForConstraint: aConstraint) ifAbsent: [ ^ self ].
 	island := self rootOf: island.
 	island removeConstraint: aConstraint
+]
+
+
+{ #category : 'private' }
+CFPhysicsPersistentIslandGraph >> keyForConstraint: aConstraint [
+	"Contacts are recreated or reused across step buffers, so their stable pair key identifies the persistent edge. Runtime joints retain identity."
+	^ (aConstraint isKindOf: CFPhysicsContact)
+		ifTrue: [ { #contact. aConstraint key } ]
+		ifFalse: [ aConstraint ]
+]
+
+{ #category : 'body lifecycle' }
+CFPhysicsPersistentIslandGraph >> removeBody: aBody [
+	| island |
+	island := islandByBody removeKey: aBody ifAbsent: [ ^ self ].
+	island := self rootOf: island.
+	island removeBody: aBody.
+	island bodies isEmpty ifTrue: [ islands remove: island ifAbsent: [ ] ]
 ]

@@ -6805,3 +6805,29 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphDefersSplitAfterConstraintRemov
 	self assert: graph islands size equals: 1.
 	^ graph
 ]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateTests >> worldPersistentIslandGraphTracksRuntimeJointLifecycle [
+	<gtExample>
+	| owner firstElement secondElement world first second joint graph island |
+	owner := BlElement new size: 200 @ 200; yourself.
+	firstElement := BlElement new size: 20 @ 20; yourself.
+	secondElement := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	graph := world persistentIslandGraph.
+	self assert: graph islands size equals: 2.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	world addDistanceJoint: joint.
+	graph mergeIslands.
+	island := graph islandForBody: first.
+	self assert: (graph islandForBody: second) == island.
+	self assert: (graph islandForConstraint: joint) == island.
+	world removeDistanceJoint: joint.
+	self assert: island constraintRemoveCount equals: 1.
+	self assert: (graph islandForConstraint: joint) isNil.
+	^ world
+]
