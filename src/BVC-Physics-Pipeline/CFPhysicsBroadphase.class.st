@@ -228,3 +228,17 @@ CFPhysicsBroadphase >> kinematicTreeAreaRatio [ ^ kinematicTree areaRatio ]
 
 { #category : 'measurements' }
 CFPhysicsBroadphase >> staticTreeAreaRatio [ ^ staticTree areaRatio ]
+
+
+{ #category : 'maintenance' }
+CFPhysicsBroadphase >> rebuildTrees [
+	"Partially rebuild the dynamic and kinematic trees, matching
+	b2BroadPhase_RebuildTrees in Box2D 3.1.1. Static proxies are not rebuilt."
+	^ dynamicTree rebuild + kinematicTree rebuild
+]
+
+{ #category : 'maintenance' }
+CFPhysicsBroadphase >> rebuildTreesFully [
+	"Fully rebuild the dynamic and kinematic trees for explicit maintenance or diagnostics."
+	^ dynamicTree rebuildFully + kinematicTree rebuildFully
+]

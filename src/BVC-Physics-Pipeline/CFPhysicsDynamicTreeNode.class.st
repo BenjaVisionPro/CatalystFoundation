@@ -6,7 +6,7 @@ Leaf nodes carry proxy data. Internal nodes carry two children and the union of 
 Class {
 	#name : 'CFPhysicsDynamicTreeNode',
 	#superclass : 'Object',
-	#instVars : [ 'identifier', 'aabb', 'parent', 'firstChild', 'secondChild', 'height', 'userData', 'allocated' ],
+	#instVars : [ 'identifier', 'aabb', 'parent', 'firstChild', 'secondChild', 'height', 'userData', 'allocated', 'enlarged' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -25,12 +25,14 @@ CFPhysicsDynamicTreeNode >> reset [
 	secondChild := nil.
 	height := -1.
 	userData := nil.
-	allocated := false
+	allocated := false.
+	enlarged := false
 ]
 
 { #category : 'allocation' }
 CFPhysicsDynamicTreeNode >> allocate [
 	allocated := true.
+	enlarged := false.
 	height := 0
 ]
 
@@ -81,3 +83,10 @@ CFPhysicsDynamicTreeNode >> userData [ ^ userData ]
 
 { #category : 'accessing' }
 CFPhysicsDynamicTreeNode >> userData: anObject [ userData := anObject ]
+
+
+{ #category : 'testing' }
+CFPhysicsDynamicTreeNode >> isEnlarged [ ^ enlarged ]
+
+{ #category : 'accessing' }
+CFPhysicsDynamicTreeNode >> enlarged: aBoolean [ enlarged := aBoolean ]

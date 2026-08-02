@@ -8,7 +8,7 @@ My node pool reuses released node objects. Query result ordering is made determi
 Class {
 	#name : 'CFPhysicsDynamicTree',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount', 'queryLeafVisitCount', 'rotationCount' ],
+	#instVars : [ 'root', 'nodes', 'freeNodes', 'nextNodeIdentifier', 'proxyCount', 'queryVisitCount', 'queryLeafVisitCount', 'rotationCount', 'rebuildCount', 'lastRebuiltLeafCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -23,7 +23,9 @@ CFPhysicsDynamicTree >> initialize [
 	proxyCount := 0.
 	queryVisitCount := 0.
 	queryLeafVisitCount := 0.
-	rotationCount := 0
+	rotationCount := 0.
+	rebuildCount := 0.
+	lastRebuiltLeafCount := 0
 ]
 
 { #category : 'proxies' }
@@ -350,8 +352,143 @@ CFPhysicsDynamicTree >> refit: aNode [
 	aNode isLeaf ifTrue: [ ^ self ].
 	aNode
 		aabb: (aNode firstChild aabb mergedWith: aNode secondChild aabb);
-		height: 1 + (aNode firstChild height max: aNode secondChild height)
+		height: 1 + (aNode firstChild height max: aNode secondChild height);
+		enlarged: (aNode firstChild isEnlarged or: [ aNode secondChild isEnlarged ])
 ]
+
+
+{ #category : 'proxies' }
+CFPhysicsDynamicTree >> enlargeProxy: aLeaf to: anAABB [
+	"Enlarge a proxy in place and mark affected ancestors for the next partial rebuild,
+	matching b2DynamicTree_EnlargeProxy in Box2D 3.1.1."
+	| ancestor enlargedAABB changed |
+	self assert: aLeaf isAllocated.
+	self assert: aLeaf isLeaf.
+	self assert: (aLeaf aabb contains: anAABB) not.
+	aLeaf aabb: anAABB.
+	ancestor := aLeaf parent.
+	[ ancestor notNil ] whileTrue: [
+		enlargedAABB := ancestor aabb mergedWith: anAABB.
+		changed := (ancestor aabb contains: enlargedAABB) not.
+		ancestor
+			aabb: enlargedAABB;
+			enlarged: true.
+		ancestor := ancestor parent.
+		changed ifFalse: [
+			[ ancestor notNil and: [ ancestor isEnlarged not ] ] whileTrue: [
+				ancestor enlarged: true.
+				ancestor := ancestor parent ].
+			^ self ] ]
+]
+
+{ #category : 'maintenance' }
+CFPhysicsDynamicTree >> rebuild [
+	"Partially rebuild subtrees marked by proxy enlargement, matching
+	b2DynamicTree_Rebuild(tree, false) in Box2D 3.1.1."
+	^ self rebuildFully: false
+]
+
+{ #category : 'maintenance' }
+CFPhysicsDynamicTree >> rebuildFully [
+	"Rebuild the complete tree, matching b2DynamicTree_Rebuild(tree, true)."
+	^ self rebuildFully: true
+]
+
+{ #category : 'private - maintenance' }
+CFPhysicsDynamicTree >> rebuildFully: fullBuild [
+	| rebuildLeaves traversal node |
+	proxyCount = 0 ifTrue: [
+		lastRebuiltLeafCount := 0.
+		^ 0 ].
+	rebuildLeaves := OrderedCollection new.
+	traversal := OrderedCollection with: root.
+	[ traversal isEmpty ] whileFalse: [
+		node := traversal removeLast.
+		(node isLeaf or: [ fullBuild not and: [ node isEnlarged not ] ])
+			ifTrue: [
+				node parent: nil.
+				rebuildLeaves add: node ]
+			ifFalse: [
+				traversal
+					add: node secondChild;
+					add: node firstChild.
+				self releaseNode: node ] ].
+	rebuildLeaves do: [ :each | each enlarged: false ].
+	root := self buildTreeFrom: rebuildLeaves.
+	rebuildCount := rebuildCount + 1.
+	lastRebuiltLeafCount := rebuildLeaves size.
+	self validate.
+	^ lastRebuiltLeafCount
+]
+
+{ #category : 'private - maintenance' }
+CFPhysicsDynamicTree >> buildTreeFrom: aCollection [
+	| partitions parent first second |
+	aCollection size = 1 ifTrue: [
+		aCollection first parent: nil.
+		^ aCollection first ].
+	partitions := self partitionMid: aCollection.
+	first := self buildTreeFrom: partitions first.
+	second := self buildTreeFrom: partitions second.
+	parent := self allocateNode.
+	parent
+		firstChild: first;
+		secondChild: second.
+	first parent: parent.
+	second parent: parent.
+	self refit: parent.
+	^ parent
+]
+
+{ #category : 'private - maintenance' }
+CFPhysicsDynamicTree >> partitionMid: aCollection [
+	"Median-split heuristic selected by B2_TREE_HEURISTIC = 0 in Box2D 3.1.1."
+	| nodesToPartition centres minimum maximum delta pivot left right i j temporary |
+	nodesToPartition := aCollection asOrderedCollection.
+	nodesToPartition size <= 2 ifTrue: [
+		^ { nodesToPartition copyFrom: 1 to: nodesToPartition size // 2.
+			nodesToPartition copyFrom: nodesToPartition size // 2 + 1 to: nodesToPartition size } ].
+	centres := nodesToPartition collect: [ :each | each aabb centre ].
+	minimum := centres first.
+	maximum := centres first.
+	centres allButFirstDo: [ :centre |
+		minimum := (minimum x min: centre x) @ (minimum y min: centre y).
+		maximum := (maximum x max: centre x) @ (maximum y max: centre y) ].
+	delta := maximum - minimum.
+	pivot := delta x > delta y
+		ifTrue: [ (minimum x + maximum x) * 0.5 ]
+		ifFalse: [ (minimum y + maximum y) * 0.5 ].
+	i := 1.
+	j := nodesToPartition size + 1.
+	[ i < j ] whileTrue: [
+		[ i < j and: [
+			delta x > delta y
+				ifTrue: [ (centres at: i) x < pivot ]
+				ifFalse: [ (centres at: i) y < pivot ] ] ] whileTrue: [ i := i + 1 ].
+		[ i < j and: [
+			delta x > delta y
+				ifTrue: [ (centres at: j - 1) x >= pivot ]
+				ifFalse: [ (centres at: j - 1) y >= pivot ] ] ] whileTrue: [ j := j - 1 ].
+		i < j ifTrue: [
+			temporary := nodesToPartition at: i.
+			nodesToPartition at: i put: (nodesToPartition at: j - 1).
+			nodesToPartition at: j - 1 put: temporary.
+			temporary := centres at: i.
+			centres at: i put: (centres at: j - 1).
+			centres at: j - 1 put: temporary.
+			i := i + 1.
+			j := j - 1 ] ].
+	(i = 1 or: [ i = nodesToPartition size + 1 ]) ifTrue: [ i := nodesToPartition size // 2 + 1 ].
+	left := nodesToPartition copyFrom: 1 to: i - 1.
+	right := nodesToPartition copyFrom: i to: nodesToPartition size.
+	^ { left. right }
+]
+
+{ #category : 'measurements' }
+CFPhysicsDynamicTree >> rebuildCount [ ^ rebuildCount ]
+
+{ #category : 'measurements' }
+CFPhysicsDynamicTree >> lastRebuiltLeafCount [ ^ lastRebuiltLeafCount ]
 
 { #category : 'accessing' }
 CFPhysicsDynamicTree >> root [ ^ root ]

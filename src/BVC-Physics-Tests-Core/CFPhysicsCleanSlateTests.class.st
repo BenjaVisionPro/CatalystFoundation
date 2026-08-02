@@ -6696,3 +6696,43 @@ CFPhysicsCleanSlateTests >> dynamicTreeShapeCastCallbackCanTerminateTraversal [
 	self assert: visited equals: 1.
 	^ tree
 ]
+
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeFullRebuildPreservesProxiesAndInvariants [
+	<gtExample>
+	| tree before after rebuilt |
+	tree := CFPhysicsDynamicTree new.
+	1 to: 32 do: [ :index |
+		tree
+			createProxyFor: index
+			aabb: (CFPhysicsAABB
+				position: (index * 13) @ ((index \\ 7) * 17)
+				extent: 9 @ 11) ].
+	before := tree proxyCount.
+	rebuilt := tree rebuildFully.
+	after := tree proxyCount.
+	self assert: rebuilt equals: before.
+	self assert: after equals: before.
+	self assert: tree rebuildCount equals: 1.
+	self assert: tree validate.
+	self assert: (tree query: (CFPhysicsAABB position: 0 @ 0 extent: 1000 @ 1000)) size equals: before.
+	^ tree
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
+	<gtExample>
+	| tree proxy rebuilt |
+	tree := CFPhysicsDynamicTree new.
+	proxy := tree createProxyFor: #moving aabb: (CFPhysicsAABB position: 0 @ 0 extent: 10 @ 10).
+	tree createProxyFor: #near aabb: (CFPhysicsAABB position: 20 @ 0 extent: 10 @ 10).
+	tree createProxyFor: #far aabb: (CFPhysicsAABB position: 200 @ 0 extent: 10 @ 10).
+	tree enlargeProxy: proxy to: (CFPhysicsAABB position: 0 @ 0 extent: 40 @ 10).
+	rebuilt := tree rebuild.
+	self assert: rebuilt > 0.
+	self assert: rebuilt <= tree proxyCount.
+	self assert: tree validate.
+	self assert: (tree query: (CFPhysicsAABB position: 30 @ 0 extent: 5 @ 5)) includes: #moving.
+	^ tree
+]
