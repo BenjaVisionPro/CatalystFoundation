@@ -478,7 +478,7 @@ CFPhysicsDynamicTree >> partitionMid: aCollection [
 			centres at: j - 1 put: temporary.
 			i := i + 1.
 			j := j - 1 ] ].
-	(i = 1 or: [ i = nodesToPartition size + 1 ]) ifTrue: [ i := nodesToPartition size // 2 + 1 ].
+	(i = 1 or: [ i = (nodesToPartition size + 1) ]) ifTrue: [ i := nodesToPartition size // 2 + 1 ].
 	left := nodesToPartition copyFrom: 1 to: i - 1.
 	right := nodesToPartition copyFrom: i to: nodesToPartition size.
 	^ { left. right }
