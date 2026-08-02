@@ -62,12 +62,6 @@ CFPhysicsTimeOfImpactResult >> isFailed [
 ]
 
 { #category : 'testing' }
-CFPhysicsTimeOfImpactResult >> isIterationLimit [
-	"Compatibility with the former result vocabulary. New results report #failed, matching Box2D 3.1.1."
-	^ self isFailed
-]
-
-{ #category : 'testing' }
 CFPhysicsTimeOfImpactResult >> isOverlapped [
 	^ status = #overlapped
 ]
