@@ -59,6 +59,11 @@ CFPhysicsTelemetryLogger >> announcementIntervalMilliseconds: anInteger [
 ]
 
 { #category : 'accessing' }
+CFPhysicsTelemetryLogger >> world [
+	^ world
+]
+
+{ #category : 'accessing' }
 CFPhysicsTelemetryLogger >> world: aWorld [ world := aWorld ]
 
 { #category : 'accessing' }

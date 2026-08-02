@@ -93,26 +93,65 @@ CFPhysicsProfileHealthElement >> sampleNow [
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectSample [
+	| bodies contacts joints islands solutions loggers |
+	bodies := CFPhysicsBody allInstances.
+	contacts := CFPhysicsContact allInstances.
+	joints := CFPhysicsJoint withAllSubclasses
+		flatCollect: [ :each | each allInstances ].
+	islands := CFPhysicsIsland allInstances.
+	solutions := CFPhysicsWorldSolution allInstances.
+	loggers := CFPhysicsTelemetryLogger allInstances.
 	^ {
 		#timestamp -> DateAndTime now.
 		#heapSize -> (Smalltalk vm parameterAt: 3).
 		#rows -> {
-			self rowNamed: 'PhysicsBody' actual: CFPhysicsBody allInstances size expected: world members size.
-			self rowNamed: 'PhysicsContact' actual: CFPhysicsContact allInstances size expected: world activeContacts size.
-			self rowNamed: 'PhysicsJoint' actual: (CFPhysicsJoint withAllSubclasses inject: 0 into: [ :total :each | total + each allInstances size ]) expected: world joints size.
-			self rowNamed: 'PhysicsIsland' actual: CFPhysicsIsland allInstances size expected: world persistentIslandGraph islands size.
-			self rowNamed: 'PhysicsWorldSolution' actual: CFPhysicsWorldSolution allInstances size expected: (world activeSolveTicket ifNil: [ 0 ] ifNotNil: [ 1 ]).
-			self rowNamed: 'PhysicsTelemetryLogger' actual: CFPhysicsTelemetryLogger allInstances size expected: (world hasTelemetryLogger ifTrue: [ 1 ] ifFalse: [ 0 ]) }
+			self rowNamed: 'PhysicsBody'
+				total: bodies size
+				owned: (bodies count: [ :each | each world == world ])
+				expected: world members size.
+			self rowNamed: 'PhysicsContact'
+				total: contacts size
+				owned: (contacts count: [ :each | each firstBody world == world ])
+				expected: world activeContacts size.
+			self rowNamed: 'PhysicsJoint'
+				total: joints size
+				owned: (joints count: [ :each | self joint: each belongsTo: world ])
+				expected: world joints size.
+			self rowNamed: 'PhysicsIsland'
+				total: islands size
+				owned: (islands count: [ :each | self island: each belongsTo: world ])
+				expected: world persistentIslandGraph islands size.
+			self rowNamed: 'PhysicsWorldSolution'
+				total: solutions size
+				owned: (solutions count: [ :each | each world == world ])
+				expected: (world activeSolveTicket ifNil: [ 0 ] ifNotNil: [ 1 ]).
+			self rowNamed: 'PhysicsTelemetryLogger'
+				total: loggers size
+				owned: (loggers count: [ :each | each world == world ])
+				expected: (world hasTelemetryLogger ifTrue: [ 1 ] ifFalse: [ 0 ]) }
 	} asDictionary
 ]
 
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> rowNamed: aName actual: actualCount expected: expectedCount [
+CFPhysicsProfileHealthElement >> rowNamed: aName total: totalCount owned: ownedCount expected: expectedCount [
 	^ {
 		#name -> aName.
-		#actual -> actualCount.
+		#total -> totalCount.
+		#owned -> ownedCount.
 		#expected -> expectedCount.
-		#difference -> (actualCount - expectedCount) } asDictionary
+		#difference -> (ownedCount - expectedCount) } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> joint: aJoint belongsTo: aWorld [
+	| body |
+	body := aJoint bodyA ifNil: [ aJoint bodyB ].
+	^ body notNil and: [ body world == aWorld ]
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> island: anIsland belongsTo: aWorld [
+	^ anIsland bodies anySatisfy: [ :body | body world == aWorld ]
 ]
 
 { #category : 'private - updating' }
@@ -138,7 +177,7 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 	content addChild: (BrLabel new
 		vFitContent;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
-		text: 'Instances / expected (difference), sampled every 30 seconds';
+		text: 'Image / world / expected (world difference), sampled every 30 seconds';
 		yourself).
 	(aSample at: #rows) do: [ :row | content addChild: (self labelForRow: row) ].
 	self alerts do: [ :alert |
@@ -170,7 +209,8 @@ CFPhysicsProfileHealthElement >> labelForRow: row [
 		vExact: 28;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
 		text: (row at: #name), '  ',
-			(row at: #actual) asString, '/',
+			(row at: #total) asString, '/',
+			(row at: #owned) asString, '/',
 			(row at: #expected) asString, ' (', sign, difference asString, ') ',
 			(self trendFor: (row at: #name));
 		yourself
