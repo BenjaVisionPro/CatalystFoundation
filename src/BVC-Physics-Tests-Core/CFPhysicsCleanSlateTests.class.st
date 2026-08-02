@@ -857,7 +857,8 @@ CFPhysicsCleanSlateTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
 		self cleanSlateConstraintBetween: first and: second.
 		self cleanSlateConstraintBetween: third and: fourth }.
 	islands := CFPhysicsIslandBuilder new
-		islandsFromBodies: { fourth. second. third. first }
+		islandsFromPersistentBodyGroups: { { first }. { second }. { third }. { fourth } }
+		bodies: { fourth. second. third. first }
 		constraints: constraints.
 	self assert: islands size equals: 2.
 	self assert: (islands first dynamicBodies collect: #sequence) equals: #(1 2).
@@ -879,7 +880,8 @@ CFPhysicsCleanSlateTests >> staticBodyDoesNotBridgeDynamicIslands [
 		self cleanSlateConstraintBetween: first and: ground.
 		self cleanSlateConstraintBetween: ground and: second }.
 	islands := CFPhysicsIslandBuilder new
-		islandsFromBodies: { second. ground. first }
+		islandsFromPersistentBodyGroups: { { first }. { second } }
+		bodies: { second. ground. first }
 		constraints: constraints.
 	self assert: islands size equals: 2.
 	self assert: (islands first dynamicBodies collect: #sequence) equals: #(1).
@@ -4915,30 +4917,6 @@ CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
 	self assert: body force equals: 0 @ 0.
 	self assert: body torque equals: 0.0.
 	^ body
-]
-
-{ #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> islandRebuildSplitsRemovedConnectivityDeterministically [
-	<gtExample>
-	| first second third firstConstraint removedConstraint builder connected split |
-	first := self cleanSlateBodyWithSequence: 1.
-	second := self cleanSlateBodyWithSequence: 2.
-	third := self cleanSlateBodyWithSequence: 3.
-	firstConstraint := self cleanSlateConstraintBetween: first and: second.
-	removedConstraint := self cleanSlateConstraintBetween: second and: third.
-	builder := CFPhysicsIslandBuilder new.
-	connected := builder
-		islandsFromBodies: { third. second. first }
-		constraints: { removedConstraint. firstConstraint }.
-	self assert: connected size equals: 1.
-	self assert: (connected first dynamicBodies collect: #sequence) equals: #(1 2 3).
-	split := builder
-		islandsFromBodies: { third. second. first }
-		constraints: { firstConstraint }.
-	self assert: split size equals: 2.
-	self assert: (split first dynamicBodies collect: #sequence) equals: #(1 2).
-	self assert: (split second dynamicBodies collect: #sequence) equals: #(3).
-	^ split
 ]
 
 { #category : 'examples - step pipeline' }

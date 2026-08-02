@@ -1,5 +1,7 @@
 "
-I build islands for the current pipeline result. I expose the island builder as one ordered step stage.
+I materialise solver islands from the detached persistent island groups captured from the world.
+
+The legacy whole-world connectivity rebuild has been removed. The persistent island graph is the only runtime source of solver groups.
 "
 
 Class {
@@ -24,17 +26,10 @@ CFPhysicsIslandBuilderStage >> islandBuilder: anObject [ islandBuilder := anObje
 { #category : 'executing' }
 CFPhysicsIslandBuilderStage >> executeOn: aStepResult [
 	| islands |
-	islands := aStepResult islandBodyGroups isEmpty
-		ifTrue: [
-			"Focused stage examples may construct a pipeline result without a captured world state."
-			islandBuilder
-				islandsFromBodies: aStepResult bodies
-				constraints: aStepResult constraints ]
-		ifFalse: [
-			islandBuilder
-				islandsFromPersistentBodyGroups: aStepResult islandBodyGroups
-				bodies: aStepResult bodies
-				constraints: aStepResult constraints ].
+	islands := islandBuilder
+		islandsFromPersistentBodyGroups: aStepResult islandBodyGroups
+		bodies: aStepResult bodies
+		constraints: aStepResult constraints.
 	aStepResult islands: islands.
 	^ islands
 ]
