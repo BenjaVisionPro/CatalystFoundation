@@ -6508,3 +6508,51 @@ CFPhysicsCleanSlateTests >> worldScalesBroadphaseDistancesIntoEachStep [
 	self assert: (secondStep broadphaseAABBMargin closeTo: 10.0).
 	^ secondStep
 ]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeQueriesOnlyOverlappingProxies [
+	<gtExample>
+	| tree first second third result |
+	tree := CFPhysicsDynamicTree new.
+	first := tree createProxyFor: #first aabb: (CFPhysicsAABB position: 0 @ 0 extent: 10 @ 10).
+	second := tree createProxyFor: #second aabb: (CFPhysicsAABB position: 8 @ 8 extent: 10 @ 10).
+	third := tree createProxyFor: #third aabb: (CFPhysicsAABB position: 100 @ 100 extent: 10 @ 10).
+	result := tree query: (CFPhysicsAABB position: 5 @ 5 extent: 10 @ 10).
+	self assert: result asArray equals: #(first second).
+	self assert: tree proxyCount equals: 3.
+	self assert: first isLeaf.
+	self assert: second isLeaf.
+	self assert: third isLeaf.
+	^ tree
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeMovesProxyOnlyOutsideItsFatBounds [
+	<gtExample>
+	| tree proxy moved |
+	tree := CFPhysicsDynamicTree new.
+	proxy := tree createProxyFor: #body aabb: (CFPhysicsAABB position: 0 @ 0 extent: 20 @ 20).
+	moved := tree moveProxy: proxy to: (CFPhysicsAABB position: 5 @ 5 extent: 5 @ 5).
+	self assert: moved not.
+	moved := tree moveProxy: proxy to: (CFPhysicsAABB position: 30 @ 30 extent: 5 @ 5).
+	self assert: moved.
+	self assert: (tree query: (CFPhysicsAABB position: 30 @ 30 extent: 5 @ 5)) asArray equals: #(body).
+	^ tree
+]
+
+{ #category : 'examples - broadphase' }
+CFPhysicsCleanSlateTests >> dynamicTreeReusesReleasedNodes [
+	<gtExample>
+	| tree first second pooledBefore third |
+	tree := CFPhysicsDynamicTree new.
+	first := tree createProxyFor: #first aabb: (CFPhysicsAABB position: 0 @ 0 extent: 10 @ 10).
+	second := tree createProxyFor: #second aabb: (CFPhysicsAABB position: 20 @ 0 extent: 10 @ 10).
+	tree destroyProxy: second.
+	pooledBefore := tree pooledNodeCount.
+	third := tree createProxyFor: #third aabb: (CFPhysicsAABB position: 40 @ 0 extent: 10 @ 10).
+	self assert: pooledBefore > 0.
+	self assert: tree proxyCount equals: 2.
+	self assert: third identifier equals: second identifier.
+	self assert: first isLeaf.
+	^ tree
+]

@@ -87,3 +87,18 @@ CFPhysicsAABB >> expandedBy: aNumber [
 		position: minimum - (distance @ distance)
 		extent: self extent + ((distance * 2.0) @ (distance * 2.0))
 ]
+
+{ #category : 'testing' }
+CFPhysicsAABB >> contains: anotherAABB [
+	^ minimum x <= anotherAABB minimum x
+		and: [ minimum y <= anotherAABB minimum y
+		and: [ maximum x >= anotherAABB maximum x
+		and: [ maximum y >= anotherAABB maximum y ] ] ]
+]
+
+{ #category : 'measuring' }
+CFPhysicsAABB >> perimeter [
+	| size |
+	size := self extent.
+	^ 2.0 * (size x + size y)
+]
