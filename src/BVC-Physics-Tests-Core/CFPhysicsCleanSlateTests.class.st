@@ -6764,3 +6764,53 @@ CFPhysicsCleanSlateTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
 	self assert: ((tree query: (CFPhysicsAABB position: 30 @ 0 extent: 5 @ 5)) includes: #moving).
 	^ tree
 ]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphLinksAndMergesLikeBox2D [
+	<gtExample>
+	| first second third firstConstraint secondConstraint graph islands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	firstConstraint := CFPhysicsPreparedDistanceJoint new
+		bodyA: first;
+		bodyB: second;
+		yourself.
+	secondConstraint := CFPhysicsPreparedDistanceJoint new
+		bodyA: second;
+		bodyB: third;
+		yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph
+		linkConstraint: firstConstraint;
+		linkConstraint: secondConstraint.
+	self assert: graph islands size equals: 3.
+	islands := graph mergeIslands.
+	self assert: islands size equals: 1.
+	self assert: islands first bodies size equals: 3.
+	self assert: islands first constraints size equals: 2.
+	self assert: (graph islandForBody: first) == islands first.
+	self assert: (graph islandForBody: third) == islands first.
+	^ graph
+]
+
+{ #category : 'examples - islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphDefersSplitAfterConstraintRemoval [
+	<gtExample>
+	| first second constraint graph island |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	constraint := CFPhysicsPreparedDistanceJoint new
+		bodyA: first;
+		bodyB: second;
+		yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph linkConstraint: constraint.
+	graph mergeIslands.
+	island := graph islandForBody: first.
+	graph unlinkConstraint: constraint.
+	self assert: island constraintRemoveCount equals: 1.
+	self assert: island constraints isEmpty.
+	self assert: graph islands size equals: 1.
+	^ graph
+]
