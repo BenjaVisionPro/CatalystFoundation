@@ -25,7 +25,9 @@ CFPhysicsConservativeAdvancement class >> betweenShapeState: firstShapeState swe
 			at: fraction.
 		distanceResult isOverlapping ifTrue: [
 			^ CFPhysicsTimeOfImpactResult
-				status: #overlapped
+				status: (fraction = 0.0
+					ifTrue: [ #overlapped ]
+					ifFalse: [ #impact ])
 				fraction: fraction
 				distanceResult: distanceResult
 				iterations: iteration ].
