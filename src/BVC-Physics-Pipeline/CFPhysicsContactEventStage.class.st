@@ -16,10 +16,7 @@ CFPhysicsContactEventStage >> initialize [
 	eventBuilder := CFPhysicsContactEventBuilder new
 ]
 
-{ #category : 'accessing' }
-CFPhysicsContactEventStage >> eventBuilder [ ^ eventBuilder ]
-{ #category : 'accessing' }
-CFPhysicsContactEventStage >> eventBuilder: anObject [ eventBuilder := anObject ]
+
 
 { #category : 'executing' }
 CFPhysicsContactEventStage >> executeOn: aStepResult [

@@ -181,7 +181,3 @@ CFPhysicsConstraintPreparationStage >> preparedObjectCount [
 		+ self preparedJointConstraintCount
 ]
 
-{ #category : 'accessing - measurement' }
-CFPhysicsConstraintPreparationStage >> reusedPreparedObjectCount [
-	^ constraintBuilder reusedConstraintCount + constraintBuilder reusedPointCount
-]
