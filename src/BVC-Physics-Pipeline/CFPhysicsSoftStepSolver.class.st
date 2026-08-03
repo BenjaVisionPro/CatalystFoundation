@@ -5,17 +5,27 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
 CFPhysicsSoftStepSolver class >> step: aStep bodyStates: anOrderedCollection constraints: aCollection [
+	^ self
+		step: aStep
+		bodyStates: anOrderedCollection
+		constraints: aCollection
+		gravity: 0 @ 0
+]
+
+{ #category : 'instance creation' }
+CFPhysicsSoftStepSolver class >> step: aStep bodyStates: anOrderedCollection constraints: aCollection gravity: aPoint [
 	^ self new
 		step: aStep;
 		bodyStates: anOrderedCollection;
 		constraints: aCollection;
+		gravity: aPoint;
 		yourself
 ]
 
@@ -46,8 +56,10 @@ CFPhysicsSoftStepSolver >> initialize [
 { #category : 'solving' }
 CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	maximumInitialContactPenetration := self maximumContactPenetration.
-	self warmStart.
 	step substepCount timesRepeat: [
+		bodyStates do: [ :state |
+			state integrateVelocityBy: step substepTime gravity: gravity ].
+		self warmStart.
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
 		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
@@ -877,6 +889,8 @@ CFPhysicsSoftStepSolver >> cross: first with: second [ ^ (first x * second y) - 
 { #category : 'private - mathematics' }
 CFPhysicsSoftStepSolver >> crossScalar: scalar with: vector [ ^ (scalar * vector y negated) @ (scalar * vector x) ]
 
+{ #category : 'accessing' }
+CFPhysicsSoftStepSolver >> gravity: aPoint [ gravity := aPoint ]
 { #category : 'accessing' }
 CFPhysicsSoftStepSolver >> step: anObject [ step := anObject ]
 { #category : 'accessing' }

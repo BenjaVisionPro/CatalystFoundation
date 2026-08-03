@@ -5,17 +5,27 @@ I solve each simulation island for one substep. I coordinate the soft-step solve
 Class {
 	#name : 'CFPhysicsIslandSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'islands', 'softStepSolvers' ],
+	#instVars : [ 'step', 'bodyStates', 'islands', 'gravity', 'softStepSolvers' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'instance creation' }
 CFPhysicsIslandSolver class >> step: aStep bodyStates: aDictionary islands: aCollection [
+	^ self
+		step: aStep
+		bodyStates: aDictionary
+		islands: aCollection
+		gravity: 0 @ 0
+]
+
+{ #category : 'instance creation' }
+CFPhysicsIslandSolver class >> step: aStep bodyStates: aDictionary islands: aCollection gravity: aPoint [
 	^ self new
 		step: aStep;
 		bodyStates: aDictionary;
 		islands: aCollection;
+		gravity: aPoint;
 		yourself
 ]
 
@@ -33,7 +43,8 @@ CFPhysicsIslandSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		solver := CFPhysicsSoftStepSolver
 			step: step
 			bodyStates: (self bodyStatesFor: island)
-			constraints: island constraints.
+			constraints: island constraints
+			gravity: gravity.
 		solver solveWithRestitutionThreshold: restitutionThreshold.
 		solver ]
 ]
@@ -49,6 +60,8 @@ CFPhysicsIslandSolver >> step: anObject [ step := anObject ]
 CFPhysicsIslandSolver >> bodyStates: aDictionary [ bodyStates := aDictionary ]
 { #category : 'accessing' }
 CFPhysicsIslandSolver >> islands: aCollection [ islands := aCollection asArray ]
+{ #category : 'accessing' }
+CFPhysicsIslandSolver >> gravity: aPoint [ gravity := aPoint ]
 { #category : 'accessing' }
 CFPhysicsIslandSolver >> islands [ ^ islands ]
 { #category : 'accessing' }

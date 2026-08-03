@@ -4027,10 +4027,30 @@ CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSw
 	CFPhysicsVelocityIntegrationStage new executeOn: result.
 	CFPhysicsPairFinderStage new executeOn: result.
 	state := result bodyStates at: moving.
-	self assert: state linearVelocity equals: 100 @ 0.
+	self assert: state linearVelocity equals: 0 @ 0.
 	self assert: moving velocity equals: 0 @ 0.
 	self assert: result pairs isEmpty.
 	^ result
+]
+
+{ #category : 'examples - solver' }
+CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
+	<gtExample>
+	| world body |
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
+	world
+		gravity: 0 @ 0;
+		stepDuration: 1.0;
+		substepCount: 2.
+	body := self cleanSlateBodyWithSequence: 1.
+	body
+		velocity: 100 @ 0;
+		linearDamping: 1.0.
+	world add: body.
+	world step.
+	self assert: (body velocity x closeTo: (100.0 / 1.5 / 1.5)).
+	self assert: (body velocity y closeTo: 0.0).
+	^ body
 ]
 
 { #category : 'examples - continuous collision' }

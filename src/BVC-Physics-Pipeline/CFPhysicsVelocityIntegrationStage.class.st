@@ -11,9 +11,6 @@ Class {
 
 { #category : 'executing' }
 CFPhysicsVelocityIntegrationStage >> executeOn: aStepResult [
-	aStepResult bodies do: [ :body |
-		(aStepResult bodyStates at: body)
-			integrateVelocityBy: aStepResult step timeStep
-			gravity: aStepResult gravity ].
+	"Velocity integration is performed once per solver substep, matching Box2D Soft Step."
 	^ aStepResult bodyStates
 ]
