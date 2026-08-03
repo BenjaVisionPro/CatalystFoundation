@@ -4036,17 +4036,19 @@ CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSw
 { #category : 'examples - solver' }
 CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
 	<gtExample>
-	| world body |
+	| world element body |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	world
 		gravity: 0 @ 0;
 		stepDuration: 1.0;
 		substepCount: 2.
-	body := self cleanSlateBodyWithSequence: 1.
-	body
+	element := BlElement new size: 10 @ 10; yourself.
+	world owner addChild: element.
+	element physics
+		beDynamic;
 		velocity: 100 @ 0;
 		linearDamping: 1.0.
-	world add: body.
+	body := element physics body.
 	world step.
 	self assert: (body velocity x closeTo: (100.0 / 1.5 / 1.5)).
 	self assert: (body velocity y closeTo: 0.0).
