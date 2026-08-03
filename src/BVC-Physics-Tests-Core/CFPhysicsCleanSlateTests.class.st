@@ -910,7 +910,7 @@ CFPhysicsCleanSlateTests >> cleanSlateConstraintBetween: firstBody and: secondBo
 
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> awakeKinematicBodyWakesConnectedSleepingDynamicBody [
+CFPhysicsCleanSlateTests >> awakeKinematicBodyDoesNotWakeConnectedSleepingDynamicBody [
 	<gtExample>
 	| kinematic dynamic island stage bodyStates decision |
 	kinematic := self cleanSlateBodyWithSequence: 1.
@@ -931,8 +931,8 @@ CFPhysicsCleanSlateTests >> awakeKinematicBodyWakesConnectedSleepingDynamicBody 
 		updateIslands: { island }
 		bodyStates: bodyStates
 		elapsed: 0.0) first.
-	self assert: (bodyStates at: dynamic) isAwake.
-	self assert: decision wokeBodies equals: { dynamic }.
+	self assert: (bodyStates at: dynamic) isAwake not.
+	self assert: decision wokeBodies isEmpty.
 	^ decision
 ]
 
@@ -1002,7 +1002,7 @@ CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
+CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwakeWithoutResettingSleepyMembers [
 	<gtExample>
 	| first second island stage bodyStates decision |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1024,13 +1024,13 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwake [
 	self assert: decision eligible not.
 	self assert: (bodyStates at: first) isAwake.
 	self assert: (bodyStates at: second) isAwake.
-	self assert: (bodyStates at: first) sleepTime equals: 0.0.
+	self assert: ((bodyStates at: first) sleepTime closeTo: 0.266).
 	self assert: (bodyStates at: second) sleepTime equals: 0.0.
 	self assert: first sleepTime equals: 0.25.
 	self assert: second sleepTime equals: 0.0.
 	(bodyStates at: first) commit.
 	(bodyStates at: second) commit.
-	self assert: first sleepTime equals: 0.0.
+	self assert: (first sleepTime closeTo: 0.266).
 	self assert: second sleepTime equals: 0.0.
 	^ decision
 ]

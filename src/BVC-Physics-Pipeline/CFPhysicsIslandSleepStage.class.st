@@ -39,16 +39,13 @@ CFPhysicsIslandSleepStage >> propagateWakeAcross: islands [
 
 { #category : 'private - waking' }
 CFPhysicsIslandSleepStage >> islandHasAwakeSolverBody: island [
-	"Answer whether an awake non-static body should wake the island's sleeping dynamic bodies. Kinematic bodies are always awake and participate in Box2D's awake solver set."
-	^ island bodies anySatisfy: [ :body |
-		body isStatic not and: [ body isAwake ] ]
+	^ island dynamicBodies anySatisfy: #isAwake
 ]
 
 { #category : 'private - waking' }
 CFPhysicsIslandSleepStage >> islandHasAwakeSolverBody: island bodyStates: bodyStates [
-	"Answer whether an awake non-static step body should wake the island's sleeping dynamic bodies. Kinematic bodies are always awake and participate in Box2D's awake solver set."
-	^ island bodies anySatisfy: [ :body |
-		body isStatic not and: [ (bodyStates at: body) isAwake ] ]
+	^ island dynamicBodies anySatisfy: [ :body |
+		(bodyStates at: body) isAwake ]
 ]
 
 { #category : 'private - waking' }
@@ -88,34 +85,26 @@ CFPhysicsIslandSleepStage >> updateIsland: island bodyStates: bodyStates elapsed
 			minimumSleepTime: configuration timeToSleep;
 			yourself ].
 
-	eligible := dynamicBodies allSatisfy: [ :body |
-		| state |
+	eligible := true.
+	minimum := Float infinity.
+	dynamicBodies do: [ :body |
+		| state sleepy |
 		state := bodyStates at: body.
-		state allowsSleeping and: [
-			configuration acceptsStepState: state elapsed: seconds ] ].
-
-	eligible
-		ifTrue: [
-			minimum := Float infinity.
-			dynamicBodies do: [ :body |
-				| state |
-				state := bodyStates at: body.
-				state advanceSleepTimeBy: seconds.
-				minimum := minimum min: state sleepTime ].
-			slept := minimum >= configuration timeToSleep.
-			slept ifTrue: [
-				dynamicBodies do: [ :body |
-					| state |
-					state := bodyStates at: body.
-					state sleep ] ] ]
-		ifFalse: [
-			dynamicBodies do: [ :body |
-				| state |
-				state := bodyStates at: body.
+		sleepy := state allowsSleeping and: [
+			configuration acceptsStepState: state elapsed: seconds ].
+		sleepy
+			ifTrue: [ state advanceSleepTimeBy: seconds ]
+			ifFalse: [
 				state resetSleepTime.
 				state wake ].
-			minimum := 0.0.
-			slept := false ].
+		minimum := minimum min: state sleepTime.
+		state sleepTime < configuration timeToSleep ifTrue: [
+			eligible := false ] ].
+
+	slept := eligible.
+	slept ifTrue: [
+		dynamicBodies do: [ :body |
+			(bodyStates at: body) sleep ] ].
 
 	^ decision
 		eligible: eligible;
