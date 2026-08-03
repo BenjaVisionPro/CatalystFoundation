@@ -5480,10 +5480,17 @@ CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
 { #category : 'examples - contacts' }
 CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds [
 	<gtExample>
-	| first second result stage contacts |
+	| first second result stage contacts step |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	step speculativeDistance: 0.0.
 	result := CFPhysicsStepPipelineResult new
+		step: step;
 		bodies: { first. second };
 		previousContacts: #();
 		yourself.
@@ -5501,11 +5508,18 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds
 { #category : 'examples - contacts' }
 CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 	<gtExample>
-	| first second result stage contacts |
+	| first second result stage contacts step |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 15 @ 0 extent: 20 @ 20.
 	first beSensor.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	step speculativeDistance: 0.0.
 	result := CFPhysicsStepPipelineResult new
+		step: step;
 		bodies: { first. second };
 		previousContacts: #();
 		yourself.
