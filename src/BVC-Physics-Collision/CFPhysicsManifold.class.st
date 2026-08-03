@@ -64,16 +64,19 @@ CFPhysicsManifold >> clearImpulses [
 
 { #category : 'updating' }
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
+	| matchedFeatureIds |
 	anOldManifold ifNil: [ ^ self ].
-	rollingImpulse := anOldManifold rollingImpulse.
+	contactPoints ifNotEmpty: [ rollingImpulse := anOldManifold rollingImpulse ].
+	matchedFeatureIds := Set new.
 	contactPoints do: [ :point |
-		point featureId ifNotNil: [ :featureId |
+		point featureId ifNotNil: [ :featureId | (matchedFeatureIds includes: featureId) ifFalse: [
 			anOldManifold contactPoints
 				detect: [ :oldPoint | oldPoint featureId = featureId ]
 				ifFound: [ :oldPoint |
 					point
 						normalImpulse: oldPoint normalImpulse;
-						tangentImpulse: oldPoint tangentImpulse ] ] ]
+						tangentImpulse: oldPoint tangentImpulse.
+					matchedFeatureIds add: featureId ] ] ]
 ]
 
 { #category : 'testing' }

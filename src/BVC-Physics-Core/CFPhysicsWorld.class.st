@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -30,6 +30,7 @@ CFPhysicsWorld >> initialize [
 	restitutionThreshold := 1.0.
 	hitEventThreshold := 1.0.
 	maximumContactPushSpeed := 3.0.
+	maximumLinearSpeed := 400.0.
 	substepCount := 4.
 	contactHertz := 30.0.
 	contactDampingRatio := 10.0.
@@ -241,6 +242,19 @@ CFPhysicsWorld >> maximumContactPushSpeed: aNumber [
 	"Set the maximum penetration recovery speed. The supplied value is
 	specified in metres per second."
 	maximumContactPushSpeed := aNumber asFloat max: 0.0
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> maximumLinearSpeed [
+	"Maximum body speed in metres per second. Box2D 3.1.1 defaults this to 400 m/s."
+	maximumLinearSpeed ifNil: [ maximumLinearSpeed := 400.0 ].
+	^ maximumLinearSpeed
+]
+
+{ #category : 'solver configuration' }
+CFPhysicsWorld >> maximumLinearSpeed: aNumber [
+	"Set the maximum body speed in metres per second. It is converted to physics length units for each step."
+	maximumLinearSpeed := aNumber asFloat max: 0.0
 ]
 
 { #category : 'solver configuration' }
@@ -462,16 +476,11 @@ CFPhysicsWorld >> newStep [
 		simulationTime: simulationTime;
 		stepNumber: stepNumber + 1;
 		maximumContactPushSpeed: (self lengthUnitsForMetres: maximumContactPushSpeed);
+		maximumLinearSpeed: (self lengthUnitsForMetres: self maximumLinearSpeed);
 		hitEventThreshold: (self lengthUnitsForMetres: hitEventThreshold);
 		speculativeDistance: (self lengthUnitsForMetres: 0.02);
 		broadphaseAABBMargin: (self lengthUnitsForMetres: 0.05);
-		warmStartRatio: (warmStarting
-		ifFalse: [ 0.0 ]
-		ifTrue: [ previousTimeStep
-			ifNil: [ 1.0 ]
-			ifNotNil: [ previousTimeStep = 0.0
-				ifTrue: [ 0.0 ]
-				ifFalse: [ currentTimeStep / previousTimeStep ] ] ]).
+		warmStartRatio: (warmStarting ifTrue: [ 1.0 ] ifFalse: [ 0.0 ]).
 	^ step
 ]
 

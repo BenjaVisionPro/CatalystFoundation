@@ -5,7 +5,7 @@ I represent one body's mutable state during a simulation step. I isolate solver 
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepThreshold', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet' ],
+	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepThreshold', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet', 'allowFastRotation' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -44,26 +44,61 @@ CFPhysicsBodyStepState >> capture [
 	collisionMaskBits := body collisionMaskBits.
 	collisionGroupIndex := body collisionGroupIndex.
 	bullet := body isBullet.
+	allowFastRotation := body allowFastRotation.
 	deltaPosition := 0 @ 0.
 	deltaRotation := 0.0
 ]
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
+	^ self
+		integrateVelocityBy: seconds
+		gravity: gravityVector
+		maximumLinearSpeed: Float infinity
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed [
 	bodyType isDynamic ifFalse: [ ^ self ].
 	awake ifFalse: [ ^ self ].
-	self integrateDynamicVelocityBy: seconds gravity: gravityVector
+	self
+		integrateDynamicVelocityBy: seconds
+		gravity: gravityVector
+		maximumLinearSpeed: aMaximumLinearSpeed
 ]
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector [
+	^ self
+		integrateDynamicVelocityBy: seconds
+		gravity: gravityVector
+		maximumLinearSpeed: Float infinity
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed [
 	| linearVelocityDelta angularVelocityDelta linearDampingFactor angularDampingFactor |
 	linearVelocityDelta := ((gravityVector * gravityScale) + (force * inverseMass)) * seconds.
 	angularVelocityDelta := torque * inverseInertia * seconds.
 	linearDampingFactor := 1.0 / (1.0 + (seconds * linearDamping)).
 	angularDampingFactor := 1.0 / (1.0 + (seconds * angularDamping)).
 	linearVelocity := linearVelocityDelta + (linearVelocity * linearDampingFactor).
-	angularVelocity := angularVelocityDelta + (angularVelocity * angularDampingFactor)
+	angularVelocity := angularVelocityDelta + (angularVelocity * angularDampingFactor).
+	self limitVelocityFor: seconds maximumLinearSpeed: aMaximumLinearSpeed
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> limitVelocityFor: seconds maximumLinearSpeed: aMaximumLinearSpeed [
+	| linearSpeed maximumAngularSpeed |
+	linearSpeed := linearVelocity r.
+	linearSpeed > aMaximumLinearSpeed ifTrue: [
+		linearVelocity := linearVelocity * (aMaximumLinearSpeed / linearSpeed) ].
+	seconds <= 0.0 ifTrue: [ ^ self ].
+	maximumAngularSpeed := Float pi * 0.25 / seconds.
+	(allowFastRotation not and: [ angularVelocity abs > maximumAngularSpeed ]) ifTrue: [
+		angularVelocity := angularVelocity >= 0.0
+			ifTrue: [ maximumAngularSpeed ]
+			ifFalse: [ maximumAngularSpeed negated ] ]
 ]
 
 { #category : 'integration' }

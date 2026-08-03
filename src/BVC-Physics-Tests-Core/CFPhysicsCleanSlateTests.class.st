@@ -90,6 +90,42 @@ CFPhysicsCleanSlateTests >> manifoldDoesNotUsePositionAsIdentity [
 	^ newManifold
 ]
 
+{ #category : 'examples - contacts' }
+CFPhysicsCleanSlateTests >> manifoldConsumesEachPreviousFeatureImpulseOnlyOnce [
+	<gtExample>
+	| featureId firstOldPoint secondOldPoint oldManifold firstNewPoint secondNewPoint newManifold |
+	featureId := CFPhysicsContactFeatureId
+		featureA: #face index: 0 featureB: #vertex index: 0.
+	firstOldPoint := CFPhysicsManifoldPoint at: 10 @ 20.
+	firstOldPoint
+		featureId: featureId;
+		normalImpulse: 7.5;
+		tangentImpulse: -1.25.
+	secondOldPoint := CFPhysicsManifoldPoint at: 20 @ 20.
+	secondOldPoint
+		featureId: featureId;
+		normalImpulse: 4.0;
+		tangentImpulse: 0.5.
+	oldManifold := CFPhysicsManifold new
+		contactPoints: { firstOldPoint. secondOldPoint };
+		yourself.
+
+	firstNewPoint := CFPhysicsManifoldPoint at: 11 @ 20.
+	firstNewPoint featureId: featureId.
+	secondNewPoint := CFPhysicsManifoldPoint at: 21 @ 20.
+	secondNewPoint featureId: featureId.
+	newManifold := CFPhysicsManifold new
+		contactPoints: { firstNewPoint. secondNewPoint };
+		preserveImpulsesFrom: oldManifold;
+		yourself.
+
+	self assert: firstNewPoint normalImpulse equals: 7.5.
+	self assert: firstNewPoint tangentImpulse equals: -1.25.
+	self assert: secondNewPoint normalImpulse equals: 0.0.
+	self assert: secondNewPoint tangentImpulse equals: 0.0.
+	^ newManifold
+]
+
 { #category : 'examples - polygon manifolds' }
 CFPhysicsCleanSlateTests >> faceContactProducesTwoPoints [
 	<gtExample>
@@ -3595,7 +3631,7 @@ CFPhysicsCleanSlateTests >> changingStepDurationPreservesAccumulatedSimulationTi
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldScalesWarmStartingWhenStepDurationChanges [
+CFPhysicsCleanSlateTests >> worldKeepsBox2DWarmStartingWhenStepDurationChanges [
 	<gtExample>
 	| world firstStep secondStep |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3604,7 +3640,7 @@ CFPhysicsCleanSlateTests >> worldScalesWarmStartingWhenStepDurationChanges [
 	world step.
 	world stepDuration: 8 milliseconds.
 	secondStep := world newStep.
-	self assert: secondStep warmStartRatio equals: 0.5.
+	self assert: secondStep warmStartRatio equals: 1.0.
 	^ secondStep
 ]
 
@@ -3633,8 +3669,19 @@ CFPhysicsCleanSlateTests >> worldCanDisableAndResumeWarmStarting [
 	world warmStarting: true.
 	world stepDuration: 4 milliseconds.
 	resumedStep := world newStep.
-	self assert: resumedStep warmStartRatio equals: 0.5.
+	self assert: resumedStep warmStartRatio equals: 1.0.
 	^ resumedStep
+]
+
+{ #category : 'examples - stepping' }
+CFPhysicsCleanSlateTests >> worldConvertsBox2DMaximumLinearSpeedToPhysicsUnits [
+	<gtExample>
+	| world step |
+	world := CFPhysicsWorld new.
+	world maximumLinearSpeed: 5.0.
+	step := world newStep.
+	self assert: step maximumLinearSpeed equals: 500.0.
+	^ step
 ]
 
 { #category : 'examples - contacts' }
@@ -4977,6 +5024,38 @@ CFPhysicsCleanSlateTests >> stepStateAppliesPadeLinearDamping [
 	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
 	self assert: state linearVelocity equals: 6 @ -3.
 	^ state
+]
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateCapsLinearVelocityLikeBox2D [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body velocity: 6 @ 8.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 1.0 gravity: 0 @ 0 maximumLinearSpeed: 5.0.
+	self assert: (state linearVelocity closeTo: 3 @ 4).
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateCapsAngularVelocityUnlessFastRotationIsAllowed [
+	<gtExample>
+	| body cappedState uncappedState maximumAngularSpeed |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	maximumAngularSpeed := Float pi * 0.25.
+	body angularVelocity: Float pi.
+	cappedState := CFPhysicsBodyStepState on: body.
+	cappedState integrateVelocityBy: 1.0 gravity: 0 @ 0 maximumLinearSpeed: 400.0.
+	self assert: (cappedState angularVelocity closeTo: maximumAngularSpeed).
+
+	body
+		allowFastRotation: true;
+		angularVelocity: Float pi.
+	uncappedState := CFPhysicsBodyStepState on: body.
+	uncappedState integrateVelocityBy: 1.0 gravity: 0 @ 0 maximumLinearSpeed: 400.0.
+	self assert: uncappedState angularVelocity equals: Float pi.
+	^ uncappedState
 ]
 
 { #category : 'examples - velocity integration' }

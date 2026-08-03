@@ -6,7 +6,7 @@ My responsibility is to own an element's physical state, material, shape and par
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet', 'allowFastRotation' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -210,6 +210,7 @@ CFPhysicsBody >> initialize [
 	sleepingAllowed := true.
 	sleepThreshold := 0.05.
 	bullet := false.
+	allowFastRotation := false.
 	contacts := IdentitySet new
 ]
 
@@ -483,6 +484,17 @@ CFPhysicsBody >> angularDamping [
 { #category : 'angular dynamics' }
 CFPhysicsBody >> angularDamping: aNumber [
 	angularDamping := aNumber asFloat max: 0.0
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> allowFastRotation [
+	"Whether this body may exceed Box2D's default maximum angular step of pi/4."
+	^ allowFastRotation = true
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> allowFastRotation: aBoolean [
+	allowFastRotation := aBoolean = true
 ]
 
 { #category : 'angular dynamics' }

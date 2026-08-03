@@ -58,7 +58,10 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	maximumInitialContactPenetration := self maximumContactPenetration.
 	step substepCount timesRepeat: [
 		bodyStates do: [ :state |
-			state integrateVelocityBy: step substepTime gravity: gravity ].
+			state
+				integrateVelocityBy: step substepTime
+				gravity: gravity
+				maximumLinearSpeed: step maximumLinearSpeed ].
 		self warmStart.
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.

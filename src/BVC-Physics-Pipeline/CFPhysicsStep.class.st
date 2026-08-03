@@ -5,7 +5,7 @@ I describe the numerical configuration and identity of one simulation step. I de
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'staticBiasRate', 'staticMassCoefficient', 'staticImpulseCoefficient', 'maximumContactPushSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'staticBiasRate', 'staticMassCoefficient', 'staticImpulseCoefficient', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -26,6 +26,7 @@ CFPhysicsStep >> prepare [
 	| effectiveContactHertz coefficients staticCoefficients |
 	warmStartRatio ifNil: [ warmStartRatio := 1.0 ].
 	maximumContactPushSpeed ifNil: [ maximumContactPushSpeed := 3.0 ].
+	maximumLinearSpeed ifNil: [ maximumLinearSpeed := 400.0 ].
 	hitEventThreshold ifNil: [ hitEventThreshold := 1.0 ].
 	speculativeDistance ifNil: [ speculativeDistance := 0.02 ].
 	broadphaseAABBMargin ifNil: [ broadphaseAABBMargin := 0.05 ].
@@ -101,6 +102,16 @@ CFPhysicsStep >> maximumContactPushSpeed [
 
 { #category : 'accessing' }
 CFPhysicsStep >> maximumContactPushSpeed: aNumber [ maximumContactPushSpeed := aNumber asFloat max: 0.0 ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> maximumLinearSpeed [
+	"Maximum body speed in physics length units per second."
+	maximumLinearSpeed ifNil: [ maximumLinearSpeed := 400.0 ].
+	^ maximumLinearSpeed
+]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> maximumLinearSpeed: aNumber [ maximumLinearSpeed := aNumber asFloat max: 0.0 ]
 
 { #category : 'accessing' }
 CFPhysicsStep >> hitEventThreshold [
