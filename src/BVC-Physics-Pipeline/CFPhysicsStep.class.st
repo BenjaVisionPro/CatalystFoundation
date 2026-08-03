@@ -5,7 +5,7 @@ I describe the numerical configuration and identity of one simulation step. I de
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'staticBiasRate', 'staticMassCoefficient', 'staticImpulseCoefficient', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'staticBiasRate', 'staticMassCoefficient', 'staticImpulseCoefficient', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'hitEventThreshold', 'linearSlop', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -28,6 +28,7 @@ CFPhysicsStep >> prepare [
 	maximumContactPushSpeed ifNil: [ maximumContactPushSpeed := 3.0 ].
 	maximumLinearSpeed ifNil: [ maximumLinearSpeed := 400.0 ].
 	hitEventThreshold ifNil: [ hitEventThreshold := 1.0 ].
+	linearSlop ifNil: [ linearSlop := 0.005 ].
 	speculativeDistance ifNil: [ speculativeDistance := 0.02 ].
 	broadphaseAABBMargin ifNil: [ broadphaseAABBMargin := 0.05 ].
 	substepCount := substepCount max: 1.
@@ -121,6 +122,17 @@ CFPhysicsStep >> hitEventThreshold [
 
 { #category : 'accessing' }
 CFPhysicsStep >> hitEventThreshold: aNumber [ hitEventThreshold := aNumber asFloat max: 0.0 ]
+
+{ #category : 'continuous collision' }
+CFPhysicsStep >> linearSlop [
+	"Box2D's core distance tolerance in physics length units. Capture it on the step so asynchronous solves never read a live world."
+	^ linearSlop
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsStep >> linearSlop: aNumber [
+	linearSlop := aNumber asFloat max: 0.0
+]
 
 { #category : 'warm starting' }
 CFPhysicsStep >> warmStartRatio [ ^ warmStartRatio ]

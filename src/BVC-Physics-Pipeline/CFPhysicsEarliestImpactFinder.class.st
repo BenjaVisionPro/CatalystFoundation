@@ -108,12 +108,65 @@ CFPhysicsEarliestImpactFinder >> earliestSolvedAmong: pairs bodyStates: bodyStat
 ]
 
 { #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> earliestSolvedAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction linearSlop: linearSlop [
+	| candidates |
+	candidates := self
+		solvedImpactsAmong: pairs
+		bodyStates: bodyStates
+		afterFraction: minimumFraction
+		linearSlop: linearSlop.
+	^ candidates ifEmpty: [ nil ] ifNotEmpty: [ candidates first ]
+]
+
+{ #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> earliestSolvedAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction linearSlop: linearSlop fastBody: fastBody [
+	| candidates |
+	candidates := self
+		solvedImpactsAmong: pairs
+		bodyStates: bodyStates
+		afterFraction: minimumFraction
+		linearSlop: linearSlop
+		fastBody: fastBody.
+	^ candidates ifEmpty: [ nil ] ifNotEmpty: [ candidates first ]
+]
+
+{ #category : 'finding - solved sweeps' }
 CFPhysicsEarliestImpactFinder >> solvedImpactsAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction [
 	| impacts |
 	impacts := OrderedCollection new.
 	pairs do: [ :pair |
 		| candidate |
 		candidate := self solvedTimeOfImpactFor: pair bodyStates: bodyStates.
+		(candidate timeOfImpactResult hasImpact and: [ candidate fraction > minimumFraction ]) ifTrue: [
+			impacts add: candidate ] ].
+	^ impacts asArray sorted: [ :left :right |
+		self candidate: left comesBefore: right tolerance: 1.0e-9 ]
+]
+
+{ #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedImpactsAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction linearSlop: linearSlop [
+	| impacts |
+	impacts := OrderedCollection new.
+	pairs do: [ :pair |
+		| candidate |
+		candidate := self solvedTimeOfImpactFor: pair bodyStates: bodyStates linearSlop: linearSlop.
+		(candidate timeOfImpactResult hasImpact and: [ candidate fraction > minimumFraction ]) ifTrue: [
+			impacts add: candidate ] ].
+	^ impacts asArray sorted: [ :left :right |
+		self candidate: left comesBefore: right tolerance: 1.0e-9 ]
+]
+
+{ #category : 'finding - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedImpactsAmong: pairs bodyStates: bodyStates afterFraction: minimumFraction linearSlop: linearSlop fastBody: fastBody [
+	| impacts |
+	impacts := OrderedCollection new.
+	pairs do: [ :pair |
+		| candidate |
+		candidate := self
+			solvedTimeOfImpactFor: pair
+			bodyStates: bodyStates
+			linearSlop: linearSlop
+			fastBody: fastBody.
 		(candidate timeOfImpactResult hasImpact and: [ candidate fraction > minimumFraction ]) ifTrue: [
 			impacts add: candidate ] ].
 	^ impacts asArray sorted: [ :left :right |
@@ -130,5 +183,51 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 		sweep: firstState solvedSweep
 		andShapeState: secondState shapeState
 		sweep: secondState solvedSweep.
+	^ CFPhysicsPairTimeOfImpact pair: pair result: result
+]
+
+{ #category : 'private - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodyStates linearSlop: linearSlop [
+	| firstState secondState result |
+	firstState := bodyStates at: pair firstBody.
+	secondState := bodyStates at: pair secondBody.
+	result := CFPhysicsBox2DTimeOfImpact
+		betweenShapeState: firstState shapeState
+		sweep: firstState solvedSweep
+		andShapeState: secondState shapeState
+		sweep: secondState solvedSweep
+		linearSlop: linearSlop.
+	^ CFPhysicsPairTimeOfImpact pair: pair result: result
+]
+
+{ #category : 'private - solved sweeps' }
+CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodyStates linearSlop: linearSlop fastBody: fastBody [
+	| firstState secondState result fastState fallbackProxy firstProxy secondProxy fallbackResult |
+	firstState := bodyStates at: pair firstBody.
+	secondState := bodyStates at: pair secondBody.
+	result := CFPhysicsBox2DTimeOfImpact
+		betweenShapeState: firstState shapeState
+		sweep: firstState solvedSweep
+		andShapeState: secondState shapeState
+		sweep: secondState solvedSweep
+		linearSlop: linearSlop.
+	result fraction = 0.0 ifTrue: [
+		fastState := bodyStates at: fastBody.
+		fallbackProxy := CFPhysicsDistanceProxy
+			points: { 0 @ 0 }
+			radius: 0.25 * fastState shapeState minimumExtent.
+		firstProxy := pair firstBody == fastBody
+			ifTrue: [ fallbackProxy ]
+			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: firstState shapeState ].
+		secondProxy := pair secondBody == fastBody
+			ifTrue: [ fallbackProxy ]
+			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: secondState shapeState ].
+		fallbackResult := CFPhysicsBox2DTimeOfImpact
+			betweenProxy: firstProxy
+			sweep: firstState solvedSweep
+			andProxy: secondProxy
+			sweep: secondState solvedSweep
+			linearSlop: linearSlop.
+		(fallbackResult hasImpact and: [ fallbackResult fraction > 0.0 ]) ifTrue: [ result := fallbackResult ] ].
 	^ CFPhysicsPairTimeOfImpact pair: pair result: result
 ]

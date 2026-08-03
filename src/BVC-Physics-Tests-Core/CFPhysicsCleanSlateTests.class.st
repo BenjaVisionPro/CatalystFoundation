@@ -21,6 +21,34 @@ CFPhysicsCleanSlateTests >> softStepUsesSubstepDuration [
 	^ step
 ]
 
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> distanceProxySeparatesRoundedShapeCoreFromRadius [
+	<gtExample>
+	| state proxy |
+	state := CFPhysicsShapeState on: (BlElement new
+		size: 20 @ 10;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 3);
+		yourself).
+	proxy := CFPhysicsDistanceProxy fromShapeState: state.
+	self assert: proxy points equals: { -7 @ -2. 7 @ -2. 7 @ 2. -7 @ 2 }.
+	self assert: (proxy radius closeTo: 3.0).
+	^ proxy
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> distanceProxyUsesBodyCentredCircleCore [
+	<gtExample>
+	| state proxy |
+	state := CFPhysicsShapeState on: (BlElement new
+		size: 20 @ 20;
+		geometry: BlCircleGeometry new;
+		yourself).
+	proxy := CFPhysicsDistanceProxy fromShapeState: state.
+	self assert: proxy points equals: { 0 @ 0 }.
+	self assert: (proxy radius closeTo: 10.0).
+	^ proxy
+]
+
 { #category : 'examples - contacts' }
 CFPhysicsCleanSlateTests >> contactFeatureIdentityIsStructural [
 	<gtExample>
@@ -4344,6 +4372,30 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementUsesRelativeMotion [
 		sweep: secondSweep.
 	self assert: result hasImpact.
 	self assert: (result fraction closeTo: 0.5).
+	^ result
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> box2DTimeOfImpactUsesCoreDistanceAndLinearSlop [
+	<gtExample>
+	| first second firstSweep secondSweep result |
+	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	firstSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform bodyOrigin: 40 @ 0 rotation: 0).
+	secondSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 30 @ 0 rotation: 0)
+		to: (CFPhysicsTransform bodyOrigin: 30 @ 0 rotation: 0).
+	result := CFPhysicsBox2DTimeOfImpact
+		betweenShapeState: first
+		sweep: firstSweep
+		andShapeState: second
+		sweep: secondSweep
+		linearSlop: 0.005.
+	self assert: result hasImpact.
+	self assert: result fraction < 0.25.
+	self assert: result fraction > 0.249.
 	^ result
 ]
 

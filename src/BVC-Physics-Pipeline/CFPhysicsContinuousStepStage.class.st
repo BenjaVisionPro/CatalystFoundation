@@ -38,7 +38,8 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 			bodyStates: aStepResult bodyStates
 			impacts: impacts
 			impactSolveResults: impactSolveResults
-			sensorContactsByKey: sensorContactsByKey ].
+			sensorContactsByKey: sensorContactsByKey
+			step: aStepResult step ].
 	aStepResult continuousSensorContacts: (self orderedContactsFrom: sensorContactsByKey).
 	impacts ifEmpty: [
 		aStepResult continuousStepResult: nil.
@@ -56,7 +57,7 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 ]
 
 { #category : 'private - clamping' }
-CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPairs sensorPairs: sensorPairs bodyStates: bodyStates impacts: impacts impactSolveResults: impactSolveResults sensorContactsByKey: sensorContactsByKey [
+CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPairs sensorPairs: sensorPairs bodyStates: bodyStates impacts: impacts impactSolveResults: impactSolveResults sensorContactsByKey: sensorContactsByKey step: aStep [
 	| body candidates impact maximumFraction impactContact advancement |
 	body := state body.
 	candidates := solidPairs select: [ :pair |
@@ -64,7 +65,9 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 	impact := impactFinder
 		earliestSolvedAmong: candidates
 		bodyStates: bodyStates
-		afterFraction: 1.0e-9.
+		afterFraction: 1.0e-9
+		linearSlop: aStep linearSlop
+		fastBody: body.
 	maximumFraction := impact ifNil: [ 1.0 ] ifNotNil: [ impact fraction ].
 	self
 		recordSensorContactsAmong: (sensorPairs select: [ :pair |
@@ -72,7 +75,9 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 			self pair: pair requiresContinuousCollisionFor: body bodyStates: bodyStates ] ])
 		bodyStates: bodyStates
 		throughFraction: maximumFraction
-		into: sensorContactsByKey.
+		into: sensorContactsByKey
+		linearSlop: aStep linearSlop
+		fastBody: body.
 	impact ifNil: [ ^ self ].
 	impacts add: impact.
 	impactContact := self contactForImpact: impact bodyStates: bodyStates.
@@ -107,11 +112,13 @@ CFPhysicsContinuousStepStage >> contactForImpact: impact bodyStates: bodyStates 
 ]
 
 { #category : 'private - sensors' }
-CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bodyStates throughFraction: maximumFraction into: contactsByKey [
+CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bodyStates throughFraction: maximumFraction into: contactsByKey linearSlop: linearSlop fastBody: fastBody [
 	(impactFinder
 		solvedImpactsAmong: pairs
 		bodyStates: bodyStates
-		afterFraction: 1.0e-9) do: [ :impact |
+		afterFraction: 1.0e-9
+		linearSlop: linearSlop
+		fastBody: fastBody) do: [ :impact |
 		impact fraction <= (maximumFraction + 1.0e-9) ifTrue: [
 			| contact |
 			contact := self contactForImpact: impact bodyStates: bodyStates.
@@ -149,7 +156,5 @@ CFPhysicsContinuousStepStage >> orderedContactsFrom: contactsByKey [
 CFPhysicsContinuousStepStage >> manifoldGenerator: aManifoldGenerator [
 	manifoldGenerator := aManifoldGenerator
 ]
-
-
 
 
