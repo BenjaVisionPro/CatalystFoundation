@@ -846,13 +846,10 @@ CFPhysicsSoftStepSolver >> orderedJointConstraints [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> relativeVelocityAt: point constraint: constraint [
-	| anchorA anchorB |
-	anchorA := self rotated: point anchorA by: constraint bodyStateA deltaRotation.
-	anchorB := self rotated: point anchorB by: constraint bodyStateB deltaRotation.
 	^ (constraint bodyStateB linearVelocity
-		+ (self crossScalar: constraint bodyStateB angularVelocity with: anchorB))
+		+ (self crossScalar: constraint bodyStateB angularVelocity with: point anchorB))
 		- (constraint bodyStateA linearVelocity
-			+ (self crossScalar: constraint bodyStateA angularVelocity with: anchorA))
+			+ (self crossScalar: constraint bodyStateA angularVelocity with: point anchorA))
 ]
 
 { #category : 'private - solving' }
@@ -868,19 +865,16 @@ CFPhysicsSoftStepSolver >> contactSeparationAt: point constraint: constraint [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyImpulse: impulse at: point constraint: constraint [
-	| anchorA anchorB |
-	anchorA := self rotated: point anchorA by: constraint bodyStateA deltaRotation.
-	anchorB := self rotated: point anchorB by: constraint bodyStateB deltaRotation.
 	constraint bodyStateA linearVelocity:
 		constraint bodyStateA linearVelocity - (impulse * constraint bodyStateA inverseMass).
 	constraint bodyStateA angularVelocity:
 		constraint bodyStateA angularVelocity
-			- ((self cross: anchorA with: impulse) * constraint bodyStateA inverseInertia).
+			- ((self cross: point anchorA with: impulse) * constraint bodyStateA inverseInertia).
 	constraint bodyStateB linearVelocity:
 		constraint bodyStateB linearVelocity + (impulse * constraint bodyStateB inverseMass).
 	constraint bodyStateB angularVelocity:
 		constraint bodyStateB angularVelocity
-			+ ((self cross: anchorB with: impulse) * constraint bodyStateB inverseInertia)
+			+ ((self cross: point anchorB with: impulse) * constraint bodyStateB inverseInertia)
 ]
 
 { #category : 'private - mathematics' }
