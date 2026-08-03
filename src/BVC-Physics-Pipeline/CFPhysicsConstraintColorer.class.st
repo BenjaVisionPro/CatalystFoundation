@@ -37,9 +37,9 @@ CFPhysicsConstraintColorer class >> colorsFor: constraints [
 			bodySet := bodySets at: colorIndex.
 			dynamicStates noneSatisfy: [ :state | bodySet includes: state ] ] ifNone: [ nil ].
 		assigned
-			ifNil: [ colors at: self overflowColorIndex add: constraint ]
+			ifNil: [ (colors at: self overflowColorIndex) add: constraint ]
 			ifNotNil: [
-				colors at: assigned add: constraint.
+				(colors at: assigned) add: constraint.
 				(bodySets at: assigned) addAll: dynamicStates ] ].
 	^ colors collect: #asArray
 ]
