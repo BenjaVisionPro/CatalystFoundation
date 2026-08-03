@@ -42,7 +42,7 @@ CFPhysicsProfileElement >> build [
 
 { #category : 'private - building' }
 CFPhysicsProfileElement >> buildControls [
-	| row startButton stopButton |
+	| row startButton stopButton collectButton |
 	row := BrHorizontalPane new
 		hMatchParent;
 		vExact: 32;
@@ -60,6 +60,12 @@ CFPhysicsProfileElement >> buildControls [
 		label: 'Stop';
 		action: [ self stopProfiling ];
 		yourself.
+	collectButton := BrButton new
+		aptitude: BrGlamorousButtonWithIconAndLabelAptitude new;
+		icon: BrGlamorousVectorIcons refresh;
+		label: 'Collect';
+		action: [ health ifNotNil: [ health collectRetainedNow ] ];
+		yourself.
 	statusLabel := BrLabel new
 		hMatchParent;
 		vFitContent;
@@ -68,6 +74,7 @@ CFPhysicsProfileElement >> buildControls [
 	row
 		addChild: startButton;
 		addChild: stopButton;
+		addChild: collectButton;
 		addChild: statusLabel.
 	^ row
 ]

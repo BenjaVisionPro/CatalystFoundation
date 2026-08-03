@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsProfileHealthElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'samples', 'lastSampleMilliseconds', 'running' ],
+	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -19,8 +19,11 @@ CFPhysicsProfileHealthElement class >> world: aWorld [
 CFPhysicsProfileHealthElement >> initialize [
 	super initialize.
 	samples := OrderedCollection new.
+	retentionSamples := OrderedCollection new.
 	lastSampleMilliseconds := nil.
+	lastRetentionSampleMilliseconds := nil.
 	running := false.
+	sampling := false.
 	self
 		hMatchParent;
 		vFitContent;
@@ -55,6 +58,7 @@ CFPhysicsProfileHealthElement >> build [
 			cancelSoft;
 			whenSuccess: [ :anElement :sample | self acceptSample: sample ];
 			whenError: [ :anElement :anError |
+				sampling := false.
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
 	self addChild: content.
@@ -64,7 +68,10 @@ CFPhysicsProfileHealthElement >> build [
 { #category : 'profiling' }
 CFPhysicsProfileHealthElement >> startProfiling [
 	samples removeAll.
+	retentionSamples removeAll.
 	lastSampleMilliseconds := nil.
+	lastRetentionSampleMilliseconds := nil.
+	sampling := false.
 	running := true.
 	self sampleNow
 ]
@@ -72,23 +79,45 @@ CFPhysicsProfileHealthElement >> startProfiling [
 { #category : 'profiling' }
 CFPhysicsProfileHealthElement >> stopProfiling [
 	running := false.
+	sampling := false.
 	content ifNotNil: [ content asyncFuture interrupt ]
+]
+
+{ #category : 'profiling' }
+CFPhysicsProfileHealthElement >> collectRetainedNow [
+	(running and: [ sampling not ]) ifFalse: [ ^ self ].
+	sampling := true.
+	content asyncFuture future: [ self collectRetentionSample ] asAsyncFuture
 ]
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> sampleIfDue [
 	| now |
-	running ifFalse: [ ^ self ].
+	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	now := Time millisecondClockValue.
+	(lastRetentionSampleMilliseconds isNil
+		or: [ now - lastRetentionSampleMilliseconds >= 600000 ])
+		ifTrue: [ ^ self collectRetainedNow ].
 	(lastSampleMilliseconds isNil or: [ now - lastSampleMilliseconds >= 30000 ])
 		ifTrue: [ self sampleNow ]
 ]
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> sampleNow [
-	running ifFalse: [ ^ self ].
+	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	lastSampleMilliseconds := Time millisecondClockValue.
+	sampling := true.
 	content asyncFuture future: [ self collectSample ] asAsyncFuture
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> collectRetentionSample [
+	Smalltalk garbageCollect.
+	500 milliSeconds wait.
+	Smalltalk garbageCollect.
+	^ self collectSample
+		at: #retention put: true;
+		yourself
 ]
 
 { #category : 'private - sampling' }
@@ -103,6 +132,7 @@ CFPhysicsProfileHealthElement >> collectSample [
 	loggers := CFPhysicsTelemetryLogger allInstances.
 	^ {
 		#timestamp -> DateAndTime now.
+		#retention -> false.
 		#heapSize -> (Smalltalk vm parameterAt: 3).
 		#rows -> {
 			self rowNamed: 'PhysicsBody'
@@ -156,17 +186,24 @@ CFPhysicsProfileHealthElement >> island: anIsland belongsTo: aWorld [
 
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> acceptSample: aSample [
+	sampling := false.
 	running ifFalse: [ ^ self ].
-	samples add: aSample.
-	[ samples size > 20 ] whileTrue: [ samples removeFirst ].
+	(aSample at: #retention)
+		ifTrue: [
+			lastRetentionSampleMilliseconds := Time millisecondClockValue.
+			retentionSamples add: aSample.
+			[ retentionSamples size > 100 ] whileTrue: [ retentionSamples removeFirst ] ]
+		ifFalse: [
+			samples add: aSample.
+			[ samples size > 20 ] whileTrue: [ samples removeFirst ] ].
 	self renderSample: aSample
 ]
 
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> renderSample: aSample [
-	| heapDelta |
+	| heapDelta retainedSample |
 	content removeChildren.
-	heapDelta := (aSample at: #heapSize) - (samples first at: #heapSize).
+	heapDelta := (aSample at: #heapSize) - (self baselineSample at: #heapSize).
 	content addChild: (BrLabel new
 		hMatchParent;
 		vExact: 30;
@@ -174,12 +211,23 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 		text: 'Image heap  ', (aSample at: #heapSize) humanReadableSISizeString,
 			'  (', (self signedSizeString: heapDelta), ') ', self heapTrend;
 		yourself).
-	content addChild: (BrLabel new
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
-		text: 'Image / world / expected (world difference), sampled every 30 seconds';
-		yourself).
-	(aSample at: #rows) do: [ :row | content addChild: (self labelForRow: row) ].
+	retainedSample := retentionSamples ifEmpty: [ nil ] ifNotEmpty: [ retentionSamples last ].
+	retainedSample
+		ifNil: [
+			content addChild: (BrLabel new
+				vFitContent;
+				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
+				text: 'Current instances. Use Collect to establish retained counts after garbage collection.';
+				yourself).
+			(aSample at: #rows) do: [ :row | content addChild: (self labelForCurrentRow: row) ] ]
+		ifNotNil: [
+			content addChild: (BrLabel new
+				vFitContent;
+				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
+				text: 'After GC: image / world / expected (world difference). Current pre-GC counts shown below.';
+				yourself).
+			(retainedSample at: #rows) do: [ :row |
+				content addChild: (self labelForRetainedRow: row currentSample: aSample) ] ].
 	self alerts do: [ :alert |
 		content addChild: (BrLabel new
 			hMatchParent;
@@ -200,27 +248,52 @@ CFPhysicsProfileHealthElement >> renderStopped [
 ]
 
 { #category : 'private - building' }
-CFPhysicsProfileHealthElement >> labelForRow: row [
-	| difference sign |
-	difference := row at: #difference.
-	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
+CFPhysicsProfileHealthElement >> labelForCurrentRow: row [
 	^ BrLabel new
 		hMatchParent;
 		vExact: 28;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
-		text: (row at: #name), '  ',
-			(row at: #total) asString, '/',
-			(row at: #owned) asString, '/',
-			(row at: #expected) asString, ' (', sign, difference asString, ') ',
-			(self trendFor: (row at: #name));
+		text: (row at: #name), '  ', (self rowSummary: row), ' ·';
 		yourself
 ]
 
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: currentSample [
+	| currentRow |
+	currentRow := (currentSample at: #rows)
+		detect: [ :each | (each at: #name) = (row at: #name) ].
+	^ BrLabel new
+		hMatchParent;
+		vExact: 42;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
+		text: (row at: #name), '  ', (self rowSummary: row), ' ',
+			(self retentionTrendFor: (row at: #name)), String cr,
+			'Current  ', (self rowSummary: currentRow);
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> rowSummary: row [
+	| difference sign |
+	difference := row at: #difference.
+	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
+	^ (row at: #total) asString, '/',
+		(row at: #owned) asString, '/',
+		(row at: #expected) asString, ' (', sign, difference asString, ')'
+]
+
 { #category : 'private - analysis' }
-CFPhysicsProfileHealthElement >> trendFor: aName [
+CFPhysicsProfileHealthElement >> baselineSample [
+	retentionSamples ifNotEmpty: [ ^ retentionSamples first ].
+	samples ifNotEmpty: [ ^ samples first ].
+	^ { #heapSize -> 0 } asDictionary
+]
+
+{ #category : 'private - analysis' }
+CFPhysicsProfileHealthElement >> retentionTrendFor: aName [
 	| differences first last delta tolerance |
-	samples size < 3 ifTrue: [ ^ '·' ].
-	differences := samples collect: [ :sample |
+	retentionSamples size < 3 ifTrue: [ ^ '·' ].
+	differences := retentionSamples collect: [ :sample |
 		((sample at: #rows) detect: [ :row | (row at: #name) = aName ]) at: #difference ].
 	first := differences first.
 	last := differences last.
@@ -233,10 +306,13 @@ CFPhysicsProfileHealthElement >> trendFor: aName [
 
 { #category : 'private - analysis' }
 CFPhysicsProfileHealthElement >> heapTrend [
-	| first last tolerance |
-	samples size < 3 ifTrue: [ ^ '·' ].
-	first := samples first at: #heapSize.
-	last := samples last at: #heapSize.
+	| source first last tolerance |
+	source := retentionSamples size >= 3
+		ifTrue: [ retentionSamples ]
+		ifFalse: [ samples ].
+	source size < 3 ifTrue: [ ^ '·' ].
+	first := source first at: #heapSize.
+	last := source last at: #heapSize.
 	tolerance := 10 * 1024 * 1024.
 	last - first > tolerance ifTrue: [ ^ '↗' ].
 	first - last > tolerance ifTrue: [ ^ '↘' ].
@@ -247,25 +323,15 @@ CFPhysicsProfileHealthElement >> heapTrend [
 CFPhysicsProfileHealthElement >> alerts [
 	| result firstHeap lastHeap |
 	result := OrderedCollection new.
-	samples size < 3 ifTrue: [ ^ result ].
-	firstHeap := samples first at: #heapSize.
-	lastHeap := samples last at: #heapSize.
+	retentionSamples size < 3 ifTrue: [ ^ result ].
+	firstHeap := retentionSamples first at: #heapSize.
+	lastHeap := retentionSamples last at: #heapSize.
 	lastHeap - firstHeap > (100 * 1024 * 1024) ifTrue: [
-		result add: '⚠ Image heap has increased by ', (lastHeap - firstHeap) humanReadableSISizeString, '.' ].
-	(samples last at: #rows) do: [ :row |
-		(self trendFor: (row at: #name)) = '↗' ifTrue: [
-			result add: '⚠ ', (row at: #name), ' excess instance count is increasing.' ] ].
+		result add: '⚠ Image heap after GC has increased by ',
+			(lastHeap - firstHeap) humanReadableSISizeString, '.' ].
+	(retentionSamples last at: #rows) do: [ :row |
+		(self retentionTrendFor: (row at: #name)) = '↗' ifTrue: [
+			result add: '⚠ ', (row at: #name),
+				' retained excess instance count is increasing after GC.' ] ].
 	^ result
-]
-
-{ #category : 'private - formatting' }
-CFPhysicsProfileHealthElement >> signedSizeString: byteCount [
-	byteCount > 0 ifTrue: [ ^ '+', byteCount humanReadableSISizeString ].
-	^ byteCount humanReadableSISizeString
-]
-
-{ #category : 'hooks - scene graph' }
-CFPhysicsProfileHealthElement >> onRemovedFromSceneGraph [
-	self stopProfiling.
-	super onRemovedFromSceneGraph
 ]
