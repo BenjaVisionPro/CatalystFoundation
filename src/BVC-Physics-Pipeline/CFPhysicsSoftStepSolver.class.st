@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'constraintColors', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -36,6 +36,7 @@ CFPhysicsSoftStepSolver >> initialize [
 	constraints := #().
 	contactConstraints := #().
 	orderedJointConstraints := #().
+	constraintColors := #().
 	contactPointCount := 0.
 	warmStartedContactPointCount := 0.
 	restitutionCandidatePointCount := 0.
@@ -63,11 +64,9 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 				gravity: gravity
 				maximumLinearSpeed: step maximumLinearSpeed ].
 		self warmStart.
-		self solveContactsWithBias: true.
-		self solveJointConstraintsWithBias: true.
+		self solveConstraintsWithBias: true.
 		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
-		self solveContactsWithBias: false.
-		self solveJointConstraintsWithBias: false ].
+		self solveConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
 	maximumFinalContactPenetration := self maximumContactPenetration.
 	averageFinalContactPenetration := self averageContactPenetration.
@@ -122,7 +121,19 @@ CFPhysicsSoftStepSolver >> totalTangentImpulse [ ^ totalTangentImpulse ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStart [
-	self contactConstraints do: [ :constraint |
+	self constraintColorsInSolverOrder do: [ :color |
+		color do: [ :constraint | self warmStartConstraint: constraint ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartConstraint: constraint [
+	(constraint isKindOf: CFPhysicsPreparedConstraint)
+		ifTrue: [ ^ self warmStartContactConstraint: constraint ].
+	self warmStartJointConstraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartContactConstraint: constraint [
 		constraint points do: [ :point |
 			self
 				applyImpulse: (constraint normal * point normalImpulse)
@@ -132,9 +143,7 @@ CFPhysicsSoftStepSolver >> warmStart [
 		constraint bodyStateA angularVelocity:
 			constraint bodyStateA angularVelocity - (constraint bodyStateA inverseInertia * constraint rollingImpulse).
 		constraint bodyStateB angularVelocity:
-			constraint bodyStateB angularVelocity + (constraint bodyStateB inverseInertia * constraint rollingImpulse) ].
-	self orderedJointConstraints do: [ :constraint |
-		self warmStartJointConstraint: constraint ]
+			constraint bodyStateB angularVelocity + (constraint bodyStateB inverseInertia * constraint rollingImpulse)
 ]
 
 { #category : 'private - solving' }
@@ -164,6 +173,24 @@ CFPhysicsSoftStepSolver >> solveContactsWithBias: biasEnabled [
 		constraint points do: [ :point |
 			self solveTangentAt: point constraint: constraint ].
 		self solveRollingResistanceFor: constraint ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveConstraintsWithBias: biasEnabled [
+	self constraintColorsInSolverOrder do: [ :color |
+		color do: [ :constraint |
+			(constraint isKindOf: CFPhysicsPreparedConstraint)
+				ifTrue: [ self solveContactConstraint: constraint biasEnabled: biasEnabled ]
+				ifFalse: [ self solveJointConstraint: constraint biasEnabled: biasEnabled ] ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveContactConstraint: constraint biasEnabled: biasEnabled [
+	constraint points do: [ :point |
+		self solveNormalAt: point constraint: constraint biasEnabled: biasEnabled ].
+	constraint points do: [ :point |
+		self solveTangentAt: point constraint: constraint ].
+	self solveRollingResistanceFor: constraint
 ]
 
 { #category : 'private - solving' }
@@ -922,8 +949,27 @@ CFPhysicsSoftStepSolver >> constraints: aCollection [
 		asArray sorted: [ :first :second |
 			first joint orderingKey = second joint orderingKey
 				ifTrue: [ first joint class name asString < second joint class name asString ]
-				ifFalse: [ first joint orderingKey < second joint orderingKey ] ].
+			ifFalse: [ first joint orderingKey < second joint orderingKey ] ].
+	constraintColors := CFPhysicsConstraintColorer colorsFor: constraints.
 	self measurePreparedWork
+]
+
+{ #category : 'accessing' }
+CFPhysicsSoftStepSolver >> constraintColors [
+	^ constraintColors
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> constraintColorsInSolverOrder [
+	"Box2D executes overflow joints, then overflow contacts, before the non-overflow graph colours."
+	| overflow overflowJoints overflowContacts |
+	constraintColors ifEmpty: [ ^ #() ].
+	overflow := constraintColors last.
+	overflowJoints := overflow reject: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedConstraint ].
+	overflowContacts := overflow select: [ :constraint |
+		constraint isKindOf: CFPhysicsPreparedConstraint ].
+	^ { overflowJoints asArray. overflowContacts asArray }, constraintColors allButLast
 ]
 
 { #category : 'private - telemetry' }

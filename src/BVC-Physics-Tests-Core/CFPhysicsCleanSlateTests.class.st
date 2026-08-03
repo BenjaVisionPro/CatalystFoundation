@@ -2475,6 +2475,38 @@ CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 ]
 
 { #category : 'examples - constraint graph' }
+CFPhysicsCleanSlateTests >> constraintColorerSeparatesSharedDynamicBodies [
+	<gtExample>
+	| static first second staticState firstState secondState firstConstraint secondConstraint thirdConstraint colors |
+	static := self cleanSlateBodyWithSequence: 1.
+	static beStatic.
+	first := self cleanSlateBodyWithSequence: 2.
+	second := self cleanSlateBodyWithSequence: 3.
+	staticState := CFPhysicsBodyStepState on: static.
+	firstState := CFPhysicsBodyStepState on: first.
+	secondState := CFPhysicsBodyStepState on: second.
+	firstConstraint := CFPhysicsPreparedConstraint new
+		bodyStateA: staticState;
+		bodyStateB: firstState;
+		yourself.
+	secondConstraint := CFPhysicsPreparedConstraint new
+		bodyStateA: staticState;
+		bodyStateB: firstState;
+		yourself.
+	thirdConstraint := CFPhysicsPreparedConstraint new
+		bodyStateA: firstState;
+		bodyStateB: secondState;
+		yourself.
+	colors := CFPhysicsConstraintColorer
+		colorsFor: { firstConstraint. secondConstraint. thirdConstraint }.
+	self assert: colors size equals: 12.
+	self assert: (colors at: 1) equals: { thirdConstraint }.
+	self assert: (colors at: 2) equals: { firstConstraint }.
+	self assert: (colors at: 3) equals: { secondConstraint }.
+	^ colors
+]
+
+{ #category : 'examples - constraint graph' }
 CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	<gtExample>
 	| owner first second third fourth world revolute fixed unrelated |
