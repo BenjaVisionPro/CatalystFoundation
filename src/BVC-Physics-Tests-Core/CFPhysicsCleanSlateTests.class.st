@@ -4040,7 +4040,7 @@ CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	world
 		gravity: 0 @ 0;
-		stepDuration: 1.0;
+		stepDuration: 1000 milliseconds;
 		substepCount: 2.
 	element := BlElement new size: 10 @ 10; yourself.
 	world owner addChild: element.
