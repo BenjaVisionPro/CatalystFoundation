@@ -152,7 +152,7 @@ CFPhysicsSoftStepSolver >> warmStartJointConstraint: constraint [
 	(constraint isKindOf: CFPhysicsPreparedMouseJoint) ifTrue: [
 		^ self warmStartMouseJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedDistanceJoint) ifTrue: [
-		^ self applyDistanceJointImpulse: (self distanceJointAxisFor: constraint) * constraint impulse constraint: constraint ].
+		^ self warmStartDistanceJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedPrismaticJoint) ifTrue: [
 		^ self warmStartPrismaticJointConstraint: constraint ].
 	(constraint isKindOf: CFPhysicsPreparedWheelJoint) ifTrue: [
@@ -274,23 +274,85 @@ CFPhysicsSoftStepSolver >> applyMouseJointLinearImpulse: impulse constraint: con
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solveDistanceJointConstraint: constraint biasEnabled: biasEnabled [
-	| axis relativeVelocity separation bias massCoefficient impulseCoefficient increment |
+	| axis currentLength relativeVelocity separation bias massCoefficient impulseCoefficient increment springConstraintActive |
 	axis := self distanceJointAxisFor: constraint.
-	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
-	separation := (self distanceJointLengthFor: constraint) - constraint joint length.
-	constraint springEnabled
+	currentLength := self distanceJointLengthFor: constraint.
+	separation := currentLength - constraint joint length.
+	springConstraintActive := constraint springEnabled
+		and: [ constraint limitsEnabled not or: [ constraint minimumLength < constraint maximumLength ] ].
+	springConstraintActive
 		ifTrue: [
-			bias := constraint biasRate * separation.
-			massCoefficient := constraint massCoefficient.
-			impulseCoefficient := constraint impulseCoefficient ]
+			constraint joint hertz > 0.0 ifTrue: [
+				relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
+				bias := constraint biasRate * separation.
+				increment := (constraint massCoefficient * constraint effectiveMass * (relativeVelocity + bias)) negated
+					- (constraint impulseCoefficient * constraint impulse).
+				constraint impulse: constraint impulse + increment.
+				self applyDistanceJointImpulse: axis * increment constraint: constraint ].
+		constraint limitsEnabled ifTrue: [
+			self solveDistanceJointLimits: constraint axis: axis length: currentLength biasEnabled: biasEnabled ].
+		constraint motorEnabled ifTrue: [ self solveDistanceJointMotor: constraint axis: axis ] ]
 		ifFalse: [
+			relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
 			bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 			massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
-			impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ] ].
+			impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
+			increment := (massCoefficient * constraint effectiveMass * (relativeVelocity + bias)) negated
+				- (impulseCoefficient * constraint impulse).
+			constraint impulse: constraint impulse + increment.
+			self applyDistanceJointImpulse: axis * increment constraint: constraint ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveDistanceJointLimits: constraint axis: axis length: length biasEnabled: biasEnabled [
+	| relativeVelocity separation bias massCoefficient impulseCoefficient oldImpulse increment newImpulse |
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
+	separation := length - constraint minimumLength.
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime ]
+		ifFalse: [ biasEnabled ifTrue: [
+			bias := separation * step biasRate.
+			massCoefficient := step massCoefficient.
+			impulseCoefficient := step impulseCoefficient ] ].
+	oldImpulse := constraint lowerLimitImpulse.
 	increment := (massCoefficient * constraint effectiveMass * (relativeVelocity + bias)) negated
-		- (impulseCoefficient * constraint impulse).
-	constraint impulse: constraint impulse + increment.
-	self applyDistanceJointImpulse: axis * increment constraint: constraint
+		- (impulseCoefficient * oldImpulse).
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint lowerLimitImpulse: newImpulse.
+	self applyDistanceJointImpulse: axis * (newImpulse - oldImpulse) constraint: constraint.
+
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
+	separation := constraint maximumLength - length.
+	bias := 0.0.
+	massCoefficient := 1.0.
+	impulseCoefficient := 0.0.
+	separation > 0.0
+		ifTrue: [ bias := separation * step inverseSubstepTime ]
+		ifFalse: [ biasEnabled ifTrue: [
+			bias := separation * step biasRate.
+			massCoefficient := step massCoefficient.
+			impulseCoefficient := step impulseCoefficient ] ].
+	oldImpulse := constraint upperLimitImpulse.
+	increment := (massCoefficient * constraint effectiveMass * (relativeVelocity negated + bias)) negated
+		- (impulseCoefficient * oldImpulse).
+	newImpulse := (oldImpulse + increment) max: 0.0.
+	constraint upperLimitImpulse: newImpulse.
+	self applyDistanceJointImpulse: axis * (newImpulse - oldImpulse) negated constraint: constraint
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> solveDistanceJointMotor: constraint axis: axis [
+	| relativeVelocity increment oldImpulse newImpulse |
+	relativeVelocity := self dot: (self distanceJointRelativeVelocity: constraint) with: axis.
+	increment := constraint effectiveMass * (constraint motorSpeed - relativeVelocity).
+	oldImpulse := constraint motorImpulse.
+	newImpulse := ((oldImpulse + increment) max: constraint maximumMotorImpulse negated)
+		min: constraint maximumMotorImpulse.
+	constraint motorImpulse: newImpulse.
+	self applyDistanceJointImpulse: axis * (newImpulse - oldImpulse) constraint: constraint
 ]
 
 { #category : 'private - solving' }
@@ -316,6 +378,14 @@ CFPhysicsSoftStepSolver >> distanceJointAxisFor: constraint [
 	separation := self distanceJointSeparationFor: constraint.
 	length := separation r.
 	^ length = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ separation / length ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> warmStartDistanceJointConstraint: constraint [
+	| impulse |
+	impulse := constraint impulse + constraint lowerLimitImpulse
+		- constraint upperLimitImpulse + constraint motorImpulse.
+	self applyDistanceJointImpulse: (self distanceJointAxisFor: constraint) * impulse constraint: constraint
 ]
 
 { #category : 'private - solving' }

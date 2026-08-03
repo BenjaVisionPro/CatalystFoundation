@@ -1876,6 +1876,99 @@ CFPhysicsCleanSlateTests >> distanceJointSpringUsesBox2DSoftConstraint [
 ]
 
 { #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointPreparesBox2DLengthLimitsAndAxialMotor [
+	<gtExample>
+	| first second joint bodyStates step prepared |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	joint
+		springEnabled: true;
+		hertz: 3.0;
+		limitLengthFrom: 60.0 to: 40.0;
+		limitsEnabled: true;
+		motorEnabled: true;
+		motorSpeed: -20.0;
+		maximumMotorForce: 30.0.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	step := CFPhysicsStep
+		timeStep: 1.0 / 60.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	prepared := (CFPhysicsDistanceJointConstraintBuilder new
+		constraintsFrom: { joint } bodyStates: bodyStates step: step) first.
+	self assert: joint minimumLength equals: 40.0.
+	self assert: joint maximumLength equals: 60.0.
+	self assert: prepared limitsEnabled.
+	self assert: prepared minimumLength equals: 40.0.
+	self assert: prepared maximumLength equals: 60.0.
+	self assert: prepared motorEnabled.
+	self assert: prepared motorSpeed equals: -20.0.
+	self assert: prepared maximumMotorImpulse equals: 30.0 * step substepTime.
+	^ prepared
+]
+
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointLengthLimitOpposesExcessExtension [
+	<gtExample>
+	| owner first second world joint result prepared |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	joint := first physics distanceJointTo: second.
+	joint
+		length: 100.0;
+		springEnabled: true;
+		hertz: 3.0;
+		limitLengthFrom: 40.0 to: 60.0;
+		limitsEnabled: true.
+	result := world step.
+	prepared := result constraints first.
+	self assert: prepared upperLimitImpulse > 0.0.
+	self assert: first physics velocity x > 0.0.
+	self assert: second physics velocity x < 0.0.
+	^ result
+]
+
+{ #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
+	<gtExample>
+	| owner first second world joint result prepared |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 0 @ 0.
+	second physics position: 100 @ 0.
+	joint := first physics distanceJointTo: second.
+	joint
+		springEnabled: true;
+		hertz: 0.0;
+		motorEnabled: true;
+		motorSpeed: 100.0;
+		maximumMotorForce: 100000.0.
+	result := world step.
+	prepared := result constraints first.
+	self assert: prepared motorImpulse > 0.0.
+	self assert: first physics velocity x < 0.0.
+	self assert: second physics velocity x > 0.0.
+	^ result
+]
+
+{ #category : 'examples - distance joints' }
 CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
 	<gtExample>
 	| first second joint |
@@ -1887,6 +1980,7 @@ CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
 	self assert: joint bodyA == first.
 	self assert: joint bodyB == second.
 	self assert: joint length equals: 100.0.
+	self assert: joint currentLength equals: 100.0.
 	^ joint
 ]
 

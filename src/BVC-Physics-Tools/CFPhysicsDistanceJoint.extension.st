@@ -31,7 +31,16 @@ CFPhysicsDistanceJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent
 		#springEnabled -> 'Spring enabled'.
 		#hertz -> 'Hertz'.
 		#dampingRatio -> 'Damping ratio'.
-		#impulse -> 'Impulse' }
+		#limitsEnabled -> 'Limits enabled'.
+		#minimumLength -> 'Minimum length'.
+		#maximumLength -> 'Maximum length'.
+		#motorEnabled -> 'Motor enabled'.
+		#motorSpeed -> 'Motor speed'.
+		#maximumMotorForce -> 'Maximum motor force'.
+		#impulse -> 'Spring/rigid impulse'.
+		#lowerLimitImpulse -> 'Lower limit impulse'.
+		#upperLimitImpulse -> 'Upper limit impulse'.
+		#motorImpulse -> 'Motor impulse' }
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -40,10 +49,18 @@ CFPhysicsDistanceJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	points := self endpointPair worldPoints.
 	anInspectorContent
 		diagnosticNumber: self length at: #length;
-		diagnosticNumber: (points second - points first) r at: #currentLength;
+		diagnosticNumber: self currentLength at: #currentLength;
 		text: self springEnabled printString at: #springEnabled;
 		diagnosticNumber: self hertz at: #hertz;
 		diagnosticNumber: self dampingRatio at: #dampingRatio;
-		diagnosticNumber: self impulse at: #impulse
+		text: self limitsEnabled printString at: #limitsEnabled;
+		diagnosticNumber: self minimumLength at: #minimumLength;
+		diagnosticNumber: self maximumLength at: #maximumLength;
+		text: self motorEnabled printString at: #motorEnabled;
+		diagnosticNumber: self motorSpeed at: #motorSpeed;
+		diagnosticNumber: self maximumMotorForce at: #maximumMotorForce;
+		diagnosticNumber: self impulse at: #impulse;
+		diagnosticNumber: self lowerLimitImpulse at: #lowerLimitImpulse;
+		diagnosticNumber: self upperLimitImpulse at: #upperLimitImpulse;
+		diagnosticNumber: self motorImpulse at: #motorImpulse
 ]
-

@@ -34,7 +34,17 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		springEnabled: joint springEnabled;
 		biasRate: (a1 = 0.0 ifTrue: [ 0.0 ] ifFalse: [ omega / a1 ]);
 		massCoefficient: a2 * a3; impulseCoefficient: a3;
-		impulse: joint impulse * step warmStartRatio; yourself
+		impulse: joint impulse * step warmStartRatio;
+		limitsEnabled: joint limitsEnabled;
+		minimumLength: joint minimumLength;
+		maximumLength: joint maximumLength;
+		lowerLimitImpulse: joint lowerLimitImpulse * step warmStartRatio;
+		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
+		motorEnabled: joint motorEnabled;
+		motorSpeed: joint motorSpeed;
+		maximumMotorImpulse: joint maximumMotorForce * step substepTime;
+		motorImpulse: joint motorImpulse * step warmStartRatio;
+		yourself
 ]
 
 { #category : 'private - mathematics' }
