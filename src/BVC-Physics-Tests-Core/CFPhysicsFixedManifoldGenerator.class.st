@@ -35,3 +35,13 @@ CFPhysicsFixedManifoldGenerator >> manifoldBetweenBodyState: firstBodyState andB
 CFPhysicsFixedManifoldGenerator >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform [
 	^ manifold
 ]
+
+{ #category : 'generating' }
+CFPhysicsFixedManifoldGenerator >> manifoldBetweenBodyState: firstBodyState andBodyState: secondBodyState speculativeDistance: speculativeDistance [
+	^ manifold
+]
+
+{ #category : 'generating' }
+CFPhysicsFixedManifoldGenerator >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform speculativeDistance: speculativeDistance [
+	^ manifold
+]

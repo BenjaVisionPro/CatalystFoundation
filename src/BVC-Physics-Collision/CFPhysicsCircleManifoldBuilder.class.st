@@ -12,11 +12,23 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA bodyOrigin: bodyOriginA rotation: rotationA andCircleShapeState: circleB bodyOrigin: bodyOriginB rotation: rotationB [
+	^ self
+		manifoldBetweenCircleShapeState: circleA
+		bodyOrigin: bodyOriginA
+		rotation: rotationA
+		andCircleShapeState: circleB
+		bodyOrigin: bodyOriginB
+		rotation: rotationB
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA bodyOrigin: bodyOriginA rotation: rotationA andCircleShapeState: circleB bodyOrigin: bodyOriginB rotation: rotationB speculativeDistance: speculativeDistance [
 	| delta distance radiusSum normal separation worldPoint point |
 	delta := bodyOriginB - bodyOriginA.
 	distance := delta r.
 	radiusSum := circleA radius + circleB radius.
-	distance > radiusSum ifTrue: [ ^ nil ].
+	distance > (radiusSum + speculativeDistance) ifTrue: [ ^ nil ].
 	normal := distance = 0.0 ifTrue: [ 1 @ 0 ] ifFalse: [ delta / distance ].
 	separation := distance - radiusSum.
 	worldPoint := bodyOriginA + (normal * (circleA radius + (separation / 2.0))).
@@ -35,13 +47,26 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circleA
 
 { #category : 'collision' }
 CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation [
-	| polygon centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex |
+	^ self
+		manifoldBetweenCircleShapeState: circle
+		bodyOrigin: circleBodyOrigin
+		rotation: circleRotation
+		andPolygonShapeState: polygonState
+		bodyOrigin: polygonBodyOrigin
+		rotation: polygonRotation
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation speculativeDistance: speculativeDistance [
+	| polygon centre vertices normals radiusSum faceIndex faceSeparation faceNormal vertex1 vertex2 edge u1 u2 closest delta distance normal separation worldPoint point polygonFeatureKind polygonFeatureIndex maximumSeparation |
 	polygon := polygonState polygonShape.
 	polygon ifNil: [ ^ nil ].
 	centre := circleBodyOrigin.
 	vertices := polygon worldVerticesAtBodyOrigin: polygonBodyOrigin rotation: polygonRotation.
 	normals := polygon worldNormalsAtRotation: polygonRotation.
 	radiusSum := circle radius + polygon radius.
+	maximumSeparation := radiusSum + speculativeDistance.
 	faceIndex := 1.
 	faceSeparation := self dot: centre - vertices first with: normals first.
 	2 to: vertices size do: [ :index |
@@ -50,7 +75,7 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle 
 		candidate > faceSeparation ifTrue: [
 			faceSeparation := candidate.
 			faceIndex := index ] ].
-	faceSeparation > radiusSum ifTrue: [ ^ nil ].
+	faceSeparation > maximumSeparation ifTrue: [ ^ nil ].
 	faceNormal := normals at: faceIndex.
 	vertex1 := vertices at: faceIndex.
 	vertex2 := vertices at: (faceIndex = vertices size ifTrue: [ 1 ] ifFalse: [ faceIndex + 1 ]).
@@ -75,7 +100,7 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle 
 	delta := closest - centre.
 	distance := delta r.
 	separation := distance - radiusSum.
-	separation > 0.0 ifTrue: [ ^ nil ].
+	separation > speculativeDistance ifTrue: [ ^ nil ].
 	normal := polygonFeatureKind = #face
 		ifTrue: [ faceNormal negated ]
 		ifFalse: [ distance = 0.0 ifTrue: [ faceNormal negated ] ifFalse: [ delta / distance ] ].
@@ -95,6 +120,18 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenCircleShapeState: circle 
 
 { #category : 'collision' }
 CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation andCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation [
+	^ self
+		manifoldBetweenPolygonShapeState: polygonState
+		bodyOrigin: polygonBodyOrigin
+		rotation: polygonRotation
+		andCircleShapeState: circle
+		bodyOrigin: circleBodyOrigin
+		rotation: circleRotation
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation andCircleShapeState: circle bodyOrigin: circleBodyOrigin rotation: circleRotation speculativeDistance: speculativeDistance [
 	| manifold point oldFeature |
 	manifold := self
 		manifoldBetweenCircleShapeState: circle
@@ -102,7 +139,8 @@ CFPhysicsCircleManifoldBuilder class >> manifoldBetweenPolygonShapeState: polygo
 		rotation: circleRotation
 		andPolygonShapeState: polygonState
 		bodyOrigin: polygonBodyOrigin
-		rotation: polygonRotation.
+		rotation: polygonRotation
+		speculativeDistance: speculativeDistance.
 	manifold ifNil: [ ^ nil ].
 	manifold normal: manifold normal negated.
 	point := manifold contactPoints first.

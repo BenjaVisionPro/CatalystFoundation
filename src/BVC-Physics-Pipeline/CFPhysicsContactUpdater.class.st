@@ -19,12 +19,13 @@ CFPhysicsContactUpdater class >> manifoldGenerator: aManifoldGenerator [
 CFPhysicsContactUpdater >> manifoldGenerator: aManifoldGenerator [ manifoldGenerator := aManifoldGenerator ]
 
 { #category : 'private - collision' }
-CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates [
+CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance [
 	^ bodyStates
 		ifNil: [ manifoldGenerator manifoldBetweenBody: pair firstBody andBody: pair secondBody ]
 		ifNotNil: [ manifoldGenerator
 			manifoldBetweenBodyState: (bodyStates at: pair firstBody)
-			andBodyState: (bodyStates at: pair secondBody) ]
+			andBodyState: (bodyStates at: pair secondBody)
+			speculativeDistance: speculativeDistance ]
 ]
 
 { #category : 'updating' }
@@ -79,6 +80,17 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates [
+	^ self
+		updatePairs: pairs
+		includingImpactContacts: impactContacts
+		fromContacts: previousContacts
+		reusingContacts: reusableContacts
+		bodyStates: bodyStates
+		speculativeDistance: 0.0
+]
+
+{ #category : 'updating' }
+CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates speculativeDistance: speculativeDistance [
 	| previousByKey reusableByKey impactByKey contacts touching began continued ended orderedPairs |
 	previousByKey := Dictionary new.
 	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
@@ -95,7 +107,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	orderedPairs do: [ :pair |
 		| manifold impactContact contact previous |
-		manifold := self manifoldForPair: pair bodyStates: bodyStates.
+		manifold := self manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance.
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
 		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
 			manifold := impactContact manifold ].

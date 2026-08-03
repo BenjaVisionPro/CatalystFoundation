@@ -23,6 +23,14 @@ CFPhysicsManifoldGenerator >> manifoldBetweenBody: bodyA andBody: bodyB [
 
 { #category : 'collision' }
 CFPhysicsManifoldGenerator >> manifoldBetweenBodyState: bodyStateA andBodyState: bodyStateB [
+	^ self
+		manifoldBetweenBodyState: bodyStateA
+		andBodyState: bodyStateB
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsManifoldGenerator >> manifoldBetweenBodyState: bodyStateA andBodyState: bodyStateB speculativeDistance: speculativeDistance [
 	| firstTransform secondTransform |
 	firstTransform := bodyStateA currentTransform.
 	secondTransform := bodyStateB currentTransform.
@@ -33,10 +41,21 @@ CFPhysicsManifoldGenerator >> manifoldBetweenBodyState: bodyStateA andBodyState:
 		andShapeState: bodyStateB shapeState
 		bodyOrigin: secondTransform bodyOrigin
 		rotation: secondTransform rotation
+		speculativeDistance: speculativeDistance
 ]
 
 { #category : 'collision' }
 CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: transformA andShapeState: shapeStateB transform: transformB [
+	^ self
+		manifoldBetweenShapeState: shapeStateA
+		transform: transformA
+		andShapeState: shapeStateB
+		transform: transformB
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: transformA andShapeState: shapeStateB transform: transformB speculativeDistance: speculativeDistance [
 	^ self
 		manifoldBetweenShapeState: shapeStateA
 		bodyOrigin: transformA bodyOrigin
@@ -44,10 +63,23 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: 
 		andShapeState: shapeStateB
 		bodyOrigin: transformB bodyOrigin
 		rotation: transformB rotation
+		speculativeDistance: speculativeDistance
 ]
 
 { #category : 'private - collision' }
 CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
+	^ self
+		manifoldBetweenShapeState: shapeStateA
+		bodyOrigin: bodyOriginA
+		rotation: rotationA
+		andShapeState: shapeStateB
+		bodyOrigin: bodyOriginB
+		rotation: rotationB
+		speculativeDistance: 0.0
+]
+
+{ #category : 'private - collision' }
+CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB speculativeDistance: speculativeDistance [
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
@@ -55,7 +87,8 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin:
 			rotation: rotationA
 			andCircleShapeState: shapeStateB
 			bodyOrigin: bodyOriginB
-			rotation: rotationB ].
+			rotation: rotationB
+			speculativeDistance: speculativeDistance ].
 	shapeStateA isCircle ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
@@ -63,7 +96,8 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin:
 			rotation: rotationA
 			andPolygonShapeState: shapeStateB
 			bodyOrigin: bodyOriginB
-			rotation: rotationB ].
+			rotation: rotationB
+			speculativeDistance: speculativeDistance ].
 	shapeStateB isCircle ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenPolygonShapeState: shapeStateA
@@ -71,7 +105,8 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin:
 			rotation: rotationA
 			andCircleShapeState: shapeStateB
 			bodyOrigin: bodyOriginB
-			rotation: rotationB ].
+			rotation: rotationB
+			speculativeDistance: speculativeDistance ].
 	^ self
 		manifoldBetweenPolygonShapeState: shapeStateA
 		bodyOrigin: bodyOriginA
@@ -79,10 +114,11 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin:
 		andPolygonShapeState: shapeStateB
 		bodyOrigin: bodyOriginB
 		rotation: rotationB
+		speculativeDistance: speculativeDistance
 ]
 
 { #category : 'private - collision' }
-CFPhysicsManifoldGenerator >> manifoldBetweenPolygonShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andPolygonShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
+CFPhysicsManifoldGenerator >> manifoldBetweenPolygonShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andPolygonShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB speculativeDistance: speculativeDistance [
 	| shapeA shapeB |
 	shapeA := shapeStateA polygonShape.
 	shapeB := shapeStateB polygonShape.
@@ -94,4 +130,5 @@ CFPhysicsManifoldGenerator >> manifoldBetweenPolygonShapeState: shapeStateA body
 		andShape: shapeB
 		bodyOrigin: bodyOriginB
 		rotation: rotationB
+		speculativeDistance: speculativeDistance
 ]

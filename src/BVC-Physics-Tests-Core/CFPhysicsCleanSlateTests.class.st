@@ -7040,3 +7040,114 @@ CFPhysicsCleanSlateTests >> removedBroadphasePairDoesNotRetainDestroyedContact [
 	self assert: removedBatch endedContacts size equals: 1.
 	^ removedBatch
 ]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> separatedPolygonCoresWithinSpeculativeDistanceProduceAManifold [
+	<gtExample>
+	| first second manifold |
+	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
+	second := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
+	manifold := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: first
+		bodyOrigin: first rotationCentre
+		rotation: 0
+		andShape: second
+		bodyOrigin: (20 @ 21) + second rotationCentre
+		rotation: 0
+		speculativeDistance: 2.0.
+	self assert: manifold notNil.
+	self assert: manifold contactPoints size equals: 2.
+	manifold contactPoints do: [ :point |
+		self assert: (point separation closeTo: 1.0) ].
+	^ manifold
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> polygonSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
+	<gtExample>
+	| first second manifold |
+	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
+	second := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
+	manifold := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: first
+		bodyOrigin: first rotationCentre
+		rotation: 0
+		andShape: second
+		bodyOrigin: (20 @ 23) + second rotationCentre
+		rotation: 0
+		speculativeDistance: 2.0.
+	self assert: manifold isNil.
+	^ manifold
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateTests >> separatedCirclesWithinSpeculativeDistanceProduceAStableManifoldPoint [
+	<gtExample>
+	| first second firstManifold secondManifold |
+	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	second := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	firstManifold := CFPhysicsManifoldGenerator new
+		manifoldBetweenShapeState: first
+		bodyOrigin: first extent / 2.0
+		rotation: 0
+		andShapeState: second
+		bodyOrigin: (31 @ 0) + (second extent / 2.0)
+		rotation: 0
+		speculativeDistance: 2.0.
+	secondManifold := CFPhysicsManifoldGenerator new
+		manifoldBetweenShapeState: first
+		bodyOrigin: first extent / 2.0
+		rotation: 0
+		andShapeState: second
+		bodyOrigin: (30.5 @ 0) + (second extent / 2.0)
+		rotation: 0
+		speculativeDistance: 2.0.
+	self assert: firstManifold notNil.
+	self assert: (firstManifold contactPoints first separation closeTo: 1.0).
+	self assert: firstManifold contactPoints first featureId equals: secondManifold contactPoints first featureId.
+	^ firstManifold
+]
+
+{ #category : 'examples - circle manifolds' }
+CFPhysicsCleanSlateTests >> circleSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
+	<gtExample>
+	| first second manifold |
+	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	second := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
+	manifold := CFPhysicsManifoldGenerator new
+		manifoldBetweenShapeState: first
+		bodyOrigin: first extent / 2.0
+		rotation: 0
+		andShapeState: second
+		bodyOrigin: (33 @ 0) + (second extent / 2.0)
+		rotation: 0
+		speculativeDistance: 2.0.
+	self assert: manifold isNil.
+	^ manifold
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> speculativeDistanceFlowsThroughTheContactPipeline [
+	<gtExample>
+	| first second step pipeline result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 30 @ 30.
+	second := self cleanSlateBodyWithSequence: 2 position: 31 @ 0 extent: 30 @ 30.
+	first element geometry: BlCircleGeometry new.
+	second element geometry: BlCircleGeometry new.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	step speculativeDistance: 2.0.
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
+	result := pipeline
+		stepBodies: { first. second }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result activeContacts size equals: 1.
+	self assert: (result activeContacts first manifold contactPoints first separation closeTo: 1.0).
+	^ result
+]

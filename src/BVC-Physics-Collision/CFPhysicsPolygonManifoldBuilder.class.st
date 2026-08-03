@@ -12,17 +12,30 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin: bodyOriginA rotation: rotationA andShape: shapeB bodyOrigin: bodyOriginB rotation: rotationB [
-	| verticesA normalsA verticesB normalsB separationA separationB referenceIsA referenceShape referenceRotation referenceVertices referenceNormals incidentShape incidentRotation incidentVertices incidentNormals referenceIndex referenceNormal referenceVertex1 referenceVertex2 tangent incidentEdge clipped totalRadius points manifoldNormal penetration |
+	^ self
+		manifoldBetweenShape: shapeA
+		bodyOrigin: bodyOriginA
+		rotation: rotationA
+		andShape: shapeB
+		bodyOrigin: bodyOriginB
+		rotation: rotationB
+		speculativeDistance: 0.0
+]
+
+{ #category : 'collision' }
+CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin: bodyOriginA rotation: rotationA andShape: shapeB bodyOrigin: bodyOriginB rotation: rotationB speculativeDistance: speculativeDistance [
+	| verticesA normalsA verticesB normalsB separationA separationB referenceIsA referenceShape referenceRotation referenceVertices referenceNormals incidentShape incidentRotation incidentVertices incidentNormals referenceIndex referenceNormal referenceVertex1 referenceVertex2 tangent incidentEdge clipped totalRadius points manifoldNormal penetration maximumSeparation |
 	verticesA := shapeA worldVerticesAtBodyOrigin: bodyOriginA rotation: rotationA.
 	normalsA := shapeA worldNormalsAtRotation: rotationA.
 	verticesB := shapeB worldVerticesAtBodyOrigin: bodyOriginB rotation: rotationB.
 	normalsB := shapeB worldNormalsAtRotation: rotationB.
 	totalRadius := shapeA radius + shapeB radius.
+	maximumSeparation := totalRadius + speculativeDistance.
 
 	separationA := self maximumSeparationOf: verticesA normals: normalsA from: verticesB.
-	separationA second > totalRadius ifTrue: [ ^ nil ].
+	separationA second > maximumSeparation ifTrue: [ ^ nil ].
 	separationB := self maximumSeparationOf: verticesB normals: normalsB from: verticesA.
-	separationB second > totalRadius ifTrue: [ ^ nil ].
+	separationB second > maximumSeparation ifTrue: [ ^ nil ].
 
 	referenceIsA := separationB second <= separationA second.
 	referenceIsA
@@ -63,7 +76,7 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin
 		| coreSeparation separation worldPoint point featureId |
 		coreSeparation := self dot: clipVertex position - referenceVertex1 with: referenceNormal.
 		separation := coreSeparation - totalRadius.
-		separation <= 0 ifTrue: [
+		separation <= speculativeDistance ifTrue: [
 			worldPoint := clipVertex position
 				- (referenceNormal * ((coreSeparation + incidentShape radius - referenceShape radius) / 2.0)).
 			featureId := referenceIsA

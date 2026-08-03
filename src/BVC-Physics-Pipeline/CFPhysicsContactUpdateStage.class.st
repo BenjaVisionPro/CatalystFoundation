@@ -30,7 +30,8 @@ CFPhysicsContactUpdateStage >> executeOn: aStepResult [
 		includingImpactContacts: #()
 		fromContacts: aStepResult previousContacts
 		reusingContacts: aStepResult calculationContacts
-		bodyStates: aStepResult bodyStates.
+		bodyStates: aStepResult bodyStates
+		speculativeDistance: aStepResult step speculativeDistance.
 	contactResult := CFPhysicsContactUpdateResult
 		pairs: aStepResult pairs
 		contactBatch: batch.
