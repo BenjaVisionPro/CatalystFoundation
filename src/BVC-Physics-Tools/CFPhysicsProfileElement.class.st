@@ -136,19 +136,20 @@ CFPhysicsProfileElement >> updateStatus [
 
 { #category : 'private - updating' }
 CFPhysicsProfileElement >> recordingElapsedString [
-	| elapsedSeconds hours minutes seconds |
+	| elapsedSeconds hours minutes seconds printer |
 	recordingStartedMilliseconds ifNil: [ ^ '00:00:00' ].
 	elapsedSeconds := (Time millisecondClockValue - recordingStartedMilliseconds) // 1000.
 	hours := elapsedSeconds // 3600.
 	minutes := (elapsedSeconds \\ 3600) // 60.
 	seconds := elapsedSeconds \\ 60.
+	printer := GRPrinter new.
 	^ String streamContents: [ :stream |
 		stream
-			nextPutAll: (hours printString padded: #left to: 2 with: $0);
+			nextPutAll: (printer pad: hours printString left: $0 to: 2);
 			nextPut: $:;
-			nextPutAll: (minutes printString padded: #left to: 2 with: $0);
+			nextPutAll: (printer pad: minutes printString left: $0 to: 2);
 			nextPut: $:;
-			nextPutAll: (seconds printString padded: #left to: 2 with: $0) ]
+			nextPutAll: (printer pad: seconds printString left: $0 to: 2) ]
 ]
 
 { #category : 'hooks - scene graph' }
