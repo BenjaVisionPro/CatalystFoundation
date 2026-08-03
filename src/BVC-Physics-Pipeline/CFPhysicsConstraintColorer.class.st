@@ -25,7 +25,8 @@ CFPhysicsConstraintColorer class >> overflowColorIndex [
 { #category : 'coloring' }
 CFPhysicsConstraintColorer class >> colorsFor: constraints [
 	| colors bodySets |
-	colors := (1 to: self graphColorCount) collect: [ :ignored | OrderedCollection new ].
+	colors := OrderedCollection new: self graphColorCount.
+	self graphColorCount timesRepeat: [ colors add: OrderedCollection new ].
 	bodySets := (1 to: self graphColorCount - 1) collect: [ :ignored | IdentitySet new ].
 	constraints do: [ :constraint |
 		| dynamicStates startColor assigned |
