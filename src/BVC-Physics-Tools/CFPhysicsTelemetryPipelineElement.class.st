@@ -159,46 +159,53 @@ CFPhysicsTelemetryPipelineElement >> profileSummaryLabel [
 
 { #category : 'private - updating' }
 CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
+	| printer valueFor |
+	printer := GRPrinter new.
+	valueFor := [ :key |
+		printer
+			pad: (data at: key ifAbsent: [ 0 ]) printString
+			left: Character space
+			to: 6 ].
 	contactsSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Contacts     Persistent ';
-			print: (data at: #persistentContactCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Began ';
-			print: (data at: #beganContactCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Continued ';
-			print: (data at: #continuedContactCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Ended ';
-			print: (data at: #endedContactCount ifAbsent: [ 0 ]) ]).
+			nextPutAll: 'Contacts     Persistent';
+			nextPutAll: (valueFor value: #persistentContactCount);
+			nextPutAll: '   Began';
+			nextPutAll: (valueFor value: #beganContactCount);
+			nextPutAll: '   Continued';
+			nextPutAll: (valueFor value: #continuedContactCount);
+			nextPutAll: '   Ended';
+			nextPutAll: (valueFor value: #endedContactCount) ]).
 	manifoldsSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Manifolds    Stable ';
-			print: (data at: #stablePreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Changed ';
-			print: (data at: #changedPreparedManifoldCount ifAbsent: [ 0 ]) ]).
+			nextPutAll: 'Manifolds    Stable';
+			nextPutAll: (valueFor value: #stablePreparedManifoldCount);
+			nextPutAll: '   Changed';
+			nextPutAll: (valueFor value: #changedPreparedManifoldCount) ]).
 	pointsSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Points       Reused ';
-			print: (data at: #reusablePreparedContactPointCount ifAbsent: [ 0 ]);
-			nextPutAll: '   New ';
-			print: (data at: #newPreparedContactPointCount ifAbsent: [ 0 ]) ]).
+			nextPutAll: 'Points       Reused';
+			nextPutAll: (valueFor value: #reusablePreparedContactPointCount);
+			nextPutAll: '   New';
+			nextPutAll: (valueFor value: #newPreparedContactPointCount) ]).
 	changesSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Changes      Id ';
-			print: (data at: #featureIdChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Normal ';
-			print: (data at: #normalChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Count ';
-			print: (data at: #pointCountChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Order ';
-			print: (data at: #pointOrderChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Separation ';
-			print: (data at: #separationChangedPreparedManifoldCount ifAbsent: [ 0 ]) ]).
+			nextPutAll: 'Changes      Id';
+			nextPutAll: (valueFor value: #featureIdChangedPreparedManifoldCount);
+			nextPutAll: '   Normal';
+			nextPutAll: (valueFor value: #normalChangedPreparedManifoldCount);
+			nextPutAll: '   Count';
+			nextPutAll: (valueFor value: #pointCountChangedPreparedManifoldCount);
+			nextPutAll: '   Order';
+			nextPutAll: (valueFor value: #pointOrderChangedPreparedManifoldCount);
+			nextPutAll: '   Sep';
+			nextPutAll: (valueFor value: #separationChangedPreparedManifoldCount) ]).
 	bodiesSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Bodies       Awake ';
-			print: (data at: #activeBodyCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Sleeping ';
-			print: (data at: #sleepingBodyCount ifAbsent: [ 0 ]) ])
+			nextPutAll: 'Bodies       Awake';
+			nextPutAll: (valueFor value: #activeBodyCount);
+			nextPutAll: '   Sleeping';
+			nextPutAll: (valueFor value: #sleepingBodyCount) ])
 ]
 
 { #category : 'private - building' }
