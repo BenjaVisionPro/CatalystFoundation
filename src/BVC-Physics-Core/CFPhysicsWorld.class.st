@@ -670,6 +670,11 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #newPreparedContactPointCount put: self constraintPreparationMeasurements newContactPointCount;
 		at: #stablePreparedManifoldCount put: self constraintPreparationMeasurements stableManifoldCount;
 		at: #changedPreparedManifoldCount put: self constraintPreparationMeasurements changedManifoldCount;
+		at: #featureIdChangedPreparedManifoldCount put: self constraintPreparationMeasurements featureIdChangedManifoldCount;
+		at: #normalChangedPreparedManifoldCount put: self constraintPreparationMeasurements normalChangedManifoldCount;
+		at: #pointCountChangedPreparedManifoldCount put: self constraintPreparationMeasurements pointCountChangedManifoldCount;
+		at: #pointOrderChangedPreparedManifoldCount put: self constraintPreparationMeasurements pointOrderChangedManifoldCount;
+		at: #separationChangedPreparedManifoldCount put: self constraintPreparationMeasurements separationChangedManifoldCount;
 		at: #preparedJointConstraintCount put: self constraintPreparationMeasurements preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: self constraintPreparationMeasurements preparedObjectCount;
 		yourself

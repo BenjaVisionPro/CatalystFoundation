@@ -5,7 +5,7 @@ I prepare contact and joint constraints for the solver. I translate persistent c
 Class {
 	#name : 'CFPhysicsConstraintPreparationStage',
 	#superclass : 'CFPhysicsStepStage',
-	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'weldJointConstraintBuilder', 'prismaticJointConstraintBuilder', 'wheelJointConstraintBuilder', 'mouseJointConstraintBuilder', 'motorJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'preparedJointConstraintCount' ],
+	#instVars : [ 'constraintBuilder', 'distanceJointConstraintBuilder', 'revoluteJointConstraintBuilder', 'weldJointConstraintBuilder', 'prismaticJointConstraintBuilder', 'wheelJointConstraintBuilder', 'mouseJointConstraintBuilder', 'motorJointConstraintBuilder', 'preparedContactConstraintCount', 'preparedContactPointCount', 'continuedContactConstraintCount', 'beganContactConstraintCount', 'reusableContactPointCount', 'newContactPointCount', 'stableManifoldCount', 'changedManifoldCount', 'featureIdChangedManifoldCount', 'normalChangedManifoldCount', 'pointCountChangedManifoldCount', 'pointOrderChangedManifoldCount', 'separationChangedManifoldCount', 'preparedJointConstraintCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -118,6 +118,11 @@ CFPhysicsConstraintPreparationStage >> measureContacts: contacts [
 	newContactPointCount := 0.
 	stableManifoldCount := 0.
 	changedManifoldCount := 0.
+	featureIdChangedManifoldCount := 0.
+	normalChangedManifoldCount := 0.
+	pointCountChangedManifoldCount := 0.
+	pointOrderChangedManifoldCount := 0.
+	separationChangedManifoldCount := 0.
 	preparedJointConstraintCount := 0.
 	solidContacts := contacts reject: #isSensor.
 	solidContacts do: [ :contact | self measureContact: contact ].
@@ -141,7 +146,9 @@ CFPhysicsConstraintPreparationStage >> measureContact: contact [
 		and: [ contact previousManifold contactPoints size = pointCount ].
 	stable
 		ifTrue: [ stableManifoldCount := stableManifoldCount + 1 ]
-		ifFalse: [ changedManifoldCount := changedManifoldCount + 1 ]
+		ifFalse: [
+			changedManifoldCount := changedManifoldCount + 1.
+			self measureChangesFrom: contact previousManifold to: contact manifold ]
 ]
 
 { #category : 'private - measurement' }
@@ -154,6 +161,56 @@ CFPhysicsConstraintPreparationStage >> reusablePointCountFor: contact [
 		point featureId notNil and: [
 			previous contactPoints anySatisfy: [ :oldPoint |
 				oldPoint featureId = point featureId ] ] ]
+]
+
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> measureChangesFrom: previous to: current [
+	(self featureIdsChangedFrom: previous to: current)
+		ifTrue: [ featureIdChangedManifoldCount := featureIdChangedManifoldCount + 1 ].
+	(self normalChangedFrom: previous to: current)
+		ifTrue: [ normalChangedManifoldCount := normalChangedManifoldCount + 1 ].
+	previous contactPoints size ~= current contactPoints size
+		ifTrue: [ pointCountChangedManifoldCount := pointCountChangedManifoldCount + 1 ].
+	(self pointOrderChangedFrom: previous to: current)
+		ifTrue: [ pointOrderChangedManifoldCount := pointOrderChangedManifoldCount + 1 ].
+	(self separationChangedFrom: previous to: current)
+		ifTrue: [ separationChangedManifoldCount := separationChangedManifoldCount + 1 ]
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> featureIdsChangedFrom: previous to: current [
+	| previousIds currentIds |
+	previousIds := previous contactPoints collect: #featureId.
+	currentIds := current contactPoints collect: #featureId.
+	previousIds size = currentIds size ifFalse: [ ^ true ].
+	^ previousIds anySatisfy: [ :featureId |
+		(previousIds occurrencesOf: featureId) ~= (currentIds occurrencesOf: featureId) ]
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> normalChangedFrom: previous to: current [
+	(previous normal isNil or: [ current normal isNil ])
+		ifTrue: [ ^ previous normal ~~ current normal ].
+	^ (previous normal closeTo: current normal) not
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> pointOrderChangedFrom: previous to: current [
+	| previousIds currentIds |
+	previousIds := previous contactPoints collect: #featureId.
+	currentIds := current contactPoints collect: #featureId.
+	(self featureIdsChangedFrom: previous to: current) ifTrue: [ ^ false ].
+	^ previousIds ~= currentIds
+]
+
+{ #category : 'private - measurement' }
+CFPhysicsConstraintPreparationStage >> separationChangedFrom: previous to: current [
+	^ current contactPoints anySatisfy: [ :point |
+		previous contactPoints
+			detect: [ :oldPoint | oldPoint featureId = point featureId ]
+			ifFound: [ :oldPoint | (oldPoint separation closeTo: point separation) not ]
+			ifNone: [ false ] ]
 ]
 
 { #category : 'accessing - measurement' }
@@ -172,6 +229,17 @@ CFPhysicsConstraintPreparationStage >> newContactPointCount [ ^ newContactPointC
 CFPhysicsConstraintPreparationStage >> stableManifoldCount [ ^ stableManifoldCount ifNil: [ 0 ] ]
 { #category : 'accessing - measurement' }
 CFPhysicsConstraintPreparationStage >> changedManifoldCount [ ^ changedManifoldCount ifNil: [ 0 ] ]
+
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> featureIdChangedManifoldCount [ ^ featureIdChangedManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> normalChangedManifoldCount [ ^ normalChangedManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> pointCountChangedManifoldCount [ ^ pointCountChangedManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> pointOrderChangedManifoldCount [ ^ pointOrderChangedManifoldCount ifNil: [ 0 ] ]
+{ #category : 'accessing - measurement' }
+CFPhysicsConstraintPreparationStage >> separationChangedManifoldCount [ ^ separationChangedManifoldCount ifNil: [ 0 ] ]
 { #category : 'accessing - measurement' }
 CFPhysicsConstraintPreparationStage >> preparedJointConstraintCount [ ^ preparedJointConstraintCount ifNil: [ 0 ] ]
 { #category : 'accessing - measurement' }

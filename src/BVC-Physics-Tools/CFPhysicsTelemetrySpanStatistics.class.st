@@ -671,6 +671,11 @@ CFPhysicsTelemetrySpanStatistics >> gtConstraintPreparationEvidenceFor: aView [
 			'Average new contact points' -> (self averageSampleValue: #newPreparedContactPointCount).
 			'Average stable manifolds' -> (self averageSampleValue: #stablePreparedManifoldCount).
 			'Average changed manifolds' -> (self averageSampleValue: #changedPreparedManifoldCount).
+			'Average manifolds with feature ID changes' -> (self averageSampleValue: #featureIdChangedPreparedManifoldCount).
+			'Average manifolds with normal changes' -> (self averageSampleValue: #normalChangedPreparedManifoldCount).
+			'Average manifolds with point-count changes' -> (self averageSampleValue: #pointCountChangedPreparedManifoldCount).
+			'Average manifolds with point-order changes' -> (self averageSampleValue: #pointOrderChangedPreparedManifoldCount).
+			'Average manifolds with separation changes' -> (self averageSampleValue: #separationChangedPreparedManifoldCount).
 			'Average prepared joint constraints' -> (self averageSampleValue: #preparedJointConstraintCount).
 			'Average prepared objects created' -> (self averageSampleValue: #preparedConstraintObjectCount).
 			'Maximum prepared objects created' -> (self maximumSampleValue: #preparedConstraintObjectCount) } ];

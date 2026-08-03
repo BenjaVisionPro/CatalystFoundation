@@ -127,7 +127,7 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
 	| stepRecordings data |
 	stepRecordings := analysis stepRecordings.
 	stepRecordings ifEmpty: [
-		summaryLabel text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Points reused/new 0/0   Manifolds stable/changed 0/0   Awake 0   Sleeping 0'.
+		summaryLabel text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Points reused/new 0/0   Manifolds stable/changed 0/0   Changes IDs/normal/count/order/separation 0/0/0/0/0   Awake 0   Sleeping 0'.
 		^ self ].
 	data := stepRecordings last physicsData.
 	summaryLabel text: (String streamContents: [ :stream |
@@ -148,6 +148,16 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
 			print: (data at: #stablePreparedManifoldCount ifAbsent: [ 0 ]);
 			nextPut: $/;
 			print: (data at: #changedPreparedManifoldCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Changes IDs/normal/count/order/separation ';
+			print: (data at: #featureIdChangedPreparedManifoldCount ifAbsent: [ 0 ]);
+			nextPut: $/;
+			print: (data at: #normalChangedPreparedManifoldCount ifAbsent: [ 0 ]);
+			nextPut: $/;
+			print: (data at: #pointCountChangedPreparedManifoldCount ifAbsent: [ 0 ]);
+			nextPut: $/;
+			print: (data at: #pointOrderChangedPreparedManifoldCount ifAbsent: [ 0 ]);
+			nextPut: $/;
+			print: (data at: #separationChangedPreparedManifoldCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Awake ';
 			print: (data at: #activeBodyCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Sleeping ';

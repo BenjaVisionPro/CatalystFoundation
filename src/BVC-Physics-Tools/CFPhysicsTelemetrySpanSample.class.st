@@ -107,6 +107,18 @@ CFPhysicsTelemetrySpanSample >> continuedContactCount [ ^ self physicsDataAt: #c
 { #category : 'accessing' }
 CFPhysicsTelemetrySpanSample >> endedContactCount [ ^ self physicsDataAt: #endedContactCount ]
 
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> featureIdChangedPreparedManifoldCount [ ^ self physicsDataAt: #featureIdChangedPreparedManifoldCount ]
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> normalChangedPreparedManifoldCount [ ^ self physicsDataAt: #normalChangedPreparedManifoldCount ]
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> pointCountChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointCountChangedPreparedManifoldCount ]
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> pointOrderChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointOrderChangedPreparedManifoldCount ]
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> separationChangedPreparedManifoldCount [ ^ self physicsDataAt: #separationChangedPreparedManifoldCount ]
+
 { #category : 'private - accessing' }
 CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
 	| data |
@@ -271,6 +283,11 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'New prepared contact points' -> self newPreparedContactPointCount.
 			'Stable prepared manifolds' -> self stablePreparedManifoldCount.
 			'Changed prepared manifolds' -> self changedPreparedManifoldCount.
+			'Manifolds with feature ID changes' -> self featureIdChangedPreparedManifoldCount.
+			'Manifolds with normal changes' -> self normalChangedPreparedManifoldCount.
+			'Manifolds with point-count changes' -> self pointCountChangedPreparedManifoldCount.
+			'Manifolds with point-order changes' -> self pointOrderChangedPreparedManifoldCount.
+			'Manifolds with separation changes' -> self separationChangedPreparedManifoldCount.
 			'Prepared joint constraints' -> self preparedJointConstraintCount.
 			'Prepared constraint objects' -> self preparedConstraintObjectCount } ];
 		column: 'Property' text: #key;

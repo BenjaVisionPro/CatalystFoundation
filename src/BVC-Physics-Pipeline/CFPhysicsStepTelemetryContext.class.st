@@ -79,6 +79,11 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #newPreparedContactPointCount put: preparation newContactPointCount;
 		at: #stablePreparedManifoldCount put: preparation stableManifoldCount;
 		at: #changedPreparedManifoldCount put: preparation changedManifoldCount;
+		at: #featureIdChangedPreparedManifoldCount put: preparation featureIdChangedManifoldCount;
+		at: #normalChangedPreparedManifoldCount put: preparation normalChangedManifoldCount;
+		at: #pointCountChangedPreparedManifoldCount put: preparation pointCountChangedManifoldCount;
+		at: #pointOrderChangedPreparedManifoldCount put: preparation pointOrderChangedManifoldCount;
+		at: #separationChangedPreparedManifoldCount put: preparation separationChangedManifoldCount;
 		at: #preparedJointConstraintCount put: preparation preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: preparation preparedObjectCount;
 		yourself
