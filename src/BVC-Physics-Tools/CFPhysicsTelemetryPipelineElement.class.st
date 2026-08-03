@@ -9,6 +9,7 @@ Class {
 		'controls',
 		'windowToggleGroup',
 		'samplesLabel',
+		'summaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -63,8 +64,15 @@ CFPhysicsTelemetryPipelineElement >> build [
 			whenError: [ :anElement :anError |
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
+	summaryLabel := BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
+		text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Awake 0   Sleeping 0';
+		yourself.
 	self
 		addChild: controls;
+		addChild: summaryLabel;
 		addChild: graph.
 	self updateGraph
 ]
@@ -85,6 +93,7 @@ CFPhysicsTelemetryPipelineElement >> updateGraph [
 CFPhysicsTelemetryPipelineElement >> renderAnalysis: analysis [
 	| root pipeline maximumEnd scale |
 	samplesLabel text: analysis sampleCount asString, ' samples'.
+	self updateSummaryFrom: analysis.
 	graph removeChildren.
 	root := analysis rootStatistics.
 	root ifNil: [
@@ -109,6 +118,32 @@ CFPhysicsTelemetryPipelineElement >> renderAnalysis: analysis [
 	graph addChild: (self axisRowFor: scale).
 	pipeline children do: [ :span |
 		graph addChild: (self stageRowFor: span scale: scale) ]
+]
+
+
+
+{ #category : 'private - updating' }
+CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
+	| stepRecordings data |
+	stepRecordings := analysis stepRecordings.
+	stepRecordings ifEmpty: [
+		summaryLabel text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Awake 0   Sleeping 0'.
+		^ self ].
+	data := stepRecordings last physicsData.
+	summaryLabel text: String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Contacts  Persistent ';
+			print: (data at: #persistentContactCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Began ';
+			print: (data at: #beganContactCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Continued ';
+			print: (data at: #continuedContactCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Ended ';
+			print: (data at: #endedContactCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Awake ';
+			print: (data at: #activeBodyCount ifAbsent: [ 0 ]);
+			nextPutAll: '   Sleeping ';
+			print: (data at: #sleepingBodyCount ifAbsent: [ 0 ]) ]
 ]
 
 { #category : 'private - building' }
