@@ -7245,3 +7245,31 @@ CFPhysicsCleanSlateTests >> speculativeDistanceFlowsThroughTheContactPipeline [
 	self assert: (result activeContacts first manifold contactPoints first separation closeTo: 1.0).
 	^ result
 ]
+
+{ #category : 'examples - solver' }
+CFPhysicsCleanSlateTests >> zeroRestitutionSkipsRestitutionPass [
+	<gtExample>
+	| first second step result |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	first
+		velocity: 0 @ 100;
+		restitution: 0.0.
+	second := self cleanSlateBodyWithSequence: 2 position: 0 @ 19 extent: 20 @ 20.
+	second
+		beStatic;
+		restitution: 0.0.
+	step := CFPhysicsStep
+		timeStep: 1.0 / 60.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	result := (CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new)
+		stepBodies: { first. second }
+		fromContacts: #()
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result activeContacts isNotEmpty.
+	self assert: result solver restitutionCandidatePointCount equals: 0.
+	^ result
+]

@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse', 'maximumInitialLinearSpeed', 'maximumIntegratedLinearSpeed', 'maximumWarmStartedLinearSpeed', 'maximumBiasedLinearSpeed', 'maximumRelaxedLinearSpeed', 'maximumRestitutionLinearSpeed' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -50,34 +50,22 @@ CFPhysicsSoftStepSolver >> initialize [
 	averageFinalContactPenetration := 0.0.
 	maximumBodyTranslation := 0.0.
 	totalNormalImpulse := 0.0.
-	totalTangentImpulse := 0.0.
-	maximumInitialLinearSpeed := 0.0.
-	maximumIntegratedLinearSpeed := 0.0.
-	maximumWarmStartedLinearSpeed := 0.0.
-	maximumBiasedLinearSpeed := 0.0.
-	maximumRelaxedLinearSpeed := 0.0.
-	maximumRestitutionLinearSpeed := 0.0
+	totalTangentImpulse := 0.0
 ]
 
 { #category : 'solving' }
 CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	maximumInitialContactPenetration := self maximumContactPenetration.
-	maximumInitialLinearSpeed := self maximumLinearSpeed.
 	step substepCount timesRepeat: [
 		bodyStates do: [ :state |
 			state integrateVelocityBy: step substepTime gravity: gravity ].
-		maximumIntegratedLinearSpeed := maximumIntegratedLinearSpeed max: self maximumLinearSpeed.
 		self warmStart.
-		maximumWarmStartedLinearSpeed := maximumWarmStartedLinearSpeed max: self maximumLinearSpeed.
 		self solveContactsWithBias: true.
 		self solveJointConstraintsWithBias: true.
-		maximumBiasedLinearSpeed := maximumBiasedLinearSpeed max: self maximumLinearSpeed.
 		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
 		self solveContactsWithBias: false.
-		self solveJointConstraintsWithBias: false.
-		maximumRelaxedLinearSpeed := maximumRelaxedLinearSpeed max: self maximumLinearSpeed ].
+		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
-	maximumRestitutionLinearSpeed := self maximumLinearSpeed.
 	maximumFinalContactPenetration := self maximumContactPenetration.
 	averageFinalContactPenetration := self averageContactPenetration.
 	maximumBodyTranslation := bodyStates
@@ -92,27 +80,6 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	contactConstraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
 
-
-
-{ #category : 'private - telemetry' }
-CFPhysicsSoftStepSolver >> maximumLinearSpeed [
-	^ bodyStates
-		ifEmpty: [ 0.0 ]
-		ifNotEmpty: [ (bodyStates collect: [ :state | state linearVelocity r ]) max ]
-]
-
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumInitialLinearSpeed [ ^ maximumInitialLinearSpeed ]
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumIntegratedLinearSpeed [ ^ maximumIntegratedLinearSpeed ]
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumWarmStartedLinearSpeed [ ^ maximumWarmStartedLinearSpeed ]
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumBiasedLinearSpeed [ ^ maximumBiasedLinearSpeed ]
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumRelaxedLinearSpeed [ ^ maximumRelaxedLinearSpeed ]
-{ #category : 'accessing - telemetry' }
-CFPhysicsSoftStepSolver >> maximumRestitutionLinearSpeed [ ^ maximumRestitutionLinearSpeed ]
 
 { #category : 'private - telemetry' }
 CFPhysicsSoftStepSolver >> maximumContactPenetration [
@@ -741,20 +708,21 @@ CFPhysicsSoftStepSolver >> solveTangentAt: point constraint: constraint [
 CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 	restitutionCandidatePointCount := 0.
 	self contactConstraints do: [ :constraint |
-		constraint points do: [ :point |
-			(point relativeNormalVelocity < threshold negated and: [ point totalNormalImpulse ~= 0.0 ]) ifTrue: [
-				| normalVelocity increment oldImpulse newImpulse appliedImpulse |
-				restitutionCandidatePointCount := restitutionCandidatePointCount + 1.
-				normalVelocity := self dot: (self relativeVelocityAt: point constraint: constraint) with: constraint normal.
-				increment := point normalMass
-					* (normalVelocity + (constraint restitution * point relativeNormalVelocity)) negated.
-				oldImpulse := point normalImpulse.
-				newImpulse := (oldImpulse + increment) max: 0.0.
-				appliedImpulse := newImpulse - oldImpulse.
-				point
-					normalImpulse: newImpulse;
-					totalNormalImpulse: point totalNormalImpulse + appliedImpulse.
-				self applyImpulse: constraint normal * appliedImpulse at: point constraint: constraint ] ] ]
+		constraint restitution = 0.0 ifFalse: [
+			constraint points do: [ :point |
+				(point relativeNormalVelocity < threshold negated and: [ point totalNormalImpulse ~= 0.0 ]) ifTrue: [
+					| normalVelocity increment oldImpulse newImpulse appliedImpulse |
+					restitutionCandidatePointCount := restitutionCandidatePointCount + 1.
+					normalVelocity := self dot: (self relativeVelocityAt: point constraint: constraint) with: constraint normal.
+					increment := point normalMass
+						* (normalVelocity + (constraint restitution * point relativeNormalVelocity)) negated.
+					oldImpulse := point normalImpulse.
+					newImpulse := (oldImpulse + increment) max: 0.0.
+					appliedImpulse := newImpulse - oldImpulse.
+					point
+						normalImpulse: newImpulse;
+						totalNormalImpulse: point totalNormalImpulse + appliedImpulse.
+					self applyImpulse: constraint normal * appliedImpulse at: point constraint: constraint ] ] ] ]
 ]
 
 { #category : 'private - solving' }

@@ -112,29 +112,3 @@ CFPhysicsIslandSolver >> totalNormalImpulse [
 CFPhysicsIslandSolver >> totalTangentImpulse [
 	^ softStepSolvers inject: 0.0 into: [ :total :solver | total + solver totalTangentImpulse ]
 ]
-
-
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumInitialLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumInitialLinearSpeed) max ]
-]
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumIntegratedLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumIntegratedLinearSpeed) max ]
-]
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumWarmStartedLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumWarmStartedLinearSpeed) max ]
-]
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumBiasedLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumBiasedLinearSpeed) max ]
-]
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumRelaxedLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumRelaxedLinearSpeed) max ]
-]
-{ #category : 'accessing - telemetry' }
-CFPhysicsIslandSolver >> maximumRestitutionLinearSpeed [
-	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumRestitutionLinearSpeed) max ]
-]
