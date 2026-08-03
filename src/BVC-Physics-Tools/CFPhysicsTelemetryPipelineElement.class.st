@@ -18,6 +18,7 @@ Class {
 		'sleepSummaryLabel',
 		'worstBodySummaryLabel',
 		'solverSummaryLabel',
+		'velocitySummaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -85,6 +86,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	sleepSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
 	solverSummaryLabel := self profileSummaryLabel.
+	velocitySummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
 		addChild: manifoldsSummaryLabel;
@@ -93,7 +95,8 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: bodiesSummaryLabel;
 		addChild: sleepSummaryLabel;
 		addChild: worstBodySummaryLabel;
-		addChild: solverSummaryLabel.
+		addChild: solverSummaryLabel;
+		addChild: velocitySummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
@@ -261,7 +264,21 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: '   Impulses N/T ';
 			nextPutAll: ((data at: #solverTotalNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPut: $/;
-			nextPutAll: ((data at: #solverTotalTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ])
+			nextPutAll: ((data at: #solverTotalTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
+	velocitySummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Velocity     Initial/integrated/warm/biased/relaxed/restitution ';
+			nextPutAll: ((data at: #solverMaximumInitialLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumIntegratedLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumWarmStartedLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumBiasedLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumRelaxedLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumRestitutionLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ])
 ]
 
 { #category : 'private - building' }

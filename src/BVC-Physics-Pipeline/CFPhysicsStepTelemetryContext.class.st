@@ -132,6 +132,12 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #solverMaximumBodyTranslation put: result solver maximumBodyTranslation;
 		at: #solverTotalNormalImpulse put: result solver totalNormalImpulse;
 		at: #solverTotalTangentImpulse put: result solver totalTangentImpulse;
+		at: #solverMaximumInitialLinearSpeed put: result solver maximumInitialLinearSpeed;
+		at: #solverMaximumIntegratedLinearSpeed put: result solver maximumIntegratedLinearSpeed;
+		at: #solverMaximumWarmStartedLinearSpeed put: result solver maximumWarmStartedLinearSpeed;
+		at: #solverMaximumBiasedLinearSpeed put: result solver maximumBiasedLinearSpeed;
+		at: #solverMaximumRelaxedLinearSpeed put: result solver maximumRelaxedLinearSpeed;
+		at: #solverMaximumRestitutionLinearSpeed put: result solver maximumRestitutionLinearSpeed;
 		at: #solverJointConstraintCount put: result solver jointConstraintCount;
 		at: #solverDistanceJointConstraintCount put: result solver distanceJointConstraintCount;
 		at: #solverPrismaticJointConstraintCount put: result solver prismaticJointConstraintCount;
