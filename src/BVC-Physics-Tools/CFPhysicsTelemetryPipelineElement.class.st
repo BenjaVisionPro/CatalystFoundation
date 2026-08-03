@@ -10,6 +10,11 @@ Class {
 		'windowToggleGroup',
 		'samplesLabel',
 		'summaryLabel',
+		'contactsSummaryLabel',
+		'manifoldsSummaryLabel',
+		'pointsSummaryLabel',
+		'changesSummaryLabel',
+		'bodiesSummaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -64,12 +69,23 @@ CFPhysicsTelemetryPipelineElement >> build [
 			whenError: [ :anElement :anError |
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
-	summaryLabel := BrLabel new
+	summaryLabel := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
-		text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Awake 0   Sleeping 0';
+		cellSpacing: 2;
 		yourself.
+	contactsSummaryLabel := self profileSummaryLabel.
+	manifoldsSummaryLabel := self profileSummaryLabel.
+	pointsSummaryLabel := self profileSummaryLabel.
+	changesSummaryLabel := self profileSummaryLabel.
+	bodiesSummaryLabel := self profileSummaryLabel.
+	summaryLabel
+		addChild: contactsSummaryLabel;
+		addChild: manifoldsSummaryLabel;
+		addChild: pointsSummaryLabel;
+		addChild: changesSummaryLabel;
+		addChild: bodiesSummaryLabel.
+	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
 		addChild: summaryLabel;
@@ -126,39 +142,60 @@ CFPhysicsTelemetryPipelineElement >> renderAnalysis: analysis [
 CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
 	| stepRecordings data |
 	stepRecordings := analysis stepRecordings.
-	stepRecordings ifEmpty: [
-		summaryLabel text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Points reused/new 0/0   Manifolds stable/changed 0/0   Changes IDs/normal/count/order/separation 0/0/0/0/0   Awake 0   Sleeping 0'.
-		^ self ].
-	data := stepRecordings last physicsData.
-	summaryLabel text: (String streamContents: [ :stream |
+	data := stepRecordings
+		ifEmpty: [ Dictionary new ]
+		ifNotEmpty: [ stepRecordings last physicsData ].
+	self updateSummaryLabelsWith: data
+]
+
+{ #category : 'private - building' }
+CFPhysicsTelemetryPipelineElement >> profileSummaryLabel [
+	^ BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.72));
+		yourself
+]
+
+{ #category : 'private - updating' }
+CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
+	contactsSummaryLabel text: (String streamContents: [ :stream |
 		stream
-			nextPutAll: 'Contacts  Persistent ';
+			nextPutAll: 'Contacts     Persistent ';
 			print: (data at: #persistentContactCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Began ';
 			print: (data at: #beganContactCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Continued ';
 			print: (data at: #continuedContactCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Ended ';
-			print: (data at: #endedContactCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Points reused/new ';
-			print: (data at: #reusablePreparedContactPointCount ifAbsent: [ 0 ]);
-			nextPut: $/;
-			print: (data at: #newPreparedContactPointCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Manifolds stable/changed ';
+			print: (data at: #endedContactCount ifAbsent: [ 0 ]) ]).
+	manifoldsSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Manifolds    Stable ';
 			print: (data at: #stablePreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPut: $/;
-			print: (data at: #changedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Changes IDs/normal/count/order/separation ';
+			nextPutAll: '   Changed ';
+			print: (data at: #changedPreparedManifoldCount ifAbsent: [ 0 ]) ]).
+	pointsSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Points       Reused ';
+			print: (data at: #reusablePreparedContactPointCount ifAbsent: [ 0 ]);
+			nextPutAll: '   New ';
+			print: (data at: #newPreparedContactPointCount ifAbsent: [ 0 ]) ]).
+	changesSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Changes      Id ';
 			print: (data at: #featureIdChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPut: $/;
+			nextPutAll: '   Normal ';
 			print: (data at: #normalChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPut: $/;
+			nextPutAll: '   Count ';
 			print: (data at: #pointCountChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPut: $/;
+			nextPutAll: '   Order ';
 			print: (data at: #pointOrderChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPut: $/;
-			print: (data at: #separationChangedPreparedManifoldCount ifAbsent: [ 0 ]);
-			nextPutAll: '   Awake ';
+			nextPutAll: '   Separation ';
+			print: (data at: #separationChangedPreparedManifoldCount ifAbsent: [ 0 ]) ]).
+	bodiesSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Bodies       Awake ';
 			print: (data at: #activeBodyCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Sleeping ';
 			print: (data at: #sleepingBodyCount ifAbsent: [ 0 ]) ])
