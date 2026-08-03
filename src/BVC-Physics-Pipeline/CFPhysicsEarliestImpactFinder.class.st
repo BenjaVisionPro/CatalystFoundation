@@ -205,12 +205,21 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 	| firstState secondState result fastState fallbackProxy firstProxy secondProxy fallbackResult |
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
-	result := CFPhysicsBox2DTimeOfImpact
-		betweenShapeState: firstState shapeState
-		sweep: firstState solvedSweep
-		andShapeState: secondState shapeState
-		sweep: secondState solvedSweep
-		linearSlop: linearSlop.
+	result := (firstState isSensor or: [ secondState isSensor ])
+		ifTrue: [
+			"Swept sensors are a Catalyst event contract, not a Box2D contact constraint. Preserve crossings even when the shapes are separated again at the end of the step."
+			CFPhysicsConservativeAdvancement
+				betweenShapeState: firstState shapeState
+				sweep: firstState solvedSweep
+				andShapeState: secondState shapeState
+				sweep: secondState solvedSweep ]
+		ifFalse: [
+			CFPhysicsBox2DTimeOfImpact
+				betweenShapeState: firstState shapeState
+				sweep: firstState solvedSweep
+				andShapeState: secondState shapeState
+				sweep: secondState solvedSweep
+				linearSlop: linearSlop ].
 	result fraction = 0.0 ifTrue: [
 		fastState := bodyStates at: fastBody.
 		fallbackProxy := CFPhysicsDistanceProxy
