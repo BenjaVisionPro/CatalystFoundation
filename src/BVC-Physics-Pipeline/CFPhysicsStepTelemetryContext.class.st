@@ -31,7 +31,7 @@ CFPhysicsStepTelemetryContext >> jointCount: anInteger [ jointCount := anInteger
 
 { #category : 'telemetry' }
 CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipeline [
-	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios |
+	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios worstState worstRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
 	result := aWorldSolution pipelineResult.
 	bodyStates := result bodyStates values.
 	dynamicBodyStates := bodyStates select: [ :each | each bodyType isDynamic ].
@@ -46,6 +46,36 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		threshold <= 0.0
 			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
 			ifFalse: [ velocity / threshold ] ].
+	worstState := nil.
+	worstRatio := -1.0.
+	dynamicBodyStates do: [ :each |
+		| threshold velocity ratio |
+		threshold := each sleepThreshold.
+		velocity := each sleepVelocityForElapsed: step timeStep positionCorrectionFactor: sleepConfiguration positionCorrectionFactor.
+		ratio := threshold <= 0.0
+			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
+			ifFalse: [ velocity / threshold ].
+		ratio > worstRatio ifTrue: [
+			worstRatio := ratio.
+			worstState := each ] ].
+	worstMaximumVelocity := 0.0.
+	worstCorrectionVelocity := 0.0.
+	worstNormalImpulse := 0.0.
+	worstTangentImpulse := 0.0.
+	worstState ifNotNil: [
+		worstMaximumVelocity := worstState linearVelocity r
+			+ (worstState angularVelocity abs * worstState shapeState boundingRadius).
+		step timeStep > 0.0 ifTrue: [
+			worstCorrectionVelocity := sleepConfiguration positionCorrectionFactor
+				* (worstState deltaPosition r
+					+ (worstState deltaRotation sin abs * worstState shapeState boundingRadius))
+				/ step timeStep ].
+		result activeContacts do: [ :contact |
+			(contact firstBody == worstState body or: [ contact secondBody == worstState body ]) ifTrue: [
+				contact manifold ifNotNil: [ :manifold |
+					manifold contactPoints do: [ :point |
+						worstNormalImpulse := worstNormalImpulse + point normalImpulse.
+						worstTangentImpulse := worstTangentImpulse + point tangentImpulse abs ] ] ] ] ].
 	solvedIslands := result islands select: [ :island |
 		island dynamicBodies anySatisfy: #isAwake ].
 	pairFinder := (aPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder.
@@ -68,6 +98,16 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #maximumSleepVelocity put: (sleepVelocities ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepVelocities max ]);
 		at: #maximumSleepThresholdRatio put: (sleepThresholdRatios ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepThresholdRatios max ]);
 		at: #minimumSleepTime put: (dynamicBodyStates ifEmpty: [ 0.0 ] ifNotEmpty: [ (dynamicBodyStates collect: #sleepTime) min ]);
+		at: #worstSleepBodySequence put: (worstState ifNil: [ 0 ] ifNotNil: [ worstState body sequence ]);
+		at: #worstSleepThresholdRatio put: (worstRatio max: 0.0);
+		at: #worstSleepLinearSpeed put: (worstState ifNil: [ 0.0 ] ifNotNil: [ worstState linearVelocity r ]);
+		at: #worstSleepAngularSpeed put: (worstState ifNil: [ 0.0 ] ifNotNil: [ worstState angularVelocity abs ]);
+		at: #worstSleepMaximumVelocity put: worstMaximumVelocity;
+		at: #worstSleepCorrectionVelocity put: worstCorrectionVelocity;
+		at: #worstSleepTime put: (worstState ifNil: [ 0.0 ] ifNotNil: [ worstState sleepTime ]);
+		at: #worstSleepNormalImpulse put: worstNormalImpulse;
+		at: #worstSleepTangentImpulse put: worstTangentImpulse;
+		at: #worstSleepReason put: (worstCorrectionVelocity > worstMaximumVelocity ifTrue: [ #correction ] ifFalse: [ #velocity ]);
 		at: #contactCount put: result activeContacts size;
 		at: #persistentContactCount put: result contacts size;
 		at: #pairFinderEntryCount put: pairFinder entryCount;

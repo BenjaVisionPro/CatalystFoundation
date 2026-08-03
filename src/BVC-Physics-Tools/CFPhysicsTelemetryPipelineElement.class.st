@@ -16,6 +16,7 @@ Class {
 		'changesSummaryLabel',
 		'bodiesSummaryLabel',
 		'sleepSummaryLabel',
+		'worstBodySummaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -81,13 +82,15 @@ CFPhysicsTelemetryPipelineElement >> build [
 	changesSummaryLabel := self profileSummaryLabel.
 	bodiesSummaryLabel := self profileSummaryLabel.
 	sleepSummaryLabel := self profileSummaryLabel.
+	worstBodySummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
 		addChild: manifoldsSummaryLabel;
 		addChild: pointsSummaryLabel;
 		addChild: changesSummaryLabel;
 		addChild: bodiesSummaryLabel;
-		addChild: sleepSummaryLabel.
+		addChild: sleepSummaryLabel;
+		addChild: worstBodySummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
@@ -221,7 +224,27 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: ((data at: #maximumSleepThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
 			nextPutAll: 'x   Min time ';
 			nextPutAll: ((data at: #minimumSleepTime ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
-			nextPutAll: ' s' ])
+			nextPutAll: ' s' ]).
+	worstBodySummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Worst body   #';
+			nextPutAll: (data at: #worstSleepBodySequence ifAbsent: [ 0 ]) printString;
+			nextPutAll: '   Ratio ';
+			nextPutAll: ((data at: #worstSleepThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
+			nextPutAll: 'x   Linear ';
+			nextPutAll: ((data at: #worstSleepLinearSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Angular ';
+			nextPutAll: ((data at: #worstSleepAngularSpeed ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Correction ';
+			nextPutAll: ((data at: #worstSleepCorrectionVelocity ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Reason ';
+			nextPutAll: (data at: #worstSleepReason ifAbsent: [ #none ]) asString;
+			nextPutAll: '   Sleep time ';
+			nextPutAll: ((data at: #worstSleepTime ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: ' s   Impulses N/T ';
+			nextPutAll: ((data at: #worstSleepNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #worstSleepTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ])
 ]
 
 { #category : 'private - building' }
