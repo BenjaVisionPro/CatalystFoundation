@@ -1165,8 +1165,8 @@ CFPhysicsCleanSlateTests >> endingAContactDoesNotWakeBodies [
 		fromContacts: { previousContact }.
 	result := batch endedContacts first.
 	self assert: result ended.
-	self deny: (bodyStates at: first) isAwake.
-	self deny: (bodyStates at: second) isAwake.
+	self assert: (bodyStates at: first) isAwake not.
+	self assert: (bodyStates at: second) isAwake not.
 	^ result
 ]
 
@@ -1251,7 +1251,8 @@ CFPhysicsCleanSlateTests >> contactEventStagePublishesLifecycleEvents [
 	endedContact := beganContact copyForUpdate.
 	endedContact updateWith: nil.
 	batch := CFPhysicsContactUpdateBatch
-		active: { beganContact }
+		contacts: { beganContact }
+		touching: { beganContact }
 		began: { beganContact }
 		continued: #()
 		ended: { endedContact }.
@@ -1277,7 +1278,8 @@ CFPhysicsCleanSlateTests >> continuedContactsDoNotPublishLifecycleEvents [
 		updateWith: (self cleanSlateManifoldWithFeatureIndex: 1);
 		yourself.
 	batch := CFPhysicsContactUpdateBatch
-		active: { contact }
+		contacts: { contact }
+		touching: { contact }
 		began: #()
 		continued: { contact }
 		ended: #().
@@ -7014,7 +7016,7 @@ CFPhysicsCleanSlateTests >> broadphasePairRetainsNonTouchingContact [
 	self assert: nonTouchingBatch contacts size equals: 1.
 	self assert: nonTouchingBatch activeContacts isEmpty.
 	self assert: nonTouchingBatch endedContacts size equals: 1.
-	self deny: nonTouchingBatch contacts first isTouching.
+	self assert: nonTouchingBatch contacts first isTouching not.
 	self assert: nonTouchingBatch contacts first key equals: pair key.
 	^ nonTouchingBatch
 ]
