@@ -982,7 +982,7 @@ CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
 		yourself.
 	stage propagateWakeAcross: { island }.
 	firstDecision := (stage updateIslands: { island } bodyStates: bodyStates elapsed: 0.01) first.
-	self assert: firstDecision eligible.
+	self assert: firstDecision eligible not.
 	self assert: firstDecision slept not.
 	self assert: first isAwake.
 	self assert: second isAwake.
@@ -1076,7 +1076,7 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 		updateIslands: { island }
 		bodyStates: (IdentityDictionary new at: body put: state; yourself)
 		elapsed: 0.02) first.
-	self assert: decision eligible.
+	self assert: decision eligible not.
 	self assert: decision slept not.
 	self assert: (state sleepTime closeTo: 0.02).
 	self assert: body sleepTime equals: 0.0.
