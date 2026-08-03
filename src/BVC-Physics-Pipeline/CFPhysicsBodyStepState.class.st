@@ -57,12 +57,13 @@ CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector [
-	linearVelocity := linearVelocity + ((((gravityVector * gravityScale) + (force * inverseMass))) * seconds).
-	angularVelocity := angularVelocity + (torque * inverseInertia * seconds).
-	linearDamping > 0.0 ifTrue: [
-		linearVelocity := linearVelocity * (1.0 / (1.0 + (seconds * linearDamping))) ].
-	angularDamping > 0.0 ifTrue: [
-		angularVelocity := angularVelocity * (1.0 / (1.0 + (seconds * angularDamping))) ]
+	| linearVelocityDelta angularVelocityDelta linearDampingFactor angularDampingFactor |
+	linearVelocityDelta := ((gravityVector * gravityScale) + (force * inverseMass)) * seconds.
+	angularVelocityDelta := torque * inverseInertia * seconds.
+	linearDampingFactor := 1.0 / (1.0 + (seconds * linearDamping)).
+	angularDampingFactor := 1.0 / (1.0 + (seconds * angularDamping)).
+	linearVelocity := linearVelocityDelta + (linearVelocity * linearDampingFactor).
+	angularVelocity := angularVelocityDelta + (angularVelocity * angularDampingFactor)
 ]
 
 { #category : 'integration' }

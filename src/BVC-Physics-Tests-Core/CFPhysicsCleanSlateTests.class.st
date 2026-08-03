@@ -4954,6 +4954,21 @@ CFPhysicsCleanSlateTests >> stepStateAppliesPadeLinearDamping [
 ]
 
 { #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateDoesNotDampCurrentForceContribution [
+	<gtExample>
+	| body state |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body
+		velocity: 12 @ -6;
+		linearDamping: 2.0;
+		applyForce: 200 @ -100.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
+	self assert: (state linearVelocity closeTo: 7 @ -3.5).
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
 CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
 	<gtExample>
 	| body state |
