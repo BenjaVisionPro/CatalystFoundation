@@ -4595,10 +4595,12 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact.
-	self assert: (result continuousStepResult fraction closeTo: 0.25).
+	"Box2D TOI stops at the linear-slop target, before the exact touching fraction."
+	self assert: result continuousStepResult fraction < 0.25.
+	self assert: result continuousStepResult fraction > 0.249.
 	self assert: moving position equals: 0 @ 0.
 	result commitBodyStates.
-	self assert: (moving position closeTo: 10 @ 0).
+	self assert: (moving position closeTo: 9.995 @ 0).
 	self assert: (moving velocity closeTo: 40 @ 0).
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
@@ -4719,8 +4721,8 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrd
 	self assert: result continuousStepResult impacts first pair firstBody equals: firstMoving.
 	self assert: result continuousStepResult impacts second pair firstBody equals: secondMoving.
 	result commitBodyStates.
-	self assert: (firstMoving position closeTo: 10 @ 0).
-	self assert: (secondMoving position closeTo: 20 @ 100).
+	self assert: (firstMoving position closeTo: 9.995 @ 0).
+	self assert: (secondMoving position closeTo: 19.995 @ 100).
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
@@ -4959,7 +4961,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	result commitBodyStates.
-	self assert: (moving position closeTo: 10 @ 0).
+	self assert: (moving position closeTo: 9.995 @ 0).
 	^ result
 ]
 
@@ -4997,7 +4999,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	result commitBodyStates.
-	self assert: (moving position closeTo: 50 @ 0).
+	self assert: (moving position closeTo: 49.995 @ 0).
 	^ result
 ]
 
