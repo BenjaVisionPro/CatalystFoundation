@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsProfileElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'startedRecording', 'statusLabel', 'tabs', 'pipeline', 'health' ],
+	#instVars : [ 'world', 'startedRecording', 'recordingStartedMilliseconds', 'statusLabel', 'tabs', 'pipeline', 'health', 'telemetryUpdatesStream' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -19,6 +19,7 @@ CFPhysicsProfileElement class >> world: aWorld [
 CFPhysicsProfileElement >> initialize [
 	super initialize.
 	startedRecording := false.
+	recordingStartedMilliseconds := nil.
 	self
 		hMatchParent;
 		vMatchParent;
@@ -28,7 +29,14 @@ CFPhysicsProfileElement >> initialize [
 
 { #category : 'accessing' }
 CFPhysicsProfileElement >> world: aWorld [
-	world := aWorld
+	world := aWorld.
+	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink peek ifSome: [ anElement updateStatus ] ];
+			forwardStream: telemetryUpdatesStream ]
 ]
 
 { #category : 'building' }
@@ -103,6 +111,7 @@ CFPhysicsProfileElement >> startProfiling [
 	world resetTelemetry.
 	world telemetryEnabled: true.
 	health startProfiling.
+	recordingStartedMilliseconds := Time millisecondClockValue.
 	startedRecording := true.
 	self updateStatus
 ]
@@ -112,6 +121,8 @@ CFPhysicsProfileElement >> stopProfiling [
 	world telemetryEnabled: false.
 	health stopProfiling.
 	startedRecording := false.
+	recordingStartedMilliseconds := nil.
+	recordingStartedMilliseconds := nil.
 	self updateStatus
 ]
 
@@ -119,8 +130,25 @@ CFPhysicsProfileElement >> stopProfiling [
 CFPhysicsProfileElement >> updateStatus [
 	statusLabel ifNil: [ ^ self ].
 	statusLabel text: (world telemetryEnabled
-		ifTrue: [ 'Recording' ]
+		ifTrue: [ 'Recording ', self recordingElapsedString ]
 		ifFalse: [ 'Stopped' ])
+]
+
+{ #category : 'private - updating' }
+CFPhysicsProfileElement >> recordingElapsedString [
+	| elapsedSeconds hours minutes seconds |
+	recordingStartedMilliseconds ifNil: [ ^ '00:00:00' ].
+	elapsedSeconds := (Time millisecondClockValue - recordingStartedMilliseconds) // 1000.
+	hours := elapsedSeconds // 3600.
+	minutes := (elapsedSeconds \ 3600) // 60.
+	seconds := elapsedSeconds \ 60.
+	^ String streamContents: [ :stream |
+		stream
+			nextPutAll: (hours printString padded: #left to: 2 with: $0);
+			nextPut: $:;
+			nextPutAll: (minutes printString padded: #left to: 2 with: $0);
+			nextPut: $:;
+			nextPutAll: (seconds printString padded: #left to: 2 with: $0) ]
 ]
 
 { #category : 'hooks - scene graph' }
