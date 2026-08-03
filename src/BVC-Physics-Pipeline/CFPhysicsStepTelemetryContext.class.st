@@ -57,8 +57,8 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #stepNumber put: step stepNumber;
 		at: #simulationTime put: step simulationTime + step timeStep;
 		at: #bodyCount put: bodyCount;
-		at: #activeBodyCount put: (bodyStates count: #isAwake);
-		at: #sleepingBodyCount put: (bodyStates count: [ :each | each isAwake not ]);
+		at: #activeBodyCount put: (dynamicBodyStates count: #isAwake);
+		at: #sleepingBodyCount put: (dynamicBodyStates count: [ :each | each isAwake not ]);
 		at: #sleepAllowedBodyCount put: (dynamicBodyStates count: #allowsSleeping);
 		at: #sleepMotionAcceptedBodyCount put: (dynamicBodyStates count: [ :each |
 			each allowsSleeping and: [ sleepConfiguration acceptsStepState: each elapsed: step timeStep ] ]);
