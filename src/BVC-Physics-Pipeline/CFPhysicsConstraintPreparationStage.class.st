@@ -149,7 +149,7 @@ CFPhysicsConstraintPreparationStage >> reusablePointCountFor: contact [
 	| previous current |
 	previous := contact previousManifold.
 	current := contact manifold.
-	(previous isNil or: [ (current hasCompatibleNormalWith: previous) not ]) ifTrue: [ ^ 0 ].
+	previous ifNil: [ ^ 0 ].
 	^ current contactPoints count: [ :point |
 		point featureId notNil and: [
 			previous contactPoints anySatisfy: [ :oldPoint |

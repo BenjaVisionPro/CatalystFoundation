@@ -66,7 +66,6 @@ CFPhysicsManifold >> clearImpulses [
 CFPhysicsManifold >> preserveImpulsesFrom: anOldManifold [
 	anOldManifold ifNil: [ ^ self ].
 	rollingImpulse := anOldManifold rollingImpulse.
-	(self hasCompatibleNormalWith: anOldManifold) ifFalse: [ ^ self ].
 	contactPoints do: [ :point |
 		point featureId ifNotNil: [ :featureId |
 			anOldManifold contactPoints
