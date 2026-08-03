@@ -5,7 +5,7 @@ I represent one body's mutable state during a simulation step. I isolate solver 
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet' ],
+	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepThreshold', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -36,6 +36,9 @@ CFPhysicsBodyStepState >> capture [
 	tangentSpeed := body tangentSpeed.
 	awake := body isAwake.
 	sleepingAllowed := body allowsSleeping.
+	sleepThreshold := body world
+		ifNil: [ body sleepThreshold * 100.0 ]
+		ifNotNil: [ :aWorld | aWorld lengthUnitsForMetres: body sleepThreshold ].
 	sleepTime := body sleepTime.
 	collisionCategoryBits := body collisionCategoryBits.
 	collisionMaskBits := body collisionMaskBits.
@@ -247,6 +250,20 @@ CFPhysicsBodyStepState >> isFastForContinuousCollision [
 
 { #category : 'sleeping' }
 CFPhysicsBodyStepState >> allowsSleeping [ ^ sleepingAllowed ]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> sleepThreshold [ ^ sleepThreshold ]
+
+{ #category : 'sleeping' }
+CFPhysicsBodyStepState >> sleepVelocityForElapsed: seconds positionCorrectionFactor: aFactor [
+	| maximumVelocity maximumCorrection |
+	maximumVelocity := linearVelocity r
+		+ (angularVelocity abs * shapeState boundingRadius).
+	seconds <= 0.0 ifTrue: [ ^ maximumVelocity ].
+	maximumCorrection := deltaPosition r
+		+ (deltaRotation sin abs * shapeState boundingRadius).
+	^ maximumVelocity max: aFactor * maximumCorrection / seconds
+]
 
 { #category : 'sleeping' }
 CFPhysicsBodyStepState >> sleepTime [ ^ sleepTime ]

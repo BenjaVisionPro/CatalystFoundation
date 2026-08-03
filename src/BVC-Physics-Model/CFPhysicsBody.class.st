@@ -6,7 +6,7 @@ My responsibility is to own an element's physical state, material, shape and par
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'bullet' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -208,6 +208,7 @@ CFPhysicsBody >> initialize [
 	angularDamping := 0.0.
 	gravityScale := 1.0.
 	sleepingAllowed := true.
+	sleepThreshold := 0.05.
 	bullet := false.
 	contacts := IdentitySet new
 ]
@@ -363,6 +364,17 @@ CFPhysicsBody >> allowsSleeping [
 { #category : 'sleeping' }
 CFPhysicsBody >> allowSleeping [
 	sleepingAllowed := true
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBody >> sleepThreshold [
+	"Sleep speed threshold in metres per second. Box2D 3.1.1 defaults this to 0.05 m/s."
+	^ sleepThreshold
+]
+
+{ #category : 'sleeping' }
+CFPhysicsBody >> sleepThreshold: aNumber [
+	sleepThreshold := aNumber asFloat max: 0.0
 ]
 
 { #category : 'sleeping' }

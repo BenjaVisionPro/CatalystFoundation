@@ -303,6 +303,16 @@ CFPhysics >> allowSleeping [
 ]
 
 { #category : 'sleeping' }
+CFPhysics >> sleepThreshold [
+	^ self body sleepThreshold
+]
+
+{ #category : 'sleeping' }
+CFPhysics >> sleepThreshold: aNumber [
+	self body sleepThreshold: aNumber
+]
+
+{ #category : 'sleeping' }
 CFPhysics >> preventSleeping [
 	self body preventSleeping
 ]

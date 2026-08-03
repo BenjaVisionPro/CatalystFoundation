@@ -982,8 +982,6 @@ CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
 		addBody: second;
 		yourself.
 	configuration := CFPhysicsSleepConfiguration standard
-		linearVelocityThreshold: 1.0;
-		angularVelocityThreshold: 1.0;
 		timeToSleep: 0.02;
 		yourself.
 	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
@@ -1054,8 +1052,6 @@ CFPhysicsCleanSlateTests >> positionCorrectionKeepsAnIslandAwake [
 	body := self cleanSlateBodyWithSequence: 1.
 	island := CFPhysicsIsland new addBody: body; yourself.
 	configuration := CFPhysicsSleepConfiguration standard
-		linearVelocityThreshold: 1.0;
-		angularVelocityThreshold: 1.0;
 		timeToSleep: 0.01;
 		yourself.
 	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
@@ -1079,8 +1075,6 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 	body := self cleanSlateBodyWithSequence: 1.
 	island := CFPhysicsIsland new addBody: body; yourself.
 	configuration := CFPhysicsSleepConfiguration standard
-		linearVelocityThreshold: 1.0;
-		angularVelocityThreshold: 1.0;
 		timeToSleep: 1.0;
 		yourself.
 	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.
@@ -1100,6 +1094,55 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 	^ decision
 ]
 
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> sleepVelocityIncludesBodyExtent [
+	<gtExample>
+	| smallBody largeBody smallState largeState smallExtentVelocity largeExtentVelocity |
+	smallBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	largeBody := self cleanSlateBodyWithSequence: 2 position: 0 @ 0 extent: 200 @ 200.
+	smallState := CFPhysicsBodyStepState on: smallBody.
+	largeState := CFPhysicsBodyStepState on: largeBody.
+	smallState angularVelocity: 1.0.
+	largeState angularVelocity: 1.0.
+	smallExtentVelocity := smallState
+		sleepVelocityForElapsed: 0.02
+		positionCorrectionFactor: 0.5.
+	largeExtentVelocity := largeState
+		sleepVelocityForElapsed: 0.02
+		positionCorrectionFactor: 0.5.
+	self assert: largeExtentVelocity > smallExtentVelocity.
+	^ largeExtentVelocity
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> sleepVelocityUsesBox2DPositionCorrectionFormula [
+	<gtExample>
+	| body state expected actual |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	state := CFPhysicsBodyStepState on: body.
+	state translateBy: 0.02 @ 0.
+	expected := 0.5 * 0.02 / 0.02.
+	actual := state
+		sleepVelocityForElapsed: 0.02
+		positionCorrectionFactor: 0.5.
+	self assert: (actual closeTo: expected).
+	^ actual
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> bodySleepThresholdUsesWorldScale [
+	<gtExample>
+	| world body state |
+	world := self cleanSlateWorld.
+	world lengthUnitsPerMetre: 200.0.
+	body := self cleanSlateBodyWithSequence: 1.
+	body world: world.
+	body sleepThreshold: 0.05.
+	state := CFPhysicsBodyStepState on: body.
+	self assert: (state sleepThreshold closeTo: 10.0).
+	^ state
+]
 
 { #category : 'examples - island sleeping' }
 CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
@@ -1180,8 +1223,6 @@ CFPhysicsCleanSlateTests >> bodyThatPreventsSleepingKeepsItsIslandAwake [
 		addBody: second;
 		yourself.
 	configuration := CFPhysicsSleepConfiguration standard
-		linearVelocityThreshold: 1.0;
-		angularVelocityThreshold: 1.0;
 		timeToSleep: 0.01;
 		yourself.
 	stage := CFPhysicsIslandSleepStage new configuration: configuration; yourself.

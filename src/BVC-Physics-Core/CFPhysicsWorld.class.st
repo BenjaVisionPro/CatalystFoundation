@@ -830,18 +830,6 @@ CFPhysicsWorld >> sleepConfiguration [ ^ stepPipeline sleepConfiguration ]
 CFPhysicsWorld >> sleepConfiguration: aConfiguration [ stepPipeline sleepConfiguration: aConfiguration ]
 
 { #category : 'sleeping' }
-CFPhysicsWorld >> linearSleepVelocityThreshold [ ^ self sleepConfiguration linearVelocityThreshold ]
-
-{ #category : 'sleeping' }
-CFPhysicsWorld >> linearSleepVelocityThreshold: aNumber [ self sleepConfiguration linearVelocityThreshold: aNumber ]
-
-{ #category : 'sleeping' }
-CFPhysicsWorld >> angularSleepVelocityThreshold [ ^ self sleepConfiguration angularVelocityThreshold ]
-
-{ #category : 'sleeping' }
-CFPhysicsWorld >> angularSleepVelocityThreshold: aNumber [ self sleepConfiguration angularVelocityThreshold: aNumber ]
-
-{ #category : 'sleeping' }
 CFPhysicsWorld >> timeToSleep [ ^ self sleepConfiguration timeToSleep ]
 
 { #category : 'sleeping' }
