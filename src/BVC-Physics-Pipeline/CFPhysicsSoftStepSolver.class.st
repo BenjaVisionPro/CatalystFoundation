@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'contactConstraints', 'orderedJointConstraints', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -34,11 +34,18 @@ CFPhysicsSoftStepSolver >> initialize [
 	revoluteJointConstraintCount := 0.
 	weldJointConstraintCount := 0.
 	mouseJointConstraintCount := 0.
-	motorJointConstraintCount := 0
+	motorJointConstraintCount := 0.
+	maximumInitialContactPenetration := 0.0.
+	maximumFinalContactPenetration := 0.0.
+	averageFinalContactPenetration := 0.0.
+	maximumBodyTranslation := 0.0.
+	totalNormalImpulse := 0.0.
+	totalTangentImpulse := 0.0
 ]
 
 { #category : 'solving' }
 CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
+	maximumInitialContactPenetration := self maximumContactPenetration.
 	self warmStart.
 	step substepCount timesRepeat: [
 		self solveContactsWithBias: true.
@@ -47,8 +54,56 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		self solveContactsWithBias: false.
 		self solveJointConstraintsWithBias: false ].
 	self applyRestitutionWithThreshold: restitutionThreshold.
+	maximumFinalContactPenetration := self maximumContactPenetration.
+	averageFinalContactPenetration := self averageContactPenetration.
+	maximumBodyTranslation := bodyStates
+		ifEmpty: [ 0.0 ]
+		ifNotEmpty: [ (bodyStates collect: [ :state | state deltaPosition r ]) max ].
+	totalNormalImpulse := contactConstraints
+		inject: 0.0
+		into: [ :total :constraint | total + (constraint points inject: 0.0 into: [ :pointTotal :point | pointTotal + point normalImpulse ]) ].
+	totalTangentImpulse := contactConstraints
+		inject: 0.0
+		into: [ :total :constraint | total + (constraint points inject: 0.0 into: [ :pointTotal :point | pointTotal + point tangentImpulse abs ]) ].
 	contactConstraints do: [ :constraint | constraint writeImpulsesBack ]
 ]
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsSoftStepSolver >> maximumContactPenetration [
+	| maximum |
+	maximum := 0.0.
+	contactConstraints do: [ :constraint |
+		constraint points do: [ :point |
+			maximum := maximum max: (self contactSeparationAt: point constraint: constraint) negated ] ].
+	^ maximum max: 0.0
+]
+
+{ #category : 'private - telemetry' }
+CFPhysicsSoftStepSolver >> averageContactPenetration [
+	| total count penetration |
+	total := 0.0.
+	count := 0.
+	contactConstraints do: [ :constraint |
+		constraint points do: [ :point |
+			penetration := (self contactSeparationAt: point constraint: constraint) negated max: 0.0.
+		total := total + penetration.
+		count := count + 1 ] ].
+	^ count = 0 ifTrue: [ 0.0 ] ifFalse: [ total / count ]
+]
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> maximumInitialContactPenetration [ ^ maximumInitialContactPenetration ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> maximumFinalContactPenetration [ ^ maximumFinalContactPenetration ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> averageFinalContactPenetration [ ^ averageFinalContactPenetration ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> maximumBodyTranslation [ ^ maximumBodyTranslation ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> totalNormalImpulse [ ^ totalNormalImpulse ]
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> totalTangentImpulse [ ^ totalTangentImpulse ]
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> warmStart [

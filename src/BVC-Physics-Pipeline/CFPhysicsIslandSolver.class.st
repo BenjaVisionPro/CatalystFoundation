@@ -73,3 +73,29 @@ CFPhysicsIslandSolver >> prismaticJointConstraintCount [ ^ softStepSolvers injec
 CFPhysicsIslandSolver >> revoluteJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver revoluteJointConstraintCount ] ]
 { #category : 'accessing - telemetry' }
 CFPhysicsIslandSolver >> weldJointConstraintCount [ ^ softStepSolvers inject: 0 into: [ :total :solver | total + solver weldJointConstraintCount ] ]
+
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> maximumInitialContactPenetration [
+	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumInitialContactPenetration) max ]
+]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> maximumFinalContactPenetration [
+	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumFinalContactPenetration) max ]
+]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> averageFinalContactPenetration [
+	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers inject: 0.0 into: [ :total :solver | total + solver averageFinalContactPenetration ]) / softStepSolvers size ]
+]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> maximumBodyTranslation [
+	^ softStepSolvers ifEmpty: [ 0.0 ] ifNotEmpty: [ (softStepSolvers collect: #maximumBodyTranslation) max ]
+]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> totalNormalImpulse [
+	^ softStepSolvers inject: 0.0 into: [ :total :solver | total + solver totalNormalImpulse ]
+]
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> totalTangentImpulse [
+	^ softStepSolvers inject: 0.0 into: [ :total :solver | total + solver totalTangentImpulse ]
+]

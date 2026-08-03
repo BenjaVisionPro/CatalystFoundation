@@ -126,6 +126,12 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #solverContactPointCount put: result solver contactPointCount;
 		at: #solverWarmStartedContactPointCount put: result solver warmStartedContactPointCount;
 		at: #solverRestitutionCandidatePointCount put: result solver restitutionCandidatePointCount;
+		at: #solverMaximumInitialContactPenetration put: result solver maximumInitialContactPenetration;
+		at: #solverMaximumFinalContactPenetration put: result solver maximumFinalContactPenetration;
+		at: #solverAverageFinalContactPenetration put: result solver averageFinalContactPenetration;
+		at: #solverMaximumBodyTranslation put: result solver maximumBodyTranslation;
+		at: #solverTotalNormalImpulse put: result solver totalNormalImpulse;
+		at: #solverTotalTangentImpulse put: result solver totalTangentImpulse;
 		at: #solverJointConstraintCount put: result solver jointConstraintCount;
 		at: #solverDistanceJointConstraintCount put: result solver distanceJointConstraintCount;
 		at: #solverPrismaticJointConstraintCount put: result solver prismaticJointConstraintCount;

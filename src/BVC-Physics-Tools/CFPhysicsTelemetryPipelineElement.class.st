@@ -17,6 +17,7 @@ Class {
 		'bodiesSummaryLabel',
 		'sleepSummaryLabel',
 		'worstBodySummaryLabel',
+		'solverSummaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -83,6 +84,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	bodiesSummaryLabel := self profileSummaryLabel.
 	sleepSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
+	solverSummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
 		addChild: manifoldsSummaryLabel;
@@ -90,7 +92,8 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: changesSummaryLabel;
 		addChild: bodiesSummaryLabel;
 		addChild: sleepSummaryLabel;
-		addChild: worstBodySummaryLabel.
+		addChild: worstBodySummaryLabel;
+		addChild: solverSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
@@ -244,7 +247,21 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: ' s   Impulses N/T ';
 			nextPutAll: ((data at: #worstSleepNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPut: $/;
-			nextPutAll: ((data at: #worstSleepTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ])
+			nextPutAll: ((data at: #worstSleepTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
+	solverSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Solver       Penetration initial/final/avg ';
+			nextPutAll: ((data at: #solverMaximumInitialContactPenetration ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverMaximumFinalContactPenetration ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverAverageFinalContactPenetration ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Max translation ';
+			nextPutAll: ((data at: #solverMaximumBodyTranslation ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Impulses N/T ';
+			nextPutAll: ((data at: #solverTotalNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPut: $/;
+			nextPutAll: ((data at: #solverTotalTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ])
 ]
 
 { #category : 'private - building' }

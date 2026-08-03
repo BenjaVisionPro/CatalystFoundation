@@ -718,6 +718,12 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #solverContactPointCount put: aStepResult solver contactPointCount;
 		at: #solverWarmStartedContactPointCount put: aStepResult solver warmStartedContactPointCount;
 		at: #solverRestitutionCandidatePointCount put: aStepResult solver restitutionCandidatePointCount;
+		at: #solverMaximumInitialContactPenetration put: aStepResult solver maximumInitialContactPenetration;
+		at: #solverMaximumFinalContactPenetration put: aStepResult solver maximumFinalContactPenetration;
+		at: #solverAverageFinalContactPenetration put: aStepResult solver averageFinalContactPenetration;
+		at: #solverMaximumBodyTranslation put: aStepResult solver maximumBodyTranslation;
+		at: #solverTotalNormalImpulse put: aStepResult solver totalNormalImpulse;
+		at: #solverTotalTangentImpulse put: aStepResult solver totalTangentImpulse;
 		at: #solverJointConstraintCount put: aStepResult solver jointConstraintCount;
 		at: #solverDistanceJointConstraintCount put: aStepResult solver distanceJointConstraintCount;
 		at: #solverPrismaticJointConstraintCount put: aStepResult solver prismaticJointConstraintCount;
