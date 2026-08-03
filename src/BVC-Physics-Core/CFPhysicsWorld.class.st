@@ -623,7 +623,7 @@ CFPhysicsWorld >> stepRecordingTelemetry [
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 	| solvedIslands dynamicBodyStates sleepConfiguration step sleepVelocities sleepThresholdRatios |
-	dynamicBodyStates := bodyStates values select: [ :each | each bodyType isDynamic ].
+	dynamicBodyStates := aStepResult bodyStates values select: [ :each | each bodyType isDynamic ].
 	step := aStepResult step.
 	sleepConfiguration := stepPipeline sleepConfiguration.
 	sleepVelocities := dynamicBodyStates collect: [ :each |
