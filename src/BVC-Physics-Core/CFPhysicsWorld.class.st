@@ -626,6 +626,9 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #activeBodyCount put: (bodyStates values count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates values count: [ :each | each isAwake not ]);
 		at: #contactCount put: activeContacts size;
+		at: #beganContactCount put: aStepResult beganContacts size;
+		at: #continuedContactCount put: aStepResult continuedContacts size;
+		at: #endedContactCount put: aStepResult endedContacts size;
 		at: #pairFinderEntryCount put: self pairFinderMeasurements entryCount;
 		at: #pairFinderComparisonCount put: self pairFinderMeasurements comparisonCount;
 		at: #pairFinderAcceptedPairCount put: self pairFinderMeasurements acceptedPairCount;

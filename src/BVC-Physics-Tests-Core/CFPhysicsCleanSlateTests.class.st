@@ -6948,6 +6948,9 @@ CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
 		assert: (run valuesAt: #stepNumber)
 		equals: (initialStepNumber + 3 to: initialStepNumber + 5) asArray.
 	self assert: run analysis sampleCount equals: 3.
+	self assert: (run valuesAt: #beganContactCount) size equals: 3.
+	self assert: (run valuesAt: #continuedContactCount) size equals: 3.
+	self assert: (run valuesAt: #endedContactCount) size equals: 3.
 	self assert: world telemetryEnabled not.
 	^ run
 ]

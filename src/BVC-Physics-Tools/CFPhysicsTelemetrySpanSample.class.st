@@ -98,6 +98,15 @@ CFPhysicsTelemetrySpanSample >> contactCount [
 	^ data ifNil: [ nil ] ifNotNil: [ data at: #contactCount ifAbsent: [ nil ] ]
 ]
 
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> beganContactCount [ ^ self physicsDataAt: #beganContactCount ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> continuedContactCount [ ^ self physicsDataAt: #continuedContactCount ]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> endedContactCount [ ^ self physicsDataAt: #endedContactCount ]
+
 { #category : 'private - accessing' }
 CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
 	| data |
@@ -232,6 +241,9 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 			'End (ms)' -> self endMilliseconds.
 			'Bodies' -> self bodyCount.
 			'Contacts' -> self contactCount.
+			'Contacts began' -> self beganContactCount.
+			'Contacts continued' -> self continuedContactCount.
+			'Contacts ended' -> self endedContactCount.
 			'Pair finder entries' -> self pairFinderEntryCount.
 			'Pair finder comparisons' -> self pairFinderComparisonCount.
 			'Pair finder accepted pairs' -> self pairFinderAcceptedPairCount.
