@@ -4046,6 +4046,7 @@ CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
 	world owner addChild: element.
 	element physics
 		beDynamic;
+		position: 1000 @ 1000;
 		velocity: 100 @ 0;
 		linearDamping: 1.0.
 	body := element physics body.
