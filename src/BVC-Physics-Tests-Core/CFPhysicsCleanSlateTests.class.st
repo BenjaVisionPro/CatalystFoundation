@@ -441,8 +441,34 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 	self assert: point featureId equals: manifold contactPoints first featureId.
 	self assert: point normalMass > 0.0.
 	self assert: point tangentMass > 0.0.
-	self assert: (point baseSeparation closeTo: -1.0).
+	self assert: (point baseSeparation closeTo: 4.0).
 	^ constraint
+]
+
+
+{ #category : 'examples - constraints' }
+CFPhysicsCleanSlateTests >> constraintBuilderBaseSeparationMatchesBox2DAnchorDecomposition [
+	<gtExample>
+	| first second pair manifold contact bodyStates constraint point expected |
+	first := self cleanSlateBodyWithSequence: 1.
+	first beStatic.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	contact := CFPhysicsContact pair: pair manifold: manifold.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	constraint := (CFPhysicsConstraintBuilder new
+		constraintsFrom: { contact }
+		bodyStates: bodyStates) first.
+	point := constraint points first.
+	expected := manifold contactPoints first separation
+		- ((point anchorB - point anchorA) dotProduct: constraint normal).
+	self assert: (point baseSeparation closeTo: expected).
+	self assert: (point baseSeparation closeTo: 4.0).
+	^ point
 ]
 
 { #category : 'examples - constraints' }
