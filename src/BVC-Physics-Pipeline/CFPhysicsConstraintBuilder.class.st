@@ -1,5 +1,5 @@
 "
-I build prepared contact constraints from active contacts and step-local body states. I also reuse constraint and point objects to reduce allocation during stepping.
+I build step-local prepared contact constraints from active contacts and captured body states.
 "
 
 Class {
@@ -44,16 +44,11 @@ CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
 
 { #category : 'private - building' }
 CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
-	| normal tangent constraint previousPoints rollingDenominator maximumRadius |
+	| normal tangent constraint rollingDenominator maximumRadius |
 	normal := contact manifold normal.
 	tangent := normal y @ normal x negated.
-	constraint := contact preparedConstraint.
-	constraint
-		ifNil: [
-			constraint := CFPhysicsPreparedConstraint new.
-			createdConstraintCount := createdConstraintCount + 1 ]
-		ifNotNil: [ reusedConstraintCount := reusedConstraintCount + 1 ].
-	previousPoints := constraint points ifNil: [ #() ].
+	constraint := CFPhysicsPreparedConstraint new.
+	createdConstraintCount := createdConstraintCount + 1.
 	rollingDenominator := stateA inverseInertia + stateB inverseInertia.
 	maximumRadius := stateA shapeState rollingResistanceRadius max: stateB shapeState rollingResistanceRadius.
 	constraint
@@ -70,33 +65,27 @@ CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodySta
 		tangentSpeed: stateA tangentSpeed + stateB tangentSpeed.
 	constraint points: (self
 		pointsFrom: contact manifold contactPoints
-		previousPoints: previousPoints
 		contact: contact
 		bodyStateA: stateA
 		bodyStateB: stateB
 		normal: normal
 		tangent: tangent
 		warmStartRatio: warmStartRatio).
-	contact preparedConstraint: constraint.
 	^ constraint
 ]
 
 { #category : 'private - building' }
-CFPhysicsConstraintBuilder >> pointsFrom: manifoldPoints previousPoints: previousPoints contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
-	| result index reusablePoint |
+CFPhysicsConstraintBuilder >> pointsFrom: manifoldPoints contact: contact bodyStateA: stateA bodyStateB: stateB normal: normal tangent: tangent warmStartRatio: warmStartRatio [
+	| result index point |
 	result := Array new: manifoldPoints size.
 	index := 1.
 	manifoldPoints do: [ :manifoldPoint |
-		reusablePoint := self reusablePointFor: manifoldPoint among: previousPoints contact: contact.
-		reusablePoint
-			ifNil: [
-				reusablePoint := CFPhysicsConstraintPoint new.
-				createdPointCount := createdPointCount + 1 ]
-			ifNotNil: [ reusedPointCount := reusedPointCount + 1 ].
+		point := CFPhysicsConstraintPoint new.
+		createdPointCount := createdPointCount + 1.
 		result
 			at: index
 			put: (self
-				updatePoint: reusablePoint
+				updatePoint: point
 				from: manifoldPoint
 				contact: contact
 				bodyStateA: stateA
@@ -106,16 +95,6 @@ CFPhysicsConstraintBuilder >> pointsFrom: manifoldPoints previousPoints: previou
 				warmStartRatio: warmStartRatio).
 		index := index + 1 ].
 	^ result
-]
-
-{ #category : 'private - building' }
-CFPhysicsConstraintBuilder >> reusablePointFor: manifoldPoint among: previousPoints contact: contact [
-	manifoldPoint featureId ifNil: [ ^ nil ].
-	(contact previousManifold isNil or: [
-		(contact manifold hasCompatibleNormalWith: contact previousManifold) not ]) ifTrue: [ ^ nil ].
-	^ previousPoints
-		detect: [ :point | point featureId = manifoldPoint featureId ]
-		ifNone: [ nil ]
 ]
 
 { #category : 'private - building' }

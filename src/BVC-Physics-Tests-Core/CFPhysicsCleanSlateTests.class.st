@@ -789,43 +789,33 @@ CFPhysicsCleanSlateTests >> worldCarriesActiveContactsExplicitlyBetweenSteps [
 ]
 
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> persistentContactStorageAlternatesBetweenTwoGenerations [
+CFPhysicsCleanSlateTests >> preparedContactConstraintsAreStepLocal [
 	<gtExample>
-	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint thirdContact fourthContact |
+	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	firstContact := world activeContacts first.
-	firstConstraint := firstContact preparedConstraint.
+	firstConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	firstPoint := firstConstraint points first.
 	world step.
 	secondContact := world activeContacts first.
-	secondConstraint := secondContact preparedConstraint.
+	secondConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	secondPoint := secondConstraint points first.
 	self assert: secondContact ~~ firstContact.
 	self assert: secondConstraint ~~ firstConstraint.
 	self assert: secondPoint ~~ firstPoint.
-	world step.
-	thirdContact := world activeContacts first.
-	self assert: thirdContact == firstContact.
-	self assert: thirdContact preparedConstraint == firstConstraint.
-	self assert: thirdContact preparedConstraint points first == firstPoint.
-	world step.
-	fourthContact := world activeContacts first.
-	self assert: fourthContact == secondContact.
-	self assert: fourthContact preparedConstraint == secondConstraint.
-	self assert: fourthContact preparedConstraint points first == secondPoint.
-	^ fourthContact
+	self assert: firstConstraint contact == firstContact.
+	self assert: secondConstraint contact == secondContact.
+	^ secondConstraint
 ]
 
-
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> disappearingContactReusesItsGenerationWhenItReturns [
+CFPhysicsCleanSlateTests >> returningContactBuildsFreshPreparedConstraint [
 	<gtExample>
-	| world movingBody contact constraint point returnedContact returnedPoint returnedManifoldPoint |
+	| world movingBody contact constraint returnedContact returnedConstraint returnedPoint returnedManifoldPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	movingBody := world bodyStatesInOrder second.
 	contact := world activeContacts first.
-	constraint := contact preparedConstraint.
-	point := constraint points first.
+	constraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	movingBody position: 20 @ 100.
 	world step.
 	self assert: world activeContacts isEmpty.
@@ -833,11 +823,12 @@ CFPhysicsCleanSlateTests >> disappearingContactReusesItsGenerationWhenItReturns 
 	world step.
 	self assert: world activeContacts size equals: 1.
 	returnedContact := world activeContacts first.
-	returnedPoint := returnedContact preparedConstraint points first.
+	returnedConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	returnedPoint := returnedConstraint points first.
 	returnedManifoldPoint := returnedContact manifold contactPoints first.
 	self assert: returnedContact == contact.
-	self assert: returnedContact preparedConstraint == constraint.
-	self assert: returnedPoint ~~ point.
+	self assert: returnedConstraint ~~ constraint.
+	self assert: returnedConstraint contact == returnedContact.
 	self assert: returnedPoint manifoldPoint == returnedManifoldPoint.
 	self assert: returnedPoint featureId equals: returnedManifoldPoint featureId.
 	self assert: returnedPoint normalImpulse equals: returnedManifoldPoint normalImpulse.
@@ -5425,7 +5416,7 @@ CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
 
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderReusesPreparedContactObjects [
+CFPhysicsCleanSlateTests >> constraintBuilderCreatesStepLocalPreparedContactObjects [
 	<gtExample>
 	| first second pair updater firstBatch secondBatch bodyStates builder firstConstraint secondConstraint firstPoint secondPoint |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -5443,19 +5434,19 @@ CFPhysicsCleanSlateTests >> constraintBuilderReusesPreparedContactObjects [
 		constraintsFrom: firstBatch activeContacts
 		bodyStates: bodyStates) first.
 	firstPoint := firstConstraint points first.
-	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
+	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch contacts.
 	secondConstraint := (builder
 		constraintsFrom: secondBatch activeContacts
 		bodyStates: bodyStates) first.
 	secondPoint := secondConstraint points first.
-	self assert: secondConstraint == firstConstraint.
-	self assert: secondPoint == firstPoint.
+	self assert: secondConstraint ~~ firstConstraint.
+	self assert: secondPoint ~~ firstPoint.
 	self assert: secondConstraint contact == secondBatch activeContacts first.
 	self assert: secondPoint manifoldPoint == secondBatch activeContacts first manifold contactPoints first.
-	self assert: builder createdConstraintCount equals: 0.
-	self assert: builder reusedConstraintCount equals: 1.
-	self assert: builder createdPointCount equals: 0.
-	self assert: builder reusedPointCount equals: 1.
+	self assert: builder createdConstraintCount equals: 1.
+	self assert: builder reusedConstraintCount equals: 0.
+	self assert: builder createdPointCount equals: 1.
+	self assert: builder reusedPointCount equals: 0.
 	^ secondConstraint
 ]
 
@@ -5608,48 +5599,41 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> solvingCapturedStateDoesNotRetargetCommittedPreparedConstraint [
+CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentPreparedConstraint [
 	<gtExample>
-	| world committedContact committedConstraint state solution calculationContact calculationConstraint |
+	| world committedContact committedManifold state solution calculationContact calculationConstraint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	committedContact := world activeContacts first.
-	committedConstraint := committedContact preparedConstraint.
-	self assert: committedConstraint notNil.
-	self assert: committedConstraint contact == committedContact.
+	committedManifold := committedContact manifold.
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
-	calculationConstraint := calculationContact preparedConstraint.
+	calculationConstraint := (solution pipelineResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	self assert: world activeContacts first == committedContact.
-	self assert: committedContact preparedConstraint == committedConstraint.
-	self assert: committedConstraint contact == committedContact.
+	self assert: committedContact manifold == committedManifold.
 	self assert: calculationContact ~~ committedContact.
-	self assert: calculationConstraint ~~ committedConstraint.
+	self assert: calculationConstraint contact == calculationContact.
 	^ solution
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> solvingCapturedStateDoesNotRetargetCommittedConstraintPoint [
+CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentConstraintPoint [
 	<gtExample>
-	| world committedContact committedConstraint committedPoint committedManifoldPoint state solution calculationContact calculationPoint |
+	| world committedContact committedManifoldPoint state solution calculationContact calculationConstraint calculationPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	committedContact := world activeContacts first.
-	committedConstraint := committedContact preparedConstraint.
-	committedPoint := committedConstraint points first.
 	committedManifoldPoint := committedContact manifold contactPoints first.
-	self assert: committedPoint manifoldPoint == committedManifoldPoint.
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
-	calculationPoint := calculationContact preparedConstraint points first.
+	calculationConstraint := (solution pipelineResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	calculationPoint := calculationConstraint points first.
 	self assert: world activeContacts first == committedContact.
-	self assert: committedConstraint points first == committedPoint.
-	self assert: committedPoint manifoldPoint == committedManifoldPoint.
-	self assert: calculationPoint ~~ committedPoint.
+	self assert: committedContact manifold contactPoints first == committedManifoldPoint.
 	self assert: calculationPoint manifoldPoint == calculationContact manifold contactPoints first.
+	self assert: calculationPoint manifoldPoint ~~ committedManifoldPoint.
 	^ solution
 ]
-
 
 { #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> worldSolutionCarriesCommitIdentity [

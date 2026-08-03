@@ -1,12 +1,12 @@
 "
 I represent the persistent contact relationship between a pair of bodies.
 
-I retain the current and previous manifolds, prepared solver state and shape snapshots needed to classify and continue the contact across steps.
+I retain the current and previous manifolds and shape snapshots needed to classify and continue the contact across steps.
 "
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',
-	#instVars : [ 'pair', 'manifold', 'previousManifold', 'preparedConstraint', 'firstShapeState', 'secondShapeState' ],
+	#instVars : [ 'pair', 'manifold', 'previousManifold', 'firstShapeState', 'secondShapeState' ],
 	#category : 'BVC-Physics-Collision',
 	#package : 'BVC-Physics-Collision'
 }
@@ -40,11 +40,6 @@ CFPhysicsContact >> manifold: aManifold [ manifold := aManifold ]
 { #category : 'accessing' }
 CFPhysicsContact >> previousManifold [ ^ previousManifold ]
 
-{ #category : 'accessing' }
-CFPhysicsContact >> preparedConstraint [ ^ preparedConstraint ]
-
-{ #category : 'accessing' }
-CFPhysicsContact >> preparedConstraint: anObject [ preparedConstraint := anObject ]
 
 { #category : 'accessing' }
 CFPhysicsContact >> shapeStatesFromBodyStates: bodyStates [
@@ -90,7 +85,6 @@ CFPhysicsContact >> copyForUpdate [
 	^ self class new
 		pair: pair;
 		manifold: manifold;
-		preparedConstraint: preparedConstraint;
 		firstShapeState: firstShapeState;
 		secondShapeState: secondShapeState;
 		yourself
