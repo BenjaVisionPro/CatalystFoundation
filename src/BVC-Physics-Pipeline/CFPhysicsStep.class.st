@@ -5,7 +5,7 @@ I describe the numerical configuration and identity of one simulation step. I de
 Class {
 	#name : 'CFPhysicsStep',
 	#superclass : 'Object',
-	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'maximumContactPushSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
+	#instVars : [ 'timeStep', 'substepCount', 'substepTime', 'inverseSubstepTime', 'contactHertz', 'contactDampingRatio', 'biasRate', 'massCoefficient', 'impulseCoefficient', 'staticBiasRate', 'staticMassCoefficient', 'staticImpulseCoefficient', 'maximumContactPushSpeed', 'hitEventThreshold', 'speculativeDistance', 'broadphaseAABBMargin', 'warmStartRatio', 'simulationTime', 'stepNumber' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -23,7 +23,7 @@ CFPhysicsStep class >> timeStep: seconds substeps: anInteger contactHertz: hertz
 
 { #category : 'preparing' }
 CFPhysicsStep >> prepare [
-	| omega a1 a2 a3 |
+	| effectiveContactHertz coefficients staticCoefficients |
 	warmStartRatio ifNil: [ warmStartRatio := 1.0 ].
 	maximumContactPushSpeed ifNil: [ maximumContactPushSpeed := 3.0 ].
 	hitEventThreshold ifNil: [ hitEventThreshold := 1.0 ].
@@ -32,14 +32,39 @@ CFPhysicsStep >> prepare [
 	substepCount := substepCount max: 1.
 	substepTime := timeStep / substepCount.
 	inverseSubstepTime := substepTime = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / substepTime ].
-	omega := 2.0 * Float pi * contactHertz.
+	effectiveContactHertz := contactHertz min: 0.125 * inverseSubstepTime.
+	coefficients := self softnessForHertz: effectiveContactHertz.
+	biasRate := coefficients first.
+	massCoefficient := coefficients second.
+	impulseCoefficient := coefficients third.
+	staticCoefficients := self softnessForHertz: 2.0 * effectiveContactHertz.
+	staticBiasRate := staticCoefficients first.
+	staticMassCoefficient := staticCoefficients second.
+	staticImpulseCoefficient := staticCoefficients third
+]
+
+
+{ #category : 'private - preparing' }
+CFPhysicsStep >> softnessForHertz: hertz [
+	| omega a1 a2 a3 |
+	omega := 2.0 * Float pi * hertz.
 	a1 := (2.0 * contactDampingRatio) + (omega * substepTime).
 	a2 := substepTime * omega * a1.
 	a3 := 1.0 / (1.0 + a2).
-	biasRate := a1 = 0.0 ifTrue: [ 0.0 ] ifFalse: [ omega / a1 ].
-	massCoefficient := a2 * a3.
-	impulseCoefficient := a3
+	^ {
+		a1 = 0.0 ifTrue: [ 0.0 ] ifFalse: [ omega / a1 ].
+		a2 * a3.
+		a3 }
 ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> staticBiasRate [ ^ staticBiasRate ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> staticMassCoefficient [ ^ staticMassCoefficient ]
+
+{ #category : 'accessing' }
+CFPhysicsStep >> staticImpulseCoefficient [ ^ staticImpulseCoefficient ]
 
 { #category : 'accessing' }
 CFPhysicsStep >> timeStep [ ^ timeStep ]

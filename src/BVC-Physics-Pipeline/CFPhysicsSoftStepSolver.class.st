@@ -678,9 +678,15 @@ CFPhysicsSoftStepSolver >> solveNormalAt: point constraint: constraint biasEnabl
 	separation > 0.0
 		ifTrue: [ bias := separation * step inverseSubstepTime ]
 		ifFalse: [ biasEnabled ifTrue: [
-			bias := (step biasRate * separation) max: step maximumContactPushSpeed negated.
-			massCoefficient := step massCoefficient.
-			impulseCoefficient := step impulseCoefficient ] ].
+			(constraint bodyStateA bodyType isStatic or: [ constraint bodyStateB bodyType isStatic ])
+				ifTrue: [
+					bias := (step staticBiasRate * separation) max: step maximumContactPushSpeed negated.
+					massCoefficient := step staticMassCoefficient.
+					impulseCoefficient := step staticImpulseCoefficient ]
+				ifFalse: [
+					bias := (step biasRate * separation) max: step maximumContactPushSpeed negated.
+					massCoefficient := step massCoefficient.
+					impulseCoefficient := step impulseCoefficient ] ] ].
 	increment := (massCoefficient * point normalMass * (normalVelocity + bias)) negated
 		- (impulseCoefficient * point normalImpulse).
 	oldImpulse := point normalImpulse.

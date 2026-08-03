@@ -7288,3 +7288,39 @@ CFPhysicsCleanSlateTests >> zeroRestitutionSkipsRestitutionPass [
 	self assert: result solver restitutionCandidatePointCount equals: 0.
 	^ result
 ]
+
+
+{ #category : 'examples - solver' }
+CFPhysicsCleanSlateTests >> contactHertzIsCappedForLargeSubsteps [
+	<gtExample>
+	| step capped |
+	step := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 120.0
+		dampingRatio: 1.0.
+	capped := CFPhysicsStep
+		timeStep: 1.0
+		substeps: 1
+		contactHertz: 0.125
+		dampingRatio: 1.0.
+	self assert: (step biasRate closeTo: capped biasRate).
+	self assert: (step massCoefficient closeTo: capped massCoefficient).
+	self assert: (step impulseCoefficient closeTo: capped impulseCoefficient).
+	^ step
+]
+
+{ #category : 'examples - solver' }
+CFPhysicsCleanSlateTests >> staticContactUsesStifferSoftness [
+	<gtExample>
+	| step |
+	step := CFPhysicsStep
+		timeStep: 1.0 / 60.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 1.0.
+	self assert: step staticBiasRate > step biasRate.
+	self assert: step staticMassCoefficient > step massCoefficient.
+	self assert: step staticImpulseCoefficient < step impulseCoefficient.
+	^ step
+]
