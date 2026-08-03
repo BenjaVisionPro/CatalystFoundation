@@ -743,7 +743,14 @@ CFPhysicsSoftStepSolver >> solveTangentAt: point constraint: constraint [
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 	restitutionCandidatePointCount := 0.
-	self contactConstraints do: [ :constraint |
+	self constraintColorsInSolverOrder do: [ :color |
+		color do: [ :constraint |
+			(constraint isKindOf: CFPhysicsPreparedConstraint) ifTrue: [
+				self applyRestitutionFor: constraint threshold: threshold ] ] ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsSoftStepSolver >> applyRestitutionFor: constraint threshold: threshold [
 		constraint restitution = 0.0 ifFalse: [
 			constraint points do: [ :point |
 				(point relativeNormalVelocity < threshold negated and: [ point totalNormalImpulse ~= 0.0 ]) ifTrue: [
@@ -758,7 +765,7 @@ CFPhysicsSoftStepSolver >> applyRestitutionWithThreshold: threshold [
 					point
 						normalImpulse: newImpulse;
 						totalNormalImpulse: point totalNormalImpulse + appliedImpulse.
-					self applyImpulse: constraint normal * appliedImpulse at: point constraint: constraint ] ] ] ]
+					self applyImpulse: constraint normal * appliedImpulse at: point constraint: constraint ] ] ]
 ]
 
 { #category : 'private - solving' }
