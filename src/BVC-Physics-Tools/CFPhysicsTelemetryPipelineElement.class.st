@@ -130,7 +130,7 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
 		summaryLabel text: 'Contacts  Persistent 0   Began 0   Continued 0   Ended 0   Awake 0   Sleeping 0'.
 		^ self ].
 	data := stepRecordings last physicsData.
-	summaryLabel text: String streamContents: [ :stream |
+	summaryLabel text: (String streamContents: [ :stream |
 		stream
 			nextPutAll: 'Contacts  Persistent ';
 			print: (data at: #persistentContactCount ifAbsent: [ 0 ]);
@@ -143,7 +143,7 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryFrom: analysis [
 			nextPutAll: '   Awake ';
 			print: (data at: #activeBodyCount ifAbsent: [ 0 ]);
 			nextPutAll: '   Sleeping ';
-			print: (data at: #sleepingBodyCount ifAbsent: [ 0 ]) ]
+			print: (data at: #sleepingBodyCount ifAbsent: [ 0 ]) ])
 ]
 
 { #category : 'private - building' }
