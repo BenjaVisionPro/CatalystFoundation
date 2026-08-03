@@ -15,6 +15,7 @@ Class {
 		'pointsSummaryLabel',
 		'changesSummaryLabel',
 		'bodiesSummaryLabel',
+		'sleepSummaryLabel',
 		'graph'
 	],
 	#category : 'BVC-Physics-Tools',
@@ -79,12 +80,14 @@ CFPhysicsTelemetryPipelineElement >> build [
 	pointsSummaryLabel := self profileSummaryLabel.
 	changesSummaryLabel := self profileSummaryLabel.
 	bodiesSummaryLabel := self profileSummaryLabel.
+	sleepSummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
 		addChild: manifoldsSummaryLabel;
 		addChild: pointsSummaryLabel;
 		addChild: changesSummaryLabel;
-		addChild: bodiesSummaryLabel.
+		addChild: bodiesSummaryLabel;
+		addChild: sleepSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
@@ -205,7 +208,20 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: 'Bodies       Awake';
 			nextPutAll: (valueFor value: #activeBodyCount);
 			nextPutAll: '   Sleeping';
-			nextPutAll: (valueFor value: #sleepingBodyCount) ])
+			nextPutAll: (valueFor value: #sleepingBodyCount) ]).
+	sleepSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Sleep        Accepted';
+			nextPutAll: (valueFor value: #sleepMotionAcceptedBodyCount);
+			nextPutAll: '   Rejected';
+			nextPutAll: (valueFor value: #sleepMotionRejectedBodyCount);
+			nextPutAll: '   Disabled';
+			nextPutAll: (valueFor value: #sleepDisabledBodyCount);
+			nextPutAll: '   Max ratio ';
+			nextPutAll: ((data at: #maximumSleepThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
+			nextPutAll: 'x   Min time ';
+			nextPutAll: ((data at: #minimumSleepTime ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: ' s' ])
 ]
 
 { #category : 'private - building' }

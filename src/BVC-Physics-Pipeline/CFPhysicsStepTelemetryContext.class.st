@@ -31,10 +31,21 @@ CFPhysicsStepTelemetryContext >> jointCount: anInteger [ jointCount := anInteger
 
 { #category : 'telemetry' }
 CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipeline [
-	| result solvedIslands bodyStates pairFinder preparation step |
+	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios |
 	result := aWorldSolution pipelineResult.
 	bodyStates := result bodyStates values.
+	dynamicBodyStates := bodyStates select: [ :each | each bodyType isDynamic ].
 	step := result step.
+	sleepConfiguration := aPipeline sleepConfiguration.
+	sleepVelocities := dynamicBodyStates collect: [ :each |
+		each sleepVelocityForElapsed: step timeStep positionCorrectionFactor: sleepConfiguration positionCorrectionFactor ].
+	sleepThresholdRatios := dynamicBodyStates collect: [ :each |
+		| threshold velocity |
+		threshold := each sleepThreshold.
+		velocity := each sleepVelocityForElapsed: step timeStep positionCorrectionFactor: sleepConfiguration positionCorrectionFactor.
+		threshold <= 0.0
+			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
+			ifFalse: [ velocity / threshold ] ].
 	solvedIslands := result islands select: [ :island |
 		island dynamicBodies anySatisfy: #isAwake ].
 	pairFinder := (aPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder.
@@ -48,6 +59,15 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #bodyCount put: bodyCount;
 		at: #activeBodyCount put: (bodyStates count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates count: [ :each | each isAwake not ]);
+		at: #sleepAllowedBodyCount put: (dynamicBodyStates count: #allowsSleeping);
+		at: #sleepMotionAcceptedBodyCount put: (dynamicBodyStates count: [ :each |
+			each allowsSleeping and: [ sleepConfiguration acceptsStepState: each elapsed: step timeStep ] ]);
+		at: #sleepMotionRejectedBodyCount put: (dynamicBodyStates count: [ :each |
+			each allowsSleeping and: [ (sleepConfiguration acceptsStepState: each elapsed: step timeStep) not ] ]);
+		at: #sleepDisabledBodyCount put: (dynamicBodyStates count: [ :each | each allowsSleeping not ]);
+		at: #maximumSleepVelocity put: (sleepVelocities ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepVelocities max ]);
+		at: #maximumSleepThresholdRatio put: (sleepThresholdRatios ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepThresholdRatios max ]);
+		at: #minimumSleepTime put: (dynamicBodyStates ifEmpty: [ 0.0 ] ifNotEmpty: [ (dynamicBodyStates collect: #sleepTime) min ]);
 		at: #contactCount put: result activeContacts size;
 		at: #persistentContactCount put: result contacts size;
 		at: #pairFinderEntryCount put: pairFinder entryCount;
