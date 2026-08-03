@@ -21,11 +21,11 @@ CFPhysicsShowcaseExamples >> clickMe [
 		yourself.
 	world := host physics beWorld.
 	world
-		gravity: 0 @ 0.08;
+		gravity: 0 @ 9.81;
 		contactHertz: 120.0;
 		contactDampingRatio: 1.0.
 	random := Random new.
-	buttons := (1 to: 14) collect: [ :each |
+	buttons := (1 to: 50) collect: [ :each |
 		self newClickMeButtonUsing: random ].
 	host addChildren: buttons.
 	world synchroniseMembership.
