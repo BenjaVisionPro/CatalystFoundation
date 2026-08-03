@@ -175,6 +175,8 @@ CFPhysicsProfileHealthElement >> rowNamed: aName total: totalCount owned: ownedC
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> joint: aJoint belongsTo: aWorld [
 	| body |
+	((aJoint respondsTo: #endpointPair)
+		and: [ aJoint endpointPair isNil ]) ifTrue: [ ^ false ].
 	body := aJoint bodyA ifNil: [ aJoint bodyB ].
 	^ body notNil and: [ body world == aWorld ]
 ]
