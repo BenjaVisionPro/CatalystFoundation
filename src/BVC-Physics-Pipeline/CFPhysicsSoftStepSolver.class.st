@@ -857,10 +857,13 @@ CFPhysicsSoftStepSolver >> relativeVelocityAt: point constraint: constraint [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> contactSeparationAt: point constraint: constraint [
+	| displacement |
+	displacement := constraint bodyStateB deltaPosition
+		- constraint bodyStateA deltaPosition
+		+ (self rotated: point anchorB by: constraint bodyStateB deltaRotation)
+		- (self rotated: point anchorA by: constraint bodyStateA deltaRotation).
 	^ point baseSeparation
-		+ (self dot: constraint bodyStateB deltaPosition - constraint bodyStateA deltaPosition with: constraint normal)
-		+ (self dot: (self rotated: point anchorB by: constraint bodyStateB deltaRotation) - point anchorB with: constraint normal)
-		- (self dot: (self rotated: point anchorA by: constraint bodyStateA deltaRotation) - point anchorA with: constraint normal)
+		+ (self dot: displacement with: constraint normal)
 ]
 
 { #category : 'private - solving' }
