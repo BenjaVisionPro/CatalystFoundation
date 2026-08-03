@@ -1,21 +1,22 @@
 "
 I represent a polygon vertex while it is being clipped against a reference face.
 
-I retain the incident vertex index so the manifold builder can assign stable contact features.
+I retain the Box2D-style contact feature identity and the incident edge index needed when clipping creates an intersection point.
 "
 Class {
 	#name : 'CFPhysicsClipVertex',
 	#superclass : 'Object',
-	#instVars : [ 'position', 'incidentVertexIndex' ],
+	#instVars : [ 'position', 'featureId', 'incidentEdgeIndex' ],
 	#category : 'BVC-Physics-Collision',
 	#package : 'BVC-Physics-Collision'
 }
 
 { #category : 'instance creation' }
-CFPhysicsClipVertex class >> position: aPoint incidentVertexIndex: anInteger [
+CFPhysicsClipVertex class >> position: aPoint featureId: aFeatureId incidentEdgeIndex: anInteger [
 	^ self new
 		position: aPoint;
-		incidentVertexIndex: anInteger;
+		featureId: aFeatureId;
+		incidentEdgeIndex: anInteger;
 		yourself
 ]
 
@@ -26,7 +27,13 @@ CFPhysicsClipVertex >> position [ ^ position ]
 CFPhysicsClipVertex >> position: aPoint [ position := aPoint ]
 
 { #category : 'accessing' }
-CFPhysicsClipVertex >> incidentVertexIndex [ ^ incidentVertexIndex ]
+CFPhysicsClipVertex >> featureId [ ^ featureId ]
 
 { #category : 'accessing' }
-CFPhysicsClipVertex >> incidentVertexIndex: anInteger [ incidentVertexIndex := anInteger ]
+CFPhysicsClipVertex >> featureId: anObject [ featureId := anObject ]
+
+{ #category : 'accessing' }
+CFPhysicsClipVertex >> incidentEdgeIndex [ ^ incidentEdgeIndex ]
+
+{ #category : 'accessing' }
+CFPhysicsClipVertex >> incidentEdgeIndex: anInteger [ incidentEdgeIndex := anInteger ]

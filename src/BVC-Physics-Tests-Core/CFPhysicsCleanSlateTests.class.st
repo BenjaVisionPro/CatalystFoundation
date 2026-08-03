@@ -7094,6 +7094,59 @@ CFPhysicsCleanSlateTests >> polygonSeparationBeyondSpeculativeDistanceDoesNotPro
 	^ manifold
 ]
 
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> clippedIntersectionUsesReferenceVertexAndIncidentFaceIdentity [
+	<gtExample>
+	| firstFeature secondFeature first second clipped intersectionFeature |
+	firstFeature := CFPhysicsContactFeatureId
+		featureA: #face index: 3
+		featureB: #vertex index: 2.
+	secondFeature := CFPhysicsContactFeatureId
+		featureA: #face index: 3
+		featureB: #vertex index: 3.
+	first := CFPhysicsClipVertex
+		position: -1 @ 0
+		featureId: firstFeature
+		incidentEdgeIndex: 2.
+	second := CFPhysicsClipVertex
+		position: 1 @ 0
+		featureId: secondFeature
+		incidentEdgeIndex: 2.
+	clipped := CFPhysicsPolygonManifoldBuilder
+		clip: { first. second }
+		toNormal: 1 @ 0
+		offset: 0
+		referenceVertexIndex: 4
+		referenceIsA: true.
+	self assert: clipped size equals: 2.
+	intersectionFeature := clipped second featureId.
+	self assert: intersectionFeature featureA equals: #vertex.
+	self assert: intersectionFeature indexA equals: 4.
+	self assert: intersectionFeature featureB equals: #face.
+	self assert: intersectionFeature indexB equals: 2.
+	^ clipped
+]
+
+{ #category : 'examples - polygon manifolds' }
+CFPhysicsCleanSlateTests >> clippedFaceContactIdentityPersistsAcrossTangentialMotion [
+	<gtExample>
+	| ground box first second firstIds secondIds |
+	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
+	box := CFPhysicsPolygonShape rectangleExtent: 60 @ 20.
+	first := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (-10 @ 15) + box rotationCentre rotation: 0.
+	second := CFPhysicsPolygonManifoldBuilder
+		manifoldBetweenShape: ground bodyOrigin: ground rotationCentre rotation: 0
+		andShape: box bodyOrigin: (-9 @ 15) + box rotationCentre rotation: 0.
+	firstIds := first contactPoints collect: #featureId.
+	secondIds := second contactPoints collect: #featureId.
+	self assert: firstIds asSet equals: secondIds asSet.
+	self assert: (firstIds anySatisfy: [ :featureId |
+		featureId featureA = #vertex and: [ featureId featureB = #face ] ]).
+	^ second
+]
+
 { #category : 'examples - circle manifolds' }
 CFPhysicsCleanSlateTests >> separatedCirclesWithinSpeculativeDistanceProduceAStableManifoldPoint [
 	<gtExample>

@@ -65,10 +65,25 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin
 	referenceVertex2 := referenceVertices at: (referenceIndex = referenceVertices size ifTrue: [ 1 ] ifFalse: [ referenceIndex + 1 ]).
 	tangent := referenceVertex2 - referenceVertex1.
 	tangent := tangent / tangent r.
-	incidentEdge := self incidentEdgeFrom: incidentVertices normals: incidentNormals referenceNormal: referenceNormal.
-	clipped := self clip: incidentEdge toNormal: tangent negated offset: (self dot: tangent negated with: referenceVertex1).
+	incidentEdge := self
+		incidentEdgeFrom: incidentVertices
+		normals: incidentNormals
+		referenceNormal: referenceNormal
+		referenceIndex: referenceIndex
+		referenceIsA: referenceIsA.
+	clipped := self
+		clip: incidentEdge
+		toNormal: tangent negated
+		offset: (self dot: tangent negated with: referenceVertex1)
+		referenceVertexIndex: referenceIndex
+		referenceIsA: referenceIsA.
 	clipped size < 2 ifTrue: [ ^ nil ].
-	clipped := self clip: clipped toNormal: tangent offset: (self dot: tangent with: referenceVertex2).
+	clipped := self
+		clip: clipped
+		toNormal: tangent
+		offset: (self dot: tangent with: referenceVertex2)
+		referenceVertexIndex: (referenceIndex = referenceVertices size ifTrue: [ 1 ] ifFalse: [ referenceIndex + 1 ])
+		referenceIsA: referenceIsA.
 	clipped isEmpty ifTrue: [ ^ nil ].
 
 	points := OrderedCollection new: 2.
@@ -79,13 +94,7 @@ CFPhysicsPolygonManifoldBuilder class >> manifoldBetweenShape: shapeA bodyOrigin
 		separation <= speculativeDistance ifTrue: [
 			worldPoint := clipVertex position
 				- (referenceNormal * ((coreSeparation + incidentShape radius - referenceShape radius) / 2.0)).
-			featureId := referenceIsA
-				ifTrue: [ CFPhysicsContactFeatureId
-					featureA: #face index: referenceIndex
-					featureB: #vertex index: clipVertex incidentVertexIndex ]
-				ifFalse: [ CFPhysicsContactFeatureId
-					featureA: #vertex index: clipVertex incidentVertexIndex
-					featureB: #face index: referenceIndex ].
+			featureId := clipVertex featureId.
 			point := CFPhysicsManifoldPoint at: worldPoint.
 			point
 				separation: separation;
@@ -120,8 +129,8 @@ CFPhysicsPolygonManifoldBuilder class >> maximumSeparationOf: referenceVertices 
 ]
 
 { #category : 'private' }
-CFPhysicsPolygonManifoldBuilder class >> incidentEdgeFrom: vertices normals: normals referenceNormal: referenceNormal [
-	| incidentIndex minimumDot secondIndex |
+CFPhysicsPolygonManifoldBuilder class >> incidentEdgeFrom: vertices normals: normals referenceNormal: referenceNormal referenceIndex: referenceIndex referenceIsA: referenceIsA [
+	| incidentIndex minimumDot secondIndex firstFeatureId secondFeatureId |
 	incidentIndex := 1.
 	minimumDot := self dot: referenceNormal with: normals first.
 	2 to: normals size do: [ :index |
@@ -131,14 +140,34 @@ CFPhysicsPolygonManifoldBuilder class >> incidentEdgeFrom: vertices normals: nor
 			minimumDot := value.
 			incidentIndex := index ] ].
 	secondIndex := incidentIndex = vertices size ifTrue: [ 1 ] ifFalse: [ incidentIndex + 1 ].
+	firstFeatureId := referenceIsA
+		ifTrue: [ CFPhysicsContactFeatureId
+			featureA: #face index: referenceIndex
+			featureB: #vertex index: incidentIndex ]
+		ifFalse: [ CFPhysicsContactFeatureId
+			featureA: #vertex index: incidentIndex
+			featureB: #face index: referenceIndex ].
+	secondFeatureId := referenceIsA
+		ifTrue: [ CFPhysicsContactFeatureId
+			featureA: #face index: referenceIndex
+			featureB: #vertex index: secondIndex ]
+		ifFalse: [ CFPhysicsContactFeatureId
+			featureA: #vertex index: secondIndex
+			featureB: #face index: referenceIndex ].
 	^ {
-		CFPhysicsClipVertex position: (vertices at: incidentIndex) incidentVertexIndex: incidentIndex.
-		CFPhysicsClipVertex position: (vertices at: secondIndex) incidentVertexIndex: secondIndex }
+		CFPhysicsClipVertex
+			position: (vertices at: incidentIndex)
+			featureId: firstFeatureId
+			incidentEdgeIndex: incidentIndex.
+		CFPhysicsClipVertex
+			position: (vertices at: secondIndex)
+			featureId: secondFeatureId
+			incidentEdgeIndex: incidentIndex }
 ]
 
 { #category : 'private' }
-CFPhysicsPolygonManifoldBuilder class >> clip: clipVertices toNormal: normal offset: offset [
-	| output first second distanceFirst distanceSecond interpolation intersection sourceIndex |
+CFPhysicsPolygonManifoldBuilder class >> clip: clipVertices toNormal: normal offset: offset referenceVertexIndex: referenceVertexIndex referenceIsA: referenceIsA [
+	| output first second distanceFirst distanceSecond interpolation intersection intersectionFeatureId incidentEdgeIndex |
 	clipVertices isEmpty ifTrue: [ ^ #() ].
 	clipVertices size = 1 ifTrue: [
 		^ ((self dot: normal with: clipVertices first position) - offset) <= 0
@@ -154,10 +183,18 @@ CFPhysicsPolygonManifoldBuilder class >> clip: clipVertices toNormal: normal off
 	(distanceFirst * distanceSecond < 0) ifTrue: [
 		interpolation := distanceFirst / (distanceFirst - distanceSecond).
 		intersection := first position + ((second position - first position) * interpolation).
-		sourceIndex := distanceFirst > 0
-			ifTrue: [ first incidentVertexIndex ]
-			ifFalse: [ second incidentVertexIndex ].
-		output add: (CFPhysicsClipVertex position: intersection incidentVertexIndex: sourceIndex) ].
+		incidentEdgeIndex := first incidentEdgeIndex.
+		intersectionFeatureId := referenceIsA
+			ifTrue: [ CFPhysicsContactFeatureId
+				featureA: #vertex index: referenceVertexIndex
+				featureB: #face index: incidentEdgeIndex ]
+			ifFalse: [ CFPhysicsContactFeatureId
+				featureA: #face index: incidentEdgeIndex
+				featureB: #vertex index: referenceVertexIndex ].
+		output add: (CFPhysicsClipVertex
+			position: intersection
+			featureId: intersectionFeatureId
+			incidentEdgeIndex: incidentEdgeIndex) ].
 	^ output asArray
 ]
 
