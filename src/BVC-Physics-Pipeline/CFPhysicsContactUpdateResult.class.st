@@ -31,7 +31,13 @@ CFPhysicsContactUpdateResult >> contactBatch [ ^ contactBatch ]
 CFPhysicsContactUpdateResult >> contactBatch: aContactBatch [ contactBatch := aContactBatch ]
 
 { #category : 'accessing' }
-CFPhysicsContactUpdateResult >> activeContacts [ ^ contactBatch activeContacts ]
+CFPhysicsContactUpdateResult >> contacts [ ^ contactBatch contacts ]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdateResult >> touchingContacts [ ^ contactBatch touchingContacts ]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdateResult >> activeContacts [ ^ contactBatch touchingContacts ]
 
 { #category : 'accessing' }
 CFPhysicsContactUpdateResult >> beganContacts [ ^ contactBatch beganContacts ]

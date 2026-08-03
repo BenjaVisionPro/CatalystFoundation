@@ -142,7 +142,7 @@ CFPhysicsProfileHealthElement >> collectSample [
 			self rowNamed: 'PhysicsContact'
 				total: contacts size
 				owned: (contacts count: [ :each | each firstBody world == world ])
-				expected: world activeContacts size.
+				expected: world contacts size.
 			self rowNamed: 'PhysicsJoint'
 				total: joints size
 				owned: (joints count: [ :each | self joint: each belongsTo: world ])

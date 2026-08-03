@@ -1145,9 +1145,9 @@ CFPhysicsCleanSlateTests >> bodySleepThresholdUsesWorldScale [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
+CFPhysicsCleanSlateTests >> endingAContactDoesNotWakeBodies [
 	<gtExample>
-	| first second pair manifold previousContact batch stage result bodyStates |
+	| first second pair manifold previousContact batch bodyStates result |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self cleanSlateBodyWithSequence: 2 position: 10 @ 0 extent: 20 @ 20.
 	pair := CFPhysicsPair first: first second: second.
@@ -1163,22 +1163,10 @@ CFPhysicsCleanSlateTests >> endingAContactWakesBothBodies [
 		updatePairs: #()
 		includingImpactContacts: #()
 		fromContacts: { previousContact }.
-	stage := CFPhysicsContactUpdateStage new.
-	stage
-		wakeBodiesForEndedContacts: batch endedContacts
-		bodyStates: bodyStates.
 	result := batch endedContacts first.
 	self assert: result ended.
-	self assert: (bodyStates at: first) isAwake.
-	self assert: (bodyStates at: second) isAwake.
-	self assert: (bodyStates at: first) sleepTime equals: 0.0.
-	self assert: (bodyStates at: second) sleepTime equals: 0.0.
-	self assert: first isSleeping.
-	self assert: second isSleeping.
-	(bodyStates at: first) commit.
-	(bodyStates at: second) commit.
-	self assert: first isAwake.
-	self assert: second isAwake.
+	self deny: (bodyStates at: first) isAwake.
+	self deny: (bodyStates at: second) isAwake.
 	^ result
 ]
 
@@ -7009,4 +6997,60 @@ CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
 		equals: (initialStepNumber + 3 to: initialStepNumber + 5) asArray.
 	world telemetryEnabled: false.
 	^ world
+]
+
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> broadphasePairRetainsNonTouchingContact [
+	<gtExample>
+	| first second pair touchingUpdater nonTouchingUpdater touchingBatch nonTouchingBatch |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	touchingUpdater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
+	touchingBatch := touchingUpdater updatePairs: { pair } fromContacts: #().
+	nonTouchingUpdater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nil).
+	nonTouchingBatch := nonTouchingUpdater updatePairs: { pair } fromContacts: touchingBatch contacts.
+	self assert: nonTouchingBatch contacts size equals: 1.
+	self assert: nonTouchingBatch activeContacts isEmpty.
+	self assert: nonTouchingBatch endedContacts size equals: 1.
+	self deny: nonTouchingBatch contacts first isTouching.
+	self assert: nonTouchingBatch contacts first key equals: pair key.
+	^ nonTouchingBatch
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> nonTouchingContactBeginsAgainWithoutPairRecreation [
+	<gtExample>
+	| first second pair touchingUpdater nonTouchingUpdater firstBatch secondBatch thirdBatch |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	touchingUpdater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
+	nonTouchingUpdater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nil).
+	firstBatch := touchingUpdater updatePairs: { pair } fromContacts: #().
+	secondBatch := nonTouchingUpdater updatePairs: { pair } fromContacts: firstBatch contacts.
+	thirdBatch := touchingUpdater updatePairs: { pair } fromContacts: secondBatch contacts.
+	self assert: thirdBatch contacts size equals: 1.
+	self assert: thirdBatch activeContacts size equals: 1.
+	self assert: thirdBatch beganContacts size equals: 1.
+	self assert: thirdBatch endedContacts isEmpty.
+	self assert: thirdBatch contacts first key equals: pair key.
+	^ thirdBatch
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> removedBroadphasePairDoesNotRetainDestroyedContact [
+	<gtExample>
+	| first second pair updater firstBatch removedBatch |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: (self cleanSlateManifoldWithFeatureIndex: 1)).
+	firstBatch := updater updatePairs: { pair } fromContacts: #().
+	removedBatch := updater updatePairs: #() fromContacts: firstBatch contacts.
+	self assert: removedBatch contacts isEmpty.
+	self assert: removedBatch activeContacts isEmpty.
+	self assert: removedBatch endedContacts size equals: 1.
+	^ removedBatch
 ]

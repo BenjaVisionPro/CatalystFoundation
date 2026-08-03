@@ -3,9 +3,7 @@ I am the persistent broadphase translated from Box2D 3.1.1.
 
 I own one dynamic AABB tree for each body type, retain proxies between steps,
 buffer proxies whose fat bounds change, and query only those moved proxies for
-new candidate pairs. Candidate pairs remain registered while their fat proxy
-bounds overlap because Catalyst currently represents a non-touching Box2D
-contact as a broadphase candidate rather than as a persistent contact object.
+new candidate pairs. Candidate pairs remain registered while their fat proxy bounds overlap and drive the lifetime of persistent contacts.
 "
 Class {
 	#name : 'CFPhysicsBroadphase',

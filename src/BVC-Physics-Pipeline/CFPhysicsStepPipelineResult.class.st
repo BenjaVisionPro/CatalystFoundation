@@ -167,7 +167,11 @@ CFPhysicsStepPipelineResult >> wokenBodies [
 ]
 
 { #category : 'contacts' }
-CFPhysicsStepPipelineResult >> activeContacts [ ^ contactResult activeContacts ]
+CFPhysicsStepPipelineResult >> contacts [ ^ contactResult contacts ]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> touchingContacts [ ^ contactResult touchingContacts ]
+{ #category : 'contacts' }
+CFPhysicsStepPipelineResult >> activeContacts [ ^ contactResult touchingContacts ]
 { #category : 'contacts' }
 CFPhysicsStepPipelineResult >> beganContacts [ ^ contactResult beganContacts ]
 { #category : 'contacts' }

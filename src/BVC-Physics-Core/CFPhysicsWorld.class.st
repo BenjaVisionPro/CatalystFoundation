@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -33,6 +33,7 @@ CFPhysicsWorld >> initialize [
 	substepCount := 4.
 	contactHertz := 30.0.
 	contactDampingRatio := 10.0.
+	contacts := #().
 	activeContacts := #().
 	calculationContacts := #().
 	mouseJoints := IdentitySet new.
@@ -124,6 +125,7 @@ CFPhysicsWorld >> release [
 			physics retireBodyFromWorld: self ] ].
 	bodyStates removeAll.
 	members removeAll.
+	contacts := #().
 	activeContacts := #().
 	calculationContacts := #().
 	membershipProvider := nil.
@@ -277,6 +279,9 @@ CFPhysicsWorld >> lastStepResult [ ^ lastStepResult ]
 
 
 { #category : 'collision' }
+CFPhysicsWorld >> contacts [ ^ contacts ]
+
+{ #category : 'collision' }
 CFPhysicsWorld >> activeContacts [ ^ activeContacts ]
 
 { #category : 'collision' }
@@ -381,6 +386,8 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removePrismaticJointsUsingBody: body.
 		self removeWheelJointsUsingBody: body.
 		self removeContainmentsUsingBody: body.
+		contacts := contacts reject: [ :contact |
+			contact firstBody == body or: [ contact secondBody == body ] ].
 		activeContacts := activeContacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
 		calculationContacts := calculationContacts reject: [ :contact |
@@ -529,7 +536,7 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		bodies: bodies;
 		bodyStates: capturedBodyStates;
 		orderedBodyStates: orderedBodyStates;
-		contacts: activeContacts;
+		contacts: contacts;
 		calculationContacts: calculationContacts;
 		joints: capturedJoints;
 		collisionSuppressedBodyPairs: self collisionSuppressedBodyPairs;
@@ -554,9 +561,10 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	step := pipelineResult step.
 	pipelineResult commitBodyStates.
 	pipelineResult commitJointConstraints.
-	previousCommittedContacts := activeContacts.
+	previousCommittedContacts := contacts.
 	self updatePersistentIslandsFrom: pipelineResult.
-	activeContacts := pipelineResult activeContacts.
+	contacts := pipelineResult contacts.
+	activeContacts := pipelineResult touchingContacts.
 	calculationContacts := previousCommittedContacts.
 	lastStepResult := pipelineResult.
 	self applyDefaultBoundaryExcept: aWorldSolution explicitlyContainedBodies.
@@ -626,6 +634,7 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #activeBodyCount put: (bodyStates values count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates values count: [ :each | each isAwake not ]);
 		at: #contactCount put: activeContacts size;
+		at: #persistentContactCount put: contacts size;
 		at: #beganContactCount put: aStepResult beganContacts size;
 		at: #continuedContactCount put: aStepResult continuedContacts size;
 		at: #endedContactCount put: aStepResult endedContacts size;

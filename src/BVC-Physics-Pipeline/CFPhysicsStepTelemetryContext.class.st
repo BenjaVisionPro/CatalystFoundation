@@ -49,6 +49,7 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #activeBodyCount put: (bodyStates count: #isAwake);
 		at: #sleepingBodyCount put: (bodyStates count: [ :each | each isAwake not ]);
 		at: #contactCount put: result activeContacts size;
+		at: #persistentContactCount put: result contacts size;
 		at: #pairFinderEntryCount put: pairFinder entryCount;
 		at: #pairFinderComparisonCount put: pairFinder comparisonCount;
 		at: #pairFinderAcceptedPairCount put: pairFinder acceptedPairCount;
