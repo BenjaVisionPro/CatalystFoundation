@@ -1134,7 +1134,7 @@ CFPhysicsCleanSlateTests >> sleepVelocityUsesBox2DPositionCorrectionFormula [
 CFPhysicsCleanSlateTests >> bodySleepThresholdUsesWorldScale [
 	<gtExample>
 	| world body state |
-	world := self cleanSlateWorld.
+	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	world lengthUnitsPerMetre: 200.0.
 	body := self cleanSlateBodyWithSequence: 1.
 	body world: world.
