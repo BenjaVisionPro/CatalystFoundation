@@ -31,7 +31,7 @@ CFPhysicsStepTelemetryContext >> jointCount: anInteger [ jointCount := anInteger
 
 { #category : 'telemetry' }
 CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipeline [
-	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios worstState worstRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
+	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
 	result := aWorldSolution pipelineResult.
 	bodyStates := result bodyStates values.
 	dynamicBodyStates := bodyStates select: [ :each | each bodyType isDynamic ].
@@ -46,8 +46,30 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		threshold <= 0.0
 			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
 			ifFalse: [ velocity / threshold ] ].
+	motionThresholdRatios := dynamicBodyStates collect: [ :each |
+		| threshold velocity |
+		threshold := each sleepThreshold.
+		velocity := each linearVelocity r + (each angularVelocity abs * each shapeState boundingRadius).
+		threshold <= 0.0
+			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
+			ifFalse: [ velocity / threshold ] ].
+	correctionThresholdRatios := dynamicBodyStates collect: [ :each |
+		| threshold velocity |
+		threshold := each sleepThreshold.
+		velocity := step timeStep <= 0.0
+			ifTrue: [ 0.0 ]
+			ifFalse: [ sleepConfiguration positionCorrectionFactor
+				* (each deltaPosition r + (each deltaRotation sin abs * each shapeState boundingRadius))
+				/ step timeStep ].
+		threshold <= 0.0
+			ifTrue: [ velocity = 0.0 ifTrue: [ 0.0 ] ifFalse: [ Float infinity ] ]
+			ifFalse: [ velocity / threshold ] ].
 	worstState := nil.
 	worstRatio := -1.0.
+	worstMotionState := nil.
+	worstMotionRatio := -1.0.
+	worstCorrectionState := nil.
+	worstCorrectionRatio := -1.0.
 	dynamicBodyStates do: [ :each |
 		| threshold velocity ratio |
 		threshold := each sleepThreshold.
@@ -57,7 +79,13 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 			ifFalse: [ velocity / threshold ].
 		ratio > worstRatio ifTrue: [
 			worstRatio := ratio.
-			worstState := each ] ].
+			worstState := each ].
+		((motionThresholdRatios at: (dynamicBodyStates indexOf: each)) > worstMotionRatio) ifTrue: [
+			worstMotionRatio := motionThresholdRatios at: (dynamicBodyStates indexOf: each).
+			worstMotionState := each ].
+		((correctionThresholdRatios at: (dynamicBodyStates indexOf: each)) > worstCorrectionRatio) ifTrue: [
+			worstCorrectionRatio := correctionThresholdRatios at: (dynamicBodyStates indexOf: each).
+			worstCorrectionState := each ] ].
 	worstMaximumVelocity := 0.0.
 	worstCorrectionVelocity := 0.0.
 	worstNormalImpulse := 0.0.
@@ -94,7 +122,23 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 			each allowsSleeping and: [ sleepConfiguration acceptsStepState: each elapsed: step timeStep ] ]);
 		at: #sleepMotionRejectedBodyCount put: (dynamicBodyStates count: [ :each |
 			each allowsSleeping and: [ (sleepConfiguration acceptsStepState: each elapsed: step timeStep) not ] ]);
+		at: #sleepMotionOnlyRejectedBodyCount put: ((1 to: dynamicBodyStates size) count: [ :index |
+			(dynamicBodyStates at: index) allowsSleeping
+				and: [ (motionThresholdRatios at: index) > 1.0
+				and: [ (correctionThresholdRatios at: index) <= 1.0 ] ] ]);
+		at: #sleepCorrectionOnlyRejectedBodyCount put: ((1 to: dynamicBodyStates size) count: [ :index |
+			(dynamicBodyStates at: index) allowsSleeping
+				and: [ (motionThresholdRatios at: index) <= 1.0
+				and: [ (correctionThresholdRatios at: index) > 1.0 ] ] ]);
+		at: #sleepMotionAndCorrectionRejectedBodyCount put: ((1 to: dynamicBodyStates size) count: [ :index |
+			(dynamicBodyStates at: index) allowsSleeping
+				and: [ (motionThresholdRatios at: index) > 1.0
+				and: [ (correctionThresholdRatios at: index) > 1.0 ] ] ]);
 		at: #sleepDisabledBodyCount put: (dynamicBodyStates count: [ :each | each allowsSleeping not ]);
+		at: #maximumSleepMotionThresholdRatio put: (motionThresholdRatios ifEmpty: [ 0.0 ] ifNotEmpty: [ motionThresholdRatios max ]);
+		at: #maximumSleepCorrectionThresholdRatio put: (correctionThresholdRatios ifEmpty: [ 0.0 ] ifNotEmpty: [ correctionThresholdRatios max ]);
+		at: #worstSleepMotionBodySequence put: (worstMotionState ifNil: [ 0 ] ifNotNil: [ worstMotionState body sequence ]);
+		at: #worstSleepCorrectionBodySequence put: (worstCorrectionState ifNil: [ 0 ] ifNotNil: [ worstCorrectionState body sequence ]);
 		at: #maximumSleepVelocity put: (sleepVelocities ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepVelocities max ]);
 		at: #maximumSleepThresholdRatio put: (sleepThresholdRatios ifEmpty: [ 0.0 ] ifNotEmpty: [ sleepThresholdRatios max ]);
 		at: #minimumSleepTime put: (dynamicBodyStates ifEmpty: [ 0.0 ] ifNotEmpty: [ (dynamicBodyStates collect: #sleepTime) min ]);

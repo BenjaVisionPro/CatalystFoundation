@@ -16,6 +16,7 @@ Class {
 		'changesSummaryLabel',
 		'bodiesSummaryLabel',
 		'sleepSummaryLabel',
+		'sleepRatiosSummaryLabel',
 		'worstBodySummaryLabel',
 		'solverSummaryLabel',
 		'graph'
@@ -83,6 +84,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	changesSummaryLabel := self profileSummaryLabel.
 	bodiesSummaryLabel := self profileSummaryLabel.
 	sleepSummaryLabel := self profileSummaryLabel.
+	sleepRatiosSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
 	solverSummaryLabel := self profileSummaryLabel.
 	summaryLabel
@@ -92,6 +94,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: changesSummaryLabel;
 		addChild: bodiesSummaryLabel;
 		addChild: sleepSummaryLabel;
+		addChild: sleepRatiosSummaryLabel;
 		addChild: worstBodySummaryLabel;
 		addChild: solverSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
@@ -219,13 +222,25 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 		stream
 			nextPutAll: 'Sleep        Accepted';
 			nextPutAll: (valueFor value: #sleepMotionAcceptedBodyCount);
-			nextPutAll: '   Rejected';
-			nextPutAll: (valueFor value: #sleepMotionRejectedBodyCount);
+			nextPutAll: '   Motion';
+			nextPutAll: (valueFor value: #sleepMotionOnlyRejectedBodyCount);
+			nextPutAll: '   Correction';
+			nextPutAll: (valueFor value: #sleepCorrectionOnlyRejectedBodyCount);
+			nextPutAll: '   Both';
+			nextPutAll: (valueFor value: #sleepMotionAndCorrectionRejectedBodyCount);
 			nextPutAll: '   Disabled';
-			nextPutAll: (valueFor value: #sleepDisabledBodyCount);
-			nextPutAll: '   Max ratio ';
-			nextPutAll: ((data at: #maximumSleepThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
-			nextPutAll: 'x   Min time ';
+			nextPutAll: (valueFor value: #sleepDisabledBodyCount) ]).
+	sleepRatiosSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Sleep ratio  Motion ';
+			nextPutAll: ((data at: #maximumSleepMotionThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
+			nextPutAll: 'x (#';
+			nextPutAll: (data at: #worstSleepMotionBodySequence ifAbsent: [ 0 ]) printString;
+			nextPutAll: ')   Correction ';
+			nextPutAll: ((data at: #maximumSleepCorrectionThresholdRatio ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 2);
+			nextPutAll: 'x (#';
+			nextPutAll: (data at: #worstSleepCorrectionBodySequence ifAbsent: [ 0 ]) printString;
+			nextPutAll: ')   Min time ';
 			nextPutAll: ((data at: #minimumSleepTime ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPutAll: ' s' ]).
 	worstBodySummaryLabel text: (String streamContents: [ :stream |
