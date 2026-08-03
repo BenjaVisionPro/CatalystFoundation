@@ -209,7 +209,8 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 		vExact: 30;
 		aptitude: BrGlamorousLabelAptitude new;
 		text: 'Image heap  ', (aSample at: #heapSize) humanReadableSISizeString,
-			'  (', (self signedSizeString: heapDelta), ') ', self heapTrend;
+			'  (', (heapDelta >= 0 ifTrue: [ '+' ] ifFalse: [ '' ]),
+			heapDelta humanReadableSISizeString, ') ', self heapTrend;
 		yourself).
 	retainedSample := retentionSamples ifEmpty: [ nil ] ifNotEmpty: [ retentionSamples last ].
 	retainedSample
