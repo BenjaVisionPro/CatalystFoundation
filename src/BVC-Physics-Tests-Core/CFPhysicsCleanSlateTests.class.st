@@ -2662,7 +2662,7 @@ CFPhysicsCleanSlateTests >> constraintColorerSeparatesSharedDynamicBodies [
 { #category : 'examples - constraint graph' }
 CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	<gtExample>
-	| owner first second third fourth world revolute fixed unrelated |
+	| owner first second third fourth world revolute fixed motor filter unrelated |
 	owner := BlElement new size: 400 @ 300; yourself.
 	first := BlElement new size: 20 @ 20; yourself.
 	second := BlElement new size: 20 @ 20; yourself.
@@ -2673,14 +2673,20 @@ CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	world synchroniseMembership.
 	revolute := first physics revoluteJointTo: second.
 	fixed := first physics weldJointTo: third.
+	motor := first physics motorJointTo: fourth.
+	filter := first physics filterJointTo: second.
 	unrelated := second physics distanceJointTo: fourth.
 	owner removeChild: first.
 	world synchroniseMembership.
 	self assert: world revoluteJoints isEmpty.
 	self assert: world weldJoints isEmpty.
+	self assert: world motorJoints isEmpty.
+	self assert: world filterJoints isEmpty.
 	self assert: world distanceJoints equals: { unrelated }.
 	self assert: revolute isActive not.
 	self assert: fixed isActive not.
+	self assert: motor isActive not.
+	self assert: filter isActive not.
 	self assert: unrelated isActive.
 	^ world
 ]
@@ -2787,6 +2793,38 @@ CFPhysicsCleanSlateTests >> prismaticJointCanSuppressCollisionBetweenItsEndpoint
 		second physics body }.
 	self assert: pairs size equals: 1.
 	^ joint
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> filterJointMatchesBox2DCollisionAndIslandSemantics [
+	<gtExample>
+	| owner first second world joint graph island suppressedResult collidingResult |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 100 @ 100.
+	second physics position: 110 @ 100.
+	joint := first physics filterJointTo: second.
+	self assert: joint collideConnected not.
+	self assert: world filterJoints equals: { joint }.
+	self assert: first physics filterJoints equals: { joint }.
+	suppressedResult := world step.
+	self assert: suppressedResult activeContacts isEmpty.
+	self assert: suppressedResult jointConstraints isEmpty.
+	graph := world persistentIslandGraph.
+	graph mergeIslands.
+	island := graph islandForBody: first physics body.
+	self assert: (graph islandForBody: second physics body) == island.
+	self assert: (graph islandForConstraint: joint) == island.
+	joint collideConnected: true.
+	collidingResult := world step.
+	self assert: collidingResult activeContacts size equals: 1.
+	self assert: collidingResult jointConstraints isEmpty.
+	^ collidingResult
 ]
 
 { #category : 'examples - collision filtering' }
