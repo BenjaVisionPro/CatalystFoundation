@@ -8041,3 +8041,21 @@ CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
 	self assert: manifold isNil.
 	^ manifold
 ]
+
+
+{ #category : 'examples - containment' }
+CFPhysicsCleanSlateTests >> worldContainmentBuildsInternalChainWithoutPublicMembership [
+	<gtExample>
+	| owner child world result |
+	owner := BlElement new size: 200 @ 120; yourself.
+	child := BlElement new size: 20 @ 20; yourself.
+	owner addChild: child.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	result := world step.
+	self assert: world containmentBoundaryChain notNil.
+	self assert: world containmentBoundaryChain segments size equals: 4.
+	self assert: world bodies size equals: 1.
+	^ result
+]
