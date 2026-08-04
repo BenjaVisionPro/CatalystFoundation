@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -73,6 +73,13 @@ CFPhysicsWorld >> initialize [
 	committedVisualState := CFPhysicsWorldVisualState new.
 	calculationVisualState := CFPhysicsWorldVisualState new.
 	containment := CFPhysicsWorldContainment new.
+	containmentBody := nil.
+	containmentChain := nil.
+	containmentGeometry := nil.
+	containmentExtent := nil.
+	containmentMargin := nil.
+	containmentFriction := nil.
+	containmentRestitution := nil.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
 	weldJoints := IdentitySet new.
@@ -517,20 +524,22 @@ CFPhysicsWorld >> captureState [
 { #category : 'private - stepping' }
 CFPhysicsWorld >> synchroniseForStateCapture [
 	self synchroniseMembership.
+	self synchroniseContainmentBoundary.
 	self retireInvalidBehaviours
 ]
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureStateAfterSynchronisation [
-	| bodies step capturedBodyStates orderedBodyStates capturedJoints index solveTicket |
+	| bodies step capturedBodyStates orderedBodyStates capturedJoints index solveTicket containmentState |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
+	containmentBody ifNotNil: [ containmentBody beginStep ].
 	step := self newStep.
 	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
 	capturedBodyStates := IdentityDictionary new.
-	orderedBodyStates := Array new: bodies size.
+	orderedBodyStates := Array new: bodies size + (containmentBody isNil ifTrue: [ 0 ] ifFalse: [ 1 ]).
 	capturedJoints := self joints collect: #capturedForStep.
 	index := 0.
 	bodies do: [ :body |
@@ -538,6 +547,10 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		bodyState := CFPhysicsBodyStepState on: body.
 		capturedBodyStates at: body put: bodyState.
 		orderedBodyStates at: (index := index + 1) put: bodyState ].
+	containmentBody ifNotNil: [
+		containmentState := CFPhysicsBodyStepState on: containmentBody.
+		capturedBodyStates at: containmentBody put: containmentState.
+		orderedBodyStates at: (index := index + 1) put: containmentState ].
 	solveTicket := self beginSolveTicket.
 	^ CFPhysicsWorldState new
 		world: self;
@@ -1564,4 +1577,79 @@ CFPhysicsWorld >> removeWheelJoint: aJoint [
 CFPhysicsWorld >> removeWheelJointsUsingBody: aBodyState [
 	(wheelJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
 		self removeWheelJoint: each ]
+]
+
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> containmentBoundaryBody [
+	^ containmentBody
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> containmentBoundaryChain [
+	^ containmentChain
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> synchroniseContainmentBoundary [
+	| shapeState extent geometry vertices localVertices material filter changed |
+	self containment isEnabled ifFalse: [
+		self removeContainmentBoundary.
+		^ self ].
+	owner ifNil: [ ^ self ].
+	shapeState := CFPhysicsShapeState on: owner.
+	extent := shapeState extent.
+	(extent x <= 0 or: [ extent y <= 0 ]) ifTrue: [
+		self removeContainmentBoundary.
+		^ self ].
+	geometry := owner geometry.
+	changed := containmentChain isNil
+		or: [ containmentGeometry ~~ geometry
+			or: [ containmentExtent ~= extent
+				or: [ containmentMargin ~= self containment margin
+					or: [ containmentFriction ~= self containment friction
+						or: [ containmentRestitution ~= self containment restitution ] ] ] ] ].
+	changed ifFalse: [ ^ self ].
+	self removeContainmentBoundary.
+	containmentBody := CFPhysicsBody element: owner world: self.
+	containmentBody sequence: 0.
+	containmentBody beStatic.
+	containmentBody shapeCollection remove: containmentBody shapeState.
+	vertices := CFPhysicsBlocGeometryBuilder
+		boundaryVerticesFor: geometry
+		extent: extent
+		margin: self containment margin.
+	localVertices := vertices collect: [ :each | each - (extent / 2.0) ].
+	material := self containment material.
+	filter := CFPhysicsCollisionFilter new.
+	containmentChain := CFPhysicsChainBuilder
+		inwardLoopFrom: localVertices
+		material: material
+		collisionFilter: filter
+		body: containmentBody.
+	containmentGeometry := geometry.
+	containmentExtent := extent.
+	containmentMargin := self containment margin.
+	containmentFriction := self containment friction.
+	containmentRestitution := self containment restitution.
+	self invalidateTopology
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> removeContainmentBoundary [
+	containmentBody ifNil: [ ^ self ].
+	contacts := contacts reject: [ :contact |
+		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
+	activeContacts := activeContacts reject: [ :contact |
+		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
+	calculationContacts := calculationContacts reject: [ :contact |
+		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
+	containmentBody := nil.
+	containmentChain := nil.
+	containmentGeometry := nil.
+	containmentExtent := nil.
+	containmentMargin := nil.
+	containmentFriction := nil.
+	containmentRestitution := nil.
+	self invalidateTopology
 ]
