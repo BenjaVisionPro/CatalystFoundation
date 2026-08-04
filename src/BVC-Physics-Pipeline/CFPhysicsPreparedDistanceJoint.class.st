@@ -104,9 +104,11 @@ CFPhysicsPreparedDistanceJoint >> motorImpulse: anObject [ motorImpulse := anObj
 
 { #category : 'writing back' }
 CFPhysicsPreparedDistanceJoint >> writeImpulsesBack [
-	joint solverCommitTarget
-		impulse: impulse;
-		lowerLimitImpulse: lowerLimitImpulse;
-		upperLimitImpulse: upperLimitImpulse;
-		motorImpulse: motorImpulse
+	| target |
+	target := joint solverCommitTarget.
+	target impulse: impulse.
+	"Prepared constraints are also constructed directly by existing extension examples. Preserve their old single-impulse contract when the newly introduced axial impulses are absent."
+	lowerLimitImpulse ifNotNil: [ target lowerLimitImpulse: lowerLimitImpulse ].
+	upperLimitImpulse ifNotNil: [ target upperLimitImpulse: upperLimitImpulse ].
+	motorImpulse ifNotNil: [ target motorImpulse: motorImpulse ]
 ]

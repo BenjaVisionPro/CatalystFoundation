@@ -55,12 +55,14 @@ CFPhysicsDistanceJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 		diagnosticNumber: self dampingRatio at: #dampingRatio;
 		text: self limitsEnabled printString at: #limitsEnabled;
 		diagnosticNumber: self minimumLength at: #minimumLength;
-		diagnosticNumber: self maximumLength at: #maximumLength;
 		text: self motorEnabled printString at: #motorEnabled;
 		diagnosticNumber: self motorSpeed at: #motorSpeed;
 		diagnosticNumber: self maximumMotorForce at: #maximumMotorForce;
 		diagnosticNumber: self impulse at: #impulse;
 		diagnosticNumber: self lowerLimitImpulse at: #lowerLimitImpulse;
 		diagnosticNumber: self upperLimitImpulse at: #upperLimitImpulse;
-		diagnosticNumber: self motorImpulse at: #motorImpulse
+		diagnosticNumber: self motorImpulse at: #motorImpulse.
+	self maximumLength isInfinite
+		ifTrue: [ anInspectorContent text: 'Unlimited' at: #maximumLength ]
+		ifFalse: [ anInspectorContent diagnosticNumber: self maximumLength at: #maximumLength ]
 ]
