@@ -129,3 +129,9 @@ CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyO
 CFPhysicsChainSegmentShape >> isSensor [
 	^ false
 ]
+
+
+{ #category : 'capturing' }
+CFPhysicsChainSegmentShape >> capturedForStep [
+	^ self shallowCopy
+]

@@ -13,7 +13,11 @@ Class {
 
 { #category : 'instance creation' }
 CFPhysicsContact class >> pair: aPair manifold: aManifold [
-	^ self new pair: aPair; manifold: aManifold; yourself
+	^ self new
+		pair: aPair;
+		shapeStatesFromPair;
+		manifold: aManifold;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -43,12 +47,14 @@ CFPhysicsContact >> previousManifold [ ^ previousManifold ]
 
 { #category : 'accessing' }
 CFPhysicsContact >> shapeStatesFromBodyStates: bodyStates [
-	firstShapeState := pair firstShape isChainSegment
-		ifTrue: [ pair firstShape ]
-		ifFalse: [ (bodyStates at: pair firstBody) shapeState ].
-	secondShapeState := pair secondShape isChainSegment
-		ifTrue: [ pair secondShape ]
-		ifFalse: [ (bodyStates at: pair secondBody) shapeState ]
+	firstShapeState := (bodyStates at: pair firstBody) shapeStateFor: pair firstShape.
+	secondShapeState := (bodyStates at: pair secondBody) shapeStateFor: pair secondShape
+]
+
+{ #category : 'accessing' }
+CFPhysicsContact >> shapeStatesFromPair [
+	firstShapeState := pair firstShape capturedForStep.
+	secondShapeState := pair secondShape capturedForStep
 ]
 
 { #category : 'testing' }

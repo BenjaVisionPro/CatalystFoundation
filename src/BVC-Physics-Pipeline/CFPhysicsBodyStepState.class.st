@@ -5,7 +5,7 @@ I represent one body's mutable state during a simulation step. I isolate solver 
 Class {
 	#name : 'CFPhysicsBodyStepState',
 	#superclass : 'Object',
-	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepThreshold', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet', 'allowFastRotation' ],
+	#instVars : [ 'body', 'bodyType', 'bodyOrigin', 'rotation', 'linearVelocity', 'angularVelocity', 'force', 'torque', 'inverseMass', 'inverseInertia', 'linearDamping', 'angularDamping', 'gravityScale', 'shapeState', 'shapeStates', 'friction', 'restitution', 'rollingResistance', 'tangentSpeed', 'awake', 'sleepingAllowed', 'sleepThreshold', 'sleepTime', 'collisionCategoryBits', 'collisionMaskBits', 'collisionGroupIndex', 'deltaPosition', 'deltaRotation', 'bullet', 'allowFastRotation' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -29,7 +29,9 @@ CFPhysicsBodyStepState >> capture [
 	linearDamping := body linearDamping.
 	angularDamping := body angularDamping.
 	gravityScale := body gravityScale.
-	shapeState := body shapeState capturedForStep.
+	shapeStates := IdentityDictionary new.
+	body shapes do: [ :each | shapeStates at: each put: each capturedForStep ].
+	shapeState := shapeStates at: body shapeState.
 	friction := body friction.
 	restitution := body restitution.
 	rollingResistance := body rollingResistance.
@@ -191,6 +193,17 @@ CFPhysicsBodyStepState >> tangentSpeed [ ^ tangentSpeed ]
 CFPhysicsBodyStepState >> inverseMass [ ^ inverseMass ]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> inverseInertia [ ^ inverseInertia ]
+
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> shapeStateFor: aShape [
+	^ shapeStates at: aShape
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyStepState >> shapeStates [
+	^ shapeStates
+]
 { #category : 'accessing' }
 CFPhysicsBodyStepState >> shapeState [ ^ shapeState ]
 

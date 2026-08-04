@@ -122,7 +122,9 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 							ifNotNil: [ previous copyForUpdate ] ]
 					ifNotNil: [ impactContact ] ].
 		contact pair: pair.
-		bodyStates ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
+		bodyStates
+			ifNil: [ contact shapeStatesFromPair ]
+			ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
 		contact updateFromPreviousContact: previous with: manifold.
 		contacts add: contact.
 		contact isTouching ifTrue: [ touching add: contact ].

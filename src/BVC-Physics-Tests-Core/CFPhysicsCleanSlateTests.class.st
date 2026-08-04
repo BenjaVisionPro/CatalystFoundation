@@ -8072,7 +8072,7 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
 	worldBody sequence: 1.
 	circleBody sequence: 2.
 	worldBody beStatic.
-	circleBody position: 50 @ 4.
+	circleBody position: 50 @ -4.
 	chain := CFPhysicsChainBuilder
 		loopFrom: { 0 @ 0. 100 @ 0. 100 @ 100. 0 @ 100 }
 		material: nil
@@ -8110,7 +8110,7 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
 	worldBody sequence: 1.
 	circleBody sequence: 2.
 	worldBody beStatic.
-	circleBody position: 50 @ -4.
+	circleBody position: 50 @ 4.
 	chain := CFPhysicsChainBuilder
 		loopFrom: { 0 @ 0. 100 @ 0. 100 @ 100. 0 @ 100 }
 		material: nil
