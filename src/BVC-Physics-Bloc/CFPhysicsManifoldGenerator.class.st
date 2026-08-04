@@ -136,6 +136,42 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin:
 
 { #category : 'private - collision' }
 CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB speculativeDistance: speculativeDistance [
+	shapeStateA isChainSegment ifTrue: [
+		shapeStateB isCircle ifTrue: [
+			^ CFPhysicsChainCircleManifoldBuilder
+				manifoldBetweenChainSegment: shapeStateA
+				bodyOrigin: bodyOriginA
+				rotation: rotationA
+				andCircleShapeState: shapeStateB
+				bodyOrigin: bodyOriginB
+				rotation: rotationB
+				speculativeDistance: speculativeDistance ].
+		^ CFPhysicsChainPolygonManifoldBuilder
+			manifoldBetweenChainSegment: shapeStateA
+			bodyOrigin: bodyOriginA
+			rotation: rotationA
+			andPolygonShapeState: shapeStateB
+			bodyOrigin: bodyOriginB
+			rotation: rotationB
+			speculativeDistance: speculativeDistance ].
+	shapeStateB isChainSegment ifTrue: [
+		shapeStateA isCircle ifTrue: [
+			^ CFPhysicsChainCircleManifoldBuilder
+				manifoldBetweenCircleShapeState: shapeStateA
+				bodyOrigin: bodyOriginA
+				rotation: rotationA
+				andChainSegment: shapeStateB
+				bodyOrigin: bodyOriginB
+				rotation: rotationB
+				speculativeDistance: speculativeDistance ].
+		^ CFPhysicsChainPolygonManifoldBuilder
+			manifoldBetweenPolygonShapeState: shapeStateA
+			bodyOrigin: bodyOriginA
+			rotation: rotationA
+			andChainSegment: shapeStateB
+			bodyOrigin: bodyOriginB
+			rotation: rotationB
+			speculativeDistance: speculativeDistance ].
 	(shapeStateA isCircle and: [ shapeStateB isCircle ]) ifTrue: [
 		^ CFPhysicsCircleManifoldBuilder
 			manifoldBetweenCircleShapeState: shapeStateA
