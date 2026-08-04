@@ -2394,12 +2394,12 @@ CFPhysicsCleanSlateTests >> prismaticJointCouplesOffsetPerpendicularAndAngularCo
 	leverA := solver prismaticJointLeverAFor: prepared direction: normal.
 	leverB := solver prismaticJointLeverBFor: prepared direction: normal.
 	self assert: leverA ~= 0.0.
-	self assert: (solver
+	self assert: ((solver
 		prismaticJointVelocityFor: prepared
 		direction: normal
 		leverA: leverA
-		leverB: leverB) closeTo: 0.0.
-	self assert: (solver weldJointRelativeAngularVelocity: prepared) closeTo: 0.0.
+		leverB: leverB) closeTo: 0.0).
+	self assert: ((solver weldJointRelativeAngularVelocity: prepared) closeTo: 0.0).
 	^ prepared
 ]
 

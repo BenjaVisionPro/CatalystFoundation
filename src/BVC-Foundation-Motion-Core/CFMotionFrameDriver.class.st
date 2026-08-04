@@ -84,6 +84,9 @@ CFMotionFrameDriver >> run [
 		elapsed := previousTime
 			ifNil: [ 0 milliSeconds ]
 			ifNotNil: [ now - previousTime ].
+		"BlRealTime uses the wall clock, which can be adjusted backwards. Frame
+		progress is monotonic, so a regressing clock contributes no elapsed time."
+		elapsed < (0 milliSeconds) ifTrue: [ elapsed := 0 milliSeconds ].
 		previousTime := now.
 		frame := CFMotionFrame
 			absoluteTime: now

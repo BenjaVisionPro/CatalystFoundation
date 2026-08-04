@@ -2112,6 +2112,28 @@ CFMotionTest >> testCoordinatorAdvancesActiveMotionsWithOneSharedFrame [
 ]
 
 { #category : 'examples - frame driver' }
+CFMotionTest >> testCoordinatorFrameDriverClampsBackwardTimeToZero [
+	<gtExample>
+	| space coordinator motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	coordinator := space cfMotionCoordinator.
+	motion := CFMotionFrameRecorder new.
+	coordinator play: motion.
+	space pulse.
+	space time wait: 17 milliSeconds.
+	space pulse.
+	space time date: space time now - (2 milliSeconds).
+	space pulse.
+	space time wait: 17 milliSeconds.
+	space pulse.
+	self assert: motion frames size equals: 4.
+	self assert: motion frames third elapsedTime equals: 0 milliSeconds.
+	self assert: motion frames fourth elapsedTime equals: 17 milliSeconds.
+	^ motion
+]
+
+{ #category : 'examples - frame driver' }
 CFMotionTest >> testCoordinatorFrameDriverUsesSpaceTime [
 	<gtExample>
 	| space coordinator motion |
@@ -2530,6 +2552,7 @@ CFMotionTest >> testIndefiniteTrackMayStartAfterFiniteTimelineContent [
 ]
 
 
+
 { #category : 'examples - behaviour lifecycle' }
 CFMotionTest >> testBehaviourLifecycleSpansPauseAndResume [
 	<gtExample>
@@ -2661,4 +2684,3 @@ CFMotionTest >> testOneMotionComposesFiniteAndIndefiniteBehaviours [
 	self assert: motion isCancelled.
 	^ indefiniteTrack
 ]
-
