@@ -577,7 +577,6 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	activeContacts := pipelineResult touchingContacts.
 	calculationContacts := previousCommittedContacts.
 	lastStepResult := pipelineResult.
-	self applyContainment.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
@@ -1397,21 +1396,9 @@ CFPhysicsWorld >> wakeJointsUsingBody: aBodyState [
 ]
 
 
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> containmentExtent [
-	^ (CFPhysicsShapeState on: owner) extent
-]
-
 { #category : 'containment' }
 CFPhysicsWorld >> containment [
 	^ containment ifNil: [ containment := CFPhysicsWorldContainment new ]
-]
-
-{ #category : 'private - containment' }
-CFPhysicsWorld >> applyContainment [
-	| bounds |
-	bounds := 0 @ 0 extent: self containmentExtent.
-	self containment applyToBodies: self bodyStatesInOrder bounds: bounds
 ]
 
 

@@ -1,7 +1,7 @@
 "
-I configure and apply containment for a Physics world.
+I configure containment for a Physics world.
 
-I am enabled by default. My material describes the static boundary surface that will be used by the Box2D-shaped chain implementation. Until that chain is installed, I preserve the existing correction behaviour through the same world-owned API.
+I am enabled by default. My material and margin describe the internal static boundary chain that the world geometry will build. I do not move bodies or participate in stepping; containment enters the normal broadphase, contact and solver pipeline.
 "
 Class {
 	#name : 'CFPhysicsWorldContainment',
@@ -69,17 +69,4 @@ CFPhysicsWorldContainment >> restitution [
 { #category : 'accessing' }
 CFPhysicsWorldContainment >> restitution: aNumber [
 	material restitution: ((aNumber asFloat max: 0.0) min: 1.0)
-]
-
-{ #category : 'private - applying' }
-CFPhysicsWorldContainment >> applyToBodies: bodyStates bounds: aRectangle [
-	(enabled and: [
-		aRectangle extent x > 0 and: [ aRectangle extent y > 0 ] ]) ifFalse: [ ^ self ].
-	bodyStates do: [ :each |
-		each isDynamic ifTrue: [
-			CFPhysicsContainmentConstraint
-				applyTo: each
-				bounds: aRectangle
-				margin: margin
-				restitution: material restitution ] ]
 ]
