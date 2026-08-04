@@ -21,7 +21,7 @@ CFPhysicsShapeCollection class >> with: aShape [
 { #category : 'adding' }
 CFPhysicsShapeCollection >> add: aShape [
 	shapes add: aShape.
-	^ aShapeState
+	^ aShape
 ]
 
 { #category : 'enumerating' }
