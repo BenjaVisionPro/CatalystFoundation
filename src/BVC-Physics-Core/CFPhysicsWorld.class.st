@@ -637,7 +637,7 @@ CFPhysicsWorld >> stepRecordingTelemetry [
 
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
-	| solvedIslands dynamicBodyStates sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse worstVelocitySequence |
+	| solvedIslands dynamicBodyStates sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
 	dynamicBodyStates := aStepResult bodyStates values select: [ :each | each bodyType isDynamic ].
 	step := aStepResult step.
 	sleepConfiguration := stepPipeline sleepConfiguration.
@@ -694,9 +694,7 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 	worstCorrectionVelocity := 0.0.
 	worstNormalImpulse := 0.0.
 	worstTangentImpulse := 0.0.
-	worstVelocitySequence := 0.
 	worstState ifNotNil: [
-		worstVelocitySequence := worstState body sequence.
 		worstMaximumVelocity := worstState linearVelocity r
 			+ (worstState angularVelocity abs * worstState shapeState boundingRadius).
 		step timeStep > 0.0 ifTrue: [
@@ -755,12 +753,6 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #worstSleepNormalImpulse put: worstNormalImpulse;
 		at: #worstSleepTangentImpulse put: worstTangentImpulse;
 		at: #worstSleepReason put: (worstCorrectionVelocity > worstMaximumVelocity ifTrue: [ #correction ] ifFalse: [ #velocity ]);
-		at: #worstSleepVelocityIntegrationDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #velocityIntegration solver: aStepResult solver);
-		at: #worstSleepWarmStartDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #warmStart solver: aStepResult solver);
-		at: #worstSleepBiasedSolveDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #biasedSolve solver: aStepResult solver);
-		at: #worstSleepRelaxationDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #relaxation solver: aStepResult solver);
-		at: #worstSleepRestitutionDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #restitution solver: aStepResult solver);
-		at: #worstSleepMostIncreasingSubstepTrace put: (aStepResult solver mostIncreasingSubstepVelocityTraceForBodySequence: worstVelocitySequence);
 		at: #contactCount put: activeContacts size;
 		at: #persistentContactCount put: contacts size;
 		at: #beganContactCount put: aStepResult beganContacts size;
@@ -812,15 +804,6 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #preparedJointConstraintCount put: self constraintPreparationMeasurements preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: self constraintPreparationMeasurements preparedObjectCount;
 		yourself
-]
-
-
-{ #category : 'private - telemetry' }
-CFPhysicsWorld >> maximumLinearDeltaForBodySequence: aSequence stage: aStage solver: aSolver [
-	| measurement |
-	aSequence = 0 ifTrue: [ ^ 0.0 ].
-	measurement := aSolver stageVelocityMeasurementForBodySequence: aSequence at: aStage.
-	^ measurement at: #maximumLinearDelta ifAbsent: [ 0.0 ]
 ]
 
 

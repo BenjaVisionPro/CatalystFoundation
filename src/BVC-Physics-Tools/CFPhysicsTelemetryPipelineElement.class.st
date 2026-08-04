@@ -18,8 +18,6 @@ Class {
 		'sleepSummaryLabel',
 		'sleepRatiosSummaryLabel',
 		'worstBodySummaryLabel',
-		'velocityStagesSummaryLabel',
-		'substepVelocitySummaryLabel',
 		'solverSummaryLabel',
 		'graph'
 	],
@@ -88,8 +86,6 @@ CFPhysicsTelemetryPipelineElement >> build [
 	sleepSummaryLabel := self profileSummaryLabel.
 	sleepRatiosSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
-	velocityStagesSummaryLabel := self profileSummaryLabel.
-	substepVelocitySummaryLabel := self profileSummaryLabel.
 	solverSummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
@@ -100,8 +96,6 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: sleepSummaryLabel;
 		addChild: sleepRatiosSummaryLabel;
 		addChild: worstBodySummaryLabel;
-		addChild: velocityStagesSummaryLabel;
-		addChild: substepVelocitySummaryLabel;
 		addChild: solverSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
@@ -269,54 +263,6 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: ((data at: #worstSleepNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPut: $/;
 			nextPutAll: ((data at: #worstSleepTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
-	velocityStagesSummaryLabel text: (String streamContents: [ :stream |
-		stream
-			nextPutAll: 'Worst Δv     Integrate ';
-			nextPutAll: ((data at: #worstSleepVelocityIntegrationDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
-			nextPutAll: '   Warm ';
-			nextPutAll: ((data at: #worstSleepWarmStartDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
-			nextPutAll: '   Bias ';
-			nextPutAll: ((data at: #worstSleepBiasedSolveDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
-			nextPutAll: '   Relax ';
-			nextPutAll: ((data at: #worstSleepRelaxationDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
-			nextPutAll: '   Restitution ';
-			nextPutAll: ((data at: #worstSleepRestitutionDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
-	substepVelocitySummaryLabel text: (String streamContents: [ :stream |
-		| trace captured integrated warmStarted biasedSolved relaxed capturedSpeed integratedSpeed warmStartedSpeed biasedSolvedSpeed relaxedSpeed |
-		trace := data at: #worstSleepMostIncreasingSubstepTrace ifAbsent: [ Dictionary new ].
-		captured := trace at: #capturedLinearVelocity ifAbsent: [ 0 @ 0 ].
-		integrated := trace at: #integratedLinearVelocity ifAbsent: [ 0 @ 0 ].
-		warmStarted := trace at: #warmStartedLinearVelocity ifAbsent: [ 0 @ 0 ].
-		biasedSolved := trace at: #biasedSolvedLinearVelocity ifAbsent: [ 0 @ 0 ].
-		relaxed := trace at: #relaxedLinearVelocity ifAbsent: [ 0 @ 0 ].
-		capturedSpeed := captured r asFloat.
-		integratedSpeed := integrated r asFloat.
-		warmStartedSpeed := warmStarted r asFloat.
-		biasedSolvedSpeed := biasedSolved r asFloat.
-		relaxedSpeed := relaxed r asFloat.
-		stream
-			nextPutAll: 'Worst substep #';
-			nextPutAll: (trace at: #substep ifAbsent: [ 0 ]) printString;
-			nextPutAll: '   Speed captured/integrated/warm/bias/relax ';
-			nextPutAll: (capturedSpeed printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: (integratedSpeed printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: (warmStartedSpeed printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: (biasedSolvedSpeed printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: (relaxedSpeed printShowingDecimalPlaces: 3);
-			nextPutAll: '   Delta integrate/warm/bias/relax ';
-			nextPutAll: ((integratedSpeed - capturedSpeed) printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: ((warmStartedSpeed - integratedSpeed) printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: ((biasedSolvedSpeed - warmStartedSpeed) printShowingDecimalPlaces: 3);
-			nextPut: $/;
-			nextPutAll: ((relaxedSpeed - biasedSolvedSpeed) printShowingDecimalPlaces: 3);
-			nextPutAll: '   Net ';
-			nextPutAll: ((relaxedSpeed - capturedSpeed) printShowingDecimalPlaces: 3) ]).
 	solverSummaryLabel text: (String streamContents: [ :stream |
 		stream
 			nextPutAll: 'Solver       Penetration initial/final/avg ';
