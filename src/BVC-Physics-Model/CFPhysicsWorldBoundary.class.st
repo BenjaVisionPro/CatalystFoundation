@@ -49,14 +49,3 @@ CFPhysicsWorldBoundary >> restitution: aNumber [
 	restitution := (aNumber asFloat max: 0.0) min: 1.0
 ]
 
-{ #category : 'applying' }
-CFPhysicsWorldBoundary >> applyTo: aBodyState bounds: aRectangle [
-	(enabled and: [
-		aBodyState isDynamic and: [
-			aRectangle extent x > 0 and: [ aRectangle extent y > 0 ] ] ]) ifFalse: [ ^ self ].
-	CFPhysicsContainmentConstraint
-		applyTo: aBodyState
-		bounds: aRectangle
-		margin: margin
-		restitution: restitution
-]

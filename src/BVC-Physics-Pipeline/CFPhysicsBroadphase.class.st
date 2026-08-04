@@ -55,7 +55,7 @@ CFPhysicsBroadphase >> synchroniseProxiesWith: stepStates statesByBody: statesBy
 	| currentShapes removedShapes |
 	currentShapes := IdentitySet new.
 	stepStates do: [ :state |
-		state body shapes withIndexDo: [ :shape :index |
+		state body collisionShapes withIndexDo: [ :shape :index |
 			currentShapes add: shape.
 			self
 				synchroniseProxyForShape: shape
@@ -120,7 +120,7 @@ CFPhysicsBroadphase >> touchProxyForBody: aBody [
 	Box2D uses this path when a joint begins allowing its connected bodies to
 	collide, because neither body need move for the broadphase to reconsider
 	the pair."
-	aBody shapes do: [ :shape |
+	aBody collisionShapes do: [ :shape |
 		(proxiesByShape includesKey: shape) ifTrue: [ movedShapes add: shape ] ].
 	^ self
 ]

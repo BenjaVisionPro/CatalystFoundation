@@ -43,25 +43,29 @@ CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
 
 { #category : 'private - building' }
 CFPhysicsConstraintBuilder >> constraintFrom: contact bodyStateA: stateA bodyStateB: stateB warmStartRatio: warmStartRatio [
-	| normal tangent constraint rollingDenominator maximumRadius |
+	| normal tangent constraint rollingDenominator maximumRadius firstShapeState secondShapeState firstMaterial secondMaterial |
 	normal := contact manifold normal.
+	firstShapeState := contact firstShapeState.
+	secondShapeState := contact secondShapeState.
+	firstMaterial := firstShapeState material.
+	secondMaterial := secondShapeState material.
 	tangent := normal y @ normal x negated.
 	constraint := CFPhysicsPreparedConstraint new.
 	createdConstraintCount := createdConstraintCount + 1.
 	rollingDenominator := stateA inverseInertia + stateB inverseInertia.
-	maximumRadius := stateA shapeState rollingResistanceRadius max: stateB shapeState rollingResistanceRadius.
+	maximumRadius := firstShapeState rollingResistanceRadius max: secondShapeState rollingResistanceRadius.
 	constraint
 		contact: contact;
 		bodyStateA: stateA;
 		bodyStateB: stateB;
 		normal: normal;
 		tangent: tangent;
-		friction: (stateA friction * stateB friction) sqrt;
-		restitution: (stateA restitution max: stateB restitution);
-		rollingResistance: (stateA rollingResistance max: stateB rollingResistance) * maximumRadius;
+		friction: (firstMaterial friction * secondMaterial friction) sqrt;
+		restitution: (firstMaterial restitution max: secondMaterial restitution);
+		rollingResistance: (firstMaterial rollingResistance max: secondMaterial rollingResistance) * maximumRadius;
 		rollingMass: (rollingDenominator = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / rollingDenominator ]);
 		rollingImpulse: contact manifold rollingImpulse * warmStartRatio;
-		tangentSpeed: stateA tangentSpeed + stateB tangentSpeed.
+		tangentSpeed: firstMaterial tangentSpeed + secondMaterial tangentSpeed.
 	constraint points: (self
 		pointsFrom: contact manifold contactPoints
 		contact: contact
