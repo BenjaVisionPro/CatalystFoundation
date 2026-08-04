@@ -901,11 +901,11 @@ CFPhysicsCleanSlateTests >> preparedContactConstraintsAreStepLocal [
 	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	firstContact := world activeContacts first.
-	firstConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	firstConstraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	firstPoint := firstConstraint points first.
 	world step.
 	secondContact := world activeContacts first.
-	secondConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	secondConstraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	secondPoint := secondConstraint points first.
 	self assert: secondContact ~~ firstContact.
 	self assert: secondConstraint ~~ firstConstraint.
@@ -922,7 +922,7 @@ CFPhysicsCleanSlateTests >> returningContactBuildsFreshPreparedConstraint [
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
 	movingBody := world bodyStatesInOrder second.
 	contact := world activeContacts first.
-	constraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	constraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	movingBody position: 20 @ 100.
 	world step.
 	self assert: world activeContacts isEmpty.
@@ -930,7 +930,7 @@ CFPhysicsCleanSlateTests >> returningContactBuildsFreshPreparedConstraint [
 	world step.
 	self assert: world activeContacts size equals: 1.
 	returnedContact := world activeContacts first.
-	returnedConstraint := (world lastStepResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	returnedConstraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	returnedPoint := returnedConstraint points first.
 	returnedManifoldPoint := returnedContact manifold contactPoints first.
 	self assert: returnedContact == contact.
@@ -5907,7 +5907,7 @@ CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentPreparedConstra
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
-	calculationConstraint := (solution pipelineResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	calculationConstraint := (solution pipelineResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	self assert: world activeContacts first == committedContact.
 	self assert: committedContact manifold == committedManifold.
 	self assert: calculationContact ~~ committedContact.
@@ -5925,7 +5925,7 @@ CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentConstraintPoint
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
-	calculationConstraint := (solution pipelineResult constraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
+	calculationConstraint := (solution pipelineResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	calculationPoint := calculationConstraint points first.
 	self assert: world activeContacts first == committedContact.
 	self assert: committedContact manifold contactPoints first == committedManifoldPoint.
