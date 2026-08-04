@@ -161,3 +161,37 @@ CFPhysicsChainSegmentShape >> isSensor [
 CFPhysicsChainSegmentShape >> capturedForStep [
 	^ self shallowCopy
 ]
+
+{ #category : 'continuous collision' }
+CFPhysicsChainSegmentShape >> sweptAABBAlong: aSweep [
+	| startTransform endTransform startBounds endBounds radius startCentre endCentre minimum maximum |
+	startTransform := aSweep startTransform.
+	endTransform := aSweep endTransform.
+	startBounds := self
+		aabbAtBodyOrigin: startTransform bodyOrigin
+		rotation: startTransform rotation.
+	endBounds := self
+		aabbAtBodyOrigin: endTransform bodyOrigin
+		rotation: endTransform rotation.
+	startTransform rotation = endTransform rotation ifTrue: [
+		^ startBounds mergedWith: endBounds ].
+
+	radius := self boundingRadius.
+	startCentre := startTransform bodyOrigin.
+	endCentre := endTransform bodyOrigin.
+	minimum := ((startCentre x min: endCentre x) - radius)
+		@ ((startCentre y min: endCentre y) - radius).
+	maximum := ((startCentre x max: endCentre x) + radius)
+		@ ((startCentre y max: endCentre y) + radius).
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> boundingRadius [
+	^ point1 r max: point2 r
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> rollingResistanceRadius [
+	^ 0.0
+]
