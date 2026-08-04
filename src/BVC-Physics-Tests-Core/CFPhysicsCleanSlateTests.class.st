@@ -789,8 +789,8 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesTheComposedStep [
 	self assert: result beganContacts size equals: 1.
 	self assert: result activeContacts size equals: 1.
 	self assert: result bodyStates size equals: 2.
-	self assert: result constraints size equals: 1.
-	self assert: result constraints first contact == result activeContacts first.
+	self assert: result contactConstraints size equals: 1.
+	self assert: result contactConstraints first contact == result activeContacts first.
 	self assert: result solver notNil.
 	^ result
 ]
@@ -996,7 +996,7 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesExplicitIslands [
 	| result |
 	result := self stepPipelineExposesTheComposedStep.
 	self assert: result islands size equals: 1.
-	self assert: result islands first constraints equals: result constraints.
+	self assert: result islands first constraints equals: result solverConstraints.
 	self assert: result solver islands equals: result islands.
 	self assert: result solver softStepSolvers size equals: result islands size.
 	^ result
@@ -1420,7 +1420,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 	self assert: result stageExecutions first output == result bodyStates.
 	self assert: result stageExecutions second output equals: result pairs.
 	self assert: result stageExecutions third output == result contactResult.
-	self assert: result stageExecutions fourth output equals: result constraints.
+	self assert: result stageExecutions fourth output equals: result solverConstraints.
 	self assert: result stageExecutions fifth output equals: result islands.
 	self assert: (result stageExecutions at: 7) output == result solver.
 	self assert: (result stageExecutions at: 8) output contactResults equals: result contactSolveResults.
@@ -1452,9 +1452,9 @@ CFPhysicsCleanSlateTests >> postSolveCollectorCapturesSolvedImpulses [
 	<gtExample>
 	| result solveResult pointResult constraint |
 	result := self stepPipelineExposesTheComposedStep.
-	self assert: result contactSolveResults size equals: result constraints size.
+	self assert: result contactSolveResults size equals: result contactConstraints size.
 	solveResult := result contactSolveResults first.
-	constraint := result constraints first.
+	constraint := result contactConstraints first.
 	self assert: solveResult contact == constraint contact.
 	self assert: solveResult normal equals: constraint normal.
 	self assert: solveResult points size equals: constraint points size.
@@ -1768,7 +1768,7 @@ CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 		restitutionThreshold: 1.0.
 	self assert: result activeContacts size equals: 1.
 	self assert: result beganContacts size equals: 1.
-	self assert: result constraints size equals: 1.
+	self assert: result contactConstraints size equals: 1.
 	self assert: result contactSolveResults size equals: 1.
 	^ result
 ]

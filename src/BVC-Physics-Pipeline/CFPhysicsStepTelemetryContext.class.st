@@ -158,7 +158,7 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #pairFinderComparisonCount put: pairFinder comparisonCount;
 		at: #pairFinderAcceptedPairCount put: pairFinder acceptedPairCount;
 		at: #pairFinderMaximumActiveCount put: pairFinder maximumActiveCount;
-		at: #constraintCount put: result constraints size;
+		at: #constraintCount put: result solverConstraints size;
 		at: #jointCount put: jointCount;
 		at: #islandCount put: result islands size;
 		at: #solvedIslandCount put: solvedIslands size;

@@ -20,7 +20,7 @@ CFPhysicsPostSolveStage >> initialize [
 CFPhysicsPostSolveStage >> executeOn: aStepResult [
 	| batch |
 	collector hitEventThreshold: aStepResult step hitEventThreshold.
-	batch := collector collectFrom: aStepResult constraints.
+	batch := collector collectFrom: aStepResult contactConstraints.
 	aStepResult
 		contactSolveResults: batch contactResults;
 		hitEvents: batch hitEvents.

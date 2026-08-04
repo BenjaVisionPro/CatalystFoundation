@@ -36,11 +36,14 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 		warmStartRatio: aStepResult step warmStartRatio.
 	jointConstraints := self jointConstraintsFor: aStepResult.
 	preparedJointConstraintCount := jointConstraints size.
-	aStepResult jointConstraints: jointConstraints.
-	aStepResult constraints: (self
-		contactConstraints: contactConstraints
-		followedBy: jointConstraints).
-	^ aStepResult constraints
+	aStepResult
+		contactConstraints: contactConstraints;
+		jointConstraints: jointConstraints;
+		constraints: jointConstraints;
+		solverConstraints: (self
+			contactConstraints: contactConstraints
+			followedBy: jointConstraints).
+	^ aStepResult solverConstraints
 ]
 
 { #category : 'private - building' }

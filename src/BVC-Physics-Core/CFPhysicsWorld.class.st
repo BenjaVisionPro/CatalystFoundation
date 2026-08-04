@@ -772,7 +772,7 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #broadphaseProxyCount put: self pairFinderMeasurements proxyCount;
 		at: #broadphaseMovedProxyCount put: self pairFinderMeasurements movedProxyCount;
 		at: #broadphaseQueryVisitCount put: self pairFinderMeasurements queryVisitCount;
-		at: #constraintCount put: aStepResult constraints size;
+		at: #constraintCount put: aStepResult solverConstraints size;
 		at: #jointCount put: self joints size;
 		at: #islandCount put: aStepResult islands size;
 		at: #solvedIslandCount put: solvedIslands size;

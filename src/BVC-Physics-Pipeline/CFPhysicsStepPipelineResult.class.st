@@ -5,7 +5,7 @@ I carry the mutable working state of one pipeline execution. I connect stage out
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs', 'islandBodyGroups' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'contactConstraints', 'solverConstraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs', 'islandBodyGroups' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -18,6 +18,8 @@ CFPhysicsStepPipelineResult >> initialize [
 	calculationContacts := #().
 	pairs := #().
 	constraints := #().
+	contactConstraints := #().
+	solverConstraints := #().
 	joints := #().
 	islands := #().
 	sleepDecisions := #().
@@ -77,9 +79,27 @@ CFPhysicsStepPipelineResult >> orderedBodyStates [ ^ orderedBodyStates ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> orderedBodyStates: aCollection [ orderedBodyStates := aCollection asArray ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> constraints [ ^ constraints ]
+CFPhysicsStepPipelineResult >> constraints [
+	"Compatibility name for prepared joint constraints. Contacts remain separate, matching Box2D's solver model."
+	^ constraints
+]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> constraints: aCollection [ constraints := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactConstraints [
+	^ contactConstraints
+]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> contactConstraints: aCollection [ contactConstraints := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> solverConstraints [
+	"Private combined sequence consumed by island construction and solving."
+	^ solverConstraints
+]
+{ #category : 'accessing' }
+CFPhysicsStepPipelineResult >> solverConstraints: aCollection [ solverConstraints := aCollection asArray ]
 
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> jointConstraints [ ^ jointConstraints ]
