@@ -34,13 +34,6 @@ CFPhysicsShapeState >> captureGeometry [
 ]
 
 { #category : 'capturing' }
-CFPhysicsShapeState >> captureCollisionGeometryForExtent: anExtent [
-	self subclassResponsibility
-]
-
-
-
-{ #category : 'capturing' }
 CFPhysicsShapeState >> uncapturedCollisionGeometry [
 	^ self captureCollisionGeometryForExtent: self extent
 ]
