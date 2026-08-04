@@ -18,6 +18,7 @@ Class {
 		'sleepSummaryLabel',
 		'sleepRatiosSummaryLabel',
 		'worstBodySummaryLabel',
+		'velocityStagesSummaryLabel',
 		'solverSummaryLabel',
 		'graph'
 	],
@@ -86,6 +87,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	sleepSummaryLabel := self profileSummaryLabel.
 	sleepRatiosSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
+	velocityStagesSummaryLabel := self profileSummaryLabel.
 	solverSummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
@@ -96,6 +98,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: sleepSummaryLabel;
 		addChild: sleepRatiosSummaryLabel;
 		addChild: worstBodySummaryLabel;
+		addChild: velocityStagesSummaryLabel;
 		addChild: solverSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
@@ -263,6 +266,18 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: ((data at: #worstSleepNormalImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPut: $/;
 			nextPutAll: ((data at: #worstSleepTangentImpulse ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
+	velocityStagesSummaryLabel text: (String streamContents: [ :stream |
+		stream
+			nextPutAll: 'Worst Δv     Integrate ';
+			nextPutAll: ((data at: #worstSleepVelocityIntegrationDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Warm ';
+			nextPutAll: ((data at: #worstSleepWarmStartDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Bias ';
+			nextPutAll: ((data at: #worstSleepBiasedSolveDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Relax ';
+			nextPutAll: ((data at: #worstSleepRelaxationDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
+			nextPutAll: '   Restitution ';
+			nextPutAll: ((data at: #worstSleepRestitutionDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
 	solverSummaryLabel text: (String streamContents: [ :stream |
 		stream
 			nextPutAll: 'Solver       Penetration initial/final/avg ';

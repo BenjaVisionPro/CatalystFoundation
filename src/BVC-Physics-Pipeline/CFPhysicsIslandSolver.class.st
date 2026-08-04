@@ -112,3 +112,13 @@ CFPhysicsIslandSolver >> totalNormalImpulse [
 CFPhysicsIslandSolver >> totalTangentImpulse [
 	^ softStepSolvers inject: 0.0 into: [ :total :solver | total + solver totalTangentImpulse ]
 ]
+
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> stageVelocityMeasurementForBodySequence: aSequence at: aStage [
+	| solver |
+	solver := softStepSolvers
+		detect: [ :each | each bodyStates anySatisfy: [ :state | state body sequence = aSequence ] ]
+		ifNone: [ ^ Dictionary new ].
+	^ solver stageVelocityMeasurementForBodySequence: aSequence at: aStage
+]
