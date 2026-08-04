@@ -402,7 +402,6 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeWeldJointsUsingBody: body.
 		self removePrismaticJointsUsingBody: body.
 		self removeWheelJointsUsingBody: body.
-		self removeContainmentsUsingBody: body.
 		contacts := contacts reject: [ :contact |
 			contact firstBody == body or: [ contact secondBody == body ] ].
 		activeContacts := activeContacts reject: [ :contact |
@@ -530,7 +529,6 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
-	self prepareContainmentForStep.
 	capturedBodyStates := IdentityDictionary new.
 	orderedBodyStates := Array new: bodies size.
 	capturedJoints := self joints collect: #capturedForStep.
@@ -556,7 +554,6 @@ CFPhysicsWorld >> captureStateAfterSynchronisation [
 		step: step;
 		gravity: (self accelerationUnitsForMetresPerSecondSquared: gravity);
 		restitutionThreshold: (self lengthUnitsForMetres: restitutionThreshold);
-		explicitlyContainedBodies: explicitlyContainedBodies;
 		islandBodyGroups: persistentIslandGraph solverBodyGroups;
 		calculationVisualState: (visualStateConsumers > 0
 			ifTrue: [ calculationVisualState ]
@@ -580,7 +577,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	activeContacts := pipelineResult touchingContacts.
 	calculationContacts := previousCommittedContacts.
 	lastStepResult := pipelineResult.
-	self applyDefaultBoundaryExcept: aWorldSolution explicitlyContainedBodies.
+	self applyContainment.
 	previousTimeStep := step timeStep.
 	simulationTime := simulationTime + step timeStep.
 	stepNumber := step stepNumber.
@@ -1411,7 +1408,7 @@ CFPhysicsWorld >> containment [
 ]
 
 { #category : 'private - containment' }
-CFPhysicsWorld >> prepareContainmentForStep [
+CFPhysicsWorld >> applyContainment [
 	| bounds |
 	bounds := 0 @ 0 extent: self containmentExtent.
 	self containment applyToBodies: self bodyStatesInOrder bounds: bounds

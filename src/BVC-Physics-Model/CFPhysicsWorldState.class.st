@@ -6,7 +6,7 @@ My responsibility is to provide the isolated bodies, contacts, joints and config
 Class {
 	#name : 'CFPhysicsWorldState',
 	#superclass : 'Object',
-	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'explicitlyContainedBodies', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'calculationVisualState', 'islandBodyGroups' ],
+	#instVars : [ 'bodies', 'contacts', 'calculationContacts', 'joints', 'step', 'gravity', 'restitutionThreshold', 'collisionSuppressedBodyPairs', 'bodyStates', 'orderedBodyStates', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'calculationVisualState', 'islandBodyGroups' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -18,7 +18,6 @@ CFPhysicsWorldState >> initialize [
 	contacts := #().
 	calculationContacts := #().
 	joints := #().
-	explicitlyContainedBodies := #().
 	collisionSuppressedBodyPairs := #().
 	bodyStates := IdentityDictionary new.
 	orderedBodyStates := #().
@@ -73,14 +72,6 @@ CFPhysicsWorldState >> restitutionThreshold [
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> restitutionThreshold: aNumber [ restitutionThreshold := aNumber ]
-
-{ #category : 'accessing' }
-CFPhysicsWorldState >> explicitlyContainedBodies [ ^ explicitlyContainedBodies ]
-
-{ #category : 'accessing' }
-CFPhysicsWorldState >> explicitlyContainedBodies: aCollection [
-	explicitlyContainedBodies := aCollection asArray
-]
 
 { #category : 'accessing' }
 CFPhysicsWorldState >> collisionSuppressedBodyPairs [ ^ collisionSuppressedBodyPairs ]

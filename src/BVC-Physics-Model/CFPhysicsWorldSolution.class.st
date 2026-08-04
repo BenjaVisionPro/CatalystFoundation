@@ -6,23 +6,16 @@ My responsibility is to carry pipeline output and validation identity back to th
 Class {
 	#name : 'CFPhysicsWorldSolution',
 	#superclass : 'Object',
-	#instVars : [ 'pipelineResult', 'explicitlyContainedBodies', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'visualState' ],
+	#instVars : [ 'pipelineResult', 'world', 'lifetimeGeneration', 'topologyRevision', 'solveTicket', 'visualState' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
 
 { #category : 'instance creation' }
-CFPhysicsWorldSolution class >> pipelineResult: aPipelineResult explicitlyContainedBodies: aCollection [
+CFPhysicsWorldSolution class >> pipelineResult: aPipelineResult [
 	^ self new
 		pipelineResult: aPipelineResult;
-		explicitlyContainedBodies: aCollection;
 		yourself
-]
-
-{ #category : 'initialization' }
-CFPhysicsWorldSolution >> initialize [
-	super initialize.
-	explicitlyContainedBodies := #()
 ]
 
 { #category : 'accessing' }
@@ -30,15 +23,6 @@ CFPhysicsWorldSolution >> pipelineResult [ ^ pipelineResult ]
 
 { #category : 'accessing' }
 CFPhysicsWorldSolution >> pipelineResult: anObject [ pipelineResult := anObject ]
-
-{ #category : 'accessing' }
-CFPhysicsWorldSolution >> explicitlyContainedBodies [ ^ explicitlyContainedBodies ]
-
-{ #category : 'accessing' }
-CFPhysicsWorldSolution >> explicitlyContainedBodies: aCollection [
-	explicitlyContainedBodies := aCollection asArray
-]
-
 
 { #category : 'accessing - solution identity' }
 CFPhysicsWorldSolution >> world [ ^ world ]
