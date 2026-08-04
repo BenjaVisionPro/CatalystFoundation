@@ -862,6 +862,7 @@ CFPhysicsCleanSlateTests >> worldDelegatesOneStepToTheExplicitPipeline [
 	owner addChild: ground.
 	owner addChild: box.
 	world := owner physics beWorld.
+	world containment disable.
 	world
 		gravity: 0 @ 0;
 		synchroniseMembership.
