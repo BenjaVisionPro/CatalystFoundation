@@ -87,7 +87,14 @@ CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates spec
 				bodyOrigin: secondTransform bodyOrigin
 				rotation: secondTransform rotation
 				speculativeDistance: speculativeDistance ].
-		^ nil ].
+		^ CFPhysicsChainPolygonManifoldBuilder
+			manifoldBetweenChainSegment: firstShape
+			bodyOrigin: firstTransform bodyOrigin
+			rotation: firstTransform rotation
+			andPolygonShapeState: secondShape
+			bodyOrigin: secondTransform bodyOrigin
+			rotation: secondTransform rotation
+			speculativeDistance: speculativeDistance ].
 	secondShape isChainSegment ifTrue: [
 		firstShape isCircle ifTrue: [
 			^ CFPhysicsChainCircleManifoldBuilder
@@ -98,7 +105,14 @@ CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates spec
 				bodyOrigin: secondTransform bodyOrigin
 				rotation: secondTransform rotation
 				speculativeDistance: speculativeDistance ].
-		^ nil ].
+		^ CFPhysicsChainPolygonManifoldBuilder
+			manifoldBetweenPolygonShapeState: firstShape
+			bodyOrigin: firstTransform bodyOrigin
+			rotation: firstTransform rotation
+			andChainSegment: secondShape
+			bodyOrigin: secondTransform bodyOrigin
+			rotation: secondTransform rotation
+			speculativeDistance: speculativeDistance ].
 	^ self
 		manifoldBetweenShapeState: firstShape
 		bodyOrigin: firstTransform bodyOrigin

@@ -8135,3 +8135,79 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
 	self assert: manifold isNil.
 	^ manifold
 ]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentPolygonManifoldUsesOneSidedCollision [
+	<gtExample>
+	| worldElement worldBody boxElement boxBody chain segment pair states manifold |
+	worldElement := BlElement new size: 100 @ 100; yourself.
+	boxElement := BlElement new size: 10 @ 10; yourself.
+	worldBody := CFPhysicsBody element: worldElement world: nil.
+	boxBody := CFPhysicsBody element: boxElement world: nil.
+	worldBody sequence: 1.
+	boxBody sequence: 2.
+	worldBody beStatic.
+	boxBody position: 45 @ -6.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { -50 @ -50. 50 @ -50. 50 @ 50. -50 @ 50 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	segment := chain segments first.
+	pair := CFPhysicsPair
+		firstBody: worldBody
+		shape: segment
+		shapeIndex: segment segmentIndex
+		secondBody: boxBody
+		shape: boxBody shapeState
+		shapeIndex: 0.
+	states := IdentityDictionary new
+		at: worldBody put: (CFPhysicsBodyStepState on: worldBody);
+		at: boxBody put: (CFPhysicsBodyStepState on: boxBody);
+		yourself.
+	manifold := CFPhysicsManifoldGenerator new
+		manifoldForPair: pair
+		bodyStates: states
+		speculativeDistance: 0.0.
+	self assert: manifold notNil.
+	self assert: manifold normal y < 0.0.
+	self assert: manifold contactPoints notEmpty.
+	^ manifold
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
+	<gtExample>
+	| worldElement worldBody boxElement boxBody chain segment pair states manifold |
+	worldElement := BlElement new size: 100 @ 100; yourself.
+	boxElement := BlElement new size: 10 @ 10; yourself.
+	worldBody := CFPhysicsBody element: worldElement world: nil.
+	boxBody := CFPhysicsBody element: boxElement world: nil.
+	worldBody sequence: 1.
+	boxBody sequence: 2.
+	worldBody beStatic.
+	boxBody position: 45 @ 4.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { -50 @ -50. 50 @ -50. 50 @ 50. -50 @ 50 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	segment := chain segments first.
+	pair := CFPhysicsPair
+		firstBody: worldBody
+		shape: segment
+		shapeIndex: segment segmentIndex
+		secondBody: boxBody
+		shape: boxBody shapeState
+		shapeIndex: 0.
+	states := IdentityDictionary new
+		at: worldBody put: (CFPhysicsBodyStepState on: worldBody);
+		at: boxBody put: (CFPhysicsBodyStepState on: boxBody);
+		yourself.
+	manifold := CFPhysicsManifoldGenerator new
+		manifoldForPair: pair
+		bodyStates: states
+		speculativeDistance: 0.0.
+	self assert: manifold isNil.
+	^ manifold
+]
