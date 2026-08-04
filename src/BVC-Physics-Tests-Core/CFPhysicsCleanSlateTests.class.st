@@ -7808,3 +7808,65 @@ CFPhysicsCleanSlateTests >> capturedGeometryDoesNotRetainBlocGeometry [
 	self assert: geometry ~~ element geometry.
 	^ geometry
 ]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainLoopBuildsBox2DGhostVertices [
+	<gtExample>
+	| vertices chain first second fourth |
+	vertices := { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }.
+	chain := CFPhysicsChainBuilder
+		loopFrom: vertices
+		material: nil
+		collisionFilter: nil.
+	self assert: chain isLoop.
+	self assert: chain vertices equals: vertices.
+	self assert: chain segments size equals: 4.
+	first := chain segments first.
+	second := chain segments second.
+	fourth := chain segments fourth.
+	self assert: first segmentIndex equals: 1.
+	self assert: first ghost1 equals: 0 @ 10.
+	self assert: first point1 equals: 0 @ 0.
+	self assert: first point2 equals: 10 @ 0.
+	self assert: first ghost2 equals: 10 @ 10.
+	self assert: second ghost1 equals: 0 @ 0.
+	self assert: second point1 equals: 10 @ 0.
+	self assert: second point2 equals: 10 @ 10.
+	self assert: second ghost2 equals: 0 @ 10.
+	self assert: fourth ghost1 equals: 10 @ 10.
+	self assert: fourth point1 equals: 0 @ 10.
+	self assert: fourth point2 equals: 0 @ 0.
+	self assert: fourth ghost2 equals: 10 @ 0.
+	self assert: first chain == chain.
+	^ chain
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> inwardChainLoopReversesBoundaryVertices [
+	<gtExample>
+	| vertices chain |
+	vertices := { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }.
+	chain := CFPhysicsChainBuilder
+		inwardLoopFrom: vertices
+		material: nil
+		collisionFilter: nil.
+	self assert: chain vertices equals: vertices reversed asArray.
+	self assert: chain segments first point1 equals: 0 @ 10.
+	self assert: chain segments first point2 equals: 10 @ 10.
+	^ chain
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainLoopRequiresFourVertices [
+	<gtExample>
+	| raised |
+	raised := false.
+	[ CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 10 @ 0. 0 @ 10 }
+		material: nil
+		collisionFilter: nil ]
+		on: Error
+		do: [ :error | raised := true ].
+	self assert: raised.
+	^ raised
+]

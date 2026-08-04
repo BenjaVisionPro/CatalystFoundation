@@ -1,18 +1,18 @@
 
 "
-I convert Bloc element geometry into immutable Physics geometry.
+I build immutable Physics geometry from resolved Bloc element geometry.
 
 Known Bloc geometries retain their semantics. Unsupported geometries are rejected rather than silently colliding as their bounds.
 "
 Class {
-	#name : 'CFPhysicsBlocShapeFactory',
+	#name : 'CFPhysicsBlocGeometryBuilder',
 	#superclass : 'Object',
 	#category : 'BVC-Physics-Bloc',
 	#package : 'BVC-Physics-Bloc'
 }
 
 { #category : 'converting' }
-CFPhysicsBlocShapeFactory class >> collisionGeometryFor: aGeometry extent: anExtent [
+CFPhysicsBlocGeometryBuilder class >> collisionGeometryFor: aGeometry extent: anExtent [
 	| radii radius |
 	(aGeometry isKindOf: BlCircleGeometry) ifTrue: [
 		^ CFPhysicsCapturedCircleGeometry radius: anExtent min / 2.0 ].
@@ -54,7 +54,7 @@ CFPhysicsBlocShapeFactory class >> collisionGeometryFor: aGeometry extent: anExt
 ]
 
 { #category : 'converting' }
-CFPhysicsBlocShapeFactory class >> ellipseGeometryForExtent: anExtent [
+CFPhysicsBlocGeometryBuilder class >> ellipseGeometryForExtent: anExtent [
 	| centre xRadius yRadius vertices |
 	centre := anExtent / 2.0.
 	xRadius := anExtent x / 2.0.
@@ -67,16 +67,4 @@ CFPhysicsBlocShapeFactory class >> ellipseGeometryForExtent: anExtent [
 		vertices: vertices
 		radius: 0.0
 		rotationCentre: centre
-]
-
-{ #category : 'converting' }
-CFPhysicsBlocShapeFactory class >> polygonShapeFor: aShapeState [
-	| geometry |
-	geometry := aShapeState capturedCollisionGeometry
-		ifNil: [ aShapeState uncapturedCollisionGeometry ].
-	geometry isCircle ifTrue: [ ^ nil ].
-	^ CFPhysicsPolygonShape
-		vertices: geometry vertices
-		radius: geometry radius
-		rotationCentre: geometry rotationCentre
 ]

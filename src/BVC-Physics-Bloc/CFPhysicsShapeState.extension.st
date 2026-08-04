@@ -2,12 +2,12 @@ Extension { #name : 'CFPhysicsShapeState' }
 
 { #category : '*BVC-Physics-Bloc' }
 CFPhysicsShapeState >> captureCollisionGeometryForExtent: anExtent [
-	^ CFPhysicsBlocShapeFactory
+	^ CFPhysicsBlocGeometryBuilder
 		collisionGeometryFor: self element geometry
 		extent: anExtent
 ]
 
 { #category : '*BVC-Physics-Bloc' }
 CFPhysicsShapeState >> polygonShape [
-	^ CFPhysicsBlocShapeFactory polygonShapeFor: self
+	^ CFPhysicsShapeBuilder polygonShapeFor: self
 ]
