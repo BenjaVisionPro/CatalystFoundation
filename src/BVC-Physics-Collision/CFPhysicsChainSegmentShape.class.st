@@ -120,9 +120,17 @@ CFPhysicsChainSegmentShape >> rotateVector: aPoint by: anAngle [
 
 { #category : 'geometry' }
 CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
-	| bodyLocal |
-	bodyLocal := self rotateVector: aPoint - aBodyOrigin by: anAngle negated.
-	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
+	^ self rotateVector: aPoint - aBodyOrigin by: anAngle negated
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> bodyLocalPointForElementLocalPoint: aPoint [
+	^ aPoint
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> elementLocalPointForBodyLocalPoint: aPoint [
+	^ aPoint
 ]
 
 { #category : 'sensors' }
@@ -134,4 +142,25 @@ CFPhysicsChainSegmentShape >> isSensor [
 { #category : 'capturing' }
 CFPhysicsChainSegmentShape >> capturedForStep [
 	^ self shallowCopy
+]
+
+
+{ #category : 'continuous collision' }
+CFPhysicsChainSegmentShape >> distanceProxy [
+	^ CFPhysicsDistanceProxy points: { point1. point2 } radius: 0.0
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> localCentroid [
+	^ (point1 + point2) / 2.0
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> localCollisionVertices [
+	^ { point1. point2 }
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsChainSegmentShape >> minimumExtent [
+	^ (point2 - point1) r / 2.0
 ]

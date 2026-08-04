@@ -202,22 +202,24 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 
 { #category : 'private - solved sweeps' }
 CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodyStates linearSlop: linearSlop fastBody: fastBody [
-	| firstState secondState result fastState fallbackProxy firstProxy secondProxy fallbackResult |
+	| firstState secondState firstShapeState secondShapeState result fastState fallbackProxy firstProxy secondProxy fallbackResult |
 	firstState := bodyStates at: pair firstBody.
 	secondState := bodyStates at: pair secondBody.
-	result := (firstState isSensor or: [ secondState isSensor ])
+	firstShapeState := firstState shapeStateFor: pair firstShape.
+	secondShapeState := secondState shapeStateFor: pair secondShape.
+	result := (firstShapeState isSensor or: [ secondShapeState isSensor ])
 		ifTrue: [
 			"Swept sensors are a Catalyst event contract, not a Box2D contact constraint. Preserve crossings even when the shapes are separated again at the end of the step."
 			CFPhysicsConservativeAdvancement
-				betweenShapeState: firstState shapeState
+				betweenShapeState: firstShapeState
 				sweep: firstState solvedSweep
-				andShapeState: secondState shapeState
+				andShapeState: secondShapeState
 				sweep: secondState solvedSweep ]
 		ifFalse: [
 			CFPhysicsBox2DTimeOfImpact
-				betweenShapeState: firstState shapeState
+				betweenShapeState: firstShapeState
 				sweep: firstState solvedSweep
-				andShapeState: secondState shapeState
+				andShapeState: secondShapeState
 				sweep: secondState solvedSweep
 				linearSlop: linearSlop ].
 	result fraction = 0.0 ifTrue: [
@@ -227,10 +229,10 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 			radius: 0.25 * fastState shapeState minimumExtent.
 		firstProxy := pair firstBody == fastBody
 			ifTrue: [ fallbackProxy ]
-			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: firstState shapeState ].
+			ifFalse: [ firstShapeState distanceProxy ].
 		secondProxy := pair secondBody == fastBody
 			ifTrue: [ fallbackProxy ]
-			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: secondState shapeState ].
+			ifFalse: [ secondShapeState distanceProxy ].
 		fallbackResult := CFPhysicsBox2DTimeOfImpact
 			betweenProxy: firstProxy
 			sweep: firstState solvedSweep

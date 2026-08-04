@@ -8041,3 +8041,34 @@ CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
 	self assert: manifold isNil.
 	^ manifold
 ]
+
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentDistanceProxyMatchesBox2DSegment [
+	<gtExample>
+	| chain segment proxy |
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }
+		material: nil
+		collisionFilter: nil.
+	segment := chain segments first.
+	proxy := segment distanceProxy.
+	self assert: proxy points equals: { segment point1. segment point2 }.
+	self assert: proxy radius equals: 0.0.
+	^ proxy
+]
+
+{ #category : 'examples - continuous collision' }
+CFPhysicsCleanSlateTests >> shapeStateDistanceProxyPreservesExistingCircleGeometry [
+	<gtExample>
+	| element state proxy |
+	element := BlElement new
+		geometry: BlCircleGeometry new;
+		size: 20 @ 20;
+		yourself.
+	state := (CFPhysicsShapeState on: element) capturedForStep.
+	proxy := state distanceProxy.
+	self assert: proxy points equals: { 0 @ 0 }.
+	self assert: proxy radius equals: 10.0.
+	^ proxy
+]
