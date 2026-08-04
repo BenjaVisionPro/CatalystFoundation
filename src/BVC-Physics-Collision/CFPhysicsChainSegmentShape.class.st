@@ -125,6 +125,32 @@ CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyO
 	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
 ]
 
+
+{ #category : 'material' }
+CFPhysicsChainSegmentShape >> material [
+	^ chain material
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsChainSegmentShape >> collisionFilter [
+	^ chain collisionFilter
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsChainSegmentShape >> collisionCategoryBits [
+	^ self collisionFilter categoryBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsChainSegmentShape >> collisionMaskBits [
+	^ self collisionFilter maskBits
+]
+
+{ #category : 'collision filtering' }
+CFPhysicsChainSegmentShape >> collisionGroupIndex [
+	^ self collisionFilter groupIndex
+]
+
 { #category : 'sensors' }
 CFPhysicsChainSegmentShape >> isSensor [
 	^ false
