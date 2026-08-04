@@ -39,7 +39,12 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segme
 			owned := (self dot: previousEdge with: vertex - point1) > 0.0 ].
 		along > edgeLength ifTrue: [
 			owned := (self dot: nextEdge with: vertex - point2) < 0.0 ].
-		(owned and: [ along >= polygon radius negated and: [ along <= edgeLength + polygon radius and: [ separation <= speculativeDistance ] ] ]) ifTrue: [
+		(owned
+			and: [
+				(along >= polygon radius negated)
+					and: [
+						(along <= (edgeLength + polygon radius))
+							and: [ separation <= speculativeDistance ] ] ]) ifTrue: [
 			candidates add: { vertex. separation. index } ] ].
 	candidates isEmpty ifTrue: [ ^ nil ].
 	candidates size > 2 ifTrue: [ candidates := candidates first: 2 ].
