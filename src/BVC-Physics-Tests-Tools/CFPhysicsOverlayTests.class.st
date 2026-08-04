@@ -1752,7 +1752,7 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	firstContent := overlay objectInspector content.
 	self assert: overlay selectedJoint == distanceJoint.
 	self assert: (firstContent valueElements includesKey: #length).
-	self assert: (firstContent valueElements includesKey: #motorSpeed) not.
+	self assert: (firstContent valueElements includesKey: #motorSpeed).
 	fixedVisual hitTarget fireEvent: BlClickEvent new.
 	secondContent := overlay objectInspector content.
 	self assert: overlay selectedJoint == weldJoint.

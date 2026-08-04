@@ -1935,8 +1935,8 @@ CFPhysicsCleanSlateTests >> distanceJointLengthLimitOpposesExcessExtension [
 	result := world step.
 	prepared := result constraints first.
 	self assert: prepared upperLimitImpulse > 0.0.
-	self assert: first physics velocity x > 0.0.
-	self assert: second physics velocity x < 0.0.
+	self assert: first physics position x > 0.0.
+	self assert: second physics position x < 100.0.
 	^ result
 ]
 
@@ -1963,8 +1963,8 @@ CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
 	result := world step.
 	prepared := result constraints first.
 	self assert: prepared motorImpulse > 0.0.
-	self assert: first physics velocity x < 0.0.
-	self assert: second physics velocity x > 0.0.
+	self assert: first physics position x < 0.0.
+	self assert: second physics position x > 100.0.
 	^ result
 ]
 
