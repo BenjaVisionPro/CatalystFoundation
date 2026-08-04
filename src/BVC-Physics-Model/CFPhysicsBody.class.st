@@ -1,12 +1,12 @@
 "
 I represent a rigid body in a Physics world.
 
-My responsibility is to own an element's physical state, material, shape and participation in contacts and constraints.
+My responsibility is to own an element's physical state, material, ordered shapes and participation in contacts and constraints.
 "
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeState', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet', 'allowFastRotation' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeCollection', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet', 'allowFastRotation' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -114,9 +114,9 @@ CFPhysicsBody >> element [
 { #category : 'accessing' }
 CFPhysicsBody >> element: anElement [
 	element := anElement.
-	shapeState := CFPhysicsShapeState on: anElement.
+	shapeCollection := CFPhysicsShapeCollection with: (CFPhysicsShapeState on: anElement).
 	bodyOrigin ifNil: [
-		bodyOrigin := shapeState extent / 2.0.
+		bodyOrigin := self shapeState extent / 2.0.
 		previousBodyOrigin := bodyOrigin ]
 ]
 
@@ -289,9 +289,20 @@ CFPhysicsBody >> rotation: aNumber [
 
 
 { #category : 'geometry' }
+CFPhysicsBody >> shapeCollection [
+	shapeCollection ifNil: [
+		shapeCollection := CFPhysicsShapeCollection with: (CFPhysicsShapeState on: element) ].
+	^ shapeCollection
+]
+
+{ #category : 'geometry' }
 CFPhysicsBody >> shapeState [
-	shapeState ifNil: [ shapeState := CFPhysicsShapeState on: element ].
-	^ shapeState
+	^ self shapeCollection primaryShape
+]
+
+{ #category : 'geometry' }
+CFPhysicsBody >> shapes [
+	^ self shapeCollection shapes
 ]
 
 { #category : 'ordering' }

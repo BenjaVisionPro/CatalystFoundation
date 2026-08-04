@@ -7870,3 +7870,49 @@ CFPhysicsCleanSlateTests >> chainLoopRequiresFourVertices [
 	self assert: raised.
 	^ raised
 ]
+
+{ #category : 'examples - shapes' }
+CFPhysicsCleanSlateTests >> bodyOwnsItsPrimaryShapeThroughACollection [
+	<gtExample>
+	| body collection primary |
+	body := CFPhysicsBody
+		element: (BlElement new size: 20 @ 10; yourself)
+		world: nil.
+	collection := body shapeCollection.
+	primary := body shapeState.
+	self assert: collection size equals: 1.
+	self assert: collection primaryShape == primary.
+	self assert: body shapes equals: { primary }.
+	^ collection
+]
+
+{ #category : 'examples - shapes' }
+CFPhysicsCleanSlateTests >> shapeCollectionPreservesShapeOrder [
+	<gtExample>
+	| first second collection |
+	first := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
+	second := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	collection := CFPhysicsShapeCollection with: first.
+	collection add: second.
+	self assert: collection shapes equals: { first. second }.
+	self assert: collection primaryShape == first.
+	^ collection
+]
+
+{ #category : 'examples - shapes' }
+CFPhysicsCleanSlateTests >> shapeCollectionCanOwnChainSegmentShapes [
+	<gtExample>
+	| primary chain collection |
+	primary := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 20 @ 0. 20 @ 20. 0 @ 20 }
+		material: nil
+		collisionFilter: nil.
+	collection := CFPhysicsShapeCollection with: primary.
+	chain segments do: [ :segment | collection add: segment ].
+	self assert: collection size equals: 5.
+	self assert: collection primaryShape == primary.
+	self assert: collection shapes second == chain segments first.
+	self assert: collection shapes last == chain segments last.
+	^ collection
+]
