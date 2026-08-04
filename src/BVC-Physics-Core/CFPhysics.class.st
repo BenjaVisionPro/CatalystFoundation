@@ -608,23 +608,6 @@ CFPhysics >> removePrismaticJoint: aJoint [
 ]
 
 
-{ #category : 'containment interaction' }
-CFPhysics >> containWithinWorld [
-	| aWorld constraint |
-	aWorld := self world.
-	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	aWorld synchroniseMembership.
-	constraint := CFPhysicsContainmentConstraint on: self body.
-	^ aWorld addContainmentConstraint: constraint
-]
-
-{ #category : 'containment interaction' }
-CFPhysics >> removeContainment: aContainmentConstraint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeContainmentConstraint: aContainmentConstraint ]
-]
-
 { #category : 'attraction interaction' }
 CFPhysics >> attract: anotherElement [
 	| aWorld otherWorld attraction |

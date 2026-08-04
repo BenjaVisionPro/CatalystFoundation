@@ -24,21 +24,19 @@ CFPhysicsShowcaseExamples >> clickMe [
 		gravity: 0 @ 9.81;
 		contactHertz: 120.0;
 		contactDampingRatio: 1.0.
+	world containment restitution: 0.9.
 	random := Random new.
 	buttons := (1 to: 50) collect: [ :each |
 		self newClickMeButtonUsing: random ].
 	host addChildren: buttons.
 	world synchroniseMembership.
 	buttons do: [ :each |
-		| containment |
 		each physics
 			position: (self randomPositionFor: each in: host using: random);
 			velocity: (self randomInitialVelocityUsing: random);
 			restitution: 0.82;
 			friction: 0.15;
-			angularDamping: 12.0.
-		containment := each physics containWithinWorld.
-		containment restitution: 0.9 ].
+			angularDamping: 12.0 ].
 	host when: BlElementAddedToSceneGraphEvent do: [ :anEvent |
 		world startStepping ].
 	^ host

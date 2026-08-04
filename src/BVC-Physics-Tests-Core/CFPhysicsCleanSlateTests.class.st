@@ -2886,7 +2886,7 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryContainsBodiesByDefault [
+CFPhysicsCleanSlateTests >> worldContainmentContainsBodiesByDefault [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -2898,12 +2898,12 @@ CFPhysicsCleanSlateTests >> worldBoundaryContainsBodiesByDefault [
 	element physics position: 90 @ 90.
 	world step.
 	self assert: element physics position equals: 80 @ 80.
-	self assert: world boundary enabled.
+	self assert: world containment isEnabled.
 	^ world
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
+CFPhysicsCleanSlateTests >> worldContainmentCanBeDisabled [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -2911,7 +2911,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world boundary enabled: false.
+	world containment disable.
 	world synchroniseMembership.
 	element physics position: 90 @ 90.
 	world step.
@@ -2920,7 +2920,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBeDisabled [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
+CFPhysicsCleanSlateTests >> worldContainmentCanBounceAtTheWorldEdge [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -2928,7 +2928,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world boundary restitution: 0.5.
+	world containment restitution: 0.5.
 	world synchroniseMembership.
 	element physics
 		position: 90 @ 20;
@@ -2941,7 +2941,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryCanBounceAtTheWorldEdge [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryUsesItsMargin [
+CFPhysicsCleanSlateTests >> worldContainmentUsesItsMargin [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -2949,7 +2949,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryUsesItsMargin [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world boundary margin: 10.
+	world containment margin: 10.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
 	world step.
@@ -2958,7 +2958,7 @@ CFPhysicsCleanSlateTests >> worldBoundaryUsesItsMargin [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldBoundaryUsesTheCurrentWorldExtent [
+CFPhysicsCleanSlateTests >> worldContainmentUsesTheCurrentWorldExtent [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -2975,86 +2975,9 @@ CFPhysicsCleanSlateTests >> worldBoundaryUsesTheCurrentWorldExtent [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> explicitContainmentOverridesTheWorldBoundary [
+CFPhysicsCleanSlateTests >> newWorldContainsBodiesByDefault [
 	<gtExample>
-	| owner element world containment |
-	owner := BlElement new size: 100 @ 100; yourself.
-	element := BlElement new size: 20 @ 20; yourself.
-	owner addChild: element.
-	world := owner physics beWorld.
-	world gravity: 0 @ 0.
-	world boundary restitution: 0.0.
-	world synchroniseMembership.
-	containment := element physics containWithinWorld.
-	containment restitution: 0.5.
-	element physics
-		position: 90 @ 20;
-		velocity: 50 @ 0.
-	world step.
-	self assert: (element physics position x closeTo: 79.6).
-	self assert: element physics position y equals: 20.
-	self assert: element physics velocity equals: -25 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentCorrectsABodyOutsideTheWorld [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: -10 @ 95 extent: 20 @ 20.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: body position equals: 0 @ 80.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentStopsOutwardVelocity [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 90 @ 20 extent: 20 @ 20.
-	body velocity: 50 @ 0.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: body position equals: 80 @ 20.
-	self assert: body velocity equals: 0 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentCanBounceAtTheWorldEdge [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 90 @ 20 extent: 20 @ 20.
-	body velocity: 50 @ 0.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment restitution: 0.5.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: body velocity equals: -25 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentBouncesUsingRotatedBodyBounds [
-	<gtExample>
-	| body containment |
-	body := self cleanSlateBodyWithSequence: 1 position: 80 @ 20 extent: 40 @ 20.
-	body
-		rotation: Float pi / 2.0;
-		velocity: 50 @ 0.
-	containment := CFPhysicsContainmentConstraint on: body.
-	containment restitution: 0.5.
-	containment prepareForBounds: (0 @ 0 extent: 100 @ 100).
-	self assert: (body position x closeTo: 70.0).
-	self assert: (body position y closeTo: 20.0).
-	self assert: body velocity equals: -25 @ 0.
-	^ containment
-]
-
-{ #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentIsInstalledThroughTheBlocElement [
-	<gtExample>
-	| owner element world containment |
+	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
@@ -3062,17 +2985,55 @@ CFPhysicsCleanSlateTests >> containmentIsInstalledThroughTheBlocElement [
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 90 @ 90.
-	containment := element physics containWithinWorld.
 	world step.
+	self assert: world containment isEnabled.
 	self assert: element physics position equals: 80 @ 80.
-	self assert: world containmentConstraints size equals: 1.
-	element physics removeContainment: containment.
-	self assert: world containmentConstraints isEmpty.
 	^ world
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> containmentUsesTheCurrentWorldExtent [
+CFPhysicsCleanSlateTests >> worldContainmentCanBeDisabled [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world containment disable.
+	world synchroniseMembership.
+	element physics position: 90 @ 90.
+	world step.
+	self assert: world containment isEnabled not.
+	self assert: element physics position equals: 90 @ 90.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldContainmentUsesItsMaterial [
+	<gtExample>
+	| owner element world |
+	owner := BlElement new size: 100 @ 100; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world containment
+		margin: 0;
+		friction: 0.4;
+		restitution: 0.5.
+	world synchroniseMembership.
+	element physics
+		position: 90 @ 20;
+		velocity: 50 @ 0.
+	world step.
+	self assert: world containment material friction equals: 0.4.
+	self assert: element physics velocity equals: -25 @ 0.
+	^ world
+]
+
+{ #category : 'examples - containment interaction' }
+CFPhysicsCleanSlateTests >> worldContainmentUsesTheCurrentWorldExtent [
 	<gtExample>
 	| owner element world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -3081,13 +3042,13 @@ CFPhysicsCleanSlateTests >> containmentUsesTheCurrentWorldExtent [
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
-	element physics containWithinWorld.
 	element physics position: 130 @ 20.
 	owner size: 160 @ 100.
 	world step.
 	self assert: element physics position equals: 130 @ 20.
 	^ world
 ]
+
 
 { #category : 'examples - spring interaction' }
 CFPhysicsCleanSlateTests >> springEndpointsAreResolvedThroughAnchors [
@@ -3389,7 +3350,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesRepulsionBeforeIntegration [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world boundary enabled: false.
+	world containment disable.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.

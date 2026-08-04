@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containmentConstraints', 'boundary', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -72,8 +72,7 @@ CFPhysicsWorld >> initialize [
 	visualStateConsumers := 0.
 	committedVisualState := CFPhysicsWorldVisualState new.
 	calculationVisualState := CFPhysicsWorldVisualState new.
-	containmentConstraints := IdentitySet new.
-	boundary := CFPhysicsWorldBoundary new.
+	containment := CFPhysicsWorldContainment new.
 	distanceJoints := IdentitySet new.
 	revoluteJoints := IdentitySet new.
 	weldJoints := IdentitySet new.
@@ -123,7 +122,6 @@ CFPhysicsWorld >> release [
 	weldJoints copy do: [ :each | self removeWeldJoint: each ].
 	prismaticJoints copy do: [ :each | self removePrismaticJoint: each ].
 	wheelJoints copy do: [ :each | self removeWheelJoint: each ].
-	containmentConstraints copy do: [ :each | self removeContainmentConstraint: each ].
 	bodyStates keys do: [ :each |
 		each existingPhysics ifNotNil: [ :physics |
 			physics retireBodyFromWorld: self ] ].
@@ -525,14 +523,14 @@ CFPhysicsWorld >> synchroniseForStateCapture [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureStateAfterSynchronisation [
-	| bodies step explicitlyContainedBodies capturedBodyStates orderedBodyStates capturedJoints index solveTicket |
+	| bodies step capturedBodyStates orderedBodyStates capturedJoints index solveTicket |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
 	step := self newStep.
 	self updateBehavioursForStep: step.
 	self prepareAttractionConstraintsForStep: step timeStep.
 	self prepareRepulsionConstraintsForStep: step timeStep.
-	explicitlyContainedBodies := self prepareContainmentConstraintsForStep.
+	self prepareContainmentForStep.
 	capturedBodyStates := IdentityDictionary new.
 	orderedBodyStates := Array new: bodies size.
 	capturedJoints := self joints collect: #capturedForStep.
@@ -1407,64 +1405,16 @@ CFPhysicsWorld >> containmentExtent [
 	^ (CFPhysicsShapeState on: owner) extent
 ]
 
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> boundary [
-	^ boundary ifNil: [ boundary := CFPhysicsWorldBoundary new ]
+{ #category : 'containment' }
+CFPhysicsWorld >> containment [
+	^ containment ifNil: [ containment := CFPhysicsWorldContainment new ]
 ]
 
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> containmentConstraints [
-	^ containmentConstraints asArray sorted: [ :first :second |
-		first body sequence < second body sequence ]
-]
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> addContainmentConstraint: aConstraint [
-	aConstraint body world == self
-		ifFalse: [ self error: 'The contained body must belong to this physics world' ].
-	containmentConstraints add: aConstraint.
-	^ aConstraint
-]
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> removeContainmentConstraint: aConstraint [
-	(containmentConstraints includes: aConstraint) ifTrue: [
-		aConstraint release.
-		containmentConstraints remove: aConstraint ].
-	^ aConstraint
-]
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> removeContainmentsUsingBody: aBodyState [
-	(containmentConstraints select: [ :each | each body == aBodyState ]) copy do: [ :each |
-		self removeContainmentConstraint: each ]
-]
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> applyDefaultBoundaryExcept: explicitlyContainedBodies [
-	| bounds worldBoundary |
+{ #category : 'private - containment' }
+CFPhysicsWorld >> prepareContainmentForStep [
+	| bounds |
 	bounds := 0 @ 0 extent: self containmentExtent.
-	worldBoundary := self boundary.
-	worldBoundary enabled ifTrue: [
-		self bodyStatesInOrder do: [ :each |
-			(explicitlyContainedBodies includes: each) ifFalse: [
-				worldBoundary applyTo: each bounds: bounds ] ] ]
-]
-
-{ #category : 'containment interaction' }
-CFPhysicsWorld >> prepareContainmentConstraintsForStep [
-	| bounds explicitlyContainedBodies |
-	bounds := 0 @ 0 extent: self containmentExtent.
-	explicitlyContainedBodies := IdentitySet new.
-	containmentConstraints copy do: [ :each |
-		each isActive
-			ifTrue: [
-				each prepareForBounds: bounds.
-				explicitlyContainedBodies add: each body ]
-			ifFalse: [ containmentConstraints remove: each ifAbsent: [ ] ] ].
-	self applyDefaultBoundaryExcept: explicitlyContainedBodies.
-	^ explicitlyContainedBodies
+	self containment applyToBodies: self bodyStatesInOrder bounds: bounds
 ]
 
 
