@@ -495,9 +495,9 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled
 	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
 	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
 	angularRelativeVelocity := self weldJointRelativeAngularVelocity: constraint.
-	angularSeparation := constraint baseAngle
+	angularSeparation := self unwoundAngle: (constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
-		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+		- (self distanceJointDeltaRotationFor: constraint bodyStateA)).
 	angularBias := biasEnabled ifTrue: [ step biasRate * angularSeparation ] ifFalse: [ 0.0 ].
 	"Box2D 3.1.1 solves the perpendicular and angular prismatic constraints
 	as a coupled 2 by 2 block. Solving them independently leaves the lever-arm
@@ -734,9 +734,9 @@ CFPhysicsSoftStepSolver >> solveWeldJointAngularConstraint: constraint biasEnabl
 	massCoefficient := 1.0.
 	impulseCoefficient := 0.0.
 	(biasEnabled or: [ constraint angularSoftnessEnabled ]) ifTrue: [
-		separation := constraint baseAngle
+		separation := self unwoundAngle: (constraint baseAngle
 			+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
-			- (self distanceJointDeltaRotationFor: constraint bodyStateA).
+			- (self distanceJointDeltaRotationFor: constraint bodyStateA)).
 		bias := constraint angularBiasRate * separation.
 		massCoefficient := constraint angularMassCoefficient.
 		impulseCoefficient := constraint angularImpulseCoefficient ].
@@ -1140,7 +1140,9 @@ CFPhysicsSoftStepSolver >> solveMotorJointConstraint: constraint biasEnabled: bi
 	| stateA stateB angularSeparation angularBias increment oldImpulse newImpulse anchorA anchorB displacement linearSeparation linearBias velocityA velocityB relativeVelocity massResult vectorIncrement oldVector newVector magnitude |
 	stateA := constraint bodyStateA.
 	stateB := constraint bodyStateB.
-	angularSeparation := constraint baseAngularSeparation + stateB deltaRotation - stateA deltaRotation.
+	angularSeparation := self unwoundAngle: (constraint baseAngularSeparation
+		+ stateB deltaRotation
+		- stateA deltaRotation).
 	angularBias := (1.0 / step substepTime) * constraint joint correctionFactor * angularSeparation.
 	increment := (constraint angularMass
 		* ((stateB angularVelocity - stateA angularVelocity) + angularBias)) negated.

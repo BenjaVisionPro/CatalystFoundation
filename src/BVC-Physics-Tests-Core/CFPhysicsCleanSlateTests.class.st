@@ -6629,6 +6629,45 @@ CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	^ prepared
 ]
 
+{ #category : 'examples - motor joints' }
+CFPhysicsCleanSlateTests >> motorJointAngularDriveUsesTheShortestArcAcrossWrap [
+	<gtExample>
+	| first second joint bodyStates step prepared solver firstState secondState |
+	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	second := self cleanSlateBodyWithSequence: 2 position: 20 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsMotorJoint between: first and: second.
+	joint maximumForce: 0.0; maximumTorque: 100000.0.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	step := CFPhysicsStep
+		timeStep: 1.0 / 60.0
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	prepared := (CFPhysicsMotorJointConstraintBuilder new
+		constraintsFrom: { joint }
+		bodyStates: bodyStates
+		step: step) first.
+	firstState := bodyStates at: first.
+	secondState := bodyStates at: second.
+	firstState angularVelocity: 3.1 / step substepTime.
+	secondState angularVelocity: -3.1 / step substepTime.
+	firstState integratePositionBy: step substepTime.
+	secondState integratePositionBy: step substepTime.
+	firstState angularVelocity: 0.0.
+	secondState angularVelocity: 0.0.
+	solver := CFPhysicsSoftStepSolver
+		step: step
+		bodyStates: { firstState. secondState }
+		constraints: #().
+	solver solveMotorJointConstraint: prepared biasEnabled: true.
+	self assert: firstState angularVelocity > 0.0.
+	self assert: secondState angularVelocity < 0.0.
+	^ prepared
+]
+
 
 
 { #category : 'examples - prismatic joints' }
