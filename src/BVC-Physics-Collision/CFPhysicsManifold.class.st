@@ -59,7 +59,9 @@ CFPhysicsManifold >> clearImpulses [
 	contactPoints do: [ :point |
 		point
 			normalImpulse: 0.0;
-			tangentImpulse: 0.0 ]
+			tangentImpulse: 0.0;
+			totalNormalImpulse: 0.0;
+			normalVelocity: 0.0 ]
 ]
 
 { #category : 'updating' }

@@ -6,7 +6,7 @@ I retain its world position, separation, feature identity, body-local anchors an
 Class {
 	#name : 'CFPhysicsManifoldPoint',
 	#superclass : 'Object',
-	#instVars : [ 'position', 'separation', 'featureId', 'normalImpulse', 'tangentImpulse', 'localAnchorA', 'localAnchorB' ],
+	#instVars : [ 'position', 'separation', 'featureId', 'normalImpulse', 'tangentImpulse', 'totalNormalImpulse', 'normalVelocity', 'localAnchorA', 'localAnchorB' ],
 	#category : 'BVC-Physics-Collision',
 	#package : 'BVC-Physics-Collision'
 }
@@ -21,6 +21,8 @@ CFPhysicsManifoldPoint >> initialize [
 	super initialize.
 	normalImpulse := 0.0.
 	tangentImpulse := 0.0.
+	totalNormalImpulse := 0.0.
+	normalVelocity := 0.0.
 	separation := 0.0.
 	featureId := nil.
 	localAnchorA := nil.
@@ -39,6 +41,16 @@ CFPhysicsManifoldPoint >> position: aPoint [ position := aPoint ]
 CFPhysicsManifoldPoint >> tangentImpulse [ ^ tangentImpulse ]
 { #category : 'accessing' }
 CFPhysicsManifoldPoint >> tangentImpulse: aNumber [ tangentImpulse := aNumber ]
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> totalNormalImpulse [ ^ totalNormalImpulse ]
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> totalNormalImpulse: aNumber [ totalNormalImpulse := aNumber ]
+
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> normalVelocity [ ^ normalVelocity ]
+{ #category : 'accessing' }
+CFPhysicsManifoldPoint >> normalVelocity: aNumber [ normalVelocity := aNumber ]
 
 
 { #category : 'accessing' }

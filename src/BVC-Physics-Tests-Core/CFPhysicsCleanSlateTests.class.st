@@ -394,7 +394,11 @@ CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	pair := CFPhysicsPair first: first second: second.
 	oldManifold := self cleanSlateManifoldWithFeatureIndex: 1.
 	oldPoint := oldManifold contactPoints first.
-	oldPoint normalImpulse: 7.0; tangentImpulse: 2.0.
+	oldPoint
+		normalImpulse: 7.0;
+		tangentImpulse: 2.0;
+		totalNormalImpulse: 9.0;
+		normalVelocity: -4.0.
 	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: oldManifold).
 	initial := updater updatePairs: { pair } fromContacts: #().
 	newManifold := self cleanSlateManifoldWithFeatureIndex: 1.
@@ -403,6 +407,8 @@ CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	newPoint := next activeContacts first manifold contactPoints first.
 	self assert: newPoint normalImpulse equals: 7.0.
 	self assert: newPoint tangentImpulse equals: 2.0.
+	self assert: newPoint totalNormalImpulse equals: 0.0.
+	self assert: newPoint normalVelocity equals: 0.0.
 	^ next
 ]
 
@@ -416,7 +422,9 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 	oldManifold := self cleanSlateManifoldWithFeatureIndex: 1.
 	oldManifold contactPoints first
 		normalImpulse: 7.0;
-		tangentImpulse: 2.0.
+		tangentImpulse: 2.0;
+		totalNormalImpulse: 9.0;
+		normalVelocity: -4.0.
 	updater := CFPhysicsContactUpdater manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: oldManifold).
 	initial := updater updatePairs: { pair } fromContacts: #().
 
@@ -428,6 +436,8 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 
 	self assert: point normalImpulse equals: 0.0.
 	self assert: point tangentImpulse equals: 0.0.
+	self assert: point totalNormalImpulse equals: 0.0.
+	self assert: point normalVelocity equals: 0.0.
 	^ next
 ]
 
@@ -597,12 +607,18 @@ CFPhysicsCleanSlateTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly
 	constraint := self constraintBuilderPreparesSolverData.
 	manifoldPoint := constraint contact manifold contactPoints first.
 	preparedPoint := constraint points first.
-	preparedPoint normalImpulse: 4.0; tangentImpulse: 1.5.
+	preparedPoint
+		normalImpulse: 4.0;
+		tangentImpulse: 1.5;
+		totalNormalImpulse: 7.0;
+		relativeNormalVelocity: -3.0.
 	self assert: manifoldPoint normalImpulse equals: 0.0.
 	self assert: manifoldPoint tangentImpulse equals: 0.0.
 	constraint writeImpulsesBack.
 	self assert: manifoldPoint normalImpulse equals: 4.0.
 	self assert: manifoldPoint tangentImpulse equals: 1.5.
+	self assert: manifoldPoint totalNormalImpulse equals: 7.0.
+	self assert: manifoldPoint normalVelocity equals: -3.0.
 	^ constraint
 ]
 

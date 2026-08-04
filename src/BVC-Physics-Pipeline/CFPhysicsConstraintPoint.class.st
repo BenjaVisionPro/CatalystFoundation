@@ -14,7 +14,9 @@ Class {
 CFPhysicsConstraintPoint >> writeImpulsesBack [
 	manifoldPoint
 		normalImpulse: normalImpulse;
-		tangentImpulse: tangentImpulse
+		tangentImpulse: tangentImpulse;
+		totalNormalImpulse: totalNormalImpulse;
+		normalVelocity: relativeNormalVelocity
 ]
 
 { #category : 'accessing' }
