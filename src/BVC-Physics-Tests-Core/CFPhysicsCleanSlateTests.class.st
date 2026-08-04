@@ -7805,6 +7805,6 @@ CFPhysicsCleanSlateTests >> capturedGeometryDoesNotRetainBlocGeometry [
 	shapeState := (CFPhysicsShapeState on: element) capturedForStep.
 	geometry := shapeState capturedCollisionGeometry.
 	self assert: geometry class equals: CFPhysicsCapturedPolygonGeometry.
-	self deny: geometry == element geometry.
+	self assert: geometry ~~ element geometry.
 	^ geometry
 ]

@@ -18,6 +18,11 @@ CFPhysicsBlocShapeFactory class >> collisionGeometryFor: aGeometry extent: anExt
 		^ CFPhysicsCapturedCircleGeometry radius: anExtent min / 2.0 ].
 	(aGeometry isKindOf: BlEllipseGeometry) ifTrue: [
 		^ self ellipseGeometryForExtent: anExtent ].
+	(aGeometry isKindOf: BlRectangleGeometry) ifTrue: [
+		^ CFPhysicsCapturedPolygonGeometry
+			vertices: { 0 @ 0. anExtent x @ 0. anExtent. 0 @ anExtent y }
+			radius: 0.0
+			rotationCentre: anExtent / 2.0 ].
 	(aGeometry isKindOf: BlPolygonGeometry) ifTrue: [
 		^ CFPhysicsCapturedPolygonGeometry
 			vertices: aGeometry vertices
