@@ -1951,8 +1951,10 @@ CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
-	first physics position: 0 @ 0.
-	second physics position: 100 @ 0.
+	"Keep both bodies clear of the world's default containment boundary so it
+	does not overwrite the solver's outward motor response during commit."
+	first physics position: 100 @ 0.
+	second physics position: 200 @ 0.
 	joint := first physics distanceJointTo: second.
 	joint
 		springEnabled: true;
@@ -1963,8 +1965,8 @@ CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
 	result := world step.
 	prepared := result constraints first.
 	self assert: prepared motorImpulse > 0.0.
-	self assert: first physics position x < 0.0.
-	self assert: second physics position x > 100.0.
+	self assert: first physics position x < 100.0.
+	self assert: second physics position x > 200.0.
 	^ result
 ]
 
