@@ -760,6 +760,7 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #worstSleepBiasedSolveDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #biasedSolve solver: aStepResult solver);
 		at: #worstSleepRelaxationDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #relaxation solver: aStepResult solver);
 		at: #worstSleepRestitutionDelta put: (self maximumLinearDeltaForBodySequence: worstVelocitySequence stage: #restitution solver: aStepResult solver);
+		at: #worstSleepMostIncreasingSubstepTrace put: (aStepResult solver mostIncreasingSubstepVelocityTraceForBodySequence: worstVelocitySequence);
 		at: #contactCount put: activeContacts size;
 		at: #persistentContactCount put: contacts size;
 		at: #beganContactCount put: aStepResult beganContacts size;

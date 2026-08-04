@@ -122,3 +122,13 @@ CFPhysicsIslandSolver >> stageVelocityMeasurementForBodySequence: aSequence at: 
 		ifNone: [ ^ Dictionary new ].
 	^ solver stageVelocityMeasurementForBodySequence: aSequence at: aStage
 ]
+
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsIslandSolver >> mostIncreasingSubstepVelocityTraceForBodySequence: aSequence [
+	| solver |
+	solver := softStepSolvers
+		detect: [ :each | each bodyStates anySatisfy: [ :state | state body sequence = aSequence ] ]
+		ifNone: [ ^ Dictionary new ].
+	^ solver mostIncreasingSubstepVelocityTraceForBodySequence: aSequence
+]

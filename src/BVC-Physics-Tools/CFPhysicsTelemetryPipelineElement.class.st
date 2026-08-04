@@ -19,6 +19,7 @@ Class {
 		'sleepRatiosSummaryLabel',
 		'worstBodySummaryLabel',
 		'velocityStagesSummaryLabel',
+		'substepVelocitySummaryLabel',
 		'solverSummaryLabel',
 		'graph'
 	],
@@ -88,6 +89,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 	sleepRatiosSummaryLabel := self profileSummaryLabel.
 	worstBodySummaryLabel := self profileSummaryLabel.
 	velocityStagesSummaryLabel := self profileSummaryLabel.
+	substepVelocitySummaryLabel := self profileSummaryLabel.
 	solverSummaryLabel := self profileSummaryLabel.
 	summaryLabel
 		addChild: contactsSummaryLabel;
@@ -99,6 +101,7 @@ CFPhysicsTelemetryPipelineElement >> build [
 		addChild: sleepRatiosSummaryLabel;
 		addChild: worstBodySummaryLabel;
 		addChild: velocityStagesSummaryLabel;
+		addChild: substepVelocitySummaryLabel;
 		addChild: solverSummaryLabel.
 	self updateSummaryLabelsWith: Dictionary new.
 	self
@@ -278,6 +281,29 @@ CFPhysicsTelemetryPipelineElement >> updateSummaryLabelsWith: data [
 			nextPutAll: ((data at: #worstSleepRelaxationDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3);
 			nextPutAll: '   Restitution ';
 			nextPutAll: ((data at: #worstSleepRestitutionDelta ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3) ]).
+	substepVelocitySummaryLabel text: (String streamContents: [ :stream |
+		| trace captured integrated warmStarted biasedSolved relaxed |
+		trace := data at: #worstSleepMostIncreasingSubstepTrace ifAbsent: [ Dictionary new ].
+		captured := trace at: #capturedLinearVelocity ifAbsent: [ 0 @ 0 ].
+		integrated := trace at: #integratedLinearVelocity ifAbsent: [ 0 @ 0 ].
+		warmStarted := trace at: #warmStartedLinearVelocity ifAbsent: [ 0 @ 0 ].
+		biasedSolved := trace at: #biasedSolvedLinearVelocity ifAbsent: [ 0 @ 0 ].
+		relaxed := trace at: #relaxedLinearVelocity ifAbsent: [ 0 @ 0 ].
+		stream
+			nextPutAll: 'Worst substep #';
+			nextPutAll: (trace at: #substep ifAbsent: [ 0 ]) printString;
+			nextPutAll: '   Speed captured/integrated/warm/bias/relax ';
+			nextPutAll: captured r asFloat printShowingDecimalPlaces: 3;
+			nextPut: $/;
+			nextPutAll: integrated r asFloat printShowingDecimalPlaces: 3;
+			nextPut: $/;
+			nextPutAll: warmStarted r asFloat printShowingDecimalPlaces: 3;
+			nextPut: $/;
+			nextPutAll: biasedSolved r asFloat printShowingDecimalPlaces: 3;
+			nextPut: $/;
+			nextPutAll: relaxed r asFloat printShowingDecimalPlaces: 3;
+			nextPutAll: '   Net ';
+			nextPutAll: (relaxed r - captured r) asFloat printShowingDecimalPlaces: 3 ]).
 	solverSummaryLabel text: (String streamContents: [ :stream |
 		stream
 			nextPutAll: 'Solver       Penetration initial/final/avg ';

@@ -5,7 +5,7 @@ I solve prepared contacts and joints using the soft-step formulation. I warm-sta
 Class {
 	#name : 'CFPhysicsSoftStepSolver',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'constraintColors', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse', 'stageVelocityChanges' ],
+	#instVars : [ 'step', 'bodyStates', 'constraints', 'gravity', 'contactConstraints', 'orderedJointConstraints', 'constraintColors', 'contactPointCount', 'warmStartedContactPointCount', 'restitutionCandidatePointCount', 'distanceJointConstraintCount', 'prismaticJointConstraintCount', 'revoluteJointConstraintCount', 'weldJointConstraintCount', 'mouseJointConstraintCount', 'motorJointConstraintCount', 'maximumInitialContactPenetration', 'maximumFinalContactPenetration', 'averageFinalContactPenetration', 'maximumBodyTranslation', 'totalNormalImpulse', 'totalTangentImpulse', 'stageVelocityChanges', 'substepVelocityTraces' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -52,13 +52,15 @@ CFPhysicsSoftStepSolver >> initialize [
 	maximumBodyTranslation := 0.0.
 	totalNormalImpulse := 0.0.
 	totalTangentImpulse := 0.0.
-	stageVelocityChanges := Dictionary new
+	stageVelocityChanges := Dictionary new.
+	substepVelocityTraces := Dictionary new
 ]
 
 { #category : 'solving' }
 CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 	maximumInitialContactPenetration := self maximumContactPenetration.
-	step substepCount timesRepeat: [
+	1 to: step substepCount do: [ :substepIndex |
+		self recordVelocityBoundary: #captured substep: substepIndex.
 		self measureVelocityChangeAt: #velocityIntegration during: [
 			bodyStates do: [ :state |
 				state
@@ -68,10 +70,15 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 					maximumAngularSpeed: (step timeStep <= 0.0
 						ifTrue: [ Float infinity ]
 						ifFalse: [ Float pi * 0.25 / step timeStep ]) ] ].
+		self recordVelocityBoundary: #integrated substep: substepIndex.
 		self measureVelocityChangeAt: #warmStart during: [ self warmStart ].
+		self recordVelocityBoundary: #warmStarted substep: substepIndex.
 		self measureVelocityChangeAt: #biasedSolve during: [ self solveConstraintsWithBias: true ].
+		self recordVelocityBoundary: #biasedSolved substep: substepIndex.
 		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
-		self measureVelocityChangeAt: #relaxation during: [ self solveConstraintsWithBias: false ] ].
+		self recordVelocityBoundary: #positionIntegrated substep: substepIndex.
+		self measureVelocityChangeAt: #relaxation during: [ self solveConstraintsWithBias: false ].
+		self recordVelocityBoundary: #relaxed substep: substepIndex ].
 	self measureVelocityChangeAt: #restitution during: [
 		self applyRestitutionWithThreshold: restitutionThreshold ].
 	maximumFinalContactPenetration := self maximumContactPenetration.
@@ -86,6 +93,42 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 		inject: 0.0
 		into: [ :total :constraint | total + (constraint points inject: 0.0 into: [ :pointTotal :point | pointTotal + point tangentImpulse abs ]) ].
 	contactConstraints do: [ :constraint | constraint writeImpulsesBack ]
+]
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsSoftStepSolver >> recordVelocityBoundary: aBoundary substep: substepIndex [
+	bodyStates do: [ :state |
+		| traces trace |
+		traces := substepVelocityTraces
+			at: state body sequence
+			ifAbsentPut: [ OrderedCollection new ].
+		trace := traces
+			detect: [ :each | (each at: #substep) = substepIndex ]
+			ifNone: [
+				Dictionary new
+					at: #substep put: substepIndex;
+					yourself ].
+		(traces includes: trace) ifFalse: [ traces add: trace ].
+		trace
+			at: (aBoundary asString, 'LinearVelocity') asSymbol put: state linearVelocity;
+			at: (aBoundary asString, 'AngularVelocity') asSymbol put: state angularVelocity ]
+]
+
+{ #category : 'accessing - telemetry' }
+CFPhysicsSoftStepSolver >> mostIncreasingSubstepVelocityTraceForBodySequence: aSequence [
+	| traces mostIncreasing maximumIncrease |
+	traces := substepVelocityTraces at: aSequence ifAbsent: [ ^ Dictionary new ].
+	mostIncreasing := Dictionary new.
+	maximumIncrease := Float negativeInfinity.
+	traces do: [ :trace |
+		| increase |
+		increase := (trace at: #relaxedLinearVelocity) r
+			- (trace at: #capturedLinearVelocity) r.
+		increase > maximumIncrease ifTrue: [
+			maximumIncrease := increase.
+			mostIncreasing := trace ] ].
+	^ mostIncreasing
 ]
 
 
