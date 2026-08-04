@@ -38,8 +38,7 @@ CFPhysicsConstraintBuilder >> constraintsFrom: contacts bodyStates: bodyStates w
 
 { #category : 'private - testing' }
 CFPhysicsConstraintBuilder >> isSensorContact: contact bodyStates: bodyStates [
-	^ (bodyStates at: contact firstBody) isSensor or: [
-		(bodyStates at: contact secondBody) isSensor ]
+	^ contact isSensor
 ]
 
 { #category : 'private - building' }

@@ -8087,8 +8087,8 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
 		shape: circleBody shapeState
 		shapeIndex: 0.
 	states := IdentityDictionary new
-		at: worldBody put: (CFPhysicsBodyStepState capture: worldBody);
-		at: circleBody put: (CFPhysicsBodyStepState capture: circleBody);
+		at: worldBody put: (CFPhysicsBodyStepState on: worldBody);
+		at: circleBody put: (CFPhysicsBodyStepState on: circleBody);
 		yourself.
 	manifold := CFPhysicsManifoldGenerator new
 		manifoldForPair: pair
@@ -8125,8 +8125,8 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
 		shape: circleBody shapeState
 		shapeIndex: 0.
 	states := IdentityDictionary new
-		at: worldBody put: (CFPhysicsBodyStepState capture: worldBody);
-		at: circleBody put: (CFPhysicsBodyStepState capture: circleBody);
+		at: worldBody put: (CFPhysicsBodyStepState on: worldBody);
+		at: circleBody put: (CFPhysicsBodyStepState on: circleBody);
 		yourself.
 	manifold := CFPhysicsManifoldGenerator new
 		manifoldForPair: pair

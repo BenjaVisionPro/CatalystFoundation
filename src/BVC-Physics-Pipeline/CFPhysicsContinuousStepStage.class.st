@@ -127,8 +127,7 @@ CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bod
 
 { #category : 'private - testing' }
 CFPhysicsContinuousStepStage >> pairIsSensor: pair bodyStates: bodyStates [
-	^ (bodyStates at: pair firstBody) isSensor or: [
-		(bodyStates at: pair secondBody) isSensor ]
+	^ pair firstShape isSensor or: [ pair secondShape isSensor ]
 ]
 
 { #category : 'private - testing' }
