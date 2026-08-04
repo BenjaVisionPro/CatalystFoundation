@@ -8001,7 +8001,7 @@ CFPhysicsCleanSlateTests >> chainSegmentPairsHaveDistinctPersistentKeys [
 		shape: dynamicBody shapeState
 		shapeIndex: 0.
 	self assert: firstPair key ~= secondPair key.
-	self assert: firstPair comesBefore: secondPair.
+	self assert: (firstPair comesBefore: secondPair).
 	^ { firstPair. secondPair }
 ]
 
