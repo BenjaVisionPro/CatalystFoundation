@@ -55,8 +55,8 @@ CFPhysicsChainCircleManifoldBuilder class >> manifoldBetweenChainSegment: segmen
 	point
 		separation: separation;
 		featureId: (CFPhysicsContactFeatureId
-			featureA: featureKind index: featureIndex
-			featureB: #circle index: 1);
+			featureA: #chainCircle index: 0
+			featureB: #chainCircle index: 0);
 		localAnchorA: (segment localPointForWorldPoint: worldPoint bodyOrigin: segmentBodyOrigin rotation: segmentRotation);
 		localAnchorB: (circle localPointForWorldPoint: worldPoint bodyOrigin: circleBodyOrigin rotation: circleRotation).
 	^ (CFPhysicsManifold normal: normal penetration: separation negated)
