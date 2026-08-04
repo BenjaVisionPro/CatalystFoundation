@@ -59,12 +59,26 @@ CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector [
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed [
+	| maximumAngularSpeed |
+	maximumAngularSpeed := seconds <= 0.0
+		ifTrue: [ Float infinity ]
+		ifFalse: [ Float pi * 0.25 / seconds ].
+	^ self
+		integrateVelocityBy: seconds
+		gravity: gravityVector
+		maximumLinearSpeed: aMaximumLinearSpeed
+		maximumAngularSpeed: maximumAngularSpeed
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed maximumAngularSpeed: aMaximumAngularSpeed [
 	bodyType isDynamic ifFalse: [ ^ self ].
 	awake ifFalse: [ ^ self ].
 	self
 		integrateDynamicVelocityBy: seconds
 		gravity: gravityVector
 		maximumLinearSpeed: aMaximumLinearSpeed
+		maximumAngularSpeed: aMaximumAngularSpeed
 ]
 
 { #category : 'integration' }
@@ -77,6 +91,19 @@ CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVe
 
 { #category : 'integration' }
 CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed [
+	| maximumAngularSpeed |
+	maximumAngularSpeed := seconds <= 0.0
+		ifTrue: [ Float infinity ]
+		ifFalse: [ Float pi * 0.25 / seconds ].
+	^ self
+		integrateDynamicVelocityBy: seconds
+		gravity: gravityVector
+		maximumLinearSpeed: aMaximumLinearSpeed
+		maximumAngularSpeed: maximumAngularSpeed
+]
+
+{ #category : 'integration' }
+CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVector maximumLinearSpeed: aMaximumLinearSpeed maximumAngularSpeed: aMaximumAngularSpeed [
 	| linearVelocityDelta angularVelocityDelta linearDampingFactor angularDampingFactor |
 	linearVelocityDelta := ((gravityVector * gravityScale) + (force * inverseMass)) * seconds.
 	angularVelocityDelta := torque * inverseInertia * seconds.
@@ -84,21 +111,21 @@ CFPhysicsBodyStepState >> integrateDynamicVelocityBy: seconds gravity: gravityVe
 	angularDampingFactor := 1.0 / (1.0 + (seconds * angularDamping)).
 	linearVelocity := linearVelocityDelta + (linearVelocity * linearDampingFactor).
 	angularVelocity := angularVelocityDelta + (angularVelocity * angularDampingFactor).
-	self limitVelocityFor: seconds maximumLinearSpeed: aMaximumLinearSpeed
+	self
+		limitVelocityMaximumLinearSpeed: aMaximumLinearSpeed
+		maximumAngularSpeed: aMaximumAngularSpeed
 ]
 
 { #category : 'integration' }
-CFPhysicsBodyStepState >> limitVelocityFor: seconds maximumLinearSpeed: aMaximumLinearSpeed [
-	| linearSpeed maximumAngularSpeed |
+CFPhysicsBodyStepState >> limitVelocityMaximumLinearSpeed: aMaximumLinearSpeed maximumAngularSpeed: aMaximumAngularSpeed [
+	| linearSpeed |
 	linearSpeed := linearVelocity r.
 	linearSpeed > aMaximumLinearSpeed ifTrue: [
 		linearVelocity := linearVelocity * (aMaximumLinearSpeed / linearSpeed) ].
-	seconds <= 0.0 ifTrue: [ ^ self ].
-	maximumAngularSpeed := Float pi * 0.25 / seconds.
-	(allowFastRotation not and: [ angularVelocity abs > maximumAngularSpeed ]) ifTrue: [
+	(allowFastRotation not and: [ angularVelocity abs > aMaximumAngularSpeed ]) ifTrue: [
 		angularVelocity := angularVelocity >= 0.0
-			ifTrue: [ maximumAngularSpeed ]
-			ifFalse: [ maximumAngularSpeed negated ] ]
+			ifTrue: [ aMaximumAngularSpeed ]
+			ifFalse: [ aMaximumAngularSpeed negated ] ]
 ]
 
 { #category : 'integration' }

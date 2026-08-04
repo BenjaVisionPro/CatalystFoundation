@@ -5349,6 +5349,23 @@ CFPhysicsCleanSlateTests >> stepStateCapsAngularVelocityUnlessFastRotationIsAllo
 ]
 
 { #category : 'examples - velocity integration' }
+CFPhysicsCleanSlateTests >> stepStateUsesWholeStepAngularVelocityLimitAcrossSubsteps [
+	<gtExample>
+	| body state maximumAngularSpeed |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	maximumAngularSpeed := Float pi * 0.25.
+	body angularVelocity: Float pi.
+	state := CFPhysicsBodyStepState on: body.
+	state
+		integrateVelocityBy: 0.125
+		gravity: 0 @ 0
+		maximumLinearSpeed: 400.0
+		maximumAngularSpeed: maximumAngularSpeed.
+	self assert: (state angularVelocity closeTo: maximumAngularSpeed).
+	^ state
+]
+
+{ #category : 'examples - velocity integration' }
 CFPhysicsCleanSlateTests >> stepStateDoesNotDampCurrentForceContribution [
 	<gtExample>
 	| body state |

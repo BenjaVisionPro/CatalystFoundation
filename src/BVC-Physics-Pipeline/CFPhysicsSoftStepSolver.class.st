@@ -64,7 +64,10 @@ CFPhysicsSoftStepSolver >> solveWithRestitutionThreshold: restitutionThreshold [
 				state
 					integrateVelocityBy: step substepTime
 					gravity: gravity
-					maximumLinearSpeed: step maximumLinearSpeed ] ].
+					maximumLinearSpeed: step maximumLinearSpeed
+					maximumAngularSpeed: (step timeStep <= 0.0
+						ifTrue: [ Float infinity ]
+						ifFalse: [ Float pi * 0.25 / step timeStep ]) ] ].
 		self measureVelocityChangeAt: #warmStart during: [ self warmStart ].
 		self measureVelocityChangeAt: #biasedSolve during: [ self solveConstraintsWithBias: true ].
 		bodyStates do: [ :state | state integratePositionBy: step substepTime ].
