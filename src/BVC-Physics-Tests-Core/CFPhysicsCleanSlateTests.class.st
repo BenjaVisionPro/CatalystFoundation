@@ -2500,6 +2500,19 @@ CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
 	^ result
 ]
 
+{ #category : 'examples - mouse joints' }
+CFPhysicsCleanSlateTests >> mouseJointDefaultsMatchBox2D [
+	<gtExample>
+	| body joint |
+	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
+	joint := CFPhysicsMouseJoint body: body target: 0 @ 0.
+	self assert: joint hertz equals: 4.0.
+	self assert: joint dampingRatio equals: 1.0.
+	self assert: joint maximumForce equals: 1.0.
+	self assert: joint collideConnected not.
+	^ joint
+]
+
 { #category : 'examples - weld joints' }
 CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 	<gtExample>

@@ -23,12 +23,11 @@ CFPhysicsMouseJoint class >> body: aBody target: aPoint [
 { #category : 'initialization' }
 CFPhysicsMouseJoint >> initialize [
 	super initialize.
-	hertz := 5.0.
-	dampingRatio := 0.7.
-	maximumForce := 1000.0.
+	hertz := 4.0.
+	dampingRatio := 1.0.
+	maximumForce := 1.0.
 	linearImpulse := 0 @ 0.
-	angularImpulse := 0.0.
-	collideConnected := true
+	angularImpulse := 0.0
 ]
 
 { #category : 'accessing' }
