@@ -13,13 +13,32 @@ Class {
 { #category : 'building' }
 CFPhysicsChainBuilder class >> inwardLoopFrom: aCollection material: aMaterial collisionFilter: aFilter [
 	^ self
+		inwardLoopFrom: aCollection
+		material: aMaterial
+		collisionFilter: aFilter
+		body: nil
+]
+
+{ #category : 'building' }
+CFPhysicsChainBuilder class >> inwardLoopFrom: aCollection material: aMaterial collisionFilter: aFilter body: aBody [
+	^ self
 		loopFrom: aCollection reversed
 		material: aMaterial
 		collisionFilter: aFilter
+		body: aBody
 ]
 
 { #category : 'building' }
 CFPhysicsChainBuilder class >> loopFrom: aCollection material: aMaterial collisionFilter: aFilter [
+	^ self
+		loopFrom: aCollection
+		material: aMaterial
+		collisionFilter: aFilter
+		body: nil
+]
+
+{ #category : 'building' }
+CFPhysicsChainBuilder class >> loopFrom: aCollection material: aMaterial collisionFilter: aFilter body: aBody [
 	| vertices chain segments count |
 	vertices := aCollection asArray copy.
 	self validateLoopVertices: vertices.
@@ -28,6 +47,7 @@ CFPhysicsChainBuilder class >> loopFrom: aCollection material: aMaterial collisi
 		material: aMaterial;
 		collisionFilter: aFilter;
 		loop: true;
+		body: aBody;
 		yourself.
 	count := vertices size.
 	segments := Array new: count.
@@ -46,6 +66,7 @@ CFPhysicsChainBuilder class >> loopFrom: aCollection material: aMaterial collisi
 				chain: chain
 				segmentIndex: index) ].
 	chain segments: segments.
+	aBody ifNotNil: [ segments do: [ :segment | aBody shapeCollection add: segment ] ].
 	^ chain
 ]
 

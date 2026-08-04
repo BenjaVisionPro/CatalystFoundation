@@ -58,3 +58,62 @@ CFPhysicsChainSegmentShape >> segmentIndex [ ^ segmentIndex ]
 
 { #category : 'accessing' }
 CFPhysicsChainSegmentShape >> segmentIndex: anInteger [ segmentIndex := anInteger ]
+
+
+{ #category : 'testing' }
+CFPhysicsChainSegmentShape >> isChainSegment [
+	^ true
+]
+
+{ #category : 'accessing' }
+CFPhysicsChainSegmentShape >> body [
+	^ chain body
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> localAABB [
+	| minimum maximum |
+	minimum := (point1 x min: point2 x) @ (point1 y min: point2 y).
+	maximum := (point1 x max: point2 x) @ (point1 y max: point2 y).
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation [
+	^ bodyOrigin + (self rotateVector: point1 by: rotation)
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation [
+	^ bodyOrigin + (self rotateVector: point2 by: rotation)
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> worldGhost1AtBodyOrigin: bodyOrigin rotation: rotation [
+	^ bodyOrigin + (self rotateVector: ghost1 by: rotation)
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation [
+	^ bodyOrigin + (self rotateVector: ghost2 by: rotation)
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> aabbAtBodyOrigin: bodyOrigin rotation: rotation [
+	| first second minimum maximum |
+	first := self worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
+	second := self worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
+	minimum := (first x min: second x) @ (first y min: second y).
+	maximum := (first x max: second x) @ (first y max: second y).
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> rotateVector: aPoint by: anAngle [
+	| cosine sine |
+	anAngle = 0 ifTrue: [ ^ aPoint ].
+	cosine := anAngle cos.
+	sine := anAngle sin.
+	^ ((aPoint x * cosine) - (aPoint y * sine))
+		@ ((aPoint x * sine) + (aPoint y * cosine))
+]

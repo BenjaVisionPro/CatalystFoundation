@@ -54,3 +54,19 @@ CFPhysicsShapeCollection >> shapes [
 CFPhysicsShapeCollection >> size [
 	^ shapes size
 ]
+
+
+{ #category : 'testing' }
+CFPhysicsShapeCollection >> includes: aShape [
+	^ shapes includes: aShape
+]
+
+{ #category : 'removing' }
+CFPhysicsShapeCollection >> remove: aShape [
+	^ shapes remove: aShape
+]
+
+{ #category : 'removing' }
+CFPhysicsShapeCollection >> remove: aShape ifAbsent: aBlock [
+	^ shapes remove: aShape ifAbsent: aBlock
+]

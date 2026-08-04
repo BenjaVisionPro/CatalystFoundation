@@ -7916,3 +7916,54 @@ CFPhysicsCleanSlateTests >> shapeCollectionCanOwnChainSegmentShapes [
 	self assert: collection shapes last == chain segments last.
 	^ collection
 ]
+
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainAttachesItsSegmentShapesToOneBody [
+	<gtExample>
+	| body chain |
+	body := CFPhysicsBody
+		element: (BlElement new size: 40 @ 40; yourself)
+		world: nil.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 40 @ 0. 40 @ 40. 0 @ 40 }
+		material: nil
+		collisionFilter: nil
+		body: body.
+	self assert: chain body == body.
+	self assert: body shapeCollection size equals: 5.
+	chain segments do: [ :segment |
+		self assert: segment body == body.
+		self assert: (body shapeCollection includes: segment) ].
+	^ chain
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentAABBUsesOnlyItsSolidEdge [
+	<gtExample>
+	| chain segment bounds |
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }
+		material: nil
+		collisionFilter: nil.
+	segment := chain segments first.
+	bounds := segment aabbAtBodyOrigin: 5 @ 7 rotation: 0.
+	self assert: bounds position equals: 5 @ 7.
+	self assert: bounds extent equals: 10 @ 0.
+	^ bounds
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentAABBTracksBodyRotation [
+	<gtExample>
+	| chain segment bounds |
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }
+		material: nil
+		collisionFilter: nil.
+	segment := chain segments first.
+	bounds := segment aabbAtBodyOrigin: 5 @ 7 rotation: Float pi / 2.0.
+	self assert: (bounds position closeTo: 5 @ 7).
+	self assert: (bounds extent closeTo: 0 @ 10).
+	^ bounds
+]

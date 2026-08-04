@@ -6,7 +6,7 @@ I own ordered local vertices and the chain-segment shapes built from them. Chain
 Class {
 	#name : 'CFPhysicsChain',
 	#superclass : 'Object',
-	#instVars : [ 'vertices', 'segments', 'material', 'collisionFilter', 'loop' ],
+	#instVars : [ 'vertices', 'segments', 'material', 'collisionFilter', 'loop', 'body' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -19,8 +19,22 @@ CFPhysicsChain >> initialize [
 	loop := false
 ]
 
+
+{ #category : 'accessing' }
+CFPhysicsChain >> body [ ^ body ]
+
+{ #category : 'accessing' }
+CFPhysicsChain >> body: aBody [ body := aBody ]
+
 { #category : 'accessing' }
 CFPhysicsChain >> collisionFilter [ ^ collisionFilter ]
+
+
+{ #category : 'accessing' }
+CFPhysicsChain >> body [ ^ body ]
+
+{ #category : 'accessing' }
+CFPhysicsChain >> body: aBody [ body := aBody ]
 
 { #category : 'accessing' }
 CFPhysicsChain >> collisionFilter: aFilter [ collisionFilter := aFilter ]
