@@ -24,8 +24,13 @@ CFPhysicsJoint >> collideConnected [ ^ collideConnected ]
 
 { #category : 'configuration' }
 CFPhysicsJoint >> collideConnected: aBoolean [
+	| body |
 	collideConnected = aBoolean ifTrue: [ ^ self ].
 	collideConnected := aBoolean.
+	aBoolean ifTrue: [
+		body := self bodyA ifNil: [ self bodyB ].
+		body ifNotNil: [ :aBody |
+			aBody world ifNotNil: [ :world | world touchBroadphaseProxyFor: aBody ] ] ].
 	self wakeBodies
 ]
 

@@ -1505,6 +1505,12 @@ CFPhysicsWorld >> invalidateTopology [
 	activeSolveTicket := nil
 ]
 
+{ #category : 'broadphase' }
+CFPhysicsWorld >> touchBroadphaseProxyFor: aBody [
+	stepPipeline touchBroadphaseProxyFor: aBody.
+	^ self
+]
+
 { #category : 'accessing - solution identity' }
 CFPhysicsWorld >> lifetimeGeneration [ ^ lifetimeGeneration ]
 

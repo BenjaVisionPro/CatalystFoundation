@@ -95,6 +95,16 @@ CFPhysicsBroadphase >> destroyProxyFor: aBody [
 		do: [ :key | candidatePairsByKey removeKey: key ]
 ]
 
+{ #category : 'pair buffering' }
+CFPhysicsBroadphase >> touchProxyForBody: aBody [
+	"Buffer an existing proxy for pair creation without changing its bounds.
+	Box2D uses this path when a joint begins allowing its connected bodies to
+	collide, because neither body need move for the broadphase to reconsider
+	the pair."
+	(proxiesByBody includesKey: aBody) ifTrue: [ movedBodies add: aBody ].
+	^ self
+]
+
 { #category : 'private - pairs' }
 CFPhysicsBroadphase >> findNewPairsUsing: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	movedBodies do: [ :body |

@@ -68,6 +68,12 @@ CFPhysicsStepPipeline >> sleepConfiguration: aConfiguration [
 	self sleepStage configuration: aConfiguration
 ]
 
+{ #category : 'broadphase' }
+CFPhysicsStepPipeline >> touchBroadphaseProxyFor: aBody [
+	(self stageOfType: CFPhysicsPairFinderStage) pairFinder touchProxyForBody: aBody.
+	^ self
+]
+
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
 	^ self
