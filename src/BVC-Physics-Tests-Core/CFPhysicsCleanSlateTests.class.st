@@ -7948,8 +7948,8 @@ CFPhysicsCleanSlateTests >> chainSegmentAABBUsesOnlyItsSolidEdge [
 		collisionFilter: nil.
 	segment := chain segments first.
 	bounds := segment aabbAtBodyOrigin: 5 @ 7 rotation: 0.
-	self assert: bounds position equals: 5 @ 7.
-	self assert: bounds extent equals: 10 @ 0.
+	self assert: bounds minimum equals: 5 @ 7.
+	self assert: bounds maximum equals: 15 @ 7.
 	^ bounds
 ]
 
@@ -7963,7 +7963,60 @@ CFPhysicsCleanSlateTests >> chainSegmentAABBTracksBodyRotation [
 		collisionFilter: nil.
 	segment := chain segments first.
 	bounds := segment aabbAtBodyOrigin: 5 @ 7 rotation: Float pi / 2.0.
-	self assert: (bounds position closeTo: 5 @ 7).
-	self assert: (bounds extent closeTo: 0 @ 10).
+	self assert: (bounds minimum closeTo: 5 @ 7).
+	self assert: (bounds maximum closeTo: 5 @ 17).
 	^ bounds
+]
+
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentPairsHaveDistinctPersistentKeys [
+	<gtExample>
+	| worldBody dynamicBody chain firstPair secondPair |
+	worldBody := CFPhysicsBody
+		element: (BlElement new size: 40 @ 40; yourself)
+		world: nil.
+	dynamicBody := CFPhysicsBody
+		element: (BlElement new size: 10 @ 10; yourself)
+		world: nil.
+	worldBody sequence: 1.
+	dynamicBody sequence: 2.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 40 @ 0. 40 @ 40. 0 @ 40 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	firstPair := CFPhysicsPair
+		firstBody: worldBody
+		shape: chain segments first
+		shapeIndex: chain segments first segmentIndex
+		secondBody: dynamicBody
+		shape: dynamicBody shapeState
+		shapeIndex: 0.
+	secondPair := CFPhysicsPair
+		firstBody: worldBody
+		shape: chain segments second
+		shapeIndex: chain segments second segmentIndex
+		secondBody: dynamicBody
+		shape: dynamicBody shapeState
+		shapeIndex: 0.
+	self assert: firstPair key ~= secondPair key.
+	self assert: firstPair comesBefore: secondPair.
+	^ { firstPair. secondPair }
+]
+
+{ #category : 'examples - collision' }
+CFPhysicsCleanSlateTests >> primaryBodyPairsKeepZeroShapeIndexes [
+	<gtExample>
+	| first second pair |
+	first := CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil.
+	second := CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil.
+	first sequence: 1.
+	second sequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	self assert: pair firstShape == first shapeState.
+	self assert: pair secondShape == second shapeState.
+	self assert: pair key firstShapeIndex equals: 0.
+	self assert: pair key secondShapeIndex equals: 0.
+	^ pair
 ]
