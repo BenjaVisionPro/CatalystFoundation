@@ -120,9 +120,17 @@ CFPhysicsChainSegmentShape >> rotateVector: aPoint by: anAngle [
 
 { #category : 'geometry' }
 CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
-	| bodyLocal |
-	bodyLocal := self rotateVector: aPoint - aBodyOrigin by: anAngle negated.
-	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
+	^ self rotateVector: aPoint - aBodyOrigin by: anAngle negated
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsChainSegmentShape >> bodyLocalPointForElementLocalPoint: aPoint [
+	^ aPoint
+]
+
+{ #category : 'geometry - coordinates' }
+CFPhysicsChainSegmentShape >> elementLocalPointForBodyLocalPoint: aPoint [
+	^ aPoint
 ]
 
 
