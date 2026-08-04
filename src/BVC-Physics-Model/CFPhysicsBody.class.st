@@ -6,7 +6,7 @@ My responsibility is to own an element's physical state, material, ordered shape
 Class {
 	#name : 'CFPhysicsBody',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeCollection', 'primaryShapeCollides', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet', 'allowFastRotation' ],
+	#instVars : [ 'element', 'world', 'bodyOrigin', 'previousBodyOrigin', 'rotation', 'previousRotation', 'velocity', 'bodyType', 'sequence', 'shapeCollection', 'contacts', 'awake', 'sleepTime', 'angularVelocity', 'force', 'torque', 'linearDamping', 'angularDamping', 'gravityScale', 'sleepingAllowed', 'sleepThreshold', 'bullet', 'allowFastRotation' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -115,7 +115,6 @@ CFPhysicsBody >> element [
 CFPhysicsBody >> element: anElement [
 	element := anElement.
 	shapeCollection := CFPhysicsShapeCollection with: (CFPhysicsShapeState on: anElement).
-	primaryShapeCollides := true.
 	bodyOrigin ifNil: [
 		bodyOrigin := self shapeState extent / 2.0.
 		previousBodyOrigin := bodyOrigin ]
@@ -304,24 +303,6 @@ CFPhysicsBody >> shapeState [
 { #category : 'geometry' }
 CFPhysicsBody >> shapes [
 	^ self shapeCollection shapes
-]
-
-{ #category : 'geometry' }
-CFPhysicsBody >> collisionShapes [
-	| ownedShapes |
-	ownedShapes := self shapeCollection shapes.
-	primaryShapeCollides = false ifTrue: [ ^ ownedShapes allButFirst ].
-	^ ownedShapes
-]
-
-{ #category : 'geometry' }
-CFPhysicsBody >> primaryShapeCollides [
-	^ primaryShapeCollides ~= false
-]
-
-{ #category : 'geometry' }
-CFPhysicsBody >> primaryShapeCollides: aBoolean [
-	primaryShapeCollides := aBoolean = true
 ]
 
 { #category : 'ordering' }

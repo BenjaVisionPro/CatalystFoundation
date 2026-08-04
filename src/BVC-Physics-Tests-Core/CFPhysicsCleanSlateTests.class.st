@@ -8211,36 +8211,3 @@ CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
 	self assert: manifold isNil.
 	^ manifold
 ]
-
-
-{ #category : 'examples - containment' }
-CFPhysicsCleanSlateTests >> worldBoundaryUsesOwnerGeometryChain [
-	<gtExample>
-	| owner child world result |
-	owner := BlElement new size: 120 @ 80; yourself.
-	child := BlElement new size: 10 @ 10; yourself.
-	owner addChild: child.
-	world := owner physics beWorld.
-	world gravity: 0 @ 0.
-	world synchroniseMembership.
-	result := world step.
-	self assert: world boundaryChain notNil.
-	self assert: world boundaryChain segments size equals: 4.
-	self assert: world boundaryBody isStatic.
-	^ result
-]
-
-{ #category : 'examples - containment' }
-CFPhysicsCleanSlateTests >> ellipseWorldBoundaryUsesFlattenedOwnerGeometry [
-	<gtExample>
-	| owner child world result |
-	owner := BlElement new geometry: BlEllipseGeometry new; size: 120 @ 80; yourself.
-	child := BlElement new size: 10 @ 10; yourself.
-	owner addChild: child.
-	world := owner physics beWorld.
-	world gravity: 0 @ 0.
-	world synchroniseMembership.
-	result := world step.
-	self assert: world boundaryChain segments size equals: 32.
-	^ result
-]

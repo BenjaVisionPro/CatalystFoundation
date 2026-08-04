@@ -125,22 +125,6 @@ CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyO
 	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
 ]
 
-
-{ #category : 'material' }
-CFPhysicsChainSegmentShape >> material [
-	^ chain material
-]
-
-{ #category : 'collision filtering' }
-CFPhysicsChainSegmentShape >> collisionFilter [
-	^ chain collisionFilter
-]
-
-{ #category : 'geometry' }
-CFPhysicsChainSegmentShape >> rollingResistanceRadius [
-	^ 0.0
-]
-
 { #category : 'sensors' }
 CFPhysicsChainSegmentShape >> isSensor [
 	^ false

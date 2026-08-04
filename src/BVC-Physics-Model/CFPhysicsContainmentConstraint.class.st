@@ -36,18 +36,14 @@ CFPhysicsContainmentConstraint >> body: aBodyState [ body := aBodyState ]
 CFPhysicsContainmentConstraint >> margin [ ^ margin ]
 
 { #category : 'configuration' }
-CFPhysicsContainmentConstraint >> margin: aNumber [
-	margin := aNumber asFloat max: 0.0.
-	body world ifNotNil: [ :aWorld | aWorld boundary margin: margin ]
-]
+CFPhysicsContainmentConstraint >> margin: aNumber [ margin := aNumber asFloat max: 0.0 ]
 
 { #category : 'configuration' }
 CFPhysicsContainmentConstraint >> restitution [ ^ restitution ]
 
 { #category : 'configuration' }
 CFPhysicsContainmentConstraint >> restitution: aNumber [
-	restitution := (aNumber asFloat max: 0.0) min: 1.0.
-	body world ifNotNil: [ :aWorld | aWorld boundary restitution: restitution ]
+	restitution := (aNumber asFloat max: 0.0) min: 1.0
 ]
 
 { #category : 'testing' }
@@ -56,10 +52,7 @@ CFPhysicsContainmentConstraint >> isActive [ ^ active ]
 { #category : 'stepping' }
 CFPhysicsContainmentConstraint >> prepareForBounds: aRectangle [
 	active ifFalse: [ ^ self ].
-	body world ifNotNil: [ :aWorld |
-		aWorld boundary enabled: true.
-		aWorld boundary margin: margin.
-		aWorld boundary restitution: restitution ]
+	body applyContainmentConstraint: self bounds: aRectangle
 ]
 
 { #category : 'private - applying' }

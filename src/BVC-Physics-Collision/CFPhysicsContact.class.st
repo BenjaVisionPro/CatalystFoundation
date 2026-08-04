@@ -108,16 +108,6 @@ CFPhysicsContact >> firstShapeState: aShapeState [ firstShapeState := aShapeStat
 { #category : 'private - accessing' }
 CFPhysicsContact >> secondShapeState: aShapeState [ secondShapeState := aShapeState ]
 
-{ #category : 'accessing' }
-CFPhysicsContact >> firstShapeState [
-	^ firstShapeState
-]
-
-{ #category : 'accessing' }
-CFPhysicsContact >> secondShapeState [
-	^ secondShapeState
-]
-
 { #category : 'testing' }
 CFPhysicsContact >> isSensor [
 	^ firstShapeState isSensor or: [ secondShapeState isSensor ]
