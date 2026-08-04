@@ -2035,6 +2035,7 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
+	world containment disable.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.
@@ -2361,6 +2362,7 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
+	world containment disable.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	element physics position: 0 @ 0.
@@ -2850,6 +2852,7 @@ CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
+	world containment disable.
 	world gravity: 0 @ 0.
 	world synchroniseMembership.
 	first physics position: 0 @ 0.

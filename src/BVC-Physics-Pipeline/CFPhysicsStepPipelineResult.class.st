@@ -84,14 +84,21 @@ CFPhysicsStepPipelineResult >> constraints [
 	^ constraints
 ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> constraints: aCollection [ constraints := aCollection asArray ]
+CFPhysicsStepPipelineResult >> constraints: aCollection [
+	constraints := aCollection asArray.
+	jointConstraints := constraints.
+	self rebuildSolverConstraints
+]
 
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactConstraints [
 	^ contactConstraints
 ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> contactConstraints: aCollection [ contactConstraints := aCollection asArray ]
+CFPhysicsStepPipelineResult >> contactConstraints: aCollection [
+	contactConstraints := aCollection asArray.
+	self rebuildSolverConstraints
+]
 
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> solverConstraints [
@@ -104,7 +111,26 @@ CFPhysicsStepPipelineResult >> solverConstraints: aCollection [ solverConstraint
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> jointConstraints [ ^ jointConstraints ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> jointConstraints: aCollection [ jointConstraints := aCollection asArray ]
+CFPhysicsStepPipelineResult >> jointConstraints: aCollection [
+	jointConstraints := aCollection asArray.
+	constraints := jointConstraints.
+	self rebuildSolverConstraints
+]
+
+
+{ #category : 'private - constraints' }
+CFPhysicsStepPipelineResult >> rebuildSolverConstraints [
+	| combined index |
+	combined := Array new: contactConstraints size + jointConstraints size.
+	index := 1.
+	contactConstraints do: [ :constraint |
+		combined at: index put: constraint.
+		index := index + 1 ].
+	jointConstraints do: [ :constraint |
+		combined at: index put: constraint.
+		index := index + 1 ].
+	solverConstraints := combined
+]
 
 { #category : 'committing' }
 CFPhysicsStepPipelineResult >> commitBodyStates [
