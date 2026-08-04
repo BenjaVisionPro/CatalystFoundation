@@ -2363,6 +2363,47 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 ]
 
 { #category : 'examples - prismatic joints' }
+CFPhysicsCleanSlateTests >> prismaticJointCouplesOffsetPerpendicularAndAngularConstraints [
+	<gtExample>
+	| owner element world joint state prepared solver axis normal leverA leverB |
+	owner := BlElement new size: 400 @ 300; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	element physics
+		position: 100 @ 100;
+		velocity: 0 @ 100;
+		angularVelocity: 50.0.
+	joint := (element physics localAnchorAt: 0 @ 0)
+		prismaticJointTo: (world anchorAt: 100 @ 0)
+		along: 1 @ 0.
+	state := world captureStateAfterSynchronisation.
+	prepared := (CFPhysicsPrismaticJointConstraintBuilder new
+		constraintsFrom: state joints
+		bodyStates: state bodyStates
+		step: state step) first.
+	solver := CFPhysicsSoftStepSolver
+		step: state step
+		bodyStates: state orderedBodyStates
+		constraints: #().
+	solver solvePrismaticJointConstraint: prepared biasEnabled: false.
+	axis := solver prismaticJointAxisFor: prepared.
+	normal := axis y negated @ axis x.
+	leverA := solver prismaticJointLeverAFor: prepared direction: normal.
+	leverB := solver prismaticJointLeverBFor: prepared direction: normal.
+	self assert: leverA ~= 0.0.
+	self assert: (solver
+		prismaticJointVelocityFor: prepared
+		direction: normal
+		leverA: leverA
+		leverB: leverB) closeTo: 0.0.
+	self assert: (solver weldJointRelativeAngularVelocity: prepared) closeTo: 0.0.
+	^ prepared
+]
+
+{ #category : 'examples - prismatic joints' }
 CFPhysicsCleanSlateTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |

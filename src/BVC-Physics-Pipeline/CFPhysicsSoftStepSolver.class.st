@@ -479,9 +479,14 @@ CFPhysicsSoftStepSolver >> warmStartPrismaticJointConstraint: constraint [
 
 { #category : 'private - solving' }
 CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled: biasEnabled [
-	| axis normal leverA leverB relativeVelocity separation bias massCoefficient impulseCoefficient increment angularRelativeVelocity angularSeparation angularBias angularIncrement |
+	| axis normal leverA leverB relativeVelocity separation bias massCoefficient impulseCoefficient angularRelativeVelocity angularSeparation angularBias inverseMassA inverseMassB inverseInertiaA inverseInertiaB k11 k12 k22 determinant solved perpendicularIncrement angularIncrement |
 	axis := self prismaticJointAxisFor: constraint.
 	normal := axis y negated @ axis x.
+	"Box2D resolves axial spring, motor, and limits before the coupled
+	perpendicular/angle block, so the block sees their updated velocities."
+	self solvePrismaticJointSpring: constraint.
+	self solvePrismaticJointMotor: constraint.
+	self solvePrismaticJointLimits: constraint biasEnabled: biasEnabled.
 	leverA := self prismaticJointLeverAFor: constraint direction: normal.
 	leverB := self prismaticJointLeverBFor: constraint direction: normal.
 	relativeVelocity := self prismaticJointVelocityFor: constraint direction: normal leverA: leverA leverB: leverB.
@@ -489,22 +494,34 @@ CFPhysicsSoftStepSolver >> solvePrismaticJointConstraint: constraint biasEnabled
 	bias := biasEnabled ifTrue: [ step biasRate * separation ] ifFalse: [ 0.0 ].
 	massCoefficient := biasEnabled ifTrue: [ step massCoefficient ] ifFalse: [ 1.0 ].
 	impulseCoefficient := biasEnabled ifTrue: [ step impulseCoefficient ] ifFalse: [ 0.0 ].
-	increment := (massCoefficient * constraint perpendicularMass * (relativeVelocity + bias)) negated
-		- (impulseCoefficient * constraint perpendicularImpulse).
-	constraint perpendicularImpulse: constraint perpendicularImpulse + increment.
-	self applyPrismaticJointImpulse: increment direction: normal leverA: leverA leverB: leverB constraint: constraint.
 	angularRelativeVelocity := self weldJointRelativeAngularVelocity: constraint.
 	angularSeparation := constraint baseAngle
 		+ (self distanceJointDeltaRotationFor: constraint bodyStateB)
 		- (self distanceJointDeltaRotationFor: constraint bodyStateA).
 	angularBias := biasEnabled ifTrue: [ step biasRate * angularSeparation ] ifFalse: [ 0.0 ].
-	angularIncrement := (massCoefficient * constraint angularMass * (angularRelativeVelocity + angularBias)) negated
-		- (impulseCoefficient * constraint angularImpulse).
+	"Box2D 3.1.1 solves the perpendicular and angular prismatic constraints
+	as a coupled 2 by 2 block. Solving them independently leaves the lever-arm
+	cross term unresolved, particularly for off-centre anchors."
+	inverseMassA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseMass ].
+	inverseMassB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseMass ].
+	inverseInertiaA := constraint bodyStateA ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseInertia ].
+	inverseInertiaB := constraint bodyStateB ifNil: [ 0.0 ] ifNotNil: [ :state | state inverseInertia ].
+	k11 := inverseMassA + inverseMassB + (inverseInertiaA * leverA squared) + (inverseInertiaB * leverB squared).
+	k12 := (inverseInertiaA * leverA) + (inverseInertiaB * leverB).
+	k22 := inverseInertiaA + inverseInertiaB.
+	k22 = 0.0 ifTrue: [ k22 := 1.0 ].
+	determinant := (k11 * k22) - (k12 * k12).
+	solved := determinant = 0.0
+		ifTrue: [ 0 @ 0 ]
+		ifFalse: [
+			((k22 * (relativeVelocity + bias)) - (k12 * (angularRelativeVelocity + angularBias))) / determinant
+				@ (((k11 * (angularRelativeVelocity + angularBias)) - (k12 * (relativeVelocity + bias))) / determinant) ].
+	perpendicularIncrement := (solved x * massCoefficient) negated - (constraint perpendicularImpulse * impulseCoefficient).
+	angularIncrement := (solved y * massCoefficient) negated - (constraint angularImpulse * impulseCoefficient).
+	constraint perpendicularImpulse: constraint perpendicularImpulse + perpendicularIncrement.
 	constraint angularImpulse: constraint angularImpulse + angularIncrement.
-	self applyWeldJointAngularImpulse: angularIncrement constraint: constraint.
-	self solvePrismaticJointSpring: constraint.
-	self solvePrismaticJointMotor: constraint.
-	self solvePrismaticJointLimits: constraint biasEnabled: biasEnabled
+	self applyPrismaticJointImpulse: perpendicularIncrement direction: normal leverA: leverA leverB: leverB constraint: constraint.
+	self applyWeldJointAngularImpulse: angularIncrement constraint: constraint
 ]
 
 { #category : 'private - solving' }
