@@ -120,43 +120,9 @@ CFPhysicsChainSegmentShape >> rotateVector: aPoint by: anAngle [
 
 { #category : 'geometry' }
 CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
-	^ self rotateVector: aPoint - aBodyOrigin by: anAngle negated
-]
-
-{ #category : 'geometry - coordinates' }
-CFPhysicsChainSegmentShape >> bodyLocalPointForElementLocalPoint: aPoint [
-	^ aPoint
-]
-
-{ #category : 'geometry - coordinates' }
-CFPhysicsChainSegmentShape >> elementLocalPointForBodyLocalPoint: aPoint [
-	^ aPoint
-]
-
-
-{ #category : 'material' }
-CFPhysicsChainSegmentShape >> material [
-	^ chain material
-]
-
-{ #category : 'collision filtering' }
-CFPhysicsChainSegmentShape >> collisionFilter [
-	^ chain collisionFilter
-]
-
-{ #category : 'collision filtering' }
-CFPhysicsChainSegmentShape >> collisionCategoryBits [
-	^ self collisionFilter categoryBits
-]
-
-{ #category : 'collision filtering' }
-CFPhysicsChainSegmentShape >> collisionMaskBits [
-	^ self collisionFilter maskBits
-]
-
-{ #category : 'collision filtering' }
-CFPhysicsChainSegmentShape >> collisionGroupIndex [
-	^ self collisionFilter groupIndex
+	| bodyLocal |
+	bodyLocal := self rotateVector: aPoint - aBodyOrigin by: anAngle negated.
+	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
 ]
 
 { #category : 'sensors' }
@@ -168,38 +134,4 @@ CFPhysicsChainSegmentShape >> isSensor [
 { #category : 'capturing' }
 CFPhysicsChainSegmentShape >> capturedForStep [
 	^ self shallowCopy
-]
-
-{ #category : 'continuous collision' }
-CFPhysicsChainSegmentShape >> sweptAABBAlong: aSweep [
-	| startTransform endTransform startBounds endBounds radius startCentre endCentre minimum maximum |
-	startTransform := aSweep startTransform.
-	endTransform := aSweep endTransform.
-	startBounds := self
-		aabbAtBodyOrigin: startTransform bodyOrigin
-		rotation: startTransform rotation.
-	endBounds := self
-		aabbAtBodyOrigin: endTransform bodyOrigin
-		rotation: endTransform rotation.
-	startTransform rotation = endTransform rotation ifTrue: [
-		^ startBounds mergedWith: endBounds ].
-
-	radius := self boundingRadius.
-	startCentre := startTransform bodyOrigin.
-	endCentre := endTransform bodyOrigin.
-	minimum := ((startCentre x min: endCentre x) - radius)
-		@ ((startCentre y min: endCentre y) - radius).
-	maximum := ((startCentre x max: endCentre x) + radius)
-		@ ((startCentre y max: endCentre y) + radius).
-	^ CFPhysicsAABB position: minimum extent: maximum - minimum
-]
-
-{ #category : 'geometry' }
-CFPhysicsChainSegmentShape >> boundingRadius [
-	^ point1 r max: point2 r
-]
-
-{ #category : 'geometry' }
-CFPhysicsChainSegmentShape >> rollingResistanceRadius [
-	^ 0.0
 ]
