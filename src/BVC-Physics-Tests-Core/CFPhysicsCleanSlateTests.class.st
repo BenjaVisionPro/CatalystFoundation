@@ -8020,3 +8020,43 @@ CFPhysicsCleanSlateTests >> primaryBodyPairsKeepZeroShapeIndexes [
 	self assert: pair key secondShapeIndex equals: 0.
 	^ pair
 ]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> broadphaseRegistersChainSegmentsAsDistinctShapes [
+	<gtExample>
+	| worldBody dynamicBody chain broadphase pairs segmentPair |
+	worldBody := CFPhysicsBody
+		element: (BlElement new size: 1 @ 1; yourself)
+		world: nil.
+	worldBody sequence: 1.
+	worldBody beStatic.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 10 @ 0. 30 @ 0. 30 @ 20. 10 @ 20 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	dynamicBody := CFPhysicsBody
+		element: (BlElement new size: 4 @ 4; yourself)
+		world: nil.
+	dynamicBody sequence: 2.
+	dynamicBody position: 18 @ -2.
+	dynamicBody beDynamic.
+	broadphase := CFPhysicsBroadphase new.
+	pairs := broadphase
+		pairsAmongSolvedStepStates: {
+			CFPhysicsBodyStepState on: worldBody.
+			CFPhysicsBodyStepState on: dynamicBody }
+		collisionSuppressedBodyPairs: #()
+		step: nil.
+	segmentPair := pairs
+		detect: [ :pair | pair firstShape isChainSegment ]
+		ifNone: [ nil ].
+	self assert: broadphase proxyCount equals: worldBody shapes size + dynamicBody shapes size.
+	self assert: segmentPair isNotNil.
+	self assert: segmentPair firstBody == worldBody.
+	self assert: segmentPair firstShape == chain segments first.
+	self assert: segmentPair firstShapeIndex equals: 1.
+	self assert: segmentPair secondBody == dynamicBody.
+	self assert: segmentPair secondShape == dynamicBody shapeState.
+	^ pairs
+]

@@ -8,7 +8,7 @@ new candidate pairs. Candidate pairs remain registered while their fat proxy bou
 Class {
 	#name : 'CFPhysicsBroadphase',
 	#superclass : 'Object',
-	#instVars : [ 'staticTree', 'kinematicTree', 'dynamicTree', 'proxiesByBody', 'proxyTypesByBody', 'movedBodies', 'candidatePairsByKey', 'pairFilter', 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount', 'queryVisitCount', 'queryLeafVisitCount', 'lastMovedProxyCount' ],
+	#instVars : [ 'staticTree', 'kinematicTree', 'dynamicTree', 'proxiesByShape', 'proxyTypesByShape', 'entriesByShape', 'movedShapes', 'candidatePairsByKey', 'pairFilter', 'entryCount', 'comparisonCount', 'acceptedPairCount', 'maximumActiveCount', 'queryVisitCount', 'queryLeafVisitCount', 'lastMovedProxyCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -19,9 +19,10 @@ CFPhysicsBroadphase >> initialize [
 	staticTree := CFPhysicsDynamicTree new.
 	kinematicTree := CFPhysicsDynamicTree new.
 	dynamicTree := CFPhysicsDynamicTree new.
-	proxiesByBody := IdentityDictionary new.
-	proxyTypesByBody := IdentityDictionary new.
-	movedBodies := IdentitySet new.
+	proxiesByShape := IdentityDictionary new.
+	proxyTypesByShape := IdentityDictionary new.
+	entriesByShape := IdentityDictionary new.
+	movedShapes := IdentitySet new.
 	candidatePairsByKey := Dictionary new.
 	pairFilter := CFPhysicsPairFinder new.
 	lastMovedProxyCount := 0.
@@ -41,9 +42,9 @@ CFPhysicsBroadphase >> pairsAmongSolvedStepStates: stepStates collisionSuppresse
 	self
 		findNewPairsUsing: statesByBody
 		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs.
-	lastMovedProxyCount := movedBodies size.
-	movedBodies removeAll.
-	entryCount := proxiesByBody size.
+	lastMovedProxyCount := movedShapes size.
+	movedShapes removeAll.
+	entryCount := proxiesByShape size.
 	acceptedPairCount := candidatePairsByKey size.
 	^ candidatePairsByKey values asArray sorted: [ :left :right |
 		left comesBefore: right ]
@@ -51,47 +52,65 @@ CFPhysicsBroadphase >> pairsAmongSolvedStepStates: stepStates collisionSuppresse
 
 { #category : 'private - synchronisation' }
 CFPhysicsBroadphase >> synchroniseProxiesWith: stepStates statesByBody: statesByBody step: step [
-	| removedBodies |
-	removedBodies := proxiesByBody keys reject: [ :body | statesByBody includesKey: body ].
-	removedBodies do: [ :body | self destroyProxyFor: body ].
-	stepStates do: [ :state | self synchroniseProxyFor: state step: step ]
+	| currentShapes removedShapes |
+	currentShapes := IdentitySet new.
+	stepStates do: [ :state |
+		state body shapes withIndexDo: [ :shape :index |
+			currentShapes add: shape.
+			self
+				synchroniseProxyForShape: shape
+				shapeIndex: index - 1
+				stepState: state
+				step: step ] ].
+	removedShapes := proxiesByShape keys reject: [ :shape | currentShapes includes: shape ].
+	removedShapes do: [ :shape | self destroyProxyForShape: shape ]
 ]
 
 { #category : 'private - synchronisation' }
-CFPhysicsBroadphase >> synchroniseProxyFor: aStepState step: aStep [
-	| body type tree bounds proxy previousType |
-	body := aStepState body.
+CFPhysicsBroadphase >> synchroniseProxyForShape: aShape shapeIndex: aShapeIndex stepState: aStepState step: aStep [
+	| type tree bounds proxy previousType entry |
 	type := self typeFor: aStepState.
 	tree := self treeForType: type.
-	bounds := self broadphaseAABBFor: aStepState step: aStep.
-	proxy := proxiesByBody at: body ifAbsent: [ nil ].
-	previousType := proxyTypesByBody at: body ifAbsent: [ nil ].
+	bounds := self
+		broadphaseAABBForShape: aShape
+		shapeIndex: aShapeIndex
+		stepState: aStepState
+		step: aStep.
+	proxy := proxiesByShape at: aShape ifAbsent: [ nil ].
+	previousType := proxyTypesByShape at: aShape ifAbsent: [ nil ].
 	(proxy notNil and: [ previousType ~= type ]) ifTrue: [
 		(self treeForType: previousType) destroyProxy: proxy.
-		proxiesByBody removeKey: body.
-		proxyTypesByBody removeKey: body.
+		proxiesByShape removeKey: aShape.
+		proxyTypesByShape removeKey: aShape.
+		entriesByShape removeKey: aShape.
 		proxy := nil ].
 	proxy
 		ifNil: [
-			proxy := tree createProxyFor: body aabb: bounds.
-			proxiesByBody at: body put: proxy.
-			proxyTypesByBody at: body put: type.
-			movedBodies add: body ]
+			entry := CFPhysicsBroadphaseEntry
+				body: aStepState body
+				shape: aShape
+				shapeIndex: aShapeIndex.
+			proxy := tree createProxyFor: entry aabb: bounds.
+			proxiesByShape at: aShape put: proxy.
+			proxyTypesByShape at: aShape put: type.
+			entriesByShape at: aShape put: entry.
+			movedShapes add: aShape ]
 		ifNotNil: [
-			(tree moveProxy: proxy to: bounds) ifTrue: [ movedBodies add: body ] ]
+			(tree moveProxy: proxy to: bounds) ifTrue: [ movedShapes add: aShape ] ]
 ]
 
 { #category : 'private - synchronisation' }
-CFPhysicsBroadphase >> destroyProxyFor: aBody [
-	| proxy type |
-	proxy := proxiesByBody removeKey: aBody ifAbsent: [ ^ self ].
-	type := proxyTypesByBody removeKey: aBody.
+CFPhysicsBroadphase >> destroyProxyForShape: aShape [
+	| proxy type entry |
+	proxy := proxiesByShape removeKey: aShape ifAbsent: [ ^ self ].
+	type := proxyTypesByShape removeKey: aShape.
+	entry := entriesByShape removeKey: aShape.
 	(self treeForType: type) destroyProxy: proxy.
-	movedBodies remove: aBody ifAbsent: [ ].
+	movedShapes remove: aShape ifAbsent: [ ].
 	(candidatePairsByKey keys select: [ :key |
 		| pair |
 		pair := candidatePairsByKey at: key.
-		pair firstBody == aBody or: [ pair secondBody == aBody ] ])
+		pair firstShape == entry shape or: [ pair secondShape == entry shape ] ])
 		do: [ :key | candidatePairsByKey removeKey: key ]
 ]
 
@@ -101,38 +120,49 @@ CFPhysicsBroadphase >> touchProxyForBody: aBody [
 	Box2D uses this path when a joint begins allowing its connected bodies to
 	collide, because neither body need move for the broadphase to reconsider
 	the pair."
-	(proxiesByBody includesKey: aBody) ifTrue: [ movedBodies add: aBody ].
+	aBody shapes do: [ :shape |
+		(proxiesByShape includesKey: shape) ifTrue: [ movedShapes add: shape ] ].
 	^ self
 ]
 
 { #category : 'private - pairs' }
 CFPhysicsBroadphase >> findNewPairsUsing: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	movedBodies do: [ :body |
-		| state type proxy bounds |
-		state := statesByBody at: body ifAbsent: [ nil ].
-		state ifNotNil: [
-			type := proxyTypesByBody at: body.
-			proxy := proxiesByBody at: body.
-			bounds := proxy aabb.
-			type = #dynamic ifTrue: [
-				self queryTree: kinematicTree bounds: bounds for: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs.
-				self queryTree: staticTree bounds: bounds for: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs ].
-			self queryTree: dynamicTree bounds: bounds for: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs ] ]
+	movedShapes do: [ :shape |
+		| entry state type proxy bounds |
+		entry := entriesByShape at: shape ifAbsent: [ nil ].
+		entry ifNotNil: [
+			state := statesByBody at: entry body ifAbsent: [ nil ].
+			state ifNotNil: [
+				type := proxyTypesByShape at: shape.
+				proxy := proxiesByShape at: shape.
+				bounds := proxy aabb.
+				type = #dynamic ifTrue: [
+					self queryTree: kinematicTree bounds: bounds for: entry state: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs.
+					self queryTree: staticTree bounds: bounds for: entry state: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs ].
+				self queryTree: dynamicTree bounds: bounds for: entry state: state statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs ] ] ]
 ]
 
 { #category : 'private - pairs' }
-CFPhysicsBroadphase >> queryTree: aTree bounds: bounds for: queryState statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	aTree query: bounds do: [ :otherBody |
+CFPhysicsBroadphase >> queryTree: aTree bounds: bounds for: queryEntry state: queryState statesByBody: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
+	aTree query: bounds do: [ :otherEntry |
 		| otherState pair |
-		otherBody == queryState body ifFalse: [
-			otherState := statesByBody at: otherBody ifAbsent: [ nil ].
+		otherEntry body == queryEntry body ifFalse: [
+			otherState := statesByBody at: otherEntry body ifAbsent: [ nil ].
 			otherState ifNotNil: [
 				comparisonCount := comparisonCount + 1.
 				(self
 					shouldConsider: queryState
 					with: otherState
+					firstAABB: bounds
+					secondAABB: (proxiesByShape at: otherEntry shape) aabb
 					collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) ifTrue: [
-					pair := CFPhysicsPair first: queryState body second: otherBody.
+					pair := CFPhysicsPair
+						firstBody: queryEntry body
+						shape: queryEntry shape
+						shapeIndex: queryEntry shapeIndex
+						secondBody: otherEntry body
+						shape: otherEntry shape
+						shapeIndex: otherEntry shapeIndex.
 					candidatePairsByKey at: pair key put: pair ] ] ].
 		true ].
 	queryVisitCount := queryVisitCount + aTree queryVisitCount.
@@ -142,30 +172,52 @@ CFPhysicsBroadphase >> queryTree: aTree bounds: bounds for: queryState statesByB
 { #category : 'private - pairs' }
 CFPhysicsBroadphase >> removeInvalidCandidatePairsUsing: statesByBody collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	(candidatePairsByKey keys select: [ :key |
-		| pair firstState secondState |
+		| pair firstState secondState firstProxy secondProxy |
 		pair := candidatePairsByKey at: key.
 		firstState := statesByBody at: pair firstBody ifAbsent: [ nil ].
 		secondState := statesByBody at: pair secondBody ifAbsent: [ nil ].
+		firstProxy := proxiesByShape at: pair firstShape ifAbsent: [ nil ].
+		secondProxy := proxiesByShape at: pair secondShape ifAbsent: [ nil ].
 		firstState isNil or: [
 			secondState isNil or: [
-				(self
-					shouldConsider: firstState
-					with: secondState
-					collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) not ] ] ])
+				firstProxy isNil or: [
+					secondProxy isNil or: [
+						(self
+							shouldConsider: firstState
+							with: secondState
+							firstAABB: firstProxy aabb
+							secondAABB: secondProxy aabb
+							collisionSuppressedBodyPairs: collisionSuppressedBodyPairs) not ] ] ] ] ])
 		do: [ :key | candidatePairsByKey removeKey: key ]
 ]
 
 { #category : 'private - filtering' }
-CFPhysicsBroadphase >> shouldConsider: firstState with: secondState collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
-	| firstProxy secondProxy |
-	firstProxy := proxiesByBody at: firstState body.
-	secondProxy := proxiesByBody at: secondState body.
+CFPhysicsBroadphase >> shouldConsider: firstState with: secondState firstAABB: firstAABB secondAABB: secondAABB collisionSuppressedBodyPairs: collisionSuppressedBodyPairs [
 	^ pairFilter
 		shouldConsiderStepState: firstState
 		with: secondState
-		firstAABB: firstProxy aabb
-		secondAABB: secondProxy aabb
+		firstAABB: firstAABB
+		secondAABB: secondAABB
 		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
+]
+
+{ #category : 'private - bounds' }
+CFPhysicsBroadphase >> broadphaseAABBForShape: aShape shapeIndex: aShapeIndex stepState: aStepState step: aStep [
+	| transform bounds speculativeDistance proxyMargin |
+	aShapeIndex = 0 ifTrue: [ ^ self broadphaseAABBFor: aStepState step: aStep ].
+	aShape isChainSegment ifFalse: [
+		self error: 'Unsupported additional Physics shape: ', aShape class name ].
+	transform := aStepState solvedTransform.
+	bounds := aShape
+		aabbAtBodyOrigin: transform bodyOrigin
+		rotation: transform rotation.
+	aStep ifNil: [ ^ bounds ].
+	speculativeDistance := aStep speculativeDistance.
+	proxyMargin := aStepState body isStatic
+		ifTrue: [ speculativeDistance ]
+		ifFalse: [ aStep broadphaseAABBMargin ].
+	^ (bounds expandedBy: speculativeDistance)
+		expandedBy: proxyMargin
 ]
 
 { #category : 'private - bounds' }
@@ -220,7 +272,7 @@ CFPhysicsBroadphase >> queryLeafVisitCount [ ^ queryLeafVisitCount ]
 { #category : 'measurements' }
 CFPhysicsBroadphase >> movedProxyCount [ ^ lastMovedProxyCount ]
 { #category : 'measurements' }
-CFPhysicsBroadphase >> proxyCount [ ^ proxiesByBody size ]
+CFPhysicsBroadphase >> proxyCount [ ^ proxiesByShape size ]
 { #category : 'accessing' }
 CFPhysicsBroadphase >> staticTree [ ^ staticTree ]
 { #category : 'accessing' }
