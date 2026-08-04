@@ -8072,3 +8072,29 @@ CFPhysicsCleanSlateTests >> shapeStateDistanceProxyPreservesExistingCircleGeomet
 	self assert: proxy radius equals: 10.0.
 	^ proxy
 ]
+
+{ #category : 'examples - chain shapes' }
+CFPhysicsCleanSlateTests >> chainSegmentImplementsGenericCollisionShapeQueries [
+	| material filter body chain segment sweep bounds |
+	material := CFPhysicsMaterial new.
+	filter := CFPhysicsCollisionFilter new.
+	body := CFPhysicsBody new.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { -10 @ -10. 10 @ -10. 10 @ 10. -10 @ 10 }
+		material: material
+		collisionFilter: filter
+		body: body.
+	segment := chain segments first.
+
+	self assert: segment material == material.
+	self assert: segment collisionFilter == filter.
+	self assert: segment boundingRadius >= segment minimumExtent.
+	self assert: segment rollingResistanceRadius equals: 0.0.
+
+	sweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0.0)
+		to: (CFPhysicsTransform bodyOrigin: 5 @ 0 rotation: 0.0).
+	bounds := segment sweptAABBAlong: sweep.
+	self assert: bounds minimum x <= -10.
+	self assert: bounds maximum x >= 15
+]

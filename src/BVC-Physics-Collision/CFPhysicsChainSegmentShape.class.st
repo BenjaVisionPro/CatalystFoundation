@@ -164,3 +164,97 @@ CFPhysicsChainSegmentShape >> localCollisionVertices [
 CFPhysicsChainSegmentShape >> minimumExtent [
 	^ (point2 - point1) r / 2.0
 ]
+
+{ #category : 'material' }
+CFPhysicsChainSegmentShape >> material [
+	^ chain material
+]
+
+{ #category : 'filtering' }
+CFPhysicsChainSegmentShape >> collisionFilter [
+	^ chain collisionFilter
+]
+
+{ #category : 'filtering' }
+CFPhysicsChainSegmentShape >> collisionCategoryBits [
+	^ self collisionFilter categoryBits
+]
+
+{ #category : 'filtering' }
+CFPhysicsChainSegmentShape >> collisionMaskBits [
+	^ self collisionFilter maskBits
+]
+
+{ #category : 'filtering' }
+CFPhysicsChainSegmentShape >> collisionGroupIndex [
+	^ self collisionFilter groupIndex
+]
+
+{ #category : 'filtering' }
+CFPhysicsChainSegmentShape >> allowsCollisionWith: anotherShape [
+	^ self collisionFilter allowsCollisionWith: anotherShape collisionFilter
+]
+
+{ #category : 'testing' }
+CFPhysicsChainSegmentShape >> isCircle [
+	^ false
+]
+
+{ #category : 'testing' }
+CFPhysicsChainSegmentShape >> isPolygon [
+	^ false
+]
+
+{ #category : 'testing' }
+CFPhysicsChainSegmentShape >> isRectangle [
+	^ false
+]
+
+{ #category : 'testing' }
+CFPhysicsChainSegmentShape >> isRoundedRectangle [
+	^ false
+]
+
+{ #category : 'collision' }
+CFPhysicsChainSegmentShape >> supportPointAtBodyOrigin: aBodyOrigin rotation: anAngle inDirection: aDirection [
+	| first second |
+	first := self worldPoint1AtBodyOrigin: aBodyOrigin rotation: anAngle.
+	second := self worldPoint2AtBodyOrigin: aBodyOrigin rotation: anAngle.
+	^ ((first dotProduct: aDirection) >= (second dotProduct: aDirection))
+		ifTrue: [ first ]
+		ifFalse: [ second ]
+]
+
+{ #category : 'continuous collision' }
+CFPhysicsChainSegmentShape >> sweptAABBAlong: aSweep [
+	| startTransform endTransform startBounds endBounds radius startCentre endCentre minimum maximum |
+	startTransform := aSweep startTransform.
+	endTransform := aSweep endTransform.
+	startBounds := self
+		aabbAtBodyOrigin: startTransform bodyOrigin
+		rotation: startTransform rotation.
+	endBounds := self
+		aabbAtBodyOrigin: endTransform bodyOrigin
+		rotation: endTransform rotation.
+	startTransform rotation = endTransform rotation ifTrue: [
+		^ startBounds mergedWith: endBounds ].
+
+	radius := self boundingRadius.
+	startCentre := startTransform bodyOrigin.
+	endCentre := endTransform bodyOrigin.
+	minimum := ((startCentre x min: endCentre x) - radius)
+		@ ((startCentre y min: endCentre y) - radius).
+	maximum := ((startCentre x max: endCentre x) + radius)
+		@ ((startCentre y max: endCentre y) + radius).
+	^ CFPhysicsAABB position: minimum extent: maximum - minimum
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> boundingRadius [
+	^ point1 r max: point2 r
+]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> rollingResistanceRadius [
+	^ 0.0
+]
