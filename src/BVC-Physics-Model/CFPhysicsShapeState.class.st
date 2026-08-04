@@ -518,3 +518,8 @@ CFPhysicsShapeState >> rollingResistanceRadius [
 	self isRoundedRectangle ifTrue: [ ^ self roundedRectangleRadius ].
 	^ 0.0
 ]
+
+{ #category : 'testing' }
+CFPhysicsShapeState >> isChainSegment [
+	^ false
+]

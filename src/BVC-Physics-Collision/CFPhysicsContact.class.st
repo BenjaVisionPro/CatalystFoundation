@@ -43,8 +43,12 @@ CFPhysicsContact >> previousManifold [ ^ previousManifold ]
 
 { #category : 'accessing' }
 CFPhysicsContact >> shapeStatesFromBodyStates: bodyStates [
-	firstShapeState := (bodyStates at: self firstBody) shapeState.
-	secondShapeState := (bodyStates at: self secondBody) shapeState
+	firstShapeState := pair firstShape isChainSegment
+		ifTrue: [ nil ]
+		ifFalse: [ pair firstShape ].
+	secondShapeState := pair secondShape isChainSegment
+		ifTrue: [ nil ]
+		ifFalse: [ pair secondShape ]
 ]
 
 { #category : 'testing' }
@@ -100,9 +104,7 @@ CFPhysicsContact >> secondShapeState: aShapeState [ secondShapeState := aShapeSt
 
 { #category : 'testing' }
 CFPhysicsContact >> isSensor [
-	firstShapeState ifNotNil: [
-		^ firstShapeState isSensor or: [ secondShapeState isSensor ] ].
-	^ self firstBody isSensor or: [ self secondBody isSensor ]
+	^ pair firstShape isSensor or: [ pair secondShape isSensor ]
 ]
 
 { #category : 'testing' }

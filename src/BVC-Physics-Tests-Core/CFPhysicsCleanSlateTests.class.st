@@ -8060,3 +8060,78 @@ CFPhysicsCleanSlateTests >> broadphaseRegistersChainSegmentsAsDistinctShapes [
 	self assert: segmentPair secondShape == dynamicBody shapeState.
 	^ pairs
 ]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
+	<gtExample>
+	| worldElement worldBody circleElement circleBody chain segment pair states manifold |
+	worldElement := BlElement new size: 100 @ 100; yourself.
+	circleElement := BlElement new geometry: BlCircleGeometry new; size: 10 @ 10; yourself.
+	worldBody := CFPhysicsBody element: worldElement world: nil.
+	circleBody := CFPhysicsBody element: circleElement world: nil.
+	worldBody sequence: 1.
+	circleBody sequence: 2.
+	worldBody beStatic.
+	circleBody position: 50 @ 4.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 100 @ 0. 100 @ 100. 0 @ 100 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	segment := chain segments first.
+	pair := CFPhysicsPair
+		firstBody: worldBody
+		shape: segment
+		shapeIndex: segment segmentIndex
+		secondBody: circleBody
+		shape: circleBody shapeState
+		shapeIndex: 0.
+	states := IdentityDictionary new
+		at: worldBody put: (CFPhysicsBodyStepState capture: worldBody);
+		at: circleBody put: (CFPhysicsBodyStepState capture: circleBody);
+		yourself.
+	manifold := CFPhysicsManifoldGenerator new
+		manifoldForPair: pair
+		bodyStates: states
+		speculativeDistance: 0.0.
+	self assert: manifold notNil.
+	self assert: manifold normal y < 0.0.
+	^ manifold
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
+	<gtExample>
+	| worldElement worldBody circleElement circleBody chain segment pair states manifold |
+	worldElement := BlElement new size: 100 @ 100; yourself.
+	circleElement := BlElement new geometry: BlCircleGeometry new; size: 10 @ 10; yourself.
+	worldBody := CFPhysicsBody element: worldElement world: nil.
+	circleBody := CFPhysicsBody element: circleElement world: nil.
+	worldBody sequence: 1.
+	circleBody sequence: 2.
+	worldBody beStatic.
+	circleBody position: 50 @ -4.
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 0 @ 0. 100 @ 0. 100 @ 100. 0 @ 100 }
+		material: nil
+		collisionFilter: nil
+		body: worldBody.
+	segment := chain segments first.
+	pair := CFPhysicsPair
+		firstBody: worldBody
+		shape: segment
+		shapeIndex: segment segmentIndex
+		secondBody: circleBody
+		shape: circleBody shapeState
+		shapeIndex: 0.
+	states := IdentityDictionary new
+		at: worldBody put: (CFPhysicsBodyStepState capture: worldBody);
+		at: circleBody put: (CFPhysicsBodyStepState capture: circleBody);
+		yourself.
+	manifold := CFPhysicsManifoldGenerator new
+		manifoldForPair: pair
+		bodyStates: states
+		speculativeDistance: 0.0.
+	self assert: manifold isNil.
+	^ manifold
+]

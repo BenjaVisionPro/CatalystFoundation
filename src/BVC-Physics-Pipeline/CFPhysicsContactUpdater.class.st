@@ -23,8 +23,8 @@ CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculat
 	^ bodyStates
 		ifNil: [ manifoldGenerator manifoldBetweenBody: pair firstBody andBody: pair secondBody ]
 		ifNotNil: [ manifoldGenerator
-			manifoldBetweenBodyState: (bodyStates at: pair firstBody)
-			andBodyState: (bodyStates at: pair secondBody)
+			manifoldForPair: pair
+			bodyStates: bodyStates
 			speculativeDistance: speculativeDistance ]
 ]
 

@@ -66,6 +66,48 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: 
 		speculativeDistance: speculativeDistance
 ]
 
+
+
+{ #category : 'collision' }
+CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance [
+	| firstState secondState firstTransform secondTransform firstShape secondShape |
+	firstState := bodyStates at: aPair firstBody.
+	secondState := bodyStates at: aPair secondBody.
+	firstTransform := firstState currentTransform.
+	secondTransform := secondState currentTransform.
+	firstShape := aPair firstShape.
+	secondShape := aPair secondShape.
+	firstShape isChainSegment ifTrue: [
+		secondShape isCircle ifTrue: [
+			^ CFPhysicsChainCircleManifoldBuilder
+				manifoldBetweenChainSegment: firstShape
+				bodyOrigin: firstTransform bodyOrigin
+				rotation: firstTransform rotation
+				andCircleShapeState: secondShape
+				bodyOrigin: secondTransform bodyOrigin
+				rotation: secondTransform rotation
+				speculativeDistance: speculativeDistance ].
+		^ nil ].
+	secondShape isChainSegment ifTrue: [
+		firstShape isCircle ifTrue: [
+			^ CFPhysicsChainCircleManifoldBuilder
+				manifoldBetweenCircleShapeState: firstShape
+				bodyOrigin: firstTransform bodyOrigin
+				rotation: firstTransform rotation
+				andChainSegment: secondShape
+				bodyOrigin: secondTransform bodyOrigin
+				rotation: secondTransform rotation
+				speculativeDistance: speculativeDistance ].
+		^ nil ].
+	^ self
+		manifoldBetweenShapeState: firstShape
+		bodyOrigin: firstTransform bodyOrigin
+		rotation: firstTransform rotation
+		andShapeState: secondShape
+		bodyOrigin: secondTransform bodyOrigin
+		rotation: secondTransform rotation
+		speculativeDistance: speculativeDistance
+]
 { #category : 'private - collision' }
 CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA bodyOrigin: bodyOriginA rotation: rotationA andShapeState: shapeStateB bodyOrigin: bodyOriginB rotation: rotationB [
 	^ self

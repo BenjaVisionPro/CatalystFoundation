@@ -117,3 +117,15 @@ CFPhysicsChainSegmentShape >> rotateVector: aPoint by: anAngle [
 	^ ((aPoint x * cosine) - (aPoint y * sine))
 		@ ((aPoint x * sine) + (aPoint y * cosine))
 ]
+
+{ #category : 'geometry' }
+CFPhysicsChainSegmentShape >> localPointForWorldPoint: aPoint bodyOrigin: aBodyOrigin rotation: anAngle [
+	| bodyLocal |
+	bodyLocal := self rotateVector: aPoint - aBodyOrigin by: anAngle negated.
+	^ self body shapeState elementLocalPointForBodyLocalPoint: bodyLocal
+]
+
+{ #category : 'sensors' }
+CFPhysicsChainSegmentShape >> isSensor [
+	^ false
+]
