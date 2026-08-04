@@ -6,7 +6,7 @@ My responsibility is to bridge element-local shape information into body-origin 
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'material', 'sensor', 'collisionFilter', 'capturedExtent', 'capturedGeometryKind', 'capturedVertices', 'capturedCornerRadius' ],
+	#instVars : [ 'element', 'material', 'sensor', 'collisionFilter', 'capturedExtent', 'capturedCollisionGeometry' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -29,37 +29,26 @@ CFPhysicsShapeState >> capturedForStep [
 
 { #category : 'capturing' }
 CFPhysicsShapeState >> captureGeometry [
-	| geometry anExtent radii |
-	geometry := element geometry.
-	anExtent := self extent.
-	capturedExtent := anExtent.
-	(geometry isKindOf: BlCircleGeometry) ifTrue: [
-		capturedGeometryKind := #circle.
-		capturedVertices := nil.
-		capturedCornerRadius := nil.
-		^ self ].
-	(geometry isKindOf: BlPolygonGeometry) ifTrue: [
-		capturedGeometryKind := #polygon.
-		capturedVertices := geometry vertices asArray copy.
-		capturedCornerRadius := nil.
-		^ self ].
-	(geometry isKindOf: BlNormalizedPolygonGeometry) ifTrue: [
-		capturedGeometryKind := #polygon.
-		capturedVertices := (geometry vertices collect: [ :each |
-			(each x * anExtent x) @ (each y * anExtent y) ]) asArray.
-		capturedCornerRadius := nil.
-		^ self ].
-	(geometry isKindOf: BlRoundedRectangleGeometry) ifTrue: [
-		radii := geometry cornerRadii.
-		capturedGeometryKind := #roundedRectangle.
-		capturedVertices := nil.
-		capturedCornerRadius := radii topLeft.
-		^ self ].
-	capturedGeometryKind := #rectangle.
-	capturedVertices := nil.
-	capturedCornerRadius := nil
+	capturedExtent := self extent.
+	capturedCollisionGeometry := self captureCollisionGeometryForExtent: capturedExtent
 ]
 
+{ #category : 'capturing' }
+CFPhysicsShapeState >> captureCollisionGeometryForExtent: anExtent [
+	self subclassResponsibility
+]
+
+
+
+{ #category : 'capturing' }
+CFPhysicsShapeState >> uncapturedCollisionGeometry [
+	^ self captureCollisionGeometryForExtent: self extent
+]
+
+{ #category : 'accessing' }
+CFPhysicsShapeState >> capturedCollisionGeometry [
+	^ capturedCollisionGeometry
+]
 
 { #category : 'collision' }
 CFPhysicsShapeState >> aabbAtBodyOrigin: aPoint rotation: anAngle [
@@ -136,21 +125,22 @@ CFPhysicsShapeState >> extent [
 
 { #category : 'testing' }
 CFPhysicsShapeState >> isCircle [
-	capturedGeometryKind ifNotNil: [ ^ capturedGeometryKind = #circle ].
-	^ element geometry isKindOf: BlCircleGeometry
+	capturedCollisionGeometry ifNotNil: [ ^ capturedCollisionGeometry isCircle ].
+	^ self uncapturedCollisionGeometry isCircle
 ]
 
 { #category : 'testing' }
 CFPhysicsShapeState >> isPolygon [
-	capturedGeometryKind ifNotNil: [ ^ capturedGeometryKind = #polygon ].
-	^ (element geometry isKindOf: BlPolygonGeometry)
-		or: [ element geometry isKindOf: BlNormalizedPolygonGeometry ]
+	capturedCollisionGeometry ifNotNil: [ ^ capturedCollisionGeometry isPolygon ].
+	^ self uncapturedCollisionGeometry isPolygon
 ]
 
 
 { #category : 'circle' }
 CFPhysicsShapeState >> radius [
-	^ self extent min / 2.0
+	| geometry |
+	geometry := capturedCollisionGeometry ifNil: [ self uncapturedCollisionGeometry ].
+	^ geometry radius
 ]
 
 { #category : 'continuous collision' }
@@ -169,14 +159,9 @@ CFPhysicsShapeState >> collisionVerticesAtBodyOrigin: aPoint rotation: anAngle [
 
 { #category : 'polygon' }
 CFPhysicsShapeState >> localCollisionVertices [
-	| geometry anExtent |
-	capturedVertices ifNotNil: [ ^ capturedVertices ].
-	geometry := element geometry.
-	anExtent := self extent.
-	(geometry isKindOf: BlPolygonGeometry) ifTrue: [ ^ geometry vertices ].
-	(geometry isKindOf: BlNormalizedPolygonGeometry) ifTrue: [
-		^ geometry vertices collect: [ :each | (each x * anExtent x) @ (each y * anExtent y) ] ].
-	^ { 0 @ 0. anExtent x @ 0. anExtent. 0 @ anExtent y }
+	| geometry |
+	geometry := capturedCollisionGeometry ifNil: [ self uncapturedCollisionGeometry ].
+	^ geometry vertices
 ]
 
 { #category : 'mass' }
@@ -201,16 +186,14 @@ CFPhysicsShapeState >> area [
 
 { #category : 'testing' }
 CFPhysicsShapeState >> isRoundedRectangle [
-	capturedGeometryKind ifNotNil: [ ^ capturedGeometryKind = #roundedRectangle ].
-	^ element geometry isKindOf: BlRoundedRectangleGeometry
+	| geometry |
+	geometry := capturedCollisionGeometry ifNil: [ self uncapturedCollisionGeometry ].
+	^ geometry isPolygon and: [ geometry isRounded ]
 ]
 
 { #category : 'testing' }
 CFPhysicsShapeState >> isRectangle [
-	capturedGeometryKind ifNotNil: [ ^ capturedGeometryKind = #rectangle ].
-	^ self isCircle not
-		and: [ self isPolygon not
-			and: [ self isRoundedRectangle not ] ]
+	^ self isPolygon and: [ self isRoundedRectangle not ]
 ]
 
 { #category : 'convex support' }
@@ -259,15 +242,9 @@ CFPhysicsShapeState >> supportPointOf: vertices inDirection: direction [
 
 { #category : 'rounded rectangle' }
 CFPhysicsShapeState >> roundedRectangleRadius [
-	| radii radius |
-	capturedCornerRadius ifNotNil: [ ^ capturedCornerRadius min: (self extent min / 2.0) ].
-	radii := element geometry cornerRadii.
-	radius := radii topLeft.
-	((radii topRight = radius)
-		and: [ radii bottomRight = radius
-			and: [ radii bottomLeft = radius ] ])
-		ifFalse: [ self error: 'Physics currently requires equal rounded-rectangle corner radii' ].
-	^ radius min: (self extent min / 2.0)
+	| geometry |
+	geometry := capturedCollisionGeometry ifNil: [ self uncapturedCollisionGeometry ].
+	^ geometry radius
 ]
 
 { #category : 'rounded rectangle' }

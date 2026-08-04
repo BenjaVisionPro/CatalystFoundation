@@ -7775,3 +7775,36 @@ CFPhysicsCleanSlateTests >> staticContactUsesStifferSoftness [
 	self assert: step staticImpulseCoefficient < step impulseCoefficient.
 	^ step
 ]
+
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateTests >> ellipseElementUsesBox2DMaximumVertexPolygon [
+	<gtExample>
+	| element shapeState polygon |
+	element := BlElement new
+		geometry: BlEllipseGeometry new;
+		size: 80 @ 40;
+		yourself.
+	shapeState := (CFPhysicsShapeState on: element) capturedForStep.
+	polygon := shapeState polygonShape.
+	self assert: polygon vertices size equals: 8.
+	self assert: polygon rotationCentre equals: 40.0 @ 20.0.
+	self assert: (polygon vertices first closeTo: 80.0 @ 20.0).
+	self assert: (polygon vertices third closeTo: 40.0 @ 40.0).
+	^ polygon
+]
+
+{ #category : 'examples - Bloc geometry' }
+CFPhysicsCleanSlateTests >> capturedGeometryDoesNotRetainBlocGeometry [
+	<gtExample>
+	| element shapeState geometry |
+	element := BlElement new
+		geometry: BlEllipseGeometry new;
+		size: 80 @ 40;
+		yourself.
+	shapeState := (CFPhysicsShapeState on: element) capturedForStep.
+	geometry := shapeState capturedCollisionGeometry.
+	self assert: geometry class equals: CFPhysicsCapturedPolygonGeometry.
+	self deny: geometry == element geometry.
+	^ geometry
+]
