@@ -23,7 +23,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segme
 	edgeLength = 0.0 ifTrue: [ ^ nil ].
 	tangent := edge / edgeLength.
 	normal := edge y @ edge x negated / edgeLength.
-	centroid := vertices inject: 0 @ 0 into: [ :sum :each | sum + each ] / vertices size.
+	centroid := (vertices inject: 0 @ 0 into: [ :sum :each | sum + each ]) / vertices size.
 	frontOffset := self dot: centroid - point1 with: normal.
 	frontOffset < 0.0 ifTrue: [ ^ nil ].
 	previousEdge := point1 - ghost1.
