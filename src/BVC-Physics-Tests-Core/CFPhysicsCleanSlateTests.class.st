@@ -2128,6 +2128,28 @@ CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 ]
 
 { #category : 'examples - distance joints' }
+CFPhysicsCleanSlateTests >> destroyingADistanceJointWakesBothSleepingEndpoints [
+	<gtExample>
+	| owner first second world joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world synchroniseMembership.
+	joint := first physics distanceJointTo: second.
+	first physics body sleep.
+	second physics body sleep.
+	self assert: first physics body isAwake not.
+	self assert: second physics body isAwake not.
+	world removeDistanceJoint: joint.
+	self assert: joint isActive not.
+	self assert: first physics body isAwake.
+	self assert: second physics body isAwake.
+	^ world
+]
+
+{ #category : 'examples - distance joints' }
 CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 	<gtExample>
 	| owner first second world joint result |

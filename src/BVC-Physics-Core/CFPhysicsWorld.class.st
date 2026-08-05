@@ -1060,12 +1060,7 @@ CFPhysicsWorld >> addMouseJoint: aJoint [
 
 { #category : 'mouse joints' }
 CFPhysicsWorld >> removeMouseJoint: aJoint [
-	(mouseJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		mouseJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: mouseJoints
 ]
 
 { #category : 'mouse joints' }
@@ -1083,7 +1078,9 @@ CFPhysicsWorld >> addMotorJoint: aJoint [
 	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. aJoint wakeBodies. ^ aJoint
 ]
 { #category : 'motor joints' }
-CFPhysicsWorld >> removeMotorJoint: aJoint [ (motorJoints includes: aJoint) ifTrue: [ self invalidateTopology. persistentIslandGraph unlinkConstraint: aJoint. aJoint release. motorJoints remove: aJoint ]. ^ aJoint ]
+CFPhysicsWorld >> removeMotorJoint: aJoint [
+	^ self removeJoint: aJoint from: motorJoints
+]
 { #category : 'motor joints' }
 CFPhysicsWorld >> removeMotorJointsUsingBody: aBody [ (motorJoints select: [ :each | each includesBody: aBody ]) copy do: [ :each | self removeMotorJoint: each ] ]
 
@@ -1112,12 +1109,7 @@ CFPhysicsWorld >> filterJointsUsingBody: aBody [
 
 { #category : 'filter joints' }
 CFPhysicsWorld >> removeFilterJoint: aJoint [
-	(filterJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		filterJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: filterJoints
 ]
 
 { #category : 'filter joints' }
@@ -1251,6 +1243,17 @@ CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 	^ self distanceJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
+{ #category : 'private - joints' }
+CFPhysicsWorld >> removeJoint: aJoint from: aJointCollection [
+	(aJointCollection includes: aJoint) ifFalse: [ ^ aJoint ].
+	self invalidateTopology.
+	persistentIslandGraph unlinkConstraint: aJoint.
+	aJoint release.
+	aJointCollection remove: aJoint.
+	aJoint wakeBodies.
+	^ aJoint
+]
+
 { #category : 'joints' }
 CFPhysicsWorld >> joints [
 	^ (self mouseJoints, self motorJoints, self filterJoints, self distanceJoints, self revoluteJoints, self weldJoints, self prismaticJoints, self wheelJoints) asArray sorted: [ :first :second |
@@ -1278,12 +1281,7 @@ CFPhysicsWorld >> jointPreventsCollisionBetween: firstBody and: secondBody [
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> removeDistanceJoint: aJoint [
-	(distanceJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		distanceJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: distanceJoints
 ]
 
 { #category : 'distance joints' }
@@ -1320,12 +1318,7 @@ CFPhysicsWorld >> revoluteJointsUsingBody: aBodyState [
 
 { #category : 'revolute joints' }
 CFPhysicsWorld >> removeRevoluteJoint: aJoint [
-	(revoluteJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		revoluteJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: revoluteJoints
 ]
 
 { #category : 'revolute joints' }
@@ -1362,12 +1355,7 @@ CFPhysicsWorld >> weldJointsUsingBody: aBodyState [
 
 { #category : 'weld joints' }
 CFPhysicsWorld >> removeWeldJoint: aJoint [
-	(weldJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		weldJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: weldJoints
 ]
 
 { #category : 'weld joints' }
@@ -1404,12 +1392,7 @@ CFPhysicsWorld >> prismaticJointsUsingBody: aBodyState [
 
 { #category : 'prismatic joints' }
 CFPhysicsWorld >> removePrismaticJoint: aJoint [
-	(prismaticJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		prismaticJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: prismaticJoints
 ]
 
 { #category : 'prismatic joints' }
@@ -1590,12 +1573,7 @@ CFPhysicsWorld >> wheelJointsUsingBody: aBodyState [
 
 { #category : 'wheel joints' }
 CFPhysicsWorld >> removeWheelJoint: aJoint [
-	(wheelJoints includes: aJoint) ifTrue: [
-		self invalidateTopology.
-		persistentIslandGraph unlinkConstraint: aJoint.
-		aJoint release.
-		wheelJoints remove: aJoint ].
-	^ aJoint
+	^ self removeJoint: aJoint from: wheelJoints
 ]
 
 { #category : 'wheel joints' }
