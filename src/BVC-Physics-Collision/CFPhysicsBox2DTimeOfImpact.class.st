@@ -27,15 +27,16 @@ CFPhysicsBox2DTimeOfImpact class >> betweenShapeState: firstShapeState sweep: fi
 
 { #category : 'querying' }
 CFPhysicsBox2DTimeOfImpact class >> betweenProxy: proxyA sweep: firstSweep andProxy: proxyB sweep: secondSweep linearSlop: linearSlop [
-	| totalRadius target tolerance fraction maximumIterations distanceState distanceResult simplex separationFunction done secondFraction pushBackIterations separationAtEnd firstIndex secondIndex separationAtStart rootIterations lower upper candidate candidateSeparation |
+	| totalRadius target tolerance fraction maximumIterations simplexCache distanceState distanceResult simplex separationFunction done secondFraction pushBackIterations separationAtEnd firstIndex secondIndex separationAtStart rootIterations lower upper candidate candidateSeparation |
 	totalRadius := proxyA radius + proxyB radius.
 	target := linearSlop max: (totalRadius - linearSlop).
 	tolerance := 0.25 * linearSlop.
 	fraction := 0.0.
 	maximumIterations := 20.
+	simplexCache := CFPhysicsSimplexCache empty.
 	1 to: maximumIterations do: [ :iteration |
 		distanceState := self
-			distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: fraction.
+			distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: fraction cache: simplexCache.
 		distanceResult := distanceState first.
 		simplex := distanceState second.
 		distanceResult isOverlapping ifTrue: [
@@ -93,96 +94,28 @@ CFPhysicsBox2DTimeOfImpact class >> betweenProxy: proxyA sweep: firstSweep andPr
 ]
 
 { #category : 'private - distance' }
-CFPhysicsBox2DTimeOfImpact class >> distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: fraction [
-	| transformA transformB direction simplex state closest previousDistanceSquared support progress result |
+CFPhysicsBox2DTimeOfImpact class >> distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: fraction cache: simplexCache [
+	| transformA transformB distanceResult simplex |
 	transformA := firstSweep transformAt: fraction.
 	transformB := secondSweep transformAt: fraction.
-	direction := transformB bodyOrigin - transformA bodyOrigin.
-	direction r = 0 ifTrue: [ direction := 1 @ 0 ].
-	simplex := OrderedCollection with: (self supportBetween: proxyA transform: transformA and: proxyB transform: transformB inDirection: direction).
-	state := CFPhysicsGJK closestStateForDistanceSimplex: simplex.
-	previousDistanceSquared := Float infinity.
-	1 to: 32 do: [ :ignored |
-		state fourth ifTrue: [ ^ { self distanceResultFrom: state. state first } ].
-		closest := state second.
-		closest r <= 1.0e-9 ifTrue: [ ^ { self distanceResultFrom: state. state first } ].
-		((closest x squared + closest y squared) >= (previousDistanceSquared - 1.0e-9)) ifTrue: [
-			^ { self distanceResultFrom: state. state first } ].
-		previousDistanceSquared := closest x squared + closest y squared.
-		direction := closest negated.
-		support := self supportBetween: proxyA transform: transformA and: proxyB transform: transformB inDirection: direction.
-		(state first anySatisfy: [ :each | each firstIndex = support firstIndex and: [ each secondIndex = support secondIndex ] ]) ifTrue: [
-			^ { self distanceResultFrom: state. state first } ].
-		progress := (self dot: support point with: direction) - (self dot: closest with: direction).
-		progress <= 1.0e-9 ifTrue: [ ^ { self distanceResultFrom: state. state first } ].
-		simplex := state first asOrderedCollection.
-		simplex add: support.
-		state := CFPhysicsGJK closestStateForDistanceSimplex: simplex ].
-	result := self distanceResultFrom: state.
-	^ { result. state first }
-]
-
-{ #category : 'private - distance' }
-CFPhysicsBox2DTimeOfImpact class >> distanceResultFrom: state [
-	| simplex weights firstWitness secondWitness distance |
-	simplex := state first.
-	weights := state third.
-	firstWitness := 0 @ 0.
-	secondWitness := 0 @ 0.
-	1 to: simplex size do: [ :index |
-		firstWitness := firstWitness + ((simplex at: index) firstPoint * (weights at: index)).
-		secondWitness := secondWitness + ((simplex at: index) secondPoint * (weights at: index)) ].
-	distance := (firstWitness - secondWitness) r.
-	^ CFPhysicsDistanceResult
-		distance: (state fourth ifTrue: [ 0.0 ] ifFalse: [ distance ])
-		firstPoint: firstWitness
-		secondPoint: secondWitness
-		axis: (distance = 0 ifTrue: [ 0 @ 0 ] ifFalse: [ (secondWitness - firstWitness) / distance ])
-		overlapping: state fourth
-]
-
-{ #category : 'private - support' }
-CFPhysicsBox2DTimeOfImpact class >> supportBetween: proxyA transform: transformA and: proxyB transform: transformB inDirection: direction [
-	| indexA indexB pointA pointB |
-	indexA := proxyA supportIndexInDirection: (self inverseRotate: direction by: transformA rotation).
-	indexB := proxyB supportIndexInDirection: (self inverseRotate: direction negated by: transformB rotation).
-	pointA := self transform: (proxyA points at: indexA) by: transformA.
-	pointB := self transform: (proxyB points at: indexB) by: transformB.
-	^ CFPhysicsSupportPoint
-		point: pointA - pointB
-		firstPoint: pointA
-		secondPoint: pointB
-		firstIndex: indexA
-		secondIndex: indexB
+	distanceResult := CFPhysicsGJK
+		distanceBetweenProxy: proxyA
+		transform: transformA
+		andProxy: proxyB
+		transform: transformB
+		cache: simplexCache.
+	simplex := CFPhysicsGJK
+		simplexFromCache: simplexCache
+		firstProxy: proxyA
+		transform: transformA
+		secondProxy: proxyB
+		transform: transformB.
+	^ { distanceResult. simplex asArray }
 ]
 
 { #category : 'private' }
 CFPhysicsBox2DTimeOfImpact class >> separatedResultBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep [
 	| distanceState |
-	distanceState := self distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: 1.0.
+	distanceState := self distanceBetween: proxyA sweep: firstSweep and: proxyB sweep: secondSweep at: 1.0 cache: CFPhysicsSimplexCache empty.
 	^ CFPhysicsTimeOfImpactResult status: #separated fraction: 1.0 distanceResult: distanceState first iterations: 0
-]
-
-{ #category : 'private' }
-CFPhysicsBox2DTimeOfImpact class >> dot: first with: second [
-	^ (first x * second x) + (first y * second y)
-]
-
-{ #category : 'private' }
-CFPhysicsBox2DTimeOfImpact class >> inverseRotate: aPoint by: anAngle [
-	^ self rotate: aPoint by: anAngle negated
-]
-
-{ #category : 'private' }
-CFPhysicsBox2DTimeOfImpact class >> rotate: aPoint by: anAngle [
-	| cosine sine |
-	anAngle = 0 ifTrue: [ ^ aPoint ].
-	cosine := anAngle cos.
-	sine := anAngle sin.
-	^ ((aPoint x * cosine) - (aPoint y * sine)) @ ((aPoint x * sine) + (aPoint y * cosine))
-]
-
-{ #category : 'private' }
-CFPhysicsBox2DTimeOfImpact class >> transform: aPoint by: aTransform [
-	^ aTransform bodyOrigin + (self rotate: aPoint by: aTransform rotation)
 ]
