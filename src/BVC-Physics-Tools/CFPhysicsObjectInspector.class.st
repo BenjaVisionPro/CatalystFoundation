@@ -100,7 +100,7 @@ CFPhysicsObjectInspector >> newContentContainer [
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
-			c vertical fitContent ];
+			c vertical matchParent ];
 		yourself
 ]
 
@@ -188,6 +188,8 @@ CFPhysicsObjectInspector >> clearWithoutMotion [
 { #category : 'private - content transition' }
 CFPhysicsObjectInspector >> addContentElement: anElement [
 	anElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c vertical matchParent.
 		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
 	contentContainer addChild: anElement.
@@ -221,21 +223,11 @@ CFPhysicsObjectInspector >> preparePanelForSizing [
 
 { #category : 'private - sizing' }
 CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
-	| maximumContentHeight naturalContentHeight constrainedContentHeight |
+	| maximumContentHeight constrainedContentHeight |
 	maximumContentHeight := (self availablePanelHeight - 12) max: 0.
-
-	"A scroll pane cannot discover its content height while its viewport is
-	zero. Give it the largest legal viewport first so Bloc lays out the real
-	data hierarchy, then shrink the panel to the resulting natural height."
-	aContent fitWithinHeight: maximumContentHeight.
-	root space pulse.
-
-	naturalContentHeight := aContent naturalHeight.
-	constrainedContentHeight := naturalContentHeight min: maximumContentHeight.
+	constrainedContentHeight := aContent preferredHeight min: maximumContentHeight.
 	aContent fitWithinHeight: constrainedContentHeight.
-	root space pulse.
-
-	^ panel extent x @ (constrainedContentHeight + 12)
+	^ 190 @ (constrainedContentHeight + 12)
 ]
 
 { #category : 'private - sizing' }
