@@ -2856,7 +2856,7 @@ CFPhysicsCleanSlateTests >> retiringAContactingBodyUnlinksItsContactFromThePersi
 	world synchroniseMembership.
 	self assert: (graph islandForConstraint: contact) isNil.
 	self assert: (graph islandForBody: retiredBody) isNil.
-	self deny: (island constraints includes: contact).
+	self assert: (island constraints includes: contact) not.
 	^ world
 ]
 
