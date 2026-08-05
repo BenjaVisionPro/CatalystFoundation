@@ -181,23 +181,44 @@ CFPhysicsChainPolygonManifoldBuilder class >> minimumSeparationOf: vertices alon
 
 { #category : 'private - manifold' }
 CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: incidentIndex polygon: polygon vertices: vertices normals: normals segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| point1 point2 edge normal incidentEdge clippedPoints points |
+	| point1 point2 edge normal incidentEdge tangent clippedPoints points |
 	point1 := segment worldPoint1AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
 	point2 := segment worldPoint2AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
 	edge := self unitVectorFrom: point1 to: point2.
 	edge ifNil: [ ^ nil ].
 	normal := self rightPerpendicular: edge.
 	incidentEdge := self incidentEdgeForVertex: incidentIndex normals: normals withSegmentNormal: normal.
-	clippedPoints := self
-		clippedPointsForReferencePoint1: point1
-		point2: point2
-		incidentPoint1: (vertices at: incidentEdge first)
-		incidentPoint2: (vertices at: incidentEdge second)
-		normal: normal.
+	tangent := edge.
+	clippedPoints := {
+		CFPhysicsClipVertex
+			position: (vertices at: incidentEdge first)
+			featureId: (CFPhysicsContactFeatureId
+				featureA: #face index: segment segmentIndex
+				featureB: #vertex index: incidentEdge first)
+			incidentEdgeIndex: incidentEdge first.
+		CFPhysicsClipVertex
+			position: (vertices at: incidentEdge second)
+			featureId: (CFPhysicsContactFeatureId
+				featureA: #face index: segment segmentIndex
+				featureB: #vertex index: incidentEdge second)
+			incidentEdgeIndex: incidentEdge first }.
+	clippedPoints := CFPhysicsPolygonManifoldBuilder
+		clip: clippedPoints
+		toNormal: tangent negated
+		offset: (self dot: tangent negated with: point1)
+		referenceVertexIndex: 1
+		referenceIsA: true.
+	clippedPoints size < 2 ifTrue: [ ^ nil ].
+	clippedPoints := CFPhysicsPolygonManifoldBuilder
+		clip: clippedPoints
+		toNormal: tangent
+		offset: (self dot: tangent with: point2)
+		referenceVertexIndex: 2
+		referenceIsA: true.
 	clippedPoints isEmpty ifTrue: [ ^ nil ].
 	points := OrderedCollection new: 2.
 	self
-		addClippedPoint: clippedPoints first
+		addClippedPoint: clippedPoints first position
 		feature: (CFPhysicsContactFeatureId
 			featureA: #face index: segment segmentIndex
 			featureB: #vertex index: incidentEdge second)
@@ -207,7 +228,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: inciden
 		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
 		speculativeDistance: speculativeDistance into: points.
 	self
-		addClippedPoint: clippedPoints second
+		addClippedPoint: clippedPoints second position
 		feature: (CFPhysicsContactFeatureId
 			featureA: #face index: segment segmentIndex
 			featureB: #vertex index: incidentEdge first)
@@ -221,7 +242,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: inciden
 
 { #category : 'private - manifold' }
 CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: referenceIndex polygon: polygon vertices: vertices normals: normals segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| point1 point2 referencePoint1 referencePoint2 referenceNormal secondIndex clippedPoints points |
+	| point1 point2 referencePoint1 referencePoint2 referenceNormal secondIndex tangent clippedPoints points |
 	point1 := segment worldPoint1AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
 	point2 := segment worldPoint2AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
 	secondIndex := referenceIndex = vertices size ifTrue: [ 1 ] ifFalse: [ referenceIndex + 1 ].
@@ -234,16 +255,38 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 		segment: segment
 		bodyOrigin: segmentBodyOrigin
 		rotation: segmentRotation) ifFalse: [ ^ nil ].
-	clippedPoints := self
-		clippedPointsForReferencePoint1: referencePoint1
-		point2: referencePoint2
-		incidentPoint1: point1
-		incidentPoint2: point2
-		normal: referenceNormal.
+	tangent := self unitVectorFrom: referencePoint1 to: referencePoint2.
+	tangent ifNil: [ ^ nil ].
+	clippedPoints := {
+		CFPhysicsClipVertex
+			position: point1
+			featureId: (CFPhysicsContactFeatureId
+				featureA: #vertex index: 1
+				featureB: #face index: referenceIndex)
+			incidentEdgeIndex: 1.
+		CFPhysicsClipVertex
+			position: point2
+			featureId: (CFPhysicsContactFeatureId
+				featureA: #vertex index: 2
+				featureB: #face index: referenceIndex)
+			incidentEdgeIndex: 1 }.
+	clippedPoints := CFPhysicsPolygonManifoldBuilder
+		clip: clippedPoints
+		toNormal: tangent negated
+		offset: (self dot: tangent negated with: referencePoint1)
+		referenceVertexIndex: referenceIndex
+		referenceIsA: false.
+	clippedPoints size < 2 ifTrue: [ ^ nil ].
+	clippedPoints := CFPhysicsPolygonManifoldBuilder
+		clip: clippedPoints
+		toNormal: tangent
+		offset: (self dot: tangent with: referencePoint2)
+		referenceVertexIndex: secondIndex
+		referenceIsA: false.
 	clippedPoints isEmpty ifTrue: [ ^ nil ].
 	points := OrderedCollection new: 2.
 	self
-		addClippedPoint: clippedPoints first
+		addClippedPoint: clippedPoints first position
 		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 1 featureB: #face index: referenceIndex)
 		referencePoint: referencePoint1 normal: referenceNormal
 		referenceRadius: polygon radius incidentRadius: 0.0
@@ -251,7 +294,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
 		speculativeDistance: speculativeDistance into: points.
 	self
-		addClippedPoint: clippedPoints second
+		addClippedPoint: clippedPoints second position
 		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 2 featureB: #face index: secondIndex)
 		referencePoint: referencePoint1 normal: referenceNormal
 		referenceRadius: polygon radius incidentRadius: 0.0
@@ -284,24 +327,6 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceNormal: referenceN
 	dot1 < dot2 ifTrue: [
 		^ (self dot: normal0 with: referenceNormal) >= (self dot: normal1 with: referenceNormal) ].
 	^ (self dot: normal2 with: referenceNormal) >= (self dot: normal1 with: referenceNormal)
-]
-
-{ #category : 'private - clipping' }
-CFPhysicsChainPolygonManifoldBuilder class >> clippedPointsForReferencePoint1: referencePoint1 point2: referencePoint2 incidentPoint1: incidentPoint1 incidentPoint2: incidentPoint2 normal: normal [
-	| tangent upper1 upper2 lower2 denominator lowerPoint upperPoint |
-	tangent := self leftPerpendicular: normal.
-	upper1 := self dot: referencePoint2 - referencePoint1 with: tangent.
-	upper2 := self dot: incidentPoint1 - referencePoint1 with: tangent.
-	lower2 := self dot: incidentPoint2 - referencePoint1 with: tangent.
-	(upper2 < 0.0 or: [ upper1 < lower2 ]) ifTrue: [ ^ #() ].
-	denominator := upper2 - lower2.
-	lowerPoint := (lower2 < 0.0 and: [ denominator abs > Float epsilon ])
-		ifTrue: [ incidentPoint2 + ((incidentPoint1 - incidentPoint2) * (lower2 negated / denominator)) ]
-		ifFalse: [ incidentPoint2 ].
-	upperPoint := (upper2 > upper1 and: [ denominator abs > Float epsilon ])
-		ifTrue: [ incidentPoint2 + ((incidentPoint1 - incidentPoint2) * ((upper1 - lower2) / denominator)) ]
-		ifFalse: [ incidentPoint1 ].
-	^ { lowerPoint. upperPoint }
 ]
 
 { #category : 'private - manifold' }
