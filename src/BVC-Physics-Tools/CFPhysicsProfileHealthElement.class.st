@@ -360,10 +360,15 @@ CFPhysicsProfileHealthElement >> alerts [
 
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> updateLiveHealth [
-	| recordings |
-	recordings := world telemetryRecordings.
-	latestPhysicsData := recordings ifEmpty: [ Dictionary new ] ifNotEmpty: [ recordings last physicsData ].
+	latestPhysicsData := self latestPhysicsFrameDataFrom: world telemetryRecordings.
 	self renderLiveHealth
+]
+
+{ #category : 'private - updating' }
+CFPhysicsProfileHealthElement >> latestPhysicsFrameDataFrom: recordings [
+	recordings reverseDo: [ :recording |
+		(recording data includesKey: #physicsFrame) ifTrue: [ ^ recording physicsData ] ].
+	^ Dictionary new
 ]
 
 { #category : 'private - updating' }
