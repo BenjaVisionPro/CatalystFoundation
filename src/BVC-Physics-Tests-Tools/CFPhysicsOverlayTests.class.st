@@ -1829,7 +1829,7 @@ CFPhysicsOverlayTests >> physicsObjectInspectorUsesNaturalHeightWhenItFits [
 	inspector install.
 	inspector inspect: physics.
 	host space pulse.
-	expectedPanelHeight := inspector content preferredHeight + 12.
+	expectedPanelHeight := inspector content preferredHeight + inspector panelVerticalChromeHeight.
 	expectedBodyHeight := inspector content preferredHeight
 		- inspector content titleHeight
 		- inspector content titleBodySpacing.

@@ -226,12 +226,30 @@ CFPhysicsObjectInspector >> preparePanelForSizing [
 ]
 
 { #category : 'private - sizing' }
+CFPhysicsObjectInspector >> panelVerticalPadding [
+	^ 12
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> panelBorderWidth [
+	^ 1
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> panelVerticalChromeHeight [
+	"The exact panel extent contains the content plus top/bottom padding and
+	the border on both vertical edges. Keep this calculation in one place so
+	the viewport and panel extent cannot disagree."
+	^ self panelVerticalPadding + (2 * self panelBorderWidth)
+]
+
+{ #category : 'private - sizing' }
 CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
 	| maximumContentHeight constrainedContentHeight |
-	maximumContentHeight := (self availablePanelHeight - 12) max: 0.
+	maximumContentHeight := (self availablePanelHeight - self panelVerticalChromeHeight) max: 0.
 	constrainedContentHeight := aContent preferredHeight min: maximumContentHeight.
 	aContent fitWithinHeight: constrainedContentHeight.
-	^ aContent panelWidth @ (constrainedContentHeight + 12)
+	^ aContent panelWidth @ (constrainedContentHeight + self panelVerticalChromeHeight)
 ]
 
 { #category : 'private - sizing' }
