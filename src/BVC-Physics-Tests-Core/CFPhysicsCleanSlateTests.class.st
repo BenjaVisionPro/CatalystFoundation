@@ -441,6 +441,107 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 	^ next
 ]
 
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> sleepingTouchingContactRetainsItsPersistentStateWithoutNarrowPhase [
+	<gtExample>
+	| first second pair manifold previous calculation updater bodyStates batch retained |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	previous := CFPhysicsContact pair: pair manifold: manifold.
+	calculation := previous copyForUpdate.
+	first sleep.
+	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	updater := CFPhysicsContactUpdater
+		manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nil).
+	batch := updater
+		updatePairs: { pair }
+		includingImpactContacts: #()
+		fromContacts: { previous }
+		reusingContacts: { calculation }
+		bodyStates: bodyStates
+		speculativeDistance: 0.0.
+	retained := batch contacts first.
+	self assert: retained == calculation.
+	self assert: retained manifold == manifold.
+	self assert: batch touchingContacts equals: { retained }.
+	self assert: batch continuedContacts equals: { retained }.
+	self assert: batch beganContacts isEmpty.
+	self assert: batch endedContacts isEmpty.
+	self assert: updater bothSleepingPairCount equals: 1.
+	self assert: updater manifoldGenerationCount equals: 0.
+	^ retained
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> sleepingSensorContactStillRunsNarrowPhase [
+	<gtExample>
+	| first second pair previousManifold nextManifold previous updater bodyStates batch |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	second beSensor.
+	pair := CFPhysicsPair first: first second: second.
+	previousManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	nextManifold := self cleanSlateManifoldWithFeatureIndex: 2.
+	previous := CFPhysicsContact pair: pair manifold: previousManifold.
+	first sleep.
+	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	updater := CFPhysicsContactUpdater
+		manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nextManifold).
+	batch := updater
+		updatePairs: { pair }
+		includingImpactContacts: #()
+		fromContacts: { previous }
+		reusingContacts: #()
+		bodyStates: bodyStates
+		speculativeDistance: 0.0.
+	self assert: updater bothSleepingPairCount equals: 1.
+	self assert: updater manifoldGenerationCount equals: 1.
+	self assert: batch contacts first manifold == nextManifold.
+	^ batch contacts first
+]
+
+{ #category : 'examples - contact pipeline' }
+CFPhysicsCleanSlateTests >> wakingEndpointReturnsSleepingContactToNarrowPhase [
+	<gtExample>
+	| first second pair previousManifold nextManifold previous calculation updater bodyStates batch updated |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	previousManifold := self cleanSlateManifoldWithFeatureIndex: 1.
+	nextManifold := self cleanSlateManifoldWithFeatureIndex: 2.
+	previous := CFPhysicsContact pair: pair manifold: previousManifold.
+	calculation := previous copyForUpdate.
+	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	updater := CFPhysicsContactUpdater
+		manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nextManifold).
+	batch := updater
+		updatePairs: { pair }
+		includingImpactContacts: #()
+		fromContacts: { previous }
+		reusingContacts: { calculation }
+		bodyStates: bodyStates
+		speculativeDistance: 0.0.
+	updated := batch contacts first.
+	self assert: updated manifold == nextManifold.
+	self assert: updater bothSleepingPairCount equals: 0.
+	self assert: updater manifoldGenerationCount equals: 1.
+	^ updated
+]
+
 { #category : 'examples - constraints' }
 CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
 	<gtExample>

@@ -153,7 +153,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	visitedPairCount := orderedPairs size.
 	orderedPairs do: [ :pair |
-		| manifold impactContact contact previous |
+		| manifold impactContact contact previous bothSleeping retainSleepingContact |
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
 		previous ifNotNil: [ previousContactMatchCount := previousContactMatchCount + 1 ].
@@ -170,26 +170,38 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 					ifNotNil: [ impactContact ] ].
 		contact pair: pair.
 		contact simplexCache count > 0 ifTrue: [ cachedSimplexCount := cachedSimplexCount + 1 ].
-		bodyStates ifNotNil: [
-			(((bodyStates at: pair firstBody) isAwake not) and: [ (bodyStates at: pair secondBody) isAwake not ])
-				ifTrue: [ bothSleepingPairCount := bothSleepingPairCount + 1 ] ].
-		manifoldGenerationCount := manifoldGenerationCount + 1.
-		manifold := self
-			manifoldForPair: pair
-			bodyStates: bodyStates
-			speculativeDistance: speculativeDistance
-			simplexCache: contact simplexCache.
-		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
-			manifold := impactContact manifold ].
-		bodyStates
-			ifNil: [ contact shapeStatesFromPair ]
-			ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
-		contact updateFromPreviousContact: previous with: manifold.
-		contacts add: contact.
-		contact isTouching ifTrue: [ touching add: contact ].
-		contact began ifTrue: [ began add: contact ].
-		contact continued ifTrue: [ continued add: contact ].
-		contact ended ifTrue: [ ended add: contact ] ].
+		bothSleeping := bodyStates notNil and: [
+			((bodyStates at: pair firstBody) isAwake not) and: [
+				(bodyStates at: pair secondBody) isAwake not ] ].
+		bothSleeping ifTrue: [ bothSleepingPairCount := bothSleepingPairCount + 1 ].
+		retainSleepingContact := bothSleeping
+			and: [ previous notNil
+			and: [ previous isTouching
+			and: [ previous isSolid
+			and: [ impactContact isNil ] ] ] ].
+		retainSleepingContact
+			ifTrue: [
+				contacts add: contact.
+				touching add: contact.
+				continued add: contact ]
+			ifFalse: [
+				manifoldGenerationCount := manifoldGenerationCount + 1.
+				manifold := self
+					manifoldForPair: pair
+					bodyStates: bodyStates
+					speculativeDistance: speculativeDistance
+					simplexCache: contact simplexCache.
+				(manifold isNil and: [ impactContact notNil ]) ifTrue: [
+					manifold := impactContact manifold ].
+				bodyStates
+					ifNil: [ contact shapeStatesFromPair ]
+					ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
+				contact updateFromPreviousContact: previous with: manifold.
+				contacts add: contact.
+				contact isTouching ifTrue: [ touching add: contact ].
+				contact began ifTrue: [ began add: contact ].
+				contact continued ifTrue: [ continued add: contact ].
+				contact ended ifTrue: [ ended add: contact ] ] ].
 	"Pairs absent from the broadphase are destroyed. A touching contact contributes one final end transition, but the destroyed contact is not retained in the batch."
 	previousByKey valuesDo: [ :previous |
 		previous isTouching ifTrue: [
