@@ -644,7 +644,7 @@ CFPhysicsWorld >> stepRecordingTelemetry [
 
 { #category : 'private - telemetry' }
 CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
-	| solvedIslands dynamicBodyStates sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
+	| solvedIslands dynamicBodyStates sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse contactUpdater |
 	dynamicBodyStates := aStepResult bodyStates values select: [ :each | each bodyType isDynamic ].
 	step := aStepResult step.
 	sleepConfiguration := stepPipeline sleepConfiguration.
@@ -717,6 +717,7 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 						worstTangentImpulse := worstTangentImpulse + point tangentImpulse abs ] ] ] ] ].
 	solvedIslands := aStepResult islands select: [ :island |
 		island dynamicBodies anySatisfy: #isAwake ].
+	contactUpdater := self contactUpdaterMeasurements.
 	^ Dictionary new
 		at: #physicsWorld put: self;
 		at: #kind put: #step;
@@ -765,6 +766,16 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #beganContactCount put: aStepResult beganContacts size;
 		at: #continuedContactCount put: aStepResult continuedContacts size;
 		at: #endedContactCount put: aStepResult endedContacts size;
+		at: #contactUpdateVisitedPairCount put: contactUpdater visitedPairCount;
+		at: #contactUpdatePreviousMatchCount put: contactUpdater previousContactMatchCount;
+		at: #contactUpdateReusedContactCount put: contactUpdater reusedContactCount;
+		at: #contactUpdateCreatedContactCount put: contactUpdater createdContactCount;
+		at: #contactUpdateCopiedContactCount put: contactUpdater copiedContactCount;
+		at: #contactUpdateImpactContactCount put: contactUpdater impactContactCount;
+		at: #contactUpdateManifoldGenerationCount put: contactUpdater manifoldGenerationCount;
+		at: #contactUpdateCachedSimplexCount put: contactUpdater cachedSimplexCount;
+		at: #contactUpdateBothSleepingPairCount put: contactUpdater bothSleepingPairCount;
+		at: #contactUpdateTouchingContactCount put: contactUpdater touchingContactCount;
 		at: #pairFinderEntryCount put: self pairFinderMeasurements entryCount;
 		at: #pairFinderComparisonCount put: self pairFinderMeasurements comparisonCount;
 		at: #pairFinderAcceptedPairCount put: self pairFinderMeasurements acceptedPairCount;
@@ -811,6 +822,13 @@ CFPhysicsWorld >> telemetryDataForStepResult: aStepResult [
 		at: #preparedJointConstraintCount put: self constraintPreparationMeasurements preparedJointConstraintCount;
 		at: #preparedConstraintObjectCount put: self constraintPreparationMeasurements preparedObjectCount;
 		yourself
+]
+
+
+
+{ #category : 'private - telemetry' }
+CFPhysicsWorld >> contactUpdaterMeasurements [
+	^ (stepPipeline stageOfType: CFPhysicsContactUpdateStage) contactUpdater
 ]
 
 
