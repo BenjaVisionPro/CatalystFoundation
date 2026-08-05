@@ -5,7 +5,7 @@ I reconcile persistent broadphase pairs with the previous contact set. A contact
 Class {
 	#name : 'CFPhysicsContactUpdater',
 	#superclass : 'Object',
-	#instVars : [ 'manifoldGenerator', 'visitedPairCount', 'previousContactMatchCount', 'reusedContactCount', 'createdContactCount', 'copiedContactCount', 'impactContactCount', 'manifoldGenerationCount', 'cachedSimplexCount', 'bothSleepingPairCount', 'touchingContactCount' ],
+	#instVars : [ 'manifoldGenerator', 'visitedPairCount', 'previousContactMatchCount', 'reusedContactCount', 'createdContactCount', 'copiedContactCount', 'impactContactCount', 'manifoldGenerationCount', 'cachedSimplexCount', 'bothSleepingPairCount', 'touchingContactCount', 'sleepingRetainedContactCount', 'awakeManifoldGenerationCount', 'sleepingImpactManifoldGenerationCount', 'sleepingNewManifoldGenerationCount', 'sleepingNonTouchingManifoldGenerationCount', 'sleepingNonSolidManifoldGenerationCount', 'sleepingOtherManifoldGenerationCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -39,6 +39,21 @@ CFPhysicsContactUpdater >> bothSleepingPairCount [ ^ bothSleepingPairCount ifNil
 { #category : 'telemetry' }
 CFPhysicsContactUpdater >> touchingContactCount [ ^ touchingContactCount ifNil: [ 0 ] ]
 
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingRetainedContactCount [ ^ sleepingRetainedContactCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> awakeManifoldGenerationCount [ ^ awakeManifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingImpactManifoldGenerationCount [ ^ sleepingImpactManifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingNewManifoldGenerationCount [ ^ sleepingNewManifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingNonTouchingManifoldGenerationCount [ ^ sleepingNonTouchingManifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingNonSolidManifoldGenerationCount [ ^ sleepingNonSolidManifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> sleepingOtherManifoldGenerationCount [ ^ sleepingOtherManifoldGenerationCount ifNil: [ 0 ] ]
+
 { #category : 'private - telemetry' }
 CFPhysicsContactUpdater >> resetMeasurements [
 	visitedPairCount := 0.
@@ -50,7 +65,14 @@ CFPhysicsContactUpdater >> resetMeasurements [
 	manifoldGenerationCount := 0.
 	cachedSimplexCount := 0.
 	bothSleepingPairCount := 0.
-	touchingContactCount := 0
+	touchingContactCount := 0.
+	sleepingRetainedContactCount := 0.
+	awakeManifoldGenerationCount := 0.
+	sleepingImpactManifoldGenerationCount := 0.
+	sleepingNewManifoldGenerationCount := 0.
+	sleepingNonTouchingManifoldGenerationCount := 0.
+	sleepingNonSolidManifoldGenerationCount := 0.
+	sleepingOtherManifoldGenerationCount := 0
 ]
 
 { #category : 'private - collision' }
@@ -181,11 +203,27 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 			and: [ impactContact isNil ] ] ] ].
 		retainSleepingContact
 			ifTrue: [
+				sleepingRetainedContactCount := sleepingRetainedContactCount + 1.
 				contacts add: contact.
 				touching add: contact.
 				continued add: contact ]
 			ifFalse: [
 				manifoldGenerationCount := manifoldGenerationCount + 1.
+				bothSleeping
+					ifFalse: [ awakeManifoldGenerationCount := awakeManifoldGenerationCount + 1 ]
+					ifTrue: [
+						impactContact notNil
+							ifTrue: [ sleepingImpactManifoldGenerationCount := sleepingImpactManifoldGenerationCount + 1 ]
+							ifFalse: [
+								previous isNil
+									ifTrue: [ sleepingNewManifoldGenerationCount := sleepingNewManifoldGenerationCount + 1 ]
+									ifFalse: [
+										previous isTouching not
+											ifTrue: [ sleepingNonTouchingManifoldGenerationCount := sleepingNonTouchingManifoldGenerationCount + 1 ]
+											ifFalse: [
+												previous isSolid not
+													ifTrue: [ sleepingNonSolidManifoldGenerationCount := sleepingNonSolidManifoldGenerationCount + 1 ]
+													ifFalse: [ sleepingOtherManifoldGenerationCount := sleepingOtherManifoldGenerationCount + 1 ] ] ] ] ] ].
 				manifold := self
 					manifoldForPair: pair
 					bodyStates: bodyStates

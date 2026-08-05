@@ -165,6 +165,13 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #contactUpdateCachedSimplexCount put: contactUpdater cachedSimplexCount;
 		at: #contactUpdateBothSleepingPairCount put: contactUpdater bothSleepingPairCount;
 		at: #contactUpdateTouchingContactCount put: contactUpdater touchingContactCount;
+		at: #contactUpdateSleepingRetainedContactCount put: contactUpdater sleepingRetainedContactCount;
+		at: #contactUpdateAwakeManifoldGenerationCount put: contactUpdater awakeManifoldGenerationCount;
+		at: #contactUpdateSleepingImpactManifoldGenerationCount put: contactUpdater sleepingImpactManifoldGenerationCount;
+		at: #contactUpdateSleepingNewManifoldGenerationCount put: contactUpdater sleepingNewManifoldGenerationCount;
+		at: #contactUpdateSleepingNonTouchingManifoldGenerationCount put: contactUpdater sleepingNonTouchingManifoldGenerationCount;
+		at: #contactUpdateSleepingNonSolidManifoldGenerationCount put: contactUpdater sleepingNonSolidManifoldGenerationCount;
+		at: #contactUpdateSleepingOtherManifoldGenerationCount put: contactUpdater sleepingOtherManifoldGenerationCount;
 		at: #pairFinderEntryCount put: pairFinder entryCount;
 		at: #pairFinderComparisonCount put: pairFinder comparisonCount;
 		at: #pairFinderAcceptedPairCount put: pairFinder acceptedPairCount;
