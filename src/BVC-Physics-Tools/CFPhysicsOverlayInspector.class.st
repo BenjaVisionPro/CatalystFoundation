@@ -140,7 +140,11 @@ CFPhysicsOverlayInspector >> fieldWidthForColumns: aColumnCount [
 CFPhysicsOverlayInspector >> groupHeightForFieldCount: aCount columns: aColumnCount [
 	| rowCount |
 	rowCount := (aCount + aColumnCount - 1) // aColumnCount.
-	^ self groupTitleHeight + self groupTitleRowSpacing + (rowCount * self fieldRowHeight)
+	"There is one vertical-pane spacing gap after the title and between every
+	pair of field rows: rowCount gaps in total."
+	^ self groupTitleHeight
+		+ (rowCount * self fieldRowHeight)
+		+ (rowCount * self groupTitleRowSpacing)
 ]
 
 { #category : 'private - building' }
