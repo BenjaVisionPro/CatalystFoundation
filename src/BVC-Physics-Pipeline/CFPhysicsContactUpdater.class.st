@@ -223,7 +223,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 											ifFalse: [
 												previous isSolid not
 													ifTrue: [ sleepingNonSolidManifoldGenerationCount := sleepingNonSolidManifoldGenerationCount + 1 ]
-													ifFalse: [ sleepingOtherManifoldGenerationCount := sleepingOtherManifoldGenerationCount + 1 ] ] ] ] ] ].
+													ifFalse: [ sleepingOtherManifoldGenerationCount := sleepingOtherManifoldGenerationCount + 1 ] ] ] ] ].
 				manifold := self
 					manifoldForPair: pair
 					bodyStates: bodyStates
