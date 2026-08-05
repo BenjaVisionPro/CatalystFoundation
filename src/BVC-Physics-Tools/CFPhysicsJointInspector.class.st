@@ -20,7 +20,7 @@ CFPhysicsJointInspector >> configureInspector [
 		#collideConnected -> 'Collide connected' }.
 	self addGroup: 'Connection' fields: {
 		#bodyA -> 'First body'.
-		#bodyB -> 'Second body' }.
+		#bodyB -> 'Second body' } columns: 1.
 	self addGroup: 'Anchors' fields: {
 		#anchorA -> 'First anchor'.
 		#anchorB -> 'Second anchor' }

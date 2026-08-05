@@ -40,10 +40,11 @@ CFPhysicsOverlayInspector >> initializeContent [
 	titleElement := self newTitleElement.
 	dataElement := BrVerticalPane new
 		hMatchParent;
-		vExact: 0;
+		vFitContent;
 		cellSpacing: self groupSpacing;
 		yourself.
 	scrollPane := BrScrollPane new
+		allowMeAndChildrenMouseEvents;
 		aptitude: BrScrollPaneAptitude + BrGlamorousWithVerticalScrollbarAptitude;
 		hMatchParent;
 		vExact: 0;
@@ -70,14 +71,21 @@ CFPhysicsOverlayInspector >> addTitle: aString [
 
 { #category : 'building' }
 CFPhysicsOverlayInspector >> addGroup: aName fields: associations [
+	^ self addGroup: aName fields: associations columns: 2
+]
+
+{ #category : 'building' }
+CFPhysicsOverlayInspector >> addGroup: aName fields: associations columns: aColumnCount [
 	| fields groupHeight |
 	fields := associations asArray.
-	groupHeight := self groupHeightForFieldCount: fields size.
+	groupHeight := self groupHeightForFieldCount: fields size columns: aColumnCount.
 	groupCount > 0 ifTrue: [ preferredDataHeight := preferredDataHeight + self groupSpacing ].
 	preferredDataHeight := preferredDataHeight + groupHeight.
-	dataElement
-		vExact: preferredDataHeight;
-		addChild: (self newGroup: aName fields: fields height: groupHeight).
+	dataElement addChild: (self
+		newGroup: aName
+		fields: fields
+		columns: aColumnCount
+		height: groupHeight).
 	^ self
 ]
 
@@ -113,10 +121,25 @@ CFPhysicsOverlayInspector >> groupTitleRowSpacing [ ^ 1 ]
 { #category : 'sizing constants' }
 CFPhysicsOverlayInspector >> groupSpacing [ ^ 3 ]
 
+{ #category : 'sizing constants' }
+CFPhysicsOverlayInspector >> panelWidth [ ^ 230 ]
+
+{ #category : 'sizing constants' }
+CFPhysicsOverlayInspector >> panelHorizontalPadding [ ^ 12 ]
+
+{ #category : 'sizing constants' }
+CFPhysicsOverlayInspector >> fieldSpacing [ ^ 4 ]
+
 { #category : 'sizing' }
-CFPhysicsOverlayInspector >> groupHeightForFieldCount: aCount [
+CFPhysicsOverlayInspector >> fieldWidthForColumns: aColumnCount [
+	^ (self panelWidth - self panelHorizontalPadding
+		- ((aColumnCount - 1) * self fieldSpacing)) / aColumnCount
+]
+
+{ #category : 'sizing' }
+CFPhysicsOverlayInspector >> groupHeightForFieldCount: aCount columns: aColumnCount [
 	| rowCount |
-	rowCount := (aCount + 1) // 2.
+	rowCount := (aCount + aColumnCount - 1) // aColumnCount.
 	^ self groupTitleHeight + self groupTitleRowSpacing + (rowCount * self fieldRowHeight)
 ]
 
@@ -133,8 +156,9 @@ CFPhysicsOverlayInspector >> newTitleElement [
 ]
 
 { #category : 'private - building' }
-CFPhysicsOverlayInspector >> newGroup: aName fields: fields height: groupHeight [
-	| group index row |
+CFPhysicsOverlayInspector >> newGroup: aName fields: fields columns: aColumnCount height: groupHeight [
+	| group index row columnIndex fieldWidth |
+	fieldWidth := self fieldWidthForColumns: aColumnCount.
 	group := BrVerticalPane new
 		hMatchParent;
 		vExact: groupHeight;
@@ -153,26 +177,32 @@ CFPhysicsOverlayInspector >> newGroup: aName fields: fields height: groupHeight 
 		row := BrHorizontalPane new
 			hMatchParent;
 			vExact: self fieldRowHeight;
-			cellSpacing: 4;
-			addChild: (self newFieldFor: (fields at: index) key description: (fields at: index) value);
+			cellSpacing: self fieldSpacing;
 			yourself.
-		index + 1 <= fields size
-			ifTrue: [ row addChild: (self newFieldFor: (fields at: index + 1) key description: (fields at: index + 1) value) ]
-			ifFalse: [ row addChild: self newEmptyField ].
-		group addChild: row.
-		index := index + 2 ].
+		columnIndex := 1.
+		[ columnIndex <= aColumnCount ] whileTrue: [
+			index <= fields size
+				ifTrue: [ row addChild: (self
+					newFieldFor: (fields at: index) key
+					description: (fields at: index) value
+					width: fieldWidth) ]
+				ifFalse: [ row addChild: (self newEmptyFieldWidth: fieldWidth) ].
+			index := index + 1.
+			columnIndex := columnIndex + 1 ].
+		group addChild: row ].
 	^ group
 ]
 
 { #category : 'private - building' }
-CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString [
-	| valueElement valueContainer |
+CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString width: aWidth [
+	| valueElement valueContainer valueWidth |
 	valueElement := self newValueElement.
 	valueElements at: aKey put: valueElement.
+	valueWidth := (aWidth - 12) max: 0.
 	valueContainer := BlElement new
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
-			c horizontal matchParent.
+			c horizontal exact: valueWidth.
 			c vertical matchParent ];
 		addChild: valueElement;
 		yourself.
@@ -180,7 +210,7 @@ CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString [
 		c frame horizontal alignRight.
 		c frame vertical alignCenter ].
 	^ BrHorizontalPane new
-		hMatchParent;
+		hExact: aWidth;
 		vExact: self fieldRowHeight;
 		cellSpacing: 2;
 		addChild: (self newHelpIconFor: aString);
@@ -189,10 +219,10 @@ CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString [
 ]
 
 { #category : 'private - building' }
-CFPhysicsOverlayInspector >> newEmptyField [
+CFPhysicsOverlayInspector >> newEmptyFieldWidth: aWidth [
 	^ BlElement new
 		constraintsDo: [ :c |
-			c horizontal matchParent.
+			c horizontal exact: aWidth.
 			c vertical exact: self fieldRowHeight ];
 		yourself
 ]

@@ -80,7 +80,7 @@ CFPhysicsObjectInspector >> initializeInspector [
 CFPhysicsObjectInspector >> newPanel [
 	^ BrVerticalPane new
 		id: #cfPhysicsObjectInspectorPanel;
-		hExact: 190;
+		hExact: 230;
 		vFitContent;
 		padding: (BlInsets all: 6);
 		background: (Color black alpha: 0.1);
@@ -227,7 +227,7 @@ CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
 	maximumContentHeight := (self availablePanelHeight - 12) max: 0.
 	constrainedContentHeight := aContent preferredHeight min: maximumContentHeight.
 	aContent fitWithinHeight: constrainedContentHeight.
-	^ 190 @ (constrainedContentHeight + 12)
+	^ aContent panelWidth @ (constrainedContentHeight + 12)
 ]
 
 { #category : 'private - sizing' }
