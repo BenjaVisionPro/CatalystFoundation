@@ -80,6 +80,7 @@ CFPhysicsObjectInspector >> initializeInspector [
 CFPhysicsObjectInspector >> newPanel [
 	^ BrVerticalPane new
 		id: #cfPhysicsObjectInspectorPanel;
+		allowMeAndChildrenMouseEvents;
 		hExact: 230;
 		vFitContent;
 		padding: (BlInsets all: 6);

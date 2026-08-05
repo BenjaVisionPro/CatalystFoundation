@@ -157,12 +157,12 @@ CFPhysicsOverlayInspector >> newTitleElement [
 
 { #category : 'private - building' }
 CFPhysicsOverlayInspector >> newGroup: aName fields: fields columns: aColumnCount height: groupHeight [
-	| group index row columnIndex fieldWidth |
-	fieldWidth := self fieldWidthForColumns: aColumnCount.
+	| group index rowFields |
 	group := BrVerticalPane new
 		hMatchParent;
 		vExact: groupHeight;
 		cellSpacing: self groupTitleRowSpacing;
+		clipChildren: true;
 		yourself.
 	group addChild: (BrLabel new
 		hMatchParent;
@@ -174,33 +174,44 @@ CFPhysicsOverlayInspector >> newGroup: aName fields: fields columns: aColumnCoun
 		yourself).
 	index := 1.
 	[ index <= fields size ] whileTrue: [
-		row := BrHorizontalPane new
-			hMatchParent;
-			vExact: self fieldRowHeight;
-			cellSpacing: self fieldSpacing;
-			yourself.
-		columnIndex := 1.
-		[ columnIndex <= aColumnCount ] whileTrue: [
-			index <= fields size
-				ifTrue: [ row addChild: (self
-					newFieldFor: (fields at: index) key
-					description: (fields at: index) value
-					width: fieldWidth) ]
-				ifFalse: [ row addChild: (self newEmptyFieldWidth: fieldWidth) ].
-			index := index + 1.
-			columnIndex := columnIndex + 1 ].
-		group addChild: row ].
+		rowFields := fields copyFrom: index to: (index + aColumnCount - 1 min: fields size).
+		group addChild: (self newTableRowFor: rowFields columns: aColumnCount).
+		index := index + aColumnCount ].
 	^ group
 ]
 
 { #category : 'private - building' }
+CFPhysicsOverlayInspector >> newTableRowFor: fields columns: aColumnCount [
+	| row fieldWidth columnIndex |
+	fieldWidth := self fieldWidthForColumns: aColumnCount.
+	row := BrHorizontalPane new
+		hMatchParent;
+		vExact: self fieldRowHeight;
+		cellSpacing: self fieldSpacing;
+		clipChildren: true;
+		yourself.
+	columnIndex := 1.
+	[ columnIndex <= aColumnCount ] whileTrue: [
+		columnIndex <= fields size
+			ifTrue: [
+				row addChild: (self
+					newFieldFor: (fields at: columnIndex) key
+					description: (fields at: columnIndex) value
+					width: fieldWidth) ]
+			ifFalse: [ row addChild: (self newEmptyFieldWidth: fieldWidth) ].
+		columnIndex := columnIndex + 1 ].
+	^ row
+]
+
+{ #category : 'private - building' }
 CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString width: aWidth [
-	| valueElement valueContainer valueWidth |
+	| valueElement valueContainer valueWidth field |
 	valueElement := self newValueElement.
 	valueElements at: aKey put: valueElement.
 	valueWidth := (aWidth - 12) max: 0.
 	valueContainer := BlElement new
 		layout: BlFrameLayout new;
+		clipChildren: true;
 		constraintsDo: [ :c |
 			c horizontal exact: valueWidth.
 			c vertical matchParent ];
@@ -209,18 +220,21 @@ CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString width: aWidt
 	valueElement constraintsDo: [ :c |
 		c frame horizontal alignRight.
 		c frame vertical alignCenter ].
-	^ BrHorizontalPane new
+	field := BrHorizontalPane new
 		hExact: aWidth;
 		vExact: self fieldRowHeight;
 		cellSpacing: 2;
+		clipChildren: true;
 		addChild: (self newHelpIconFor: aString);
 		addChild: valueContainer;
-		yourself
+		yourself.
+	^ field
 ]
 
 { #category : 'private - building' }
 CFPhysicsOverlayInspector >> newEmptyFieldWidth: aWidth [
 	^ BlElement new
+		clipChildren: true;
 		constraintsDo: [ :c |
 			c horizontal exact: aWidth.
 			c vertical exact: self fieldRowHeight ];
