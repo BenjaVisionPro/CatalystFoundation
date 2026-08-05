@@ -92,10 +92,13 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainGeometryFor: segment bodyOrig
 	point1 := segment worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
 	point2 := segment worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
 	ghost2 := segment worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation.
-	edge0 := self normalized: point1 - ghost1.
-	edge1 := self normalized: point2 - point1.
-	edge2 := self normalized: ghost2 - point2.
-	(edge0 isNil or: [ edge1 isNil or: [ edge2 isNil ] ]) ifTrue: [ ^ nil ].
+	edge0 := point1 - ghost1.
+	edge1 := point2 - point1.
+	edge2 := ghost2 - point2.
+	(edge0 r = 0 or: [ edge1 r = 0 or: [ edge2 r = 0 ] ]) ifTrue: [ ^ nil ].
+	edge0 := edge0 / edge0 r.
+	edge1 := edge1 / edge1 r.
+	edge2 := edge2 / edge2 r.
 	normal0 := self rightPerpendicular: edge0.
 	normal1 := self rightPerpendicular: edge1.
 	normal2 := self rightPerpendicular: edge2.
@@ -417,14 +420,6 @@ CFPhysicsChainPolygonManifoldBuilder class >> reverse: manifold [
 		point featureId: (CFPhysicsContactFeatureId
 			featureA: feature featureB index: feature indexB
 			featureB: feature featureA index: feature indexA) ]
-]
-
-{ #category : 'private - geometry' }
-CFPhysicsChainPolygonManifoldBuilder class >> normalized: vector [
-	| length |
-	length := vector r.
-	length <= Float epsilon ifTrue: [ ^ nil ].
-	^ vector / length
 ]
 
 { #category : 'private - geometry' }
