@@ -8102,3 +8102,77 @@ CFPhysicsCleanSlateTests >> chainSegmentImplementsGenericCollisionShapeQueries [
 	self assert: bounds minimum x <= -10.
 	self assert: bounds maximum x >= 15
 ]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DTailBranches [
+	<gtExample>
+	| builder edge normal2 |
+	builder := CFPhysicsChainPolygonManifoldBuilder.
+	edge := 1 @ 0.
+	normal2 := 0 @ -1.
+	self
+		assert: (builder
+			classifyNormal: -1 @ 0
+			edge: edge
+			normal0: 0 @ -1
+			normal2: normal2
+			convex1: true
+			convex2: true)
+		equals: #skip.
+	self
+		assert: (builder
+			classifyNormal: -1 @ 0
+			edge: edge
+			normal0: 0 @ 1
+			normal2: normal2
+			convex1: true
+			convex2: true)
+		equals: #admit.
+	self
+		assert: (builder
+			classifyNormal: -1 @ 0
+			edge: edge
+			normal0: 0 @ -1
+			normal2: normal2
+			convex1: false
+			convex2: true)
+		equals: #snap.
+	^ builder
+]
+
+{ #category : 'examples - chains' }
+CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DHeadBranches [
+	<gtExample>
+	| builder edge normal0 |
+	builder := CFPhysicsChainPolygonManifoldBuilder.
+	edge := 1 @ 0.
+	normal0 := 0 @ -1.
+	self
+		assert: (builder
+			classifyNormal: 1 @ 0
+			edge: edge
+			normal0: normal0
+			normal2: 0 @ -1
+			convex1: true
+			convex2: true)
+		equals: #skip.
+	self
+		assert: (builder
+			classifyNormal: 1 @ 0
+			edge: edge
+			normal0: normal0
+			normal2: 0 @ 1
+			convex1: true
+			convex2: true)
+		equals: #admit.
+	self
+		assert: (builder
+			classifyNormal: 1 @ 0
+			edge: edge
+			normal0: normal0
+			normal2: 0 @ -1
+			convex1: true
+			convex2: false)
+		equals: #snap.
+	^ builder
+]
