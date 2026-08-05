@@ -2830,6 +2830,36 @@ CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 	^ world
 ]
 
+{ #category : 'examples - constraint graph' }
+CFPhysicsCleanSlateTests >> retiringAContactingBodyUnlinksItsContactFromThePersistentIslandGraph [
+	<gtExample>
+	| owner first second world result contact graph island retiredBody |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	first physics position: 100 @ 100.
+	second physics position: 110 @ 100.
+	result := world step.
+	self assert: result activeContacts size equals: 1.
+	contact := result activeContacts first.
+	graph := world persistentIslandGraph.
+	island := graph islandForConstraint: contact.
+	self assert: island notNil.
+	self assert: (island constraints includes: contact).
+	retiredBody := second physics body.
+	owner removeChild: second.
+	world synchroniseMembership.
+	self assert: (graph islandForConstraint: contact) isNil.
+	self assert: (graph islandForBody: retiredBody) isNil.
+	self deny: (island constraints includes: contact).
+	^ world
+]
+
 { #category : 'examples - collision filtering' }
 CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>

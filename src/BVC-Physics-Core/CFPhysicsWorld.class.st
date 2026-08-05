@@ -409,13 +409,23 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 		self removeWeldJointsUsingBody: body.
 		self removePrismaticJointsUsingBody: body.
 		self removeWheelJointsUsingBody: body.
-		contacts := contacts reject: [ :contact |
-			contact firstBody == body or: [ contact secondBody == body ] ].
-		activeContacts := activeContacts reject: [ :contact |
-			contact firstBody == body or: [ contact secondBody == body ] ].
-		calculationContacts := calculationContacts reject: [ :contact |
-			contact firstBody == body or: [ contact secondBody == body ] ].
+		self removeContactsUsingBody: body.
 		persistentIslandGraph removeBody: body ]
+]
+
+{ #category : 'private - contacts' }
+CFPhysicsWorld >> removeContactsUsingBody: aBody [
+	| removedContacts |
+	removedContacts := contacts select: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ].
+	removedContacts do: [ :contact |
+		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ] ].
+	contacts := contacts reject: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ].
+	activeContacts := activeContacts reject: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ].
+	calculationContacts := calculationContacts reject: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ]
 ]
 
 
