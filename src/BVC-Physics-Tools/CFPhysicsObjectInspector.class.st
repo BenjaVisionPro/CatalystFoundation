@@ -221,13 +221,21 @@ CFPhysicsObjectInspector >> preparePanelForSizing [
 
 { #category : 'private - sizing' }
 CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
-	| naturalExtent constrainedHeight |
-	aContent useNaturalHeight.
+	| maximumContentHeight naturalContentHeight constrainedContentHeight |
+	maximumContentHeight := (self availablePanelHeight - 12) max: 0.
+
+	"A scroll pane cannot discover its content height while its viewport is
+	zero. Give it the largest legal viewport first so Bloc lays out the real
+	data hierarchy, then shrink the panel to the resulting natural height."
+	aContent fitWithinHeight: maximumContentHeight.
 	root space pulse.
-	naturalExtent := panel extent x @ (aContent naturalHeight + 12).
-	constrainedHeight := naturalExtent y min: self availablePanelHeight.
-	aContent fitWithinHeight: (constrainedHeight - 12 max: 0).
-	^ naturalExtent x @ constrainedHeight
+
+	naturalContentHeight := aContent naturalHeight.
+	constrainedContentHeight := naturalContentHeight min: maximumContentHeight.
+	aContent fitWithinHeight: constrainedContentHeight.
+	root space pulse.
+
+	^ panel extent x @ (constrainedContentHeight + 12)
 ]
 
 { #category : 'private - sizing' }
