@@ -10,7 +10,7 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segment bodyOrigin: segmentBodyOrigin rotation: segmentRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation speculativeDistance: speculativeDistance [
-	| polygon ghost1 point1 point2 ghost2 vertices normals centroid edge0 edge1 edge2 normal0 normal1 normal2 convex1 convex2 behind0 behind1 behind2 incidentIndex edgeSeparation polygonSeparation referenceIndex incidentNormal points manifoldNormal penetration |
+	| polygon ghost1 point1 point2 ghost2 vertices normals centroid edge0 edge1 edge2 normal0 normal1 normal2 convex1 convex2 behind0 behind1 behind2 incidentIndex edgeSeparation polygonSeparation referenceIndex incidentNormal clippedPoints points manifoldNormal penetration |
 	polygon := polygonState polygonShape.
 	polygon ifNil: [ ^ nil ].
 	ghost1 := segment worldGhost1AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
@@ -111,27 +111,48 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segme
 		incidentEdgeForVertex: incidentIndex
 		normals: normals
 		withSegmentNormal: normal1.
-	points := self
-		clipReferencePoint1: point1
+	clippedPoints := self
+		clippedPointsForReferencePoint1: point1
 		point2: point2
 		incidentPoint1: (vertices at: incidentNormal first)
 		incidentPoint2: (vertices at: incidentNormal second)
+		normal: normal1.
+	clippedPoints isEmpty ifTrue: [ ^ nil ].
+	points := OrderedCollection new: 2.
+	self
+		addClippedPoint: clippedPoints first
+		feature: (CFPhysicsContactFeatureId
+			featureA: #vertex index: 1
+			featureB: #vertex index: incidentNormal second)
+		referencePoint: point1
 		normal: normal1
 		referenceRadius: 0.0
 		incidentRadius: polygon radius
-		firstFeature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 1
-			featureB: #vertex index: incidentNormal second)
-		secondFeature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 2
-			featureB: #vertex index: incidentNormal first)
 		segment: segment
 		segmentBodyOrigin: segmentBodyOrigin
 		segmentRotation: segmentRotation
 		polygonState: polygonState
 		polygonBodyOrigin: polygonBodyOrigin
 		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance.
+		speculativeDistance: speculativeDistance
+		into: points.
+	self
+		addClippedPoint: clippedPoints second
+		feature: (CFPhysicsContactFeatureId
+			featureA: #vertex index: 2
+			featureB: #vertex index: incidentNormal first)
+		referencePoint: point1
+		normal: normal1
+		referenceRadius: 0.0
+		incidentRadius: polygon radius
+		segment: segment
+		segmentBodyOrigin: segmentBodyOrigin
+		segmentRotation: segmentRotation
+		polygonState: polygonState
+		polygonBodyOrigin: polygonBodyOrigin
+		polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance
+		into: points.
 	points isEmpty ifTrue: [ ^ nil ].
 	manifoldNormal := normal1.
 	penetration := (points collect: [ :each | each separation negated ]) max.
@@ -166,7 +187,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenPolygonShapeState: 
 
 { #category : 'private' }
 CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldAt: referenceIndex vertices: vertices normals: normals point1: point1 point2: point2 normal0: normal0 normal1: normal1 normal2: normal2 polygonRadius: polygonRadius segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| secondIndex referencePoint1 referencePoint2 referenceNormal dot1 dot2 points penetration |
+	| secondIndex referencePoint1 referencePoint2 referenceNormal dot1 dot2 clippedPoints points penetration |
 	secondIndex := referenceIndex = vertices size ifTrue: [ 1 ] ifFalse: [ referenceIndex + 1 ].
 	referencePoint1 := vertices at: referenceIndex.
 	referencePoint2 := vertices at: secondIndex.
@@ -180,27 +201,48 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldAt: refere
 		ifFalse: [
 			(self dot: normal2 with: referenceNormal) < (self dot: normal1 with: referenceNormal)
 				ifTrue: [ ^ nil ] ].
-	points := self
-		clipReferencePoint1: referencePoint1
+	clippedPoints := self
+		clippedPointsForReferencePoint1: referencePoint1
 		point2: referencePoint2
 		incidentPoint1: point1
 		incidentPoint2: point2
+		normal: referenceNormal.
+	clippedPoints isEmpty ifTrue: [ ^ nil ].
+	points := OrderedCollection new: 2.
+	self
+		addClippedPoint: clippedPoints first
+		feature: (CFPhysicsContactFeatureId
+			featureA: #vertex index: 1
+			featureB: #vertex index: referenceIndex)
+		referencePoint: referencePoint1
 		normal: referenceNormal
 		referenceRadius: polygonRadius
 		incidentRadius: 0.0
-		firstFeature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 1
-			featureB: #vertex index: referenceIndex)
-		secondFeature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 2
-			featureB: #vertex index: secondIndex)
 		segment: segment
 		segmentBodyOrigin: segmentBodyOrigin
 		segmentRotation: segmentRotation
 		polygonState: polygonState
 		polygonBodyOrigin: polygonBodyOrigin
 		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance.
+		speculativeDistance: speculativeDistance
+		into: points.
+	self
+		addClippedPoint: clippedPoints second
+		feature: (CFPhysicsContactFeatureId
+			featureA: #vertex index: 2
+			featureB: #vertex index: secondIndex)
+		referencePoint: referencePoint1
+		normal: referenceNormal
+		referenceRadius: polygonRadius
+		incidentRadius: 0.0
+		segment: segment
+		segmentBodyOrigin: segmentBodyOrigin
+		segmentRotation: segmentRotation
+		polygonState: polygonState
+		polygonBodyOrigin: polygonBodyOrigin
+		polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance
+		into: points.
 	points isEmpty ifTrue: [ ^ nil ].
 	penetration := (points collect: [ :each | each separation negated ]) max.
 	^ (CFPhysicsManifold normal: referenceNormal negated penetration: penetration)
@@ -209,8 +251,8 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldAt: refere
 ]
 
 { #category : 'private' }
-CFPhysicsChainPolygonManifoldBuilder class >> clipReferencePoint1: referencePoint1 point2: referencePoint2 incidentPoint1: incidentPoint1 incidentPoint2: incidentPoint2 normal: normal referenceRadius: referenceRadius incidentRadius: incidentRadius firstFeature: firstFeature secondFeature: secondFeature segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| tangent lower1 upper1 upper2 lower2 lowerPoint upperPoint denominator points |
+CFPhysicsChainPolygonManifoldBuilder class >> clippedPointsForReferencePoint1: referencePoint1 point2: referencePoint2 incidentPoint1: incidentPoint1 incidentPoint2: incidentPoint2 normal: normal [
+	| tangent lower1 upper1 upper2 lower2 lowerPoint upperPoint denominator |
 	tangent := self leftPerpendicular: normal.
 	lower1 := 0.0.
 	upper1 := self dot: referencePoint2 - referencePoint1 with: tangent.
@@ -224,38 +266,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> clipReferencePoint1: referencePoin
 	upperPoint := (upper2 > upper1 and: [ denominator abs > Float epsilon ])
 		ifTrue: [ incidentPoint2 + ((incidentPoint1 - incidentPoint2) * ((upper1 - lower2) / denominator)) ]
 		ifFalse: [ incidentPoint1 ].
-	points := OrderedCollection new: 2.
-	self
-		addClippedPoint: lowerPoint
-		feature: firstFeature
-		referencePoint: referencePoint1
-		normal: normal
-		referenceRadius: referenceRadius
-		incidentRadius: incidentRadius
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
-	self
-		addClippedPoint: upperPoint
-		feature: secondFeature
-		referencePoint: referencePoint1
-		normal: normal
-		referenceRadius: referenceRadius
-		incidentRadius: incidentRadius
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
-	^ points asArray
+	^ { lowerPoint. upperPoint }
 ]
 
 { #category : 'private' }
