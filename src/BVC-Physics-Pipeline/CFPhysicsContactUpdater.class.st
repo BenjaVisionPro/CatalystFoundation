@@ -19,6 +19,15 @@ CFPhysicsContactUpdater class >> manifoldGenerator: aManifoldGenerator [
 CFPhysicsContactUpdater >> manifoldGenerator: aManifoldGenerator [ manifoldGenerator := aManifoldGenerator ]
 
 { #category : 'private - collision' }
+CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance [
+	^ self
+		manifoldForPair: pair
+		bodyStates: bodyStates
+		speculativeDistance: speculativeDistance
+		simplexCache: CFPhysicsSimplexCache empty
+]
+
+{ #category : 'private - collision' }
 CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance simplexCache: simplexCache [
 	^ bodyStates
 		ifNil: [ manifoldGenerator manifoldBetweenBody: pair firstBody andBody: pair secondBody ]
@@ -107,19 +116,9 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	ended := OrderedCollection new.
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	orderedPairs do: [ :pair |
-		| manifold impactContact contact previous simplexCache |
+		| manifold impactContact contact previous |
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
-		simplexCache := previous
-			ifNil: [ impactContact ifNil: [ CFPhysicsSimplexCache empty ] ifNotNil: [ impactContact simplexCache ] ]
-			ifNotNil: [ previous simplexCache ].
-		manifold := self
-			manifoldForPair: pair
-			bodyStates: bodyStates
-			speculativeDistance: speculativeDistance
-			simplexCache: simplexCache.
-		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
-			manifold := impactContact manifold ].
 		contact := reusableByKey
 			removeKey: pair key
 			ifAbsent: [
@@ -130,7 +129,13 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 							ifNotNil: [ previous copyForUpdate ] ]
 					ifNotNil: [ impactContact ] ].
 		contact pair: pair.
-		contact simplexCache: simplexCache.
+		manifold := self
+			manifoldForPair: pair
+			bodyStates: bodyStates
+			speculativeDistance: speculativeDistance
+			simplexCache: contact simplexCache.
+		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
+			manifold := impactContact manifold ].
 		bodyStates
 			ifNil: [ contact shapeStatesFromPair ]
 			ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].

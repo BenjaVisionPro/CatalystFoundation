@@ -69,6 +69,15 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: 
 
 
 { #category : 'collision' }
+CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance [
+	^ self
+		manifoldForPair: aPair
+		bodyStates: bodyStates
+		speculativeDistance: speculativeDistance
+		simplexCache: CFPhysicsSimplexCache empty
+]
+
+{ #category : 'private - collision' }
 CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance simplexCache: simplexCache [ 
 	| firstState secondState firstTransform secondTransform firstShape secondShape |
 	firstState := bodyStates at: aPair firstBody.
