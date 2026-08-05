@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsProfileHealthElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData' ],
+	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'scrollPane', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -26,9 +26,7 @@ CFPhysicsProfileHealthElement >> initialize [
 	sampling := false.
 	self
 		hMatchParent;
-		vFitContent;
-		cellSpacing: 6;
-		padding: (BlInsets all: 12)
+		vMatchParent
 ]
 
 { #category : 'accessing' }
@@ -49,17 +47,18 @@ CFPhysicsProfileHealthElement >> build [
 	content := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 10;
+		cellSpacing: 4;
+		padding: (BlInsets all: 6);
 		yourself.
 	liveContent := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 8;
+		cellSpacing: 3;
 		yourself.
 	profileContent := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 4;
+		cellSpacing: 2;
 		yourself.
 	content addChild: liveContent; addChild: profileContent.
 	profileContent withAsyncFutureDo: [ :anElementFuture |
@@ -72,7 +71,14 @@ CFPhysicsProfileHealthElement >> build [
 				sampling := false.
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
-	self addChild: content.
+	scrollPane := BrScrollPane new
+		allowMeAndChildrenMouseEvents;
+		aptitude: BrScrollPaneAptitude + BrGlamorousWithVerticalScrollbarAptitude;
+		hMatchParent;
+		vMatchParent;
+		content: content;
+		yourself.
+	self addChild: scrollPane.
 	self updateLiveHealth.
 	self renderStopped
 ]
@@ -392,8 +398,20 @@ CFPhysicsProfileHealthElement >> renderLiveHealth [
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> healthSectionNamed: aName rows: rows [
 	| section |
-	section := BrVerticalPane new hMatchParent; vFitContent; cellSpacing: 3; padding: (BlInsets all: 6); yourself.
-	section addChild: (BrLabel new hMatchParent; vExact: 22; aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.55)); text: aName; yourself).
+	section := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 1;
+		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 2);
+		yourself.
+	section addChild: (BrLabel new
+		hMatchParent;
+		vExact: 16;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.48);
+			fontSize: 9);
+		text: aName;
+		yourself).
 	rows do: [ :row | section addChild: row ].
 	^ section
 ]
@@ -401,7 +419,7 @@ CFPhysicsProfileHealthElement >> healthSectionNamed: aName rows: rows [
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> healthRowNamed: firstName value: firstValue secondaryNamed: secondName value: secondValue [
 	| row first second |
-	row := BrHorizontalPane new hMatchParent; vExact: 24; cellSpacing: 12; yourself.
+	row := BrHorizontalPane new hMatchParent; vExact: 18; cellSpacing: 6; yourself.
 	first := self healthCellNamed: firstName value: firstValue.
 	second := self healthCellNamed: secondName value: secondValue.
 	row addChild: first; addChild: second.
@@ -411,9 +429,11 @@ CFPhysicsProfileHealthElement >> healthRowNamed: firstName value: firstValue sec
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> healthCellNamed: aName value: aValue [
 	^ BrLabel new
-		hExact: 300;
-		vExact: 24;
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
+		hExact: 250;
+		vExact: 18;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 10);
 		text: aName, '  ', aValue;
 		yourself
 ]
