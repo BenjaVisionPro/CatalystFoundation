@@ -1832,7 +1832,7 @@ CFPhysicsOverlayTests >> physicsObjectInspectorUsesNaturalHeightWhenItFits [
 	expectedPanelHeight := inspector content preferredHeight + inspector panelVerticalChromeHeight.
 	expectedBodyHeight := inspector content preferredHeight
 		- inspector content titleHeight
-		- inspector content titleBodySpacing.
+		- inspector content titleBodySpacingHeight.
 	self assert: inspector panel extent y equals: expectedPanelHeight.
 	self assert: inspector content scrollPane extent y equals: expectedBodyHeight.
 	self assert: inspector content dataElement extent y equals: expectedBodyHeight.

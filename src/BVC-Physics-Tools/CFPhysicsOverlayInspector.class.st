@@ -35,7 +35,7 @@ CFPhysicsOverlayInspector >> valueElements [ ^ valueElements ]
 { #category : 'initialization' }
 CFPhysicsOverlayInspector >> initializeContent [
 	valueElements := Dictionary new.
-	preferredDataHeight := 0.
+	preferredDataHeight := self groupSpacing.
 	groupCount := 0.
 	titleElement := self newTitleElement.
 	dataElement := BrVerticalPane new
@@ -79,8 +79,7 @@ CFPhysicsOverlayInspector >> addGroup: aName fields: associations columns: aColu
 	| fields groupHeight |
 	fields := associations asArray.
 	groupHeight := self groupHeightForFieldCount: fields size columns: aColumnCount.
-	groupCount > 0 ifTrue: [ preferredDataHeight := preferredDataHeight + self groupSpacing ].
-	preferredDataHeight := preferredDataHeight + groupHeight.
+	preferredDataHeight := preferredDataHeight + groupHeight + self groupSpacing.
 	dataElement addChild: (self
 		newGroup: aName
 		fields: fields
@@ -93,7 +92,7 @@ CFPhysicsOverlayInspector >> addGroup: aName fields: associations columns: aColu
 { #category : 'sizing' }
 CFPhysicsOverlayInspector >> fitWithinHeight: aHeight [
 	| bodyHeight |
-	bodyHeight := (aHeight - self titleHeight - self titleBodySpacing) max: 0.
+	bodyHeight := (aHeight - self titleHeight - self titleBodySpacingHeight) max: 0.
 	element vExact: aHeight.
 	scrollPane vExact: bodyHeight.
 	^ self
@@ -101,7 +100,7 @@ CFPhysicsOverlayInspector >> fitWithinHeight: aHeight [
 
 { #category : 'sizing' }
 CFPhysicsOverlayInspector >> preferredHeight [
-	^ self titleHeight + self titleBodySpacing + preferredDataHeight
+	^ self titleHeight + self titleBodySpacingHeight + preferredDataHeight
 ]
 
 { #category : 'sizing constants' }
@@ -109,6 +108,13 @@ CFPhysicsOverlayInspector >> titleHeight [ ^ 13 ]
 
 { #category : 'sizing constants' }
 CFPhysicsOverlayInspector >> titleBodySpacing [ ^ 3 ]
+
+{ #category : 'sizing' }
+CFPhysicsOverlayInspector >> titleBodySpacingHeight [
+	"BlLinearLayout applies cell spacing before the first child, between children,
+	and after the last child. The title/body pane has two children."
+	^ 3 * self titleBodySpacing
+]
 
 { #category : 'sizing constants' }
 CFPhysicsOverlayInspector >> groupTitleHeight [ ^ 11 ]
@@ -134,18 +140,18 @@ CFPhysicsOverlayInspector >> fieldSpacing [ ^ 4 ]
 { #category : 'sizing' }
 CFPhysicsOverlayInspector >> fieldWidthForColumns: aColumnCount [
 	^ (self panelWidth - self panelHorizontalPadding
-		- ((aColumnCount - 1) * self fieldSpacing)) / aColumnCount
+		- ((aColumnCount + 1) * self fieldSpacing)) / aColumnCount
 ]
 
 { #category : 'sizing' }
 CFPhysicsOverlayInspector >> groupHeightForFieldCount: aCount columns: aColumnCount [
 	| rowCount |
 	rowCount := (aCount + aColumnCount - 1) // aColumnCount.
-	"There is one vertical-pane spacing gap after the title and between every
-	pair of field rows: rowCount gaps in total."
+	"BlLinearLayout applies spacing before the title, between every child, and
+	after the last row. With one title and rowCount rows that is rowCount + 2 gaps."
 	^ self groupTitleHeight
 		+ (rowCount * self fieldRowHeight)
-		+ (rowCount * self groupTitleRowSpacing)
+		+ ((rowCount + 2) * self groupTitleRowSpacing)
 ]
 
 { #category : 'private - building' }
@@ -213,7 +219,9 @@ CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString width: aWidt
 	| valueElement valueContainer valueWidth field |
 	valueElement := self newValueElement.
 	valueElements at: aKey put: valueElement.
-	valueWidth := (aWidth - 12) max: 0.
+	"The field has two children. BlLinearLayout contributes three spacing gaps:
+	before the icon, between icon and value, and after the value."
+	valueWidth := (aWidth - 10 - (3 * 2)) max: 0.
 	valueContainer := BlElement new
 		layout: BlFrameLayout new;
 		clipChildren: true;
