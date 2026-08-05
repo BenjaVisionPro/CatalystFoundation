@@ -218,7 +218,7 @@ CFPhysicsOverlayInspector >> newFieldFor: aKey description: aString width: aWidt
 		addChild: valueElement;
 		yourself.
 	valueElement constraintsDo: [ :c |
-		c frame horizontal alignRight.
+		c frame horizontal alignLeft.
 		c frame vertical alignCenter ].
 	field := BrHorizontalPane new
 		hExact: aWidth;
