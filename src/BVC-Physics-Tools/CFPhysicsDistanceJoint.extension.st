@@ -7,7 +7,7 @@ CFPhysicsDistanceJoint >> physicsOverlayWorldPoints [
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsDistanceJoint >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
+	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
 ]
 
 { #category : '*bvc-physics-tools' }

@@ -636,12 +636,10 @@ CFPhysicsOverlayTests >> physicsObjectInspectorRefreshesSynchronously [
 		velocity: 12.3456 @ -34.5678;
 		angularVelocity: 123.1234.
 	inspector refresh.
-	self assert: (inspector valueElementAt: #positionX) text asString equals: '-12.1234'.
-	self assert: (inspector valueElementAt: #positionY) text asString equals: '34.4566'.
-	self assert: (inspector valueElementAt: #rotation) text asString equals: '123.1234'.
-	self assert: (inspector valueElementAt: #velocityX) text asString equals: '12.3456'.
-	self assert: (inspector valueElementAt: #velocityY) text asString equals: '-34.5678'.
-	self assert: (inspector valueElementAt: #angularVelocity) text asString equals: '123.1234'.
+	self assert: (inspector valueElementAt: #position) text asString equals: '-12.123 @ 34.457'.
+	self assert: (inspector valueElementAt: #rotation) text asString equals: '123.123'.
+	self assert: (inspector valueElementAt: #velocity) text asString equals: '12.346 @ -34.568'.
+	self assert: (inspector valueElementAt: #angularVelocity) text asString equals: '123.123'.
 	^ inspector
 ]
 
@@ -981,6 +979,23 @@ CFPhysicsOverlayTests >> physicsOverlaySelectsASpringFromItsOverlayHitTarget [
 	^ overlay
 ]
 
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsOverlayInspectsSelectedSpringAsDistanceJoint [
+	<gtExample>
+	| overlay spring inspector content |
+	overlay := self physicsOverlaySelectsASpringFromItsOverlayHitTarget.
+	spring := overlay selectedSpring.
+	inspector := overlay objectInspector.
+	content := inspector content.
+	self assert: spring class equals: CFPhysicsDistanceJoint.
+	self assert: inspector selectedObject == spring.
+	self assert: content class equals: CFPhysicsJointInspector.
+	self assert: content joint == spring.
+	self assert: (content valueElementAt: #jointType) text asString equals: 'Distance'.
+	self assert: (content valueElementAt: #springEnabled) text asString equals: true printString.
+	^ overlay
+]
+
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> physicsOverlayMaintainsSingleSelectionAcrossBodiesSpringsAndJoints [
 	<gtExample>
@@ -1282,7 +1297,7 @@ CFPhysicsOverlayTests >> physicsOverlayInspectsSelectedJoint [
 	inspector := overlay objectInspector.
 	content := inspector content.
 	self assert: inspector selectedObject == joint.
-	self assert: content class equals: CFPhysicsJointInspectorContent.
+	self assert: content class equals: CFPhysicsJointInspector.
 	self assert: content joint == joint.
 	self assert: (content valueElementAt: #jointType) text asString equals: 'Distance'.
 	self assert: (content valueElementAt: #active) text asString equals: joint isActive printString.

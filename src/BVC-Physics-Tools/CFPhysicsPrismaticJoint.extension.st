@@ -9,7 +9,7 @@ CFPhysicsPrismaticJoint >> physicsOverlayWorldAxis [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsPrismaticJoint >> inspectInPhysicsOverlay: anInspector [ anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent ]
+CFPhysicsPrismaticJoint >> inspectInPhysicsOverlay: anInspector [ anInspector inspect: self usingContent: CFPhysicsJointInspector newContent ]
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsPrismaticJoint >> updatePhysicsOverlayVisual: visual from: firstPoint to: secondPoint worldPoints: worldPoints [

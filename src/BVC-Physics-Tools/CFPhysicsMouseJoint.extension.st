@@ -9,7 +9,7 @@ CFPhysicsMouseJoint >> physicsOverlayWorldPoints [
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsMouseJoint >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
+	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
 ]
 
 { #category : '*bvc-physics-tools' }

@@ -7,7 +7,7 @@ CFPhysicsFilterJoint >> physicsOverlayWorldPoints [
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsFilterJoint >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsJointInspectorContent newContent
+	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
 ]
 
 { #category : '*bvc-physics-tools' }

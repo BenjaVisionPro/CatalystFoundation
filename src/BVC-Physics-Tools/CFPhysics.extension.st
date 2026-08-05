@@ -2,7 +2,7 @@ Extension { #name : 'CFPhysics' }
 
 { #category : '*bvc-physics-tools' }
 CFPhysics >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsBodyInspectorContent newContent
+	anInspector inspect: self usingContent: CFPhysicsBodyInspector newContent
 ]
 
 { #category : '*bvc-physics-tools' }
