@@ -73,34 +73,8 @@ CFPhysicsTelemetryPipelineElement >> build [
 			whenError: [ :anElement :anError |
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
-	summaryLabel := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 2;
-		yourself.
-	contactsSummaryLabel := self profileSummaryLabel.
-	manifoldsSummaryLabel := self profileSummaryLabel.
-	pointsSummaryLabel := self profileSummaryLabel.
-	changesSummaryLabel := self profileSummaryLabel.
-	bodiesSummaryLabel := self profileSummaryLabel.
-	sleepSummaryLabel := self profileSummaryLabel.
-	sleepRatiosSummaryLabel := self profileSummaryLabel.
-	worstBodySummaryLabel := self profileSummaryLabel.
-	solverSummaryLabel := self profileSummaryLabel.
-	summaryLabel
-		addChild: contactsSummaryLabel;
-		addChild: manifoldsSummaryLabel;
-		addChild: pointsSummaryLabel;
-		addChild: changesSummaryLabel;
-		addChild: bodiesSummaryLabel;
-		addChild: sleepSummaryLabel;
-		addChild: sleepRatiosSummaryLabel;
-		addChild: worstBodySummaryLabel;
-		addChild: solverSummaryLabel.
-	self updateSummaryLabelsWith: Dictionary new.
 	self
 		addChild: controls;
-		addChild: summaryLabel;
 		addChild: graph.
 	self updateGraph
 ]
@@ -121,7 +95,6 @@ CFPhysicsTelemetryPipelineElement >> updateGraph [
 CFPhysicsTelemetryPipelineElement >> renderAnalysis: analysis [
 	| root pipeline maximumEnd scale |
 	samplesLabel text: analysis sampleCount asString, ' samples'.
-	self updateSummaryFrom: analysis.
 	graph removeChildren.
 	root := analysis rootStatistics.
 	root ifNil: [

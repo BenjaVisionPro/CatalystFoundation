@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsProfileHealthElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling' ],
+	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -39,7 +39,7 @@ CFPhysicsProfileHealthElement >> world: aWorld [
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :anElement :aSink |
-				aSink peek ifSome: [ anElement sampleIfDue ] ];
+				aSink peek ifSome: [ anElement updateLiveHealth. anElement sampleIfDue ] ];
 			forwardStream: telemetryUpdatesStream ]
 ]
 
@@ -49,9 +49,20 @@ CFPhysicsProfileHealthElement >> build [
 	content := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
+		cellSpacing: 10;
+		yourself.
+	liveContent := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
+	profileContent := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
 		cellSpacing: 4;
 		yourself.
-	content withAsyncFutureDo: [ :anElementFuture |
+	content addChild: liveContent; addChild: profileContent.
+	profileContent withAsyncFutureDo: [ :anElementFuture |
 		anElementFuture
 			executionConfiguration: (AsyncFutureExecutionConfiguration new
 				customGroup: #'Physics Profile Health');
@@ -62,6 +73,7 @@ CFPhysicsProfileHealthElement >> build [
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
 	self addChild: content.
+	self updateLiveHealth.
 	self renderStopped
 ]
 
@@ -80,14 +92,14 @@ CFPhysicsProfileHealthElement >> startProfiling [
 CFPhysicsProfileHealthElement >> stopProfiling [
 	running := false.
 	sampling := false.
-	content ifNotNil: [ content asyncFuture interrupt ]
+	profileContent ifNotNil: [ profileContent asyncFuture interrupt ]
 ]
 
 { #category : 'profiling' }
 CFPhysicsProfileHealthElement >> collectRetainedNow [
 	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	sampling := true.
-	content asyncFuture future: [ self collectRetentionSample ] asAsyncFuture
+	profileContent asyncFuture future: [ self collectRetentionSample ] asAsyncFuture
 ]
 
 { #category : 'private - sampling' }
@@ -107,7 +119,7 @@ CFPhysicsProfileHealthElement >> sampleNow [
 	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	lastSampleMilliseconds := Time millisecondClockValue.
 	sampling := true.
-	content asyncFuture future: [ self collectSample ] asAsyncFuture
+	profileContent asyncFuture future: [ self collectSample ] asAsyncFuture
 ]
 
 { #category : 'private - sampling' }
@@ -204,9 +216,9 @@ CFPhysicsProfileHealthElement >> acceptSample: aSample [
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> renderSample: aSample [
 	| heapDelta retainedSample |
-	content removeChildren.
+	profileContent removeChildren.
 	heapDelta := (aSample at: #heapSize) - (self baselineSample at: #heapSize).
-	content addChild: (BrLabel new
+	profileContent addChild: (BrLabel new
 		hMatchParent;
 		vExact: 30;
 		aptitude: BrGlamorousLabelAptitude new;
@@ -217,22 +229,22 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 	retainedSample := retentionSamples ifEmpty: [ nil ] ifNotEmpty: [ retentionSamples last ].
 	retainedSample
 		ifNil: [
-			content addChild: (BrLabel new
+			profileContent addChild: (BrLabel new
 				vFitContent;
 				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
 				text: 'Current instances. Use Collect to establish retained counts after garbage collection.';
 				yourself).
-			(aSample at: #rows) do: [ :row | content addChild: (self labelForCurrentRow: row) ] ]
+			(aSample at: #rows) do: [ :row | profileContent addChild: (self labelForCurrentRow: row) ] ]
 		ifNotNil: [
-			content addChild: (BrLabel new
+			profileContent addChild: (BrLabel new
 				vFitContent;
 				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
 				text: 'After GC: image / world / expected (world difference). Current pre-GC counts shown below.';
 				yourself).
 			(retainedSample at: #rows) do: [ :row |
-				content addChild: (self labelForRetainedRow: row currentSample: aSample) ] ].
+				profileContent addChild: (self labelForRetainedRow: row currentSample: aSample) ] ].
 	self alerts do: [ :alert |
-		content addChild: (BrLabel new
+		profileContent addChild: (BrLabel new
 			hMatchParent;
 			vFitContent;
 			aptitude: (BrGlamorousLabelAptitude new foreground: Color orange muchDarker);
@@ -242,8 +254,8 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> renderStopped [
-	content removeChildren.
-	content addChild: (BrLabel new
+	profileContent removeChildren.
+	profileContent addChild: (BrLabel new
 		vFitContent;
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
 		text: 'Start profiling to collect health samples.';
@@ -337,4 +349,81 @@ CFPhysicsProfileHealthElement >> alerts [
 			result add: '⚠ ', (row at: #name),
 				' retained excess instance count is increasing after GC.' ] ].
 	^ result
+]
+
+
+{ #category : 'private - updating' }
+CFPhysicsProfileHealthElement >> updateLiveHealth [
+	| recordings |
+	recordings := world telemetryRecordings.
+	latestPhysicsData := recordings ifEmpty: [ Dictionary new ] ifNotEmpty: [ recordings last physicsData ].
+	self renderLiveHealth
+]
+
+{ #category : 'private - updating' }
+CFPhysicsProfileHealthElement >> renderLiveHealth [
+	| data |
+	liveContent removeChildren.
+	data := latestPhysicsData ifNil: [ Dictionary new ].
+	liveContent addChild: (self healthSectionNamed: 'CONTACT LIFECYCLE' rows: {
+		self healthRowNamed: 'Persistent' value: (self integerAt: #persistentContactCount in: data) secondaryNamed: 'Touching' value: (self integerAt: #contactCount in: data).
+		self healthRowNamed: 'Began' value: (self integerAt: #beganContactCount in: data) secondaryNamed: 'Continued' value: (self integerAt: #continuedContactCount in: data).
+		self healthRowNamed: 'Ended' value: (self integerAt: #endedContactCount in: data) secondaryNamed: 'Pairs visited' value: (self integerAt: #contactUpdateVisitedPairCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'CONTACT UPDATE WORK' rows: {
+		self healthRowNamed: 'Manifolds generated' value: (self integerAt: #contactUpdateManifoldGenerationCount in: data) secondaryNamed: 'Both sleeping' value: (self integerAt: #contactUpdateBothSleepingPairCount in: data).
+		self healthRowNamed: 'Previous matched' value: (self integerAt: #contactUpdatePreviousMatchCount in: data) secondaryNamed: 'Simplex cached' value: (self integerAt: #contactUpdateCachedSimplexCount in: data).
+		self healthRowNamed: 'Contacts reused' value: (self integerAt: #contactUpdateReusedContactCount in: data) secondaryNamed: 'Copied' value: (self integerAt: #contactUpdateCopiedContactCount in: data).
+		self healthRowNamed: 'Created' value: (self integerAt: #contactUpdateCreatedContactCount in: data) secondaryNamed: 'Impact' value: (self integerAt: #contactUpdateImpactContactCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'MANIFOLD CONTINUITY' rows: {
+		self healthRowNamed: 'Stable' value: (self integerAt: #stablePreparedManifoldCount in: data) secondaryNamed: 'Changed' value: (self integerAt: #changedPreparedManifoldCount in: data).
+		self healthRowNamed: 'Points reused' value: (self integerAt: #reusablePreparedContactPointCount in: data) secondaryNamed: 'New points' value: (self integerAt: #newPreparedContactPointCount in: data).
+		self healthRowNamed: 'Feature id' value: (self integerAt: #featureIdChangedPreparedManifoldCount in: data) secondaryNamed: 'Normal' value: (self integerAt: #normalChangedPreparedManifoldCount in: data).
+		self healthRowNamed: 'Point count' value: (self integerAt: #pointCountChangedPreparedManifoldCount in: data) secondaryNamed: 'Order' value: (self integerAt: #pointOrderChangedPreparedManifoldCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'SLEEP' rows: {
+		self healthRowNamed: 'Awake' value: (self integerAt: #activeBodyCount in: data) secondaryNamed: 'Sleeping' value: (self integerAt: #sleepingBodyCount in: data).
+		self healthRowNamed: 'Accepted' value: (self integerAt: #sleepMotionAcceptedBodyCount in: data) secondaryNamed: 'Disabled' value: (self integerAt: #sleepDisabledBodyCount in: data).
+		self healthRowNamed: 'Motion rejected' value: (self integerAt: #sleepMotionOnlyRejectedBodyCount in: data) secondaryNamed: 'Correction rejected' value: (self integerAt: #sleepCorrectionOnlyRejectedBodyCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'SOLVER' rows: {
+		self healthRowNamed: 'Initial penetration' value: (self decimalAt: #solverMaximumInitialContactPenetration in: data) secondaryNamed: 'Final penetration' value: (self decimalAt: #solverMaximumFinalContactPenetration in: data).
+		self healthRowNamed: 'Average penetration' value: (self decimalAt: #solverAverageFinalContactPenetration in: data) secondaryNamed: 'Max translation' value: (self decimalAt: #solverMaximumBodyTranslation in: data).
+		self healthRowNamed: 'Normal impulse' value: (self decimalAt: #solverTotalNormalImpulse in: data) secondaryNamed: 'Tangent impulse' value: (self decimalAt: #solverTotalTangentImpulse in: data) })
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthSectionNamed: aName rows: rows [
+	| section |
+	section := BrVerticalPane new hMatchParent; vFitContent; cellSpacing: 3; padding: (BlInsets all: 6); yourself.
+	section addChild: (BrLabel new hMatchParent; vExact: 22; aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.55)); text: aName; yourself).
+	rows do: [ :row | section addChild: row ].
+	^ section
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthRowNamed: firstName value: firstValue secondaryNamed: secondName value: secondValue [
+	| row first second |
+	row := BrHorizontalPane new hMatchParent; vExact: 24; cellSpacing: 12; yourself.
+	first := self healthCellNamed: firstName value: firstValue.
+	second := self healthCellNamed: secondName value: secondValue.
+	row addChild: first; addChild: second.
+	^ row
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthCellNamed: aName value: aValue [
+	^ BrLabel new
+		hExact: 300;
+		vExact: 24;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
+		text: aName, '  ', aValue;
+		yourself
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> integerAt: aKey in: data [
+	^ (data at: aKey ifAbsent: [ 0 ]) printString
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> decimalAt: aKey in: data [
+	^ (data at: aKey ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3
 ]

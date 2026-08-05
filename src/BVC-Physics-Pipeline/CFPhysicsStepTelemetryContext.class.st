@@ -31,7 +31,7 @@ CFPhysicsStepTelemetryContext >> jointCount: anInteger [ jointCount := anInteger
 
 { #category : 'telemetry' }
 CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipeline [
-	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
+	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation contactUpdater sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
 	result := aWorldSolution pipelineResult.
 	bodyStates := result bodyStates values.
 	dynamicBodyStates := bodyStates select: [ :each | each bodyType isDynamic ].
@@ -108,6 +108,7 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		island dynamicBodies anySatisfy: #isAwake ].
 	pairFinder := (aPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder.
 	preparation := aPipeline stageOfType: CFPhysicsConstraintPreparationStage.
+	contactUpdater := (aPipeline stageOfType: CFPhysicsContactUpdateStage) contactUpdater.
 	^ Dictionary new
 		at: #physicsWorld put: world;
 		at: #kind put: #step;
@@ -154,6 +155,16 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #worstSleepReason put: (worstCorrectionVelocity > worstMaximumVelocity ifTrue: [ #correction ] ifFalse: [ #velocity ]);
 		at: #contactCount put: result activeContacts size;
 		at: #persistentContactCount put: result contacts size;
+		at: #contactUpdateVisitedPairCount put: contactUpdater visitedPairCount;
+		at: #contactUpdatePreviousMatchCount put: contactUpdater previousContactMatchCount;
+		at: #contactUpdateReusedContactCount put: contactUpdater reusedContactCount;
+		at: #contactUpdateCreatedContactCount put: contactUpdater createdContactCount;
+		at: #contactUpdateCopiedContactCount put: contactUpdater copiedContactCount;
+		at: #contactUpdateImpactContactCount put: contactUpdater impactContactCount;
+		at: #contactUpdateManifoldGenerationCount put: contactUpdater manifoldGenerationCount;
+		at: #contactUpdateCachedSimplexCount put: contactUpdater cachedSimplexCount;
+		at: #contactUpdateBothSleepingPairCount put: contactUpdater bothSleepingPairCount;
+		at: #contactUpdateTouchingContactCount put: contactUpdater touchingContactCount;
 		at: #pairFinderEntryCount put: pairFinder entryCount;
 		at: #pairFinderComparisonCount put: pairFinder comparisonCount;
 		at: #pairFinderAcceptedPairCount put: pairFinder acceptedPairCount;

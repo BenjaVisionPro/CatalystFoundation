@@ -5,7 +5,7 @@ I reconcile persistent broadphase pairs with the previous contact set. A contact
 Class {
 	#name : 'CFPhysicsContactUpdater',
 	#superclass : 'Object',
-	#instVars : [ 'manifoldGenerator' ],
+	#instVars : [ 'manifoldGenerator', 'visitedPairCount', 'previousContactMatchCount', 'reusedContactCount', 'createdContactCount', 'copiedContactCount', 'impactContactCount', 'manifoldGenerationCount', 'cachedSimplexCount', 'bothSleepingPairCount', 'touchingContactCount' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -17,6 +17,41 @@ CFPhysicsContactUpdater class >> manifoldGenerator: aManifoldGenerator [
 
 { #category : 'accessing' }
 CFPhysicsContactUpdater >> manifoldGenerator: aManifoldGenerator [ manifoldGenerator := aManifoldGenerator ]
+
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> visitedPairCount [ ^ visitedPairCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> previousContactMatchCount [ ^ previousContactMatchCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> reusedContactCount [ ^ reusedContactCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> createdContactCount [ ^ createdContactCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> copiedContactCount [ ^ copiedContactCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> impactContactCount [ ^ impactContactCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> manifoldGenerationCount [ ^ manifoldGenerationCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> cachedSimplexCount [ ^ cachedSimplexCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> bothSleepingPairCount [ ^ bothSleepingPairCount ifNil: [ 0 ] ]
+{ #category : 'telemetry' }
+CFPhysicsContactUpdater >> touchingContactCount [ ^ touchingContactCount ifNil: [ 0 ] ]
+
+{ #category : 'private - telemetry' }
+CFPhysicsContactUpdater >> resetMeasurements [
+	visitedPairCount := 0.
+	previousContactMatchCount := 0.
+	reusedContactCount := 0.
+	createdContactCount := 0.
+	copiedContactCount := 0.
+	impactContactCount := 0.
+	manifoldGenerationCount := 0.
+	cachedSimplexCount := 0.
+	bothSleepingPairCount := 0.
+	touchingContactCount := 0
+]
 
 { #category : 'private - collision' }
 CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance [
@@ -102,6 +137,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates speculativeDistance: speculativeDistance [
 	| previousByKey reusableByKey impactByKey contacts touching began continued ended orderedPairs |
+	self resetMeasurements.
 	previousByKey := Dictionary new.
 	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
 	reusableByKey := Dictionary new.
@@ -115,20 +151,29 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	continued := OrderedCollection new.
 	ended := OrderedCollection new.
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
+	visitedPairCount := orderedPairs size.
 	orderedPairs do: [ :pair |
 		| manifold impactContact contact previous |
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
 		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		previous ifNotNil: [ previousContactMatchCount := previousContactMatchCount + 1 ].
+		(reusableByKey includesKey: pair key) ifTrue: [ reusedContactCount := reusedContactCount + 1 ].
+		impactContact ifNotNil: [ impactContactCount := impactContactCount + 1 ].
 		contact := reusableByKey
 			removeKey: pair key
 			ifAbsent: [
 				impactContact
 					ifNil: [
 						previous
-							ifNil: [ CFPhysicsContact pair: pair manifold: nil ]
-							ifNotNil: [ previous copyForUpdate ] ]
+							ifNil: [ createdContactCount := createdContactCount + 1. CFPhysicsContact pair: pair manifold: nil ]
+							ifNotNil: [ copiedContactCount := copiedContactCount + 1. previous copyForUpdate ] ]
 					ifNotNil: [ impactContact ] ].
 		contact pair: pair.
+		contact simplexCache count > 0 ifTrue: [ cachedSimplexCount := cachedSimplexCount + 1 ].
+		bodyStates ifNotNil: [
+			(((bodyStates at: pair firstBody) isAwake not) and: [ (bodyStates at: pair secondBody) isAwake not ])
+				ifTrue: [ bothSleepingPairCount := bothSleepingPairCount + 1 ] ].
+		manifoldGenerationCount := manifoldGenerationCount + 1.
 		manifold := self
 			manifoldForPair: pair
 			bodyStates: bodyStates
@@ -155,6 +200,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 			endedContact pair: previous pair.
 			endedContact updateFromPreviousContact: previous with: nil.
 			ended add: endedContact ] ].
+	touchingContactCount := touching size.
 	ended := ended asArray sorted: [ :left :right |
 		left pair comesBefore: right pair ].
 	^ CFPhysicsContactUpdateBatch
