@@ -389,7 +389,7 @@ CFPhysicsProfileHealthElement >> renderLiveHealth [
 		self healthRowNamed: 'Sleeping retained' value: (self integerAt: #contactUpdateSleepingRetainedContactCount in: data) secondaryNamed: 'Awake generated' value: (self integerAt: #contactUpdateAwakeManifoldGenerationCount in: data).
 		self healthRowNamed: 'Sleeping non-touching' value: (self integerAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) secondaryNamed: 'Sleeping sensor' value: (self integerAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data).
 		self healthRowNamed: 'Sleeping new' value: (self integerAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) secondaryNamed: 'Sleeping impact' value: (self integerAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data).
-		self healthRowNamed: 'Sleeping other' value: (self integerAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data) secondaryNamed: 'Decision total' value: ((self integerAt: #contactUpdateAwakeManifoldGenerationCount in: data) + (self integerAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) + (self integerAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data) + (self integerAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) + (self integerAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data) + (self integerAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data)) }).
+		self healthRowNamed: 'Sleeping other' value: (self integerAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data) secondaryNamed: 'Decision total' value: ((self integerValueAt: #contactUpdateAwakeManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data)) printString }).
 	liveContent addChild: (self healthSectionNamed: 'MANIFOLD CONTINUITY' rows: {
 		self healthRowNamed: 'Stable' value: (self integerAt: #stablePreparedManifoldCount in: data) secondaryNamed: 'Changed' value: (self integerAt: #changedPreparedManifoldCount in: data).
 		self healthRowNamed: 'Points reused' value: (self integerAt: #reusablePreparedContactPointCount in: data) secondaryNamed: 'New points' value: (self integerAt: #newPreparedContactPointCount in: data).
@@ -446,6 +446,12 @@ CFPhysicsProfileHealthElement >> healthCellNamed: aName value: aValue [
 			fontSize: 10);
 		text: aName, '  ', aValue;
 		yourself
+]
+
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> integerValueAt: aKey in: data [
+	^ data at: aKey ifAbsent: [ 0 ]
 ]
 
 { #category : 'private - formatting' }
