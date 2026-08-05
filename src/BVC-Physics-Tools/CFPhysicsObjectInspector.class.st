@@ -141,10 +141,10 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 	content inspect: anObject.
 	shouldAnimate
 		ifTrue: [
-			targetExtent := self constrainedPanelExtentFor: content.
 			self prepareOutgoingContent: outgoingElement.
 			content element opacity: 0.0.
-			self addContentElement: content element ]
+			self addContentElement: content element.
+			targetExtent := self constrainedPanelExtentFor: content ]
 		ifFalse: [
 			outgoingElement ifNotNil: [ outgoingElement removeFromParent ].
 			self addContentElement: content element.
@@ -213,7 +213,8 @@ CFPhysicsObjectInspector >> availablePanelHeight [
 CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
 	| naturalExtent constrainedHeight |
 	aContent useNaturalHeight.
-	naturalExtent := self measurePanelExtentFor: aContent element.
+	root space pulse.
+	naturalExtent := panel extent x @ (aContent element extent y + 12).
 	constrainedHeight := naturalExtent y min: self availablePanelHeight.
 	aContent fitWithinHeight: (constrainedHeight - 12 max: 0).
 	^ naturalExtent x @ constrainedHeight
@@ -236,27 +237,6 @@ CFPhysicsObjectInspector >> fitWithinHost [
 	selectedObject ifNil: [ ^ self ].
 	self fitPanelToContent.
 	^ self
-]
-
-{ #category : 'private - content transition' }
-CFPhysicsObjectInspector >> measurePanelExtentFor: anElement [
-	| measurementPanel targetExtent previousParent |
-	previousParent := anElement parent.
-	measurementPanel := self newPanel.
-	measurementPanel
-		visibility: BlVisibility hidden;
-		constraintsDo: [ :c |
-			c ignoreByLayout.
-			c ignored horizontal alignLeft.
-			c ignored vertical alignTop ].
-	measurementPanel addChild: anElement.
-	root addChild: measurementPanel.
-	root space pulse.
-	targetExtent := measurementPanel extent.
-	anElement removeFromParent.
-	measurementPanel removeFromParent.
-	previousParent ifNotNil: [ previousParent addChild: anElement ].
-	^ targetExtent
 ]
 
 { #category : 'private - content transition' }
