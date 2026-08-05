@@ -10,44 +10,49 @@ Class {
 
 { #category : 'collision' }
 CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segment bodyOrigin: segmentBodyOrigin rotation: segmentRotation andPolygonShapeState: polygonState bodyOrigin: polygonBodyOrigin rotation: polygonRotation speculativeDistance: speculativeDistance [
-	| polygonGeometry chainGeometry chainSeparation polygonSeparation |
-	polygonGeometry := self
-		polygonGeometryFor: polygonState
-		bodyOrigin: polygonBodyOrigin
-		rotation: polygonRotation.
-	polygonGeometry ifNil: [ ^ nil ].
-	chainGeometry := self
-		chainGeometryFor: segment
+	| polygon vertices normals centroid chainSeparation polygonSeparation |
+	polygon := polygonState polygonShape.
+	polygon ifNil: [ ^ nil ].
+	vertices := polygon worldVerticesAtBodyOrigin: polygonBodyOrigin rotation: polygonRotation.
+	vertices isEmpty ifTrue: [ ^ nil ].
+	normals := polygon worldNormalsAtRotation: polygonRotation.
+	centroid := (vertices inject: 0 @ 0 into: [ :sum :vertex | sum + vertex ]) / vertices size.
+	(self
+		polygonCentroid: centroid
+		isBehindChainSegment: segment
+		bodyOrigin: segmentBodyOrigin
+		rotation: segmentRotation) ifTrue: [ ^ nil ].
+	chainSeparation := self
+		chainSeparationForVertices: vertices
+		chainSegment: segment
 		bodyOrigin: segmentBodyOrigin
 		rotation: segmentRotation.
-	chainGeometry ifNil: [ ^ nil ].
-	(self polygonGeometry: polygonGeometry isBehindChainGeometry: chainGeometry)
-		ifTrue: [ ^ nil ].
-	chainSeparation := self
-		chainSeparationForPolygonGeometry: polygonGeometry
-		chainGeometry: chainGeometry.
 	polygonSeparation := self
-		polygonSeparationForPolygonGeometry: polygonGeometry
-		chainGeometry: chainGeometry.
+		polygonSeparationForVertices: vertices
+		normals: normals
+		chainSegment: segment
+		bodyOrigin: segmentBodyOrigin
+		rotation: segmentRotation.
 	((polygonSeparation first notNil)
-		and: [ polygonSeparation second > chainSeparation second ])
-		ifTrue: [
-			^ self
-				polygonReferenceManifoldFor: polygonSeparation first
-				polygonGeometry: polygonGeometry
-				chainGeometry: chainGeometry
-				segment: segment
-				segmentBodyOrigin: segmentBodyOrigin
-				segmentRotation: segmentRotation
-				polygonState: polygonState
-				polygonBodyOrigin: polygonBodyOrigin
-				polygonRotation: polygonRotation
-				speculativeDistance: speculativeDistance ].
+		and: [ polygonSeparation second > chainSeparation second ]) ifTrue: [
+		^ self
+			polygonReferenceManifoldFor: polygonSeparation first
+			polygon: polygon
+			vertices: vertices
+			normals: normals
+			segment: segment
+			segmentBodyOrigin: segmentBodyOrigin
+			segmentRotation: segmentRotation
+			polygonState: polygonState
+			polygonBodyOrigin: polygonBodyOrigin
+			polygonRotation: polygonRotation
+			speculativeDistance: speculativeDistance ].
 	chainSeparation first ifNil: [ ^ nil ].
 	^ self
 		chainReferenceManifoldFor: chainSeparation first
-		polygonGeometry: polygonGeometry
-		chainGeometry: chainGeometry
+		polygon: polygon
+		vertices: vertices
+		normals: normals
 		segment: segment
 		segmentBodyOrigin: segmentBodyOrigin
 		segmentRotation: segmentRotation
@@ -73,72 +78,41 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenPolygonShapeState: 
 	^ manifold
 ]
 
-{ #category : 'private - geometry' }
-CFPhysicsChainPolygonManifoldBuilder class >> polygonGeometryFor: polygonState bodyOrigin: bodyOrigin rotation: rotation [
-	| polygon vertices normals centroid |
-	polygon := polygonState polygonShape.
-	polygon ifNil: [ ^ nil ].
-	vertices := polygon worldVerticesAtBodyOrigin: bodyOrigin rotation: rotation.
-	vertices isEmpty ifTrue: [ ^ nil ].
-	normals := polygon worldNormalsAtRotation: rotation.
-	centroid := (vertices inject: 0 @ 0 into: [ :sum :each | sum + each ]) / vertices size.
-	^ { polygon. vertices. normals. centroid }
-]
-
-{ #category : 'private - geometry' }
-CFPhysicsChainPolygonManifoldBuilder class >> chainGeometryFor: segment bodyOrigin: bodyOrigin rotation: rotation [
+{ #category : 'private - classification' }
+CFPhysicsChainPolygonManifoldBuilder class >> polygonCentroid: centroid isBehindChainSegment: segment bodyOrigin: bodyOrigin rotation: rotation [
 	| ghost1 point1 point2 ghost2 edge0 edge1 edge2 normal0 normal1 normal2 convex1 convex2 |
 	ghost1 := segment worldGhost1AtBodyOrigin: bodyOrigin rotation: rotation.
 	point1 := segment worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
 	point2 := segment worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
 	ghost2 := segment worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation.
-	edge0 := point1 - ghost1.
-	edge1 := point2 - point1.
-	edge2 := ghost2 - point2.
-	(edge0 r = 0 or: [ edge1 r = 0 or: [ edge2 r = 0 ] ]) ifTrue: [ ^ nil ].
-	edge0 := edge0 / edge0 r.
-	edge1 := edge1 / edge1 r.
-	edge2 := edge2 / edge2 r.
+	edge0 := self unitVectorFrom: ghost1 to: point1.
+	edge1 := self unitVectorFrom: point1 to: point2.
+	edge2 := self unitVectorFrom: point2 to: ghost2.
+	(edge0 isNil or: [ edge1 isNil or: [ edge2 isNil ] ]) ifTrue: [ ^ true ].
 	normal0 := self rightPerpendicular: edge0.
 	normal1 := self rightPerpendicular: edge1.
 	normal2 := self rightPerpendicular: edge2.
 	convex1 := (self cross: edge0 with: edge1) >= 0.01.
 	convex2 := (self cross: edge1 with: edge2) >= 0.01.
-	^ { ghost1. point1. point2. ghost2. edge0. edge1. edge2. normal0. normal1. normal2. convex1. convex2 }
-]
-
-{ #category : 'private - classification' }
-CFPhysicsChainPolygonManifoldBuilder class >> polygonGeometry: polygonGeometry isBehindChainGeometry: chainGeometry [
-	| centroid point1 point2 normal0 normal1 normal2 convex1 convex2 behind0 behind1 behind2 |
-	centroid := polygonGeometry fourth.
-	point1 := chainGeometry second.
-	point2 := chainGeometry third.
-	normal0 := chainGeometry eighth.
-	normal1 := chainGeometry ninth.
-	normal2 := chainGeometry tenth.
-	convex1 := chainGeometry eleventh.
-	convex2 := chainGeometry twelfth.
-	behind1 := (self dot: normal1 with: centroid - point1) < 0.0.
-	behind0 := convex1
-		ifTrue: [ (self dot: normal0 with: centroid - point1) < 0.0 ]
-		ifFalse: [ true ].
-	behind2 := convex2
-		ifTrue: [ (self dot: normal2 with: centroid - point2) < 0.0 ]
-		ifFalse: [ true ].
-	^ behind1 and: [ behind0 and: [ behind2 ] ]
+	^ ((self dot: normal1 with: centroid - point1) < 0.0)
+		and: [ (convex1 not or: [ (self dot: normal0 with: centroid - point1) < 0.0 ])
+		and: [ convex2 not or: [ (self dot: normal2 with: centroid - point2) < 0.0 ] ] ]
 ]
 
 { #category : 'private - separation' }
-CFPhysicsChainPolygonManifoldBuilder class >> chainSeparationForPolygonGeometry: polygonGeometry chainGeometry: chainGeometry [
-	| vertices point1 point2 normal0 normal1 normal2 convex1 convex2 incidentIndex edgeSeparation neighbourSeparation |
-	vertices := polygonGeometry second.
-	point1 := chainGeometry second.
-	point2 := chainGeometry third.
-	normal0 := chainGeometry eighth.
-	normal1 := chainGeometry ninth.
-	normal2 := chainGeometry tenth.
-	convex1 := chainGeometry eleventh.
-	convex2 := chainGeometry twelfth.
+CFPhysicsChainPolygonManifoldBuilder class >> chainSeparationForVertices: vertices chainSegment: segment bodyOrigin: bodyOrigin rotation: rotation [
+	| ghost1 point1 point2 ghost2 edge0 edge1 edge2 normal0 normal1 normal2 incidentIndex edgeSeparation neighbourSeparation |
+	ghost1 := segment worldGhost1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point1 := segment worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point2 := segment worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
+	ghost2 := segment worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation.
+	edge0 := self unitVectorFrom: ghost1 to: point1.
+	edge1 := self unitVectorFrom: point1 to: point2.
+	edge2 := self unitVectorFrom: point2 to: ghost2.
+	(edge0 isNil or: [ edge1 isNil or: [ edge2 isNil ] ]) ifTrue: [ ^ { nil. Float infinity } ].
+	normal0 := self rightPerpendicular: edge0.
+	normal1 := self rightPerpendicular: edge1.
+	normal2 := self rightPerpendicular: edge2.
 	incidentIndex := 1.
 	edgeSeparation := Float infinity.
 	1 to: vertices size do: [ :index |
@@ -147,12 +121,12 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainSeparationForPolygonGeometry:
 		separation < edgeSeparation ifTrue: [
 			edgeSeparation := separation.
 			incidentIndex := index ] ].
-	convex1 ifTrue: [
+	(self cross: edge0 with: edge1) >= 0.01 ifTrue: [
 		neighbourSeparation := self minimumSeparationOf: vertices along: normal0 from: point1.
 		neighbourSeparation > edgeSeparation ifTrue: [
 			edgeSeparation := neighbourSeparation.
 			incidentIndex := nil ] ].
-	convex2 ifTrue: [
+	(self cross: edge1 with: edge2) >= 0.01 ifTrue: [
 		neighbourSeparation := self minimumSeparationOf: vertices along: normal2 from: point2.
 		neighbourSeparation > edgeSeparation ifTrue: [
 			edgeSeparation := neighbourSeparation.
@@ -161,17 +135,20 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainSeparationForPolygonGeometry:
 ]
 
 { #category : 'private - separation' }
-CFPhysicsChainPolygonManifoldBuilder class >> polygonSeparationForPolygonGeometry: polygonGeometry chainGeometry: chainGeometry [
-	| vertices normals point1 point2 edge1 normal0 normal2 convex1 convex2 referenceIndex polygonSeparation |
-	vertices := polygonGeometry second.
-	normals := polygonGeometry third.
-	point1 := chainGeometry second.
-	point2 := chainGeometry third.
-	edge1 := chainGeometry sixth.
-	normal0 := chainGeometry eighth.
-	normal2 := chainGeometry tenth.
-	convex1 := chainGeometry eleventh.
-	convex2 := chainGeometry twelfth.
+CFPhysicsChainPolygonManifoldBuilder class >> polygonSeparationForVertices: vertices normals: normals chainSegment: segment bodyOrigin: bodyOrigin rotation: rotation [
+	| ghost1 point1 point2 ghost2 edge0 edge1 edge2 normal0 normal2 convex1 convex2 referenceIndex polygonSeparation |
+	ghost1 := segment worldGhost1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point1 := segment worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point2 := segment worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
+	ghost2 := segment worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation.
+	edge0 := self unitVectorFrom: ghost1 to: point1.
+	edge1 := self unitVectorFrom: point1 to: point2.
+	edge2 := self unitVectorFrom: point2 to: ghost2.
+	(edge0 isNil or: [ edge1 isNil or: [ edge2 isNil ] ]) ifTrue: [ ^ { nil. Float negativeInfinity } ].
+	normal0 := self rightPerpendicular: edge0.
+	normal2 := self rightPerpendicular: edge2.
+	convex1 := (self cross: edge0 with: edge1) >= 0.01.
+	convex2 := (self cross: edge1 with: edge2) >= 0.01.
 	referenceIndex := nil.
 	polygonSeparation := Float negativeInfinity.
 	1 to: normals size do: [ :index |
@@ -203,23 +180,20 @@ CFPhysicsChainPolygonManifoldBuilder class >> minimumSeparationOf: vertices alon
 ]
 
 { #category : 'private - manifold' }
-CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: incidentIndex polygonGeometry: polygonGeometry chainGeometry: chainGeometry segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| polygon vertices normals point1 normal1 incidentEdge clippedPoints points |
-	polygon := polygonGeometry first.
-	vertices := polygonGeometry second.
-	normals := polygonGeometry third.
-	point1 := chainGeometry second.
-	normal1 := chainGeometry ninth.
-	incidentEdge := self
-		incidentEdgeForVertex: incidentIndex
-		normals: normals
-		withSegmentNormal: normal1.
+CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: incidentIndex polygon: polygon vertices: vertices normals: normals segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
+	| point1 point2 edge normal incidentEdge clippedPoints points |
+	point1 := segment worldPoint1AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
+	point2 := segment worldPoint2AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
+	edge := self unitVectorFrom: point1 to: point2.
+	edge ifNil: [ ^ nil ].
+	normal := self rightPerpendicular: edge.
+	incidentEdge := self incidentEdgeForVertex: incidentIndex normals: normals withSegmentNormal: normal.
 	clippedPoints := self
 		clippedPointsForReferencePoint1: point1
-		point2: chainGeometry third
+		point2: point2
 		incidentPoint1: (vertices at: incidentEdge first)
 		incidentPoint2: (vertices at: incidentEdge second)
-		normal: normal1.
+		normal: normal.
 	clippedPoints isEmpty ifTrue: [ ^ nil ].
 	points := OrderedCollection new: 2.
 	self
@@ -227,49 +201,29 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: inciden
 		feature: (CFPhysicsContactFeatureId
 			featureA: #face index: segment segmentIndex
 			featureB: #vertex index: incidentEdge second)
-		referencePoint: point1
-		normal: normal1
-		referenceRadius: 0.0
-		incidentRadius: polygon radius
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
+		referencePoint: point1 normal: normal
+		referenceRadius: 0.0 incidentRadius: polygon radius
+		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
+		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance into: points.
 	self
 		addClippedPoint: clippedPoints second
 		feature: (CFPhysicsContactFeatureId
 			featureA: #face index: segment segmentIndex
 			featureB: #vertex index: incidentEdge first)
-		referencePoint: point1
-		normal: normal1
-		referenceRadius: 0.0
-		incidentRadius: polygon radius
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
-	^ self manifoldWithNormal: normal1 points: points
+		referencePoint: point1 normal: normal
+		referenceRadius: 0.0 incidentRadius: polygon radius
+		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
+		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance into: points.
+	^ self manifoldWithNormal: normal points: points
 ]
 
 { #category : 'private - manifold' }
-CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: referenceIndex polygonGeometry: polygonGeometry chainGeometry: chainGeometry segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
-	| polygon vertices normals point1 point2 normal0 normal1 normal2 secondIndex referencePoint1 referencePoint2 referenceNormal clippedPoints points |
-	polygon := polygonGeometry first.
-	vertices := polygonGeometry second.
-	normals := polygonGeometry third.
-	point1 := chainGeometry second.
-	point2 := chainGeometry third.
-	normal0 := chainGeometry eleventh ifTrue: [ chainGeometry eighth ] ifFalse: [ chainGeometry ninth ].
-	normal1 := chainGeometry ninth.
-	normal2 := chainGeometry twelfth ifTrue: [ chainGeometry tenth ] ifFalse: [ chainGeometry ninth ].
+CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: referenceIndex polygon: polygon vertices: vertices normals: normals segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation speculativeDistance: speculativeDistance [
+	| point1 point2 referencePoint1 referencePoint2 referenceNormal secondIndex clippedPoints points |
+	point1 := segment worldPoint1AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
+	point2 := segment worldPoint2AtBodyOrigin: segmentBodyOrigin rotation: segmentRotation.
 	secondIndex := referenceIndex = vertices size ifTrue: [ 1 ] ifFalse: [ referenceIndex + 1 ].
 	referencePoint1 := vertices at: referenceIndex.
 	referencePoint2 := vertices at: secondIndex.
@@ -277,11 +231,9 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 	(self
 		polygonReferenceNormal: referenceNormal
 		referencePoint: referencePoint1
-		point1: point1
-		point2: point2
-		normal0: normal0
-		normal1: normal1
-		normal2: normal2) ifFalse: [ ^ nil ].
+		segment: segment
+		bodyOrigin: segmentBodyOrigin
+		rotation: segmentRotation) ifFalse: [ ^ nil ].
 	clippedPoints := self
 		clippedPointsForReferencePoint1: referencePoint1
 		point2: referencePoint2
@@ -292,51 +244,46 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 	points := OrderedCollection new: 2.
 	self
 		addClippedPoint: clippedPoints first
-		feature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 1
-			featureB: #face index: referenceIndex)
-		referencePoint: referencePoint1
-		normal: referenceNormal
-		referenceRadius: polygon radius
-		incidentRadius: 0.0
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
+		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 1 featureB: #face index: referenceIndex)
+		referencePoint: referencePoint1 normal: referenceNormal
+		referenceRadius: polygon radius incidentRadius: 0.0
+		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
+		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance into: points.
 	self
 		addClippedPoint: clippedPoints second
-		feature: (CFPhysicsContactFeatureId
-			featureA: #vertex index: 2
-			featureB: #face index: secondIndex)
-		referencePoint: referencePoint1
-		normal: referenceNormal
-		referenceRadius: polygon radius
-		incidentRadius: 0.0
-		segment: segment
-		segmentBodyOrigin: segmentBodyOrigin
-		segmentRotation: segmentRotation
-		polygonState: polygonState
-		polygonBodyOrigin: polygonBodyOrigin
-		polygonRotation: polygonRotation
-		speculativeDistance: speculativeDistance
-		into: points.
+		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 2 featureB: #face index: secondIndex)
+		referencePoint: referencePoint1 normal: referenceNormal
+		referenceRadius: polygon radius incidentRadius: 0.0
+		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
+		polygonState: polygonState polygonBodyOrigin: polygonBodyOrigin polygonRotation: polygonRotation
+		speculativeDistance: speculativeDistance into: points.
 	^ self manifoldWithNormal: referenceNormal negated points: points
 ]
 
 { #category : 'private - manifold' }
-CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceNormal: referenceNormal referencePoint: referencePoint point1: point1 point2: point2 normal0: normal0 normal1: normal1 normal2: normal2 [
-	| dot1 dot2 |
+CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceNormal: referenceNormal referencePoint: referencePoint segment: segment bodyOrigin: bodyOrigin rotation: rotation [
+	| ghost1 point1 point2 ghost2 edge0 edge1 edge2 normal0 normal1 normal2 dot1 dot2 |
+	ghost1 := segment worldGhost1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point1 := segment worldPoint1AtBodyOrigin: bodyOrigin rotation: rotation.
+	point2 := segment worldPoint2AtBodyOrigin: bodyOrigin rotation: rotation.
+	ghost2 := segment worldGhost2AtBodyOrigin: bodyOrigin rotation: rotation.
+	edge0 := self unitVectorFrom: ghost1 to: point1.
+	edge1 := self unitVectorFrom: point1 to: point2.
+	edge2 := self unitVectorFrom: point2 to: ghost2.
+	(edge0 isNil or: [ edge1 isNil or: [ edge2 isNil ] ]) ifTrue: [ ^ false ].
+	normal0 := (self cross: edge0 with: edge1) >= 0.01
+		ifTrue: [ self rightPerpendicular: edge0 ]
+		ifFalse: [ self rightPerpendicular: edge1 ].
+	normal1 := self rightPerpendicular: edge1.
+	normal2 := (self cross: edge1 with: edge2) >= 0.01
+		ifTrue: [ self rightPerpendicular: edge2 ]
+		ifFalse: [ normal1 ].
 	dot1 := self dot: referenceNormal with: point1 - referencePoint.
 	dot2 := self dot: referenceNormal with: point2 - referencePoint.
 	dot1 < dot2 ifTrue: [
-		^ (self dot: normal0 with: referenceNormal)
-			>= (self dot: normal1 with: referenceNormal) ].
-	^ (self dot: normal2 with: referenceNormal)
-		>= (self dot: normal1 with: referenceNormal)
+		^ (self dot: normal0 with: referenceNormal) >= (self dot: normal1 with: referenceNormal) ].
+	^ (self dot: normal2 with: referenceNormal) >= (self dot: normal1 with: referenceNormal)
 ]
 
 { #category : 'private - clipping' }
@@ -413,13 +360,20 @@ CFPhysicsChainPolygonManifoldBuilder class >> reverse: manifold [
 	manifold contactPoints do: [ :point |
 		| anchor feature |
 		anchor := point localAnchorA.
-		point
-			localAnchorA: point localAnchorB;
-			localAnchorB: anchor.
+		point localAnchorA: point localAnchorB; localAnchorB: anchor.
 		feature := point featureId.
 		point featureId: (CFPhysicsContactFeatureId
 			featureA: feature featureB index: feature indexB
 			featureB: feature featureA index: feature indexA) ]
+]
+
+{ #category : 'private - geometry' }
+CFPhysicsChainPolygonManifoldBuilder class >> unitVectorFrom: firstPoint to: secondPoint [
+	| vector length |
+	vector := secondPoint - firstPoint.
+	length := vector r.
+	length = 0.0 ifTrue: [ ^ nil ].
+	^ vector / length
 ]
 
 { #category : 'private - geometry' }
