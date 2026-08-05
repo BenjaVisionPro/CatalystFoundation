@@ -220,7 +220,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: inciden
 	self
 		addClippedPoint: clippedPoints first position
 		feature: (CFPhysicsContactFeatureId
-			featureA: #face index: segment segmentIndex
+			featureA: #vertex index: 1
 			featureB: #vertex index: incidentEdge second)
 		referencePoint: point1 normal: normal
 		referenceRadius: 0.0 incidentRadius: polygon radius
@@ -230,7 +230,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> chainReferenceManifoldFor: inciden
 	self
 		addClippedPoint: clippedPoints second position
 		feature: (CFPhysicsContactFeatureId
-			featureA: #face index: segment segmentIndex
+			featureA: #vertex index: 2
 			featureB: #vertex index: incidentEdge first)
 		referencePoint: point1 normal: normal
 		referenceRadius: 0.0 incidentRadius: polygon radius
@@ -287,7 +287,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 	points := OrderedCollection new: 2.
 	self
 		addClippedPoint: clippedPoints first position
-		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 1 featureB: #face index: referenceIndex)
+		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 2 featureB: #vertex index: referenceIndex)
 		referencePoint: referencePoint1 normal: referenceNormal
 		referenceRadius: polygon radius incidentRadius: 0.0
 		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
@@ -295,7 +295,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> polygonReferenceManifoldFor: refer
 		speculativeDistance: speculativeDistance into: points.
 	self
 		addClippedPoint: clippedPoints second position
-		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 2 featureB: #face index: secondIndex)
+		feature: (CFPhysicsContactFeatureId featureA: #vertex index: 1 featureB: #vertex index: secondIndex)
 		referencePoint: referencePoint1 normal: referenceNormal
 		referenceRadius: polygon radius incidentRadius: 0.0
 		segment: segment segmentBodyOrigin: segmentBodyOrigin segmentRotation: segmentRotation
