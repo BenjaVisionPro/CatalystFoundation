@@ -6,7 +6,7 @@ I retain the current and previous manifolds and shape snapshots needed to classi
 Class {
 	#name : 'CFPhysicsContact',
 	#superclass : 'Object',
-	#instVars : [ 'pair', 'manifold', 'previousManifold', 'firstShapeState', 'secondShapeState' ],
+	#instVars : [ 'pair', 'manifold', 'previousManifold', 'firstShapeState', 'secondShapeState', 'simplexCache' ],
 	#category : 'BVC-Physics-Collision',
 	#package : 'BVC-Physics-Collision'
 }
@@ -15,6 +15,7 @@ Class {
 CFPhysicsContact class >> pair: aPair manifold: aManifold [
 	^ self new
 		pair: aPair;
+		simplexCache: CFPhysicsSimplexCache empty;
 		shapeStatesFromPair;
 		manifold: aManifold;
 		yourself
@@ -43,6 +44,16 @@ CFPhysicsContact >> manifold: aManifold [ manifold := aManifold ]
 
 { #category : 'accessing' }
 CFPhysicsContact >> previousManifold [ ^ previousManifold ]
+
+{ #category : 'accessing' }
+CFPhysicsContact >> simplexCache [
+	^ simplexCache ifNil: [ simplexCache := CFPhysicsSimplexCache empty ]
+]
+
+{ #category : 'private - accessing' }
+CFPhysicsContact >> simplexCache: aSimplexCache [
+	simplexCache := aSimplexCache
+]
 
 
 { #category : 'accessing' }
@@ -97,6 +108,7 @@ CFPhysicsContact >> copyForUpdate [
 		manifold: manifold;
 		firstShapeState: firstShapeState;
 		secondShapeState: secondShapeState;
+		simplexCache: self simplexCache;
 		yourself
 ]
 

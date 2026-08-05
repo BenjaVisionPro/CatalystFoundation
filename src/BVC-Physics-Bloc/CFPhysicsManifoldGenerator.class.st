@@ -69,7 +69,7 @@ CFPhysicsManifoldGenerator >> manifoldBetweenShapeState: shapeStateA transform: 
 
 
 { #category : 'collision' }
-CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance [
+CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance simplexCache: simplexCache [ 
 	| firstState secondState firstTransform secondTransform firstShape secondShape |
 	firstState := bodyStates at: aPair firstBody.
 	secondState := bodyStates at: aPair secondBody.
@@ -94,7 +94,8 @@ CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates spec
 			andPolygonShapeState: secondShape
 			bodyOrigin: secondTransform bodyOrigin
 			rotation: secondTransform rotation
-			speculativeDistance: speculativeDistance ].
+			speculativeDistance: speculativeDistance
+			simplexCache: simplexCache ].
 	secondShape isChainSegment ifTrue: [
 		firstShape isCircle ifTrue: [
 			^ CFPhysicsChainCircleManifoldBuilder
@@ -112,7 +113,8 @@ CFPhysicsManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates spec
 			andChainSegment: secondShape
 			bodyOrigin: secondTransform bodyOrigin
 			rotation: secondTransform rotation
-			speculativeDistance: speculativeDistance ].
+			speculativeDistance: speculativeDistance 
+			simplexCache: simplexCache ].
 	^ self
 		manifoldBetweenShapeState: firstShape
 		bodyOrigin: firstTransform bodyOrigin

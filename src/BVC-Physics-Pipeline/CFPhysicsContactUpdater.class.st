@@ -19,13 +19,14 @@ CFPhysicsContactUpdater class >> manifoldGenerator: aManifoldGenerator [
 CFPhysicsContactUpdater >> manifoldGenerator: aManifoldGenerator [ manifoldGenerator := aManifoldGenerator ]
 
 { #category : 'private - collision' }
-CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance [
+CFPhysicsContactUpdater >> manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance simplexCache: simplexCache [
 	^ bodyStates
 		ifNil: [ manifoldGenerator manifoldBetweenBody: pair firstBody andBody: pair secondBody ]
 		ifNotNil: [ manifoldGenerator
 			manifoldForPair: pair
 			bodyStates: bodyStates
-			speculativeDistance: speculativeDistance ]
+			speculativeDistance: speculativeDistance
+			simplexCache: simplexCache ]
 ]
 
 { #category : 'updating' }
@@ -106,12 +107,19 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	ended := OrderedCollection new.
 	orderedPairs := pairs asArray sorted: [ :left :right | left comesBefore: right ].
 	orderedPairs do: [ :pair |
-		| manifold impactContact contact previous |
-		manifold := self manifoldForPair: pair bodyStates: bodyStates speculativeDistance: speculativeDistance.
+		| manifold impactContact contact previous simplexCache |
 		impactContact := impactByKey at: pair key ifAbsent: [ nil ].
+		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
+		simplexCache := previous
+			ifNil: [ impactContact ifNil: [ CFPhysicsSimplexCache empty ] ifNotNil: [ impactContact simplexCache ] ]
+			ifNotNil: [ previous simplexCache ].
+		manifold := self
+			manifoldForPair: pair
+			bodyStates: bodyStates
+			speculativeDistance: speculativeDistance
+			simplexCache: simplexCache.
 		(manifold isNil and: [ impactContact notNil ]) ifTrue: [
 			manifold := impactContact manifold ].
-		previous := previousByKey removeKey: pair key ifAbsent: [ nil ].
 		contact := reusableByKey
 			removeKey: pair key
 			ifAbsent: [
@@ -122,6 +130,7 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 							ifNotNil: [ previous copyForUpdate ] ]
 					ifNotNil: [ impactContact ] ].
 		contact pair: pair.
+		contact simplexCache: simplexCache.
 		bodyStates
 			ifNil: [ contact shapeStatesFromPair ]
 			ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].

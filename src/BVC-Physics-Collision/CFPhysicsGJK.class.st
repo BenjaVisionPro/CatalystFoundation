@@ -303,3 +303,100 @@ CFPhysicsGJK class >> distanceResultFromState: state [
 		axis: axis
 		overlapping: overlapping
 ]
+
+{ #category : 'distance' }
+CFPhysicsGJK class >> distanceBetweenProxy: firstProxy transform: firstTransform andProxy: secondProxy transform: secondTransform cache: cache [
+	| simplex state closest previousDistanceSquared direction support progress |
+	simplex := self simplexFromCache: cache firstProxy: firstProxy transform: firstTransform secondProxy: secondProxy transform: secondTransform.
+	state := self closestStateForDistanceSimplex: simplex.
+	previousDistanceSquared := Float infinity.
+	1 to: 32 do: [ :ignored |
+		state fourth ifTrue: [ ^ self distanceResultFromState: state updatingCache: cache ].
+		closest := state second.
+		closest r <= 1.0e-9 ifTrue: [ ^ self distanceResultFromState: state updatingCache: cache ].
+		((closest x squared + closest y squared) >= (previousDistanceSquared - 1.0e-9)) ifTrue: [
+			^ self distanceResultFromState: state updatingCache: cache ].
+		previousDistanceSquared := closest x squared + closest y squared.
+		direction := closest negated.
+		support := self
+			supportBetweenProxy: firstProxy transform: firstTransform
+			andProxy: secondProxy transform: secondTransform
+			inDirection: direction.
+		(state first anySatisfy: [ :each |
+			each firstIndex = support firstIndex and: [ each secondIndex = support secondIndex ] ]) ifTrue: [
+			^ self distanceResultFromState: state updatingCache: cache ].
+		progress := (self dot: support point with: direction) - (self dot: closest with: direction).
+		progress <= 1.0e-9 ifTrue: [ ^ self distanceResultFromState: state updatingCache: cache ].
+		simplex := state first asOrderedCollection.
+		simplex add: support.
+		state := self closestStateForDistanceSimplex: simplex ].
+	^ self distanceResultFromState: state updatingCache: cache
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> simplexFromCache: cache firstProxy: firstProxy transform: firstTransform secondProxy: secondProxy transform: secondTransform [
+	| simplex |
+	simplex := OrderedCollection new: 3.
+	(cache isValidForFirstProxy: firstProxy secondProxy: secondProxy) ifTrue: [
+		1 to: cache count do: [ :index |
+			simplex add: (self
+				supportAtFirstIndex: (cache firstIndexAt: index)
+				secondIndex: (cache secondIndexAt: index)
+				firstProxy: firstProxy transform: firstTransform
+				secondProxy: secondProxy transform: secondTransform) ] ].
+	simplex isEmpty ifTrue: [
+		simplex add: (self
+			supportAtFirstIndex: 1 secondIndex: 1
+			firstProxy: firstProxy transform: firstTransform
+			secondProxy: secondProxy transform: secondTransform) ].
+	^ simplex
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> supportBetweenProxy: firstProxy transform: firstTransform andProxy: secondProxy transform: secondTransform inDirection: direction [
+	| firstIndex secondIndex |
+	firstIndex := firstProxy supportIndexInDirection: (self inverseRotate: direction by: firstTransform rotation).
+	secondIndex := secondProxy supportIndexInDirection: (self inverseRotate: direction negated by: secondTransform rotation).
+	^ self
+		supportAtFirstIndex: firstIndex secondIndex: secondIndex
+		firstProxy: firstProxy transform: firstTransform
+		secondProxy: secondProxy transform: secondTransform
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> supportAtFirstIndex: firstIndex secondIndex: secondIndex firstProxy: firstProxy transform: firstTransform secondProxy: secondProxy transform: secondTransform [
+	| firstPoint secondPoint |
+	firstPoint := self transform: (firstProxy points at: firstIndex) by: firstTransform.
+	secondPoint := self transform: (secondProxy points at: secondIndex) by: secondTransform.
+	^ CFPhysicsSupportPoint
+		point: firstPoint - secondPoint
+		firstPoint: firstPoint
+		secondPoint: secondPoint
+		firstIndex: firstIndex
+		secondIndex: secondIndex
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> distanceResultFromState: state updatingCache: cache [
+	cache updateFromSimplex: state first.
+	^ self distanceResultFromState: state
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> inverseRotate: aPoint by: anAngle [
+	^ self rotate: aPoint by: anAngle negated
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> rotate: aPoint by: anAngle [
+	| cosine sine |
+	anAngle = 0 ifTrue: [ ^ aPoint ].
+	cosine := anAngle cos.
+	sine := anAngle sin.
+	^ ((aPoint x * cosine) - (aPoint y * sine)) @ ((aPoint x * sine) + (aPoint y * cosine))
+]
+
+{ #category : 'distance - private' }
+CFPhysicsGJK class >> transform: aPoint by: aTransform [
+	^ aTransform bodyOrigin + (self rotate: aPoint by: aTransform rotation)
+]
