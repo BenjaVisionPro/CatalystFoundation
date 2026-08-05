@@ -108,6 +108,30 @@ CFPhysicsPolygonShape >> rotationCentre: aPoint [
 	rotationCentre := aPoint
 ]
 
+
+{ #category : 'geometry' }
+CFPhysicsPolygonShape >> localCentroid [
+	| twiceArea weightedX weightedY nextIndex first second cross |
+	twiceArea := 0.0.
+	weightedX := 0.0.
+	weightedY := 0.0.
+	1 to: vertices size do: [ :index |
+		nextIndex := index = vertices size ifTrue: [ 1 ] ifFalse: [ index + 1 ].
+		first := vertices at: index.
+		second := vertices at: nextIndex.
+		cross := (first x * second y) - (second x * first y).
+		twiceArea := twiceArea + cross.
+		weightedX := weightedX + ((first x + second x) * cross).
+		weightedY := weightedY + ((first y + second y) * cross) ].
+	twiceArea = 0.0 ifTrue: [ self error: 'A polygon centroid requires non-zero area' ].
+	^ (weightedX / (3.0 * twiceArea)) @ (weightedY / (3.0 * twiceArea))
+]
+
+{ #category : 'geometry' }
+CFPhysicsPolygonShape >> worldCentroidAtBodyOrigin: aBodyOrigin rotation: anAngle [
+	^ aBodyOrigin + (self rotate: self localCentroid - rotationCentre by: anAngle)
+]
+
 { #category : 'geometry' }
 CFPhysicsPolygonShape >> inferredRotationCentre [
 	| minimumX minimumY maximumX maximumY |

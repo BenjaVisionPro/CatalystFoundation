@@ -16,7 +16,7 @@ CFPhysicsChainPolygonManifoldBuilder class >> manifoldBetweenChainSegment: segme
 	vertices := polygon worldVerticesAtBodyOrigin: polygonBodyOrigin rotation: polygonRotation.
 	vertices isEmpty ifTrue: [ ^ nil ].
 	normals := polygon worldNormalsAtRotation: polygonRotation.
-	centroid := (vertices inject: 0 @ 0 into: [ :sum :vertex | sum + vertex ]) / vertices size.
+	centroid := polygon worldCentroidAtBodyOrigin: polygonBodyOrigin rotation: polygonRotation.
 	(self
 		polygonCentroid: centroid
 		isBehindChainSegment: segment
