@@ -45,3 +45,9 @@ CFPhysicsFixedManifoldGenerator >> manifoldBetweenBodyState: firstBodyState andB
 CFPhysicsFixedManifoldGenerator >> manifoldBetweenShapeState: firstShapeState transform: firstTransform andShapeState: secondShapeState transform: secondTransform speculativeDistance: speculativeDistance [
 	^ manifold
 ]
+
+
+{ #category : 'generating' }
+CFPhysicsFixedManifoldGenerator >> manifoldForPair: aPair bodyStates: bodyStates speculativeDistance: speculativeDistance simplexCache: simplexCache [
+	^ manifold
+]

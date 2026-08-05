@@ -210,10 +210,13 @@ CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
 
 { #category : 'private - sizing' }
 CFPhysicsObjectInspector >> availablePanelHeight [
-	"The inspector is presented in an overlay whose extent follows the host's
-	displayed bounds. Use that presentation extent rather than the host's local
-	extent so camera scaling does not make the inspector unnecessarily short."
-	^ (root extent y - 12) max: 0
+	"The overlay receives its presentation extent during layout. Inspection can
+	occur before that first layout pass, so use the host extent until the overlay
+	has a usable extent."
+	| presentationHeight |
+	presentationHeight := root extent y.
+	presentationHeight > 0 ifFalse: [ presentationHeight := host extent y ].
+	^ (presentationHeight - 12) max: 0
 ]
 
 { #category : 'private - sizing' }
