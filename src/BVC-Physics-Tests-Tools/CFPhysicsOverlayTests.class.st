@@ -1817,3 +1817,24 @@ CFPhysicsOverlayTests >> physicsObjectInspectorKeepsItsTitleOutsideTheScrollable
 	self assert: firstDataRow children size equals: 2.
 	^ content
 ]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorUsesNaturalHeightWhenItFits [
+	<gtExample>
+	| host inspector physics expectedPanelHeight expectedBodyHeight |
+	host := self physicsHost.
+	host size: 400 @ 500.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector install.
+	inspector inspect: physics.
+	host space pulse.
+	expectedPanelHeight := inspector content preferredHeight + 12.
+	expectedBodyHeight := inspector content preferredHeight
+		- inspector content titleHeight
+		- inspector content titleBodySpacing.
+	self assert: inspector panel extent y equals: expectedPanelHeight.
+	self assert: inspector content scrollPane extent y equals: expectedBodyHeight.
+	self assert: inspector content dataElement extent y equals: expectedBodyHeight.
+	^ inspector
+]

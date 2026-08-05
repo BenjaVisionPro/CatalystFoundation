@@ -86,6 +86,7 @@ CFPhysicsOverlayInspector >> addGroup: aName fields: associations columns: aColu
 		fields: fields
 		columns: aColumnCount
 		height: groupHeight).
+	groupCount := groupCount + 1.
 	^ self
 ]
 
