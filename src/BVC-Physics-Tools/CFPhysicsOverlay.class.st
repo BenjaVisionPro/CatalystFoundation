@@ -285,6 +285,7 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 	controls jointsEnabled ifTrue: [ jointOverlay update ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectionVisual.
+	objectInspector fitWithinHost.
 	^ self
 ]
 

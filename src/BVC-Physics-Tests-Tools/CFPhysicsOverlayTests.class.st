@@ -636,9 +636,9 @@ CFPhysicsOverlayTests >> physicsObjectInspectorRefreshesSynchronously [
 		velocity: 12.3456 @ -34.5678;
 		angularVelocity: 123.1234.
 	inspector refresh.
-	self assert: (inspector valueElementAt: #position) text asString equals: '-12.123 @ 34.457'.
+	self assert: (inspector valueElementAt: #position) text asString equals: '-12.123,34.457'.
 	self assert: (inspector valueElementAt: #rotation) text asString equals: '123.123'.
-	self assert: (inspector valueElementAt: #velocity) text asString equals: '12.346 @ -34.568'.
+	self assert: (inspector valueElementAt: #velocity) text asString equals: '12.346,-34.568'.
 	self assert: (inspector valueElementAt: #angularVelocity) text asString equals: '123.123'.
 	^ inspector
 ]
@@ -1778,4 +1778,36 @@ CFPhysicsOverlayTests >> physicsOverlayReplacesJointInspectorContentAcrossJointT
 	self assert: (secondContent valueElements includesKey: #motorSpeed) not.
 	self assert: firstContent joint == distanceJoint.
 	^ overlay
+]
+
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorIsCompactAndContainedByItsHost [
+	<gtExample>
+	| host inspector physics |
+	host := self physicsHost.
+	host size: 400 @ 120.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector install.
+	inspector inspect: physics.
+	host space pulse.
+	self assert: inspector panel extent x equals: 190.
+	self assert: inspector panel extent y <= host extent y.
+	self assert: (inspector panel bounds inParent: inspector root) asRectangle top >= 0.
+	self assert: (inspector panel bounds inParent: inspector root) asRectangle bottom <= host extent y.
+	^ inspector
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> physicsObjectInspectorKeepsItsTitleOutsideTheScrollableData [
+	<gtExample>
+	| content firstGroup firstDataRow |
+	content := CFPhysicsBodyInspector newContent.
+	self assert: content element children first == content titleElement.
+	self assert: content element children second == content scrollPane.
+	firstGroup := content dataElement children first.
+	firstDataRow := firstGroup children second.
+	self assert: firstDataRow children size equals: 2.
+	^ content
 ]

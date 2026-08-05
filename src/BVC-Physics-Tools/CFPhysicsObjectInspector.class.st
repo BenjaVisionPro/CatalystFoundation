@@ -80,9 +80,9 @@ CFPhysicsObjectInspector >> initializeInspector [
 CFPhysicsObjectInspector >> newPanel [
 	^ BrVerticalPane new
 		id: #cfPhysicsObjectInspectorPanel;
-		hExact: 300;
+		hExact: 190;
 		vFitContent;
-		padding: (BlInsets all: 8);
+		padding: (BlInsets all: 6);
 		background: (Color black alpha: 0.1);
 		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
 		effect: (BlBlurBelowEffect radius: 14);
@@ -90,7 +90,7 @@ CFPhysicsObjectInspector >> newPanel [
 		constraintsDo: [ :c |
 			c frame horizontal alignLeft.
 			c frame vertical alignCenter ];
-		margin: (BlInsets all: 10);
+		margin: (BlInsets all: 6);
 		yourself
 ]
 
@@ -141,13 +141,14 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 	content inspect: anObject.
 	shouldAnimate
 		ifTrue: [
-			targetExtent := self measurePanelExtentFor: content element.
+			targetExtent := self constrainedPanelExtentFor: content.
 			self prepareOutgoingContent: outgoingElement.
 			content element opacity: 0.0.
 			self addContentElement: content element ]
 		ifFalse: [
 			outgoingElement ifNotNil: [ outgoingElement removeFromParent ].
-			self addContentElement: content element ].
+			self addContentElement: content element.
+			self fitPanelToContent ].
 	shouldAnimate ifTrue: [
 		self
 			animateContentTransitionFrom: sourceExtent
@@ -202,9 +203,45 @@ CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
 	^ self
 ]
 
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> availablePanelHeight [
+	^ (host extent y - 12) max: 0
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
+	| naturalExtent constrainedHeight |
+	aContent useNaturalHeight.
+	naturalExtent := self measurePanelExtentFor: aContent element.
+	constrainedHeight := naturalExtent y min: self availablePanelHeight.
+	aContent fitWithinHeight: (constrainedHeight - 12 max: 0).
+	^ naturalExtent x @ constrainedHeight
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> fitPanelToContent [
+	| targetExtent |
+	content ifNil: [ ^ self ].
+	targetExtent := self constrainedPanelExtentFor: content.
+	panel extent: targetExtent.
+	panel constraintsDo: [ :c |
+		c horizontal exact: targetExtent x.
+		c vertical exact: targetExtent y ].
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsObjectInspector >> fitWithinHost [
+	selectedObject ifNil: [ ^ self ].
+	self fitPanelToContent.
+	^ self
+]
+
 { #category : 'private - content transition' }
 CFPhysicsObjectInspector >> measurePanelExtentFor: anElement [
-	| measurementPanel targetExtent |
+	| measurementPanel targetExtent previousParent |
+	previousParent := anElement parent.
 	measurementPanel := self newPanel.
 	measurementPanel
 		visibility: BlVisibility hidden;
@@ -218,6 +255,7 @@ CFPhysicsObjectInspector >> measurePanelExtentFor: anElement [
 	targetExtent := measurementPanel extent.
 	anElement removeFromParent.
 	measurementPanel removeFromParent.
+	previousParent ifNotNil: [ previousParent addChild: anElement ].
 	^ targetExtent
 ]
 
@@ -246,11 +284,10 @@ CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTar
 			on: anIncomingElement
 			property: CFMotionOpacityProperty uniqueInstance
 			target: 1.0.
-		(CFMotionExtentTrack
+		CFMotionExtentTrack
 			on: panel
 			from: aSourceExtent
-			to: aTargetExtent)
-			fitContentAtDestination }.
+			to: aTargetExtent }.
 	aMotion := CFMotion
 		coordinator: panel space cfMotionCoordinator
 		tracks: tracks.
@@ -263,6 +300,9 @@ CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTar
 				outgoingContentElement ifNotNil: [ :anElement |
 					anElement removeFromParent ].
 				outgoingContentElement := nil.
+				panel constraintsDo: [ :c |
+					c horizontal exact: aTargetExtent x.
+					c vertical exact: aTargetExtent y ].
 				contentTransitionMotion := nil ] ];
 		start.
 	^ aMotion
