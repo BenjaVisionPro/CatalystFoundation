@@ -88,6 +88,11 @@ CFPhysicsOverlayInspector >> useNaturalHeight [
 	^ self
 ]
 
+{ #category : 'sizing' }
+CFPhysicsOverlayInspector >> naturalHeight [
+	^ titleElement extent y + 3 + dataElement extent y
+]
+
 { #category : 'private - building' }
 CFPhysicsOverlayInspector >> newTitleElement [
 	^ BrLabel new

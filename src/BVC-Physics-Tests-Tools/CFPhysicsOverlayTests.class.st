@@ -1796,8 +1796,10 @@ CFPhysicsOverlayTests >> physicsObjectInspectorIsCompactAndContainedByItsHost [
 	self assert: inspector panel extent x equals: 190.
 	self assert: inspector panel extent y > 0.
 	self assert: inspector panel extent y <= host extent y.
-	self assert: (inspector panel bounds inParent: inspector root) asRectangle top >= 0.
+	self assert: (inspector panel bounds inParent: inspector root) asRectangle top equals: 6.
+	self assert: (inspector panel bounds inParent: inspector root) asRectangle left equals: 6.
 	self assert: (inspector panel bounds inParent: inspector root) asRectangle bottom <= host extent y.
+	self assert: inspector content scrollPane extent y > 0.
 	^ inspector
 ]
 

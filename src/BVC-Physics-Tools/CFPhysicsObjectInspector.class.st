@@ -89,7 +89,7 @@ CFPhysicsObjectInspector >> newPanel [
 		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
 		constraintsDo: [ :c |
 			c frame horizontal alignLeft.
-			c frame vertical alignCenter ];
+			c frame vertical alignTop ];
 		margin: (BlInsets all: 6);
 		yourself
 ]
@@ -224,7 +224,7 @@ CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
 	| naturalExtent constrainedHeight |
 	aContent useNaturalHeight.
 	root space pulse.
-	naturalExtent := panel extent x @ (aContent element extent y + 12).
+	naturalExtent := panel extent x @ (aContent naturalHeight + 12).
 	constrainedHeight := naturalExtent y min: self availablePanelHeight.
 	aContent fitWithinHeight: (constrainedHeight - 12 max: 0).
 	^ naturalExtent x @ constrainedHeight
