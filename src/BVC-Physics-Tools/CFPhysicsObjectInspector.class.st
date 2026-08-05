@@ -139,6 +139,7 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 	selectedObject := anObject.
 	content := aContent.
 	content inspect: anObject.
+	self preparePanelForSizing.
 	shouldAnimate
 		ifTrue: [
 			self prepareOutgoingContent: outgoingElement.
@@ -207,6 +208,15 @@ CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
 { #category : 'private - sizing' }
 CFPhysicsObjectInspector >> availablePanelHeight [
 	^ (host extent y - 12) max: 0
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> preparePanelForSizing [
+	panel visibility == BlVisibility gone ifTrue: [
+		panel
+			opacity: 0.0;
+			visibility: BlVisibility visible ].
+	^ self
 ]
 
 { #category : 'private - sizing' }

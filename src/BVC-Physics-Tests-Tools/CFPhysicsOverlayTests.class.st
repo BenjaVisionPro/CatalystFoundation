@@ -1792,7 +1792,9 @@ CFPhysicsOverlayTests >> physicsObjectInspectorIsCompactAndContainedByItsHost [
 	inspector install.
 	inspector inspect: physics.
 	host space pulse.
+	self assert: inspector panel visibility equals: BlVisibility visible.
 	self assert: inspector panel extent x equals: 190.
+	self assert: inspector panel extent y > 0.
 	self assert: inspector panel extent y <= host extent y.
 	self assert: (inspector panel bounds inParent: inspector root) asRectangle top >= 0.
 	self assert: (inspector panel bounds inParent: inspector root) asRectangle bottom <= host extent y.
