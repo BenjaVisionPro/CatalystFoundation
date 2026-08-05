@@ -204,17 +204,20 @@ CFPhysicsPersistentIslandGraph >> addConstraint: aConstraint forBody: aBody to: 
 
 { #category : 'splitting' }
 CFPhysicsPersistentIslandGraph >> splitSleepiestIslandEligibleAt: minimumSleepTime [
-	"Split at most one dirty island, matching Box2D 3.1.1 finalisation scheduling. A body whose sleep time has reached the threshold may nominate its dirty island; the island containing the sleepiest eligible body wins."
+	"Split at most one dirty awake island. Box2D 3.1.1 selects the island containing the sleepiest eligible body and resolves equal sleep times in favour of the largest island identifier."
 	| candidate candidateSleepTime |
 	self mergeIslands.
 	candidate := nil.
 	candidateSleepTime := 0.0.
 	islands do: [ :island |
-		island constraintRemoveCount > 0 ifTrue: [
+		(island constraintRemoveCount > 0 and: [ island bodies anySatisfy: #isAwake ]) ifTrue: [
 			island bodies do: [ :body |
 				| sleepTime |
 				sleepTime := body sleepTime.
-				(sleepTime >= minimumSleepTime and: [ sleepTime > candidateSleepTime ]) ifTrue: [
+				(sleepTime >= minimumSleepTime and: [
+					sleepTime > candidateSleepTime or: [
+						sleepTime = candidateSleepTime and: [
+							candidate isNil or: [ island identifier > candidate identifier ] ] ] ]) ifTrue: [
 					candidate := island.
 					candidateSleepTime := sleepTime ] ] ] ].
 	candidate ifNil: [ ^ #() ].

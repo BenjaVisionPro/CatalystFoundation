@@ -7400,6 +7400,60 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIsla
 	^ graph
 ]
 
+{ #category : 'examples - persistent islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphDoesNotSplitASleepingDirtyIsland [
+	<gtExample>
+	| first second constraint graph island splitIslands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	constraint := CFPhysicsTestConstraint new bodyA: first; bodyB: second; yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph linkConstraint: constraint.
+	graph mergeIslands.
+	island := graph islandForBody: first.
+	graph unlinkConstraint: constraint.
+	first commitAwake: false sleepTime: 0.8.
+	second commitAwake: false sleepTime: 0.8.
+	splitIslands := graph splitSleepiestIslandEligibleAt: 0.5.
+	self assert: splitIslands isEmpty.
+	self assert: (graph islands includes: island).
+	self assert: (graph islandForBody: first) == island.
+	self assert: (graph islandForBody: second) == island.
+	^ graph
+]
+
+{ #category : 'examples - persistent islands' }
+CFPhysicsCleanSlateTests >> persistentIslandGraphBreaksEqualSleepTimeTiesByLargestIdentifier [
+	<gtExample>
+	| first second third fourth firstConstraint secondConstraint graph firstIsland secondIsland splitIslands |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	fourth := self cleanSlateBodyWithSequence: 4.
+	firstConstraint := CFPhysicsTestConstraint new bodyA: first; bodyB: second; yourself.
+	secondConstraint := CFPhysicsTestConstraint new bodyA: third; bodyB: fourth; yourself.
+	graph := CFPhysicsPersistentIslandGraph new.
+	graph linkConstraint: firstConstraint.
+	graph linkConstraint: secondConstraint.
+	graph mergeIslands.
+	firstIsland := graph islandForBody: first.
+	secondIsland := graph islandForBody: third.
+	self assert: secondIsland identifier > firstIsland identifier.
+	graph unlinkConstraint: firstConstraint.
+	graph unlinkConstraint: secondConstraint.
+	first commitAwake: true sleepTime: 0.8.
+	second commitAwake: true sleepTime: 0.8.
+	third commitAwake: true sleepTime: 0.8.
+	fourth commitAwake: true sleepTime: 0.8.
+	splitIslands := graph splitSleepiestIslandEligibleAt: 0.5.
+	self assert: splitIslands size = 2.
+	self assert: (graph islands includes: firstIsland).
+	self assert: (graph islands includes: secondIsland) not.
+	self assert: (graph islandForBody: first) == (graph islandForBody: second).
+	self assert: (graph islandForBody: third) ~~ (graph islandForBody: fourth).
+	^ graph
+]
+
 { #category : 'examples - telemetry testing' }
 CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
 	<gtExample>
