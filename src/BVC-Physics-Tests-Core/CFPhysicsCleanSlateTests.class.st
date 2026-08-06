@@ -5489,7 +5489,7 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
+CFPhysicsCleanSlateTests >> changingBodyTypeDoesNotWakeContactNeighbours [
 	<gtExample>
 	| first second contact |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -5502,12 +5502,84 @@ CFPhysicsCleanSlateTests >> changingBodyTypeWakesContactNeighbours [
 	second sleep.
 	self assert: second isSleeping.
 	first beStatic.
-	self assert: second isAwake.
-	second sleep.
 	self assert: second isSleeping.
 	first beDynamic.
-	self assert: second isAwake.
+	self assert: second isSleeping.
 	^ first
+]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> staticToDynamicCreatesContactWithoutMovement [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0; beStatic.
+	secondBody position: 10 @ 0; beStatic.
+	firstResult := world step.
+	self assert: firstResult activeContacts isEmpty.
+	firstBody beDynamic.
+	secondResult := world step.
+	self assert: secondResult beganContacts size equals: 1.
+	self assert: secondResult activeContacts size equals: 1.
+	^ secondResult
+]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> dynamicToStaticEndsContactAndRemovesPersistentConnectivity [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult contact secondResult |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0.
+	secondBody position: 10 @ 0; beStatic.
+	firstResult := world step.
+	contact := firstResult activeContacts first.
+	self assert: (world persistentIslandGraph islandForConstraint: contact) notNil.
+	firstBody beStatic.
+	self assert: (world persistentIslandGraph islandForConstraint: contact) isNil.
+	self assert: (world persistentIslandGraph islandForBody: firstBody) isNil.
+	secondResult := world step.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult activeContacts isEmpty.
+	^ secondResult
+]
+
+{ #category : 'examples - body types' }
+CFPhysicsCleanSlateTests >> bodyTypeChangeReconcilesPersistentIslandMembership [
+	<gtExample>
+	| owner element world body |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world containment disable.
+	world synchroniseMembership.
+	body := world bodyStateFor: element.
+	self assert: (world persistentIslandGraph islandForBody: body) notNil.
+	body beStatic.
+	self assert: (world persistentIslandGraph islandForBody: body) isNil.
+	body beKinematic.
+	self assert: (world persistentIslandGraph islandForBody: body) notNil.
+	body beDynamic.
+	self assert: (world persistentIslandGraph islandForBody: body) notNil.
+	^ body
 ]
 
 

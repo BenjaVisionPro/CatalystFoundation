@@ -90,20 +90,17 @@ CFPhysicsBody >> beStatic [
 { #category : 'body type' }
 CFPhysicsBody >> setBodyType: aBodyType [
 	bodyType class = aBodyType class ifTrue: [ ^ self ].
-	self wakeContactNeighbours.
-	world ifNotNil: [ world wakeJointsUsingBody: self ].
+	world
+		ifNil: [ self installBodyType: aBodyType ]
+		ifNotNil: [ world changeBody: self toType: aBodyType ]
+]
+
+{ #category : 'private - body type' }
+CFPhysicsBody >> installBodyType: aBodyType [
 	bodyType := aBodyType.
 	self resetSleepTime.
 	self clearForces.
 	bodyType enter
-]
-
-{ #category : 'body type' }
-CFPhysicsBody >> wakeContactNeighbours [
-	self contacts do: [ :contact |
-		(contact firstBody == self
-			ifTrue: [ contact secondBody ]
-			ifFalse: [ contact firstBody ]) wake ]
 ]
 
 { #category : 'accessing' }

@@ -324,6 +324,28 @@ CFPhysicsWorld >> bodyStatesInOrder [
 		first sequence < second sequence ]
 ]
 
+
+{ #category : 'body types' }
+CFPhysicsWorld >> changeBody: aBody toType: aBodyType [
+	| attachedContacts attachedJoints |
+	aBody bodyType class = aBodyType class ifTrue: [ ^ aBody ].
+	self invalidateTopology.
+	attachedContacts := contacts select: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ].
+	attachedJoints := self joints select: [ :joint | joint includesBody: aBody ].
+	attachedContacts do: [ :contact |
+		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ] ].
+	attachedJoints do: [ :joint | persistentIslandGraph unlinkConstraint: joint ].
+	persistentIslandGraph removeBody: aBody.
+	aBody installBodyType: aBodyType.
+	persistentIslandGraph addBody: aBody.
+	attachedJoints do: [ :joint | persistentIslandGraph linkConstraint: joint ].
+	aBody wake.
+	attachedJoints do: #wakeBodies.
+	stepPipeline touchBroadphaseProxyFor: aBody.
+	^ aBody
+]
+
 { #category : 'body states' }
 CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
