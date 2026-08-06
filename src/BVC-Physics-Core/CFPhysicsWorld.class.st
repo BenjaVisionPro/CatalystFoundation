@@ -1461,6 +1461,33 @@ CFPhysicsWorld >> wakeJointsUsingBody: aBodyState [
 ]
 
 
+{ #category : 'sleeping' }
+CFPhysicsWorld >> wakeBody: aBody [
+	| island |
+	self invalidateTopology.
+	persistentIslandGraph mergeIslands.
+	island := persistentIslandGraph islandForBody: aBody.
+	island
+		ifNil: [ aBody wakeLocally ]
+		ifNotNil: [ island bodies do: #wakeLocally ]
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> sleepBody: aBody [
+	| island |
+	self invalidateTopology.
+	persistentIslandGraph mergeIslands.
+	island := persistentIslandGraph islandForBody: aBody.
+	island ifNil: [
+		aBody sleepLocally.
+		^ self ].
+	island constraintRemoveCount > 0 ifTrue: [
+		persistentIslandGraph splitIsland: island.
+		island := persistentIslandGraph islandForBody: aBody ].
+	island ifNotNil: [ island bodies do: #sleepLocally ]
+]
+
+
 { #category : 'containment' }
 CFPhysicsWorld >> containment [
 	^ containment ifNil: [ containment := CFPhysicsWorldContainment new ]

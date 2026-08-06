@@ -8576,3 +8576,124 @@ CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DHeadBran
 		equals: #snap.
 	^ builder
 ]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> manualWakeWakesTheEntirePersistentIsland [
+	<gtExample>
+	| world graph first second constraint |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first world: world.
+	second world: world.
+	constraint := self cleanSlateConstraintBetween: first and: second.
+	graph linkConstraint: constraint.
+	graph mergeIslands.
+	first sleepLocally.
+	second sleepLocally.
+	first wake.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	^ graph islandForBody: first
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> manualSleepSleepsTheEntirePersistentIsland [
+	<gtExample>
+	| world graph first second constraint |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first world: world.
+	second world: world.
+	constraint := self cleanSlateConstraintBetween: first and: second.
+	graph linkConstraint: constraint.
+	graph mergeIslands.
+	first sleep.
+	self assert: first isSleeping.
+	self assert: second isSleeping.
+	^ graph islandForBody: first
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> manualSleepSplitsDirtyConnectivityBeforeSleeping [
+	<gtExample>
+	| world graph first second third firstConstraint removedConstraint |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	third := self cleanSlateBodyWithSequence: 3.
+	{ first. second. third } do: [ :body | body world: world ].
+	firstConstraint := self cleanSlateConstraintBetween: first and: second.
+	removedConstraint := self cleanSlateConstraintBetween: second and: third.
+	graph linkConstraint: firstConstraint.
+	graph linkConstraint: removedConstraint.
+	graph mergeIslands.
+	graph unlinkConstraint: removedConstraint.
+	first sleep.
+	self assert: first isSleeping.
+	self assert: second isSleeping.
+	self assert: third isAwake.
+	self assert: (graph islandForBody: first) == (graph islandForBody: second).
+	self assert: (graph islandForBody: third) ~~ (graph islandForBody: first).
+	^ graph islands
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> manualWakeDoesNotCrossAStaticSharedEndpoint [
+	<gtExample>
+	| world graph first second ground |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	ground := self cleanSlateBodyWithSequence: 2.
+	second := self cleanSlateBodyWithSequence: 3.
+	ground beStatic.
+	{ first. ground. second } do: [ :body | body world: world ].
+	graph linkConstraint: (self cleanSlateConstraintBetween: first and: ground).
+	graph linkConstraint: (self cleanSlateConstraintBetween: second and: ground).
+	graph mergeIslands.
+	first sleepLocally.
+	second sleepLocally.
+	first wake.
+	self assert: first isAwake.
+	self assert: second isSleeping.
+	self assert: (graph islandForBody: first) ~~ (graph islandForBody: second).
+	^ graph islands
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> forceWakesTheEntirePersistentIsland [
+	<gtExample>
+	| world graph first second constraint |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first world: world.
+	second world: world.
+	constraint := self cleanSlateConstraintBetween: first and: second.
+	graph linkConstraint: constraint.
+	graph mergeIslands.
+	first sleepLocally.
+	second sleepLocally.
+	first applyForce: 10 @ 0.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	^ first
+]
+
+{ #category : 'examples - island sleeping' }
+CFPhysicsCleanSlateTests >> standaloneBodyWakeAndSleepRemainLocal [
+	<gtExample>
+	| body |
+	body := self cleanSlateBodyWithSequence: 1.
+	body sleep.
+	self assert: body isSleeping.
+	body wake.
+	self assert: body isAwake.
+	^ body
+]

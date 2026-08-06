@@ -395,6 +395,13 @@ CFPhysicsBody >> preventSleeping [
 
 { #category : 'sleeping' }
 CFPhysicsBody >> sleep [
+	world
+		ifNil: [ self sleepLocally ]
+		ifNotNil: [ world sleepBody: self ]
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> sleepLocally [
 	bodyType sleep
 ]
 
@@ -414,6 +421,13 @@ CFPhysicsBody >> updateSleepBy: seconds linearThresholdSquared: thresholdSquared
 
 { #category : 'sleeping' }
 CFPhysicsBody >> wake [
+	world
+		ifNil: [ self wakeLocally ]
+		ifNotNil: [ world wakeBody: self ]
+]
+
+{ #category : 'private - sleeping' }
+CFPhysicsBody >> wakeLocally [
 	bodyType wake
 ]
 
