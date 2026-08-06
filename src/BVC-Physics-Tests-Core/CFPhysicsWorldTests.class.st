@@ -78,7 +78,7 @@ CFPhysicsWorldTests >> testReturningContactBuildsFreshPreparedConstraint [
 	^ returnedContact
 ]
 { #category : 'tests - world membership' }
-CFPhysicsWorldTests >> testCompositeElementCanExcludeItsDecorativeDescendantsFromTheWorld [
+CFPhysicsWorldTests >> testOnlyElementsThatEnterPhysicsParticipateInTheWorld [
 	<gtExample>
 	| owner button label world |
 	owner := BlElement new size: 200 @ 120; yourself.
@@ -87,15 +87,37 @@ CFPhysicsWorldTests >> testCompositeElementCanExcludeItsDecorativeDescendantsFro
 		label: 'Click Me';
 		yourself.
 	label := button childWithId: #label.
-	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	button physics beDynamic.
 	self assert: world members size equals: 1.
 	self assert: (world includes: button).
 	self assert: (world includes: label) not.
 	^ world
 ]
+
+{ #category : 'tests - world membership' }
+CFPhysicsWorldTests >> testBodyTypeSelectorsEnterAnElementIntoPhysics [
+	<gtExample>
+	| owner dynamicElement staticElement kinematicElement world |
+	owner := BlElement new.
+	dynamicElement := BlElement new extent: 20 @ 20.
+	staticElement := BlElement new extent: 20 @ 20.
+	kinematicElement := BlElement new extent: 20 @ 20.
+	owner addChildren: { dynamicElement. staticElement. kinematicElement }.
+	world := owner physics beWorld.
+	dynamicElement physics beDynamic.
+	staticElement physics beStatic.
+	kinematicElement physics beKinematic.
+	self assert: (world includes: dynamicElement).
+	self assert: (world includes: staticElement).
+	self assert: (world includes: kinematicElement).
+	self assert: dynamicElement physics isDynamic.
+	self assert: staticElement physics isStatic.
+	self assert: kinematicElement physics isKinematic.
+	^ world
+]
+
 { #category : 'tests - worlds' }
 CFPhysicsWorldTests >> testBeWorldInstallsWorldAlongsidePhysics [
 	<gtExample>

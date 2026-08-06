@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented access to body, world, interacti
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pointerJointHandler', 'excludedFromWorld', 'behaviours' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler', 'participatesInWorld', 'behaviours' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -22,7 +22,8 @@ CFPhysics class >> on: anElement [
 { #category : 'initialization' }
 CFPhysics >> initialize [
 	super initialize.
-	behaviours := OrderedCollection new
+	behaviours := OrderedCollection new.
+	participatesInWorld := false
 ]
 
 { #category : 'behaviours' }
@@ -55,17 +56,20 @@ CFPhysics >> removeBehaviour: aBehaviour [
 
 { #category : 'body type' }
 CFPhysics >> beDynamic [
-	self body beDynamic
+	self body beDynamic.
+	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beKinematic [
-	self body beKinematic
+	self body beKinematic.
+	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beStatic [
-	self body beStatic
+	self body beStatic.
+	^ self
 ]
 
 { #category : 'worlds' }
@@ -124,27 +128,18 @@ CFPhysics >> element: anElement [
 	pointerJointHandler := CFPhysicsMouseJointHandler on: element
 ]
 
-{ #category : 'world membership' }
-CFPhysics >> excludeFromWorld [
-	excludedFromWorld := true
+{ #category : 'private - world membership' }
+CFPhysics >> participateInWorld [
+	| aWorld |
+	participatesInWorld := true.
+	aWorld := self world.
+	aWorld ifNotNil: [ aWorld synchroniseMembership ].
+	^ self
 ]
 
-{ #category : 'world membership' }
-CFPhysics >> includeInWorld [
-	excludedFromWorld := false
-]
-
-{ #category : 'world membership' }
-CFPhysics >> isExcludedFromWorld [
-	^ excludedFromWorld = true
-]
-
-{ #category : 'world membership' }
-CFPhysics >> excludeDescendantsFromWorld [
-	element children do: [ :each |
-		each physics
-			excludeFromWorld;
-			excludeDescendantsFromWorld ]
+{ #category : 'private - world membership' }
+CFPhysics >> participatesInWorld [
+	^ participatesInWorld = true
 ]
 
 
@@ -233,10 +228,13 @@ CFPhysics >> position: aPoint [
 { #category : 'bodies' }
 CFPhysics >> body [
 	| aWorld |
-	body ifNotNil: [ ^ body ].
 	aWorld := self world.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	aWorld synchroniseMembership.
+	(body notNil
+		and: [ body world == aWorld
+		and: [ self participatesInWorld ] ])
+		ifTrue: [ ^ body ].
+	self participateInWorld.
 	body ifNil: [ self error: 'The element is not tracked by its physics world' ].
 	^ body
 ]
@@ -413,23 +411,23 @@ CFPhysics >> collisionGroupIndex: anInteger [
 ]
 
 
-{ #category : 'pull interaction' }
+{ #category : 'private - interaction' }
 CFPhysics >> enablePullInteraction [
 	pointerJointHandler enable.
 	^ pointerJointHandler
 ]
 
-{ #category : 'pull interaction' }
+{ #category : 'private - interaction' }
 CFPhysics >> disablePullInteraction [
 	pointerJointHandler disable
 ]
 
-{ #category : 'pull interaction' }
+{ #category : 'private - interaction' }
 CFPhysics >> isPullInteractionEnabled [
 	^ pointerJointHandler isEnabled
 ]
 
-{ #category : 'pull interaction' }
+{ #category : 'private - interaction' }
 CFPhysics >> pointerJointHandler [
 	^ pointerJointHandler
 ]

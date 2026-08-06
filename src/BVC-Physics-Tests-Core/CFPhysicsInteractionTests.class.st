@@ -34,7 +34,6 @@ CFPhysicsInteractionTests >> testConfiguredPullDrivesAGlamorousButtonThroughPhys
 	button addEventHandler: (BlEventHandler
 		on: BlPullEvent
 		do: [ :anEvent | pullEvents add: anEvent ]).
-	button physics excludeDescendantsFromWorld.
 	owner addChild: button.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.

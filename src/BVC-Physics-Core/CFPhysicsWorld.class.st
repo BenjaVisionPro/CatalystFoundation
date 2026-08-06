@@ -370,7 +370,7 @@ CFPhysicsWorld >> membershipProvider [
 { #category : 'membership' }
 CFPhysicsWorld >> membershipProvider: aCollectionOrProvider [
 	"A collection or zero-argument block that supplies exactly the elements that
-	should become bodies. Nil retains the default recursive membership of my owner."
+	should participate in this world. Nil discovers only descendants that have explicitly entered Physics through their element facade."
 	membershipProvider := aCollectionOrProvider.
 	self synchroniseMembership.
 	^ self
@@ -382,10 +382,12 @@ CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 { #category : 'membership' }
 CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
 	| physics |
-	physics := anElement physics.
-	(physics world == self and: [ physics isExcludedFromWorld not ])
+	(anElement userData includesKey: CFPhysicsWorld) ifTrue: [ ^ self ].
+	physics := anElement userData at: CFPhysics ifAbsent: [ nil ].
+	(physics notNil
+		and: [ physics world == self
+		and: [ physics participatesInWorld ] ])
 		ifTrue: [ aSet add: anElement ].
-	physics isWorld ifTrue: [ ^ self ].
 	anElement children do: [ :each |
 		self collectMembersFrom: each into: aSet ]
 ]
@@ -395,8 +397,7 @@ CFPhysicsWorld >> collectProvidedMembersInto: aSet [
 	membershipProvider value do: [ :each |
 		| physics |
 		physics := each physics.
-		(physics world == self and: [ physics isExcludedFromWorld not ])
-			ifTrue: [ aSet add: each ] ]
+		physics world == self ifTrue: [ aSet add: each ] ]
 ]
 
 { #category : 'membership' }

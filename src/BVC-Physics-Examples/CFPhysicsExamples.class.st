@@ -585,7 +585,6 @@ CFPhysicsExamples >> newClickMeButtonUsing: aRandom [
 			aButton physics body
 				addVelocity: (self randomClickVelocityUsing: aRandom) ];
 		yourself.
-	button physics excludeDescendantsFromWorld.
 	^ button
 ]
 

@@ -178,7 +178,6 @@ CFPhysicsMondrian >> prepareGraphElements [
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> preparePhysicsPresentationOf: anEdgeElement [
 	sessionPhysicsElements ifNotNil: [ sessionPhysicsElements add: anEdgeElement ].
-	anEdgeElement physics excludeFromWorld.
 	anEdgeElement fromAnchor: (CFPhysicsMondrianPresentationAnchor on: anEdgeElement fromAnchor).
 	anEdgeElement toAnchor: (CFPhysicsMondrianPresentationAnchor on: anEdgeElement toAnchor)
 ]
