@@ -433,28 +433,35 @@ CFPhysicsWorld >> refreshMembershipFromProvider [
 	^ members
 ]
 
-{ #category : 'membership' }
+{ #category : 'private - membership' }
+CFPhysicsWorld >> retireElement: anElement [
+	| body |
+	body := bodyStates at: anElement ifAbsent: [ ^ self ].
+	self invalidateTopology.
+	bodyStates removeKey: anElement.
+	members remove: anElement ifAbsent: [ ].
+	geometrySignaturesByBody removeKey: body ifAbsent: [ ].
+	anElement existingPhysics ifNotNil: [ :physics |
+		physics retireBodyFromWorld: self ].
+	self removeAttractionsUsingBody: body.
+	self removeRepulsionsUsingBody: body.
+	self removeMouseJointsUsingBody: body.
+	self removeMotorJointsUsingBody: body.
+	self removeFilterJointsUsingBody: body.
+	self removeDistanceJointsUsingBody: body.
+	self removeRevoluteJointsUsingBody: body.
+	self removeWeldJointsUsingBody: body.
+	self removePrismaticJointsUsingBody: body.
+	self removeWheelJointsUsingBody: body.
+	self removeContactsUsingBody: body.
+	persistentIslandGraph removeBody: body.
+	^ self
+]
+
+{ #category : 'private - membership' }
 CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
-	| retiredElements |
-	retiredElements := bodyStates keys reject: [ :each | currentMembers includes: each ].
-	retiredElements ifNotEmpty: [ self invalidateTopology ].
-	retiredElements do: [ :each |
-		| body |
-		body := bodyStates removeKey: each.
-		geometrySignaturesByBody removeKey: body ifAbsent: [ ].
-		each physics retireBodyFromWorld: self.
-		self removeAttractionsUsingBody: body.
-		self removeRepulsionsUsingBody: body.
-		self removeMouseJointsUsingBody: body.
-		self removeMotorJointsUsingBody: body.
-		self removeFilterJointsUsingBody: body.
-		self removeDistanceJointsUsingBody: body.
-		self removeRevoluteJointsUsingBody: body.
-		self removeWeldJointsUsingBody: body.
-		self removePrismaticJointsUsingBody: body.
-		self removeWheelJointsUsingBody: body.
-		self removeContactsUsingBody: body.
-		persistentIslandGraph removeBody: body ]
+	(bodyStates keys reject: [ :each | currentMembers includes: each ])
+		do: [ :each | self retireElement: each ]
 ]
 
 { #category : 'private - contacts' }

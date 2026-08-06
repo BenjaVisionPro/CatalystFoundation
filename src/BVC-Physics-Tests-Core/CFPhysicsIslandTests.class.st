@@ -442,7 +442,6 @@ CFPhysicsIslandTests >> testRetiringABodyRetiresAllOfItsJointTypes [
 	filter := first physics filterJointTo: second.
 	unrelated := second physics distanceJointTo: fourth.
 	owner removeChild: first.
-	world owner physics makeChildrenDynamic.
 	self assert: world revoluteJoints isEmpty.
 	self assert: world weldJoints isEmpty.
 	self assert: world motorJoints isEmpty.
@@ -478,7 +477,6 @@ CFPhysicsIslandTests >> testRetiringAContactingBodyUnlinksItsContactFromThePersi
 	self assert: (island constraints includes: contact).
 	retiredBody := second physics body.
 	owner removeChild: second.
-	world owner physics makeChildrenDynamic.
 	self assert: (graph islandForConstraint: contact) isNil.
 	self assert: (graph islandForBody: retiredBody) isNil.
 	self assert: (island constraints includes: contact) not.

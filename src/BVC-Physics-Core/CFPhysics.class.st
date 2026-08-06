@@ -123,6 +123,14 @@ CFPhysics >> ensureBodyInWorld: aWorld [
 	^ body
 ]
 
+
+{ #category : 'private - world membership' }
+CFPhysics >> retireFromCurrentWorld [
+	body ifNil: [ ^ self ].
+	body world ifNotNil: [ :aWorld | aWorld retireElement: element ].
+	^ self
+]
+
 { #category : 'private - bodies' }
 CFPhysics >> retireBodyFromWorld: aWorld [
 	(body notNil and: [ body world == aWorld ]) ifTrue: [ body world: nil ]
@@ -136,7 +144,10 @@ CFPhysics >> element [
 { #category : 'accessing' }
 CFPhysics >> element: anElement [
 	element := anElement.
-	pointerJointHandler := CFPhysicsMouseJointHandler on: element
+	pointerJointHandler := CFPhysicsMouseJointHandler on: element.
+	element
+		when: BlElementRemovedFromParentEvent
+		do: [ :anEvent | self retireFromCurrentWorld ]
 ]
 
 { #category : 'children' }

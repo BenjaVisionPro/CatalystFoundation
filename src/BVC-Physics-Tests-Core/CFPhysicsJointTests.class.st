@@ -156,7 +156,6 @@ CFPhysicsJointTests >> testDistanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 	self assert: first physics distanceJoints equals: { attached }.
 	self assert: second physics distanceJoints equals: { attached. unrelated }.
 	owner removeChild: first.
-	world owner physics makeChildrenDynamic.
 	self assert: world distanceJoints equals: { unrelated }.
 	self assert: attached isActive not.
 	self assert: unrelated isActive.
