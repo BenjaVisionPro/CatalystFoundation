@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsAngularDynamicsTests',
-	#superclass : 'TestCase',
+	#superclass : 'CFPhysicsTestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }

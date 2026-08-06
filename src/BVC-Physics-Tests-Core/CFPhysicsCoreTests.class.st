@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsCoreTests',
-	#superclass : 'TestCase',
+	#superclass : 'CFPhysicsTestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
@@ -723,12 +723,6 @@ CFPhysicsCoreTests >> testPreparedConstraintWritesSolvedImpulsesBackExplicitly [
 	^ constraint
 ]
 
-{ #category : 'private - contact pipeline' }
-CFPhysicsCoreTests >> cleanSlateBodyWithSequence: anInteger [
-	^ (CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil)
-		sequence: anInteger;
-		yourself
-]
 
 { #category : 'private - contact pipeline' }
 CFPhysicsCoreTests >> cleanSlateManifoldWithFeatureIndex: anInteger [
@@ -852,18 +846,6 @@ CFPhysicsCoreTests >> testPairFinderRejectsStaticStaticPairs [
 	^ pairs
 ]
 
-{ #category : 'private - pair discovery' }
-CFPhysicsCoreTests >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
-	^ (CFPhysicsBody
-		element: (BlElement new
-			geometry: BlRoundedRectangleGeometry new;
-			size: anExtent;
-			yourself)
-		world: nil)
-		sequence: anInteger;
-		position: aPoint;
-		yourself
-]
 
 { #category : 'examples - step pipeline' }
 CFPhysicsCoreTests >> testStepPipelineExposesTheComposedStep [
