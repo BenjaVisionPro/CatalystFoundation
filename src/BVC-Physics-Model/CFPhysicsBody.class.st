@@ -673,12 +673,22 @@ CFPhysicsBody >> updateDynamicSleepBy: seconds linearThresholdSquared: threshold
 
 { #category : 'sensors' }
 CFPhysicsBody >> beSensor [
-	self shapeState beSensor
+	self isSensor ifTrue: [ ^ self ].
+	self shapeState beSensor.
+	self sensorClassificationChanged
 ]
 
 { #category : 'sensors' }
 CFPhysicsBody >> beSolid [
-	self shapeState beSolid
+	self isSensor ifFalse: [ ^ self ].
+	self shapeState beSolid.
+	self sensorClassificationChanged
+]
+
+{ #category : 'private - sensors' }
+CFPhysicsBody >> sensorClassificationChanged [
+	world ifNotNil: [ :aWorld | aWorld sensorClassificationChangedForBody: self ].
+	^ self
 ]
 
 { #category : 'sensors' }

@@ -6033,6 +6033,71 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 ]
 
 
+{ #category : 'examples - sensors' }
+CFPhysicsCleanSlateTests >> runtimeSensorChangeUnlinksAContinuedContactFromItsPersistentIsland [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult firstContact secondResult |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0.
+	secondBody position: 10 @ 0.
+	firstResult := world step.
+	firstContact := firstResult activeContacts first.
+	self assert: (world persistentIslandGraph islandForConstraint: firstContact) notNil.
+	firstBody sleep.
+	secondBody sleep.
+	firstBody beSensor.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	secondResult := world step.
+	self assert: secondResult continuedContacts size equals: 1.
+	self assert: secondResult continuedContacts first isSensor.
+	self assert: (world persistentIslandGraph islandForConstraint: firstContact) isNil.
+	self assert: (world persistentIslandGraph islandForConstraint: secondResult continuedContacts first) isNil.
+	^ secondResult
+]
+
+{ #category : 'examples - sensors' }
+CFPhysicsCleanSlateTests >> runtimeSolidChangeLinksAContinuedContactIntoThePersistentIsland [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult contact |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0; beSensor.
+	secondBody position: 10 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts size equals: 1.
+	self assert: firstResult activeContacts first isSensor.
+	self assert: (world persistentIslandGraph islandForConstraint: firstResult activeContacts first) isNil.
+	firstBody sleep.
+	secondBody sleep.
+	firstBody beSolid.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	secondResult := world step.
+	self assert: secondResult continuedContacts size equals: 1.
+	contact := secondResult continuedContacts first.
+	self assert: contact isSolid.
+	self assert: (world persistentIslandGraph islandForConstraint: contact) notNil.
+	^ secondResult
+]
+
 { #category : 'examples - world state capture' }
 CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 	<gtExample>

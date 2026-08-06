@@ -615,11 +615,23 @@ CFPhysicsWorld >> commit: aWorldSolution [
 
 { #category : 'private - islands' }
 CFPhysicsWorld >> updatePersistentIslandsFrom: aPipelineResult [
-	"Maintain Box2D-style persistent connectivity from committed contact lifecycle changes. Sensors do not join solver islands."
+	| previousContactsByKey |
+	"Maintain persistent solver connectivity from committed contact lifecycle and classification changes. Sensors do not join solver islands."
+	previousContactsByKey := Dictionary new.
+	aPipelineResult previousContacts do: [ :contact |
+		previousContactsByKey at: contact key put: contact ].
 	aPipelineResult endedContacts do: [ :contact |
 		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ] ].
 	aPipelineResult beganContacts do: [ :contact |
 		contact isSolid ifTrue: [ persistentIslandGraph linkConstraint: contact ] ].
+	aPipelineResult continuedContacts do: [ :contact |
+		| previousContact |
+		previousContact := previousContactsByKey at: contact key ifAbsent: [ nil ].
+		previousContact ifNotNil: [
+			(previousContact isSolid and: [ contact isSensor ]) ifTrue: [
+				persistentIslandGraph unlinkConstraint: previousContact ].
+			(previousContact isSensor and: [ contact isSolid ]) ifTrue: [
+				persistentIslandGraph linkConstraint: contact ] ] ].
 	persistentIslandGraph mergeIslands.
 	"Box2D 3.1.1 splits at most one dirty island after sleep times have been committed. The sleepiest eligible body nominates its island."
 	persistentIslandGraph splitSleepiestIslandEligibleAt: self timeToSleep
@@ -1468,6 +1480,17 @@ CFPhysicsWorld >> invalidateTopology [
 	self rejectTelemetrySolveTicket: activeSolveTicket.
 	topologyRevision := topologyRevision + 1.
 	activeSolveTicket := nil
+]
+
+
+{ #category : 'sensors' }
+CFPhysicsWorld >> sensorClassificationChangedForBody: aBody [
+	activeContacts do: [ :contact |
+		(contact firstBody == aBody or: [ contact secondBody == aBody ]) ifTrue: [
+			contact firstBody wake.
+			contact secondBody wake ] ].
+	self touchBroadphaseProxyFor: aBody.
+	^ self
 ]
 
 { #category : 'collision filtering' }
