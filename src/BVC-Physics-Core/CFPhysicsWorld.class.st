@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -65,6 +65,7 @@ CFPhysicsWorld >> initialize [
 	telemetryStepStatisticsMaximumMicroseconds := nil.
 	telemetryAnalysisInBackground := false.
 	backgroundStepping := false.
+	released := false.
 	telemetryAnnouncer := Announcer new.
 	lifetimeGeneration := 1.
 	topologyRevision := 0.
@@ -104,6 +105,18 @@ CFPhysicsWorld >> persistentIslandGraph [
 { #category : 'accessing' }
 CFPhysicsWorld >> owner [ ^ owner ]
 
+
+{ #category : 'testing - lifecycle' }
+CFPhysicsWorld >> isReleased [
+	^ released
+]
+
+{ #category : 'private - lifecycle' }
+CFPhysicsWorld >> assertNotReleased [
+	released ifTrue: [
+		self error: 'The Physics world has been released' ]
+]
+
 { #category : 'accessing' }
 CFPhysicsWorld >> owner: anElement [
 	owner == anElement ifTrue: [ ^ self ].
@@ -114,6 +127,8 @@ CFPhysicsWorld >> owner: anElement [
 
 { #category : 'lifecycle' }
 CFPhysicsWorld >> release [
+	released ifTrue: [ ^ self ].
+	released := true.
 	self invalidateLifetime.
 	"Release every resource owned by this world. My owner remains structurally
 	unchanged; its Physics facade removes the world association separately."
@@ -210,7 +225,11 @@ CFPhysicsWorld >> gravity: aPoint [
 CFPhysicsWorld >> stepDuration [ ^ stepDuration ]
 
 { #category : 'accessing' }
-CFPhysicsWorld >> stepDuration: aDuration [ stepDuration := aDuration ]
+CFPhysicsWorld >> stepDuration: aDuration [
+	(aDuration asMilliSeconds > 0) ifFalse: [
+		self error: 'Physics step duration must be greater than zero' ].
+	stepDuration := aDuration
+]
 
 { #category : 'solver configuration' }
 CFPhysicsWorld >> restitutionThreshold [
@@ -269,7 +288,11 @@ CFPhysicsWorld >> maximumLinearSpeed: aNumber [
 CFPhysicsWorld >> substepCount [ ^ substepCount ]
 
 { #category : 'solver configuration' }
-CFPhysicsWorld >> substepCount: anInteger [ substepCount := anInteger max: 1 ]
+CFPhysicsWorld >> substepCount: anInteger [
+	(anInteger isInteger and: [ anInteger > 0 ]) ifFalse: [
+		self error: 'Physics substep count must be a positive integer' ].
+	substepCount := anInteger
+]
 
 { #category : 'solver configuration' }
 CFPhysicsWorld >> contactHertz [ ^ contactHertz ]
@@ -523,6 +546,7 @@ CFPhysicsWorld >> newStep [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
+	self assertNotReleased.
 	telemetryEnabled ifTrue: [ ^ self stepWithTelemetry ].
 	^ self stepWithoutTelemetry
 ]
@@ -1030,6 +1054,8 @@ CFPhysicsWorld >> resetTelemetry [
 
 { #category : 'stepping' }
 CFPhysicsWorld >> step: aPositiveInteger [
+	(aPositiveInteger isInteger and: [ aPositiveInteger > 0 ]) ifFalse: [
+		self error: 'Physics step count must be a positive integer' ].
 	aPositiveInteger timesRepeat: [ self step ].
 	^ lastStepResult
 ]
