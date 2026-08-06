@@ -367,53 +367,69 @@ CFPhysicsWorld >> membershipProvider [
 	^ membershipProvider
 ]
 
-{ #category : 'membership' }
+{ #category : 'private - membership providers' }
 CFPhysicsWorld >> membershipProvider: aCollectionOrProvider [
-	"A collection or zero-argument block that supplies exactly the elements that
-	should participate in this world. Nil discovers only descendants that have explicitly entered Physics through their element facade."
+	"Install an explicit provider used by orchestration adapters such as Mondrian."
 	membershipProvider := aCollectionOrProvider.
-	self synchroniseMembership.
+	self refreshMembershipFromProvider.
 	^ self
 ]
 
 { #category : 'testing' }
 CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 
-{ #category : 'membership' }
-CFPhysicsWorld >> collectMembersFrom: anElement into: aSet [
+{ #category : 'private - membership' }
+CFPhysicsWorld >> isValidMember: anElement [
 	| physics |
-	(anElement userData includesKey: CFPhysicsWorld) ifTrue: [ ^ self ].
-	physics := anElement userData at: CFPhysics ifAbsent: [ nil ].
-	(physics notNil
-		and: [ physics world == self
-		and: [ physics participatesInWorld ] ])
-		ifTrue: [ aSet add: anElement ].
-	anElement children do: [ :each |
-		self collectMembersFrom: each into: aSet ]
+	physics := anElement existingPhysics.
+	^ physics notNil and: [ physics world == self ]
 ]
 
-{ #category : 'membership' }
-CFPhysicsWorld >> collectProvidedMembersInto: aSet [
-	membershipProvider value do: [ :each |
-		| physics |
-		physics := each physics.
-		physics world == self ifTrue: [ aSet add: each ] ]
+{ #category : 'private - membership providers' }
+CFPhysicsWorld >> providedMembers [
+	^ membershipProvider
+		ifNil: [ #() ]
+		ifNotNil: [ membershipProvider value asArray ]
 ]
 
-{ #category : 'membership' }
-CFPhysicsWorld >> synchroniseMembership [
-	| currentMembers |
-	currentMembers := IdentitySet new.
-	membershipProvider
-		ifNil: [ owner children do: [ :each |
-			self collectMembersFrom: each into: currentMembers ] ]
-		ifNotNil: [ self collectProvidedMembersInto: currentMembers ].
-	self retireBodiesAbsentFrom: currentMembers.
-	currentMembers do: [ :each |
-		bodyStates at: each ifAbsentPut: [ self registerBodyFor: each ] ].
-	currentMembers do: [ :each |
+{ #category : 'private - membership' }
+CFPhysicsWorld >> addElement: anElement [
+	| body |
+	(self includes: anElement) ifTrue: [ ^ bodyStates at: anElement ].
+	(self isElementOwnedByWorld: anElement) ifFalse: [
+		self error: 'The element is not contained by this physics world' ].
+	body := self registerBodyFor: anElement.
+	bodyStates at: anElement put: body.
+	members add: anElement.
+	^ body
+]
+
+{ #category : 'private - membership' }
+CFPhysicsWorld >> isElementOwnedByWorld: anElement [
+	^ anElement physics world == self
+]
+
+{ #category : 'private - membership' }
+CFPhysicsWorld >> refreshMemberState [
+	| retainedMembers |
+	retainedMembers := members select: [ :each | self isValidMember: each ].
+	self retireBodiesAbsentFrom: retainedMembers.
+	retainedMembers do: [ :each |
 		self synchroniseCollisionGeometryFor: (bodyStates at: each) ].
-	members := currentMembers.
+	members := retainedMembers asIdentitySet.
+	^ members
+]
+
+{ #category : 'private - membership providers' }
+CFPhysicsWorld >> refreshMembershipFromProvider [
+	| providedMembers |
+	membershipProvider ifNil: [ ^ self refreshMemberState ].
+	providedMembers := self providedMembers asIdentitySet.
+	providedMembers do: [ :each | self addElement: each ].
+	self retireBodiesAbsentFrom: providedMembers.
+	members := providedMembers.
+	members do: [ :each |
+		self synchroniseCollisionGeometryFor: (bodyStates at: each) ].
 	^ members
 ]
 
@@ -561,7 +577,9 @@ CFPhysicsWorld >> captureState [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> synchroniseForStateCapture [
-	self synchroniseMembership.
+	membershipProvider
+		ifNil: [ self refreshMemberState ]
+		ifNotNil: [ self refreshMembershipFromProvider ].
 	self synchroniseContainmentBoundary.
 	self retireInvalidBehaviours
 ]

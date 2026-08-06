@@ -307,7 +307,7 @@ CFPhysicsCollisionTests >> testElementCanCreateALocalAnchor [
 	element := BlElement new size: 40 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 100 @ 50.
 	anchor := element physics localAnchorAt: 40 @ 10.
 	self assert: anchor class equals: CFPhysicsLocalAnchor.
@@ -360,7 +360,7 @@ CFPhysicsCollisionTests >> testElementCanCreateANormalisedAnchor [
 	element := BlElement new size: 40 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 100 @ 50.
 	anchor := element physics normalisedAnchorAt: 1 @ 1.
 	self assert: anchor class equals: CFPhysicsNormalisedAnchor.
@@ -396,7 +396,7 @@ CFPhysicsCollisionTests >> testExplicitAnchorsCanCreateWorldOwnedRelationships [
 	second := BlElement new size: 60 @ 30; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 20 @ 30.
 	second physics position: 200 @ 80.
 	anchorA := first physics localAnchorAt: 40 @ 10.
@@ -1256,7 +1256,7 @@ CFPhysicsCollisionTests >> testRuntimeGeometryChangeRecreatesContactAndWakesBoth
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0.
@@ -1287,7 +1287,7 @@ CFPhysicsCollisionTests >> testRuntimeGeometryExpansionCreatesContactWithoutBody
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0.

@@ -16,8 +16,8 @@ CFPhysicsWorldTestCase >> newWorldAfterOneStep [
 	world := owner physics beWorld.
 	world containment disable.
 	world
-		gravity: 0 @ 0;
-		synchroniseMembership.
+		gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	groundBody := world bodyStateFor: ground.
 	boxBody := world bodyStateFor: box.
 	groundBody

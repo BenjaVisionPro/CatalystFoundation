@@ -571,7 +571,7 @@ CFPhysicsContactTests >> testRuntimeSensorChangeUnlinksAContinuedContactFromItsP
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0.
@@ -602,7 +602,7 @@ CFPhysicsContactTests >> testRuntimeSolidChangeLinksAContinuedContactIntoThePers
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0; beSensor.
@@ -651,7 +651,7 @@ CFPhysicsContactTests >> testWorldScaleConvertsMutableConfigurationWhenStateIsCa
 		gravity: 0 @ 5.0;
 		restitutionThreshold: 2.0;
 		hitEventThreshold: 1.5.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	state := world captureStateAfterSynchronisation.
 	self assert: (world gravity closeTo: 0 @ 5.0).
 	self assert: (world restitutionThreshold closeTo: 2.0).

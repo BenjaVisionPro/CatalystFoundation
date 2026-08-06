@@ -15,7 +15,7 @@ CFPhysicsJointTests >> testDistanceJointSpringUsesBox2DSoftConstraint [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	joint := first physics distanceJointTo: second.
@@ -79,7 +79,7 @@ CFPhysicsJointTests >> testDistanceJointLengthLimitOpposesExcessExtension [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	joint := first physics distanceJointTo: second.
@@ -106,7 +106,7 @@ CFPhysicsJointTests >> testDistanceJointAxialMotorDrivesRelativeMotion [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	"Keep both bodies clear of the world's default containment boundary so it
 	does not overwrite the solver's outward motor response during commit."
 	first physics position: 100 @ 0.
@@ -150,13 +150,13 @@ CFPhysicsJointTests >> testDistanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 	third := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	attached := first physics distanceJointTo: second.
 	unrelated := second physics distanceJointTo: third.
 	self assert: first physics distanceJoints equals: { attached }.
 	self assert: second physics distanceJoints equals: { attached. unrelated }.
 	owner removeChild: first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: world distanceJoints equals: { unrelated }.
 	self assert: attached isActive not.
 	self assert: unrelated isActive.
@@ -171,7 +171,7 @@ CFPhysicsJointTests >> testDestroyingADistanceJointWakesBothSleepingEndpoints [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	joint := first physics distanceJointTo: second.
 	first physics body sleep.
 	second physics body sleep.
@@ -194,7 +194,7 @@ CFPhysicsJointTests >> testDistanceJointParticipatesInTheIslandSolver [
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	joint := first physics distanceJointTo: second.
@@ -219,7 +219,7 @@ CFPhysicsJointTests >> testDistanceJointCanAnchorABodyToTheWorld [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 100 @ 10.
@@ -242,7 +242,7 @@ CFPhysicsJointTests >> testMovingAWorldAnchorWakesItsSleepingDistanceJointBody [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -264,7 +264,7 @@ CFPhysicsJointTests >> testRetuningDistanceJointRestLengthWakesItsSleepingEndpoi
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	joint := first physics distanceJointTo: second.
 	first physics body sleep.
 	second physics body sleep.
@@ -283,7 +283,7 @@ CFPhysicsJointTests >> testOffCentreDistanceJointProducesAngularResponse [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	second physics beStatic.
@@ -327,7 +327,7 @@ CFPhysicsJointTests >> testRevoluteJointParticipatesInTheIslandSolver [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 30 @ 0.
 	second physics beStatic.
@@ -352,7 +352,7 @@ CFPhysicsJointTests >> testRevoluteJointCanAnchorABodyToTheWorld [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -375,7 +375,7 @@ CFPhysicsJointTests >> testMovingAWorldAnchorWakesItsSleepingRevoluteJointBody [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -397,7 +397,7 @@ CFPhysicsJointTests >> testRevoluteJointMotorDrivesRelativeAngularVelocity [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 30 @ 0.
 	second physics beStatic.
@@ -424,7 +424,7 @@ CFPhysicsJointTests >> testRevoluteJointMotorTorqueIsConvertedToASubstepImpulse 
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 30 @ 0.
 	second physics beStatic.
@@ -477,7 +477,7 @@ CFPhysicsJointTests >> testRevoluteJointSpringDrivesRelativeAngleTowardItsTarget
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	element physics rotation: 0.5.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
@@ -505,7 +505,7 @@ CFPhysicsJointTests >> testRevoluteJointLimitsBoundAnAnchoredElementRotation [
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -530,7 +530,7 @@ CFPhysicsJointTests >> testPrismaticJointCouplesOffsetPerpendicularAndAngularCon
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics
 		position: 100 @ 100;
 		velocity: 0 @ 100;
@@ -570,7 +570,7 @@ CFPhysicsJointTests >> testPrismaticJointConstrainsAnAnchoredElementToItsAxis [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -594,7 +594,7 @@ CFPhysicsJointTests >> testPrismaticJointLimitsBoundAnAnchoredElementTravel [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -619,7 +619,7 @@ CFPhysicsJointTests >> testMouseJointRespectsAPrismaticAxis [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -679,7 +679,7 @@ CFPhysicsJointTests >> testWeldJointPreparesIndependentLinearAndAngularSoftness 
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -707,7 +707,7 @@ CFPhysicsJointTests >> testWeldJointAnchorsABodyOrientationToTheWorld [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	worldAnchor := world anchorAt: 10 @ 10.
@@ -757,7 +757,7 @@ CFPhysicsJointTests >> testMotorJointPreservesConfiguredRelativeTransform [
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0.
@@ -781,7 +781,7 @@ CFPhysicsJointTests >> testMotorJointPreservesRelativeTransformBetweenDynamicBod
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0.
@@ -807,7 +807,7 @@ CFPhysicsJointTests >> testMotorJointLinearImpulseIsCappedBySubstepForce [
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0.
@@ -837,7 +837,7 @@ CFPhysicsJointTests >> testMotorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0; rotation: Float pi / 2.0.
@@ -900,7 +900,7 @@ CFPhysicsJointTests >> testPrismaticJointMotorDrivesAlongItsLocalAxis [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	joint := (element physics localAnchorAt: 10 @ 10)
 		prismaticJointTo: (world anchorAt: 10 @ 10)
 		along: 1 @ 0.
@@ -919,7 +919,7 @@ CFPhysicsJointTests >> testPrismaticJointSpringTargetsTranslation [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	joint := (element physics localAnchorAt: 10 @ 10)
 		prismaticJointTo: (world anchorAt: 10 @ 10)
 		along: 1 @ 0.
@@ -939,7 +939,7 @@ CFPhysicsJointTests >> testPrismaticJointAxisRotatesWithBodyA [
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstElement physics rotation: Float pi / 2.0.
 	joint := (firstElement physics localAnchorAt: 10 @ 10)
 		prismaticJointTo: (secondElement physics localAnchorAt: 10 @ 10)

@@ -376,7 +376,7 @@ CFPhysicsIslandTests >> testMixedJointConstraintsKeepTheWorldOrdering [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics position: 0 @ 0.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
 	revoluteAnchor := world anchorAt: 10 @ 10.
@@ -435,14 +435,14 @@ CFPhysicsIslandTests >> testRetiringABodyRetiresAllOfItsJointTypes [
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	revolute := first physics revoluteJointTo: second.
 	fixed := first physics weldJointTo: third.
 	motor := first physics motorJointTo: fourth.
 	filter := first physics filterJointTo: second.
 	unrelated := second physics distanceJointTo: fourth.
 	owner removeChild: first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: world revoluteJoints isEmpty.
 	self assert: world weldJoints isEmpty.
 	self assert: world motorJoints isEmpty.
@@ -466,7 +466,7 @@ CFPhysicsIslandTests >> testRetiringAContactingBodyUnlinksItsContactFromThePersi
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 100 @ 100.
 	second physics position: 110 @ 100.
 	result := world step.
@@ -478,7 +478,7 @@ CFPhysicsIslandTests >> testRetiringAContactingBodyUnlinksItsContactFromThePersi
 	self assert: (island constraints includes: contact).
 	retiredBody := second physics body.
 	owner removeChild: second.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: (graph islandForConstraint: contact) isNil.
 	self assert: (graph islandForBody: retiredBody) isNil.
 	self assert: (island constraints includes: contact) not.
@@ -556,7 +556,7 @@ CFPhysicsIslandTests >> testWorldPersistentIslandGraphTracksRuntimeJointLifecycl
 	secondElement := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	graph := world persistentIslandGraph.

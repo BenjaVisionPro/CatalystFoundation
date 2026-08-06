@@ -28,7 +28,8 @@ CFPhysicsTelemetryBenchmarkScenarios class >> sleepingBodies: aBodyCount [
 		host addChild: element.
 		element ].
 	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	columns := 20.
 	elements withIndexDo: [ :element :index |
 		(world bodyStateFor: element)
@@ -49,7 +50,8 @@ CFPhysicsTelemetryBenchmarkScenarios class >> densePileRows: rowCount columns: c
 			host addChild: element.
 			elements add: { element. column. row } ] ].
 	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	elements do: [ :entry |
 		(world bodyStateFor: entry first)
 			position: ((entry second - 1) * 18) @ ((entry third - 1) * 18) ].
@@ -68,7 +70,8 @@ CFPhysicsTelemetryBenchmarkScenarios class >> independentIslands: islandCount bo
 			host addChild: element.
 			entries add: { element. islandIndex. bodyIndex } ] ].
 	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	entries do: [ :entry |
 		| islandOrigin localIndex |
 		islandOrigin := ((entry second - 1) * 120) @ 0.
@@ -88,7 +91,8 @@ CFPhysicsTelemetryBenchmarkScenarios class >> singleIslandBodies: aBodyCount [
 		host addChild: element.
 		element ].
 	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	elements withIndexDo: [ :element :index |
 		(world bodyStateFor: element)
 			position: ((index - 1) * 18) @ 100 ].
@@ -109,7 +113,8 @@ CFPhysicsTelemetryBenchmarkScenarios class >> sensorOverlapPairs: aPairCount [
 			addChild: solidElement.
 		entries add: { sensorElement. solidElement. index } ].
 	world := host physics beWorld.
-	world gravity: 0 @ 0; synchroniseMembership.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
 	entries do: [ :entry |
 		| position |
 		position := ((entry third - 1) * 40) @ 100.

@@ -102,7 +102,6 @@ CFPhysicsMouseJointHandler >> beginMouseJointFrom: anEvent [
 	(initialPointerPosition isNil or: [ pointerPosition isNil ]) ifTrue: [ ^ self ].
 	world := element physics world.
 	world ifNil: [ ^ self ].
-	world synchroniseMembership.
 	body := world bodyStateFor: element.
 	(body isNil or: [ body isDynamic not ]) ifTrue: [ ^ self ].
 	mouseJoint := CFPhysicsMouseJoint body: body target: initialPointerPosition.

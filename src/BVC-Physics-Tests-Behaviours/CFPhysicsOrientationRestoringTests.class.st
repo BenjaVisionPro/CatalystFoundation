@@ -14,7 +14,7 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringReturnsItsElementT
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	target := 0.35.
 	element physics rotation: target.
 	behaviour := element physics restoreOrientation.
@@ -36,7 +36,7 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringUsesTheShortestAng
 	owner addChild: element.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics rotation: Float pi - 0.1.
 	behaviour := element physics restoreOrientation.
 	world step.
@@ -57,7 +57,7 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringActsOnlyOnItsAttac
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 40 @ 100.
 	second physics position: 240 @ 100.
 	behaviour := first physics restoreOrientation.

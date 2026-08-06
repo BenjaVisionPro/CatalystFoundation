@@ -14,7 +14,7 @@ CFPhysicsWorldLifecycleTests >> testCeaseBeingWorldReleasesItsBodiesAndConstrain
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
 	world := root physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	spring := first physics distanceJointTo: second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	repulsion := first physics repel: second.

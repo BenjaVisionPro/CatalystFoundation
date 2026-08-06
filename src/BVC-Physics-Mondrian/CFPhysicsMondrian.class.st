@@ -71,7 +71,7 @@ CFPhysicsMondrian >> bodyElements: aCollectionOrProvider [
 	"Configure the graph elements represented as Physics bodies. The argument may
 	be a collection or a zero-argument block, so live graph changes are supported."
 	bodyElements := aCollectionOrProvider.
-	world ifNotNil: [ world synchroniseMembership ].
+	world ifNotNil: [ world refreshMembershipFromProvider ].
 	^ self
 ]
 

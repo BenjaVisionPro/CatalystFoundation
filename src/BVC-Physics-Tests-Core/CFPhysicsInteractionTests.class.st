@@ -37,7 +37,7 @@ CFPhysicsInteractionTests >> testConfiguredPullDrivesAGlamorousButtonThroughPhys
 	owner addChild: button.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	button physics position: 20 @ 20.
 	button relocate: 20 @ 20.
 	scripter := BlScripter new element: owner.
@@ -176,7 +176,7 @@ CFPhysicsInteractionTests >> testAttractionsAreInstalledAndDiscoveredThroughBloc
 	owner addChildren: { first. second. third }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstAttraction := first physics attract: second.
 	secondAttraction := first physics attract: third.
 	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
@@ -197,7 +197,7 @@ CFPhysicsInteractionTests >> testDuplicateAttractionsRemainIndependent [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstAttraction := first physics attract: second.
 	secondAttraction := first physics attract: second.
 	self assert: (firstAttraction == secondAttraction) not.
@@ -218,12 +218,12 @@ CFPhysicsInteractionTests >> testRetiringABodyRemovesOnlyItsAttractions [
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	attachedA := first physics attract: second.
 	attachedB := first physics attract: third.
 	unrelated := third physics attract: fourth.
 	owner removeChild: first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: world attractions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
@@ -241,7 +241,7 @@ CFPhysicsInteractionTests >> testWorldStepAppliesAttractionBeforeIntegration [
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	attraction := first physics attract: second.
@@ -309,7 +309,7 @@ CFPhysicsInteractionTests >> testRepulsionsAreInstalledAndDiscoveredThroughBlocE
 	owner addChildren: { first. second. third }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstRepulsion := first physics repel: second.
 	secondRepulsion := first physics repel: third.
 	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
@@ -330,7 +330,7 @@ CFPhysicsInteractionTests >> testDuplicateRepulsionsRemainIndependent [
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstRepulsion := first physics repel: second.
 	secondRepulsion := first physics repel: second.
 	self assert: (firstRepulsion == secondRepulsion) not.
@@ -351,12 +351,12 @@ CFPhysicsInteractionTests >> testRetiringABodyRemovesOnlyItsRepulsions [
 	fourth := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second. third. fourth }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	attachedA := first physics repel: second.
 	attachedB := first physics repel: third.
 	unrelated := third physics repel: fourth.
 	owner removeChild: first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: world repulsions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
@@ -375,7 +375,7 @@ CFPhysicsInteractionTests >> testWorldStepAppliesRepulsionBeforeIntegration [
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world containment disable.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 100 @ 0.
 	repulsion := first physics repel: second.

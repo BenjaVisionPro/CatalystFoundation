@@ -436,7 +436,7 @@ CFPhysicsSolverTests >> testSoftStepIntegratesVelocityPerSubstep [
 		yourself.
 	host addChild: element.
 	element physics beDynamic.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	element physics
 		velocity: 100 @ 0;
 		linearDamping: 1.0.

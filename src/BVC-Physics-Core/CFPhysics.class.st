@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented access to body, world, interacti
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pointerJointHandler', 'participatesInWorld', 'behaviours' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler', 'behaviours' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -22,8 +22,7 @@ CFPhysics class >> on: anElement [
 { #category : 'initialization' }
 CFPhysics >> initialize [
 	super initialize.
-	behaviours := OrderedCollection new.
-	participatesInWorld := false
+	behaviours := OrderedCollection new
 ]
 
 { #category : 'behaviours' }
@@ -56,19 +55,19 @@ CFPhysics >> removeBehaviour: aBehaviour [
 
 { #category : 'body type' }
 CFPhysics >> beDynamic [
-	self body beDynamic.
+	self participateInWorld beDynamic.
 	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beKinematic [
-	self body beKinematic.
+	self participateInWorld beKinematic.
 	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beStatic [
-	self body beStatic.
+	self participateInWorld beStatic.
 	^ self
 ]
 
@@ -131,17 +130,48 @@ CFPhysics >> element: anElement [
 { #category : 'private - world membership' }
 CFPhysics >> participateInWorld [
 	| aWorld |
-	participatesInWorld := true.
 	aWorld := self world.
-	aWorld ifNotNil: [ aWorld synchroniseMembership ].
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	body := aWorld addElement: element.
+	^ body
+]
+
+
+{ #category : 'children' }
+CFPhysics >> makeChildrenDynamic [
+	^ self makeChildrenDynamicMatching: [ :each | true ]
+]
+
+{ #category : 'children' }
+CFPhysics >> makeChildrenDynamicMatching: aBlock [
+	element children do: [ :each |
+		(aBlock value: each) ifTrue: [ each physics beDynamic ] ].
 	^ self
 ]
 
-{ #category : 'private - world membership' }
-CFPhysics >> participatesInWorld [
-	^ participatesInWorld = true
+{ #category : 'children' }
+CFPhysics >> makeChildrenKinematic [
+	^ self makeChildrenKinematicMatching: [ :each | true ]
 ]
 
+{ #category : 'children' }
+CFPhysics >> makeChildrenKinematicMatching: aBlock [
+	element children do: [ :each |
+		(aBlock value: each) ifTrue: [ each physics beKinematic ] ].
+	^ self
+]
+
+{ #category : 'children' }
+CFPhysics >> makeChildrenStatic [
+	^ self makeChildrenStaticMatching: [ :each | true ]
+]
+
+{ #category : 'children' }
+CFPhysics >> makeChildrenStaticMatching: aBlock [
+	element children do: [ :each |
+		(aBlock value: each) ifTrue: [ each physics beStatic ] ].
+	^ self
+]
 
 { #category : 'material' }
 CFPhysics >> density [
@@ -230,13 +260,9 @@ CFPhysics >> body [
 	| aWorld |
 	aWorld := self world.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	(body notNil
-		and: [ body world == aWorld
-		and: [ self participatesInWorld ] ])
+	(body notNil and: [ body world == aWorld and: [ aWorld includes: element ] ])
 		ifTrue: [ ^ body ].
-	self participateInWorld.
-	body ifNil: [ self error: 'The element is not tracked by its physics world' ].
-	^ body
+	self error: 'The element is not participating in Physics. Send #beDynamic, #beKinematic or #beStatic first'
 ]
 
 { #category : 'bodies' }
@@ -439,7 +465,6 @@ CFPhysics >> distanceJointTo: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsDistanceJoint
 		between: self body
 		and: anotherElement physics body.
@@ -451,7 +476,6 @@ CFPhysics >> distanceJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld distanceJointsUsingBody: body
@@ -469,13 +493,12 @@ CFPhysics >> motorJointTo: anotherElement [
 	| aWorld otherWorld joint |
 	aWorld := self world. otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ]) ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsMotorJoint between: self body and: anotherElement physics body.
 	^ aWorld addMotorJoint: joint
 ]
 
 { #category : 'motor joints' }
-CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. aWorld synchroniseMembership. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
+CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
 
 { #category : 'motor joints' }
 CFPhysics >> removeMotorJoint: aJoint [ self world ifNotNil: [ :aWorld | aWorld removeMotorJoint: aJoint ] ]
@@ -487,7 +510,6 @@ CFPhysics >> filterJointTo: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ]) ifFalse: [
 		self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsFilterJoint between: self body and: anotherElement physics body.
 	^ aWorld addFilterJoint: joint
 ]
@@ -497,7 +519,6 @@ CFPhysics >> filterJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld filterJointsUsingBody: body
@@ -515,7 +536,6 @@ CFPhysics >> revoluteJointTo: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsRevoluteJoint
 		between: self body
 		and: anotherElement physics body.
@@ -527,7 +547,6 @@ CFPhysics >> revoluteJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld revoluteJointsUsingBody: body
@@ -547,7 +566,6 @@ CFPhysics >> weldJointTo: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsWeldJoint
 		between: self body
 		and: anotherElement physics body.
@@ -559,7 +577,6 @@ CFPhysics >> weldJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld weldJointsUsingBody: body
@@ -579,7 +596,6 @@ CFPhysics >> prismaticJointTo: anotherElement along: anAxis [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsPrismaticJoint
 		between: self body
 		and: anotherElement physics body
@@ -592,7 +608,6 @@ CFPhysics >> prismaticJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld prismaticJointsUsingBody: body
@@ -613,7 +628,6 @@ CFPhysics >> attract: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	attraction := CFPhysicsAttractionConstraint
 		between: self body
 		and: anotherElement physics body.
@@ -625,7 +639,6 @@ CFPhysics >> attractions [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld attractionsUsingBody: body
@@ -647,7 +660,6 @@ CFPhysics >> repel: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	repulsion := CFPhysicsRepulsionConstraint
 		between: self body
 		and: anotherElement physics body.
@@ -659,7 +671,6 @@ CFPhysics >> repulsions [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld repulsionsUsingBody: body
@@ -677,7 +688,6 @@ CFPhysics >> localAnchorAt: aPoint [
 	| aWorld |
 	aWorld := self world.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	aWorld synchroniseMembership.
 	^ CFPhysicsLocalAnchor on: self body at: aPoint
 ]
 
@@ -686,7 +696,6 @@ CFPhysics >> normalisedAnchorAt: aPoint [
 	| aWorld |
 	aWorld := self world.
 	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	aWorld synchroniseMembership.
 	^ CFPhysicsNormalisedAnchor on: self body at: aPoint
 ]
 
@@ -707,7 +716,6 @@ CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	^ CFPhysicsNearestGeometryEndpointPair
 		between: self body
 		and: anotherElement physics body
@@ -727,7 +735,6 @@ CFPhysics >> wheelJointTo: anotherElement along: anAxis [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	aWorld synchroniseMembership.
 	joint := CFPhysicsWheelJoint between: self body and: anotherElement physics body along: anAxis.
 	^ aWorld addWheelJoint: joint
 ]
@@ -737,7 +744,6 @@ CFPhysics >> wheelJoints [
 	| aWorld body |
 	aWorld := self world.
 	aWorld ifNil: [ ^ #() ].
-	aWorld synchroniseMembership.
 	body := aWorld bodyStateFor: element.
 	body ifNil: [ ^ #() ].
 	^ aWorld wheelJointsUsingBody: body

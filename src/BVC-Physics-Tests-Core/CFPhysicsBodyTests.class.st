@@ -35,7 +35,7 @@ CFPhysicsBodyTests >> testStaticToDynamicCreatesContactWithoutMovement [
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0; beStatic.
@@ -59,7 +59,7 @@ CFPhysicsBodyTests >> testDynamicToStaticEndsContactAndRemovesPersistentConnecti
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0.
@@ -84,7 +84,7 @@ CFPhysicsBodyTests >> testBodyTypeChangeReconcilesPersistentIslandMembership [
 	owner addChild: element.
 	world := owner physics beWorld.
 	world containment disable.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	body := world bodyStateFor: element.
 	self assert: (world persistentIslandGraph islandForBody: body) notNil.
 	body beStatic.
@@ -163,7 +163,7 @@ CFPhysicsBodyTests >> testPhysicsFacadeExposesTheExistingBodyType [
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	physics := element physics.
 	self assert: physics bodyType == physics body bodyType.
 	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.

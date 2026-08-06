@@ -64,7 +64,7 @@ CFPhysicsWorldPresentation >> present [
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> presentWithoutTelemetry [
 	self prepare ifFalse: [ ^ self ].
-	world synchroniseMembership.
+	world refreshMemberState.
 	self synchronisePresentations.
 	world bodyStatesInOrder do: [ :each |
 		(self presentationFor: each)
@@ -108,7 +108,7 @@ CFPhysicsWorldPresentation >> telemetryDataAtAlpha: aNumber [
 CFPhysicsWorldPresentation >> tryPresentAtAlpha: aNumber [
 	| alpha |
 	self prepare ifFalse: [ ^ false ].
-	world synchroniseMembership.
+	world refreshMemberState.
 	self synchronisePresentations.
 	alpha := (aNumber max: 0.0) min: 1.0.
 	world bodyStatesInOrder do: [ :each |

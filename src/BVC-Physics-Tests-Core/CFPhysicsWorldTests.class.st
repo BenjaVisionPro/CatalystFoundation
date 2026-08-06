@@ -118,6 +118,38 @@ CFPhysicsWorldTests >> testBodyTypeSelectorsEnterAnElementIntoPhysics [
 	^ world
 ]
 
+{ #category : 'tests - world membership' }
+CFPhysicsWorldTests >> testMakeChildrenDynamicAddsOnlyDirectChildren [
+	<gtExample>
+	| owner child nested world |
+	owner := BlElement new.
+	child := BlElement new extent: 20 @ 20.
+	nested := BlElement new extent: 10 @ 10.
+	child addChild: nested.
+	owner addChild: child.
+	world := owner physics beWorld.
+	owner physics makeChildrenDynamic.
+	self assert: (world includes: child).
+	self assert: (world includes: nested) not.
+	self assert: child physics isDynamic.
+	^ world
+]
+
+{ #category : 'tests - world membership' }
+CFPhysicsWorldTests >> testMakeChildrenDynamicMatchingAddsOnlyMatchingChildren [
+	<gtExample>
+	| owner included ignored world |
+	owner := BlElement new.
+	included := BlElement new extent: 20 @ 20.
+	ignored := BlElement new extent: 20 @ 20.
+	owner addChildren: { included. ignored }.
+	world := owner physics beWorld.
+	owner physics makeChildrenDynamicMatching: [ :each | each == included ].
+	self assert: (world includes: included).
+	self assert: (world includes: ignored) not.
+	^ world
+]
+
 { #category : 'tests - worlds' }
 CFPhysicsWorldTests >> testBeWorldInstallsWorldAlongsidePhysics [
 	<gtExample>
@@ -167,7 +199,7 @@ CFPhysicsWorldTests >> testPhysicsMagritteDescriptionsAreReadOnly [
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	physics := element physics.
 	descriptions := physics magritteDescription children.
 	expectedAccessors := #(bodyTypeName isAwake isSensor density friction restitution velocityX velocityY angularVelocity).
@@ -191,7 +223,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedBodyStatesBeforeSolve [
 		yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	body := element physics body.
 	body position: 0 @ 0.
 	state := world captureStateAfterSynchronisation.
@@ -220,7 +252,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedJointConfigurationBeforeSolve [
 		yourself.
 	owner addChildren: { firstElement. secondElement }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first := firstElement physics body.
 	second := secondElement physics body.
 	first position: 0 @ 0.
@@ -414,12 +446,10 @@ CFPhysicsWorldTests >> testDetachedCaptureSolveCommitMatchesSynchronousStep [
 	detachedOwner addChild: detachedElement.
 	synchronousWorld := synchronousOwner physics beWorld.
 	detachedWorld := detachedOwner physics beWorld.
-	synchronousWorld
-		gravity: 0 @ 0.1;
-		synchroniseMembership.
-	detachedWorld
-		gravity: 0 @ 0.1;
-		synchroniseMembership.
+	synchronousWorld gravity: 0 @ 0.1.
+	synchronousWorld owner physics makeChildrenDynamic.
+	detachedWorld gravity: 0 @ 0.1.
+	detachedWorld owner physics makeChildrenDynamic.
 	synchronousBody := synchronousWorld bodyStateFor: synchronousElement.
 	detachedBody := detachedWorld bodyStateFor: detachedElement.
 	synchronousBody

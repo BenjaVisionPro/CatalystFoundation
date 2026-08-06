@@ -75,10 +75,10 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	initial := mondrian nodes with: #(one two).
 	world := mondrian physics beWorld.
 	added := (mondrian nodes with: #(three)) first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: (world includes: added).
 	mondrian root removeChild: initial first.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: (world includes: initial first) not.
 	^ mondrian
 ]
@@ -94,7 +94,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldExcludesEdges [
 	world := mondrian physics beWorld.
 	self assert: (world includes: edgeElements first) not.
 	mondrian edges connectAssociations: { #two -> #three }.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	self assert: world members size equals: 3.
 	^ mondrian
 ]
@@ -185,10 +185,10 @@ CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldReleasesRetiredSessi
 	world := physics beWorld.
 	added := (mondrian nodes with: #(two)) first.
 	members add: added.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	members remove: added.
 	mondrian root removeChild: added.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	physics ceaseBeingWorld.
 	self assert: added existingPhysics isNil.
 	^ mondrian

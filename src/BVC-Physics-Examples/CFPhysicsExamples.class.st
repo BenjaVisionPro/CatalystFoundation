@@ -31,7 +31,7 @@ CFPhysicsExamples >> bodies [
 	host addChild: circle.
 	host addChild: rectangle.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	(world bodyStateFor: circle)
 		position: 75 @ 65;
 		velocity: 45 @ 20.
@@ -69,7 +69,7 @@ CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	world := host physics beWorld.
 	world gravity: 0 @ 0.
 	world stepDuration: 10 milliSeconds.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	(world bodyStateFor: body)
 		position: 40 @ 40;
 		velocity: 100 @ 0.
@@ -100,8 +100,8 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	world := owner physics beWorld.
 	world
 		gravity: 0 @ 0;
-		stepDuration: 10 milliSeconds;
-		synchroniseMembership.
+		stepDuration: 10 milliSeconds.
+	world owner physics makeChildrenDynamic.
 	(world bodyStateFor: body)
 		position: 20 @ 20;
 		velocity: 100 @ 0.
@@ -205,7 +205,7 @@ CFPhysicsExamples >> physicsPresentationComposesWithOtherMotionTransforms [
 	space root addChild: host.
 	space pulse.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
@@ -238,7 +238,7 @@ CFPhysicsExamples >> releasingPhysicsPresentationPreservesOtherMotionTransforms 
 	body transformDo: [ :builder | builder translateBy: 8 @ 0 ].
 	applicationTransformation := body transformation.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	state position: 40 @ 20.
 	world present.
@@ -265,7 +265,7 @@ CFPhysicsExamples >> bodyMutationDoesNotPresentOutsideMotion [
 	space root addChild: host.
 	space pulse.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	self assert: ((CFPhysicsWorldMotionIntegration for: world) manualPresentation isPresenting: state) not.
 	state position: 40 @ 20.
@@ -291,7 +291,7 @@ CFPhysicsExamples >> physicsPresentationConvertsPhysicsRotationToMotionDegrees [
 	space root addChild: host.
 	space pulse.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	state rotation: Float pi / 2.0.
 	world present.
@@ -314,8 +314,8 @@ CFPhysicsExamples >> manualPhysicsSteppingDoesNotPresent [
 	world := host physics beWorld.
 	world
 		gravity: 0 @ 0;
-		stepDuration: 10 milliSeconds;
-		synchroniseMembership.
+		stepDuration: 10 milliSeconds.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	state
 		position: 20 @ 20;
@@ -343,8 +343,8 @@ CFPhysicsExamples >> stepAndPresentRemainsExplicit [
 	world := host physics beWorld.
 	world
 		gravity: 0 @ 0;
-		stepDuration: 10 milliSeconds;
-		synchroniseMembership.
+		stepDuration: 10 milliSeconds.
+	world owner physics makeChildrenDynamic.
 	state := world bodyStateFor: body.
 	state
 		position: 20 @ 20;
@@ -558,7 +558,7 @@ CFPhysicsExamples >> clickMe [
 	buttons := (1 to: 50) collect: [ :each |
 		self newClickMeButtonUsing: random ].
 	host addChildren: buttons.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	buttons do: [ :each |
 		each physics
 			position: (self randomPositionFor: each in: host using: random);
@@ -636,7 +636,7 @@ CFPhysicsExamples >> joints [
 		railBody.
 		fixedBody.
 		fixedPartner }.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 
 	distanceBody physics position: 72 @ 118.
 	revoluteBody physics position: 225 @ 112.

@@ -163,7 +163,7 @@ CFPhysicsBroadphaseTests >> testElementFacingCollisionFilteringConfiguresItsBody
 	child := BlElement new size: 30 @ 30; yourself.
 	owner addChild: child.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	child physics
 		collisionCategoryBits: 2r0010;
 		collisionMaskBits: 2r0101;
@@ -185,7 +185,7 @@ CFPhysicsBroadphaseTests >> testRuntimeFilterChangeCreatesAContactWithoutBodyMov
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0; collisionMaskBits: 0.
@@ -209,7 +209,7 @@ CFPhysicsBroadphaseTests >> testRuntimeFilterChangeEndsATouchingContactAndWakesB
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	firstBody := world bodyStateFor: first.
 	secondBody := world bodyStateFor: second.
 	firstBody position: 0 @ 0.
@@ -236,7 +236,7 @@ CFPhysicsBroadphaseTests >> testDistanceJointCanSuppressCollisionBetweenItsEndpo
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics distanceJointTo: second.
@@ -261,7 +261,7 @@ CFPhysicsBroadphaseTests >> testRevoluteJointCanSuppressCollisionBetweenItsEndpo
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics revoluteJointTo: second.
@@ -286,7 +286,7 @@ CFPhysicsBroadphaseTests >> testWeldJointCanSuppressCollisionBetweenItsEndpoints
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics weldJointTo: second.
@@ -311,7 +311,7 @@ CFPhysicsBroadphaseTests >> testPrismaticJointCanSuppressCollisionBetweenItsEndp
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	joint := first physics prismaticJointTo: second along: 1 @ 0.
@@ -337,7 +337,7 @@ CFPhysicsBroadphaseTests >> testFilterJointMatchesBox2DCollisionAndIslandSemanti
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 100 @ 100.
 	second physics position: 110 @ 100.
 	joint := first physics filterJointTo: second.
@@ -369,7 +369,7 @@ CFPhysicsBroadphaseTests >> testDisablingDistanceJointCollisionEndsAnActiveConta
 	world := owner physics beWorld.
 	world containment disable.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	first physics position: 0 @ 0.
 	second physics position: 10 @ 0.
 	firstResult := world step.
@@ -391,7 +391,7 @@ CFPhysicsBroadphaseTests >> testChangingDistanceJointCollisionPolicyWakesItsBodi
 	second := BlElement new size: 20 @ 20; yourself.
 	owner addChildren: { first. second }.
 	world := owner physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	joint := first physics distanceJointTo: second.
 	joint collideConnected: true.
 	first physics body sleep.
@@ -414,7 +414,7 @@ CFPhysicsBroadphaseTests >> testThreeOverlappingBodiesAnchoredIndependentlyToWor
 	owner addChildren: elements.
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	elements do: [ :element | element physics position: 220 @ 160 ].
 	centreAnchor := world anchorAt: 250 @ 180.
 	joints := elements collect: [ :element |

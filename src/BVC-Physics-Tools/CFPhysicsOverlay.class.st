@@ -311,7 +311,7 @@ CFPhysicsOverlay >> refreshSelectedObject [
 	selectedElement ifNil: [ ^ self ].
 	physics := selectedElement existingPhysics.
 	physics ifNil: [ ^ self clearSelection ].
-	body := physics body.
+	body := physics bodyOrNil.
 	(body isNil or: [ body world ~~ world ]) ifTrue: [ ^ self clearSelection ].
 	objectInspector selectedObject == physics ifFalse: [ objectInspector inspect: physics ].
 	objectInspector refresh.
@@ -324,7 +324,7 @@ CFPhysicsOverlay >> refresh [
 	"A structural refresh is the explicit boundary at which Bloc membership
 	changes are reconciled with the Physics world. Frame diagnostics deliberately
 	do not perform this work."
-	world synchroniseMembership.
+	world refreshMemberState.
 	controls bodiesEnabled
 		ifTrue: [ bodyOverlay update ]
 		ifFalse: [ bodyOverlay clear ].
@@ -345,7 +345,7 @@ CFPhysicsOverlay >> refresh [
 CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world synchroniseMembership.
+			world refreshMemberState.
 			bodyOverlay update.
 			self refreshSelectionVisual ]
 		ifFalse: [ bodyOverlay clear ].
@@ -356,7 +356,7 @@ CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 CFPhysicsOverlay >> springsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world synchroniseMembership.
+			world refreshMemberState.
 			springOverlay update ]
 		ifFalse: [ springOverlay clear ].
 	^ self
@@ -367,7 +367,7 @@ CFPhysicsOverlay >> springsEnabled: aBoolean [
 CFPhysicsOverlay >> jointsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world synchroniseMembership.
+			world refreshMemberState.
 			jointOverlay update ]
 		ifFalse: [
 			selectedJoint ifNotNil: [ self clearSelection ].

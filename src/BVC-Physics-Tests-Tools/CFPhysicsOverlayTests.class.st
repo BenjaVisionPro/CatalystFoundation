@@ -30,7 +30,7 @@ CFPhysicsOverlayTests >> physicsHost [
 	host addChild: first.
 	host addChild: second.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	(world bodyStateFor: first) position: 40 @ 50.
 	(world bodyStateFor: second)
 		position: 180 @ 120;
@@ -65,7 +65,7 @@ CFPhysicsOverlayTests >> physicsCanvassableHost [
 	host addChild: first.
 	host addChild: second.
 	world := host physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	(world bodyStateFor: first) position: 40 @ 50.
 	(world bodyStateFor: second)
 		position: 180 @ 120;
@@ -708,7 +708,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayObservesConsumedButtonClicks [
 	host addChild: button.
 	space root addChild: host.
 	space pulse.
-	host physics beWorld synchroniseMembership.
+	host physics makeChildrenDynamic.
 	overlay := host showPhysicsOverlay.
 	scripter := BlScripter new.
 	scripter element: host.

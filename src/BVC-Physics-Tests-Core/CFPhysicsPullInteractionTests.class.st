@@ -13,7 +13,7 @@ CFPhysicsPullInteractionTests >> testPullInteractionCanEndAfterItsWorldIsRelease
 	child := BlElement new extent: 20 @ 20.
 	root addChild: child.
 	world := root physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	body := child physics body.
 	handler := child physics pointerJointHandler.
 	constraint := CFPhysicsMouseJoint body: body target: 10 @ 10.
@@ -35,7 +35,7 @@ CFPhysicsPullInteractionTests >> testPullInteractionPreservesBodyVelocityWhenRel
 	child := BlElement new extent: 20 @ 20.
 	root addChild: child.
 	world := root physics beWorld.
-	world synchroniseMembership.
+	world owner physics makeChildrenDynamic.
 	body := child physics body.
 	body
 		velocity: 800 @ -200;
