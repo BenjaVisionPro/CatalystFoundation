@@ -1192,8 +1192,9 @@ CFPhysicsContinuousCollisionTests >> testIgnoredSweptSensorProducesNoFollowingEn
 	<gtExample>
 	| firstResult moving sensor pipeline step secondResult |
 	firstResult := self sweptSensorIgnoredStepResult.
-	moving := firstResult bodies first.
-	sensor := firstResult bodies second.
+	moving := firstResult bodyStates keys detect: [ :each | each sequence = 1 ].
+	sensor := firstResult bodyStates keys detect: [ :each | each sequence = 2 ].
+	firstResult commitBodyStates.
 	moving velocity: 0 @ 0.
 	moving beginStep.
 	sensor beginStep.
