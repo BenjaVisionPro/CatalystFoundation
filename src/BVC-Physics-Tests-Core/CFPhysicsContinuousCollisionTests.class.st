@@ -903,9 +903,9 @@ CFPhysicsContinuousCollisionTests >> testPredictedSweepContinuesFromAdvancedStep
 	self assert: body position equals: 0 @ 0.
 	^ sweep
 ]
-{ #category : 'tests - continuous collision' }
+{ #category : 'private - continuous collision fixtures' }
 CFPhysicsContinuousCollisionTests >> multipleContinuousImpactStepResult [
-	| firstMoving firstObstacle secondMoving secondObstacle pipeline step result |
+	| firstMoving firstObstacle secondMoving secondObstacle pipeline step |
 	firstMoving := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	firstObstacle := self newBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
 	secondMoving := self newBodyWithSequence: 3 position: 0 @ 100 extent: 20 @ 20.
@@ -924,24 +924,14 @@ CFPhysicsContinuousCollisionTests >> multipleContinuousImpactStepResult [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	result := pipeline
+	^ pipeline
 		stepBodies: { secondObstacle. firstMoving. secondMoving. firstObstacle }
 		fromContacts: #()
 		step: step
 		gravity: 0 @ 0
-		restitutionThreshold: 1.0.
-	self assert: result hasContinuousImpact.
-	self assert: result continuousStepResult impacts size equals: 2.
-	self assert: result continuousStepResult impacts first pair firstBody equals: firstMoving.
-	self assert: result continuousStepResult impacts second pair firstBody equals: secondMoving.
-	result commitBodyStates.
-	self assert: (firstMoving position closeTo: 9.995 @ 0).
-	self assert: (secondMoving position closeTo: 19.995 @ 100).
-	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
-	self assert: result solver notNil.
-	^ result
+		restitutionThreshold: 1.0
 ]
+
 { #category : 'tests - continuous collision' }
 CFPhysicsContinuousCollisionTests >> testStepPipelineKeepsDiscretePathWhenNoPositiveImpactExists [
 	<gtExample>
@@ -1102,9 +1092,9 @@ CFPhysicsContinuousCollisionTests >> testContinuousContactsPublishInDeterministi
 	self assert: impacts second pair secondBody sequence equals: 4.
 	^ impacts
 ]
-{ #category : 'tests - continuous collision' }
+{ #category : 'private - continuous collision fixtures' }
 CFPhysicsContinuousCollisionTests >> sweptSensorIgnoredStepResult [
-	| moving sensor pipeline step result |
+	| moving sensor pipeline step |
 	moving := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	sensor := self newBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
 	sensor beStatic; beSensor.
@@ -1117,22 +1107,14 @@ CFPhysicsContinuousCollisionTests >> sweptSensorIgnoredStepResult [
 		substeps: 4
 		contactHertz: 30.0
 		dampingRatio: 10.0.
-	result := pipeline
+	^ pipeline
 		stepBodies: { sensor. moving }
 		fromContacts: #()
 		step: step
 		gravity: 0 @ 0
-		restitutionThreshold: 1.0.
-	self assert: result hasContinuousImpact not.
-	self assert: result continuousSensorContacts isEmpty.
-	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
-	self assert: result solver notNil.
-	result commitBodyStates.
-	self assert: (moving position closeTo: 60 @ 0).
-	self assert: result contactBeganEvents isEmpty.
-	^ result
+		restitutionThreshold: 1.0
 ]
+
 { #category : 'tests - continuous collision' }
 CFPhysicsContinuousCollisionTests >> testContinuousSolidImpactDoesNotPublishSensorBeyondResolvedPath [
 	<gtExample>
@@ -1316,11 +1298,34 @@ CFPhysicsContinuousCollisionTests >> testShapeStateDistanceProxyPreservesExistin
 { #category : 'tests - continuous collision' }
 CFPhysicsContinuousCollisionTests >> testStepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
 	<gtExample>
-	^ self multipleContinuousImpactStepResult
+	| result firstMoving secondMoving |
+	result := self multipleContinuousImpactStepResult.
+	self assert: result hasContinuousImpact.
+	self assert: result continuousStepResult impacts size equals: 2.
+	firstMoving := result continuousStepResult impacts first pair firstBody.
+	secondMoving := result continuousStepResult impacts second pair firstBody.
+	self assert: firstMoving sequence equals: 1.
+	self assert: secondMoving sequence equals: 3.
+	result commitBodyStates.
+	self assert: (firstMoving position closeTo: 9.995 @ 0).
+	self assert: (secondMoving position closeTo: 19.995 @ 100).
+	self assert: result activeContacts isEmpty.
+	^ result
 ]
 
 { #category : 'tests - continuous collision' }
 CFPhysicsContinuousCollisionTests >> testStepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
 	<gtExample>
-	^ self sweptSensorIgnoredStepResult
+	| result moving |
+	result := self sweptSensorIgnoredStepResult.
+	self assert: result hasContinuousImpact not.
+	self assert: result continuousSensorContacts isEmpty.
+	self assert: result activeContacts isEmpty.
+	self assert: result constraints isEmpty.
+	self assert: result solver notNil.
+	moving := result bodyStates keys detect: [ :each | each sequence = 1 ].
+	result commitBodyStates.
+	self assert: (moving position closeTo: 60 @ 0).
+	self assert: result contactBeganEvents isEmpty.
+	^ result
 ]

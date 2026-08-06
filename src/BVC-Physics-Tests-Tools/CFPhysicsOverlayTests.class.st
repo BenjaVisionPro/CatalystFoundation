@@ -5,7 +5,7 @@ Class {
 	#package : 'BVC-Physics-Tests-Tools'
 }
 
-{ #category : 'examples - physics overlay' }
+{ #category : 'private - overlay fixtures' }
 CFPhysicsOverlayTests >> physicsHost [
 	| space container host first second world |
 	space := BlSpace new.
@@ -36,8 +36,6 @@ CFPhysicsOverlayTests >> physicsHost [
 		position: 180 @ 120;
 		rotation: Float pi / 8.0.
 	space pulse.
-	self assert: host existingPhysicsOverlay isNil.
-	self assert: host children size equals: 2.
 	^ host
 ]
 
@@ -76,20 +74,14 @@ CFPhysicsOverlayTests >> physicsCanvassableHost [
 	^ host
 ]
 
-{ #category : 'examples - physics overlay' }
+{ #category : 'private - overlay fixtures' }
 CFPhysicsOverlayTests >> installedPhysicsOverlay [
-	| host overlay |
+	| host |
 	host := self physicsHost.
-	overlay := host showPhysicsOverlay.
+	host showPhysicsOverlay.
 	host space pulse.
-	self assert: overlay isInstalled.
-	self assert: host existingPhysicsOverlay == overlay.
-	self assert: overlay bodyOverlay visuals size equals: 2.
-	self assert: host children size equals: 2.
-	self assert: overlay root parent == host parent.
 	^ host
 ]
-
 
 { #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsOverlayRendersAboveItsHost [
@@ -954,7 +946,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayPresentationDiagnosticsFollowHostTran
 	^ overlay
 ]
 
-{ #category : 'examples - physics object selection' }
+{ #category : 'private - overlay fixtures' }
 CFPhysicsOverlayTests >> overlayWithSelectedSpringHitTarget [
 	| host world spring overlay visual |
 	host := self physicsHost.
@@ -968,10 +960,6 @@ CFPhysicsOverlayTests >> overlayWithSelectedSpringHitTarget [
 	host space pulse.
 	visual := overlay springOverlay visuals first.
 	BlSpace simulateClickOn: visual hitTarget.
-	self assert: overlay selectedSpring == spring.
-	self assert: overlay selectedElement isNil.
-	self assert: overlay selectionVisual isSelection.
-	self assert: overlay selectionVisual spring == spring.
 	^ overlay
 ]
 
@@ -1221,24 +1209,19 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayClearsWhenDisabled [
 	^ host
 ]
 
-{ #category : 'examples - physics object selection' }
+{ #category : 'private - overlay fixtures' }
 CFPhysicsOverlayTests >> overlayWithSelectedJointHitTarget [
-	| host overlay world first joint visual |
+	| host overlay world first visual |
 	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
-	joint := (first physics localAnchorAt: 20 @ 20)
+	(first physics localAnchorAt: 20 @ 20)
 		distanceJointTo: (world anchorAt: 240 @ 40).
 	overlay refresh.
 	host space pulse.
 	visual := overlay jointOverlay visuals first.
 	BlSpace simulateClickOn: visual hitTarget.
-	self assert: overlay selectedJoint == joint.
-	self assert: overlay selectedSpring isNil.
-	self assert: overlay selectedElement isNil.
-	self assert: overlay selectionVisual isSelection.
-	self assert: overlay selectionVisual joint == joint.
 	^ overlay
 ]
 
@@ -1283,20 +1266,9 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectedJointWhenJointsAreDisab
 ]
 
 
-{ #category : 'examples - physics object inspector' }
+{ #category : 'private - overlay fixtures' }
 CFPhysicsOverlayTests >> overlayInspectingSelectedJoint [
-	| overlay joint inspector content |
-	overlay := self overlayWithSelectedJointHitTarget.
-	joint := overlay selectedJoint.
-	inspector := overlay objectInspector.
-	content := inspector content.
-	self assert: inspector selectedObject == joint.
-	self assert: content class equals: CFPhysicsJointInspector.
-	self assert: content joint == joint.
-	self assert: (content valueElementAt: #jointType) text asString equals: 'Distance'.
-	self assert: (content valueElementAt: #active) text asString equals: joint isActive printString.
-	self assert: (content valueElementAt: #sequence) text asString equals: joint sequence printString.
-	^ overlay
+	^ self overlayWithSelectedJointHitTarget
 ]
 
 { #category : 'examples - physics object inspector' }
@@ -1831,40 +1803,73 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorUsesNaturalHeightWhenItFits [
 	^ inspector
 ]
 
-{ #category : 'examples - physics overlay' }
+{ #category : 'tests - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsHost [
 	<gtExample>
-	^ self physicsHost
+	| host |
+	host := self physicsHost.
+	self assert: host existingPhysicsOverlay isNil.
+	self assert: host children size equals: 2.
+	^ host
 ]
 
-{ #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsCanvassableHost [
-	<gtExample>
-	^ self physicsCanvassableHost
-]
 
-{ #category : 'examples - physics overlay' }
+{ #category : 'tests - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsOverlayCanBeInstalled [
 	<gtExample>
-	^ self installedPhysicsOverlay
+	| host overlay |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	self assert: overlay isInstalled.
+	self assert: overlay notNil.
+	self assert: overlay bodyOverlay visuals size equals: 2.
+	self assert: host children size equals: 2.
+	self assert: overlay root parent == host parent.
+	^ host
 ]
 
-{ #category : 'examples - physics object inspector' }
+{ #category : 'tests - physics object inspector' }
 CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedJoint [
 	<gtExample>
-	^ self overlayInspectingSelectedJoint
+	| overlay joint inspector content |
+	overlay := self overlayInspectingSelectedJoint.
+	joint := overlay selectedJoint.
+	inspector := overlay objectInspector.
+	content := inspector content.
+	self assert: inspector selectedObject == joint.
+	self assert: content class equals: CFPhysicsJointInspector.
+	self assert: content joint == joint.
+	self assert: (content valueElementAt: #jointType) text asString equals: 'Distance'.
+	self assert: (content valueElementAt: #active) text asString equals: joint isActive printString.
+	self assert: (content valueElementAt: #sequence) text asString equals: joint sequence printString.
+	^ overlay
 ]
 
-{ #category : 'examples - physics object selection' }
+{ #category : 'tests - physics object selection' }
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget [
 	<gtExample>
-	^ self overlayWithSelectedJointHitTarget
+	| overlay joint |
+	overlay := self overlayWithSelectedJointHitTarget.
+	joint := overlay selectedJoint.
+	self assert: joint notNil.
+	self assert: overlay selectedSpring isNil.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectionVisual isSelection.
+	self assert: overlay selectionVisual joint == joint.
+	^ overlay
 ]
 
-{ #category : 'examples - physics object selection' }
+{ #category : 'tests - physics object selection' }
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget [
 	<gtExample>
-	^ self overlayWithSelectedSpringHitTarget
+	| overlay spring |
+	overlay := self overlayWithSelectedSpringHitTarget.
+	spring := overlay selectedSpring.
+	self assert: spring notNil.
+	self assert: overlay selectedElement isNil.
+	self assert: overlay selectionVisual isSelection.
+	self assert: overlay selectionVisual spring == spring.
+	^ overlay
 ]
 
 { #category : 'examples - physics overlay - joints' }
