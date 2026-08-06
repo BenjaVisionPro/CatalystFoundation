@@ -699,7 +699,9 @@ CFPhysicsBody >> collisionCategoryBits [
 
 { #category : 'collision filtering' }
 CFPhysicsBody >> collisionCategoryBits: anInteger [
-	self shapeState collisionCategoryBits: anInteger
+	self collisionCategoryBits = anInteger ifTrue: [ ^ self ].
+	self shapeState collisionCategoryBits: anInteger.
+	self collisionFilterChanged
 ]
 
 { #category : 'collision filtering' }
@@ -709,7 +711,9 @@ CFPhysicsBody >> collisionMaskBits [
 
 { #category : 'collision filtering' }
 CFPhysicsBody >> collisionMaskBits: anInteger [
-	self shapeState collisionMaskBits: anInteger
+	self collisionMaskBits = anInteger ifTrue: [ ^ self ].
+	self shapeState collisionMaskBits: anInteger.
+	self collisionFilterChanged
 ]
 
 { #category : 'collision filtering' }
@@ -719,7 +723,15 @@ CFPhysicsBody >> collisionGroupIndex [
 
 { #category : 'collision filtering' }
 CFPhysicsBody >> collisionGroupIndex: anInteger [
-	self shapeState collisionGroupIndex: anInteger
+	self collisionGroupIndex = anInteger ifTrue: [ ^ self ].
+	self shapeState collisionGroupIndex: anInteger.
+	self collisionFilterChanged
+]
+
+{ #category : 'private - collision filtering' }
+CFPhysicsBody >> collisionFilterChanged [
+	world ifNotNil: [ :aWorld | aWorld collisionFilterChangedForBody: self ].
+	^ self
 ]
 
 { #category : 'collision filtering' }

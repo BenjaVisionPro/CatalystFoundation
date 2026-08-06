@@ -1772,6 +1772,62 @@ CFPhysicsCleanSlateTests >> elementFacingCollisionFilteringConfiguresItsBody [
 	^ child
 ]
 
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> runtimeFilterChangeCreatesAContactWithoutBodyMovement [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0; collisionMaskBits: 0.
+	secondBody position: 10 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts isEmpty.
+	firstBody collisionMaskBits: 16rFFFFFFFF.
+	secondResult := world step.
+	self assert: secondResult beganContacts size equals: 1.
+	self assert: secondResult activeContacts size equals: 1.
+	^ secondResult
+]
+
+{ #category : 'examples - collision filtering' }
+CFPhysicsCleanSlateTests >> runtimeFilterChangeEndsATouchingContactAndWakesBothBodies [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0.
+	secondBody position: 10 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts size equals: 1.
+	firstBody sleep.
+	secondBody sleep.
+	firstBody collisionMaskBits: 0.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	secondResult := world step.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult activeContacts isEmpty.
+	self assert: (world persistentIslandGraph islandForConstraint: firstResult activeContacts first) isNil.
+	^ secondResult
+]
+
 { #category : 'examples - circle manifolds' }
 CFPhysicsCleanSlateTests >> overlappingCirclesProducePersistentSinglePointManifold [
 	<gtExample>

@@ -1470,6 +1470,18 @@ CFPhysicsWorld >> invalidateTopology [
 	activeSolveTicket := nil
 ]
 
+{ #category : 'collision filtering' }
+CFPhysicsWorld >> collisionFilterChangedForBody: aBody [
+	activeContacts do: [ :contact |
+		((contact isSolid
+			and: [ contact firstBody == aBody or: [ contact secondBody == aBody ] ])
+			and: [ (contact pair firstShape allowsCollisionWith: contact pair secondShape) not ]) ifTrue: [
+			contact firstBody wake.
+			contact secondBody wake ] ].
+	self touchBroadphaseProxyFor: aBody.
+	^ self
+]
+
 { #category : 'broadphase' }
 CFPhysicsWorld >> touchBroadphaseProxyFor: aBody [
 	stepPipeline touchBroadphaseProxyFor: aBody.
