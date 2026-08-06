@@ -6,14 +6,13 @@ Class {
 }
 
 { #category : 'private - fixtures' }
-CFPhysicsTestCase >> cleanSlateBodyWithSequence: anInteger [
+CFPhysicsTestCase >> newBodyWithSequence: anInteger [
 	^ (CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil)
 		sequence: anInteger;
 		yourself
 ]
-
 { #category : 'private - fixtures' }
-CFPhysicsTestCase >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
+CFPhysicsTestCase >> newBodyWithSequence: anInteger position: aPoint extent: anExtent [
 	^ (CFPhysicsBody
 		element: (BlElement new
 			geometry: BlRoundedRectangleGeometry new;
