@@ -6,8 +6,7 @@ Class {
 }
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsHost [
-	<gtExample>
+CFPhysicsOverlayTests >> physicsHost [
 	| space container host first second world |
 	space := BlSpace new.
 	container := BlElement new
@@ -43,8 +42,7 @@ CFPhysicsOverlayTests >> testPhysicsHost [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsCanvassableHost [
-	<gtExample>
+CFPhysicsOverlayTests >> physicsCanvassableHost [
 	| space container host first second world |
 	space := BlSpace new.
 	container := BlElement new
@@ -79,10 +77,9 @@ CFPhysicsOverlayTests >> testPhysicsCanvassableHost [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsOverlayCanBeInstalled [
-	<gtExample>
+CFPhysicsOverlayTests >> installedPhysicsOverlay [
 	| host overlay |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
 	self assert: overlay isInstalled.
@@ -98,7 +95,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCanBeInstalled [
 CFPhysicsOverlayTests >> testPhysicsOverlayRendersAboveItsHost [
 	<gtExample>
 	| host overlay |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	host zIndex: 7.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
@@ -112,7 +109,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRendersAboveItsHost [
 CFPhysicsOverlayTests >> testPhysicsOverlayCanBeRemovedWithoutChangingTheHost [
 	<gtExample>
 	| host overlay |
-	host := self testPhysicsCanvassableHost.
+	host := self physicsCanvassableHost.
 	overlay := host showPhysicsOverlay.
 	host hidePhysicsOverlay.
 	self assert: host existingPhysicsOverlay isNil.
@@ -125,7 +122,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCanBeRemovedWithoutChangingTheHost [
 CFPhysicsOverlayTests >> testPhysicsBodyOverlayPreservesItsIdentityWhileRefreshing [
 	<gtExample>
 	| host overlay world body representation |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	body := world bodyStatesInOrder first.
@@ -150,7 +147,7 @@ CFPhysicsOverlayTests >> testPhysicsBodyOverlayPreservesItsIdentityWhileRefreshi
 CFPhysicsOverlayTests >> testPhysicsOverlayRemovesRetiredBodyRepresentations [
 	<gtExample>
 	| host overlay world retiredElement retiredBody |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	retiredElement := host children first.
@@ -167,7 +164,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRemovesRetiredBodyRepresentations [
 CFPhysicsOverlayTests >> testPhysicsOverlayCanBeToggledRepeatedly [
 	<gtExample>
 	| host firstOverlay secondOverlay |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	firstOverlay := host togglePhysicsOverlay.
 	host space pulse.
 	self assert: firstOverlay isInstalled.
@@ -188,7 +185,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCanBeToggledRepeatedly [
 CFPhysicsOverlayTests >> testPhysicsOverlayCapabilityResolvesAnElementHost [
 	<gtExample>
 	| host |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	self assert: (CFPhysicsOverlay hostFor: host) == host.
 	self assert: (CFPhysicsOverlay hasWorldFor: host).
 	^ host
@@ -225,7 +222,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayActionTracksWorldLifecycle [
 CFPhysicsOverlayTests >> testPhysicsOverlayOwnsOneContactRenderingPass [
 	<gtExample>
 	| host overlay |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	self assert: overlay contactOverlay notNil.
 	self assert: overlay contactOverlay visuals isEmpty.
@@ -236,7 +233,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayOwnsOneContactRenderingPass [
 CFPhysicsOverlayTests >> testPhysicsOverlayWorldCoordinatesResolveThroughItsHost [
 	<gtExample>
 	| host overlay context point |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	context := CFPhysicsOverlayContext host: host world: overlay world overlay: overlay.
 	point := 75 @ 55.
@@ -251,7 +248,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayWorldCoordinatesResolveThroughItsHost
 CFPhysicsOverlayTests >> testPhysicsOverlayRefreshesContactsAfterEachPresentedFrame [
 	<gtExample>
 	| host overlay world first second |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -272,7 +269,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRefreshesContactsAfterEachPresentedFr
 CFPhysicsOverlayTests >> testPhysicsOverlayPresentsContactGeometryWithItsReferenceBody [
 	<gtExample>
 	| host overlay world first second firstBody visual initialPosition state expectedPosition context |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -304,7 +301,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayPresentsContactGeometryWithItsReferen
 CFPhysicsOverlayTests >> testPhysicsOverlayNodeSelectionLeavesPhlowToTheNode [
 	<gtExample>
 	| host overlay node clickEvent phlowSelectionRequested |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	node := host children first.
 	phlowSelectionRequested := false.
@@ -322,7 +319,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayNodeSelectionLeavesPhlowToTheNode [
 CFPhysicsOverlayTests >> testPhysicsPresentationAndWorldCoordinatesAgreeForPositionedElements [
 	<gtExample>
 	| host overlay world body element physicsPosition displayedPoint worldPoint context |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	element := host children first.
@@ -347,7 +344,7 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAndWorldCoordinatesAgreeForPosit
 CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlySuccessfullyPresentedFrames [
 	<gtExample>
 	| host world presentation handler presentedCount |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	presentedCount := 0.
 	handler := BlEventHandler
@@ -371,7 +368,7 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlySuccessfullyPresent
 CFPhysicsOverlayTests >> testPhysicsOverlayFrameHandlerFollowsShowHideShowLifecycle [
 	<gtExample>
 	| host world first second firstOverlay secondOverlay |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
 	second := host children second.
@@ -399,7 +396,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayFrameHandlerFollowsShowHideShowLifecy
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorCanBeInstalledAndReleased [
 	<gtExample>
 	| host inspector |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	inspector := CFPhysicsObjectInspector on: host.
 	self assert: inspector isInstalled not.
 	inspector install.
@@ -414,7 +411,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorCanBeInstalledAndReleased [
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorBuildsItsSynchronousPanel [
 	<gtExample>
 	| host inspector physics |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector inspect: physics.
@@ -430,7 +427,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorBuildsItsSynchronousPanel [
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorReusesItsPanelWhenSelectionChanges [
 	<gtExample>
 	| host inspector firstPhysics secondPhysics originalPanel |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	firstPhysics := host children first existingPhysics.
 	secondPhysics := host children second existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
@@ -447,7 +444,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorReusesItsPanelWhenSelectionCh
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorContentTransition [
 	<gtExample>
 	| host world spring inspector physics outgoingElement motion |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -484,7 +481,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorContentTransition [
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorCanClearItsObject [
 	<gtExample>
 	| host inspector physics panel |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
 	panel := inspector panel.
@@ -501,7 +498,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorCanClearItsObject [
 CFPhysicsOverlayTests >> testPhysicsOverlayOwnsAndInstallsItsObjectInspector [
 	<gtExample>
 	| host overlay inspector |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	inspector := overlay objectInspector.
 	self assert: inspector notNil.
@@ -515,7 +512,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayOwnsAndInstallsItsObjectInspector [
 CFPhysicsOverlayTests >> testPhysicsOverlayReleasesItsObjectInspector [
 	<gtExample>
 	| host overlay inspector |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	inspector := overlay objectInspector.
 	host hidePhysicsOverlay.
@@ -530,7 +527,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayReleasesItsObjectInspector [
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAnActivePhysicalElementOnClick [
 	<gtExample>
 	| host overlay element physics |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	physics := element existingPhysics.
@@ -544,7 +541,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAnActivePhysicalElementOnClick
 CFPhysicsOverlayTests >> testPhysicsOverlayReplacesTheSelectedPhysicalElement [
 	<gtExample>
 	| host overlay first second |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	first := host children first.
 	second := host children second.
@@ -559,7 +556,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayReplacesTheSelectedPhysicalElement [
 CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectionWhenTheSelectedElementIsClickedAgain [
 	<gtExample>
 	| host overlay element selectionVisual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
@@ -575,7 +572,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectionWhenTheSelectedElementI
 CFPhysicsOverlayTests >> testPhysicsOverlayDoesNotCreatePhysicsWhenAPlainElementIsClicked [
 	<gtExample>
 	| host overlay element |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := BlElement new size: 20 @ 20.
 	host addChild: element.
@@ -592,7 +589,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayDoesNotCreatePhysicsWhenAPlainElement
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenTheSelectedBodyRetires [
 	<gtExample>
 	| host overlay element physics |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	physics := element existingPhysics.
@@ -612,7 +609,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenTheSelectedBodyRet
 CFPhysicsOverlayTests >> testPhysicsOverlayKeepsRefreshingAnActiveSelection [
 	<gtExample>
 	| host overlay element physics |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	physics := element existingPhysics.
@@ -627,7 +624,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayKeepsRefreshingAnActiveSelection [
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorRefreshesSynchronously [
 	<gtExample>
 	| host inspector physics |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector inspect: physics.
@@ -647,7 +644,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorRefreshesSynchronously [
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectionPreservesPullDragging [
 	<gtExample>
 	| host overlay element scripter |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element addEventHandler: BlPullHandler new.
@@ -675,7 +672,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectionPreservesPullDragging [
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorOnlyHandlesMouseEventsInItsPanel [
 	<gtExample>
 	| host inspector physics |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
 	inspector inspect: physics.
@@ -689,7 +686,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorOnlyHandlesMouseEventsInItsPa
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenTheBackgroundIsClicked [
 	<gtExample>
 	| host overlay element |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
@@ -736,7 +733,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayObservesConsumedButtonClicks [
 CFPhysicsOverlayTests >> testPhysicsOverlayIgnoresClicksInsideItsObjectInspector [
 	<gtExample>
 	| host overlay element event |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
@@ -754,7 +751,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayIgnoresClicksInsideItsObjectInspector
 CFPhysicsOverlayTests >> testPhysicsOverlayHighlightsTheSelectedBody [
 	<gtExample>
 	| host overlay element selectedBody |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	selectedBody := element existingPhysics bodyOrNil.
@@ -769,7 +766,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayHighlightsTheSelectedBody [
 CFPhysicsOverlayTests >> testPhysicsOverlayMovesTheSelectionHighlight [
 	<gtExample>
 	| host overlay first second firstBody secondBody selection |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	first := host children first.
 	second := host children second.
@@ -788,7 +785,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayMovesTheSelectionHighlight [
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionHighlightWhenTheBackgroundIsClicked [
 	<gtExample>
 	| host overlay element |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	element fireEvent: BlClickEvent new.
@@ -805,7 +802,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionHighlightWhenTheBackgr
 CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectionVisibleWhenBodiesAreHidden [
 	<gtExample>
 	| host overlay element selectedBody |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	element := host children first.
 	selectedBody := element existingPhysics bodyOrNil.
@@ -824,7 +821,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectionVisibleWhenBodiesAreHid
 CFPhysicsOverlayTests >> testPhysicsOverlayCreatesOneRetainedVisualPerSpring [
 	<gtExample>
 	| host world spring overlay |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -842,7 +839,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCreatesOneRetainedVisualPerSpring [
 CFPhysicsOverlayTests >> testPhysicsSpringOverlayPreservesVisualIdentity [
 	<gtExample>
 	| host world spring overlay visual |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -860,7 +857,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayPreservesVisualIdentity [
 CFPhysicsOverlayTests >> testPhysicsSpringVisualUsesItsAnchoredEndpointPair [
 	<gtExample>
 	| host world first second spring overlay visual firstPoint secondPoint context |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
@@ -887,7 +884,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualUsesItsAnchoredEndpointPair [
 CFPhysicsOverlayTests >> testPhysicsSpringVisualRefreshesOnPresentedFrame [
 	<gtExample>
 	| host world first second spring overlay visual originalPosition expectedPosition context |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
@@ -915,7 +912,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualRefreshesOnPresentedFrame [
 CFPhysicsOverlayTests >> testPhysicsOverlayPresentationDiagnosticsFollowHostTransformation [
 	<gtExample>
 	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint context contactState expectedSpringPoint expectedContactPoint |
-	host := self testPhysicsCanvassableHost.
+	host := self physicsCanvassableHost.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
 	overlay := host existingPhysicsOverlay.
@@ -958,10 +955,9 @@ CFPhysicsOverlayTests >> testPhysicsOverlayPresentationDiagnosticsFollowHostTran
 ]
 
 { #category : 'examples - physics object selection' }
-CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget [
-	<gtExample>
+CFPhysicsOverlayTests >> overlayWithSelectedSpringHitTarget [
 	| host world spring overlay visual |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -983,7 +979,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget
 CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedSpringAsDistanceJoint [
 	<gtExample>
 	| overlay spring inspector content |
-	overlay := self testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget.
+	overlay := self overlayWithSelectedSpringHitTarget.
 	spring := overlay selectedSpring.
 	inspector := overlay objectInspector.
 	content := inspector content.
@@ -1000,7 +996,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedSpringAsDistanceJoint
 CFPhysicsOverlayTests >> testPhysicsOverlayMaintainsSingleSelectionAcrossBodiesSpringsAndJoints [
 	<gtExample>
 	| host overlay world first spring joint springVisual jointVisual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1039,7 +1035,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayMaintainsSingleSelectionAcrossBodiesS
 CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
 	| host world first second spring overlay visual |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
@@ -1061,7 +1057,7 @@ CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
 CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksItsRestLength [
 	<gtExample>
 	| host world first second spring overlay visual firstPoint secondPoint direction expectedMarkerPosition |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
@@ -1089,7 +1085,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksItsRestLength [
 CFPhysicsOverlayTests >> testPhysicsSpringOverlayRemovesReleasedSprings [
 	<gtExample>
 	| host world spring overlay visual |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -1109,7 +1105,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayRemovesReleasedSprings [
 CFPhysicsOverlayTests >> testPhysicsSpringOverlayIsEmptyWhileDisabled [
 	<gtExample>
 	| host world spring overlay |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	world := host physics world.
 	spring := CFPhysicsDistanceJoint
 		between: world bodyStatesInOrder first
@@ -1129,7 +1125,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayIsEmptyWhileDisabled [
 CFPhysicsOverlayTests >> testPhysicsJointOverlayCreatesVisualsForWorldJoints [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1147,7 +1143,7 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayCreatesVisualsForWorldJoints [
 CFPhysicsOverlayTests >> testPhysicsJointOverlayPreservesVisualIdentity [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1164,7 +1160,7 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayPreservesVisualIdentity [
 CFPhysicsOverlayTests >> testPhysicsJointOverlayRemovesRetiredVisuals [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1184,7 +1180,7 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayRemovesRetiredVisuals [
 CFPhysicsOverlayTests >> testPhysicsJointOverlayUsesDisplayedAnchorCoordinates [
 	<gtExample>
 	| host overlay world first joint visual context points expectedFirst expectedSecond |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1210,7 +1206,7 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayUsesDisplayedAnchorCoordinates [
 CFPhysicsOverlayTests >> testPhysicsJointOverlayClearsWhenDisabled [
 	<gtExample>
 	| host overlay world first visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1226,10 +1222,9 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayClearsWhenDisabled [
 ]
 
 { #category : 'examples - physics object selection' }
-CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget [
-	<gtExample>
+CFPhysicsOverlayTests >> overlayWithSelectedJointHitTarget [
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1251,7 +1246,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget 
 CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectedJointWhenClickedAgain [
 	<gtExample>
 	| overlay diagnostic joint selectionVisual |
-	overlay := self testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	overlay := self overlayWithSelectedJointHitTarget.
 	diagnostic := overlay jointOverlay visuals first.
 	joint := overlay selectedJoint.
 	selectionVisual := overlay selectionVisual.
@@ -1265,7 +1260,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayKeepsSelectedJointWhenClickedAgain [
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenSelectedJointIsRemoved [
 	<gtExample>
 	| overlay world joint |
-	overlay := self testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	overlay := self overlayWithSelectedJointHitTarget.
 	world := overlay world.
 	joint := overlay selectedJoint.
 	world removeDistanceJoint: joint.
@@ -1279,7 +1274,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenSelectedJointIsRem
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectedJointWhenJointsAreDisabled [
 	<gtExample>
 	| overlay |
-	overlay := self testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	overlay := self overlayWithSelectedJointHitTarget.
 	overlay jointsEnabled: false.
 	self assert: overlay selectedJoint isNil.
 	self assert: overlay selectionVisual isNil.
@@ -1289,10 +1284,9 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectedJointWhenJointsAreDisab
 
 
 { #category : 'examples - physics object inspector' }
-CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedJoint [
-	<gtExample>
+CFPhysicsOverlayTests >> overlayInspectingSelectedJoint [
 	| overlay joint inspector content |
-	overlay := self testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget.
+	overlay := self overlayWithSelectedJointHitTarget.
 	joint := overlay selectedJoint.
 	inspector := overlay objectInspector.
 	content := inspector content.
@@ -1309,7 +1303,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedJoint [
 CFPhysicsOverlayTests >> testPhysicsOverlayRefreshesSelectedJointInspector [
 	<gtExample>
 	| overlay joint content initialAnchor |
-	overlay := self testPhysicsOverlayInspectsSelectedJoint.
+	overlay := self overlayInspectingSelectedJoint.
 	joint := overlay selectedJoint.
 	content := overlay objectInspector content.
 	initialAnchor := (content valueElementAt: #anchorA) text asString.
@@ -1326,7 +1320,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRefreshesSelectedJointInspector [
 CFPhysicsOverlayTests >> testPhysicsOverlayClearsJointInspectorWhenJointIsRemoved [
 	<gtExample>
 	| overlay world joint |
-	overlay := self testPhysicsOverlayInspectsSelectedJoint.
+	overlay := self overlayInspectingSelectedJoint.
 	world := overlay world.
 	joint := overlay selectedJoint.
 	world removeDistanceJoint: joint.
@@ -1340,7 +1334,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsJointInspectorWhenJointIsRemove
 CFPhysicsOverlayTests >> testPhysicsDistanceJointVisualShowsItsRestLength [
 	<gtExample>
 	| host overlay world first joint visual points context firstPoint secondPoint distance expectedPosition |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1371,7 +1365,7 @@ CFPhysicsOverlayTests >> testPhysicsDistanceJointVisualShowsItsRestLength [
 CFPhysicsOverlayTests >> testPhysicsNonDistanceJointVisualHidesTheRestLengthMarker [
 	<gtExample>
 	| host overlay world first second joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1391,7 +1385,7 @@ CFPhysicsOverlayTests >> testPhysicsNonDistanceJointVisualHidesTheRestLengthMark
 CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualShowsItsAxisAndLimits [
 	<gtExample>
 	| host overlay world first joint visual points context secondPoint axisStart axisEnd displayedAxis expectedStart expectedEnd normal |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1432,7 +1426,7 @@ CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualShowsItsAxisAndLimits [
 CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualHidesLimitMarkersWhenLimitsAreDisabled [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1449,10 +1443,9 @@ CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualHidesLimitMarkersWhenLim
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsPivotAndReferenceDirection [
-	<gtExample>
+CFPhysicsOverlayTests >> revoluteJointVisual [
 	| host overlay world first joint visual points context firstPoint secondPoint pivotPoint |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1484,7 +1477,7 @@ CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsPivotAndReferenceDir
 CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsConfiguredAngularLimits [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1507,7 +1500,7 @@ CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsConfiguredAngularLim
 CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsMotorDirectionOnlyWhenEnabled [
 	<gtExample>
 	| host overlay world first joint visual |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1532,10 +1525,9 @@ CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsMotorDirectionOnlyWh
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation [
-	<gtExample>
+CFPhysicsOverlayTests >> weldJointVisual [
 	| host overlay world first second joint visual points context firstPoint secondPoint pivotPoint |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1569,7 +1561,7 @@ CFPhysicsOverlayTests >> testPhysicsWeldJointVisualShowsItsLockedReferenceOrient
 CFPhysicsOverlayTests >> testPhysicsWeldJointVisualTracksReferenceAngleChanges [
 	<gtExample>
 	| visual overlay joint initialEnd |
-	visual := self testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation.
+	visual := self weldJointVisual.
 	overlay := visual context overlay.
 	joint := visual joint.
 	initialEnd := visual referenceRay toPosition.
@@ -1586,7 +1578,7 @@ CFPhysicsOverlayTests >> testPhysicsWeldJointVisualTracksReferenceAngleChanges [
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAWeldJointAcrossItsVisibleGlyph [
 	<gtExample>
 	| visual overlay joint |
-	visual := self testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation.
+	visual := self weldJointVisual.
 	overlay := visual context overlay.
 	joint := visual joint.
 	BlSpace simulateClickOn: visual hitTarget.
@@ -1600,7 +1592,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAWeldJointAcrossItsVisibleGlyp
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsARevoluteJointAcrossItsVisibleGlyph [
 	<gtExample>
 	| visual overlay joint |
-	visual := self testPhysicsRevoluteJointVisualShowsPivotAndReferenceDirection.
+	visual := self revoluteJointVisual.
 	overlay := visual context overlay.
 	joint := visual joint.
 	BlSpace simulateClickOn: visual hitTarget.
@@ -1614,7 +1606,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsARevoluteJointAcrossItsVisible
 CFPhysicsOverlayTests >> testPhysicsOverlayDistanceJointInspectorShowsConfigurationAndSolverState [
 	<gtExample>
 	| overlay joint content points |
-	overlay := self testPhysicsOverlayInspectsSelectedJoint.
+	overlay := self overlayInspectingSelectedJoint.
 	joint := overlay selectedJoint.
 	content := overlay objectInspector content.
 	points := joint endpointPair worldPoints.
@@ -1628,7 +1620,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayDistanceJointInspectorShowsConfigurat
 CFPhysicsOverlayTests >> testPhysicsOverlayRevoluteJointInspectorShowsLimitsAndMotor [
 	<gtExample>
 	| host overlay world first joint content |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1655,7 +1647,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRevoluteJointInspectorShowsLimitsAndM
 CFPhysicsOverlayTests >> testPhysicsOverlayPrismaticJointInspectorShowsAxisLimitsAndSolverState [
 	<gtExample>
 	| host overlay world first joint content |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1679,7 +1671,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayPrismaticJointInspectorShowsAxisLimit
 CFPhysicsOverlayTests >> testPhysicsOverlayWeldJointInspectorDoesNotExposeRevoluteMotorFields [
 	<gtExample>
 	| host overlay world first joint content |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1699,7 +1691,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayWeldJointInspectorDoesNotExposeRevolu
 CFPhysicsOverlayTests >> testPhysicsWeldJointDiagnosticFollowsHostTransformation [
 	<gtExample>
 	| host overlay first second joint visual initialPivot |
-	host := self testPhysicsCanvassableHost.
+	host := self physicsCanvassableHost.
 	overlay := host showPhysicsOverlay.
 	host space pulse.
 	first := host children first.
@@ -1722,7 +1714,7 @@ CFPhysicsOverlayTests >> testPhysicsWeldJointDiagnosticFollowsHostTransformation
 CFPhysicsOverlayTests >> testPhysicsJointVisualReleasesEveryRetainedPrimitiveWhenDisabled [
 	<gtExample>
 	| visual overlay primitives |
-	visual := self testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation.
+	visual := self weldJointVisual.
 	overlay := visual context overlay.
 	primitives := {
 		visual.
@@ -1748,7 +1740,7 @@ CFPhysicsOverlayTests >> testPhysicsJointVisualReleasesEveryRetainedPrimitiveWhe
 CFPhysicsOverlayTests >> testPhysicsOverlayReplacesJointInspectorContentAcrossJointTypes [
 	<gtExample>
 	| host overlay world first second distanceJoint weldJoint distanceVisual fixedVisual firstContent secondContent |
-	host := self testPhysicsOverlayCanBeInstalled.
+	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
@@ -1785,7 +1777,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayReplacesJointInspectorContentAcrossJo
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorIsCompactAndContainedByItsHost [
 	<gtExample>
 	| host inspector physics |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	host size: 400 @ 120.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
@@ -1822,7 +1814,7 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorKeepsItsTitleOutsideTheScroll
 CFPhysicsOverlayTests >> testPhysicsObjectInspectorUsesNaturalHeightWhenItFits [
 	<gtExample>
 	| host inspector physics expectedPanelHeight expectedBodyHeight |
-	host := self testPhysicsHost.
+	host := self physicsHost.
 	host size: 400 @ 500.
 	physics := host children first existingPhysics.
 	inspector := CFPhysicsObjectInspector on: host.
@@ -1837,4 +1829,52 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorUsesNaturalHeightWhenItFits [
 	self assert: inspector content scrollPane extent y equals: expectedBodyHeight.
 	self assert: inspector content dataElement extent y equals: expectedBodyHeight.
 	^ inspector
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsHost [
+	<gtExample>
+	^ self physicsHost
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsCanvassableHost [
+	<gtExample>
+	^ self physicsCanvassableHost
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsOverlayCanBeInstalled [
+	<gtExample>
+	^ self installedPhysicsOverlay
+]
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> testPhysicsOverlayInspectsSelectedJoint [
+	<gtExample>
+	^ self overlayInspectingSelectedJoint
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAJointFromItsOverlayHitTarget [
+	<gtExample>
+	^ self overlayWithSelectedJointHitTarget
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget [
+	<gtExample>
+	^ self overlayWithSelectedSpringHitTarget
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsPivotAndReferenceDirection [
+	<gtExample>
+	^ self revoluteJointVisual
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation [
+	<gtExample>
+	^ self weldJointVisual
 ]

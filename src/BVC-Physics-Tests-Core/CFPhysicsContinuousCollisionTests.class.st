@@ -904,8 +904,7 @@ CFPhysicsContinuousCollisionTests >> testPredictedSweepContinuesFromAdvancedStep
 	^ sweep
 ]
 { #category : 'tests - continuous collision' }
-CFPhysicsContinuousCollisionTests >> testStepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
-	<gtExample>
+CFPhysicsContinuousCollisionTests >> multipleContinuousImpactStepResult [
 	| firstMoving firstObstacle secondMoving secondObstacle pipeline step result |
 	firstMoving := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	firstObstacle := self newBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
@@ -1094,7 +1093,7 @@ CFPhysicsContinuousCollisionTests >> testStepPipelineKeepsOverlappingSensorOnDis
 CFPhysicsContinuousCollisionTests >> testContinuousContactsPublishInDeterministicPairOrder [
 	<gtExample>
 	| result impacts |
-	result := self testStepPipelineSolvesMultipleContinuousImpactsInTimeOrder.
+	result := self multipleContinuousImpactStepResult.
 	impacts := result continuousStepResult impacts.
 	self assert: impacts size equals: 2.
 	self assert: impacts first pair firstBody sequence equals: 1.
@@ -1104,8 +1103,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousContactsPublishInDeterministi
 	^ impacts
 ]
 { #category : 'tests - continuous collision' }
-CFPhysicsContinuousCollisionTests >> testStepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
-	<gtExample>
+CFPhysicsContinuousCollisionTests >> sweptSensorIgnoredStepResult [
 	| moving sensor pipeline step result |
 	moving := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	sensor := self newBodyWithSequence: 2 position: 30 @ 0 extent: 20 @ 20.
@@ -1211,7 +1209,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousSolidImpactIgnoresSweptSensor
 CFPhysicsContinuousCollisionTests >> testIgnoredSweptSensorProducesNoFollowingEndEvent [
 	<gtExample>
 	| firstResult moving sensor pipeline step secondResult |
-	firstResult := self testStepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion.
+	firstResult := self sweptSensorIgnoredStepResult.
 	moving := firstResult bodies first.
 	sensor := firstResult bodies second.
 	moving velocity: 0 @ 0.
@@ -1313,4 +1311,16 @@ CFPhysicsContinuousCollisionTests >> testShapeStateDistanceProxyPreservesExistin
 	self assert: proxy points equals: { 0 @ 0 }.
 	self assert: proxy radius equals: 10.0.
 	^ proxy
+]
+
+{ #category : 'tests - continuous collision' }
+CFPhysicsContinuousCollisionTests >> testStepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
+	<gtExample>
+	^ self multipleContinuousImpactStepResult
+]
+
+{ #category : 'tests - continuous collision' }
+CFPhysicsContinuousCollisionTests >> testStepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
+	<gtExample>
+	^ self sweptSensorIgnoredStepResult
 ]
