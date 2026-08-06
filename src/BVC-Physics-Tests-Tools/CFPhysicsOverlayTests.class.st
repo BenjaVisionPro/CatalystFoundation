@@ -1415,20 +1415,6 @@ CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualHidesLimitMarkersWhenLim
 ]
 
 { #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> revoluteJointVisual [
-	| host overlay world first |
-	host := self installedPhysicsOverlay.
-	overlay := host existingPhysicsOverlay.
-	world := host physics world.
-	first := host children first.
-	(first physics localAnchorAt: 20 @ 20)
-		revoluteJointTo: (world anchorAt: 180 @ 80).
-	overlay refresh.
-	host space pulse.
-	^ overlay jointOverlay visuals first
-]
-
-{ #category : 'examples - physics overlay - joints' }
 CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsConfiguredAngularLimits [
 	<gtExample>
 	| host overlay world first joint visual |
@@ -1527,10 +1513,16 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsAWeldJointAcrossItsVisibleGlyp
 { #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> testPhysicsOverlaySelectsARevoluteJointAcrossItsVisibleGlyph [
 	<gtExample>
-	| visual overlay joint |
-	visual := self revoluteJointVisual.
-	overlay := visual context overlay.
-	joint := visual joint.
+	| host overlay world first joint visual |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		revoluteJointTo: (world anchorAt: 180 @ 80).
+	overlay refresh.
+	host space pulse.
+	visual := overlay jointOverlay visuals first.
 	BlSpace simulateClickOn: visual hitTarget.
 	self assert: overlay selectedJoint == joint.
 	self assert: overlay selectedElement isNil.

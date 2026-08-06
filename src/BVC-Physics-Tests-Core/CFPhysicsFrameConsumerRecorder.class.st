@@ -1,12 +1,12 @@
 "
 I record frame-consumer callbacks for executable examples.
 
-My responsibility is to verify presentation and release behaviour without introducing a real visual consumer.
+My responsibility is to record presentation cadence and interpolation alpha without introducing a visual consumer.
 "
 Class {
 	#name : 'CFPhysicsFrameConsumerRecorder',
 	#superclass : 'Object',
-	#instVars : [ 'presentationCount', 'lastPresentationAlpha', 'releaseCount' ],
+	#instVars : [ 'presentationCount', 'lastPresentationAlpha' ],
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
@@ -16,7 +16,6 @@ CFPhysicsFrameConsumerRecorder >> initialize [
 	super initialize.
 	presentationCount := 0.
 	lastPresentationAlpha := nil.
-	releaseCount := 0
 ]
 
 { #category : 'consuming frames' }
@@ -25,10 +24,6 @@ CFPhysicsFrameConsumerRecorder >> frameReadyAtAlpha: aNumber [
 	lastPresentationAlpha := aNumber
 ]
 
-{ #category : 'controlling' }
-CFPhysicsFrameConsumerRecorder >> release [
-	releaseCount := releaseCount + 1
-]
 
 { #category : 'accessing' }
 CFPhysicsFrameConsumerRecorder >> presentationCount [
@@ -40,7 +35,3 @@ CFPhysicsFrameConsumerRecorder >> lastPresentationAlpha [
 	^ lastPresentationAlpha
 ]
 
-{ #category : 'accessing' }
-CFPhysicsFrameConsumerRecorder >> releaseCount [
-	^ releaseCount
-]

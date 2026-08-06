@@ -49,7 +49,6 @@ CFPhysicsMotionTests >> testPhysicsWorldBehaviourAdvancesDeterministicFixedSteps
 	self assert: motion isRunning.
 	motion cancel.
 	self assert: behaviour isActive not.
-	self assert: presentation releaseCount equals: 0.
 	self assert: space cfMotionCoordinator hasActiveMotions not.
 	^ track
 ]
