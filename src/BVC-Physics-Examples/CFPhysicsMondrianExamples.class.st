@@ -4,14 +4,14 @@ I provide executable showcases of Physics integrated with Mondrian.
 My responsibility is to demonstrate world creation, force-directed Behaviour and Physics inspection on graph visualisations.
 "
 Class {
-	#name : 'CFPhysicsMondrianShowcaseExamples',
+	#name : 'CFPhysicsMondrianExamples',
 	#superclass : 'Object',
 	#category : 'BVC-Physics-Examples',
 	#package : 'BVC-Physics-Examples'
 }
 
 { #category : 'showcase - mondrian' }
-CFPhysicsMondrianShowcaseExamples >> defaultPhysicsGraph [
+CFPhysicsMondrianExamples >> defaultPhysicsGraph [
 	<gtExample>
 	<return: #GtMondrian>
 	| mondrian |
@@ -21,7 +21,7 @@ CFPhysicsMondrianShowcaseExamples >> defaultPhysicsGraph [
 ]
 
 { #category : 'showcase - mondrian' }
-CFPhysicsMondrianShowcaseExamples >> forceDirectedGraph [
+CFPhysicsMondrianExamples >> forceDirectedGraph [
 	<gtExample>
 	<return: #GtMondrian>
 	| mondrian world |
@@ -33,7 +33,7 @@ CFPhysicsMondrianShowcaseExamples >> forceDirectedGraph [
 ]
 
 { #category : 'showcase - mondrian' }
-CFPhysicsMondrianShowcaseExamples >> livingBehaviourGraph [
+CFPhysicsMondrianExamples >> livingBehaviourGraph [
 	<gtExample>
 	<return: #GtMondrian>
 	^ self forceDirectedGraph
@@ -41,7 +41,7 @@ CFPhysicsMondrianShowcaseExamples >> livingBehaviourGraph [
 
 
 { #category : 'showcase - mondrian' }
-CFPhysicsMondrianShowcaseExamples >> physicsInspectorGraph [
+CFPhysicsMondrianExamples >> physicsInspectorGraph [
 	<gtExample>
 	<return: #GtMondrian>
 	| space mondrian world nodes overlay |

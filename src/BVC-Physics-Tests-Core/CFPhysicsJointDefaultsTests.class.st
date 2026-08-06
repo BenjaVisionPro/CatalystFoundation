@@ -1,13 +1,13 @@
 "I specify the Box2D 3.1.1 Wheel joint defaults introduced by the first implementation increment."
 Class {
-	#name : 'CFPhysicsWheelJointExamples',
-	#superclass : 'Object',
+	#name : 'CFPhysicsJointDefaultsTests',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'examples - wheel joint' }
-CFPhysicsWheelJointExamples >> wheelJointDefaultsMatchBox2D [
+CFPhysicsJointDefaultsTests >> wheelJointDefaultsMatchBox2D [
 	<gtExample>
 	| joint |
 	joint := CFPhysicsWheelJoint new.

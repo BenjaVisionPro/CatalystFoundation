@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFPhysicsSharedScalarExamples',
-	#superclass : 'Object',
+	#name : 'CFPhysicsSharedScalarTests',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Behaviours',
 	#package : 'BVC-Physics-Tests-Behaviours'
 }
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> sharedScalarRetainsAndUpdatesItsValue [
+CFPhysicsSharedScalarTests >> sharedScalarRetainsAndUpdatesItsValue [
 	<gtExample>
 	| scalar |
 	scalar := CFPhysicsSharedScalar value: 12.
@@ -17,7 +17,7 @@ CFPhysicsSharedScalarExamples >> sharedScalarRetainsAndUpdatesItsValue [
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> ordinaryPhysicsValuesResolveWithoutWrapping [
+CFPhysicsSharedScalarTests >> ordinaryPhysicsValuesResolveWithoutWrapping [
 	<gtExample>
 	self assert: 42 value equals: 42.
 	self assert: nil value isNil.
@@ -25,7 +25,7 @@ CFPhysicsSharedScalarExamples >> ordinaryPhysicsValuesResolveWithoutWrapping [
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> constantForceResponseObservesSharedForceAndDistance [
+CFPhysicsSharedScalarTests >> constantForceResponseObservesSharedForceAndDistance [
 	<gtExample>
 	| force maximumDistance response |
 	force := CFPhysicsSharedScalar value: 250.
@@ -47,7 +47,7 @@ CFPhysicsSharedScalarExamples >> constantForceResponseObservesSharedForceAndDist
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarExamples >> sharedValuesAreIndependent [
+CFPhysicsSharedScalarTests >> sharedValuesAreIndependent [
 	<gtExample>
 	| first second |
 	first := CFPhysicsSharedScalar value: 10.

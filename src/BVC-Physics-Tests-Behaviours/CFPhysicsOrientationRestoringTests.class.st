@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFPhysicsOrientationRestoringExamples',
-	#superclass : 'Object',
+	#name : 'CFPhysicsOrientationRestoringTests',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Behaviours',
 	#package : 'BVC-Physics-Tests-Behaviours'
 }
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsItsElementToCapturedRotation [
+CFPhysicsOrientationRestoringTests >> orientationRestoringReturnsItsElementToCapturedRotation [
 	<gtExample>
 	| owner element world behaviour target |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -28,7 +28,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringReturnsItsElementTo
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringUsesTheShortestAngularPath [
+CFPhysicsOrientationRestoringTests >> orientationRestoringUsesTheShortestAngularPath [
 	<gtExample>
 	| owner element world behaviour initialVelocity |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -48,7 +48,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringUsesTheShortestAngu
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringActsOnlyOnItsAttachedElement [
+CFPhysicsOrientationRestoringTests >> orientationRestoringActsOnlyOnItsAttachedElement [
 	<gtExample>
 	| owner first second world behaviour secondRotation |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -73,7 +73,7 @@ CFPhysicsOrientationRestoringExamples >> orientationRestoringActsOnlyOnItsAttach
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringExamples >> orientationRestoringAllowsFastCollisionSpinToDecayNaturally [
+CFPhysicsOrientationRestoringTests >> orientationRestoringAllowsFastCollisionSpinToDecayNaturally [
 	<gtExample>
 	| behaviour slowResponse fastResponse |
 	behaviour := CFPhysicsOrientationRestoringBehaviour new

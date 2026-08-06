@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFPhysicsCleanSlateTests',
-	#superclass : 'Object',
+	#name : 'CFPhysicsCoreTests',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'examples - step' }
-CFPhysicsCleanSlateTests >> softStepUsesSubstepDuration [
+CFPhysicsCoreTests >> softStepUsesSubstepDuration [
 	<gtExample>
 	| step |
 	step := CFPhysicsStep
@@ -22,7 +22,7 @@ CFPhysicsCleanSlateTests >> softStepUsesSubstepDuration [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> distanceProxySeparatesRoundedShapeCoreFromRadius [
+CFPhysicsCoreTests >> distanceProxySeparatesRoundedShapeCoreFromRadius [
 	<gtExample>
 	| state proxy |
 	state := CFPhysicsShapeState on: (BlElement new
@@ -36,7 +36,7 @@ CFPhysicsCleanSlateTests >> distanceProxySeparatesRoundedShapeCoreFromRadius [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> distanceProxyUsesBodyCentredCircleCore [
+CFPhysicsCoreTests >> distanceProxyUsesBodyCentredCircleCore [
 	<gtExample>
 	| state proxy |
 	state := CFPhysicsShapeState on: (BlElement new
@@ -50,7 +50,7 @@ CFPhysicsCleanSlateTests >> distanceProxyUsesBodyCentredCircleCore [
 ]
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> contactFeatureIdentityIsStructural [
+CFPhysicsCoreTests >> contactFeatureIdentityIsStructural [
 	<gtExample>
 	| first second different |
 	first := CFPhysicsContactFeatureId
@@ -66,7 +66,7 @@ CFPhysicsCleanSlateTests >> contactFeatureIdentityIsStructural [
 ]
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> manifoldPreservesImpulsesByFeatureIdentity [
+CFPhysicsCoreTests >> manifoldPreservesImpulsesByFeatureIdentity [
 	<gtExample>
 	| retainedId oldPoint oldManifold retainedPoint newPoint newManifold |
 	retainedId := CFPhysicsContactFeatureId
@@ -96,7 +96,7 @@ CFPhysicsCleanSlateTests >> manifoldPreservesImpulsesByFeatureIdentity [
 ]
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> manifoldDoesNotUsePositionAsIdentity [
+CFPhysicsCoreTests >> manifoldDoesNotUsePositionAsIdentity [
 	<gtExample>
 	| oldPoint oldManifold newPoint newManifold |
 	oldPoint := CFPhysicsManifoldPoint at: 10 @ 20.
@@ -119,7 +119,7 @@ CFPhysicsCleanSlateTests >> manifoldDoesNotUsePositionAsIdentity [
 ]
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> manifoldConsumesEachPreviousFeatureImpulseOnlyOnce [
+CFPhysicsCoreTests >> manifoldConsumesEachPreviousFeatureImpulseOnlyOnce [
 	<gtExample>
 	| featureId firstOldPoint secondOldPoint oldManifold firstNewPoint secondNewPoint newManifold |
 	featureId := CFPhysicsContactFeatureId
@@ -155,7 +155,7 @@ CFPhysicsCleanSlateTests >> manifoldConsumesEachPreviousFeatureImpulseOnlyOnce [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> faceContactProducesTwoPoints [
+CFPhysicsCoreTests >> faceContactProducesTwoPoints [
 	<gtExample>
 	| ground box manifold |
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
@@ -175,7 +175,7 @@ CFPhysicsCleanSlateTests >> faceContactProducesTwoPoints [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> faceContactIdentityPersistsAcrossTangentialMotion [
+CFPhysicsCoreTests >> faceContactIdentityPersistsAcrossTangentialMotion [
 	<gtExample>
 	| ground box first second firstIds secondIds |
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
@@ -193,7 +193,7 @@ CFPhysicsCleanSlateTests >> faceContactIdentityPersistsAcrossTangentialMotion [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> roundedPolygonUsesCoreAndRadius [
+CFPhysicsCoreTests >> roundedPolygonUsesCoreAndRadius [
 	<gtExample>
 	| ground box manifold |
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
@@ -209,7 +209,7 @@ CFPhysicsCleanSlateTests >> roundedPolygonUsesCoreAndRadius [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> separatedPolygonCoresRespectCombinedRadius [
+CFPhysicsCoreTests >> separatedPolygonCoresRespectCombinedRadius [
 	<gtExample>
 	| first second touching separated |
 	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20 radius: 5.
@@ -226,7 +226,7 @@ CFPhysicsCleanSlateTests >> separatedPolygonCoresRespectCombinedRadius [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> polygonRotationUsesItsCentre [
+CFPhysicsCoreTests >> polygonRotationUsesItsCentre [
 	<gtExample>
 	| shape vertices |
 	shape := CFPhysicsPolygonShape rectangleExtent: 80 @ 30.
@@ -240,7 +240,7 @@ CFPhysicsCleanSlateTests >> polygonRotationUsesItsCentre [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> polygonWorldAndLocalTransformsRoundTripAroundCentre [
+CFPhysicsCoreTests >> polygonWorldAndLocalTransformsRoundTripAroundCentre [
 	<gtExample>
 	| shape localPoint worldPoint recoveredPoint |
 	shape := CFPhysicsPolygonShape rectangleExtent: 80 @ 30.
@@ -256,7 +256,7 @@ CFPhysicsCleanSlateTests >> polygonWorldAndLocalTransformsRoundTripAroundCentre 
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> blocPolygonShapeUsesElementCentreAsRotationCentre [
+CFPhysicsCoreTests >> blocPolygonShapeUsesElementCentreAsRotationCentre [
 	<gtExample>
 	| element polygon |
 	element := BlElement new
@@ -269,7 +269,7 @@ CFPhysicsCleanSlateTests >> blocPolygonShapeUsesElementCentreAsRotationCentre [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> rectangleElementProducesPolygonShape [
+CFPhysicsCoreTests >> rectangleElementProducesPolygonShape [
 	<gtExample>
 	| element shapeState polygon |
 	element := BlElement new
@@ -285,7 +285,7 @@ CFPhysicsCleanSlateTests >> rectangleElementProducesPolygonShape [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> roundedRectangleElementProducesInsetCoreAndRadius [
+CFPhysicsCoreTests >> roundedRectangleElementProducesInsetCoreAndRadius [
 	<gtExample>
 	| element shapeState polygon |
 	element := BlElement new
@@ -300,7 +300,7 @@ CFPhysicsCleanSlateTests >> roundedRectangleElementProducesInsetCoreAndRadius [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> normalizedPolygonElementUsesItsRenderedExtent [
+CFPhysicsCoreTests >> normalizedPolygonElementUsesItsRenderedExtent [
 	<gtExample>
 	| element shapeState polygon |
 	element := BlElement new
@@ -314,7 +314,7 @@ CFPhysicsCleanSlateTests >> normalizedPolygonElementUsesItsRenderedExtent [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> BlocGeometryRoutesToPolygonManifold [
+CFPhysicsCoreTests >> BlocGeometryRoutesToPolygonManifold [
 	<gtExample>
 	| ground box manifold |
 	ground := CFPhysicsShapeState on: (BlElement new
@@ -335,7 +335,7 @@ CFPhysicsCleanSlateTests >> BlocGeometryRoutesToPolygonManifold [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> circleDoesNotPretendToBeAPolygon [
+CFPhysicsCoreTests >> circleDoesNotPretendToBeAPolygon [
 	<gtExample>
 	| element shapeState |
 	element := BlElement new
@@ -348,7 +348,7 @@ CFPhysicsCleanSlateTests >> circleDoesNotPretendToBeAPolygon [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> contactPipelineOrdersPairsDeterministically [
+CFPhysicsCoreTests >> contactPipelineOrdersPairsDeterministically [
 	<gtExample>
 	| first second third pairs |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -365,7 +365,7 @@ CFPhysicsCleanSlateTests >> contactPipelineOrdersPairsDeterministically [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> contactPipelineReportsBeginContinueAndEnd [
+CFPhysicsCoreTests >> contactPipelineReportsBeginContinueAndEnd [
 	<gtExample>
 	| first second pair manifold updater firstBatch secondBatch thirdBatch |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -386,7 +386,7 @@ CFPhysicsCleanSlateTests >> contactPipelineReportsBeginContinueAndEnd [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
+CFPhysicsCoreTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 	<gtExample>
 	| first second pair oldManifold newManifold updater initial next oldPoint newPoint |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -413,7 +413,7 @@ CFPhysicsCleanSlateTests >> contactPipelinePersistsImpulsesByFeatureIdentity [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
+CFPhysicsCoreTests >> sensorContactClearsRetainedImpulses [
 	<gtExample>
 	| first second pair oldManifold newManifold updater initial next point |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -442,7 +442,7 @@ CFPhysicsCleanSlateTests >> sensorContactClearsRetainedImpulses [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> sleepingTouchingContactRetainsItsPersistentStateWithoutNarrowPhase [
+CFPhysicsCoreTests >> sleepingTouchingContactRetainsItsPersistentStateWithoutNarrowPhase [
 	<gtExample>
 	| first second pair manifold previous calculation updater bodyStates batch retained |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -479,7 +479,7 @@ CFPhysicsCleanSlateTests >> sleepingTouchingContactRetainsItsPersistentStateWith
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> sleepingSensorContactStillRunsNarrowPhase [
+CFPhysicsCoreTests >> sleepingSensorContactStillRunsNarrowPhase [
 	<gtExample>
 	| first second pair previousManifold nextManifold previous updater bodyStates batch |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -511,7 +511,7 @@ CFPhysicsCleanSlateTests >> sleepingSensorContactStillRunsNarrowPhase [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> wakingEndpointReturnsSleepingContactToNarrowPhase [
+CFPhysicsCoreTests >> wakingEndpointReturnsSleepingContactToNarrowPhase [
 	<gtExample>
 	| first second pair previousManifold nextManifold previous calculation updater bodyStates batch updated |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -543,7 +543,7 @@ CFPhysicsCleanSlateTests >> wakingEndpointReturnsSleepingContactToNarrowPhase [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
+CFPhysicsCoreTests >> constraintPreparationMeasuresReusableContactWork [
 	<gtExample>
 	| first second pair updater firstBatch secondBatch stage |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -567,7 +567,7 @@ CFPhysicsCleanSlateTests >> constraintPreparationMeasuresReusableContactWork [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintPreparationMeasuresChangedContactWork [
+CFPhysicsCoreTests >> constraintPreparationMeasuresChangedContactWork [
 	<gtExample>
 	| first second pair updater firstBatch secondBatch stage |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -588,7 +588,7 @@ CFPhysicsCleanSlateTests >> constraintPreparationMeasuresChangedContactWork [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
+CFPhysicsCoreTests >> constraintBuilderPreparesSolverData [
 	<gtExample>
 	| first second pair manifold contact bodyStates constraints constraint point |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -622,7 +622,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesSolverData [
 
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderBaseSeparationMatchesBox2DAnchorDecomposition [
+CFPhysicsCoreTests >> constraintBuilderBaseSeparationMatchesBox2DAnchorDecomposition [
 	<gtExample>
 	| first second pair manifold contact bodyStates constraint point expected |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -647,7 +647,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderBaseSeparationMatchesBox2DAnchorDec
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderUsesCapturedBodyProperties [
+CFPhysicsCoreTests >> constraintBuilderUsesCapturedBodyProperties [
 	<gtExample>
 	| first second pair manifold bodyStates builder initialConstraint capturedConstraint |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -693,7 +693,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderUsesCapturedBodyProperties [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> contactTangentSpeedDefaultsToZero [
+CFPhysicsCoreTests >> contactTangentSpeedDefaultsToZero [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -702,7 +702,7 @@ CFPhysicsCleanSlateTests >> contactTangentSpeedDefaultsToZero [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly [
+CFPhysicsCoreTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly [
 	<gtExample>
 	| constraint manifoldPoint preparedPoint |
 	constraint := self constraintBuilderPreparesSolverData.
@@ -724,14 +724,14 @@ CFPhysicsCleanSlateTests >> preparedConstraintWritesSolvedImpulsesBackExplicitly
 ]
 
 { #category : 'private - contact pipeline' }
-CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger [
+CFPhysicsCoreTests >> cleanSlateBodyWithSequence: anInteger [
 	^ (CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil)
 		sequence: anInteger;
 		yourself
 ]
 
 { #category : 'private - contact pipeline' }
-CFPhysicsCleanSlateTests >> cleanSlateManifoldWithFeatureIndex: anInteger [
+CFPhysicsCoreTests >> cleanSlateManifoldWithFeatureIndex: anInteger [
 	| point manifold |
 	point := CFPhysicsManifoldPoint at: 5 @ 5.
 	point
@@ -745,7 +745,7 @@ CFPhysicsCleanSlateTests >> cleanSlateManifoldWithFeatureIndex: anInteger [
 ]
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> pairFinderReturnsOverlappingPairsInSequenceOrder [
+CFPhysicsCoreTests >> pairFinderReturnsOverlappingPairsInSequenceOrder [
 	<gtExample>
 	| first second third pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -759,7 +759,7 @@ CFPhysicsCleanSlateTests >> pairFinderReturnsOverlappingPairsInSequenceOrder [
 
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> pairFinderExpiresInactiveSweepEntriesInPlace [
+CFPhysicsCoreTests >> pairFinderExpiresInactiveSweepEntriesInPlace [
 	<gtExample>
 	| first second third pairFinder pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -775,7 +775,7 @@ CFPhysicsCleanSlateTests >> pairFinderExpiresInactiveSweepEntriesInPlace [
 ]
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedBodyState [
+CFPhysicsCoreTests >> pairFinderStageUsesCapturedBodyState [
 	<gtExample>
 	| first second result stage pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -795,7 +795,7 @@ CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedBodyState [
 
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedJointCollisionPolicy [
+CFPhysicsCoreTests >> pairFinderStageUsesCapturedJointCollisionPolicy [
 	<gtExample>
 	| first second result pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -814,7 +814,7 @@ CFPhysicsCleanSlateTests >> pairFinderStageUsesCapturedJointCollisionPolicy [
 ]
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> bodyStepStateCapturesBlocGeometry [
+CFPhysicsCoreTests >> bodyStepStateCapturesBlocGeometry [
 	<gtExample>
 	| first second result pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -829,7 +829,7 @@ CFPhysicsCleanSlateTests >> bodyStepStateCapturesBlocGeometry [
 ]
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedBodies [
+CFPhysicsCoreTests >> pairFinderRejectsSeparatedBodies [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -840,7 +840,7 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedBodies [
 ]
 
 { #category : 'examples - pair discovery' }
-CFPhysicsCleanSlateTests >> pairFinderRejectsStaticStaticPairs [
+CFPhysicsCoreTests >> pairFinderRejectsStaticStaticPairs [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -853,7 +853,7 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsStaticStaticPairs [
 ]
 
 { #category : 'private - pair discovery' }
-CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
+CFPhysicsCoreTests >> cleanSlateBodyWithSequence: anInteger position: aPoint extent: anExtent [
 	^ (CFPhysicsBody
 		element: (BlElement new
 			geometry: BlRoundedRectangleGeometry new;
@@ -866,7 +866,7 @@ CFPhysicsCleanSlateTests >> cleanSlateBodyWithSequence: anInteger position: aPoi
 ]
 
 { #category : 'examples - step pipeline' }
-CFPhysicsCleanSlateTests >> stepPipelineExposesTheComposedStep [
+CFPhysicsCoreTests >> stepPipelineExposesTheComposedStep [
 	<gtExample>
 	| ground box step pipeline result |
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
@@ -897,7 +897,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesTheComposedStep [
 ]
 
 { #category : 'examples - step pipeline' }
-CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
+CFPhysicsCoreTests >> stepPipelineProjectsOverlappingBodiesApart [
 	<gtExample>
 	| ground box step pipeline result manifold |
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
@@ -928,7 +928,7 @@ CFPhysicsCleanSlateTests >> stepPipelineProjectsOverlappingBodiesApart [
 ]
 
 { #category : 'examples - step pipeline' }
-CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
+CFPhysicsCoreTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 	<gtExample>
 	| firstResult ground box step pipeline secondResult |
 	firstResult := self stepPipelineExposesTheComposedStep.
@@ -954,7 +954,7 @@ CFPhysicsCleanSlateTests >> stepPipelineCarriesActiveContactsIntoTheNextStep [
 ]
 
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> worldDelegatesOneStepToTheExplicitPipeline [
+CFPhysicsCoreTests >> worldDelegatesOneStepToTheExplicitPipeline [
 	<gtExample>
 	| owner ground box world groundBody boxBody result |
 	owner := BlElement new.
@@ -983,7 +983,7 @@ CFPhysicsCleanSlateTests >> worldDelegatesOneStepToTheExplicitPipeline [
 ]
 
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> worldCarriesActiveContactsExplicitlyBetweenSteps [
+CFPhysicsCoreTests >> worldCarriesActiveContactsExplicitlyBetweenSteps [
 	<gtExample>
 	| world firstResult secondResult |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -997,7 +997,7 @@ CFPhysicsCleanSlateTests >> worldCarriesActiveContactsExplicitlyBetweenSteps [
 ]
 
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> preparedContactConstraintsAreStepLocal [
+CFPhysicsCoreTests >> preparedContactConstraintsAreStepLocal [
 	<gtExample>
 	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -1017,7 +1017,7 @@ CFPhysicsCleanSlateTests >> preparedContactConstraintsAreStepLocal [
 ]
 
 { #category : 'examples - world cutover' }
-CFPhysicsCleanSlateTests >> returningContactBuildsFreshPreparedConstraint [
+CFPhysicsCoreTests >> returningContactBuildsFreshPreparedConstraint [
 	<gtExample>
 	| world movingBody contact constraint returnedContact returnedConstraint returnedPoint returnedManifoldPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -1045,7 +1045,7 @@ CFPhysicsCleanSlateTests >> returningContactBuildsFreshPreparedConstraint [
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
+CFPhysicsCoreTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
 	<gtExample>
 	| first second third fourth constraints islands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1068,7 +1068,7 @@ CFPhysicsCleanSlateTests >> islandBuilderSeparatesDisconnectedDynamicGroups [
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> staticBodyDoesNotBridgeDynamicIslands [
+CFPhysicsCoreTests >> staticBodyDoesNotBridgeDynamicIslands [
 	<gtExample>
 	| first ground second constraints islands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1093,7 +1093,7 @@ CFPhysicsCleanSlateTests >> staticBodyDoesNotBridgeDynamicIslands [
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> stepPipelineSolvesExplicitIslands [
+CFPhysicsCoreTests >> stepPipelineSolvesExplicitIslands [
 	<gtExample>
 	| result |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1105,7 +1105,7 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesExplicitIslands [
 ]
 
 { #category : 'private - islands' }
-CFPhysicsCleanSlateTests >> cleanSlateConstraintBetween: firstBody and: secondBody [
+CFPhysicsCoreTests >> cleanSlateConstraintBetween: firstBody and: secondBody [
 	| contact |
 	contact := CFPhysicsContact
 		pair: (CFPhysicsPair first: firstBody second: secondBody)
@@ -1118,7 +1118,7 @@ CFPhysicsCleanSlateTests >> cleanSlateConstraintBetween: firstBody and: secondBo
 
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> awakeKinematicBodyDoesNotWakeConnectedSleepingDynamicBody [
+CFPhysicsCoreTests >> awakeKinematicBodyDoesNotWakeConnectedSleepingDynamicBody [
 	<gtExample>
 	| kinematic dynamic island stage bodyStates decision |
 	kinematic := self cleanSlateBodyWithSequence: 1.
@@ -1145,7 +1145,7 @@ CFPhysicsCleanSlateTests >> awakeKinematicBodyDoesNotWakeConnectedSleepingDynami
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> islandWakePropagatesAcrossConnectedDynamicBodies [
+CFPhysicsCoreTests >> islandWakePropagatesAcrossConnectedDynamicBodies [
 	<gtExample>
 	| first second island stage decisions |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1171,7 +1171,7 @@ CFPhysicsCleanSlateTests >> islandWakePropagatesAcrossConnectedDynamicBodies [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
+CFPhysicsCoreTests >> islandSleepsAsOneDecision [
 	<gtExample>
 	| first second island stage configuration bodyStates firstDecision secondDecision |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1210,7 +1210,7 @@ CFPhysicsCleanSlateTests >> islandSleepsAsOneDecision [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwakeWithoutResettingSleepyMembers [
+CFPhysicsCoreTests >> movingMemberKeepsTheWholeIslandAwakeWithoutResettingSleepyMembers [
 	<gtExample>
 	| first second island stage bodyStates decision |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1245,7 +1245,7 @@ CFPhysicsCleanSlateTests >> movingMemberKeepsTheWholeIslandAwakeWithoutResetting
 
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> positionCorrectionKeepsAnIslandAwake [
+CFPhysicsCoreTests >> positionCorrectionKeepsAnIslandAwake [
 	<gtExample>
 	| body island stage configuration state decision |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -1268,7 +1268,7 @@ CFPhysicsCleanSlateTests >> positionCorrectionKeepsAnIslandAwake [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
+CFPhysicsCoreTests >> smallPositionCorrectionMayAccumulateSleepTime [
 	<gtExample>
 	| body island stage configuration state decision |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -1295,7 +1295,7 @@ CFPhysicsCleanSlateTests >> smallPositionCorrectionMayAccumulateSleepTime [
 
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> sleepVelocityIncludesBodyExtent [
+CFPhysicsCoreTests >> sleepVelocityIncludesBodyExtent [
 	<gtExample>
 	| smallBody largeBody smallState largeState smallExtentVelocity largeExtentVelocity |
 	smallBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1315,7 +1315,7 @@ CFPhysicsCleanSlateTests >> sleepVelocityIncludesBodyExtent [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> sleepVelocityUsesBox2DPositionCorrectionFormula [
+CFPhysicsCoreTests >> sleepVelocityUsesBox2DPositionCorrectionFormula [
 	<gtExample>
 	| body state expected actual |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1330,7 +1330,7 @@ CFPhysicsCleanSlateTests >> sleepVelocityUsesBox2DPositionCorrectionFormula [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> bodySleepThresholdUsesWorldScale [
+CFPhysicsCoreTests >> bodySleepThresholdUsesWorldScale [
 	<gtExample>
 	| world body state |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -1344,7 +1344,7 @@ CFPhysicsCleanSlateTests >> bodySleepThresholdUsesWorldScale [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> endingAContactDoesNotWakeBodies [
+CFPhysicsCoreTests >> endingAContactDoesNotWakeBodies [
 	<gtExample>
 	| first second pair manifold previousContact batch bodyStates result |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1370,7 +1370,7 @@ CFPhysicsCleanSlateTests >> endingAContactDoesNotWakeBodies [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
+CFPhysicsCoreTests >> bodyMayOptOutOfSleeping [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -1387,7 +1387,7 @@ CFPhysicsCleanSlateTests >> bodyMayOptOutOfSleeping [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> impulseWakesSleepingBody [
+CFPhysicsCoreTests >> impulseWakesSleepingBody [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -1399,7 +1399,7 @@ CFPhysicsCleanSlateTests >> impulseWakesSleepingBody [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> bodyThatPreventsSleepingKeepsItsIslandAwake [
+CFPhysicsCoreTests >> bodyThatPreventsSleepingKeepsItsIslandAwake [
 	<gtExample>
 	| first second island stage configuration bodyStates decision |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1429,7 +1429,7 @@ CFPhysicsCleanSlateTests >> bodyThatPreventsSleepingKeepsItsIslandAwake [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> stepPipelineExposesIslandSleepDecisions [
+CFPhysicsCoreTests >> stepPipelineExposesIslandSleepDecisions [
 	<gtExample>
 	| result |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1439,7 +1439,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesIslandSleepDecisions [
 ]
 
 { #category : 'examples - contact events' }
-CFPhysicsCleanSlateTests >> contactEventStagePublishesLifecycleEvents [
+CFPhysicsCoreTests >> contactEventStagePublishesLifecycleEvents [
 	<gtExample>
 	| first second pair manifold beganContact endedContact batch result events |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1466,7 +1466,7 @@ CFPhysicsCleanSlateTests >> contactEventStagePublishesLifecycleEvents [
 ]
 
 { #category : 'examples - contact events' }
-CFPhysicsCleanSlateTests >> continuedContactsDoNotPublishLifecycleEvents [
+CFPhysicsCoreTests >> continuedContactsDoNotPublishLifecycleEvents [
 	<gtExample>
 	| first second pair contact batch result events |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -1489,7 +1489,7 @@ CFPhysicsCleanSlateTests >> continuedContactsDoNotPublishLifecycleEvents [
 ]
 
 { #category : 'examples - contact events' }
-CFPhysicsCleanSlateTests >> stepPipelineExposesContactEvents [
+CFPhysicsCoreTests >> stepPipelineExposesContactEvents [
 	<gtExample>
 	| result |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1500,7 +1500,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesContactEvents [
 ]
 
 { #category : 'examples - step stages' }
-CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
+CFPhysicsCoreTests >> stepPipelineExecutesExplicitOrderedStages [
 	<gtExample>
 	| result expectedTypes |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1532,7 +1532,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExecutesExplicitOrderedStages [
 ]
 
 { #category : 'examples - step stages' }
-CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
+CFPhysicsCoreTests >> stepPipelineExposesReplaceableStageList [
 	<gtExample>
 	| pipeline stages |
 	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
@@ -1550,7 +1550,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesReplaceableStageList [
 
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> postSolveCollectorCapturesSolvedImpulses [
+CFPhysicsCoreTests >> postSolveCollectorCapturesSolvedImpulses [
 	<gtExample>
 	| result solveResult pointResult constraint |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1569,7 +1569,7 @@ CFPhysicsCleanSlateTests >> postSolveCollectorCapturesSolvedImpulses [
 ]
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> hitEventsAreDerivedAfterSolving [
+CFPhysicsCoreTests >> hitEventsAreDerivedAfterSolving [
 	<gtExample>
 	| result stage |
 	stage := CFPhysicsPostSolveStage new.
@@ -1584,7 +1584,7 @@ CFPhysicsCleanSlateTests >> hitEventsAreDerivedAfterSolving [
 ]
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> hitEventThresholdSuppressesSmallApproaches [
+CFPhysicsCoreTests >> hitEventThresholdSuppressesSmallApproaches [
 	<gtExample>
 	| result stage |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1596,7 +1596,7 @@ CFPhysicsCleanSlateTests >> hitEventThresholdSuppressesSmallApproaches [
 ]
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> stepPipelineExposesPostSolveStage [
+CFPhysicsCoreTests >> stepPipelineExposesPostSolveStage [
 	<gtExample>
 	| result execution |
 	result := self stepPipelineExposesTheComposedStep.
@@ -1609,7 +1609,7 @@ CFPhysicsCleanSlateTests >> stepPipelineExposesPostSolveStage [
 
 
 { #category : 'examples - sensors' }
-CFPhysicsCleanSlateTests >> sensorContactParticipatesInLifecycleButNotSolving [
+CFPhysicsCoreTests >> sensorContactParticipatesInLifecycleButNotSolving [
 	<gtExample>
 	| ground sensor step pipeline result |
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
@@ -1640,7 +1640,7 @@ CFPhysicsCleanSlateTests >> sensorContactParticipatesInLifecycleButNotSolving [
 ]
 
 { #category : 'examples - sensors' }
-CFPhysicsCleanSlateTests >> sensorContactDoesNotJoinDynamicBodiesIntoOneIsland [
+CFPhysicsCoreTests >> sensorContactDoesNotJoinDynamicBodiesIntoOneIsland [
 	<gtExample>
 	| first second sensor step pipeline result dynamicIslands |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1670,7 +1670,7 @@ CFPhysicsCleanSlateTests >> sensorContactDoesNotJoinDynamicBodiesIntoOneIsland [
 ]
 
 { #category : 'examples - sensors' }
-CFPhysicsCleanSlateTests >> sensorContactPublishesEndedEventWithoutSolveData [
+CFPhysicsCoreTests >> sensorContactPublishesEndedEventWithoutSolveData [
 	<gtExample>
 	| firstResult sensor ground secondResult step pipeline |
 	firstResult := self sensorContactParticipatesInLifecycleButNotSolving.
@@ -1698,7 +1698,7 @@ CFPhysicsCleanSlateTests >> sensorContactPublishesEndedEventWithoutSolveData [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> collisionFiltersAllowOrdinaryOverlappingBodies [
+CFPhysicsCoreTests >> collisionFiltersAllowOrdinaryOverlappingBodies [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1712,7 +1712,7 @@ CFPhysicsCleanSlateTests >> collisionFiltersAllowOrdinaryOverlappingBodies [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> collisionMasksRejectBodiesBeforeManifoldConstruction [
+CFPhysicsCoreTests >> collisionMasksRejectBodiesBeforeManifoldConstruction [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1727,7 +1727,7 @@ CFPhysicsCleanSlateTests >> collisionMasksRejectBodiesBeforeManifoldConstruction
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> positiveCollisionGroupOverridesMasks [
+CFPhysicsCoreTests >> positiveCollisionGroupOverridesMasks [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1740,7 +1740,7 @@ CFPhysicsCleanSlateTests >> positiveCollisionGroupOverridesMasks [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> negativeCollisionGroupSuppressesCollision [
+CFPhysicsCoreTests >> negativeCollisionGroupSuppressesCollision [
 	<gtExample>
 	| first second pairs |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -1753,7 +1753,7 @@ CFPhysicsCleanSlateTests >> negativeCollisionGroupSuppressesCollision [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> elementFacingCollisionFilteringConfiguresItsBody [
+CFPhysicsCoreTests >> elementFacingCollisionFilteringConfiguresItsBody [
 	<gtExample>
 	| owner child world body |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -1774,7 +1774,7 @@ CFPhysicsCleanSlateTests >> elementFacingCollisionFilteringConfiguresItsBody [
 
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> runtimeFilterChangeCreatesAContactWithoutBodyMovement [
+CFPhysicsCoreTests >> runtimeFilterChangeCreatesAContactWithoutBodyMovement [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -1799,7 +1799,7 @@ CFPhysicsCleanSlateTests >> runtimeFilterChangeCreatesAContactWithoutBodyMovemen
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> runtimeFilterChangeEndsATouchingContactAndWakesBothBodies [
+CFPhysicsCoreTests >> runtimeFilterChangeEndsATouchingContactAndWakesBothBodies [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -1829,7 +1829,7 @@ CFPhysicsCleanSlateTests >> runtimeFilterChangeEndsATouchingContactAndWakesBothB
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> overlappingCirclesProducePersistentSinglePointManifold [
+CFPhysicsCoreTests >> overlappingCirclesProducePersistentSinglePointManifold [
 	<gtExample>
 	| first second firstManifold secondManifold |
 	first := CFPhysicsShapeState on: (BlElement new
@@ -1855,7 +1855,7 @@ CFPhysicsCleanSlateTests >> overlappingCirclesProducePersistentSinglePointManifo
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> separatedCirclesDoNotProduceAManifold [
+CFPhysicsCoreTests >> separatedCirclesDoNotProduceAManifold [
 	<gtExample>
 	| first second manifold |
 	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
@@ -1868,7 +1868,7 @@ CFPhysicsCleanSlateTests >> separatedCirclesDoNotProduceAManifold [
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> circleAgainstRectangleProducesMixedShapeManifold [
+CFPhysicsCoreTests >> circleAgainstRectangleProducesMixedShapeManifold [
 	<gtExample>
 	| circle rectangle manifold |
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
@@ -1886,7 +1886,7 @@ CFPhysicsCleanSlateTests >> circleAgainstRectangleProducesMixedShapeManifold [
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> mixedShapeOrderingReversesOnlyTheManifoldOrientation [
+CFPhysicsCoreTests >> mixedShapeOrderingReversesOnlyTheManifoldOrientation [
 	<gtExample>
 	| circle rectangle circleFirst polygonFirst |
 	circle := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself).
@@ -1905,7 +1905,7 @@ CFPhysicsCleanSlateTests >> mixedShapeOrderingReversesOnlyTheManifoldOrientation
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
+CFPhysicsCoreTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 	<gtExample>
 	| first second step pipeline result |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 30 @ 30.
@@ -1942,7 +1942,7 @@ CFPhysicsCleanSlateTests >> circleContactsFlowThroughTheOrdinaryStepPipeline [
 
 
 { #category : 'examples - pull interaction' }
-CFPhysicsCleanSlateTests >> pullInteractionIsInstalledThroughThePhysicsFacade [
+CFPhysicsCoreTests >> pullInteractionIsInstalledThroughThePhysicsFacade [
 	<gtExample>
 	| element handler |
 	element := BlElement new size: 40 @ 40; yourself.
@@ -1957,7 +1957,7 @@ CFPhysicsCleanSlateTests >> pullInteractionIsInstalledThroughThePhysicsFacade [
 ]
 
 { #category : 'examples - world membership' }
-CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFromTheWorld [
+CFPhysicsCoreTests >> compositeElementCanExcludeItsDecorativeDescendantsFromTheWorld [
 	<gtExample>
 	| owner button label world |
 	owner := BlElement new size: 200 @ 120; yourself.
@@ -1977,7 +1977,7 @@ CFPhysicsCleanSlateTests >> compositeElementCanExcludeItsDecorativeDescendantsFr
 ]
 
 { #category : 'examples - pull interaction' }
-CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
+CFPhysicsCoreTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 	<gtExample>
 	| scripter owner button world pullEvents |
 	owner := BlElement new size: 200 @ 120; yourself.
@@ -2021,7 +2021,7 @@ CFPhysicsCleanSlateTests >> configuredPullDrivesAGlamorousButtonThroughPhysics [
 
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointSpringUsesBox2DSoftConstraint [
+CFPhysicsCoreTests >> distanceJointSpringUsesBox2DSoftConstraint [
 	<gtExample>
 	| owner first second world joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2050,7 +2050,7 @@ CFPhysicsCleanSlateTests >> distanceJointSpringUsesBox2DSoftConstraint [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointPreparesBox2DLengthLimitsAndAxialMotor [
+CFPhysicsCoreTests >> distanceJointPreparesBox2DLengthLimitsAndAxialMotor [
 	<gtExample>
 	| first second joint bodyStates step prepared |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2087,7 +2087,7 @@ CFPhysicsCleanSlateTests >> distanceJointPreparesBox2DLengthLimitsAndAxialMotor 
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointLengthLimitOpposesExcessExtension [
+CFPhysicsCoreTests >> distanceJointLengthLimitOpposesExcessExtension [
 	<gtExample>
 	| owner first second world joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2115,7 +2115,7 @@ CFPhysicsCleanSlateTests >> distanceJointLengthLimitOpposesExcessExtension [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
+CFPhysicsCoreTests >> distanceJointAxialMotorDrivesRelativeMotion [
 	<gtExample>
 	| owner first second world joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2145,7 +2145,7 @@ CFPhysicsCleanSlateTests >> distanceJointAxialMotorDrivesRelativeMotion [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
+CFPhysicsCoreTests >> distanceJointCapturesItsEndpointDistance [
 	<gtExample>
 	| first second joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2161,7 +2161,7 @@ CFPhysicsCleanSlateTests >> distanceJointCapturesItsEndpointDistance [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
+CFPhysicsCoreTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 	<gtExample>
 	| owner first second third world attached unrelated |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2184,7 +2184,7 @@ CFPhysicsCleanSlateTests >> distanceJointsAreOwnedAndRetiredByThePhysicsWorld [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> destroyingADistanceJointWakesBothSleepingEndpoints [
+CFPhysicsCoreTests >> destroyingADistanceJointWakesBothSleepingEndpoints [
 	<gtExample>
 	| owner first second world joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2206,7 +2206,7 @@ CFPhysicsCleanSlateTests >> destroyingADistanceJointWakesBothSleepingEndpoints [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
+CFPhysicsCoreTests >> distanceJointParticipatesInTheIslandSolver [
 	<gtExample>
 	| owner first second world joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2234,7 +2234,7 @@ CFPhysicsCleanSlateTests >> distanceJointParticipatesInTheIslandSolver [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
+CFPhysicsCoreTests >> distanceJointCanAnchorABodyToTheWorld [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2258,7 +2258,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanAnchorABodyToTheWorld [
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody [
+CFPhysicsCoreTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2281,7 +2281,7 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingDistanceJointBody 
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpoints [
+CFPhysicsCoreTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpoints [
 	<gtExample>
 	| owner first second world joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2300,7 +2300,7 @@ CFPhysicsCleanSlateTests >> retuningDistanceJointRestLengthWakesItsSleepingEndpo
 ]
 
 { #category : 'examples - distance joints' }
-CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
+CFPhysicsCoreTests >> offCentreDistanceJointProducesAngularResponse [
 	<gtExample>
 	| owner first second world firstAnchor secondAnchor joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2324,7 +2324,7 @@ CFPhysicsCleanSlateTests >> offCentreDistanceJointProducesAngularResponse [
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
+CFPhysicsCoreTests >> revoluteJointCapturesItsAnchoredPivot [
 	<gtExample>
 	| first second firstAnchor secondAnchor joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2346,7 +2346,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCapturesItsAnchoredPivot [
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
+CFPhysicsCoreTests >> revoluteJointParticipatesInTheIslandSolver [
 	<gtExample>
 	| owner first second world firstAnchor secondAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2373,7 +2373,7 @@ CFPhysicsCleanSlateTests >> revoluteJointParticipatesInTheIslandSolver [
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
+CFPhysicsCoreTests >> revoluteJointCanAnchorABodyToTheWorld [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2397,7 +2397,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanAnchorABodyToTheWorld [
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody [
+CFPhysicsCoreTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2419,7 +2419,7 @@ CFPhysicsCleanSlateTests >> movingAWorldAnchorWakesItsSleepingRevoluteJointBody 
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
+CFPhysicsCoreTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 	<gtExample>
 	| owner first second world firstAnchor secondAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2448,7 +2448,7 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorDrivesRelativeAngularVelocity [
 
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointMotorTorqueIsConvertedToASubstepImpulse [
+CFPhysicsCoreTests >> revoluteJointMotorTorqueIsConvertedToASubstepImpulse [
 	<gtExample>
 	| owner first second world firstAnchor secondAnchor joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2475,7 +2475,7 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorTorqueIsConvertedToASubstepImpulse
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointMotorConfigurationPreservesItsAccumulatedImpulse [
+CFPhysicsCoreTests >> revoluteJointMotorConfigurationPreservesItsAccumulatedImpulse [
 	<gtExample>
 	| first second joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2492,7 +2492,7 @@ CFPhysicsCleanSlateTests >> revoluteJointMotorConfigurationPreservesItsAccumulat
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointAllowsEqualLimitAngles [
+CFPhysicsCoreTests >> revoluteJointAllowsEqualLimitAngles [
 	<gtExample>
 	| first second joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2506,7 +2506,7 @@ CFPhysicsCleanSlateTests >> revoluteJointAllowsEqualLimitAngles [
 
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointSpringDrivesRelativeAngleTowardItsTarget [
+CFPhysicsCoreTests >> revoluteJointSpringDrivesRelativeAngleTowardItsTarget [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint initialRotation result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2534,7 +2534,7 @@ CFPhysicsCleanSlateTests >> revoluteJointSpringDrivesRelativeAngleTowardItsTarge
 ]
 
 { #category : 'examples - revolute joints' }
-CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
+CFPhysicsCoreTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2561,7 +2561,7 @@ CFPhysicsCleanSlateTests >> revoluteJointLimitsBoundAnAnchoredElementRotation [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointCouplesOffsetPerpendicularAndAngularConstraints [
+CFPhysicsCoreTests >> prismaticJointCouplesOffsetPerpendicularAndAngularConstraints [
 	<gtExample>
 	| owner element world joint state prepared solver axis normal leverA leverB |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2602,7 +2602,7 @@ CFPhysicsCleanSlateTests >> prismaticJointCouplesOffsetPerpendicularAndAngularCo
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
+CFPhysicsCoreTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2627,7 +2627,7 @@ CFPhysicsCleanSlateTests >> prismaticJointConstrainsAnAnchoredElementToItsAxis [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
+CFPhysicsCoreTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2653,7 +2653,7 @@ CFPhysicsCleanSlateTests >> prismaticJointLimitsBoundAnAnchoredElementTravel [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
+CFPhysicsCoreTests >> mouseJointRespectsAPrismaticAxis [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint mouseJoint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2683,7 +2683,7 @@ CFPhysicsCleanSlateTests >> mouseJointRespectsAPrismaticAxis [
 ]
 
 { #category : 'examples - mouse joints' }
-CFPhysicsCleanSlateTests >> mouseJointDefaultsMatchBox2D [
+CFPhysicsCoreTests >> mouseJointDefaultsMatchBox2D [
 	<gtExample>
 	| body joint |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2696,7 +2696,7 @@ CFPhysicsCleanSlateTests >> mouseJointDefaultsMatchBox2D [
 ]
 
 { #category : 'examples - weld joints' }
-CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
+CFPhysicsCoreTests >> weldJointCapturesItsReferenceAngle [
 	<gtExample>
 	| first second joint |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2716,7 +2716,7 @@ CFPhysicsCleanSlateTests >> weldJointCapturesItsReferenceAngle [
 ]
 
 { #category : 'examples - weld joints' }
-CFPhysicsCleanSlateTests >> weldJointPreparesIndependentLinearAndAngularSoftness [
+CFPhysicsCoreTests >> weldJointPreparesIndependentLinearAndAngularSoftness [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2745,7 +2745,7 @@ CFPhysicsCleanSlateTests >> weldJointPreparesIndependentLinearAndAngularSoftness
 ]
 
 { #category : 'examples - weld joints' }
-CFPhysicsCleanSlateTests >> weldJointAnchorsABodyOrientationToTheWorld [
+CFPhysicsCoreTests >> weldJointAnchorsABodyOrientationToTheWorld [
 	<gtExample>
 	| owner element world bodyAnchor worldAnchor joint result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2769,7 +2769,7 @@ CFPhysicsCleanSlateTests >> weldJointAnchorsABodyOrientationToTheWorld [
 ]
 
 { #category : 'examples - weld joints' }
-CFPhysicsCleanSlateTests >> weldJointPreparationUnwindsTheReferenceAngleError [
+CFPhysicsCoreTests >> weldJointPreparationUnwindsTheReferenceAngleError [
 	<gtExample>
 	| first second firstAnchor secondAnchor joint builder bodyStates step prepared |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -2796,7 +2796,7 @@ CFPhysicsCleanSlateTests >> weldJointPreparationUnwindsTheReferenceAngleError [
 ]
 
 { #category : 'examples - constraint graph' }
-CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
+CFPhysicsCoreTests >> mixedJointConstraintsKeepTheWorldOrdering [
 	<gtExample>
 	| owner element world bodyAnchor revoluteAnchor distanceAnchor revolute distance result |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2823,7 +2823,7 @@ CFPhysicsCleanSlateTests >> mixedJointConstraintsKeepTheWorldOrdering [
 ]
 
 { #category : 'examples - constraint graph' }
-CFPhysicsCleanSlateTests >> constraintColorerSeparatesSharedDynamicBodies [
+CFPhysicsCoreTests >> constraintColorerSeparatesSharedDynamicBodies [
 	<gtExample>
 	| static first second staticState firstState secondState firstConstraint secondConstraint thirdConstraint colors |
 	static := self cleanSlateBodyWithSequence: 1.
@@ -2855,7 +2855,7 @@ CFPhysicsCleanSlateTests >> constraintColorerSeparatesSharedDynamicBodies [
 ]
 
 { #category : 'examples - constraint graph' }
-CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
+CFPhysicsCoreTests >> retiringABodyRetiresAllOfItsJointTypes [
 	<gtExample>
 	| owner first second third fourth world revolute fixed motor filter unrelated |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2887,7 +2887,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRetiresAllOfItsJointTypes [
 ]
 
 { #category : 'examples - constraint graph' }
-CFPhysicsCleanSlateTests >> retiringAContactingBodyUnlinksItsContactFromThePersistentIslandGraph [
+CFPhysicsCoreTests >> retiringAContactingBodyUnlinksItsContactFromThePersistentIslandGraph [
 	<gtExample>
 	| owner first second world result contact graph island retiredBody |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2917,7 +2917,7 @@ CFPhysicsCleanSlateTests >> retiringAContactingBodyUnlinksItsContactFromThePersi
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCoreTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2943,7 +2943,7 @@ CFPhysicsCleanSlateTests >> distanceJointCanSuppressCollisionBetweenItsEndpoints
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCoreTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2969,7 +2969,7 @@ CFPhysicsCleanSlateTests >> revoluteJointCanSuppressCollisionBetweenItsEndpoints
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> weldJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCoreTests >> weldJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -2995,7 +2995,7 @@ CFPhysicsCleanSlateTests >> weldJointCanSuppressCollisionBetweenItsEndpoints [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> prismaticJointCanSuppressCollisionBetweenItsEndpoints [
+CFPhysicsCoreTests >> prismaticJointCanSuppressCollisionBetweenItsEndpoints [
 	<gtExample>
 	| owner first second world joint pairs |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3021,7 +3021,7 @@ CFPhysicsCleanSlateTests >> prismaticJointCanSuppressCollisionBetweenItsEndpoint
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> filterJointMatchesBox2DCollisionAndIslandSemantics [
+CFPhysicsCoreTests >> filterJointMatchesBox2DCollisionAndIslandSemantics [
 	<gtExample>
 	| owner first second world joint graph island suppressedResult collidingResult |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3053,7 +3053,7 @@ CFPhysicsCleanSlateTests >> filterJointMatchesBox2DCollisionAndIslandSemantics [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
+CFPhysicsCoreTests >> disablingDistanceJointCollisionEndsAnActiveContact [
 	<gtExample>
 	| owner first second world joint firstResult secondResult |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3078,7 +3078,7 @@ CFPhysicsCleanSlateTests >> disablingDistanceJointCollisionEndsAnActiveContact [
 ]
 
 { #category : 'examples - collision filtering' }
-CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
+CFPhysicsCoreTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 	<gtExample>
 	| owner first second world joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3099,7 +3099,7 @@ CFPhysicsCleanSlateTests >> changingDistanceJointCollisionPolicyWakesItsBodies [
 
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> newWorldConfiguresContainmentByDefault [
+CFPhysicsCoreTests >> newWorldConfiguresContainmentByDefault [
 	<gtExample>
 	| owner world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -3112,7 +3112,7 @@ CFPhysicsCleanSlateTests >> newWorldConfiguresContainmentByDefault [
 ]
 
 { #category : 'examples - containment interaction' }
-CFPhysicsCleanSlateTests >> worldContainmentCanBeConfigured [
+CFPhysicsCoreTests >> worldContainmentCanBeConfigured [
 	<gtExample>
 	| owner world |
 	owner := BlElement new size: 100 @ 100; yourself.
@@ -3133,7 +3133,7 @@ CFPhysicsCleanSlateTests >> worldContainmentCanBeConfigured [
 
 
 { #category : 'examples - spring interaction' }
-CFPhysicsCleanSlateTests >> springEndpointsAreResolvedThroughAnchors [
+CFPhysicsCoreTests >> springEndpointsAreResolvedThroughAnchors [
 	<gtExample>
 	| first second spring |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3150,7 +3150,7 @@ CFPhysicsCleanSlateTests >> springEndpointsAreResolvedThroughAnchors [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> constantForceResponseCanBeLimitedByDistance [
+CFPhysicsCoreTests >> constantForceResponseCanBeLimitedByDistance [
 	<gtExample>
 	| response |
 	response := CFPhysicsConstantForceResponse force: 250.
@@ -3164,7 +3164,7 @@ CFPhysicsCleanSlateTests >> constantForceResponseCanBeLimitedByDistance [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionEndpointsAreResolvedThroughAnchors [
+CFPhysicsCoreTests >> attractionEndpointsAreResolvedThroughAnchors [
 	<gtExample>
 	| first second attraction |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3180,7 +3180,7 @@ CFPhysicsCleanSlateTests >> attractionEndpointsAreResolvedThroughAnchors [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionAppliesEqualAndOppositeImpulse [
+CFPhysicsCoreTests >> attractionAppliesEqualAndOppositeImpulse [
 	<gtExample>
 	| first second attraction |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3197,7 +3197,7 @@ CFPhysicsCleanSlateTests >> attractionAppliesEqualAndOppositeImpulse [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionCanPullTowardAStaticBody [
+CFPhysicsCoreTests >> attractionCanPullTowardAStaticBody [
 	<gtExample>
 	| dynamicBody staticBody attraction |
 	dynamicBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3212,7 +3212,7 @@ CFPhysicsCleanSlateTests >> attractionCanPullTowardAStaticBody [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionsAreInstalledAndDiscoveredThroughBlocElements [
+CFPhysicsCoreTests >> attractionsAreInstalledAndDiscoveredThroughBlocElements [
 	<gtExample>
 	| owner first second third world firstAttraction secondAttraction |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3236,7 +3236,7 @@ CFPhysicsCleanSlateTests >> attractionsAreInstalledAndDiscoveredThroughBlocEleme
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> duplicateAttractionsRemainIndependent [
+CFPhysicsCoreTests >> duplicateAttractionsRemainIndependent [
 	<gtExample>
 	| owner first second world firstAttraction secondAttraction |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3256,7 +3256,7 @@ CFPhysicsCleanSlateTests >> duplicateAttractionsRemainIndependent [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsAttractions [
+CFPhysicsCoreTests >> retiringABodyRemovesOnlyItsAttractions [
 	<gtExample>
 	| owner first second third fourth world attachedA attachedB unrelated |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3281,7 +3281,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsAttractions [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> worldStepAppliesAttractionBeforeIntegration [
+CFPhysicsCoreTests >> worldStepAppliesAttractionBeforeIntegration [
 	<gtExample>
 	| owner first second world attraction |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3306,7 +3306,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesAttractionBeforeIntegration [
 
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionEndpointsAreResolvedThroughAnchors [
+CFPhysicsCoreTests >> repulsionEndpointsAreResolvedThroughAnchors [
 	<gtExample>
 	| first second repulsion |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3322,7 +3322,7 @@ CFPhysicsCleanSlateTests >> repulsionEndpointsAreResolvedThroughAnchors [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionAppliesEqualAndOppositeImpulse [
+CFPhysicsCoreTests >> repulsionAppliesEqualAndOppositeImpulse [
 	<gtExample>
 	| first second repulsion |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3339,7 +3339,7 @@ CFPhysicsCleanSlateTests >> repulsionAppliesEqualAndOppositeImpulse [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionCanPushAwayFromAStaticBody [
+CFPhysicsCoreTests >> repulsionCanPushAwayFromAStaticBody [
 	<gtExample>
 	| dynamicBody staticBody repulsion |
 	dynamicBody := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3354,7 +3354,7 @@ CFPhysicsCleanSlateTests >> repulsionCanPushAwayFromAStaticBody [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionsAreInstalledAndDiscoveredThroughBlocElements [
+CFPhysicsCoreTests >> repulsionsAreInstalledAndDiscoveredThroughBlocElements [
 	<gtExample>
 	| owner first second third world firstRepulsion secondRepulsion |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3378,7 +3378,7 @@ CFPhysicsCleanSlateTests >> repulsionsAreInstalledAndDiscoveredThroughBlocElemen
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> duplicateRepulsionsRemainIndependent [
+CFPhysicsCoreTests >> duplicateRepulsionsRemainIndependent [
 	<gtExample>
 	| owner first second world firstRepulsion secondRepulsion |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3398,7 +3398,7 @@ CFPhysicsCleanSlateTests >> duplicateRepulsionsRemainIndependent [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsRepulsions [
+CFPhysicsCoreTests >> retiringABodyRemovesOnlyItsRepulsions [
 	<gtExample>
 	| owner first second third fourth world attachedA attachedB unrelated |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3423,7 +3423,7 @@ CFPhysicsCleanSlateTests >> retiringABodyRemovesOnlyItsRepulsions [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> worldStepAppliesRepulsionBeforeIntegration [
+CFPhysicsCoreTests >> worldStepAppliesRepulsionBeforeIntegration [
 	<gtExample>
 	| owner first second world repulsion |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3447,7 +3447,7 @@ CFPhysicsCleanSlateTests >> worldStepAppliesRepulsionBeforeIntegration [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> localAnchorFollowsBodyTranslationAndRotation [
+CFPhysicsCoreTests >> localAnchorFollowsBodyTranslationAndRotation [
 	<gtExample>
 	| body anchor |
 	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
@@ -3463,7 +3463,7 @@ CFPhysicsCleanSlateTests >> localAnchorFollowsBodyTranslationAndRotation [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> elementCanCreateALocalAnchor [
+CFPhysicsCoreTests >> elementCanCreateALocalAnchor [
 	<gtExample>
 	| owner element world anchor |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3480,7 +3480,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateALocalAnchor [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> relationshipsCanResolveBodyLocalAnchors [
+CFPhysicsCoreTests >> relationshipsCanResolveBodyLocalAnchors [
 	<gtExample>
 	| first second anchorA anchorB spring attraction repulsion |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3503,7 +3503,7 @@ CFPhysicsCleanSlateTests >> relationshipsCanResolveBodyLocalAnchors [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> normalisedAnchorFollowsBodyGeometry [
+CFPhysicsCoreTests >> normalisedAnchorFollowsBodyGeometry [
 	<gtExample>
 	| body anchor |
 	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
@@ -3519,7 +3519,7 @@ CFPhysicsCleanSlateTests >> normalisedAnchorFollowsBodyGeometry [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> elementCanCreateANormalisedAnchor [
+CFPhysicsCoreTests >> elementCanCreateANormalisedAnchor [
 	<gtExample>
 	| owner element world anchor |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3536,7 +3536,7 @@ CFPhysicsCleanSlateTests >> elementCanCreateANormalisedAnchor [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> relationshipsCanResolveNormalisedAnchors [
+CFPhysicsCoreTests >> relationshipsCanResolveNormalisedAnchors [
 	<gtExample>
 	| first second anchorA anchorB spring attraction repulsion |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3556,7 +3556,7 @@ CFPhysicsCleanSlateTests >> relationshipsCanResolveNormalisedAnchors [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
+CFPhysicsCoreTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
 	<gtExample>
 	| owner first second world anchorA anchorB spring attraction repulsion |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -3586,7 +3586,7 @@ CFPhysicsCleanSlateTests >> explicitAnchorsCanCreateWorldOwnedRelationships [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> linearFalloffResponseVariesSmoothlyWithDistance [
+CFPhysicsCoreTests >> linearFalloffResponseVariesSmoothlyWithDistance [
 	<gtExample>
 	| response |
 	response := CFPhysicsLinearFalloffResponse force: 400 maximumDistance: 200.
@@ -3599,7 +3599,7 @@ CFPhysicsCleanSlateTests >> linearFalloffResponseVariesSmoothlyWithDistance [
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionCanUseLinearFalloffResponse [
+CFPhysicsCoreTests >> attractionCanUseLinearFalloffResponse [
 	<gtExample>
 	| first second attraction response |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3616,7 +3616,7 @@ CFPhysicsCleanSlateTests >> attractionCanUseLinearFalloffResponse [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionCanUseLinearFalloffResponse [
+CFPhysicsCoreTests >> repulsionCanUseLinearFalloffResponse [
 	<gtExample>
 	| first second repulsion response |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3634,7 +3634,7 @@ CFPhysicsCleanSlateTests >> repulsionCanUseLinearFalloffResponse [
 
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> softenedInverseSquareResponseFallsOffWithoutSingularity [
+CFPhysicsCoreTests >> softenedInverseSquareResponseFallsOffWithoutSingularity [
 	<gtExample>
 	| response |
 	response := CFPhysicsSoftenedInverseSquareResponse
@@ -3649,7 +3649,7 @@ CFPhysicsCleanSlateTests >> softenedInverseSquareResponseFallsOffWithoutSingular
 ]
 
 { #category : 'examples - attraction interaction' }
-CFPhysicsCleanSlateTests >> attractionCanUseSoftenedInverseSquareResponse [
+CFPhysicsCoreTests >> attractionCanUseSoftenedInverseSquareResponse [
 	<gtExample>
 	| first second attraction response |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3668,7 +3668,7 @@ CFPhysicsCleanSlateTests >> attractionCanUseSoftenedInverseSquareResponse [
 ]
 
 { #category : 'examples - repulsion interaction' }
-CFPhysicsCleanSlateTests >> repulsionCanUseSoftenedInverseSquareResponse [
+CFPhysicsCoreTests >> repulsionCanUseSoftenedInverseSquareResponse [
 	<gtExample>
 	| first second repulsion response |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3688,7 +3688,7 @@ CFPhysicsCleanSlateTests >> repulsionCanUseSoftenedInverseSquareResponse [
 
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> anchoredEndpointPairResolvesBothEndpointsTogether [
+CFPhysicsCoreTests >> anchoredEndpointPairResolvesBothEndpointsTogether [
 	<gtExample>
 	| first second anchorA anchorB endpoints points |
 	first := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 40 @ 20.
@@ -3709,7 +3709,7 @@ CFPhysicsCleanSlateTests >> anchoredEndpointPairResolvesBothEndpointsTogether [
 ]
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> relationshipsResolveThroughAnEndpointPair [
+CFPhysicsCoreTests >> relationshipsResolveThroughAnEndpointPair [
 	<gtExample>
 	| first second endpoints spring attraction repulsion |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3734,7 +3734,7 @@ CFPhysicsCleanSlateTests >> relationshipsResolveThroughAnEndpointPair [
 
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> worldAnchorRemainsAtItsWorldPoint [
+CFPhysicsCoreTests >> worldAnchorRemainsAtItsWorldPoint [
 	<gtExample>
 	| world anchor |
 	world := CFPhysicsWorld new.
@@ -3748,7 +3748,7 @@ CFPhysicsCleanSlateTests >> worldAnchorRemainsAtItsWorldPoint [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> attractionAndRepulsionCanUseWorldAnchors [
+CFPhysicsCoreTests >> attractionAndRepulsionCanUseWorldAnchors [
 	<gtExample>
 	| world attracted repelled attraction repulsion |
 	world := CFPhysicsWorld new.
@@ -3768,7 +3768,7 @@ CFPhysicsCleanSlateTests >> attractionAndRepulsionCanUseWorldAnchors [
 ]
 
 { #category : 'examples - anchors' }
-CFPhysicsCleanSlateTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
+CFPhysicsCoreTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 	<gtExample>
 	| world body spring |
 	world := CFPhysicsWorld new.
@@ -3785,7 +3785,7 @@ CFPhysicsCleanSlateTests >> worldAnchorRelationshipsStillCleanUpWithTheirBody [
 
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> nearestGeometryEndpointsResolveCircleBoundaries [
+CFPhysicsCoreTests >> nearestGeometryEndpointsResolveCircleBoundaries [
 	<gtExample>
 	| first second endpoints points |
 	first := (CFPhysicsBody
@@ -3808,7 +3808,7 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsResolveCircleBoundaries [
 ]
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> nearestGeometryEndpointsResolveRectangleEdges [
+CFPhysicsCoreTests >> nearestGeometryEndpointsResolveRectangleEdges [
 	<gtExample>
 	| first second endpoints points |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 40 @ 40.
@@ -3821,7 +3821,7 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsResolveRectangleEdges [
 ]
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> nearestGeometryEndpointPairTracksCurrentGeometry [
+CFPhysicsCoreTests >> nearestGeometryEndpointPairTracksCurrentGeometry [
 	<gtExample>
 	| first second endpoints initial moved |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -3837,7 +3837,7 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointPairTracksCurrentGeometry [
 ]
 
 { #category : 'examples - relationship endpoints' }
-CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationships [
+CFPhysicsCoreTests >> nearestGeometryEndpointsCreateWorldOwnedRelationships [
 	<gtExample>
 	| world first second endpoints spring attraction repulsion |
 	world := CFPhysicsWorld new.
@@ -3863,7 +3863,7 @@ CFPhysicsCleanSlateTests >> nearestGeometryEndpointsCreateWorldOwnedRelationship
 
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderScalesRetainedImpulsesForChangedTimeStep [
+CFPhysicsCoreTests >> constraintBuilderScalesRetainedImpulsesForChangedTimeStep [
 	<gtExample>
 	| first second pair manifold contact bodyStates constraint point |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -3890,7 +3890,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderScalesRetainedImpulsesForChangedTim
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldSimulationIdentityStartsAtZero [
+CFPhysicsCoreTests >> worldSimulationIdentityStartsAtZero [
 	<gtExample>
 	| world step |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3905,7 +3905,7 @@ CFPhysicsCleanSlateTests >> worldSimulationIdentityStartsAtZero [
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldAdvancesSimulationIdentityAfterSuccessfulSteps [
+CFPhysicsCoreTests >> worldAdvancesSimulationIdentityAfterSuccessfulSteps [
 	<gtExample>
 	| world firstResult secondResult |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3923,7 +3923,7 @@ CFPhysicsCleanSlateTests >> worldAdvancesSimulationIdentityAfterSuccessfulSteps 
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> changingStepDurationPreservesAccumulatedSimulationTime [
+CFPhysicsCoreTests >> changingStepDurationPreservesAccumulatedSimulationTime [
 	<gtExample>
 	| world result |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3938,7 +3938,7 @@ CFPhysicsCleanSlateTests >> changingStepDurationPreservesAccumulatedSimulationTi
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldKeepsBox2DWarmStartingWhenStepDurationChanges [
+CFPhysicsCoreTests >> worldKeepsBox2DWarmStartingWhenStepDurationChanges [
 	<gtExample>
 	| world firstStep secondStep |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3952,7 +3952,7 @@ CFPhysicsCleanSlateTests >> worldKeepsBox2DWarmStartingWhenStepDurationChanges [
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldWarmStartingDefaultsToEnabled [
+CFPhysicsCoreTests >> worldWarmStartingDefaultsToEnabled [
 	<gtExample>
 	| world |
 	world := CFPhysicsWorld new.
@@ -3961,7 +3961,7 @@ CFPhysicsCleanSlateTests >> worldWarmStartingDefaultsToEnabled [
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldCanDisableAndResumeWarmStarting [
+CFPhysicsCoreTests >> worldCanDisableAndResumeWarmStarting [
 	<gtExample>
 	| world disabledStep resumedStep |
 	world := CFPhysicsWorld on: BlElement new.
@@ -3981,7 +3981,7 @@ CFPhysicsCleanSlateTests >> worldCanDisableAndResumeWarmStarting [
 ]
 
 { #category : 'examples - stepping' }
-CFPhysicsCleanSlateTests >> worldConvertsBox2DMaximumLinearSpeedToPhysicsUnits [
+CFPhysicsCoreTests >> worldConvertsBox2DMaximumLinearSpeedToPhysicsUnits [
 	<gtExample>
 	| world step |
 	world := CFPhysicsWorld new.
@@ -3992,7 +3992,7 @@ CFPhysicsCleanSlateTests >> worldConvertsBox2DMaximumLinearSpeedToPhysicsUnits [
 ]
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> manifoldPreservesImpulsesByFeatureIdentityWhenNormalChanges [
+CFPhysicsCoreTests >> manifoldPreservesImpulsesByFeatureIdentityWhenNormalChanges [
 	<gtExample>
 	| featureId oldPoint oldManifold newPoint newManifold |
 	featureId := CFPhysicsContactFeatureId
@@ -4021,7 +4021,7 @@ CFPhysicsCleanSlateTests >> manifoldPreservesImpulsesByFeatureIdentityWhenNormal
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> aabbMergesBothBounds [
+CFPhysicsCoreTests >> aabbMergesBothBounds [
 	<gtExample>
 	| first second merged |
 	first := CFPhysicsAABB position: 10 @ 20 extent: 30 @ 40.
@@ -4033,7 +4033,7 @@ CFPhysicsCleanSlateTests >> aabbMergesBothBounds [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
+CFPhysicsCoreTests >> bodySweptAABBCoversTranslation [
 	<gtExample>
 	| element body bounds |
 	element := BlElement new size: 20 @ 10.
@@ -4050,7 +4050,7 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversTranslation [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
+CFPhysicsCoreTests >> bodySweptAABBCoversRotationBetweenTransforms [
 	<gtExample>
 	| element body bounds previousBounds currentBounds |
 	element := BlElement new size: 40 @ 10.
@@ -4075,7 +4075,7 @@ CFPhysicsCleanSlateTests >> bodySweptAABBCoversRotationBetweenTransforms [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> pairFinderReturnsCandidateAcrossSweptPath [
+CFPhysicsCoreTests >> pairFinderReturnsCandidateAcrossSweptPath [
 	<gtExample>
 	| moving obstacle pairs |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4096,7 +4096,7 @@ CFPhysicsCleanSlateTests >> pairFinderReturnsCandidateAcrossSweptPath [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedSweptPaths [
+CFPhysicsCoreTests >> pairFinderRejectsSeparatedSweptPaths [
 	<gtExample>
 	| moving obstacle pairs |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4115,7 +4115,7 @@ CFPhysicsCleanSlateTests >> pairFinderRejectsSeparatedSweptPaths [
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
+CFPhysicsCoreTests >> bodySweepCapturesStepTransforms [
 	<gtExample>
 	| body sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4133,7 +4133,7 @@ CFPhysicsCleanSlateTests >> bodySweepCapturesStepTransforms [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> beginningStepProducesStationarySweep [
+CFPhysicsCoreTests >> beginningStepProducesStationarySweep [
 	<gtExample>
 	| body sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4149,7 +4149,7 @@ CFPhysicsCleanSlateTests >> beginningStepProducesStationarySweep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> settingTransformResetsSweepEndpoints [
+CFPhysicsCoreTests >> settingTransformResetsSweepEndpoints [
 	<gtExample>
 	| body sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4168,7 +4168,7 @@ CFPhysicsCleanSlateTests >> settingTransformResetsSweepEndpoints [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweepInterpolationPreservesIntegratedAngularDisplacement [
+CFPhysicsCoreTests >> sweepInterpolationPreservesIntegratedAngularDisplacement [
 	<gtExample>
 	| sweep transform |
 	sweep := CFPhysicsSweep
@@ -4180,7 +4180,7 @@ CFPhysicsCleanSlateTests >> sweepInterpolationPreservesIntegratedAngularDisplace
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
+CFPhysicsCoreTests >> sweepInterpolatesTransform [
 	<gtExample>
 	| sweep transform |
 	sweep := CFPhysicsSweep
@@ -4193,7 +4193,7 @@ CFPhysicsCleanSlateTests >> sweepInterpolatesTransform [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweptAABBDelegatesToShapeState [
+CFPhysicsCoreTests >> sweptAABBDelegatesToShapeState [
 	<gtExample>
 	| body bodyBounds sweepBounds |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4209,7 +4209,7 @@ CFPhysicsCleanSlateTests >> sweptAABBDelegatesToShapeState [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepStatePredictsLinearMovement [
+CFPhysicsCoreTests >> stepStatePredictsLinearMovement [
 	<gtExample>
 	| body state transform |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4223,7 +4223,7 @@ CFPhysicsCleanSlateTests >> stepStatePredictsLinearMovement [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepStatePredictsAngularMovement [
+CFPhysicsCoreTests >> stepStatePredictsAngularMovement [
 	<gtExample>
 	| body state transform |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4237,7 +4237,7 @@ CFPhysicsCleanSlateTests >> stepStatePredictsAngularMovement [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepStatePredictsCombinedMovementSweep [
+CFPhysicsCoreTests >> stepStatePredictsCombinedMovementSweep [
 	<gtExample>
 	| body state sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4255,7 +4255,7 @@ CFPhysicsCleanSlateTests >> stepStatePredictsCombinedMovementSweep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepStateUsesCapturedBodyValues [
+CFPhysicsCoreTests >> stepStateUsesCapturedBodyValues [
 	<gtExample>
 	| body state transform |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4270,7 +4270,7 @@ CFPhysicsCleanSlateTests >> stepStateUsesCapturedBodyValues [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> staticStepStatePredictsStationarySweep [
+CFPhysicsCoreTests >> staticStepStatePredictsStationarySweep [
 	<gtExample>
 	| body state sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4288,7 +4288,7 @@ CFPhysicsCleanSlateTests >> staticStepStatePredictsStationarySweep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sleepingStepStatePredictsStationarySweep [
+CFPhysicsCoreTests >> sleepingStepStatePredictsStationarySweep [
 	<gtExample>
 	| body state sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4306,7 +4306,7 @@ CFPhysicsCleanSlateTests >> sleepingStepStatePredictsStationarySweep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> zeroDurationPredictionProducesStationarySweep [
+CFPhysicsCoreTests >> zeroDurationPredictionProducesStationarySweep [
 	<gtExample>
 	| body state sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 10 @ 10.
@@ -4322,7 +4322,7 @@ CFPhysicsCleanSlateTests >> zeroDurationPredictionProducesStationarySweep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
+CFPhysicsCoreTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 	<gtExample>
 	| moving obstacle step pipeline result predictedEndBounds impact |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4356,7 +4356,7 @@ CFPhysicsCleanSlateTests >> stepPipelineDiscoversCandidateAcrossPredictedPath [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotMutateBodies [
+CFPhysicsCoreTests >> discretePairDiscoveryDoesNotMutateBodies [
 	<gtExample>
 	| moving obstacle step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4385,7 +4385,7 @@ CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotMutateBodies [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSweeps [
+CFPhysicsCoreTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSweeps [
 	<gtExample>
 	| moving obstacle step result state |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4414,7 +4414,7 @@ CFPhysicsCleanSlateTests >> discretePairDiscoveryDoesNotUsePreparedVelocityForSw
 ]
 
 { #category : 'examples - solver' }
-CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
+CFPhysicsCoreTests >> softStepIntegratesVelocityPerSubstep [
 	<gtExample>
 	| host world element body |
 	host := BlElement new size: 2000 @ 2000; yourself.
@@ -4441,7 +4441,7 @@ CFPhysicsCleanSlateTests >> softStepIntegratesVelocityPerSubstep [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> predictedPairDiscoveryPreservesDeterministicOrder [
+CFPhysicsCoreTests >> predictedPairDiscoveryPreservesDeterministicOrder [
 	<gtExample>
 	| first second third step result sequences |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -4470,7 +4470,7 @@ CFPhysicsCleanSlateTests >> predictedPairDiscoveryPreservesDeterministicOrder [
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> gjkUsesExplicitTransformsForOverlapQueries [
+CFPhysicsCoreTests >> gjkUsesExplicitTransformsForOverlapQueries [
 	<gtExample>
 	| first second firstTransform overlappingTransform separatedTransform overlappingSimplex separatedSimplex |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4494,7 +4494,7 @@ CFPhysicsCleanSlateTests >> gjkUsesExplicitTransformsForOverlapQueries [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> gjkExplicitTransformQueryIncludesRotation [
+CFPhysicsCoreTests >> gjkExplicitTransformQueryIncludesRotation [
 	<gtExample>
 	| first second firstTransform secondTransform simplex |
 	first := CFPhysicsShapeState on: (BlElement new size: 40 @ 10; yourself).
@@ -4511,7 +4511,7 @@ CFPhysicsCleanSlateTests >> gjkExplicitTransformQueryIncludesRotation [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> gjkDistanceReportsSeparationAndWitnessPoints [
+CFPhysicsCoreTests >> gjkDistanceReportsSeparationAndWitnessPoints [
 	<gtExample>
 	| first second result separation |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4531,7 +4531,7 @@ CFPhysicsCleanSlateTests >> gjkDistanceReportsSeparationAndWitnessPoints [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> gjkDistanceUsesExplicitRotation [
+CFPhysicsCoreTests >> gjkDistanceUsesExplicitRotation [
 	<gtExample>
 	| first second result |
 	first := CFPhysicsShapeState on: (BlElement new size: 40 @ 10; yourself).
@@ -4548,7 +4548,7 @@ CFPhysicsCleanSlateTests >> gjkDistanceUsesExplicitRotation [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> gjkDistanceReportsOverlap [
+CFPhysicsCoreTests >> gjkDistanceReportsOverlap [
 	<gtExample>
 	| first second result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4565,7 +4565,7 @@ CFPhysicsCleanSlateTests >> gjkDistanceReportsOverlap [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> conservativeAdvancementFindsLinearImpact [
+CFPhysicsCoreTests >> conservativeAdvancementFindsLinearImpact [
 	<gtExample>
 	| first second firstSweep secondSweep result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4588,7 +4588,7 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementFindsLinearImpact [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> conservativeAdvancementReportsInitialOverlap [
+CFPhysicsCoreTests >> conservativeAdvancementReportsInitialOverlap [
 	<gtExample>
 	| first second firstSweep secondSweep result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4611,7 +4611,7 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementReportsInitialOverlap [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> conservativeAdvancementReportsSeparatingMotion [
+CFPhysicsCoreTests >> conservativeAdvancementReportsSeparatingMotion [
 	<gtExample>
 	| first second firstSweep secondSweep result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4633,7 +4633,7 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementReportsSeparatingMotion [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> conservativeAdvancementUsesRelativeMotion [
+CFPhysicsCoreTests >> conservativeAdvancementUsesRelativeMotion [
 	<gtExample>
 	| first second firstSweep secondSweep result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4655,7 +4655,7 @@ CFPhysicsCleanSlateTests >> conservativeAdvancementUsesRelativeMotion [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> box2DTimeOfImpactUsesCoreDistanceAndLinearSlop [
+CFPhysicsCoreTests >> box2DTimeOfImpactUsesCoreDistanceAndLinearSlop [
 	<gtExample>
 	| first second firstSweep secondSweep result |
 	first := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
@@ -4680,7 +4680,7 @@ CFPhysicsCleanSlateTests >> box2DTimeOfImpactUsesCoreDistanceAndLinearSlop [
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> earliestImpactFinderSelectsSmallestFraction [
+CFPhysicsCoreTests >> earliestImpactFinderSelectsSmallestFraction [
 	<gtExample>
 	| moving near far bodyStates nearPair farPair result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4706,7 +4706,7 @@ CFPhysicsCleanSlateTests >> earliestImpactFinderSelectsSmallestFraction [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> earliestImpactFinderBreaksFractionTiesByPairOrder [
+CFPhysicsCoreTests >> earliestImpactFinderBreaksFractionTiesByPairOrder [
 	<gtExample>
 	| moving firstObstacle secondObstacle bodyStates firstPair secondPair result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4732,7 +4732,7 @@ CFPhysicsCleanSlateTests >> earliestImpactFinderBreaksFractionTiesByPairOrder [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> earliestImpactFinderIgnoresSeparatedPairs [
+CFPhysicsCoreTests >> earliestImpactFinderIgnoresSeparatedPairs [
 	<gtExample>
 	| moving obstacle bodyStates pair result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4753,7 +4753,7 @@ CFPhysicsCleanSlateTests >> earliestImpactFinderIgnoresSeparatedPairs [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> earliestImpactFinderDoesNotMutateBodies [
+CFPhysicsCoreTests >> earliestImpactFinderDoesNotMutateBodies [
 	<gtExample>
 	| moving obstacle originalMovingPosition originalObstaclePosition bodyStates pair result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4778,7 +4778,7 @@ CFPhysicsCleanSlateTests >> earliestImpactFinderDoesNotMutateBodies [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> transformExplicitManifoldDoesNotUseAuthoritativeTransforms [
+CFPhysicsCoreTests >> transformExplicitManifoldDoesNotUseAuthoritativeTransforms [
 	<gtExample>
 	| first second manifold |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4796,7 +4796,7 @@ CFPhysicsCleanSlateTests >> transformExplicitManifoldDoesNotUseAuthoritativeTran
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> transformExplicitTouchingManifoldProvidesLocalAnchors [
+CFPhysicsCoreTests >> transformExplicitTouchingManifoldProvidesLocalAnchors [
 	<gtExample>
 	| first second firstTransform secondTransform manifold |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4820,7 +4820,7 @@ CFPhysicsCleanSlateTests >> transformExplicitTouchingManifoldProvidesLocalAnchor
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> constraintBuilderUsesAdvancedStepRotation [
+CFPhysicsCoreTests >> constraintBuilderUsesAdvancedStepRotation [
 	<gtExample>
 	| first second firstState secondState bodyStates manifoldPoint manifold contact constraint anchor |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4852,7 +4852,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderUsesAdvancedStepRotation [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
+CFPhysicsCoreTests >> stepPipelineUsesContinuousPathForSweptImpact [
 	<gtExample>
 	| moving obstacle pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4887,7 +4887,7 @@ CFPhysicsCleanSlateTests >> stepPipelineUsesContinuousPathForSweptImpact [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpactSlice [
+CFPhysicsCoreTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpactSlice [
 	<gtExample>
 	| moving obstacle tether joint pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4922,7 +4922,7 @@ CFPhysicsCleanSlateTests >> continuousImpactAppliesDistanceJointImpulseAtTheImpa
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
+CFPhysicsCoreTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 	<gtExample>
 	| moving obstacle pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4952,7 +4952,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePreservesDiscretePathWithoutTOI [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> predictedSweepContinuesFromAdvancedStepState [
+CFPhysicsCoreTests >> predictedSweepContinuesFromAdvancedStepState [
 	<gtExample>
 	| body state sweep |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -4968,7 +4968,7 @@ CFPhysicsCleanSlateTests >> predictedSweepContinuesFromAdvancedStepState [
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
+CFPhysicsCoreTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrder [
 	<gtExample>
 	| firstMoving firstObstacle secondMoving secondObstacle pipeline step result |
 	firstMoving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5009,7 +5009,7 @@ CFPhysicsCleanSlateTests >> stepPipelineSolvesMultipleContinuousImpactsInTimeOrd
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExists [
+CFPhysicsCoreTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExists [
 	<gtExample>
 	| moving obstacle pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5039,7 +5039,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsDiscretePathWhenNoPositiveImpactExi
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
+CFPhysicsCoreTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
 	<gtExample>
 	| moving obstacle pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5069,7 +5069,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsInitialOverlapOnDiscretePath [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecovery [
+CFPhysicsCoreTests >> continuousImpactDoesNotSuppressSeparateOverlapRecovery [
 	<gtExample>
 	| moving wall overlapping obstacle pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5103,7 +5103,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotSuppressSeparateOverlapRecove
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMovingBody [
+CFPhysicsCoreTests >> continuousImpactDoesNotDoubleIntegrateSeparateMovingBody [
 	<gtExample>
 	| moving wall separate pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5132,7 +5132,7 @@ CFPhysicsCleanSlateTests >> continuousImpactDoesNotDoubleIntegrateSeparateMoving
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
+CFPhysicsCoreTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
 	<gtExample>
 	| moving sensor pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5161,7 +5161,7 @@ CFPhysicsCleanSlateTests >> stepPipelineKeepsOverlappingSensorOnDiscretePath [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
+CFPhysicsCoreTests >> continuousContactsPublishInDeterministicPairOrder [
 	<gtExample>
 	| result impacts |
 	result := self stepPipelineSolvesMultipleContinuousImpactsInTimeOrder.
@@ -5175,7 +5175,7 @@ CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
+CFPhysicsCoreTests >> stepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
 	<gtExample>
 	| moving sensor pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5208,7 +5208,7 @@ CFPhysicsCleanSlateTests >> stepPipelineIgnoresSweptSensorWithoutSolvingOrBlocki
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResolvedPath [
+CFPhysicsCoreTests >> continuousSolidImpactDoesNotPublishSensorBeyondResolvedPath [
 	<gtExample>
 	| moving wall sensor pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5245,7 +5245,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousSolidImpactIgnoresSweptSensorBeforeResolvedImpact [
+CFPhysicsCoreTests >> continuousSolidImpactIgnoresSweptSensorBeforeResolvedImpact [
 	<gtExample>
 	| moving sensor wall pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5282,7 +5282,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactIgnoresSweptSensorBeforeResolve
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> ignoredSweptSensorProducesNoFollowingEndEvent [
+CFPhysicsCoreTests >> ignoredSweptSensorProducesNoFollowingEndEvent [
 	<gtExample>
 	| firstResult moving sensor pipeline step secondResult |
 	firstResult := self stepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion.
@@ -5318,7 +5318,7 @@ CFPhysicsCleanSlateTests >> ignoredSweptSensorProducesNoFollowingEndEvent [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateIntegratesAccumulatedForceByInverseMass [
+CFPhysicsCoreTests >> stepStateIntegratesAccumulatedForceByInverseMass [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5331,7 +5331,7 @@ CFPhysicsCleanSlateTests >> stepStateIntegratesAccumulatedForceByInverseMass [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateAppliesPerBodyGravityScale [
+CFPhysicsCoreTests >> stepStateAppliesPerBodyGravityScale [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5343,7 +5343,7 @@ CFPhysicsCleanSlateTests >> stepStateAppliesPerBodyGravityScale [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateAppliesPadeLinearDamping [
+CFPhysicsCoreTests >> stepStateAppliesPadeLinearDamping [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5357,7 +5357,7 @@ CFPhysicsCleanSlateTests >> stepStateAppliesPadeLinearDamping [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateCapsLinearVelocityLikeBox2D [
+CFPhysicsCoreTests >> stepStateCapsLinearVelocityLikeBox2D [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5369,7 +5369,7 @@ CFPhysicsCleanSlateTests >> stepStateCapsLinearVelocityLikeBox2D [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateCapsAngularVelocityUnlessFastRotationIsAllowed [
+CFPhysicsCoreTests >> stepStateCapsAngularVelocityUnlessFastRotationIsAllowed [
 	<gtExample>
 	| body cappedState uncappedState maximumAngularSpeed |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5389,7 +5389,7 @@ CFPhysicsCleanSlateTests >> stepStateCapsAngularVelocityUnlessFastRotationIsAllo
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateUsesWholeStepAngularVelocityLimitAcrossSubsteps [
+CFPhysicsCoreTests >> stepStateUsesWholeStepAngularVelocityLimitAcrossSubsteps [
 	<gtExample>
 	| body state maximumAngularSpeed |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5406,7 +5406,7 @@ CFPhysicsCleanSlateTests >> stepStateUsesWholeStepAngularVelocityLimitAcrossSubs
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> stepStateDoesNotDampCurrentForceContribution [
+CFPhysicsCoreTests >> stepStateDoesNotDampCurrentForceContribution [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5421,7 +5421,7 @@ CFPhysicsCleanSlateTests >> stepStateDoesNotDampCurrentForceContribution [
 ]
 
 { #category : 'examples - velocity integration' }
-CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
+CFPhysicsCoreTests >> bodyCommitClearsAccumulatedForceAndTorque [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5436,7 +5436,7 @@ CFPhysicsCleanSlateTests >> bodyCommitClearsAccumulatedForceAndTorque [
 ]
 
 { #category : 'examples - step pipeline' }
-CFPhysicsCleanSlateTests >> solvedBodyStateRemainsDetachedUntilPipelineResultCommit [
+CFPhysicsCoreTests >> solvedBodyStateRemainsDetachedUntilPipelineResultCommit [
 	<gtExample>
 	| body state result |
 	body := self cleanSlateBodyWithSequence: 1 position: 10 @ 20 extent: 30 @ 40.
@@ -5456,7 +5456,7 @@ CFPhysicsCleanSlateTests >> solvedBodyStateRemainsDetachedUntilPipelineResultCom
 ]
 
 { #category : 'examples - constraint preparation' }
-CFPhysicsCleanSlateTests >> preparedJointImpulseRemainsDetachedUntilPipelineResultCommit [
+CFPhysicsCoreTests >> preparedJointImpulseRemainsDetachedUntilPipelineResultCommit [
 	<gtExample>
 	| first second joint prepared result |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -5476,7 +5476,7 @@ CFPhysicsCleanSlateTests >> preparedJointImpulseRemainsDetachedUntilPipelineResu
 ]
 
 { #category : 'examples - constraint preparation' }
-CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract [
+CFPhysicsCoreTests >> preparedJointConstraintsShareTheirJointStateContract [
 	<gtExample>
 	self assert: CFPhysicsPreparedDistanceJoint superclass equals: CFPhysicsPreparedJointConstraint.
 	self assert: CFPhysicsPreparedRevoluteJoint superclass equals: CFPhysicsPreparedJointConstraint.
@@ -5486,7 +5486,7 @@ CFPhysicsCleanSlateTests >> preparedJointConstraintsShareTheirJointStateContract
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> changingBodyTypeDoesNotWakeContactNeighbours [
+CFPhysicsCoreTests >> changingBodyTypeDoesNotWakeContactNeighbours [
 	<gtExample>
 	| first second contact |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -5506,7 +5506,7 @@ CFPhysicsCleanSlateTests >> changingBodyTypeDoesNotWakeContactNeighbours [
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> staticToDynamicCreatesContactWithoutMovement [
+CFPhysicsCoreTests >> staticToDynamicCreatesContactWithoutMovement [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -5531,7 +5531,7 @@ CFPhysicsCleanSlateTests >> staticToDynamicCreatesContactWithoutMovement [
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> dynamicToStaticEndsContactAndRemovesPersistentConnectivity [
+CFPhysicsCoreTests >> dynamicToStaticEndsContactAndRemovesPersistentConnectivity [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult contact secondResult |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -5559,7 +5559,7 @@ CFPhysicsCleanSlateTests >> dynamicToStaticEndsContactAndRemovesPersistentConnec
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> bodyTypeChangeReconcilesPersistentIslandMembership [
+CFPhysicsCoreTests >> bodyTypeChangeReconcilesPersistentIslandMembership [
 	<gtExample>
 	| owner element world body |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -5582,7 +5582,7 @@ CFPhysicsCleanSlateTests >> bodyTypeChangeReconcilesPersistentIslandMembership [
 
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> kinematicBodyIntegratesItsPrescribedVelocityWithoutForces [
+CFPhysicsCoreTests >> kinematicBodyIntegratesItsPrescribedVelocityWithoutForces [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
@@ -5606,7 +5606,7 @@ CFPhysicsCleanSlateTests >> kinematicBodyIntegratesItsPrescribedVelocityWithoutF
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> kinematicBodyHasInfiniteMassAndCannotSleep [
+CFPhysicsCoreTests >> kinematicBodyHasInfiniteMassAndCannotSleep [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -5623,7 +5623,7 @@ CFPhysicsCleanSlateTests >> kinematicBodyHasInfiniteMassAndCannotSleep [
 ]
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
+CFPhysicsCoreTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
 	<gtExample>
 	| dynamic kinematic static finder pairs |
 	dynamic := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5645,7 +5645,7 @@ CFPhysicsCleanSlateTests >> broadphaseRequiresADynamicBodyInKinematicPairs [
 ]
 
 { #category : 'examples - worlds' }
-CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
+CFPhysicsCoreTests >> beWorldInstallsWorldAlongsidePhysics [
 	<gtExample>
 	| element physics world |
 	element := BlElement new.
@@ -5658,7 +5658,7 @@ CFPhysicsCleanSlateTests >> beWorldInstallsWorldAlongsidePhysics [
 ]
 
 { #category : 'examples - worlds' }
-CFPhysicsCleanSlateTests >> worldAnswersNearestExplicitWorld [
+CFPhysicsCoreTests >> worldAnswersNearestExplicitWorld [
 	<gtExample>
 	| root child world |
 	root := BlElement new.
@@ -5672,7 +5672,7 @@ CFPhysicsCleanSlateTests >> worldAnswersNearestExplicitWorld [
 ]
 
 { #category : 'examples - worlds' }
-CFPhysicsCleanSlateTests >> beWorldInstallsOnReceiverWhenNoWorldExists [
+CFPhysicsCoreTests >> beWorldInstallsOnReceiverWhenNoWorldExists [
 	<gtExample>
 	| root parent child world |
 	root := BlElement new.
@@ -5699,7 +5699,8 @@ CFPhysicsCleanSlateTests >> beWorldInstallsOnReceiverWhenNoWorldExists [
 
 
 { #category : 'tests - angular dynamics' }
-CFPhysicsCleanSlateTests >> testAngularImpulseChangesDynamicAngularVelocityByInverseInertia [
+CFPhysicsCoreTests >> testAngularImpulseChangesDynamicAngularVelocityByInverseInertia [
+	<gtExample>
 	| body impulse expected |
 	body := self cleanSlateBodyWithSequence: 1.
 	impulse := 12.0.
@@ -5709,7 +5710,8 @@ CFPhysicsCleanSlateTests >> testAngularImpulseChangesDynamicAngularVelocityByInv
 ]
 
 { #category : 'tests - angular dynamics' }
-CFPhysicsCleanSlateTests >> testZeroAngularImpulseDoesNotWakeSleepingBody [
+CFPhysicsCoreTests >> testZeroAngularImpulseDoesNotWakeSleepingBody [
+	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
 	body sleep.
@@ -5718,7 +5720,8 @@ CFPhysicsCleanSlateTests >> testZeroAngularImpulseDoesNotWakeSleepingBody [
 ]
 
 { #category : 'tests - angular dynamics' }
-CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
+CFPhysicsCoreTests >> testStaticBodyIgnoresAngularImpulse [
+	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
 	body beStatic.
@@ -5731,7 +5734,8 @@ CFPhysicsCleanSlateTests >> testStaticBodyIgnoresAngularImpulse [
 
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
+CFPhysicsCoreTests >> testForceDirectedDefaultsFavourQuickSettling [
+	<gtExample>
 	| behaviour |
 	behaviour := CFPhysicsForceDirectedBehaviour new.
 	self assert: behaviour length equals: 80.0.
@@ -5744,7 +5748,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedDefaultsFavourQuickSettling [
 ]
 
 { #category : 'tests - worlds' }
-CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
+CFPhysicsCoreTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
+	<gtExample>
 	| root first second world spring repulsion |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5765,7 +5770,8 @@ CFPhysicsCleanSlateTests >> testCeaseBeingWorldReleasesItsBodiesAndConstraints [
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnectionOrder [
+CFPhysicsCoreTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnectionOrder [
+	<gtExample>
 	| root first second third world edge behaviour |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5787,7 +5793,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnec
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testForceDirectedRetainsExistingConstraintsWhileReconcilingChanges [
+CFPhysicsCoreTests >> testForceDirectedRetainsExistingConstraintsWhileReconcilingChanges [
+	<gtExample>
 	| root first second third world nodes connections firstConnection secondConnection behaviour retainedSpring retainedRepulsion |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5824,7 +5831,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedRetainsExistingConstraintsWhileReco
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitiveValues [
+CFPhysicsCoreTests >> testForceDirectedConfigurationUpdatesSharedPrimitiveValues [
+	<gtExample>
 	| root first second world connection behaviour spring repulsion |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5859,7 +5867,8 @@ CFPhysicsCleanSlateTests >> testForceDirectedConfigurationUpdatesSharedPrimitive
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstraints [
+CFPhysicsCoreTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstraints [
+	<gtExample>
 	| root first second world connection firstBehaviour secondBehaviour firstSpring secondSpring |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5886,7 +5895,8 @@ CFPhysicsCleanSlateTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstrai
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelection [
+CFPhysicsCoreTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelection [
+	<gtExample>
 	| root first second world connection behaviour |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
@@ -5908,7 +5918,7 @@ CFPhysicsCleanSlateTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelec
 
 
 { #category : 'examples - hierarchy collision diagnosis' }
-CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCentre [
+CFPhysicsCoreTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCentre [
 	<gtExample>
 	| owner elements world centreAnchor joints result |
 	owner := BlElement new size: 500 @ 360; yourself.
@@ -5939,7 +5949,7 @@ CFPhysicsCleanSlateTests >> threeOverlappingBodiesAnchoredIndependentlyToWorldCe
 
 
 { #category : 'examples - body types' }
-CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
+CFPhysicsCoreTests >> physicsFacadeExposesTheExistingBodyType [
 	<gtExample>
 	| owner element world physics |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -5959,7 +5969,7 @@ CFPhysicsCleanSlateTests >> physicsFacadeExposesTheExistingBodyType [
 
 
 { #category : 'examples - inspection' }
-CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
+CFPhysicsCoreTests >> physicsMagritteDescriptionsAreReadOnly [
 	<gtExample>
 	| owner element world physics descriptions expectedAccessors |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -5982,7 +5992,7 @@ CFPhysicsCleanSlateTests >> physicsMagritteDescriptionsAreReadOnly [
 
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderCreatesStepLocalPreparedContactObjects [
+CFPhysicsCoreTests >> constraintBuilderCreatesStepLocalPreparedContactObjects [
 	<gtExample>
 	| first second pair updater firstBatch secondBatch bodyStates builder firstConstraint secondConstraint firstPoint secondPoint |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -6017,7 +6027,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderCreatesStepLocalPreparedContactObje
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
+CFPhysicsCoreTests >> islandWakeUpdatesCapturedBodyState [
 	<gtExample>
 	| first second island stage bodyStates |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -6044,7 +6054,7 @@ CFPhysicsCleanSlateTests >> islandWakeUpdatesCapturedBodyState [
 
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds [
+CFPhysicsCoreTests >> contactUpdateStageUsesCapturedTransformsForManifolds [
 	<gtExample>
 	| first second result stage contacts step |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -6072,7 +6082,7 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedTransformsForManifolds
 
 
 { #category : 'examples - contacts' }
-CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
+CFPhysicsCoreTests >> contactUpdateStageUsesCapturedSensorClassification [
 	<gtExample>
 	| first second result stage contacts step |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -6103,7 +6113,7 @@ CFPhysicsCleanSlateTests >> contactUpdateStageUsesCapturedSensorClassification [
 
 
 { #category : 'examples - sensors' }
-CFPhysicsCleanSlateTests >> runtimeSensorChangeUnlinksAContinuedContactFromItsPersistentIsland [
+CFPhysicsCoreTests >> runtimeSensorChangeUnlinksAContinuedContactFromItsPersistentIsland [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult firstContact secondResult |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6135,7 +6145,7 @@ CFPhysicsCleanSlateTests >> runtimeSensorChangeUnlinksAContinuedContactFromItsPe
 ]
 
 { #category : 'examples - sensors' }
-CFPhysicsCleanSlateTests >> runtimeSolidChangeLinksAContinuedContactIntoThePersistentIsland [
+CFPhysicsCoreTests >> runtimeSolidChangeLinksAContinuedContactIntoThePersistentIsland [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult contact |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6168,7 +6178,7 @@ CFPhysicsCleanSlateTests >> runtimeSolidChangeLinksAContinuedContactIntoThePersi
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
+CFPhysicsCoreTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 	<gtExample>
 	| owner element world body state solution |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6195,7 +6205,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedBodyStatesBeforeSolve [
 
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve [
+CFPhysicsCoreTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve [
 	<gtExample>
 	| owner firstElement secondElement world first second joint state capturedJoint prepared solution solvedPrepared |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6244,7 +6254,7 @@ CFPhysicsCleanSlateTests >> worldStateOwnsCapturedJointConfigurationBeforeSolve 
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentPreparedConstraint [
+CFPhysicsCoreTests >> solvingCapturedStateBuildsIndependentPreparedConstraint [
 	<gtExample>
 	| world committedContact committedManifold state solution calculationContact calculationConstraint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6262,7 +6272,7 @@ CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentPreparedConstra
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentConstraintPoint [
+CFPhysicsCoreTests >> solvingCapturedStateBuildsIndependentConstraintPoint [
 	<gtExample>
 	| world committedContact committedManifoldPoint state solution calculationContact calculationConstraint calculationPoint |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6281,7 +6291,7 @@ CFPhysicsCleanSlateTests >> solvingCapturedStateBuildsIndependentConstraintPoint
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> worldSolutionCarriesCommitIdentity [
+CFPhysicsCoreTests >> worldSolutionCarriesCommitIdentity [
 	<gtExample>
 	| world state solution |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6295,7 +6305,7 @@ CFPhysicsCleanSlateTests >> worldSolutionCarriesCommitIdentity [
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> newerCaptureRejectsOlderSolution [
+CFPhysicsCoreTests >> newerCaptureRejectsOlderSolution [
 	<gtExample>
 	| world firstState firstSolution stepBefore |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6309,7 +6319,7 @@ CFPhysicsCleanSlateTests >> newerCaptureRejectsOlderSolution [
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> releasedWorldRejectsCapturedSolution [
+CFPhysicsCoreTests >> releasedWorldRejectsCapturedSolution [
 	<gtExample>
 	| world state solution |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6322,7 +6332,7 @@ CFPhysicsCleanSlateTests >> releasedWorldRejectsCapturedSolution [
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> worldCapturesAtMostOneSolveAtATime [
+CFPhysicsCoreTests >> worldCapturesAtMostOneSolveAtATime [
 	<gtExample>
 	| world firstState secondState thirdState |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6340,7 +6350,7 @@ CFPhysicsCleanSlateTests >> worldCapturesAtMostOneSolveAtATime [
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> abandoningTheActiveSolveAllowsImmediateRecapture [
+CFPhysicsCoreTests >> abandoningTheActiveSolveAllowsImmediateRecapture [
 	<gtExample>
 	| world firstState secondState |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6355,7 +6365,7 @@ CFPhysicsCleanSlateTests >> abandoningTheActiveSolveAllowsImmediateRecapture [
 ]
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
+CFPhysicsCoreTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 	<gtExample>
 	| world firstState secondState |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6372,7 +6382,7 @@ CFPhysicsCleanSlateTests >> abandoningAnOlderSolveDoesNotReleaseTheCurrentSolve 
 
 
 { #category : 'examples - background stepping' }
-CFPhysicsCleanSlateTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
+CFPhysicsCoreTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
 	<gtExample>
 	| world space startedAgain |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6387,7 +6397,7 @@ CFPhysicsCleanSlateTests >> backgroundStepClaimsTheSingleSolveSlotWithoutWaiting
 
 
 { #category : 'examples - world state capture' }
-CFPhysicsCleanSlateTests >> topologyInvalidationReleasesTheSolveSlotImmediately [
+CFPhysicsCoreTests >> topologyInvalidationReleasesTheSolveSlotImmediately [
 	<gtExample>
 	| world firstState firstSolution secondState |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6405,7 +6415,7 @@ CFPhysicsCleanSlateTests >> topologyInvalidationReleasesTheSolveSlotImmediately 
 ]
 
 { #category : 'examples - background stepping' }
-CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
+CFPhysicsCoreTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 	<gtExample>
 	| synchronousOwner detachedOwner synchronousElement detachedElement synchronousWorld detachedWorld synchronousBody detachedBody synchronousResult state solution detachedResult |
 	synchronousOwner := BlElement new.
@@ -6450,7 +6460,7 @@ CFPhysicsCleanSlateTests >> detachedCaptureSolveCommitMatchesSynchronousStep [
 
 
 { #category : 'examples - background stepping' }
-CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
+CFPhysicsCoreTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
 	<gtExample>
 	| world space backgroundStep capturedPipeline replacementPipeline |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6468,7 +6478,7 @@ CFPhysicsCleanSlateTests >> backgroundStepResolvesItsPipelineBeforeDispatch [
 ]
 
 { #category : 'examples - background stepping' }
-CFPhysicsCleanSlateTests >> staleSolveCannotCompeteWithRestartedWorldProgress [
+CFPhysicsCoreTests >> staleSolveCannotCompeteWithRestartedWorldProgress [
 	<gtExample>
 	| world oldState oldSolution newState newSolution committed |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6493,7 +6503,7 @@ CFPhysicsCleanSlateTests >> staleSolveCannotCompeteWithRestartedWorldProgress [
 
 
 { #category : 'examples - background stepping' }
-CFPhysicsCleanSlateTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
+CFPhysicsCoreTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
 	<gtExample>
 	| world backgroundStep |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6507,7 +6517,7 @@ CFPhysicsCleanSlateTests >> detachedOwnerCannotClaimABackgroundSolveSlot [
 
 
 { #category : 'examples - background telemetry' }
-CFPhysicsCleanSlateTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
+CFPhysicsCoreTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
 	<gtExample>
 	| world state backgroundStep solution committed |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6532,7 +6542,7 @@ CFPhysicsCleanSlateTests >> detachedSolvePublishesTelemetryOnlyAfterCommit [
 
 
 { #category : 'examples - background telemetry' }
-CFPhysicsCleanSlateTests >> staleDetachedSolvePublishesNoTelemetry [
+CFPhysicsCoreTests >> staleDetachedSolvePublishesNoTelemetry [
 	<gtExample>
 	| world state backgroundStep solution |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6555,7 +6565,7 @@ CFPhysicsCleanSlateTests >> staleDetachedSolvePublishesNoTelemetry [
 
 
 { #category : 'examples - background telemetry' }
-CFPhysicsCleanSlateTests >> backgroundStepCapturesTelemetryModeBeforeDispatch [
+CFPhysicsCoreTests >> backgroundStepCapturesTelemetryModeBeforeDispatch [
 	<gtExample>
 	| world space backgroundStep |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6571,7 +6581,7 @@ CFPhysicsCleanSlateTests >> backgroundStepCapturesTelemetryModeBeforeDispatch [
 ]
 
 { #category : 'examples - background telemetry' }
-CFPhysicsCleanSlateTests >> backgroundStepDefaultsToTheUnmeasuredSolver [
+CFPhysicsCoreTests >> backgroundStepDefaultsToTheUnmeasuredSolver [
 	<gtExample>
 	| world space backgroundStep |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -6585,7 +6595,7 @@ CFPhysicsCleanSlateTests >> backgroundStepDefaultsToTheUnmeasuredSolver [
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> bodyLocalPointRoundTripsThroughWorld [
+CFPhysicsCoreTests >> bodyLocalPointRoundTripsThroughWorld [
 	<gtExample>
 	| body localPoint worldPoint recoveredPoint |
 	body := CFPhysicsBody
@@ -6602,7 +6612,7 @@ CFPhysicsCleanSlateTests >> bodyLocalPointRoundTripsThroughWorld [
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> bodyLocalVectorRoundTripsWithoutTranslation [
+CFPhysicsCoreTests >> bodyLocalVectorRoundTripsWithoutTranslation [
 	<gtExample>
 	| body localVector worldVector recoveredVector |
 	body := CFPhysicsBody
@@ -6621,7 +6631,7 @@ CFPhysicsCleanSlateTests >> bodyLocalVectorRoundTripsWithoutTranslation [
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> bodyAndCapturedStateUseTheSameCoordinateContract [
+CFPhysicsCoreTests >> bodyAndCapturedStateUseTheSameCoordinateContract [
 	<gtExample>
 	| body state localPoint localVector |
 	body := CFPhysicsBody
@@ -6641,7 +6651,7 @@ CFPhysicsCleanSlateTests >> bodyAndCapturedStateUseTheSameCoordinateContract [
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> elementLocalAndBodyLocalPointsRoundTrip [
+CFPhysicsCoreTests >> elementLocalAndBodyLocalPointsRoundTrip [
 	<gtExample>
 	| shapeState elementPoint bodyPoint recoveredPoint |
 	shapeState := CFPhysicsShapeState on: (BlElement new size: 80 @ 30; yourself).
@@ -6654,7 +6664,7 @@ CFPhysicsCleanSlateTests >> elementLocalAndBodyLocalPointsRoundTrip [
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> normalisedPointsResolveIntoTheBodyLocalFrame [
+CFPhysicsCoreTests >> normalisedPointsResolveIntoTheBodyLocalFrame [
 	<gtExample>
 	| shapeState |
 	shapeState := CFPhysicsShapeState on: (BlElement new size: 80 @ 30; yourself).
@@ -6669,7 +6679,7 @@ CFPhysicsCleanSlateTests >> normalisedPointsResolveIntoTheBodyLocalFrame [
 
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> equivalentLocalAndNormalisedAnchorsShareTheCoordinateContract [
+CFPhysicsCoreTests >> equivalentLocalAndNormalisedAnchorsShareTheCoordinateContract [
 	<gtExample>
 	| body localAnchor normalisedAnchor centreAnchor |
 	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
@@ -6683,7 +6693,7 @@ CFPhysicsCleanSlateTests >> equivalentLocalAndNormalisedAnchorsShareTheCoordinat
 ]
 
 { #category : 'examples - coordinate contract' }
-CFPhysicsCleanSlateTests >> bodyStoresItsWorldOriginWithoutChangingTheElementPositionContract [
+CFPhysicsCoreTests >> bodyStoresItsWorldOriginWithoutChangingTheElementPositionContract [
 	<gtExample>
 	| body |
 	body := CFPhysicsBody
@@ -6703,7 +6713,7 @@ CFPhysicsCleanSlateTests >> bodyStoresItsWorldOriginWithoutChangingTheElementPos
 
 
 { #category : 'examples - coordinates' }
-CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransformContract [
+CFPhysicsCoreTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransformContract [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1 position: 100 @ 50 extent: 40 @ 20.
@@ -6721,7 +6731,8 @@ CFPhysicsCleanSlateTests >> bodyStepStateCapturesBodyOriginWithoutChangingTransf
 
 
 { #category : 'tests - pull interaction' }
-CFPhysicsCleanSlateTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
+CFPhysicsCoreTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
+	<gtExample>
 	| root child world body handler constraint |
 	root := BlElement new.
 	child := BlElement new extent: 20 @ 20.
@@ -6742,7 +6753,8 @@ CFPhysicsCleanSlateTests >> testPullInteractionCanEndAfterItsWorldIsReleased [
 
 
 { #category : 'tests - pull interaction' }
-CFPhysicsCleanSlateTests >> testPullInteractionPreservesBodyVelocityWhenReleased [
+CFPhysicsCoreTests >> testPullInteractionPreservesBodyVelocityWhenReleased [
+	<gtExample>
 	| root child world body handler joint |
 	root := BlElement new.
 	child := BlElement new extent: 20 @ 20.
@@ -6765,7 +6777,7 @@ CFPhysicsCleanSlateTests >> testPullInteractionPreservesBodyVelocityWhenReleased
 
 
 { #category : 'examples - motor joints' }
-CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
+CFPhysicsCoreTests >> motorJointPreservesConfiguredRelativeTransform [
 	<gtExample>
 	| owner firstElement secondElement world first second joint |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6790,7 +6802,7 @@ CFPhysicsCleanSlateTests >> motorJointPreservesConfiguredRelativeTransform [
 ]
 
 { #category : 'examples - motor joints' }
-CFPhysicsCleanSlateTests >> motorJointPreservesRelativeTransformBetweenDynamicBodies [
+CFPhysicsCoreTests >> motorJointPreservesRelativeTransformBetweenDynamicBodies [
 	<gtExample>
 	| owner firstElement secondElement world first second joint initialCentre |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6817,7 +6829,7 @@ CFPhysicsCleanSlateTests >> motorJointPreservesRelativeTransformBetweenDynamicBo
 ]
 
 { #category : 'examples - motor joints' }
-CFPhysicsCleanSlateTests >> motorJointLinearImpulseIsCappedBySubstepForce [
+CFPhysicsCoreTests >> motorJointLinearImpulseIsCappedBySubstepForce [
 	<gtExample>
 	| owner firstElement secondElement world first second joint state solution prepared expectedMaximum |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6848,7 +6860,7 @@ CFPhysicsCleanSlateTests >> motorJointLinearImpulseIsCappedBySubstepForce [
 ]
 
 { #category : 'examples - motor joints' }
-CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
+CFPhysicsCoreTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	<gtExample>
 	| owner firstElement secondElement world first second joint state prepared |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -6875,7 +6887,7 @@ CFPhysicsCleanSlateTests >> motorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 ]
 
 { #category : 'examples - motor joints' }
-CFPhysicsCleanSlateTests >> motorJointAngularDriveUsesTheShortestArcAcrossWrap [
+CFPhysicsCoreTests >> motorJointAngularDriveUsesTheShortestArcAcrossWrap [
 	<gtExample>
 	| first second joint bodyStates step prepared solver firstState secondState |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -6916,7 +6928,7 @@ CFPhysicsCleanSlateTests >> motorJointAngularDriveUsesTheShortestArcAcrossWrap [
 
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointMotorDrivesAlongItsLocalAxis [
+CFPhysicsCoreTests >> prismaticJointMotorDrivesAlongItsLocalAxis [
 	<gtExample>
 	| owner element world joint |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -6936,7 +6948,7 @@ CFPhysicsCleanSlateTests >> prismaticJointMotorDrivesAlongItsLocalAxis [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointSpringTargetsTranslation [
+CFPhysicsCoreTests >> prismaticJointSpringTargetsTranslation [
 	<gtExample>
 	| owner element world joint initialError |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -6956,7 +6968,7 @@ CFPhysicsCleanSlateTests >> prismaticJointSpringTargetsTranslation [
 ]
 
 { #category : 'examples - prismatic joints' }
-CFPhysicsCleanSlateTests >> prismaticJointAxisRotatesWithBodyA [
+CFPhysicsCoreTests >> prismaticJointAxisRotatesWithBodyA [
 	<gtExample>
 	| owner firstElement secondElement world joint state prepared |
 	owner := BlElement new size: 400 @ 300; yourself.
@@ -6979,7 +6991,7 @@ CFPhysicsCleanSlateTests >> prismaticJointAxisRotatesWithBodyA [
 
 
 { #category : 'examples - contact solver' }
-CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
+CFPhysicsCoreTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
 	<gtExample>
 	| world step |
 	world := CFPhysicsWorld new.
@@ -6997,7 +7009,7 @@ CFPhysicsCleanSlateTests >> contactPushSpeedDefaultsAndPropagatesIntoStep [
 ]
 
 { #category : 'examples - contact solver' }
-CFPhysicsCleanSlateTests >> worldScaleConvertsMutableConfigurationWhenStateIsCaptured [
+CFPhysicsCoreTests >> worldScaleConvertsMutableConfigurationWhenStateIsCaptured [
 	<gtExample>
 	| owner world state |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -7019,7 +7031,7 @@ CFPhysicsCleanSlateTests >> worldScaleConvertsMutableConfigurationWhenStateIsCap
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> contactRollingResistanceDefaultsToZero [
+CFPhysicsCoreTests >> contactRollingResistanceDefaultsToZero [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -7028,7 +7040,7 @@ CFPhysicsCleanSlateTests >> contactRollingResistanceDefaultsToZero [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> constraintBuilderPreparesRollingResistance [
+CFPhysicsCoreTests >> constraintBuilderPreparesRollingResistance [
 	<gtExample>
 	| first second pair manifold bodyStates constraint |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7052,7 +7064,7 @@ CFPhysicsCleanSlateTests >> constraintBuilderPreparesRollingResistance [
 ]
 
 { #category : 'examples - constraints' }
-CFPhysicsCleanSlateTests >> preparedConstraintWritesRollingImpulseBack [
+CFPhysicsCoreTests >> preparedConstraintWritesRollingImpulseBack [
 	<gtExample>
 	| constraint |
 	constraint := self constraintBuilderPreparesSolverData.
@@ -7064,7 +7076,7 @@ CFPhysicsCleanSlateTests >> preparedConstraintWritesRollingImpulseBack [
 
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> hitEventsUseConfirmedImpulseRatherThanWarmStartedImpulse [
+CFPhysicsCoreTests >> hitEventsUseConfirmedImpulseRatherThanWarmStartedImpulse [
 	<gtExample>
 	| constraint point result collector |
 	point := CFPhysicsConstraintPoint new
@@ -7088,7 +7100,7 @@ CFPhysicsCleanSlateTests >> hitEventsUseConfirmedImpulseRatherThanWarmStartedImp
 ]
 
 { #category : 'examples - post solve' }
-CFPhysicsCleanSlateTests >> hitEventsChooseFastestPointPerContact [
+CFPhysicsCoreTests >> hitEventsChooseFastestPointPerContact [
 	<gtExample>
 	| constraint firstPoint secondPoint result collector |
 	firstPoint := CFPhysicsConstraintPoint new
@@ -7123,7 +7135,7 @@ CFPhysicsCleanSlateTests >> hitEventsChooseFastestPointPerContact [
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousCollisionUsesBox2DBodyTypePolicy [
+CFPhysicsCoreTests >> continuousCollisionUsesBox2DBodyTypePolicy [
 	<gtExample>
 	| dynamic static kinematic dynamicState staticState kinematicState |
 	dynamic := self cleanSlateBodyWithSequence: 1.
@@ -7140,7 +7152,7 @@ CFPhysicsCleanSlateTests >> continuousCollisionUsesBox2DBodyTypePolicy [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> bulletContinuousCollisionIncludesMovableNonBulletBodies [
+CFPhysicsCoreTests >> bulletContinuousCollisionIncludesMovableNonBulletBodies [
 	<gtExample>
 	| bullet dynamic otherBullet bulletState dynamicState otherBulletState |
 	bullet := self cleanSlateBodyWithSequence: 1.
@@ -7158,7 +7170,7 @@ CFPhysicsCleanSlateTests >> bulletContinuousCollisionIncludesMovableNonBulletBod
 
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweepInterpolatesSolvedBodyOriginAndRotation [
+CFPhysicsCoreTests >> sweepInterpolatesSolvedBodyOriginAndRotation [
 	<gtExample>
 	| sweep midpoint |
 	sweep := CFPhysicsSweep
@@ -7171,7 +7183,7 @@ CFPhysicsCleanSlateTests >> sweepInterpolatesSolvedBodyOriginAndRotation [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousClampUsesTheSolvedSweepFraction [
+CFPhysicsCoreTests >> continuousClampUsesTheSolvedSweepFraction [
 	<gtExample>
 	| body state |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -7187,7 +7199,7 @@ CFPhysicsCleanSlateTests >> continuousClampUsesTheSolvedSweepFraction [
 
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> aabbExpansionPreservesCentreAndAddsMargin [
+CFPhysicsCoreTests >> aabbExpansionPreservesCentreAndAddsMargin [
 	<gtExample>
 	| bounds expanded |
 	bounds := CFPhysicsAABB position: 10 @ 20 extent: 30 @ 40.
@@ -7199,7 +7211,7 @@ CFPhysicsCleanSlateTests >> aabbExpansionPreservesCentreAndAddsMargin [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> worldScalesBroadphaseDistancesIntoEachStep [
+CFPhysicsCoreTests >> worldScalesBroadphaseDistancesIntoEachStep [
 	<gtExample>
 	| owner world firstStep secondStep |
 	owner := BlElement new size: 100 @ 100.
@@ -7215,7 +7227,7 @@ CFPhysicsCleanSlateTests >> worldScalesBroadphaseDistancesIntoEachStep [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeQueriesOnlyOverlappingProxies [
+CFPhysicsCoreTests >> dynamicTreeQueriesOnlyOverlappingProxies [
 	<gtExample>
 	| tree first second third result |
 	tree := CFPhysicsDynamicTree new.
@@ -7232,7 +7244,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeQueriesOnlyOverlappingProxies [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeMovesProxyOnlyOutsideItsFatBounds [
+CFPhysicsCoreTests >> dynamicTreeMovesProxyOnlyOutsideItsFatBounds [
 	<gtExample>
 	| tree proxy moved |
 	tree := CFPhysicsDynamicTree new.
@@ -7246,7 +7258,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeMovesProxyOnlyOutsideItsFatBounds [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeReusesReleasedNodes [
+CFPhysicsCoreTests >> dynamicTreeReusesReleasedNodes [
 	<gtExample>
 	| tree first second pooledBefore third |
 	tree := CFPhysicsDynamicTree new.
@@ -7263,7 +7275,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeReusesReleasedNodes [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
+CFPhysicsCoreTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
 	<gtExample>
 	| tree proxies |
 	tree := CFPhysicsDynamicTree new.
@@ -7283,7 +7295,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeMaintainsBox2DStructuralInvariants [
 
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeQueryCanTerminateWithoutCollectingResults [
+CFPhysicsCoreTests >> dynamicTreeQueryCanTerminateWithoutCollectingResults [
 	<gtExample>
 	| tree visited completed |
 	tree := CFPhysicsDynamicTree new.
@@ -7302,7 +7314,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeQueryCanTerminateWithoutCollectingResults
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeReportsBox2DAreaRatio [
+CFPhysicsCoreTests >> dynamicTreeReportsBox2DAreaRatio [
 	<gtExample>
 	| tree |
 	tree := CFPhysicsDynamicTree new.
@@ -7316,7 +7328,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeReportsBox2DAreaRatio [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeRayCastClipsAndVisitsNearestProxyFirst [
+CFPhysicsCoreTests >> dynamicTreeRayCastClipsAndVisitsNearestProxyFirst [
 	<gtExample>
 	| tree visited completed |
 	tree := CFPhysicsDynamicTree new.
@@ -7338,7 +7350,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeRayCastClipsAndVisitsNearestProxyFirst [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeRayCastCallbackCanTerminateTraversal [
+CFPhysicsCoreTests >> dynamicTreeRayCastCallbackCanTerminateTraversal [
 	<gtExample>
 	| tree visited completed |
 	tree := CFPhysicsDynamicTree new.
@@ -7357,7 +7369,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeRayCastCallbackCanTerminateTraversal [
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeShapeCastClipsAndVisitsNearestProxyFirst [
+CFPhysicsCoreTests >> dynamicTreeShapeCastClipsAndVisitsNearestProxyFirst [
 	<gtExample>
 	| tree input visited completed |
 	tree := CFPhysicsDynamicTree new.
@@ -7382,7 +7394,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeShapeCastClipsAndVisitsNearestProxyFirst 
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeShapeCastCallbackCanTerminateTraversal [
+CFPhysicsCoreTests >> dynamicTreeShapeCastCallbackCanTerminateTraversal [
 	<gtExample>
 	| tree input visited completed |
 	tree := CFPhysicsDynamicTree new.
@@ -7404,7 +7416,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeShapeCastCallbackCanTerminateTraversal [
 
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreeFullRebuildPreservesProxiesAndInvariants [
+CFPhysicsCoreTests >> dynamicTreeFullRebuildPreservesProxiesAndInvariants [
 	<gtExample>
 	| tree before after rebuilt |
 	tree := CFPhysicsDynamicTree new.
@@ -7426,7 +7438,7 @@ CFPhysicsCleanSlateTests >> dynamicTreeFullRebuildPreservesProxiesAndInvariants 
 ]
 
 { #category : 'examples - broadphase' }
-CFPhysicsCleanSlateTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
+CFPhysicsCoreTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
 	<gtExample>
 	| tree proxy rebuilt |
 	tree := CFPhysicsDynamicTree new.
@@ -7443,7 +7455,7 @@ CFPhysicsCleanSlateTests >> dynamicTreePartialRebuildTouchesOnlyEnlargedBranch [
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphLinksAndMergesLikeBox2D [
+CFPhysicsCoreTests >> persistentIslandGraphLinksAndMergesLikeBox2D [
 	<gtExample>
 	| first second third firstConstraint secondConstraint graph islands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7466,7 +7478,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphLinksAndMergesLikeBox2D [
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphDefersSplitAfterConstraintRemoval [
+CFPhysicsCoreTests >> persistentIslandGraphDefersSplitAfterConstraintRemoval [
 	<gtExample>
 	| first second constraint graph island |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7484,7 +7496,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphDefersSplitAfterConstraintRemov
 ]
 
 { #category : 'examples - islands' }
-CFPhysicsCleanSlateTests >> worldPersistentIslandGraphTracksRuntimeJointLifecycle [
+CFPhysicsCoreTests >> worldPersistentIslandGraphTracksRuntimeJointLifecycle [
 	<gtExample>
 	| owner firstElement secondElement world first second joint graph island |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -7510,7 +7522,7 @@ CFPhysicsCleanSlateTests >> worldPersistentIslandGraphTracksRuntimeJointLifecycl
 ]
 
 { #category : 'examples - persistent islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
+CFPhysicsCoreTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
 	<gtExample>
 	| first second third constraint result islands |
 	first := CFPhysicsBody new sequence: 1; beDynamic; yourself.
@@ -7534,7 +7546,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGroupsDriveSolverIslandEnumeration [
 
 
 { #category : 'examples - persistent islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyRemovedConnection [
+CFPhysicsCoreTests >> persistentIslandGraphSplitsOnlyRemovedConnection [
 	<gtExample>
 	| first second third firstConstraint secondConstraint graph base islands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7560,7 +7572,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyRemovedConnection [
 
 
 { #category : 'examples - persistent islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIslandPerStep [
+CFPhysicsCoreTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIslandPerStep [
 	<gtExample>
 	| first second third fourth firstConstraint secondConstraint graph firstIsland secondIsland splitIslands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7591,7 +7603,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphSplitsOnlyOneSleepiestDirtyIsla
 ]
 
 { #category : 'examples - persistent islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphDoesNotSplitASleepingDirtyIsland [
+CFPhysicsCoreTests >> persistentIslandGraphDoesNotSplitASleepingDirtyIsland [
 	<gtExample>
 	| first second constraint graph island splitIslands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7613,7 +7625,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphDoesNotSplitASleepingDirtyIslan
 ]
 
 { #category : 'examples - persistent islands' }
-CFPhysicsCleanSlateTests >> persistentIslandGraphBreaksEqualSleepTimeTiesByLargestIdentifier [
+CFPhysicsCoreTests >> persistentIslandGraphBreaksEqualSleepTimeTiesByLargestIdentifier [
 	<gtExample>
 	| first second third fourth firstConstraint secondConstraint graph firstIsland secondIsland splitIslands |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7645,7 +7657,7 @@ CFPhysicsCleanSlateTests >> persistentIslandGraphBreaksEqualSleepTimeTiesByLarge
 ]
 
 { #category : 'examples - telemetry testing' }
-CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
+CFPhysicsCoreTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
 	<gtExample>
 	| world run initialStepNumber |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -7668,7 +7680,7 @@ CFPhysicsCleanSlateTests >> telemetryTestRunCollectsOnlyMeasuredSteps [
 ]
 
 { #category : 'examples - telemetry testing' }
-CFPhysicsCleanSlateTests >> telemetryTestRunRestoresWorldTelemetryConfiguration [
+CFPhysicsCoreTests >> telemetryTestRunRestoresWorldTelemetryConfiguration [
 	<gtExample>
 	| world run |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -7688,7 +7700,7 @@ CFPhysicsCleanSlateTests >> telemetryTestRunRestoresWorldTelemetryConfiguration 
 
 
 { #category : 'examples - telemetry testing' }
-CFPhysicsCleanSlateTests >> telemetryResetPreservesRecordingBuffer [
+CFPhysicsCoreTests >> telemetryResetPreservesRecordingBuffer [
 	<gtExample>
 	| world |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -7704,7 +7716,7 @@ CFPhysicsCleanSlateTests >> telemetryResetPreservesRecordingBuffer [
 ]
 
 { #category : 'examples - telemetry testing' }
-CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
+CFPhysicsCoreTests >> telemetryCapacitySurvivesReset [
 	<gtExample>
 	| world initialStepNumber |
 	world := self worldDelegatesOneStepToTheExplicitPipeline.
@@ -7725,7 +7737,7 @@ CFPhysicsCleanSlateTests >> telemetryCapacitySurvivesReset [
 
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> broadphasePairRetainsNonTouchingContact [
+CFPhysicsCoreTests >> broadphasePairRetainsNonTouchingContact [
 	<gtExample>
 	| first second pair touchingUpdater nonTouchingUpdater touchingBatch nonTouchingBatch |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7744,7 +7756,7 @@ CFPhysicsCleanSlateTests >> broadphasePairRetainsNonTouchingContact [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> nonTouchingContactBeginsAgainWithoutPairRecreation [
+CFPhysicsCoreTests >> nonTouchingContactBeginsAgainWithoutPairRecreation [
 	<gtExample>
 	| first second pair touchingUpdater nonTouchingUpdater firstBatch secondBatch thirdBatch |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7764,7 +7776,7 @@ CFPhysicsCleanSlateTests >> nonTouchingContactBeginsAgainWithoutPairRecreation [
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> removedBroadphasePairDoesNotRetainDestroyedContact [
+CFPhysicsCoreTests >> removedBroadphasePairDoesNotRetainDestroyedContact [
 	<gtExample>
 	| first second pair updater firstBatch removedBatch |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -7780,7 +7792,7 @@ CFPhysicsCleanSlateTests >> removedBroadphasePairDoesNotRetainDestroyedContact [
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> separatedPolygonCoresWithinSpeculativeDistanceProduceAManifold [
+CFPhysicsCoreTests >> separatedPolygonCoresWithinSpeculativeDistanceProduceAManifold [
 	<gtExample>
 	| first second manifold |
 	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
@@ -7801,7 +7813,7 @@ CFPhysicsCleanSlateTests >> separatedPolygonCoresWithinSpeculativeDistanceProduc
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> polygonSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
+CFPhysicsCoreTests >> polygonSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
 	<gtExample>
 	| first second manifold |
 	first := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
@@ -7819,7 +7831,7 @@ CFPhysicsCleanSlateTests >> polygonSeparationBeyondSpeculativeDistanceDoesNotPro
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> clippedIntersectionUsesReferenceVertexAndIncidentFaceIdentity [
+CFPhysicsCoreTests >> clippedIntersectionUsesReferenceVertexAndIncidentFaceIdentity [
 	<gtExample>
 	| firstFeature secondFeature first second clipped intersectionFeature |
 	firstFeature := CFPhysicsContactFeatureId
@@ -7852,7 +7864,7 @@ CFPhysicsCleanSlateTests >> clippedIntersectionUsesReferenceVertexAndIncidentFac
 ]
 
 { #category : 'examples - polygon manifolds' }
-CFPhysicsCleanSlateTests >> clippedFaceContactIdentityPersistsAcrossTangentialMotion [
+CFPhysicsCoreTests >> clippedFaceContactIdentityPersistsAcrossTangentialMotion [
 	<gtExample>
 	| ground box first second firstIds secondIds |
 	ground := CFPhysicsPolygonShape rectangleExtent: 100 @ 20.
@@ -7872,7 +7884,7 @@ CFPhysicsCleanSlateTests >> clippedFaceContactIdentityPersistsAcrossTangentialMo
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> separatedCirclesWithinSpeculativeDistanceProduceAStableManifoldPoint [
+CFPhysicsCoreTests >> separatedCirclesWithinSpeculativeDistanceProduceAStableManifoldPoint [
 	<gtExample>
 	| first second firstManifold secondManifold |
 	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
@@ -7900,7 +7912,7 @@ CFPhysicsCleanSlateTests >> separatedCirclesWithinSpeculativeDistanceProduceASta
 ]
 
 { #category : 'examples - circle manifolds' }
-CFPhysicsCleanSlateTests >> circleSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
+CFPhysicsCoreTests >> circleSeparationBeyondSpeculativeDistanceDoesNotProduceAManifold [
 	<gtExample>
 	| first second manifold |
 	first := CFPhysicsShapeState on: (BlElement new geometry: BlCircleGeometry new; size: 30 @ 30; yourself).
@@ -7918,7 +7930,7 @@ CFPhysicsCleanSlateTests >> circleSeparationBeyondSpeculativeDistanceDoesNotProd
 ]
 
 { #category : 'examples - contact pipeline' }
-CFPhysicsCleanSlateTests >> speculativeDistanceFlowsThroughTheContactPipeline [
+CFPhysicsCoreTests >> speculativeDistanceFlowsThroughTheContactPipeline [
 	<gtExample>
 	| first second step pipeline result |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 30 @ 30.
@@ -7944,7 +7956,7 @@ CFPhysicsCleanSlateTests >> speculativeDistanceFlowsThroughTheContactPipeline [
 ]
 
 { #category : 'examples - solver' }
-CFPhysicsCleanSlateTests >> zeroRestitutionSkipsRestitutionPass [
+CFPhysicsCoreTests >> zeroRestitutionSkipsRestitutionPass [
 	<gtExample>
 	| first second step result |
 	first := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -7973,7 +7985,7 @@ CFPhysicsCleanSlateTests >> zeroRestitutionSkipsRestitutionPass [
 
 
 { #category : 'examples - solver' }
-CFPhysicsCleanSlateTests >> contactHertzIsCappedForLargeSubsteps [
+CFPhysicsCoreTests >> contactHertzIsCappedForLargeSubsteps [
 	<gtExample>
 	| step capped |
 	step := CFPhysicsStep
@@ -7993,7 +8005,7 @@ CFPhysicsCleanSlateTests >> contactHertzIsCappedForLargeSubsteps [
 ]
 
 { #category : 'examples - solver' }
-CFPhysicsCleanSlateTests >> staticContactUsesStifferSoftness [
+CFPhysicsCoreTests >> staticContactUsesStifferSoftness [
 	<gtExample>
 	| step |
 	step := CFPhysicsStep
@@ -8009,7 +8021,7 @@ CFPhysicsCleanSlateTests >> staticContactUsesStifferSoftness [
 
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> ellipseElementUsesBox2DMaximumVertexPolygon [
+CFPhysicsCoreTests >> ellipseElementUsesBox2DMaximumVertexPolygon [
 	<gtExample>
 	| element shapeState polygon |
 	element := BlElement new
@@ -8026,7 +8038,7 @@ CFPhysicsCleanSlateTests >> ellipseElementUsesBox2DMaximumVertexPolygon [
 ]
 
 { #category : 'examples - Bloc geometry' }
-CFPhysicsCleanSlateTests >> capturedGeometryDoesNotRetainBlocGeometry [
+CFPhysicsCoreTests >> capturedGeometryDoesNotRetainBlocGeometry [
 	<gtExample>
 	| element shapeState geometry |
 	element := BlElement new
@@ -8041,7 +8053,7 @@ CFPhysicsCleanSlateTests >> capturedGeometryDoesNotRetainBlocGeometry [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainLoopBuildsBox2DGhostVertices [
+CFPhysicsCoreTests >> chainLoopBuildsBox2DGhostVertices [
 	<gtExample>
 	| vertices chain first second fourth |
 	vertices := { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }.
@@ -8073,7 +8085,7 @@ CFPhysicsCleanSlateTests >> chainLoopBuildsBox2DGhostVertices [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> inwardChainLoopReversesBoundaryVertices [
+CFPhysicsCoreTests >> inwardChainLoopReversesBoundaryVertices [
 	<gtExample>
 	| vertices chain |
 	vertices := { 0 @ 0. 10 @ 0. 10 @ 10. 0 @ 10 }.
@@ -8088,7 +8100,7 @@ CFPhysicsCleanSlateTests >> inwardChainLoopReversesBoundaryVertices [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainLoopRequiresFourVertices [
+CFPhysicsCoreTests >> chainLoopRequiresFourVertices [
 	<gtExample>
 	| raised |
 	raised := false.
@@ -8103,7 +8115,7 @@ CFPhysicsCleanSlateTests >> chainLoopRequiresFourVertices [
 ]
 
 { #category : 'examples - shapes' }
-CFPhysicsCleanSlateTests >> bodyOwnsItsPrimaryShapeThroughACollection [
+CFPhysicsCoreTests >> bodyOwnsItsPrimaryShapeThroughACollection [
 	<gtExample>
 	| body collection primary |
 	body := CFPhysicsBody
@@ -8118,7 +8130,7 @@ CFPhysicsCleanSlateTests >> bodyOwnsItsPrimaryShapeThroughACollection [
 ]
 
 { #category : 'examples - shapes' }
-CFPhysicsCleanSlateTests >> shapeCollectionPreservesShapeOrder [
+CFPhysicsCoreTests >> shapeCollectionPreservesShapeOrder [
 	<gtExample>
 	| first second collection |
 	first := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
@@ -8131,7 +8143,7 @@ CFPhysicsCleanSlateTests >> shapeCollectionPreservesShapeOrder [
 ]
 
 { #category : 'examples - shapes' }
-CFPhysicsCleanSlateTests >> shapeCollectionCanOwnChainSegmentShapes [
+CFPhysicsCoreTests >> shapeCollectionCanOwnChainSegmentShapes [
 	<gtExample>
 	| primary chain collection |
 	primary := CFPhysicsShapeState on: (BlElement new size: 10 @ 10; yourself).
@@ -8150,7 +8162,7 @@ CFPhysicsCleanSlateTests >> shapeCollectionCanOwnChainSegmentShapes [
 
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainAttachesItsSegmentShapesToOneBody [
+CFPhysicsCoreTests >> chainAttachesItsSegmentShapesToOneBody [
 	<gtExample>
 	| body chain |
 	body := CFPhysicsBody
@@ -8170,7 +8182,7 @@ CFPhysicsCleanSlateTests >> chainAttachesItsSegmentShapesToOneBody [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentAABBUsesOnlyItsSolidEdge [
+CFPhysicsCoreTests >> chainSegmentAABBUsesOnlyItsSolidEdge [
 	<gtExample>
 	| chain segment bounds |
 	chain := CFPhysicsChainBuilder
@@ -8185,7 +8197,7 @@ CFPhysicsCleanSlateTests >> chainSegmentAABBUsesOnlyItsSolidEdge [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentAABBTracksBodyRotation [
+CFPhysicsCoreTests >> chainSegmentAABBTracksBodyRotation [
 	<gtExample>
 	| chain segment bounds |
 	chain := CFPhysicsChainBuilder
@@ -8201,7 +8213,7 @@ CFPhysicsCleanSlateTests >> chainSegmentAABBTracksBodyRotation [
 
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentPairsHaveDistinctPersistentKeys [
+CFPhysicsCoreTests >> chainSegmentPairsHaveDistinctPersistentKeys [
 	<gtExample>
 	| worldBody dynamicBody chain firstPair secondPair |
 	worldBody := CFPhysicsBody
@@ -8237,7 +8249,7 @@ CFPhysicsCleanSlateTests >> chainSegmentPairsHaveDistinctPersistentKeys [
 ]
 
 { #category : 'examples - collision' }
-CFPhysicsCleanSlateTests >> primaryBodyPairsKeepZeroShapeIndexes [
+CFPhysicsCoreTests >> primaryBodyPairsKeepZeroShapeIndexes [
 	<gtExample>
 	| first second pair |
 	first := CFPhysicsBody element: (BlElement new size: 10 @ 10; yourself) world: nil.
@@ -8253,7 +8265,7 @@ CFPhysicsCleanSlateTests >> primaryBodyPairsKeepZeroShapeIndexes [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> broadphaseRegistersChainSegmentsAsDistinctShapes [
+CFPhysicsCoreTests >> broadphaseRegistersChainSegmentsAsDistinctShapes [
 	<gtExample>
 	| worldBody dynamicBody chain broadphase pairs segmentPair |
 	worldBody := CFPhysicsBody
@@ -8293,7 +8305,7 @@ CFPhysicsCleanSlateTests >> broadphaseRegistersChainSegmentsAsDistinctShapes [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
+CFPhysicsCoreTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
 	<gtExample>
 	| worldElement worldBody circleElement circleBody chain segment pair states manifold |
 	worldElement := BlElement new size: 100 @ 100; yourself.
@@ -8331,7 +8343,7 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleManifoldUsesOneSidedCollision [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
+CFPhysicsCoreTests >> chainSegmentCircleRejectsBackSide [
 	<gtExample>
 	| worldElement worldBody circleElement circleBody chain segment pair states manifold |
 	worldElement := BlElement new size: 100 @ 100; yourself.
@@ -8368,7 +8380,7 @@ CFPhysicsCleanSlateTests >> chainSegmentCircleRejectsBackSide [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentPolygonManifoldUsesOneSidedCollision [
+CFPhysicsCoreTests >> chainSegmentPolygonManifoldUsesOneSidedCollision [
 	<gtExample>
 	| worldElement worldBody boxElement boxBody chain segment pair states manifold |
 	worldElement := BlElement new size: 100 @ 100; yourself.
@@ -8407,7 +8419,7 @@ CFPhysicsCleanSlateTests >> chainSegmentPolygonManifoldUsesOneSidedCollision [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
+CFPhysicsCoreTests >> chainSegmentPolygonRejectsBackSide [
 	<gtExample>
 	| worldElement worldBody boxElement boxBody chain segment pair states manifold |
 	worldElement := BlElement new size: 100 @ 100; yourself.
@@ -8445,7 +8457,7 @@ CFPhysicsCleanSlateTests >> chainSegmentPolygonRejectsBackSide [
 
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainSegmentDistanceProxyMatchesBox2DSegment [
+CFPhysicsCoreTests >> chainSegmentDistanceProxyMatchesBox2DSegment [
 	<gtExample>
 	| chain segment proxy |
 	chain := CFPhysicsChainBuilder
@@ -8460,7 +8472,7 @@ CFPhysicsCleanSlateTests >> chainSegmentDistanceProxyMatchesBox2DSegment [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> shapeStateDistanceProxyPreservesExistingCircleGeometry [
+CFPhysicsCoreTests >> shapeStateDistanceProxyPreservesExistingCircleGeometry [
 	<gtExample>
 	| element state proxy |
 	element := BlElement new
@@ -8475,7 +8487,7 @@ CFPhysicsCleanSlateTests >> shapeStateDistanceProxyPreservesExistingCircleGeomet
 ]
 
 { #category : 'examples - chain shapes' }
-CFPhysicsCleanSlateTests >> chainSegmentImplementsGenericCollisionShapeQueries [
+CFPhysicsCoreTests >> chainSegmentImplementsGenericCollisionShapeQueries [
 	| material filter body chain segment sweep bounds |
 	material := CFPhysicsMaterial new.
 	filter := CFPhysicsCollisionFilter new.
@@ -8501,7 +8513,7 @@ CFPhysicsCleanSlateTests >> chainSegmentImplementsGenericCollisionShapeQueries [
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DTailBranches [
+CFPhysicsCoreTests >> chainPolygonNormalClassificationMatchesBox2DTailBranches [
 	<gtExample>
 	| builder edge normal2 |
 	builder := CFPhysicsChainPolygonManifoldBuilder.
@@ -8538,7 +8550,7 @@ CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DTailBran
 ]
 
 { #category : 'examples - chains' }
-CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DHeadBranches [
+CFPhysicsCoreTests >> chainPolygonNormalClassificationMatchesBox2DHeadBranches [
 	<gtExample>
 	| builder edge normal0 |
 	builder := CFPhysicsChainPolygonManifoldBuilder.
@@ -8575,7 +8587,7 @@ CFPhysicsCleanSlateTests >> chainPolygonNormalClassificationMatchesBox2DHeadBran
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> manualWakeWakesTheEntirePersistentIsland [
+CFPhysicsCoreTests >> manualWakeWakesTheEntirePersistentIsland [
 	<gtExample>
 	| world graph first second constraint |
 	world := CFPhysicsWorld new.
@@ -8596,7 +8608,7 @@ CFPhysicsCleanSlateTests >> manualWakeWakesTheEntirePersistentIsland [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> manualSleepSleepsTheEntirePersistentIsland [
+CFPhysicsCoreTests >> manualSleepSleepsTheEntirePersistentIsland [
 	<gtExample>
 	| world graph first second constraint |
 	world := CFPhysicsWorld new.
@@ -8615,7 +8627,7 @@ CFPhysicsCleanSlateTests >> manualSleepSleepsTheEntirePersistentIsland [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> manualSleepSplitsDirtyConnectivityBeforeSleeping [
+CFPhysicsCoreTests >> manualSleepSplitsDirtyConnectivityBeforeSleeping [
 	<gtExample>
 	| world graph first second third firstConstraint removedConstraint |
 	world := CFPhysicsWorld new.
@@ -8640,7 +8652,7 @@ CFPhysicsCleanSlateTests >> manualSleepSplitsDirtyConnectivityBeforeSleeping [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> manualWakeDoesNotCrossAStaticSharedEndpoint [
+CFPhysicsCoreTests >> manualWakeDoesNotCrossAStaticSharedEndpoint [
 	<gtExample>
 	| world graph first second ground |
 	world := CFPhysicsWorld new.
@@ -8663,7 +8675,7 @@ CFPhysicsCleanSlateTests >> manualWakeDoesNotCrossAStaticSharedEndpoint [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> forceWakesTheEntirePersistentIsland [
+CFPhysicsCoreTests >> forceWakesTheEntirePersistentIsland [
 	<gtExample>
 	| world graph first second constraint |
 	world := CFPhysicsWorld new.
@@ -8684,7 +8696,7 @@ CFPhysicsCleanSlateTests >> forceWakesTheEntirePersistentIsland [
 ]
 
 { #category : 'examples - island sleeping' }
-CFPhysicsCleanSlateTests >> standaloneBodyWakeAndSleepRemainLocal [
+CFPhysicsCoreTests >> standaloneBodyWakeAndSleepRemainLocal [
 	<gtExample>
 	| body |
 	body := self cleanSlateBodyWithSequence: 1.
@@ -8696,7 +8708,7 @@ CFPhysicsCleanSlateTests >> standaloneBodyWakeAndSleepRemainLocal [
 ]
 
 { #category : 'examples - joint lifecycle' }
-CFPhysicsCleanSlateTests >> creatingAJointBetweenSleepingIslandsKeepsBothIslandsSleeping [
+CFPhysicsCoreTests >> creatingAJointBetweenSleepingIslandsKeepsBothIslandsSleeping [
 	<gtExample>
 	| world graph first second joint island |
 	world := CFPhysicsWorld new.
@@ -8719,7 +8731,7 @@ CFPhysicsCleanSlateTests >> creatingAJointBetweenSleepingIslandsKeepsBothIslands
 ]
 
 { #category : 'examples - joint lifecycle' }
-CFPhysicsCleanSlateTests >> creatingAJointBetweenAwakeAndSleepingIslandsWakesTheSleepingIsland [
+CFPhysicsCoreTests >> creatingAJointBetweenAwakeAndSleepingIslandsWakesTheSleepingIsland [
 	<gtExample>
 	| world graph first second joint island |
 	world := CFPhysicsWorld new.
@@ -8742,7 +8754,7 @@ CFPhysicsCleanSlateTests >> creatingAJointBetweenAwakeAndSleepingIslandsWakesThe
 
 
 { #category : 'examples - simulation participation' }
-CFPhysicsCleanSlateTests >> sleepingIslandContactIsRetainedWithoutSolverPreparation [
+CFPhysicsCoreTests >> sleepingIslandContactIsRetainedWithoutSolverPreparation [
 	<gtExample>
 	| firstResult ground box step pipeline secondResult |
 	firstResult := self stepPipelineExposesTheComposedStep.
@@ -8769,7 +8781,7 @@ CFPhysicsCleanSlateTests >> sleepingIslandContactIsRetainedWithoutSolverPreparat
 ]
 
 { #category : 'examples - simulation participation' }
-CFPhysicsCleanSlateTests >> sleepingIslandJointIsRetainedWithoutSolverPreparation [
+CFPhysicsCoreTests >> sleepingIslandJointIsRetainedWithoutSolverPreparation [
 	<gtExample>
 	| first second joint step pipeline result |
 	first := self cleanSlateBodyWithSequence: 1.
@@ -8797,7 +8809,7 @@ CFPhysicsCleanSlateTests >> sleepingIslandJointIsRetainedWithoutSolverPreparatio
 ]
 
 { #category : 'examples - simulation participation' }
-CFPhysicsCleanSlateTests >> wakingAnIslandRestoresContactAndJointSolverParticipation [
+CFPhysicsCoreTests >> wakingAnIslandRestoresContactAndJointSolverParticipation [
 	<gtExample>
 	| ground first second contactResult joint step pipeline result |
 	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
@@ -8837,7 +8849,7 @@ CFPhysicsCleanSlateTests >> wakingAnIslandRestoresContactAndJointSolverParticipa
 
 
 { #category : 'examples - geometry lifecycle' }
-CFPhysicsCleanSlateTests >> runtimeGeometryChangeRecreatesContactAndWakesBothBodies [
+CFPhysicsCoreTests >> runtimeGeometryChangeRecreatesContactAndWakesBothBodies [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult oldContact |
 	owner := BlElement new size: 200 @ 200; yourself.
@@ -8869,7 +8881,7 @@ CFPhysicsCleanSlateTests >> runtimeGeometryChangeRecreatesContactAndWakesBothBod
 ]
 
 { #category : 'examples - geometry lifecycle' }
-CFPhysicsCleanSlateTests >> runtimeGeometryExpansionCreatesContactWithoutBodyMovement [
+CFPhysicsCoreTests >> runtimeGeometryExpansionCreatesContactWithoutBodyMovement [
 	<gtExample>
 	| owner first second world firstBody secondBody firstResult secondResult |
 	owner := BlElement new size: 300 @ 200; yourself.

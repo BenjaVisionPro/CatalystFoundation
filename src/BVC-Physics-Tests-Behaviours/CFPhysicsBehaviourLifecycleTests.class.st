@@ -1,12 +1,13 @@
 Class {
 	#name : 'CFPhysicsBehaviourLifecycleTests',
-	#superclass : 'Object',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Behaviours',
 	#package : 'BVC-Physics-Tests-Behaviours'
 }
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testPhysicsOwnsAddedBehaviourAndWorldParticipates [
+	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
 	element := BlElement new.
@@ -23,6 +24,7 @@ CFPhysicsBehaviourLifecycleTests >> testPhysicsOwnsAddedBehaviourAndWorldPartici
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testDetachedElementCannotAddPhysicsBehaviour [
+	<gtExample>
 	| element behaviour |
 	element := BlElement new.
 	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
@@ -33,6 +35,7 @@ CFPhysicsBehaviourLifecycleTests >> testDetachedElementCannotAddPhysicsBehaviour
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
+	<gtExample>
 	| root element world order first second |
 	root := BlElement new.
 	element := BlElement new.
@@ -55,6 +58,7 @@ CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testBehaviourRemovalIsIdempotentAndClearsBothOwners [
+	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
 	element := BlElement new.
@@ -71,6 +75,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourRemovalIsIdempotentAndClearsBot
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testBehaviourCanRemoveItselfDuringWorldUpdate [
+	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
 	element := BlElement new.
@@ -88,6 +93,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourCanRemoveItselfDuringWorldUpdat
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextStep [
+	<gtExample>
 	| root element world first second |
 	root := BlElement new.
 	element := BlElement new.
@@ -108,6 +114,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextSt
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWorld [
+	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
 	element := BlElement new.
@@ -126,6 +133,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWo
 
 { #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testWorldOwningElementCanOwnBehaviour [
+	<gtExample>
 	| root world behaviour |
 	root := BlElement new.
 	world := root physics beWorld.

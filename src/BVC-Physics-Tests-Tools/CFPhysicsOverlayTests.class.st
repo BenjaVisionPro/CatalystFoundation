@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsOverlayTests',
-	#superclass : 'Object',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Tools',
 	#package : 'BVC-Physics-Tests-Tools'
 }

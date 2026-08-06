@@ -4,14 +4,14 @@ I provide executable regression examples for the Physics and Motion integration 
 My responsibility is to verify fixed-step playback, background solve coordination, presentation cadence, shared frame-driver behaviour and lifecycle cleanup using focused test doubles.
 "
 Class {
-	#name : 'CFPhysicsMotionIntegrationExamples',
-	#superclass : 'Object',
+	#name : 'CFPhysicsMotionTests',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
+CFPhysicsMotionTests >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	<gtExample>
 	| space owner world presentation behaviour timeline track motion |
 	space := BlSpace new.
@@ -55,7 +55,7 @@ CFPhysicsMotionIntegrationExamples >> physicsWorldBehaviourAdvancesDeterministic
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
+CFPhysicsMotionTests >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion |
 	space := BlSpace new.
@@ -97,7 +97,7 @@ CFPhysicsMotionIntegrationExamples >> backgroundPhysicsPlaybackNeverCatchesUpOnA
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> independentPhysicsWorldBehavioursShareOneFrameDriver [
+CFPhysicsMotionTests >> independentPhysicsWorldBehavioursShareOneFrameDriver [
 	<gtExample>
 	| space firstOwner secondOwner firstWorld secondWorld firstBehaviour secondBehaviour firstTimeline secondTimeline firstMotion secondMotion coordinator |
 	space := BlSpace new.
@@ -146,7 +146,7 @@ CFPhysicsMotionIntegrationExamples >> independentPhysicsWorldBehavioursShareOneF
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
+CFPhysicsMotionTests >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
 	<gtExample>
 	| space owner world behaviour timeline motion stepCountBeforeDetachment |
 	space := BlSpace new.
@@ -177,7 +177,7 @@ CFPhysicsMotionIntegrationExamples >> detachedPhysicsWorldOwnerEndsPlaybackClean
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
+CFPhysicsMotionTests >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	<gtExample>
 	| space owner world firstBehaviour firstTimeline firstMotion secondBehaviour secondTimeline secondMotion |
 	space := BlSpace new.
@@ -211,7 +211,7 @@ CFPhysicsMotionIntegrationExamples >> restartingPhysicsSteppingBeginsAtCleanStep
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionIntegrationExamples >> backgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
+CFPhysicsMotionTests >> backgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion initialPresentationCount |
 	space := BlSpace new.

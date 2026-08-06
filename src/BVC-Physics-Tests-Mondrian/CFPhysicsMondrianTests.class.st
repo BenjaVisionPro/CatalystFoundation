@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsMondrianTests',
-	#superclass : 'Object',
+	#superclass : 'TestCase',
 	#category : 'BVC-Physics-Tests-Mondrian',
 	#package : 'BVC-Physics-Tests-Mondrian'
 }
