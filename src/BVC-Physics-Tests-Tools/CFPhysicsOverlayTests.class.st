@@ -1020,7 +1020,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayMaintainsSingleSelectionAcrossBodiesS
 	^ overlay
 ]
 
-CFPhysicsOverlayTests >> physicsSpringVisualMarksBothAnchoredEndpoints [
+CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksBothAnchoredEndpoints [
 	<gtExample>
 	| host world first second spring overlay visual |
 	host := self physicsHost.
