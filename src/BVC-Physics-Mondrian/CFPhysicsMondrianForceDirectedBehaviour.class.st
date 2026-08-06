@@ -46,7 +46,7 @@ CFPhysicsMondrianForceDirectedBehaviour >> initialize [
 CFPhysicsMondrianForceDirectedBehaviour >> install [
 	forceDirectedBehaviour := self mondrian root physics forceDirected.
 	forceDirectedBehaviour
-		nodes: [ physics bodyElements ];
+		nodes: [ physics mondrian nodeElements ];
 		connections: [ physics forceDirectedConnections ];
 		length: 104.0;
 		hertz: 3.0;
@@ -58,7 +58,7 @@ CFPhysicsMondrianForceDirectedBehaviour >> install [
 	hierarchyBehaviour := self mondrian root physics addBehaviour:
 		(CFPhysicsMondrianHierarchyBehaviour physics: self mondrian root physics).
 	hierarchyBehaviour
-		nodes: [ physics bodyElements ];
+		nodes: [ physics mondrian nodeElements ];
 		connections: [ physics forceDirectedConnections ];
 		centre: [ self mondrian root extent / 2.0 ].
 	self synchroniseNodeBehaviours.
@@ -73,7 +73,7 @@ CFPhysicsMondrianForceDirectedBehaviour >> updateForStep: aPhysicsStep [
 { #category : 'private - nodes' }
 CFPhysicsMondrianForceDirectedBehaviour >> synchroniseNodeBehaviours [
 	| currentNodes currentSet |
-	currentNodes := physics bodyElements.
+	currentNodes := physics mondrian nodeElements.
 	currentSet := currentNodes asIdentitySet.
 	orientationBehavioursByNode keys copy do: [ :node |
 		(currentSet includes: node) ifFalse: [ self removeNode: node ] ].

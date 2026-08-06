@@ -21,7 +21,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldAdoptsExistingNodes [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> testMondrianPhysicsBodyMembershipExcludesNodePresentationChildren [
+CFPhysicsMondrianTests >> testMondrianPhysicsExcludesNodePresentationChildren [
 	<gtExample>
 	| mondrian nodes world |
 	mondrian := GtMondrian new.
@@ -38,22 +38,6 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBodyMembershipExcludesNodePresentat
 	nodes do: [ :each |
 		self assert: (world includes: each).
 		self assert: (world includes: each children first) not ].
-	^ mondrian
-]
-
-{ #category : 'examples' }
-CFPhysicsMondrianTests >> testMondrianPhysicsBodyMembershipIsConfigurable [
-	<gtExample>
-	| mondrian nodes world |
-	mondrian := GtMondrian new.
-	nodes := mondrian nodes with: #(one two three).
-	world := (mondrian physics
-		bodyElements: [ { nodes second. nodes third } ];
-		beWorld).
-	self assert: world members size equals: 2.
-	self assert: (world includes: nodes first) not.
-	self assert: (world includes: nodes second).
-	self assert: (world includes: nodes third).
 	^ mondrian
 ]
 
@@ -75,10 +59,8 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	initial := mondrian nodes with: #(one two).
 	world := mondrian physics beWorld.
 	added := (mondrian nodes with: #(three)) first.
-	world owner physics makeChildrenDynamic.
 	self assert: (world includes: added).
 	mondrian root removeChild: initial first.
-	world owner physics makeChildrenDynamic.
 	self assert: (world includes: initial first) not.
 	^ mondrian
 ]
@@ -94,7 +76,6 @@ CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldExcludesEdges [
 	world := mondrian physics beWorld.
 	self assert: (world includes: edgeElements first) not.
 	mondrian edges connectAssociations: { #two -> #three }.
-	world owner physics makeChildrenDynamic.
 	self assert: world members size equals: 3.
 	^ mondrian
 ]
@@ -176,19 +157,14 @@ CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldPreservesPreexisting
 { #category : 'examples' }
 CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNodes [
 	<gtExample>
-	| mondrian initial added members physics world |
+	| mondrian added physics |
 	mondrian := GtMondrian new.
-	initial := (mondrian nodes with: #(one)) first.
-	members := OrderedCollection with: initial.
+	mondrian nodes with: #(one).
 	physics := mondrian physics.
-	physics bodyElements: [ members ].
-	world := physics beWorld.
+	physics beWorld.
 	added := (mondrian nodes with: #(two)) first.
-	members add: added.
-	world owner physics makeChildrenDynamic.
-	members remove: added.
+	self assert: added existingPhysics notNil.
 	mondrian root removeChild: added.
-	world owner physics makeChildrenDynamic.
 	physics ceaseBeingWorld.
 	self assert: added existingPhysics isNil.
 	^ mondrian
@@ -322,25 +298,6 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesLiveMondrianConnec
 	mondrian edges connectAssociations: { #two -> #three }.
 	world step.
 	self assert: genericBehaviour springsByConnection size equals: 2.
-	^ mondrian
-]
-
-{ #category : 'examples' }
-CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesConfiguredBodyElements [
-	<gtExample>
-	| mondrian nodes world behaviour genericBehaviour |
-	mondrian := GtMondrian new.
-	nodes := mondrian nodes with: #(one two three).
-	mondrian edges connectAssociations: { #one -> #two. #two -> #three }.
-	world := (mondrian physics
-		bodyElements: [ { nodes second. nodes third } ];
-		beWorld).
-	world gravity: 0 @ 0.
-	behaviour := mondrian physics forceDirected.
-	genericBehaviour := behaviour forceDirectedBehaviour.
-	world step.
-	self assert: genericBehaviour springsByConnection size equals: 1.
-	self assert: genericBehaviour repulsionsByPair size equals: 1.
 	^ mondrian
 ]
 

@@ -1,12 +1,12 @@
 "
 I integrate one Mondrian graph with a Physics world.
 
-My responsibility is to manage the graph's participating bodies, Physics Behaviours, playback lifecycle and presentation changes, and to restore the original Mondrian state when the integration ends.
+My responsibility is to manage the graph's participating elements, Physics Behaviours, playback lifecycle and presentation changes, and to restore the original Mondrian state when the integration ends.
 "
 Class {
 	#name : 'CFPhysicsMondrian',
 	#superclass : 'Object',
-	#instVars : [ 'mondrian', 'world', 'behaviours', 'bodyElements', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
+	#instVars : [ 'mondrian', 'world', 'behaviours', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
 	#category : 'BVC-Physics-Mondrian',
 	#package : 'BVC-Physics-Mondrian'
 }
@@ -55,26 +55,6 @@ CFPhysicsMondrian >> mondrian [
 	^ mondrian
 ]
 
-{ #category : 'configuration' }
-CFPhysicsMondrian >> bodyElements [
-	"Answer the live collection of graph elements represented as Physics bodies."
-	| elements |
-	elements := (bodyElements
-		ifNil: [ mondrian nodeElements ]
-		ifNotNil: [ :aCollectionOrProvider | aCollectionOrProvider value ]) asArray.
-	sessionPhysicsElements ifNotNil: [ sessionPhysicsElements addAll: elements ].
-	^ elements
-]
-
-{ #category : 'configuration' }
-CFPhysicsMondrian >> bodyElements: aCollectionOrProvider [
-	"Configure the graph elements represented as Physics bodies. The argument may
-	be a collection or a zero-argument block, so live graph changes are supported."
-	bodyElements := aCollectionOrProvider.
-	world ifNotNil: [ world refreshMembershipFromProvider ].
-	^ self
-]
-
 { #category : 'worlds' }
 CFPhysicsMondrian >> world [
 	^ world
@@ -85,9 +65,8 @@ CFPhysicsMondrian >> beWorld [
 	world ifNotNil: [ ^ world ].
 	self captureOriginalPresentation.
 	world := mondrian root physics beWorld.
-	world membershipProvider: [ self bodyElements ].
+	self addNodeElements: mondrian nodeElements.
 	self prepareGraphElements.
-	self adoptCurrentNodePositions.
 	self configureRootForPhysicsPresentation.
 	self installPlaybackLifecycle.
 	^ world
@@ -119,12 +98,12 @@ CFPhysicsMondrian >> forceDirected [
 
 { #category : 'private - behaviours' }
 CFPhysicsMondrian >> forceDirectedConnections [
-	| currentBodyElements |
-	currentBodyElements := self bodyElements asIdentitySet.
+	| currentNodeElements |
+	currentNodeElements := mondrian nodeElements asIdentitySet.
 	^ (mondrian edgeElements collect: [ :each |
 		each graph model fromElement -> each graph model toElement ]) select: [ :each |
-		(currentBodyElements includes: each key) and: [
-			currentBodyElements includes: each value ] ]
+		(currentNodeElements includes: each key) and: [
+			currentNodeElements includes: each value ] ]
 ]
 
 { #category : 'private - world setup' }
@@ -183,9 +162,20 @@ CFPhysicsMondrian >> preparePhysicsPresentationOf: anEdgeElement [
 ]
 
 { #category : 'private - world setup' }
-CFPhysicsMondrian >> adoptCurrentNodePositions [
-	self bodyElements do: [ :each |
-		each physics position: each position ]
+CFPhysicsMondrian >> addNodeElement: anElement [
+	world ifNil: [ ^ anElement ].
+	sessionPhysicsElements add: anElement.
+	anElement existingPhysics ifNotNil: [ preexistingPhysicsElements add: anElement ].
+	anElement physics
+		beDynamic;
+		position: anElement position.
+	^ anElement
+]
+
+{ #category : 'private - world setup' }
+CFPhysicsMondrian >> addNodeElements: aCollection [
+	aCollection do: [ :each | self addNodeElement: each ].
+	^ aCollection
 ]
 
 { #category : 'private - teardown' }
@@ -226,7 +216,7 @@ CFPhysicsMondrian >> sessionElementsFrom: aWorld [
 	elements := IdentitySet new.
 	elements add: mondrian root.
 	sessionPhysicsElements ifNotNil: [ elements addAll: sessionPhysicsElements ].
-	self bodyElements do: [ :each | elements add: each ].
+	mondrian nodeElements do: [ :each | elements add: each ].
 	aWorld ifNotNil: [
 		aWorld bodyStatesInOrder do: [ :each | elements add: each element ] ].
 	mondrian edgeElements do: [ :each | elements add: each ].

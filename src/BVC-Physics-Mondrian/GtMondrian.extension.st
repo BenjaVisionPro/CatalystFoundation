@@ -11,6 +11,18 @@ GtMondrian >> edges [
 		ifFalse: [ GtMondrianEdgeBuilder new mondrian: self ]
 ]
 
+
+{ #category : '*BVC-Physics-Mondrian' }
+GtMondrian >> nodes [
+	| physicsMondrian |
+	physicsMondrian := self root userData
+		at: CFPhysicsMondrian
+		ifAbsent: [ nil ].
+	^ (physicsMondrian notNil and: [ physicsMondrian world notNil ])
+		ifTrue: [ CFPhysicsMondrianNodeBuilder new mondrian: self ]
+		ifFalse: [ GtMondrianNodeBuilder new mondrian: self ]
+]
+
 { #category : '*BVC-Physics-Mondrian' }
 GtMondrian >> physics [
 	^ self root userData
