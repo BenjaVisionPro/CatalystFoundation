@@ -8697,3 +8697,48 @@ CFPhysicsCleanSlateTests >> standaloneBodyWakeAndSleepRemainLocal [
 	self assert: body isAwake.
 	^ body
 ]
+
+{ #category : 'examples - joint lifecycle' }
+CFPhysicsCleanSlateTests >> creatingAJointBetweenSleepingIslandsKeepsBothIslandsSleeping [
+	<gtExample>
+	| world graph first second joint island |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first world: world.
+	second world: world.
+	first sleepLocally.
+	second sleepLocally.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	world addDistanceJoint: joint.
+	graph mergeIslands.
+	island := graph islandForBody: first.
+	self assert: first isSleeping.
+	self assert: second isSleeping.
+	self assert: (graph islandForBody: second) == island.
+	self assert: (graph islandForConstraint: joint) == island.
+	^ joint
+]
+
+{ #category : 'examples - joint lifecycle' }
+CFPhysicsCleanSlateTests >> creatingAJointBetweenAwakeAndSleepingIslandsWakesTheSleepingIsland [
+	<gtExample>
+	| world graph first second joint island |
+	world := CFPhysicsWorld new.
+	graph := world persistentIslandGraph.
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first world: world.
+	second world: world.
+	second sleepLocally.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	world addDistanceJoint: joint.
+	graph mergeIslands.
+	island := graph islandForBody: first.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	self assert: (graph islandForBody: second) == island.
+	self assert: (graph islandForConstraint: joint) == island.
+	^ joint
+]

@@ -1098,7 +1098,7 @@ CFPhysicsWorld >> addMouseJoint: aJoint [
 	nextMouseJointSequence := nextMouseJointSequence + 1.
 	mouseJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1119,7 +1119,7 @@ CFPhysicsWorld >> motorJoints [ ^ motorJoints asArray sorted: [ :first :second |
 { #category : 'motor joints' }
 CFPhysicsWorld >> addMotorJoint: aJoint [
 	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [ self error: 'Motor joint bodies must belong to this physics world' ].
-	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. aJoint wakeBodies. ^ aJoint
+	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. self wakeBodiesForJointCreation: aJoint. ^ aJoint
 ]
 { #category : 'motor joints' }
 CFPhysicsWorld >> removeMotorJoint: aJoint [
@@ -1142,7 +1142,7 @@ CFPhysicsWorld >> addFilterJoint: aJoint [
 	nextFilterJointSequence := nextFilterJointSequence + 1.
 	filterJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1278,7 +1278,7 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
 	distanceJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1286,6 +1286,19 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
 	^ self distanceJoints select: [ :each | each includesBody: aBodyState ]
 ]
+
+{ #category : 'private - joints' }
+CFPhysicsWorld >> wakeBodiesForJointCreation: aJoint [
+	"Box2D 3.1.1 keeps a joint between sleeping/static bodies asleep. If either endpoint is awake, the sleeping endpoint's island is woken."
+	| bodyA bodyB |
+	bodyA := aJoint bodyA.
+	bodyB := aJoint bodyB.
+	((bodyA notNil and: [ bodyA isAwake ]) or: [
+		bodyB notNil and: [ bodyB isAwake ] ]) ifFalse: [ ^ self ].
+	bodyA ifNotNil: [ self wakeBody: bodyA ].
+	bodyB ifNotNil: [ self wakeBody: bodyB ]
+]
+
 
 { #category : 'private - joints' }
 CFPhysicsWorld >> removeJoint: aJoint from: aJointCollection [
@@ -1351,7 +1364,7 @@ CFPhysicsWorld >> addRevoluteJoint: aJoint [
 	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
 	revoluteJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1388,7 +1401,7 @@ CFPhysicsWorld >> addWeldJoint: aJoint [
 	nextWeldJointSequence := nextWeldJointSequence + 1.
 	weldJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1425,7 +1438,7 @@ CFPhysicsWorld >> addPrismaticJoint: aJoint [
 	nextPrismaticJointSequence := nextPrismaticJointSequence + 1.
 	prismaticJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
@@ -1656,7 +1669,7 @@ CFPhysicsWorld >> addWheelJoint: aJoint [
 	nextWheelJointSequence := nextWheelJointSequence + 1.
 	wheelJoints add: aJoint.
 	persistentIslandGraph linkConstraint: aJoint.
-	aJoint wakeBodies.
+	self wakeBodiesForJointCreation: aJoint.
 	^ aJoint
 ]
 
