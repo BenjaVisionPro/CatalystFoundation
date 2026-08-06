@@ -8742,3 +8742,98 @@ CFPhysicsCleanSlateTests >> creatingAJointBetweenAwakeAndSleepingIslandsWakesThe
 	self assert: (graph islandForConstraint: joint) == island.
 	^ joint
 ]
+
+
+{ #category : 'examples - simulation participation' }
+CFPhysicsCleanSlateTests >> sleepingIslandContactIsRetainedWithoutSolverPreparation [
+	<gtExample>
+	| firstResult ground box step pipeline secondResult |
+	firstResult := self stepPipelineExposesTheComposedStep.
+	firstResult commitBodyStates.
+	ground := firstResult bodies first.
+	box := firstResult bodies second.
+	box sleep.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
+	secondResult := pipeline
+		stepBodies: { box. ground }
+		fromContacts: firstResult activeContacts
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: secondResult activeContacts size equals: 1.
+	self assert: secondResult contactConstraints isEmpty.
+	self assert: secondResult islands isEmpty.
+	^ secondResult
+]
+
+{ #category : 'examples - simulation participation' }
+CFPhysicsCleanSlateTests >> sleepingIslandJointIsRetainedWithoutSolverPreparation [
+	<gtExample>
+	| first second joint step pipeline result |
+	first := self cleanSlateBodyWithSequence: 1.
+	second := self cleanSlateBodyWithSequence: 2.
+	first sleepLocally.
+	second sleepLocally.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
+	result := pipeline
+		stepBodies: { first. second }
+		fromContacts: #()
+		joints: { joint }
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result joints size equals: 1.
+	self assert: result jointConstraints isEmpty.
+	self assert: result islands isEmpty.
+	^ result
+]
+
+{ #category : 'examples - simulation participation' }
+CFPhysicsCleanSlateTests >> wakingAnIslandRestoresContactAndJointSolverParticipation [
+	<gtExample>
+	| ground first second contactResult joint step pipeline result |
+	ground := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
+	ground beStatic.
+	first := self cleanSlateBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
+	second := self cleanSlateBodyWithSequence: 3 position: 90 @ 15 extent: 60 @ 20.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	step := CFPhysicsStep
+		timeStep: 0.016
+		substeps: 4
+		contactHertz: 30.0
+		dampingRatio: 10.0.
+	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
+	contactResult := pipeline
+		stepBodies: { ground. first. second }
+		fromContacts: #()
+		joints: { joint }
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	contactResult commitBodyStates.
+	first sleepLocally.
+	second sleepLocally.
+	first wakeLocally.
+	result := pipeline
+		stepBodies: { ground. first. second }
+		fromContacts: contactResult activeContacts
+		joints: { joint }
+		step: step
+		gravity: 0 @ 0
+		restitutionThreshold: 1.0.
+	self assert: result contactConstraints isEmpty not.
+	self assert: result jointConstraints size equals: 1.
+	self assert: result islands isEmpty not.
+	^ result
+]

@@ -25,8 +25,8 @@ CFPhysicsIslandBuilderStage >> islandBuilder [ ^ islandBuilder ]
 CFPhysicsIslandBuilderStage >> executeOn: aStepResult [
 	| islands |
 	islands := islandBuilder
-		islandsFromPersistentBodyGroups: aStepResult islandBodyGroups
-		bodies: aStepResult bodies
+		islandsFromPersistentBodyGroups: aStepResult activeSimulationIslandBodyGroups
+		bodies: aStepResult activeSimulationBodies
 		constraints: aStepResult solverConstraints.
 	aStepResult islands: islands.
 	^ islands

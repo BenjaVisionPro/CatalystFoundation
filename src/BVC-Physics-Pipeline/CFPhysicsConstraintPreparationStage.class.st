@@ -31,7 +31,7 @@ CFPhysicsConstraintPreparationStage >> initialize [
 CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	| contactConstraints jointConstraints |
 	contactConstraints := constraintBuilder
-		constraintsFrom: aStepResult activeContacts
+		constraintsFrom: aStepResult activeSimulationContacts
 		bodyStates: aStepResult bodyStates
 		warmStartRatio: aStepResult step warmStartRatio.
 	jointConstraints := self jointConstraintsFor: aStepResult.
@@ -49,33 +49,33 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 { #category : 'private - building' }
 CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 	| constraints |
-	constraints := OrderedCollection new: aStepResult joints size.
+	constraints := OrderedCollection new: aStepResult activeSimulationJoints size.
 	constraints addAll: (motorJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (mouseJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (distanceJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (revoluteJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (weldJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (prismaticJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	constraints addAll: (wheelJointConstraintBuilder
-		constraintsFrom: aStepResult joints
+		constraintsFrom: aStepResult activeSimulationJoints
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	^ self orderedJointConstraints: constraints

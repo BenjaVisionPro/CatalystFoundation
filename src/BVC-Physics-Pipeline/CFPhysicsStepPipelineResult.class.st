@@ -261,3 +261,55 @@ CFPhysicsStepPipelineResult >> islandBodyGroups: aCollection [
 	islandBodyGroups := aCollection collect: [ :group | group asArray ]
 ]
 
+
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> bodyParticipatesInActiveSimulation: aBody [
+	^ aBody isStatic not and: [ aBody isAwake ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> constraintParticipatesInActiveSimulation: aConstraint [
+	| bodyA bodyB |
+	bodyA := aConstraint bodyA.
+	bodyB := aConstraint bodyB.
+	^ (bodyA notNil and: [ self bodyParticipatesInActiveSimulation: bodyA ]) or: [
+		bodyB notNil and: [ self bodyParticipatesInActiveSimulation: bodyB ] ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> activeSimulationBodies [
+	| participating |
+	participating := IdentitySet new.
+	bodies do: [ :body |
+		(self bodyParticipatesInActiveSimulation: body) ifTrue: [ participating add: body ] ].
+	self activeSimulationContacts do: [ :contact |
+		contact firstBody ifNotNil: [ :body | participating add: body ].
+		contact secondBody ifNotNil: [ :body | participating add: body ] ].
+	self activeSimulationJoints do: [ :joint |
+		joint bodyA ifNotNil: [ :body | participating add: body ].
+		joint bodyB ifNotNil: [ :body | participating add: body ] ].
+	^ bodies select: [ :body | participating includes: body ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> activeSimulationContacts [
+	contactResult ifNil: [ ^ #() ].
+	^ self activeContacts select: [ :contact |
+		contact isSolid and: [ self constraintParticipatesInActiveSimulation: contact ] ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> activeSimulationJoints [
+	^ joints select: [ :joint |
+		joint isActive and: [ self constraintParticipatesInActiveSimulation: joint ] ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStepPipelineResult >> activeSimulationIslandBodyGroups [
+	| participatingBodies |
+	participatingBodies := IdentitySet new.
+	participatingBodies addAll: self activeSimulationBodies.
+	^ islandBodyGroups select: [ :group |
+		group anySatisfy: [ :body | participatingBodies includes: body ] ]
+]
