@@ -417,7 +417,7 @@ CFPhysicsWorld >> refreshMemberState [
 	retainedMembers := members select: [ :each | self isValidMember: each ].
 	self retireBodiesAbsentFrom: retainedMembers.
 	retainedMembers do: [ :each |
-		self synchroniseCollisionGeometryFor: (bodyStates at: each) ].
+		self refreshCollisionGeometryFor: (bodyStates at: each) ].
 	members := retainedMembers asIdentitySet.
 	^ members
 ]
@@ -1787,7 +1787,7 @@ CFPhysicsWorld >> removeContainmentBoundary [
 
 
 { #category : 'geometry lifecycle' }
-CFPhysicsWorld >> synchroniseCollisionGeometryFor: aBody [
+CFPhysicsWorld >> refreshCollisionGeometryFor: aBody [
 	| signature previousSignature |
 	signature := aBody shapeState collisionGeometrySignature.
 	previousSignature := geometrySignaturesByBody

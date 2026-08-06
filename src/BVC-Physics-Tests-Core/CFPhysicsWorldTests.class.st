@@ -673,3 +673,61 @@ CFPhysicsWorldTests >> testTelemetryCapacitySurvivesReset [
 	world telemetryEnabled: false.
 	^ world
 ]
+
+
+{ #category : 'tests - geometry lifecycle' }
+CFPhysicsWorldTests >> testParticipatingElementResizeRefreshesCollisionGeometryAutomatically [
+	<gtExample>
+	| owner element world body initialRevision |
+	owner := BlElement new size: 300 @ 200; yourself.
+	element := BlElement new size: 20 @ 30; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	element physics beDynamic.
+	body := element physics body.
+	initialRevision := body shapeState geometryRevision.
+	element size: 60 @ 40.
+	world step.
+	self assert: body shapeState extent equals: 60 @ 40.
+	self assert: body shapeState geometryRevision equals: initialRevision + 1.
+	^ world
+]
+
+{ #category : 'tests - geometry lifecycle' }
+CFPhysicsWorldTests >> testParticipatingElementGeometryReplacementRefreshesCollisionGeometryAutomatically [
+	<gtExample>
+	| owner element world body initialRevision |
+	owner := BlElement new size: 300 @ 200; yourself.
+	element := BlElement new
+		geometry: BlRoundedRectangleGeometry new;
+		size: 40 @ 40;
+		yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	element physics beDynamic.
+	body := element physics body.
+	initialRevision := body shapeState geometryRevision.
+	self assert: body shapeState isCircle not.
+	element geometry: BlCircleGeometry new.
+	world step.
+	self assert: body shapeState isCircle.
+	self assert: body shapeState geometryRevision equals: initialRevision + 1.
+	^ world
+]
+
+{ #category : 'tests - geometry lifecycle' }
+CFPhysicsWorldTests >> testUnchangedGeometryDoesNotAdvanceRuntimeIdentity [
+	<gtExample>
+	| owner element world body initialRevision |
+	owner := BlElement new size: 300 @ 200; yourself.
+	element := BlElement new size: 40 @ 40; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	element physics beDynamic.
+	body := element physics body.
+	initialRevision := body shapeState geometryRevision.
+	world step.
+	world step.
+	self assert: body shapeState geometryRevision equals: initialRevision.
+	^ world
+]
