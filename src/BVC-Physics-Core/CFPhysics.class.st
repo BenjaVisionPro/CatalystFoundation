@@ -457,6 +457,12 @@ CFPhysics >> applyTorque: aNumber [
 
 
 { #category : 'continuous collision' }
+CFPhysics >> beBullet [
+	self body beBullet.
+	^ self
+]
+
+{ #category : 'continuous collision' }
 CFPhysics >> beNonBullet [
 	self body beNonBullet.
 	^ self
