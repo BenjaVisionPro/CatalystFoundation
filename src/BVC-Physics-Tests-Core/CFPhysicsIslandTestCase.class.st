@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsIslandTestCase',
-	#superclass : 'CFPhysicsContactTestCase',
+	#superclass : 'CFPhysicsWorldTestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }

@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFPhysicsWorldTests',
-	#superclass : 'CFPhysicsTestCase',
+	#superclass : 'CFPhysicsWorldTestCase',
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
@@ -8,24 +8,9 @@ Class {
 { #category : 'tests - world cutover' }
 CFPhysicsWorldTests >> testWorldDelegatesOneStepToTheExplicitPipeline [
 	<gtExample>
-	| owner ground box world groundBody boxBody result |
-	owner := BlElement new.
-	ground := BlElement new size: 100 @ 20; yourself.
-	box := BlElement new size: 60 @ 20; yourself.
-	owner addChild: ground.
-	owner addChild: box.
-	world := owner physics beWorld.
-	world containment disable.
-	world
-		gravity: 0 @ 0;
-		synchroniseMembership.
-	groundBody := world bodyStateFor: ground.
-	boxBody := world bodyStateFor: box.
-	groundBody
-		position: 0 @ 0;
-		beStatic.
-	boxBody position: 20 @ 15.
-	result := world step.
+	| world result |
+	world := self newWorldAfterOneStep.
+	result := world lastStepResult.
 	self assert: result == world lastStepResult.
 	self assert: result bodies equals: world bodyStatesInOrder.
 	self assert: result activeContacts size equals: 1.
@@ -37,7 +22,7 @@ CFPhysicsWorldTests >> testWorldDelegatesOneStepToTheExplicitPipeline [
 CFPhysicsWorldTests >> testWorldCarriesActiveContactsExplicitlyBetweenSteps [
 	<gtExample>
 	| world firstResult secondResult |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstResult := world lastStepResult.
 	secondResult := world step.
 	self assert: firstResult beganContacts size equals: 1.
@@ -50,7 +35,7 @@ CFPhysicsWorldTests >> testWorldCarriesActiveContactsExplicitlyBetweenSteps [
 CFPhysicsWorldTests >> testPreparedContactConstraintsAreStepLocal [
 	<gtExample>
 	| world firstContact firstConstraint firstPoint secondContact secondConstraint secondPoint |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstContact := world activeContacts first.
 	firstConstraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
 	firstPoint := firstConstraint points first.
@@ -69,7 +54,7 @@ CFPhysicsWorldTests >> testPreparedContactConstraintsAreStepLocal [
 CFPhysicsWorldTests >> testReturningContactBuildsFreshPreparedConstraint [
 	<gtExample>
 	| world movingBody contact constraint returnedContact returnedConstraint returnedPoint returnedManifoldPoint |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	movingBody := world bodyStatesInOrder second.
 	contact := world activeContacts first.
 	constraint := (world lastStepResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
@@ -250,7 +235,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedJointConfigurationBeforeSolve [
 CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentPreparedConstraint [
 	<gtExample>
 	| world committedContact committedManifold state solution calculationContact calculationConstraint |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	committedContact := world activeContacts first.
 	committedManifold := committedContact manifold.
 	state := world captureStateAfterSynchronisation.
@@ -267,7 +252,7 @@ CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentPreparedConstrai
 CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentConstraintPoint [
 	<gtExample>
 	| world committedContact committedManifoldPoint state solution calculationContact calculationConstraint calculationPoint |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	committedContact := world activeContacts first.
 	committedManifoldPoint := committedContact manifold contactPoints first.
 	state := world captureStateAfterSynchronisation.
@@ -285,7 +270,7 @@ CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentConstraintPoint 
 CFPhysicsWorldTests >> testWorldSolutionCarriesCommitIdentity [
 	<gtExample>
 	| world state solution |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	self assert: solution world == world.
@@ -298,7 +283,7 @@ CFPhysicsWorldTests >> testWorldSolutionCarriesCommitIdentity [
 CFPhysicsWorldTests >> testNewerCaptureRejectsOlderSolution [
 	<gtExample>
 	| world firstState firstSolution stepBefore |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstState := world captureStateAfterSynchronisation.
 	firstSolution := world stepPipeline solve: firstState.
 	stepBefore := world stepNumber.
@@ -311,7 +296,7 @@ CFPhysicsWorldTests >> testNewerCaptureRejectsOlderSolution [
 CFPhysicsWorldTests >> testReleasedWorldRejectsCapturedSolution [
 	<gtExample>
 	| world state solution |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	state := world captureStateAfterSynchronisation.
 	solution := world stepPipeline solve: state.
 	world release.
@@ -323,7 +308,7 @@ CFPhysicsWorldTests >> testReleasedWorldRejectsCapturedSolution [
 CFPhysicsWorldTests >> testWorldCapturesAtMostOneSolveAtATime [
 	<gtExample>
 	| world firstState secondState thirdState |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstState := world captureStateIfIdle.
 	secondState := world captureStateIfIdle.
 	self assert: firstState notNil.
@@ -340,7 +325,7 @@ CFPhysicsWorldTests >> testWorldCapturesAtMostOneSolveAtATime [
 CFPhysicsWorldTests >> testAbandoningTheActiveSolveAllowsImmediateRecapture [
 	<gtExample>
 	| world firstState secondState |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstState := world captureStateIfIdle.
 	self assert: world hasSolveInFlight.
 	world abandonActiveSolve.
@@ -354,7 +339,7 @@ CFPhysicsWorldTests >> testAbandoningTheActiveSolveAllowsImmediateRecapture [
 CFPhysicsWorldTests >> testAbandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 	<gtExample>
 	| world firstState secondState |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstState := world captureStateAfterSynchronisation.
 	secondState := world captureStateAfterSynchronisation.
 	self assert: secondState solveTicket > firstState solveTicket.
@@ -369,7 +354,7 @@ CFPhysicsWorldTests >> testAbandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 CFPhysicsWorldTests >> testBackgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
 	<gtExample>
 	| world space startedAgain |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	space := BlSpace new.
 	space root addChild: world owner.
 	self assert: world startBackgroundStep.
@@ -382,7 +367,7 @@ CFPhysicsWorldTests >> testBackgroundStepClaimsTheSingleSolveSlotWithoutWaiting 
 CFPhysicsWorldTests >> testTopologyInvalidationReleasesTheSolveSlotImmediately [
 	<gtExample>
 	| world firstState firstSolution secondState |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	firstState := world captureStateIfIdle.
 	firstSolution := world stepPipeline solve: firstState.
 	self assert: world hasSolveInFlight.
@@ -442,7 +427,7 @@ CFPhysicsWorldTests >> testDetachedCaptureSolveCommitMatchesSynchronousStep [
 CFPhysicsWorldTests >> testBackgroundStepResolvesItsPipelineBeforeDispatch [
 	<gtExample>
 	| world space backgroundStep capturedPipeline replacementPipeline |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	space := BlSpace new.
 	space root addChild: world owner.
 	capturedPipeline := world stepPipeline.
@@ -459,7 +444,7 @@ CFPhysicsWorldTests >> testBackgroundStepResolvesItsPipelineBeforeDispatch [
 CFPhysicsWorldTests >> testStaleSolveCannotCompeteWithRestartedWorldProgress [
 	<gtExample>
 	| world oldState oldSolution newState newSolution committed |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	oldState := world captureStateIfIdle.
 	self assert: oldState notNil.
 	oldSolution := world stepPipeline solve: oldState.
@@ -482,7 +467,7 @@ CFPhysicsWorldTests >> testStaleSolveCannotCompeteWithRestartedWorldProgress [
 CFPhysicsWorldTests >> testDetachedOwnerCannotClaimABackgroundSolveSlot [
 	<gtExample>
 	| world backgroundStep |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	self assert: world owner isAttachedToSceneGraph not.
 	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
 	self assert: backgroundStep start not.
@@ -494,7 +479,7 @@ CFPhysicsWorldTests >> testDetachedOwnerCannotClaimABackgroundSolveSlot [
 CFPhysicsWorldTests >> testDetachedSolvePublishesTelemetryOnlyAfterCommit [
 	<gtExample>
 	| world state backgroundStep solution committed |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	world telemetryEnabled: true.
 	world resetTelemetry.
 	state := world captureStateIfIdle.
@@ -517,7 +502,7 @@ CFPhysicsWorldTests >> testDetachedSolvePublishesTelemetryOnlyAfterCommit [
 CFPhysicsWorldTests >> testStaleDetachedSolvePublishesNoTelemetry [
 	<gtExample>
 	| world state backgroundStep solution |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	world telemetryEnabled: true.
 	world resetTelemetry.
 	state := world captureStateIfIdle.
@@ -538,7 +523,7 @@ CFPhysicsWorldTests >> testStaleDetachedSolvePublishesNoTelemetry [
 CFPhysicsWorldTests >> testBackgroundStepCapturesTelemetryModeBeforeDispatch [
 	<gtExample>
 	| world space backgroundStep |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	space := BlSpace new.
 	space root addChild: world owner.
 	world telemetryEnabled: true.
@@ -553,7 +538,7 @@ CFPhysicsWorldTests >> testBackgroundStepCapturesTelemetryModeBeforeDispatch [
 CFPhysicsWorldTests >> testBackgroundStepDefaultsToTheUnmeasuredSolver [
 	<gtExample>
 	| world space backgroundStep |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	space := BlSpace new.
 	space root addChild: world owner.
 	self assert: world telemetryEnabled not.
@@ -566,7 +551,7 @@ CFPhysicsWorldTests >> testBackgroundStepDefaultsToTheUnmeasuredSolver [
 CFPhysicsWorldTests >> testTelemetryTestRunCollectsOnlyMeasuredSteps [
 	<gtExample>
 	| world run initialStepNumber |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	initialStepNumber := world stepNumber.
 	run := CFPhysicsTelemetryTestRun
 		world: world
@@ -588,7 +573,7 @@ CFPhysicsWorldTests >> testTelemetryTestRunCollectsOnlyMeasuredSteps [
 CFPhysicsWorldTests >> testTelemetryTestRunRestoresWorldTelemetryConfiguration [
 	<gtExample>
 	| world run |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	world
 		telemetryCapacity: 17;
 		telemetryEnabled: true.
@@ -606,7 +591,7 @@ CFPhysicsWorldTests >> testTelemetryTestRunRestoresWorldTelemetryConfiguration [
 CFPhysicsWorldTests >> testTelemetryResetPreservesRecordingBuffer [
 	<gtExample>
 	| world |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	world telemetryEnabled: true.
 	world step.
 	self assert: world telemetryRecordings size equals: 1.
@@ -621,7 +606,7 @@ CFPhysicsWorldTests >> testTelemetryResetPreservesRecordingBuffer [
 CFPhysicsWorldTests >> testTelemetryCapacitySurvivesReset [
 	<gtExample>
 	| world initialStepNumber |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	initialStepNumber := world stepNumber.
 	world
 		telemetryCapacity: 3;

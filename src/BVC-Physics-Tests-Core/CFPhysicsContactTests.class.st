@@ -346,7 +346,7 @@ CFPhysicsContactTests >> testContinuedContactsDoNotPublishLifecycleEvents [
 CFPhysicsContactTests >> testStepPipelineExposesContactEvents [
 	<gtExample>
 	| result |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	self assert: result contactEvents size equals: result beganContacts size + result endedContacts size.
 	self assert: result contactBeganEvents size equals: result beganContacts size.
 	self assert: result contactEndedEvents size equals: result endedContacts size.
@@ -356,7 +356,7 @@ CFPhysicsContactTests >> testStepPipelineExposesContactEvents [
 CFPhysicsContactTests >> testPostSolveCollectorCapturesSolvedImpulses [
 	<gtExample>
 	| result solveResult pointResult constraint |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	self assert: result contactSolveResults size equals: result contactConstraints size.
 	solveResult := result contactSolveResults first.
 	constraint := result contactConstraints first.
@@ -376,7 +376,7 @@ CFPhysicsContactTests >> testHitEventsAreDerivedAfterSolving [
 	| result stage |
 	stage := CFPhysicsPostSolveStage new.
 	stage hitEventThreshold: 0.0.
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	stage executeOn: result.
 	self assert: (result hitEvents allSatisfy: [ :event |
 		event normalImpulse > 0.0 and: [ event approachSpeed > 0.0 ] ]).
@@ -388,7 +388,7 @@ CFPhysicsContactTests >> testHitEventsAreDerivedAfterSolving [
 CFPhysicsContactTests >> testHitEventThresholdSuppressesSmallApproaches [
 	<gtExample>
 	| result stage |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	stage := CFPhysicsPostSolveStage new.
 	stage hitEventThreshold: 1.0e100.
 	stage executeOn: result.
@@ -399,7 +399,7 @@ CFPhysicsContactTests >> testHitEventThresholdSuppressesSmallApproaches [
 CFPhysicsContactTests >> testStepPipelineExposesPostSolveStage [
 	<gtExample>
 	| result execution |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	execution := result executionForStageType: CFPhysicsPostSolveStage.
 	self assert: execution notNil.
 	self assert: execution output contactResults equals: result contactSolveResults.
@@ -409,23 +409,8 @@ CFPhysicsContactTests >> testStepPipelineExposesPostSolveStage [
 { #category : 'tests - sensors' }
 CFPhysicsContactTests >> testSensorContactParticipatesInLifecycleButNotSolving [
 	<gtExample>
-	| ground sensor step pipeline result |
-	ground := self newBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
-	ground beStatic.
-	sensor := self newBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
-	sensor beSensor.
-	step := CFPhysicsStep
-		timeStep: 0.016
-		substeps: 4
-		contactHertz: 30.0
-		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
-	result := pipeline
-		stepBodies: { sensor. ground }
-		fromContacts: #()
-		step: step
-		gravity: 0 @ 0
-		restitutionThreshold: 1.0.
+	| result |
+	result := self newSensorContactStepResult.
 	self assert: result activeContacts size equals: 1.
 	self assert: result activeContacts first isSensor.
 	self assert: result beganContacts size equals: 1.
@@ -469,7 +454,7 @@ CFPhysicsContactTests >> testSensorContactDoesNotJoinDynamicBodiesIntoOneIsland 
 CFPhysicsContactTests >> testSensorContactPublishesEndedEventWithoutSolveData [
 	<gtExample>
 	| firstResult sensor ground secondResult step pipeline |
-	firstResult := self testSensorContactParticipatesInLifecycleButNotSolving.
+	firstResult := self newSensorContactStepResult.
 	ground := firstResult bodies first.
 	sensor := firstResult bodies second.
 	sensor position: 0 @ 100.

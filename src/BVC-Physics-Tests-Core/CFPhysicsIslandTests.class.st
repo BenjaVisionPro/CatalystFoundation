@@ -55,7 +55,7 @@ CFPhysicsIslandTests >> testStaticBodyDoesNotBridgeDynamicIslands [
 CFPhysicsIslandTests >> testStepPipelineSolvesExplicitIslands [
 	<gtExample>
 	| result |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	self assert: result islands size equals: 1.
 	self assert: result islands first constraints equals: result solverConstraints.
 	self assert: result solver islands equals: result islands.
@@ -268,7 +268,7 @@ CFPhysicsIslandTests >> testSleepVelocityUsesBox2DPositionCorrectionFormula [
 CFPhysicsIslandTests >> testBodySleepThresholdUsesWorldScale [
 	<gtExample>
 	| world body state |
-	world := self testWorldDelegatesOneStepToTheExplicitPipeline.
+	world := self newWorldAfterOneStep.
 	world lengthUnitsPerMetre: 200.0.
 	body := self newBodyWithSequence: 1.
 	body world: world.
@@ -362,7 +362,7 @@ CFPhysicsIslandTests >> testBodyThatPreventsSleepingKeepsItsIslandAwake [
 CFPhysicsIslandTests >> testStepPipelineExposesIslandSleepDecisions [
 	<gtExample>
 	| result |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	self assert: result sleepDecisions size equals: result islands size.
 	self assert: result sleepDecisions first island == result islands first.
 	^ result sleepDecisions
@@ -818,7 +818,7 @@ CFPhysicsIslandTests >> testStandaloneBodyWakeAndSleepRemainLocal [
 CFPhysicsIslandTests >> testSleepingIslandContactIsRetainedWithoutSolverPreparation [
 	<gtExample>
 	| firstResult ground box step pipeline secondResult |
-	firstResult := self testStepPipelineExposesTheComposedStep.
+	firstResult := self newComposedStepResult.
 	firstResult commitBodyStates.
 	ground := firstResult bodies first.
 	box := firstResult bodies second.

@@ -66,30 +66,17 @@ CFPhysicsSolverTests >> testConstraintPreparationMeasuresChangedContactWork [
 { #category : 'tests - constraints' }
 CFPhysicsSolverTests >> testConstraintBuilderPreparesSolverData [
 	<gtExample>
-	| first second pair manifold contact bodyStates constraints constraint point |
-	first := self newBodyWithSequence: 1.
-	first beStatic.
-	second := self newBodyWithSequence: 2.
-	pair := CFPhysicsPair first: first second: second.
-	manifold := self newManifoldWithFeatureIndex: 1.
-	contact := CFPhysicsContact pair: pair manifold: manifold.
-	bodyStates := IdentityDictionary new
-		at: first put: (CFPhysicsBodyStepState on: first);
-		at: second put: (CFPhysicsBodyStepState on: second);
-		yourself.
-	constraints := CFPhysicsConstraintBuilder new
-		constraintsFrom: { contact }
-		bodyStates: bodyStates.
-	constraint := constraints first.
+	| constraint point manifoldPoint |
+	constraint := self newPreparedConstraint.
 	point := constraint points first.
-	self assert: constraint contact == contact.
-	self assert: constraint bodyA == first.
-	self assert: constraint bodyB == second.
-	self assert: constraint bodyStateA == (bodyStates at: first).
-	self assert: constraint bodyStateB == (bodyStates at: second).
+	manifoldPoint := constraint contact manifold contactPoints first.
+	self assert: constraint bodyA isStatic.
+	self assert: constraint bodyB isDynamic.
+	self assert: constraint bodyStateA body == constraint bodyA.
+	self assert: constraint bodyStateB body == constraint bodyB.
 	self assert: constraint normal equals: 0 @ 1.
 	self assert: constraint tangent equals: 1 @ 0.
-	self assert: point featureId equals: manifold contactPoints first featureId.
+	self assert: point featureId equals: manifoldPoint featureId.
 	self assert: point normalMass > 0.0.
 	self assert: point tangentMass > 0.0.
 	self assert: (point baseSeparation closeTo: 4.0).
@@ -176,7 +163,7 @@ CFPhysicsSolverTests >> testContactTangentSpeedDefaultsToZero [
 CFPhysicsSolverTests >> testPreparedConstraintWritesSolvedImpulsesBackExplicitly [
 	<gtExample>
 	| constraint manifoldPoint preparedPoint |
-	constraint := self testConstraintBuilderPreparesSolverData.
+	constraint := self newPreparedConstraint.
 	manifoldPoint := constraint contact manifold contactPoints first.
 	preparedPoint := constraint points first.
 	preparedPoint
@@ -196,23 +183,10 @@ CFPhysicsSolverTests >> testPreparedConstraintWritesSolvedImpulsesBackExplicitly
 { #category : 'tests - step pipeline' }
 CFPhysicsSolverTests >> testStepPipelineExposesTheComposedStep [
 	<gtExample>
-	| ground box step pipeline result |
-	ground := self newBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 20.
-	ground beStatic.
-	box := self newBodyWithSequence: 2 position: 20 @ 15 extent: 60 @ 20.
-	step := CFPhysicsStep
-		timeStep: 0.016
-		substeps: 4
-		contactHertz: 30.0
-		dampingRatio: 10.0.
-	pipeline := CFPhysicsStepPipeline manifoldGenerator: CFPhysicsManifoldGenerator new.
-	result := pipeline
-		stepBodies: { box. ground }
-		fromContacts: #()
-		step: step
-		gravity: 0 @ 0
-		restitutionThreshold: 1.0.
-	self assert: result step == step.
+	| result |
+	result := self newComposedStepResult.
+	self assert: result step timeStep equals: 0.016.
+	self assert: result step substepCount equals: 4.
 	self assert: (result bodies collect: #sequence) equals: #(1 2).
 	self assert: result pairs size equals: 1.
 	self assert: result beganContacts size equals: 1.
@@ -257,7 +231,7 @@ CFPhysicsSolverTests >> testStepPipelineProjectsOverlappingBodiesApart [
 CFPhysicsSolverTests >> testStepPipelineCarriesActiveContactsIntoTheNextStep [
 	<gtExample>
 	| firstResult ground box step pipeline secondResult |
-	firstResult := self testStepPipelineExposesTheComposedStep.
+	firstResult := self newComposedStepResult.
 	firstResult commitBodyStates.
 	ground := firstResult bodies first.
 	box := firstResult bodies second.
@@ -282,7 +256,7 @@ CFPhysicsSolverTests >> testStepPipelineCarriesActiveContactsIntoTheNextStep [
 CFPhysicsSolverTests >> testStepPipelineExecutesExplicitOrderedStages [
 	<gtExample>
 	| result expectedTypes |
-	result := self testStepPipelineExposesTheComposedStep.
+	result := self newComposedStepResult.
 	expectedTypes := {
 		CFPhysicsVelocityIntegrationStage.
 		CFPhysicsPairFinderStage.
@@ -698,7 +672,7 @@ CFPhysicsSolverTests >> testConstraintBuilderPreparesRollingResistance [
 CFPhysicsSolverTests >> testPreparedConstraintWritesRollingImpulseBack [
 	<gtExample>
 	| constraint |
-	constraint := self testConstraintBuilderPreparesSolverData.
+	constraint := self newPreparedConstraint.
 	constraint rollingImpulse: 2.5.
 	constraint writeImpulsesBack.
 	self assert: (constraint contact manifold rollingImpulse closeTo: 2.5).
