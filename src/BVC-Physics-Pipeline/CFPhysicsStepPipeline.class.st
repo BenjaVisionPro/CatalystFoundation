@@ -256,6 +256,7 @@ CFPhysicsStepPipeline >> hitEventThreshold: aNumber [
 
 { #category : 'broadphase' }
 CFPhysicsStepPipeline >> resetBroadphaseProxiesFor: aBody [
-	broadphase resetProxiesForBody: aBody.
+	(self stageOfType: CFPhysicsPairFinderStage) pairFinder
+		resetProxiesForBody: aBody.
 	^ self
 ]
