@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldAdoptsExistingNodes [
 	<gtExample>
 	| mondrian nodes world |
 	mondrian := GtMondrian new.
@@ -21,7 +21,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldAdoptsExistingNodes [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipExcludesNodePresentationChildren [
+CFPhysicsMondrianTests >> testMondrianPhysicsBodyMembershipExcludesNodePresentationChildren [
 	<gtExample>
 	| mondrian nodes world |
 	mondrian := GtMondrian new.
@@ -42,7 +42,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipExcludesNodePresentationC
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipIsConfigurable [
+CFPhysicsMondrianTests >> testMondrianPhysicsBodyMembershipIsConfigurable [
 	<gtExample>
 	| mondrian nodes world |
 	mondrian := GtMondrian new.
@@ -58,7 +58,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBodyMembershipIsConfigurable [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
+CFPhysicsMondrianTests >> testMondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
 	<gtExample>
 	| mondrian world |
 	mondrian := CFPhysicsMondrianExampleGraphBuilder new build.
@@ -68,7 +68,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsExampleGraphBuilderIsPhysicsAgnostic [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 	<gtExample>
 	| mondrian initial added world |
 	mondrian := GtMondrian new.
@@ -84,7 +84,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldTracksAddedAndRemovedNodes [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldExcludesEdges [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldExcludesEdges [
 	<gtExample>
 	| mondrian edgeElements world |
 	mondrian := GtMondrian new.
@@ -100,7 +100,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldExcludesEdges [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldIsIdempotent [
 	<gtExample>
 	| mondrian firstWorld secondWorld |
 	mondrian := GtMondrian new.
@@ -112,7 +112,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldIsIdempotent [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldRestoresTheOriginalGraph [
+CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldRestoresTheOriginalGraph [
 	<gtExample>
 	| mondrian nodes edge originalLayout originalAutoScale originalScale originalTranslation physics world |
 	mondrian := GtMondrian new.
@@ -144,7 +144,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldRestoresTheOriginalGraph
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldIsIdempotent [
+CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldIsIdempotent [
 	<gtExample>
 	| mondrian physics |
 	mondrian := GtMondrian new.
@@ -159,7 +159,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldIsIdempotent [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldPreservesPreexistingPhysics [
+CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldPreservesPreexistingPhysics [
 	<gtExample>
 	| mondrian node preexistingPhysics physics |
 	mondrian := GtMondrian new.
@@ -174,7 +174,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldPreservesPreexistingPhys
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNodes [
+CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNodes [
 	<gtExample>
 	| mondrian initial added members physics world |
 	mondrian := GtMondrian new.
@@ -195,7 +195,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsCeaseBeingWorldReleasesRetiredSessionNo
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
 	<gtExample>
 	| mondrian space world |
 	space := BlSpace new.
@@ -213,7 +213,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeginsSteppingWhenAddedToASceneGraph [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
+CFPhysicsMondrianTests >> testMondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 	<gtExample>
 	| mondrian |
 	mondrian := GtMondrian new.
@@ -225,7 +225,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsBeWorldUsesFixedCanvasCoordinates [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareAnchors [
+CFPhysicsMondrianTests >> testMondrianPhysicsEdgesUsePresentationAwareAnchors [
 	<gtExample>
 	| mondrian edge |
 	mondrian := GtMondrian new.
@@ -246,7 +246,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsEdgesUsePresentationAwareAnchors [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsPreservesStandardAndCustomAnchors [
+CFPhysicsMondrianTests >> testMondrianPhysicsPreservesStandardAndCustomAnchors [
 	<gtExample>
 	| mondrian standardEdge customEdge |
 	mondrian := GtMondrian new.
@@ -270,7 +270,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsPreservesStandardAndCustomAnchors [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianUsesStandardEdgesUntilPhysicsIsEnabled [
+CFPhysicsMondrianTests >> testMondrianUsesStandardEdgesUntilPhysicsIsEnabled [
 	<gtExample>
 	| mondrian |
 	mondrian := GtMondrian new.
@@ -283,7 +283,7 @@ CFPhysicsMondrianTests >> mondrianUsesStandardEdgesUntilPhysicsIsEnabled [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
+CFPhysicsMondrianTests >> testMondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 	<gtExample>
 	| mondrian nodes initialPositions world |
 	mondrian := GtMondrian new.
@@ -306,7 +306,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsUsesDefaultGravityWithoutABehaviour [
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnections [
+CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesLiveMondrianConnections [
 	<gtExample>
 	| mondrian world behaviour genericBehaviour |
 	mondrian := GtMondrian new.
@@ -326,7 +326,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesLiveMondrianConnection
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesConfiguredBodyElements [
+CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesConfiguredBodyElements [
 	<gtExample>
 	| mondrian nodes world behaviour genericBehaviour |
 	mondrian := GtMondrian new.
@@ -345,7 +345,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedUsesConfiguredBodyElements
 ]
 
 { #category : 'examples' }
-CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
+CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	<gtExample>
 	| mondrian added addedEdge world behaviour genericBehaviour |
 	mondrian := GtMondrian new.
@@ -380,7 +380,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsForceDirectedTracksAddedNodes [
 
 
 { #category : 'examples - physics overlay' }
-CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgree [
+CFPhysicsMondrianTests >> testMondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgree [
 	<gtExample>
 	| space mondrian node world overlay body physicsPosition context displayedPoint worldPoint |
 	space := BlSpace new.
@@ -413,7 +413,7 @@ CFPhysicsMondrianTests >> mondrianPhysicsDisplayedAndWorldOverlayCoordinatesAgre
 
 
 { #category : 'examples - physics overlay' }
-CFPhysicsMondrianTests >> mondrianPhysicsWorldOverlayCoordinatesFollowGraphScaleAndTranslation [
+CFPhysicsMondrianTests >> testMondrianPhysicsWorldOverlayCoordinatesFollowGraphScaleAndTranslation [
 	<gtExample>
 	| space mondrian node world overlay body physicsPosition context displayedPoint worldPoint directHostPoint |
 	space := BlSpace new.

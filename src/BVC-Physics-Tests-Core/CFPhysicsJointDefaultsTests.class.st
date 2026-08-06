@@ -7,7 +7,7 @@ Class {
 }
 
 { #category : 'examples - wheel joint' }
-CFPhysicsJointDefaultsTests >> wheelJointDefaultsMatchBox2D [
+CFPhysicsJointDefaultsTests >> testWheelJointDefaultsMatchBox2D [
 	<gtExample>
 	| joint |
 	joint := CFPhysicsWheelJoint new.

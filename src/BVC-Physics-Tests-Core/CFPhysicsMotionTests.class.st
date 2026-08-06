@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
+CFPhysicsMotionTests >> testPhysicsWorldBehaviourAdvancesDeterministicFixedSteps [
 	<gtExample>
 	| space owner world presentation behaviour timeline track motion |
 	space := BlSpace new.
@@ -55,7 +55,7 @@ CFPhysicsMotionTests >> physicsWorldBehaviourAdvancesDeterministicFixedSteps [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
+CFPhysicsMotionTests >> testBackgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion |
 	space := BlSpace new.
@@ -97,7 +97,7 @@ CFPhysicsMotionTests >> backgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> independentPhysicsWorldBehavioursShareOneFrameDriver [
+CFPhysicsMotionTests >> testIndependentPhysicsWorldBehavioursShareOneFrameDriver [
 	<gtExample>
 	| space firstOwner secondOwner firstWorld secondWorld firstBehaviour secondBehaviour firstTimeline secondTimeline firstMotion secondMotion coordinator |
 	space := BlSpace new.
@@ -146,7 +146,7 @@ CFPhysicsMotionTests >> independentPhysicsWorldBehavioursShareOneFrameDriver [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
+CFPhysicsMotionTests >> testDetachedPhysicsWorldOwnerEndsPlaybackCleanly [
 	<gtExample>
 	| space owner world behaviour timeline motion stepCountBeforeDetachment |
 	space := BlSpace new.
@@ -177,7 +177,7 @@ CFPhysicsMotionTests >> detachedPhysicsWorldOwnerEndsPlaybackCleanly [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
+CFPhysicsMotionTests >> testRestartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	<gtExample>
 	| space owner world firstBehaviour firstTimeline firstMotion secondBehaviour secondTimeline secondMotion |
 	space := BlSpace new.
@@ -211,7 +211,7 @@ CFPhysicsMotionTests >> restartingPhysicsSteppingBeginsAtCleanStepBoundary [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> backgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
+CFPhysicsMotionTests >> testBackgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion initialPresentationCount |
 	space := BlSpace new.

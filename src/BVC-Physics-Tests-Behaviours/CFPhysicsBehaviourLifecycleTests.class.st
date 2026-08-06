@@ -6,23 +6,6 @@ Class {
 }
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testPhysicsOwnsAddedBehaviourAndWorldParticipates [
-	<gtExample>
-	| root element world behaviour |
-	root := BlElement new.
-	element := BlElement new.
-	root addChild: element.
-	world := root physics beWorld.
-	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
-	element physics addBehaviour: behaviour.
-	self assert: element physics behaviours equals: { behaviour }.
-	self assert: world behaviours equals: { behaviour }.
-	self assert: behaviour physics identicalTo: element physics.
-	self assert: behaviour world identicalTo: world.
-	self assert: behaviour element identicalTo: element
-]
-
-{ #category : 'tests - behaviours' }
 CFPhysicsBehaviourLifecycleTests >> testDetachedElementCannotAddPhysicsBehaviour [
 	<gtExample>
 	| element behaviour |

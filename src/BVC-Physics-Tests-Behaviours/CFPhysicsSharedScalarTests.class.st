@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarTests >> sharedScalarRetainsAndUpdatesItsValue [
+CFPhysicsSharedScalarTests >> testSharedScalarRetainsAndUpdatesItsValue [
 	<gtExample>
 	| scalar |
 	scalar := CFPhysicsSharedScalar value: 12.
@@ -17,7 +17,7 @@ CFPhysicsSharedScalarTests >> sharedScalarRetainsAndUpdatesItsValue [
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarTests >> ordinaryPhysicsValuesResolveWithoutWrapping [
+CFPhysicsSharedScalarTests >> testOrdinaryPhysicsValuesResolveWithoutWrapping [
 	<gtExample>
 	self assert: 42 value equals: 42.
 	self assert: nil value isNil.
@@ -25,7 +25,7 @@ CFPhysicsSharedScalarTests >> ordinaryPhysicsValuesResolveWithoutWrapping [
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarTests >> constantForceResponseObservesSharedForceAndDistance [
+CFPhysicsSharedScalarTests >> testConstantForceResponseObservesSharedForceAndDistance [
 	<gtExample>
 	| force maximumDistance response |
 	force := CFPhysicsSharedScalar value: 250.
@@ -47,7 +47,7 @@ CFPhysicsSharedScalarTests >> constantForceResponseObservesSharedForceAndDistanc
 ]
 
 { #category : 'examples - shared scalar' }
-CFPhysicsSharedScalarTests >> sharedValuesAreIndependent [
+CFPhysicsSharedScalarTests >> testSharedValuesAreIndependent [
 	<gtExample>
 	| first second |
 	first := CFPhysicsSharedScalar value: 10.
