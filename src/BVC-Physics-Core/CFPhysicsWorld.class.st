@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph' ],
+	#instVars : [ 'owner', 'members', 'membershipProvider', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -23,6 +23,7 @@ CFPhysicsWorld >> initialize [
 	super initialize.
 	members := IdentitySet new.
 	bodyStates := IdentityDictionary new.
+	geometrySignaturesByBody := IdentityDictionary new.
 	nextBodySequence := 1.
 	lengthUnitsPerMetre := 100.0.
 	gravity := 0 @ 10.0.
@@ -354,6 +355,7 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
 	persistentIslandGraph addBody: body.
+	geometrySignaturesByBody at: body put: body shapeState collisionGeometrySignature.
 	^ body
 ]
 
@@ -408,6 +410,8 @@ CFPhysicsWorld >> synchroniseMembership [
 	self retireBodiesAbsentFrom: currentMembers.
 	currentMembers do: [ :each |
 		bodyStates at: each ifAbsentPut: [ self registerBodyFor: each ] ].
+	currentMembers do: [ :each |
+		self synchroniseCollisionGeometryFor: (bodyStates at: each) ].
 	members := currentMembers.
 	^ members
 ]
@@ -420,6 +424,7 @@ CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
 	retiredElements do: [ :each |
 		| body |
 		body := bodyStates removeKey: each.
+		geometrySignaturesByBody removeKey: body ifAbsent: [ ].
 		each physics retireBodyFromWorld: self.
 		self removeAttractionsUsingBody: body.
 		self removeRepulsionsUsingBody: body.
@@ -1762,4 +1767,33 @@ CFPhysicsWorld >> removeContainmentBoundary [
 	containmentFriction := nil.
 	containmentRestitution := nil.
 	self invalidateTopology
+]
+
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsWorld >> synchroniseCollisionGeometryFor: aBody [
+	| signature previousSignature |
+	signature := aBody shapeState collisionGeometrySignature.
+	previousSignature := geometrySignaturesByBody
+		at: aBody
+		ifAbsentPut: [ signature ].
+	previousSignature = signature ifTrue: [ ^ self ].
+	geometrySignaturesByBody at: aBody put: signature.
+	self collisionGeometryChangedForBody: aBody
+]
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsWorld >> collisionGeometryChangedForBody: aBody [
+	| attachedContacts |
+	self invalidateTopology.
+	attachedContacts := contacts select: [ :contact |
+		contact firstBody == aBody or: [ contact secondBody == aBody ] ].
+	attachedContacts do: [ :contact |
+		contact isSolid ifTrue: [ persistentIslandGraph unlinkConstraint: contact ].
+		contact isTouching ifTrue: [
+			contact firstBody wake.
+			contact secondBody wake ] ].
+	aBody shapeState advanceGeometryRevision.
+	stepPipeline resetBroadphaseProxiesFor: aBody.
+	^ self
 ]

@@ -56,8 +56,10 @@ CFPhysicsPair >> initializeFirstBody: aFirstBody shape: aFirstShape shapeIndex: 
 	key := CFPhysicsContactKey
 		firstBody: firstBody
 		firstShapeIndex: firstShapeIndex
+		firstShapeRevision: firstShape geometryRevision
 		secondBody: secondBody
 		secondShapeIndex: secondShapeIndex
+		secondShapeRevision: secondShape geometryRevision
 ]
 
 { #category : 'accessing' }
@@ -89,7 +91,11 @@ CFPhysicsPair >> comesBefore: anotherPair [
 		^ key firstSequence < anotherPair key firstSequence ].
 	key firstShapeIndex = anotherPair key firstShapeIndex ifFalse: [
 		^ key firstShapeIndex < anotherPair key firstShapeIndex ].
+	key firstShapeRevision = anotherPair key firstShapeRevision ifFalse: [
+		^ key firstShapeRevision < anotherPair key firstShapeRevision ].
 	key secondSequence = anotherPair key secondSequence ifFalse: [
 		^ key secondSequence < anotherPair key secondSequence ].
-	^ key secondShapeIndex < anotherPair key secondShapeIndex
+	key secondShapeIndex = anotherPair key secondShapeIndex ifFalse: [
+		^ key secondShapeIndex < anotherPair key secondShapeIndex ].
+	^ key secondShapeRevision < anotherPair key secondShapeRevision
 ]

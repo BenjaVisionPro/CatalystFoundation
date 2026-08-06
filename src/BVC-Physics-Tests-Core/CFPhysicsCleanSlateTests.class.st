@@ -8837,3 +8837,61 @@ CFPhysicsCleanSlateTests >> wakingAnIslandRestoresContactAndJointSolverParticipa
 	self assert: result islands isEmpty not.
 	^ result
 ]
+
+
+{ #category : 'examples - geometry lifecycle' }
+CFPhysicsCleanSlateTests >> runtimeGeometryChangeRecreatesContactAndWakesBothBodies [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult oldContact |
+	owner := BlElement new size: 200 @ 200; yourself.
+	first := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	second := BlElement new geometry: BlCircleGeometry new; size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0.
+	secondBody position: 10 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts size equals: 1.
+	oldContact := firstResult activeContacts first.
+	firstBody sleep.
+	secondBody sleep.
+	first geometry: BlRoundedRectangleGeometry new.
+	secondResult := world step.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	self assert: secondResult endedContacts size equals: 1.
+	self assert: secondResult beganContacts size equals: 1.
+	self assert: secondResult activeContacts size equals: 1.
+	self assert: secondResult activeContacts first key = oldContact key equals: false.
+	^ secondResult
+]
+
+{ #category : 'examples - geometry lifecycle' }
+CFPhysicsCleanSlateTests >> runtimeGeometryExpansionCreatesContactWithoutBodyMovement [
+	<gtExample>
+	| owner first second world firstBody secondBody firstResult secondResult |
+	owner := BlElement new size: 300 @ 200; yourself.
+	first := BlElement new geometry: BlCircleGeometry new; size: 10 @ 10; yourself.
+	second := BlElement new geometry: BlCircleGeometry new; size: 10 @ 10; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world containment disable.
+	world gravity: 0 @ 0.
+	world synchroniseMembership.
+	firstBody := world bodyStateFor: first.
+	secondBody := world bodyStateFor: second.
+	firstBody position: 0 @ 0.
+	secondBody position: 30 @ 0.
+	firstResult := world step.
+	self assert: firstResult activeContacts isEmpty.
+	first size: 60 @ 60.
+	secondResult := world step.
+	self assert: secondResult beganContacts size equals: 1.
+	self assert: secondResult activeContacts size equals: 1.
+	^ secondResult
+]

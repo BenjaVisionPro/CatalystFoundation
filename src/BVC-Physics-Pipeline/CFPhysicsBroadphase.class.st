@@ -302,3 +302,10 @@ CFPhysicsBroadphase >> rebuildTreesFully [
 	"Fully rebuild the dynamic and kinematic trees for explicit maintenance or diagnostics."
 	^ dynamicTree rebuildFully + kinematicTree rebuildFully
 ]
+
+
+{ #category : 'private - synchronisation' }
+CFPhysicsBroadphase >> resetProxiesForBody: aBody [
+	aBody shapes do: [ :shape | self destroyProxyForShape: shape ].
+	^ self
+]

@@ -258,3 +258,8 @@ CFPhysicsChainSegmentShape >> boundingRadius [
 CFPhysicsChainSegmentShape >> rollingResistanceRadius [
 	^ 0.0
 ]
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsChainSegmentShape >> geometryRevision [
+	^ 0
+]

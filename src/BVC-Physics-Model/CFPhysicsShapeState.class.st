@@ -6,7 +6,7 @@ My responsibility is to bridge element-local shape information into body-origin 
 Class {
 	#name : 'CFPhysicsShapeState',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'material', 'sensor', 'collisionFilter', 'capturedExtent', 'capturedCollisionGeometry' ],
+	#instVars : [ 'element', 'material', 'sensor', 'collisionFilter', 'capturedExtent', 'capturedCollisionGeometry', 'geometryRevision' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -94,7 +94,8 @@ CFPhysicsShapeState >> initialize [
 	super initialize.
 	material := CFPhysicsMaterial new.
 	sensor := false.
-	collisionFilter := CFPhysicsCollisionFilter new
+	collisionFilter := CFPhysicsCollisionFilter new.
+	geometryRevision := 0
 ]
 
 { #category : 'material' }
@@ -544,4 +545,27 @@ CFPhysicsShapeState >> distanceProxy [
 	^ CFPhysicsDistanceProxy
 		points: (self localCollisionVertices collect: [ :each | each - centre ])
 		radius: 0.0
+]
+
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsShapeState >> geometryRevision [
+	^ geometryRevision ifNil: [ geometryRevision := 0 ]
+]
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsShapeState >> advanceGeometryRevision [
+	geometryRevision := self geometryRevision + 1
+]
+
+{ #category : 'geometry lifecycle' }
+CFPhysicsShapeState >> collisionGeometrySignature [
+	| captured geometry |
+	captured := self capturedForStep.
+	geometry := captured capturedCollisionGeometry.
+	geometry isCircle ifTrue: [
+		^ { #circle. captured extent. geometry radius } ].
+	geometry isPolygon ifTrue: [
+		^ { #polygon. captured extent. geometry vertices. geometry radius. geometry rotationCentre } ].
+	self error: 'Unsupported captured Physics geometry: ', geometry class name
 ]

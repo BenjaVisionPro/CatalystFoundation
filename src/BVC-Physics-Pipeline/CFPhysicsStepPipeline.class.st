@@ -252,3 +252,10 @@ CFPhysicsStepPipeline >> hitEventThreshold [
 CFPhysicsStepPipeline >> hitEventThreshold: aNumber [
 	self postSolveStage hitEventThreshold: aNumber
 ]
+
+
+{ #category : 'broadphase' }
+CFPhysicsStepPipeline >> resetBroadphaseProxiesFor: aBody [
+	broadphase resetProxiesForBody: aBody.
+	^ self
+]
