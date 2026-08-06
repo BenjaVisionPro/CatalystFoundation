@@ -173,3 +173,51 @@ CFPhysicsBodyTests >> testPhysicsFacadeExposesTheExistingBodyType [
 	self assert: physics bodyType class equals: CFPhysicsStaticBodyType.
 	^ physics
 ]
+
+{ #category : 'tests - public api' }
+CFPhysicsBodyTests >> testPhysicsFacadeConfiguresContinuousCollision [
+	<gtExample>
+	| owner element world physics |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	physics := element physics beDynamic.
+	self deny: physics isBullet.
+	self assert: physics beBullet == physics.
+	self assert: physics isBullet.
+	self assert: physics beNonBullet == physics.
+	self deny: physics isBullet.
+	^ physics
+]
+
+{ #category : 'tests - public api' }
+CFPhysicsBodyTests >> testPhysicsFacadeAppliesImpulseAtTheBodyCentre [
+	<gtExample>
+	| owner element world physics |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	physics := element physics beDynamic.
+	physics applyImpulse: 10 @ 0.
+	self assert: physics velocity x > 0.
+	self assert: physics angularVelocity equals: 0.0.
+	^ physics
+]
+
+{ #category : 'tests - public api' }
+CFPhysicsBodyTests >> testPhysicsFacadeAppliesImpulseAtAWorldPoint [
+	<gtExample>
+	| owner element world physics point |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	physics := element physics beDynamic.
+	point := physics body worldBodyOrigin + (0 @ 10).
+	physics applyImpulse: 10 @ 0 atWorldPoint: point.
+	self assert: physics velocity x > 0.
+	self deny: physics angularVelocity equals: 0.0.
+	^ physics
+]

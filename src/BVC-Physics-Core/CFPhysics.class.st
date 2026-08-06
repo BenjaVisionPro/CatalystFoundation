@@ -259,11 +259,13 @@ CFPhysics >> isWorld [
 
 { #category : 'bodies' }
 CFPhysics >> position [
+	"Answer the element's top-left position in the owning Bloc world's length units."
 	^ self body position
 ]
 
 { #category : 'bodies' }
 CFPhysics >> position: aPoint [
+	"Set the element's top-left position in the owning Bloc world's length units."
 	self body position: aPoint
 ]
 
@@ -310,11 +312,13 @@ CFPhysics >> translation: aPoint rotation: aNumber [
 
 { #category : 'bodies' }
 CFPhysics >> velocity [
+	"Answer linear velocity in physics length units per second."
 	^ self body velocity
 ]
 
 { #category : 'bodies' }
 CFPhysics >> velocity: aPoint [
+	"Set linear velocity in physics length units per second."
 	self body velocity: aPoint
 ]
 
@@ -369,6 +373,20 @@ CFPhysics >> wake [
 CFPhysics >> applyForce: aPoint [ self body applyForce: aPoint ]
 
 { #category : 'linear dynamics' }
+CFPhysics >> applyImpulse: anImpulse [
+	"Apply a linear impulse at the body's centre of mass."
+	self body
+		applyImpulse: anImpulse
+		atWorldPoint: self body worldBodyOrigin
+]
+
+{ #category : 'linear dynamics' }
+CFPhysics >> applyImpulse: anImpulse atWorldPoint: aPoint [
+	"Apply a linear impulse at a point expressed in the owning world's coordinate frame."
+	self body applyImpulse: anImpulse atWorldPoint: aPoint
+]
+
+{ #category : 'linear dynamics' }
 CFPhysics >> clearForces [ self body clearForces ]
 
 { #category : 'linear dynamics' }
@@ -402,6 +420,23 @@ CFPhysics >> applyTorque: aNumber [ self body applyTorque: aNumber ]
 { #category : 'mass' }
 CFPhysics >> inverseInertia [ ^ self body inverseInertia ]
 
+
+{ #category : 'continuous collision' }
+CFPhysics >> beBullet [
+	self body beBullet.
+	^ self
+]
+
+{ #category : 'continuous collision' }
+CFPhysics >> beNonBullet [
+	self body beNonBullet.
+	^ self
+]
+
+{ #category : 'continuous collision' }
+CFPhysics >> isBullet [
+	^ self body isBullet
+]
 
 { #category : 'sensors' }
 CFPhysics >> beSensor [
