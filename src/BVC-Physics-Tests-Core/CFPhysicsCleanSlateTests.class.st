@@ -5175,7 +5175,7 @@ CFPhysicsCleanSlateTests >> continuousContactsPublishInDeterministicPairOrder [
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBlockingMotion [
+CFPhysicsCleanSlateTests >> stepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion [
 	<gtExample>
 	| moving sensor pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5197,7 +5197,7 @@ CFPhysicsCleanSlateTests >> stepPipelinePublishesSweptSensorWithoutSolvingOrBloc
 		gravity: 0 @ 0
 		restitutionThreshold: 1.0.
 	self assert: result hasContinuousImpact not.
-	self assert: result continuousSensorContacts size equals: 1.
+	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	self assert: result solver notNil.
@@ -5245,7 +5245,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactDoesNotPublishSensorBeyondResol
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedImpact [
+CFPhysicsCleanSlateTests >> continuousSolidImpactIgnoresSweptSensorBeforeResolvedImpact [
 	<gtExample>
 	| moving sensor wall pipeline step result |
 	moving := self cleanSlateBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -5273,8 +5273,7 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 	self assert: result continuousStepResult impacts size equals: 1.
 	self assert: result continuousStepResult impacts first pair firstBody equals: moving.
 	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
-	self assert: result continuousSensorContacts size equals: 1.
-	self assert: result continuousSensorContacts first isSensor.
+	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
 	self assert: result constraints isEmpty.
 	result commitBodyStates.
@@ -5283,10 +5282,10 @@ CFPhysicsCleanSlateTests >> continuousSolidImpactPublishesSensorBeforeResolvedIm
 ]
 
 { #category : 'examples - continuous collision' }
-CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
+CFPhysicsCleanSlateTests >> ignoredSweptSensorProducesNoFollowingEndEvent [
 	<gtExample>
 	| firstResult moving sensor pipeline step secondResult |
-	firstResult := self stepPipelinePublishesSweptSensorWithoutSolvingOrBlockingMotion.
+	firstResult := self stepPipelineIgnoresSweptSensorWithoutSolvingOrBlockingMotion.
 	moving := firstResult bodies first.
 	sensor := firstResult bodies second.
 	moving velocity: 0 @ 0.
@@ -5317,8 +5316,6 @@ CFPhysicsCleanSlateTests >> sweptSensorCrossingEndsOnFollowingStep [
 	self assert: (moving position closeTo: 60 @ 0).
 	^ secondResult
 ]
-
-
 
 { #category : 'examples - velocity integration' }
 CFPhysicsCleanSlateTests >> stepStateIntegratesAccumulatedForceByInverseMass [

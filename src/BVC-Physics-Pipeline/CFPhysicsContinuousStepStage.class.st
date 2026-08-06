@@ -19,35 +19,30 @@ CFPhysicsContinuousStepStage >> initialize [
 
 { #category : 'executing' }
 CFPhysicsContinuousStepStage >> executeOn: aStepResult [
-	| solvedPairs solidPairs sensorPairs impacts impactSolveResults sensorContactsByKey continuousResult |
+	| solvedPairs solidPairs impacts impactSolveResults continuousResult |
 	solvedPairs := pairFinder
 		pairsAmongSolvedStepStates: aStepResult orderedBodyStates
 		collisionSuppressedBodyPairs: aStepResult collisionSuppressedBodyPairs.
 	solidPairs := solvedPairs reject: [ :pair |
 		self pairIsSensor: pair bodyStates: aStepResult bodyStates ].
-	sensorPairs := solvedPairs select: [ :pair |
-		self pairIsSensor: pair bodyStates: aStepResult bodyStates ].
 	impacts := OrderedCollection new.
 	impactSolveResults := OrderedCollection new.
-	sensorContactsByKey := Dictionary new.
 	(aStepResult orderedBodyStates select: #isFastForContinuousCollision) do: [ :state |
 		self
 			clampSolvedState: state
 			amongSolidPairs: solidPairs
-			sensorPairs: sensorPairs
 			bodyStates: aStepResult bodyStates
 			impacts: impacts
 			impactSolveResults: impactSolveResults
-			sensorContactsByKey: sensorContactsByKey
 			step: aStepResult step ].
-	aStepResult continuousSensorContacts: (self orderedContactsFrom: sensorContactsByKey).
+	aStepResult continuousSensorContacts: #().
 	impacts ifEmpty: [
 		aStepResult continuousStepResult: nil.
 		^ nil ].
 	continuousResult := CFPhysicsContinuousStepResult
 		impacts: impacts
 		impactSolveResults: impactSolveResults
-		sensorContacts: aStepResult continuousSensorContacts
+		sensorContacts: #()
 		bodyStates: aStepResult bodyStates
 		remainingTime: 0.0
 		iterationLimitReached: false
@@ -57,7 +52,7 @@ CFPhysicsContinuousStepStage >> executeOn: aStepResult [
 ]
 
 { #category : 'private - clamping' }
-CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPairs sensorPairs: sensorPairs bodyStates: bodyStates impacts: impacts impactSolveResults: impactSolveResults sensorContactsByKey: sensorContactsByKey step: aStep [
+CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPairs bodyStates: bodyStates impacts: impacts impactSolveResults: impactSolveResults step: aStep [
 	| body candidates impact maximumFraction impactContact advancement |
 	body := state body.
 	candidates := solidPairs select: [ :pair |
@@ -68,17 +63,8 @@ CFPhysicsContinuousStepStage >> clampSolvedState: state amongSolidPairs: solidPa
 		afterFraction: 1.0e-9
 		linearSlop: aStep linearSlop
 		fastBody: body.
-	maximumFraction := impact ifNil: [ 1.0 ] ifNotNil: [ impact fraction ].
-	self
-		recordSensorContactsAmong: (sensorPairs select: [ :pair |
-			(self pair: pair includesBody: body) and: [
-			self pair: pair requiresContinuousCollisionFor: body bodyStates: bodyStates ] ])
-		bodyStates: bodyStates
-		throughFraction: maximumFraction
-		into: sensorContactsByKey
-		linearSlop: aStep linearSlop
-		fastBody: body.
 	impact ifNil: [ ^ self ].
+	maximumFraction := impact fraction.
 	impacts add: impact.
 	impactContact := self contactForImpact: impact bodyStates: bodyStates.
 	advancement := CFPhysicsImpactAdvancementResult
@@ -111,20 +97,6 @@ CFPhysicsContinuousStepStage >> contactForImpact: impact bodyStates: bodyStates 
 		yourself
 ]
 
-{ #category : 'private - sensors' }
-CFPhysicsContinuousStepStage >> recordSensorContactsAmong: pairs bodyStates: bodyStates throughFraction: maximumFraction into: contactsByKey linearSlop: linearSlop fastBody: fastBody [
-	(impactFinder
-		solvedImpactsAmong: pairs
-		bodyStates: bodyStates
-		afterFraction: 1.0e-9
-		linearSlop: linearSlop
-		fastBody: fastBody) do: [ :impact |
-		impact fraction <= (maximumFraction + 1.0e-9) ifTrue: [
-			| contact |
-			contact := self contactForImpact: impact bodyStates: bodyStates.
-			contact ifNotNil: [ contactsByKey at: contact key ifAbsentPut: [ contact ] ] ] ]
-]
-
 { #category : 'private - testing' }
 CFPhysicsContinuousStepStage >> pairIsSensor: pair bodyStates: bodyStates [
 	^ pair firstShape isSensor or: [ pair secondShape isSensor ]
@@ -143,12 +115,6 @@ CFPhysicsContinuousStepStage >> pair: pair requiresContinuousCollisionFor: body 
 		ifFalse: [ pair firstBody ].
 	^ (bodyStates at: body)
 		requiresContinuousCollisionAgainst: (bodyStates at: counterpart)
-]
-
-{ #category : 'private - ordering' }
-CFPhysicsContinuousStepStage >> orderedContactsFrom: contactsByKey [
-	^ contactsByKey values asArray sorted: [ :left :right |
-		left pair comesBefore: right pair ]
 ]
 
 { #category : 'accessing' }
