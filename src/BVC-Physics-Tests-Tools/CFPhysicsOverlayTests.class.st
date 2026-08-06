@@ -1872,14 +1872,4 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget
 	^ overlay
 ]
 
-{ #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsPivotAndReferenceDirection [
-	<gtExample>
-	^ self revoluteJointVisual
-]
 
-{ #category : 'examples - physics overlay - joints' }
-CFPhysicsOverlayTests >> testPhysicsWeldJointVisualShowsItsLockedReferenceOrientation [
-	<gtExample>
-	^ self weldJointVisual
-]

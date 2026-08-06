@@ -96,15 +96,7 @@ CFPhysicsTelemetryTestRun >> sampleCount [
 	^ recordings size
 ]
 
-{ #category : 'accessing' }
-CFPhysicsTelemetryTestRun >> latestRecording [
-	^ recordings ifEmpty: [ nil ] ifNotEmpty: [ recordings last ]
-]
 
-{ #category : 'accessing' }
-CFPhysicsTelemetryTestRun >> latestPhysicsData [
-	^ physicsData ifEmpty: [ nil ] ifNotEmpty: [ physicsData last ]
-]
 
 { #category : 'accessing' }
 CFPhysicsTelemetryTestRun >> valuesAt: aKey [
