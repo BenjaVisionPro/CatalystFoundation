@@ -1,7 +1,7 @@
 "
 I am the Physics facade attached to one Bloc element.
 
-My responsibility is to expose element-oriented access to body, world, interaction, membership and Behaviour capabilities while keeping simulation objects behind the Bloc API. I create or locate the Physics state associated with my element.
+My responsibility is to expose element-oriented Physics configuration and operations while keeping runtime bodies, contacts, constraints and solver state behind the Bloc API.
 "
 Class {
 	#name : 'CFPhysics',
@@ -105,7 +105,7 @@ CFPhysics >> ceaseBeingWorld [
 	^ self
 ]
 
-{ #category : 'bodies' }
+{ #category : 'private - runtime' }
 CFPhysics >> bodyOrNil [
 	^ body
 ]
@@ -271,7 +271,7 @@ CFPhysics >> position: aPoint [
 ]
 
 
-{ #category : 'bodies' }
+{ #category : 'private - runtime' }
 CFPhysics >> body [
 	| aWorld |
 	aWorld := self world.
@@ -307,7 +307,7 @@ CFPhysics >> world [
 ]
 
 
-{ #category : 'bodies' }
+{ #category : 'private - presentation' }
 CFPhysics >> translation: aPoint rotation: aNumber [
 	self body translation: aPoint rotation: aNumber.
 	^ self
@@ -377,6 +377,12 @@ CFPhysics >> wake [
 	^ self
 ]
 
+
+{ #category : 'linear dynamics' }
+CFPhysics >> addVelocity: aPoint [
+	self body addVelocity: aPoint.
+	^ self
+]
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyForce: aPoint [
@@ -569,9 +575,8 @@ CFPhysics >> distanceJoints [
 
 { #category : 'distance joints' }
 CFPhysics >> removeDistanceJoint: aJoint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeDistanceJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removeDistanceJoint: aJoint ].
+	^ self
 ]
 
 { #category : 'motor joints' }
@@ -587,7 +592,10 @@ CFPhysics >> motorJointTo: anotherElement [
 CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
 
 { #category : 'motor joints' }
-CFPhysics >> removeMotorJoint: aJoint [ self world ifNotNil: [ :aWorld | aWorld removeMotorJoint: aJoint ] ]
+CFPhysics >> removeMotorJoint: aJoint [
+	self world ifNotNil: [ :aWorld | aWorld removeMotorJoint: aJoint ].
+	^ self
+]
 
 { #category : 'filter joints' }
 CFPhysics >> filterJointTo: anotherElement [
@@ -612,7 +620,8 @@ CFPhysics >> filterJoints [
 
 { #category : 'filter joints' }
 CFPhysics >> removeFilterJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeFilterJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removeFilterJoint: aJoint ].
+	^ self
 ]
 
 { #category : 'revolute joints' }
@@ -640,9 +649,8 @@ CFPhysics >> revoluteJoints [
 
 { #category : 'revolute joints' }
 CFPhysics >> removeRevoluteJoint: aJoint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeRevoluteJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removeRevoluteJoint: aJoint ].
+	^ self
 ]
 
 { #category : 'weld joints' }
@@ -670,9 +678,8 @@ CFPhysics >> weldJoints [
 
 { #category : 'weld joints' }
 CFPhysics >> removeWeldJoint: aJoint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeWeldJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removeWeldJoint: aJoint ].
+	^ self
 ]
 
 { #category : 'prismatic joints' }
@@ -701,9 +708,8 @@ CFPhysics >> prismaticJoints [
 
 { #category : 'prismatic joints' }
 CFPhysics >> removePrismaticJoint: aJoint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removePrismaticJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removePrismaticJoint: aJoint ].
+	^ self
 ]
 
 
@@ -732,9 +738,8 @@ CFPhysics >> attractions [
 
 { #category : 'attraction interaction' }
 CFPhysics >> removeAttraction: anAttractionConstraint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeAttractionConstraint: anAttractionConstraint ]
+	self world ifNotNil: [ :aWorld | aWorld removeAttractionConstraint: anAttractionConstraint ].
+	^ self
 ]
 
 
@@ -764,9 +769,8 @@ CFPhysics >> repulsions [
 
 { #category : 'repulsion interaction' }
 CFPhysics >> removeRepulsion: aRepulsionConstraint [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNotNil: [ aWorld removeRepulsionConstraint: aRepulsionConstraint ]
+	self world ifNotNil: [ :aWorld | aWorld removeRepulsionConstraint: aRepulsionConstraint ].
+	^ self
 ]
 
 { #category : 'anchors' }
@@ -809,7 +813,8 @@ CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
 
 { #category : 'angular dynamics' }
 CFPhysics >> applyAngularImpulse: aNumber [
-	self body applyAngularImpulse: aNumber
+	self body applyAngularImpulse: aNumber.
+	^ self
 ]
 
 
@@ -837,5 +842,6 @@ CFPhysics >> wheelJoints [
 
 { #category : 'wheel joints' }
 CFPhysics >> removeWheelJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeWheelJoint: aJoint ]
+	self world ifNotNil: [ :aWorld | aWorld removeWheelJoint: aJoint ].
+	^ self
 ]

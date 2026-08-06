@@ -238,6 +238,7 @@ CFPhysicsBodyTests >> testPhysicsFacadeConfigurationIsFluent [
 		position: 40 @ 30;
 		rotation: 0.2;
 		velocity: 2 @ 1;
+		addVelocity: 1 @ 0;
 		linearDamping: 0.1;
 		angularDamping: 0.2;
 		gravityScale: 0.5;
@@ -249,6 +250,7 @@ CFPhysicsBodyTests >> testPhysicsFacadeConfigurationIsFluent [
 		collisionCategoryBits: 2;
 		collisionMaskBits: 3;
 		collisionGroupIndex: 0;
+		applyAngularImpulse: 0;
 		clearForces) == physics.
 	^ physics
 ]

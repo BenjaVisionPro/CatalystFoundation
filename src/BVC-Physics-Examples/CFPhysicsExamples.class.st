@@ -582,7 +582,7 @@ CFPhysicsExamples >> newClickMeButtonUsing: aRandom [
 		size: 104 @ 42;
 		addEventHandler: BlPullHandler new;
 		action: [ :aButton |
-			aButton physics body
+			aButton physics
 				addVelocity: (self randomClickVelocityUsing: aRandom) ];
 		yourself.
 	^ button
