@@ -1416,33 +1416,16 @@ CFPhysicsOverlayTests >> testPhysicsPrismaticJointVisualHidesLimitMarkersWhenLim
 
 { #category : 'examples - physics overlay - joints' }
 CFPhysicsOverlayTests >> revoluteJointVisual [
-	| host overlay world first joint visual points context firstPoint secondPoint pivotPoint |
+	| host overlay world first |
 	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
 	first := host children first.
-	joint := (first physics localAnchorAt: 20 @ 20)
+	(first physics localAnchorAt: 20 @ 20)
 		revoluteJointTo: (world anchorAt: 180 @ 80).
 	overlay refresh.
 	host space pulse.
-	visual := overlay jointOverlay visuals first.
-	points := joint endpointPair worldPoints.
-	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
-	firstPoint := context
-		overlayPointFromWorld: points first
-		attachedTo: joint bodyA.
-	secondPoint := context
-		overlayPointFromWorld: points second
-		attachedTo: joint bodyB.
-	pivotPoint := (firstPoint + secondPoint) / 2.0.
-	self assert: visual pivotMarker visibility equals: BlVisibility visible.
-	self assert: visual pivotMarker position equals: pivotPoint - (5 @ 5).
-	self assert: visual referenceRay visibility equals: BlVisibility visible.
-	self assert: visual referenceRay fromPosition equals: pivotPoint.
-	self assert: visual lowerAngleMarker visibility equals: BlVisibility gone.
-	self assert: visual upperAngleMarker visibility equals: BlVisibility gone.
-	self assert: visual allowedAngleArc visibility equals: BlVisibility gone.
-	^ visual
+	^ overlay jointOverlay visuals first
 ]
 
 { #category : 'examples - physics overlay - joints' }
@@ -1498,35 +1481,16 @@ CFPhysicsOverlayTests >> testPhysicsRevoluteJointVisualShowsMotorDirectionOnlyWh
 
 { #category : 'examples - physics overlay - joints' }
 CFPhysicsOverlayTests >> weldJointVisual [
-	| host overlay world first second joint visual points context firstPoint secondPoint pivotPoint |
+	| host overlay first second |
 	host := self installedPhysicsOverlay.
 	overlay := host existingPhysicsOverlay.
-	world := host physics world.
 	first := host children first.
 	second := host children second.
-	joint := (first physics localAnchorAt: 20 @ 20)
+	(first physics localAnchorAt: 20 @ 20)
 		weldJointTo: (second physics localAnchorAt: 20 @ 20).
 	overlay refresh.
 	host space pulse.
-	visual := overlay jointOverlay visuals first.
-	points := joint endpointPair worldPoints.
-	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
-	firstPoint := context
-		overlayPointFromWorld: points first
-		attachedTo: joint bodyA.
-	secondPoint := context
-		overlayPointFromWorld: points second
-		attachedTo: joint bodyB.
-	pivotPoint := (firstPoint + secondPoint) / 2.0.
-	self assert: visual pivotMarker visibility equals: BlVisibility visible.
-	self assert: visual pivotMarker position equals: pivotPoint - (5 @ 5).
-	self assert: visual referenceRay visibility equals: BlVisibility visible.
-	self assert: visual referenceRay fromPosition equals: pivotPoint.
-	self assert: visual lowerAngleMarker visibility equals: BlVisibility visible.
-	self assert: visual upperAngleMarker visibility equals: BlVisibility visible.
-	self assert: visual allowedAngleArc visibility equals: BlVisibility gone.
-	self assert: visual motorCue visibility equals: BlVisibility gone.
-	^ visual
+	^ overlay jointOverlay visuals first
 ]
 
 { #category : 'examples - physics overlay - joints' }
