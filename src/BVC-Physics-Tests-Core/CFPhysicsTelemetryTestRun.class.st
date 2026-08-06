@@ -68,7 +68,8 @@ CFPhysicsTelemetryTestRun >> run [
 	previousCapacity := world telemetryCapacity.
 	[
 		world telemetryEnabled: false.
-		world step: warmUpStepCount.
+		warmUpStepCount > 0 ifTrue: [
+			world step: warmUpStepCount ].
 		world telemetryCapacity: measuredStepCount.
 		world telemetryEnabled: true.
 		world resetTelemetry.
