@@ -31,11 +31,12 @@ CFPhysicsExamples >> bodies [
 	host addChild: circle.
 	host addChild: rectangle.
 	world := host physics beWorld.
-	world owner physics makeChildrenDynamic.
-	(world bodyStateFor: circle)
+	circle physics
+		beDynamic;
 		position: 75 @ 65;
 		velocity: 45 @ 20.
-	(world bodyStateFor: rectangle)
+	rectangle physics
+		beDynamic;
 		position: 265 @ 150;
 		rotation: Float pi / 10.0.
 	^ host
@@ -69,17 +70,17 @@ CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	world := host physics beWorld.
 	world gravity: 0 @ 0.
 	world stepDuration: 10 milliSeconds.
-	world owner physics makeChildrenDynamic.
-	(world bodyStateFor: body)
+	body physics
+		beDynamic;
 		position: 40 @ 40;
 		velocity: 100 @ 0.
-	initialPosition := (world bodyStateFor: body) position.
+	initialPosition := body physics position.
 	motion := world startStepping.
 	self assert: world isStepping.
 	space pulse.
 	space time wait: 20 milliSeconds.
 	space pulse.
-	self assert: (world bodyStateFor: body) position x > initialPosition x.
+	self assert: body physics position x > initialPosition x.
 	world stopStepping.
 	self assert: world isStepping not.
 	^ host
@@ -101,8 +102,8 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	world
 		gravity: 0 @ 0;
 		stepDuration: 10 milliSeconds.
-	world owner physics makeChildrenDynamic.
-	(world bodyStateFor: body)
+	body physics
+		beDynamic;
 		position: 20 @ 20;
 		velocity: 100 @ 0.
 	firstMotion := world startStepping.
@@ -110,19 +111,19 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	space pulse.
 	space time wait: 20 milliSeconds.
 	space pulse.
-	positionBeforePause := (world bodyStateFor: body) position.
+	positionBeforePause := body physics position.
 	world pauseStepping.
 	self assert: firstMotion isPaused.
 	space time wait: 40 milliSeconds.
 	space pulse.
-	positionWhilePaused := (world bodyStateFor: body) position.
+	positionWhilePaused := body physics position.
 	self assert: positionWhilePaused equals: positionBeforePause.
 	world resumeStepping.
 	self assert: firstMotion isRunning.
 	space pulse.
 	space time wait: 10 milliSeconds.
 	space pulse.
-	self assert: (world bodyStateFor: body) position x > positionWhilePaused x.
+	self assert: body physics position x > positionWhilePaused x.
 	world stopStepping.
 	self assert: firstMotion isCancelled.
 	^ world

@@ -336,7 +336,7 @@ CFPhysicsWorld >> endedContacts [
 		ifNotNil: [ lastStepResult endedContacts ]
 ]
 
-{ #category : 'body states' }
+{ #category : 'private - body states' }
 CFPhysicsWorld >> bodyStateFor: anElement [
 	^ bodyStates at: anElement ifAbsent: [ nil ]
 ]

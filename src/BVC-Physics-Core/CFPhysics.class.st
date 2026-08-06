@@ -455,15 +455,6 @@ CFPhysics >> applyTorque: aNumber [
 	^ self
 ]
 
-{ #category : 'mass' }
-CFPhysics >> inverseInertia [ ^ self body inverseInertia ]
-
-
-{ #category : 'continuous collision' }
-CFPhysics >> beBullet [
-	self body beBullet.
-	^ self
-]
 
 { #category : 'continuous collision' }
 CFPhysics >> beNonBullet [
@@ -799,17 +790,6 @@ CFPhysics >> worldAnchorAt: aPoint [
 ]
 
 
-{ #category : 'relationship endpoints' }
-CFPhysics >> nearestGeometryEndpointsTo: anotherElement [
-	| aWorld otherWorld |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	^ CFPhysicsNearestGeometryEndpointPair
-		between: self body
-		and: anotherElement physics body
-]
 
 { #category : 'angular dynamics' }
 CFPhysics >> applyAngularImpulse: aNumber [
