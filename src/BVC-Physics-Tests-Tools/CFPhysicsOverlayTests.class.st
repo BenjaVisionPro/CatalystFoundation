@@ -590,7 +590,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenTheSelectedBodyRet
 	self assert: overlay objectInspector selectedPhysics == physics.
 	element removeFromParent.
 	overlay refresh.
-	self assert: physics body world isNil.
+	self assert: physics bodyOrNil world isNil.
 	self assert: overlay selectedElement isNil.
 	self assert: overlay objectInspector selectedPhysics isNil.
 	self assert: overlay objectInspector panel visibility equals: BlVisibility gone.
@@ -708,6 +708,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayObservesConsumedButtonClicks [
 	host addChild: button.
 	space root addChild: host.
 	space pulse.
+	host physics beWorld.
 	host physics makeChildrenDynamic.
 	overlay := host showPhysicsOverlay.
 	scripter := BlScripter new.

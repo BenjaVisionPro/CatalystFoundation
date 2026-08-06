@@ -223,7 +223,7 @@ CFPhysicsInteractionTests >> testRetiringABodyRemovesOnlyItsAttractions [
 	attachedB := first physics attract: third.
 	unrelated := third physics attract: fourth.
 	owner removeChild: first.
-	world owner physics makeChildrenDynamic.
+	world refreshMemberState.
 	self assert: world attractions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.
@@ -356,7 +356,7 @@ CFPhysicsInteractionTests >> testRetiringABodyRemovesOnlyItsRepulsions [
 	attachedB := first physics repel: third.
 	unrelated := third physics repel: fourth.
 	owner removeChild: first.
-	world owner physics makeChildrenDynamic.
+	world refreshMemberState.
 	self assert: world repulsions equals: { unrelated }.
 	self assert: attachedA isActive not.
 	self assert: attachedB isActive not.

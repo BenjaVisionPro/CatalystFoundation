@@ -55,19 +55,31 @@ CFPhysics >> removeBehaviour: aBehaviour [
 
 { #category : 'body type' }
 CFPhysics >> beDynamic [
-	self participateInWorld beDynamic.
+	| aWorld aBody |
+	aWorld := self world.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aBody := aWorld addElement: element.
+	aBody beDynamic.
 	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beKinematic [
-	self participateInWorld beKinematic.
+	| aWorld aBody |
+	aWorld := self world.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aBody := aWorld addElement: element.
+	aBody beKinematic.
 	^ self
 ]
 
 { #category : 'body type' }
 CFPhysics >> beStatic [
-	self participateInWorld beStatic.
+	| aWorld aBody |
+	aWorld := self world.
+	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
+	aBody := aWorld addElement: element.
+	aBody beStatic.
 	^ self
 ]
 
@@ -126,16 +138,6 @@ CFPhysics >> element: anElement [
 	element := anElement.
 	pointerJointHandler := CFPhysicsMouseJointHandler on: element
 ]
-
-{ #category : 'private - world membership' }
-CFPhysics >> participateInWorld [
-	| aWorld |
-	aWorld := self world.
-	aWorld ifNil: [ self error: 'The element does not belong to a physics world' ].
-	body := aWorld addElement: element.
-	^ body
-]
-
 
 { #category : 'children' }
 CFPhysics >> makeChildrenDynamic [
