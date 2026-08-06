@@ -372,7 +372,7 @@ CFPhysicsWorld >> changeBody: aBody toType: aBodyType [
 { #category : 'body states' }
 CFPhysicsWorld >> registerBodyFor: anElement [
 	| body |
-	body := anElement physics ensureBodyInWorld: self.
+	body := anElement physics bodyForRegistrationInWorld: self.
 	self invalidateTopology.
 	body sequence: nextBodySequence.
 	nextBodySequence := nextBodySequence + 1.
@@ -412,10 +412,10 @@ CFPhysicsWorld >> isElementOwnedByWorld: anElement [
 ]
 
 { #category : 'private - membership' }
-CFPhysicsWorld >> refreshMemberState [
+CFPhysicsWorld >> refreshExistingMembers [
 	| retainedMembers |
 	retainedMembers := members select: [ :each | self isValidMember: each ].
-	self retireBodiesAbsentFrom: retainedMembers.
+	self retireMembersAbsentFrom: retainedMembers.
 	retainedMembers do: [ :each |
 		self refreshCollisionGeometryFor: (bodyStates at: each) ].
 	members := retainedMembers asIdentitySet.
@@ -448,7 +448,7 @@ CFPhysicsWorld >> retireElement: anElement [
 ]
 
 { #category : 'private - membership' }
-CFPhysicsWorld >> retireBodiesAbsentFrom: currentMembers [
+CFPhysicsWorld >> retireMembersAbsentFrom: currentMembers [
 	(bodyStates keys reject: [ :each | currentMembers includes: each ])
 		do: [ :each | self retireElement: each ]
 ]
@@ -568,19 +568,19 @@ CFPhysicsWorld >> captureStateIfIdle [
 
 { #category : 'private - stepping' }
 CFPhysicsWorld >> captureState [
-	self synchroniseForStateCapture.
-	^ self captureStateAfterSynchronisation
+	self prepareForStateCapture.
+	^ self capturePreparedState
 ]
 
 { #category : 'private - stepping' }
-CFPhysicsWorld >> synchroniseForStateCapture [
-	self refreshMemberState.
-	self synchroniseContainmentBoundary.
+CFPhysicsWorld >> prepareForStateCapture [
+	self refreshExistingMembers.
+	self refreshContainmentBoundary.
 	self retireInvalidBehaviours
 ]
 
 { #category : 'private - stepping' }
-CFPhysicsWorld >> captureStateAfterSynchronisation [
+CFPhysicsWorld >> capturePreparedState [
 	| bodies step capturedBodyStates orderedBodyStates capturedJoints index solveTicket containmentState |
 	bodies := self bodyStatesInOrder.
 	bodies do: #beginStep.
@@ -696,9 +696,9 @@ CFPhysicsWorld >> stepWithTelemetry [
 CFPhysicsWorld >> stepRecordingTelemetry [
 	| state solution |
 	ProcessTelemetry time: [ 'Membership synchronisation' ] during: [
-		self synchroniseForStateCapture ].
+		self prepareForStateCapture ].
 	state := ProcessTelemetry time: [ 'Preparation' ] during: [
-		self captureStateAfterSynchronisation ].
+		self capturePreparedState ].
 	solution := ProcessTelemetry time: [ 'Pipeline' ] during: [
 		stepPipeline solveWithTelemetry: state ].
 	^ ProcessTelemetry time: [ 'Boundary' ] during: [
@@ -1722,7 +1722,7 @@ CFPhysicsWorld >> containmentBoundaryChain [
 ]
 
 { #category : 'containment - internal' }
-CFPhysicsWorld >> synchroniseContainmentBoundary [
+CFPhysicsWorld >> refreshContainmentBoundary [
 	| shapeState extent geometry vertices localVertices material filter changed |
 	self containment isEnabled ifFalse: [
 		self removeContainmentBoundary.

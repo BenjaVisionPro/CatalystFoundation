@@ -105,11 +105,6 @@ CFPhysics >> ceaseBeingWorld [
 	^ self
 ]
 
-{ #category : 'body type' }
-CFPhysics >> bodyType [
-	^ self body bodyType
-]
-
 { #category : 'bodies' }
 CFPhysics >> bodyOrNil [
 	^ body
@@ -117,7 +112,7 @@ CFPhysics >> bodyOrNil [
 
 
 { #category : 'private - bodies' }
-CFPhysics >> ensureBodyInWorld: aWorld [
+CFPhysics >> bodyForRegistrationInWorld: aWorld [
 	body ifNil: [ body := CFPhysicsBody element: element world: aWorld ].
 	body world: aWorld.
 	^ body
@@ -193,7 +188,8 @@ CFPhysics >> density [
 
 { #category : 'material' }
 CFPhysics >> density: aNumber [
-	self body density: aNumber
+	self body density: aNumber.
+	^ self
 ]
 
 { #category : 'material' }
@@ -203,7 +199,8 @@ CFPhysics >> friction [
 
 { #category : 'material' }
 CFPhysics >> friction: aNumber [
-	self body friction: aNumber
+	self body friction: aNumber.
+	^ self
 ]
 
 
@@ -214,7 +211,8 @@ CFPhysics >> rollingResistance [
 
 { #category : 'material' }
 CFPhysics >> rollingResistance: aNumber [
-	self body rollingResistance: aNumber
+	self body rollingResistance: aNumber.
+	^ self
 ]
 
 { #category : 'material' }
@@ -224,7 +222,8 @@ CFPhysics >> tangentSpeed [
 
 { #category : 'material' }
 CFPhysics >> tangentSpeed: aNumber [
-	self body tangentSpeed: aNumber
+	self body tangentSpeed: aNumber.
+	^ self
 ]
 
 { #category : 'material' }
@@ -234,7 +233,8 @@ CFPhysics >> restitution [
 
 { #category : 'material' }
 CFPhysics >> restitution: aNumber [
-	self body restitution: aNumber
+	self body restitution: aNumber.
+	^ self
 ]
 
 { #category : 'body type' }
@@ -266,7 +266,8 @@ CFPhysics >> position [
 { #category : 'bodies' }
 CFPhysics >> position: aPoint [
 	"Set the element's top-left position in the owning Bloc world's length units."
-	self body position: aPoint
+	self body position: aPoint.
+	^ self
 ]
 
 
@@ -287,7 +288,8 @@ CFPhysics >> rotation [
 
 { #category : 'bodies' }
 CFPhysics >> rotation: aNumber [
-	self body rotation: aNumber
+	self body rotation: aNumber.
+	^ self
 ]
 
 
@@ -307,7 +309,8 @@ CFPhysics >> world [
 
 { #category : 'bodies' }
 CFPhysics >> translation: aPoint rotation: aNumber [
-	self body translation: aPoint rotation: aNumber
+	self body translation: aPoint rotation: aNumber.
+	^ self
 ]
 
 { #category : 'bodies' }
@@ -319,7 +322,8 @@ CFPhysics >> velocity [
 { #category : 'bodies' }
 CFPhysics >> velocity: aPoint [
 	"Set linear velocity in physics length units per second."
-	self body velocity: aPoint
+	self body velocity: aPoint.
+	^ self
 ]
 
 
@@ -340,7 +344,8 @@ CFPhysics >> allowsSleeping [
 
 { #category : 'sleeping' }
 CFPhysics >> allowSleeping [
-	self body allowSleeping
+	self body allowSleeping.
+	^ self
 ]
 
 { #category : 'sleeping' }
@@ -350,72 +355,99 @@ CFPhysics >> sleepThreshold [
 
 { #category : 'sleeping' }
 CFPhysics >> sleepThreshold: aNumber [
-	self body sleepThreshold: aNumber
+	self body sleepThreshold: aNumber.
+	^ self
 ]
 
 { #category : 'sleeping' }
 CFPhysics >> preventSleeping [
-	self body preventSleeping
+	self body preventSleeping.
+	^ self
 ]
 
 { #category : 'sleeping' }
 CFPhysics >> sleep [
-	self body sleep
+	self body sleep.
+	^ self
 ]
 
 { #category : 'sleeping' }
 CFPhysics >> wake [
-	self body wake
+	self body wake.
+	^ self
 ]
 
 
 { #category : 'linear dynamics' }
-CFPhysics >> applyForce: aPoint [ self body applyForce: aPoint ]
+CFPhysics >> applyForce: aPoint [
+	self body applyForce: aPoint.
+	^ self
+]
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyImpulse: anImpulse [
 	"Apply a linear impulse at the body's centre of mass."
 	self body
 		applyImpulse: anImpulse
-		atWorldPoint: self body worldBodyOrigin
+		atWorldPoint: self body worldBodyOrigin.
+	^ self
 ]
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyImpulse: anImpulse atWorldPoint: aPoint [
 	"Apply a linear impulse at a point expressed in the owning world's coordinate frame."
-	self body applyImpulse: anImpulse atWorldPoint: aPoint
+	self body applyImpulse: anImpulse atWorldPoint: aPoint.
+	^ self
 ]
 
 { #category : 'linear dynamics' }
-CFPhysics >> clearForces [ self body clearForces ]
+CFPhysics >> clearForces [
+	self body clearForces.
+	^ self
+]
 
 { #category : 'linear dynamics' }
 CFPhysics >> linearDamping [ ^ self body linearDamping ]
 
 { #category : 'linear dynamics' }
-CFPhysics >> linearDamping: aNumber [ self body linearDamping: aNumber ]
+CFPhysics >> linearDamping: aNumber [
+	self body linearDamping: aNumber.
+	^ self
+]
 
 { #category : 'linear dynamics' }
 CFPhysics >> gravityScale [ ^ self body gravityScale ]
 
 { #category : 'linear dynamics' }
-CFPhysics >> gravityScale: aNumber [ self body gravityScale: aNumber ]
+CFPhysics >> gravityScale: aNumber [
+	self body gravityScale: aNumber.
+	^ self
+]
 
 { #category : 'angular dynamics' }
 CFPhysics >> angularVelocity [ ^ self body angularVelocity ]
 
 
 { #category : 'angular dynamics' }
-CFPhysics >> angularVelocity: aNumber [ self body angularVelocity: aNumber ]
+CFPhysics >> angularVelocity: aNumber [
+	self body angularVelocity: aNumber.
+	^ self
+]
 
 { #category : 'angular dynamics' }
 CFPhysics >> angularDamping [ ^ self body angularDamping ]
 
 { #category : 'angular dynamics' }
-CFPhysics >> angularDamping: aNumber [ self body angularDamping: aNumber ]
+CFPhysics >> angularDamping: aNumber [
+	self body angularDamping: aNumber.
+	^ self
+]
 
 { #category : 'angular dynamics' }
-CFPhysics >> applyTorque: aNumber [ self body applyTorque: aNumber ]
+CFPhysics >> applyTorque: aNumber [
+	self body applyTorque: aNumber.
+	^ self
+]
 
 { #category : 'mass' }
 CFPhysics >> inverseInertia [ ^ self body inverseInertia ]
@@ -440,12 +472,14 @@ CFPhysics >> isBullet [
 
 { #category : 'sensors' }
 CFPhysics >> beSensor [
-	self body beSensor
+	self body beSensor.
+	^ self
 ]
 
 { #category : 'sensors' }
 CFPhysics >> beSolid [
-	self body beSolid
+	self body beSolid.
+	^ self
 ]
 
 { #category : 'sensors' }
@@ -461,7 +495,8 @@ CFPhysics >> collisionCategoryBits [
 
 { #category : 'collision filtering' }
 CFPhysics >> collisionCategoryBits: anInteger [
-	self body collisionCategoryBits: anInteger
+	self body collisionCategoryBits: anInteger.
+	^ self
 ]
 
 { #category : 'collision filtering' }
@@ -471,7 +506,8 @@ CFPhysics >> collisionMaskBits [
 
 { #category : 'collision filtering' }
 CFPhysics >> collisionMaskBits: anInteger [
-	self body collisionMaskBits: anInteger
+	self body collisionMaskBits: anInteger.
+	^ self
 ]
 
 { #category : 'collision filtering' }
@@ -481,7 +517,8 @@ CFPhysics >> collisionGroupIndex [
 
 { #category : 'collision filtering' }
 CFPhysics >> collisionGroupIndex: anInteger [
-	self body collisionGroupIndex: anInteger
+	self body collisionGroupIndex: anInteger.
+	^ self
 ]
 
 
@@ -493,7 +530,8 @@ CFPhysics >> enablePullInteraction [
 
 { #category : 'private - interaction' }
 CFPhysics >> disablePullInteraction [
-	pointerJointHandler disable
+	pointerJointHandler disable.
+	^ pointerJointHandler
 ]
 
 { #category : 'private - interaction' }

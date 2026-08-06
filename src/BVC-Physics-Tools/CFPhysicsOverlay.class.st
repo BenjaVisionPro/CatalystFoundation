@@ -324,7 +324,7 @@ CFPhysicsOverlay >> refresh [
 	"A structural refresh is the explicit boundary at which Bloc membership
 	changes are reconciled with the Physics world. Frame diagnostics deliberately
 	do not perform this work."
-	world refreshMemberState.
+	world refreshExistingMembers.
 	controls bodiesEnabled
 		ifTrue: [ bodyOverlay update ]
 		ifFalse: [ bodyOverlay clear ].
@@ -345,7 +345,7 @@ CFPhysicsOverlay >> refresh [
 CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world refreshMemberState.
+			world refreshExistingMembers.
 			bodyOverlay update.
 			self refreshSelectionVisual ]
 		ifFalse: [ bodyOverlay clear ].
@@ -356,7 +356,7 @@ CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 CFPhysicsOverlay >> springsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world refreshMemberState.
+			world refreshExistingMembers.
 			springOverlay update ]
 		ifFalse: [ springOverlay clear ].
 	^ self
@@ -367,7 +367,7 @@ CFPhysicsOverlay >> springsEnabled: aBoolean [
 CFPhysicsOverlay >> jointsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
-			world refreshMemberState.
+			world refreshExistingMembers.
 			jointOverlay update ]
 		ifFalse: [
 			selectedJoint ifNotNil: [ self clearSelection ].

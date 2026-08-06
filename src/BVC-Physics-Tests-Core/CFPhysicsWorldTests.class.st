@@ -226,7 +226,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedBodyStatesBeforeSolve [
 	world owner physics makeChildrenDynamic.
 	body := element physics body.
 	body position: 0 @ 0.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	body
 		position: 100 @ 0;
 		velocity: 50 @ 0.
@@ -262,7 +262,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedJointConfigurationBeforeSolve [
 		length: 25;
 		impulse: 3.0.
 	world addDistanceJoint: joint.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	capturedJoint := state joints first.
 	joint
 		length: 100;
@@ -292,7 +292,7 @@ CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentPreparedConstrai
 	world := self newWorldAfterOneStep.
 	committedContact := world activeContacts first.
 	committedManifold := committedContact manifold.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
 	calculationConstraint := (solution pipelineResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
@@ -309,7 +309,7 @@ CFPhysicsWorldTests >> testSolvingCapturedStateBuildsIndependentConstraintPoint 
 	world := self newWorldAfterOneStep.
 	committedContact := world activeContacts first.
 	committedManifoldPoint := committedContact manifold contactPoints first.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
 	calculationContact := solution pipelineResult activeContacts first.
 	calculationConstraint := (solution pipelineResult contactConstraints detect: [ :each | each isKindOf: CFPhysicsPreparedConstraint ]).
@@ -325,7 +325,7 @@ CFPhysicsWorldTests >> testWorldSolutionCarriesCommitIdentity [
 	<gtExample>
 	| world state solution |
 	world := self newWorldAfterOneStep.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
 	self assert: solution world == world.
 	self assert: solution lifetimeGeneration equals: state lifetimeGeneration.
@@ -338,10 +338,10 @@ CFPhysicsWorldTests >> testNewerCaptureRejectsOlderSolution [
 	<gtExample>
 	| world firstState firstSolution stepBefore |
 	world := self newWorldAfterOneStep.
-	firstState := world captureStateAfterSynchronisation.
+	firstState := world capturePreparedState.
 	firstSolution := world stepPipeline solve: firstState.
 	stepBefore := world stepNumber.
-	world captureStateAfterSynchronisation.
+	world capturePreparedState.
 	self assert: (world commit: firstSolution) isNil.
 	self assert: world stepNumber equals: stepBefore.
 	^ world
@@ -351,7 +351,7 @@ CFPhysicsWorldTests >> testReleasedWorldRejectsCapturedSolution [
 	<gtExample>
 	| world state solution |
 	world := self newWorldAfterOneStep.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
 	world release.
 	self assert: (world commit: solution) isNil.
@@ -394,8 +394,8 @@ CFPhysicsWorldTests >> testAbandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 	<gtExample>
 	| world firstState secondState |
 	world := self newWorldAfterOneStep.
-	firstState := world captureStateAfterSynchronisation.
-	secondState := world captureStateAfterSynchronisation.
+	firstState := world capturePreparedState.
+	secondState := world capturePreparedState.
 	self assert: secondState solveTicket > firstState solveTicket.
 	world abandonSolveTicket: firstState solveTicket.
 	self assert: world hasSolveInFlight.

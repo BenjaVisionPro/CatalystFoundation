@@ -537,7 +537,7 @@ CFPhysicsJointTests >> testPrismaticJointCouplesOffsetPerpendicularAndAngularCon
 	joint := (element physics localAnchorAt: 0 @ 0)
 		prismaticJointTo: (world anchorAt: 100 @ 0)
 		along: 1 @ 0.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	prepared := (CFPhysicsPrismaticJointConstraintBuilder new
 		constraintsFrom: state joints
 		bodyStates: state bodyStates
@@ -816,7 +816,7 @@ CFPhysicsJointTests >> testMotorJointLinearImpulseIsCappedBySubstepForce [
 	joint maximumForce: 100.0; maximumTorque: 0.0.
 	world addMotorJoint: joint.
 	second position: 80 @ 0.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
 	prepared := solution pipelineResult jointConstraints
 		detect: [ :each | each class == CFPhysicsPreparedMotorJoint ].
@@ -843,7 +843,7 @@ CFPhysicsJointTests >> testMotorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	world addMotorJoint: joint.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	prepared := (CFPhysicsMotorJointConstraintBuilder new
 		constraintsFrom: state joints
 		bodyStates: state bodyStates
@@ -943,7 +943,7 @@ CFPhysicsJointTests >> testPrismaticJointAxisRotatesWithBodyA [
 	joint := (firstElement physics localAnchorAt: 10 @ 10)
 		prismaticJointTo: (secondElement physics localAnchorAt: 10 @ 10)
 		along: 0 @ 1.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	prepared := (CFPhysicsPrismaticJointConstraintBuilder new constraintsFrom: state joints bodyStates: state bodyStates step: state step) first.
 	self assert: (joint localAxisA closeTo: 1 @ 0).
 	self assert: (prepared axis closeTo: 0 @ 1).

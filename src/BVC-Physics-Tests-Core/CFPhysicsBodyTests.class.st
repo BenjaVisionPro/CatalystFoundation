@@ -156,21 +156,19 @@ CFPhysicsBodyTests >> testBroadphaseRequiresADynamicBodyInKinematicPairs [
 	^ pairs
 ]
 { #category : 'tests - body types' }
-CFPhysicsBodyTests >> testPhysicsFacadeExposesTheExistingBodyType [
+CFPhysicsBodyTests >> testPhysicsFacadeExposesBodyTypeThroughIntentQueries [
 	<gtExample>
 	| owner element world physics |
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 20 @ 20; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world owner physics makeChildrenDynamic.
-	physics := element physics.
-	self assert: physics bodyType == physics body bodyType.
-	self assert: physics bodyType class equals: CFPhysicsDynamicBodyType.
+	physics := element physics beDynamic.
+	self assert: physics isDynamic.
 	physics beKinematic.
-	self assert: physics bodyType class equals: CFPhysicsKinematicBodyType.
+	self assert: physics isKinematic.
 	physics beStatic.
-	self assert: physics bodyType class equals: CFPhysicsStaticBodyType.
+	self assert: physics isStatic.
 	^ physics
 ]
 
@@ -219,5 +217,38 @@ CFPhysicsBodyTests >> testPhysicsFacadeAppliesImpulseAtAWorldPoint [
 	physics applyImpulse: 10 @ 0 atWorldPoint: point.
 	self assert: physics velocity x > 0.
 	self deny: physics angularVelocity equals: 0.0.
+	^ physics
+]
+
+{ #category : 'tests - public api' }
+CFPhysicsBodyTests >> testPhysicsFacadeConfigurationIsFluent [
+	<gtExample>
+	| owner element physics |
+	owner := BlElement new size: 200 @ 200; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	owner physics beWorld.
+	physics := element physics beDynamic.
+	self assert: (physics
+		density: 2;
+		friction: 0.3;
+		restitution: 0.5;
+		rollingResistance: 0.1;
+		tangentSpeed: 1;
+		position: 40 @ 30;
+		rotation: 0.2;
+		velocity: 2 @ 1;
+		linearDamping: 0.1;
+		angularDamping: 0.2;
+		gravityScale: 0.5;
+		sleepThreshold: 0.05;
+		allowSleeping;
+		wake;
+		beSensor;
+		beSolid;
+		collisionCategoryBits: 2;
+		collisionMaskBits: 3;
+		collisionGroupIndex: 0;
+		clearForces) == physics.
 	^ physics
 ]

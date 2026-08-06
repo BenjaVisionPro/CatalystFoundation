@@ -652,7 +652,7 @@ CFPhysicsContactTests >> testWorldScaleConvertsMutableConfigurationWhenStateIsCa
 		restitutionThreshold: 2.0;
 		hitEventThreshold: 1.5.
 	world owner physics makeChildrenDynamic.
-	state := world captureStateAfterSynchronisation.
+	state := world capturePreparedState.
 	self assert: (world gravity closeTo: 0 @ 5.0).
 	self assert: (world restitutionThreshold closeTo: 2.0).
 	self assert: (world hitEventThreshold closeTo: 1.5).
