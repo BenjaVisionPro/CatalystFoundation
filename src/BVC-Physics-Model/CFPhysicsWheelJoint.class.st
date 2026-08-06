@@ -31,7 +31,15 @@ CFPhysicsWheelJoint class >> betweenEndpoints: endpoints along: aWorldAxis [
 	localAxis := bodyA
 		ifNil: [ aWorldAxis ]
 		ifNotNil: [ bodyA bodyLocalVectorForWorldVector: aWorldAxis ].
-	^ self new endpointPair: endpoints; localAxisA: localAxis; yourself
+	^ self new
+		endpointPair: endpoints;
+		initialLocalAxisA: localAxis;
+		yourself
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsWheelJoint >> initialLocalAxisA: anAxis [
+	localAxisA := anAxis
 ]
 
 { #category : 'initialization' }

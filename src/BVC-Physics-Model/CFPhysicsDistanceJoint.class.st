@@ -23,7 +23,10 @@ CFPhysicsDistanceJoint class >> betweenAnchor: anchorA andAnchor: anchorB [
 
 { #category : 'instance creation' }
 CFPhysicsDistanceJoint class >> betweenEndpoints: endpoints [
-	^ self new endpointPair: endpoints; length: (self distanceBetweenEndpoints: endpoints); yourself
+	^ self new
+		endpointPair: endpoints;
+		initialLength: (self distanceBetweenEndpoints: endpoints);
+		yourself
 ]
 
 { #category : 'private' }
@@ -64,6 +67,11 @@ CFPhysicsDistanceJoint >> anchorB [ ^ endpointPair anchorB ]
 CFPhysicsDistanceJoint >> bodyA [ ^ endpointPair bodyA ]
 { #category : 'accessing' }
 CFPhysicsDistanceJoint >> bodyB [ ^ endpointPair bodyB ]
+
+{ #category : 'private - initialization' }
+CFPhysicsDistanceJoint >> initialLength: aNumber [
+	length := aNumber asFloat max: 0.0
+]
 
 { #category : 'configuration' }
 CFPhysicsDistanceJoint >> length [ ^ length ]

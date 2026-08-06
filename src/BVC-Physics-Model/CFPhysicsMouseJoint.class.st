@@ -15,7 +15,7 @@ Class {
 CFPhysicsMouseJoint class >> body: aBody target: aPoint [
 	^ self new
 		bodyB: aBody;
-		target: aPoint;
+		initialTarget: aPoint;
 		localAnchorB: (aBody bodyLocalPointForWorldPoint: aPoint);
 		yourself
 ]
@@ -28,6 +28,11 @@ CFPhysicsMouseJoint >> initialize [
 	maximumForce := 1.0.
 	linearImpulse := 0 @ 0.
 	angularImpulse := 0.0
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsMouseJoint >> initialTarget: aPoint [
+	target := aPoint
 ]
 
 { #category : 'accessing' }

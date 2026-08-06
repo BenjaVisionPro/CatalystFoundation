@@ -16,8 +16,8 @@ CFPhysicsMotorJoint class >> between: bodyA and: bodyB [
 	^ self new
 		bodyA: bodyA;
 		bodyB: bodyB;
-		linearOffset: bodyB worldBodyOrigin - bodyA worldBodyOrigin;
-		angularOffset: bodyB rotation - bodyA rotation;
+		initialLinearOffset: bodyB worldBodyOrigin - bodyA worldBodyOrigin
+			angularOffset: bodyB rotation - bodyA rotation;
 		yourself
 ]
 
@@ -31,6 +31,12 @@ CFPhysicsMotorJoint >> initialize [
 	correctionFactor := 0.3.
 	linearImpulse := 0 @ 0.
 	angularImpulse := 0.0
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsMotorJoint >> initialLinearOffset: aPoint angularOffset: aNumber [
+	linearOffset := aPoint.
+	angularOffset := aNumber asFloat
 ]
 
 { #category : 'accessing' }

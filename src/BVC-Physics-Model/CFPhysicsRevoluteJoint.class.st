@@ -29,8 +29,13 @@ CFPhysicsRevoluteJoint class >> betweenAnchor: firstAnchor andAnchor: secondAnch
 CFPhysicsRevoluteJoint class >> betweenEndpoints: anEndpointPair [
 	^ self new
 		endpointPair: anEndpointPair;
-		referenceAngle: ((self angleFor: anEndpointPair bodyB) - (self angleFor: anEndpointPair bodyA));
+		initialReferenceAngle: ((self angleFor: anEndpointPair bodyB) - (self angleFor: anEndpointPair bodyA));
 		yourself
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsRevoluteJoint >> initialReferenceAngle: aNumber [
+	referenceAngle := aNumber asFloat
 ]
 
 { #category : 'private' }

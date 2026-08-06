@@ -33,13 +33,19 @@ CFPhysicsPrismaticJoint class >> betweenEndpoints: endpoints along: aWorldAxis [
 		ifNotNil: [ bodyA bodyLocalVectorForWorldVector: aWorldAxis ].
 	^ self new
 		endpointPair: endpoints;
-		localAxisA: localAxis;
-		referenceAngle: ((self angleFor: endpoints bodyB) - (self angleFor: bodyA));
+		initialLocalAxisA: localAxis
+			referenceAngle: ((self angleFor: endpoints bodyB) - (self angleFor: bodyA));
 		yourself
 ]
 
 { #category : 'private' }
 CFPhysicsPrismaticJoint class >> angleFor: aBody [ ^ aBody ifNil: [ 0.0 ] ifNotNil: [ aBody rotation ] ]
+
+{ #category : 'private - initialization' }
+CFPhysicsPrismaticJoint >> initialLocalAxisA: anAxis referenceAngle: anAngle [
+	localAxisA := anAxis.
+	referenceAngle := anAngle asFloat
+]
 
 { #category : 'initialization' }
 CFPhysicsPrismaticJoint >> initialize [
