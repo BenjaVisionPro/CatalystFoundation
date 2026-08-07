@@ -447,7 +447,7 @@ CFPhysicsInteractionTests >> testAttractionCanUseInverseSquareResponse [
 	| first second attraction response |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
-	response := CFPhysicsInverseSquareResponse
+	response := CFPhysicsInverseSquareResponse new
 		force: 10;
 		maximumDistance: 5.0;
 		yourself.
@@ -466,7 +466,7 @@ CFPhysicsInteractionTests >> testRepulsionCanUseInverseSquareResponse [
 	| first second repulsion response |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
-	response := CFPhysicsInverseSquareResponse
+	response := CFPhysicsInverseSquareResponse new
 		force: 10;
 		maximumDistance: 5.0;
 		yourself.

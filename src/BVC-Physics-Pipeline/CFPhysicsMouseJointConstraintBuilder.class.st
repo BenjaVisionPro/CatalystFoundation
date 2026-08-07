@@ -55,7 +55,7 @@ CFPhysicsMouseJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySt
 		angularMass: (inverseInertia = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseInertia ]);
 		angularMassCoefficient: angularA2 * angularA3;
 		angularImpulseCoefficient: angularA3;
-		maximumImpulse: step substepTime * joint maximumForce;
+		maximumImpulse: step substepTime * (joint forceUnitsForNewtons: joint maximumForce);
 		linearImpulse: joint linearImpulse * step warmStartRatio;
 		angularImpulse: joint angularImpulse * step warmStartRatio;
 		yourself

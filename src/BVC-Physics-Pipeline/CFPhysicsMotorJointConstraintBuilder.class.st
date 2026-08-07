@@ -47,8 +47,8 @@ CFPhysicsMotorJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySt
 		effectiveMassXY: massXY;
 		effectiveMassYY: massYY;
 		angularMass: (inverseAngularMass = 0.0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverseAngularMass ]);
-		maximumLinearImpulse: step substepTime * joint maximumForce;
-		maximumAngularImpulse: step substepTime * joint maximumTorque;
+		maximumLinearImpulse: step substepTime * (joint forceUnitsForNewtons: joint maximumForce);
+		maximumAngularImpulse: step substepTime * (joint torqueUnitsForNewtonMetres: joint maximumTorque);
 		linearImpulse: joint linearImpulse * step warmStartRatio;
 		angularImpulse: joint angularImpulse * step warmStartRatio;
 		yourself

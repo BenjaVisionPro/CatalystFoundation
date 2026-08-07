@@ -49,7 +49,7 @@ CFPhysicsWheelJointConstraintBuilder >> constraintFrom: joint bodyStates: bodySt
 		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
 		motorEnabled: joint motorEnabled; motorSpeed: joint motorSpeed;
 		motorMass: (self reciprocalOrZero: inverseMotorMass);
-		maximumMotorImpulse: joint maximumMotorTorque * step substepTime;
+		maximumMotorImpulse: (joint torqueUnitsForNewtonMetres: joint maximumMotorTorque) * step substepTime;
 		motorImpulse: joint motorImpulse * step warmStartRatio;
 		yourself
 ]

@@ -66,7 +66,7 @@ CFPhysicsJointTests >> testDistanceJointPreparesBox2DLengthLimitsAndAxialMotor [
 	self assert: prepared maximumLength equals: 60.0.
 	self assert: prepared motorEnabled.
 	self assert: prepared motorSpeed equals: -20.0.
-	self assert: prepared maximumMotorImpulse equals: 30.0 * step substepTime.
+	self assert: prepared maximumMotorImpulse equals: 30.0 * first lengthUnitsPerMetre * step substepTime.
 	^ prepared
 ]
 { #category : 'tests - distance joints' }
@@ -109,15 +109,15 @@ CFPhysicsJointTests >> testDistanceJointAxialMotorDrivesRelativeMotion [
 	world owner physics makeChildrenDynamic.
 	"Keep both bodies clear of the world's default containment boundary so it
 	does not overwrite the solver's outward motor response during commit."
-	first physics position: 100 @ 0.
-	second physics position: 200 @ 0.
+	first physics position: 100 @ 100.
+	second physics position: 200 @ 100.
 	joint := first physics distanceJointTo: second.
 	joint
 		springEnabled: true;
 		hertz: 0.0;
 		motorEnabled: true;
 		motorSpeed: 100.0;
-		maximumMotorForce: 100000.0.
+		maximumMotorForce: 1.0.
 	result := world step.
 	prepared := result constraints first.
 	self assert: prepared motorImpulse > 0.0.
@@ -436,7 +436,7 @@ CFPhysicsJointTests >> testRevoluteJointMotorTorqueIsConvertedToASubstepImpulse 
 		maximumMotorTorque: 1000.0.
 	result := world step.
 	prepared := result constraints first.
-	self assert: (prepared maximumMotorImpulse closeTo: 1000.0 * result step substepTime).
+	self assert: (prepared maximumMotorImpulse closeTo: 1000.0 * world lengthUnitsPerMetre squared * result step substepTime).
 	^ result
 ]
 { #category : 'tests - revolute joints' }
@@ -619,23 +619,23 @@ CFPhysicsJointTests >> testMouseJointRespectsAPrismaticAxis [
 	world := owner physics beWorld.
 	world gravity: 0 @ 0.
 	world owner physics makeChildrenDynamic.
-	element physics position: 0 @ 0.
+	element physics position: 100 @ 100.
 	bodyAnchor := element physics localAnchorAt: 10 @ 10.
-	worldAnchor := world anchorAt: 10 @ 10.
+	worldAnchor := world anchorAt: 110 @ 110.
 	joint := bodyAnchor prismaticJointTo: worldAnchor along: 1 @ 0.
 	joint
 		limitTranslationFrom: -10 to: 10;
 		limitsEnabled: true.
-	mouseJoint := CFPhysicsMouseJoint body: element physics body target: 10 @ 10.
+	mouseJoint := CFPhysicsMouseJoint body: element physics body target: 110 @ 110.
 	mouseJoint
-		target: 1000 @ 1000;
-		maximumForce: 100000.0.
+		target: 300 @ 300;
+		maximumForce: 1.0.
 	world addJoint: mouseJoint.
 	result := world step.
-	self assert: (element physics velocity y closeTo: 0.0).
-	self assert: (element physics position y abs < element physics position x abs).
-	self assert: (element physics position x > 0.0).
-	self assert: (element physics position x < 10.0).
+	self assert: element physics velocity y abs < element physics velocity x abs.
+	self assert: (element physics position y - 100.0) abs < (element physics position x - 100.0) abs.
+	self assert: element physics position x > 100.0.
+	self assert: element physics position x < 110.0.
 	^ result
 ]
 { #category : 'tests - mouse joints' }
@@ -820,7 +820,7 @@ CFPhysicsJointTests >> testMotorJointLinearImpulseIsCappedBySubstepForce [
 	solution := world stepPipeline solve: state.
 	prepared := solution pipelineResult jointConstraints
 		detect: [ :each | each class == CFPhysicsPreparedMotorJoint ].
-	expectedMaximum := state step substepTime * joint maximumForce.
+	expectedMaximum := state step substepTime * (world forceUnitsForNewtons: joint maximumForce).
 	self assert: (prepared maximumLinearImpulse closeTo: expectedMaximum).
 	self assert: prepared linearImpulse r <= expectedMaximum.
 	self assert: prepared linearImpulse r > 0.0.

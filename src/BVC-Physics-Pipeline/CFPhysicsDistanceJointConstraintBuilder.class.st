@@ -42,7 +42,7 @@ CFPhysicsDistanceJointConstraintBuilder >> constraintFrom: joint bodyStates: bod
 		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
 		motorEnabled: joint motorEnabled;
 		motorSpeed: joint motorSpeed;
-		maximumMotorImpulse: joint maximumMotorForce * step substepTime;
+		maximumMotorImpulse: (joint forceUnitsForNewtons: joint maximumMotorForce) * step substepTime;
 		motorImpulse: joint motorImpulse * step warmStartRatio;
 		yourself
 ]

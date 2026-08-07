@@ -58,6 +58,30 @@ CFPhysicsJoint >> world [
 	^ world
 ]
 
+
+
+{ #category : 'units' }
+CFPhysicsJoint >> lengthUnitsPerMetre [
+	| targetWorld body |
+	targetWorld := self solverCommitTarget world.
+	targetWorld ifNotNil: [ ^ targetWorld lengthUnitsPerMetre ].
+	body := self bodyA ifNil: [ self bodyB ].
+	body ifNotNil: [ ^ body lengthUnitsPerMetre ].
+	^ CFPhysicsBody defaultLengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsJoint >> forceUnitsForNewtons: aNumber [
+	"Convert a force limit in newtons into solver force units."
+	^ aNumber * self lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsJoint >> torqueUnitsForNewtonMetres: aNumber [
+	"Convert a torque limit in newton-metres into solver torque units."
+	^ aNumber * self lengthUnitsPerMetre squared
+]
+
 { #category : 'lifecycle' }
 CFPhysicsJoint >> addedToWorld: aWorld [
 	world ifNotNil: [ self error: 'Joint already belongs to a Physics world' ].

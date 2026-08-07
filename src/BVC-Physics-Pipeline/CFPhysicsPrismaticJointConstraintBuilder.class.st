@@ -44,7 +44,7 @@ CFPhysicsPrismaticJointConstraintBuilder >> constraintFrom: joint bodyStates: bo
 		lowerLimitImpulse: joint lowerLimitImpulse * step warmStartRatio;
 		upperLimitImpulse: joint upperLimitImpulse * step warmStartRatio;
 		motorEnabled: joint motorEnabled; motorSpeed: joint motorSpeed;
-		maximumMotorImpulse: joint maximumMotorForce * step substepTime;
+		maximumMotorImpulse: (joint forceUnitsForNewtons: joint maximumMotorForce) * step substepTime;
 		motorImpulse: joint motorImpulse * step warmStartRatio;
 		baseAngle: angleB - angleA - joint referenceAngle;
 		angularMass: (self reciprocalOrZero: inverseAngularMass);
