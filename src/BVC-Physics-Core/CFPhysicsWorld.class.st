@@ -1577,7 +1577,7 @@ CFPhysicsWorld >> refreshCanvasContainmentBoundary [
 	self containment isEnabled ifFalse: [
 		self removeContainmentBoundary.
 		^ self ].
-	visibleBounds := (owner localBoundsToChildren: owner bounds inLocal copy) asRectangle.
+	visibleBounds := (owner localBoundsToChildren: (BlBounds origin: 0 @ 0 extent: owner extent)) asRectangle.
 	visibleBounds extent x <= 0 ifTrue: [ ^ self ].
 	visibleBounds extent y <= 0 ifTrue: [ ^ self ].
 	expandedBounds := containmentBounds
