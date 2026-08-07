@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce',
 		'length', 'hertz', 'dampingRatio',
-		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'linearDamping', 'originalLinearDampingByElement'
+		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'linearDamping', 'originalLinearDampingByBody'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -30,7 +30,7 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
 	centringStrength := CFPhysicsSharedScalar value: 14.0.
 	linearDamping := CFPhysicsSharedScalar value: 2.5.
-	originalLinearDampingByElement := IdentityDictionary new
+	originalLinearDampingByBody := IdentityDictionary new
 ]
 
 { #category : 'configuration' }
@@ -219,24 +219,25 @@ CFPhysicsForceDirectedBehaviour >> ensurePositioningForceFor: currentBodies [
 
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> reconcileBodyDampingFor: currentElements [
-	| desiredElements |
-	desiredElements := currentElements asIdentitySet.
-	originalLinearDampingByElement associations copy do: [ :association |
-		(desiredElements includes: association key) ifFalse: [
-			association key physics linearDamping: association value.
-			originalLinearDampingByElement removeKey: association key ] ].
-	currentElements do: [ :element |
-		originalLinearDampingByElement
-			at: element
-			ifAbsentPut: [ element physics linearDamping ].
-		element physics linearDamping: linearDamping value ]
+	| currentBodies desiredBodies |
+	currentBodies := currentElements collect: [ :element | element physics body ].
+	desiredBodies := currentBodies asIdentitySet.
+	originalLinearDampingByBody associations copy do: [ :association |
+		(desiredBodies includes: association key) ifFalse: [
+			association key linearDamping: association value.
+			originalLinearDampingByBody removeKey: association key ] ].
+	currentBodies do: [ :body |
+		originalLinearDampingByBody
+			at: body
+			ifAbsentPut: [ body linearDamping ].
+		body linearDamping: linearDamping value ]
 ]
 
 { #category : 'private - running' }
 CFPhysicsForceDirectedBehaviour >> restoreBodyDamping [
-	originalLinearDampingByElement associations copy do: [ :association |
-		association key physics linearDamping: association value ].
-	originalLinearDampingByElement removeAll
+	originalLinearDampingByBody associations copy do: [ :association |
+		association key linearDamping: association value ].
+	originalLinearDampingByBody removeAll
 ]
 
 { #category : 'private - running' }

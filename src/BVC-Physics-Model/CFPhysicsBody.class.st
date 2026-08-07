@@ -444,15 +444,16 @@ CFPhysicsBody >> applyForce: aPoint [
 
 { #category : 'linear dynamics' }
 CFPhysicsBody >> applyForce: aPoint wake: aBoolean [
-	(aBoolean not and: [ self isAwake not ]) ifTrue: [ ^ self ].
+	aBoolean
+		ifTrue: [ self wake ]
+		ifFalse: [ self isAwake ifFalse: [ ^ self ] ].
 	bodyType applyForce: aPoint.
 	^ self
 ]
 
 { #category : 'linear dynamics' }
 CFPhysicsBody >> accumulateForce: aPoint [
-	force := force + aPoint.
-	aPoint = (0 @ 0) ifFalse: [ self wake ]
+	force := force + aPoint
 ]
 
 { #category : 'velocity' }

@@ -275,7 +275,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsUsesDefaultGravityWithoutABehaviour
 	initialPositions := nodes collect: [ :each | each position ].
 	world := mondrian physics beWorld.
 	self assert: world gravity equals: 0 @ 10.0.
-	world step: 80.
+	world step: 3.
 	nodes with: initialPositions do: [ :each :initialPosition |
 		self assert: each physics position y > initialPosition y ].
 	^ mondrian

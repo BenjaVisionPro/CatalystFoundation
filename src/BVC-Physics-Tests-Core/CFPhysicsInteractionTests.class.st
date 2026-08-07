@@ -136,7 +136,7 @@ CFPhysicsInteractionTests >> testAttractionEndpointsAreResolvedThroughAnchors [
 	^ attraction
 ]
 { #category : 'tests - attraction interaction' }
-CFPhysicsInteractionTests >> testAttractionAppliesEqualAndOppositeImpulse [
+CFPhysicsInteractionTests >> testAttractionAppliesEqualAndOppositeForce [
 	<gtExample>
 	| first second attraction |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -144,11 +144,11 @@ CFPhysicsInteractionTests >> testAttractionAppliesEqualAndOppositeImpulse [
 	attraction := CFPhysicsAttractionForce between: first and: second.
 	attraction force: 1000.
 	attraction applyForStep: 0.1.
-	self assert: first velocity x > 0.
-	self assert: second velocity x < 0.
-	self assert: first velocity y equals: 0.
-	self assert: second velocity y equals: 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x > 0.
+	self assert: second force x < 0.
+	self assert: first force y equals: 0.
+	self assert: second force y equals: 0.
+	self assert: first force equals: second force negated.
 	^ attraction
 ]
 { #category : 'tests - attraction interaction' }
@@ -161,8 +161,8 @@ CFPhysicsInteractionTests >> testAttractionCanPullTowardAStaticBody [
 	attraction := CFPhysicsAttractionForce between: dynamicBody and: staticBody.
 	attraction force: 1000.
 	attraction applyForStep: 0.1.
-	self assert: dynamicBody velocity x > 0.
-	self assert: staticBody velocity equals: 0 @ 0.
+	self assert: dynamicBody force x > 0.
+	self assert: staticBody force equals: 0 @ 0.
 	^ attraction
 ]
 { #category : 'tests - attraction interaction' }
@@ -268,7 +268,7 @@ CFPhysicsInteractionTests >> testRepulsionEndpointsAreResolvedThroughAnchors [
 	^ repulsion
 ]
 { #category : 'tests - repulsion interaction' }
-CFPhysicsInteractionTests >> testRepulsionAppliesEqualAndOppositeImpulse [
+CFPhysicsInteractionTests >> testRepulsionAppliesEqualAndOppositeForce [
 	<gtExample>
 	| first second repulsion |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
@@ -276,11 +276,11 @@ CFPhysicsInteractionTests >> testRepulsionAppliesEqualAndOppositeImpulse [
 	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	repulsion force: 1000.
 	repulsion applyForStep: 0.1.
-	self assert: first velocity x < 0.
-	self assert: second velocity x > 0.
-	self assert: first velocity y equals: 0.
-	self assert: second velocity y equals: 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x < 0.
+	self assert: second force x > 0.
+	self assert: first force y equals: 0.
+	self assert: second force y equals: 0.
+	self assert: first force equals: second force negated.
 	^ repulsion
 ]
 { #category : 'tests - repulsion interaction' }
@@ -293,8 +293,8 @@ CFPhysicsInteractionTests >> testRepulsionCanPushAwayFromAStaticBody [
 	repulsion := CFPhysicsRepulsionForce between: dynamicBody and: staticBody.
 	repulsion force: 1000.
 	repulsion applyForStep: 0.1.
-	self assert: dynamicBody velocity x < 0.
-	self assert: staticBody velocity equals: 0 @ 0.
+	self assert: dynamicBody force x < 0.
+	self assert: staticBody force equals: 0 @ 0.
 	^ repulsion
 ]
 { #category : 'tests - repulsion interaction' }
@@ -408,9 +408,9 @@ CFPhysicsInteractionTests >> testAttractionCanUseLinearFalloffResponse [
 	attraction distanceResponse: response.
 	attraction applyForStep: 0.1.
 	self assert: attraction distanceResponse == response.
-	self assert: first velocity x > 0.
-	self assert: second velocity x < 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x > 0.
+	self assert: second force x < 0.
+	self assert: first force equals: second force negated.
 	^ attraction
 ]
 { #category : 'tests - repulsion interaction' }
@@ -424,9 +424,9 @@ CFPhysicsInteractionTests >> testRepulsionCanUseLinearFalloffResponse [
 	repulsion distanceResponse: response.
 	repulsion applyForStep: 0.1.
 	self assert: repulsion distanceResponse == response.
-	self assert: first velocity x < 0.
-	self assert: second velocity x > 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x < 0.
+	self assert: second force x > 0.
+	self assert: first force equals: second force negated.
 	^ repulsion
 ]
 { #category : 'tests - attraction interaction' }
@@ -456,9 +456,9 @@ CFPhysicsInteractionTests >> testAttractionCanUseSoftenedInverseSquareResponse [
 	attraction distanceResponse: response.
 	attraction applyForStep: 0.1.
 	self assert: attraction distanceResponse == response.
-	self assert: first velocity x > 0.
-	self assert: second velocity x < 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x > 0.
+	self assert: second force x < 0.
+	self assert: first force equals: second force negated.
 	^ attraction
 ]
 { #category : 'tests - repulsion interaction' }
@@ -474,9 +474,9 @@ CFPhysicsInteractionTests >> testRepulsionCanUseSoftenedInverseSquareResponse [
 	repulsion distanceResponse: response.
 	repulsion applyForStep: 0.1.
 	self assert: repulsion distanceResponse == response.
-	self assert: first velocity x < 0.
-	self assert: second velocity x > 0.
-	self assert: first velocity equals: second velocity negated.
+	self assert: first force x < 0.
+	self assert: second force x > 0.
+	self assert: first force equals: second force negated.
 	^ repulsion
 ]
 { #category : 'tests - relationship endpoints' }

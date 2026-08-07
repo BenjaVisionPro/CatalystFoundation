@@ -444,8 +444,8 @@ CFPhysicsCollisionTests >> testAttractionAndRepulsionCanUseWorldAnchors [
 		repel: (world anchorAt: 110 @ 50).
 	attraction applyForStep: 0.1.
 	repulsion applyForStep: 0.1.
-	self assert: attracted velocity x > 0.
-	self assert: repelled velocity x < 0.
+	self assert: attracted force x > 0.
+	self assert: repelled force x < 0.
 	^ { attraction. repulsion }
 ]
 { #category : 'tests - anchors' }
