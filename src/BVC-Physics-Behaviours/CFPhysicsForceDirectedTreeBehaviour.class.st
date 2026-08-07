@@ -1,10 +1,10 @@
-
 "I specialise force-directed graph orchestration for directed trees.
 
-I use the same graph adapter and Physics implementation as my superclass, with defaults tuned for compact parent-child structure."
+I use edge distance joints and many-body repulsion from my superclass, while attracting each body toward the graph centre as the D3 force-directed tree reference does with its x and y forces."
 Class {
 	#name : 'CFPhysicsForceDirectedTreeBehaviour',
 	#superclass : 'CFPhysicsForceDirectedBehaviour',
+	#instVars : [ 'attractionStrength' ],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
 }
@@ -12,13 +12,33 @@ Class {
 { #category : 'initialization' }
 CFPhysicsForceDirectedTreeBehaviour >> initialize [
 	super initialize.
+	attractionStrength := CFPhysicsSharedScalar value: 1.0.
 	self
-		length: 42.0;
+		length: 0.0;
 		hertz: 6.0;
 		dampingRatio: 1.0;
-		repulsion: 125000.0;
-		repulsionSofteningDistance: 42.0;
+		repulsion: 90000.0;
+		repulsionSofteningDistance: 36.0;
 		maximumRepulsionDistance: 220.0;
-		centringStrength: 5.0;
 		velocityDamping: 10.0
+]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedTreeBehaviour >> attractionStrength [
+	^ attractionStrength value
+]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedTreeBehaviour >> attractionStrength: aNumber [
+	attractionStrength value: (aNumber asFloat max: 0.0)
+]
+
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedTreeBehaviour >> ensurePositioningForceFor: currentBodies [
+	(positioningForce isNil or: [ positioningForce isActive not ]) ifTrue: [
+		positioningForce := self world addForce: CFPhysicsPointAttractionForce new ].
+	positioningForce
+		bodies: currentBodies;
+		point: self world owner extent / 2.0;
+		strength: attractionStrength value
 ]

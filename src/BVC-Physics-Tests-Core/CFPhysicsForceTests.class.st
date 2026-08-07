@@ -62,3 +62,36 @@ CFPhysicsForceTests >> testBodyForceDropsARetiredBodyWithoutDroppingOtherBodies 
 	self deny: (wind includesBody: first).
 	self assert: (wind includesBody: second)
 ]
+
+{ #category : 'tests - many body' }
+CFPhysicsForceTests >> testManyBodyRepulsionAppliesEqualAndOppositeForces [
+	| first second repulsion |
+	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	second := self newBodyWithSequence: 2 position: 20 @ 0 extent: 10 @ 10.
+	first beDynamic.
+	second beDynamic.
+	repulsion := CFPhysicsManyBodyRepulsionForce new
+		bodies: { first. second };
+		force: 40;
+		yourself.
+	repulsion applyForStep: 0.016.
+	self assert: first force equals: -40 @ 0.
+	self assert: second force equals: 40 @ 0
+]
+
+{ #category : 'tests - point attraction' }
+CFPhysicsForceTests >> testPointAttractionPullsEachBodyTowardTheConfiguredPoint [
+	| first second attraction |
+	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	second := self newBodyWithSequence: 2 position: 20 @ 0 extent: 10 @ 10.
+	first beDynamic.
+	second beDynamic.
+	attraction := CFPhysicsPointAttractionForce new
+		bodies: { first. second };
+		point: 15 @ 5;
+		strength: 2;
+		yourself.
+	attraction applyForStep: 0.016.
+	self assert: first force equals: 20 @ 0.
+	self assert: second force equals: -20 @ 0
+]

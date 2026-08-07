@@ -1,14 +1,13 @@
-
 "
 I orchestrate a force-directed arrangement for a graph supplied by an adapter.
 
-I reconcile distance joints and repulsion forces with the current graph and damp the selected elements while the arrangement settles.
+I reconcile edge distance joints and configure the persistent forces that repel and centre the selected graph elements.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
-		'adapter', 'springsByEdge', 'repulsionsByPair', 'centringForce',
+		'adapter', 'springsByEdge', 'repulsionForce', 'positioningForce',
 		'length', 'hertz', 'dampingRatio',
 		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'velocityDamping'
 	],
@@ -20,8 +19,8 @@ Class {
 CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByEdge := IdentityDictionary new.
-	repulsionsByPair := Dictionary new.
-	centringForce := nil.
+	repulsionForce := nil.
+	positioningForce := nil.
 	length := CFPhysicsSharedScalar value: 80.0.
 	hertz := CFPhysicsSharedScalar value: 3.0.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
@@ -58,7 +57,10 @@ CFPhysicsForceDirectedBehaviour >> edges [
 CFPhysicsForceDirectedBehaviour >> springsByEdge [ ^ springsByEdge copy ]
 
 { #category : 'accessing' }
-CFPhysicsForceDirectedBehaviour >> repulsionsByPair [ ^ repulsionsByPair copy ]
+CFPhysicsForceDirectedBehaviour >> repulsionForce [ ^ repulsionForce ]
+
+{ #category : 'accessing' }
+CFPhysicsForceDirectedBehaviour >> positioningForce [ ^ positioningForce ]
 
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> length [ ^ length value ]
@@ -121,16 +123,15 @@ CFPhysicsForceDirectedBehaviour >> step: aPhysicsStep [
 
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> reconcile [
-	| currentElements currentEdges desiredPairs |
+	| currentElements currentEdges currentBodies |
 	currentElements := self elements.
 	currentEdges := self edges.
 	self validateElements: currentElements edges: currentEdges.
-	self ensureCentringForceFor: currentElements.
-	desiredPairs := self orderedPairsFor: currentElements.
+	currentBodies := currentElements collect: [ :element | element physics body ].
+	self ensureRepulsionForceFor: currentBodies.
+	self ensurePositioningForceFor: currentBodies.
 	self removeObsoleteSpringsExcept: currentEdges asIdentitySet.
-	self removeObsoleteRepulsionsExcept: desiredPairs asSet.
-	currentEdges do: [ :edge | self ensureSpringFor: edge ].
-	desiredPairs do: [ :pair | self ensureRepulsionFor: pair ]
+	currentEdges do: [ :edge | self ensureSpringFor: edge ]
 ]
 
 { #category : 'private - validation' }
@@ -143,19 +144,7 @@ CFPhysicsForceDirectedBehaviour >> validateElements: currentElements edges: curr
 	currentEdges do: [ :edge |
 		((elementSet includes: (adapter sourceElementFor: edge)) and: [
 			elementSet includes: (adapter destinationElementFor: edge) ]) ifFalse: [
-				self error: 'Every force-directed edge endpoint must occur in the selected elements' ] ]
-]
-
-{ #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> orderedPairsFor: currentElements [
-	| pairs |
-	pairs := OrderedCollection new.
-	1 to: currentElements size do: [ :firstIndex |
-		firstIndex + 1 to: currentElements size do: [ :secondIndex |
-			pairs add: (CFPhysicsNodePair
-				first: (currentElements at: firstIndex)
-				second: (currentElements at: secondIndex)) ] ].
-	^ pairs
+			self error: 'Every force-directed edge endpoint must occur in the selected elements' ] ]
 ]
 
 { #category : 'private - reconciliation' }
@@ -165,14 +154,6 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredEdges [
 		(desiredEdges includes: association key) ifFalse: [
 			association value remove.
 			springsByEdge removeKey: association key ] ]
-]
-
-{ #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs [
-	repulsionsByPair associations copy do: [ :association |
-		(desiredPairs includes: association key) ifFalse: [
-			association value remove.
-			repulsionsByPair removeKey: association key ] ]
 ]
 
 { #category : 'private - reconciliation' }
@@ -191,27 +172,24 @@ CFPhysicsForceDirectedBehaviour >> ensureSpringFor: anEdge [
 ]
 
 { #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
-	^ repulsionsByPair at: pair ifAbsentPut: [
-		| force |
-		force := CFPhysicsRepulsionForce
-			between: pair first physics body
-			and: pair second physics body.
-		force distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
+CFPhysicsForceDirectedBehaviour >> ensureRepulsionForceFor: currentBodies [
+	(repulsionForce isNil or: [ repulsionForce isActive not ]) ifTrue: [
+		repulsionForce := self world addForce: CFPhysicsManyBodyRepulsionForce new ].
+	repulsionForce
+		bodies: currentBodies;
+		distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
 			force: repulsion;
 			softeningDistance: repulsionSofteningDistance;
 			maximumDistance: maximumRepulsionDistance;
-			yourself).
-		self world addForce: force ]
+			yourself)
 ]
 
-
 { #category : 'private - reconciliation' }
-CFPhysicsForceDirectedBehaviour >> ensureCentringForceFor: currentElements [
-	(centringForce isNil or: [ centringForce isActive not ]) ifTrue: [
-		centringForce := self world addForce: CFPhysicsCentreForce new ].
-	centringForce
-		bodies: (currentElements collect: [ :element | element physics body ]);
+CFPhysicsForceDirectedBehaviour >> ensurePositioningForceFor: currentBodies [
+	(positioningForce isNil or: [ positioningForce isActive not ]) ifTrue: [
+		positioningForce := self world addForce: CFPhysicsCentreForce new ].
+	positioningForce
+		bodies: currentBodies;
 		centre: self world owner extent / 2.0;
 		strength: centringStrength value
 ]
@@ -228,9 +206,9 @@ CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentElements over: aTime
 { #category : 'private - running' }
 CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	springsByEdge values copy do: #remove.
-	repulsionsByPair values copy do: #remove.
-	centringForce ifNotNil: [ centringForce remove ].
-	centringForce := nil.
-	springsByEdge removeAll.
-	repulsionsByPair removeAll
+	repulsionForce ifNotNil: [ repulsionForce remove ].
+	positioningForce ifNotNil: [ positioningForce remove ].
+	repulsionForce := nil.
+	positioningForce := nil.
+	springsByEdge removeAll
 ]
