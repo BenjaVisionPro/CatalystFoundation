@@ -2,7 +2,7 @@
 "
 I orchestrate a force-directed arrangement for a graph supplied by an adapter.
 
-I reconcile distance joints and repulsion constraints with the current graph and damp the selected elements while the arrangement settles.
+I reconcile distance joints and repulsion forces with the current graph and damp the selected elements while the arrangement settles.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
@@ -94,23 +94,19 @@ CFPhysicsForceDirectedBehaviour >> velocityDamping: aNumber [ velocityDamping va
 
 { #category : 'running' }
 CFPhysicsForceDirectedBehaviour >> start [
-	| aWorld |
 	adapter ifNil: [ self error: 'A force-directed Behaviour requires a graph adapter' ].
 	super start.
-	aWorld := self world.
 	[ self reconcile ] on: Error do: [ :error |
 		super stop.
-		self removeOwnedPhysicsFrom: aWorld.
+		self removeOwnedPhysics.
 		error pass ].
 	^ self
 ]
 
 { #category : 'running' }
 CFPhysicsForceDirectedBehaviour >> stop [
-	| aWorld |
-	aWorld := self world.
 	super stop.
-	aWorld ifNotNil: [ self removeOwnedPhysicsFrom: aWorld ].
+	self removeOwnedPhysics.
 	^ self
 ]
 
@@ -172,10 +168,9 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredEdges [
 
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs [
-	(repulsionsByPair associations sorted: [ :first :second |
-		first value sequence < second value sequence ]) do: [ :association |
+	repulsionsByPair associations copy do: [ :association |
 		(desiredPairs includes: association key) ifFalse: [
-			self world removeRepulsionConstraint: association value.
+			association value remove.
 			repulsionsByPair removeKey: association key ] ]
 ]
 
@@ -197,16 +192,16 @@ CFPhysicsForceDirectedBehaviour >> ensureSpringFor: anEdge [
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 	^ repulsionsByPair at: pair ifAbsentPut: [
-		| constraint |
-		constraint := CFPhysicsRepulsionConstraint
+		| force |
+		force := CFPhysicsRepulsionForce
 			between: pair first physics body
 			and: pair second physics body.
-		constraint distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
+		force distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
 			force: repulsion;
 			softeningDistance: repulsionSofteningDistance;
 			maximumDistance: maximumRepulsionDistance;
 			yourself).
-		self world addRepulsionConstraint: constraint ]
+		self world addForce: force ]
 ]
 
 
@@ -233,10 +228,9 @@ CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentElements over: aTime
 ]
 
 { #category : 'private - running' }
-CFPhysicsForceDirectedBehaviour >> removeOwnedPhysicsFrom: aWorld [
+CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	springsByEdge values copy do: #remove.
-	repulsionsByPair values copy do: [ :constraint |
-		aWorld removeRepulsionConstraint: constraint ].
+	repulsionsByPair values copy do: #remove.
 	springsByEdge removeAll.
 	repulsionsByPair removeAll
 ]

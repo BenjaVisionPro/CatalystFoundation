@@ -66,10 +66,10 @@ CFPhysicsEndpointPair >> weldJoint [
 
 { #category : 'relationships' }
 CFPhysicsEndpointPair >> attraction [
-	^ self world addAttractionConstraint: (CFPhysicsAttractionConstraint betweenEndpoints: self)
+	^ self world addForce: (CFPhysicsAttractionForce betweenEndpoints: self)
 ]
 
 { #category : 'relationships' }
 CFPhysicsEndpointPair >> repulsion [
-	^ self world addRepulsionConstraint: (CFPhysicsRepulsionConstraint betweenEndpoints: self)
+	^ self world addForce: (CFPhysicsRepulsionForce betweenEndpoints: self)
 ]

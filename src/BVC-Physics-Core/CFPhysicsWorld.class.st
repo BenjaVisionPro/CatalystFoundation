@@ -1,12 +1,12 @@
 "
 I represent a Physics world.
 
-My responsibility is to own authoritative simulation state and advance it through the configured step pipeline. I coordinate bodies, constraints, joints, contacts, Behaviours, telemetry and committed solutions for my member elements.
+My responsibility is to own authoritative simulation state and advance it through the configured step pipeline. I coordinate bodies, forces, joints, contacts, Behaviours, telemetry and committed solutions for my member elements.
 "
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'nextJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -39,11 +39,8 @@ CFPhysicsWorld >> initialize [
 	activeContacts := #().
 	calculationContacts := #().
 	joints := OrderedCollection new.
-	attractionConstraints := IdentitySet new.
-	repulsionConstraints := IdentitySet new.
+	forces := OrderedCollection new.
 	nextJointSequence := 1.
-	nextAttractionSequence := 1.
-	nextRepulsionSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	simulationTime := 0.0.
@@ -122,8 +119,7 @@ CFPhysicsWorld >> release [
 	telemetryLogger := nil.
 	behaviours copy do: [ :each | each stop ].
 	joints copy do: #remove.
-	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
-	repulsionConstraints copy do: [ :each | self removeRepulsionConstraint: each ].
+	forces copy do: #remove.
 	bodyStates keys do: [ :each |
 		each existingPhysics ifNotNil: [ :physics |
 			physics retireBodyFromWorld: self ] ].
@@ -411,8 +407,7 @@ CFPhysicsWorld >> retireElement: anElement [
 	geometrySignaturesByBody removeKey: body ifAbsent: [ ].
 	anElement existingPhysics ifNotNil: [ :physics |
 		physics retireBodyFromWorld: self ].
-	self removeAttractionsUsingBody: body.
-	self removeRepulsionsUsingBody: body.
+	self removeForcesUsingBody: body.
 	self removeJointsUsingBody: body.
 	self removeContactsUsingBody: body.
 	persistentIslandGraph removeBody: body.
@@ -564,8 +559,7 @@ CFPhysicsWorld >> capturePreparedState [
 	containmentBody ifNotNil: [ containmentBody beginStep ].
 	step := self newStep.
 	self updateBehavioursForStep: step.
-	self prepareAttractionConstraintsForStep: step timeStep.
-	self prepareRepulsionConstraintsForStep: step timeStep.
+	self applyForcesForStep: step timeStep.
 	capturedBodyStates := IdentityDictionary new.
 	orderedBodyStates := Array new: bodies size + (containmentBody isNil ifTrue: [ 0 ] ifFalse: [ 1 ]).
 	capturedJoints := self joints collect: #capturedForStep.
@@ -1115,91 +1109,61 @@ CFPhysicsWorld >> filterJointsUsingBody: aBody [
 
 
 
-{ #category : 'attraction interaction' }
+{ #category : 'forces' }
+CFPhysicsWorld >> forces [
+	^ forces copy
+]
+
+{ #category : 'forces' }
+CFPhysicsWorld >> addForce: aForce [
+	aForce validateForWorld: self.
+	aForce addedToWorld: self.
+	forces add: aForce.
+	^ aForce
+]
+
+{ #category : 'forces' }
+CFPhysicsWorld >> removeForce: aForce [
+	(forces identityIncludes: aForce) ifTrue: [
+		forces remove: aForce.
+		aForce removedFromWorld ].
+	^ aForce
+]
+
+{ #category : 'forces' }
+CFPhysicsWorld >> forcesUsingBody: aBody [
+	^ forces select: [ :each | each includesBody: aBody ]
+]
+
+{ #category : 'forces' }
+CFPhysicsWorld >> removeForcesUsingBody: aBody [
+	(self forcesUsingBody: aBody) copy do: #remove
+]
+
+{ #category : 'forces' }
+CFPhysicsWorld >> applyForcesForStep: seconds [
+	forces copy do: [ :each |
+		(each world == self) ifTrue: [ each applyForStep: seconds ] ]
+]
+
+{ #category : 'forces' }
 CFPhysicsWorld >> attractions [
-	^ attractionConstraints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ forces select: [ :each | each isKindOf: CFPhysicsAttractionForce ]
 ]
 
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> addAttractionConstraint: aConstraint [
-	aConstraint endpointPair world == self
-		ifFalse: [ self error: 'Attraction endpoints must belong to this physics world' ].
-	aConstraint sequence: nextAttractionSequence.
-	nextAttractionSequence := nextAttractionSequence + 1.
-	attractionConstraints add: aConstraint.
-	^ aConstraint
+{ #category : 'forces' }
+CFPhysicsWorld >> attractionsUsingBody: aBody [
+	^ self attractions select: [ :each | each includesBody: aBody ]
 ]
 
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> attractionsUsingBody: aBodyState [
-	^ self attractions select: [ :each | each includesBody: aBodyState ]
-]
-
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> removeAttractionConstraint: aConstraint [
-	(attractionConstraints includes: aConstraint) ifTrue: [
-		aConstraint release.
-		attractionConstraints remove: aConstraint ].
-	^ aConstraint
-]
-
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> removeAttractionsUsingBody: aBodyState [
-	(attractionConstraints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeAttractionConstraint: each ]
-]
-
-{ #category : 'attraction interaction' }
-CFPhysicsWorld >> prepareAttractionConstraintsForStep: seconds [
-	attractionConstraints copy do: [ :each |
-		each isActive
-			ifTrue: [ each prepareForStep: seconds ]
-			ifFalse: [ attractionConstraints remove: each ifAbsent: [ ] ] ]
-]
-
-
-{ #category : 'repulsion interaction' }
+{ #category : 'forces' }
 CFPhysicsWorld >> repulsions [
-	^ repulsionConstraints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ forces select: [ :each | each isKindOf: CFPhysicsRepulsionForce ]
 ]
 
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> addRepulsionConstraint: aConstraint [
-	aConstraint endpointPair world == self
-		ifFalse: [ self error: 'Repulsion endpoints must belong to this physics world' ].
-	aConstraint sequence: nextRepulsionSequence.
-	nextRepulsionSequence := nextRepulsionSequence + 1.
-	repulsionConstraints add: aConstraint.
-	^ aConstraint
-]
-
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> repulsionsUsingBody: aBodyState [
-	^ self repulsions select: [ :each | each includesBody: aBodyState ]
-]
-
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> removeRepulsionConstraint: aConstraint [
-	(repulsionConstraints includes: aConstraint) ifTrue: [
-		aConstraint release.
-		repulsionConstraints remove: aConstraint ].
-	^ aConstraint
-]
-
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> removeRepulsionsUsingBody: aBodyState [
-	(repulsionConstraints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeRepulsionConstraint: each ]
-]
-
-{ #category : 'repulsion interaction' }
-CFPhysicsWorld >> prepareRepulsionConstraintsForStep: seconds [
-	repulsionConstraints copy do: [ :each |
-		each isActive
-			ifTrue: [ each prepareForStep: seconds ]
-			ifFalse: [ repulsionConstraints remove: each ifAbsent: [ ] ] ]
+{ #category : 'forces' }
+CFPhysicsWorld >> repulsionsUsingBody: aBody [
+	^ self repulsions select: [ :each | each includesBody: aBody ]
 ]
 
 

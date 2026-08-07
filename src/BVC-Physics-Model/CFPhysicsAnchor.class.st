@@ -90,14 +90,14 @@ CFPhysicsAnchor >> wheelJointTo: anotherAnchor along: anAxis [
 CFPhysicsAnchor >> attract: anotherAnchor [
 	| aWorld attraction |
 	aWorld := self relationshipWorldWith: anotherAnchor.
-	attraction := CFPhysicsAttractionConstraint betweenAnchor: self andAnchor: anotherAnchor.
-	^ aWorld addAttractionConstraint: attraction
+	attraction := CFPhysicsAttractionForce betweenAnchor: self andAnchor: anotherAnchor.
+	^ aWorld addForce: attraction
 ]
 
 { #category : 'relationships' }
 CFPhysicsAnchor >> repel: anotherAnchor [
 	| aWorld repulsion |
 	aWorld := self relationshipWorldWith: anotherAnchor.
-	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: self andAnchor: anotherAnchor.
-	^ aWorld addRepulsionConstraint: repulsion
+	repulsion := CFPhysicsRepulsionForce betweenAnchor: self andAnchor: anotherAnchor.
+	^ aWorld addForce: repulsion
 ]

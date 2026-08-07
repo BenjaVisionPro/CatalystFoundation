@@ -325,8 +325,8 @@ CFPhysicsCollisionTests >> testRelationshipsCanResolveBodyLocalAnchors [
 	anchorB := CFPhysicsLocalAnchor on: second at: 0 @ 10.
 	spring := CFPhysicsDistanceJoint betweenAnchor: anchorA andAnchor: anchorB.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
-	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
-	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	attraction := CFPhysicsAttractionForce betweenAnchor: anchorA andAnchor: anchorB.
+	repulsion := CFPhysicsRepulsionForce betweenAnchor: anchorA andAnchor: anchorB.
 	self assert: spring anchorA == anchorA.
 	self assert: spring anchorB == anchorB.
 	self assert: attraction anchorA == anchorA.
@@ -378,8 +378,8 @@ CFPhysicsCollisionTests >> testRelationshipsCanResolveNormalisedAnchors [
 	anchorB := CFPhysicsNormalisedAnchor on: second at: 0 @ 0.5.
 	spring := CFPhysicsDistanceJoint betweenAnchor: anchorA andAnchor: anchorB.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
-	attraction := CFPhysicsAttractionConstraint betweenAnchor: anchorA andAnchor: anchorB.
-	repulsion := CFPhysicsRepulsionConstraint betweenAnchor: anchorA andAnchor: anchorB.
+	attraction := CFPhysicsAttractionForce betweenAnchor: anchorA andAnchor: anchorB.
+	repulsion := CFPhysicsRepulsionForce betweenAnchor: anchorA andAnchor: anchorB.
 	self assert: spring anchorA == anchorA.
 	self assert: attraction anchorA == anchorA.
 	self assert: repulsion anchorA == anchorA.
@@ -442,8 +442,8 @@ CFPhysicsCollisionTests >> testAttractionAndRepulsionCanUseWorldAnchors [
 		attract: (world anchorAt: 110 @ 10).
 	repulsion := (CFPhysicsBodyCentreAnchor on: repelled)
 		repel: (world anchorAt: 110 @ 50).
-	attraction prepareForStep: 0.1.
-	repulsion prepareForStep: 0.1.
+	attraction applyForStep: 0.1.
+	repulsion applyForStep: 0.1.
 	self assert: attracted velocity x > 0.
 	self assert: repelled velocity x < 0.
 	^ { attraction. repulsion }

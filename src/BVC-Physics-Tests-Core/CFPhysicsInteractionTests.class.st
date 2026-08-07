@@ -126,7 +126,7 @@ CFPhysicsInteractionTests >> testAttractionEndpointsAreResolvedThroughAnchors [
 	| first second attraction |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction := CFPhysicsAttractionForce between: first and: second.
 	self assert: attraction anchorA class equals: CFPhysicsBodyCentreAnchor.
 	self assert: attraction anchorB class equals: CFPhysicsBodyCentreAnchor.
 	self assert: attraction anchorA worldPoint equals: 10 @ 10.
@@ -141,9 +141,9 @@ CFPhysicsInteractionTests >> testAttractionAppliesEqualAndOppositeImpulse [
 	| first second attraction |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction := CFPhysicsAttractionForce between: first and: second.
 	attraction force: 1000.
-	attraction prepareForStep: 0.1.
+	attraction applyForStep: 0.1.
 	self assert: first velocity x > 0.
 	self assert: second velocity x < 0.
 	self assert: first velocity y equals: 0.
@@ -158,9 +158,9 @@ CFPhysicsInteractionTests >> testAttractionCanPullTowardAStaticBody [
 	dynamicBody := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	staticBody := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
 	staticBody beStatic.
-	attraction := CFPhysicsAttractionConstraint between: dynamicBody and: staticBody.
+	attraction := CFPhysicsAttractionForce between: dynamicBody and: staticBody.
 	attraction force: 1000.
-	attraction prepareForStep: 0.1.
+	attraction applyForStep: 0.1.
 	self assert: dynamicBody velocity x > 0.
 	self assert: staticBody velocity equals: 0 @ 0.
 	^ attraction
@@ -182,7 +182,7 @@ CFPhysicsInteractionTests >> testAttractionsAreInstalledAndDiscoveredThroughBloc
 	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
 	self assert: second physics attractions equals: { firstAttraction }.
 	self assert: world attractions equals: { firstAttraction. secondAttraction }.
-	first physics removeAttraction: firstAttraction.
+	firstAttraction remove.
 	self assert: first physics attractions equals: { secondAttraction }.
 	self assert: firstAttraction isActive not.
 	self assert: secondAttraction isActive.
@@ -202,7 +202,7 @@ CFPhysicsInteractionTests >> testDuplicateAttractionsRemainIndependent [
 	secondAttraction := first physics attract: second.
 	self assert: (firstAttraction == secondAttraction) not.
 	self assert: first physics attractions equals: { firstAttraction. secondAttraction }.
-	first physics removeAttraction: firstAttraction.
+	firstAttraction remove.
 	self assert: first physics attractions equals: { secondAttraction }.
 	self assert: secondAttraction isActive.
 	^ world
@@ -258,7 +258,7 @@ CFPhysicsInteractionTests >> testRepulsionEndpointsAreResolvedThroughAnchors [
 	| first second repulsion |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	self assert: repulsion anchorA class equals: CFPhysicsBodyCentreAnchor.
 	self assert: repulsion anchorB class equals: CFPhysicsBodyCentreAnchor.
 	self assert: repulsion anchorA worldPoint equals: 10 @ 10.
@@ -273,9 +273,9 @@ CFPhysicsInteractionTests >> testRepulsionAppliesEqualAndOppositeImpulse [
 	| first second repulsion |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
-	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	repulsion force: 1000.
-	repulsion prepareForStep: 0.1.
+	repulsion applyForStep: 0.1.
 	self assert: first velocity x < 0.
 	self assert: second velocity x > 0.
 	self assert: first velocity y equals: 0.
@@ -290,9 +290,9 @@ CFPhysicsInteractionTests >> testRepulsionCanPushAwayFromAStaticBody [
 	dynamicBody := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	staticBody := self newBodyWithSequence: 2 position: 100 @ 0 extent: 20 @ 20.
 	staticBody beStatic.
-	repulsion := CFPhysicsRepulsionConstraint between: dynamicBody and: staticBody.
+	repulsion := CFPhysicsRepulsionForce between: dynamicBody and: staticBody.
 	repulsion force: 1000.
-	repulsion prepareForStep: 0.1.
+	repulsion applyForStep: 0.1.
 	self assert: dynamicBody velocity x < 0.
 	self assert: staticBody velocity equals: 0 @ 0.
 	^ repulsion
@@ -314,7 +314,7 @@ CFPhysicsInteractionTests >> testRepulsionsAreInstalledAndDiscoveredThroughBlocE
 	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
 	self assert: second physics repulsions equals: { firstRepulsion }.
 	self assert: world repulsions equals: { firstRepulsion. secondRepulsion }.
-	first physics removeRepulsion: firstRepulsion.
+	firstRepulsion remove.
 	self assert: first physics repulsions equals: { secondRepulsion }.
 	self assert: firstRepulsion isActive not.
 	self assert: secondRepulsion isActive.
@@ -334,7 +334,7 @@ CFPhysicsInteractionTests >> testDuplicateRepulsionsRemainIndependent [
 	secondRepulsion := first physics repel: second.
 	self assert: (firstRepulsion == secondRepulsion) not.
 	self assert: first physics repulsions equals: { firstRepulsion. secondRepulsion }.
-	first physics removeRepulsion: firstRepulsion.
+	firstRepulsion remove.
 	self assert: first physics repulsions equals: { secondRepulsion }.
 	self assert: secondRepulsion isActive.
 	^ world
@@ -404,9 +404,9 @@ CFPhysicsInteractionTests >> testAttractionCanUseLinearFalloffResponse [
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
 	response := CFPhysicsLinearFalloffResponse force: 1000 maximumDistance: 200.
-	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction := CFPhysicsAttractionForce between: first and: second.
 	attraction distanceResponse: response.
-	attraction prepareForStep: 0.1.
+	attraction applyForStep: 0.1.
 	self assert: attraction distanceResponse == response.
 	self assert: first velocity x > 0.
 	self assert: second velocity x < 0.
@@ -420,9 +420,9 @@ CFPhysicsInteractionTests >> testRepulsionCanUseLinearFalloffResponse [
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
 	response := CFPhysicsLinearFalloffResponse force: 1000 maximumDistance: 200.
-	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	repulsion distanceResponse: response.
-	repulsion prepareForStep: 0.1.
+	repulsion applyForStep: 0.1.
 	self assert: repulsion distanceResponse == response.
 	self assert: first velocity x < 0.
 	self assert: second velocity x > 0.
@@ -452,9 +452,9 @@ CFPhysicsInteractionTests >> testAttractionCanUseSoftenedInverseSquareResponse [
 	response := CFPhysicsSoftenedInverseSquareResponse
 		force: 1000
 		softeningDistance: 100.
-	attraction := CFPhysicsAttractionConstraint between: first and: second.
+	attraction := CFPhysicsAttractionForce between: first and: second.
 	attraction distanceResponse: response.
-	attraction prepareForStep: 0.1.
+	attraction applyForStep: 0.1.
 	self assert: attraction distanceResponse == response.
 	self assert: first velocity x > 0.
 	self assert: second velocity x < 0.
@@ -470,9 +470,9 @@ CFPhysicsInteractionTests >> testRepulsionCanUseSoftenedInverseSquareResponse [
 	response := CFPhysicsSoftenedInverseSquareResponse
 		force: 1000
 		softeningDistance: 100.
-	repulsion := CFPhysicsRepulsionConstraint between: first and: second.
+	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	repulsion distanceResponse: response.
-	repulsion prepareForStep: 0.1.
+	repulsion applyForStep: 0.1.
 	self assert: repulsion distanceResponse == response.
 	self assert: first velocity x < 0.
 	self assert: second velocity x > 0.
@@ -510,8 +510,8 @@ CFPhysicsInteractionTests >> testRelationshipsResolveThroughAnEndpointPair [
 		anchorB: (CFPhysicsLocalAnchor on: second at: -10 @ 0).
 	spring := CFPhysicsDistanceJoint betweenEndpoints: endpoints.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
-	attraction := CFPhysicsAttractionConstraint betweenEndpoints: endpoints.
-	repulsion := CFPhysicsRepulsionConstraint betweenEndpoints: endpoints.
+	attraction := CFPhysicsAttractionForce betweenEndpoints: endpoints.
+	repulsion := CFPhysicsRepulsionForce betweenEndpoints: endpoints.
 	self assert: spring endpointPair == endpoints.
 	self assert: attraction endpointPair == endpoints.
 	self assert: repulsion endpointPair == endpoints.

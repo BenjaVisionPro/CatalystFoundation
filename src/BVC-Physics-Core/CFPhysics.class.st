@@ -650,10 +650,10 @@ CFPhysics >> attract: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	attraction := CFPhysicsAttractionConstraint
+	attraction := CFPhysicsAttractionForce
 		between: self body
 		and: anotherElement physics body.
-	^ aWorld addAttractionConstraint: attraction
+	^ aWorld addForce: attraction
 ]
 
 { #category : 'attraction interaction' }
@@ -666,11 +666,6 @@ CFPhysics >> attractions [
 	^ aWorld attractionsUsingBody: body
 ]
 
-{ #category : 'attraction interaction' }
-CFPhysics >> removeAttraction: anAttractionConstraint [
-	self world ifNotNil: [ :aWorld | aWorld removeAttractionConstraint: anAttractionConstraint ].
-	^ self
-]
 
 
 
@@ -681,10 +676,10 @@ CFPhysics >> repel: anotherElement [
 	otherWorld := anotherElement physics world.
 	(aWorld notNil and: [ aWorld == otherWorld ])
 		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	repulsion := CFPhysicsRepulsionConstraint
+	repulsion := CFPhysicsRepulsionForce
 		between: self body
 		and: anotherElement physics body.
-	^ aWorld addRepulsionConstraint: repulsion
+	^ aWorld addForce: repulsion
 ]
 
 { #category : 'repulsion interaction' }
@@ -697,11 +692,6 @@ CFPhysics >> repulsions [
 	^ aWorld repulsionsUsingBody: body
 ]
 
-{ #category : 'repulsion interaction' }
-CFPhysics >> removeRepulsion: aRepulsionConstraint [
-	self world ifNotNil: [ :aWorld | aWorld removeRepulsionConstraint: aRepulsionConstraint ].
-	^ self
-]
 
 { #category : 'anchors' }
 CFPhysics >> localAnchorAt: aPoint [
