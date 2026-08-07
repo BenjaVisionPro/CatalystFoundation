@@ -409,3 +409,41 @@ CFPhysicsMondrianTests >> testMondrianPhysicsWorldOverlayCoordinatesFollowGraphS
 	world stopStepping.
 	^ mondrian
 ]
+
+{ #category : 'tests - containment' }
+CFPhysicsMondrianTests >> testMondrianContainmentExpandsWithVisibleCanvasAndDoesNotShrink [
+	<gtExample>
+	| space mondrian world initialExtent expandedExtent retainedExtent |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three).
+	space root addChild: mondrian root.
+	space pulse.
+	world := mondrian physics beWorld.
+	world stopStepping.
+	world step.
+	initialExtent := self containmentExtentOf: world.
+	mondrian root childrenScaleFactor: 0.5.
+	space pulse.
+	world step.
+	expandedExtent := self containmentExtentOf: world.
+	self assert: expandedExtent x > initialExtent x.
+	self assert: expandedExtent y > initialExtent y.
+	mondrian root childrenScaleFactor: 1.0.
+	space pulse.
+	world step.
+	retainedExtent := self containmentExtentOf: world.
+	self assert: retainedExtent equals: expandedExtent.
+	^ mondrian
+]
+
+{ #category : 'private - containment' }
+CFPhysicsMondrianTests >> containmentExtentOf: aWorld [
+	| origin vertices minimum maximum |
+	origin := aWorld containmentBoundaryBody worldBodyOrigin.
+	vertices := aWorld containmentBoundaryChain vertices collect: [ :each | each + origin ].
+	minimum := (vertices collect: #x) min @ (vertices collect: #y) min.
+	maximum := (vertices collect: #x) max @ (vertices collect: #y) max.
+	^ maximum - minimum
+]

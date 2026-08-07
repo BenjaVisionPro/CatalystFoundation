@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -67,6 +67,7 @@ CFPhysicsWorld >> initialize [
 	containmentChain := nil.
 	containmentGeometry := nil.
 	containmentExtent := nil.
+	containmentBounds := nil.
 	containmentMargin := nil.
 	containmentFriction := nil.
 	containmentRestitution := nil.
@@ -1519,6 +1520,13 @@ CFPhysicsWorld >> containmentBoundaryChain [
 
 { #category : 'containment - internal' }
 CFPhysicsWorld >> refreshContainmentBoundary [
+	(owner notNil and: [ owner respondsTo: #childrenTransformation ])
+		ifTrue: [ ^ self refreshCanvasContainmentBoundary ].
+	^ self refreshElementContainmentBoundary
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> refreshElementContainmentBoundary [
 	| shapeState extent geometry vertices localVertices material filter changed |
 	self containment isEnabled ifFalse: [
 		self removeContainmentBoundary.
@@ -1546,7 +1554,7 @@ CFPhysicsWorld >> refreshContainmentBoundary [
 		boundaryVerticesFor: geometry
 		extent: extent
 		margin: self containment margin.
-	localVertices := vertices collect: [ :each | each - (extent / 2.0) ].
+	localVertices := vertices collect: [ :each | each - containmentBody worldBodyOrigin ].
 	material := self containment material.
 	filter := CFPhysicsCollisionFilter new.
 	containmentChain := CFPhysicsChainBuilder
@@ -1556,6 +1564,7 @@ CFPhysicsWorld >> refreshContainmentBoundary [
 		body: containmentBody.
 	containmentGeometry := geometry.
 	containmentExtent := extent.
+	containmentBounds := nil.
 	containmentMargin := self containment margin.
 	containmentFriction := self containment friction.
 	containmentRestitution := self containment restitution.
@@ -1563,7 +1572,67 @@ CFPhysicsWorld >> refreshContainmentBoundary [
 ]
 
 { #category : 'containment - internal' }
+CFPhysicsWorld >> refreshCanvasContainmentBoundary [
+	| visibleBounds expandedBounds margin minimum maximum vertices localVertices material filter changed |
+	self containment isEnabled ifFalse: [
+		self removeContainmentBoundary.
+		^ self ].
+	visibleBounds := (owner localBoundsToChildren: owner bounds inLocal copy) asRectangle.
+	visibleBounds extent x <= 0 ifTrue: [ ^ self ].
+	visibleBounds extent y <= 0 ifTrue: [ ^ self ].
+	expandedBounds := containmentBounds
+		ifNil: [ visibleBounds ]
+		ifNotNil: [ self containmentBounds: containmentBounds mergedWith: visibleBounds ].
+	changed := containmentChain isNil
+		or: [ containmentBounds ~= expandedBounds
+			or: [ containmentMargin ~= self containment margin
+				or: [ containmentFriction ~= self containment friction
+					or: [ containmentRestitution ~= self containment restitution ] ] ] ].
+	changed ifFalse: [ ^ self ].
+	self removeContainmentBoundaryPreservingBounds.
+	containmentBounds := expandedBounds.
+	margin := self containment margin.
+	minimum := containmentBounds origin + (margin @ margin).
+	maximum := containmentBounds corner - (margin @ margin).
+	(maximum x <= minimum x or: [ maximum y <= minimum y ]) ifTrue: [
+		self error: 'Containment margin leaves no interior geometry' ].
+	containmentBody := CFPhysicsBody element: owner world: self.
+	containmentBody sequence: 0.
+	containmentBody beStatic.
+	containmentBody shapeCollection remove: containmentBody shapeState.
+	vertices := { minimum. maximum x @ minimum y. maximum. minimum x @ maximum y }.
+	localVertices := vertices collect: [ :each | each - containmentBody worldBodyOrigin ].
+	material := self containment material.
+	filter := CFPhysicsCollisionFilter new.
+	containmentChain := CFPhysicsChainBuilder
+		inwardLoopFrom: localVertices
+		material: material
+		collisionFilter: filter
+		body: containmentBody.
+	containmentGeometry := nil.
+	containmentExtent := containmentBounds extent.
+	containmentMargin := margin.
+	containmentFriction := self containment friction.
+	containmentRestitution := self containment restitution.
+	self invalidateTopology
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> containmentBounds: firstBounds mergedWith: secondBounds [
+	| minimum maximum |
+	minimum := (firstBounds left min: secondBounds left) @ (firstBounds top min: secondBounds top).
+	maximum := (firstBounds right max: secondBounds right) @ (firstBounds bottom max: secondBounds bottom).
+	^ Rectangle origin: minimum corner: maximum
+]
+
+{ #category : 'containment - internal' }
 CFPhysicsWorld >> removeContainmentBoundary [
+	self removeContainmentBoundaryPreservingBounds.
+	containmentBounds := nil
+]
+
+{ #category : 'containment - internal' }
+CFPhysicsWorld >> removeContainmentBoundaryPreservingBounds [
 	containmentBody ifNil: [ ^ self ].
 	contacts := contacts reject: [ :contact |
 		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
