@@ -1148,7 +1148,7 @@ CFPhysicsWorld >> applyForcesForStep: seconds [
 
 { #category : 'forces' }
 CFPhysicsWorld >> attractions [
-	^ forces select: [ :each | each isKindOf: CFPhysicsAttractionForce ]
+	^ self forces select: [ :each | each isKindOf: CFPhysicsAttractionForce ]
 ]
 
 { #category : 'forces' }
@@ -1158,7 +1158,7 @@ CFPhysicsWorld >> attractionsUsingBody: aBody [
 
 { #category : 'forces' }
 CFPhysicsWorld >> repulsions [
-	^ forces select: [ :each | each isKindOf: CFPhysicsRepulsionForce ]
+	^ self forces select: [ :each | each isKindOf: CFPhysicsRepulsionForce ]
 ]
 
 { #category : 'forces' }
