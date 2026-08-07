@@ -53,7 +53,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 	spec package: 'BVC-Physics-Motion'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Physics-Core') ].
 	spec package: 'BVC-Physics-Tools'
-		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion' 'BVC-Foundation-Magritte-GT') ].
+		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Physics-Mondrian'
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Motion' 'BVC-Physics-Tools') ].
 	spec package: 'BVC-Physics-Examples'
@@ -66,7 +66,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 	spec package: 'BVC-Physics-Tests-Mondrian'
 		with: [ spec requires: #('BVC-Physics-Mondrian' 'BVC-Physics-Examples') ].
 	spec package: 'BVC-Physics-Tests-Tools'
-		with: [ spec requires: #('BVC-Physics-Tools' 'BVC-Physics-Mondrian') ]
+		with: [ spec requires: #('BVC-Physics-Tools' 'BVC-Physics-Behaviours' 'BVC-Physics-Mondrian') ]
 ]
 
 { #category : 'baseline' }
