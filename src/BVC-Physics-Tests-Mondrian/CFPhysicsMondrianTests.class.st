@@ -301,6 +301,32 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesLiveMondrianConnec
 ]
 
 { #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesMondrianForceLayoutAsStartingPositions [
+	<gtExample>
+	| mondrian nodes initialPositions world |
+	mondrian := GtMondrian new.
+	mondrian root size: 920 @ 620.
+	mondrian nodes with: #(one two three four five six).
+	mondrian edges connectAssociations: {
+		#one -> #two.
+		#one -> #three.
+		#two -> #four.
+		#three -> #five.
+		#three -> #six }.
+	nodes := mondrian nodeElements.
+	nodes do: [ :each | each size: 62 @ 34 ].
+	nodes withIndexDo: [ :each :index | each relocate: (index * 70) @ 100 ].
+	initialPositions := nodes collect: #position.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	mondrian physics forceDirected.
+	self assert: (nodes collect: #position) ~= initialPositions.
+	nodes do: [ :each |
+		self assert: each physics position equals: each position ].
+	^ mondrian
+]
+
+{ #category : 'examples' }
 CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	<gtExample>
 	| mondrian added addedEdge world behaviour |

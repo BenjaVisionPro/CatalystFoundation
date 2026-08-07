@@ -58,11 +58,23 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 
 { #category : 'behaviours' }
 CFPhysicsMondrian >> forceDirected [
+	self prepareForceDirectedStartingPositions.
 	self beWorld.
 	^ CFPhysicsForceDirectedBehaviour new
 		target: mondrian;
 		adapter: CFPhysicsMondrianGraphAdapter new;
 		start
+]
+
+{ #category : 'private - behaviours' }
+CFPhysicsMondrian >> prepareForceDirectedStartingPositions [
+	mondrian layout force.
+	mondrian root forceLayout.
+	world ifNotNil: [
+		mondrian nodeElements do: [ :each |
+			(world includes: each) ifTrue: [ each physics position: each position ] ].
+		self configureRootForPhysicsPresentation ].
+	^ self
 ]
 
 
