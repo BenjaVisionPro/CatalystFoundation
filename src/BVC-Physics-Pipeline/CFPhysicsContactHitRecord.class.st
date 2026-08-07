@@ -3,7 +3,7 @@ I announce a contact impact that exceeded the configured hit threshold. I report
 "
 
 Class {
-	#name : 'CFPhysicsContactHitEvent',
+	#name : 'CFPhysicsContactHitRecord',
 	#superclass : 'Object',
 	#instVars : [ 'contact', 'featureId', 'position', 'normal', 'approachSpeed', 'normalImpulse' ],
 	#category : 'BVC-Physics-Pipeline',
@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-CFPhysicsContactHitEvent class >> contact: aContact normal: aNormal pointResult: aPointResult [
+CFPhysicsContactHitRecord class >> contact: aContact normal: aNormal pointResult: aPointResult [
 	^ self new
 		contact: aContact;
 		featureId: aPointResult featureId;
@@ -23,26 +23,26 @@ CFPhysicsContactHitEvent class >> contact: aContact normal: aNormal pointResult:
 ]
 
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> contact [ ^ contact ]
+CFPhysicsContactHitRecord >> contact [ ^ contact ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> contact: anObject [ contact := anObject ]
+CFPhysicsContactHitRecord >> contact: anObject [ contact := anObject ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> featureId [ ^ featureId ]
+CFPhysicsContactHitRecord >> featureId [ ^ featureId ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> featureId: anObject [ featureId := anObject ]
+CFPhysicsContactHitRecord >> featureId: anObject [ featureId := anObject ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> position [ ^ position ]
+CFPhysicsContactHitRecord >> position [ ^ position ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> position: aPoint [ position := aPoint ]
+CFPhysicsContactHitRecord >> position: aPoint [ position := aPoint ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> normal [ ^ normal ]
+CFPhysicsContactHitRecord >> normal [ ^ normal ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> normal: aPoint [ normal := aPoint ]
+CFPhysicsContactHitRecord >> normal: aPoint [ normal := aPoint ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> approachSpeed [ ^ approachSpeed ]
+CFPhysicsContactHitRecord >> approachSpeed [ ^ approachSpeed ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> approachSpeed: aNumber [ approachSpeed := aNumber ]
+CFPhysicsContactHitRecord >> approachSpeed: aNumber [ approachSpeed := aNumber ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> normalImpulse [ ^ normalImpulse ]
+CFPhysicsContactHitRecord >> normalImpulse [ ^ normalImpulse ]
 { #category : 'accessing' }
-CFPhysicsContactHitEvent >> normalImpulse: aNumber [ normalImpulse := aNumber ]
+CFPhysicsContactHitRecord >> normalImpulse: aNumber [ normalImpulse := aNumber ]

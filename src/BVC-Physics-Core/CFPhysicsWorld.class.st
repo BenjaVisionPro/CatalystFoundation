@@ -623,6 +623,7 @@ CFPhysicsWorld >> commit: aWorldSolution [
 		calculationVisualState := previousVisualState ].
 	activeSolveTicket := nil.
 	self commitTelemetrySolveTicket: aWorldSolution solveTicket.
+	self dispatchContactEventsFrom: pipelineResult.
 	^ pipelineResult
 ]
 
@@ -1638,4 +1639,32 @@ CFPhysicsWorld >> collisionGeometryChangedForBody: aBody [
 	aBody shapeState advanceGeometryRevision.
 	stepPipeline resetBroadphaseProxiesFor: aBody.
 	^ self
+]
+
+
+{ #category : 'private - events' }
+CFPhysicsWorld >> dispatchContactEventsFrom: aStepResult [
+	aStepResult contactEvents do: [ :record |
+		| eventClass contact |
+		eventClass := record began
+			ifTrue: [ CFPhysicsContactBeganEvent ]
+			ifFalse: [ CFPhysicsContactEndedEvent ].
+		contact := record contact.
+		self dispatchContactEvent: eventClass contact: contact toBody: contact firstBody.
+		self dispatchContactEvent: eventClass contact: contact toBody: contact secondBody ].
+	aStepResult hitEvents do: [ :record |
+		self dispatchHitEvent: record toBody: record contact firstBody.
+		self dispatchHitEvent: record toBody: record contact secondBody ]
+]
+
+{ #category : 'private - events' }
+CFPhysicsWorld >> dispatchContactEvent: anEventClass contact: aContact toBody: aBody [
+	aBody element ifNotNil: [ :element |
+		element dispatchEvent: (anEventClass contact: aContact forBody: aBody) ]
+]
+
+{ #category : 'private - events' }
+CFPhysicsWorld >> dispatchHitEvent: aHitRecord toBody: aBody [
+	aBody element ifNotNil: [ :element |
+		element dispatchEvent: (CFPhysicsContactHitEvent record: aHitRecord forBody: aBody) ]
 ]

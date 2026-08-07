@@ -33,7 +33,7 @@ CFPhysicsPostSolveCollector >> collectFrom: constraints [
 				(hitPoint isNil or: [ point approachSpeed > hitPoint approachSpeed ])
 					ifTrue: [ hitPoint := point ] ] ].
 		hitPoint ifNotNil: [
-			events add: (CFPhysicsContactHitEvent
+			events add: (CFPhysicsContactHitRecord
 				contact: result contact
 				normal: result normal
 				pointResult: hitPoint) ] ].

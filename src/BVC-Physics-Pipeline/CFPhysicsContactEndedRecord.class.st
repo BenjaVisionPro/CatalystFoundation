@@ -3,14 +3,14 @@ I announce that a contact has ended. I preserve the final contact identity for o
 "
 
 Class {
-	#name : 'CFPhysicsContactEndedEvent',
-	#superclass : 'CFPhysicsContactEvent',
+	#name : 'CFPhysicsContactEndedRecord',
+	#superclass : 'CFPhysicsContactEventRecord',
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'accessing' }
-CFPhysicsContactEndedEvent >> manifold [ ^ contact previousManifold ]
+CFPhysicsContactEndedRecord >> manifold [ ^ contact previousManifold ]
 
 { #category : 'testing' }
-CFPhysicsContactEndedEvent >> ended [ ^ true ]
+CFPhysicsContactEndedRecord >> ended [ ^ true ]

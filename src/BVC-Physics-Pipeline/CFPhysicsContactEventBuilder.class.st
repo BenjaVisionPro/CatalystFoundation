@@ -13,9 +13,9 @@ Class {
 CFPhysicsContactEventBuilder >> eventsFrom: aContactResult [
 	| began ended |
 	began := aContactResult beganContacts collect: [ :contact |
-		CFPhysicsContactBeganEvent contact: contact ].
+		CFPhysicsContactBeganRecord contact: contact ].
 	ended := aContactResult endedContacts collect: [ :contact |
-		CFPhysicsContactEndedEvent contact: contact ].
+		CFPhysicsContactEndedRecord contact: contact ].
 	^ (began, ended) sorted: [ :left :right |
 		left comesBefore: right ]
 ]

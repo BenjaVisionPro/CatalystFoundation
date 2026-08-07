@@ -3,14 +3,14 @@ I announce that a contact has begun. I expose the contact and its manifold throu
 "
 
 Class {
-	#name : 'CFPhysicsContactBeganEvent',
-	#superclass : 'CFPhysicsContactEvent',
+	#name : 'CFPhysicsContactBeganRecord',
+	#superclass : 'CFPhysicsContactEventRecord',
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
 
 { #category : 'accessing' }
-CFPhysicsContactBeganEvent >> manifold [ ^ contact manifold ]
+CFPhysicsContactBeganRecord >> manifold [ ^ contact manifold ]
 
 { #category : 'testing' }
-CFPhysicsContactBeganEvent >> began [ ^ true ]
+CFPhysicsContactBeganRecord >> began [ ^ true ]
