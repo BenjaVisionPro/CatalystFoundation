@@ -458,7 +458,7 @@ CFPhysicsCollisionTests >> testWorldAnchorRelationshipsStillCleanUpWithTheirBody
 	spring := (CFPhysicsBodyCentreAnchor on: body)
 		distanceJointTo: (world anchorAt: 100 @ 10).
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
-	world removeDistanceJointsUsingBody: body.
+	world removeJointsUsingBody: body.
 	self assert: world springs isEmpty.
 	self assert: spring isActive not.
 	^ spring

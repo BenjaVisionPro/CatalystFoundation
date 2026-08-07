@@ -386,11 +386,11 @@ CFPhysicsIslandTests >> testMixedJointConstraintsKeepTheWorldOrdering [
 	result := world step.
 	self
 		assert: (result joints collect: #solverCommitTarget)
-		equals: { distance. revolute }.
+		equals: { revolute. distance }.
 	self assert: (result constraints collect: #joint) equals: result joints.
 	self assert: (result constraints collect: #class) equals: {
-		CFPhysicsPreparedDistanceJoint.
-		CFPhysicsPreparedRevoluteJoint }.
+		CFPhysicsPreparedRevoluteJoint.
+		CFPhysicsPreparedDistanceJoint }.
 	^ result
 ]
 { #category : 'tests - constraint graph' }
