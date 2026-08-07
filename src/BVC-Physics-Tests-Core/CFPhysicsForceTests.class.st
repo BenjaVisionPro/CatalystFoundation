@@ -103,9 +103,8 @@ CFPhysicsForceTests >> testOneNewtonAcceleratesOneKilogramByOneMetrePerSecondSqu
 	element := BlElement new size: 100 @ 100; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world
-		containment disable;
-		gravity: 0 @ 0.
+	world containment disable.
+	world gravity: 0 @ 0.
 	element physics
 		beDynamic;
 		density: 1.0.
@@ -125,10 +124,9 @@ CFPhysicsForceTests >> testPhysicalForceIsIndependentOfWorldLengthScale [
 	element := BlElement new size: 200 @ 200; yourself.
 	owner addChild: element.
 	world := owner physics beWorld.
-	world
-		lengthUnitsPerMetre: 200.0;
-		containment disable;
-		gravity: 0 @ 0.
+	world lengthUnitsPerMetre: 200.0.
+	world containment disable.
+	world gravity: 0 @ 0.
 	element physics
 		beDynamic;
 		density: 1.0.
