@@ -1,7 +1,7 @@
 "
 I represent a mutable scalar shared by several Physics collaborators.
 
-My responsibility is to let related constraints and Behaviours observe one live configuration value.
+My responsibility is to let related Forces and Behaviours observe one live configuration value.
 "
 Class {
 	#name : 'CFPhysicsSharedScalar',

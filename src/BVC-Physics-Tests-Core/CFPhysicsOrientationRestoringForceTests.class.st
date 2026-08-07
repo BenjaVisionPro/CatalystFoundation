@@ -1,14 +1,14 @@
 Class {
-	#name : 'CFPhysicsOrientationRestoringTests',
+	#name : 'CFPhysicsOrientationRestoringForceTests',
 	#superclass : 'TestCase',
-	#category : 'BVC-Physics-Tests-Behaviours',
-	#package : 'BVC-Physics-Tests-Behaviours'
+	#category : 'BVC-Physics-Tests-Core',
+	#package : 'BVC-Physics-Tests-Core'
 }
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringTests >> testOrientationRestoringReturnsItsElementToCapturedRotation [
+CFPhysicsOrientationRestoringForceTests >> testOrientationRestoringReturnsItsElementToCapturedRotation [
 	<gtExample>
-	| owner element world behaviour target |
+	| owner element world force target |
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 80 @ 40; yourself.
 	owner addChild: element.
@@ -17,20 +17,19 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringReturnsItsElementT
 	world owner physics makeChildrenDynamic.
 	target := 0.35.
 	element physics rotation: target.
-	behaviour := element physics restoreOrientation.
-	behaviour stiffness: 36.0; damping: 6.0.
+	force := element physics restoreOrientation.
 	world step.
 	element physics rotation: target + 0.8; angularVelocity: 4.0.
 	1 to: 360 do: [ :index | world step ].
 	self assert: ((element physics rotation - target) abs < 0.003).
 	self assert: (element physics angularVelocity abs < 0.02).
-	^ behaviour
+	^ force
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringTests >> testOrientationRestoringUsesTheShortestAngularPath [
+CFPhysicsOrientationRestoringForceTests >> testOrientationRestoringUsesTheShortestAngularPath [
 	<gtExample>
-	| owner element world behaviour initialVelocity |
+	| owner element world force initialVelocity |
 	owner := BlElement new size: 400 @ 300; yourself.
 	element := BlElement new size: 80 @ 40; yourself.
 	owner addChild: element.
@@ -38,19 +37,18 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringUsesTheShortestAng
 	world gravity: 0 @ 0.
 	world owner physics makeChildrenDynamic.
 	element physics rotation: Float pi - 0.1.
-	behaviour := element physics restoreOrientation.
-	world step.
+	force := element physics restoreOrientation.
 	element physics rotation: Float pi negated + 0.1.
 	world step.
 	initialVelocity := element physics angularVelocity.
 	self assert: initialVelocity < 0.0.
-	^ behaviour
+	^ force
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringTests >> testOrientationRestoringActsOnlyOnItsAttachedElement [
+CFPhysicsOrientationRestoringForceTests >> testOrientationRestoringActsOnlyOnItsBody [
 	<gtExample>
-	| owner first second world behaviour secondRotation |
+	| owner first second world force secondRotation |
 	owner := BlElement new size: 400 @ 300; yourself.
 	first := BlElement new size: 80 @ 40; yourself.
 	second := BlElement new size: 80 @ 40; yourself.
@@ -60,8 +58,7 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringActsOnlyOnItsAttac
 	world owner physics makeChildrenDynamic.
 	first physics position: 40 @ 100.
 	second physics position: 240 @ 100.
-	behaviour := first physics restoreOrientation.
-	world step.
+	force := first physics restoreOrientation.
 	first physics rotation: 0.8.
 	secondRotation := 0.6.
 	second physics rotation: secondRotation.
@@ -69,20 +66,20 @@ CFPhysicsOrientationRestoringTests >> testOrientationRestoringActsOnlyOnItsAttac
 	self assert: first physics angularVelocity isZero not.
 	self assert: second physics rotation equals: secondRotation.
 	self assert: second physics angularVelocity isZero.
-	^ behaviour
+	^ force
 ]
 
 { #category : 'examples - orientation restoring' }
-CFPhysicsOrientationRestoringTests >> testOrientationRestoringAllowsFastCollisionSpinToDecayNaturally [
+CFPhysicsOrientationRestoringForceTests >> testOrientationRestoringAllowsFastCollisionSpinToDecayNaturally [
 	<gtExample>
-	| behaviour slowResponse fastResponse |
-	behaviour := CFPhysicsOrientationRestoringBehaviour new
+	| force slowResponse fastResponse |
+	force := CFPhysicsOrientationRestoringForce new
 		angularResponseVelocityScale: 4.0;
 		yourself.
-	slowResponse := behaviour responseFactorForAngularVelocity: 1.0.
-	fastResponse := behaviour responseFactorForAngularVelocity: 12.0.
+	slowResponse := force responseFactorForAngularVelocity: 1.0.
+	fastResponse := force responseFactorForAngularVelocity: 12.0.
 	self assert: fastResponse < slowResponse.
 	self assert: fastResponse > 0.0.
 	self assert: slowResponse < 1.0.
-	^ behaviour
+	^ force
 ]

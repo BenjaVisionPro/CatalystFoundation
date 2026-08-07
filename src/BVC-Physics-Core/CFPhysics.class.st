@@ -643,6 +643,15 @@ CFPhysics >> prismaticJoints [
 
 
 
+{ #category : 'forces' }
+CFPhysics >> restoreOrientation [
+	| aWorld force |
+	aWorld := self world.
+	aWorld ifNil: [ self error: 'The element does not belong to a Physics world' ].
+	force := CFPhysicsOrientationRestoringForce new body: self body.
+	^ aWorld addForce: force
+]
+
 { #category : 'attraction interaction' }
 CFPhysics >> attract: anotherElement [
 	| aWorld otherWorld attraction |

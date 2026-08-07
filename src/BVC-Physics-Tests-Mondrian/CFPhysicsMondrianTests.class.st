@@ -294,6 +294,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesLiveMondrianConnec
 	world step.
 	self assert: behaviour springsByEdge size equals: 1.
 	self assert: behaviour repulsionForce bodies size equals: 3.
+	self assert: behaviour orientationForcesByElement size equals: 3.
 	mondrian edges connectAssociations: { #two -> #three }.
 	world step.
 	self assert: behaviour springsByEdge size equals: 2.
@@ -314,6 +315,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	self assert: world members size equals: 2.
 	self assert: behaviour springsByEdge size equals: 1.
 	self assert: behaviour repulsionForce bodies size equals: 2.
+	self assert: behaviour orientationForcesByElement size equals: 2.
 	added := (mondrian nodes with: #(three)) first.
 	addedEdge := (mondrian edges connectAssociations: { #two -> #three }) first.
 	world step.
@@ -321,6 +323,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	self assert: world members size equals: 3.
 	self assert: behaviour springsByEdge size equals: 2.
 	self assert: behaviour repulsionForce bodies size equals: 3.
+	self assert: behaviour orientationForcesByElement size equals: 3.
 	mondrian root removeChild: addedEdge.
 	world step.
 	self assert: behaviour springsByEdge size equals: 1.
@@ -330,6 +333,7 @@ CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	self assert: world members size equals: 2.
 	self assert: behaviour springsByEdge size equals: 1.
 	self assert: behaviour repulsionForce bodies size equals: 2.
+	self assert: behaviour orientationForcesByElement size equals: 2.
 	^ mondrian
 ]
 

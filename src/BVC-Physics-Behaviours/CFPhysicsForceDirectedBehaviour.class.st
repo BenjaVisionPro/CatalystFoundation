@@ -7,7 +7,7 @@ Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
-		'adapter', 'springsByEdge', 'repulsionForce', 'positioningForce',
+		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce',
 		'length', 'hertz', 'dampingRatio',
 		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'velocityDamping'
 	],
@@ -19,6 +19,7 @@ Class {
 CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByEdge := IdentityDictionary new.
+	orientationForcesByElement := IdentityDictionary new.
 	repulsionForce := nil.
 	positioningForce := nil.
 	length := CFPhysicsSharedScalar value: 90.0.
@@ -130,6 +131,7 @@ CFPhysicsForceDirectedBehaviour >> reconcile [
 	currentBodies := currentElements collect: [ :element | element physics body ].
 	self ensureRepulsionForceFor: currentBodies.
 	self ensurePositioningForceFor: currentBodies.
+	self reconcileOrientationForcesFor: currentElements.
 	self removeObsoleteSpringsExcept: currentEdges asIdentitySet.
 	currentEdges do: [ :edge | self ensureSpringFor: edge ]
 ]
@@ -154,6 +156,28 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredEdges [
 		(desiredEdges includes: association key) ifFalse: [
 			association value remove.
 			springsByEdge removeKey: association key ] ]
+]
+
+
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedBehaviour >> reconcileOrientationForcesFor: currentElements [
+	| desiredElements |
+	desiredElements := currentElements asIdentitySet.
+	orientationForcesByElement associations copy do: [ :association |
+		(desiredElements includes: association key) ifFalse: [
+			association value remove.
+			orientationForcesByElement removeKey: association key ] ].
+	currentElements do: [ :element |
+		| force |
+		force := orientationForcesByElement at: element ifAbsent: [ nil ].
+		(force isNil or: [ force isActive not ]) ifTrue: [
+			force := element physics restoreOrientation.
+			orientationForcesByElement at: element put: force ] ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsForceDirectedBehaviour >> orientationForcesByElement [
+	^ orientationForcesByElement copy
 ]
 
 { #category : 'private - reconciliation' }
@@ -206,9 +230,11 @@ CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentElements over: aTime
 { #category : 'private - running' }
 CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	springsByEdge values copy do: #remove.
+	orientationForcesByElement values copy do: #remove.
 	repulsionForce ifNotNil: [ repulsionForce remove ].
 	positioningForce ifNotNil: [ positioningForce remove ].
 	repulsionForce := nil.
 	positioningForce := nil.
-	springsByEdge removeAll
+	springsByEdge removeAll.
+	orientationForcesByElement removeAll
 ]
