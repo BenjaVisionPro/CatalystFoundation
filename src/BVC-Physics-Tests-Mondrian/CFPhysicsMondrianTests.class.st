@@ -268,12 +268,11 @@ CFPhysicsMondrianTests >> testMondrianPhysicsUsesDefaultGravityWithoutABehaviour
 		background: Color veryVeryLightGray.
 	mondrian nodes with: (1 to: 12).
 	nodes := mondrian nodeElements.
-	nodes withIndexDo: [ :each :index |
-		each
-			size: 62 @ 34;
-			relocate: 24 + ((index - 1) * 74) @ (28 + (index * 6)) ].
-	initialPositions := nodes collect: [ :each | each position ].
+	nodes do: [ :each | each size: 62 @ 34 ].
 	world := mondrian physics beWorld.
+	nodes withIndexDo: [ :each :index |
+		each physics position: 80 + ((index - 1) * 65) @ 100 ].
+	initialPositions := nodes collect: [ :each | each physics position ].
 	self assert: world gravity equals: 0 @ 10.0.
 	world step: 3.
 	nodes with: initialPositions do: [ :each :initialPosition |
