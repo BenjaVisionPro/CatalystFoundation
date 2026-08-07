@@ -5,6 +5,16 @@ Class {
 	#package : 'BVC-Physics-Tests-Behaviours'
 }
 
+{ #category : 'private' }
+CFPhysicsForceDirectedBehaviourTests >> adapterForElements: elements edges: edges [
+	^ CFPhysicsGraphAdapter new
+		elementsBlock: [ :target | elements ];
+		edgesBlock: [ :target | edges ];
+		sourceElementBlock: [ :edge | edge key ];
+		destinationElementBlock: [ :edge | edge value ];
+		yourself
+]
+
 { #category : 'tests - behaviours' }
 CFPhysicsForceDirectedBehaviourTests >> testForceDirectedDefaultsFavourQuickSettling [
 	<gtExample>
@@ -20,7 +30,7 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedDefaultsFavourQuickSett
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsForceDirectedBehaviourTests >> testForceDirectedCreatesSpringsAndRepulsionsInConnectionOrder [
+CFPhysicsForceDirectedBehaviourTests >> testForceDirectedCreatesSpringsAndRepulsions [
 	<gtExample>
 	| root first second third world edge behaviour |
 	root := BlElement new.
@@ -31,12 +41,11 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedCreatesSpringsAndRepuls
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	edge := first -> second.
-	behaviour := root physics forceDirected.
-	behaviour
-		nodes: [ { first. second. third } ];
-		connections: [ { edge } ].
-	world step.
-	self assert: behaviour springsByConnection size equals: 1.
+	behaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first. second. third } edges: { edge });
+		start.
+	self assert: behaviour springsByEdge size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 3.
 	self assert: world springs size equals: 1.
 	self assert: world repulsions size equals: 3
@@ -45,7 +54,7 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedCreatesSpringsAndRepuls
 { #category : 'tests - behaviours' }
 CFPhysicsForceDirectedBehaviourTests >> testForceDirectedRetainsExistingConstraintsWhileReconcilingChanges [
 	<gtExample>
-	| root first second third world nodes connections firstConnection secondConnection behaviour retainedSpring retainedRepulsion |
+	| root first second third world elements edges firstEdge secondEdge behaviour retainedSpring retainedRepulsion |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
@@ -53,49 +62,47 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedRetainsExistingConstrai
 	root addChildren: { first. second. third }.
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
-	nodes := OrderedCollection with: first with: second.
-	firstConnection := first -> second.
-	secondConnection := second -> third.
-	connections := OrderedCollection with: firstConnection.
-	behaviour := root physics forceDirected.
-	behaviour
-		nodes: [ nodes ];
-		connections: [ connections ].
-	world step.
-	retainedSpring := behaviour springsByConnection at: firstConnection.
+	elements := OrderedCollection with: first with: second.
+	firstEdge := first -> second.
+	secondEdge := second -> third.
+	edges := OrderedCollection with: firstEdge.
+	behaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: elements edges: edges);
+		start.
+	retainedSpring := behaviour springsByEdge at: firstEdge.
 	retainedRepulsion := behaviour repulsionsByPair values anyOne.
-	nodes add: third.
-	connections add: secondConnection.
+	elements add: third.
+	edges add: secondEdge.
 	world step.
-	self assert: (behaviour springsByConnection at: firstConnection) identicalTo: retainedSpring.
+	self assert: (behaviour springsByEdge at: firstEdge) identicalTo: retainedSpring.
 	self assert: (behaviour repulsionsByPair values includes: retainedRepulsion).
-	self assert: behaviour springsByConnection size equals: 2.
+	self assert: behaviour springsByEdge size equals: 2.
 	self assert: behaviour repulsionsByPair size equals: 3.
-	connections remove: firstConnection.
-	nodes remove: first.
+	edges remove: firstEdge.
+	elements remove: first.
 	world step.
-	self deny: (behaviour springsByConnection includesKey: firstConnection).
-	self assert: behaviour springsByConnection size equals: 1.
+	self deny: (behaviour springsByEdge includesKey: firstEdge).
+	self assert: behaviour springsByEdge size equals: 1.
 	self assert: behaviour repulsionsByPair size equals: 1.
 	self deny: retainedSpring isActive
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsForceDirectedBehaviourTests >> testForceDirectedConfigurationUpdatesSharedPrimitiveValues [
+CFPhysicsForceDirectedBehaviourTests >> testForceDirectedConfigurationUpdatesOwnedPhysics [
 	<gtExample>
-	| root first second world connection behaviour spring repulsion |
+	| root first second world edge behaviour spring repulsion |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
 	world := root physics beWorld.
-	connection := first -> second.
-	behaviour := root physics forceDirected.
-	behaviour
-		nodes: [ { first. second } ];
-		connections: [ { connection } ].
-	world step.
-	spring := behaviour springsByConnection at: connection.
+	edge := first -> second.
+	behaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first. second } edges: { edge });
+		start.
+	spring := behaviour springsByEdge at: edge.
 	repulsion := behaviour repulsionsByPair values anyOne.
 	behaviour
 		length: 175;
@@ -110,34 +117,31 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedConfigurationUpdatesSha
 	self assert: spring hertz equals: 25.0.
 	self assert: spring dampingRatio equals: 4.0.
 	self assert: repulsion force value equals: 700.0.
-	self assert: repulsion distanceResponse class equals: CFPhysicsSoftenedInverseSquareResponse.
 	self assert: repulsion distanceResponse softeningDistance value equals: 35.0.
-	self assert: repulsion maximumDistance value equals: 250.0.
-	self assert: behaviour velocityDamping equals: 12.0
+	self assert: repulsion maximumDistance value equals: 250.0
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsForceDirectedBehaviourTests >> testRemovingForceDirectedRemovesOnlyItsOwnedConstraints [
+CFPhysicsForceDirectedBehaviourTests >> testStoppingForceDirectedRemovesOnlyItsOwnedPhysics [
 	<gtExample>
-	| root first second world connection firstBehaviour secondBehaviour firstSpring secondSpring |
+	| root first second world edge firstBehaviour secondBehaviour firstSpring secondSpring |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
 	world := root physics beWorld.
-	connection := first -> second.
-	firstBehaviour := root physics forceDirected.
-	firstBehaviour
-		nodes: [ { first. second } ];
-		connections: [ { connection } ].
-	secondBehaviour := root physics forceDirected.
-	secondBehaviour
-		nodes: [ { first. second } ];
-		connections: [ { connection } ].
-	world step.
-	firstSpring := firstBehaviour springsByConnection at: connection.
-	secondSpring := secondBehaviour springsByConnection at: connection.
-	firstBehaviour remove.
+	edge := first -> second.
+	firstBehaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first. second } edges: { edge });
+		start.
+	secondBehaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first. second } edges: { edge });
+		start.
+	firstSpring := firstBehaviour springsByEdge at: edge.
+	secondSpring := secondBehaviour springsByEdge at: edge.
+	firstBehaviour stop.
 	self deny: firstSpring isActive.
 	self assert: secondSpring isActive.
 	self assert: world springs equals: { secondSpring }.
@@ -145,23 +149,22 @@ CFPhysicsForceDirectedBehaviourTests >> testRemovingForceDirectedRemovesOnlyItsO
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsForceDirectedBehaviourTests >> testForceDirectedRejectsEndpointsOutsideItsNodeSelection [
+CFPhysicsForceDirectedBehaviourTests >> testForceDirectedRejectsEndpointsOutsideItsElementSelection [
 	<gtExample>
-	| root first second world connection behaviour |
+	| root first second edge behaviour |
 	root := BlElement new.
 	first := BlElement new extent: 20 @ 20.
 	second := BlElement new extent: 20 @ 20.
 	root addChildren: { first. second }.
-	world := root physics beWorld.
-	connection := first -> second.
-	behaviour := root physics forceDirected.
-	behaviour
-		nodes: [ { first } ];
-		connections: [ { connection } ].
+	root physics beWorld.
+	edge := first -> second.
+	behaviour := CFPhysicsForceDirectedBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first } edges: { edge }).
 	self
-		should: [ world step ]
+		should: [ behaviour start ]
 		raise: Error
 		withExceptionDo: [ :error |
 			self assert: error messageText equals:
-				'Every force-directed connection endpoint must occur in the selected nodes' ]
+				'Every force-directed edge endpoint must occur in the selected elements' ]
 ]

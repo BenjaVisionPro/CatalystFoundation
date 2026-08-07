@@ -284,54 +284,52 @@ CFPhysicsMondrianTests >> testMondrianPhysicsUsesDefaultGravityWithoutABehaviour
 { #category : 'examples' }
 CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedUsesLiveMondrianConnections [
 	<gtExample>
-	| mondrian world behaviour genericBehaviour |
+	| mondrian world behaviour |
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two three).
 	mondrian edges connectAssociations: { #one -> #two }.
 	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
-	genericBehaviour := behaviour forceDirectedBehaviour.
 	world step.
-	self assert: genericBehaviour springsByConnection size equals: 1.
-	self assert: genericBehaviour repulsionsByPair size equals: 3.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 3.
 	mondrian edges connectAssociations: { #two -> #three }.
 	world step.
-	self assert: genericBehaviour springsByConnection size equals: 2.
+	self assert: behaviour springsByEdge size equals: 2.
 	^ mondrian
 ]
 
 { #category : 'examples' }
 CFPhysicsMondrianTests >> testMondrianPhysicsForceDirectedTracksAddedNodes [
 	<gtExample>
-	| mondrian added addedEdge world behaviour genericBehaviour |
+	| mondrian added addedEdge world behaviour |
 	mondrian := GtMondrian new.
 	mondrian nodes with: #(one two).
 	mondrian edges connectAssociations: { #one -> #two }.
 	world := mondrian physics beWorld.
 	world gravity: 0 @ 0.
 	behaviour := mondrian physics forceDirected.
-	genericBehaviour := behaviour forceDirectedBehaviour.
 	world step.
 	self assert: world members size equals: 2.
-	self assert: genericBehaviour springsByConnection size equals: 1.
-	self assert: genericBehaviour repulsionsByPair size equals: 1.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1.
 	added := (mondrian nodes with: #(three)) first.
 	addedEdge := (mondrian edges connectAssociations: { #two -> #three }) first.
 	world step.
 	self assert: (world includes: added).
 	self assert: world members size equals: 3.
-	self assert: genericBehaviour springsByConnection size equals: 2.
-	self assert: genericBehaviour repulsionsByPair size equals: 3.
+	self assert: behaviour springsByEdge size equals: 2.
+	self assert: behaviour repulsionsByPair size equals: 3.
 	mondrian root removeChild: addedEdge.
 	world step.
-	self assert: genericBehaviour springsByConnection size equals: 1.
-	self assert: genericBehaviour repulsionsByPair size equals: 3.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 3.
 	mondrian root removeChild: added.
 	world step.
 	self assert: world members size equals: 2.
-	self assert: genericBehaviour springsByConnection size equals: 1.
-	self assert: genericBehaviour repulsionsByPair size equals: 1.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1.
 	^ mondrian
 ]
 

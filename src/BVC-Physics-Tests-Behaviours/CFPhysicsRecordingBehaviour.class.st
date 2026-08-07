@@ -1,7 +1,7 @@
 Class {
 	#name : 'CFPhysicsRecordingBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
-	#instVars : [ 'updates', 'removalCount', 'updateBlock' ],
+	#instVars : [ 'updates', 'stopCount', 'updateBlock' ],
 	#category : 'BVC-Physics-Tests-Behaviours',
 	#package : 'BVC-Physics-Tests-Behaviours'
 }
@@ -10,7 +10,7 @@ Class {
 CFPhysicsRecordingBehaviour >> initialize [
 	super initialize.
 	updates := OrderedCollection new.
-	removalCount := 0
+	stopCount := 0
 ]
 
 { #category : 'accessing' }
@@ -19,8 +19,8 @@ CFPhysicsRecordingBehaviour >> updates [
 ]
 
 { #category : 'accessing' }
-CFPhysicsRecordingBehaviour >> removalCount [
-	^ removalCount
+CFPhysicsRecordingBehaviour >> stopCount [
+	^ stopCount
 ]
 
 { #category : 'accessing' }
@@ -29,12 +29,13 @@ CFPhysicsRecordingBehaviour >> updateBlock: aBlock [
 ]
 
 { #category : 'updating' }
-CFPhysicsRecordingBehaviour >> updateForStep: aPhysicsStep [
+CFPhysicsRecordingBehaviour >> step: aPhysicsStep [
 	updates add: aPhysicsStep.
 	updateBlock ifNotNil: [ updateBlock value: self value: aPhysicsStep ]
 ]
 
-{ #category : 'removing' }
-CFPhysicsRecordingBehaviour >> removing [
-	removalCount := removalCount + 1
+{ #category : 'running' }
+CFPhysicsRecordingBehaviour >> stop [
+	self isRunning ifTrue: [ stopCount := stopCount + 1 ].
+	^ super stop
 ]

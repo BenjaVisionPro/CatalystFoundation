@@ -120,7 +120,7 @@ CFPhysicsWorld >> release [
 	unchanged; its Physics facade removes the world association separately."
 	self telemetryEnabled: false.
 	telemetryLogger := nil.
-	behaviours copy do: [ :each | each remove ].
+	behaviours copy do: [ :each | each stop ].
 	joints copy do: #remove.
 	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
 	repulsionConstraints copy do: [ :each | self removeRepulsionConstraint: each ].
@@ -462,16 +462,21 @@ CFPhysicsWorld >> removeBehaviour: aBehaviour [
 ]
 
 { #category : 'behaviours' }
+CFPhysicsWorld >> includesBehaviour: aBehaviour [
+	^ behaviours identityIncludes: aBehaviour
+]
+
+{ #category : 'behaviours' }
 CFPhysicsWorld >> retireInvalidBehaviours [
-	behaviours copy do: [ :each |
-		each belongsToWorld ifFalse: [ each remove ] ]
+	behaviours copy do: [ :behaviour |
+		behaviour target physics world == self ifFalse: [ behaviour stop ] ]
 ]
 
 { #category : 'behaviours' }
 CFPhysicsWorld >> updateBehavioursForStep: aPhysicsStep [
-	behaviours copy do: [ :each |
-		each isRemoved ifFalse: [
-			each updateForStep: aPhysicsStep ] ]
+	behaviours copy do: [ :behaviour |
+		(self includesBehaviour: behaviour) ifTrue: [
+			behaviour step: aPhysicsStep ] ]
 ]
 
 { #category : 'accessing - stepping' }

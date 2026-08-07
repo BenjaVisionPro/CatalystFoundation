@@ -1,37 +1,28 @@
-"
-I represent a reusable orchestration of Physics across one or more bodies.
 
-My responsibility is to participate in a world step and manage my ownership and removal lifecycle. Subclasses define the physical mechanism I apply.
+"
+I orchestrate Physics for one target.
+
+My target determines the Physics world in which I run. The world sends me #step: before each simulation step. Subclasses may create persistent Physics resources, contribute on every step, or do both.
 "
 Class {
 	#name : 'CFPhysicsBehaviour',
 	#superclass : 'Object',
-	#instVars : [ 'physics', 'world', 'removed' ],
+	#instVars : [ 'target', 'world' ],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
 }
 
-{ #category : 'instance creation' }
-CFPhysicsBehaviour class >> physics: aPhysics [
-	^ self new
-		physics: aPhysics;
-		yourself
-]
-
-{ #category : 'initialization' }
-CFPhysicsBehaviour >> initialize [
-	super initialize.
-	removed := false
+{ #category : 'accessing' }
+CFPhysicsBehaviour >> target [
+	^ target
 ]
 
 { #category : 'accessing' }
-CFPhysicsBehaviour >> physics [
-	^ physics
-]
-
-{ #category : 'private - installation' }
-CFPhysicsBehaviour >> physics: aPhysics [
-	physics := aPhysics
+CFPhysicsBehaviour >> target: aTarget [
+	self isRunning ifTrue: [
+		self error: 'Stop a Physics Behaviour before changing its target' ].
+	target := aTarget.
+	^ self
 ]
 
 { #category : 'accessing' }
@@ -39,48 +30,30 @@ CFPhysicsBehaviour >> world [
 	^ world
 ]
 
-{ #category : 'private - installation' }
-CFPhysicsBehaviour >> world: aWorld [
-	world := aWorld
-]
-
-{ #category : 'accessing' }
-CFPhysicsBehaviour >> element [
-	^ physics element
-]
-
-{ #category : 'testing' }
-CFPhysicsBehaviour >> isRemoved [
-	^ removed
-]
-
-{ #category : 'testing' }
-CFPhysicsBehaviour >> belongsToWorld [
-	^ physics notNil and: [ physics world == world ]
-]
-
-{ #category : 'updating' }
-CFPhysicsBehaviour >> updateForStep: aPhysicsStep [
-	self subclassResponsibility
-]
-
-{ #category : 'removing' }
-CFPhysicsBehaviour >> remove [
-	removed ifTrue: [ ^ self ].
-	removed := true.
-	[ self removing ] ensure: [
-		world ifNotNil: [ world removeBehaviour: self ].
-		physics ifNotNil: [ physics removeBehaviour: self ] ].
+{ #category : 'running' }
+CFPhysicsBehaviour >> start [
+	self isRunning ifTrue: [ ^ self ].
+	target ifNil: [ self error: 'A Physics Behaviour requires a target' ].
+	world := target physics world.
+	world ifNil: [
+		self error: 'A Physics Behaviour target must belong to a Physics world' ].
+	world addBehaviour: self.
 	^ self
 ]
 
-{ #category : 'removing' }
-CFPhysicsBehaviour >> removing [
+{ #category : 'running' }
+CFPhysicsBehaviour >> stop [
+	world ifNotNil: [
+		world removeBehaviour: self.
+		world := nil ].
+	^ self
 ]
 
+{ #category : 'testing' }
+CFPhysicsBehaviour >> isRunning [
+	^ world notNil and: [ world includesBehaviour: self ]
+]
 
-{ #category : 'protected - participants' }
-CFPhysicsBehaviour >> resolvedParticipantsFrom: aCollectionOrProvider default: aBlock [
-	aCollectionOrProvider ifNil: [ ^ aBlock value asArray ].
-	^ aCollectionOrProvider value asArray
+{ #category : 'stepping' }
+CFPhysicsBehaviour >> step: aPhysicsStep [
 ]

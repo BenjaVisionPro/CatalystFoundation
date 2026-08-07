@@ -85,9 +85,9 @@ CFPhysicsOrientationRestoringBehaviour >> angularVelocityTolerance: aNumberOrSha
 CFPhysicsOrientationRestoringBehaviour >> angularVelocityTolerance [ ^ angularVelocityTolerance ]
 
 { #category : 'updating' }
-CFPhysicsOrientationRestoringBehaviour >> updateForStep: aPhysicsStep [
+CFPhysicsOrientationRestoringBehaviour >> step: aPhysicsStep [
 	| body |
-	body := physics body.
+	body := target physics body.
 	targetRotation ifNil: [ targetRotation := body rotation ].
 	self restoreBody: body
 ]

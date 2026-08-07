@@ -6,18 +6,15 @@ Class {
 }
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testDetachedElementCannotAddPhysicsBehaviour [
+CFPhysicsBehaviourLifecycleTests >> testDetachedTargetCannotStartPhysicsBehaviour [
 	<gtExample>
-	| element behaviour |
-	element := BlElement new.
-	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
-	self
-		should: [ element physics addBehaviour: behaviour ]
-		raise: Error
+	| behaviour |
+	behaviour := CFPhysicsRecordingBehaviour new target: BlElement new.
+	self should: [ behaviour start ] raise: Error
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
+CFPhysicsBehaviourLifecycleTests >> testWorldStepsBehavioursInStartOrder [
 	<gtExample>
 	| root element world order first second |
 	root := BlElement new.
@@ -26,13 +23,12 @@ CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
 	order := OrderedCollection new.
-	first := CFPhysicsRecordingBehaviour physics: element physics.
+	first := CFPhysicsRecordingBehaviour new target: element.
 	first updateBlock: [ :behaviour :step | order add: #first ].
-	second := CFPhysicsRecordingBehaviour physics: element physics.
+	second := CFPhysicsRecordingBehaviour new target: element.
 	second updateBlock: [ :behaviour :step | order add: #second ].
-	element physics
-		addBehaviour: first;
-		addBehaviour: second.
+	first start.
+	second start.
 	world step.
 	self assert: order asArray equals: #(first second).
 	self assert: first updates first stepNumber equals: 1.
@@ -40,24 +36,22 @@ CFPhysicsBehaviourLifecycleTests >> testWorldUpdatesBehavioursInInsertionOrder [
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testBehaviourRemovalIsIdempotentAndClearsBothOwners [
+CFPhysicsBehaviourLifecycleTests >> testStopIsIdempotent [
 	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
 	element := BlElement new.
 	root addChild: element.
 	world := root physics beWorld.
-	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
-	element physics addBehaviour: behaviour.
-	behaviour remove; remove.
-	self assert: behaviour isRemoved.
-	self assert: behaviour removalCount equals: 1.
-	self assert: element physics behaviours isEmpty.
+	behaviour := CFPhysicsRecordingBehaviour new target: element.
+	behaviour start; stop; stop.
+	self deny: behaviour isRunning.
+	self assert: behaviour stopCount equals: 1.
 	self assert: world behaviours isEmpty
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testBehaviourCanRemoveItselfDuringWorldUpdate [
+CFPhysicsBehaviourLifecycleTests >> testBehaviourCanStopItselfDuringWorldStep [
 	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
@@ -65,17 +59,17 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourCanRemoveItselfDuringWorldUpdat
 	root addChild: element.
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
-	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
-	behaviour updateBlock: [ :each :step | each remove ].
-	element physics addBehaviour: behaviour.
+	behaviour := CFPhysicsRecordingBehaviour new target: element.
+	behaviour updateBlock: [ :each :step | each stop ].
+	behaviour start.
 	world step; step.
 	self assert: behaviour updates size equals: 1.
-	self assert: behaviour removalCount equals: 1.
+	self assert: behaviour stopCount equals: 1.
 	self assert: world behaviours isEmpty
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextStep [
+CFPhysicsBehaviourLifecycleTests >> testBehaviourStartedDuringStepBeginsNextStep [
 	<gtExample>
 	| root element world first second |
 	root := BlElement new.
@@ -83,11 +77,10 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextSt
 	root addChild: element.
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
-	second := CFPhysicsRecordingBehaviour physics: element physics.
-	first := CFPhysicsRecordingBehaviour physics: element physics.
-	first updateBlock: [ :behaviour :step |
-		element physics addBehaviour: second ].
-	element physics addBehaviour: first.
+	second := CFPhysicsRecordingBehaviour new target: element.
+	first := CFPhysicsRecordingBehaviour new target: element.
+	first updateBlock: [ :behaviour :step | second start ].
+	first start.
 	world step.
 	self assert: first updates size equals: 1.
 	self assert: second updates isEmpty.
@@ -96,7 +89,7 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourAddedDuringUpdateBeginsOnNextSt
 ]
 
 { #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWorld [
+CFPhysicsBehaviourLifecycleTests >> testBehaviourStopsWhenTargetLeavesItsWorld [
 	<gtExample>
 	| root element world behaviour |
 	root := BlElement new.
@@ -104,26 +97,11 @@ CFPhysicsBehaviourLifecycleTests >> testBehaviourIsRemovedWhenElementLeavesItsWo
 	root addChild: element.
 	world := root physics beWorld.
 	world gravity: 0 @ 0.
-	behaviour := CFPhysicsRecordingBehaviour physics: element physics.
-	element physics addBehaviour: behaviour.
+	behaviour := CFPhysicsRecordingBehaviour new target: element.
+	behaviour start.
 	root removeChild: element.
 	world step.
-	self assert: behaviour isRemoved.
-	self assert: behaviour removalCount equals: 1.
-	self assert: element physics behaviours isEmpty.
+	self deny: behaviour isRunning.
+	self assert: behaviour stopCount equals: 1.
 	self assert: world behaviours isEmpty
-]
-
-{ #category : 'tests - behaviours' }
-CFPhysicsBehaviourLifecycleTests >> testWorldOwningElementCanOwnBehaviour [
-	<gtExample>
-	| root world behaviour |
-	root := BlElement new.
-	world := root physics beWorld.
-	world gravity: 0 @ 0.
-	behaviour := CFPhysicsRecordingBehaviour physics: root physics.
-	root physics addBehaviour: behaviour.
-	world step.
-	self assert: behaviour updates size equals: 1.
-	self assert: behaviour belongsToWorld
 ]

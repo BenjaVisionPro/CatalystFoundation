@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented Physics configuration and operat
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pointerJointHandler', 'behaviours' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -18,40 +18,6 @@ CFPhysics class >> on: anElement [
 		yourself
 ]
 
-
-{ #category : 'initialization' }
-CFPhysics >> initialize [
-	super initialize.
-	behaviours := OrderedCollection new
-]
-
-{ #category : 'behaviours' }
-CFPhysics >> behaviours [
-	^ behaviours copy
-]
-
-{ #category : 'behaviours' }
-CFPhysics >> addBehaviour: aBehaviour [
-	| aWorld |
-	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
-		self error: 'The Physics Behaviour already belongs to another Physics facade' ].
-	aWorld := self world.
-	aWorld ifNil: [
-		self error: 'A Physics Behaviour requires an element belonging to a physics world' ].
-	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
-	aBehaviour
-		physics: self;
-		world: aWorld.
-	behaviours add: aBehaviour.
-	aWorld addBehaviour: aBehaviour.
-	^ aBehaviour
-]
-
-{ #category : 'behaviours' }
-CFPhysics >> removeBehaviour: aBehaviour [
-	behaviours remove: aBehaviour ifAbsent: [ ].
-	^ aBehaviour
-]
 
 { #category : 'body type' }
 CFPhysics >> beDynamic [

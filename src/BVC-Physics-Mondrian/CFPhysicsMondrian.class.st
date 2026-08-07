@@ -6,7 +6,7 @@ My responsibility is to manage the graph's participating elements, Physics Behav
 Class {
 	#name : 'CFPhysicsMondrian',
 	#superclass : 'Object',
-	#instVars : [ 'mondrian', 'world', 'behaviours', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
+	#instVars : [ 'mondrian', 'world', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
 	#category : 'BVC-Physics-Mondrian',
 	#package : 'BVC-Physics-Mondrian'
 }
@@ -18,37 +18,6 @@ CFPhysicsMondrian class >> on: aMondrian [
 		yourself
 ]
 
-
-{ #category : 'initialization' }
-CFPhysicsMondrian >> initialize [
-	super initialize.
-	behaviours := OrderedCollection new
-]
-
-{ #category : 'behaviours' }
-CFPhysicsMondrian >> behaviours [
-	^ behaviours copy
-]
-
-{ #category : 'behaviours' }
-CFPhysicsMondrian >> addBehaviour: aBehaviour [
-	self beWorld.
-	(aBehaviour physics notNil and: [ aBehaviour physics ~~ self ]) ifTrue: [
-		self error: 'The Mondrian Physics Behaviour already belongs to another facade' ].
-	(behaviours identityIncludes: aBehaviour) ifTrue: [ ^ aBehaviour ].
-	aBehaviour
-		physics: self;
-		world: world.
-	behaviours add: aBehaviour.
-	world addBehaviour: aBehaviour.
-	^ aBehaviour
-]
-
-{ #category : 'behaviours' }
-CFPhysicsMondrian >> removeBehaviour: aBehaviour [
-	behaviours remove: aBehaviour ifAbsent: [ ].
-	^ aBehaviour
-]
 
 { #category : 'accessing' }
 CFPhysicsMondrian >> mondrian [
@@ -77,7 +46,6 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 	| formerWorld |
 	world ifNil: [ ^ self ].
 	formerWorld := world.
-	behaviours copy do: [ :each | each remove ].
 	self removePlaybackLifecycle.
 	formerWorld stopStepping.
 	self restoreGraphPresentation.
@@ -90,20 +58,27 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 
 { #category : 'behaviours' }
 CFPhysicsMondrian >> forceDirected [
-	| behaviour |
-	behaviour := self addBehaviour:
-		(CFPhysicsMondrianForceDirectedBehaviour physics: self).
-	^ behaviour install
+	self beWorld.
+	^ CFPhysicsForceDirectedBehaviour new
+		target: mondrian;
+		adapter: CFPhysicsMondrianGraphAdapter new;
+		length: 104.0;
+		hertz: 3.0;
+		dampingRatio: 1.0;
+		repulsion: 72000.0;
+		repulsionSofteningDistance: 58.0;
+		maximumRepulsionDistance: 175.0;
+		velocityDamping: 10.0;
+		start
 ]
 
-{ #category : 'private - behaviours' }
-CFPhysicsMondrian >> forceDirectedConnections [
-	| currentNodeElements |
-	currentNodeElements := mondrian nodeElements asIdentitySet.
-	^ (mondrian edgeElements collect: [ :each |
-		each graph model fromElement -> each graph model toElement ]) select: [ :each |
-		(currentNodeElements includes: each key) and: [
-			currentNodeElements includes: each value ] ]
+{ #category : 'graph synchronisation' }
+CFPhysicsMondrian >> synchroniseGraph [
+	mondrian nodeElements do: [ :element |
+		(world includes: element) ifFalse: [ self addNodeElement: element ] ].
+	mondrian edgeElements do: [ :edge |
+		(edge fromAnchor isKindOf: CFPhysicsMondrianPresentationAnchor) ifFalse: [
+			self preparePhysicsPresentationOf: edge ] ]
 ]
 
 { #category : 'private - world setup' }
