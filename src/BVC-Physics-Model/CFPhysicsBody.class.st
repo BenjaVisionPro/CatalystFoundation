@@ -439,6 +439,12 @@ CFPhysicsBody >> force [
 
 { #category : 'linear dynamics' }
 CFPhysicsBody >> applyForce: aPoint [
+	^ self applyForce: aPoint wake: true
+]
+
+{ #category : 'linear dynamics' }
+CFPhysicsBody >> applyForce: aPoint wake: aBoolean [
+	(aBoolean not and: [ self isAwake not ]) ifTrue: [ ^ self ].
 	bodyType applyForce: aPoint.
 	^ self
 ]

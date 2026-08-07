@@ -45,5 +45,5 @@ CFPhysicsPointAttractionForce >> applyForStep: seconds [
 		| bodyCentre force |
 		bodyCentre := body position + (body extent / 2.0).
 		force := (point - bodyCentre) * strength.
-		force = (0 @ 0) ifFalse: [ body applyForce: force ] ]
+		force = (0 @ 0) ifFalse: [ self applyForce: force to: body ] ]
 ]

@@ -6,7 +6,7 @@ My responsibility is to contribute physical effects before the world captures st
 Class {
 	#name : 'CFPhysicsForce',
 	#superclass : 'Object',
-	#instVars : [ 'world' ],
+	#instVars : [ 'world', 'wakesBodies' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -14,9 +14,26 @@ Class {
 { #category : 'initialization' }
 CFPhysicsForce >> initialize [
 	super initialize.
-	world := nil
+	world := nil.
+	wakesBodies := true
 ]
 
+
+{ #category : 'configuration' }
+CFPhysicsForce >> wakesBodies [
+	^ wakesBodies
+]
+
+{ #category : 'configuration' }
+CFPhysicsForce >> wakesBodies: aBoolean [
+	wakesBodies := aBoolean.
+	^ self
+]
+
+{ #category : 'private - applying' }
+CFPhysicsForce >> applyForce: aForce to: aBody [
+	aBody applyForce: aForce wake: wakesBodies
+]
 { #category : 'accessing' }
 CFPhysicsForce >> world [
 	^ world

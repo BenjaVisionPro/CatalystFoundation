@@ -28,5 +28,5 @@ CFPhysicsWindForce >> force: aPoint [
 { #category : 'stepping' }
 CFPhysicsWindForce >> applyForStep: seconds [
 	force = (0 @ 0) ifTrue: [ ^ self ].
-	bodies do: [ :body | body applyForce: force ]
+	bodies do: [ :body | self applyForce: force to: body ]
 ]

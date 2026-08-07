@@ -357,6 +357,12 @@ CFPhysics >> applyForce: aPoint [
 ]
 
 { #category : 'linear dynamics' }
+CFPhysics >> applyForce: aPoint wake: aBoolean [
+	self body applyForce: aPoint wake: aBoolean.
+	^ self
+]
+
+{ #category : 'linear dynamics' }
 CFPhysics >> applyImpulse: anImpulse [
 	"Apply a linear impulse at the body's centre of mass."
 	self body

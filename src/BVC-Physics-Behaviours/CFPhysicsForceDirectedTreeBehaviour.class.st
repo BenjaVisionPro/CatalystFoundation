@@ -20,7 +20,7 @@ CFPhysicsForceDirectedTreeBehaviour >> initialize [
 		repulsion: 700000.0;
 		repulsionSofteningDistance: 48.0;
 		maximumRepulsionDistance: 600.0;
-		velocityDamping: 3.0
+		linearDamping: 3.0
 ]
 
 { #category : 'configuration' }
@@ -36,7 +36,7 @@ CFPhysicsForceDirectedTreeBehaviour >> attractionStrength: aNumber [
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedTreeBehaviour >> ensurePositioningForceFor: currentBodies [
 	(positioningForce isNil or: [ positioningForce isActive not ]) ifTrue: [
-		positioningForce := self world addForce: CFPhysicsPointAttractionForce new ].
+		positioningForce := self world addForce: (CFPhysicsPointAttractionForce new wakesBodies: false) ].
 	positioningForce
 		bodies: currentBodies;
 		point: self world owner extent / 2.0;

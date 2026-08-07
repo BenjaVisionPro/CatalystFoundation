@@ -105,7 +105,7 @@ CFPhysicsPairForce >> includesBody: aBody [
 
 { #category : 'stepping' }
 CFPhysicsPairForce >> applyForStep: seconds [
-	| points displacement distance forceMagnitude impulse firstBody secondBody |
+	| points displacement distance forceMagnitude force firstBody secondBody |
 	firstBody := self bodyA.
 	secondBody := self bodyB.
 	points := endpointPair worldPoints.
@@ -114,13 +114,9 @@ CFPhysicsPairForce >> applyForStep: seconds [
 	distance = 0 ifTrue: [ ^ self ].
 	forceMagnitude := distanceResponse forceMagnitudeAtDistance: distance.
 	forceMagnitude = 0 ifTrue: [ ^ self ].
-	impulse := (self directionFor: displacement distance: distance) * (forceMagnitude * seconds).
-	firstBody ifNotNil: [
-		firstBody addVelocity: impulse * firstBody inverseMass ].
-	secondBody ifNotNil: [
-		secondBody addVelocity: impulse negated * secondBody inverseMass ].
-	firstBody ifNotNil: [ firstBody wake ].
-	secondBody ifNotNil: [ secondBody wake ]
+	force := (self directionFor: displacement distance: distance) * forceMagnitude.
+	firstBody ifNotNil: [ self applyForce: force to: firstBody ].
+	secondBody ifNotNil: [ self applyForce: force negated to: secondBody ]
 ]
 
 { #category : 'stepping' }

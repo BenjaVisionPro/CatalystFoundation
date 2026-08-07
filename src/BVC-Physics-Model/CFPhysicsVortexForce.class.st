@@ -68,5 +68,5 @@ CFPhysicsVortexForce >> applyForStep: seconds [
 			magnitude := distanceResponse forceMagnitudeAtDistance: distance.
 			magnitude > 0 ifTrue: [
 				tangent := displacement y negated @ displacement x.
-				body applyForce: tangent / distance * magnitude ] ] ]
+				self applyForce: tangent / distance * magnitude to: body ] ] ]
 ]

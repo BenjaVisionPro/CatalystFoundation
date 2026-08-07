@@ -254,3 +254,25 @@ CFPhysicsBodyTests >> testPhysicsFacadeConfigurationIsFluent [
 		clearForces) == physics.
 	^ physics
 ]
+
+
+{ #category : 'examples - forces' }
+CFPhysicsBodyTests >> testForceCanLeaveSleepingBodyAsleep [
+	<gtExample>
+	| owner element world body |
+	owner := BlElement new size: 300 @ 200; yourself.
+	element := BlElement new size: 40 @ 40; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	element physics beDynamic.
+	body := element physics body.
+	body sleep.
+	body applyForce: 100 @ 0 wake: false.
+	self assert: body isAwake not.
+	self assert: body force equals: 0 @ 0.
+	body applyForce: 100 @ 0 wake: true.
+	self assert: body isAwake.
+	self assert: body force equals: 100 @ 0.
+	^ body
+]

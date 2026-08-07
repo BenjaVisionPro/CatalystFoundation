@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce',
 		'length', 'hertz', 'dampingRatio',
-		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'velocityDamping'
+		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'linearDamping', 'originalLinearDampingByElement'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -29,7 +29,8 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
 	centringStrength := CFPhysicsSharedScalar value: 14.0.
-	velocityDamping := CFPhysicsSharedScalar value: 2.5
+	linearDamping := CFPhysicsSharedScalar value: 2.5.
+	originalLinearDampingByElement := IdentityDictionary new
 ]
 
 { #category : 'configuration' }
@@ -92,9 +93,9 @@ CFPhysicsForceDirectedBehaviour >> centringStrength [ ^ centringStrength value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> centringStrength: aNumber [ centringStrength value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> velocityDamping [ ^ velocityDamping value ]
+CFPhysicsForceDirectedBehaviour >> linearDamping [ ^ linearDamping value ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> velocityDamping: aNumber [ velocityDamping value: (aNumber asFloat max: 0.0) ]
+CFPhysicsForceDirectedBehaviour >> linearDamping: aNumber [ linearDamping value: (aNumber asFloat max: 0.0) ]
 
 { #category : 'running' }
 CFPhysicsForceDirectedBehaviour >> start [
@@ -116,10 +117,7 @@ CFPhysicsForceDirectedBehaviour >> stop [
 
 { #category : 'stepping' }
 CFPhysicsForceDirectedBehaviour >> step: aPhysicsStep [
-	| currentElements |
-	self reconcile.
-	currentElements := self elements.
-	self dampVelocitiesOf: currentElements over: aPhysicsStep timeStep
+	self reconcile
 ]
 
 { #category : 'private - reconciliation' }
@@ -131,6 +129,7 @@ CFPhysicsForceDirectedBehaviour >> reconcile [
 	currentBodies := currentElements collect: [ :element | element physics body ].
 	self ensureRepulsionForceFor: currentBodies.
 	self ensurePositioningForceFor: currentBodies.
+	self reconcileBodyDampingFor: currentElements.
 	self reconcileOrientationForcesFor: currentElements.
 	self removeObsoleteSpringsExcept: currentEdges asIdentitySet.
 	currentEdges do: [ :edge | self ensureSpringFor: edge ]
@@ -198,7 +197,7 @@ CFPhysicsForceDirectedBehaviour >> ensureSpringFor: anEdge [
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> ensureRepulsionForceFor: currentBodies [
 	(repulsionForce isNil or: [ repulsionForce isActive not ]) ifTrue: [
-		repulsionForce := self world addForce: CFPhysicsManyBodyRepulsionForce new ].
+		repulsionForce := self world addForce: (CFPhysicsManyBodyRepulsionForce new wakesBodies: false) ].
 	repulsionForce
 		bodies: currentBodies;
 		distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
@@ -211,24 +210,38 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionForceFor: currentBodies [
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> ensurePositioningForceFor: currentBodies [
 	(positioningForce isNil or: [ positioningForce isActive not ]) ifTrue: [
-		positioningForce := self world addForce: CFPhysicsCentreForce new ].
+		positioningForce := self world addForce: (CFPhysicsCentreForce new wakesBodies: false) ].
 	positioningForce
 		bodies: currentBodies;
 		centre: self world owner extent / 2.0;
 		strength: centringStrength value
 ]
 
-{ #category : 'private - stepping' }
-CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentElements over: aTimeStep [
-	| factor |
-	velocityDamping value isZero ifTrue: [ ^ self ].
-	factor := 1.0 / (1.0 + (aTimeStep * velocityDamping value)).
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedBehaviour >> reconcileBodyDampingFor: currentElements [
+	| desiredElements |
+	desiredElements := currentElements asIdentitySet.
+	originalLinearDampingByElement associations copy do: [ :association |
+		(desiredElements includes: association key) ifFalse: [
+			association key physics linearDamping: association value.
+			originalLinearDampingByElement removeKey: association key ] ].
 	currentElements do: [ :element |
-		element physics velocity: element physics velocity * factor ]
+		originalLinearDampingByElement
+			at: element
+			ifAbsentPut: [ element physics linearDamping ].
+		element physics linearDamping: linearDamping value ]
+]
+
+{ #category : 'private - running' }
+CFPhysicsForceDirectedBehaviour >> restoreBodyDamping [
+	originalLinearDampingByElement associations copy do: [ :association |
+		association key physics linearDamping: association value ].
+	originalLinearDampingByElement removeAll
 ]
 
 { #category : 'private - running' }
 CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
+	self restoreBodyDamping.
 	springsByEdge values copy do: #remove.
 	orientationForcesByElement values copy do: #remove.
 	repulsionForce ifNotNil: [ repulsionForce remove ].

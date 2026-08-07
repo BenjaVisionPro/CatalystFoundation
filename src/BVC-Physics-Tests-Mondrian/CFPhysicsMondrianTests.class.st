@@ -447,3 +447,28 @@ CFPhysicsMondrianTests >> containmentExtentOf: aWorld [
 	maximum := (vertices collect: #x) max @ (vertices collect: #y) max.
 	^ maximum - minimum
 ]
+
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianForceDirectedUsesBodyDampingAndRestoresItOnStop [
+	<gtExample>
+	| mondrian world behaviour nodes |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two).
+	mondrian edges connectAssociations: { #one -> #two }.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	nodes := mondrian nodeElements.
+	nodes first physics beDynamic; linearDamping: 0.75.
+	nodes second physics beDynamic; linearDamping: 1.25.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	self assert: nodes first physics linearDamping equals: behaviour linearDamping.
+	self assert: nodes second physics linearDamping equals: behaviour linearDamping.
+	self assert: behaviour repulsionForce wakesBodies not.
+	self assert: behaviour positioningForce wakesBodies not.
+	behaviour stop.
+	self assert: nodes first physics linearDamping equals: 0.75.
+	self assert: nodes second physics linearDamping equals: 1.25.
+	^ mondrian
+]

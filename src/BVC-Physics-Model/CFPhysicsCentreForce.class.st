@@ -48,5 +48,5 @@ CFPhysicsCentreForce >> applyForStep: seconds [
 	currentCentre := currentCentre / bodies size.
 	force := (centre - currentCentre) * strength.
 	force = (0 @ 0) ifTrue: [ ^ self ].
-	bodies do: [ :body | body applyForce: force ]
+	bodies do: [ :body | self applyForce: force to: body ]
 ]

@@ -68,6 +68,6 @@ CFPhysicsManyBodyRepulsionForce >> applyBetween: firstBody and: secondBody [
 	magnitude = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.
 	force := direction * magnitude.
-	firstBody applyForce: force negated.
-	secondBody applyForce: force
+	self applyForce: force negated to: firstBody.
+	self applyForce: force to: secondBody
 ]
