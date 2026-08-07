@@ -1114,6 +1114,7 @@ CFPhysicsWorld >> mouseJoints [
 { #category : 'mouse joints' }
 CFPhysicsWorld >> addMouseJoint: aJoint [
 	aJoint bodyB world == self ifFalse: [ self error: 'Mouse joint body must belong to this physics world' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextMouseJointSequence.
 	nextMouseJointSequence := nextMouseJointSequence + 1.
@@ -1140,6 +1141,7 @@ CFPhysicsWorld >> motorJoints [ ^ motorJoints asArray sorted: [ :first :second |
 { #category : 'motor joints' }
 CFPhysicsWorld >> addMotorJoint: aJoint [
 	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [ self error: 'Motor joint bodies must belong to this physics world' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. self wakeBodiesForJointCreation: aJoint. ^ aJoint
 ]
 { #category : 'motor joints' }
@@ -1158,6 +1160,7 @@ CFPhysicsWorld >> filterJoints [
 CFPhysicsWorld >> addFilterJoint: aJoint [
 	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [
 		self error: 'Filter joint bodies must belong to this physics world' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextFilterJointSequence.
 	nextFilterJointSequence := nextFilterJointSequence + 1.
@@ -1294,6 +1297,7 @@ CFPhysicsWorld >> addDistanceJoint: aJoint [
 		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
 	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
 		ifFalse: [ self error: 'A distance joint requires at least one body endpoint' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextDistanceJointSequence.
 	nextDistanceJointSequence := nextDistanceJointSequence + 1.
@@ -1321,14 +1325,23 @@ CFPhysicsWorld >> wakeBodiesForJointCreation: aJoint [
 ]
 
 
+{ #category : 'joints' }
+CFPhysicsWorld >> removeJoint: aJoint [
+	| jointCollection |
+	jointCollection := { mouseJoints. motorJoints. filterJoints. distanceJoints. revoluteJoints. weldJoints. prismaticJoints. wheelJoints }
+		detect: [ :each | each includes: aJoint ]
+		ifNone: [ ^ aJoint ].
+	^ self removeJoint: aJoint from: jointCollection
+]
+
 { #category : 'private - joints' }
 CFPhysicsWorld >> removeJoint: aJoint from: aJointCollection [
 	(aJointCollection includes: aJoint) ifFalse: [ ^ aJoint ].
 	self invalidateTopology.
 	persistentIslandGraph unlinkConstraint: aJoint.
-	aJoint release.
 	aJointCollection remove: aJoint.
 	aJoint wakeBodies.
+	aJoint removedFromWorld.
 	^ aJoint
 ]
 
@@ -1380,6 +1393,7 @@ CFPhysicsWorld >> addRevoluteJoint: aJoint [
 		ifFalse: [ self error: 'Revolute joint endpoints must belong to this physics world' ].
 	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
 		ifFalse: [ self error: 'A revolute joint requires at least one body endpoint' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextRevoluteJointSequence.
 	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
@@ -1417,6 +1431,7 @@ CFPhysicsWorld >> addWeldJoint: aJoint [
 		ifFalse: [ self error: 'Weld joint endpoints must belong to this physics world' ].
 	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
 		ifFalse: [ self error: 'A weld joint requires at least one body endpoint' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextWeldJointSequence.
 	nextWeldJointSequence := nextWeldJointSequence + 1.
@@ -1454,6 +1469,7 @@ CFPhysicsWorld >> addPrismaticJoint: aJoint [
 		ifFalse: [ self error: 'Prismatic joint endpoints must belong to this physics world' ].
 	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
 		ifFalse: [ self error: 'A prismatic joint requires at least one body endpoint' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextPrismaticJointSequence.
 	nextPrismaticJointSequence := nextPrismaticJointSequence + 1.
@@ -1685,6 +1701,7 @@ CFPhysicsWorld >> addWheelJoint: aJoint [
 		ifFalse: [ self error: 'Wheel joint endpoints must belong to this physics world' ].
 	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
 		ifFalse: [ self error: 'A wheel joint requires at least one body endpoint' ].
+	aJoint addedToWorld: self.
 	self invalidateTopology.
 	aJoint sequence: nextWheelJointSequence.
 	nextWheelJointSequence := nextWheelJointSequence + 1.

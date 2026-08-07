@@ -549,15 +549,11 @@ CFPhysics >> pointerJointHandler [
 
 { #category : 'distance joints' }
 CFPhysics >> distanceJointTo: anotherElement [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsDistanceJoint
-		between: self body
-		and: anotherElement physics body.
-	^ aWorld addDistanceJoint: joint
+	| body |
+	body := self body.
+	^ body world addDistanceJoint: (CFPhysicsDistanceJoint
+		between: body
+		and: anotherElement physics body)
 ]
 
 { #category : 'distance joints' }
@@ -570,39 +566,27 @@ CFPhysics >> distanceJoints [
 	^ aWorld distanceJointsUsingBody: body
 ]
 
-{ #category : 'distance joints' }
-CFPhysics >> removeDistanceJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeDistanceJoint: aJoint ].
-	^ self
-]
 
 { #category : 'motor joints' }
 CFPhysics >> motorJointTo: anotherElement [
-	| aWorld otherWorld joint |
-	aWorld := self world. otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ]) ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsMotorJoint between: self body and: anotherElement physics body.
-	^ aWorld addMotorJoint: joint
+	| body |
+	body := self body.
+	^ body world addMotorJoint: (CFPhysicsMotorJoint
+		between: body
+		and: anotherElement physics body)
 ]
 
 { #category : 'motor joints' }
 CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
 
-{ #category : 'motor joints' }
-CFPhysics >> removeMotorJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeMotorJoint: aJoint ].
-	^ self
-]
 
 { #category : 'filter joints' }
 CFPhysics >> filterJointTo: anotherElement [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ]) ifFalse: [
-		self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsFilterJoint between: self body and: anotherElement physics body.
-	^ aWorld addFilterJoint: joint
+	| body |
+	body := self body.
+	^ body world addFilterJoint: (CFPhysicsFilterJoint
+		between: body
+		and: anotherElement physics body)
 ]
 
 { #category : 'filter joints' }
@@ -615,23 +599,14 @@ CFPhysics >> filterJoints [
 	^ aWorld filterJointsUsingBody: body
 ]
 
-{ #category : 'filter joints' }
-CFPhysics >> removeFilterJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeFilterJoint: aJoint ].
-	^ self
-]
 
 { #category : 'revolute joints' }
 CFPhysics >> revoluteJointTo: anotherElement [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsRevoluteJoint
-		between: self body
-		and: anotherElement physics body.
-	^ aWorld addRevoluteJoint: joint
+	| body |
+	body := self body.
+	^ body world addRevoluteJoint: (CFPhysicsRevoluteJoint
+		between: body
+		and: anotherElement physics body)
 ]
 
 { #category : 'revolute joints' }
@@ -644,23 +619,14 @@ CFPhysics >> revoluteJoints [
 	^ aWorld revoluteJointsUsingBody: body
 ]
 
-{ #category : 'revolute joints' }
-CFPhysics >> removeRevoluteJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeRevoluteJoint: aJoint ].
-	^ self
-]
 
 { #category : 'weld joints' }
 CFPhysics >> weldJointTo: anotherElement [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsWeldJoint
-		between: self body
-		and: anotherElement physics body.
-	^ aWorld addWeldJoint: joint
+	| body |
+	body := self body.
+	^ body world addWeldJoint: (CFPhysicsWeldJoint
+		between: body
+		and: anotherElement physics body)
 ]
 
 { #category : 'weld joints' }
@@ -673,24 +639,15 @@ CFPhysics >> weldJoints [
 	^ aWorld weldJointsUsingBody: body
 ]
 
-{ #category : 'weld joints' }
-CFPhysics >> removeWeldJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeWeldJoint: aJoint ].
-	^ self
-]
 
 { #category : 'prismatic joints' }
 CFPhysics >> prismaticJointTo: anotherElement along: anAxis [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsPrismaticJoint
-		between: self body
+	| body |
+	body := self body.
+	^ body world addPrismaticJoint: (CFPhysicsPrismaticJoint
+		between: body
 		and: anotherElement physics body
-		along: anAxis.
-	^ aWorld addPrismaticJoint: joint
+		along: anAxis)
 ]
 
 { #category : 'prismatic joints' }
@@ -703,11 +660,6 @@ CFPhysics >> prismaticJoints [
 	^ aWorld prismaticJointsUsingBody: body
 ]
 
-{ #category : 'prismatic joints' }
-CFPhysics >> removePrismaticJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removePrismaticJoint: aJoint ].
-	^ self
-]
 
 
 { #category : 'attraction interaction' }
@@ -807,13 +759,12 @@ CFPhysics >> applyAngularImpulse: aNumber [
 
 { #category : 'wheel joints' }
 CFPhysics >> wheelJointTo: anotherElement along: anAxis [
-	| aWorld otherWorld joint |
-	aWorld := self world.
-	otherWorld := anotherElement physics world.
-	(aWorld notNil and: [ aWorld == otherWorld ])
-		ifFalse: [ self error: 'Both elements must belong to the same physics world' ].
-	joint := CFPhysicsWheelJoint between: self body and: anotherElement physics body along: anAxis.
-	^ aWorld addWheelJoint: joint
+	| body |
+	body := self body.
+	^ body world addWheelJoint: (CFPhysicsWheelJoint
+		between: body
+		and: anotherElement physics body
+		along: anAxis)
 ]
 
 { #category : 'wheel joints' }
@@ -826,8 +777,3 @@ CFPhysics >> wheelJoints [
 	^ aWorld wheelJointsUsingBody: body
 ]
 
-{ #category : 'wheel joints' }
-CFPhysics >> removeWheelJoint: aJoint [
-	self world ifNotNil: [ :aWorld | aWorld removeWheelJoint: aJoint ].
-	^ self
-]

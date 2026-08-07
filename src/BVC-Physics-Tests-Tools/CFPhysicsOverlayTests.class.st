@@ -1083,7 +1083,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayRemovesReleasedSprings [
 	world addDistanceJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
-	world removeDistanceJoint: spring.
+	spring remove.
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
 	self assert: visual hasParent not.
@@ -1157,7 +1157,7 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayRemovesRetiredVisuals [
 		distanceJointTo: (world anchorAt: 20 @ 20).
 	overlay refresh.
 	visual := overlay jointOverlay visuals first.
-	world removeDistanceJoint: joint.
+	joint remove.
 	overlay refresh.
 	self assert: overlay jointOverlay visuals isEmpty.
 	self assert: visual hasParent not.
@@ -1247,7 +1247,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsSelectionWhenSelectedJointIsRem
 	overlay := self overlayWithSelectedJointHitTarget.
 	world := overlay world.
 	joint := overlay selectedJoint.
-	world removeDistanceJoint: joint.
+	joint remove.
 	overlay refresh.
 	self assert: overlay selectedJoint isNil.
 	self assert: overlay selectionVisual isNil.
@@ -1296,7 +1296,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayClearsJointInspectorWhenJointIsRemove
 	overlay := self overlayInspectingSelectedJoint.
 	world := overlay world.
 	joint := overlay selectedJoint.
-	world removeDistanceJoint: joint.
+	joint remove.
 	overlay refresh.
 	self assert: overlay objectInspector selectedObject isNil.
 	self assert: overlay objectInspector content joint isNil.

@@ -177,8 +177,8 @@ CFPhysicsMondrianHierarchyBehaviour >> buildRingJointsFor: roots [
 
 { #category : 'private - joints' }
 CFPhysicsMondrianHierarchyBehaviour >> removeJoints [
-	radialJoints values do: [ :joint | self world removeDistanceJoint: joint ].
-	ringJoints do: [ :joint | self world removeDistanceJoint: joint ].
+	radialJoints values do: [ :joint | joint remove ].
+	ringJoints do: [ :joint | joint remove ].
 	radialJoints removeAll.
 	ringJoints removeAll
 ]

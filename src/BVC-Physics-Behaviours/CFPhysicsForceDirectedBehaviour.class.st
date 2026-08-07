@@ -157,7 +157,7 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteSpringsExcept: desiredConnectio
 	(springsByConnection associations sorted: [ :first :second |
 		first value sequence < second value sequence ]) do: [ :association |
 		(desiredConnections includes: association key) ifFalse: [
-			world removeDistanceJoint: association value.
+			association value remove.
 			springsByConnection removeKey: association key ] ]
 ]
 
@@ -202,7 +202,7 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 
 { #category : 'removing' }
 CFPhysicsForceDirectedBehaviour >> removing [
-	springsByConnection values copy do: [ :each | world removeDistanceJoint: each ].
+	springsByConnection values copy do: [ :each | each remove ].
 	repulsionsByPair values copy do: [ :each | world removeRepulsionConstraint: each ].
 	springsByConnection removeAll.
 	repulsionsByPair removeAll

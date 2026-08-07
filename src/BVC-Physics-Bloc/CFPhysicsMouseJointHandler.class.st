@@ -120,7 +120,7 @@ CFPhysicsMouseJointHandler >> finishMouseJoint [
 	activeMouseJoint := mouseJoint.
 	mouseJoint := nil.
 	world := activeMouseJoint bodyB world.
-	world ifNotNil: [ world removeMouseJoint: activeMouseJoint ]
+	world ifNotNil: [ activeMouseJoint remove ]
 ]
 
 { #category : 'private' }
@@ -130,7 +130,7 @@ CFPhysicsMouseJointHandler >> removeMouseJoint [
 	activeMouseJoint := mouseJoint.
 	mouseJoint := nil.
 	world := activeMouseJoint bodyB world.
-	world ifNotNil: [ world removeMouseJoint: activeMouseJoint ]
+	world ifNotNil: [ activeMouseJoint remove ]
 ]
 
 { #category : 'controlling' }

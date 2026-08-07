@@ -565,7 +565,7 @@ CFPhysicsIslandTests >> testWorldPersistentIslandGraphTracksRuntimeJointLifecycl
 	island := graph islandForBody: first.
 	self assert: (graph islandForBody: second) == island.
 	self assert: (graph islandForConstraint: joint) == island.
-	world removeDistanceJoint: joint.
+	joint remove.
 	self assert: island constraintRemoveCount equals: 1.
 	self assert: (graph islandForConstraint: joint) isNil.
 	^ world

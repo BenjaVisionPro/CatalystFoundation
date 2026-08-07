@@ -176,7 +176,7 @@ CFPhysicsJointTests >> testDestroyingADistanceJointWakesBothSleepingEndpoints [
 	second physics body sleep.
 	self assert: first physics body isAwake not.
 	self assert: second physics body isAwake not.
-	world removeDistanceJoint: joint.
+	joint remove.
 	self assert: joint isActive not.
 	self assert: first physics body isAwake.
 	self assert: second physics body isAwake.
@@ -990,5 +990,25 @@ CFPhysicsJointTests >> testCreatingAJointBetweenAwakeAndSleepingIslandsWakesTheS
 	self assert: second isAwake.
 	self assert: (graph islandForBody: second) == island.
 	self assert: (graph islandForConstraint: joint) == island.
+	^ joint
+]
+
+
+{ #category : 'tests - joint lifecycle' }
+CFPhysicsJointTests >> testRemovingAJointIsIdempotent [
+	<gtExample>
+	| owner first second world joint |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world owner physics makeChildrenDynamic.
+	joint := first physics distanceJointTo: second.
+	joint remove.
+	joint remove.
+	self assert: joint world isNil.
+	self deny: joint isActive.
+	self assert: world distanceJoints isEmpty.
 	^ joint
 ]
