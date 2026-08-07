@@ -33,6 +33,12 @@ CFPhysicsForce >> remove [
 	world ifNotNil: [ world removeForce: self ]
 ]
 
+
+{ #category : 'lifecycle' }
+CFPhysicsForce >> removeBody: aBody [
+	(self includesBody: aBody) ifTrue: [ self remove ]
+]
+
 { #category : 'lifecycle' }
 CFPhysicsForce >> removedFromWorld [
 	world := nil

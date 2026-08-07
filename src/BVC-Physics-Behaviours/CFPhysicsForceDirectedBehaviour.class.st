@@ -8,7 +8,7 @@ Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
-		'adapter', 'springsByEdge', 'repulsionsByPair',
+		'adapter', 'springsByEdge', 'repulsionsByPair', 'centringForce',
 		'length', 'hertz', 'dampingRatio',
 		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'velocityDamping'
 	],
@@ -21,6 +21,7 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	super initialize.
 	springsByEdge := IdentityDictionary new.
 	repulsionsByPair := Dictionary new.
+	centringForce := nil.
 	length := CFPhysicsSharedScalar value: 80.0.
 	hertz := CFPhysicsSharedScalar value: 3.0.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
@@ -115,7 +116,6 @@ CFPhysicsForceDirectedBehaviour >> step: aPhysicsStep [
 	| currentElements |
 	self reconcile.
 	currentElements := self elements.
-	self centre: currentElements.
 	self dampVelocitiesOf: currentElements over: aPhysicsStep timeStep
 ]
 
@@ -125,6 +125,7 @@ CFPhysicsForceDirectedBehaviour >> reconcile [
 	currentElements := self elements.
 	currentEdges := self edges.
 	self validateElements: currentElements edges: currentEdges.
+	self ensureCentringForceFor: currentElements.
 	desiredPairs := self orderedPairsFor: currentElements.
 	self removeObsoleteSpringsExcept: currentEdges asIdentitySet.
 	self removeObsoleteRepulsionsExcept: desiredPairs asSet.
@@ -205,17 +206,14 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 ]
 
 
-{ #category : 'private - stepping' }
-CFPhysicsForceDirectedBehaviour >> centre: currentElements [
-	| centroid targetPoint force |
-	(currentElements isEmpty or: [ centringStrength value isZero ]) ifTrue: [ ^ self ].
-	centroid := currentElements
-		inject: 0 @ 0
-		into: [ :sum :element | sum + element physics position ].
-	centroid := centroid / currentElements size.
-	targetPoint := self world owner extent / 2.0.
-	force := (targetPoint - centroid) * centringStrength value.
-	currentElements do: [ :element | element physics applyForce: force ]
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedBehaviour >> ensureCentringForceFor: currentElements [
+	(centringForce isNil or: [ centringForce isActive not ]) ifTrue: [
+		centringForce := self world addForce: CFPhysicsCentreForce new ].
+	centringForce
+		bodies: (currentElements collect: [ :element | element physics body ]);
+		centre: self world owner extent / 2.0;
+		strength: centringStrength value
 ]
 
 { #category : 'private - stepping' }
@@ -231,6 +229,8 @@ CFPhysicsForceDirectedBehaviour >> dampVelocitiesOf: currentElements over: aTime
 CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	springsByEdge values copy do: #remove.
 	repulsionsByPair values copy do: #remove.
+	centringForce ifNotNil: [ centringForce remove ].
+	centringForce := nil.
 	springsByEdge removeAll.
 	repulsionsByPair removeAll
 ]

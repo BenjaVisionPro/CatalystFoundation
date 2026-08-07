@@ -1137,7 +1137,7 @@ CFPhysicsWorld >> forcesUsingBody: aBody [
 
 { #category : 'forces' }
 CFPhysicsWorld >> removeForcesUsingBody: aBody [
-	(self forcesUsingBody: aBody) copy do: #remove
+	(self forcesUsingBody: aBody) copy do: [ :force | force removeBody: aBody ]
 ]
 
 { #category : 'forces' }
