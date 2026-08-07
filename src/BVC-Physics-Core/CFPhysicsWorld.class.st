@@ -1111,7 +1111,7 @@ CFPhysicsWorld >> filterJointsUsingBody: aBody [
 
 { #category : 'forces' }
 CFPhysicsWorld >> forces [
-	^ forces copy
+	^ forces asArray
 ]
 
 { #category : 'forces' }
@@ -1132,7 +1132,7 @@ CFPhysicsWorld >> removeForce: aForce [
 
 { #category : 'forces' }
 CFPhysicsWorld >> forcesUsingBody: aBody [
-	^ forces select: [ :each | each includesBody: aBody ]
+	^ self forces select: [ :each | each includesBody: aBody ]
 ]
 
 { #category : 'forces' }
