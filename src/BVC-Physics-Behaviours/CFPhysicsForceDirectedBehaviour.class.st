@@ -25,12 +25,12 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	componentForces := IdentityDictionary new.
 	length := CFPhysicsSharedScalar value: 90.0.
 	hertz := CFPhysicsSharedScalar value: 1.5.
-	dampingRatio := CFPhysicsSharedScalar value: 1.0.
-	repulsionAtOneMetre := CFPhysicsSharedScalar value: 0.18.
+	dampingRatio := CFPhysicsSharedScalar value: 1.5.
+	repulsionAtOneMetre := CFPhysicsSharedScalar value: 1.5.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 5.0.
-	centringStiffness := CFPhysicsSharedScalar value: 0.002.
-	componentCentringStiffness := CFPhysicsSharedScalar value: 0.0002.
-	linearDamping := CFPhysicsSharedScalar value: 1.5.
+	centringStiffness := CFPhysicsSharedScalar value: 2.0.
+	componentCentringStiffness := CFPhysicsSharedScalar value: 1.0.
+	linearDamping := CFPhysicsSharedScalar value: 2.5.
 	originalLinearDampingByBody := IdentityDictionary new
 ]
 
