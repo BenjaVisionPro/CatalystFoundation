@@ -1,5 +1,5 @@
 "
-I represent a uniform force applied to selected Physics bodies.
+I represent a uniform force, in newtons, applied to selected Physics bodies.
 "
 Class {
 	#name : 'CFPhysicsWindForce',

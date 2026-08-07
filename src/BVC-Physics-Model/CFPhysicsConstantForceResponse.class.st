@@ -1,7 +1,7 @@
 "
 I represent a constant-magnitude distance response.
 
-My responsibility is to answer the configured force while its distance limit is satisfied.
+My responsibility is to answer the configured force in newtons while its distance limit in metres is satisfied.
 "
 Class {
 	#name : 'CFPhysicsConstantForceResponse',
@@ -21,7 +21,7 @@ CFPhysicsConstantForceResponse class >> force: aNumber [
 { #category : 'initialization' }
 CFPhysicsConstantForceResponse >> initialize [
 	super initialize.
-	force := 1000.0.
+	force := 1.0.
 	maximumDistance := nil
 ]
 

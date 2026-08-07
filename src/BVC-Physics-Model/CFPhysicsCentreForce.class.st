@@ -6,7 +6,7 @@ I apply one uniform force derived from the offset between the current group cent
 Class {
 	#name : 'CFPhysicsCentreForce',
 	#superclass : 'CFPhysicsBodyForce',
-	#instVars : [ 'centre', 'strength' ],
+	#instVars : [ 'centre', 'stiffness' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -15,7 +15,7 @@ Class {
 CFPhysicsCentreForce >> initialize [
 	super initialize.
 	centre := 0 @ 0.
-	strength := 1.0
+	stiffness := 1.0
 ]
 
 { #category : 'accessing' }
@@ -29,24 +29,26 @@ CFPhysicsCentreForce >> centre: aPoint [
 ]
 
 { #category : 'accessing' }
-CFPhysicsCentreForce >> strength [
-	^ strength
+CFPhysicsCentreForce >> stiffness [
+	^ stiffness
 ]
 
 { #category : 'accessing' }
-CFPhysicsCentreForce >> strength: aNumber [
-	strength := aNumber asFloat max: 0.0
+CFPhysicsCentreForce >> stiffness: aNumber [
+	"Spring stiffness in newtons per metre."
+	stiffness := aNumber asFloat max: 0.0
 ]
 
 { #category : 'stepping' }
 CFPhysicsCentreForce >> applyForStep: seconds [
-	| currentCentre force |
-	(bodies isEmpty or: [ strength isZero ]) ifTrue: [ ^ self ].
+	| currentCentre displacementMetres force |
+	(bodies isEmpty or: [ stiffness isZero ]) ifTrue: [ ^ self ].
 	currentCentre := bodies
 		inject: 0 @ 0
 		into: [ :sum :body | sum + body position + (body extent / 2.0) ].
 	currentCentre := currentCentre / bodies size.
-	force := (centre - currentCentre) * strength.
+	displacementMetres := (centre - currentCentre) / self lengthUnitsPerMetre.
+	force := displacementMetres * stiffness.
 	force = (0 @ 0) ifTrue: [ ^ self ].
 	bodies do: [ :body | self applyForce: force to: body ]
 ]

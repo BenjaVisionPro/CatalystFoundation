@@ -1,7 +1,7 @@
 "
 I repel each selected Physics body from every other selected body.
 
-My distance response determines the repulsive force magnitude for each body pair.
+My distance response maps separation in metres to repulsive force magnitude in newtons.
 "
 Class {
 	#name : 'CFPhysicsManyBodyRepulsionForce',
@@ -58,13 +58,14 @@ CFPhysicsManyBodyRepulsionForce >> applyForStep: seconds [
 
 { #category : 'private - stepping' }
 CFPhysicsManyBodyRepulsionForce >> applyBetween: firstBody and: secondBody [
-	| firstCentre secondCentre displacement distance magnitude direction force |
+	| firstCentre secondCentre displacement distance distanceMetres magnitude direction force |
 	firstCentre := firstBody position + (firstBody extent / 2.0).
 	secondCentre := secondBody position + (secondBody extent / 2.0).
 	displacement := secondCentre - firstCentre.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
-	magnitude := distanceResponse forceMagnitudeAtDistance: distance.
+	distanceMetres := self metresForLengthUnits: distance.
+	magnitude := distanceResponse forceMagnitudeAtDistance: distanceMetres.
 	magnitude = 0 ifTrue: [ ^ self ].
 	direction := displacement / distance.
 	force := direction * magnitude.

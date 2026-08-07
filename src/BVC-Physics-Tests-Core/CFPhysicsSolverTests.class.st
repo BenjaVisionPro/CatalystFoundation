@@ -450,12 +450,12 @@ CFPhysicsSolverTests >> testSoftStepIntegratesVelocityPerSubstep [
 CFPhysicsSolverTests >> testStepStateIntegratesAccumulatedForceByInverseMass [
 	<gtExample>
 	| body state |
-	body := self newBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
-	body applyForce: 200 @ -100.
+	body := self newBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 100.
+	body applyForce: 2 @ -1.
 	state := CFPhysicsBodyStepState on: body.
 	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
-	self assert: (state linearVelocity x closeTo: 1.0).
-	self assert: (state linearVelocity y closeTo: -0.5).
+	self assert: (state linearVelocity x closeTo: 100.0).
+	self assert: (state linearVelocity y closeTo: -50.0).
 	^ state
 ]
 { #category : 'tests - velocity integration' }
@@ -532,14 +532,14 @@ CFPhysicsSolverTests >> testStepStateUsesWholeStepAngularVelocityLimitAcrossSubs
 CFPhysicsSolverTests >> testStepStateDoesNotDampCurrentForceContribution [
 	<gtExample>
 	| body state |
-	body := self newBodyWithSequence: 1 position: 0 @ 0 extent: 10 @ 10.
+	body := self newBodyWithSequence: 1 position: 0 @ 0 extent: 100 @ 100.
 	body
 		velocity: 12 @ -6;
 		linearDamping: 2.0;
-		applyForce: 200 @ -100.
+		applyForce: 2 @ -1.
 	state := CFPhysicsBodyStepState on: body.
 	state integrateVelocityBy: 0.5 gravity: 0 @ 0.
-	self assert: (state linearVelocity closeTo: 7 @ -3.5).
+	self assert: (state linearVelocity closeTo: 106 @ -53).
 	^ state
 ]
 { #category : 'tests - velocity integration' }

@@ -518,7 +518,7 @@ CFPhysicsMondrianTests >> testMondrianForceDirectedGentlyCentresDisconnectedComp
 	self assert: componentSizes equals: #(2 3).
 	behaviour componentForces do: [ :force |
 		self assert: force centre equals: world owner extent / 2.0.
-		self assert: force strength equals: behaviour componentCentringStrength.
+		self assert: force stiffness equals: behaviour componentCentringStiffness.
 		self assert: force wakesBodies not ].
 	behaviour stop.
 	^ mondrian

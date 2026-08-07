@@ -149,6 +149,7 @@ CFPhysics >> makeChildrenStaticMatching: aBlock [
 
 { #category : 'material' }
 CFPhysics >> density [
+	"Mass density in kilograms per square metre."
 	^ self body density
 ]
 
@@ -352,19 +353,21 @@ CFPhysics >> addVelocity: aPoint [
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyForce: aPoint [
+	"Apply a force vector in newtons."
 	self body applyForce: aPoint.
 	^ self
 ]
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyForce: aPoint wake: aBoolean [
+	"Apply a force vector in newtons."
 	self body applyForce: aPoint wake: aBoolean.
 	^ self
 ]
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyImpulse: anImpulse [
-	"Apply a linear impulse at the body's centre of mass."
+	"Apply a linear impulse in newton-seconds at the body's centre of mass."
 	self body
 		applyImpulse: anImpulse
 		atWorldPoint: self body worldBodyOrigin.
@@ -373,7 +376,7 @@ CFPhysics >> applyImpulse: anImpulse [
 
 { #category : 'linear dynamics' }
 CFPhysics >> applyImpulse: anImpulse atWorldPoint: aPoint [
-	"Apply a linear impulse at a point expressed in the owning world's coordinate frame."
+	"Apply a linear impulse in newton-seconds at a point expressed in the owning world's coordinate frame."
 	self body applyImpulse: anImpulse atWorldPoint: aPoint.
 	^ self
 ]
@@ -423,6 +426,7 @@ CFPhysics >> angularDamping: aNumber [
 
 { #category : 'angular dynamics' }
 CFPhysics >> applyTorque: aNumber [
+	"Apply torque in newton-metres."
 	self body applyTorque: aNumber.
 	^ self
 ]

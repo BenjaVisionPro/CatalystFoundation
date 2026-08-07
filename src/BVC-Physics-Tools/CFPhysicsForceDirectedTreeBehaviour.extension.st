@@ -1,11 +1,11 @@
 Extension { #name : 'CFPhysicsForceDirectedTreeBehaviour' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsForceDirectedTreeBehaviour >> descriptionAttractionStrength [
+CFPhysicsForceDirectedTreeBehaviour >> descriptionAttractionStiffness [
 	<magritteDescription>
 	^ MANumberDescription new
-		accessor: #attractionStrength;
-		label: 'Attraction strength';
+		accessor: #attractionStiffness;
+		label: 'Attraction stiffness (N/m)';
 		group: 'Positioning';
 		priority: 85;
 		cfSerializable: true;

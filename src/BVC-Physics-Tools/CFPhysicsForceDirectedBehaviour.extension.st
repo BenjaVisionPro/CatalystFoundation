@@ -45,35 +45,24 @@ CFPhysicsForceDirectedBehaviour >> descriptionDampingRatio [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsForceDirectedBehaviour >> descriptionRepulsion [
+CFPhysicsForceDirectedBehaviour >> descriptionRepulsionAtOneMetre [
 	<magritteDescription>
 	^ MANumberDescription new
-		accessor: #repulsion;
-		label: 'Repulsion';
+		accessor: #repulsionAtOneMetre;
+		label: 'Repulsion at 1 m (N)';
 		group: 'Repulsion';
 		priority: 40;
 		cfSerializable: true;
 		yourself
 ]
 
-{ #category : '*bvc-physics-tools' }
-CFPhysicsForceDirectedBehaviour >> descriptionRepulsionSofteningDistance [
-	<magritteDescription>
-	^ MANumberDescription new
-		accessor: #repulsionSofteningDistance;
-		label: 'Softening distance';
-		group: 'Repulsion';
-		priority: 50;
-		cfSerializable: true;
-		yourself
-]
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsForceDirectedBehaviour >> descriptionMaximumRepulsionDistance [
 	<magritteDescription>
 	^ MANumberDescription new
 		accessor: #maximumRepulsionDistance;
-		label: 'Maximum distance';
+		label: 'Maximum distance (m)';
 		group: 'Repulsion';
 		priority: 60;
 		cfSerializable: true;
@@ -81,11 +70,11 @@ CFPhysicsForceDirectedBehaviour >> descriptionMaximumRepulsionDistance [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsForceDirectedBehaviour >> descriptionCentringStrength [
+CFPhysicsForceDirectedBehaviour >> descriptionCentringStiffness [
 	<magritteDescription>
 	^ MANumberDescription new
-		accessor: #centringStrength;
-		label: 'Centring strength';
+		accessor: #centringStiffness;
+		label: 'Centring stiffness (N/m)';
 		group: 'Positioning';
 		priority: 70;
 		cfSerializable: true;
@@ -93,11 +82,11 @@ CFPhysicsForceDirectedBehaviour >> descriptionCentringStrength [
 ]
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsForceDirectedBehaviour >> descriptionComponentCentringStrength [
+CFPhysicsForceDirectedBehaviour >> descriptionComponentCentringStiffness [
 	<magritteDescription>
 	^ MANumberDescription new
-		accessor: #componentCentringStrength;
-		label: 'Component centring strength';
+		accessor: #componentCentringStiffness;
+		label: 'Component centring stiffness (N/m)';
 		group: 'Positioning';
 		priority: 80;
 		cfSerializable: true;

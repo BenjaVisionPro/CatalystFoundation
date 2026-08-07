@@ -25,7 +25,7 @@ CFPhysicsWorld >> initialize [
 	bodyStates := IdentityDictionary new.
 	geometrySignaturesByBody := IdentityDictionary new.
 	nextBodySequence := 1.
-	lengthUnitsPerMetre := 100.0.
+	lengthUnitsPerMetre := CFPhysicsBody defaultLengthUnitsPerMetre.
 	gravity := 0 @ 10.0.
 	stepDuration := 16 milliseconds.
 	restitutionThreshold := 1.0.
@@ -174,6 +174,48 @@ CFPhysicsWorld >> accelerationUnitsForMetresPerSecondSquared: aPoint [
 	"Convert an acceleration vector specified in metres per second squared
 	into physics length units per second squared."
 	^ aPoint * lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> forceUnitsForNewtons: aPoint [
+	"Convert a force vector specified in newtons into solver force units."
+	^ aPoint * lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> newtonsForForceUnits: aPoint [
+	"Convert a solver force vector into newtons."
+	^ aPoint / lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> torqueUnitsForNewtonMetres: aNumber [
+	"Convert torque specified in newton-metres into solver torque units."
+	^ aNumber * lengthUnitsPerMetre squared
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> newtonMetresForTorqueUnits: aNumber [
+	"Convert solver torque into newton-metres."
+	^ aNumber / lengthUnitsPerMetre squared
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> impulseUnitsForNewtonSeconds: aPoint [
+	"Convert linear impulse specified in newton-seconds into solver units."
+	^ aPoint * lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> angularImpulseUnitsForNewtonMetreSeconds: aNumber [
+	"Convert angular impulse specified in newton-metre-seconds into solver units."
+	^ aNumber * lengthUnitsPerMetre squared
+]
+
+{ #category : 'units' }
+CFPhysicsWorld >> squareMetresForAreaUnits: aNumber [
+	"Convert squared Physics length units into square metres."
+	^ aNumber / lengthUnitsPerMetre squared
 ]
 
 { #category : 'accessing' }

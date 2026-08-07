@@ -273,6 +273,6 @@ CFPhysicsBodyTests >> testForceCanLeaveSleepingBodyAsleep [
 	self assert: body force equals: 0 @ 0.
 	body applyForce: 100 @ 0 wake: true.
 	self assert: body isAwake.
-	self assert: body force equals: 100 @ 0.
+	self assert: body forceInNewtons equals: 100 @ 0.
 	^ body
 ]

@@ -6,7 +6,7 @@ Each body receives its own restoring force based on its displacement from that p
 Class {
 	#name : 'CFPhysicsPointAttractionForce',
 	#superclass : 'CFPhysicsBodyForce',
-	#instVars : [ 'point', 'strength' ],
+	#instVars : [ 'point', 'stiffness' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -15,7 +15,7 @@ Class {
 CFPhysicsPointAttractionForce >> initialize [
 	super initialize.
 	point := 0 @ 0.
-	strength := 1.0
+	stiffness := 1.0
 ]
 
 { #category : 'accessing' }
@@ -29,21 +29,23 @@ CFPhysicsPointAttractionForce >> point: aPoint [
 ]
 
 { #category : 'accessing' }
-CFPhysicsPointAttractionForce >> strength [
-	^ strength
+CFPhysicsPointAttractionForce >> stiffness [
+	^ stiffness
 ]
 
 { #category : 'accessing' }
-CFPhysicsPointAttractionForce >> strength: aNumber [
-	strength := aNumber asFloat max: 0.0
+CFPhysicsPointAttractionForce >> stiffness: aNumber [
+	"Spring stiffness in newtons per metre."
+	stiffness := aNumber asFloat max: 0.0
 ]
 
 { #category : 'stepping' }
 CFPhysicsPointAttractionForce >> applyForStep: seconds [
-	strength isZero ifTrue: [ ^ self ].
+	stiffness isZero ifTrue: [ ^ self ].
 	bodies do: [ :body |
-		| bodyCentre force |
+		| bodyCentre displacementMetres force |
 		bodyCentre := body position + (body extent / 2.0).
-		force := (point - bodyCentre) * strength.
+		displacementMetres := (point - bodyCentre) / self lengthUnitsPerMetre.
+		force := displacementMetres * stiffness.
 		force = (0 @ 0) ifFalse: [ self applyForce: force to: body ] ]
 ]

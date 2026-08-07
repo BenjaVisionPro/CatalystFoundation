@@ -1,7 +1,7 @@
 "
 I apply tangential force around a configured world point.
 
-My distance response determines the force magnitude at each body's distance from the vortex centre.
+My distance response maps each body's distance in metres to tangential force magnitude in newtons.
 "
 Class {
 	#name : 'CFPhysicsVortexForce',
@@ -61,11 +61,12 @@ CFPhysicsVortexForce >> maximumDistance: aNumber [
 { #category : 'stepping' }
 CFPhysicsVortexForce >> applyForStep: seconds [
 	bodies do: [ :body |
-		| displacement distance magnitude tangent |
+		| displacement distance distanceMetres magnitude tangent |
 		displacement := body position + (body extent / 2.0) - centre.
 		distance := displacement r.
 		distance > 0 ifTrue: [
-			magnitude := distanceResponse forceMagnitudeAtDistance: distance.
+			distanceMetres := self metresForLengthUnits: distance.
+			magnitude := distanceResponse forceMagnitudeAtDistance: distanceMetres.
 			magnitude > 0 ifTrue: [
 				tangent := displacement y negated @ displacement x.
 				self applyForce: tangent / distance * magnitude to: body ] ] ]

@@ -11,7 +11,7 @@ CFPhysicsAngularDynamicsTests >> testAngularImpulseChangesDynamicAngularVelocity
 	| body impulse expected |
 	body := self newBodyWithSequence: 1.
 	impulse := 12.0.
-	expected := impulse * body inverseInertia.
+	expected := impulse * body lengthUnitsPerMetre squared * body inverseInertia.
 	body applyAngularImpulse: impulse.
 	self assert: (body angularVelocity closeTo: expected)
 ]

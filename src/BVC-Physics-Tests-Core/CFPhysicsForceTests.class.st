@@ -17,8 +17,8 @@ CFPhysicsForceTests >> testWindAppliesTheConfiguredForceToEveryBody [
 		force: 30 @ -10;
 		yourself.
 	wind applyForStep: 0.016.
-	self assert: first force equals: 30 @ -10.
-	self assert: second force equals: 30 @ -10
+	self assert: first forceInNewtons equals: 30 @ -10.
+	self assert: second forceInNewtons equals: 30 @ -10
 ]
 
 { #category : 'tests - centre' }
@@ -31,11 +31,11 @@ CFPhysicsForceTests >> testCentreForceMovesAGroupTowardItsConfiguredCentre [
 	centre := CFPhysicsCentreForce new
 		bodies: { first. second };
 		centre: 25 @ 5;
-		strength: 2;
+		stiffness: 2;
 		yourself.
 	centre applyForStep: 0.016.
-	self assert: first force equals: 20 @ 0.
-	self assert: second force equals: 20 @ 0
+	self assert: first forceInNewtons equals: 0.2 @ 0.
+	self assert: second forceInNewtons equals: 0.2 @ 0
 ]
 
 { #category : 'tests - vortex' }
@@ -49,7 +49,7 @@ CFPhysicsForceTests >> testVortexAppliesTangentialForceAroundItsCentre [
 		force: 40;
 		yourself.
 	vortex applyForStep: 0.016.
-	self assert: body force equals: 0 @ 40
+	self assert: body forceInNewtons equals: 0 @ 40
 ]
 
 { #category : 'tests - membership' }
@@ -75,8 +75,8 @@ CFPhysicsForceTests >> testManyBodyRepulsionAppliesEqualAndOppositeForces [
 		force: 40;
 		yourself.
 	repulsion applyForStep: 0.016.
-	self assert: first force equals: -40 @ 0.
-	self assert: second force equals: 40 @ 0
+	self assert: first forceInNewtons equals: -40 @ 0.
+	self assert: second forceInNewtons equals: 40 @ 0
 ]
 
 { #category : 'tests - point attraction' }
@@ -89,9 +89,54 @@ CFPhysicsForceTests >> testPointAttractionPullsEachBodyTowardTheConfiguredPoint 
 	attraction := CFPhysicsPointAttractionForce new
 		bodies: { first. second };
 		point: 15 @ 5;
-		strength: 2;
+		stiffness: 2;
 		yourself.
 	attraction applyForStep: 0.016.
-	self assert: first force equals: 20 @ 0.
-	self assert: second force equals: -20 @ 0
+	self assert: first forceInNewtons equals: 0.2 @ 0.
+	self assert: second forceInNewtons equals: -0.2 @ 0
+]
+
+{ #category : 'tests - units' }
+CFPhysicsForceTests >> testOneNewtonAcceleratesOneKilogramByOneMetrePerSecondSquared [
+	| owner element world body state |
+	owner := BlElement new size: 300 @ 300; yourself.
+	element := BlElement new size: 100 @ 100; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world
+		containment disable;
+		gravity: 0 @ 0.
+	element physics
+		beDynamic;
+		density: 1.0.
+	body := element physics body.
+	self assert: (body mass closeTo: 1.0).
+	body applyForce: 1 @ 0.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 1.0 gravity: 0 @ 0.
+	self assert: (state linearVelocity x closeTo: 100.0).
+	self assert: (world metresForLengthUnits: state linearVelocity x) closeTo: 1.0
+]
+
+{ #category : 'tests - units' }
+CFPhysicsForceTests >> testPhysicalForceIsIndependentOfWorldLengthScale [
+	| owner element world body state |
+	owner := BlElement new size: 600 @ 600; yourself.
+	element := BlElement new size: 200 @ 200; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world
+		lengthUnitsPerMetre: 200.0;
+		containment disable;
+		gravity: 0 @ 0.
+	element physics
+		beDynamic;
+		density: 1.0.
+	body := element physics body.
+	self assert: (body mass closeTo: 1.0).
+	body applyForce: 1 @ 0.
+	state := CFPhysicsBodyStepState on: body.
+	state integrateVelocityBy: 1.0 gravity: 0 @ 0.
+	self assert: (state linearVelocity x closeTo: 200.0).
+	self assert: (world metresForLengthUnits: state linearVelocity x) closeTo: 1.0
 ]

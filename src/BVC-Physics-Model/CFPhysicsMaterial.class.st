@@ -13,11 +13,13 @@ Class {
 
 { #category : 'accessing' }
 CFPhysicsMaterial >> density [
+	"Mass density in kilograms per square metre."
 	^ density
 ]
 
 { #category : 'accessing' }
 CFPhysicsMaterial >> density: aNumber [
+	"Set mass density in kilograms per square metre."
 	density := aNumber asFloat
 ]
 

@@ -430,28 +430,27 @@ CFPhysicsInteractionTests >> testRepulsionCanUseLinearFalloffResponse [
 	^ repulsion
 ]
 { #category : 'tests - attraction interaction' }
-CFPhysicsInteractionTests >> testSoftenedInverseSquareResponseFallsOffWithoutSingularity [
+CFPhysicsInteractionTests >> testInverseSquareResponseDefinesForceAtOneMetre [
 	<gtExample>
 	| response |
-	response := CFPhysicsSoftenedInverseSquareResponse
-		force: 400
-		softeningDistance: 20.
-	self assert: (response forceMagnitudeAtDistance: 0) equals: 400.0.
-	self assert: (response forceMagnitudeAtDistance: 20) equals: 200.0.
-	self assert: (response forceMagnitudeAtDistance: 40) equals: 80.0.
-	response maximumDistance: 50.
-	self assert: (response forceMagnitudeAtDistance: 51) equals: 0.0.
+	response := CFPhysicsInverseSquareResponse force: 4.
+	self assert: (response forceMagnitudeAtDistance: 0.5) equals: 16.0.
+	self assert: (response forceMagnitudeAtDistance: 1.0) equals: 4.0.
+	self assert: (response forceMagnitudeAtDistance: 2.0) equals: 1.0.
+	response maximumDistance: 5.0.
+	self assert: (response forceMagnitudeAtDistance: 5.1) equals: 0.0.
 	^ response
 ]
 { #category : 'tests - attraction interaction' }
-CFPhysicsInteractionTests >> testAttractionCanUseSoftenedInverseSquareResponse [
+CFPhysicsInteractionTests >> testAttractionCanUseInverseSquareResponse [
 	<gtExample>
 	| first second attraction response |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
-	response := CFPhysicsSoftenedInverseSquareResponse
-		force: 1000
-		softeningDistance: 100.
+	response := CFPhysicsInverseSquareResponse
+		force: 10;
+		maximumDistance: 5.0;
+		yourself.
 	attraction := CFPhysicsAttractionForce between: first and: second.
 	attraction distanceResponse: response.
 	attraction applyForStep: 0.1.
@@ -462,14 +461,15 @@ CFPhysicsInteractionTests >> testAttractionCanUseSoftenedInverseSquareResponse [
 	^ attraction
 ]
 { #category : 'tests - repulsion interaction' }
-CFPhysicsInteractionTests >> testRepulsionCanUseSoftenedInverseSquareResponse [
+CFPhysicsInteractionTests >> testRepulsionCanUseInverseSquareResponse [
 	<gtExample>
 	| first second repulsion response |
 	first := self newBodyWithSequence: 1 position: 0 @ 0 extent: 20 @ 20.
 	second := self newBodyWithSequence: 2 position: 90 @ 0 extent: 20 @ 20.
-	response := CFPhysicsSoftenedInverseSquareResponse
-		force: 1000
-		softeningDistance: 100.
+	response := CFPhysicsInverseSquareResponse
+		force: 10;
+		maximumDistance: 5.0;
+		yourself.
 	repulsion := CFPhysicsRepulsionForce between: first and: second.
 	repulsion distanceResponse: response.
 	repulsion applyForStep: 0.1.

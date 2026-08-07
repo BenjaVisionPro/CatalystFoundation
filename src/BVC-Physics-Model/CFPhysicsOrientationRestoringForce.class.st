@@ -135,7 +135,7 @@ CFPhysicsOrientationRestoringForce >> validateForWorld: aWorld [
 
 { #category : 'stepping' }
 CFPhysicsOrientationRestoringForce >> applyForStep: seconds [
-	| error angularAcceleration inverseInertia torque |
+	| error angularAcceleration momentOfInertia torque |
 	body isDynamic ifFalse: [ ^ self ].
 	error := self shortestAngleFrom: body rotation to: targetRotation.
 	(error abs <= angleTolerance and: [
@@ -148,9 +148,9 @@ CFPhysicsOrientationRestoringForce >> applyForStep: seconds [
 		* (self responseFactorForAngularVelocity: body angularVelocity).
 	angularAcceleration := (angularAcceleration max: maximumAngularAcceleration negated)
 		min: maximumAngularAcceleration.
-	inverseInertia := body inverseInertia.
-	inverseInertia isZero ifTrue: [ ^ self ].
-	torque := angularAcceleration / inverseInertia.
+	momentOfInertia := body momentOfInertia.
+	momentOfInertia isZero ifTrue: [ ^ self ].
+	torque := angularAcceleration * momentOfInertia.
 	self applyTorque: torque to: body
 ]
 

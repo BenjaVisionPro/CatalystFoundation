@@ -1,7 +1,7 @@
 "
 I represent a force response that decreases linearly with distance.
 
-My responsibility is to interpolate from full force to zero across a configured range.
+My responsibility is to interpolate from full force in newtons to zero across a configured range in metres.
 "
 Class {
 	#name : 'CFPhysicsLinearFalloffResponse',
@@ -22,8 +22,8 @@ CFPhysicsLinearFalloffResponse class >> force: aForce maximumDistance: aDistance
 { #category : 'initialization' }
 CFPhysicsLinearFalloffResponse >> initialize [
 	super initialize.
-	force := 1000.0.
-	maximumDistance := 100.0
+	force := 1.0.
+	maximumDistance := 1.0
 ]
 
 { #category : 'accessing' }

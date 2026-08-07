@@ -46,6 +46,18 @@ CFPhysicsForce >> world [
 	^ world
 ]
 
+{ #category : 'units' }
+CFPhysicsForce >> lengthUnitsPerMetre [
+	^ world
+		ifNil: [ CFPhysicsBody defaultLengthUnitsPerMetre ]
+		ifNotNil: [ world lengthUnitsPerMetre ]
+]
+
+{ #category : 'units' }
+CFPhysicsForce >> metresForLengthUnits: aNumber [
+	^ aNumber / self lengthUnitsPerMetre
+]
+
 { #category : 'lifecycle' }
 CFPhysicsForce >> addedToWorld: aWorld [
 	world ifNotNil: [ self error: 'Force already belongs to a Physics world' ].

@@ -1,7 +1,7 @@
 "
 I represent a force acting between two Physics endpoints.
 
-My responsibility is to resolve endpoint geometry and a distance response, then apply equal and opposite impulses to the connected bodies.
+My responsibility is to resolve endpoint geometry and a distance response, then apply equal and opposite forces to the connected bodies.
 "
 Class {
 	#name : 'CFPhysicsPairForce',
@@ -105,14 +105,15 @@ CFPhysicsPairForce >> includesBody: aBody [
 
 { #category : 'stepping' }
 CFPhysicsPairForce >> applyForStep: seconds [
-	| points displacement distance forceMagnitude force firstBody secondBody |
+	| points displacement distance distanceMetres forceMagnitude force firstBody secondBody |
 	firstBody := self bodyA.
 	secondBody := self bodyB.
 	points := endpointPair worldPoints.
 	displacement := points second - points first.
 	distance := displacement r.
 	distance = 0 ifTrue: [ ^ self ].
-	forceMagnitude := distanceResponse forceMagnitudeAtDistance: distance.
+	distanceMetres := self metresForLengthUnits: distance.
+	forceMagnitude := distanceResponse forceMagnitudeAtDistance: distanceMetres.
 	forceMagnitude = 0 ifTrue: [ ^ self ].
 	force := (self directionFor: displacement distance: distance) * forceMagnitude.
 	firstBody ifNotNil: [ self applyForce: force to: firstBody ].

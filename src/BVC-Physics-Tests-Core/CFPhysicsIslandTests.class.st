@@ -326,7 +326,7 @@ CFPhysicsIslandTests >> testImpulseWakesSleepingBody [
 	body sleep.
 	body applyImpulse: 10 @ 0 atWorldPoint: body worldBodyOrigin.
 	self assert: body isAwake.
-	self assert: body velocity equals: 10 @ 0 * body inverseMass.
+	self assert: body velocity equals: 10 @ 0 * body lengthUnitsPerMetre * body inverseMass.
 	^ body
 ]
 { #category : 'tests - island sleeping' }

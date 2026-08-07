@@ -54,7 +54,7 @@ CFPhysics >> descriptionDensity [
 	<magritteDescription>
 	^ MANumberDescription new
 		accessor: #density;
-		label: 'Density';
+		label: 'Density (kg/m²)';
 		priority: 40;
 		group: 'Material';
 		beReadOnly;

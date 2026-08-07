@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce', 'componentForces',
 		'length', 'hertz', 'dampingRatio',
-		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'componentCentringStrength', 'linearDamping', 'originalLinearDampingByBody'
+		'repulsionAtOneMetre', 'maximumRepulsionDistance', 'centringStiffness', 'componentCentringStiffness', 'linearDamping', 'originalLinearDampingByBody'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -26,11 +26,10 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	length := CFPhysicsSharedScalar value: 90.0.
 	hertz := CFPhysicsSharedScalar value: 1.5.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
-	repulsion := CFPhysicsSharedScalar value: 650000.0.
-	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
-	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
-	centringStrength := CFPhysicsSharedScalar value: 20.0.
-	componentCentringStrength := CFPhysicsSharedScalar value: 2.0.
+	repulsionAtOneMetre := CFPhysicsSharedScalar value: 0.18.
+	maximumRepulsionDistance := CFPhysicsSharedScalar value: 5.0.
+	centringStiffness := CFPhysicsSharedScalar value: 0.002.
+	componentCentringStiffness := CFPhysicsSharedScalar value: 0.0002.
 	linearDamping := CFPhysicsSharedScalar value: 1.5.
 	originalLinearDampingByBody := IdentityDictionary new
 ]
@@ -82,25 +81,21 @@ CFPhysicsForceDirectedBehaviour >> dampingRatio [ ^ dampingRatio value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> dampingRatio: aNumber [ dampingRatio value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> repulsion [ ^ repulsion value ]
+CFPhysicsForceDirectedBehaviour >> repulsionAtOneMetre [ "Repulsive force in newtons at one metre separation." ^ repulsionAtOneMetre value ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> repulsion: aNumber [ repulsion value: aNumber ]
+CFPhysicsForceDirectedBehaviour >> repulsionAtOneMetre: aNumber [ repulsionAtOneMetre value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> repulsionSofteningDistance [ ^ repulsionSofteningDistance value ]
-{ #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> repulsionSofteningDistance: aNumber [ repulsionSofteningDistance value: (aNumber asFloat max: 0.0) ]
-{ #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance [ ^ maximumRepulsionDistance value ]
+CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance [ "Maximum repulsion range in metres." ^ maximumRepulsionDistance value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance: aNumber [ maximumRepulsionDistance value: aNumber ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> centringStrength [ ^ centringStrength value ]
+CFPhysicsForceDirectedBehaviour >> centringStiffness [ "Whole-graph centring stiffness in newtons per metre." ^ centringStiffness value ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> centringStrength: aNumber [ centringStrength value: (aNumber asFloat max: 0.0) ]
+CFPhysicsForceDirectedBehaviour >> centringStiffness: aNumber [ centringStiffness value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> componentCentringStrength [ ^ componentCentringStrength value ]
+CFPhysicsForceDirectedBehaviour >> componentCentringStiffness [ "Disconnected-component centring stiffness in newtons per metre." ^ componentCentringStiffness value ]
 { #category : 'configuration' }
-CFPhysicsForceDirectedBehaviour >> componentCentringStrength: aNumber [ componentCentringStrength value: (aNumber asFloat max: 0.0) ]
+CFPhysicsForceDirectedBehaviour >> componentCentringStiffness: aNumber [ componentCentringStiffness value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> linearDamping [ ^ linearDamping value ]
 { #category : 'configuration' }
@@ -211,9 +206,8 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionForceFor: currentBodies [
 		repulsionForce := self world addForce: (CFPhysicsManyBodyRepulsionForce new wakesBodies: false) ].
 	repulsionForce
 		bodies: currentBodies;
-		distanceResponse: (CFPhysicsSoftenedInverseSquareResponse new
-			force: repulsion;
-			softeningDistance: repulsionSofteningDistance;
+		distanceResponse: (CFPhysicsInverseSquareResponse new
+			force: repulsionAtOneMetre;
 			maximumDistance: maximumRepulsionDistance;
 			yourself)
 ]
@@ -225,7 +219,7 @@ CFPhysicsForceDirectedBehaviour >> ensurePositioningForceFor: currentBodies [
 	positioningForce
 		bodies: currentBodies;
 		centre: self world owner extent / 2.0;
-		strength: centringStrength value
+		stiffness: centringStiffness value
 ]
 
 
@@ -277,7 +271,7 @@ CFPhysicsForceDirectedBehaviour >> reconcileComponentForcesFor: currentElements 
 			force
 				bodies: bodies;
 				centre: centre;
-				strength: componentCentringStrength value ] ].
+				stiffness: componentCentringStiffness value ] ].
 	componentForces associations copy do: [ :association |
 		(desiredKeys includes: association key) ifFalse: [
 			association value remove.

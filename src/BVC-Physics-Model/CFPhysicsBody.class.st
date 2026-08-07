@@ -11,6 +11,12 @@ Class {
 	#package : 'BVC-Physics-Model'
 }
 
+
+{ #category : 'units' }
+CFPhysicsBody class >> defaultLengthUnitsPerMetre [
+	^ 100.0
+]
+
 { #category : 'instance creation' }
 CFPhysicsBody class >> element: anElement world: aWorld [
 	^ self new
@@ -130,10 +136,10 @@ CFPhysicsBody >> inverseMass [
 
 { #category : 'mass' }
 CFPhysicsBody >> calculatedInverseMass [
-	| area mass |
-	area := self shapeState area.
-	mass := area * self shapeState material density.
-	^ mass > 0 ifTrue: [ 1.0 / mass ] ifFalse: [ 0.0 ]
+	| areaSquareMetres massKilograms |
+	areaSquareMetres := self shapeState area / self lengthUnitsPerMetre squared.
+	massKilograms := areaSquareMetres * self shapeState material density.
+	^ massKilograms > 0 ifTrue: [ 1.0 / massKilograms ] ifFalse: [ 0.0 ]
 ]
 
 { #category : 'material' }
@@ -349,6 +355,33 @@ CFPhysicsBody >> world [
 	^ world
 ]
 
+{ #category : 'units' }
+CFPhysicsBody >> lengthUnitsPerMetre [
+	^ world
+		ifNil: [ self class defaultLengthUnitsPerMetre ]
+		ifNotNil: [ world lengthUnitsPerMetre ]
+]
+
+{ #category : 'units' }
+CFPhysicsBody >> forceInNewtons [
+	^ force / self lengthUnitsPerMetre
+]
+
+{ #category : 'units' }
+CFPhysicsBody >> torqueInNewtonMetres [
+	^ torque / self lengthUnitsPerMetre squared
+]
+
+{ #category : 'mass' }
+CFPhysicsBody >> momentOfInertia [
+	"Moment of inertia in kilogram-square metres."
+	| inverse |
+	inverse := self inverseInertia.
+	^ inverse = 0
+		ifTrue: [ 0.0 ]
+		ifFalse: [ (1.0 / inverse) / self lengthUnitsPerMetre squared ]
+]
+
 { #category : 'accessing' }
 CFPhysicsBody >> world: aWorld [
 	world := aWorld
@@ -444,10 +477,11 @@ CFPhysicsBody >> applyForce: aPoint [
 
 { #category : 'linear dynamics' }
 CFPhysicsBody >> applyForce: aPoint wake: aBoolean [
+	"Apply a force vector in newtons."
 	aBoolean
 		ifTrue: [ self wake ]
 		ifFalse: [ self isAwake ifFalse: [ ^ self ] ].
-	bodyType applyForce: aPoint.
+	bodyType applyForce: (aPoint * self lengthUnitsPerMetre).
 	^ self
 ]
 
@@ -533,10 +567,11 @@ CFPhysicsBody >> applyTorque: aNumber [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyTorque: aNumber wake: aBoolean [
+	"Apply torque in newton-metres."
 	aBoolean
 		ifTrue: [ self wake ]
 		ifFalse: [ self isAwake ifFalse: [ ^ self ] ].
-	bodyType applyTorque: aNumber.
+	bodyType applyTorque: aNumber * self lengthUnitsPerMetre squared.
 	^ self
 ]
 
@@ -559,6 +594,7 @@ CFPhysicsBody >> accumulateAngularVelocity: aNumber [
 
 { #category : 'mass' }
 CFPhysicsBody >> mass [
+	"Mass in kilograms."
 	| inverse |
 	inverse := self inverseMass.
 	^ inverse = 0 ifTrue: [ 0.0 ] ifFalse: [ 1.0 / inverse ]
@@ -590,7 +626,10 @@ CFPhysicsBody >> velocityAtWorldPoint: aPoint [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyImpulse: anImpulse atWorldPoint: aPoint [
-	bodyType applyImpulse: anImpulse atWorldPoint: aPoint.
+	"Apply linear impulse in newton-seconds at a Physics world point."
+	bodyType
+		applyImpulse: anImpulse * self lengthUnitsPerMetre
+		atWorldPoint: aPoint.
 	^ self
 ]
 
@@ -834,7 +873,8 @@ CFPhysicsBody >> isBullet [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyAngularImpulse: aNumber [
-	bodyType applyAngularImpulse: aNumber.
+	"Apply angular impulse in newton-metre-seconds."
+	bodyType applyAngularImpulse: aNumber * self lengthUnitsPerMetre squared.
 	^ self
 ]
 
