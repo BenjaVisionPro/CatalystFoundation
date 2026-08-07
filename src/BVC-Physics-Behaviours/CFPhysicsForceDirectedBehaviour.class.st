@@ -23,13 +23,13 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	repulsionForce := nil.
 	positioningForce := nil.
 	length := CFPhysicsSharedScalar value: 90.0.
-	hertz := CFPhysicsSharedScalar value: 0.65.
+	hertz := CFPhysicsSharedScalar value: 1.15.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
-	repulsion := CFPhysicsSharedScalar value: 450000.0.
+	repulsion := CFPhysicsSharedScalar value: 650000.0.
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
-	centringStrength := CFPhysicsSharedScalar value: 8.0.
-	velocityDamping := CFPhysicsSharedScalar value: 4.0
+	centringStrength := CFPhysicsSharedScalar value: 14.0.
+	velocityDamping := CFPhysicsSharedScalar value: 7.0
 ]
 
 { #category : 'configuration' }
