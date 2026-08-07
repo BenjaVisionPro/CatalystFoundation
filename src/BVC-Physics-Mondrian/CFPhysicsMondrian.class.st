@@ -62,14 +62,6 @@ CFPhysicsMondrian >> forceDirected [
 	^ CFPhysicsForceDirectedBehaviour new
 		target: mondrian;
 		adapter: CFPhysicsMondrianGraphAdapter new;
-		length: 104.0;
-		hertz: 3.0;
-		dampingRatio: 1.0;
-		repulsion: 72000.0;
-		repulsionSofteningDistance: 58.0;
-		maximumRepulsionDistance: 175.0;
-		centringStrength: 5.0;
-		velocityDamping: 10.0;
 		start
 ]
 

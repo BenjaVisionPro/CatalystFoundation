@@ -21,14 +21,14 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	springsByEdge := IdentityDictionary new.
 	repulsionForce := nil.
 	positioningForce := nil.
-	length := CFPhysicsSharedScalar value: 80.0.
-	hertz := CFPhysicsSharedScalar value: 3.0.
+	length := CFPhysicsSharedScalar value: 90.0.
+	hertz := CFPhysicsSharedScalar value: 0.65.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
-	repulsion := CFPhysicsSharedScalar value: 100000.0.
-	repulsionSofteningDistance := CFPhysicsSharedScalar value: 50.0.
-	maximumRepulsionDistance := CFPhysicsSharedScalar value: 200.0.
-	centringStrength := CFPhysicsSharedScalar value: 4.0.
-	velocityDamping := CFPhysicsSharedScalar value: 8.0
+	repulsion := CFPhysicsSharedScalar value: 450000.0.
+	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
+	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
+	centringStrength := CFPhysicsSharedScalar value: 8.0.
+	velocityDamping := CFPhysicsSharedScalar value: 4.0
 ]
 
 { #category : 'configuration' }
