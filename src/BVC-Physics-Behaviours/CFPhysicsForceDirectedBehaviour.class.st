@@ -1,15 +1,15 @@
 "
 I orchestrate a force-directed arrangement for a graph supplied by an adapter.
 
-I reconcile edge distance joints and configure the persistent forces that repel and centre the selected graph elements.
+I reconcile edge distance joints and configure the persistent forces that repel, centre, and gently gather disconnected graph components.
 "
 Class {
 	#name : 'CFPhysicsForceDirectedBehaviour',
 	#superclass : 'CFPhysicsBehaviour',
 	#instVars : [
-		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce',
+		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce', 'componentForces',
 		'length', 'hertz', 'dampingRatio',
-		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'linearDamping', 'originalLinearDampingByBody'
+		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'componentCentringStrength', 'linearDamping', 'originalLinearDampingByBody'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -22,6 +22,7 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	orientationForcesByElement := IdentityDictionary new.
 	repulsionForce := nil.
 	positioningForce := nil.
+	componentForces := IdentityDictionary new.
 	length := CFPhysicsSharedScalar value: 90.0.
 	hertz := CFPhysicsSharedScalar value: 1.5.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
@@ -29,6 +30,7 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
 	centringStrength := CFPhysicsSharedScalar value: 20.0.
+	componentCentringStrength := CFPhysicsSharedScalar value: 2.0.
 	linearDamping := CFPhysicsSharedScalar value: 1.5.
 	originalLinearDampingByBody := IdentityDictionary new
 ]
@@ -64,6 +66,9 @@ CFPhysicsForceDirectedBehaviour >> repulsionForce [ ^ repulsionForce ]
 { #category : 'accessing' }
 CFPhysicsForceDirectedBehaviour >> positioningForce [ ^ positioningForce ]
 
+{ #category : 'accessing' }
+CFPhysicsForceDirectedBehaviour >> componentForces [ ^ componentForces values asArray ]
+
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> length [ ^ length value ]
 { #category : 'configuration' }
@@ -92,6 +97,10 @@ CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance: aNumber [ maximumRe
 CFPhysicsForceDirectedBehaviour >> centringStrength [ ^ centringStrength value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> centringStrength: aNumber [ centringStrength value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> componentCentringStrength [ ^ componentCentringStrength value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> componentCentringStrength: aNumber [ componentCentringStrength value: (aNumber asFloat max: 0.0) ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> linearDamping [ ^ linearDamping value ]
 { #category : 'configuration' }
@@ -129,6 +138,7 @@ CFPhysicsForceDirectedBehaviour >> reconcile [
 	currentBodies := currentElements collect: [ :element | element physics body ].
 	self ensureRepulsionForceFor: currentBodies.
 	self ensurePositioningForceFor: currentBodies.
+	self reconcileComponentForcesFor: currentElements edges: currentEdges.
 	self reconcileBodyDampingFor: currentElements.
 	self reconcileOrientationForcesFor: currentElements.
 	self removeObsoleteSpringsExcept: currentEdges asIdentitySet.
@@ -218,6 +228,62 @@ CFPhysicsForceDirectedBehaviour >> ensurePositioningForceFor: currentBodies [
 		strength: centringStrength value
 ]
 
+
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedBehaviour >> connectedComponentsFor: currentElements edges: currentEdges [
+	| adjacency remaining components |
+	adjacency := IdentityDictionary new.
+	currentElements do: [ :element | adjacency at: element put: IdentitySet new ].
+	currentEdges do: [ :edge |
+		| source destination |
+		source := adapter sourceElementFor: edge.
+		destination := adapter destinationElementFor: edge.
+		(adjacency at: source) add: destination.
+		(adjacency at: destination) add: source ].
+	remaining := currentElements asIdentitySet.
+	components := OrderedCollection new.
+	currentElements do: [ :start |
+		(remaining includes: start) ifTrue: [
+			| component pending |
+			component := OrderedCollection new.
+			pending := OrderedCollection with: start.
+			remaining remove: start.
+			[ pending isNotEmpty ] whileTrue: [
+				| element |
+				element := pending removeFirst.
+				component add: element.
+				(adjacency at: element) do: [ :neighbour |
+					(remaining includes: neighbour) ifTrue: [
+						remaining remove: neighbour.
+						pending add: neighbour ] ] ].
+			components add: component ] ].
+	^ components
+]
+
+{ #category : 'private - reconciliation' }
+CFPhysicsForceDirectedBehaviour >> reconcileComponentForcesFor: currentElements edges: currentEdges [
+	| components desiredKeys centre |
+	components := self connectedComponentsFor: currentElements edges: currentEdges.
+	desiredKeys := IdentitySet new.
+	centre := self world owner extent / 2.0.
+	components size > 1 ifTrue: [
+		components do: [ :component |
+			| key force bodies |
+			key := component first.
+			desiredKeys add: key.
+			bodies := component collect: [ :element | element physics body ].
+			force := componentForces at: key ifAbsentPut: [
+				self world addForce: (CFPhysicsCentreForce new wakesBodies: false) ].
+			force
+				bodies: bodies;
+				centre: centre;
+				strength: componentCentringStrength value ] ].
+	componentForces associations copy do: [ :association |
+		(desiredKeys includes: association key) ifFalse: [
+			association value remove.
+			componentForces removeKey: association key ] ]
+]
+
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> reconcileBodyDampingFor: currentElements [
 	| currentBodies desiredBodies |
@@ -248,8 +314,10 @@ CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	orientationForcesByElement values copy do: #remove.
 	repulsionForce ifNotNil: [ repulsionForce remove ].
 	positioningForce ifNotNil: [ positioningForce remove ].
+	componentForces values copy do: #remove.
 	repulsionForce := nil.
 	positioningForce := nil.
 	springsByEdge removeAll.
-	orientationForcesByElement removeAll
+	orientationForcesByElement removeAll.
+	componentForces removeAll
 ]

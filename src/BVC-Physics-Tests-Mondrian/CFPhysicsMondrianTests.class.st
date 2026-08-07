@@ -497,3 +497,29 @@ CFPhysicsMondrianTests >> testMondrianForceDirectedUsesBodyDampingAndRestoresItO
 	self assert: nodes second physics linearDamping equals: 1.25.
 	^ mondrian
 ]
+
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianForceDirectedGentlyCentresDisconnectedComponents [
+	<gtExample>
+	| mondrian world behaviour componentSizes |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three four five).
+	mondrian edges connectAssociations: {
+		#one -> #two.
+		#two -> #three.
+		#four -> #five }.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	self assert: behaviour componentForces size equals: 2.
+	componentSizes := (behaviour componentForces collect: [ :force | force bodies size ]) sorted.
+	self assert: componentSizes equals: #(2 3).
+	behaviour componentForces do: [ :force |
+		self assert: force centre equals: world owner extent / 2.0.
+		self assert: force strength equals: behaviour componentCentringStrength.
+		self assert: force wakesBodies not ].
+	behaviour stop.
+	^ mondrian
+]
