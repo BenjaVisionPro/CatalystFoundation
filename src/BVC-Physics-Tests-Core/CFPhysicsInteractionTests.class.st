@@ -584,7 +584,7 @@ CFPhysicsInteractionTests >> testNearestGeometryEndpointsCreateWorldOwnedRelatio
 	spring := (CFPhysicsDistanceJoint betweenEndpoints: endpoints)
 		springEnabled: true;
 		yourself.
-	world addDistanceJoint: spring.
+	world addJoint: spring.
 	attraction := endpoints attraction.
 	repulsion := endpoints repulsion.
 	self assert: spring endpointPair == endpoints.

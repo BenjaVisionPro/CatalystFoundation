@@ -1,5 +1,5 @@
 "
-I represent the shared lifecycle of a joint between two physics bodies.
+I represent the shared lifecycle of a Physics joint.
 
 My responsibility is to retain activation, ordering, collision and solver-commit state common to every joint. Concrete joints own their bodies, geometry, configuration and accumulated impulses.
 "
@@ -89,3 +89,15 @@ CFPhysicsJoint >> sourceJoint: aJoint [
 
 { #category : 'committing' }
 CFPhysicsJoint >> solverCommitTarget [ ^ sourceJoint ifNil: [ self ] ]
+
+{ #category : 'validation' }
+CFPhysicsJoint >> validateForWorld: aWorld [
+	(self bodyA isNil and: [ self bodyB isNil ]) ifTrue: [
+		self error: 'A joint requires at least one body' ].
+	self bodyA ifNotNil: [ :body |
+		body world == aWorld ifFalse: [
+			self error: 'Joint bodies must belong to the Physics world' ] ].
+	self bodyB ifNotNil: [ :body |
+		body world == aWorld ifFalse: [
+			self error: 'Joint bodies must belong to the Physics world' ] ]
+]

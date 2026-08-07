@@ -858,3 +858,9 @@ CFPhysicsBody >> worldVectorForBodyLocalVector: aPoint [
 CFPhysicsBody >> bodyLocalVectorForWorldVector: aPoint [
 	^ self shapeState rotateVector: aPoint by: rotation negated
 ]
+
+
+{ #category : 'joints' }
+CFPhysicsBody >> joints [
+	^ world ifNil: [ #() ] ifNotNil: [ world jointsUsingBody: self ]
+]

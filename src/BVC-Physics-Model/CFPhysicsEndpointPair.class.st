@@ -51,17 +51,17 @@ CFPhysicsEndpointPair >> includesBody: aBodyState [
 
 { #category : 'relationships' }
 CFPhysicsEndpointPair >> distanceJoint [
-	^ self world addDistanceJoint: (CFPhysicsDistanceJoint betweenEndpoints: self)
+	^ self world addJoint: (CFPhysicsDistanceJoint betweenEndpoints: self)
 ]
 
 { #category : 'relationships' }
 CFPhysicsEndpointPair >> revoluteJoint [
-	^ self world addRevoluteJoint: (CFPhysicsRevoluteJoint betweenEndpoints: self)
+	^ self world addJoint: (CFPhysicsRevoluteJoint betweenEndpoints: self)
 ]
 
 { #category : 'relationships' }
 CFPhysicsEndpointPair >> weldJoint [
-	^ self world addWeldJoint: (CFPhysicsWeldJoint betweenEndpoints: self)
+	^ self world addJoint: (CFPhysicsWeldJoint betweenEndpoints: self)
 ]
 
 { #category : 'relationships' }

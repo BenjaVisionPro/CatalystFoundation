@@ -174,7 +174,7 @@ CFPhysicsForceDirectedBehaviour >> removeObsoleteRepulsionsExcept: desiredPairs 
 CFPhysicsForceDirectedBehaviour >> ensureSpringFor: aConnection [
 	| spring |
 	spring := springsByConnection at: aConnection ifAbsentPut: [
-		world addDistanceJoint: (CFPhysicsDistanceJoint
+		world addJoint: (CFPhysicsDistanceJoint
 			between: aConnection key physics body
 			and: aConnection value physics body) ].
 	spring

@@ -547,11 +547,19 @@ CFPhysics >> pointerJointHandler [
 	^ pointerJointHandler
 ]
 
+{ #category : 'joints' }
+CFPhysics >> joints [
+	| body |
+	body := self bodyOrNil.
+	body ifNil: [ ^ #() ].
+	^ body joints
+]
+
 { #category : 'distance joints' }
 CFPhysics >> distanceJointTo: anotherElement [
 	| body |
 	body := self body.
-	^ body world addDistanceJoint: (CFPhysicsDistanceJoint
+	^ body world addJoint: (CFPhysicsDistanceJoint
 		between: body
 		and: anotherElement physics body)
 ]
@@ -571,20 +579,27 @@ CFPhysics >> distanceJoints [
 CFPhysics >> motorJointTo: anotherElement [
 	| body |
 	body := self body.
-	^ body world addMotorJoint: (CFPhysicsMotorJoint
+	^ body world addJoint: (CFPhysicsMotorJoint
 		between: body
 		and: anotherElement physics body)
 ]
 
 { #category : 'motor joints' }
-CFPhysics >> motorJoints [ | aWorld body | aWorld := self world. aWorld ifNil: [ ^ #() ]. body := aWorld bodyStateFor: element. body ifNil: [ ^ #() ]. ^ aWorld motorJoints select: [ :each | each includesBody: body ] ]
+CFPhysics >> motorJoints [
+	| aWorld body |
+	aWorld := self world.
+	aWorld ifNil: [ ^ #() ].
+	body := aWorld bodyStateFor: element.
+	body ifNil: [ ^ #() ].
+	^ aWorld motorJointsUsingBody: body
+]
 
 
 { #category : 'filter joints' }
 CFPhysics >> filterJointTo: anotherElement [
 	| body |
 	body := self body.
-	^ body world addFilterJoint: (CFPhysicsFilterJoint
+	^ body world addJoint: (CFPhysicsFilterJoint
 		between: body
 		and: anotherElement physics body)
 ]
@@ -604,7 +619,7 @@ CFPhysics >> filterJoints [
 CFPhysics >> revoluteJointTo: anotherElement [
 	| body |
 	body := self body.
-	^ body world addRevoluteJoint: (CFPhysicsRevoluteJoint
+	^ body world addJoint: (CFPhysicsRevoluteJoint
 		between: body
 		and: anotherElement physics body)
 ]
@@ -624,7 +639,7 @@ CFPhysics >> revoluteJoints [
 CFPhysics >> weldJointTo: anotherElement [
 	| body |
 	body := self body.
-	^ body world addWeldJoint: (CFPhysicsWeldJoint
+	^ body world addJoint: (CFPhysicsWeldJoint
 		between: body
 		and: anotherElement physics body)
 ]
@@ -644,7 +659,7 @@ CFPhysics >> weldJoints [
 CFPhysics >> prismaticJointTo: anotherElement along: anAxis [
 	| body |
 	body := self body.
-	^ body world addPrismaticJoint: (CFPhysicsPrismaticJoint
+	^ body world addJoint: (CFPhysicsPrismaticJoint
 		between: body
 		and: anotherElement physics body
 		along: anAxis)
@@ -761,7 +776,7 @@ CFPhysics >> applyAngularImpulse: aNumber [
 CFPhysics >> wheelJointTo: anotherElement along: anAxis [
 	| body |
 	body := self body.
-	^ body world addWheelJoint: (CFPhysicsWheelJoint
+	^ body world addJoint: (CFPhysicsWheelJoint
 		between: body
 		and: anotherElement physics body
 		along: anAxis)

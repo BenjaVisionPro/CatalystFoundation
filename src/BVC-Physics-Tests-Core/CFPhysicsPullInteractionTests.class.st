@@ -17,7 +17,7 @@ CFPhysicsPullInteractionTests >> testPullInteractionCanEndAfterItsWorldIsRelease
 	body := child physics body.
 	handler := child physics pointerJointHandler.
 	constraint := CFPhysicsMouseJoint body: body target: 10 @ 10.
-	world addMouseJoint: constraint.
+	world addJoint: constraint.
 	handler instVarNamed: 'mouseJoint' put: constraint.
 	root physics ceaseBeingWorld.
 	self assert: body world isNil.
@@ -42,7 +42,7 @@ CFPhysicsPullInteractionTests >> testPullInteractionPreservesBodyVelocityWhenRel
 		angularVelocity: 3.5.
 	handler := child physics pointerJointHandler.
 	joint := CFPhysicsMouseJoint body: body target: 10 @ 10.
-	world addMouseJoint: joint.
+	world addJoint: joint.
 	handler instVarNamed: 'mouseJoint' put: joint.
 	handler finishMouseJoint.
 	self assert: body velocity equals: 800 @ -200.

@@ -110,7 +110,7 @@ CFPhysicsMouseJointHandler >> beginMouseJointFrom: anEvent [
 		dampingRatio: dampingRatio;
 		maximumForce: maximumAcceleration * body mass;
 		target: pointerPosition.
-	world addMouseJoint: mouseJoint
+	world addJoint: mouseJoint
 ]
 
 { #category : 'private' }

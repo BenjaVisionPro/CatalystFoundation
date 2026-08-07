@@ -220,3 +220,11 @@ CFPhysicsRevoluteJoint >> capturedForStep [
 ]
 
 
+
+
+{ #category : 'validation' }
+CFPhysicsRevoluteJoint >> validateForWorld: aWorld [
+	super validateForWorld: aWorld.
+	endpointPair world == aWorld ifFalse: [
+		self error: 'Joint endpoints must belong to the Physics world' ]
+]

@@ -630,7 +630,7 @@ CFPhysicsJointTests >> testMouseJointRespectsAPrismaticAxis [
 	mouseJoint
 		target: 1000 @ 1000;
 		maximumForce: 100000.0.
-	world addMouseJoint: mouseJoint.
+	world addJoint: mouseJoint.
 	result := world step.
 	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: (element physics position y abs < element physics position x abs).
@@ -764,7 +764,7 @@ CFPhysicsJointTests >> testMotorJointPreservesConfiguredRelativeTransform [
 	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	joint maximumForce: 100000.0; maximumTorque: 100000.0.
-	world addMotorJoint: joint.
+	world addJoint: joint.
 	second position: 80 @ 0.
 	10 timesRepeat: [ world step ].
 	self assert: second position x < 80.
@@ -788,7 +788,7 @@ CFPhysicsJointTests >> testMotorJointPreservesRelativeTransformBetweenDynamicBod
 	initialCentre := (first position + second position) / 2.0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	joint maximumForce: 100000.0; maximumTorque: 100000.0.
-	world addMotorJoint: joint.
+	world addJoint: joint.
 	second position: 80 @ 0.
 	10 timesRepeat: [ world step ].
 	self assert: (second position - first position) x < 80.0.
@@ -814,7 +814,7 @@ CFPhysicsJointTests >> testMotorJointLinearImpulseIsCappedBySubstepForce [
 	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
 	joint maximumForce: 100.0; maximumTorque: 0.0.
-	world addMotorJoint: joint.
+	world addJoint: joint.
 	second position: 80 @ 0.
 	state := world capturePreparedState.
 	solution := world stepPipeline solve: state.
@@ -842,7 +842,7 @@ CFPhysicsJointTests >> testMotorJointLinearOffsetMatchesBox2DWithRotatedBodyA [
 	first position: 0 @ 0; rotation: Float pi / 2.0.
 	second position: 40 @ 0.
 	joint := CFPhysicsMotorJoint between: first and: second.
-	world addMotorJoint: joint.
+	world addJoint: joint.
 	state := world capturePreparedState.
 	prepared := (CFPhysicsMotorJointConstraintBuilder new
 		constraintsFrom: state joints
@@ -962,7 +962,7 @@ CFPhysicsJointTests >> testCreatingAJointBetweenSleepingIslandsKeepsBothIslandsS
 	first sleepLocally.
 	second sleepLocally.
 	joint := CFPhysicsDistanceJoint between: first and: second.
-	world addDistanceJoint: joint.
+	world addJoint: joint.
 	graph mergeIslands.
 	island := graph islandForBody: first.
 	self assert: first isSleeping.
@@ -983,7 +983,7 @@ CFPhysicsJointTests >> testCreatingAJointBetweenAwakeAndSleepingIslandsWakesTheS
 	second world: world.
 	second sleepLocally.
 	joint := CFPhysicsDistanceJoint between: first and: second.
-	world addDistanceJoint: joint.
+	world addJoint: joint.
 	graph mergeIslands.
 	island := graph islandForBody: first.
 	self assert: first isAwake.

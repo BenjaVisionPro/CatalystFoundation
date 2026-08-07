@@ -261,7 +261,7 @@ CFPhysicsWorldTests >> testWorldStateOwnsCapturedJointConfigurationBeforeSolve [
 	joint
 		length: 25;
 		impulse: 3.0.
-	world addDistanceJoint: joint.
+	world addJoint: joint.
 	state := world capturePreparedState.
 	capturedJoint := state joints first.
 	joint

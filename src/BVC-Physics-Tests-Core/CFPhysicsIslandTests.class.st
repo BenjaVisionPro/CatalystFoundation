@@ -560,7 +560,7 @@ CFPhysicsIslandTests >> testWorldPersistentIslandGraphTracksRuntimeJointLifecycl
 	graph := world persistentIslandGraph.
 	self assert: graph islands size equals: 2.
 	joint := CFPhysicsDistanceJoint between: first and: second.
-	world addDistanceJoint: joint.
+	world addJoint: joint.
 	graph mergeIslands.
 	island := graph islandForBody: first.
 	self assert: (graph islandForBody: second) == island.

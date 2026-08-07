@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'mouseJoints', 'motorJoints', 'filterJoints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'distanceJoints', 'revoluteJoints', 'weldJoints', 'prismaticJoints', 'wheelJoints', 'nextMouseJointSequence', 'nextMotorJointSequence', 'nextFilterJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'nextDistanceJointSequence', 'nextRevoluteJointSequence', 'nextWeldJointSequence', 'nextPrismaticJointSequence', 'nextWheelJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'attractionConstraints', 'repulsionConstraints', 'containment', 'nextJointSequence', 'nextAttractionSequence', 'nextRepulsionSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -38,21 +38,12 @@ CFPhysicsWorld >> initialize [
 	contacts := #().
 	activeContacts := #().
 	calculationContacts := #().
-	mouseJoints := IdentitySet new.
-	motorJoints := IdentitySet new.
-	filterJoints := IdentitySet new.
+	joints := OrderedCollection new.
 	attractionConstraints := IdentitySet new.
 	repulsionConstraints := IdentitySet new.
-	nextMouseJointSequence := 1.
-	nextMotorJointSequence := 1.
-	nextFilterJointSequence := 1.
+	nextJointSequence := 1.
 	nextAttractionSequence := 1.
 	nextRepulsionSequence := 1.
-	nextDistanceJointSequence := 1.
-	nextRevoluteJointSequence := 1.
-	nextWeldJointSequence := 1.
-	nextPrismaticJointSequence := 1.
-	nextWheelJointSequence := 1.
 	previousTimeStep := nil.
 	warmStarting := true.
 	simulationTime := 0.0.
@@ -82,11 +73,6 @@ CFPhysicsWorld >> initialize [
 	containmentMargin := nil.
 	containmentFriction := nil.
 	containmentRestitution := nil.
-	distanceJoints := IdentitySet new.
-	revoluteJoints := IdentitySet new.
-	weldJoints := IdentitySet new.
-	prismaticJoints := IdentitySet new.
-	wheelJoints := IdentitySet new.
 	manifoldGenerator := CFPhysicsManifoldGenerator new.
 	persistentIslandGraph := CFPhysicsPersistentIslandGraph new.
 	stepPipeline := CFPhysicsStepPipeline manifoldGenerator: manifoldGenerator
@@ -135,16 +121,9 @@ CFPhysicsWorld >> release [
 	self telemetryEnabled: false.
 	telemetryLogger := nil.
 	behaviours copy do: [ :each | each remove ].
-	mouseJoints copy do: [ :each | self removeMouseJoint: each ].
-	motorJoints copy do: [ :each | self removeMotorJoint: each ].
-	filterJoints copy do: [ :each | self removeFilterJoint: each ].
+	joints copy do: #remove.
 	attractionConstraints copy do: [ :each | self removeAttractionConstraint: each ].
 	repulsionConstraints copy do: [ :each | self removeRepulsionConstraint: each ].
-	distanceJoints copy do: [ :each | self removeDistanceJoint: each ].
-	revoluteJoints copy do: [ :each | self removeRevoluteJoint: each ].
-	weldJoints copy do: [ :each | self removeWeldJoint: each ].
-	prismaticJoints copy do: [ :each | self removePrismaticJoint: each ].
-	wheelJoints copy do: [ :each | self removeWheelJoint: each ].
 	bodyStates keys do: [ :each |
 		each existingPhysics ifNotNil: [ :physics |
 			physics retireBodyFromWorld: self ] ].
@@ -434,14 +413,7 @@ CFPhysicsWorld >> retireElement: anElement [
 		physics retireBodyFromWorld: self ].
 	self removeAttractionsUsingBody: body.
 	self removeRepulsionsUsingBody: body.
-	self removeMouseJointsUsingBody: body.
-	self removeMotorJointsUsingBody: body.
-	self removeFilterJointsUsingBody: body.
-	self removeDistanceJointsUsingBody: body.
-	self removeRevoluteJointsUsingBody: body.
-	self removeWeldJointsUsingBody: body.
-	self removePrismaticJointsUsingBody: body.
-	self removeWheelJointsUsingBody: body.
+	self removeJointsUsingBody: body.
 	self removeContactsUsingBody: body.
 	persistentIslandGraph removeBody: body.
 	^ self
@@ -1108,83 +1080,34 @@ CFPhysicsWorld >> hitEvents [
 
 { #category : 'mouse joints' }
 CFPhysicsWorld >> mouseJoints [
-	^ mouseJoints asArray sorted: [ :first :second | first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsMouseJoint ]
 ]
 
-{ #category : 'mouse joints' }
-CFPhysicsWorld >> addMouseJoint: aJoint [
-	aJoint bodyB world == self ifFalse: [ self error: 'Mouse joint body must belong to this physics world' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextMouseJointSequence.
-	nextMouseJointSequence := nextMouseJointSequence + 1.
-	mouseJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
-
-{ #category : 'mouse joints' }
-CFPhysicsWorld >> removeMouseJoint: aJoint [
-	^ self removeJoint: aJoint from: mouseJoints
-]
-
-{ #category : 'mouse joints' }
-CFPhysicsWorld >> removeMouseJointsUsingBody: aBody [
-	(mouseJoints select: [ :each | each includesBody: aBody ]) copy do: [ :each | self removeMouseJoint: each ]
-]
 
 
 
 { #category : 'motor joints' }
-CFPhysicsWorld >> motorJoints [ ^ motorJoints asArray sorted: [ :first :second | first orderingKey < second orderingKey ] ]
-{ #category : 'motor joints' }
-CFPhysicsWorld >> addMotorJoint: aJoint [
-	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [ self error: 'Motor joint bodies must belong to this physics world' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology. aJoint sequence: nextMotorJointSequence. nextMotorJointSequence := nextMotorJointSequence + 1. motorJoints add: aJoint. persistentIslandGraph linkConstraint: aJoint. self wakeBodiesForJointCreation: aJoint. ^ aJoint
+CFPhysicsWorld >> motorJoints [
+	^ self joints select: [ :each | each class == CFPhysicsMotorJoint ]
 ]
+
 { #category : 'motor joints' }
-CFPhysicsWorld >> removeMotorJoint: aJoint [
-	^ self removeJoint: aJoint from: motorJoints
+CFPhysicsWorld >> motorJointsUsingBody: aBody [
+	^ self motorJoints select: [ :each | each includesBody: aBody ]
 ]
-{ #category : 'motor joints' }
-CFPhysicsWorld >> removeMotorJointsUsingBody: aBody [ (motorJoints select: [ :each | each includesBody: aBody ]) copy do: [ :each | self removeMotorJoint: each ] ]
 
 { #category : 'filter joints' }
 CFPhysicsWorld >> filterJoints [
-	^ filterJoints asArray sorted: [ :first :second | first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsFilterJoint ]
 ]
 
-{ #category : 'filter joints' }
-CFPhysicsWorld >> addFilterJoint: aJoint [
-	(aJoint bodyA world == self and: [ aJoint bodyB world == self ]) ifFalse: [
-		self error: 'Filter joint bodies must belong to this physics world' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextFilterJointSequence.
-	nextFilterJointSequence := nextFilterJointSequence + 1.
-	filterJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'filter joints' }
 CFPhysicsWorld >> filterJointsUsingBody: aBody [
 	^ self filterJoints select: [ :each | each includesBody: aBody ]
 ]
 
-{ #category : 'filter joints' }
-CFPhysicsWorld >> removeFilterJoint: aJoint [
-	^ self removeJoint: aJoint from: filterJoints
-]
 
-{ #category : 'filter joints' }
-CFPhysicsWorld >> removeFilterJointsUsingBody: aBody [
-	(filterJoints select: [ :each | each includesBody: aBody ]) copy do: [ :each |
-		self removeFilterJoint: each ]
-]
 
 { #category : 'attraction interaction' }
 CFPhysicsWorld >> attractions [
@@ -1287,25 +1210,9 @@ CFPhysicsWorld >> springsUsingBody: aBody [
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> distanceJoints [
-	^ distanceJoints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsDistanceJoint ]
 ]
 
-{ #category : 'distance joints' }
-CFPhysicsWorld >> addDistanceJoint: aJoint [
-	aJoint endpointPair world == self
-		ifFalse: [ self error: 'Distance joint endpoints must belong to this physics world' ].
-	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
-		ifFalse: [ self error: 'A distance joint requires at least one body endpoint' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextDistanceJointSequence.
-	nextDistanceJointSequence := nextDistanceJointSequence + 1.
-	distanceJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> distanceJointsUsingBody: aBodyState [
@@ -1326,20 +1233,25 @@ CFPhysicsWorld >> wakeBodiesForJointCreation: aJoint [
 
 
 { #category : 'joints' }
-CFPhysicsWorld >> removeJoint: aJoint [
-	| jointCollection |
-	jointCollection := { mouseJoints. motorJoints. filterJoints. distanceJoints. revoluteJoints. weldJoints. prismaticJoints. wheelJoints }
-		detect: [ :each | each includes: aJoint ]
-		ifNone: [ ^ aJoint ].
-	^ self removeJoint: aJoint from: jointCollection
+CFPhysicsWorld >> addJoint: aJoint [
+	aJoint validateForWorld: self.
+	aJoint addedToWorld: self.
+	aJoint sequence: nextJointSequence.
+	nextJointSequence := nextJointSequence + 1.
+	self invalidateTopology.
+	joints add: aJoint.
+	persistentIslandGraph linkConstraint: aJoint.
+	self wakeBodiesForJointCreation: aJoint.
+	^ aJoint
 ]
 
-{ #category : 'private - joints' }
-CFPhysicsWorld >> removeJoint: aJoint from: aJointCollection [
-	(aJointCollection includes: aJoint) ifFalse: [ ^ aJoint ].
+{ #category : 'joints' }
+CFPhysicsWorld >> removeJoint: aJoint [
+	aJoint world == self ifFalse: [ ^ aJoint ].
+	(joints includes: aJoint) ifFalse: [ ^ aJoint ].
 	self invalidateTopology.
 	persistentIslandGraph unlinkConstraint: aJoint.
-	aJointCollection remove: aJoint.
+	joints remove: aJoint.
 	aJoint wakeBodies.
 	aJoint removedFromWorld.
 	^ aJoint
@@ -1347,10 +1259,17 @@ CFPhysicsWorld >> removeJoint: aJoint from: aJointCollection [
 
 { #category : 'joints' }
 CFPhysicsWorld >> joints [
-	^ (self mouseJoints, self motorJoints, self filterJoints, self distanceJoints, self revoluteJoints, self weldJoints, self prismaticJoints, self wheelJoints) asArray sorted: [ :first :second |
-		first orderingKey = second orderingKey
-			ifTrue: [ first class name asString < second class name asString ]
-			ifFalse: [ first orderingKey < second orderingKey ] ]
+	^ joints asArray
+]
+
+{ #category : 'joints' }
+CFPhysicsWorld >> jointsUsingBody: aBody [
+	^ self joints select: [ :each | each includesBody: aBody ]
+]
+
+{ #category : 'joints' }
+CFPhysicsWorld >> removeJointsUsingBody: aBody [
+	(self jointsUsingBody: aBody) do: #remove
 ]
 
 
@@ -1370,130 +1289,46 @@ CFPhysicsWorld >> jointPreventsCollisionBetween: firstBody and: secondBody [
 					and: [ joint bodyB == firstBody ] ] ] ]
 ]
 
-{ #category : 'distance joints' }
-CFPhysicsWorld >> removeDistanceJoint: aJoint [
-	^ self removeJoint: aJoint from: distanceJoints
-]
 
-{ #category : 'distance joints' }
-CFPhysicsWorld >> removeDistanceJointsUsingBody: aBodyState [
-	(distanceJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeDistanceJoint: each ]
-]
 
 { #category : 'revolute joints' }
 CFPhysicsWorld >> revoluteJoints [
-	^ revoluteJoints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsRevoluteJoint ]
 ]
 
-{ #category : 'revolute joints' }
-CFPhysicsWorld >> addRevoluteJoint: aJoint [
-	aJoint endpointPair world == self
-		ifFalse: [ self error: 'Revolute joint endpoints must belong to this physics world' ].
-	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
-		ifFalse: [ self error: 'A revolute joint requires at least one body endpoint' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextRevoluteJointSequence.
-	nextRevoluteJointSequence := nextRevoluteJointSequence + 1.
-	revoluteJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'revolute joints' }
 CFPhysicsWorld >> revoluteJointsUsingBody: aBodyState [
 	^ self revoluteJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
-{ #category : 'revolute joints' }
-CFPhysicsWorld >> removeRevoluteJoint: aJoint [
-	^ self removeJoint: aJoint from: revoluteJoints
-]
 
-{ #category : 'revolute joints' }
-CFPhysicsWorld >> removeRevoluteJointsUsingBody: aBodyState [
-	(revoluteJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeRevoluteJoint: each ]
-]
 
 { #category : 'weld joints' }
 CFPhysicsWorld >> weldJoints [
-	^ weldJoints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsWeldJoint ]
 ]
 
-{ #category : 'weld joints' }
-CFPhysicsWorld >> addWeldJoint: aJoint [
-	aJoint endpointPair world == self
-		ifFalse: [ self error: 'Weld joint endpoints must belong to this physics world' ].
-	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
-		ifFalse: [ self error: 'A weld joint requires at least one body endpoint' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextWeldJointSequence.
-	nextWeldJointSequence := nextWeldJointSequence + 1.
-	weldJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'weld joints' }
 CFPhysicsWorld >> weldJointsUsingBody: aBodyState [
 	^ self weldJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
-{ #category : 'weld joints' }
-CFPhysicsWorld >> removeWeldJoint: aJoint [
-	^ self removeJoint: aJoint from: weldJoints
-]
 
-{ #category : 'weld joints' }
-CFPhysicsWorld >> removeWeldJointsUsingBody: aBodyState [
-	(weldJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeWeldJoint: each ]
-]
 
 { #category : 'prismatic joints' }
 CFPhysicsWorld >> prismaticJoints [
-	^ prismaticJoints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsPrismaticJoint ]
 ]
 
-{ #category : 'prismatic joints' }
-CFPhysicsWorld >> addPrismaticJoint: aJoint [
-	aJoint endpointPair world == self
-		ifFalse: [ self error: 'Prismatic joint endpoints must belong to this physics world' ].
-	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
-		ifFalse: [ self error: 'A prismatic joint requires at least one body endpoint' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextPrismaticJointSequence.
-	nextPrismaticJointSequence := nextPrismaticJointSequence + 1.
-	prismaticJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'prismatic joints' }
 CFPhysicsWorld >> prismaticJointsUsingBody: aBodyState [
 	^ self prismaticJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
-{ #category : 'prismatic joints' }
-CFPhysicsWorld >> removePrismaticJoint: aJoint [
-	^ self removeJoint: aJoint from: prismaticJoints
-]
 
-{ #category : 'prismatic joints' }
-CFPhysicsWorld >> removePrismaticJointsUsingBody: aBodyState [
-	(prismaticJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removePrismaticJoint: each ]
-]
 
 { #category : 'distance joints' }
 CFPhysicsWorld >> wakeDistanceJointsUsingAnchor: anAnchor [
@@ -1691,41 +1526,15 @@ CFPhysicsWorld >> visualStateEnabled [
 
 { #category : 'wheel joints' }
 CFPhysicsWorld >> wheelJoints [
-	^ wheelJoints asArray sorted: [ :first :second |
-		first orderingKey < second orderingKey ]
+	^ self joints select: [ :each | each class == CFPhysicsWheelJoint ]
 ]
 
-{ #category : 'wheel joints' }
-CFPhysicsWorld >> addWheelJoint: aJoint [
-	aJoint endpointPair world == self
-		ifFalse: [ self error: 'Wheel joint endpoints must belong to this physics world' ].
-	(aJoint bodyA notNil or: [ aJoint bodyB notNil ])
-		ifFalse: [ self error: 'A wheel joint requires at least one body endpoint' ].
-	aJoint addedToWorld: self.
-	self invalidateTopology.
-	aJoint sequence: nextWheelJointSequence.
-	nextWheelJointSequence := nextWheelJointSequence + 1.
-	wheelJoints add: aJoint.
-	persistentIslandGraph linkConstraint: aJoint.
-	self wakeBodiesForJointCreation: aJoint.
-	^ aJoint
-]
 
 { #category : 'wheel joints' }
 CFPhysicsWorld >> wheelJointsUsingBody: aBodyState [
 	^ self wheelJoints select: [ :each | each includesBody: aBodyState ]
 ]
 
-{ #category : 'wheel joints' }
-CFPhysicsWorld >> removeWheelJoint: aJoint [
-	^ self removeJoint: aJoint from: wheelJoints
-]
-
-{ #category : 'wheel joints' }
-CFPhysicsWorld >> removeWheelJointsUsingBody: aBodyState [
-	(wheelJoints select: [ :each | each includesBody: aBodyState ]) copy do: [ :each |
-		self removeWheelJoint: each ]
-]
 
 
 { #category : 'containment - internal' }

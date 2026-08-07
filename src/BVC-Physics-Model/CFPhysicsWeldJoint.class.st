@@ -140,3 +140,11 @@ CFPhysicsWeldJoint >> capturedForStep [
 		sourceJoint: self.
 	^ captured
 ]
+
+
+{ #category : 'validation' }
+CFPhysicsWeldJoint >> validateForWorld: aWorld [
+	super validateForWorld: aWorld.
+	endpointPair world == aWorld ifFalse: [
+		self error: 'Joint endpoints must belong to the Physics world' ]
+]
