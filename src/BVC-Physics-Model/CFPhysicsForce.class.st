@@ -34,6 +34,13 @@ CFPhysicsForce >> wakesBodies: aBoolean [
 CFPhysicsForce >> applyForce: aForce to: aBody [
 	aBody applyForce: aForce wake: wakesBodies
 ]
+
+
+{ #category : 'private - applying' }
+CFPhysicsForce >> applyTorque: aTorque to: aBody [
+	aBody applyTorque: aTorque wake: wakesBodies
+]
+
 { #category : 'accessing' }
 CFPhysicsForce >> world [
 	^ world

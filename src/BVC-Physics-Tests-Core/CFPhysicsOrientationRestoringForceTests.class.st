@@ -83,3 +83,21 @@ CFPhysicsOrientationRestoringForceTests >> testOrientationRestoringAllowsFastCol
 	self assert: slowResponse < 1.0.
 	^ force
 ]
+
+{ #category : 'tests - orientation restoring' }
+CFPhysicsOrientationRestoringForceTests >> testNonWakingOrientationRestoringForceLeavesSleepingBodyAsleep [
+	<gtExample>
+	| body force |
+	body := CFPhysicsBody new.
+	body element: (BlElement new size: 80 @ 40; yourself).
+	force := CFPhysicsOrientationRestoringForce new
+		body: body;
+		wakesBodies: false;
+		yourself.
+	body rotation: 0.8.
+	body putToSleep.
+	force applyForStep: 1.0 / 60.0.
+	self assert: body isSleeping.
+	self assert: body torque equals: 0.0.
+	^ force
+]

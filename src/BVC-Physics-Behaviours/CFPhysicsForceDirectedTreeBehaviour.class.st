@@ -15,12 +15,12 @@ CFPhysicsForceDirectedTreeBehaviour >> initialize [
 	attractionStrength := CFPhysicsSharedScalar value: 2000.0.
 	self
 		length: 0.0;
-		hertz: 1.4;
+		hertz: 1.5;
 		dampingRatio: 1.0;
 		repulsion: 700000.0;
 		repulsionSofteningDistance: 48.0;
 		maximumRepulsionDistance: 600.0;
-		linearDamping: 3.0
+		linearDamping: 1.75
 ]
 
 { #category : 'configuration' }

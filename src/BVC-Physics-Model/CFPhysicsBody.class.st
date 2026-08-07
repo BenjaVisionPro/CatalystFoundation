@@ -528,14 +528,21 @@ CFPhysicsBody >> allowFastRotation: aBoolean [
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> applyTorque: aNumber [
+	^ self applyTorque: aNumber wake: true
+]
+
+{ #category : 'angular dynamics' }
+CFPhysicsBody >> applyTorque: aNumber wake: aBoolean [
+	aBoolean
+		ifTrue: [ self wake ]
+		ifFalse: [ self isAwake ifFalse: [ ^ self ] ].
 	bodyType applyTorque: aNumber.
 	^ self
 ]
 
 { #category : 'angular dynamics' }
 CFPhysicsBody >> accumulateTorque: aNumber [
-	torque := torque + aNumber.
-	aNumber = 0 ifFalse: [ self wake ]
+	torque := torque + aNumber
 ]
 
 { #category : 'angular dynamics' }

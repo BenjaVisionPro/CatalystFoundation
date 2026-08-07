@@ -23,13 +23,13 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	repulsionForce := nil.
 	positioningForce := nil.
 	length := CFPhysicsSharedScalar value: 90.0.
-	hertz := CFPhysicsSharedScalar value: 1.35.
+	hertz := CFPhysicsSharedScalar value: 1.5.
 	dampingRatio := CFPhysicsSharedScalar value: 1.0.
 	repulsion := CFPhysicsSharedScalar value: 650000.0.
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 60.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 500.0.
-	centringStrength := CFPhysicsSharedScalar value: 14.0.
-	linearDamping := CFPhysicsSharedScalar value: 2.5.
+	centringStrength := CFPhysicsSharedScalar value: 20.0.
+	linearDamping := CFPhysicsSharedScalar value: 1.5.
 	originalLinearDampingByBody := IdentityDictionary new
 ]
 
@@ -171,6 +171,7 @@ CFPhysicsForceDirectedBehaviour >> reconcileOrientationForcesFor: currentElement
 		force := orientationForcesByElement at: element ifAbsent: [ nil ].
 		(force isNil or: [ force isActive not ]) ifTrue: [
 			force := element physics restoreOrientation.
+			force wakesBodies: false.
 			orientationForcesByElement at: element put: force ] ]
 ]
 

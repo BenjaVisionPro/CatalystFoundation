@@ -151,7 +151,7 @@ CFPhysicsOrientationRestoringForce >> applyForStep: seconds [
 	inverseInertia := body inverseInertia.
 	inverseInertia isZero ifTrue: [ ^ self ].
 	torque := angularAcceleration / inverseInertia.
-	body applyTorque: torque
+	self applyTorque: torque to: body
 ]
 
 { #category : 'private - restoring' }
