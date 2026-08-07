@@ -10,7 +10,7 @@ Class {
 	#instVars : [
 		'adapter', 'springsByEdge', 'repulsionsByPair',
 		'length', 'hertz', 'dampingRatio',
-		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'velocityDamping'
+		'repulsion', 'repulsionSofteningDistance', 'maximumRepulsionDistance', 'centringStrength', 'velocityDamping'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -27,6 +27,7 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	repulsion := CFPhysicsSharedScalar value: 100000.0.
 	repulsionSofteningDistance := CFPhysicsSharedScalar value: 50.0.
 	maximumRepulsionDistance := CFPhysicsSharedScalar value: 200.0.
+	centringStrength := CFPhysicsSharedScalar value: 4.0.
 	velocityDamping := CFPhysicsSharedScalar value: 8.0
 ]
 
@@ -83,6 +84,10 @@ CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance [ ^ maximumRepulsion
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> maximumRepulsionDistance: aNumber [ maximumRepulsionDistance value: aNumber ]
 { #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> centringStrength [ ^ centringStrength value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> centringStrength: aNumber [ centringStrength value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> velocityDamping [ ^ velocityDamping value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> velocityDamping: aNumber [ velocityDamping value: (aNumber asFloat max: 0.0) ]
@@ -111,8 +116,11 @@ CFPhysicsForceDirectedBehaviour >> stop [
 
 { #category : 'stepping' }
 CFPhysicsForceDirectedBehaviour >> step: aPhysicsStep [
+	| currentElements |
 	self reconcile.
-	self dampVelocitiesOf: self elements over: aPhysicsStep timeStep
+	currentElements := self elements.
+	self centre: currentElements.
+	self dampVelocitiesOf: currentElements over: aPhysicsStep timeStep
 ]
 
 { #category : 'private - reconciliation' }
@@ -199,6 +207,20 @@ CFPhysicsForceDirectedBehaviour >> ensureRepulsionFor: pair [
 			maximumDistance: maximumRepulsionDistance;
 			yourself).
 		self world addRepulsionConstraint: constraint ]
+]
+
+
+{ #category : 'private - stepping' }
+CFPhysicsForceDirectedBehaviour >> centre: currentElements [
+	| centroid targetPoint force |
+	(currentElements isEmpty or: [ centringStrength value isZero ]) ifTrue: [ ^ self ].
+	centroid := currentElements
+		inject: 0 @ 0
+		into: [ :sum :element | sum + element physics position ].
+	centroid := centroid / currentElements size.
+	targetPoint := self world owner extent / 2.0.
+	force := (targetPoint - centroid) * centringStrength value.
+	currentElements do: [ :element | element physics applyForce: force ]
 ]
 
 { #category : 'private - stepping' }

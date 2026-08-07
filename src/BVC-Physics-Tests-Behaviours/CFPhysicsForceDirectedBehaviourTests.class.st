@@ -26,6 +26,7 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedDefaultsFavourQuickSett
 	self assert: behaviour repulsion equals: 100000.0.
 	self assert: behaviour repulsionSofteningDistance equals: 50.0.
 	self assert: behaviour maximumRepulsionDistance equals: 200.0.
+	self assert: behaviour centringStrength equals: 4.0.
 	self assert: behaviour velocityDamping equals: 8.0
 ]
 
@@ -111,6 +112,7 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedConfigurationUpdatesOwn
 		repulsion: 700;
 		repulsionSofteningDistance: 35;
 		maximumRepulsionDistance: 250;
+		centringStrength: 0;
 		velocityDamping: 12.
 	world step.
 	self assert: spring length equals: 175.0.
@@ -167,4 +169,26 @@ CFPhysicsForceDirectedBehaviourTests >> testForceDirectedRejectsEndpointsOutside
 		withExceptionDo: [ :error |
 			self assert: error messageText equals:
 				'Every force-directed edge endpoint must occur in the selected elements' ]
+]
+
+
+{ #category : 'tests - behaviours' }
+CFPhysicsForceDirectedBehaviourTests >> testForceDirectedTreeUsesTreeDefaultsAndSharedGraphOrchestration [
+	<gtExample>
+	| root first second world edge behaviour |
+	root := BlElement new extent: 400 @ 300.
+	first := BlElement new extent: 20 @ 20.
+	second := BlElement new extent: 20 @ 20.
+	root addChildren: { first. second }.
+	world := root physics beWorld.
+	world gravity: 0 @ 0.
+	edge := first -> second.
+	behaviour := CFPhysicsForceDirectedTreeBehaviour new
+		target: root;
+		adapter: (self adapterForElements: { first. second } edges: { edge });
+		start.
+	self assert: behaviour length equals: 42.0.
+	self assert: behaviour hertz equals: 6.0.
+	self assert: behaviour springsByEdge size equals: 1.
+	self assert: behaviour repulsionsByPair size equals: 1
 ]

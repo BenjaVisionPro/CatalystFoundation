@@ -68,7 +68,18 @@ CFPhysicsMondrian >> forceDirected [
 		repulsion: 72000.0;
 		repulsionSofteningDistance: 58.0;
 		maximumRepulsionDistance: 175.0;
+		centringStrength: 5.0;
 		velocityDamping: 10.0;
+		start
+]
+
+
+{ #category : 'behaviours' }
+CFPhysicsMondrian >> forceDirectedTree [
+	self beWorld.
+	^ CFPhysicsForceDirectedTreeBehaviour new
+		target: mondrian;
+		adapter: CFPhysicsMondrianGraphAdapter new;
 		start
 ]
 

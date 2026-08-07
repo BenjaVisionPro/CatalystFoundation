@@ -32,6 +32,25 @@ CFPhysicsMondrianExamples >> forceDirectedGraph [
 	^ mondrian
 ]
 
+
+{ #category : 'showcase - mondrian' }
+CFPhysicsMondrianExamples >> forceDirectedTree [
+	<gtExample>
+	<return: #GtMondrian>
+	| mondrian world |
+	mondrian := CFPhysicsMondrianExampleGraphBuilder new
+		depth: 4;
+		rootCountFrom: 1 to: 1;
+		childrenAtLevel: 1 from: 4 to: 7;
+		childrenAtLevel: 2 from: 2 to: 5;
+		childrenAtLevel: 3 from: 0 to: 3;
+		build.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	mondrian physics forceDirectedTree.
+	^ mondrian
+]
+
 { #category : 'showcase - mondrian' }
 CFPhysicsMondrianExamples >> livingBehaviourGraph [
 	<gtExample>
