@@ -263,6 +263,14 @@ CFPhysicsJointVisual >> addTo: aParentElement [
 	^ self
 ]
 
+{ #category : 'private - updating' }
+CFPhysicsJointVisual >> updateLine: aLine from: firstPoint to: secondPoint [
+	aLine fromAnchor position: firstPoint.
+	aLine toAnchor position: secondPoint.
+	aLine requestLayout.
+	^ aLine
+]
+
 { #category : 'updating' }
 CFPhysicsJointVisual >> update [
 	| points firstPoint secondPoint |
@@ -273,14 +281,8 @@ CFPhysicsJointVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: joint bodyB.
-	self
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
-	hitTarget
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
-	self requestLayout.
-	hitTarget requestLayout.
+	self updateLine: self from: firstPoint to: secondPoint.
+	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	joint
 		updatePhysicsOverlayVisual: self
 		from: firstPoint
@@ -293,10 +295,7 @@ CFPhysicsJointVisual >> update [
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showHitTargetFrom: firstPoint to: secondPoint [
-	hitTarget
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
-	hitTarget requestLayout
+	self updateLine: hitTarget from: firstPoint to: secondPoint
 ]
 
 { #category : 'updating - joint decorations' }
@@ -308,20 +307,14 @@ CFPhysicsJointVisual >> hideRail [
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showRailFrom: firstPoint to: secondPoint [
-	rail
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible.
-	rail requestLayout
+	self updateLine: rail from: firstPoint to: secondPoint.
+	rail visibility: BlVisibility visible
 ]
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showRailLimitFrom: firstPoint to: secondPoint on: aMarker [
-	aMarker
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible.
-	aMarker requestLayout
+	self updateLine: aMarker from: firstPoint to: secondPoint.
+	aMarker visibility: BlVisibility visible
 ]
 
 
@@ -344,20 +337,14 @@ CFPhysicsJointVisual >> showPivotAt: aPoint [
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showReferenceRayFrom: firstPoint to: secondPoint [
-	referenceRay
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible.
-	referenceRay requestLayout
+	self updateLine: referenceRay from: firstPoint to: secondPoint.
+	referenceRay visibility: BlVisibility visible
 ]
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showAngleLimitFrom: firstPoint to: secondPoint on: aMarker [
-	aMarker
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible.
-	aMarker requestLayout
+	self updateLine: aMarker from: firstPoint to: secondPoint.
+	aMarker visibility: BlVisibility visible
 ]
 
 { #category : 'updating - joint decorations' }
@@ -372,11 +359,8 @@ CFPhysicsJointVisual >> showAllowedAngleFromDegrees: startDegrees toDegrees: end
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showMotorCueFrom: firstPoint to: secondPoint [
-	motorCue
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible.
-	motorCue requestLayout
+	self updateLine: motorCue from: firstPoint to: secondPoint.
+	motorCue visibility: BlVisibility visible
 ]
 
 

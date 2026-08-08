@@ -281,8 +281,8 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 	"Physics frames and camera transforms both alter the displayed coordinate
 	system. Body visuals observe their source elements directly; the aggregate
 	spring and contact diagnostics refresh here once for the owning host."
-	controls springsEnabled ifTrue: [ springOverlay update ].
-	controls jointsEnabled ifTrue: [ jointOverlay update ].
+	controls springsEnabled ifTrue: [ springOverlay updateGeometry ].
+	controls jointsEnabled ifTrue: [ jointOverlay updateGeometry ].
 	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
 	self refreshSelectionVisual.
 	objectInspector fitWithinHost.

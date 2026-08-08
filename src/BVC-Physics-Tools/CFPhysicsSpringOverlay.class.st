@@ -55,12 +55,17 @@ CFPhysicsSpringOverlay >> update [
 	(visualsBySpring keys reject: [ :each | live includes: each ]) do: [ :spring |
 		(visualsBySpring removeKey: spring) release ].
 	springs do: [ :spring |
-		| visual |
-		visual := visualsBySpring at: spring ifAbsentPut: [
+		visualsBySpring at: spring ifAbsentPut: [
 			(CFPhysicsSpringVisual diagnosticOn: spring context: context)
 				addTo: root;
-				yourself ].
-		visual update ].
+				yourself ] ].
+	self updateGeometry.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsSpringOverlay >> updateGeometry [
+	visualsBySpring valuesDo: #update.
 	^ self
 ]
 

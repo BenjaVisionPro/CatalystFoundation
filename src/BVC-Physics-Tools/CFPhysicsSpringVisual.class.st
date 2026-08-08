@@ -141,12 +141,10 @@ CFPhysicsSpringVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: spring endpointPair bodyB.
-	self
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
-	hitTarget
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint).
+	self fromAnchor position: firstPoint.
+	self toAnchor position: secondPoint.
+	hitTarget fromAnchor position: firstPoint.
+	hitTarget toAnchor position: secondPoint.
 	self requestLayout.
 	hitTarget requestLayout.
 	displacement := points second - points first.

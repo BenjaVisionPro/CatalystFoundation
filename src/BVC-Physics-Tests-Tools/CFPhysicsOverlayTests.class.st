@@ -871,6 +871,31 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayPreservesVisualIdentity [
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsSpringVisualRetainsAnchorsAcrossPresentationRefresh [
+	<gtExample>
+	| host world spring overlay visual fromAnchor toAnchor hitFromAnchor hitToAnchor |
+	host := self physicsHost.
+	world := host physics world.
+	spring := CFPhysicsDistanceJoint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
+	world addJoint: spring.
+	overlay := host showPhysicsOverlay.
+	visual := overlay springOverlay visuals first.
+	fromAnchor := visual fromAnchor.
+	toAnchor := visual toAnchor.
+	hitFromAnchor := visual hitTarget fromAnchor.
+	hitToAnchor := visual hitTarget toAnchor.
+	overlay refreshPresentationGeometry.
+	self assert: visual fromAnchor == fromAnchor.
+	self assert: visual toAnchor == toAnchor.
+	self assert: visual hitTarget fromAnchor == hitFromAnchor.
+	self assert: visual hitTarget toAnchor == hitToAnchor.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsSpringVisualUsesItsAnchoredEndpointPair [
 	<gtExample>
 	| host world first second spring overlay visual firstPoint secondPoint context |
@@ -1153,6 +1178,23 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayCreatesVisualsForWorldJoints [
 ]
 
 { #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> testPhysicsPresentationRefreshDoesNotReconcileJointTopology [
+	<gtExample>
+	| host overlay world first |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	(first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refreshPresentationGeometry.
+	self assert: overlay jointOverlay visuals isEmpty.
+	overlay refresh.
+	self assert: overlay jointOverlay visuals size equals: 1.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
 CFPhysicsOverlayTests >> testPhysicsJointOverlayPreservesVisualIdentity [
 	<gtExample>
 	| host overlay world first joint visual |
@@ -1166,6 +1208,30 @@ CFPhysicsOverlayTests >> testPhysicsJointOverlayPreservesVisualIdentity [
 	visual := overlay jointOverlay visuals first.
 	overlay refresh.
 	self assert: overlay jointOverlay visuals first == visual.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - joints' }
+CFPhysicsOverlayTests >> testPhysicsJointVisualRetainsAnchorsAcrossPresentationRefresh [
+	<gtExample>
+	| host overlay world first joint visual fromAnchor toAnchor hitFromAnchor hitToAnchor |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	joint := (first physics localAnchorAt: 20 @ 20)
+		distanceJointTo: (world anchorAt: 20 @ 20).
+	overlay refresh.
+	visual := overlay jointOverlay visuals first.
+	fromAnchor := visual fromAnchor.
+	toAnchor := visual toAnchor.
+	hitFromAnchor := visual hitTarget fromAnchor.
+	hitToAnchor := visual hitTarget toAnchor.
+	overlay refreshPresentationGeometry.
+	self assert: visual fromAnchor == fromAnchor.
+	self assert: visual toAnchor == toAnchor.
+	self assert: visual hitTarget fromAnchor == hitFromAnchor.
+	self assert: visual hitTarget toAnchor == hitToAnchor.
 	^ host
 ]
 

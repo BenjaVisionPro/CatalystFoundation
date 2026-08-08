@@ -112,10 +112,11 @@ CFPhysicsContactVisual >> showMarker: anElement at: aPoint [
 
 { #category : 'private - updating' }
 CFPhysicsContactVisual >> showLine: aLine from: firstPoint to: secondPoint [
+	aLine fromAnchor position: firstPoint.
+	aLine toAnchor position: secondPoint.
 	aLine
-		fromAnchor: (BlAbsolutePositionAnchor position: firstPoint);
-		toAnchor: (BlAbsolutePositionAnchor position: secondPoint);
-		visibility: BlVisibility visible
+		visibility: BlVisibility visible;
+		requestLayout
 ]
 
 { #category : 'private - updating' }

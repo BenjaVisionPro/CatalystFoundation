@@ -58,14 +58,17 @@ CFPhysicsJointOverlay >> update [
 	(visualsByJoint keys reject: [ :each | live includes: each ]) do: [ :joint |
 		(visualsByJoint removeKey: joint) release ].
 	joints do: [ :joint |
-		| visual |
-		visual := visualsByJoint at: joint ifAbsentPut: [
+		visualsByJoint at: joint ifAbsentPut: [
 			(CFPhysicsJointVisual diagnosticOn: joint context: context)
 				addTo: root;
-				yourself ].
-		visual
-			joint: joint;
-			update ].
+				yourself ] ].
+	self updateGeometry.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsJointOverlay >> updateGeometry [
+	visualsByJoint valuesDo: #update.
 	^ self
 ]
 
