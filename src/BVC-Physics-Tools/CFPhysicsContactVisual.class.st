@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsContactVisual',
 	#superclass : 'Object',
-	#instVars : [ 'context', 'root', 'state', 'contactLine', 'firstPointMarker', 'secondPointMarker', 'firstNormalLine', 'secondNormalLine', 'firstSeparationLine', 'secondSeparationLine' ],
+	#instVars : [ 'context', 'root', 'state', 'contactLine', 'firstPointMarker', 'secondPointMarker', 'firstNormalLine', 'secondNormalLine', 'firstSeparationLine', 'secondSeparationLine', 'negativeSeparationBorder', 'positiveSeparationBorder' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -24,8 +24,10 @@ CFPhysicsContactVisual >> initializeVisual [
 	secondPointMarker := self newPointMarker.
 	firstNormalLine := self newLinePaint: (Color green alpha: 0.8) width: 1.
 	secondNormalLine := self newLinePaint: (Color green alpha: 0.8) width: 1.
-	firstSeparationLine := self newLinePaint: (Color red alpha: 0.8) width: 2.
-	secondSeparationLine := self newLinePaint: (Color red alpha: 0.8) width: 2.
+	negativeSeparationBorder := BlBorder paint: (Color red alpha: 0.8) width: 2.
+	positiveSeparationBorder := BlBorder paint: (Color yellow alpha: 0.8) width: 2.
+	firstSeparationLine := self newLineBorder: negativeSeparationBorder.
+	secondSeparationLine := self newLineBorder: negativeSeparationBorder.
 	{ contactLine. firstPointMarker. secondPointMarker. firstNormalLine. secondNormalLine. firstSeparationLine. secondSeparationLine }
 		do: [ :element | root addChild: element ].
 	^ self
@@ -45,10 +47,15 @@ CFPhysicsContactVisual >> newPointMarker [
 
 { #category : 'private - building' }
 CFPhysicsContactVisual >> newLinePaint: aPaint width: aNumber [
+	^ self newLineBorder: (BlBorder paint: aPaint width: aNumber)
+]
+
+{ #category : 'private - building' }
+CFPhysicsContactVisual >> newLineBorder: aBorder [
 	^ BlLineElement new
 		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
 		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		border: (BlBorder paint: aPaint width: aNumber);
+		border: aBorder;
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents;
 		visibility: BlVisibility gone;
@@ -122,9 +129,9 @@ CFPhysicsContactVisual >> showLine: aLine from: firstPoint to: secondPoint [
 { #category : 'private - updating' }
 CFPhysicsContactVisual >> updateSeparationLine: aLine from: displayedPoint to: separationPoint separation: separation [
 	separation isZero ifTrue: [ ^ aLine visibility: BlVisibility gone ].
-	aLine border: (BlBorder
-		paint: ((separation < 0 ifTrue: [ Color red ] ifFalse: [ Color yellow ]) alpha: 0.8)
-		width: 2).
+	aLine border: (separation < 0
+		ifTrue: [ negativeSeparationBorder ]
+		ifFalse: [ positiveSeparationBorder ]).
 	self showLine: aLine from: displayedPoint to: separationPoint
 ]
 

@@ -12,7 +12,8 @@ Class {
 		'released',
 		'visibilityMotion',
 		'contentTransitionMotion',
-		'outgoingContentElement'
+		'outgoingContentElement',
+		'extentChangedHandler'
 	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
@@ -73,6 +74,10 @@ CFPhysicsObjectInspector >> initializeInspector [
 	content := nil.
 	panel addChild: contentContainer.
 	root addChild: panel.
+	extentChangedHandler := BlEventHandler
+		on: BlElementExtentChangedEvent
+		do: [ :anEvent | self fitWithinHost ].
+	root addEventHandler: extentChangedHandler.
 	self clearWithoutMotion
 ]
 
@@ -387,6 +392,9 @@ CFPhysicsObjectInspector >> release [
 	released := true.
 	visibilityMotion ifNotNil: #cancel.
 	self clearWithoutMotion.
+	extentChangedHandler ifNotNil: [
+		root removeEventHandler: extentChangedHandler.
+		extentChangedHandler := nil ].
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self

@@ -1920,3 +1920,19 @@ CFPhysicsOverlayTests >> testPhysicsOverlaySelectsASpringFromItsOverlayHitTarget
 ]
 
 
+
+{ #category : 'examples - physics object inspector' }
+CFPhysicsOverlayTests >> testPhysicsObjectInspectorRefitsWhenItsOverlayExtentChanges [
+	<gtExample>
+	| host inspector physics |
+	host := self physicsHost.
+	physics := host children first existingPhysics.
+	inspector := CFPhysicsObjectInspector on: host.
+	inspector install.
+	inspector inspect: physics.
+	host space pulse.
+	host size: host extent x @ 70.
+	host space pulse.
+	self assert: inspector panel extent y <= (inspector root extent y - 12).
+	^ inspector
+]
