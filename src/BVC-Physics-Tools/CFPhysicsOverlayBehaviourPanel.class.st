@@ -54,8 +54,10 @@ CFPhysicsOverlayBehaviourPanel >> initializePanel [
 		yourself.
 	headerButton := BrButton new
 		id: #cfPhysicsOverlayBehavioursButton;
-		aptitude: BrGlamorousButtonWithLabelAptitude;
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: BrGlamorousVectorIcons settings;
 		label: 'Behaviours';
+		size: 34 @ 34;
 		action: [ self toggleExpanded ];
 		yourself.
 	listElement := BrVerticalPane new
@@ -94,9 +96,6 @@ CFPhysicsOverlayBehaviourPanel >> rebuild [
 		listElement removeChildren.
 		listElement hasParent ifTrue: [ listElement removeFromParent ].
 		^ self ].
-	headerButton label: (selected
-		ifNil: [ 'Behaviours ', behaviours size asString ]
-		ifNotNil: [ selected class name asString ]).
 	listElement removeChildren.
 	expanded ifTrue: [
 		behaviours do: [ :behaviour |
@@ -114,7 +113,7 @@ CFPhysicsOverlayBehaviourPanel >> buttonFor: aBehaviour selected: isSelected [
 			ifTrue: [ '● ', aBehaviour class name asString ]
 			ifFalse: [ aBehaviour class name asString ]);
 		action: [
-			overlay toggleBehaviourFocus: aBehaviour.
+			overlay selectBehaviour: aBehaviour.
 			expanded := false.
 			self rebuild ];
 		yourself

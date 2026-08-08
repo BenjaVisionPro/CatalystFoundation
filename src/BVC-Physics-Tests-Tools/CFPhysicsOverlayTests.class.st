@@ -503,14 +503,14 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorContentTransition [
 	self assert: motion isRunning.
 	self assert: motion tracks size equals: 3.
 	self assert: inspector panel extent equals: motion tracks third sourceExtent.
-	self assert: inspector panel children size equals: 1.
+	self assert: inspector panel children size equals: 2.
 	self assert: inspector contentContainer children size equals: 2.
 	self assert: outgoingElement opacity equals: 1.0.
 	self assert: inspector content element opacity equals: 0.0.
 	host space time wait: 200 milliSeconds.
 	host space pulse.
 	self assert: motion isCompleted.
-	self assert: inspector panel children size equals: 1.
+	self assert: inspector panel children size equals: 2.
 	self assert: inspector contentContainer children size equals: 1.
 	self assert: inspector content element opacity equals: 1.0.
 	^ inspector
@@ -2004,7 +2004,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayShowsBehaviourPanelOnlyWhenWorldHasBe
 ]
 
 { #category : 'examples - physics overlay - behaviours' }
-CFPhysicsOverlayTests >> testPhysicsOverlayBehaviourFocusScopesDiagnostics [
+CFPhysicsOverlayTests >> testPhysicsOverlayBehaviourSelectionScopesDiagnosticsAndInspector [
 	<gtExample>
 	| host overlay behaviour |
 	host := self installedPhysicsOverlay.
@@ -2013,10 +2013,13 @@ CFPhysicsOverlayTests >> testPhysicsOverlayBehaviourFocusScopesDiagnostics [
 		target: host children first;
 		start.
 	overlay behaviourPanel refresh.
-	overlay toggleBehaviourFocus: behaviour.
+	overlay selectBehaviour: behaviour.
 	self assert: overlay selectedBehaviour == behaviour.
+	self assert: overlay objectInspector selectedObject == behaviour.
 	self assert: overlay bodyOverlay visuals isEmpty.
-	overlay toggleBehaviourFocus: behaviour.
+	overlay clearSelection.
+	self assert: overlay selectedBehaviour == behaviour.
+	overlay clearBehaviourFocus.
 	self assert: overlay selectedBehaviour isNil.
 	self assert: overlay bodyOverlay visuals isNotEmpty.
 	^ host

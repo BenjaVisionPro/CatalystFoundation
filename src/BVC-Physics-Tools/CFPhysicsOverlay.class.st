@@ -72,7 +72,10 @@ CFPhysicsOverlay >> clickEvent: anEvent [
 	spring := self springFrom: anEvent target.
 	spring ifNotNil: [ ^ self selectSpring: spring ].
 	anElement := self physicalElementFrom: anEvent target.
-	anElement ifNil: [ ^ self clearSelection ].
+	anElement ifNil: [
+		self clearSelection.
+		self clearBehaviourFocus.
+		^ self ].
 	selectedElement == anElement ifTrue: [ ^ self ].
 	selectedSpring := nil.
 	selectedJoint := nil.
@@ -306,6 +309,9 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectedObject [
 	| physics body |
+	(selectedBehaviour notNil and: [ objectInspector selectedObject == selectedBehaviour ]) ifTrue: [
+		objectInspector refresh.
+		^ self ].
 	selectedJoint ifNotNil: [
 		(selectedJoint world == world)
 			ifFalse: [ self clearSelection ]
@@ -409,6 +415,7 @@ CFPhysicsOverlay >> contactsEnabled: aBoolean [
 CFPhysicsOverlay >> validateBehaviourFocus [
 	selectedBehaviour ifNil: [ ^ self ].
 	(world includesBehaviour: selectedBehaviour) ifFalse: [
+		objectInspector selectedObject == selectedBehaviour ifTrue: [ objectInspector clear ].
 		selectedBehaviour := nil.
 		scopedBodies := nil.
 		scopedBodySet := nil.
@@ -462,15 +469,35 @@ CFPhysicsOverlay >> updateConstraintOverlays [
 ]
 
 { #category : 'controlling - behaviour scope' }
-CFPhysicsOverlay >> toggleBehaviourFocus: aBehaviour [
-	selectedBehaviour == aBehaviour
-		ifTrue: [ selectedBehaviour := nil ]
-		ifFalse: [ selectedBehaviour := aBehaviour ].
-	self clearSelection.
+CFPhysicsOverlay >> selectBehaviour: aBehaviour [
+	selectedElement := nil.
+	selectedSpring := nil.
+	selectedJoint := nil.
+	self clearSelectionVisual.
+	selectedBehaviour := aBehaviour.
+	self refreshScope.
+	behaviourPanel rebuild.
+	self refresh.
+	objectInspector inspect: aBehaviour.
+	^ self
+]
+
+{ #category : 'controlling - behaviour scope' }
+CFPhysicsOverlay >> clearBehaviourFocus [
+	selectedBehaviour ifNil: [ ^ self ].
+	selectedBehaviour := nil.
 	self refreshScope.
 	behaviourPanel rebuild.
 	self refresh.
 	^ self
+]
+
+{ #category : 'controlling - behaviour scope' }
+CFPhysicsOverlay >> toggleBehaviourFocus: aBehaviour [
+	"Compatibility for callers from the first Behaviour-scope implementation."
+	selectedBehaviour == aBehaviour
+		ifTrue: [ ^ self clearBehaviourFocus ]
+		ifFalse: [ ^ self selectBehaviour: aBehaviour ]
 ]
 
 { #category : 'controlling' }

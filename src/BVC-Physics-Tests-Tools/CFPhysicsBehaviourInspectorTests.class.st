@@ -10,7 +10,7 @@ CFPhysicsBehaviourInspectorTests >> testForceDirectedConfigurationDescriptionsAr
 	| behaviour descriptions expected |
 	behaviour := CFPhysicsForceDirectedBehaviour new.
 	descriptions := behaviour configurationDescriptions.
-	expected := #(length hertz dampingRatio repulsionAtOneMetre maximumRepulsionDistance centringStiffness componentCentringStiffness linearDamping).
+	expected := #(length hertz dampingRatio repulsionAtOneMetre maximumRepulsionDistance centringStiffness componentCentringStiffness linearDamping orientationStiffness orientationDamping orientationMaximumAngularAcceleration orientationAngularResponseVelocityScale orientationAngleTolerance orientationAngularVelocityTolerance).
 	self assert: (descriptions collect: [ :each | each accessor selector ]) asArray equals: expected.
 	self assert: (descriptions allSatisfy: #cfSerializable).
 	self assert: (descriptions noneSatisfy: #isReadOnly)
@@ -62,4 +62,32 @@ CFPhysicsBehaviourInspectorTests >> testWorldBehaviourRevisionChangesOnlyWhenMem
 	self assert: world behaviourRevision equals: initialRevision + 2.
 	behaviour stop.
 	self assert: world behaviourRevision equals: initialRevision + 2
+]
+
+
+{ #category : 'tests' }
+CFPhysicsBehaviourInspectorTests >> testForceDirectedExposesSharedOrientationConfiguration [
+	| behaviour |
+	behaviour := CFPhysicsForceDirectedBehaviour new
+		orientationStiffness: 42.0;
+		orientationDamping: 7.0;
+		yourself.
+	self assert: behaviour orientationStiffness equals: 42.0.
+	self assert: behaviour orientationDamping equals: 7.0.
+	self assert: (behaviour configurationSource includesSubstring: 'orientationStiffness: 42.0;').
+	self assert: (behaviour configurationSource includesSubstring: 'orientationDamping: 7.0;')
+]
+
+{ #category : 'tests' }
+CFPhysicsBehaviourInspectorTests >> testBehaviourOverlayInspectorWritesLiveNumericValue [
+	| behaviour description content control |
+	behaviour := CFPhysicsForceDirectedBehaviour new.
+	description := behaviour configurationDescriptions detect: [ :each | each accessor selector = #length ].
+	content := CFPhysicsBehaviourInspector newContent.
+	content inspect: behaviour.
+	control := (content instVarNamed: 'controlsByDescription') at: description.
+	description write: 123.0 to: behaviour.
+	control refresh.
+	self assert: behaviour length equals: 123.0.
+	self assert: control editor text asString equals: '123.0'
 ]

@@ -104,3 +104,76 @@ CFPhysicsForceDirectedBehaviour >> descriptionLinearDamping [
 		cfSerializable: true;
 		yourself
 ]
+
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationStiffness [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationStiffness;
+		label: 'Orientation stiffness';
+		group: 'Orientation';
+		priority: 100;
+		cfSerializable: true;
+		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationDamping [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationDamping;
+		label: 'Orientation damping';
+		group: 'Orientation';
+		priority: 110;
+		cfSerializable: true;
+		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationMaximumAngularAcceleration [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationMaximumAngularAcceleration;
+		label: 'Maximum angular acceleration';
+		group: 'Orientation';
+		priority: 120;
+		cfSerializable: true;
+		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationAngularResponseVelocityScale [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationAngularResponseVelocityScale;
+		label: 'Angular response velocity scale';
+		group: 'Orientation';
+		priority: 130;
+		cfSerializable: true;
+		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationAngleTolerance [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationAngleTolerance;
+		label: 'Angle tolerance';
+		group: 'Orientation';
+		priority: 140;
+		cfSerializable: true;
+		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsForceDirectedBehaviour >> descriptionOrientationAngularVelocityTolerance [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #orientationAngularVelocityTolerance;
+		label: 'Angular velocity tolerance';
+		group: 'Orientation';
+		priority: 150;
+		cfSerializable: true;
+		yourself
+]

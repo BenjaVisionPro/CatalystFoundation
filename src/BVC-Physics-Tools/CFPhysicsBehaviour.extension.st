@@ -77,3 +77,9 @@ CFPhysicsBehaviour >> gtConfigurationFor: aView [
 							(element userData at: GtMagritteViewModel gtMementoSymbol) ].
 				Clipboard clipboardText: source ]
 ]
+
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsBehaviour >> inspectInPhysicsOverlay: anInspector [
+	anInspector inspect: self usingContent: CFPhysicsBehaviourInspector newContent
+]

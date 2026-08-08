@@ -9,7 +9,9 @@ Class {
 	#instVars : [
 		'adapter', 'springsByEdge', 'orientationForcesByElement', 'repulsionForce', 'positioningForce', 'componentForces',
 		'length', 'hertz', 'dampingRatio',
-		'repulsionAtOneMetre', 'maximumRepulsionDistance', 'centringStiffness', 'componentCentringStiffness', 'linearDamping', 'originalLinearDampingByBody'
+		'repulsionAtOneMetre', 'maximumRepulsionDistance', 'centringStiffness', 'componentCentringStiffness', 'linearDamping',
+		'orientationStiffness', 'orientationDamping', 'orientationMaximumAngularAcceleration', 'orientationAngularResponseVelocityScale', 'orientationAngleTolerance', 'orientationAngularVelocityTolerance',
+		'originalLinearDampingByBody'
 	],
 	#category : 'BVC-Physics-Behaviours',
 	#package : 'BVC-Physics-Behaviours'
@@ -31,6 +33,12 @@ CFPhysicsForceDirectedBehaviour >> initialize [
 	centringStiffness := CFPhysicsSharedScalar value: 2.0.
 	componentCentringStiffness := CFPhysicsSharedScalar value: 1.0.
 	linearDamping := CFPhysicsSharedScalar value: 2.5.
+	orientationStiffness := CFPhysicsSharedScalar value: 36.0.
+	orientationDamping := CFPhysicsSharedScalar value: 6.0.
+	orientationMaximumAngularAcceleration := CFPhysicsSharedScalar value: 30.0.
+	orientationAngularResponseVelocityScale := CFPhysicsSharedScalar value: 4.0.
+	orientationAngleTolerance := CFPhysicsSharedScalar value: 0.002.
+	orientationAngularVelocityTolerance := CFPhysicsSharedScalar value: 0.01.
 	originalLinearDampingByBody := IdentityDictionary new
 ]
 
@@ -100,6 +108,31 @@ CFPhysicsForceDirectedBehaviour >> componentCentringStiffness: aNumber [ compone
 CFPhysicsForceDirectedBehaviour >> linearDamping [ ^ linearDamping value ]
 { #category : 'configuration' }
 CFPhysicsForceDirectedBehaviour >> linearDamping: aNumber [ linearDamping value: (aNumber asFloat max: 0.0) ]
+
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationStiffness [ ^ orientationStiffness value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationStiffness: aNumber [ orientationStiffness value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationDamping [ ^ orientationDamping value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationDamping: aNumber [ orientationDamping value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationMaximumAngularAcceleration [ ^ orientationMaximumAngularAcceleration value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationMaximumAngularAcceleration: aNumber [ orientationMaximumAngularAcceleration value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngularResponseVelocityScale [ ^ orientationAngularResponseVelocityScale value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngularResponseVelocityScale: aNumber [ orientationAngularResponseVelocityScale value: (aNumber asFloat max: Float machineEpsilon) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngleTolerance [ ^ orientationAngleTolerance value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngleTolerance: aNumber [ orientationAngleTolerance value: (aNumber asFloat max: 0.0) ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngularVelocityTolerance [ ^ orientationAngularVelocityTolerance value ]
+{ #category : 'configuration' }
+CFPhysicsForceDirectedBehaviour >> orientationAngularVelocityTolerance: aNumber [ orientationAngularVelocityTolerance value: (aNumber asFloat max: 0.0) ]
 
 { #category : 'running' }
 CFPhysicsForceDirectedBehaviour >> start [
@@ -177,7 +210,14 @@ CFPhysicsForceDirectedBehaviour >> reconcileOrientationForcesFor: currentElement
 		(force isNil or: [ force isActive not ]) ifTrue: [
 			force := element physics restoreOrientation.
 			force wakesBodies: false.
-			orientationForcesByElement at: element put: force ] ]
+			orientationForcesByElement at: element put: force ].
+		force
+			stiffness: orientationStiffness value;
+			damping: orientationDamping value;
+			maximumAngularAcceleration: orientationMaximumAngularAcceleration value;
+			angularResponseVelocityScale: orientationAngularResponseVelocityScale value;
+			angleTolerance: orientationAngleTolerance value;
+			angularVelocityTolerance: orientationAngularVelocityTolerance value ]
 ]
 
 { #category : 'accessing' }
