@@ -143,7 +143,7 @@ CFPhysicsJointVisual >> initializeVisual [
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newEndpointMarker [
 	^ BlArrowheadCircle new
-		scale: 6.0;
+		scale: 2.0;
 		background: (Color blue muchDarker alpha: 0.9);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 1);
 		yourself
@@ -309,6 +309,7 @@ CFPhysicsJointVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: joint bodyB.
+	self updateDiagnosticEndpointScalesAtWorldPoints: points.
 	self updateSelectionHandlesFrom: firstPoint to: secondPoint worldPoints: points.
 	self updateLine: self from: firstPoint to: secondPoint.
 	self updateLine: hitTarget from: firstPoint to: secondPoint.
@@ -323,9 +324,21 @@ CFPhysicsJointVisual >> update [
 
 
 { #category : 'private - updating' }
+CFPhysicsJointVisual >> updateDiagnosticEndpointScalesAtWorldPoints: worldPoints [
+	| firstScale secondScale |
+	self isDiagnostic ifFalse: [ ^ self ].
+	firstScale := 2.0 * (context overlayScaleAtWorldPoint: worldPoints first).
+	secondScale := 2.0 * (context overlayScaleAtWorldPoint: worldPoints second).
+	(self fromHead scale closeTo: firstScale)
+		ifFalse: [ self fromHead scale: firstScale ].
+	(self toHead scale closeTo: secondScale)
+		ifFalse: [ self toHead scale: secondScale ]
+]
+
+{ #category : 'private - updating' }
 CFPhysicsJointVisual >> updateSelectionHandle: aHandle at: aPoint worldPoint: aWorldPoint [
 	| diameter extent origin |
-	diameter := 6.0 * (context overlayScaleAtWorldPoint: aWorldPoint).
+	diameter := 4.0 * (context overlayScaleAtWorldPoint: aWorldPoint).
 	extent := diameter asPoint.
 	(aHandle extent closeTo: extent) ifFalse: [ aHandle size: extent ].
 	origin := aPoint - (extent / 2.0).

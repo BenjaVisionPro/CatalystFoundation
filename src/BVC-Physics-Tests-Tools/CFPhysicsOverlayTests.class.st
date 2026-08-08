@@ -2057,8 +2057,8 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesUseCompactBaseS
 	visual addTo: overlay root.
 	visual update.
 	host space pulse.
-	self assert: (visual fromSelectionHandle extent x closeTo: 6.0).
-	self assert: (visual toSelectionHandle extent x closeTo: 6.0).
+	self assert: (visual fromSelectionHandle extent x closeTo: 4.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 4.0).
 	self assert: visual hasFromHead not.
 	self assert: visual hasToHead not.
 	visual release.
@@ -2085,14 +2085,46 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowCanvassab
 	host space pulse.
 	visual update.
 	host space pulse.
-	self assert: (visual fromSelectionHandle extent x closeTo: 3.0).
-	self assert: (visual toSelectionHandle extent x closeTo: 3.0).
+	self assert: (visual fromSelectionHandle extent x closeTo: 2.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 2.0).
 	host childrenScaleFactor: 1.5.
 	host space pulse.
 	visual update.
 	host space pulse.
-	self assert: (visual fromSelectionHandle extent x closeTo: 9.0).
-	self assert: (visual toSelectionHandle extent x closeTo: 9.0).
+	self assert: (visual fromSelectionHandle extent x closeTo: 6.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 6.0).
+	visual release.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsJointDiagnosticEndpointMarkersFollowCanvassableScale [
+	<gtExample>
+	| host world first second joint overlay context visual |
+	host := self physicsCanvassableHost.
+	world := host physics world.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	joint := CFPhysicsDistanceJoint
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 0 @ 0).
+	world addJoint: joint.
+	overlay := host showPhysicsOverlay.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	visual := CFPhysicsJointVisual diagnosticOn: joint context: context.
+	visual addTo: overlay root.
+	host childrenScaleFactor: 0.5.
+	host space pulse.
+	visual update.
+	host space pulse.
+	self assert: (visual fromHead scale closeTo: 1.0).
+	self assert: (visual toHead scale closeTo: 1.0).
+	host childrenScaleFactor: 1.5.
+	host space pulse.
+	visual update.
+	host space pulse.
+	self assert: (visual fromHead scale closeTo: 3.0).
+	self assert: (visual toHead scale closeTo: 3.0).
 	visual release.
 	^ overlay
 ]
