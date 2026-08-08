@@ -2100,3 +2100,44 @@ CFPhysicsOverlayTests >> testPhysicsSpringSelectionHandlesFollowCanvassableScale
 	^ overlay
 ]
 
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsSpringSelectionIsPositionedBeforeInstallation [
+	<gtExample>
+	| host world spring overlay visual |
+	host := self physicsHost.
+	world := host physics world.
+	spring := CFPhysicsDistanceJoint
+		between: world bodyStatesInOrder first
+		and: world bodyStatesInOrder second.
+	spring
+		springEnabled: true;
+		hertz: 3.0;
+		dampingRatio: 1.0.
+	world addJoint: spring.
+	overlay := host showPhysicsOverlay.
+	overlay selectSpring: spring.
+	visual := overlay selectionVisual.
+	self assert: visual fromAnchor position ~= (0 @ 0).
+	self assert: visual toAnchor position ~= (0 @ 0).
+	self assert: visual fromSelectionHandle extent x > 0.
+	self assert: visual toSelectionHandle extent x > 0.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsJointSelectionIsPositionedBeforeInstallation [
+	<gtExample>
+	| host world first joint overlay visual |
+	host := self physicsHost.
+	world := host physics world.
+	first := world bodyStatesInOrder first.
+	joint := (first element physics localAnchorAt: 10 @ 10)
+		distanceJointTo: (world anchorAt: 240 @ 40).
+	overlay := host showPhysicsOverlay.
+	overlay selectJoint: joint.
+	visual := overlay selectionVisual.
+	self assert: visual fromAnchor position ~= (0 @ 0).
+	self assert: visual toAnchor position ~= (0 @ 0).
+	^ overlay
+]
+

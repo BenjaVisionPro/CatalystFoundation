@@ -174,14 +174,18 @@ CFPhysicsOverlay >> refreshSelectionVisual [
 			ifTrue: [ selectionVisual update. ^ self ].
 		self clearSelectionVisual.
 		selectionVisual := CFPhysicsJointVisual selectionOn: selectedJoint context: context.
-		selectionVisual addTo: root.
+		selectionVisual
+			update;
+			addTo: root.
 		^ self ].
 	selectedSpring ifNotNil: [
 		(selectionVisual notNil and: [ selectionVisual matchesSelection: selectedSpring ])
 			ifTrue: [ selectionVisual update. ^ self ].
 		self clearSelectionVisual.
 		selectionVisual := CFPhysicsSpringVisual selectionOn: selectedSpring context: context.
-		selectionVisual addTo: root.
+		selectionVisual
+			update;
+			addTo: root.
 		^ self ].
 	selectedBody := selectedElement
 		ifNil: [ nil ]
@@ -191,7 +195,9 @@ CFPhysicsOverlay >> refreshSelectionVisual [
 		ifTrue: [ selectionVisual update. ^ self ].
 	self clearSelectionVisual.
 	selectionVisual := CFPhysicsBodyVisual selectionOn: selectedBody context: context.
-	selectionVisual addTo: root.
+	selectionVisual
+		update;
+		addTo: root.
 	^ self
 ]
 
