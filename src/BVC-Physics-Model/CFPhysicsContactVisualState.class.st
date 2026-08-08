@@ -6,7 +6,7 @@ My responsibility is to copy the stable diagnostic facts needed after the solver
 Class {
 	#name : 'CFPhysicsContactVisualState',
 	#superclass : 'Object',
-	#instVars : [ 'key', 'firstBody', 'normal', 'firstPoint', 'secondPoint', 'firstSeparation', 'secondSeparation', 'pointCount' ],
+	#instVars : [ 'key', 'firstBody', 'secondBody', 'normal', 'firstPoint', 'secondPoint', 'firstSeparation', 'secondSeparation', 'pointCount' ],
 	#category : 'BVC-Physics-Model',
 	#package : 'BVC-Physics-Model'
 }
@@ -16,6 +16,7 @@ CFPhysicsContactVisualState >> updateFrom: aContact [
 	| manifold points |
 	key := aContact key.
 	firstBody := aContact firstBody.
+	secondBody := aContact secondBody.
 	manifold := aContact manifold.
 	normal := manifold normal.
 	points := manifold contactPoints.
@@ -33,6 +34,8 @@ CFPhysicsContactVisualState >> updateFrom: aContact [
 CFPhysicsContactVisualState >> key [ ^ key ]
 { #category : 'accessing' }
 CFPhysicsContactVisualState >> firstBody [ ^ firstBody ]
+{ #category : 'accessing' }
+CFPhysicsContactVisualState >> secondBody [ ^ secondBody ]
 { #category : 'accessing' }
 CFPhysicsContactVisualState >> normal [ ^ normal ]
 { #category : 'accessing' }

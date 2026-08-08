@@ -315,3 +315,14 @@ CFPhysicsForceDirectedBehaviour >> removeOwnedPhysics [
 	orientationForcesByElement removeAll.
 	componentForces removeAll
 ]
+
+
+{ #category : 'accessing - physics scope' }
+CFPhysicsForceDirectedBehaviour >> physicsBodies [
+	^ self elements collect: [ :element | element physics body ]
+]
+
+{ #category : 'accessing - physics scope' }
+CFPhysicsForceDirectedBehaviour >> physicsConstraints [
+	^ springsByEdge values asArray
+]

@@ -34,8 +34,12 @@ CFPhysicsBodyOverlay >> initializeOverlay [ visualsByBody := IdentityDictionary 
 
 { #category : 'updating' }
 CFPhysicsBodyOverlay >> update [
-	| bodies live |
-	bodies := world bodyStatesInOrder.
+	^ self updateFrom: world bodyStatesInOrder
+]
+
+{ #category : 'updating' }
+CFPhysicsBodyOverlay >> updateFrom: bodies [
+	| live |
 	live := IdentitySet new.
 	live addAll: bodies.
 	(visualsByBody keys reject: [ :each | live includes: each ]) do: [ :body |

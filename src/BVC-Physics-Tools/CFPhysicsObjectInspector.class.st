@@ -13,7 +13,9 @@ Class {
 		'visibilityMotion',
 		'contentTransitionMotion',
 		'outgoingContentElement',
-		'extentChangedHandler'
+		'extentChangedHandler',
+		'dragHandle',
+		'pullHandler'
 	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
@@ -70,6 +72,8 @@ CFPhysicsObjectInspector >> initializeInspector [
 		clipChildren: false;
 		preventMouseEvents.
 	panel := self newPanel.
+	dragHandle := self newDragHandle.
+	panel addChild: dragHandle.
 	contentContainer := self newContentContainer.
 	content := nil.
 	panel addChild: contentContainer.
@@ -98,6 +102,32 @@ CFPhysicsObjectInspector >> newPanel [
 			c frame vertical alignTop ];
 		margin: (BlInsets all: 6);
 		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newDragHandle [
+	| handle |
+	handle := BrLabel new
+		id: #cfPhysicsObjectInspectorDragHandle;
+		allowMeAndChildrenMouseEvents;
+		hExact: 24;
+		vExact: 10;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.32);
+			fontSize: 8);
+		text: '•••';
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c ignored horizontal alignRight.
+			c ignored vertical alignTop ];
+		margin: (BlInsets top: 2 right: 4);
+		yourself.
+	pullHandler := BlPullHandler new
+		targetElement: panel;
+		disallowOutOfBounds;
+		yourself.
+	handle addEventHandler: pullHandler.
+	^ handle
 ]
 
 { #category : 'private - building' }
@@ -269,6 +299,16 @@ CFPhysicsObjectInspector >> fitPanelToContent [
 	panel constraintsDo: [ :c |
 		c horizontal exact: targetExtent x.
 		c vertical exact: targetExtent y ].
+	self clampPanelPositionWithinHost.
+	^ self
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> clampPanelPositionWithinHost [
+	| maximumPosition currentPosition |
+	maximumPosition := (root extent - panel extent) max: 0 @ 0.
+	currentPosition := panel constraints position.
+	panel relocate: (currentPosition min: maximumPosition max: 0 @ 0).
 	^ self
 ]
 
@@ -276,6 +316,7 @@ CFPhysicsObjectInspector >> fitPanelToContent [
 CFPhysicsObjectInspector >> fitWithinHost [
 	selectedObject ifNil: [ ^ self ].
 	self fitPanelToContent.
+	self clampPanelPositionWithinHost.
 	^ self
 ]
 
@@ -395,6 +436,9 @@ CFPhysicsObjectInspector >> release [
 	extentChangedHandler ifNotNil: [
 		root removeEventHandler: extentChangedHandler.
 		extentChangedHandler := nil ].
+	pullHandler ifNotNil: [
+		dragHandle removeEventHandler: pullHandler.
+		pullHandler := nil ].
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self

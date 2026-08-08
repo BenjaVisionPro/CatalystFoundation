@@ -57,3 +57,16 @@ CFPhysicsBehaviour >> isRunning [
 { #category : 'stepping' }
 CFPhysicsBehaviour >> step: aPhysicsStep [
 ]
+
+
+{ #category : 'accessing - physics scope' }
+CFPhysicsBehaviour >> physicsBodies [
+	"Answer the bodies this Behaviour orchestrates. Subclasses with a physical scope override this."
+	^ #()
+]
+
+{ #category : 'accessing - physics scope' }
+CFPhysicsBehaviour >> physicsConstraints [
+	"Answer the joints/constraints this Behaviour owns or orchestrates."
+	^ #()
+]

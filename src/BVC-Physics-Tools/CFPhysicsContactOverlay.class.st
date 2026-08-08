@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsContactOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'context', 'visualsByKey', 'lastVisualState' ],
+	#instVars : [ 'root', 'context', 'visualsByKey', 'lastVisualState', 'lastScopeBodies' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -20,20 +20,31 @@ CFPhysicsContactOverlay >> context: aContext [ context := aContext ]
 { #category : 'initialization' }
 CFPhysicsContactOverlay >> initializeOverlay [
 	visualsByKey := Dictionary new.
-	lastVisualState := nil
+	lastVisualState := nil.
+	lastScopeBodies := nil
 ]
 
 { #category : 'accessing' }
 CFPhysicsContactOverlay >> visuals [ ^ visualsByKey values asArray ]
 { #category : 'updating' }
 CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
-	| live |
-	lastVisualState == aWorldVisualState ifTrue: [
+	^ self updateFrom: aWorldVisualState scopedToBodies: nil
+]
+
+{ #category : 'updating' }
+CFPhysicsContactOverlay >> updateFrom: aWorldVisualState scopedToBodies: scopeBodies [
+	| live states |
+	(lastVisualState == aWorldVisualState and: [ lastScopeBodies == scopeBodies ]) ifTrue: [
 		visualsByKey valuesDo: #update.
 		^ self ].
 	lastVisualState := aWorldVisualState.
+	lastScopeBodies := scopeBodies.
+	states := scopeBodies
+		ifNil: [ aWorldVisualState contacts ]
+		ifNotNil: [ aWorldVisualState contacts select: [ :state |
+			(scopeBodies includes: state firstBody) or: [ scopeBodies includes: state secondBody ] ] ].
 	live := Set new.
-	aWorldVisualState contacts do: [ :state |
+	states do: [ :state |
 		| visual |
 		live add: state key.
 		visual := visualsByKey at: state key ifAbsentPut: [ CFPhysicsContactVisual in: root context: context ].
@@ -49,6 +60,7 @@ CFPhysicsContactOverlay >> clear [
 	visualsByKey valuesDo: #remove.
 	visualsByKey removeAll.
 	lastVisualState := nil.
+	lastScopeBodies := nil.
 	^ self
 ]
 

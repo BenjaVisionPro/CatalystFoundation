@@ -1,8 +1,8 @@
-"I present the diagnostic controls for a Physics overlay. My responsibility is to toggle the available body, spring, joint and contact visualisations."
+"I present the compact diagnostic visibility controls for a Physics overlay. Constraints covers both spring and non-spring joint diagnostics."
 Class {
 	#name : 'CFPhysicsOverlayControls',
 	#superclass : 'Object',
-	#instVars : [ 'overlay', 'element', 'bodiesToggle', 'contactsToggle', 'springsToggle', 'jointsToggle' ],
+	#instVars : [ 'overlay', 'element', 'bodiesToggle', 'constraintsToggle', 'contactsToggle' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -22,13 +22,17 @@ CFPhysicsOverlayControls >> element [ ^ element ]
 CFPhysicsOverlayControls >> bodiesEnabled [ ^ bodiesToggle isActivated ]
 
 { #category : 'testing' }
+CFPhysicsOverlayControls >> constraintsEnabled [ ^ constraintsToggle isActivated ]
+
+{ #category : 'testing' }
 CFPhysicsOverlayControls >> contactsEnabled [ ^ contactsToggle isActivated ]
 
+"Compatibility for internal callers/tests while the public overlay UI exposes Constraints."
 { #category : 'testing' }
-CFPhysicsOverlayControls >> springsEnabled [ ^ springsToggle isActivated ]
+CFPhysicsOverlayControls >> springsEnabled [ ^ self constraintsEnabled ]
 
 { #category : 'testing' }
-CFPhysicsOverlayControls >> jointsEnabled [ ^ jointsToggle isActivated ]
+CFPhysicsOverlayControls >> jointsEnabled [ ^ self constraintsEnabled ]
 
 { #category : 'initialization' }
 CFPhysicsOverlayControls >> initializeControls [
@@ -47,17 +51,13 @@ CFPhysicsOverlayControls >> initializeControls [
 		margin: (BlInsets right: 14);
 		yourself.
 	bodiesToggle := self bodiesToggle.
-	element addChild: bodiesToggle.
+	constraintsToggle := self constraintsToggle.
 	contactsToggle := self contactsToggle.
-	element addChild: contactsToggle.
-	springsToggle := self springsToggle.
-	element addChild: springsToggle.
-	element addChild: (self unavailableToggleLabel: 'Forces').
-	element addChild: (self unavailableToggleLabel: 'Anchors').
-	jointsToggle := self jointsToggle.
-	element addChild: jointsToggle
+	element
+		addChild: bodiesToggle;
+		addChild: constraintsToggle;
+		addChild: contactsToggle
 ]
-
 
 { #category : 'private - building' }
 CFPhysicsOverlayControls >> bodiesToggle [
@@ -71,6 +71,21 @@ CFPhysicsOverlayControls >> bodiesToggle [
 	toggle
 		when: BrToggleActivatedEvent do: [ overlay bodiesEnabled: true ];
 		when: BrToggleDeactivatedEvent do: [ overlay bodiesEnabled: false ].
+	^ toggle
+]
+
+{ #category : 'private - building' }
+CFPhysicsOverlayControls >> constraintsToggle [
+	| toggle |
+	toggle := BrToggle new
+		id: #cfPhysicsConstraintsOverlayToggle;
+		aptitude: BrGlamorousToggleWithLabelAptitude new;
+		label: 'Constraints';
+		activate;
+		yourself.
+	toggle
+		when: BrToggleActivatedEvent do: [ overlay constraintsEnabled: true ];
+		when: BrToggleDeactivatedEvent do: [ overlay constraintsEnabled: false ].
 	^ toggle
 ]
 
@@ -89,49 +104,7 @@ CFPhysicsOverlayControls >> contactsToggle [
 	^ toggle
 ]
 
-
-{ #category : 'private - building' }
-CFPhysicsOverlayControls >> springsToggle [
-	| toggle |
-	toggle := BrToggle new
-		id: #cfPhysicsSpringsOverlayToggle;
-		aptitude: BrGlamorousToggleWithLabelAptitude new;
-		label: 'Springs';
-		activate;
-		yourself.
-	toggle
-		when: BrToggleActivatedEvent do: [ overlay springsEnabled: true ];
-		when: BrToggleDeactivatedEvent do: [ overlay springsEnabled: false ].
-	^ toggle
-]
-
-
-{ #category : 'private - building' }
-CFPhysicsOverlayControls >> jointsToggle [
-	| toggle |
-	toggle := BrToggle new
-		id: #cfPhysicsJointsOverlayToggle;
-		aptitude: BrGlamorousToggleWithLabelAptitude new;
-		label: 'Joints';
-		activate;
-		yourself.
-	toggle
-		when: BrToggleActivatedEvent do: [ overlay jointsEnabled: true ];
-		when: BrToggleDeactivatedEvent do: [ overlay jointsEnabled: false ].
-	^ toggle
-]
-
-{ #category : 'private - building' }
-CFPhysicsOverlayControls >> unavailableToggleLabel: aString [
-	^ BrToggle new
-		aptitude: BrGlamorousToggleWithLabelAptitude new;
-		label: aString;
-		disable;
-		yourself
-]
-
 { #category : 'controlling' }
 CFPhysicsOverlayControls >> release [
-	element ifNotNil: [
-		element hasParent ifTrue: [ element removeFromParent ] ]
+	element ifNotNil: [ element hasParent ifTrue: [ element removeFromParent ] ]
 ]

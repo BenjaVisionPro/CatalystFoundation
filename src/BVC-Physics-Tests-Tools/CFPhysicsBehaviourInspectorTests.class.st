@@ -45,3 +45,21 @@ CFPhysicsBehaviourInspectorTests >> testTreeConfigurationIncludesInheritedAndTre
 	self assert: (source includesSubstring: 'CFPhysicsForceDirectedTreeBehaviour new').
 	self assert: (source includesSubstring: 'attractionStiffness: 0.0222;')
 ]
+
+{ #category : 'tests' }
+CFPhysicsBehaviourInspectorTests >> testWorldBehaviourRevisionChangesOnlyWhenMembershipChanges [
+	| host world behaviour initialRevision |
+	host := BlElement new.
+	host physics beWorld.
+	world := host physics world.
+	behaviour := CFPhysicsBehaviour new target: host.
+	initialRevision := world behaviourRevision.
+	behaviour start.
+	self assert: world behaviourRevision equals: initialRevision + 1.
+	behaviour start.
+	self assert: world behaviourRevision equals: initialRevision + 1.
+	behaviour stop.
+	self assert: world behaviourRevision equals: initialRevision + 2.
+	behaviour stop.
+	self assert: world behaviourRevision equals: initialRevision + 2
+]

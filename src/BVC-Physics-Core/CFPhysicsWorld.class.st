@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -47,6 +47,7 @@ CFPhysicsWorld >> initialize [
 	simulationTime := 0.0.
 	stepNumber := 0.
 	behaviours := OrderedCollection new.
+	behaviourRevision := 0.
 	telemetryEnabled := false.
 	telemetryLogger := nil.
 	telemetryCapacity := 3600.
@@ -492,16 +493,25 @@ CFPhysicsWorld >> behaviours [
 	^ behaviours copy
 ]
 
+
+{ #category : 'behaviours' }
+CFPhysicsWorld >> behaviourRevision [
+	^ behaviourRevision
+]
+
 { #category : 'behaviours' }
 CFPhysicsWorld >> addBehaviour: aBehaviour [
 	(behaviours identityIncludes: aBehaviour) ifFalse: [
-		behaviours add: aBehaviour ].
+		behaviours add: aBehaviour.
+		behaviourRevision := behaviourRevision + 1 ].
 	^ aBehaviour
 ]
 
 { #category : 'behaviours' }
 CFPhysicsWorld >> removeBehaviour: aBehaviour [
-	behaviours remove: aBehaviour ifAbsent: [ ].
+	(behaviours identityIncludes: aBehaviour) ifTrue: [
+		behaviours remove: aBehaviour.
+		behaviourRevision := behaviourRevision + 1 ].
 	^ aBehaviour
 ]
 

@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'controls', 'selectionVisual' ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'behaviourPanel', 'controls', 'selectionVisual', 'selectedBehaviour', 'scopedBodies', 'scopedBodySet', 'scopedConstraints'  ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -46,6 +46,10 @@ CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
 CFPhysicsOverlay >> controlRoot [ ^ controlRoot ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> worldInspectorButton [ ^ worldInspectorButton ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> behaviourPanel [ ^ behaviourPanel ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> selectedBehaviour [ ^ selectedBehaviour ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> controls [ ^ controls ]
 { #category : 'accessing' }
@@ -134,7 +138,8 @@ CFPhysicsOverlay >> physicalElementFrom: anElement [
 		physics := current existingPhysics.
 		physics ifNotNil: [
 			body := physics bodyOrNil.
-			(body notNil and: [ body world == world ]) ifTrue: [ ^ current ] ].
+			(body notNil and: [ body world == world ]) ifTrue: [
+				(scopedBodySet isNil or: [ scopedBodySet includes: body ]) ifTrue: [ ^ current ] ] ].
 		current == host ifTrue: [ ^ nil ].
 		current := current parent ].
 	^ nil
@@ -202,6 +207,10 @@ CFPhysicsOverlay >> initializeOverlay [
 	jointOverlay := CFPhysicsJointOverlay in: root world: world context: context.
 	contactOverlay := CFPhysicsContactOverlay in: root context: context.
 	objectInspector := CFPhysicsObjectInspector on: host.
+	selectedBehaviour := nil.
+	scopedBodies := nil.
+	scopedBodySet := nil.
+	scopedConstraints := nil.
 	self initializeControls.
 	selectionHandler := BlEventHandler on: BlClickEvent do: [ :anEvent | self clickEvent: anEvent ].
 	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnostics ].
@@ -220,9 +229,11 @@ CFPhysicsOverlay >> initializeControls [
 		clipChildren: false;
 		preventMouseEvents.
 	worldInspectorButton := self newWorldInspectorButton.
+	behaviourPanel := CFPhysicsOverlayBehaviourPanel on: self.
 	controls := CFPhysicsOverlayControls on: self.
 	controlRoot
 		addChild: worldInspectorButton;
+		addChild: behaviourPanel element;
 		addChild: controls element
 ]
 
@@ -281,9 +292,13 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 	"Physics frames and camera transforms both alter the displayed coordinate
 	system. Body visuals observe their source elements directly; the aggregate
 	spring and contact diagnostics refresh here once for the owning host."
-	controls springsEnabled ifTrue: [ springOverlay updateGeometry ].
-	controls jointsEnabled ifTrue: [ jointOverlay updateGeometry ].
-	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
+	behaviourPanel refresh.
+	self validateBehaviourFocus.
+	controls constraintsEnabled ifTrue: [
+		springOverlay updateGeometry.
+		jointOverlay updateGeometry ].
+	controls contactsEnabled ifTrue: [
+		contactOverlay updateFrom: world committedVisualState scopedToBodies: scopedBodySet ].
 	self refreshSelectionVisual.
 	^ self
 ]
@@ -324,16 +339,17 @@ CFPhysicsOverlay >> refresh [
 	changes are reconciled with the Physics world. Frame diagnostics deliberately
 	do not perform this work."
 	world refreshExistingMembers.
+	behaviourPanel refresh.
+	self validateBehaviourFocus.
+	self refreshScope.
 	controls bodiesEnabled
-		ifTrue: [ bodyOverlay update ]
+		ifTrue: [ self updateBodyOverlay ]
 		ifFalse: [ bodyOverlay clear ].
-	controls springsEnabled
-		ifTrue: [ springOverlay update ]
-		ifFalse: [ springOverlay clear ].
-	controls jointsEnabled
-		ifTrue: [ jointOverlay update ]
-		ifFalse: [ jointOverlay clear ].
-	controls contactsEnabled ifTrue: [ contactOverlay updateFrom: world committedVisualState ].
+	controls constraintsEnabled
+		ifTrue: [ self updateConstraintOverlays ]
+		ifFalse: [ springOverlay clear. jointOverlay clear ].
+	controls contactsEnabled ifTrue: [
+		contactOverlay updateFrom: world committedVisualState scopedToBodies: scopedBodySet ].
 	self refreshSelectedObject.
 	self refreshSelectionVisual.
 	^ self
@@ -345,33 +361,35 @@ CFPhysicsOverlay >> bodiesEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
 			world refreshExistingMembers.
-			bodyOverlay update.
+			self refreshScope.
+			self updateBodyOverlay.
 			self refreshSelectionVisual ]
 		ifFalse: [ bodyOverlay clear ].
 	^ self
 ]
 
 { #category : 'controlling - diagnostics' }
-CFPhysicsOverlay >> springsEnabled: aBoolean [
+CFPhysicsOverlay >> constraintsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
 			world refreshExistingMembers.
-			springOverlay update ]
-		ifFalse: [ springOverlay clear ].
+			self refreshScope.
+			self updateConstraintOverlays ]
+		ifFalse: [
+			(selectedSpring notNil or: [ selectedJoint notNil ]) ifTrue: [ self clearSelection ].
+			springOverlay clear.
+			jointOverlay clear ].
 	^ self
 ]
 
+{ #category : 'controlling - diagnostics' }
+CFPhysicsOverlay >> springsEnabled: aBoolean [
+	^ self constraintsEnabled: aBoolean
+]
 
 { #category : 'controlling - diagnostics' }
 CFPhysicsOverlay >> jointsEnabled: aBoolean [
-	aBoolean
-		ifTrue: [
-			world refreshExistingMembers.
-			jointOverlay update ]
-		ifFalse: [
-			selectedJoint ifNotNil: [ self clearSelection ].
-			jointOverlay clear ].
-	^ self
+	^ self constraintsEnabled: aBoolean
 ]
 
 { #category : 'controlling - diagnostics' }
@@ -379,10 +397,79 @@ CFPhysicsOverlay >> contactsEnabled: aBoolean [
 	aBoolean
 		ifTrue: [
 			world enableVisualState.
-			contactOverlay updateFrom: world committedVisualState ]
+			contactOverlay updateFrom: world committedVisualState scopedToBodies: scopedBodies ]
 		ifFalse: [
 			contactOverlay clear.
 			world disableVisualState ].
+	^ self
+]
+
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> validateBehaviourFocus [
+	selectedBehaviour ifNil: [ ^ self ].
+	(world includesBehaviour: selectedBehaviour) ifFalse: [
+		selectedBehaviour := nil.
+		scopedBodies := nil.
+		scopedBodySet := nil.
+		scopedConstraints := nil.
+		behaviourPanel rebuild ].
+	^ self
+]
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> refreshScope [
+	selectedBehaviour
+		ifNil: [
+			scopedBodies := nil.
+			scopedBodySet := nil.
+			scopedConstraints := nil ]
+		ifNotNil: [
+			scopedBodies := selectedBehaviour physicsBodies asArray.
+			scopedBodySet := scopedBodies asIdentitySet.
+			scopedConstraints := selectedBehaviour physicsConstraints asArray ].
+	^ self
+]
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> scopedSprings [
+	^ scopedConstraints select: [ :joint |
+		(joint isKindOf: CFPhysicsDistanceJoint) and: [ joint springEnabled ] ]
+]
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> scopedJoints [
+	^ scopedConstraints reject: [ :joint |
+		(joint isKindOf: CFPhysicsDistanceJoint) and: [ joint springEnabled ] ]
+]
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> updateBodyOverlay [
+	scopedBodies
+		ifNil: [ bodyOverlay update ]
+		ifNotNil: [ bodyOverlay updateFrom: scopedBodies ].
+	^ self
+]
+
+{ #category : 'private - behaviour scope' }
+CFPhysicsOverlay >> updateConstraintOverlays [
+	scopedConstraints
+		ifNil: [ springOverlay update. jointOverlay update ]
+		ifNotNil: [
+			springOverlay updateFrom: self scopedSprings.
+			jointOverlay updateFrom: self scopedJoints ].
+	^ self
+]
+
+{ #category : 'controlling - behaviour scope' }
+CFPhysicsOverlay >> toggleBehaviourFocus: aBehaviour [
+	selectedBehaviour == aBehaviour
+		ifTrue: [ selectedBehaviour := nil ]
+		ifFalse: [ selectedBehaviour := aBehaviour ].
+	self clearSelection.
+	self refreshScope.
+	behaviourPanel rebuild.
+	self refresh.
 	^ self
 ]
 
@@ -396,6 +483,7 @@ CFPhysicsOverlay >> release [
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	hostTransformationHandler ifNotNil: [ host removeEventHandler: hostTransformationHandler ].
 	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
+	behaviourPanel ifNotNil: #release.
 	controls ifNotNil: #release.
 	bodyOverlay ifNotNil: #release.
 	springOverlay ifNotNil: #release.

@@ -1174,8 +1174,8 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayIsEmptyWhileDisabled [
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
 	overlay := host showPhysicsOverlay.
-	overlay controls element children third deactivate.
-	self assert: overlay controls springsEnabled not.
+	overlay controls element children second deactivate.
+	self assert: overlay controls constraintsEnabled not.
 	self assert: overlay springOverlay visuals isEmpty.
 	overlay refresh.
 	self assert: overlay springOverlay visuals isEmpty.
@@ -1982,5 +1982,56 @@ CFPhysicsOverlayTests >> testPhysicsBodyVisualRetainsGeometryDuringPresentationU
 	self assert: representation geometry ~~ retainedGeometry.
 	self assert: representation geometry class equals: replacementGeometry class.
 	self assert: representation geometry ~~ replacementGeometry.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - behaviours' }
+CFPhysicsOverlayTests >> testPhysicsOverlayShowsBehaviourPanelOnlyWhenWorldHasBehaviours [
+	<gtExample>
+	| host overlay behaviour |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	self assert: overlay behaviourPanel element visibility equals: BlVisibility gone.
+	behaviour := CFPhysicsBehaviour new
+		target: host children first;
+		start.
+	overlay behaviourPanel refresh.
+	self assert: overlay behaviourPanel element visibility equals: BlVisibility visible.
+	behaviour stop.
+	overlay behaviourPanel refresh.
+	self assert: overlay behaviourPanel element visibility equals: BlVisibility gone.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - behaviours' }
+CFPhysicsOverlayTests >> testPhysicsOverlayBehaviourFocusScopesDiagnostics [
+	<gtExample>
+	| host overlay behaviour |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	behaviour := CFPhysicsBehaviour new
+		target: host children first;
+		start.
+	overlay behaviourPanel refresh.
+	overlay toggleBehaviourFocus: behaviour.
+	self assert: overlay selectedBehaviour == behaviour.
+	self assert: overlay bodyOverlay visuals isEmpty.
+	overlay toggleBehaviourFocus: behaviour.
+	self assert: overlay selectedBehaviour isNil.
+	self assert: overlay bodyOverlay visuals isNotEmpty.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - controls' }
+CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
+	<gtExample>
+	| host overlay controls |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	controls := overlay controls.
+	self assert: controls element children size equals: 3.
+	self assert: controls bodiesEnabled.
+	self assert: controls constraintsEnabled.
+	self assert: controls contactsEnabled.
 	^ host
 ]
