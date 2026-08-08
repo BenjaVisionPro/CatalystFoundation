@@ -91,3 +91,20 @@ CFPhysicsBehaviourInspectorTests >> testBehaviourOverlayInspectorWritesLiveNumer
 	self assert: behaviour length equals: 123.0.
 	self assert: control editor text asString equals: '123.0'
 ]
+
+{ #category : 'tests' }
+CFPhysicsBehaviourInspectorTests >> testBehaviourNumericControlRetainsSliderPositionThroughFrameLayout [
+	| behaviour description content control handle alignment |
+	behaviour := CFPhysicsForceDirectedBehaviour new.
+	description := behaviour configurationDescriptions detect: [ :each | each accessor selector = #length ].
+	content := CFPhysicsBehaviourInspector newContent.
+	content inspect: behaviour.
+	control := (content instVarNamed: 'controlsByDescription') at: description.
+	description write: 135.0 to: behaviour.
+	control refresh.
+	handle := control handle.
+	alignment := handle constraints frame horizontal alignment.
+	self assert: handle constraints position x > 0.
+	self assert: alignment class equals: BlHorizontalCoordinateStartAlignment
+]
+

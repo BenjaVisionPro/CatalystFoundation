@@ -128,10 +128,17 @@ CFPhysicsBehaviourNumberControl >> writeValue: aNumber [
 
 { #category : 'private - presentation' }
 CFPhysicsBehaviourNumberControl >> positionHandleFor: aNumber [
-	| usable fraction |
+	| usable fraction x alignment |
 	usable := (track extent x - handle extent x) max: 1.
 	fraction := ((aNumber asFloat - minimum) / (maximum - minimum)) min: 1.0 max: 0.0.
-	handle relocate: (fraction * usable) rounded @ 1
+	x := (fraction * usable) rounded.
+	alignment := track extent x isZero
+		ifTrue: [ 0.0 ]
+		ifFalse: [ x / track extent x ].
+	handle constraintsDo: [ :c |
+		c frame horizontal alignLeftAt: alignment.
+		c frame vertical alignCenter ].
+	handle relocate: x @ ((track extent y - handle extent y) / 2.0) rounded
 ]
 
 { #category : 'updating' }
