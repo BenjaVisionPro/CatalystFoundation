@@ -292,7 +292,7 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 CFPhysicsOverlay >> refreshSelectedObject [
 	| physics body |
 	selectedJoint ifNotNil: [
-		(world joints includes: selectedJoint)
+		(selectedJoint world == world)
 			ifFalse: [ self clearSelection ]
 			ifTrue: [
 				objectInspector selectedObject == selectedJoint
@@ -300,7 +300,7 @@ CFPhysicsOverlay >> refreshSelectedObject [
 				objectInspector refresh ].
 		^ self ].
 	selectedSpring ifNotNil: [
-		(world springs includes: selectedSpring)
+		(selectedSpring world == world)
 			ifFalse: [ self clearSelection ]
 			ifTrue: [
 				objectInspector selectedObject == selectedSpring

@@ -131,6 +131,16 @@ CFPhysicsSpringVisual >> addTo: aParentElement [
 	^ self
 ]
 
+{ #category : 'private - updating' }
+CFPhysicsSpringVisual >> updateLine: aLine from: firstPoint to: secondPoint [
+	(aLine fromAnchor position = firstPoint and: [ aLine toAnchor position = secondPoint ])
+		ifTrue: [ ^ aLine ].
+	aLine fromAnchor position: firstPoint.
+	aLine toAnchor position: secondPoint.
+	aLine requestLayout.
+	^ aLine
+]
+
 { #category : 'updating' }
 CFPhysicsSpringVisual >> update [
 	| points firstPoint secondPoint displacement distance restPoint |
@@ -141,12 +151,8 @@ CFPhysicsSpringVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: spring endpointPair bodyB.
-	self fromAnchor position: firstPoint.
-	self toAnchor position: secondPoint.
-	hitTarget fromAnchor position: firstPoint.
-	hitTarget toAnchor position: secondPoint.
-	self requestLayout.
-	hitTarget requestLayout.
+	self updateLine: self from: firstPoint to: secondPoint.
+	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	displacement := points second - points first.
 	distance := displacement r.
 	distance isZero
