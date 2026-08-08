@@ -237,6 +237,30 @@ CFPhysicsOverlayTests >> testPhysicsOverlayWorldCoordinatesResolveThroughItsHost
 
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsOverlayContainmentWorldPointUsesCanvassableChildrenCoordinates [
+	<gtExample>
+	| host overlay world context body point expected |
+	host := self physicsCanvassableHost.
+	overlay := host showPhysicsOverlay.
+	host space pulse.
+	world := host physics world.
+	world step.
+	body := world containmentBoundaryBody.
+	point := world containmentBoundaryChain vertices first + body worldBodyOrigin.
+	host childrenTranslationFactor: 70 @ 45.
+	host childrenScaleFactor: 0.65.
+	host space pulse.
+	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
+	expected := overlay root globalPointToLocal:
+		(host localPointToGlobal: (host childrenPointToLocal: point)).
+	self assert: (context overlayPointFromWorld: point) equals: expected.
+	self
+		assert: (context overlayPointFromWorld: point attachedTo: body)
+		equals: expected.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsOverlayRefreshesContactsAfterEachPresentedFrame [
 	<gtExample>
 	| host overlay world first second |

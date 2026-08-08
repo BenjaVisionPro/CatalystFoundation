@@ -1,4 +1,4 @@
-"I provide the coordinate context shared by Physics overlay visuals. My responsibility is to convert world, body and Bloc points into the overlay's coordinate space."
+"I provide the coordinate context shared by Physics overlay visuals. Physics-to-Bloc presentation conversion belongs to BVC-Physics-Bloc; I only adapt displayed Bloc points into overlay-local coordinates."
 Class {
 	#name : 'CFPhysicsOverlayContext',
 	#superclass : 'Object',
@@ -45,30 +45,18 @@ CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
-	"Convert a Physics-world point from the world owner's local coordinate system
-	into overlay-local coordinates. Physics positions describe the owner's child
-	coordinate system; a Mondrian root may scale or translate that system for its
-	graph presentation. Apply that children transformation before crossing into
-	the overlay's sibling coordinate system."
-	^ self overlayPointInHost: (host childrenPointToLocal: aPoint)
+	"Physics-to-Bloc presentation coordinates belong to the Bloc integration seam.
+	The overlay only converts the resulting displayed global point into its own
+	local coordinate system."
+	^ overlay root globalPointToLocal:
+		(world blocGlobalPointForWorldPoint: aPoint)
 ]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint attachedTo: aBody [
-	"Resolve a body-owned Physics point through the same body-local coordinate
-	contract as anchors, then adapt that point to Bloc element-local geometry.
-	World anchors deliberately remain in world coordinates."
-	| bodyLocalPoint elementLocalPoint |
-	aBody ifNil: [ ^ self overlayPointFromWorld: aPoint ].
-	bodyLocalPoint := aBody bodyLocalPointForWorldPoint: aPoint.
-	elementLocalPoint := aBody shapeState
-		elementLocalPointForBodyLocalPoint: bodyLocalPoint.
-	^ self overlayPoint: elementLocalPoint from: aBody element
+	"Body presentation, Motion interpolation and containment coordinate semantics
+	are resolved by the Physics-Bloc seam, not by diagnostic tooling."
+	^ overlay root globalPointToLocal:
+		(world blocGlobalPointForWorldPoint: aPoint attachedTo: aBody)
 ]
 
-{ #category : 'geometry' }
-CFPhysicsOverlayContext >> overlayPointInHost: aPoint [
-	"Convert a point expressed in the displayed Physics host child coordinates into
-	overlay-local coordinates."
-	^ overlay root globalPointToLocal: (host localPointToGlobal: aPoint)
-]
