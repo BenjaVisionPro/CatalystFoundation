@@ -7,8 +7,7 @@ CFPhysicsBehaviour >> asGtMagritteViewModel [
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsBehaviour >> configurationDescriptions [
-	^ (self magritteDescription select: #cfSerializable)
-		asSortedCollection: [ :first :second | first priority < second priority ]
+	^ self magritteDescription select: #cfSerializable
 ]
 
 { #category : '*bvc-physics-tools' }
