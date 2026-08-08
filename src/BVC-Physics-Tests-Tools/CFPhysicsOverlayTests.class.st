@@ -1107,10 +1107,8 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksBothAnchoredEndpoints [
 	world addJoint: spring.
 	overlay := host showPhysicsOverlay.
 	visual := overlay springOverlay visuals first.
-	self assert: visual fromHead class equals: BlArrowheadCircle.
-	self assert: visual toHead class equals: BlArrowheadCircle.
-	self assert: visual fromHead parent == visual.
-	self assert: visual toHead parent == visual.
+	self assert: visual hasFromHead not.
+	self assert: visual hasToHead not.
 	^ overlay
 ]
 
@@ -2045,8 +2043,8 @@ CFPhysicsOverlayTests >> testPhysicsSpringDiagnosticsDoNotDrawEndpointMarkers [
 	| overlay visual |
 	overlay := self overlayWithSelectedSpringHitTarget.
 	visual := overlay springOverlay visuals first.
-	self assert: visual fromHead isNil.
-	self assert: visual toHead isNil.
+	self assert: visual hasFromHead not.
+	self assert: visual hasToHead not.
 	^ overlay
 ]
 
@@ -2057,8 +2055,8 @@ CFPhysicsOverlayTests >> testPhysicsSpringSelectionUsesCompactExplicitHandles [
 	overlay := self overlayWithSelectedSpringHitTarget.
 	visual := overlay selectionVisual.
 	self assert: visual class equals: CFPhysicsSpringVisual.
-	self assert: visual fromHead isNil.
-	self assert: visual toHead isNil.
+	self assert: visual hasFromHead not.
+	self assert: visual hasToHead not.
 	self assert: (visual fromSelectionHandle extent x closeTo: 4.0).
 	self assert: (visual toSelectionHandle extent x closeTo: 4.0).
 	^ overlay
@@ -2119,8 +2117,10 @@ CFPhysicsOverlayTests >> testPhysicsSpringSelectionIsPositionedBeforeInstallatio
 	visual := overlay selectionVisual.
 	self assert: visual fromAnchor position ~= (0 @ 0).
 	self assert: visual toAnchor position ~= (0 @ 0).
-	self assert: visual fromSelectionHandle extent x > 0.
-	self assert: visual toSelectionHandle extent x > 0.
+	self assert: visual fromSelectionHandle constraints horizontal resizer size > 0.
+	self assert: visual fromSelectionHandle constraints vertical resizer size > 0.
+	self assert: visual toSelectionHandle constraints horizontal resizer size > 0.
+	self assert: visual toSelectionHandle constraints vertical resizer size > 0.
 	^ overlay
 ]
 
