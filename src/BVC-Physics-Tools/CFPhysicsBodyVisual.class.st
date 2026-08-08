@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsBodyVisual',
 	#superclass : 'BlElement',
-	#instVars : [ 'body', 'context', 'listener', 'presentationRole' ],
+	#instVars : [ 'body', 'context', 'listener', 'presentationRole', 'sourceGeometry', 'sourceExtent', 'sensorBorder', 'solidBorder' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -64,7 +64,14 @@ CFPhysicsBodyVisual >> initializeVisual [
 		constraintsDo: [ :c | c ignoreByLayout ];
 		background: Color transparent;
 		preventMeAndChildrenMouseEvents.
-	self isSelection ifTrue: [ self zIndex: 2 ].
+	self isSelection
+		ifTrue: [
+			self
+				border: (BlBorder paint: (Color red alpha: 0.9) width: 3);
+				zIndex: 2 ]
+		ifFalse: [
+			sensorBorder := BlBorder paint: (Color orange alpha: 0.65) width: 1.
+			solidBorder := BlBorder paint: (Color blue alpha: 0.65) width: 1 ].
 	listener := CFPhysicsBodyVisualListener for: self.
 	body shapeState element addEventHandler: listener.
 	self update
@@ -78,43 +85,63 @@ CFPhysicsBodyVisual >> addTo: aParentElement [
 
 { #category : 'updating' }
 CFPhysicsBodyVisual >> update [
-	| shape source sourceExtent origin xAxis yAxis xVector yVector scale rotation |
-	shape := body shapeState.
-	source := shape element.
-	sourceExtent := source extent.
+	self synchroniseGeometryAndExtent.
+	self updatePresentation.
+	^ self
+]
+
+{ #category : 'private - updating' }
+CFPhysicsBodyVisual >> synchroniseGeometryAndExtent [
+	| source currentGeometry currentExtent |
+	source := body shapeState element.
+	currentGeometry := source geometry.
+	currentExtent := source extent.
+	(sourceGeometry == currentGeometry and: [ sourceExtent = currentExtent ])
+		ifTrue: [ ^ self ].
+	sourceGeometry := currentGeometry.
+	sourceExtent := currentExtent.
+	self
+		geometry: currentGeometry copy;
+		size: currentExtent.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsBodyVisual >> updatePresentation [
+	| source currentExtent origin xAxis yAxis xVector yVector scale rotation |
+	source := body shapeState element.
+	currentExtent := source extent.
+	(sourceGeometry ~~ source geometry or: [ sourceExtent ~= currentExtent ])
+		ifTrue: [ self synchroniseGeometryAndExtent ].
 	origin := context overlayPoint: 0 @ 0 from: source.
-	xAxis := context overlayPoint: sourceExtent x @ 0 from: source.
-	yAxis := context overlayPoint: 0 @ sourceExtent y from: source.
+	xAxis := context overlayPoint: currentExtent x @ 0 from: source.
+	yAxis := context overlayPoint: 0 @ currentExtent y from: source.
 	xVector := xAxis - origin.
 	yVector := yAxis - origin.
 	scale :=
-		(sourceExtent x isZero
+		(currentExtent x isZero
 			ifTrue: [ 1.0 ]
-			ifFalse: [ xVector r / sourceExtent x ])
+			ifFalse: [ xVector r / currentExtent x ])
 		@
-		(sourceExtent y isZero
+		(currentExtent y isZero
 			ifTrue: [ 1.0 ]
-			ifFalse: [ yVector r / sourceExtent y ]).
+			ifFalse: [ yVector r / currentExtent y ]).
 	rotation := xVector theta radiansToDegrees.
 	self
-		geometry: source geometry copy;
-		size: sourceExtent;
 		relocate: origin;
 		transformDo: [ :aTransform |
 			aTransform
 				topLeftOrigin;
 				scaleBy: scale;
 				rotateBy: rotation ].
-	self updateBorder
+	self updateBorder.
+	^ self
 ]
 
 { #category : 'private - styling' }
 CFPhysicsBodyVisual >> updateBorder [
-	self isSelection
-		ifTrue: [ self border: (BlBorder paint: (Color red alpha: 0.9) width: 3) ]
-		ifFalse: [ self border: (BlBorder
-			paint: ((body isSensor ifTrue: [ Color orange ] ifFalse: [ Color blue ]) alpha: 0.65)
-			width: 1) ].
+	self isSelection ifTrue: [ ^ self ].
+	self border: (body isSensor ifTrue: [ sensorBorder ] ifFalse: [ solidBorder ]).
 	^ self
 ]
 

@@ -1936,3 +1936,28 @@ CFPhysicsOverlayTests >> testPhysicsObjectInspectorRefitsWhenItsOverlayExtentCha
 	self assert: inspector panel extent y <= (inspector root extent y - 12).
 	^ inspector
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsBodyVisualRetainsGeometryDuringPresentationUpdates [
+	<gtExample>
+	| host overlay body representation source retainedGeometry replacementGeometry |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	body := host physics world bodyStatesInOrder first.
+	representation := overlay bodyOverlay visuals
+		detect: [ :each | each body == body ].
+	source := body shapeState element.
+	retainedGeometry := representation geometry.
+	representation updatePresentation.
+	self assert: representation geometry == retainedGeometry.
+	source relocate: source position + (5 @ 3).
+	host space pulse.
+	self assert: representation geometry == retainedGeometry.
+	replacementGeometry := BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 6).
+	source geometry: replacementGeometry.
+	representation updatePresentation.
+	self assert: representation geometry ~~ retainedGeometry.
+	self assert: representation geometry class equals: replacementGeometry class.
+	self assert: representation geometry ~~ replacementGeometry.
+	^ host
+]

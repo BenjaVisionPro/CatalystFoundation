@@ -28,10 +28,10 @@ CFPhysicsBodyVisualListener >> eventsToHandle [
 CFPhysicsBodyVisualListener >> elementExtentChangedEvent: anEvent [ visual update ]
 
 { #category : 'events' }
-CFPhysicsBodyVisualListener >> elementPositionInSpaceChangedEvent: anEvent [ visual update ]
+CFPhysicsBodyVisualListener >> elementPositionInSpaceChangedEvent: anEvent [ visual updatePresentation ]
 
 { #category : 'events' }
-CFPhysicsBodyVisualListener >> elementTransformationInSpaceChangedEvent: anEvent [ visual update ]
+CFPhysicsBodyVisualListener >> elementTransformationInSpaceChangedEvent: anEvent [ visual updatePresentation ]
 
 { #category : 'events' }
 CFPhysicsBodyVisualListener >> elementRemovedFromSceneGraphEvent: anEvent [ visual refreshOverlay ]
