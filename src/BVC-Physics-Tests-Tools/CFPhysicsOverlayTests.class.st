@@ -2057,8 +2057,10 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesUseCompactBaseS
 	visual addTo: overlay root.
 	visual update.
 	host space pulse.
-	self assert: (visual fromHead scale closeTo: 1.5).
-	self assert: (visual toHead scale closeTo: 1.5).
+	self assert: (visual fromSelectionHandle extent x closeTo: 6.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 6.0).
+	self assert: visual hasFromHead not.
+	self assert: visual hasToHead not.
 	visual release.
 	^ overlay
 ]
@@ -2082,13 +2084,15 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowCanvassab
 	host childrenScaleFactor: 0.5.
 	host space pulse.
 	visual update.
-	self assert: (visual fromHead scale closeTo: 0.75).
-	self assert: (visual toHead scale closeTo: 0.75).
+	host space pulse.
+	self assert: (visual fromSelectionHandle extent x closeTo: 3.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 3.0).
 	host childrenScaleFactor: 1.5.
 	host space pulse.
 	visual update.
-	self assert: (visual fromHead scale closeTo: 2.25).
-	self assert: (visual toHead scale closeTo: 2.25).
+	host space pulse.
+	self assert: (visual fromSelectionHandle extent x closeTo: 9.0).
+	self assert: (visual toSelectionHandle extent x closeTo: 9.0).
 	visual release.
 	^ overlay
 ]

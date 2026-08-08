@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsJointVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker', 'rail', 'lowerLimitMarker', 'upperLimitMarker', 'pivotMarker', 'referenceRay', 'lowerAngleMarker', 'upperAngleMarker', 'allowedAngleArc', 'motorCue', 'allowedAngleStartDegrees', 'allowedAngleEndDegrees' ],
+	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker', 'rail', 'lowerLimitMarker', 'upperLimitMarker', 'pivotMarker', 'referenceRay', 'lowerAngleMarker', 'upperAngleMarker', 'allowedAngleArc', 'motorCue', 'allowedAngleStartDegrees', 'allowedAngleEndDegrees', 'fromSelectionHandle', 'toSelectionHandle' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -60,6 +60,12 @@ CFPhysicsJointVisual >> matchesSelection: anObject [
 CFPhysicsJointVisual >> hitTarget [ ^ hitTarget ]
 
 { #category : 'accessing' }
+CFPhysicsJointVisual >> fromSelectionHandle [ ^ fromSelectionHandle ]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> toSelectionHandle [ ^ toSelectionHandle ]
+
+{ #category : 'accessing' }
 CFPhysicsJointVisual >> restLengthMarker [ ^ restLengthMarker ]
 
 { #category : 'accessing' }
@@ -108,9 +114,13 @@ CFPhysicsJointVisual >> initializeVisual [
 		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.8) width: 1);
 		constraintsDo: [ :constraints | constraints ignoreByLayout ];
-		preventMeAndChildrenMouseEvents;
-		fromHead: self newEndpointMarker;
-		toHead: self newEndpointMarker.
+		preventMeAndChildrenMouseEvents.
+	self isDiagnostic ifTrue: [
+		self
+			fromHead: self newEndpointMarker;
+			toHead: self newEndpointMarker ].
+	fromSelectionHandle := self isSelection ifTrue: [ self newSelectionHandle ].
+	toSelectionHandle := self isSelection ifTrue: [ self newSelectionHandle ].
 	restLengthMarker := self newRestLengthMarker.
 	rail := self newRail.
 	lowerLimitMarker := self newRailLimitMarker.
@@ -133,9 +143,21 @@ CFPhysicsJointVisual >> initializeVisual [
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newEndpointMarker [
 	^ BlArrowheadCircle new
-		scale: (self isSelection ifTrue: [ 1.5 ] ifFalse: [ 6.0 ]);
+		scale: 6.0;
 		background: (Color blue muchDarker alpha: 0.9);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 1);
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newSelectionHandle [
+	^ BlElement new
+		geometry: BlCircleGeometry new;
+		background: (Color red alpha: 0.9);
+		border: (BlBorder paint: (Color red alpha: 0.95) width: 1);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		zIndex: 3;
 		yourself
 ]
 
@@ -249,8 +271,10 @@ CFPhysicsJointVisual >> newHitTarget [
 
 { #category : 'installing' }
 CFPhysicsJointVisual >> addTo: aParentElement [
+	aParentElement addChild: self.
+	fromSelectionHandle ifNotNil: [ aParentElement addChild: fromSelectionHandle ].
+	toSelectionHandle ifNotNil: [ aParentElement addChild: toSelectionHandle ].
 	aParentElement
-		addChild: self;
 		addChild: rail;
 		addChild: lowerLimitMarker;
 		addChild: upperLimitMarker;
@@ -285,7 +309,7 @@ CFPhysicsJointVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: joint bodyB.
-	self updateSelectionEndpointScalesForWorldPoints: points.
+	self updateSelectionHandlesFrom: firstPoint to: secondPoint worldPoints: points.
 	self updateLine: self from: firstPoint to: secondPoint.
 	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	joint
@@ -299,20 +323,21 @@ CFPhysicsJointVisual >> update [
 
 
 { #category : 'private - updating' }
-CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint atWorldPoint: aPoint [
-	| presentationScale markerScale |
-	presentationScale := context overlayScaleAtWorldPoint: aPoint.
-	markerScale := 1.5 * presentationScale.
-	(anEndpoint scale closeTo: markerScale)
-		ifFalse: [ anEndpoint scale: markerScale ]
+CFPhysicsJointVisual >> updateSelectionHandle: aHandle at: aPoint worldPoint: aWorldPoint [
+	| diameter extent origin |
+	diameter := 6.0 * (context overlayScaleAtWorldPoint: aWorldPoint).
+	extent := diameter asPoint.
+	(aHandle extent closeTo: extent) ifFalse: [ aHandle size: extent ].
+	origin := aPoint - (extent / 2.0).
+	aHandle position = origin ifFalse: [ aHandle relocate: origin ]
 ]
 
 { #category : 'private - updating' }
-CFPhysicsJointVisual >> updateSelectionEndpointScalesForWorldPoints: worldPoints [
+CFPhysicsJointVisual >> updateSelectionHandlesFrom: firstPoint to: secondPoint worldPoints: worldPoints [
 	self isSelection ifFalse: [ ^ self ].
 	self
-		updateSelectionEndpoint: self fromHead atWorldPoint: worldPoints first;
-		updateSelectionEndpoint: self toHead atWorldPoint: worldPoints second
+		updateSelectionHandle: fromSelectionHandle at: firstPoint worldPoint: worldPoints first;
+		updateSelectionHandle: toSelectionHandle at: secondPoint worldPoint: worldPoints second
 ]
 
 
@@ -435,6 +460,8 @@ CFPhysicsJointVisual >> remove [
 	upperAngleMarker hasParent ifTrue: [ upperAngleMarker removeFromParent ].
 	allowedAngleArc hasParent ifTrue: [ allowedAngleArc removeFromParent ].
 	motorCue hasParent ifTrue: [ motorCue removeFromParent ].
+	fromSelectionHandle ifNotNil: [ fromSelectionHandle hasParent ifTrue: [ fromSelectionHandle removeFromParent ] ].
+	toSelectionHandle ifNotNil: [ toSelectionHandle hasParent ifTrue: [ toSelectionHandle removeFromParent ] ].
 	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
 	^ self
 ]
