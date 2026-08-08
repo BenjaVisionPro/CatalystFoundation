@@ -2038,3 +2038,32 @@ CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 	self assert: controls contactsEnabled.
 	^ host
 ]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowBodyPresentationScale [
+	<gtExample>
+	| host world first second joint overlay visual |
+	host := self physicsHost.
+	world := host physics world.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
+	joint := CFPhysicsDistanceJoint
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 0 @ 0).
+	world addJoint: joint.
+	overlay := host showPhysicsOverlay.
+	visual := CFPhysicsJointVisual selectionOn: joint context: overlay context.
+	visual addTo: overlay root.
+	visual update.
+	host space pulse.
+	self assert: (visual fromHead scale closeTo: 2.0).
+	self assert: (visual toHead scale closeTo: 2.0).
+	first element transformDo: [ :transform | transform scaleBy: 0.5 ].
+	host space pulse.
+	visual update.
+	self assert: (visual fromHead scale closeTo: 1.0).
+	self assert: (visual toHead scale closeTo: 2.0).
+	visual release.
+	^ overlay
+]
+

@@ -133,7 +133,7 @@ CFPhysicsJointVisual >> initializeVisual [
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newEndpointMarker [
 	^ BlArrowheadCircle new
-		scale: 6.0;
+		scale: (self isSelection ifTrue: [ 2.0 ] ifFalse: [ 6.0 ]);
 		background: (Color blue muchDarker alpha: 0.9);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 1);
 		yourself
@@ -285,6 +285,7 @@ CFPhysicsJointVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: joint bodyB.
+	self updateSelectionEndpointScales.
 	self updateLine: self from: firstPoint to: secondPoint.
 	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	joint
@@ -295,6 +296,24 @@ CFPhysicsJointVisual >> update [
 	^ self
 ]
 
+
+
+{ #category : 'private - updating' }
+CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint forBody: aBody [
+	| presentationScale markerScale |
+	presentationScale := context overlayScaleForElement: aBody element.
+	markerScale := 2.0 * presentationScale.
+	(anEndpoint scale closeTo: markerScale)
+		ifFalse: [ anEndpoint scale: markerScale ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsJointVisual >> updateSelectionEndpointScales [
+	self isSelection ifFalse: [ ^ self ].
+	self
+		updateSelectionEndpoint: self fromHead forBody: joint bodyA;
+		updateSelectionEndpoint: self toHead forBody: joint bodyB
+]
 
 
 { #category : 'updating - joint decorations' }
