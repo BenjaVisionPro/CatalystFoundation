@@ -66,11 +66,11 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint attachedTo: aBody [
 ]
 
 { #category : 'geometry' }
-CFPhysicsOverlayContext >> overlayScaleAtWorldPoint: aPoint attachedTo: aBody [
+CFPhysicsOverlayContext >> overlayScaleAtWorldPoint: aPoint [
 	| origin xUnit yUnit |
-	origin := self overlayPointFromWorld: aPoint attachedTo: aBody.
-	xUnit := self overlayPointFromWorld: aPoint + (1 @ 0) attachedTo: aBody.
-	yUnit := self overlayPointFromWorld: aPoint + (0 @ 1) attachedTo: aBody.
+	origin := self overlayPointFromWorld: aPoint.
+	xUnit := self overlayPointFromWorld: aPoint + (1 @ 0).
+	yUnit := self overlayPointFromWorld: aPoint + (0 @ 1).
 	^ (((xUnit - origin) r + (yUnit - origin) r) / 2.0)
 ]
 

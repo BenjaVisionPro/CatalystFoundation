@@ -2040,7 +2040,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowBodyPresentationScale [
+CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesUseCompactBaseSize [
 	<gtExample>
 	| host world first second joint overlay context visual |
 	host := self physicsHost.
@@ -2057,35 +2057,38 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowBodyPrese
 	visual addTo: overlay root.
 	visual update.
 	host space pulse.
-	self assert: (visual fromHead scale closeTo: 2.0).
-	self assert: (visual toHead scale closeTo: 2.0).
-	first element transformDo: [ :transform | transform scaleBy: 0.5 ].
-	host space pulse.
-	visual update.
-	self assert: (visual fromHead scale closeTo: 1.0).
-	self assert: (visual toHead scale closeTo: 2.0).
+	self assert: (visual fromHead scale closeTo: 1.5).
+	self assert: (visual toHead scale closeTo: 1.5).
 	visual release.
 	^ overlay
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesSupportWorldFixedEndpoint [
+CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowCanvassableScale [
 	<gtExample>
-	| host world body joint overlay context visual |
-	host := self physicsHost.
+	| host world first second joint overlay context visual |
+	host := self physicsCanvassableHost.
 	world := host physics world.
-	body := world bodyStatesInOrder first.
+	first := world bodyStatesInOrder first.
+	second := world bodyStatesInOrder second.
 	joint := CFPhysicsDistanceJoint
-		betweenAnchor: (CFPhysicsWorldAnchor in: world at: body worldBodyOrigin - (30 @ 0))
-		andAnchor: (CFPhysicsBodyCentreAnchor on: body).
+		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 0 @ 0).
 	world addJoint: joint.
 	overlay := host showPhysicsOverlay.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	visual := CFPhysicsJointVisual selectionOn: joint context: context.
 	visual addTo: overlay root.
+	host childrenScaleFactor: 0.5.
+	host space pulse.
 	visual update.
-	self assert: (visual fromHead scale closeTo: 2.0).
-	self assert: (visual toHead scale closeTo: 2.0).
+	self assert: (visual fromHead scale closeTo: 0.75).
+	self assert: (visual toHead scale closeTo: 0.75).
+	host childrenScaleFactor: 1.5.
+	host space pulse.
+	visual update.
+	self assert: (visual fromHead scale closeTo: 2.25).
+	self assert: (visual toHead scale closeTo: 2.25).
 	visual release.
 	^ overlay
 ]

@@ -133,7 +133,7 @@ CFPhysicsJointVisual >> initializeVisual [
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newEndpointMarker [
 	^ BlArrowheadCircle new
-		scale: (self isSelection ifTrue: [ 2.0 ] ifFalse: [ 6.0 ]);
+		scale: (self isSelection ifTrue: [ 1.5 ] ifFalse: [ 6.0 ]);
 		background: (Color blue muchDarker alpha: 0.9);
 		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 1);
 		yourself
@@ -299,10 +299,10 @@ CFPhysicsJointVisual >> update [
 
 
 { #category : 'private - updating' }
-CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint atWorldPoint: aPoint attachedTo: aBody [
+CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint atWorldPoint: aPoint [
 	| presentationScale markerScale |
-	presentationScale := context overlayScaleAtWorldPoint: aPoint attachedTo: aBody.
-	markerScale := 2.0 * presentationScale.
+	presentationScale := context overlayScaleAtWorldPoint: aPoint.
+	markerScale := 1.5 * presentationScale.
 	(anEndpoint scale closeTo: markerScale)
 		ifFalse: [ anEndpoint scale: markerScale ]
 ]
@@ -311,12 +311,8 @@ CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint atWorldPoint: aPoint
 CFPhysicsJointVisual >> updateSelectionEndpointScalesForWorldPoints: worldPoints [
 	self isSelection ifFalse: [ ^ self ].
 	self
-		updateSelectionEndpoint: self fromHead
-		atWorldPoint: worldPoints first
-		attachedTo: joint bodyA;
-		updateSelectionEndpoint: self toHead
-		atWorldPoint: worldPoints second
-		attachedTo: joint bodyB
+		updateSelectionEndpoint: self fromHead atWorldPoint: worldPoints first;
+		updateSelectionEndpoint: self toHead atWorldPoint: worldPoints second
 ]
 
 
