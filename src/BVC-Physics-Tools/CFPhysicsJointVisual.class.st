@@ -285,7 +285,7 @@ CFPhysicsJointVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: joint bodyB.
-	self updateSelectionEndpointScales.
+	self updateSelectionEndpointScalesForWorldPoints: points.
 	self updateLine: self from: firstPoint to: secondPoint.
 	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	joint
@@ -299,20 +299,24 @@ CFPhysicsJointVisual >> update [
 
 
 { #category : 'private - updating' }
-CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint forBody: aBody [
+CFPhysicsJointVisual >> updateSelectionEndpoint: anEndpoint atWorldPoint: aPoint attachedTo: aBody [
 	| presentationScale markerScale |
-	presentationScale := context overlayScaleForElement: aBody element.
+	presentationScale := context overlayScaleAtWorldPoint: aPoint attachedTo: aBody.
 	markerScale := 2.0 * presentationScale.
 	(anEndpoint scale closeTo: markerScale)
 		ifFalse: [ anEndpoint scale: markerScale ]
 ]
 
 { #category : 'private - updating' }
-CFPhysicsJointVisual >> updateSelectionEndpointScales [
+CFPhysicsJointVisual >> updateSelectionEndpointScalesForWorldPoints: worldPoints [
 	self isSelection ifFalse: [ ^ self ].
 	self
-		updateSelectionEndpoint: self fromHead forBody: joint bodyA;
-		updateSelectionEndpoint: self toHead forBody: joint bodyB
+		updateSelectionEndpoint: self fromHead
+		atWorldPoint: worldPoints first
+		attachedTo: joint bodyA;
+		updateSelectionEndpoint: self toHead
+		atWorldPoint: worldPoints second
+		attachedTo: joint bodyB
 ]
 
 
