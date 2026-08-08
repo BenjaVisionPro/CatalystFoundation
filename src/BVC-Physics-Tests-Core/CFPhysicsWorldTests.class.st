@@ -731,3 +731,22 @@ CFPhysicsWorldTests >> testUnchangedGeometryDoesNotAdvanceRuntimeIdentity [
 	self assert: body shapeState geometryRevision equals: initialRevision.
 	^ world
 ]
+
+
+{ #category : 'tests - world membership' }
+CFPhysicsWorldTests >> testMembershipRevisionChangesOnlyWhenBodyMembershipChanges [
+	<gtExample>
+	| owner element world initialRevision |
+	owner := BlElement new size: 200 @ 120; yourself.
+	element := BlElement new size: 20 @ 20; yourself.
+	owner addChild: element.
+	world := owner physics beWorld.
+	initialRevision := world membershipRevision.
+	element physics beDynamic.
+	self assert: world membershipRevision equals: initialRevision + 1.
+	element physics beKinematic.
+	self assert: world membershipRevision equals: initialRevision + 1.
+	element removeFromParent.
+	self assert: world membershipRevision equals: initialRevision + 2.
+	^ world
+]

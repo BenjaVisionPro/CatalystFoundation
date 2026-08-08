@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -24,6 +24,7 @@ CFPhysicsWorld >> initialize [
 	members := IdentitySet new.
 	bodyStates := IdentityDictionary new.
 	geometrySignaturesByBody := IdentityDictionary new.
+	membershipRevision := 0.
 	nextBodySequence := 1.
 	lengthUnitsPerMetre := CFPhysicsBody defaultLengthUnitsPerMetre.
 	gravity := 0 @ 10.0.
@@ -402,6 +403,9 @@ CFPhysicsWorld >> registerBodyFor: anElement [
 { #category : 'membership' }
 CFPhysicsWorld >> members [ ^ members asArray ]
 
+{ #category : 'membership' }
+CFPhysicsWorld >> membershipRevision [ ^ membershipRevision ]
+
 { #category : 'testing' }
 CFPhysicsWorld >> includes: anElement [ ^ members includes: anElement ]
 
@@ -421,6 +425,7 @@ CFPhysicsWorld >> addElement: anElement [
 	body := self registerBodyFor: anElement.
 	bodyStates at: anElement put: body.
 	members add: anElement.
+	membershipRevision := membershipRevision + 1.
 	^ body
 ]
 
@@ -447,6 +452,7 @@ CFPhysicsWorld >> retireElement: anElement [
 	self invalidateTopology.
 	bodyStates removeKey: anElement.
 	members remove: anElement ifAbsent: [ ].
+	membershipRevision := membershipRevision + 1.
 	geometrySignaturesByBody removeKey: body ifAbsent: [ ].
 	anElement existingPhysics ifNotNil: [ :physics |
 		physics retireBodyFromWorld: self ].

@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsJointVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker', 'rail', 'lowerLimitMarker', 'upperLimitMarker', 'pivotMarker', 'referenceRay', 'lowerAngleMarker', 'upperAngleMarker', 'allowedAngleArc', 'motorCue' ],
+	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker', 'rail', 'lowerLimitMarker', 'upperLimitMarker', 'pivotMarker', 'referenceRay', 'lowerAngleMarker', 'upperAngleMarker', 'allowedAngleArc', 'motorCue', 'allowedAngleStartDegrees', 'allowedAngleEndDegrees' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -120,6 +120,8 @@ CFPhysicsJointVisual >> initializeVisual [
 	lowerAngleMarker := self newAngularLine.
 	upperAngleMarker := self newAngularLine.
 	allowedAngleArc := self newAllowedAngleArc.
+	allowedAngleStartDegrees := nil.
+	allowedAngleEndDegrees := nil.
 	motorCue := self newMotorCue.
 	hitTarget := self newHitTarget.
 	self isSelection ifTrue: [
@@ -265,6 +267,8 @@ CFPhysicsJointVisual >> addTo: aParentElement [
 
 { #category : 'private - updating' }
 CFPhysicsJointVisual >> updateLine: aLine from: firstPoint to: secondPoint [
+	(aLine fromAnchor position = firstPoint and: [ aLine toAnchor position = secondPoint ])
+		ifTrue: [ ^ aLine ].
 	aLine fromAnchor position: firstPoint.
 	aLine toAnchor position: secondPoint.
 	aLine requestLayout.
@@ -349,9 +353,12 @@ CFPhysicsJointVisual >> showAngleLimitFrom: firstPoint to: secondPoint on: aMark
 
 { #category : 'updating - joint decorations' }
 CFPhysicsJointVisual >> showAllowedAngleFromDegrees: startDegrees toDegrees: endDegrees around: pivotPoint [
-	allowedAngleArc geometry
-		startAngle: startDegrees;
-		endAngle: endDegrees.
+	(allowedAngleStartDegrees = startDegrees and: [ allowedAngleEndDegrees = endDegrees ]) ifFalse: [
+		allowedAngleArc geometry
+			startAngle: startDegrees;
+			endAngle: endDegrees.
+		allowedAngleStartDegrees := startDegrees.
+		allowedAngleEndDegrees := endDegrees ].
 	allowedAngleArc
 		relocate: pivotPoint - (28 @ 28);
 		visibility: BlVisibility visible

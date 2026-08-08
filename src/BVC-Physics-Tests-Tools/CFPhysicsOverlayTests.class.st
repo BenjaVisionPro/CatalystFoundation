@@ -357,6 +357,29 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAndWorldCoordinatesAgreeForPosit
 ]
 
 { #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsPresentationReconcilesOnlyWhenWorldMembershipChanges [
+	<gtExample>
+	| host world presentation addedBody addedElement |
+	host := self physicsHost.
+	world := host physics world.
+	presentation := CFPhysicsWorldPresentation
+		on: world
+		in: host space cfMotionCoordinator.
+	presentation presentAtAlpha: 0.5.
+	addedElement := BlElement new size: 30 @ 30; yourself.
+	host addChild: addedElement.
+	addedElement physics beDynamic.
+	addedBody := world bodyStateFor: addedElement.
+	presentation presentAtAlpha: 0.5.
+	self assert: (presentation isPresenting: addedBody).
+	addedElement removeFromParent.
+	presentation presentAtAlpha: 0.5.
+	self assert: (presentation isPresenting: addedBody) not.
+	presentation release.
+	^ host
+]
+
+{ #category : 'examples - physics overlay' }
 CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlySuccessfullyPresentedFrames [
 	<gtExample>
 	| host world presentation handler presentedCount |

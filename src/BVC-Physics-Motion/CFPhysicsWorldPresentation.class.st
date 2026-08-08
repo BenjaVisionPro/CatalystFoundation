@@ -6,7 +6,7 @@ My responsibility is to maintain per-body presentations, interpolate committed t
 Class {
 	#name : 'CFPhysicsWorldPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator' ],
+	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator', 'bodyStates', 'membershipRevision' ],
 	#category : 'BVC-Physics-Motion',
 	#package : 'BVC-Physics-Motion'
 }
@@ -31,6 +31,8 @@ CFPhysicsWorldPresentation class >> on: aWorld in: aCoordinator [
 CFPhysicsWorldPresentation >> initialize [
 	super initialize.
 	presentations := IdentityDictionary new.
+	bodyStates := #().
+	membershipRevision := -1.
 	fixedCoordinator := false
 ]
 
@@ -64,9 +66,8 @@ CFPhysicsWorldPresentation >> present [
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> presentWithoutTelemetry [
 	self prepare ifFalse: [ ^ self ].
-	world refreshExistingMembers.
 	self synchronisePresentations.
-	world bodyStatesInOrder do: [ :each |
+	bodyStates do: [ :each |
 		(self presentationFor: each)
 			translation: (self translationFor: each at: each position)
 			rotation: each rotation radiansToDegrees ]
@@ -99,7 +100,7 @@ CFPhysicsWorldPresentation >> telemetryDataAtAlpha: aNumber [
 		at: #physicsWorld put: world;
 		at: #kind put: #presentation;
 		at: #stepNumber put: world stepNumber;
-		at: #bodyCount put: world bodyStatesInOrder size;
+		at: #bodyCount put: bodyStates size;
 		at: #alpha put: aNumber;
 		yourself
 ]
@@ -108,10 +109,9 @@ CFPhysicsWorldPresentation >> telemetryDataAtAlpha: aNumber [
 CFPhysicsWorldPresentation >> tryPresentAtAlpha: aNumber [
 	| alpha |
 	self prepare ifFalse: [ ^ false ].
-	world refreshExistingMembers.
 	self synchronisePresentations.
 	alpha := (aNumber max: 0.0) min: 1.0.
-	world bodyStatesInOrder do: [ :each |
+	bodyStates do: [ :each |
 		| presentedPosition presentedRotation |
 		presentedPosition := each previousPosition + ((each position - each previousPosition) * alpha).
 		presentedRotation := each previousRotation + ((each rotation - each previousRotation) * alpha).
@@ -155,7 +155,8 @@ CFPhysicsWorldPresentation >> resolvedCoordinator [
 
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> synchronisePresentations [
-	| bodyStates currentBodies transformPresentation |
+	| currentBodies transformPresentation |
+	membershipRevision = world membershipRevision ifTrue: [ ^ self ].
 	bodyStates := world bodyStatesInOrder.
 	currentBodies := IdentitySet new.
 	currentBodies addAll: bodyStates.
@@ -168,7 +169,8 @@ CFPhysicsWorldPresentation >> synchronisePresentations [
 			transformPresentation := CFMotionTransformPresentation
 				on: each element
 				using: (coordinator transformChannelFor: each element).
-			presentations at: each put: transformPresentation ] ]
+			presentations at: each put: transformPresentation ] ].
+	membershipRevision := world membershipRevision
 ]
 
 
@@ -193,7 +195,9 @@ CFPhysicsWorldPresentation >> release [
 { #category : 'private - controlling' }
 CFPhysicsWorldPresentation >> releasePresentations [
 	presentations valuesDo: [ :each | each release ].
-	presentations removeAll
+	presentations removeAll.
+	bodyStates := #().
+	membershipRevision := -1
 ]
 
 { #category : 'private - initialization' }
