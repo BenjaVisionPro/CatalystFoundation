@@ -2039,47 +2039,39 @@ CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 	^ host
 ]
 
-{ #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesUseCompactBaseSize [
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsSpringSelectionUsesCompactExplicitHandles [
 	<gtExample>
-	| host world first second joint overlay context visual |
-	host := self physicsHost.
-	world := host physics world.
-	first := world bodyStatesInOrder first.
-	second := world bodyStatesInOrder second.
-	joint := CFPhysicsDistanceJoint
-		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
-		andAnchor: (CFPhysicsLocalAnchor on: second at: 0 @ 0).
-	world addJoint: joint.
-	overlay := host showPhysicsOverlay.
-	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
-	visual := CFPhysicsJointVisual selectionOn: joint context: context.
-	visual addTo: overlay root.
-	visual update.
-	host space pulse.
+	| overlay visual |
+	overlay := self overlayWithSelectedSpringHitTarget.
+	visual := overlay selectionVisual.
+	self assert: visual class equals: CFPhysicsSpringVisual.
+	self assert: visual fromHead isNil.
+	self assert: visual toHead isNil.
 	self assert: (visual fromSelectionHandle extent x closeTo: 4.0).
 	self assert: (visual toSelectionHandle extent x closeTo: 4.0).
-	self assert: visual hasFromHead not.
-	self assert: visual hasToHead not.
-	visual release.
 	^ overlay
 ]
 
-{ #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowCanvassableScale [
+{ #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsSpringSelectionHandlesFollowCanvassableScale [
 	<gtExample>
-	| host world first second joint overlay context visual |
+	| host world first second spring overlay context visual |
 	host := self physicsCanvassableHost.
 	world := host physics world.
 	first := world bodyStatesInOrder first.
 	second := world bodyStatesInOrder second.
-	joint := CFPhysicsDistanceJoint
+	spring := CFPhysicsDistanceJoint
 		betweenAnchor: (CFPhysicsLocalAnchor on: first at: 0 @ 0)
-		andAnchor: (CFPhysicsLocalAnchor on: second at: 0 @ 0).
-	world addJoint: joint.
+		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
+	spring
+		springEnabled: true;
+		hertz: 3.0;
+		dampingRatio: 1.0.
+	world addJoint: spring.
 	overlay := host showPhysicsOverlay.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
-	visual := CFPhysicsJointVisual selectionOn: joint context: context.
+	visual := CFPhysicsSpringVisual selectionOn: spring context: context.
 	visual addTo: overlay root.
 	host childrenScaleFactor: 0.5.
 	host space pulse.
@@ -2096,5 +2088,4 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionEndpointHandlesFollowCanvassab
 	visual release.
 	^ overlay
 ]
-
 

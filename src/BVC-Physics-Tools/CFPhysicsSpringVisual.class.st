@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsSpringVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker', 'hitTarget' ],
+	#instVars : [ 'spring', 'context', 'presentationRole', 'restLengthMarker', 'hitTarget', 'fromSelectionHandle', 'toSelectionHandle' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -39,6 +39,12 @@ CFPhysicsSpringVisual >> context: aContext [ context := aContext ]
 { #category : 'accessing' }
 CFPhysicsSpringVisual >> restLengthMarker [ ^ restLengthMarker ]
 
+{ #category : 'accessing' }
+CFPhysicsSpringVisual >> fromSelectionHandle [ ^ fromSelectionHandle ]
+
+{ #category : 'accessing' }
+CFPhysicsSpringVisual >> toSelectionHandle [ ^ toSelectionHandle ]
+
 { #category : 'testing' }
 CFPhysicsSpringVisual >> hitTarget [ ^ hitTarget ]
 
@@ -74,9 +80,14 @@ CFPhysicsSpringVisual >> initializeVisual [
 		border: (BlBorder paint: (Color darkGray alpha: 0.75) width: 1);
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents.
-	self
-		fromHead: self newEndpointMarker;
-		toHead: self newEndpointMarker.
+	self isSelection
+		ifTrue: [
+			fromSelectionHandle := self newSelectionHandle.
+			toSelectionHandle := self newSelectionHandle ]
+		ifFalse: [
+			self
+				fromHead: self newEndpointMarker;
+				toHead: self newEndpointMarker ].
 	restLengthMarker := self newRestLengthMarker.
 	hitTarget := self newHitTarget.
 	self updateBorder.
@@ -100,6 +111,18 @@ CFPhysicsSpringVisual >> newEndpointMarker [
 		scale: 6.0;
 		background: (Color darkGray alpha: 0.9);
 		border: (BlBorder paint: (Color darkGray alpha: 0.9) width: 1);
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsSpringVisual >> newSelectionHandle [
+	^ BlElement new
+		geometry: BlCircleGeometry new;
+		background: (Color red alpha: 0.9);
+		border: (BlBorder paint: (Color red alpha: 0.95) width: 1);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		zIndex: 3;
 		yourself
 ]
 
@@ -128,6 +151,8 @@ CFPhysicsSpringVisual >> addTo: aParentElement [
 		addChild: self;
 		addChild: restLengthMarker;
 		addChild: hitTarget.
+	fromSelectionHandle ifNotNil: [ aParentElement addChild: fromSelectionHandle ].
+	toSelectionHandle ifNotNil: [ aParentElement addChild: toSelectionHandle ].
 	^ self
 ]
 
@@ -151,6 +176,7 @@ CFPhysicsSpringVisual >> update [
 	secondPoint := context
 		overlayPointFromWorld: points second
 		attachedTo: spring endpointPair bodyB.
+	self updateSelectionHandlesFrom: firstPoint to: secondPoint worldPoints: points.
 	self updateLine: self from: firstPoint to: secondPoint.
 	self updateLine: hitTarget from: firstPoint to: secondPoint.
 	displacement := points second - points first.
@@ -165,6 +191,24 @@ CFPhysicsSpringVisual >> update [
 	^ self
 ]
 
+{ #category : 'private - updating' }
+CFPhysicsSpringVisual >> updateSelectionHandle: aHandle at: aPoint worldPoint: aWorldPoint [
+	| diameter extent origin |
+	diameter := 4.0 * (context overlayScaleAtWorldPoint: aWorldPoint).
+	extent := diameter asPoint.
+	(aHandle extent closeTo: extent) ifFalse: [ aHandle size: extent ].
+	origin := aPoint - (extent / 2.0).
+	aHandle position = origin ifFalse: [ aHandle relocate: origin ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsSpringVisual >> updateSelectionHandlesFrom: firstPoint to: secondPoint worldPoints: worldPoints [
+	self isSelection ifFalse: [ ^ self ].
+	self
+		updateSelectionHandle: fromSelectionHandle at: firstPoint worldPoint: worldPoints first;
+		updateSelectionHandle: toSelectionHandle at: secondPoint worldPoint: worldPoints second
+]
+
 { #category : 'testing' }
 CFPhysicsSpringVisual >> includesEventTarget: anElement [
 	^ anElement == self or: [ anElement == hitTarget ]
@@ -175,6 +219,10 @@ CFPhysicsSpringVisual >> remove [
 	self hasParent ifTrue: [ self removeFromParent ].
 	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
 	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
+	fromSelectionHandle ifNotNil: [
+		fromSelectionHandle hasParent ifTrue: [ fromSelectionHandle removeFromParent ] ].
+	toSelectionHandle ifNotNil: [
+		toSelectionHandle hasParent ifTrue: [ toSelectionHandle removeFromParent ] ].
 	^ self
 ]
 
