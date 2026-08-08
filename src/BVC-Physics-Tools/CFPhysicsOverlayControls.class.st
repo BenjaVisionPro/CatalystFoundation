@@ -27,7 +27,6 @@ CFPhysicsOverlayControls >> constraintsEnabled [ ^ constraintsToggle isActivated
 { #category : 'testing' }
 CFPhysicsOverlayControls >> contactsEnabled [ ^ contactsToggle isActivated ]
 
-"Compatibility for internal callers/tests while the public overlay UI exposes Constraints."
 { #category : 'testing' }
 CFPhysicsOverlayControls >> springsEnabled [ ^ self constraintsEnabled ]
 
