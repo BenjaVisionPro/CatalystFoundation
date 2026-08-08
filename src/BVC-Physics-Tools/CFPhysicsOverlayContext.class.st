@@ -49,7 +49,9 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint [
 	The overlay only converts the resulting displayed global point into its own
 	local coordinate system."
 	^ overlay root globalPointToLocal:
-		(world blocGlobalPointForWorldPoint: aPoint)
+		(CFPhysicsBlocPresentationCoordinates
+			globalPointForWorldPoint: aPoint
+			inWorld: world)
 ]
 
 { #category : 'geometry' }
@@ -57,6 +59,9 @@ CFPhysicsOverlayContext >> overlayPointFromWorld: aPoint attachedTo: aBody [
 	"Body presentation, Motion interpolation and containment coordinate semantics
 	are resolved by the Physics-Bloc seam, not by diagnostic tooling."
 	^ overlay root globalPointToLocal:
-		(world blocGlobalPointForWorldPoint: aPoint attachedTo: aBody)
+		(CFPhysicsBlocPresentationCoordinates
+			globalPointForWorldPoint: aPoint
+			attachedTo: aBody
+			inWorld: world)
 ]
 
