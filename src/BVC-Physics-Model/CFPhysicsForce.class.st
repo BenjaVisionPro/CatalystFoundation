@@ -86,6 +86,16 @@ CFPhysicsForce >> isActive [
 	^ world notNil
 ]
 
+{ #category : 'waking' }
+CFPhysicsForce >> affectedBodies [
+	^ #()
+]
+
+{ #category : 'waking' }
+CFPhysicsForce >> configurationChanged [
+	world ifNotNil: [ world wakeBodies: self affectedBodies ]
+]
+
 { #category : 'testing' }
 CFPhysicsForce >> includesBody: aBody [
 	^ false

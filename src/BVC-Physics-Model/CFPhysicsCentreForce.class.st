@@ -25,7 +25,9 @@ CFPhysicsCentreForce >> centre [
 
 { #category : 'accessing' }
 CFPhysicsCentreForce >> centre: aPoint [
-	centre := aPoint
+	centre = aPoint ifTrue: [ ^ self ].
+	centre := aPoint.
+	self configurationChanged
 ]
 
 { #category : 'accessing' }
@@ -35,8 +37,12 @@ CFPhysicsCentreForce >> stiffness [
 
 { #category : 'accessing' }
 CFPhysicsCentreForce >> stiffness: aNumber [
+	| newStiffness |
 	"Spring stiffness in newtons per metre."
-	stiffness := aNumber asFloat max: 0.0
+	newStiffness := aNumber asFloat max: 0.0.
+	stiffness = newStiffness ifTrue: [ ^ self ].
+	stiffness := newStiffness.
+	self configurationChanged
 ]
 
 { #category : 'stepping' }

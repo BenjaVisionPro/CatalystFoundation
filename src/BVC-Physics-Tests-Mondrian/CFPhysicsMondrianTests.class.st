@@ -523,3 +523,49 @@ CFPhysicsMondrianTests >> testMondrianForceDirectedGentlyCentresDisconnectedComp
 	behaviour stop.
 	^ mondrian
 ]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianForceDirectedParameterChangesWakeSleepingBodies [
+	<gtExample>
+	| mondrian world behaviour nodes bodies |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three).
+	mondrian edges connectAssociations: { #one -> #two. #two -> #three }.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	world containment disable.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	nodes := mondrian nodeElements.
+	bodies := nodes collect: [ :element | element physics body ].
+	bodies do: #sleepLocally.
+	behaviour repulsionAtOneMetre: behaviour repulsionAtOneMetre + 1.0.
+	behaviour step: nil.
+	self assert: (bodies allSatisfy: #isAwake).
+	bodies do: #sleepLocally.
+	behaviour orientationStiffness: behaviour orientationStiffness + 1.0.
+	behaviour step: nil.
+	self assert: (bodies allSatisfy: #isAwake).
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianForceDirectedReusesRepulsionDistanceResponse [
+	<gtExample>
+	| mondrian world behaviour response |
+	mondrian := GtMondrian new.
+	mondrian nodes with: #(one two three).
+	mondrian edges connectAssociations: { #one -> #two }.
+	world := mondrian physics beWorld.
+	world gravity: 0 @ 0.
+	behaviour := mondrian physics forceDirected.
+	world step.
+	response := behaviour repulsionForce distanceResponse.
+	behaviour repulsionAtOneMetre: behaviour repulsionAtOneMetre + 1.0.
+	behaviour step: nil.
+	self assert: behaviour repulsionForce distanceResponse == response.
+	self assert: behaviour repulsionForce force equals: behaviour repulsionAtOneMetre.
+	self assert: behaviour repulsionForce maximumDistance equals: behaviour maximumRepulsionDistance.
+	^ mondrian
+]
+

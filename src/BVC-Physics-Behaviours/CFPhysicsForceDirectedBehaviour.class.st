@@ -243,13 +243,14 @@ CFPhysicsForceDirectedBehaviour >> ensureSpringFor: anEdge [
 { #category : 'private - reconciliation' }
 CFPhysicsForceDirectedBehaviour >> ensureRepulsionForceFor: currentBodies [
 	(repulsionForce isNil or: [ repulsionForce isActive not ]) ifTrue: [
-		repulsionForce := self world addForce: (CFPhysicsManyBodyRepulsionForce new wakesBodies: false) ].
+		repulsionForce := self world addForce: (CFPhysicsManyBodyRepulsionForce new
+			wakesBodies: false;
+			distanceResponse: CFPhysicsInverseSquareResponse new;
+			yourself) ].
 	repulsionForce
 		bodies: currentBodies;
-		distanceResponse: (CFPhysicsInverseSquareResponse new
-			force: repulsionAtOneMetre;
-			maximumDistance: maximumRepulsionDistance;
-			yourself)
+		force: repulsionAtOneMetre value;
+		maximumDistance: maximumRepulsionDistance value
 ]
 
 { #category : 'private - reconciliation' }

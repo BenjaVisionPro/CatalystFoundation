@@ -24,7 +24,9 @@ CFPhysicsManyBodyRepulsionForce >> distanceResponse [
 
 { #category : 'configuration' }
 CFPhysicsManyBodyRepulsionForce >> distanceResponse: aDistanceResponse [
-	distanceResponse := aDistanceResponse
+	distanceResponse == aDistanceResponse ifTrue: [ ^ self ].
+	distanceResponse := aDistanceResponse.
+	self configurationChanged
 ]
 
 { #category : 'configuration' }
@@ -34,7 +36,11 @@ CFPhysicsManyBodyRepulsionForce >> force [
 
 { #category : 'configuration' }
 CFPhysicsManyBodyRepulsionForce >> force: aNumber [
-	distanceResponse force: aNumber
+	| oldForce newForce |
+	oldForce := distanceResponse force value asFloat.
+	distanceResponse force: aNumber.
+	newForce := distanceResponse force value asFloat.
+	oldForce = newForce ifFalse: [ self configurationChanged ]
 ]
 
 { #category : 'configuration' }
@@ -44,7 +50,11 @@ CFPhysicsManyBodyRepulsionForce >> maximumDistance [
 
 { #category : 'configuration' }
 CFPhysicsManyBodyRepulsionForce >> maximumDistance: aNumber [
-	distanceResponse maximumDistance: aNumber
+	| oldMaximum newMaximum |
+	oldMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	distanceResponse maximumDistance: aNumber.
+	newMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	oldMaximum = newMaximum ifFalse: [ self configurationChanged ]
 ]
 
 { #category : 'stepping' }

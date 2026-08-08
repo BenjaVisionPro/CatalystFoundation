@@ -45,7 +45,11 @@ CFPhysicsPairForce >> endpointPair [
 
 { #category : 'accessing' }
 CFPhysicsPairForce >> endpointPair: anEndpointPair [
-	endpointPair := anEndpointPair
+	| oldBodies |
+	endpointPair == anEndpointPair ifTrue: [ ^ self ].
+	oldBodies := self affectedBodies.
+	endpointPair := anEndpointPair.
+	world ifNotNil: [ world wakeBodies: oldBodies , self affectedBodies ]
 ]
 
 { #category : 'accessing' }
@@ -75,7 +79,9 @@ CFPhysicsPairForce >> distanceResponse [
 
 { #category : 'configuration' }
 CFPhysicsPairForce >> distanceResponse: aDistanceResponse [
-	distanceResponse := aDistanceResponse
+	distanceResponse == aDistanceResponse ifTrue: [ ^ self ].
+	distanceResponse := aDistanceResponse.
+	self configurationChanged
 ]
 
 { #category : 'configuration' }
@@ -85,7 +91,11 @@ CFPhysicsPairForce >> force [
 
 { #category : 'configuration' }
 CFPhysicsPairForce >> force: aNumber [
-	distanceResponse force: aNumber
+	| oldForce newForce |
+	oldForce := distanceResponse force value asFloat.
+	distanceResponse force: aNumber.
+	newForce := distanceResponse force value asFloat.
+	oldForce = newForce ifFalse: [ self configurationChanged ]
 ]
 
 { #category : 'configuration' }
@@ -95,7 +105,17 @@ CFPhysicsPairForce >> maximumDistance [
 
 { #category : 'configuration' }
 CFPhysicsPairForce >> maximumDistance: aNumber [
-	distanceResponse maximumDistance: aNumber
+	| oldMaximum newMaximum |
+	oldMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	distanceResponse maximumDistance: aNumber.
+	newMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	oldMaximum = newMaximum ifFalse: [ self configurationChanged ]
+]
+
+{ #category : 'waking' }
+CFPhysicsPairForce >> affectedBodies [
+	endpointPair ifNil: [ ^ #() ].
+	^ { self bodyA. self bodyB } reject: #isNil
 ]
 
 { #category : 'testing' }

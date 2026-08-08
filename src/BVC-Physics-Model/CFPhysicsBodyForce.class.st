@@ -24,13 +24,22 @@ CFPhysicsBodyForce >> bodies [
 
 { #category : 'accessing' }
 CFPhysicsBodyForce >> bodies: aCollection [
-	| newBodies |
+	| newBodies oldBodies |
 	newBodies := aCollection asArray.
 	world ifNotNil: [
 		newBodies do: [ :body |
 			body world == world ifFalse: [
 				self error: 'Force bodies must belong to the Physics world' ] ] ].
-	bodies := newBodies
+	((bodies size = newBodies size) and: [
+		bodies allSatisfy: [ :body | newBodies identityIncludes: body ] ]) ifTrue: [ ^ self ].
+	oldBodies := bodies.
+	bodies := newBodies.
+	world ifNotNil: [ world wakeBodies: oldBodies , newBodies ]
+]
+
+{ #category : 'waking' }
+CFPhysicsBodyForce >> affectedBodies [
+	^ bodies
 ]
 
 { #category : 'testing' }

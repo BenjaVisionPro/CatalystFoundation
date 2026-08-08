@@ -51,7 +51,11 @@ CFPhysicsOrientationRestoringForce >> targetRotation [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> targetRotation: anAngle [
-	targetRotation := anAngle asFloat.
+	| newTargetRotation |
+	newTargetRotation := anAngle asFloat.
+	targetRotation = newTargetRotation ifTrue: [ ^ self ].
+	targetRotation := newTargetRotation.
+	self configurationChanged.
 	^ self
 ]
 
@@ -62,7 +66,11 @@ CFPhysicsOrientationRestoringForce >> stiffness [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> stiffness: aNumber [
-	stiffness := aNumber asFloat max: 0.0.
+	| newStiffness |
+	newStiffness := aNumber asFloat max: 0.0.
+	stiffness = newStiffness ifTrue: [ ^ self ].
+	stiffness := newStiffness.
+	self configurationChanged.
 	^ self
 ]
 
@@ -73,7 +81,11 @@ CFPhysicsOrientationRestoringForce >> damping [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> damping: aNumber [
-	damping := aNumber asFloat max: 0.0.
+	| newDamping |
+	newDamping := aNumber asFloat max: 0.0.
+	damping = newDamping ifTrue: [ ^ self ].
+	damping := newDamping.
+	self configurationChanged.
 	^ self
 ]
 
@@ -84,7 +96,11 @@ CFPhysicsOrientationRestoringForce >> maximumAngularAcceleration [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> maximumAngularAcceleration: aNumber [
-	maximumAngularAcceleration := aNumber asFloat max: 0.0.
+	| newMaximum |
+	newMaximum := aNumber asFloat max: 0.0.
+	maximumAngularAcceleration = newMaximum ifTrue: [ ^ self ].
+	maximumAngularAcceleration := newMaximum.
+	self configurationChanged.
 	^ self
 ]
 
@@ -95,7 +111,11 @@ CFPhysicsOrientationRestoringForce >> angularResponseVelocityScale [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> angularResponseVelocityScale: aNumber [
-	angularResponseVelocityScale := aNumber asFloat max: Float machineEpsilon.
+	| newScale |
+	newScale := aNumber asFloat max: Float machineEpsilon.
+	angularResponseVelocityScale = newScale ifTrue: [ ^ self ].
+	angularResponseVelocityScale := newScale.
+	self configurationChanged.
 	^ self
 ]
 
@@ -106,7 +126,11 @@ CFPhysicsOrientationRestoringForce >> angleTolerance [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> angleTolerance: aNumber [
-	angleTolerance := aNumber asFloat max: 0.0.
+	| newTolerance |
+	newTolerance := aNumber asFloat max: 0.0.
+	angleTolerance = newTolerance ifTrue: [ ^ self ].
+	angleTolerance := newTolerance.
+	self configurationChanged.
 	^ self
 ]
 
@@ -117,8 +141,17 @@ CFPhysicsOrientationRestoringForce >> angularVelocityTolerance [
 
 { #category : 'configuration' }
 CFPhysicsOrientationRestoringForce >> angularVelocityTolerance: aNumber [
-	angularVelocityTolerance := aNumber asFloat max: 0.0.
+	| newTolerance |
+	newTolerance := aNumber asFloat max: 0.0.
+	angularVelocityTolerance = newTolerance ifTrue: [ ^ self ].
+	angularVelocityTolerance := newTolerance.
+	self configurationChanged.
 	^ self
+]
+
+{ #category : 'waking' }
+CFPhysicsOrientationRestoringForce >> affectedBodies [
+	^ body ifNil: [ #() ] ifNotNil: [ { body } ]
 ]
 
 { #category : 'testing' }

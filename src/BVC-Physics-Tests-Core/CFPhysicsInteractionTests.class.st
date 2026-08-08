@@ -595,3 +595,92 @@ CFPhysicsInteractionTests >> testNearestGeometryEndpointsCreateWorldOwnedRelatio
 	self assert: world repulsions equals: { repulsion }.
 	^ { spring. attraction. repulsion }
 ]
+
+{ #category : 'tests - force sleeping' }
+CFPhysicsInteractionTests >> testChangingActiveBodyForceConfigurationWakesAffectedBodies [
+	<gtExample>
+	| owner first second world force firstBody secondBody |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world containment disable.
+	world owner physics makeChildrenDynamic.
+	firstBody := first physics body.
+	secondBody := second physics body.
+	force := world addForce: (CFPhysicsCentreForce new
+		wakesBodies: false;
+		bodies: { firstBody. secondBody };
+		centre: 200 @ 150;
+		stiffness: 1.0;
+		yourself).
+	firstBody sleepLocally.
+	secondBody sleepLocally.
+	self assert: firstBody isAwake not.
+	self assert: secondBody isAwake not.
+	force stiffness: 2.0.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	^ world
+]
+
+{ #category : 'tests - force sleeping' }
+CFPhysicsInteractionTests >> testUnchangedActiveForceConfigurationDoesNotWakeBodies [
+	<gtExample>
+	| owner first second world force firstBody secondBody |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world containment disable.
+	world owner physics makeChildrenDynamic.
+	firstBody := first physics body.
+	secondBody := second physics body.
+	force := world addForce: (CFPhysicsCentreForce new
+		wakesBodies: false;
+		bodies: { firstBody. secondBody };
+		centre: 200 @ 150;
+		stiffness: 2.0;
+		yourself).
+	firstBody sleepLocally.
+	secondBody sleepLocally.
+	force stiffness: 2.0.
+	self assert: firstBody isAwake not.
+	self assert: secondBody isAwake not.
+	^ world
+]
+
+{ #category : 'tests - force sleeping' }
+CFPhysicsInteractionTests >> testChangingForceMembershipWakesOldAndNewBodies [
+	<gtExample>
+	| owner first second third world force firstBody secondBody thirdBody |
+	owner := BlElement new size: 400 @ 300; yourself.
+	first := BlElement new size: 20 @ 20; yourself.
+	second := BlElement new size: 20 @ 20; yourself.
+	third := BlElement new size: 20 @ 20; yourself.
+	owner addChildren: { first. second. third }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world containment disable.
+	world owner physics makeChildrenDynamic.
+	firstBody := first physics body.
+	secondBody := second physics body.
+	thirdBody := third physics body.
+	force := world addForce: (CFPhysicsCentreForce new
+		wakesBodies: false;
+		bodies: { firstBody. secondBody };
+		yourself).
+	firstBody sleepLocally.
+	secondBody sleepLocally.
+	thirdBody sleepLocally.
+	force bodies: { secondBody. thirdBody }.
+	self assert: firstBody isAwake.
+	self assert: secondBody isAwake.
+	self assert: thirdBody isAwake.
+	^ world
+]
+

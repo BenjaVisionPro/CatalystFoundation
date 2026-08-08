@@ -1377,13 +1377,26 @@ CFPhysicsWorld >> wakeJointsUsingBody: aBodyState [
 
 { #category : 'sleeping' }
 CFPhysicsWorld >> wakeBody: aBody [
-	| island |
+	self wakeBodies: { aBody }
+]
+
+{ #category : 'sleeping' }
+CFPhysicsWorld >> wakeBodies: aCollection [
+	| islands |
+	aCollection ifEmpty: [ ^ self ].
+	aCollection do: [ :body |
+		body world == self ifFalse: [
+			self error: 'Can only wake bodies belonging to this Physics world' ] ].
 	self invalidateTopology.
 	persistentIslandGraph mergeIslands.
-	island := persistentIslandGraph islandForBody: aBody.
-	island
-		ifNil: [ aBody wakeLocally ]
-		ifNotNil: [ island bodies do: #wakeLocally ]
+	islands := IdentitySet new.
+	aCollection do: [ :body |
+		| island |
+		island := persistentIslandGraph islandForBody: body.
+		island
+			ifNil: [ body wakeLocally ]
+			ifNotNil: [ islands add: island ] ].
+	islands do: [ :island | island bodies do: #wakeLocally ]
 ]
 
 { #category : 'sleeping' }

@@ -25,7 +25,9 @@ CFPhysicsVortexForce >> centre [
 
 { #category : 'accessing' }
 CFPhysicsVortexForce >> centre: aPoint [
-	centre := aPoint
+	centre = aPoint ifTrue: [ ^ self ].
+	centre := aPoint.
+	self configurationChanged
 ]
 
 { #category : 'accessing' }
@@ -35,7 +37,9 @@ CFPhysicsVortexForce >> distanceResponse [
 
 { #category : 'accessing' }
 CFPhysicsVortexForce >> distanceResponse: aDistanceResponse [
-	distanceResponse := aDistanceResponse
+	distanceResponse == aDistanceResponse ifTrue: [ ^ self ].
+	distanceResponse := aDistanceResponse.
+	self configurationChanged
 ]
 
 { #category : 'accessing' }
@@ -45,7 +49,11 @@ CFPhysicsVortexForce >> force [
 
 { #category : 'accessing' }
 CFPhysicsVortexForce >> force: aNumber [
-	distanceResponse force: aNumber
+	| oldForce newForce |
+	oldForce := distanceResponse force value asFloat.
+	distanceResponse force: aNumber.
+	newForce := distanceResponse force value asFloat.
+	oldForce = newForce ifFalse: [ self configurationChanged ]
 ]
 
 { #category : 'accessing' }
@@ -55,7 +63,11 @@ CFPhysicsVortexForce >> maximumDistance [
 
 { #category : 'accessing' }
 CFPhysicsVortexForce >> maximumDistance: aNumber [
-	distanceResponse maximumDistance: aNumber
+	| oldMaximum newMaximum |
+	oldMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	distanceResponse maximumDistance: aNumber.
+	newMaximum := distanceResponse maximumDistance ifNotNil: [ :value | value value asFloat ].
+	oldMaximum = newMaximum ifFalse: [ self configurationChanged ]
 ]
 
 { #category : 'stepping' }

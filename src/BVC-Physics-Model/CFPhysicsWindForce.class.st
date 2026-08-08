@@ -22,7 +22,9 @@ CFPhysicsWindForce >> force [
 
 { #category : 'accessing' }
 CFPhysicsWindForce >> force: aPoint [
-	force := aPoint
+	force = aPoint ifTrue: [ ^ self ].
+	force := aPoint.
+	self configurationChanged
 ]
 
 { #category : 'stepping' }
