@@ -32,8 +32,7 @@ CFPhysicsBehaviourNumberControl >> initializeControl [
 	value := description read: behaviour.
 	self establishRangeFor: value.
 	track := BlElement new
-		hExact: 98;
-		vExact: 12;
+		size: 98 @ 12;
 		layout: BlFrameLayout new;
 		background: (Color black alpha: 0.08);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
