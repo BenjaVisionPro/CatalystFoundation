@@ -73,7 +73,7 @@ CFPhysicsBehaviourInspector >> rebuild [
 	grouped := Dictionary new.
 	behaviour configurationDescriptions do: [ :description |
 		(grouped at: description group ifAbsentPut: [ OrderedCollection new ]) add: description ].
-	groupNames := grouped keys sorted: [ :first :second |
+	groupNames := grouped keys asSortedCollection: [ :first :second |
 		((grouped at: first) first priority) < ((grouped at: second) first priority) ].
 	groupNames do: [ :groupName |
 		self addGroup: groupName descriptions: (grouped at: groupName) ].
