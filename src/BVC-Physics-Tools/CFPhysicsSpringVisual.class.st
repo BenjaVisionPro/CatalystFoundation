@@ -80,14 +80,9 @@ CFPhysicsSpringVisual >> initializeVisual [
 		border: (BlBorder paint: (Color darkGray alpha: 0.75) width: 1);
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents.
-	self isSelection
-		ifTrue: [
-			fromSelectionHandle := self newSelectionHandle.
-			toSelectionHandle := self newSelectionHandle ]
-		ifFalse: [
-			self
-				fromHead: self newEndpointMarker;
-				toHead: self newEndpointMarker ].
+	self isSelection ifTrue: [
+		fromSelectionHandle := self newSelectionHandle.
+		toSelectionHandle := self newSelectionHandle ].
 	restLengthMarker := self newRestLengthMarker.
 	hitTarget := self newHitTarget.
 	self updateBorder.
@@ -102,15 +97,6 @@ CFPhysicsSpringVisual >> newHitTarget [
 		border: (BlBorder paint: Color transparent width: 12);
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventChildrenMouseEvents;
-		yourself
-]
-
-{ #category : 'private - building' }
-CFPhysicsSpringVisual >> newEndpointMarker [
-	^ BlArrowheadCircle new
-		scale: 6.0;
-		background: (Color darkGray alpha: 0.9);
-		border: (BlBorder paint: (Color darkGray alpha: 0.9) width: 1);
 		yourself
 ]
 

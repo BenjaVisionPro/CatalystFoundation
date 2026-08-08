@@ -2040,6 +2040,17 @@ CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 ]
 
 { #category : 'examples - physics object selection' }
+CFPhysicsOverlayTests >> testPhysicsSpringDiagnosticsDoNotDrawEndpointMarkers [
+	<gtExample>
+	| overlay visual |
+	overlay := self overlayWithSelectedSpringHitTarget.
+	visual := overlay springOverlay visuals first.
+	self assert: visual fromHead isNil.
+	self assert: visual toHead isNil.
+	^ overlay
+]
+
+{ #category : 'examples - physics object selection' }
 CFPhysicsOverlayTests >> testPhysicsSpringSelectionUsesCompactExplicitHandles [
 	<gtExample>
 	| overlay visual |
