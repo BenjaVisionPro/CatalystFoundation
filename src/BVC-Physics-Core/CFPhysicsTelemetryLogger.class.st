@@ -6,7 +6,7 @@ My responsibility is to retain accepted signals in a bounded ring buffer, defer 
 Class {
 	#name : 'CFPhysicsTelemetryLogger',
 	#superclass : 'TelemetryLogger',
-	#instVars : [ 'world', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'detachedSignals' ],
+	#instVars : [ 'world', 'lastAnnouncementMilliseconds', 'announcementIntervalMilliseconds', 'detachedSignals', 'committedSolveTicket' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -27,7 +27,8 @@ CFPhysicsTelemetryLogger >> initialize [
 	self telemetryClass: ProcessTelemetry.
 	lastAnnouncementMilliseconds := 0.
 	announcementIntervalMilliseconds := 250.
-	detachedSignals := SharedQueue new
+	detachedSignals := SharedQueue new.
+	committedSolveTicket := nil
 ]
 
 { #category : 'accessing' }
@@ -68,7 +69,7 @@ CFPhysicsTelemetryLogger >> world: aWorld [ world := aWorld ]
 
 { #category : 'accessing' }
 CFPhysicsTelemetryLogger >> nextPut: aSignal [
-	| physicsData |
+	| physicsData solveTicket publishNow |
 	aSignal class == TelemetrySignal ifFalse: [ ^ self ].
 	physicsData := aSignal data
 		at: #physicsFrame
@@ -76,10 +77,16 @@ CFPhysicsTelemetryLogger >> nextPut: aSignal [
 	(physicsData notNil and: [ (physicsData at: #physicsWorld ifAbsent: [ nil ]) == world ])
 		ifFalse: [ ^ self ].
 	physicsData at: #telemetryRecordedAt put: DateAndTime now.
-	(physicsData at: #solveTicket ifAbsent: [ nil ]) ifNotNil: [
-		detachedSignals nextPut: aSignal.
-		^ self ].
-	self publish: aSignal
+	solveTicket := physicsData at: #solveTicket ifAbsent: [ nil ].
+	solveTicket ifNil: [ ^ self publish: aSignal ].
+	publishNow := false.
+	mutex critical: [
+		committedSolveTicket = solveTicket
+			ifTrue: [
+				committedSolveTicket := nil.
+				publishNow := true ]
+			ifFalse: [ detachedSignals nextPut: aSignal ] ].
+	publishNow ifTrue: [ self publish: aSignal ]
 ]
 
 { #category : 'private - recording' }
@@ -91,19 +98,32 @@ CFPhysicsTelemetryLogger >> publish: aSignal [
 { #category : 'detached stepping' }
 CFPhysicsTelemetryLogger >> commitSolveTicket: aSolveTicket [
 	| signal matchingSignal |
-	[ (signal := detachedSignals nextOrNil) isNotNil ] whileTrue: [
-		((signal data at: #physicsFrame) at: #solveTicket) = aSolveTicket
-			ifTrue: [ matchingSignal := signal ] ].
+	mutex critical: [
+		[ (signal := detachedSignals nextOrNil) isNotNil ] whileTrue: [
+			((signal data at: #physicsFrame) at: #solveTicket) = aSolveTicket
+				ifTrue: [ matchingSignal := signal ] ].
+		matchingSignal
+			ifNil: [ committedSolveTicket := aSolveTicket ]
+			ifNotNil: [ committedSolveTicket := nil ] ].
 	matchingSignal ifNotNil: [ self publish: matchingSignal ]
 ]
 
 { #category : 'detached stepping' }
 CFPhysicsTelemetryLogger >> rejectSolveTicket: aSolveTicket [
-	self discardDetachedSignals
+	mutex critical: [
+		committedSolveTicket = aSolveTicket ifTrue: [ committedSolveTicket := nil ].
+		self discardDetachedSignalsUnsafe ]
 ]
 
 { #category : 'detached stepping' }
 CFPhysicsTelemetryLogger >> discardDetachedSignals [
+	mutex critical: [
+		committedSolveTicket := nil.
+		self discardDetachedSignalsUnsafe ]
+]
+
+{ #category : 'private - detached stepping' }
+CFPhysicsTelemetryLogger >> discardDetachedSignalsUnsafe [
 	[ detachedSignals nextOrNil isNotNil ] whileTrue
 ]
 
