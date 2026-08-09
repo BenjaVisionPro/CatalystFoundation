@@ -2207,3 +2207,64 @@ CFPhysicsOverlayTests >> testContactVisualRevisionAdvancesWhenCommittedDiagnosti
 	self assert: world contactVisualRevision > initialRevision.
 	^ world
 ]
+
+{ #category : 'examples - physics overlay performance' }
+CFPhysicsOverlayTests >> testPhysicsOverlayPerformanceIsDisabledByDefault [
+	<gtExample>
+	| host overlay event |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	event := CFPhysicsFramePresentedEvent
+		presentationChanged: true
+		contactStateChanged: false
+		behaviourChanged: false.
+	host fireEvent: event.
+	self assert: overlay performance isEnabled not.
+	self assert: overlay performance frameRefreshCount equals: 0.
+	self assert: overlay performance constraintGeometryCount equals: 0.
+	self assert: overlay performance inspectorRefreshCount equals: 0.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay performance' }
+CFPhysicsOverlayTests >> testPhysicsOverlayPerformanceRecordsPresentedWorkWhenEnabled [
+	<gtExample>
+	| host overlay event performance expectedConstraintVisuals |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	performance := overlay performance start.
+	expectedConstraintVisuals := overlay springOverlay visuals size + overlay jointOverlay visuals size.
+	event := CFPhysicsFramePresentedEvent
+		presentationChanged: true
+		contactStateChanged: false
+		behaviourChanged: false.
+	host fireEvent: event.
+	performance stop.
+	self assert: performance frameRefreshCount equals: 1.
+	self assert: performance constraintGeometryCount equals: 1.
+	self assert: performance constraintVisualUpdateCount equals: expectedConstraintVisuals.
+	self assert: performance selectionRefreshCount equals: 1.
+	self assert: performance inspectorRefreshCount equals: 1.
+	self assert: performance contactGeometryCount equals: 1.
+	^ overlay
+]
+
+{ #category : 'examples - physics overlay performance' }
+CFPhysicsOverlayTests >> testPhysicsOverlayPerformanceResetClearsRecordedWork [
+	<gtExample>
+	| host overlay performance |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	performance := overlay performance start.
+	host fireEvent: (CFPhysicsFramePresentedEvent
+		presentationChanged: true
+		contactStateChanged: false
+		behaviourChanged: false).
+	performance reset.
+	self assert: performance frameRefreshCount equals: 0.
+	self assert: performance constraintGeometryCount equals: 0.
+	self assert: performance contactGeometryCount equals: 0.
+	self assert: performance selectionRefreshCount equals: 0.
+	self assert: performance inspectorRefreshCount equals: 0.
+	^ overlay
+]
