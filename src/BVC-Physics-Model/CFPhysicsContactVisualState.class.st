@@ -48,3 +48,19 @@ CFPhysicsContactVisualState >> secondPoint [ ^ secondPoint ]
 CFPhysicsContactVisualState >> firstSeparation [ ^ firstSeparation ]
 { #category : 'accessing' }
 CFPhysicsContactVisualState >> secondSeparation [ ^ secondSeparation ]
+
+{ #category : 'comparing' }
+CFPhysicsContactVisualState >> hasSamePresentationAs: anotherState [
+	key = anotherState key ifFalse: [ ^ false ].
+	firstBody == anotherState firstBody ifFalse: [ ^ false ].
+	secondBody == anotherState secondBody ifFalse: [ ^ false ].
+	normal = anotherState normal ifFalse: [ ^ false ].
+	pointCount = anotherState pointCount ifFalse: [ ^ false ].
+	pointCount > 0 ifTrue: [
+		firstPoint = anotherState firstPoint ifFalse: [ ^ false ].
+		firstSeparation = anotherState firstSeparation ifFalse: [ ^ false ] ].
+	pointCount > 1 ifTrue: [
+		secondPoint = anotherState secondPoint ifFalse: [ ^ false ].
+		secondSeparation = anotherState secondSeparation ifFalse: [ ^ false ] ].
+	^ true
+]

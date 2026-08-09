@@ -124,8 +124,9 @@ CFMotionTransformPresentation >> scale [ ^ scale ]
 CFMotionTransformPresentation >> scale: aPoint [
 	active ifFalse: [ self begin ].
 	active ifFalse: [ ^ self ].
+	(scale = aPoint and: [ self ownsCurrentTransformation ]) ifTrue: [ ^ true ].
 	scale := aPoint.
-	self apply
+	^ self apply
 ]
 
 { #category : 'accessing' }
@@ -135,8 +136,9 @@ CFMotionTransformPresentation >> rotation [ ^ rotation ]
 CFMotionTransformPresentation >> rotation: aNumber [
 	active ifFalse: [ self begin ].
 	active ifFalse: [ ^ self ].
+	(rotation = aNumber and: [ self ownsCurrentTransformation ]) ifTrue: [ ^ true ].
 	rotation := aNumber.
-	self apply
+	^ self apply
 ]
 
 { #category : 'accessing' }
@@ -146,8 +148,9 @@ CFMotionTransformPresentation >> translation [ ^ translation ]
 CFMotionTransformPresentation >> translation: aPoint [
 	active ifFalse: [ self begin ].
 	active ifFalse: [ ^ self ].
+	(translation = aPoint and: [ self ownsCurrentTransformation ]) ifTrue: [ ^ true ].
 	translation := aPoint.
-	self apply
+	^ self apply
 ]
 
 
@@ -155,9 +158,12 @@ CFMotionTransformPresentation >> translation: aPoint [
 CFMotionTransformPresentation >> translation: aPoint rotation: aNumber [
 	active ifFalse: [ self begin ].
 	active ifFalse: [ ^ self ].
+	(translation = aPoint
+		and: [ rotation = aNumber
+		and: [ self ownsCurrentTransformation ] ]) ifTrue: [ ^ true ].
 	translation := aPoint.
 	rotation := aNumber.
-	self apply
+	^ self apply
 ]
 
 { #category : 'accessing' }

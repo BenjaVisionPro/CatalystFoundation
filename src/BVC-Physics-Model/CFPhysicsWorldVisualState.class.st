@@ -47,3 +47,20 @@ CFPhysicsWorldVisualState >> clear [
 	contacts := #().
 	^ self
 ]
+
+{ #category : 'private - accessing' }
+CFPhysicsWorldVisualState >> contactStateAtKey: aKey ifAbsent: aBlock [
+	^ contactsByKey at: aKey ifAbsent: aBlock
+]
+
+{ #category : 'comparing' }
+CFPhysicsWorldVisualState >> hasSamePresentationAs: anotherState [
+	contacts size = anotherState contacts size ifFalse: [ ^ false ].
+	contacts do: [ :state |
+		| otherState |
+		otherState := anotherState
+			contactStateAtKey: state key
+			ifAbsent: [ ^ false ].
+		(state hasSamePresentationAs: otherState) ifFalse: [ ^ false ] ].
+	^ true
+]

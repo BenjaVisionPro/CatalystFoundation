@@ -33,10 +33,12 @@ CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
 
 { #category : 'updating' }
 CFPhysicsContactOverlay >> updateFrom: aWorldVisualState scopedToBodies: scopeBodies [
+	^ self reconcileFrom: aWorldVisualState scopedToBodies: scopeBodies
+]
+
+{ #category : 'updating' }
+CFPhysicsContactOverlay >> reconcileFrom: aWorldVisualState scopedToBodies: scopeBodies [
 	| live states |
-	(lastVisualState == aWorldVisualState and: [ lastScopeBodies == scopeBodies ]) ifTrue: [
-		visualsByKey valuesDo: #update.
-		^ self ].
 	lastVisualState := aWorldVisualState.
 	lastScopeBodies := scopeBodies.
 	states := scopeBodies
@@ -51,6 +53,12 @@ CFPhysicsContactOverlay >> updateFrom: aWorldVisualState scopedToBodies: scopeBo
 		visual updateFrom: state ].
 	(visualsByKey keys reject: [ :key | live includes: key ]) do: [ :key |
 		(visualsByKey removeKey: key) remove ].
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsContactOverlay >> updateGeometry [
+	visualsByKey valuesDo: #update.
 	^ self
 ]
 

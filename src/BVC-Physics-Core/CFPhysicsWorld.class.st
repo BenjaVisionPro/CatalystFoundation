@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'contactVisualRevision', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -64,6 +64,7 @@ CFPhysicsWorld >> initialize [
 	visualStateConsumers := 0.
 	committedVisualState := CFPhysicsWorldVisualState new.
 	calculationVisualState := CFPhysicsWorldVisualState new.
+	contactVisualRevision := 0.
 	containment := CFPhysicsWorldContainment new.
 	containmentBody := nil.
 	containmentChain := nil.
@@ -676,6 +677,8 @@ CFPhysicsWorld >> commit: aWorldSolution [
 	stepNumber := step stepNumber.
 	(visualStateConsumers > 0 and: [ aWorldSolution visualState notNil ]) ifTrue: [
 		| previousVisualState |
+		(committedVisualState hasSamePresentationAs: aWorldSolution visualState) ifFalse: [
+			contactVisualRevision := contactVisualRevision + 1 ].
 		previousVisualState := committedVisualState.
 		committedVisualState := aWorldSolution visualState.
 		calculationVisualState := previousVisualState ].
@@ -1539,6 +1542,11 @@ CFPhysicsWorld >> rejectTelemetrySolveTicket: aSolveTicket [
 
 
 { #category : 'accessing - visual state' }
+CFPhysicsWorld >> contactVisualRevision [
+	^ contactVisualRevision
+]
+
+{ #category : 'accessing - visual state' }
 CFPhysicsWorld >> committedVisualState [
 	^ committedVisualState
 ]
@@ -1546,7 +1554,8 @@ CFPhysicsWorld >> committedVisualState [
 { #category : 'accessing - visual state' }
 CFPhysicsWorld >> enableVisualState [
 	visualStateConsumers = 0 ifTrue: [
-		committedVisualState updateFromContacts: activeContacts ].
+		committedVisualState updateFromContacts: activeContacts.
+		contactVisualRevision := contactVisualRevision + 1 ].
 	visualStateConsumers := visualStateConsumers + 1.
 	^ self
 ]

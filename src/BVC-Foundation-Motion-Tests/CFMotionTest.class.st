@@ -2684,3 +2684,39 @@ CFMotionTest >> testOneMotionComposesFiniteAndIndefiniteBehaviours [
 	self assert: motion isCancelled.
 	^ indefiniteTrack
 ]
+
+
+{ #category : 'examples - transform ownership probe' }
+CFMotionTest >> testTransformPresentationDoesNotReapplyUnchangedContribution [
+	<gtExample>
+	| space element presentation applied |
+	space := self spaceWithElement.
+	element := space root children first.
+	presentation := CFMotionTransformPresentation on: element.
+	presentation translation: 40 @ 20 rotation: 15.
+	applied := element transformation.
+	presentation translation: 40 @ 20 rotation: 15.
+	self assert: element transformation == applied.
+	presentation scale: 0.8 @ 0.8.
+	applied := element transformation.
+	presentation scale: 0.8 @ 0.8.
+	self assert: element transformation == applied.
+	presentation release.
+	^ presentation
+]
+
+{ #category : 'examples - transform ownership probe' }
+CFMotionTest >> testTransformPresentationStillDetectsExternalReplacementWhenValueIsUnchanged [
+	<gtExample>
+	| space element presentation externalTransformation |
+	space := self spaceWithElement.
+	element := space root children first.
+	presentation := CFMotionTransformPresentation on: element.
+	presentation translation: 40 @ 20.
+	element transformDo: [ :aTransform | aTransform translateBy: 100 @ 0 ].
+	externalTransformation := element transformation.
+	presentation translation: 40 @ 20.
+	self assert: presentation isActive not.
+	self assert: element transformation == externalTransformation.
+	^ presentation
+]

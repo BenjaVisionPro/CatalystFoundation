@@ -1,12 +1,12 @@
 "
 I present the bodies of one Physics world through Motion transform channels.
 
-My responsibility is to maintain per-body presentations, interpolate committed transforms for a frame, and release presentation resources when bodies or coordinators change.
+My responsibility is to maintain per-body presentations, interpolate committed transforms for a frame, suppress unchanged presentation work, announce meaningful diagnostic changes, and release presentation resources when bodies or coordinators change.
 "
 Class {
 	#name : 'CFPhysicsWorldPresentation',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator', 'bodyStates', 'membershipRevision' ],
+	#instVars : [ 'world', 'coordinator', 'presentations', 'fixedCoordinator', 'bodyStates', 'membershipRevision', 'lastPresentationChanged', 'lastContactVisualRevision', 'lastBehaviourRevision' ],
 	#category : 'BVC-Physics-Motion',
 	#package : 'BVC-Physics-Motion'
 }
@@ -33,19 +33,31 @@ CFPhysicsWorldPresentation >> initialize [
 	presentations := IdentityDictionary new.
 	bodyStates := #().
 	membershipRevision := -1.
+	lastPresentationChanged := false.
+	lastContactVisualRevision := -1.
+	lastBehaviourRevision := -1.
 	fixedCoordinator := false
 ]
 
 
 { #category : 'consuming frames' }
 CFPhysicsWorldPresentation >> frameReadyAtAlpha: aNumber [
-	| didPresent |
+	| didPresent contactStateChanged behaviourChanged |
 	didPresent := world telemetryEnabled
 		ifTrue: [ self tryPresentAtAlphaWithTelemetry: aNumber ]
 		ifFalse: [ self tryPresentAtAlpha: aNumber ].
 	didPresent ifFalse: [ ^ self ].
+	contactStateChanged := lastContactVisualRevision ~= world contactVisualRevision.
+	behaviourChanged := lastBehaviourRevision ~= world behaviourRevision.
+	(lastPresentationChanged or: [ contactStateChanged or: [ behaviourChanged ] ])
+		ifFalse: [ ^ self ].
+	lastContactVisualRevision := world contactVisualRevision.
+	lastBehaviourRevision := world behaviourRevision.
 	world owner ifNotNil: [ :anOwner |
-		anOwner fireEvent: CFPhysicsFramePresentedEvent new ].
+		anOwner fireEvent: (CFPhysicsFramePresentedEvent
+			presentationChanged: lastPresentationChanged
+			contactStateChanged: contactStateChanged
+			behaviourChanged: behaviourChanged) ].
 	^ self
 ]
 
@@ -108,16 +120,26 @@ CFPhysicsWorldPresentation >> telemetryDataAtAlpha: aNumber [
 { #category : 'private - presenting' }
 CFPhysicsWorldPresentation >> tryPresentAtAlpha: aNumber [
 	| alpha |
-	self prepare ifFalse: [ ^ false ].
+	self prepare ifFalse: [
+		lastPresentationChanged := false.
+		^ false ].
 	self synchronisePresentations.
+	lastPresentationChanged := false.
 	alpha := (aNumber max: 0.0) min: 1.0.
 	bodyStates do: [ :each |
-		| presentedPosition presentedRotation |
+		| presentedPosition presentedRotation translation rotation presentation changed |
 		presentedPosition := each previousPosition + ((each position - each previousPosition) * alpha).
 		presentedRotation := each previousRotation + ((each rotation - each previousRotation) * alpha).
-		(self presentationFor: each)
-			translation: (self translationFor: each at: presentedPosition)
-			rotation: presentedRotation radiansToDegrees ].
+		translation := self translationFor: each at: presentedPosition.
+		rotation := presentedRotation radiansToDegrees.
+		presentation := self presentationFor: each.
+		changed := presentation isActive not
+			or: [ presentation translation ~= translation
+			or: [ presentation rotation ~= rotation
+			or: [ presentation ownsCurrentTransformation not ] ] ].
+		presentation translation: translation rotation: rotation.
+		(changed and: [ presentation ownsCurrentTransformation ]) ifTrue: [
+			lastPresentationChanged := true ] ].
 	^ true
 ]
 
@@ -197,12 +219,15 @@ CFPhysicsWorldPresentation >> releasePresentations [
 	presentations valuesDo: [ :each | each release ].
 	presentations removeAll.
 	bodyStates := #().
-	membershipRevision := -1
+	membershipRevision := -1.
+	lastPresentationChanged := false
 ]
 
 { #category : 'private - initialization' }
 CFPhysicsWorldPresentation >> world: aWorld [
-	world := aWorld
+	world := aWorld.
+	lastContactVisualRevision := aWorld contactVisualRevision.
+	lastBehaviourRevision := aWorld behaviourRevision
 ]
 
 { #category : 'private - initialization' }

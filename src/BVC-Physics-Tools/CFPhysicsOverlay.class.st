@@ -222,7 +222,7 @@ CFPhysicsOverlay >> initializeOverlay [
 	scopedConstraints := nil.
 	self initializeControls.
 	selectionHandler := BlEventHandler on: BlClickEvent do: [ :anEvent | self clickEvent: anEvent ].
-	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnostics ].
+	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnosticsFor: anEvent ].
 	hostTransformationHandler := BlEventHandler
 		on: BlElementTransformationChangedEvent
 		do: [ :anEvent | self refreshPresentationGeometry ]
@@ -297,18 +297,43 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 ]
 
 { #category : 'updating' }
-CFPhysicsOverlay >> refreshPresentationGeometry [
-	"Physics frames and camera transforms both alter the displayed coordinate
-	system. Body visuals observe their source elements directly; the aggregate
-	spring and contact diagnostics refresh here once for the owning host."
-	behaviourPanel refresh.
-	self validateBehaviourFocus.
+CFPhysicsOverlay >> refreshFrameDiagnosticsFor: anEvent [
+	anEvent behaviourChanged ifTrue: [
+		self refresh.
+		^ self ].
+	anEvent presentationChanged ifTrue: [
+		self refreshPresentationGeometryWithoutContacts ].
+	controls contactsEnabled ifTrue: [
+		anEvent contactStateChanged
+			ifTrue: [
+				contactOverlay
+					reconcileFrom: world committedVisualState
+					scopedToBodies: scopedBodySet ]
+			ifFalse: [
+				anEvent presentationChanged ifTrue: [
+					contactOverlay updateGeometry ] ] ].
+	self refreshSelectedObject.
+	^ self
+]
+
+{ #category : 'private - updating' }
+CFPhysicsOverlay >> refreshPresentationGeometryWithoutContacts [
 	controls constraintsEnabled ifTrue: [
 		springOverlay updateGeometry.
 		jointOverlay updateGeometry ].
-	controls contactsEnabled ifTrue: [
-		contactOverlay updateFrom: world committedVisualState scopedToBodies: scopedBodySet ].
 	self refreshSelectionVisual.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsOverlay >> refreshPresentationGeometry [
+	"Camera transforms alter the displayed coordinate system even when Physics
+	presentation is unchanged. Body visuals observe their source elements directly;
+	aggregate diagnostics refresh here for the owning host."
+	behaviourPanel refresh.
+	self validateBehaviourFocus.
+	self refreshPresentationGeometryWithoutContacts.
+	controls contactsEnabled ifTrue: [ contactOverlay updateGeometry ].
 	^ self
 ]
 

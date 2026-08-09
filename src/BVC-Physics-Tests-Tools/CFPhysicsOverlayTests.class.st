@@ -380,9 +380,9 @@ CFPhysicsOverlayTests >> testPhysicsPresentationReconcilesOnlyWhenWorldMembershi
 ]
 
 { #category : 'examples - physics overlay' }
-CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlySuccessfullyPresentedFrames [
+CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlyMeaningfullyChangedPresentedFrames [
 	<gtExample>
-	| host world presentation handler presentedCount |
+	| host world presentation handler presentedCount firstBody |
 	host := self physicsHost.
 	world := host physics world.
 	presentedCount := 0.
@@ -395,10 +395,16 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlySuccessfullyPresent
 		in: host space cfMotionCoordinator.
 	presentation frameReadyAtAlpha: 0.5.
 	self assert: presentedCount equals: 1.
+	presentation frameReadyAtAlpha: 0.5.
+	self assert: presentedCount equals: 1.
+	firstBody := world bodyStatesInOrder first.
+	firstBody position: firstBody position + (10 @ 0).
+	presentation frameReadyAtAlpha: 0.5.
+	self assert: presentedCount equals: 2.
 	presentation release.
 	host removeFromParent.
 	(CFPhysicsWorldPresentation on: world) frameReadyAtAlpha: 0.5.
-	self assert: presentedCount equals: 1.
+	self assert: presentedCount equals: 2.
 	host removeEventHandler: handler.
 	^ host
 ]
@@ -2141,3 +2147,63 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionIsPositionedBeforeInstallation
 	^ overlay
 ]
 
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testPhysicsOverlayReconcilesContactsWithoutPresentationMovement [
+	<gtExample>
+	| host overlay world first second event |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	second := host children second.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	event := CFPhysicsFramePresentedEvent
+		presentationChanged: false
+		contactStateChanged: true
+		behaviourChanged: false.
+	host fireEvent: event.
+	self assert: overlay contactOverlay visuals isNotEmpty.
+	^ overlay
+]
+
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testContactVisualStateComparisonIsSemantic [
+	<gtExample>
+	| host world first second firstState secondState |
+	host := self installedPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	second := host children second.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	firstState := CFPhysicsWorldVisualState new
+		updateFromContacts: world activeContacts;
+		yourself.
+	secondState := CFPhysicsWorldVisualState new
+		updateFromContacts: world activeContacts;
+		yourself.
+	self assert: (firstState hasSamePresentationAs: secondState).
+	^ firstState
+]
+
+{ #category : 'examples - physics overlay' }
+CFPhysicsOverlayTests >> testContactVisualRevisionAdvancesWhenCommittedDiagnosticsChange [
+	<gtExample>
+	| host world first second initialRevision |
+	host := self installedPhysicsOverlay.
+	world := host physics world.
+	first := host children first.
+	second := host children second.
+	initialRevision := world contactVisualRevision.
+	first physics position: 80 @ 80.
+	second physics position: 80 @ 80.
+	world step.
+	self assert: world contactVisualRevision > initialRevision.
+	^ world
+]
