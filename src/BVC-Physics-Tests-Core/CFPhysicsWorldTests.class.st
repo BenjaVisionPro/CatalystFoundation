@@ -426,6 +426,24 @@ CFPhysicsWorldTests >> testSwitchingFromBackgroundToForegroundAbandonsActiveSolv
 ]
 
 { #category : 'tests - background stepping' }
+CFPhysicsWorldTests >> testForegroundStepWaitsForBackgroundPipelineOwnershipToFinish [
+	<gtExample>
+	| world execution initialStepNumber |
+	world := self newWorldAfterOneStep.
+	initialStepNumber := world stepNumber.
+	execution := Object new.
+	self assert: (world claimBackgroundExecution: execution).
+	self assert: world hasBackgroundExecutionInFlight.
+	self assert: world step isNil.
+	self assert: world stepNumber equals: initialStepNumber.
+	world backgroundExecutionFinished: execution.
+	self assert: world hasBackgroundExecutionInFlight not.
+	self assert: world step notNil.
+	self assert: world stepNumber equals: initialStepNumber + 1.
+	^ world
+]
+
+{ #category : 'tests - background stepping' }
 CFPhysicsWorldTests >> testBackgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
 	<gtExample>
 	| world space startedAgain |

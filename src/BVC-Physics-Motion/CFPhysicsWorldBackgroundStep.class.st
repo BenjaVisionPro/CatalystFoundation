@@ -6,7 +6,7 @@ My responsibility is to capture the configured pipeline task, execute its solve 
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'telemetryContext', 'task' ],
+	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'telemetryContext', 'promise' ],
 	#category : 'BVC-Physics-Motion',
 	#package : 'BVC-Physics-Motion'
 }
@@ -18,12 +18,6 @@ CFPhysicsWorldBackgroundStep class >> on: aPhysicsWorld [
 		yourself
 ]
 
-{ #category : 'private - configuration' }
-CFPhysicsWorldBackgroundStep >> futureConfiguration [
-	^ AsyncFutureExecutionConfiguration new
-		highPriority;
-		customGroup: #'Physics Pipeline'
-]
 
 { #category : 'accessing' }
 CFPhysicsWorldBackgroundStep >> pipeline [
@@ -42,8 +36,8 @@ CFPhysicsWorldBackgroundStep >> telemetryEnabled [
 ]
 
 { #category : 'accessing' }
-CFPhysicsWorldBackgroundStep >> task [
-	^ task
+CFPhysicsWorldBackgroundStep >> promise [
+	^ promise
 ]
 
 { #category : 'starting' }
@@ -55,22 +49,27 @@ CFPhysicsWorldBackgroundStep >> start [
 	telemetryEnabled := world telemetryEnabled.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
+	(world claimBackgroundExecution: self) ifFalse: [
+		world abandonSolveTicket: state solveTicket.
+		^ false ].
 	telemetryEnabled ifTrue: [
 		telemetryContext := world telemetryContextForState: state ].
-	task := BlEnqueuedFutureAction new
-		name: 'Physics Pipeline';
-		action: [ self solveCapturedState ];
-		futureConfiguration: self futureConfiguration;
-		onSuccessEnqueueAction: [ :solution |
-			world commit: solution ];
-		onFailureEnqueueAction: [ :anError |
-			world abandonSolveTicket: state solveTicket.
-			anError class = AsyncFutureCancelled ifFalse: [
-				NonInteractiveTranscript stdout
-					nextPutAll: anError printString;
-					cr ] ];
-		yourself.
-	owner enqueueTask: task.
+	promise := [ self solveCapturedState ]
+		asAsyncPromiseWithPriority: AsyncFutureExecutionHighPriority uniqueInstance
+		inCustomGroup: #'Physics Pipeline'.
+	promise
+		then: [ :solution |
+			world backgroundExecutionFinished: self.
+			owner enqueueTask: (BlTaskAction new action: [
+				world commit: solution ]) ]
+		otherwise: [ :anError |
+			world backgroundExecutionFinished: self.
+			owner enqueueTask: (BlTaskAction new action: [
+				world abandonSolveTicket: state solveTicket.
+				anError class = AsyncFutureCancelled ifFalse: [
+					NonInteractiveTranscript stdout
+						nextPutAll: anError printString;
+						cr ] ]) ].
 	^ true
 ]
 

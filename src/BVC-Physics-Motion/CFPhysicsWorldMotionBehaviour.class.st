@@ -34,6 +34,10 @@ CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
 	previousLocalTime := anEvaluation localTime.
 	stepDuration := world stepDuration.
 	backgroundStepping := world backgroundStepping.
+	(backgroundStepping not and: [ world hasBackgroundExecutionInFlight ]) ifTrue: [
+		accumulatedTime := stepDuration.
+		frameConsumer frameReadyAtAlpha: 1.0.
+		^ self ].
 	(previousBackgroundStepping and: [ backgroundStepping not ])
 		ifTrue: [ accumulatedTime := stepDuration ]
 		ifFalse: [ accumulatedTime := accumulatedTime + elapsed ].
@@ -48,7 +52,7 @@ CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
 { #category : 'private - evaluating' }
 CFPhysicsWorldMotionBehaviour >> performSynchronousStepsFor: aStepDuration [
 	[ accumulatedTime >= aStepDuration ] whileTrue: [
-		world step.
+		world step ifNil: [ ^ self ].
 		accumulatedTime := accumulatedTime - aStepDuration ]
 ]
 

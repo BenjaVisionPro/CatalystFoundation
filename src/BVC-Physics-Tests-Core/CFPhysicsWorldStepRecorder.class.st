@@ -47,6 +47,11 @@ CFPhysicsWorldStepRecorder >> backgroundStepping [
 	^ backgroundStepping
 ]
 
+{ #category : 'testing' }
+CFPhysicsWorldStepRecorder >> hasBackgroundExecutionInFlight [
+	^ solveInFlight
+]
+
 { #category : 'accessing' }
 CFPhysicsWorldStepRecorder >> backgroundStepping: aBoolean [
 	backgroundStepping = aBoolean ifTrue: [ ^ self ].

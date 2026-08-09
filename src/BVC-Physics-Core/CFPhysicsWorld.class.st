@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'contactVisualRevision', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'contactVisualRevision', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released', 'activeBackgroundStep' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -61,6 +61,7 @@ CFPhysicsWorld >> initialize [
 	topologyRevision := 0.
 	nextSolveTicket := 1.
 	activeSolveTicket := nil.
+	activeBackgroundStep := nil.
 	visualStateConsumers := 0.
 	committedVisualState := CFPhysicsWorldVisualState new.
 	calculationVisualState := CFPhysicsWorldVisualState new.
@@ -581,6 +582,7 @@ CFPhysicsWorld >> newStep [
 { #category : 'stepping' }
 CFPhysicsWorld >> step [
 	self assertNotReleased.
+	self hasBackgroundExecutionInFlight ifTrue: [ ^ nil ].
 	telemetryEnabled ifTrue: [ ^ self stepWithTelemetry ].
 	^ self stepWithoutTelemetry
 ]
@@ -1270,7 +1272,25 @@ CFPhysicsWorld >> activeSolveTicket [ ^ activeSolveTicket ]
 
 { #category : 'testing - solution identity' }
 CFPhysicsWorld >> hasSolveInFlight [
-	^ activeSolveTicket notNil
+	^ activeSolveTicket notNil or: [ self hasBackgroundExecutionInFlight ]
+]
+
+{ #category : 'testing - stepping' }
+CFPhysicsWorld >> hasBackgroundExecutionInFlight [
+	^ activeBackgroundStep notNil
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> claimBackgroundExecution: aBackgroundStep [
+	activeBackgroundStep ifNotNil: [ ^ false ].
+	activeBackgroundStep := aBackgroundStep.
+	^ true
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsWorld >> backgroundExecutionFinished: aBackgroundStep [
+	activeBackgroundStep == aBackgroundStep ifTrue: [
+		activeBackgroundStep := nil ]
 ]
 
 
