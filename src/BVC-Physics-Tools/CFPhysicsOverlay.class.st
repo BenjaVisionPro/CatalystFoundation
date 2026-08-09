@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'behaviourPanel', 'controls', 'selectionVisual', 'selectedBehaviour', 'scopedBodies', 'scopedBodySet', 'scopedConstraints', 'performance'  ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'behaviourPanel', 'controls', 'selectionVisual', 'selectedBehaviour', 'scopedBodies', 'scopedBodySet', 'scopedConstraints'  ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -52,8 +52,6 @@ CFPhysicsOverlay >> behaviourPanel [ ^ behaviourPanel ]
 CFPhysicsOverlay >> selectedBehaviour [ ^ selectedBehaviour ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> controls [ ^ controls ]
-{ #category : 'accessing' }
-CFPhysicsOverlay >> performance [ ^ performance ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> selectedElement [ ^ selectedElement ]
 { #category : 'accessing' }
@@ -222,13 +220,12 @@ CFPhysicsOverlay >> initializeOverlay [
 	scopedBodies := nil.
 	scopedBodySet := nil.
 	scopedConstraints := nil.
-	performance := CFPhysicsOverlayPerformance new.
 	self initializeControls.
 	selectionHandler := BlEventHandler on: BlClickEvent do: [ :anEvent | self clickEvent: anEvent ].
 	framePresentedHandler := BlEventHandler on: CFPhysicsFramePresentedEvent do: [ :anEvent | self refreshFrameDiagnosticsFor: anEvent ].
 	hostTransformationHandler := BlEventHandler
 		on: BlElementTransformationChangedEvent
-		do: [ :anEvent | self refreshPresentationGeometryFromHostTransformation ]
+		do: [ :anEvent | self refreshPresentationGeometry ]
 ]
 
 { #category : 'initialization' }
@@ -301,40 +298,30 @@ CFPhysicsOverlay >> refreshFrameDiagnostics [
 
 { #category : 'updating' }
 CFPhysicsOverlay >> refreshFrameDiagnosticsFor: anEvent [
-	| startedAt |
-	startedAt := performance startMeasurement.
 	anEvent behaviourChanged ifTrue: [
 		self refresh.
-		performance recordFrameRefreshStartedAt: startedAt.
 		^ self ].
 	anEvent presentationChanged ifTrue: [
 		self refreshPresentationGeometryWithoutContacts ].
 	controls contactsEnabled ifTrue: [
 		anEvent contactStateChanged
-			ifTrue: [ self reconcileContacts ]
+			ifTrue: [
+				contactOverlay
+					reconcileFrom: world committedVisualState
+					scopedToBodies: scopedBodySet ]
 			ifFalse: [
-				anEvent presentationChanged ifTrue: [ self refreshContactGeometry ] ] ].
+				anEvent presentationChanged ifTrue: [
+					contactOverlay updateGeometry ] ] ].
 	self refreshSelectedObject.
-	performance recordFrameRefreshStartedAt: startedAt.
 	^ self
 ]
 
 { #category : 'private - updating' }
 CFPhysicsOverlay >> refreshPresentationGeometryWithoutContacts [
-	| startedAt visualCount |
 	controls constraintsEnabled ifTrue: [
-		startedAt := performance startMeasurement.
-		visualCount := startedAt
-			ifNil: [ 0 ]
-			ifNotNil: [ springOverlay visuals size + jointOverlay visuals size ].
 		springOverlay updateGeometry.
-		jointOverlay updateGeometry.
-		performance
-			recordConstraintGeometryVisualCount: visualCount
-			startedAt: startedAt ].
-	startedAt := performance startMeasurement.
+		jointOverlay updateGeometry ].
 	self refreshSelectionVisual.
-	performance recordSelectionRefreshStartedAt: startedAt.
 	^ self
 ]
 
@@ -346,59 +333,12 @@ CFPhysicsOverlay >> refreshPresentationGeometry [
 	behaviourPanel refresh.
 	self validateBehaviourFocus.
 	self refreshPresentationGeometryWithoutContacts.
-	controls contactsEnabled ifTrue: [ self refreshContactGeometry ].
-	^ self
-]
-
-{ #category : 'private - updating' }
-CFPhysicsOverlay >> refreshPresentationGeometryFromHostTransformation [
-	| startedAt |
-	startedAt := performance startMeasurement.
-	self refreshPresentationGeometry.
-	performance recordHostTransformationRefreshStartedAt: startedAt.
-	^ self
-]
-
-{ #category : 'private - updating' }
-CFPhysicsOverlay >> reconcileContacts [
-	| startedAt |
-	startedAt := performance startMeasurement.
-	contactOverlay
-		reconcileFrom: world committedVisualState
-		scopedToBodies: scopedBodySet.
-	performance
-		recordContactReconcileVisualCount: (startedAt
-			ifNil: [ 0 ]
-			ifNotNil: [ contactOverlay visuals size ])
-		startedAt: startedAt.
-	^ self
-]
-
-{ #category : 'private - updating' }
-CFPhysicsOverlay >> refreshContactGeometry [
-	| startedAt visualCount |
-	startedAt := performance startMeasurement.
-	visualCount := startedAt
-		ifNil: [ 0 ]
-		ifNotNil: [ contactOverlay visuals size ].
-	contactOverlay updateGeometry.
-	performance
-		recordContactGeometryVisualCount: visualCount
-		startedAt: startedAt.
+	controls contactsEnabled ifTrue: [ contactOverlay updateGeometry ].
 	^ self
 ]
 
 { #category : 'private - selection' }
 CFPhysicsOverlay >> refreshSelectedObject [
-	| startedAt |
-	startedAt := performance startMeasurement.
-	self refreshSelectedObjectContent.
-	performance recordInspectorRefreshStartedAt: startedAt.
-	^ self
-]
-
-{ #category : 'private - selection' }
-CFPhysicsOverlay >> refreshSelectedObjectContent [
 	| physics body |
 	(selectedBehaviour notNil and: [ objectInspector selectedObject == selectedBehaviour ]) ifTrue: [
 		objectInspector refresh.
@@ -594,7 +534,6 @@ CFPhysicsOverlay >> toggleBehaviourFocus: aBehaviour [
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
 	| contactsWereEnabled |
-	performance stop.
 	contactsWereEnabled := controls notNil and: [ controls contactsEnabled ].
 	self clearSelection.
 	selectionHandler ifNotNil: [ host removeEventFilter: selectionHandler ].
