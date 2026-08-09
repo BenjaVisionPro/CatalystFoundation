@@ -578,6 +578,56 @@ CFPhysicsWorldTests >> testStaleDetachedSolvePublishesNoTelemetry [
 	^ world
 ]
 { #category : 'tests - background telemetry' }
+CFPhysicsWorldTests >> testFailedBackgroundStartDoesNotDiscardPendingTelemetry [
+	<gtExample>
+	| world space state backgroundStep solution secondBackgroundStep |
+	world := self newWorldAfterOneStep.
+	space := BlSpace new.
+	space root addChild: world owner.
+	world telemetryEnabled: true.
+	world resetTelemetry.
+	state := world captureStateIfIdle.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: world stepPipeline;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: true;
+		instVarNamed: 'telemetryContext' put: (world telemetryContextForState: state).
+	solution := backgroundStep solveCapturedState.
+	self assert: world telemetryRecordings isEmpty.
+	secondBackgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	self assert: secondBackgroundStep start not.
+	self assert: world telemetryRecordings isEmpty.
+	self assert: (world commit: solution) notNil.
+	self assert: world telemetryRecordings size equals: 1.
+	world telemetryEnabled: false.
+	^ world
+]
+
+{ #category : 'tests - background telemetry' }
+CFPhysicsWorldTests >> testTelemetryResetDiscardsPendingBackgroundRecording [
+	<gtExample>
+	| world state backgroundStep solution |
+	world := self newWorldAfterOneStep.
+	world telemetryEnabled: true.
+	world resetTelemetry.
+	state := world captureStateIfIdle.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: world stepPipeline;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: true;
+		instVarNamed: 'telemetryContext' put: (world telemetryContextForState: state).
+	solution := backgroundStep solveCapturedState.
+	self assert: world telemetryRecordings isEmpty.
+	world resetTelemetry.
+	self assert: (world commit: solution) notNil.
+	self assert: world telemetryRecordings isEmpty.
+	world telemetryEnabled: false.
+	^ world
+]
+
+{ #category : 'tests - background telemetry' }
 CFPhysicsWorldTests >> testBackgroundStepCapturesTelemetryModeBeforeDispatch [
 	<gtExample>
 	| world space backgroundStep |

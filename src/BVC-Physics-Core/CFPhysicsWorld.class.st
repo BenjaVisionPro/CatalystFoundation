@@ -1082,6 +1082,7 @@ CFPhysicsWorld >> latestTelemetryRecording [
 { #category : 'telemetry' }
 CFPhysicsWorld >> resetTelemetry [
 	telemetryLogger ifNotNil: [ telemetryLogger reset ].
+	self discardDetachedTelemetrySignals.
 	self resetTelemetryStepStatisticsScale.
 	self announceTelemetryChanged
 ]
