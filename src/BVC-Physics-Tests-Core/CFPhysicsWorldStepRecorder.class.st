@@ -49,6 +49,8 @@ CFPhysicsWorldStepRecorder >> backgroundStepping [
 
 { #category : 'accessing' }
 CFPhysicsWorldStepRecorder >> backgroundStepping: aBoolean [
+	backgroundStepping = aBoolean ifTrue: [ ^ self ].
+	(backgroundStepping and: [ aBoolean not ]) ifTrue: [ self abandonActiveSolve ].
 	backgroundStepping := aBoolean
 ]
 

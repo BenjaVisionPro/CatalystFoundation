@@ -6,7 +6,7 @@ My responsibility is to accumulate elapsed Motion time, request synchronous or b
 Class {
 	#name : 'CFPhysicsWorldMotionBehaviour',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'frameConsumer' ],
+	#instVars : [ 'world', 'previousLocalTime', 'accumulatedTime', 'active', 'frameConsumer', 'previousBackgroundStepping' ],
 	#category : 'BVC-Physics-Motion',
 	#package : 'BVC-Physics-Motion'
 }
@@ -26,17 +26,21 @@ CFPhysicsWorldMotionBehaviour >> animationTarget [
 
 { #category : 'evaluating' }
 CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
-	| elapsed stepDuration alpha |
+	| elapsed stepDuration alpha backgroundStepping |
 	active ifFalse: [ self error: 'A Physics world Behaviour cannot evaluate outside its playback lifetime' ].
 	elapsed := anEvaluation localTime - previousLocalTime.
 	elapsed < (0 milliSeconds) ifTrue: [
 		self error: 'A Physics Motion Behaviour cannot move backwards in time' ].
 	previousLocalTime := anEvaluation localTime.
-	accumulatedTime := accumulatedTime + elapsed.
 	stepDuration := world stepDuration.
-	world backgroundStepping
+	backgroundStepping := world backgroundStepping.
+	(previousBackgroundStepping and: [ backgroundStepping not ])
+		ifTrue: [ accumulatedTime := stepDuration ]
+		ifFalse: [ accumulatedTime := accumulatedTime + elapsed ].
+	backgroundStepping
 		ifTrue: [ self startBackgroundStepFor: stepDuration ]
 		ifFalse: [ self performSynchronousStepsFor: stepDuration ].
+	previousBackgroundStepping := backgroundStepping.
 	alpha := accumulatedTime asMilliSeconds / stepDuration asMilliSeconds.
 	frameConsumer frameReadyAtAlpha: (alpha min: 1.0)
 ]
@@ -60,13 +64,15 @@ CFPhysicsWorldMotionBehaviour >> initialize [
 	super initialize.
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
-	active := false
+	active := false.
+	previousBackgroundStepping := false
 ]
 
 { #category : 'playing' }
 CFPhysicsWorldMotionBehaviour >> playbackStartedIn: aCoordinator [
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
+	previousBackgroundStepping := world backgroundStepping.
 	active := true
 ]
 
@@ -75,7 +81,8 @@ CFPhysicsWorldMotionBehaviour >> playbackEndedWith: aMotionState [
 	world abandonActiveSolve.
 	active := false.
 	previousLocalTime := 0 milliSeconds.
-	accumulatedTime := 0 milliSeconds
+	accumulatedTime := 0 milliSeconds.
+	previousBackgroundStepping := false
 ]
 
 { #category : 'testing' }

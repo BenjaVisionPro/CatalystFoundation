@@ -210,6 +210,47 @@ CFPhysicsMotionTests >> testRestartingPhysicsSteppingBeginsAtCleanStepBoundary [
 ]
 
 { #category : 'examples - motion integration' }
+CFPhysicsMotionTests >> testBackgroundToForegroundRebasesAccumulatedTimeAtOneStep [
+	<gtExample>
+	| space owner world presentation behaviour timeline motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		backgroundStepping: true;
+		yourself.
+	presentation := CFPhysicsFrameConsumerRecorder new.
+	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepCount equals: 1.
+	self assert: world hasSolveInFlight.
+	self assert: behaviour accumulatedTime equals: 90 milliSeconds.
+	world backgroundStepping: false.
+	self assert: world hasSolveInFlight not.
+	space time wait: 5 milliSeconds.
+	space pulse.
+	self assert: world stepCount equals: 1.
+	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
+	self assert: presentation lastPresentationAlpha equals: 0.0.
+	space time wait: 5 milliSeconds.
+	space pulse.
+	self assert: world stepCount equals: 1.
+	self assert: behaviour accumulatedTime equals: 5 milliSeconds.
+	self assert: (presentation lastPresentationAlpha closeTo: 0.5).
+	motion cancel.
+	^ behaviour
+]
+
+{ #category : 'examples - motion integration' }
 CFPhysicsMotionTests >> testBackgroundPlaybackContinuesPresentingWhileSolveIsInFlight [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion initialPresentationCount |
