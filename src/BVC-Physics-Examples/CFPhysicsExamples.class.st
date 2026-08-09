@@ -68,8 +68,10 @@ CFPhysicsExamples >> physicsWorldOwnsContinuousMotionStepping [
 	space root addChild: host.
 	space pulse.
 	world := host physics beWorld.
-	world gravity: 0 @ 0.
-	world stepDuration: 10 milliSeconds.
+	world
+		backgroundStepping: false;
+		gravity: 0 @ 0;
+		stepDuration: 10 milliSeconds.
 	body physics
 		beDynamic;
 		position: 40 @ 40;
@@ -100,6 +102,7 @@ CFPhysicsExamples >> physicsWorldControlsItsSteppingLifecycle [
 	space pulse.
 	world := owner physics beWorld.
 	world
+		backgroundStepping: false;
 		gravity: 0 @ 0;
 		stepDuration: 10 milliSeconds.
 	body physics
@@ -531,12 +534,12 @@ CFPhysicsExamples >> physicsTelemetryAnalysisCanRunInBackground [
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsExamples >> physicsWorldDefaultsToSynchronousStepping [
+CFPhysicsExamples >> physicsWorldDefaultsToBackgroundStepping [
 	<gtExample>
 	| owner world |
 	owner := BlElement new size: 320 @ 200.
 	world := owner physics beWorld.
-	self assert: world backgroundStepping not.
+	self assert: world backgroundStepping.
 	^ world
 ]
 
