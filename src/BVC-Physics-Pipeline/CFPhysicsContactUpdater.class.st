@@ -158,8 +158,9 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 
 { #category : 'updating' }
 CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactContacts fromContacts: previousContacts reusingContacts: reusableContacts bodyStates: bodyStates speculativeDistance: speculativeDistance [
-	| previousByKey reusableByKey impactByKey contacts touching began continued ended orderedPairs |
+	| previousByKey reusableByKey impactByKey contacts touching began continued ended orderedPairs visualStateMayHaveChanged |
 	self resetMeasurements.
+	visualStateMayHaveChanged := false.
 	previousByKey := Dictionary new.
 	previousContacts do: [ :contact | previousByKey at: contact key put: contact ].
 	reusableByKey := Dictionary new.
@@ -236,14 +237,19 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 					ifNotNil: [ contact shapeStatesFromBodyStates: bodyStates ].
 				contact updateFromPreviousContact: previous with: manifold.
 				contacts add: contact.
-				contact isTouching ifTrue: [ touching add: contact ].
+				contact isTouching ifTrue: [
+					visualStateMayHaveChanged := true.
+					touching add: contact ].
 				contact began ifTrue: [ began add: contact ].
 				contact continued ifTrue: [ continued add: contact ].
-				contact ended ifTrue: [ ended add: contact ] ] ].
+				contact ended ifTrue: [
+					visualStateMayHaveChanged := true.
+					ended add: contact ] ] ].
 	"Pairs absent from the broadphase are destroyed. A touching contact contributes one final end transition, but the destroyed contact is not retained in the batch."
 	previousByKey valuesDo: [ :previous |
 		previous isTouching ifTrue: [
 			| endedContact |
+			visualStateMayHaveChanged := true.
 			endedContact := reusableByKey
 				removeKey: previous key
 				ifAbsent: [ CFPhysicsContact pair: previous pair manifold: nil ].
@@ -253,10 +259,12 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 	touchingContactCount := touching size.
 	ended := ended asArray sorted: [ :left :right |
 		left pair comesBefore: right pair ].
-	^ CFPhysicsContactUpdateBatch
+	^ (CFPhysicsContactUpdateBatch
 		contacts: contacts
 		touching: touching
 		began: began
 		continued: continued
-		ended: ended
+		ended: ended)
+		visualStateMayHaveChanged: visualStateMayHaveChanged;
+		yourself
 ]

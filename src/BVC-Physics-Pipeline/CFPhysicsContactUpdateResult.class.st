@@ -47,3 +47,9 @@ CFPhysicsContactUpdateResult >> continuedContacts [ ^ contactBatch continuedCont
 
 { #category : 'accessing' }
 CFPhysicsContactUpdateResult >> endedContacts [ ^ contactBatch endedContacts ]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdateResult >> visualStateMayHaveChanged [
+	^ contactBatch visualStateMayHaveChanged
+]
+

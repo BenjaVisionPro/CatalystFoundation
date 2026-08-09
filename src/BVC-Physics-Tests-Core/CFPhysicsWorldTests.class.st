@@ -750,3 +750,56 @@ CFPhysicsWorldTests >> testMembershipRevisionChangesOnlyWhenBodyMembershipChange
 	self assert: world membershipRevision equals: initialRevision + 2.
 	^ world
 ]
+
+{ #category : 'tests - visual state' }
+CFPhysicsWorldTests >> testSleepingRetainedContactsSkipVisualStateCapture [
+	<gtExample>
+	| world state solution |
+	world := self newWorldAfterOneStep.
+	world enableVisualState.
+	world bodyStatesInOrder do: [ :body |
+		body isStatic ifFalse: [ body sleep ] ].
+	state := world capturePreparedState.
+	solution := world stepPipeline solve: state.
+	self assert: solution pipelineResult contactResult visualStateMayHaveChanged not.
+	self assert: solution visualState isNil.
+	^ solution
+]
+
+{ #category : 'tests - visual state' }
+CFPhysicsWorldTests >> testSleepingRetainedContactsSkipVisualStateCaptureWithTelemetry [
+	<gtExample>
+	| world state solution |
+	world := self newWorldAfterOneStep.
+	world enableVisualState.
+	world bodyStatesInOrder do: [ :body |
+		body isStatic ifFalse: [ body sleep ] ].
+	state := world capturePreparedState.
+	solution := world stepPipeline solveWithTelemetry: state.
+	self assert: solution pipelineResult contactResult visualStateMayHaveChanged not.
+	self assert: solution visualState isNil.
+	^ solution
+]
+
+{ #category : 'tests - visual state' }
+CFPhysicsWorldTests >> testVisualStateRebuildsAfterSkippedSleepingCapture [
+	<gtExample>
+	| world movingBody sleepingState sleepingSolution changedState changedSolution |
+	world := self newWorldAfterOneStep.
+	world enableVisualState.
+	movingBody := world bodyStatesInOrder detect: [ :body | body isStatic not ].
+	movingBody sleep.
+	sleepingState := world capturePreparedState.
+	sleepingSolution := world stepPipeline solve: sleepingState.
+	self assert: sleepingSolution visualState isNil.
+	world commit: sleepingSolution.
+	movingBody position: 20 @ 100.
+	changedState := world capturePreparedState.
+	changedSolution := world stepPipeline solve: changedState.
+	self assert: changedSolution pipelineResult contactResult visualStateMayHaveChanged.
+	self assert: changedSolution visualState notNil.
+	world commit: changedSolution.
+	self assert: world committedVisualState contacts isEmpty.
+	^ world
+]
+

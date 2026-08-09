@@ -206,14 +206,12 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 	pipelineResult := self newResultForWorldState: aWorldState.
 	stages do: [ :stage |
 		pipelineResult recordStage: stage output: (stage executeOn: pipelineResult) ].
-	aWorldState calculationVisualState ifNotNil: [ :visualState |
-		visualState updateFromContacts: pipelineResult activeContacts ].
 	^ (CFPhysicsWorldSolution pipelineResult: pipelineResult)
 		world: aWorldState world;
 		lifetimeGeneration: aWorldState lifetimeGeneration;
 		topologyRevision: aWorldState topologyRevision;
 		solveTicket: aWorldState solveTicket;
-		visualState: aWorldState calculationVisualState;
+		visualState: (self visualStateFor: pipelineResult worldState: aWorldState);
 		yourself
 ]
 
@@ -227,14 +225,12 @@ CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
 			time: [ stage class name asString ]
 			during: [ stage executeOnWithTelemetry: pipelineResult ].
 		pipelineResult recordStage: stage output: output ].
-	aWorldState calculationVisualState ifNotNil: [ :visualState |
-		visualState updateFromContacts: pipelineResult activeContacts ].
 	^ (CFPhysicsWorldSolution pipelineResult: pipelineResult)
 		world: aWorldState world;
 		lifetimeGeneration: aWorldState lifetimeGeneration;
 		topologyRevision: aWorldState topologyRevision;
 		solveTicket: aWorldState solveTicket;
-		visualState: aWorldState calculationVisualState;
+		visualState: (self visualStateFor: pipelineResult worldState: aWorldState);
 		yourself
 ]
 
@@ -260,3 +256,14 @@ CFPhysicsStepPipeline >> resetBroadphaseProxiesFor: aBody [
 		resetProxiesForBody: aBody.
 	^ self
 ]
+
+{ #category : 'private - solving' }
+CFPhysicsStepPipeline >> visualStateFor: aPipelineResult worldState: aWorldState [
+	| visualState |
+	visualState := aWorldState calculationVisualState.
+	visualState ifNil: [ ^ nil ].
+	aPipelineResult contactResult visualStateMayHaveChanged ifFalse: [ ^ nil ].
+	visualState updateFromContacts: aPipelineResult activeContacts.
+	^ visualState
+]
+

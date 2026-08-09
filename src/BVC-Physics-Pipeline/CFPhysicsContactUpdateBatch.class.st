@@ -5,7 +5,7 @@ I represent the outcome of reconciling broadphase pairs with persistent contacts
 Class {
 	#name : 'CFPhysicsContactUpdateBatch',
 	#superclass : 'Object',
-	#instVars : [ 'contacts', 'touchingContacts', 'beganContacts', 'continuedContacts', 'endedContacts' ],
+	#instVars : [ 'contacts', 'touchingContacts', 'beganContacts', 'continuedContacts', 'endedContacts', 'visualStateMayHaveChanged' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -43,3 +43,14 @@ CFPhysicsContactUpdateBatch >> continuedContacts: aCollection [ continuedContact
 CFPhysicsContactUpdateBatch >> endedContacts [ ^ endedContacts ]
 { #category : 'accessing' }
 CFPhysicsContactUpdateBatch >> endedContacts: aCollection [ endedContacts := aCollection asArray ]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdateBatch >> visualStateMayHaveChanged [
+	^ visualStateMayHaveChanged ifNil: [ false ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactUpdateBatch >> visualStateMayHaveChanged: aBoolean [
+	visualStateMayHaveChanged := aBoolean
+]
+

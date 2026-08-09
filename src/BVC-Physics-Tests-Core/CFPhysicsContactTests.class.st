@@ -134,12 +134,15 @@ CFPhysicsContactTests >> testContactPipelineReportsBeginContinueAndEnd [
 	firstBatch := updater updatePairs: { pair } fromContacts: #().
 	self assert: firstBatch beganContacts size equals: 1.
 	self assert: firstBatch continuedContacts isEmpty.
+	self assert: firstBatch visualStateMayHaveChanged.
 	secondBatch := updater updatePairs: { pair } fromContacts: firstBatch activeContacts.
 	self assert: secondBatch beganContacts isEmpty.
 	self assert: secondBatch continuedContacts size equals: 1.
+	self assert: secondBatch visualStateMayHaveChanged.
 	thirdBatch := updater updatePairs: #() fromContacts: secondBatch activeContacts.
 	self assert: thirdBatch activeContacts isEmpty.
 	self assert: thirdBatch endedContacts size equals: 1.
+	self assert: thirdBatch visualStateMayHaveChanged.
 	^ thirdBatch
 ]
 { #category : 'tests - contact pipeline' }
@@ -230,6 +233,7 @@ CFPhysicsContactTests >> testSleepingTouchingContactRetainsItsPersistentStateWit
 	self assert: batch endedContacts isEmpty.
 	self assert: updater bothSleepingPairCount equals: 1.
 	self assert: updater manifoldGenerationCount equals: 0.
+	self assert: batch visualStateMayHaveChanged not.
 	^ retained
 ]
 { #category : 'tests - contact pipeline' }
@@ -794,3 +798,21 @@ CFPhysicsContactTests >> testSpeculativeDistanceFlowsThroughTheContactPipeline [
 	self assert: (result activeContacts first manifold contactPoints first separation closeTo: 1.0).
 	^ result
 ]
+
+{ #category : 'tests - contact pipeline' }
+CFPhysicsContactTests >> testNonTouchingRecomputationDoesNotDirtyContactVisualState [
+	<gtExample>
+	| first second pair updater batch |
+	first := self newBodyWithSequence: 1.
+	second := self newBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	updater := CFPhysicsContactUpdater
+		manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nil).
+	batch := updater updatePairs: { pair } fromContacts: #().
+	self assert: batch contacts size equals: 1.
+	self assert: batch touchingContacts isEmpty.
+	self assert: batch endedContacts isEmpty.
+	self assert: batch visualStateMayHaveChanged not.
+	^ batch
+]
+
