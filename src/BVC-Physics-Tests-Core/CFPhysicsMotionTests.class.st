@@ -54,7 +54,7 @@ CFPhysicsMotionTests >> testPhysicsWorldBehaviourAdvancesDeterministicFixedSteps
 ]
 
 { #category : 'examples - motion integration' }
-CFPhysicsMotionTests >> testBackgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
+CFPhysicsMotionTests >> testBackgroundPhysicsPlaybackRetainsFixedStepDebt [
 	<gtExample>
 	| space owner world presentation behaviour timeline motion |
 	space := BlSpace new.
@@ -78,18 +78,18 @@ CFPhysicsMotionTests >> testBackgroundPhysicsPlaybackNeverCatchesUpOnAFrame [
 	self assert: world backgroundStepCount equals: 1.
 	self assert: world stepCount equals: 0.
 	self assert: world hasSolveInFlight.
-	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
-	self assert: presentation lastPresentationAlpha equals: 0.0.
+	self assert: behaviour accumulatedTime equals: 90 milliSeconds.
+	self assert: presentation lastPresentationAlpha equals: 1.0.
 	space time wait: 100 milliSeconds.
 	space pulse.
 	self assert: world backgroundStepCount equals: 1.
-	self assert: behaviour accumulatedTime equals: 10 milliSeconds.
+	self assert: behaviour accumulatedTime equals: 190 milliSeconds.
 	self assert: presentation lastPresentationAlpha equals: 1.0.
 	world completeBackgroundStep.
 	space time wait: 1 milliSecond.
 	space pulse.
 	self assert: world backgroundStepCount equals: 2.
-	self assert: behaviour accumulatedTime equals: 0 milliSeconds.
+	self assert: behaviour accumulatedTime equals: 181 milliSeconds.
 	motion cancel.
 	self assert: world hasSolveInFlight not.
 	^ behaviour

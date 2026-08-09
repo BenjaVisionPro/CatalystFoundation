@@ -50,7 +50,6 @@ CFPhysicsWorldMotionBehaviour >> performSynchronousStepsFor: aStepDuration [
 
 { #category : 'private - evaluating' }
 CFPhysicsWorldMotionBehaviour >> startBackgroundStepFor: aStepDuration [
-	accumulatedTime := accumulatedTime min: aStepDuration.
 	accumulatedTime >= aStepDuration ifFalse: [ ^ self ].
 	world startBackgroundStep ifTrue: [
 		accumulatedTime := accumulatedTime - aStepDuration ]
