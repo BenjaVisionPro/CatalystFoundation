@@ -406,8 +406,23 @@ CFPhysicsWorldTests >> testAbandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 ]
 
 { #category : 'tests - background stepping' }
-CFPhysicsWorldTests >> testWorldUsesBackgroundSteppingByDefault [
-	self assert: CFPhysicsWorld new backgroundStepping
+CFPhysicsWorldTests >> testWorldUsesForegroundSteppingByDefault [
+	self assert: CFPhysicsWorld new backgroundStepping not
+]
+
+{ #category : 'tests - background stepping' }
+CFPhysicsWorldTests >> testSwitchingFromBackgroundToForegroundAbandonsActiveSolve [
+	<gtExample>
+	| world state |
+	world := self newWorldAfterOneStep.
+	world backgroundStepping: true.
+	state := world captureStateIfIdle.
+	self assert: state notNil.
+	self assert: world hasSolveInFlight.
+	world backgroundStepping: false.
+	self assert: world hasSolveInFlight not.
+	self assert: world backgroundStepping not.
+	^ world
 ]
 
 { #category : 'tests - background stepping' }

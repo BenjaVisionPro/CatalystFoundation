@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'worldInspectorButton', 'behaviourPanel', 'controls', 'selectionVisual', 'selectedBehaviour', 'scopedBodies', 'scopedBodySet', 'scopedConstraints'  ],
+	#instVars : [ 'host', 'world', 'root', 'context', 'bodyOverlay', 'springOverlay', 'jointOverlay', 'contactOverlay', 'objectInspector', 'selectedElement', 'selectedSpring', 'selectedJoint', 'selectionHandler', 'framePresentedHandler', 'hostTransformationHandler', 'controlRoot', 'statusPanel', 'worldInspectorButton', 'behaviourPanel', 'controls', 'selectionVisual', 'selectedBehaviour', 'scopedBodies', 'scopedBodySet', 'scopedConstraints'  ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -44,6 +44,8 @@ CFPhysicsOverlay >> contactOverlay [ ^ contactOverlay ]
 CFPhysicsOverlay >> objectInspector [ ^ objectInspector ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> controlRoot [ ^ controlRoot ]
+{ #category : 'accessing' }
+CFPhysicsOverlay >> statusPanel [ ^ statusPanel ]
 { #category : 'accessing' }
 CFPhysicsOverlay >> worldInspectorButton [ ^ worldInspectorButton ]
 { #category : 'accessing' }
@@ -237,34 +239,14 @@ CFPhysicsOverlay >> initializeControls [
 		zIndex: (host elevation relatedTo: 0) + 3;
 		clipChildren: false;
 		preventMouseEvents.
-	worldInspectorButton := self newWorldInspectorButton.
+	statusPanel := CFPhysicsOverlayStatusPanel on: self.
+	worldInspectorButton := statusPanel worldButton.
 	behaviourPanel := CFPhysicsOverlayBehaviourPanel on: self.
 	controls := CFPhysicsOverlayControls on: self.
 	controlRoot
-		addChild: worldInspectorButton;
+		addChild: statusPanel element;
 		addChild: behaviourPanel element;
 		addChild: controls element
-]
-
-{ #category : 'private - building' }
-CFPhysicsOverlay >> newWorldInspectorButton [
-	^ BrButton new
-		id: #cfPhysicsWorldInspectorButton;
-		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) size: 48 @ 48 ] asStencil);
-		label: 'Inspect Physics world';
-		size: 64 @ 64;
-		background: (Color black alpha: 0.08);
-		effect: (BlBlurBelowEffect radius: 14);
-		geometry: BlCircleGeometry new;
-		constraintsDo: [ :c |
-			c horizontal exact: 64.
-			c vertical exact: 64.
-			c frame horizontal alignRight.
-			c frame vertical alignTop ];
-		margin: (BlInsets all: 10);
-		action: [ :aButton | aButton phlow spawnObject: world ];
-		yourself
 ]
 
 { #category : 'testing' }
@@ -541,6 +523,7 @@ CFPhysicsOverlay >> release [
 	framePresentedHandler ifNotNil: [ host removeEventHandler: framePresentedHandler ].
 	hostTransformationHandler ifNotNil: [ host removeEventHandler: hostTransformationHandler ].
 	contactsWereEnabled ifTrue: [ world ifNotNil: #disableVisualState ].
+	statusPanel ifNotNil: #release.
 	behaviourPanel ifNotNil: #release.
 	controls ifNotNil: #release.
 	bodyOverlay ifNotNil: #release.

@@ -54,7 +54,7 @@ CFPhysicsWorld >> initialize [
 	telemetryAnalysisWindowSeconds := 5.
 	telemetryStepStatisticsMaximumMicroseconds := nil.
 	telemetryAnalysisInBackground := false.
-	backgroundStepping := true.
+	backgroundStepping := false.
 	released := false.
 	telemetryAnnouncer := Announcer new.
 	lifetimeGeneration := 1.
@@ -541,6 +541,8 @@ CFPhysicsWorld >> backgroundStepping [
 
 { #category : 'accessing - stepping' }
 CFPhysicsWorld >> backgroundStepping: aBoolean [
+	backgroundStepping = aBoolean ifTrue: [ ^ self ].
+	(backgroundStepping and: [ aBoolean not ]) ifTrue: [ self abandonActiveSolve ].
 	backgroundStepping := aBoolean
 ]
 

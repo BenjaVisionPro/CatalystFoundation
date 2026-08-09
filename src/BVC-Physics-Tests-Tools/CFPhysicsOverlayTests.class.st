@@ -2030,6 +2030,26 @@ CFPhysicsOverlayTests >> testPhysicsOverlayBehaviourSelectionScopesDiagnosticsAn
 ]
 
 { #category : 'examples - physics overlay - controls' }
+CFPhysicsOverlayTests >> testPhysicsOverlayStatusPanelControlsProcessingMode [
+	<gtExample>
+	| host overlay panel |
+	host := self installedPhysicsOverlay.
+	overlay := host existingPhysicsOverlay.
+	panel := overlay statusPanel.
+	self assert: panel worldButton == overlay worldInspectorButton.
+	self assert: panel worldButton extent equals: 34 @ 34.
+	self assert: overlay world backgroundStepping not.
+	self assert: panel modeButton label asString equals: 'FG'.
+	panel toggleProcessingMode.
+	self assert: overlay world backgroundStepping.
+	self assert: panel modeButton label asString equals: 'BG'.
+	panel toggleProcessingMode.
+	self assert: overlay world backgroundStepping not.
+	self assert: panel modeButton label asString equals: 'FG'.
+	^ host
+]
+
+{ #category : 'examples - physics overlay - controls' }
 CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 	<gtExample>
 	| host overlay controls |
