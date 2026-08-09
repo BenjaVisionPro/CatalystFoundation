@@ -99,19 +99,15 @@ CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joint
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
-	| result |
-	result := self
-		newResultForBodies: bodies
+	^ self
+		stepBodies: bodies
 		fromContacts: previousContacts
 		joints: joints
 		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
 		step: step
 		gravity: gravityVector
-		restitutionThreshold: restitutionThreshold.
-	CFPhysicsBodyStateCaptureStage new executeOn: result.
-	stages do: [ :stage |
-		result recordStage: stage output: (stage executeOn: result) ].
-	^ result
+		restitutionThreshold: restitutionThreshold
+		telemetry: false
 ]
 
 { #category : 'stepping' }
@@ -128,6 +124,19 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 
 { #category : 'stepping' }
 CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold [
+	^ self
+		stepBodies: bodies
+		fromContacts: previousContacts
+		joints: joints
+		collisionSuppressedBodyPairs: collisionSuppressedBodyPairs
+		step: step
+		gravity: gravityVector
+		restitutionThreshold: restitutionThreshold
+		telemetry: true
+]
+
+{ #category : 'private - stepping' }
+CFPhysicsStepPipeline >> stepBodies: bodies fromContacts: previousContacts joints: joints collisionSuppressedBodyPairs: collisionSuppressedBodyPairs step: step gravity: gravityVector restitutionThreshold: restitutionThreshold telemetry: telemetryEnabled [
 	| result |
 	result := self
 		newResultForBodies: bodies
@@ -138,12 +147,7 @@ CFPhysicsStepPipeline >> stepBodiesWithTelemetry: bodies fromContacts: previousC
 		gravity: gravityVector
 		restitutionThreshold: restitutionThreshold.
 	CFPhysicsBodyStateCaptureStage new executeOn: result.
-	stages do: [ :stage |
-		| output |
-		output := ProcessTelemetry
-			time: [ stage class name asString ]
-			during: [ stage executeOnWithTelemetry: result ].
-		result recordStage: stage output: output ].
+	self executeStagesOn: result telemetry: telemetryEnabled.
 	^ result
 ]
 
@@ -202,10 +206,26 @@ CFPhysicsStepPipeline >> newResultForWorldState: aWorldState [
 
 { #category : 'solving' }
 CFPhysicsStepPipeline >> solve: aWorldState [
+	^ self solve: aWorldState telemetry: false
+]
+
+{ #category : 'solving' }
+CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
+	^ ProcessTelemetry
+		time: [ 'Pipeline' ]
+		during: [ self solve: aWorldState telemetry: true ]
+]
+
+{ #category : 'private - solving' }
+CFPhysicsStepPipeline >> solve: aWorldState telemetry: telemetryEnabled [
 	| pipelineResult |
 	pipelineResult := self newResultForWorldState: aWorldState.
-	stages do: [ :stage |
-		pipelineResult recordStage: stage output: (stage executeOn: pipelineResult) ].
+	self executeStagesOn: pipelineResult telemetry: telemetryEnabled.
+	^ self solutionFor: pipelineResult worldState: aWorldState
+]
+
+{ #category : 'private - solving' }
+CFPhysicsStepPipeline >> solutionFor: pipelineResult worldState: aWorldState [
 	^ (CFPhysicsWorldSolution pipelineResult: pipelineResult)
 		world: aWorldState world;
 		lifetimeGeneration: aWorldState lifetimeGeneration;
@@ -215,23 +235,17 @@ CFPhysicsStepPipeline >> solve: aWorldState [
 		yourself
 ]
 
-{ #category : 'solving' }
-CFPhysicsStepPipeline >> solveWithTelemetry: aWorldState [
-	| pipelineResult |
-	pipelineResult := self newResultForWorldState: aWorldState.
+{ #category : 'private - solving' }
+CFPhysicsStepPipeline >> executeStagesOn: pipelineResult telemetry: telemetryEnabled [
 	stages do: [ :stage |
 		| output |
-		output := ProcessTelemetry
-			time: [ stage class name asString ]
-			during: [ stage executeOnWithTelemetry: pipelineResult ].
-		pipelineResult recordStage: stage output: output ].
-	^ (CFPhysicsWorldSolution pipelineResult: pipelineResult)
-		world: aWorldState world;
-		lifetimeGeneration: aWorldState lifetimeGeneration;
-		topologyRevision: aWorldState topologyRevision;
-		solveTicket: aWorldState solveTicket;
-		visualState: (self visualStateFor: pipelineResult worldState: aWorldState);
-		yourself
+		output := telemetryEnabled
+			ifTrue: [
+				ProcessTelemetry
+					time: [ stage class name asString ]
+					during: [ stage executeOnWithTelemetry: pipelineResult ] ]
+			ifFalse: [ stage executeOn: pipelineResult ].
+		pipelineResult recordStage: stage output: output ]
 ]
 
 { #category : 'accessing' }

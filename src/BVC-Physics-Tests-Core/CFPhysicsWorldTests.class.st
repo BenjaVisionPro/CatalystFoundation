@@ -536,7 +536,7 @@ CFPhysicsWorldTests >> testDetachedOwnerCannotClaimABackgroundSolveSlot [
 { #category : 'tests - background telemetry' }
 CFPhysicsWorldTests >> testDetachedSolvePublishesTelemetryOnlyAfterCommit [
 	<gtExample>
-	| world state backgroundStep solution committed |
+	| world state backgroundStep solution committed recording pipelineSpan |
 	world := self newWorldAfterOneStep.
 	world telemetryEnabled: true.
 	world resetTelemetry.
@@ -552,7 +552,15 @@ CFPhysicsWorldTests >> testDetachedSolvePublishesTelemetryOnlyAfterCommit [
 	committed := world commit: solution.
 	self assert: committed notNil.
 	self assert: world telemetryRecordings isNotEmpty.
-	self assert: (world latestTelemetryRecording data includesKey: #physicsFrame).
+	recording := world latestTelemetryRecording.
+	self assert: (recording data includesKey: #physicsFrame).
+	pipelineSpan := recording ping tasks
+		detect: [ :each | each name asString = 'Pipeline' ]
+		ifNone: [ nil ].
+	self assert: pipelineSpan notNil.
+	self
+		assert: (pipelineSpan tasks collect: [ :each | each name asString ])
+		equals: (world stepPipeline stages collect: [ :each | each class name asString ]).
 	world telemetryEnabled: false.
 	^ committed
 ]
@@ -655,6 +663,26 @@ CFPhysicsWorldTests >> testBackgroundStepDefaultsToTheUnmeasuredSolver [
 	self assert: backgroundStep telemetryEnabled not.
 	^ backgroundStep
 ]
+{ #category : 'tests - telemetry testing' }
+CFPhysicsWorldTests >> testTelemetryRecordingContainsPipelineSpan [
+	<gtExample>
+	| world recording pipelineSpan |
+	world := self newWorldAfterOneStep.
+	world telemetryEnabled: true.
+	world resetTelemetry.
+	world step.
+	recording := world latestTelemetryRecording.
+	pipelineSpan := recording ping tasks
+		detect: [ :each | each name asString = 'Pipeline' ]
+		ifNone: [ nil ].
+	self assert: pipelineSpan notNil.
+	self
+		assert: (pipelineSpan tasks collect: [ :each | each name asString ])
+		equals: (world stepPipeline stages collect: [ :each | each class name asString ]).
+	world telemetryEnabled: false.
+	^ recording
+]
+
 { #category : 'tests - telemetry testing' }
 CFPhysicsWorldTests >> testTelemetryTestRunCollectsOnlyMeasuredSteps [
 	<gtExample>

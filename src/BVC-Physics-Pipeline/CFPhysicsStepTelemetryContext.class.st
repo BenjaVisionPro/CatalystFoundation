@@ -30,6 +30,17 @@ CFPhysicsStepTelemetryContext >> bodyCount: anInteger [ bodyCount := anInteger ]
 CFPhysicsStepTelemetryContext >> jointCount: anInteger [ jointCount := anInteger ]
 
 { #category : 'telemetry' }
+CFPhysicsStepTelemetryContext >> recordSolutionFrom: aBlock pipeline: aPipeline [
+	^ ProcessTelemetry
+		profile: aBlock
+		executing: [ :run |
+			| solution |
+			solution := run value.
+			self dataForSolution: solution pipeline: aPipeline ]
+		as: #physicsFrame
+]
+
+{ #category : 'telemetry' }
 CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipeline [
 	| result solvedIslands bodyStates dynamicBodyStates pairFinder preparation contactUpdater sleepConfiguration step sleepVelocities sleepThresholdRatios motionThresholdRatios correctionThresholdRatios worstState worstRatio worstMotionState worstMotionRatio worstCorrectionState worstCorrectionRatio worstMaximumVelocity worstCorrectionVelocity worstNormalImpulse worstTangentImpulse |
 	result := aWorldSolution pipelineResult.
@@ -155,6 +166,9 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #worstSleepReason put: (worstCorrectionVelocity > worstMaximumVelocity ifTrue: [ #correction ] ifFalse: [ #velocity ]);
 		at: #contactCount put: result activeContacts size;
 		at: #persistentContactCount put: result contacts size;
+		at: #beganContactCount put: result beganContacts size;
+		at: #continuedContactCount put: result continuedContacts size;
+		at: #endedContactCount put: result endedContacts size;
 		at: #contactUpdateVisitedPairCount put: contactUpdater visitedPairCount;
 		at: #contactUpdatePreviousMatchCount put: contactUpdater previousContactMatchCount;
 		at: #contactUpdateReusedContactCount put: contactUpdater reusedContactCount;
@@ -176,6 +190,9 @@ CFPhysicsStepTelemetryContext >> dataForSolution: aWorldSolution pipeline: aPipe
 		at: #pairFinderComparisonCount put: pairFinder comparisonCount;
 		at: #pairFinderAcceptedPairCount put: pairFinder acceptedPairCount;
 		at: #pairFinderMaximumActiveCount put: pairFinder maximumActiveCount;
+		at: #broadphaseProxyCount put: pairFinder proxyCount;
+		at: #broadphaseMovedProxyCount put: pairFinder movedProxyCount;
+		at: #broadphaseQueryVisitCount put: pairFinder queryVisitCount;
 		at: #constraintCount put: result solverConstraints size;
 		at: #jointCount put: jointCount;
 		at: #islandCount put: result islands size;

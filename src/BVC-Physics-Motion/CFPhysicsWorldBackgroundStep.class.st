@@ -86,13 +86,7 @@ CFPhysicsWorldBackgroundStep >> solveCapturedState [
 	^ ProcessTelemetry
 		rootTimeSync: [ 'Physics step' ]
 		during: [
-			ProcessTelemetry
-				profile: [ pipeline solveWithTelemetry: state ]
-				executing: [ :run |
-					| solution |
-					solution := run value.
-					telemetryContext
-						dataForSolution: solution
-						pipeline: pipeline ]
-				as: #physicsFrame ]
+			telemetryContext
+				recordSolutionFrom: [ pipeline solveWithTelemetry: state ]
+				pipeline: pipeline ]
 ]
