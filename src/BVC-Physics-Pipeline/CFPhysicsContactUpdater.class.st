@@ -205,6 +205,10 @@ CFPhysicsContactUpdater >> updatePairs: pairs includingImpactContacts: impactCon
 		retainSleepingContact
 			ifTrue: [
 				sleepingRetainedContactCount := sleepingRetainedContactCount + 1.
+				contact
+					shapeStatesFromBodyStates: bodyStates;
+					simplexCache: previous simplexCache;
+					updateFromPreviousContact: previous with: previous manifold.
 				contacts add: contact.
 				touching add: contact.
 				continued add: contact ]

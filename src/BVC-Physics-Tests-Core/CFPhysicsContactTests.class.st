@@ -237,6 +237,42 @@ CFPhysicsContactTests >> testSleepingTouchingContactRetainsItsPersistentStateWit
 	^ retained
 ]
 { #category : 'tests - contact pipeline' }
+{ #category : 'tests - contact pipeline' }
+CFPhysicsContactTests >> testSleepingContactRefreshesLaggedReusableContactFromPreviousTouchingState [
+	<gtExample>
+	| first second pair manifold previous calculation updater bodyStates batch retained |
+	first := self newBodyWithSequence: 1.
+	second := self newBodyWithSequence: 2.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self newManifoldWithFeatureIndex: 1.
+	previous := CFPhysicsContact pair: pair manifold: manifold.
+	calculation := CFPhysicsContact pair: pair manifold: nil.
+	first sleep.
+	second sleep.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	updater := CFPhysicsContactUpdater
+		manifoldGenerator: (CFPhysicsFixedManifoldGenerator manifold: nil).
+	batch := updater
+		updatePairs: { pair }
+		includingImpactContacts: #()
+		fromContacts: { previous }
+		reusingContacts: { calculation }
+		bodyStates: bodyStates
+		speculativeDistance: 0.0.
+	retained := batch contacts first.
+	self assert: retained == calculation.
+	self assert: retained manifold == manifold.
+	self assert: retained previousManifold == manifold.
+	self assert: retained continued.
+	self assert: batch touchingContacts equals: { retained }.
+	self assert: batch continuedContacts equals: { retained }.
+	self assert: batch endedContacts isEmpty.
+	^ retained
+]
+
 CFPhysicsContactTests >> testSleepingSensorContactStillRunsNarrowPhase [
 	<gtExample>
 	| first second pair previousManifold nextManifold previous updater bodyStates batch |

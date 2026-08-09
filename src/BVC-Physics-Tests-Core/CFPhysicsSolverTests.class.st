@@ -64,6 +64,42 @@ CFPhysicsSolverTests >> testConstraintPreparationMeasuresChangedContactWork [
 	^ stage
 ]
 { #category : 'tests - constraints' }
+CFPhysicsSolverTests >> testConstraintPreparationTelemetryMeasuresOnlyActiveSimulationContacts [
+	<gtExample>
+	| first second pair manifold contact result stage bodyStates batch contactResult |
+	first := self newBodyWithSequence: 1.
+	second := self newBodyWithSequence: 2.
+	first sleep.
+	second sleep.
+	pair := CFPhysicsPair first: first second: second.
+	manifold := self newManifoldWithFeatureIndex: 1.
+	contact := CFPhysicsContact pair: pair manifold: manifold.
+	batch := CFPhysicsContactUpdateBatch
+		contacts: { contact }
+		touching: { contact }
+		began: { contact }
+		continued: #()
+		ended: #().
+	contactResult := CFPhysicsContactUpdateResult pairs: { pair } contactBatch: batch.
+	bodyStates := IdentityDictionary new
+		at: first put: (CFPhysicsBodyStepState on: first);
+		at: second put: (CFPhysicsBodyStepState on: second);
+		yourself.
+	result := CFPhysicsStepPipelineResult new
+		bodies: { first. second };
+		bodyStates: bodyStates;
+		contactResult: contactResult;
+		yourself.
+	stage := CFPhysicsConstraintPreparationStage new.
+	stage measureContacts: result activeSimulationContacts.
+	self assert: result activeContacts size equals: 1.
+	self assert: result activeSimulationContacts isEmpty.
+	self assert: stage preparedContactConstraintCount equals: 0.
+	self assert: stage preparedContactPointCount equals: 0.
+	^ stage
+]
+
+{ #category : 'tests - constraints' }
 CFPhysicsSolverTests >> testConstraintBuilderPreparesSolverData [
 	<gtExample>
 	| constraint point manifoldPoint |

@@ -97,7 +97,7 @@ CFPhysicsConstraintPreparationStage >> contactConstraints: contactConstraints fo
 
 { #category : 'executing' }
 CFPhysicsConstraintPreparationStage >> executeOnWithTelemetry: aStepResult [
-	self measureContacts: aStepResult activeContacts.
+	self measureContacts: aStepResult activeSimulationContacts.
 	^ self executeOn: aStepResult
 ]
 
