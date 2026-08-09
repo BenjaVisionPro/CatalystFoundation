@@ -237,7 +237,6 @@ CFPhysicsContactTests >> testSleepingTouchingContactRetainsItsPersistentStateWit
 	^ retained
 ]
 { #category : 'tests - contact pipeline' }
-{ #category : 'tests - contact pipeline' }
 CFPhysicsContactTests >> testSleepingContactRefreshesLaggedReusableContactFromPreviousTouchingState [
 	<gtExample>
 	| first second pair manifold previous calculation updater bodyStates batch retained |
@@ -273,6 +272,7 @@ CFPhysicsContactTests >> testSleepingContactRefreshesLaggedReusableContactFromPr
 	^ retained
 ]
 
+{ #category : 'tests - contact pipeline' }
 CFPhysicsContactTests >> testSleepingSensorContactStillRunsNarrowPhase [
 	<gtExample>
 	| first second pair previousManifold nextManifold previous updater bodyStates batch |
