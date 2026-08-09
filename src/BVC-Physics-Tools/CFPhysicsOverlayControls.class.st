@@ -65,7 +65,6 @@ CFPhysicsOverlayControls >> bodiesToggle [
 		id: #cfPhysicsBodiesOverlayToggle;
 		aptitude: BrGlamorousToggleWithLabelAptitude new;
 		label: 'Bodies';
-		activate;
 		yourself.
 	toggle
 		when: BrToggleActivatedEvent do: [ overlay bodiesEnabled: true ];
@@ -80,7 +79,6 @@ CFPhysicsOverlayControls >> constraintsToggle [
 		id: #cfPhysicsConstraintsOverlayToggle;
 		aptitude: BrGlamorousToggleWithLabelAptitude new;
 		label: 'Constraints';
-		activate;
 		yourself.
 	toggle
 		when: BrToggleActivatedEvent do: [ overlay constraintsEnabled: true ];
@@ -95,7 +93,6 @@ CFPhysicsOverlayControls >> contactsToggle [
 		id: #cfPhysicsContactsOverlayToggle;
 		aptitude: BrGlamorousToggleWithLabelAptitude new;
 		label: 'Contacts';
-		activate;
 		yourself.
 	toggle
 		when: BrToggleActivatedEvent do: [ overlay contactsEnabled: true ];

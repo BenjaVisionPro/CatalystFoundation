@@ -78,9 +78,17 @@ CFPhysicsOverlayTests >> physicsCanvassableHost [
 CFPhysicsOverlayTests >> installedPhysicsOverlay [
 	| host |
 	host := self physicsHost.
-	host showPhysicsOverlay.
+	self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	^ host
+]
+
+{ #category : 'private - overlay fixtures' }
+CFPhysicsOverlayTests >> showPhysicsOverlayWithDiagnosticsOn: aHost [
+	| overlay |
+	overlay := aHost showPhysicsOverlay.
+	overlay controls element children do: #activate.
+	^ overlay
 ]
 
 { #category : 'examples - physics overlay' }
@@ -89,7 +97,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayRendersAboveItsHost [
 	| host overlay |
 	host := self physicsHost.
 	host zIndex: 7.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	self
 		assert: (overlay root elevation relatedTo: 0)
@@ -102,7 +110,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCanBeRemovedWithoutChangingTheHost [
 	<gtExample>
 	| host overlay |
 	host := self physicsCanvassableHost.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host hidePhysicsOverlay.
 	self assert: host existingPhysicsOverlay isNil.
 	self assert: overlay isInstalled not.
@@ -241,7 +249,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayContainmentWorldPointUsesCanvassableC
 	<gtExample>
 	| host overlay world context body point expected |
 	host := self physicsCanvassableHost.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	world := host physics world.
 	world step.
@@ -763,7 +771,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayObservesConsumedButtonClicks [
 	space pulse.
 	host physics beWorld.
 	host physics makeChildrenDynamic.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	scripter := BlScripter new.
 	scripter element: host.
 	scripter click
@@ -874,7 +882,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayCreatesOneRetainedVisualPerSpring [
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	self assert: overlay springOverlay visuals size equals: 1.
 	self assert: overlay springOverlay visuals first spring == spring.
 	self assert: overlay springOverlay visuals first hasParent.
@@ -892,7 +900,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayPreservesVisualIdentity [
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	overlay refresh.
 	self assert: overlay springOverlay visuals first == visual.
@@ -910,7 +918,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualRetainsAnchorsAcrossPresentation
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	fromAnchor := visual fromAnchor.
 	toAnchor := visual toAnchor.
@@ -937,7 +945,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualUsesItsAnchoredEndpointPair [
 		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	firstPoint := context
@@ -962,7 +970,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualRefreshesOnPresentedFrame [
 	spring := CFPhysicsDistanceJoint between: first and: second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	originalPosition := visual fromPosition.
 	first beginStep.
@@ -984,7 +992,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayPresentationDiagnosticsFollowHostTran
 	<gtExample>
 	| host overlay world first second spring springVisual contactVisual initialSpringPoint initialContactPoint context contactState expectedSpringPoint expectedContactPoint |
 	host := self physicsCanvassableHost.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	overlay := host existingPhysicsOverlay.
 	world := host physics world.
@@ -1035,7 +1043,7 @@ CFPhysicsOverlayTests >> overlayWithSelectedSpringHitTarget [
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	visual := overlay springOverlay visuals first.
 	BlSpace simulateClickOn: visual hitTarget.
@@ -1111,7 +1119,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksBothAnchoredEndpoints [
 		andAnchor: (CFPhysicsLocalAnchor on: second at: 90 @ 50).
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	self assert: visual hasFromHead not.
 	self assert: visual hasToHead not.
@@ -1132,7 +1140,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualMarksItsRestLength [
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	spring length: 24.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	host space pulse.
 	firstPoint := visual fromPosition.
@@ -1157,7 +1165,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayRemovesReleasedSprings [
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	visual := overlay springOverlay visuals first.
 	spring remove.
 	overlay refresh.
@@ -1177,7 +1185,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringOverlayIsEmptyWhileDisabled [
 		and: world bodyStatesInOrder second.
 	spring springEnabled: true; hertz: 3.0; dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	overlay controls element children second deactivate.
 	self assert: overlay controls constraintsEnabled not.
 	self assert: overlay springOverlay visuals isEmpty.
@@ -1738,7 +1746,7 @@ CFPhysicsOverlayTests >> testPhysicsWeldJointDiagnosticFollowsHostTransformation
 	<gtExample>
 	| host overlay first second joint visual initialPivot |
 	host := self physicsCanvassableHost.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host space pulse.
 	first := host children first.
 	second := host children second.
@@ -2053,13 +2061,13 @@ CFPhysicsOverlayTests >> testPhysicsOverlayStatusPanelControlsProcessingMode [
 CFPhysicsOverlayTests >> testPhysicsOverlayUsesCompactDiagnosticFilters [
 	<gtExample>
 	| host overlay controls |
-	host := self installedPhysicsOverlay.
-	overlay := host existingPhysicsOverlay.
+	host := self physicsHost.
+	overlay := host showPhysicsOverlay.
 	controls := overlay controls.
 	self assert: controls element children size equals: 3.
-	self assert: controls bodiesEnabled.
-	self assert: controls constraintsEnabled.
-	self assert: controls contactsEnabled.
+	self assert: controls bodiesEnabled not.
+	self assert: controls constraintsEnabled not.
+	self assert: controls contactsEnabled not.
 	^ host
 ]
 
@@ -2104,7 +2112,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringSelectionHandlesFollowCanvassableScale
 		hertz: 3.0;
 		dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
 	visual := CFPhysicsSpringVisual selectionOn: spring context: context.
 	visual addTo: overlay root.
@@ -2138,7 +2146,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringSelectionIsPositionedBeforeInstallatio
 		hertz: 3.0;
 		dampingRatio: 1.0.
 	world addJoint: spring.
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	overlay selectSpring: spring.
 	visual := overlay selectionVisual.
 	self assert: visual fromAnchor position ~= (0 @ 0).
@@ -2159,7 +2167,7 @@ CFPhysicsOverlayTests >> testPhysicsJointSelectionIsPositionedBeforeInstallation
 	first := world bodyStatesInOrder first.
 	joint := (first element physics localAnchorAt: 10 @ 10)
 		distanceJointTo: (world anchorAt: 240 @ 40).
-	overlay := host showPhysicsOverlay.
+	overlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	overlay selectJoint: joint.
 	visual := overlay selectionVisual.
 	self assert: visual fromAnchor position ~= (0 @ 0).
