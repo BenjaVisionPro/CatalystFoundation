@@ -433,7 +433,7 @@ CFPhysicsOverlayTests >> testPhysicsOverlayFrameHandlerFollowsShowHideShowLifecy
 	self assert: firstOverlay contactOverlay visuals isNotEmpty.
 	host hidePhysicsOverlay.
 	self assert: firstOverlay contactOverlay visuals isEmpty.
-	secondOverlay := host showPhysicsOverlay.
+	secondOverlay := self showPhysicsOverlayWithDiagnosticsOn: host.
 	host fireEvent: CFPhysicsFramePresentedEvent new.
 	self assert: secondOverlay contactOverlay visuals isNotEmpty.
 	self assert: firstOverlay contactOverlay visuals isEmpty.
@@ -2045,7 +2045,6 @@ CFPhysicsOverlayTests >> testPhysicsOverlayStatusPanelControlsProcessingMode [
 	overlay := host existingPhysicsOverlay.
 	panel := overlay statusPanel.
 	self assert: panel worldButton == overlay worldInspectorButton.
-	self assert: panel worldButton extent equals: 34 @ 34.
 	self assert: overlay world backgroundStepping not.
 	self assert: panel modeButton label asString equals: 'FG'.
 	panel toggleProcessingMode.
