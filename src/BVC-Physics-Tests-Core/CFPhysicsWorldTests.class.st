@@ -404,6 +404,12 @@ CFPhysicsWorldTests >> testAbandoningAnOlderSolveDoesNotReleaseTheCurrentSolve [
 	self assert: world hasSolveInFlight not.
 	^ world
 ]
+
+{ #category : 'tests - background stepping' }
+CFPhysicsWorldTests >> testWorldUsesBackgroundSteppingByDefault [
+	self assert: CFPhysicsWorld new backgroundStepping
+]
+
 { #category : 'tests - background stepping' }
 CFPhysicsWorldTests >> testBackgroundStepClaimsTheSingleSolveSlotWithoutWaiting [
 	<gtExample>
