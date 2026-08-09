@@ -21,6 +21,7 @@ CFPhysicsWorldBackgroundStep class >> on: aPhysicsWorld [
 { #category : 'private - configuration' }
 CFPhysicsWorldBackgroundStep >> futureConfiguration [
 	^ AsyncFutureExecutionConfiguration new
+		highPriority;
 		customGroup: #'Physics Pipeline'
 ]
 
