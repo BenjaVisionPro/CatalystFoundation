@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property for translation transform contribution.
+
+I provide stable property identity for ownership and retargeting while CFMotionTranslationTrack performs presentation through the shared transform channel.
+"
 Class {
 	#name : 'CFMotionTranslationProperty',
 	#superclass : 'CFMotionProperty',

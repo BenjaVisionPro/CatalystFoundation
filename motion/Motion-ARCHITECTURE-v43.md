@@ -73,7 +73,6 @@ The coordinator owns:
 - the single frame driver;
 - presentation-property ownership;
 - transform-channel identity;
-- Motion playback history.
 
 The coordinator does not:
 
@@ -131,12 +130,13 @@ A terminal Motion does not restart. Starting another playback creates another Mo
 
 Starting a Motion:
 
-1. validates its tracks and Behaviours;
-2. prepares the Timeline for playback;
-3. captures presentation origins;
-4. claims exclusive presentation properties where applicable;
+1. validates that its lifecycle can start;
+2. validates its tracks and Behaviours;
+3. atomically claims exclusive presentation properties where applicable;
+4. captures presentation origins;
 5. sends `playbackStartedIn:` once to each Behaviour;
-6. registers the Motion with the coordinator.
+6. prepares the current presentation and Timeline playback position;
+7. registers the Motion with the coordinator.
 
 Starting registers playback. Evaluation still begins on the next coordinator frame, whose elapsed time is zero.
 
@@ -314,7 +314,7 @@ Retargeting follows these rules:
 - when the property already has an owner, that same Motion is retargeted;
 - Motion identity and lifecycle are preserved;
 - the current presentation becomes the new interpolation origin;
-- registration history is not duplicated;
+- the Motion keeps one active coordinator registration;
 - when the property is unowned, the coordinator creates and starts a new Motion.
 
 Property ownership is distinct from transform composition. Translation, scale and rotation can contribute through a shared transform channel while preserving deterministic composition.

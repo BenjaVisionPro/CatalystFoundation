@@ -1,3 +1,8 @@
+"
+I represent a Motion Behaviour that contributes rotation through Motion's shared transform channel.
+
+I interpolate from a source rotation to a target rotation, preserve composition with independent transform Motions and application transforms, and support retargeting and reversal.
+"
 Class {
 	#name : 'CFMotionRotationTrack',
 	#superclass : 'CFMotionBehaviour',

@@ -1,3 +1,10 @@
+"
+I am responsible for animating an authoritative Bloc layout mutation.
+
+I capture declared participants before the mutation, wait for the resulting layout, capture their destination geometry and start one coordinated Motion between those states. I can also coordinate inserted, removed, moved and fading elements.
+
+I do not make transforms authoritative layout; the completed Bloc layout remains the source of truth.
+"
 Class {
 	#name : 'CFMotionLayoutTransaction',
 	#superclass : 'Object',

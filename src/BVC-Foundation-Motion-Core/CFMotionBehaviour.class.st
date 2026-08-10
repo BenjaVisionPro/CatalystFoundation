@@ -1,9 +1,9 @@
 "
-I own the work performed by one Motion evaluation.
+I represent the work performed by one Motion evaluation.
 
-A CFMotionTimelineTrack sends me immutable CFMotionEvaluations. I may interpolate presentation, calculate procedural values, advance a dynamic system or coordinate another runtime. I may claim one presentation property through propertyKey, or return nil when my work has no exclusive presentation owner.
+I may interpolate presentation, calculate procedural values, advance a dynamic system or adapt Motion time to another runtime. I may identify one exclusively owned presentation property with propertyKey, or answer nil when exclusive presentation ownership does not apply.
 
-I do not own temporal placement, playback position, scheduling or Motion lifecycle. playbackStartedIn: and playbackEndedWith: delimit one whole playback and are each delivered exactly once; pause and resume occur inside that lifetime. Target-backed Behaviours must remain attached to the coordinator's BlSpace, while targetless Behaviours are valid until explicitly stopped.
+I do not own temporal placement, playback position, scheduling or Motion lifecycle. playbackStartedIn: and playbackEndedWith: delimit one whole playback lifetime; pause, resume and settlement remain inside that lifetime.
 "
 Class {
 	#name : 'CFMotionBehaviour',

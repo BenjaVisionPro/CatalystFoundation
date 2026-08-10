@@ -1,3 +1,8 @@
+"
+I am a Brick aptitude that gives a button Motion-based press feedback.
+
+I install and remove the Bloc event handlers I own, create or retarget one scale Motion while the button is pressed, and release that Motion when interaction ends. I restore presentation and remove my handlers when I am uninstalled.
+"
 Class {
 	#name : 'CFMotionButtonAptitude',
 	#superclass : 'BrAptitude',

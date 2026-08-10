@@ -1,3 +1,8 @@
+"
+I represent a transform contribution that has been frozen into Motion composition.
+
+I preserve translation, scale, rotation and transform origin after an active presentation is adopted, so the shared transform channel can retain that visual result without retaining an active presentation owner.
+"
 Class {
 	#name : 'CFMotionFrozenTransformContribution',
 	#superclass : 'Object',

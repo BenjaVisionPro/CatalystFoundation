@@ -1,3 +1,8 @@
+"
+I provide user-facing, inspectable Motion demonstrations.
+
+I intentionally show both the convenience API available from element motion and the explicit composition API built from CFMotion, tracks and retargeting. I demonstrate supported application techniques rather than coordinator scheduling, ownership-map manipulation or frame-driver internals.
+"
 Class {
 	#name : 'CFMotionGalleryExamples',
 	#superclass : 'Object',

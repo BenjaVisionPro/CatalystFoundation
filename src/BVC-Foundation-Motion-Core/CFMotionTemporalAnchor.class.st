@@ -1,3 +1,8 @@
+"
+I represent one symbolic temporal anchor belonging to a CFMotionTimeline or one of its tracks.
+
+I identify timeline start/end or track start/end so temporal placement can be expressed before concrete times are resolved. I do not resolve time myself.
+"
 Class {
 	#name : 'CFMotionTemporalAnchor',
 	#superclass : 'Object',

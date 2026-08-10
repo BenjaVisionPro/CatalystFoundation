@@ -26,4 +26,4 @@ Transform Behaviours contribute through the coordinator's `CFMotionTransformChan
 
 ## Cleanup
 
-Release external resources in `playbackEndedWith:`. The terminal callback is delivered exactly once for completion, settlement, stop, cancellation, or invalid target attachment.
+Release external resources in `playbackEndedWith:`. Settlement keeps the Behaviour playback lifetime open. The terminal callback is delivered exactly once when playback actually terminates through completion, stop, cancellation, or invalid target attachment.

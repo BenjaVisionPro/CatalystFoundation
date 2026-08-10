@@ -1,3 +1,8 @@
+"
+I represent one cancellable wait for the next layout-computed event of a Bloc element.
+
+I install exactly one event handler, complete once on the next matching layout event, and remove that handler on either completion or cancellation.
+"
 Class {
 	#name : 'CFMotionNextLayoutReadiness',
 	#superclass : 'Object',

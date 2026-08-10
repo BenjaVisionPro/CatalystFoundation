@@ -1,7 +1,7 @@
 "
-I am the immutable time sample shared by every Motion advanced in one Bloc frame.
+I represent one immutable Motion presentation-time sample.
 
-absoluteTime is sampled once from the owning BlSpace clock, elapsedTime excludes inactive time and is zero on the first frame after driver activation, and frameId identifies the enclosing BlSpaceFrame. I contain no interpolation, simulation-step or playback policy.
+I carry the absolute BlSpace time, elapsed time since the previous active Motion frame and the Bloc frame identifier. I contain no easing, playback, interpolation or simulation policy.
 "
 Class {
 	#name : 'CFMotionFrame',

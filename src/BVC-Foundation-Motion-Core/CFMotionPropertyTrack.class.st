@@ -1,3 +1,8 @@
+"
+I represent a finite Motion Behaviour that interpolates one CFMotionProperty on one element.
+
+I capture the original presentation, interpolate from the current presentation to a target value, support retargeting and reversal, and participate in the coordinator's exclusive property ownership.
+"
 Class {
 	#name : 'CFMotionPropertyTrack',
 	#superclass : 'CFMotionBehaviour',

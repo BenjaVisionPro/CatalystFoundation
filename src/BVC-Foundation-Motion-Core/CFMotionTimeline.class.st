@@ -1,9 +1,9 @@
 "
-I own temporal composition and playback position for one Motion.
+I am responsible for temporal composition and playback position for one Motion.
 
-I resolve track anchors before playback, reset and advance one playhead, and evaluate my ordered tracks at that absolute timeline position. A non-repeating finite timeline clamps at its resolved end and reports completion. A repeating finite timeline keeps its finite cycle duration while playback continues without automatic completion. A timeline containing an indefinite track has no duration, progress or automatic completion.
+I own ordered tracks, symbolic anchors, resolved duration, playback position and whole-timeline repetition. I resolve temporal layout before playback and evaluate all tracks from one shared playhead.
 
-I never schedule frames, claim presentation properties or manage Motion lifecycle. CFMotion owns lifecycle, CFMotionCoordinator supplies the shared frame cadence, CFMotionTimelineTrack owns temporal placement, and CFMotionBehaviour owns the work performed by an evaluation.
+I do not schedule frames, claim presentation properties or manage Motion lifecycle.
 "
 Class {
 	#name : 'CFMotionTimeline',

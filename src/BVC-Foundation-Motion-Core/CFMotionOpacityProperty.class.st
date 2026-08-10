@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property for a Bloc element's opacity.
+
+I read and apply opacity presentation values and provide stable property identity for Motion ownership and retargeting.
+"
 Class {
 	#name : 'CFMotionOpacityProperty',
 	#superclass : 'CFMotionProperty',

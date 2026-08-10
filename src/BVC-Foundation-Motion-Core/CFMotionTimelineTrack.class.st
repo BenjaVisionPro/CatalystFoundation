@@ -1,9 +1,9 @@
 "
-I place one CFMotionBehaviour within one CFMotionTimeline.
+I am responsible for placing one CFMotionBehaviour within one CFMotionTimeline.
 
-I own temporal anchors, offsets, duration or indefinite lifetime, easing and resolved placement. Given the timeline playhead, I decide whether the Behaviour is active and create an immutable CFMotionEvaluation containing absolute timeline time, local time and, for finite tracks, eased progress.
+I own start and end anchors, offsets, finite duration or indefinite lifetime, easing and resolved placement. At each timeline position I decide whether my Behaviour is active and create its immutable CFMotionEvaluation.
 
-I forward presentation ownership, validation and whole-playback lifecycle to my Behaviour. I never own a clock, playhead, scheduling policy or presentation logic.
+I do not own a clock, playhead, scheduling policy or presentation logic.
 "
 Class {
 	#name : 'CFMotionTimelineTrack',

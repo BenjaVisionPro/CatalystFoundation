@@ -1,7 +1,7 @@
 "
-I am one Motion Behaviour that interpolates a CFMotionValue between two explicit values. Numeric transitions use the arithmetic convenience interpolator; callers may supply any three-argument interpolator for another value domain.
+I represent a finite Motion Behaviour that interpolates one CFMotionValue between explicit endpoints.
 
-Temporal placement, easing, repetition and playback all belong to CFMotionTimeline and CFMotionTimelineTrack. I only apply the progress supplied by my track. Explicit endpoints make sequential and repeating compositions deterministic: every occurrence describes the same transition and does not depend on when another track happened to prepare.
+I consume the progress supplied by my timeline track and apply the corresponding value. Temporal placement, easing, repetition and playback remain responsibilities of the surrounding timeline and track.
 "
 Class {
 	#name : 'CFMotionValueTransition',

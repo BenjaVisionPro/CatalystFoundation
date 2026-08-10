@@ -1,7 +1,7 @@
 "
-I identify one independently owned presentation property on one element.
+I represent the identity of one exclusively ownable Motion property on one target.
 
-My element and property are compared by identity so every coordinator reaches the same ownership decision for the same presentation surface. I carry no mutable ownership state; CFMotionCoordinator maps me to the Motion that currently owns that surface.
+I combine target identity with property identity so the coordinator can deterministically enforce one owning Motion per presentation property.
 "
 Class {
 	#name : 'CFMotionPropertyKey',

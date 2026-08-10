@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property used to identify element-extent ownership.
+
+I provide the property identity used by extent tracks and ownership keys. CFMotionExtentTrack performs the actual extent presentation work.
+"
 Class {
 	#name : 'CFMotionExtentProperty',
 	#superclass : 'CFMotionProperty',

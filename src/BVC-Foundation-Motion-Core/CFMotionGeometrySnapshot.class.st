@@ -1,3 +1,8 @@
+"
+I represent one captured element geometry in a declared coordinate space.
+
+I retain the element, its parent and bounds needed to compare authoritative layout before and after a mutation. CFMotionLayoutTransaction uses me to construct geometry tracks without making presentation transforms authoritative layout.
+"
 Class {
 	#name : 'CFMotionGeometrySnapshot',
 	#superclass : 'Object',

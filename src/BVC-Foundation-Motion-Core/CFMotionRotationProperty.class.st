@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property for rotational transform contribution.
+
+I provide stable property identity for ownership and retargeting while CFMotionRotationTrack performs presentation through the shared transform channel.
+"
 Class {
 	#name : 'CFMotionRotationProperty',
 	#superclass : 'CFMotionProperty',

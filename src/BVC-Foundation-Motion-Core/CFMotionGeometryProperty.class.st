@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property used to identify geometry-presentation ownership.
+
+I provide the property identity used by geometry tracks and layout retargeting. Geometry presentation itself is performed through CFMotionGeometryTrack and the shared transform channel.
+"
 Class {
 	#name : 'CFMotionGeometryProperty',
 	#superclass : 'CFMotionProperty',

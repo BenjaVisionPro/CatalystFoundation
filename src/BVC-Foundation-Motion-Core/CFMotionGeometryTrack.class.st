@@ -1,3 +1,8 @@
+"
+I represent a Motion Behaviour that presents a layout change as temporary transform geometry.
+
+I interpolate from a captured source geometry to the authoritative destination geometry through the coordinator's shared transform channel. On completion I release the temporary presentation so the destination layout remains authoritative.
+"
 Class {
 	#name : 'CFMotionGeometryTrack',
 	#superclass : 'CFMotionBehaviour',

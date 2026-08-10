@@ -1,7 +1,7 @@
 "
 I represent the lifecycle state of a CFMotion.
 
-States are canonical identity objects so Motion can compare them directly. Idle has not started, running receives coordinator frames, paused retains playback and presentation without receiving frames, settled deliberately holds destination presentation, and completed or cancelled are terminal. I contain no transition policy; CFMotion owns valid lifecycle changes.
+I provide canonical identity objects for idle, running, paused, settled, completed and cancelled states. Settled retains live presentation ownership and remains non-terminal; completed and cancelled are terminal. CFMotion owns transition policy.
 "
 Class {
 	#name : 'CFMotionState',

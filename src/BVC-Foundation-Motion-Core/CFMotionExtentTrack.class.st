@@ -1,3 +1,8 @@
+"
+I represent a Motion Behaviour that animates a Bloc element extent.
+
+I interpolate from a source extent to a target extent, participate in exclusive property ownership, support retargeting from the current presentation, and apply the configured completion policy such as retaining an explicit extent or returning to fit-content layout.
+"
 Class {
 	#name : 'CFMotionExtentTrack',
 	#superclass : 'CFMotionBehaviour',

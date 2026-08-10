@@ -1,7 +1,7 @@
 "
-I am an ordinary value whose current value may be animated by Motion.
+I represent a mutable value that can participate in Motion timelines without requiring a Bloc element.
 
-I deliberately expose only the familiar #value and #value: protocol. Domains may distribute me wherever a live value is needed, while Motion composes transitions that write me over time. I own no clock, timeline, easing or repetition policy.
+I create CFMotionValueTransitions to interpolate between values, including custom interpolation strategies. I am useful for deterministic temporal composition of non-visual or application-defined values.
 "
 Class {
 	#name : 'CFMotionValue',

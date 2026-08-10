@@ -1,3 +1,8 @@
+"
+I represent an exclusively ownable presentation property used by Motion tracks.
+
+I define how a property reads its current presentation value and applies a new value. My identity participates in CFMotionPropertyKey so one Motion can own a given property of a given element at a time.
+"
 Class {
 	#name : 'CFMotionProperty',
 	#superclass : 'Object',

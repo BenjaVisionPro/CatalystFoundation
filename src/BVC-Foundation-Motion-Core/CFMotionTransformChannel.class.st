@@ -1,9 +1,7 @@
 "
-I compose every active Motion transform contribution for one BlElement within one CFMotionCoordinator.
+I am responsible for composing all Motion transform contributions for one Bloc element.
 
-I capture the element's existing transformation when my first presentation registers. I retain presentations in stable registration order and rebuild one composite transformation whenever any contribution changes. Releasing one presentation removes only that contribution; releasing the last restores the transformation that existed before Motion took ownership.
-
-I also detect external replacement of the element transformation. In that case I abandon all presentations rather than overwrite application state I no longer own. A coordinator owns at most one of me per element and removes me when I become empty.
+I capture the element's pre-Motion transformation, retain contributions in stable registration order, apply one composite transformation and restore or bake presentation as contributors leave. If application code replaces the transformation, I abandon ownership rather than overwrite it.
 "
 Class {
 	#name : 'CFMotionTransformChannel',

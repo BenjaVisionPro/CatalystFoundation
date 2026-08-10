@@ -1,11 +1,9 @@
 "
-I own the lifecycle of one playable temporal composition.
+I am responsible for one Motion playback lifecycle.
 
-I start, pause, resume and stop playback; coordinate presentation ownership; and deliver Behaviour lifecycle callbacks exactly once. When I own a CFMotionTimeline, the timeline is the sole owner of playback position and track evaluation. Direct track compositions built without a timeline use Motion-owned normalised playback, while timeline compositions delegate playback position entirely to their timeline. Neither path owns scheduling.
+I start, pause, resume and stop playback, coordinate presentation ownership, and delimit one Behaviour playback lifetime. When I own a CFMotionTimeline, that timeline owns playback position and temporal composition. Direct track compositions use my normalised playback progress.
 
-I advance only from immutable CFMotionFrames supplied by my CFMotionCoordinator. I never read a clock, enqueue a Bloc task or create a Bloc animation. The coordinator owns scheduling and cross-Motion ownership, the timeline owns temporal composition, timeline tracks own placement, and Behaviours own presentation or dynamic work.
-
-Stopping preserves the current presentation. Explicit cancellation variants may instead restore the origin or settle at the destination. A terminal Motion cannot restart; creating a new playback creates a new Motion.
+I advance only from immutable CFMotionFrames supplied by my CFMotionCoordinator. I do not read a clock, enqueue Bloc tasks or create Bloc animations. A terminal Motion cannot restart; retargeting preserves the identity of a live Motion.
 "
 Class {
 	#name : 'CFMotion',

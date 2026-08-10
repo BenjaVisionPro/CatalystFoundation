@@ -1,3 +1,8 @@
+"
+I represent a temporary Bloc overlay positioned from a reference element within a declared container.
+
+I validate that both elements share one BlSpace, install one BlOverlayElement and release the overlay I created when asked.
+"
 Class {
 	#name : 'CFMotionOverlay',
 	#superclass : 'Object',

@@ -1,3 +1,8 @@
+"
+I represent a Motion Behaviour that contributes translation through Motion's shared transform channel.
+
+I interpolate from a source translation to a target translation, preserve composition with independent transform Motions and application transforms, and support retargeting and reversal.
+"
 Class {
 	#name : 'CFMotionTranslationTrack',
 	#superclass : 'CFMotionBehaviour',

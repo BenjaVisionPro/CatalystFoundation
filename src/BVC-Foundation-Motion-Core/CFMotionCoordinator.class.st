@@ -1,9 +1,9 @@
 "
-I coordinate all Motion playback within one BlSpace.
+I am responsible for coordinating Motion playback within one BlSpace.
 
-I own the single CFMotionFrameDriver, the stable registration order of active Motions, presentation-property ownership and transform composition channels. Each Bloc frame produces one immutable CFMotionFrame which I deliver to every active Motion in registration order.
+I own the single CFMotionFrameDriver, stable registration order of active Motions, presentation-property ownership and transform composition channels. I validate and commit property claims atomically so a Motion either owns its complete requested property set or owns none of it.
 
-I never interpret a timeline or perform presentation work. Bloc owns pulse scheduling, CFMotion owns playback lifecycle, CFMotionTimeline owns playback position, and CFMotionBehaviour owns evaluated work.
+I do not interpret timelines or perform presentation work. Bloc owns pulse scheduling, CFMotion owns playback lifecycle, CFMotionTimeline owns playback position and CFMotionBehaviour owns evaluated work.
 "
 Class {
 	#name : 'CFMotionCoordinator',

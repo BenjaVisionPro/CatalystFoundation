@@ -1,3 +1,8 @@
+"
+I represent a Motion Behaviour that contributes scale through Motion's shared transform channel.
+
+I interpolate from a source scale to a target scale, preserve composition with independent transform Motions and application transforms, and support retargeting, reversal and an explicit destination-adoption policy.
+"
 Class {
 	#name : 'CFMotionScaleTrack',
 	#superclass : 'CFMotionBehaviour',

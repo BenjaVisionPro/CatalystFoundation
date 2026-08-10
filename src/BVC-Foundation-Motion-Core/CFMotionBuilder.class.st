@@ -1,3 +1,10 @@
+"
+I provide the application-facing builder for constructing and starting common Motions on one Bloc element.
+
+I configure duration, easing and reusable presentation tracks, and I provide named motions such as fades, scale transitions and combined effects. I also provide layout-motion conveniences that create CFMotionLayoutTransactions.
+
+I build ordinary CFMotion objects. I do not schedule frames or own playback state after a Motion starts.
+"
 Class {
 	#name : 'CFMotionBuilder',
 	#superclass : 'Object',

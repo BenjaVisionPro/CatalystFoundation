@@ -1,3 +1,8 @@
+"
+I represent the exclusive Motion property for scale transform contribution.
+
+I provide stable property identity for ownership and retargeting while CFMotionScaleTrack performs presentation through the shared transform channel.
+"
 Class {
 	#name : 'CFMotionScaleProperty',
 	#superclass : 'CFMotionProperty',
