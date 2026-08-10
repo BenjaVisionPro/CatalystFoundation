@@ -2814,3 +2814,37 @@ CFMotionTest >> testCompletedMotionLeavesNoCoordinatorRuntimeOwnership [
 	self assert: coordinator frameDriver isActive not.
 	^ motion
 ]
+
+{ #category : 'examples - behaviour lifecycle' }
+CFMotionTest >> testSettledMotionKeepsBehaviourLifetimeOpenUntilTermination [
+	<gtExample>
+	| space timeline behaviour motion terminalNotifications |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	behaviour := CFMotionLifecycleRecorder new.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	terminalNotifications := OrderedCollection new.
+	motion := CFMotion timeline: timeline coordinator: space cfMotionCoordinator.
+	motion
+		holdAtDestination;
+		onTerminalDo: [ :each | terminalNotifications add: each state ];
+		start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: motion state == CFMotionState settled.
+	self assert: behaviour coordinators equals: { space cfMotionCoordinator }.
+	self assert: behaviour terminalStates isEmpty.
+	self assert: terminalNotifications isEmpty.
+	motion cancel.
+	self assert: motion isCancelled.
+	self assert: behaviour terminalStates equals: { CFMotionState cancelled }.
+	self assert: terminalNotifications equals: { CFMotionState cancelled }.
+	motion cancel.
+	self assert: behaviour terminalStates size equals: 1.
+	self assert: terminalNotifications size equals: 1.
+	^ behaviour
+]

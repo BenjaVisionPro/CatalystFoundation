@@ -109,7 +109,6 @@ CFMotion >> complete [
 		^ self ].
 	holdAtDestination ifTrue: [
 		state := CFMotionState settled.
-		tracks do: [ :each | each playbackEndedWith: state ].
 		^ self ].
 	tracks do: [ :each | each applyDestination ].
 	state := CFMotionState completed.
