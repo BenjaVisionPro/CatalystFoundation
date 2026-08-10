@@ -196,8 +196,7 @@ CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints committedJoint
 		state ifNotNil: [ background addAll: state joints ] ].
 	known := IdentitySet new.
 	known addAll: live; addAll: committed; addAll: background.
-	other := owned copy.
-	other removeAll: known.
+	other := owned reject: [ :each | known includes: each ].
 	^ {
 		#name -> 'PhysicsJoint'.
 		#total -> allJoints size.

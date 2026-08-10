@@ -30,7 +30,7 @@ CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesKnownSnapsh
 	committedOnly := live capturedForStep.
 	backgroundOnly := live capturedForStep.
 	backgroundState := CFPhysicsWorldState new
-		joints: { committedOnly. backgroundOnly };
+		joints: { committedOnly. backgroundOnly. CFPhysicsDistanceJoint new };
 		yourself.
 	health := CFPhysicsProfileHealthElement new world: world.
 	row := health
