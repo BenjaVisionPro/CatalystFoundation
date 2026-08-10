@@ -74,7 +74,6 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Motion-Examples'
 		'BVC-Foundation-Motion-Tests'
 		'CatalystPhysics'
-		'BVC-Foundation-UI-Animation'
 		'BVC-Foundation-Magritte-GT'
 		'BVC-Foundation-Magritte-Seaside'
 		'BVC-Foundation-Config-UI-Core'
@@ -99,7 +98,6 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Motion-Tests'
 		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
-	spec package: 'BVC-Foundation-UI-Animation'.
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
 	spec package: 'BVC-Foundation-Magritte-Seaside'
@@ -107,5 +105,5 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Config-UI-Core'
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Config-UI-ConfigurationEditor'
-		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'BVC-Foundation-UI-Animation' 'BVC-Foundation-Motion-Core') ]
+		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'BVC-Foundation-Motion-Core') ]
 ]
