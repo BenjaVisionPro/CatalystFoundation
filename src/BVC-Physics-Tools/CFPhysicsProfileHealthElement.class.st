@@ -140,7 +140,7 @@ CFPhysicsProfileHealthElement >> collectRetentionSample [
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectSample [
-	| bodies contacts joints islands solutions loggers |
+	| bodies contacts joints islands solutions loggers backgroundStates |
 	bodies := CFPhysicsBody allInstances.
 	contacts := CFPhysicsContact allInstances.
 	joints := CFPhysicsJoint withAllSubclasses
@@ -148,6 +148,9 @@ CFPhysicsProfileHealthElement >> collectSample [
 	islands := CFPhysicsIsland allInstances.
 	solutions := CFPhysicsWorldSolution allInstances.
 	loggers := CFPhysicsTelemetryLogger allInstances.
+	backgroundStates := (CFPhysicsWorldBackgroundStep allInstances
+		select: [ :each | each world == world ])
+		collect: #state.
 	^ {
 		#timestamp -> DateAndTime now.
 		#retention -> false.
@@ -161,10 +164,12 @@ CFPhysicsProfileHealthElement >> collectSample [
 				total: contacts size
 				owned: (contacts count: [ :each | each firstBody world == world ])
 				expected: world contacts size.
-			self rowNamed: 'PhysicsJoint'
-				total: joints size
-				owned: (joints count: [ :each | self joint: each belongsTo: world ])
-				expected: world joints size.
+			self
+				jointRetentionRowFrom: joints
+				committedJoints: (world lastStepResult
+					ifNil: [ #() ]
+					ifNotNil: [ :result | result joints ])
+				backgroundStates: backgroundStates.
 			self rowNamed: 'PhysicsIsland'
 				total: islands size
 				owned: (islands count: [ :each | self island: each belongsTo: world ])
@@ -178,6 +183,37 @@ CFPhysicsProfileHealthElement >> collectSample [
 				owned: (loggers count: [ :each | each world == world ])
 				expected: (world hasTelemetryLogger ifTrue: [ 1 ] ifFalse: [ 0 ]) }
 	} asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints committedJoints: committedJoints backgroundStates: backgroundStates [
+	| owned live committed background known other |
+	owned := (allJoints select: [ :each | self joint: each belongsTo: world ]) asIdentitySet.
+	live := world joints asIdentitySet.
+	committed := committedJoints asIdentitySet.
+	background := IdentitySet new.
+	backgroundStates do: [ :state |
+		state ifNotNil: [ background addAll: state joints ] ].
+	known := IdentitySet new.
+	known addAll: live; addAll: committed; addAll: background.
+	other := owned copy.
+	other removeAll: known.
+	^ {
+		#name -> 'PhysicsJoint'.
+		#total -> allJoints size.
+		#owned -> owned size.
+		#live -> live size.
+		#committed -> (committed reject: [ :each | live includes: each ]) size.
+		#background -> (background reject: [ :each |
+			(live includes: each) or: [ committed includes: each ] ]) size.
+		#backgroundStateCount -> (backgroundStates count: #notNil).
+		#other -> other size.
+		#difference -> other size } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> isJointRetentionRow: row [
+	^ row includesKey: #live
 ]
 
 { #category : 'private - sampling' }
@@ -245,7 +281,7 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 			profileContent addChild: (BrLabel new
 				vFitContent;
 				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
-				text: 'After GC: image / world / expected (world difference). Current pre-GC counts shown below.';
+				text: 'After GC counts classify world-related joints by retained lifecycle. Current pre-GC counts shown below.';
 				yourself).
 			(retainedSample at: #rows) do: [ :row |
 				profileContent addChild: (self labelForRetainedRow: row currentSample: aSample) ] ].
@@ -295,12 +331,28 @@ CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: current
 
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> rowSummary: row [
+	(self isJointRetentionRow: row) ifTrue: [ ^ self jointRowSummary: row ].
+	^ self standardRowSummary: row
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> standardRowSummary: row [
 	| difference sign |
 	difference := row at: #difference.
 	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
 	^ (row at: #total) asString, '/',
 		(row at: #owned) asString, '/',
 		(row at: #expected) asString, ' (', sign, difference asString, ')'
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointRowSummary: row [
+	^ (row at: #total) asString, '/', (row at: #owned) asString,
+		'  live ', (row at: #live) asString,
+		' · committed ', (row at: #committed) asString,
+		' · background ', (row at: #background) asString,
+		' (', (row at: #backgroundStateCount) asString, ' states)',
+		' · other ', (row at: #other) asString
 ]
 
 { #category : 'private - analysis' }
@@ -353,7 +405,9 @@ CFPhysicsProfileHealthElement >> alerts [
 	(retentionSamples last at: #rows) do: [ :row |
 		(self retentionTrendFor: (row at: #name)) = '↗' ifTrue: [
 			result add: '⚠ ', (row at: #name),
-				' retained excess instance count is increasing after GC.' ] ].
+				((self isJointRetentionRow: row)
+					ifTrue: [ ' unexplained retained instance count is increasing after GC.' ]
+					ifFalse: [ ' retained excess instance count is increasing after GC.' ]) ] ].
 	^ result
 ]
 
