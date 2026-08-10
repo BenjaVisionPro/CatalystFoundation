@@ -2720,3 +2720,72 @@ CFMotionTest >> testTransformPresentationStillDetectsExternalReplacementWhenValu
 	self assert: element transformation == externalTransformation.
 	^ presentation
 ]
+
+{ #category : 'examples - lifecycle' }
+CFMotionTest >> testRunningMotionCannotStartAgain [
+	<gtExample>
+	| space element motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	motion := (element motion opacity: 0.2; build) start.
+	self assert: motion isRunning.
+	self should: [ motion start ] raise: Error.
+	self assert: motion isRunning.
+	self assert: space cfMotionCoordinator activeMotions equals: { motion }.
+	^ motion
+]
+
+{ #category : 'examples - lifecycle' }
+CFMotionTest >> testCompletedMotionCannotStartAgain [
+	<gtExample>
+	| space element motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	motion := (element motion opacity: element opacity; build) start.
+	self assert: motion isCompleted.
+	self should: [ motion start ] raise: Error.
+	self assert: motion isCompleted.
+	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	^ motion
+]
+
+{ #category : 'examples - lifecycle' }
+CFMotionTest >> testCancelledMotionCannotStartAgain [
+	<gtExample>
+	| space element motion |
+	space := self spaceWithElement.
+	element := space root children first.
+	motion := (element motion opacity: 0.2; build) start.
+	motion cancel.
+	self assert: motion isCancelled.
+	self should: [ motion start ] raise: Error.
+	self assert: motion isCancelled.
+	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	^ motion
+]
+
+{ #category : 'examples - ownership' }
+CFMotionTest >> testMultiTrackMotionClaimsPropertiesAtomically [
+	<gtExample>
+	| space element coordinator scaleOwner conflicting opacityKey scaleKey |
+	space := self spaceWithElement.
+	element := space root children first.
+	coordinator := space cfMotionCoordinator.
+	scaleOwner := (element motion scale: 0.8 @ 0.8; build) start.
+	conflicting := element motion
+		opacity: 0.5;
+		scale: 0.6 @ 0.6;
+		build.
+	opacityKey := CFMotionPropertyKey
+		element: element
+		property: CFMotionOpacityProperty uniqueInstance.
+	scaleKey := CFMotionPropertyKey
+		element: element
+		property: CFMotionScaleProperty uniqueInstance.
+	self should: [ conflicting start ] raise: Error.
+	self assert: (coordinator ownerOf: opacityKey) isNil.
+	self assert: (coordinator ownerOf: scaleKey) == scaleOwner.
+	self assert: coordinator activeMotions equals: { scaleOwner }.
+	self assert: conflicting state == CFMotionState idle.
+	^ conflicting
+]

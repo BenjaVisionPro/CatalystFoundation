@@ -181,8 +181,11 @@ CFMotion >> onTerminalDo: aBlock [
 
 { #category : 'private - ownership' }
 CFMotion >> claimTracks [
+	| propertyKeys |
+	propertyKeys := OrderedCollection new.
 	tracks do: [ :each |
-		each propertyKey ifNotNil: [ :aKey | coordinator claim: aKey for: self ] ].
+		each propertyKey ifNotNil: [ :aKey | propertyKeys add: aKey ] ].
+	coordinator claimAll: propertyKeys for: self
 ]
 
 { #category : 'private - ownership' }
@@ -222,8 +225,17 @@ CFMotion >> reversed [
 		yourself
 ]
 
+{ #category : 'private - validation' }
+CFMotion >> validateCanStart [
+	state isTerminal ifTrue: [
+		self error: 'A terminal Motion cannot start again' ].
+	(state == CFMotionState running) ifTrue: [
+		self error: 'A Motion cannot start while it is already running' ]
+]
+
 { #category : 'playing' }
 CFMotion >> start [
+	self validateCanStart.
 	(self hasComponentMotions) ifTrue: [ ^ self startComponentMotions ].
 	tracks do: [ :each | each validateForExecution ].
 	self claimTracks.
@@ -235,8 +247,6 @@ CFMotion >> start [
 
 { #category : 'private - playing' }
 CFMotion >> startComponentMotions [
-	state isTerminal ifTrue: [ self error: 'A completed Motion cannot start again' ].
-	(state == CFMotionState running) ifTrue: [ self error: 'A Motion cannot start while it is already running' ].
 	state := CFMotionState running.
 	componentMotions do: [ :each |
 		each onTerminalDo: [ :anMotion | self finishComponentMotionsIfTerminal ].

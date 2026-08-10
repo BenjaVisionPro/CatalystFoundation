@@ -28,11 +28,18 @@ CFMotionCoordinator >> advanceWith: aFrame [
 
 { #category : 'ownership' }
 CFMotionCoordinator >> claim: aKey for: aMotion [
-	| currentOwner |
-	currentOwner := self ownerOf: aKey.
-	(currentOwner notNil and: [ currentOwner ~~ aMotion ])
-		ifTrue: [ self error: 'A Motion property can have only one owner in a BlSpace' ].
-	owners at: aKey put: aMotion
+	^ self claimAll: { aKey } for: aMotion
+]
+
+{ #category : 'ownership' }
+CFMotionCoordinator >> claimAll: propertyKeys for: aMotion [
+	propertyKeys do: [ :eachKey |
+		| currentOwner |
+		currentOwner := self ownerOf: eachKey.
+		(currentOwner notNil and: [ currentOwner ~~ aMotion ])
+			ifTrue: [ self error: 'A Motion property can have only one owner in a BlSpace' ] ].
+	propertyKeys do: [ :eachKey | owners at: eachKey put: aMotion ].
+	^ aMotion
 ]
 
 { #category : 'accessing' }
