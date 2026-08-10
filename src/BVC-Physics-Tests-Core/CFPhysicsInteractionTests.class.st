@@ -6,6 +6,21 @@ Class {
 }
 
 { #category : 'tests - pull interaction' }
+CFPhysicsInteractionTests >> testPhysicsFacadeReleaseDetachesItsPullInteraction [
+	<gtExample>
+	| element physics handler |
+	element := BlElement new size: 40 @ 40; yourself.
+	physics := element physics.
+	handler := physics pointerJointHandler.
+	physics release.
+	self assert: element existingPhysics isNil.
+	self assert: handler element isNil.
+	self deny: handler isEnabled.
+	physics release.
+	^ element
+]
+
+{ #category : 'tests - pull interaction' }
 CFPhysicsInteractionTests >> testPullInteractionIsInstalledThroughThePhysicsFacade [
 	<gtExample>
 	| element handler |

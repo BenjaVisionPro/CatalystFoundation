@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented Physics configuration and operat
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pointerJointHandler' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler', 'elementRemovedHandler' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -106,9 +106,24 @@ CFPhysics >> element [
 CFPhysics >> element: anElement [
 	element := anElement.
 	pointerJointHandler := CFPhysicsMouseJointHandler on: element.
-	element
-		when: BlElementRemovedFromParentEvent
-		do: [ :anEvent | self retireFromCurrentWorld ]
+	elementRemovedHandler := BlEventHandler
+		on: BlElementRemovedFromParentEvent
+		do: [ :anEvent | self retireFromCurrentWorld ].
+	element addEventHandler: elementRemovedHandler
+]
+
+{ #category : 'lifecycle' }
+CFPhysics >> release [
+	self retireFromCurrentWorld.
+	pointerJointHandler ifNotNil: [
+		pointerJointHandler release.
+		pointerJointHandler := nil ].
+	elementRemovedHandler ifNotNil: [
+		element removeEventHandler: elementRemovedHandler.
+		elementRemovedHandler := nil ].
+	(element existingPhysics == self) ifTrue: [
+		element userData removeKey: CFPhysics ifAbsent: [ ] ].
+	^ self
 ]
 
 { #category : 'children' }

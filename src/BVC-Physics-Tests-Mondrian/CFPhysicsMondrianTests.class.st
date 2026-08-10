@@ -142,15 +142,43 @@ CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldIsIdempotent [
 { #category : 'examples' }
 CFPhysicsMondrianTests >> testMondrianPhysicsCeaseBeingWorldPreservesPreexistingPhysics [
 	<gtExample>
-	| mondrian node preexistingPhysics physics |
+	| mondrian node preexistingPhysics preexistingHandler physics |
 	mondrian := GtMondrian new.
 	node := (mondrian nodes with: #(one)) first.
 	preexistingPhysics := node physics.
+	preexistingHandler := preexistingPhysics pointerJointHandler.
 	physics := mondrian physics.
 	physics beWorld.
 	physics ceaseBeingWorld.
 	self assert: node existingPhysics == preexistingPhysics.
 	self assert: node existingPhysics world isNil.
+	self assert: preexistingHandler element == node.
+	self assert: preexistingHandler isEnabled.
+	^ mondrian
+]
+
+{ #category : 'examples' }
+CFPhysicsMondrianTests >> testMondrianPhysicsRepeatedWorldSessionsReleaseSessionPullInteraction [
+	<gtExample>
+	| mondrian node firstPhysics firstHandler secondPhysics secondHandler |
+	mondrian := GtMondrian new.
+	node := (mondrian nodes with: #(one)) first.
+	mondrian physics beWorld.
+	firstPhysics := node existingPhysics.
+	firstHandler := firstPhysics pointerJointHandler.
+	mondrian physics ceaseBeingWorld.
+	self assert: node existingPhysics isNil.
+	self assert: firstHandler element isNil.
+	self deny: firstHandler isEnabled.
+	mondrian physics beWorld.
+	secondPhysics := node existingPhysics.
+	secondHandler := secondPhysics pointerJointHandler.
+	self deny: secondPhysics == firstPhysics.
+	self deny: secondHandler == firstHandler.
+	self assert: secondHandler element == node.
+	self assert: secondHandler isEnabled.
+	mondrian physics ceaseBeingWorld.
+	self assert: node existingPhysics isNil.
 	^ mondrian
 ]
 

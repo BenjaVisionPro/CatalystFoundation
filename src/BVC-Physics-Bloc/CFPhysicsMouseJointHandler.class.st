@@ -48,6 +48,28 @@ CFPhysicsMouseJointHandler >> installOn: anElement [
 		addEventHandler: endHandler
 ]
 
+{ #category : 'lifecycle' }
+CFPhysicsMouseJointHandler >> release [
+	self removeMouseJoint.
+	enabled := false.
+	element ifNil: [ ^ self ].
+	element
+		removeEventFilter: dragStartFilter;
+		removeEventFilter: dragFilter;
+		removeEventHandler: startHandler;
+		removeEventHandler: pullHandler;
+		removeEventHandler: endHandler.
+	element := nil.
+	dragStartFilter := nil.
+	dragFilter := nil.
+	startHandler := nil.
+	pullHandler := nil.
+	endHandler := nil.
+	initialPointerPosition := nil.
+	pointerPosition := nil.
+	^ self
+]
+
 { #category : 'events' }
 CFPhysicsMouseJointHandler >> beginFrom: anEvent [
 	(self shouldHandle: anEvent) ifFalse: [ ^ self ].

@@ -6,7 +6,7 @@ My responsibility is to manage the graph's participating elements, Physics Behav
 Class {
 	#name : 'CFPhysicsMondrian',
 	#superclass : 'Object',
-	#instVars : [ 'mondrian', 'world', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'preexistingPhysicsElements', 'sessionPhysicsElements' ],
+	#instVars : [ 'mondrian', 'world', 'worldPhysics', 'originalRootLayout', 'originalAutoScaleEnabled', 'originalChildrenScaleFactor', 'originalChildrenTranslationFactor', 'playbackHandler', 'sessionPhysicsFacades' ],
 	#category : 'BVC-Physics-Mondrian',
 	#package : 'BVC-Physics-Mondrian'
 }
@@ -33,7 +33,8 @@ CFPhysicsMondrian >> world [
 CFPhysicsMondrian >> beWorld [
 	world ifNotNil: [ ^ world ].
 	self captureOriginalPresentation.
-	world := mondrian root physics beWorld.
+	worldPhysics := self physicsForSessionElement: mondrian root.
+	world := worldPhysics beWorld.
 	self addNodeElements: mondrian nodeElements.
 	self prepareGraphElements.
 	self configureRootForPhysicsPresentation.
@@ -49,8 +50,9 @@ CFPhysicsMondrian >> ceaseBeingWorld [
 	self removePlaybackLifecycle.
 	formerWorld stopStepping.
 	self restoreGraphPresentation.
-	mondrian root physics ceaseBeingWorld.
-	self removeSessionPhysicsFacadesFrom: formerWorld.
+	worldPhysics ceaseBeingWorld.
+	self removeSessionPhysicsFacades.
+	worldPhysics := nil.
 	world := nil.
 	mondrian root userData removeKey: CFPhysicsMondrian ifAbsent: [ ].
 	^ self
@@ -113,12 +115,7 @@ CFPhysicsMondrian >> captureOriginalPresentation [
 	originalAutoScaleEnabled := root autoScaleEnabled.
 	originalChildrenScaleFactor := root childrenScaleFactor.
 	originalChildrenTranslationFactor := root childrenTranslationFactor.
-	preexistingPhysicsElements := IdentitySet new.
-	sessionPhysicsElements := IdentitySet new.
-	sessionPhysicsElements add: root.
-	mondrian edgeElements do: [ :each | sessionPhysicsElements add: each ].
-	self sessionElements do: [ :each |
-		each existingPhysics ifNotNil: [ preexistingPhysicsElements add: each ] ]
+	sessionPhysicsFacades := IdentitySet new
 ]
 
 { #category : 'private - world setup' }
@@ -146,7 +143,6 @@ CFPhysicsMondrian >> prepareGraphElements [
 
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> preparePhysicsPresentationOf: anEdgeElement [
-	sessionPhysicsElements ifNotNil: [ sessionPhysicsElements add: anEdgeElement ].
 	anEdgeElement fromAnchor: (CFPhysicsMondrianPresentationAnchor on: anEdgeElement fromAnchor).
 	anEdgeElement toAnchor: (CFPhysicsMondrianPresentationAnchor on: anEdgeElement toAnchor)
 ]
@@ -154,9 +150,7 @@ CFPhysicsMondrian >> preparePhysicsPresentationOf: anEdgeElement [
 { #category : 'private - world setup' }
 CFPhysicsMondrian >> addNodeElement: anElement [
 	world ifNil: [ ^ anElement ].
-	sessionPhysicsElements add: anElement.
-	anElement existingPhysics ifNotNil: [ preexistingPhysicsElements add: anElement ].
-	anElement physics
+	(self physicsForSessionElement: anElement)
 		beDynamic;
 		position: anElement position.
 	^ anElement
@@ -169,12 +163,20 @@ CFPhysicsMondrian >> addNodeElements: aCollection [
 ]
 
 { #category : 'private - teardown' }
-CFPhysicsMondrian >> removeSessionPhysicsFacadesFrom: aWorld [
-	self sessionElementsFrom: aWorld do: [ :each |
-		(preexistingPhysicsElements includes: each) ifFalse: [
-			each userData removeKey: CFPhysics ifAbsent: [ ] ] ].
-	preexistingPhysicsElements := nil.
-	sessionPhysicsElements := nil
+CFPhysicsMondrian >> removeSessionPhysicsFacades [
+	sessionPhysicsFacades ifNil: [ ^ self ].
+	sessionPhysicsFacades do: #release.
+	sessionPhysicsFacades := nil
+]
+
+{ #category : 'private - world setup' }
+CFPhysicsMondrian >> physicsForSessionElement: anElement [
+	| physics |
+	physics := anElement existingPhysics.
+	physics ifNotNil: [ ^ physics ].
+	physics := anElement physics.
+	sessionPhysicsFacades add: physics.
+	^ physics
 ]
 
 { #category : 'private - teardown' }
@@ -193,29 +195,6 @@ CFPhysicsMondrian >> restoreGraphPresentation [
 	originalAutoScaleEnabled := nil.
 	originalChildrenScaleFactor := nil.
 	originalChildrenTranslationFactor := nil
-]
-
-{ #category : 'private - teardown' }
-CFPhysicsMondrian >> sessionElements [
-	^ self sessionElementsFrom: world
-]
-
-{ #category : 'private - teardown' }
-CFPhysicsMondrian >> sessionElementsFrom: aWorld [
-	| elements |
-	elements := IdentitySet new.
-	elements add: mondrian root.
-	sessionPhysicsElements ifNotNil: [ elements addAll: sessionPhysicsElements ].
-	mondrian nodeElements do: [ :each | elements add: each ].
-	aWorld ifNotNil: [
-		aWorld bodyStatesInOrder do: [ :each | elements add: each element ] ].
-	mondrian edgeElements do: [ :each | elements add: each ].
-	^ elements
-]
-
-{ #category : 'private - teardown' }
-CFPhysicsMondrian >> sessionElementsFrom: aWorld do: aBlock [
-	(self sessionElementsFrom: aWorld) do: aBlock
 ]
 
 { #category : 'private - teardown' }
