@@ -33,7 +33,7 @@ CFPhysicsWorldMotionBehaviour >> evaluate: anEvaluation [
 		self error: 'A Physics Motion Behaviour cannot move backwards in time' ].
 	previousLocalTime := anEvaluation localTime.
 	stepDuration := world stepDuration.
-	backgroundStepping := world backgroundStepping.
+	backgroundStepping := world effectiveBackgroundStepping.
 	(backgroundStepping not and: [ world hasBackgroundExecutionInFlight ]) ifTrue: [
 		accumulatedTime := stepDuration.
 		frameConsumer frameReadyAtAlpha: 1.0.
@@ -76,7 +76,7 @@ CFPhysicsWorldMotionBehaviour >> initialize [
 CFPhysicsWorldMotionBehaviour >> playbackStartedIn: aCoordinator [
 	previousLocalTime := 0 milliSeconds.
 	accumulatedTime := 0 milliSeconds.
-	previousBackgroundStepping := world backgroundStepping.
+	previousBackgroundStepping := world effectiveBackgroundStepping.
 	active := true
 ]
 

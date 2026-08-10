@@ -6,7 +6,7 @@ My responsibility is to expose element-oriented Physics configuration and operat
 Class {
 	#name : 'CFPhysics',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'body', 'pointerJointHandler', 'elementRemovedHandler' ],
+	#instVars : [ 'element', 'body', 'pointerJointHandler', 'elementRemovedHandler', 'pullInteractionWorld' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -106,10 +106,27 @@ CFPhysics >> element [
 CFPhysics >> element: anElement [
 	element := anElement.
 	pointerJointHandler := CFPhysicsMouseJointHandler on: element.
+	pointerJointHandler interactionOwner: self.
+	pullInteractionWorld := nil.
 	elementRemovedHandler := BlEventHandler
 		on: BlElementRemovedFromParentEvent
 		do: [ :anEvent | self retireFromCurrentWorld ].
 	element addEventHandler: elementRemovedHandler
+]
+
+{ #category : 'private - interaction' }
+CFPhysics >> pullInteractionBeganIn: aWorld [
+	pullInteractionWorld == aWorld ifTrue: [ ^ self ].
+	self pullInteractionEnded.
+	pullInteractionWorld := aWorld.
+	aWorld requireForegroundSteppingFor: self
+]
+
+{ #category : 'private - interaction' }
+CFPhysics >> pullInteractionEnded [
+	pullInteractionWorld ifNotNil: [ :aWorld |
+		aWorld releaseForegroundSteppingFor: self ].
+	pullInteractionWorld := nil
 ]
 
 { #category : 'lifecycle' }

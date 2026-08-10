@@ -285,3 +285,37 @@ CFPhysicsMotionTests >> testBackgroundPlaybackContinuesPresentingWhileSolveIsInF
 	motion cancel.
 	^ behaviour
 ]
+
+{ #category : 'examples - motion integration' }
+CFPhysicsMotionTests >> testForegroundSteppingRequirementUsesSynchronousFixedStep [
+	<gtExample>
+	| space owner world presentation behaviour timeline motion |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 320 @ 200.
+	space root addChild: owner.
+	space pulse.
+	world := CFPhysicsWorldStepRecorder new
+		owner: owner;
+		stepDuration: 10 milliSeconds;
+		backgroundStepping: true;
+		foregroundSteppingRequired: true;
+		yourself.
+	presentation := CFPhysicsFrameConsumerRecorder new.
+	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
+	timeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
+	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	space pulse.
+	space time wait: 10 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepping.
+	self assert: world stepCount equals: 1.
+	self assert: world backgroundStepCount equals: 0.
+	world foregroundSteppingRequired: false.
+	space time wait: 10 milliSeconds.
+	space pulse.
+	self assert: world backgroundStepCount equals: 1.
+	motion cancel.
+	^ behaviour
+]

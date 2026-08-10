@@ -6,7 +6,7 @@ My responsibility is to verify fixed-step and background-step coordination witho
 Class {
 	#name : 'CFPhysicsWorldStepRecorder',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'backgroundStepping', 'backgroundStepCount', 'solveInFlight' ],
+	#instVars : [ 'owner', 'stepDuration', 'stepCount', 'backgroundStepping', 'backgroundStepCount', 'solveInFlight', 'foregroundSteppingRequired' ],
 	#category : 'BVC-Physics-Tests-Core',
 	#package : 'BVC-Physics-Tests-Core'
 }
@@ -18,7 +18,8 @@ CFPhysicsWorldStepRecorder >> initialize [
 	stepCount := 0.
 	backgroundStepping := false.
 	backgroundStepCount := 0.
-	solveInFlight := false
+	solveInFlight := false.
+	foregroundSteppingRequired := false
 ]
 
 { #category : 'accessing' }
@@ -45,6 +46,17 @@ CFPhysicsWorldStepRecorder >> stepDuration: aDuration [ stepDuration := aDuratio
 { #category : 'accessing' }
 CFPhysicsWorldStepRecorder >> backgroundStepping [
 	^ backgroundStepping
+]
+
+
+{ #category : 'accessing' }
+CFPhysicsWorldStepRecorder >> effectiveBackgroundStepping [
+	^ backgroundStepping and: [ foregroundSteppingRequired not ]
+]
+
+{ #category : 'controlling' }
+CFPhysicsWorldStepRecorder >> foregroundSteppingRequired: aBoolean [
+	foregroundSteppingRequired := aBoolean
 ]
 
 { #category : 'testing' }

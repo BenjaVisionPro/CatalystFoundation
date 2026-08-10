@@ -920,3 +920,42 @@ CFPhysicsWorldTests >> testVisualStateRebuildsAfterSkippedSleepingCapture [
 	^ world
 ]
 
+
+{ #category : 'tests - stepping' }
+CFPhysicsWorldTests >> testForegroundSteppingRequirementsPreserveBackgroundPreference [
+	<gtExample>
+	| world firstOwner secondOwner |
+	world := CFPhysicsWorld new.
+	firstOwner := Object new.
+	secondOwner := Object new.
+	world backgroundStepping: true.
+	self assert: world backgroundStepping.
+	self assert: world effectiveBackgroundStepping.
+	world requireForegroundSteppingFor: firstOwner.
+	self assert: world backgroundStepping.
+	self deny: world effectiveBackgroundStepping.
+	world requireForegroundSteppingFor: secondOwner.
+	world releaseForegroundSteppingFor: firstOwner.
+	self deny: world effectiveBackgroundStepping.
+	world releaseForegroundSteppingFor: secondOwner.
+	self assert: world effectiveBackgroundStepping.
+	^ world
+]
+
+{ #category : 'tests - stepping' }
+CFPhysicsWorldTests >> testForegroundSteppingRequirementInvalidatesActiveBackgroundResultWithoutChangingPreference [
+	<gtExample>
+	| world owner state |
+	owner := Object new.
+	world := CFPhysicsWorld new.
+	world backgroundStepping: true.
+	state := world captureStateIfIdle.
+	self assert: world activeSolveTicket equals: state solveTicket.
+	world requireForegroundSteppingFor: owner.
+	self assert: world backgroundStepping.
+	self deny: world effectiveBackgroundStepping.
+	self assert: world activeSolveTicket isNil.
+	world releaseForegroundSteppingFor: owner.
+	self assert: world effectiveBackgroundStepping.
+	^ world
+]

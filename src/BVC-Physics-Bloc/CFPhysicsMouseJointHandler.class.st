@@ -6,7 +6,7 @@ My responsibility is to track the pointer in world coordinates, configure the Bo
 Class {
 	#name : 'CFPhysicsMouseJointHandler',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration' ],
+	#instVars : [ 'element', 'mouseJoint', 'startHandler', 'pullHandler', 'endHandler', 'dragStartFilter', 'dragFilter', 'initialPointerPosition', 'pointerPosition', 'enabled', 'hertz', 'dampingRatio', 'maximumAcceleration', 'interactionOwner' ],
 	#category : 'BVC-Physics-Bloc',
 	#package : 'BVC-Physics-Bloc'
 }
@@ -24,7 +24,8 @@ CFPhysicsMouseJointHandler >> initialize [
 	enabled := true.
 	hertz := 30.0.
 	dampingRatio := 1.0.
-	maximumAcceleration := 1000000.0
+	maximumAcceleration := 1000000.0.
+	interactionOwner := nil
 ]
 
 { #category : 'lifecycle' }
@@ -67,6 +68,7 @@ CFPhysicsMouseJointHandler >> release [
 	endHandler := nil.
 	initialPointerPosition := nil.
 	pointerPosition := nil.
+	interactionOwner := nil.
 	^ self
 ]
 
@@ -132,27 +134,31 @@ CFPhysicsMouseJointHandler >> beginMouseJointFrom: anEvent [
 		dampingRatio: dampingRatio;
 		maximumForce: maximumAcceleration * body mass;
 		target: pointerPosition.
-	world addJoint: mouseJoint
+	world addJoint: mouseJoint.
+	interactionOwner ifNotNil: [ :anOwner |
+		anOwner pullInteractionBeganIn: world ]
 ]
 
 { #category : 'private' }
 CFPhysicsMouseJointHandler >> finishMouseJoint [
-	| activeMouseJoint world |
-	mouseJoint ifNil: [ ^ self ].
-	activeMouseJoint := mouseJoint.
-	mouseJoint := nil.
-	world := activeMouseJoint bodyB world.
-	world ifNotNil: [ activeMouseJoint remove ]
+	self removeMouseJoint
 ]
 
 { #category : 'private' }
 CFPhysicsMouseJointHandler >> removeMouseJoint [
 	| activeMouseJoint world |
-	mouseJoint ifNil: [ ^ self ].
-	activeMouseJoint := mouseJoint.
-	mouseJoint := nil.
-	world := activeMouseJoint bodyB world.
-	world ifNotNil: [ activeMouseJoint remove ]
+	mouseJoint ifNotNil: [
+		activeMouseJoint := mouseJoint.
+		mouseJoint := nil.
+		world := activeMouseJoint bodyB world.
+		world ifNotNil: [ activeMouseJoint remove ] ].
+	interactionOwner ifNotNil: [ :anOwner |
+		anOwner pullInteractionEnded ]
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsMouseJointHandler >> interactionOwner: anObject [
+	interactionOwner := anObject
 ]
 
 { #category : 'controlling' }

@@ -6,7 +6,7 @@ My responsibility is to own authoritative simulation state and advance it throug
 Class {
 	#name : 'CFPhysicsWorld',
 	#superclass : 'Object',
-	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'contactVisualRevision', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released', 'activeBackgroundStep' ],
+	#instVars : [ 'owner', 'members', 'bodyStates', 'containmentBody', 'containmentChain', 'containmentGeometry', 'containmentExtent', 'containmentBounds', 'containmentMargin', 'containmentFriction', 'containmentRestitution', 'lengthUnitsPerMetre', 'gravity', 'stepDuration', 'nextBodySequence', 'restitutionThreshold', 'hitEventThreshold', 'maximumContactPushSpeed', 'maximumLinearSpeed', 'substepCount', 'contactHertz', 'contactDampingRatio', 'contacts', 'activeContacts', 'calculationContacts', 'lastStepResult', 'stepPipeline', 'joints', 'forces', 'containment', 'nextJointSequence', 'previousTimeStep', 'warmStarting', 'simulationTime', 'stepNumber', 'behaviours', 'telemetryEnabled', 'telemetryLogger', 'telemetryCapacity', 'telemetryAnnouncer', 'telemetryAnalysisWindowSeconds', 'telemetryStepStatisticsMaximumMicroseconds', 'telemetryAnalysisInBackground', 'backgroundStepping', 'lifetimeGeneration', 'topologyRevision', 'nextSolveTicket', 'activeSolveTicket', 'visualStateConsumers', 'committedVisualState', 'calculationVisualState', 'contactVisualRevision', 'manifoldGenerator', 'persistentIslandGraph', 'geometrySignaturesByBody', 'membershipRevision', 'behaviourRevision', 'released', 'activeBackgroundStep', 'foregroundSteppingRequirements' ],
 	#category : 'BVC-Physics-Core',
 	#package : 'BVC-Physics-Core'
 }
@@ -62,6 +62,7 @@ CFPhysicsWorld >> initialize [
 	nextSolveTicket := 1.
 	activeSolveTicket := nil.
 	activeBackgroundStep := nil.
+	foregroundSteppingRequirements := IdentitySet new.
 	visualStateConsumers := 0.
 	committedVisualState := CFPhysicsWorldVisualState new.
 	calculationVisualState := CFPhysicsWorldVisualState new.
@@ -118,6 +119,7 @@ CFPhysicsWorld >> release [
 	released ifTrue: [ ^ self ].
 	released := true.
 	self invalidateLifetime.
+	foregroundSteppingRequirements removeAll.
 	"Release every resource owned by this world. My owner remains structurally
 	unchanged; its Physics facade removes the world association separately."
 	self telemetryEnabled: false.
@@ -545,6 +547,28 @@ CFPhysicsWorld >> backgroundStepping: aBoolean [
 	backgroundStepping = aBoolean ifTrue: [ ^ self ].
 	(backgroundStepping and: [ aBoolean not ]) ifTrue: [ self abandonActiveSolve ].
 	backgroundStepping := aBoolean
+]
+
+
+{ #category : 'accessing - stepping' }
+CFPhysicsWorld >> effectiveBackgroundStepping [
+	^ backgroundStepping and: [ foregroundSteppingRequirements isEmpty ]
+]
+
+{ #category : 'stepping requirements' }
+CFPhysicsWorld >> requireForegroundSteppingFor: anOwner [
+	| wasBackgroundStepping |
+	(foregroundSteppingRequirements includes: anOwner) ifTrue: [ ^ self ].
+	wasBackgroundStepping := self effectiveBackgroundStepping.
+	foregroundSteppingRequirements add: anOwner.
+	wasBackgroundStepping ifTrue: [ self abandonActiveSolve ].
+	^ self
+]
+
+{ #category : 'stepping requirements' }
+CFPhysicsWorld >> releaseForegroundSteppingFor: anOwner [
+	foregroundSteppingRequirements remove: anOwner ifAbsent: [ ].
+	^ self
 ]
 
 { #category : 'simulation identity' }

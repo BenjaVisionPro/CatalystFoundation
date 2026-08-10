@@ -699,3 +699,40 @@ CFPhysicsInteractionTests >> testChangingForceMembershipWakesOldAndNewBodies [
 	^ world
 ]
 
+
+{ #category : 'tests - pull interaction' }
+CFPhysicsInteractionTests >> testPullInteractionTemporarilyRequiresForegroundStepping [
+	<gtExample>
+	| scripter owner button world |
+	owner := BlElement new size: 200 @ 120; yourself.
+	button := BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		label: 'Drag me';
+		size: 90 @ 32;
+		addEventHandler: BlPullHandler new;
+		yourself.
+	owner addChild: button.
+	world := owner physics beWorld.
+	world
+		gravity: 0 @ 0;
+		backgroundStepping: true.
+	world owner physics makeChildrenDynamic.
+	button physics position: 20 @ 20.
+	button relocate: 20 @ 20.
+	scripter := BlScripter new element: owner.
+	scripter mouseMoveOver
+		onChildAt: 1;
+		play.
+	scripter mouseDown play.
+	scripter mouseMove
+		by: 30 @ 0;
+		play.
+	self assert: world backgroundStepping.
+	self deny: world effectiveBackgroundStepping.
+	self assert: world mouseJoints size equals: 1.
+	scripter mouseUp play.
+	self assert: world backgroundStepping.
+	self assert: world effectiveBackgroundStepping.
+	self assert: world mouseJoints isEmpty.
+	^ button
+]
