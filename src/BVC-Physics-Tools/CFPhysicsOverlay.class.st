@@ -505,14 +505,6 @@ CFPhysicsOverlay >> clearBehaviourFocus [
 	^ self
 ]
 
-{ #category : 'controlling - behaviour scope' }
-CFPhysicsOverlay >> toggleBehaviourFocus: aBehaviour [
-	"Compatibility for callers from the first Behaviour-scope implementation."
-	selectedBehaviour == aBehaviour
-		ifTrue: [ ^ self clearBehaviourFocus ]
-		ifFalse: [ ^ self selectBehaviour: aBehaviour ]
-]
-
 { #category : 'controlling' }
 CFPhysicsOverlay >> release [
 	| contactsWereEnabled |

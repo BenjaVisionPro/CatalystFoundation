@@ -38,11 +38,7 @@ CFPhysicsConstraintPreparationStage >> executeOn: aStepResult [
 	preparedJointConstraintCount := jointConstraints size.
 	aStepResult
 		contactConstraints: contactConstraints;
-		jointConstraints: jointConstraints;
-		constraints: jointConstraints;
-		solverConstraints: (self
-			contactConstraints: contactConstraints
-			followedBy: jointConstraints).
+		jointConstraints: jointConstraints.
 	^ aStepResult solverConstraints
 ]
 
@@ -79,20 +75,6 @@ CFPhysicsConstraintPreparationStage >> jointConstraintsFor: aStepResult [
 		bodyStates: aStepResult bodyStates
 		step: aStepResult step).
 	^ self orderedJointConstraints: constraints
-]
-
-{ #category : 'private - building' }
-CFPhysicsConstraintPreparationStage >> contactConstraints: contactConstraints followedBy: jointConstraints [
-	| result index |
-	result := Array new: contactConstraints size + jointConstraints size.
-	index := 1.
-	contactConstraints do: [ :constraint |
-		result at: index put: constraint.
-		index := index + 1 ].
-	jointConstraints do: [ :constraint |
-		result at: index put: constraint.
-		index := index + 1 ].
-	^ result
 ]
 
 { #category : 'executing' }

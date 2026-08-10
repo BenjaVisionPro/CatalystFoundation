@@ -5,7 +5,7 @@ I carry the mutable working state of one pipeline execution. I connect stage out
 Class {
 	#name : 'CFPhysicsStepPipelineResult',
 	#superclass : 'Object',
-	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'constraints', 'contactConstraints', 'solverConstraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs', 'islandBodyGroups' ],
+	#instVars : [ 'step', 'bodies', 'previousContacts', 'calculationContacts', 'pairs', 'contactResult', 'bodyStates', 'contactConstraints', 'solverConstraints', 'joints', 'islands', 'solver', 'sleepDecisions', 'contactSolveResults', 'hitEvents', 'contactEvents', 'orderedBodyStates', 'gravity', 'restitutionThreshold', 'stageExecutions', 'continuousStepResult', 'continuousSensorContacts', 'jointConstraints', 'collisionSuppressedBodyPairs', 'islandBodyGroups' ],
 	#category : 'BVC-Physics-Pipeline',
 	#package : 'BVC-Physics-Pipeline'
 }
@@ -17,7 +17,6 @@ CFPhysicsStepPipelineResult >> initialize [
 	previousContacts := #().
 	calculationContacts := #().
 	pairs := #().
-	constraints := #().
 	contactConstraints := #().
 	solverConstraints := #().
 	joints := #().
@@ -79,18 +78,6 @@ CFPhysicsStepPipelineResult >> orderedBodyStates [ ^ orderedBodyStates ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> orderedBodyStates: aCollection [ orderedBodyStates := aCollection asArray ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> constraints [
-	"Compatibility name for prepared joint constraints. Contacts remain separate, matching Box2D's solver model."
-	^ constraints
-]
-{ #category : 'accessing' }
-CFPhysicsStepPipelineResult >> constraints: aCollection [
-	constraints := aCollection asArray.
-	jointConstraints := constraints.
-	self rebuildSolverConstraints
-]
-
-{ #category : 'accessing' }
 CFPhysicsStepPipelineResult >> contactConstraints [
 	^ contactConstraints
 ]
@@ -106,14 +93,10 @@ CFPhysicsStepPipelineResult >> solverConstraints [
 	^ solverConstraints
 ]
 { #category : 'accessing' }
-CFPhysicsStepPipelineResult >> solverConstraints: aCollection [ solverConstraints := aCollection asArray ]
-
-{ #category : 'accessing' }
 CFPhysicsStepPipelineResult >> jointConstraints [ ^ jointConstraints ]
 { #category : 'accessing' }
 CFPhysicsStepPipelineResult >> jointConstraints: aCollection [
 	jointConstraints := aCollection asArray.
-	constraints := jointConstraints.
 	self rebuildSolverConstraints
 ]
 

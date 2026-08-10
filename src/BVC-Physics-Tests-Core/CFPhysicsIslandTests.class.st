@@ -583,7 +583,7 @@ CFPhysicsIslandTests >> testPersistentIslandGroupsDriveSolverIslandEnumeration [
 		yourself.
 	result := CFPhysicsStepPipelineResult new
 		bodies: { first. second. third };
-		constraints: { constraint };
+		jointConstraints: { constraint };
 		islandBodyGroups: { { first }. { second }. { third } };
 		yourself.
 	islands := CFPhysicsIslandBuilderStage new executeOn: result.
