@@ -8,7 +8,7 @@ I forward presentation ownership, validation and whole-playback lifecycle to my 
 Class {
 	#name : 'CFMotionTimelineTrack',
 	#superclass : 'Object',
-	#instVars : [ 'timeline', 'behaviour', 'duration', 'easing', 'repeatInterval', 'indefinite', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
+	#instVars : [ 'timeline', 'behaviour', 'duration', 'easing', 'indefinite', 'startAnchor', 'startOffset', 'hasExplicitStartPlacement', 'endAnchor', 'endOffset', 'hasEndPlacement', 'resolvedStart', 'resolvedEnd', 'trackStartAnchor', 'trackEndAnchor' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -147,10 +147,7 @@ CFMotionTimelineTrack >> initialize [
 
 { #category : 'testing' }
 CFMotionTimelineTrack >> isFinite [
-	indefinite ifTrue: [ ^ false ].
-	duration ifNil: [ ^ false ].
-	repeatInterval ifNil: [ ^ true ].
-	^ hasEndPlacement
+	^ indefinite not and: [ duration notNil ]
 ]
 
 
@@ -160,8 +157,6 @@ CFMotionTimelineTrack >> indefinite [
 		self error: 'A Motion track with a duration cannot become indefinite' ].
 	hasEndPlacement ifTrue: [
 		self error: 'An indefinite Motion track cannot have an end placement' ].
-	repeatInterval ifNotNil: [
-		self error: 'An indefinite Motion track cannot repeat' ].
 	indefinite := true.
 	^ self
 ]
@@ -225,9 +220,7 @@ CFMotionTimelineTrack >> referencesTimelineEndWith: aCollection [
 CFMotionTimelineTrack >> resolveUsing: aTimeline [
 	indefinite ifTrue: [ ^ self resolveIndefiniteUsing: aTimeline ].
 	duration ifNil: [ self error: 'A finite Motion track needs a duration' ].
-	repeatInterval
-		ifNil: [ ^ self resolveSingleOccurrenceUsing: aTimeline ]
-		ifNotNil: [ ^ self resolveRepeatedOccurrencesUsing: aTimeline ]
+	^ self resolveSingleOccurrenceUsing: aTimeline
 ]
 
 
@@ -237,17 +230,6 @@ CFMotionTimelineTrack >> resolveIndefiniteUsing: aTimeline [
 	placedStart := self resolvedStartPlacementUsing: aTimeline.
 	placedStart ifNil: [ ^ false ].
 	^ self recordResolvedStart: placedStart
-]
-
-{ #category : 'private - resolving' }
-CFMotionTimelineTrack >> resolveRepeatedOccurrencesUsing: aTimeline [
-	| placedStart placedEnd changed |
-	placedStart := self resolvedStartPlacementUsing: aTimeline.
-	placedEnd := self resolvedEndPlacementUsing: aTimeline.
-	changed := false.
-	placedStart ifNotNil: [ changed := self recordResolvedStart: placedStart ].
-	placedEnd ifNotNil: [ changed := (self recordResolvedEnd: placedEnd) or: [ changed ] ].
-	^ changed
 ]
 
 { #category : 'private - resolving' }
@@ -295,20 +277,6 @@ CFMotionTimelineTrack >> recordResolvedStart: aDuration [
 	resolvedStart ifNil: [ resolvedStart := aDuration. ^ true ].
 	resolvedStart = aDuration ifFalse: [ self error: 'A Motion track has incompatible start placements' ].
 	^ false
-]
-
-{ #category : 'accessing' }
-CFMotionTimelineTrack >> repeatInterval [
-	^ repeatInterval
-]
-
-{ #category : 'configuration' }
-CFMotionTimelineTrack >> repeatsEvery: anInterval [
-	indefinite ifTrue: [ self error: 'An indefinite Motion track cannot repeat' ].
-	anInterval <= (0 milliSeconds) ifTrue: [
-		self error: 'A Motion repeat interval must be positive' ].
-	repeatInterval := anInterval.
-	^ self
 ]
 
 { #category : 'playing' }
@@ -389,8 +357,6 @@ CFMotionTimelineTrack >> validateAnchor: anAnchor [
 CFMotionTimelineTrack >> validateForExecution [
 	indefinite ifFalse: [
 		duration ifNil: [ self error: 'A finite Motion track needs a duration' ] ].
-	repeatInterval ifNotNil: [
-		self error: 'Repeated Motion tracks are not executable yet' ].
 	behaviour ifNil: [
 		self error: 'A Motion timeline track needs a Behaviour before it can execute' ].
 	behaviour validateForExecution

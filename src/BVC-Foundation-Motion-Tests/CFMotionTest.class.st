@@ -486,7 +486,6 @@ CFMotionTest >> testTimelineDerivesItsEndAndPlacesTracksRelativeToIt [
 		duration: 1 second.
 	bounce := (CFMotionTimelineTrack in: timeline)
 		duration: 250 milliSeconds;
-		repeatsEvery: 250 milliSeconds;
 		endsAt: timeline end.
 	fade := (CFMotionTimelineTrack in: timeline)
 		duration: 100 milliSeconds;
@@ -494,7 +493,7 @@ CFMotionTest >> testTimelineDerivesItsEndAndPlacesTracksRelativeToIt [
 	self assert: timeline duration equals: 1 second.
 	self assert: path resolvedStart equals: 0 milliSeconds.
 	self assert: path resolvedEnd equals: 1 second.
-	self assert: bounce resolvedStart equals: 0 milliSeconds.
+	self assert: bounce resolvedStart equals: 750 milliSeconds.
 	self assert: bounce resolvedEnd equals: 1 second.
 	self assert: fade resolvedStart equals: 800 milliSeconds.
 	self assert: fade resolvedEnd equals: 900 milliSeconds.
