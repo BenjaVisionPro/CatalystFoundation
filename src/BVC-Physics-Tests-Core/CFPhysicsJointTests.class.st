@@ -25,7 +25,7 @@ CFPhysicsJointTests >> testDistanceJointSpringUsesBox2DSoftConstraint [
 		hertz: 3;
 		dampingRatio: 1.
 	result := world step.
-	prepared := result constraints first.
+	prepared := result jointConstraints first.
 	self assert: prepared springEnabled.
 	self assert: prepared biasRate > 0.0.
 	self assert: prepared massCoefficient > 0.0.
@@ -90,7 +90,7 @@ CFPhysicsJointTests >> testDistanceJointLengthLimitOpposesExcessExtension [
 		limitLengthFrom: 40.0 to: 60.0;
 		limitsEnabled: true.
 	result := world step.
-	prepared := result constraints first.
+	prepared := result jointConstraints first.
 	self assert: prepared upperLimitImpulse > 0.0.
 	self assert: first physics position x > 0.0.
 	self assert: second physics position x < 100.0.
@@ -119,7 +119,7 @@ CFPhysicsJointTests >> testDistanceJointAxialMotorDrivesRelativeMotion [
 		motorSpeed: 100.0;
 		maximumMotorForce: 1.0.
 	result := world step.
-	prepared := result constraints first.
+	prepared := result jointConstraints first.
 	self assert: prepared motorImpulse > 0.0.
 	self assert: first physics position x < 100.0.
 	self assert: second physics position x > 200.0.
@@ -199,10 +199,10 @@ CFPhysicsJointTests >> testDistanceJointParticipatesInTheIslandSolver [
 	joint := first physics distanceJointTo: second.
 	joint length: 50.
 	result := world step.
-	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedDistanceJoint.
+	self assert: result jointConstraints size equals: 1.
+	self assert: result jointConstraints first class equals: CFPhysicsPreparedDistanceJoint.
 	self assert: result islands size equals: 1.
-	self assert: result islands first constraints equals: result constraints.
+	self assert: result islands first constraints equals: result solverConstraints.
 	self assert: first physics position x > 0.
 	self assert: second physics position x < 100.
 	self assert: result contactSolveResults isEmpty.
@@ -227,7 +227,7 @@ CFPhysicsJointTests >> testDistanceJointCanAnchorABodyToTheWorld [
 	result := world step.
 	self assert: joint bodyA == element physics body.
 	self assert: joint bodyB isNil.
-	self assert: result constraints size equals: 1.
+	self assert: result jointConstraints size equals: 1.
 	self assert: result islands size equals: 1.
 	self assert: element physics position x > 0.
 	^ result
@@ -336,8 +336,8 @@ CFPhysicsJointTests >> testRevoluteJointParticipatesInTheIslandSolver [
 	first physics velocity: 100 @ 0.
 	result := world step.
 	self assert: world revoluteJoints equals: { joint }.
-	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedRevoluteJoint.
+	self assert: result jointConstraints size equals: 1.
+	self assert: result jointConstraints first class equals: CFPhysicsPreparedRevoluteJoint.
 	self assert: result islands size equals: 1.
 	self assert: (first physics velocity x closeTo: 0.0).
 	^ result
@@ -360,7 +360,7 @@ CFPhysicsJointTests >> testRevoluteJointCanAnchorABodyToTheWorld [
 	result := world step.
 	self assert: joint bodyA == element physics body.
 	self assert: joint bodyB isNil.
-	self assert: result constraints size equals: 1.
+	self assert: result jointConstraints size equals: 1.
 	self assert: result islands size equals: 1.
 	self assert: (element physics velocity x closeTo: 0.0).
 	^ result
@@ -408,7 +408,7 @@ CFPhysicsJointTests >> testRevoluteJointMotorDrivesRelativeAngularVelocity [
 		motorSpeed: 10.0;
 		maximumMotorTorque: 1000.0.
 	result := world step.
-	self assert: result constraints first motorEnabled.
+	self assert: result jointConstraints first motorEnabled.
 	self assert: first physics angularVelocity < 0.0.
 	self assert: second physics angularVelocity equals: 0.0.
 	^ result
@@ -435,7 +435,7 @@ CFPhysicsJointTests >> testRevoluteJointMotorTorqueIsConvertedToASubstepImpulse 
 		motorSpeed: 10.0;
 		maximumMotorTorque: 1000.0.
 	result := world step.
-	prepared := result constraints first.
+	prepared := result jointConstraints first.
 	self assert: (prepared maximumMotorImpulse closeTo: 1000.0 * world lengthUnitsPerMetre squared * result step substepTime).
 	^ result
 ]
@@ -489,7 +489,7 @@ CFPhysicsJointTests >> testRevoluteJointSpringDrivesRelativeAngleTowardItsTarget
 		dampingRatio: 1.0.
 	initialRotation := element physics rotation abs.
 	result := world step.
-	self assert: result constraints first springEnabled.
+	self assert: result jointConstraints first springEnabled.
 	self assert: joint springImpulse abs > 0.0.
 	self assert: element physics rotation abs < initialRotation.
 	^ result
@@ -514,8 +514,8 @@ CFPhysicsJointTests >> testRevoluteJointLimitsBoundAnAnchoredElementRotation [
 		limitsEnabled: true.
 	element physics rotation: 0.5.
 	result := world step.
-	self assert: result constraints first limitsEnabled.
-	self assert: result constraints first limitBaseAngle equals: -0.5.
+	self assert: result jointConstraints first limitsEnabled.
+	self assert: result jointConstraints first limitBaseAngle equals: -0.5.
 	self assert: element physics rotation abs < 0.5.
 	self assert: (element physics angularVelocity closeTo: 0.0).
 	^ result
@@ -578,8 +578,8 @@ CFPhysicsJointTests >> testPrismaticJointConstrainsAnAnchoredElementToItsAxis [
 	element physics angularVelocity: 10.0.
 	result := world step.
 	self assert: world prismaticJoints equals: { joint }.
-	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedPrismaticJoint.
+	self assert: result jointConstraints size equals: 1.
+	self assert: result jointConstraints first class equals: CFPhysicsPreparedPrismaticJoint.
 	self assert: (element physics velocity y closeTo: 0.0).
 	self assert: (element physics angularVelocity closeTo: 0.0).
 	^ result
@@ -603,8 +603,8 @@ CFPhysicsJointTests >> testPrismaticJointLimitsBoundAnAnchoredElementTravel [
 		limitsEnabled: true.
 	element physics position: 20 @ 0.
 	result := world step.
-	self assert: result constraints first limitsEnabled.
-	self assert: result constraints first baseTranslation equals: 20.0.
+	self assert: result jointConstraints first limitsEnabled.
+	self assert: result jointConstraints first baseTranslation equals: 20.0.
 	self assert: (element physics position x < 20.0).
 	self assert: (element physics velocity x closeTo: 0.0).
 	^ result
@@ -689,7 +689,7 @@ CFPhysicsJointTests >> testWeldJointPreparesIndependentLinearAndAngularSoftness 
 		angularHertz: 7.0;
 		angularDampingRatio: 0.75.
 	result := world step.
-	prepared := result constraints first.
+	prepared := result jointConstraints first.
 	self assert: prepared linearSoftnessEnabled.
 	self assert: prepared angularSoftnessEnabled.
 	self assert: (prepared linearBiasRate > 0.0).
@@ -714,8 +714,8 @@ CFPhysicsJointTests >> testWeldJointAnchorsABodyOrientationToTheWorld [
 	element physics angularVelocity: 10.0.
 	result := world step.
 	self assert: world weldJoints equals: { joint }.
-	self assert: result constraints size equals: 1.
-	self assert: result constraints first class equals: CFPhysicsPreparedWeldJoint.
+	self assert: result jointConstraints size equals: 1.
+	self assert: result jointConstraints first class equals: CFPhysicsPreparedWeldJoint.
 	self assert: result islands size equals: 1.
 	self assert: (element physics angularVelocity closeTo: 0.0).
 	^ result

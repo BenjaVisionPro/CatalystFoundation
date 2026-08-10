@@ -427,7 +427,7 @@ CFPhysicsBroadphaseTests >> testThreeOverlappingBodiesAnchoredIndependentlyToWor
 	self assert: joints size equals: 3.
 	self assert: world distanceJoints size equals: 3.
 	self assert: result activeContacts isEmpty not.
-	self assert: result constraints size >= 3.
+	self assert: result jointConstraints size >= 3.
 	^ owner
 ]
 { #category : 'tests - broadphase' }

@@ -387,8 +387,8 @@ CFPhysicsIslandTests >> testMixedJointConstraintsKeepTheWorldOrdering [
 	self
 		assert: (result joints collect: #solverCommitTarget)
 		equals: { revolute. distance }.
-	self assert: (result constraints collect: #joint) equals: result joints.
-	self assert: (result constraints collect: #class) equals: {
+	self assert: (result jointConstraints collect: #joint) equals: result joints.
+	self assert: (result jointConstraints collect: #class) equals: {
 		CFPhysicsPreparedRevoluteJoint.
 		CFPhysicsPreparedDistanceJoint }.
 	^ result

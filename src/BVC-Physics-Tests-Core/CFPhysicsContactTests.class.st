@@ -454,7 +454,7 @@ CFPhysicsContactTests >> testSensorContactParticipatesInLifecycleButNotSolving [
 	self assert: result activeContacts size equals: 1.
 	self assert: result activeContacts first isSensor.
 	self assert: result beganContacts size equals: 1.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	self assert: result contactSolveResults isEmpty.
 	self assert: result hitEvents isEmpty.
 	self assert: result contactBeganEvents size equals: 1.
@@ -484,7 +484,7 @@ CFPhysicsContactTests >> testSensorContactDoesNotJoinDynamicBodiesIntoOneIsland 
 	dynamicIslands := result islands select: [ :island |
 		island bodies anySatisfy: [ :body | body isDynamic ] ].
 	self assert: result activeContacts size equals: 2.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	self assert: dynamicIslands size equals: 2.
 	self assert: (dynamicIslands allSatisfy: [ :island |
 		(island bodies select: [ :body | body isDynamic ]) size = 1 ]).

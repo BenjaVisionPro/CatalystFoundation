@@ -850,7 +850,7 @@ CFPhysicsContinuousCollisionTests >> testStepPipelineUsesContinuousPathForSweptI
 	self assert: (moving position closeTo: 9.995 @ 0).
 	self assert: (moving velocity closeTo: 40 @ 0).
 	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	^ result
 ]
 { #category : 'tests - continuous collision' }
@@ -1103,7 +1103,7 @@ CFPhysicsContinuousCollisionTests >> testStepPipelineKeepsOverlappingSensorOnDis
 	self assert: result hasContinuousImpact not.
 	self assert: result activeContacts size equals: 1.
 	self assert: result activeContacts first isSensor.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	^ result
 ]
 { #category : 'tests - continuous collision' }
@@ -1173,7 +1173,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousSolidImpactDoesNotPublishSens
 	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
 	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	result commitBodyStates.
 	self assert: (moving position closeTo: 9.995 @ 0).
 	^ result
@@ -1209,7 +1209,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousSolidImpactIgnoresSweptSensor
 	self assert: result continuousStepResult impacts first pair secondBody equals: wall.
 	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	result commitBodyStates.
 	self assert: (moving position closeTo: 49.995 @ 0).
 	^ result
@@ -1242,7 +1242,7 @@ CFPhysicsContinuousCollisionTests >> testIgnoredSweptSensorProducesNoFollowingEn
 	self assert: secondResult beganContacts isEmpty.
 	self assert: secondResult continuedContacts isEmpty.
 	self assert: secondResult endedContacts isEmpty.
-	self assert: secondResult constraints isEmpty.
+	self assert: secondResult solverConstraints isEmpty.
 	self assert: secondResult contactBeganEvents isEmpty.
 	self assert: secondResult contactEndedEvents isEmpty.
 	self assert: secondResult continuousSensorContacts isEmpty.
@@ -1349,7 +1349,7 @@ CFPhysicsContinuousCollisionTests >> testStepPipelineIgnoresSweptSensorWithoutSo
 	self assert: result hasContinuousImpact not.
 	self assert: result continuousSensorContacts isEmpty.
 	self assert: result activeContacts isEmpty.
-	self assert: result constraints isEmpty.
+	self assert: result solverConstraints isEmpty.
 	self assert: result solver notNil.
 	moving := result bodyStates keys detect: [ :each | each sequence = 1 ].
 	result commitBodyStates.
