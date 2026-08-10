@@ -1282,7 +1282,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousClampUsesTheSolvedSweepFracti
 	^ state
 ]
 { #category : 'tests - continuous collision' }
-CFPhysicsContinuousCollisionTests >> testShapeStateDistanceProxyPreservesExistingCircleGeometry [
+CFPhysicsContinuousCollisionTests >> testDistanceProxyPreservesCapturedCircleGeometry [
 	<gtExample>
 	| element state proxy |
 	element := BlElement new
@@ -1290,7 +1290,7 @@ CFPhysicsContinuousCollisionTests >> testShapeStateDistanceProxyPreservesExistin
 		size: 20 @ 20;
 		yourself.
 	state := (CFPhysicsShapeState on: element) capturedForStep.
-	proxy := state distanceProxy.
+	proxy := CFPhysicsDistanceProxy fromShapeState: state.
 	self assert: proxy points equals: { 0 @ 0 }.
 	self assert: proxy radius equals: 10.0.
 	^ proxy

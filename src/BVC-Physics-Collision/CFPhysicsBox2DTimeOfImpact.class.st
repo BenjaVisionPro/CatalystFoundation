@@ -15,8 +15,8 @@ Class {
 { #category : 'querying' }
 CFPhysicsBox2DTimeOfImpact class >> betweenShapeState: firstShapeState sweep: firstSweep andShapeState: secondShapeState sweep: secondSweep linearSlop: linearSlop [
 	| proxyA proxyB |
-	proxyA := firstShapeState distanceProxy.
-	proxyB := secondShapeState distanceProxy.
+	proxyA := CFPhysicsDistanceProxy fromShapeState: firstShapeState.
+	proxyB := CFPhysicsDistanceProxy fromShapeState: secondShapeState.
 	^ self
 		betweenProxy: proxyA
 		sweep: firstSweep

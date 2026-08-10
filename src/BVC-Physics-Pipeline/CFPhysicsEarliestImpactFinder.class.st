@@ -229,10 +229,10 @@ CFPhysicsEarliestImpactFinder >> solvedTimeOfImpactFor: pair bodyStates: bodySta
 			radius: 0.25 * fastState shapeState minimumExtent.
 		firstProxy := pair firstBody == fastBody
 			ifTrue: [ fallbackProxy ]
-			ifFalse: [ firstShapeState distanceProxy ].
+			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: firstShapeState ].
 		secondProxy := pair secondBody == fastBody
 			ifTrue: [ fallbackProxy ]
-			ifFalse: [ secondShapeState distanceProxy ].
+			ifFalse: [ CFPhysicsDistanceProxy fromShapeState: secondShapeState ].
 		fallbackResult := CFPhysicsBox2DTimeOfImpact
 			betweenProxy: firstProxy
 			sweep: firstState solvedSweep

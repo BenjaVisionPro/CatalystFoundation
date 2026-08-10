@@ -23,7 +23,23 @@ CFPhysicsDistanceProxy class >> points: aCollection radius: aNumber [
 
 { #category : 'instance creation' }
 CFPhysicsDistanceProxy class >> fromShapeState: aShapeState [
-	^ aShapeState distanceProxy
+	| anExtent centre cornerRadius |
+	anExtent := aShapeState extent.
+	centre := anExtent / 2.0.
+	aShapeState isCircle ifTrue: [
+		^ self points: { 0 @ 0 } radius: aShapeState radius ].
+	aShapeState isRoundedRectangle ifTrue: [
+		cornerRadius := aShapeState roundedRectangleRadius.
+		^ self
+			points: {
+				(cornerRadius @ cornerRadius) - centre.
+				((anExtent x - cornerRadius) @ cornerRadius) - centre.
+				((anExtent x - cornerRadius) @ (anExtent y - cornerRadius)) - centre.
+				(cornerRadius @ (anExtent y - cornerRadius)) - centre }
+			radius: cornerRadius ].
+	^ self
+		points: (aShapeState localCollisionVertices collect: [ :each | each - centre ])
+		radius: 0.0
 ]
 
 { #category : 'accessing' }
