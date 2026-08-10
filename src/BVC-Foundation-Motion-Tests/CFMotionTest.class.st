@@ -2842,7 +2842,7 @@ CFMotionTest >> testSettledMotionKeepsBehaviourLifetimeOpenUntilTermination [
 	motion cancel.
 	self assert: motion isCancelled.
 	self assert: behaviour terminalStates equals: { CFMotionState cancelled }.
-	self assert: terminalNotifications equals: { CFMotionState cancelled }.
+	self assert: terminalNotifications asArray equals: { CFMotionState cancelled }.
 	motion cancel.
 	self assert: behaviour terminalStates size equals: 1.
 	self assert: terminalNotifications size equals: 1.
