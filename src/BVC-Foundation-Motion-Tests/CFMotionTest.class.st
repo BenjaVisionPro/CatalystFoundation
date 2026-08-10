@@ -2789,3 +2789,28 @@ CFMotionTest >> testMultiTrackMotionClaimsPropertiesAtomically [
 	self assert: conflicting state == CFMotionState idle.
 	^ conflicting
 ]
+
+{ #category : 'examples - cleanup' }
+CFMotionTest >> testCompletedMotionLeavesNoCoordinatorRuntimeOwnership [
+	<gtExample>
+	| space element coordinator motion key |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	coordinator := space cfMotionCoordinator.
+	motion := (element motion
+		duration: 100 milliSeconds;
+		opacity: 0.0;
+		build) start.
+	key := motion tracks first propertyKey.
+	self assert: (coordinator ownerOf: key) == motion.
+	self assert: coordinator frameDriver isActive.
+	space pulse.
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: motion isCompleted.
+	self assert: coordinator activeMotions isEmpty.
+	self assert: (coordinator ownerOf: key) isNil.
+	self assert: coordinator frameDriver isActive not.
+	^ motion
+]

@@ -1,14 +1,14 @@
 "
 I coordinate all Motion playback within one BlSpace.
 
-I own the single CFMotionFrameDriver, the stable registration order of active Motions, presentation-property ownership, transform composition channels and playback history. Each Bloc frame produces one immutable CFMotionFrame which I deliver to every active Motion in registration order.
+I own the single CFMotionFrameDriver, the stable registration order of active Motions, presentation-property ownership and transform composition channels. Each Bloc frame produces one immutable CFMotionFrame which I deliver to every active Motion in registration order.
 
 I never interpret a timeline or perform presentation work. Bloc owns pulse scheduling, CFMotion owns playback lifecycle, CFMotionTimeline owns playback position, and CFMotionBehaviour owns evaluated work.
 "
 Class {
 	#name : 'CFMotionCoordinator',
 	#superclass : 'Object',
-	#instVars : [ 'space', 'owners', 'activeMotions', 'history', 'transformChannels', 'frameDriver' ],
+	#instVars : [ 'space', 'owners', 'activeMotions', 'transformChannels', 'frameDriver' ],
 	#category : 'BVC-Foundation-Motion-Core',
 	#package : 'BVC-Foundation-Motion-Core'
 }
@@ -52,15 +52,11 @@ CFMotionCoordinator >> hasActiveMotions [
 	^ activeMotions isNotEmpty
 ]
 
-{ #category : 'accessing' }
-CFMotionCoordinator >> history [ ^ history asArray ]
-
 { #category : 'initialization' }
 CFMotionCoordinator >> initialize [
 	super initialize.
 	owners := Dictionary new.
 	activeMotions := OrderedCollection new.
-	history := OrderedCollection new.
 	transformChannels := IdentityDictionary new
 ]
 
@@ -71,7 +67,6 @@ CFMotionCoordinator >> ownerOf: aKey [ ^ owners at: aKey ifAbsent: [ nil ] ]
 CFMotionCoordinator >> play: aMotion [
 	(activeMotions includes: aMotion) ifFalse: [
 		activeMotions add: aMotion ].
-	(history includes: aMotion) ifFalse: [ history add: aMotion ].
 	frameDriver activate.
 	^ aMotion
 ]
