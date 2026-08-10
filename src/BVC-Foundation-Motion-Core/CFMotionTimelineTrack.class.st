@@ -124,16 +124,6 @@ CFMotionTimelineTrack >> establishesTimelineEnd [
 	^ self isFinite and: [ (self referencesTimelineEndWith: IdentitySet new) not ]
 ]
 
-{ #category : 'testing' }
-CFMotionTimelineTrack >> hasEndPlacement [
-	^ hasEndPlacement
-]
-
-{ #category : 'testing' }
-CFMotionTimelineTrack >> hasExplicitStartPlacement [
-	^ hasExplicitStartPlacement
-]
-
 { #category : 'initialization' }
 CFMotionTimelineTrack >> initialize [
 	super initialize.

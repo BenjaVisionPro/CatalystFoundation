@@ -27,11 +27,6 @@ CFMotionCoordinator >> advanceWith: aFrame [
 ]
 
 { #category : 'ownership' }
-CFMotionCoordinator >> claim: aKey for: aMotion [
-	^ self claimAll: { aKey } for: aMotion
-]
-
-{ #category : 'ownership' }
 CFMotionCoordinator >> claimAll: propertyKeys for: aMotion [
 	propertyKeys do: [ :eachKey |
 		| currentOwner |
@@ -89,11 +84,6 @@ CFMotionCoordinator >> removeActiveMotion: aMotion [
 	activeMotions remove: aMotion ifAbsent: [ nil ].
 	activeMotions ifEmpty: [ frameDriver deactivate ].
 	^ aMotion
-]
-
-{ #category : 'ownership' }
-CFMotionCoordinator >> replaceGeometryOwnersFor: geometryTracks [
-	^ self replaceGeometryOwnersForKeys: (geometryTracks collect: #propertyKey)
 ]
 
 { #category : 'ownership' }
