@@ -152,6 +152,18 @@ CFMotionTransformPresentation >> translation: aPoint [
 ]
 
 
+{ #category : 'controlling' }
+CFMotionTransformPresentation >> translation: aPoint rotation: aNumber [
+	active ifFalse: [ self begin ].
+	active ifFalse: [ ^ self ].
+	(translation = aPoint
+		and: [ rotation = aNumber
+		and: [ self ownsCurrentTransformation ] ]) ifTrue: [ ^ true ].
+	translation := aPoint.
+	rotation := aNumber.
+	^ self apply
+]
+
 { #category : 'accessing' }
 CFMotionTransformPresentation >> transformOrigin [ ^ transformOrigin ]
 
