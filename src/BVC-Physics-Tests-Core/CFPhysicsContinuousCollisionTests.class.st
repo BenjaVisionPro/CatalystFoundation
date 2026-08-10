@@ -628,6 +628,33 @@ CFPhysicsContinuousCollisionTests >> testBox2DTimeOfImpactUsesCoreDistanceAndLin
 	self assert: result fraction > 0.249.
 	^ result
 ]
+
+{ #category : 'tests - continuous collision' }
+CFPhysicsContinuousCollisionTests >> testBox2DTimeOfImpactAcceptsChainSegmentShape [
+	<gtExample>
+	| moving chain segment movingSweep segmentSweep result |
+	moving := CFPhysicsShapeState on: (BlElement new size: 20 @ 20; yourself).
+	chain := CFPhysicsChainBuilder
+		loopFrom: { 30 @ -20. 50 @ -20. 50 @ 20. 30 @ 20 }
+		material: nil
+		collisionFilter: nil.
+	segment := chain segments fourth.
+	movingSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform bodyOrigin: 40 @ 0 rotation: 0).
+	segmentSweep := CFPhysicsSweep
+		from: (CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0)
+		to: (CFPhysicsTransform bodyOrigin: 0 @ 0 rotation: 0).
+	result := CFPhysicsBox2DTimeOfImpact
+		betweenShapeState: moving
+		sweep: movingSweep
+		andShapeState: segment
+		sweep: segmentSweep
+		linearSlop: 0.005.
+	self assert: result hasImpact.
+	^ result
+]
+
 { #category : 'tests - continuous collision' }
 CFPhysicsContinuousCollisionTests >> testEarliestImpactFinderSelectsSmallestFraction [
 	<gtExample>
@@ -1282,7 +1309,7 @@ CFPhysicsContinuousCollisionTests >> testContinuousClampUsesTheSolvedSweepFracti
 	^ state
 ]
 { #category : 'tests - continuous collision' }
-CFPhysicsContinuousCollisionTests >> testDistanceProxyPreservesCapturedCircleGeometry [
+CFPhysicsContinuousCollisionTests >> testShapeStateDistanceProxyPreservesExistingCircleGeometry [
 	<gtExample>
 	| element state proxy |
 	element := BlElement new
@@ -1290,7 +1317,7 @@ CFPhysicsContinuousCollisionTests >> testDistanceProxyPreservesCapturedCircleGeo
 		size: 20 @ 20;
 		yourself.
 	state := (CFPhysicsShapeState on: element) capturedForStep.
-	proxy := CFPhysicsDistanceProxy fromShapeState: state.
+	proxy := state distanceProxy.
 	self assert: proxy points equals: { 0 @ 0 }.
 	self assert: proxy radius equals: 10.0.
 	^ proxy
