@@ -25,7 +25,7 @@ CFPhysicsWorldPlayback >> start [
 		motion isPaused ifTrue: [ motion resume ].
 		^ motion ].
 	self validateForStart.
-	coordinator := world owner space cfMotionCoordinator.
+	coordinator := world owner space motionCoordinator.
 	presentation := CFPhysicsWorldPresentation on: world in: coordinator.
 	motion := self newMotionWith: presentation in: coordinator.
 	motion onTerminalDo: [ :endedMotion | self playbackEnded: endedMotion ].

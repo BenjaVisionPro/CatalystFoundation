@@ -36,7 +36,7 @@ CFMotionGalleryExamples >> crossFade [
 		departing := active ifTrue: [ outgoing ] ifFalse: [ incoming ].
 		arriving := active ifTrue: [ incoming ] ifFalse: [ outgoing ].
 		currentMotion := ((CFMotion
-			coordinator: card space cfMotionCoordinator
+			coordinator: card space motionCoordinator
 			tracks: {
 				CFMotionPropertyTrack on: departing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
 				CFMotionPropertyTrack on: arriving property: CFMotionOpacityProperty uniqueInstance target: 1.0 })

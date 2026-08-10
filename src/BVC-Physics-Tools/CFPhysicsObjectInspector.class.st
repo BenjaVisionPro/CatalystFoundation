@@ -350,7 +350,7 @@ CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTar
 			from: aSourceExtent
 			to: aTargetExtent }.
 	aMotion := CFMotion
-		coordinator: panel space cfMotionCoordinator
+		coordinator: panel space motionCoordinator
 		tracks: tracks.
 	contentTransitionMotion := aMotion.
 	aMotion
@@ -393,7 +393,7 @@ CFPhysicsObjectInspector >> hidePanel [
 { #category : 'private - visibility' }
 CFPhysicsObjectInspector >> animateOpacityTo: anOpacity duration: aDuration [
 	| aMotion |
-	aMotion := panel space cfMotionCoordinator
+	aMotion := panel space motionCoordinator
 		retarget: (CFMotionPropertyTrack
 			on: panel
 			property: CFMotionOpacityProperty uniqueInstance

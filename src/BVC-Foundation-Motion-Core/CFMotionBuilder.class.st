@@ -112,7 +112,7 @@ CFMotionBuilder >> build [
 	element isAttachedToSceneGraph ifFalse: [
 		self error: 'A Motion subject must be attached to a BlSpace' ].
 	motion := (CFMotion
-		coordinator: element space cfMotionCoordinator
+		coordinator: element space motionCoordinator
 		tracks: self buildTracks)
 		duration: duration;
 		easing: easing;

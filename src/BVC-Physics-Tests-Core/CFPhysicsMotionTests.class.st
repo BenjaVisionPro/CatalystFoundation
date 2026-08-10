@@ -27,7 +27,7 @@ CFPhysicsMotionTests >> testPhysicsWorldBehaviourAdvancesDeterministicFixedSteps
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	self assert: presentation presentationCount equals: 1.
 	self assert: world stepCount equals: 0.
@@ -49,7 +49,7 @@ CFPhysicsMotionTests >> testPhysicsWorldBehaviourAdvancesDeterministicFixedSteps
 	self assert: motion isRunning.
 	motion cancel.
 	self assert: behaviour isActive not.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ track
 ]
 
@@ -71,7 +71,7 @@ CFPhysicsMotionTests >> testBackgroundPhysicsPlaybackRetainsFixedStepDebt [
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 100 milliSeconds.
 	space pulse.
@@ -120,7 +120,7 @@ CFPhysicsMotionTests >> testIndependentPhysicsWorldBehavioursShareOneFrameDriver
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
 	secondTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	firstMotion := (CFMotion timeline: firstTimeline coordinator: coordinator) start.
 	secondMotion := (CFMotion timeline: secondTimeline coordinator: coordinator) start.
 	space pulse.
@@ -160,7 +160,7 @@ CFPhysicsMotionTests >> testDetachedPhysicsWorldOwnerEndsPlaybackCleanly [
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 20 milliSeconds.
 	space pulse.
@@ -171,7 +171,7 @@ CFPhysicsMotionTests >> testDetachedPhysicsWorldOwnerEndsPlaybackCleanly [
 	self assert: motion isCancelled.
 	self assert: behaviour isActive not.
 	self assert: world stepCount equals: stepCountBeforeDetachment.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ behaviour
 ]
 
@@ -191,7 +191,7 @@ CFPhysicsMotionTests >> testRestartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	firstBehaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	firstTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: firstBehaviour in: firstTimeline) indefinite.
-	firstMotion := (CFMotion timeline: firstTimeline coordinator: space cfMotionCoordinator) start.
+	firstMotion := (CFMotion timeline: firstTimeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 15 milliSeconds.
 	space pulse.
@@ -201,7 +201,7 @@ CFPhysicsMotionTests >> testRestartingPhysicsSteppingBeginsAtCleanStepBoundary [
 	secondBehaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: CFPhysicsFrameConsumerRecorder new.
 	secondTimeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: secondBehaviour in: secondTimeline) indefinite.
-	secondMotion := (CFMotion timeline: secondTimeline coordinator: space cfMotionCoordinator) start.
+	secondMotion := (CFMotion timeline: secondTimeline coordinator: space motionCoordinator) start.
 	space pulse.
 	self assert: world stepCount equals: 1.
 	self assert: secondBehaviour accumulatedTime equals: 0 milliSeconds.
@@ -227,7 +227,7 @@ CFPhysicsMotionTests >> testBackgroundToForegroundRebasesAccumulatedTimeAtOneSte
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 100 milliSeconds.
 	space pulse.
@@ -268,7 +268,7 @@ CFPhysicsMotionTests >> testBackgroundPlaybackContinuesPresentingWhileSolveIsInF
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 10 milliSeconds.
 	space pulse.
@@ -305,7 +305,7 @@ CFPhysicsMotionTests >> testForegroundSteppingRequirementUsesSynchronousFixedSte
 	behaviour := CFPhysicsWorldMotionBehaviour on: world frameConsumer: presentation.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 10 milliSeconds.
 	space pulse.

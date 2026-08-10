@@ -172,7 +172,7 @@ CFPhysicsWorldPresentation >> resolvedCoordinator [
 	| owner |
 	owner := world owner.
 	(owner notNil and: [ owner isAttachedToSceneGraph ]) ifFalse: [ ^ nil ].
-	^ owner space cfMotionCoordinator
+	^ owner space motionCoordinator
 ]
 
 { #category : 'private - presenting' }

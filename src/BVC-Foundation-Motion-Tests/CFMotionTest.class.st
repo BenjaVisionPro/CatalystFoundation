@@ -542,7 +542,7 @@ CFMotionTest >> testTimelineExecutesFiniteTracksFromOneRootMotion [
 		in: timeline)
 		duration: 400 milliSeconds;
 		starts: 200 milliSeconds after: timeline start.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	self assert: motion tracks equals: { fade. translation. scale }.
 	space pulse.
 	space time wait: 500 milliSeconds.
@@ -603,7 +603,7 @@ CFMotionTest >> testCrossFadeUsesOneSharedMotion [
 	incoming opacity: 0.0.
 	space root addChild: incoming.
 	motion := (CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: {
 			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
 			CFMotionPropertyTrack on: incoming property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
@@ -630,7 +630,7 @@ CFMotionTest >> testCrossFadeCancellationRestoresBothParticipants [
 	incoming opacity: 0.0.
 	space root addChild: incoming.
 	motion := (CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: {
 			CFMotionPropertyTrack on: outgoing property: CFMotionOpacityProperty uniqueInstance target: 0.0.
 			CFMotionPropertyTrack on: incoming property: CFMotionOpacityProperty uniqueInstance target: 1.0 })
@@ -898,7 +898,7 @@ CFMotionTest >> testCoordinatorRetargetKeepsTheOwningMotion [
 	| space element coordinator first retargeted key |
 	space := self spaceWithElement.
 	element := space root children first.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	first := (element motion opacity: 0.2; build) start.
 	retargeted := coordinator
 		retarget: (CFMotionPropertyTrack
@@ -922,7 +922,7 @@ CFMotionTest >> testCoordinatorRetargetStartsAMotionForAnUnownedProperty [
 	| space element coordinator motion key |
 	space := self spaceWithElement.
 	element := space root children first.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	motion := coordinator
 		retarget: (CFMotionPropertyTrack
 			on: element
@@ -958,7 +958,7 @@ CFMotionTest >> testOpacityRetargetsFromCurrentPresentation [
 	self assert: first == second.
 	self assert: (first tracks first startValue) equals: 0.6.
 	self assert: (first tracks first targetValue) equals: 0.8.
-	self assert: (space cfMotionCoordinator ownerOf: key) == first.
+	self assert: (space motionCoordinator ownerOf: key) == first.
 	^ first
 ]
 
@@ -977,8 +977,8 @@ CFMotionTest >> testOpacityReplacementKeepsOneOwner [
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
 	self assert: first == second.
-	self assert: (space cfMotionCoordinator ownerOf: key) == first.
-	self assert: space cfMotionCoordinator activeMotions size equals: 1.
+	self assert: (space motionCoordinator ownerOf: key) == first.
+	self assert: space motionCoordinator activeMotions size equals: 1.
 	^ first
 ]
 
@@ -1008,8 +1008,8 @@ CFMotionTest >> testOpacityCleanupReleasesOwnership [
 		element: element
 		property: CFMotionOpacityProperty uniqueInstance.
 	motion cancelSettlingAtEnd.
-	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
-	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	self assert: (space motionCoordinator ownerOf: key) isNil.
+	self assert: space motionCoordinator activeMotions isEmpty.
 	^ motion
 ]
 
@@ -1289,7 +1289,7 @@ CFMotionTest >> testGeometryMotionCompletesAtAuthoritativeLayout [
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
 	motion := CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { track }.
 	motion duration: 1 milliSeconds.
 	motion start.
@@ -1428,7 +1428,7 @@ CFMotionTest >> testVerticalExtentTrackReleasesItsExactConstraintAtCompletion [
 		to: element extent x @ 140)
 		fitContentAtDestination.
 	motion := CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { track }.
 	motion duration: 1 milliSeconds.
 	motion start.
@@ -1460,7 +1460,7 @@ CFMotionTest >> testVerticalExtentCoordinatesPreviewOpacityAndReleasesLayout [
 		property: CFMotionOpacityProperty uniqueInstance
 		target: 0.58.
 	motion := CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { extentTrack. opacityTrack }.
 	motion duration: 1 milliSeconds.
 	motion start.
@@ -1812,7 +1812,7 @@ CFMotionTest >> testLayoutTransactionCancellationPreservesRunningGeometry [
 	self assert: transaction motion isCancelled.
 	self assert: transaction phase == CFMotionState cancelled.
 	self assert: transaction motion tracks first presentation isActive not.
-	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	self assert: space motionCoordinator activeMotions isEmpty.
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		closeTo: presentation bounds.
@@ -1876,7 +1876,7 @@ CFMotionTest >> testGeometryMotionComposesWithApplicationTransform [
 	destination := CFMotionGeometrySnapshot of: element in: space root.
 	track := CFMotionGeometryTrack from: source to: destination.
 	motion := CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { track }.
 	motion duration: 1 milliSeconds.
 	motion start.
@@ -1923,7 +1923,7 @@ CFMotionTest >> testLayoutTransactionRetargetsFromCurrentPresentation [
 	self assert: second motion tracks first presentation ownsCurrentTransformation.
 	self assert: (CFMotionGeometrySnapshot of: element in: space root) bounds
 		equals: second sourceSnapshots first bounds.
-	self assert: space cfMotionCoordinator activeMotions size equals: 1.
+	self assert: space motionCoordinator activeMotions size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
@@ -1986,7 +1986,7 @@ CFMotionTest >> testLayoutTransactionRetargetsMultipleParticipantsFromCurrentPre
 	self
 		assertBounds: (CFMotionGeometrySnapshot of: secondElement in: space root) bounds
 		closeTo: second sourceSnapshots second bounds.
-	self assert: space cfMotionCoordinator activeMotions size equals: 1.
+	self assert: space motionCoordinator activeMotions size equals: 1.
 	space pulse.
 	space time wait: 5 milliSeconds.
 	space pulse.
@@ -2096,7 +2096,7 @@ CFMotionTest >> testCoordinatorAdvancesActiveMotionsWithOneSharedFrame [
 	| space coordinator firstMotion secondMotion |
 	space := BlSpace new.
 	space time: BlTime simulated.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	firstMotion := CFMotionFrameRecorder new.
 	secondMotion := CFMotionFrameRecorder new.
 	coordinator play: firstMotion.
@@ -2116,7 +2116,7 @@ CFMotionTest >> testCoordinatorFrameDriverClampsBackwardTimeToZero [
 	| space coordinator motion |
 	space := BlSpace new.
 	space time: BlTime simulated.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	motion := CFMotionFrameRecorder new.
 	coordinator play: motion.
 	space pulse.
@@ -2138,7 +2138,7 @@ CFMotionTest >> testCoordinatorFrameDriverUsesSpaceTime [
 	| space coordinator motion |
 	space := BlSpace new.
 	space time: BlTime simulated.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	motion := CFMotionFrameRecorder new.
 	coordinator play: motion.
 	space pulse.
@@ -2156,7 +2156,7 @@ CFMotionTest >> testCoordinatorFrameDriverIdlesWithoutActiveMotions [
 	| space coordinator motion frameCount |
 	space := BlSpace new.
 	space time: BlTime simulated.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	motion := CFMotionFrameRecorder new.
 	coordinator play: motion.
 	space pulse.
@@ -2176,7 +2176,7 @@ CFMotionTest >> testCoordinatorFrameDriverResetsElapsedTimeAfterInactivity [
 	| space coordinator firstMotion secondMotion |
 	space := BlSpace new.
 	space time: BlTime simulated.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	firstMotion := CFMotionFrameRecorder new.
 	coordinator play: firstMotion.
 	space pulse.
@@ -2198,7 +2198,7 @@ CFMotionTest >> testMotionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
 	element := space root children first.
 	element opacity: 0.0.
 	motion := (CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { CFMotionPropertyTrack
 			on: element
 			property: CFMotionOpacityProperty uniqueInstance
@@ -2207,7 +2207,7 @@ CFMotionTest >> testMotionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
 		easing: BlEasing linear;
 		start.
 	self assert: motion isRunning.
-	self assert: space cfMotionCoordinator activeMotions equals: { motion }.
+	self assert: space motionCoordinator activeMotions equals: { motion }.
 	space pulse.
 	space time wait: 40 milliSeconds.
 	space pulse.
@@ -2216,7 +2216,7 @@ CFMotionTest >> testMotionAdvancesFromCoordinatorFramesWithoutABlocAnimation [
 	space time wait: 60 milliSeconds.
 	space pulse.
 	self assert: motion isCompleted.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	self assert: (element opacity closeTo: 1.0).
 	^ motion
 ]
@@ -2230,7 +2230,7 @@ CFMotionTest >> testMotionPauseAndResumePreservePlaybackPosition [
 	element := space root children first.
 	element opacity: 0.0.
 	motion := (CFMotion
-		coordinator: space cfMotionCoordinator
+		coordinator: space motionCoordinator
 		tracks: { CFMotionPropertyTrack
 			on: element
 			property: CFMotionOpacityProperty uniqueInstance
@@ -2244,7 +2244,7 @@ CFMotionTest >> testMotionPauseAndResumePreservePlaybackPosition [
 	pausedOpacity := element opacity.
 	motion pause.
 	self assert: motion isPaused.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	space time wait: 2 seconds.
 	space pulse.
 	self assert: element opacity equals: pausedOpacity.
@@ -2273,7 +2273,7 @@ CFMotionTest >> testMotionRetainsItsSourceTimeline [
 			target: 0.0)
 		in: timeline)
 		duration: 100 milliSeconds.
-	motion := CFMotion timeline: timeline coordinator: space cfMotionCoordinator.
+	motion := CFMotion timeline: timeline coordinator: space motionCoordinator.
 	self assert: motion timeline == timeline.
 	self assert: motion tracks equals: { track }.
 	^ motion
@@ -2297,7 +2297,7 @@ CFMotionTest >> testTimelineOwnsPlaybackPosition [
 		in: timeline)
 		duration: 100 milliSeconds;
 		easing: BlEasing linear.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 35 milliSeconds.
 	space pulse.
@@ -2331,7 +2331,7 @@ CFMotionTest >> testTimelineEvaluatesOverlappingTracksAtOnePosition [
 		starts: 25 milliSeconds after: timeline start;
 		duration: 50 milliSeconds;
 		easing: BlEasing linear.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 50 milliSeconds.
 	space pulse.
@@ -2358,14 +2358,14 @@ CFMotionTest >> testTimelineClampsAtItsResolvedEndAndCompletesMotion [
 		in: timeline)
 		duration: 40 milliSeconds;
 		easing: BlEasing linear.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 100 milliSeconds.
 	space pulse.
 	self assert: timeline elapsedTime equals: 40 milliSeconds.
 	self assert: timeline isComplete.
 	self assert: motion isCompleted.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ motion
 ]
 
@@ -2387,7 +2387,7 @@ CFMotionTest >> testTimelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [
 		starts: 20 milliSeconds after: timeline start;
 		duration: 100 milliSeconds;
 		easing: BlEasing linear.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 70 milliSeconds.
 	space pulse.
@@ -2405,7 +2405,7 @@ CFMotionTest >> testCoordinatorProvidesOneTransformChannelPerElement [
 	| space element coordinator firstChannel secondChannel |
 	space := self spaceWithElement.
 	element := space root children first.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	firstChannel := coordinator transformChannelFor: element.
 	secondChannel := coordinator transformChannelFor: element.
 	self assert: firstChannel == secondChannel.
@@ -2422,7 +2422,7 @@ CFMotionTest >> testIndependentMotionsComposeThroughTheCoordinatorTransformChann
 	element := space root children first.
 	element transformDo: [ :builder | builder translateBy: 20 @ 0 ].
 	applicationTransformation := element transformation.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	translation := CFMotionTranslationTrack
 		on: element
 		from: 0 @ 0
@@ -2462,7 +2462,7 @@ CFMotionTest >> testTransformChannelPreservesStableRegistrationOrder [
 	| space element channel first second |
 	space := self spaceWithElement.
 	element := space root children first.
-	channel := space cfMotionCoordinator transformChannelFor: element.
+	channel := space motionCoordinator transformChannelFor: element.
 	first := CFMotionTransformPresentation on: element using: channel.
 	second := CFMotionTransformPresentation on: element using: channel.
 	first scale: 2 @ 2.
@@ -2487,7 +2487,7 @@ CFMotionTest >> testIndefiniteTimelineAdvancesUntilExplicitlyCancelled [
 	behaviour := CFMotionEvaluationRecorder new.
 	timeline := CFMotionTimeline new.
 	track := (CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 40 milliSeconds.
 	space pulse.
@@ -2512,7 +2512,7 @@ CFMotionTest >> testIndefiniteTimelineAdvancesUntilExplicitlyCancelled [
 	self assert: thirdEvaluation hasProgress not.
 	motion cancel.
 	self assert: motion isCancelled.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ track
 ]
 
@@ -2537,7 +2537,7 @@ CFMotionTest >> testIndefiniteTrackMayStartAfterFiniteTimelineContent [
 	indefiniteTrack := (CFMotionTimelineTrack on: behaviour in: timeline)
 		startsAt: finiteTrack end;
 		indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 75 milliSeconds.
 	space pulse.
@@ -2561,8 +2561,8 @@ CFMotionTest >> testBehaviourLifecycleSpansPauseAndResume [
 	behaviour := CFMotionLifecycleRecorder new.
 	timeline := CFMotionTimeline new.
 	(CFMotionTimelineTrack on: behaviour in: timeline) indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
-	self assert: behaviour coordinators equals: { space cfMotionCoordinator }.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
+	self assert: behaviour coordinators equals: { space motionCoordinator }.
 	self assert: behaviour terminalStates isEmpty.
 	space pulse.
 	motion pause.
@@ -2593,7 +2593,7 @@ CFMotionTest >> testFiniteBehaviourEndsWithCompletedState [
 	(CFMotionTimelineTrack on: behaviour in: timeline)
 		duration: 50 milliSeconds;
 		easing: BlEasing linear.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 50 milliSeconds.
 	space pulse.
@@ -2617,13 +2617,13 @@ CFMotionTest >> testDetachedPresentationTargetCancelsAndCleansUpItsMotion [
 	key := motion tracks first propertyKey.
 	space pulse.
 	self assert: motion isRunning.
-	self assert: (space cfMotionCoordinator ownerOf: key) == motion.
+	self assert: (space motionCoordinator ownerOf: key) == motion.
 	space root removeChild: element.
 	space time wait: 40 milliSeconds.
 	space pulse.
 	self assert: motion isCancelled.
-	self assert: (space cfMotionCoordinator ownerOf: key) isNil.
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: (space motionCoordinator ownerOf: key) isNil.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ motion
 ]
 
@@ -2647,7 +2647,7 @@ CFMotionTest >> testStopPreservesCurrentPresentationAndTerminatesPlayback [
 	space pulse.
 	self assert: motion isCancelled.
 	self assert: (element opacity closeTo: opacityAtStop).
-	self assert: space cfMotionCoordinator hasActiveMotions not.
+	self assert: space motionCoordinator hasActiveMotions not.
 	^ motion
 ]
 
@@ -2672,7 +2672,7 @@ CFMotionTest >> testOneMotionComposesFiniteAndIndefiniteBehaviours [
 	indefiniteTrack := (CFMotionTimelineTrack on: recorder in: timeline)
 		startsAt: finiteTrack end;
 		indefinite.
-	motion := (CFMotion timeline: timeline coordinator: space cfMotionCoordinator) start.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
 	space pulse.
 	space time wait: 75 milliSeconds.
 	space pulse.
@@ -2730,7 +2730,7 @@ CFMotionTest >> testRunningMotionCannotStartAgain [
 	self assert: motion isRunning.
 	self should: [ motion start ] raise: Error.
 	self assert: motion isRunning.
-	self assert: space cfMotionCoordinator activeMotions equals: { motion }.
+	self assert: space motionCoordinator activeMotions equals: { motion }.
 	^ motion
 ]
 
@@ -2744,7 +2744,7 @@ CFMotionTest >> testCompletedMotionCannotStartAgain [
 	self assert: motion isCompleted.
 	self should: [ motion start ] raise: Error.
 	self assert: motion isCompleted.
-	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	self assert: space motionCoordinator activeMotions isEmpty.
 	^ motion
 ]
 
@@ -2759,7 +2759,7 @@ CFMotionTest >> testCancelledMotionCannotStartAgain [
 	self assert: motion isCancelled.
 	self should: [ motion start ] raise: Error.
 	self assert: motion isCancelled.
-	self assert: space cfMotionCoordinator activeMotions isEmpty.
+	self assert: space motionCoordinator activeMotions isEmpty.
 	^ motion
 ]
 
@@ -2769,7 +2769,7 @@ CFMotionTest >> testMultiTrackMotionClaimsPropertiesAtomically [
 	| space element coordinator scaleOwner conflicting opacityKey scaleKey |
 	space := self spaceWithElement.
 	element := space root children first.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	scaleOwner := (element motion scale: 0.8 @ 0.8; build) start.
 	conflicting := element motion
 		opacity: 0.5;
@@ -2796,7 +2796,7 @@ CFMotionTest >> testCompletedMotionLeavesNoCoordinatorRuntimeOwnership [
 	space := self spaceWithElement.
 	space time: BlTime simulated.
 	element := space root children first.
-	coordinator := space cfMotionCoordinator.
+	coordinator := space motionCoordinator.
 	motion := (element motion
 		duration: 100 milliSeconds;
 		opacity: 0.0;
@@ -2826,7 +2826,7 @@ CFMotionTest >> testSettledMotionKeepsBehaviourLifetimeOpenUntilTermination [
 		duration: 50 milliSeconds;
 		easing: BlEasing linear.
 	terminalNotifications := OrderedCollection new.
-	motion := CFMotion timeline: timeline coordinator: space cfMotionCoordinator.
+	motion := CFMotion timeline: timeline coordinator: space motionCoordinator.
 	motion
 		holdAtDestination;
 		onTerminalDo: [ :each | terminalNotifications add: each state ];
@@ -2835,7 +2835,7 @@ CFMotionTest >> testSettledMotionKeepsBehaviourLifetimeOpenUntilTermination [
 	space time wait: 50 milliSeconds.
 	space pulse.
 	self assert: motion state == CFMotionState settled.
-	self assert: behaviour coordinators equals: { space cfMotionCoordinator }.
+	self assert: behaviour coordinators equals: { space motionCoordinator }.
 	self assert: behaviour terminalStates isEmpty.
 	self assert: terminalNotifications isEmpty.
 	motion cancel.

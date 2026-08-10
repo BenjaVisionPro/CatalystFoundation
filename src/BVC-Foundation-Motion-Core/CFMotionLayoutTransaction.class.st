@@ -50,7 +50,7 @@ CFMotionLayoutTransaction >> coordinateSpace: anElement [
 CFMotionLayoutTransaction >> captureDestinationAndStart [
 	| tracks coordinator |
 	phase = #awaitingLayout ifFalse: [ ^ self ].
-	coordinator := container space cfMotionCoordinator.
+	coordinator := container space motionCoordinator.
 	"The completed layout is authoritative, but an outgoing geometry presenter can
 	still be transforming it. Settle that presenter before taking the destination."
 	coordinator replaceGeometryOwnersForKeys: (participants collect: [ :each |

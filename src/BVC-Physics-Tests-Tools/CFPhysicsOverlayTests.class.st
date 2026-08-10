@@ -354,7 +354,7 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAndWorldCoordinatesAgreeForPosit
 	body := world bodyStateFor: element.
 	physicsPosition := 140 @ 90.
 	body position: physicsPosition.
-	(CFPhysicsWorldPresentation on: world in: host space cfMotionCoordinator)
+	(CFPhysicsWorldPresentation on: world in: host space motionCoordinator)
 		presentAtAlpha: 1.0.
 	host space pulse.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
@@ -372,7 +372,7 @@ CFPhysicsOverlayTests >> testPhysicsPresentationReconcilesOnlyWhenWorldMembershi
 	world := host physics world.
 	presentation := CFPhysicsWorldPresentation
 		on: world
-		in: host space cfMotionCoordinator.
+		in: host space motionCoordinator.
 	presentation presentAtAlpha: 0.5.
 	addedElement := BlElement new size: 30 @ 30; yourself.
 	host addChild: addedElement.
@@ -400,7 +400,7 @@ CFPhysicsOverlayTests >> testPhysicsPresentationAnnouncesOnlyMeaningfullyChanged
 	host addEventHandler: handler.
 	presentation := CFPhysicsWorldPresentation
 		on: world
-		in: host space cfMotionCoordinator.
+		in: host space motionCoordinator.
 	presentation frameReadyAtAlpha: 0.5.
 	self assert: presentedCount equals: 1.
 	presentation frameReadyAtAlpha: 0.5.
@@ -975,7 +975,7 @@ CFPhysicsOverlayTests >> testPhysicsSpringVisualRefreshesOnPresentedFrame [
 	originalPosition := visual fromPosition.
 	first beginStep.
 	first translateBy: 45 @ 30.
-	(CFPhysicsWorldPresentation on: world in: host space cfMotionCoordinator) presentAtAlpha: 0.5.
+	(CFPhysicsWorldPresentation on: world in: host space motionCoordinator) presentAtAlpha: 0.5.
 	host space pulse.
 	host fireEvent: CFPhysicsFramePresentedEvent new.
 	context := CFPhysicsOverlayContext host: host world: world overlay: overlay.
