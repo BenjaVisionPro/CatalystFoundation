@@ -148,9 +148,9 @@ CFPhysicsProfileHealthElement >> collectSample [
 	islands := CFPhysicsIsland allInstances.
 	solutions := CFPhysicsWorldSolution allInstances.
 	loggers := CFPhysicsTelemetryLogger allInstances.
-	backgroundStates := (CFPhysicsWorldBackgroundStep allInstances
-		select: [ :each | each world == world ])
-		collect: #state.
+	backgroundStates := CFPhysicsWorldBackgroundStep allInstances
+		collect: #state
+		thenSelect: [ :each | each notNil and: [ each world == world ] ].
 	^ {
 		#timestamp -> DateAndTime now.
 		#retention -> false.
