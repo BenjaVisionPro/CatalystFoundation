@@ -70,9 +70,7 @@ BaselineOfCatalystFoundation >> defineGemStoneGroupsOn: spec [
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 	spec group: 'ui' with: #(
-		'BVC-Foundation-Motion-Core'
-		'BVC-Foundation-Motion-Examples'
-		'BVC-Foundation-Motion-Tests'
+		'CatalystMotion'
 		'CatalystPhysics'
 		'BVC-Foundation-Magritte-GT'
 		'BVC-Foundation-Magritte-Seaside'
@@ -85,6 +83,9 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec
+		baseline: 'CatalystMotion'
+		with: [ spec repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
+	spec
 		baseline: 'CatalystPhysics'
 		with: [ spec repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
 	spec
@@ -93,11 +94,6 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec
 		baseline: 'Gt4FontAwesome'
 		with: [ spec repository: 'git@github.com:BenjaVisionPro/gt4FontAwesome.git' ].
-	spec package: 'BVC-Foundation-Motion-Core'.
-	spec package: 'BVC-Foundation-Motion-Examples'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
-	spec package: 'BVC-Foundation-Motion-Tests'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core') ].
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
 	spec package: 'BVC-Foundation-Magritte-Seaside'
@@ -105,5 +101,5 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Config-UI-Core'
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Config-UI-ConfigurationEditor'
-		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'BVC-Foundation-Motion-Core') ]
+		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'CatalystMotion') ]
 ]

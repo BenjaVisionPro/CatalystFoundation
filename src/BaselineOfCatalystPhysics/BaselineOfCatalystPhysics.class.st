@@ -17,6 +17,12 @@ BaselineOfCatalystPhysics >> baseline: spec [
 { #category : 'baseline' }
 BaselineOfCatalystPhysics >> defineDependenciesOn: spec [
 	spec
+		baseline: 'CatalystMotion'
+		with: [
+			spec
+				loads: #('core');
+				repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
+	spec
 		baseline: 'Telemetry'
 		with: [ spec repository: 'github://feenkcom/pharo-telemetry:main/src' ].
 	spec
@@ -26,14 +32,12 @@ BaselineOfCatalystPhysics >> defineDependenciesOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystPhysics >> definePackagesOn: spec [
-	"Foundation dependencies remain temporary until Motion and GT support migrate."
+	"Foundation GT dependencies remain temporary until GT support migrates."
 	spec package: 'BVC-Foundation-Core'.
 	spec package: 'BVC-Foundation-Magritte-Core'
 		with: [ spec requires: #('BVC-Foundation-Core') ].
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
-	spec package: 'BVC-Foundation-Motion-Core'.
-
 	spec package: 'BVC-Physics-Model'.
 	spec package: 'BVC-Physics-Collision'
 		with: [ spec requires: #('BVC-Physics-Model') ].
@@ -51,7 +55,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 	spec package: 'BVC-Physics-Behaviours'
 		with: [ spec requires: #('BVC-Physics-Core') ].
 	spec package: 'BVC-Physics-Motion'
-		with: [ spec requires: #('BVC-Foundation-Motion-Core' 'BVC-Physics-Core') ].
+		with: [ spec requires: #('CatalystMotion' 'BVC-Physics-Core') ].
 	spec package: 'BVC-Physics-Tools'
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Physics-Mondrian'
