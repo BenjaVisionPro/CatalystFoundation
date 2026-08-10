@@ -55,7 +55,7 @@ BaselineOfCatalystPhysics >> definePackagesOn: spec [
 	spec package: 'BVC-Physics-Tools'
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Pipeline' 'BVC-Physics-Motion' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Physics-Mondrian'
-		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Motion' 'BVC-Physics-Tools') ].
+		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Motion') ].
 	spec package: 'BVC-Physics-Examples'
 		with: [ spec requires: #('BVC-Physics-Core' 'BVC-Physics-Behaviours' 'BVC-Physics-Motion' 'BVC-Physics-Mondrian' 'BVC-Physics-Tools') ].
 
