@@ -145,3 +145,61 @@ CFPhysicsProfileHealthElementTests >> testInstanceStatisticsLineSeparatesLabelFr
 	self assert: line children second text asString
 		equals: 'image 455 · related 116 · live 29 · captured 87 · unexplained 0'
 ]
+
+{ #category : 'tests - retention' }
+CFPhysicsProfileHealthElementTests >> testPipelineResultBelongsToWorldWithoutCapturedJoints [
+	| world result health |
+	world := self worldWithOneJoint.
+	result := CFPhysicsStepPipelineResult new
+		bodies: world bodyStatesInOrder;
+		yourself.
+	health := CFPhysicsProfileHealthElement new world: world.
+	self assert: (health pipelineResult: result belongsTo: world)
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testBodyInstanceSummaryUsesLifecycleRoles [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := {
+		#total -> 33.
+		#owned -> 33.
+		#memberCount -> 31.
+		#containmentCount -> 1.
+		#stateOwnedCount -> 32.
+		#resultOwnedCount -> 32.
+		#otherCount -> 0 } asDictionary.
+	self assert: (health bodyInstanceSummaryFor: row)
+		equals: 'image 33 · related 33 · members 31 · containment 1 · state-owned 32 · result-owned 32 · other 0'
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testContactInstanceSummaryUsesLifecycleRoles [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := {
+		#total -> 10.
+		#owned -> 10.
+		#committedCount -> 2.
+		#calculationCount -> 2.
+		#stateOwnedCount -> 4.
+		#previousResultOwnedCount -> 6.
+		#currentResultOwnedCount -> 6.
+		#otherCount -> 0 } asDictionary.
+	self assert: (health contactInstanceSummaryFor: row)
+		equals: 'image 10 · related 10 · committed 2 · calculation 2 · state-owned 4 · previous-result 6 · current-result 6 · other 0'
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testSolutionInstanceSummaryUsesLifecycleRoles [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := {
+		#total -> 3.
+		#owned -> 3.
+		#backgroundStepOwnedCount -> 0.
+		#futureOwnedCount -> 0.
+		#otherCount -> 3 } asDictionary.
+	self assert: (health solutionInstanceSummaryFor: row)
+		equals: 'image 3 · world 3 · background-step 0 · future 0 · other 3'
+]

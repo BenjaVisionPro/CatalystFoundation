@@ -140,7 +140,7 @@ CFPhysicsProfileHealthElement >> collectRetentionSample [
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectSample [
-	| bodies contacts joints islands worldStates backgroundSteps solutions pipelineResults futurePromises loggers |
+	| bodies contacts joints islands worldStates backgroundSteps solutions pipelineResults futurePromises loggers worldSolutions worldPipelineResults |
 	bodies := CFPhysicsBody allInstances.
 	contacts := CFPhysicsContact allInstances.
 	joints := CFPhysicsJoint withAllSubclasses
@@ -152,19 +152,23 @@ CFPhysicsProfileHealthElement >> collectSample [
 	pipelineResults := CFPhysicsStepPipelineResult allInstances.
 	futurePromises := AsyncFuturePromise allInstances.
 	loggers := CFPhysicsTelemetryLogger allInstances.
+	worldSolutions := solutions select: [ :each | each world == world ].
+	worldPipelineResults := self
+		pipelineResultsForWorldFrom: pipelineResults
+		solutions: worldSolutions.
 	^ {
 		#timestamp -> DateAndTime now.
 		#retention -> false.
 		#heapSize -> (Smalltalk vm parameterAt: 3).
 		#rows -> {
-			self rowNamed: 'PhysicsBody'
-				total: bodies size
-				owned: (bodies count: [ :each | each world == world ])
-				expected: world members size.
-			self rowNamed: 'PhysicsContact'
-				total: contacts size
-				owned: (contacts count: [ :each | each firstBody world == world ])
-				expected: world contacts size.
+			self
+				bodyRetentionRowFrom: bodies
+				worldStates: worldStates
+				pipelineResults: worldPipelineResults.
+			self
+				contactRetentionRowFrom: contacts
+				worldStates: worldStates
+				pipelineResults: worldPipelineResults.
 			self
 				jointRetentionRowFrom: joints
 				worldStates: worldStates
@@ -176,15 +180,131 @@ CFPhysicsProfileHealthElement >> collectSample [
 				total: islands size
 				owned: (islands count: [ :each | self island: each belongsTo: world ])
 				expected: world persistentIslandGraph islands size.
-			self rowNamed: 'PhysicsWorldSolution'
-				total: solutions size
-				owned: (solutions count: [ :each | each world == world ])
-				expected: (world activeSolveTicket ifNil: [ 0 ] ifNotNil: [ 1 ]).
+			self
+				solutionRetentionRowFrom: worldSolutions
+				backgroundSteps: backgroundSteps
+				futurePromises: futurePromises.
 			self rowNamed: 'PhysicsTelemetryLogger'
 				total: loggers size
 				owned: (loggers count: [ :each | each world == world ])
 				expected: (world hasTelemetryLogger ifTrue: [ 1 ] ifFalse: [ 0 ]) }
 	} asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> pipelineResultsForWorldFrom: allPipelineResults solutions: worldSolutions [
+	| known |
+	known := IdentitySet new.
+	world lastStepResult ifNotNil: [ :each | known add: each ].
+	worldSolutions do: [ :each |
+		each pipelineResult ifNotNil: [ :result | known add: result ] ].
+	allPipelineResults do: [ :result |
+		((known includes: result) not and: [
+			self pipelineResultStructurallyBelongsToWorld: result ]) ifTrue: [
+				known add: result ] ].
+	^ known asArray
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> pipelineResultStructurallyBelongsToWorld: aPipelineResult [
+	aPipelineResult bodies anySatisfy: [ :body | body world == world ] ifTrue: [ ^ true ].
+	aPipelineResult previousContacts anySatisfy: [ :contact |
+		contact firstBody world == world ] ifTrue: [ ^ true ].
+	(aPipelineResult contactResult notNil and: [
+		aPipelineResult contacts anySatisfy: [ :contact |
+			contact firstBody world == world ] ]) ifTrue: [ ^ true ].
+	^ false
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> bodyRetentionRowFrom: allBodies worldStates: allWorldStates pipelineResults: worldPipelineResults [
+	| related members currentContainment stateOwned resultOwned known other |
+	related := (allBodies select: [ :each | each world == world ]) asIdentitySet.
+	members := world bodyStatesInOrder asIdentitySet.
+	currentContainment := IdentitySet new.
+	world containmentBoundaryBody ifNotNil: [ :body | currentContainment add: body ].
+	stateOwned := IdentitySet new.
+	(allWorldStates select: [ :each | each world == world ]) do: [ :state |
+		state bodies do: [ :body | stateOwned add: body ] ].
+	resultOwned := IdentitySet new.
+	worldPipelineResults do: [ :result |
+		result bodies do: [ :body | resultOwned add: body ] ].
+	known := IdentitySet new.
+	known addAll: members; addAll: currentContainment; addAll: stateOwned; addAll: resultOwned.
+	other := related reject: [ :each | known includes: each ].
+	^ {
+		#name -> 'PhysicsBody'.
+		#total -> allBodies size.
+		#owned -> related size.
+		#memberCount -> members size.
+		#containmentCount -> (related count: [ :each | currentContainment includes: each ]).
+		#stateOwnedCount -> (related count: [ :each | stateOwned includes: each ]).
+		#resultOwnedCount -> (related count: [ :each | resultOwned includes: each ]).
+		#otherCount -> other size.
+		#difference -> other size } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> contactRetentionRowFrom: allContacts worldStates: allWorldStates pipelineResults: worldPipelineResults [
+	| related committed calculation stateOwned previousResultOwned currentResultOwned known other |
+	related := (allContacts select: [ :each | each firstBody world == world ]) asIdentitySet.
+	committed := world contacts asIdentitySet.
+	calculation := world instVarNamed: 'calculationContacts'.
+	calculation := calculation asIdentitySet.
+	stateOwned := IdentitySet new.
+	(allWorldStates select: [ :each | each world == world ]) do: [ :state |
+		state contacts do: [ :contact | stateOwned add: contact ].
+		state calculationContacts do: [ :contact | stateOwned add: contact ] ].
+	previousResultOwned := IdentitySet new.
+	currentResultOwned := IdentitySet new.
+	worldPipelineResults do: [ :result |
+		result previousContacts do: [ :contact | previousResultOwned add: contact ].
+		result contactResult ifNotNil: [
+			result contacts do: [ :contact | currentResultOwned add: contact ] ] ].
+	known := IdentitySet new.
+	known
+		addAll: committed;
+		addAll: calculation;
+		addAll: stateOwned;
+		addAll: previousResultOwned;
+		addAll: currentResultOwned.
+	other := related reject: [ :each | known includes: each ].
+	^ {
+		#name -> 'PhysicsContact'.
+		#total -> allContacts size.
+		#owned -> related size.
+		#committedCount -> committed size.
+		#calculationCount -> calculation size.
+		#stateOwnedCount -> (related count: [ :each | stateOwned includes: each ]).
+		#previousResultOwnedCount -> (related count: [ :each | previousResultOwned includes: each ]).
+		#currentResultOwnedCount -> (related count: [ :each | currentResultOwned includes: each ]).
+		#otherCount -> other size.
+		#difference -> other size } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> solutionRetentionRowFrom: worldSolutions backgroundSteps: allBackgroundSteps futurePromises: allFuturePromises [
+	| stepOwned futureOwned other |
+	stepOwned := IdentitySet new.
+	allBackgroundSteps do: [ :step |
+		| candidate |
+		candidate := step instVarNamed: 'solution'.
+		(candidate notNil and: [ candidate world == world ]) ifTrue: [
+			stepOwned add: candidate ] ].
+	futureOwned := IdentitySet new.
+	worldSolutions do: [ :solution |
+		(self solution: solution isHeldByAny: allFuturePromises) ifTrue: [
+			futureOwned add: solution ] ].
+	other := worldSolutions reject: [ :solution |
+		(stepOwned includes: solution) or: [ futureOwned includes: solution ] ].
+	^ {
+		#name -> 'PhysicsWorldSolution'.
+		#total -> CFPhysicsWorldSolution allInstances size.
+		#owned -> worldSolutions size.
+		#backgroundStepOwnedCount -> stepOwned size.
+		#futureOwnedCount -> futureOwned size.
+		#otherCount -> other size.
+		#difference -> other size } asDictionary
 ]
 
 { #category : 'private - sampling' }
@@ -232,8 +352,15 @@ CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: a
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWorld [
-	^ aPipelineResult joints anySatisfy: [ :joint |
-		joint solverCommitTarget world == aWorld ]
+	(aPipelineResult joints anySatisfy: [ :joint |
+		joint solverCommitTarget world == aWorld ]) ifTrue: [ ^ true ].
+	aPipelineResult bodies anySatisfy: [ :body | body world == aWorld ] ifTrue: [ ^ true ].
+	aPipelineResult previousContacts anySatisfy: [ :contact |
+		contact firstBody world == aWorld ] ifTrue: [ ^ true ].
+	(aPipelineResult contactResult notNil and: [
+		aPipelineResult contacts anySatisfy: [ :contact |
+			contact firstBody world == aWorld ] ]) ifTrue: [ ^ true ].
+	^ false
 ]
 
 { #category : 'private - sampling' }
@@ -451,6 +578,9 @@ CFPhysicsProfileHealthElement >> currentSummaryFor: row [
 
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
+	(row includesKey: #memberCount) ifTrue: [ ^ self bodyInstanceSummaryFor: row ].
+	(row includesKey: #committedCount) ifTrue: [ ^ self contactInstanceSummaryFor: row ].
+	(row includesKey: #backgroundStepOwnedCount) ifTrue: [ ^ self solutionInstanceSummaryFor: row ].
 	| difference sign |
 	difference := row at: #difference.
 	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
@@ -458,6 +588,38 @@ CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
 		' · world ', (row at: #owned) asString,
 		' · expected ', (row at: #expected) asString,
 		' · excess ', sign, difference asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> bodyInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · members ', (row at: #memberCount) asString,
+		' · containment ', (row at: #containmentCount) asString,
+		' · state-owned ', (row at: #stateOwnedCount) asString,
+		' · result-owned ', (row at: #resultOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> contactInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · committed ', (row at: #committedCount) asString,
+		' · calculation ', (row at: #calculationCount) asString,
+		' · state-owned ', (row at: #stateOwnedCount) asString,
+		' · previous-result ', (row at: #previousResultOwnedCount) asString,
+		' · current-result ', (row at: #currentResultOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> solutionInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · world ', (row at: #owned) asString,
+		' · background-step ', (row at: #backgroundStepOwnedCount) asString,
+		' · future ', (row at: #futureOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
 ]
 
 { #category : 'private - building' }
