@@ -207,9 +207,9 @@ CFPhysicsProfileHealthElement >> pipelineResultsForWorldFrom: allPipelineResults
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> pipelineResultStructurallyBelongsToWorld: aPipelineResult [
-	aPipelineResult bodies anySatisfy: [ :body | body world == world ] ifTrue: [ ^ true ].
-	aPipelineResult previousContacts anySatisfy: [ :contact |
-		contact firstBody world == world ] ifTrue: [ ^ true ].
+	(aPipelineResult bodies anySatisfy: [ :body | body world == world ]) ifTrue: [ ^ true ].
+	(aPipelineResult previousContacts anySatisfy: [ :contact |
+		contact firstBody world == world ]) ifTrue: [ ^ true ].
 	(aPipelineResult contactResult notNil and: [
 		aPipelineResult contacts anySatisfy: [ :contact |
 			contact firstBody world == world ] ]) ifTrue: [ ^ true ].
@@ -354,9 +354,9 @@ CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: a
 CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWorld [
 	(aPipelineResult joints anySatisfy: [ :joint |
 		joint solverCommitTarget world == aWorld ]) ifTrue: [ ^ true ].
-	aPipelineResult bodies anySatisfy: [ :body | body world == aWorld ] ifTrue: [ ^ true ].
-	aPipelineResult previousContacts anySatisfy: [ :contact |
-		contact firstBody world == aWorld ] ifTrue: [ ^ true ].
+	(aPipelineResult bodies anySatisfy: [ :body | body world == aWorld ]) ifTrue: [ ^ true ].
+	(aPipelineResult previousContacts anySatisfy: [ :contact |
+		contact firstBody world == aWorld ]) ifTrue: [ ^ true ].
 	(aPipelineResult contactResult notNil and: [
 		aPipelineResult contacts anySatisfy: [ :contact |
 			contact firstBody world == aWorld ] ]) ifTrue: [ ^ true ].
@@ -578,10 +578,10 @@ CFPhysicsProfileHealthElement >> currentSummaryFor: row [
 
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
+	| difference sign |
 	(row includesKey: #memberCount) ifTrue: [ ^ self bodyInstanceSummaryFor: row ].
 	(row includesKey: #committedCount) ifTrue: [ ^ self contactInstanceSummaryFor: row ].
 	(row includesKey: #backgroundStepOwnedCount) ifTrue: [ ^ self solutionInstanceSummaryFor: row ].
-	| difference sign |
 	difference := row at: #difference.
 	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
 	^ 'image ', (row at: #total) asString,
