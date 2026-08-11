@@ -903,3 +903,24 @@ CFPhysicsIslandTests >> testWakingAnIslandRestoresContactAndJointSolverParticipa
 	self assert: result islands isEmpty not.
 	^ result
 ]
+
+{ #category : 'tests - simulation participation' }
+CFPhysicsIslandTests >> testSimulationParticipationQueriesDoNotRequireStepConfiguration [
+	<gtExample>
+	| first second constraint result |
+	first := self newBodyWithSequence: 1.
+	second := self newBodyWithSequence: 2.
+	second sleepLocally.
+	constraint := CFPhysicsTestConstraint new
+		bodyA: first;
+		bodyB: second;
+		yourself.
+	result := CFPhysicsStepPipelineResult new
+		bodies: { first. second };
+		jointConstraints: { constraint };
+		yourself.
+	self assert: (result bodyParticipatesInActiveSimulation: first).
+	self deny: (result bodyParticipatesInActiveSimulation: second).
+	self assert: (result constraintParticipatesInActiveSimulation: constraint).
+	^ result
+]

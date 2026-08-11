@@ -248,12 +248,12 @@ CFPhysicsStepPipelineResult >> islandBodyGroups: aCollection [
 
 { #category : 'simulation participation' }
 CFPhysicsStepPipelineResult >> bodyParticipatesInActiveSimulation: aBody [
-	^ step bodyParticipatesInActiveSimulation: aBody
+	^ CFPhysicsSimulationParticipation bodyParticipatesInActiveSimulation: aBody
 ]
 
 { #category : 'simulation participation' }
 CFPhysicsStepPipelineResult >> constraintParticipatesInActiveSimulation: aConstraint [
-	^ step constraintParticipatesInActiveSimulation: aConstraint
+	^ CFPhysicsSimulationParticipation constraintParticipatesInActiveSimulation: aConstraint
 ]
 
 { #category : 'simulation participation' }
