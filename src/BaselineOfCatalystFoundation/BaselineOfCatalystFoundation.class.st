@@ -76,6 +76,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'CatalystMotion'
 		'CatalystPhysics'
 		'BVC-Foundation-Magritte-GT'
+		'BVC-Foundation-Composer'
 		'BVC-Foundation-Magritte-Seaside'
 		'BVC-Foundation-Config-UI-Core'
 		'BVC-Foundation-Config-UI-ConfigurationEditor'
