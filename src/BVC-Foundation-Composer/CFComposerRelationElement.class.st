@@ -6,7 +6,8 @@ Class {
 		'description',
 		'formController',
 		'itemMementos',
-		'itemElements'
+		'itemElements',
+		'dropHint'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -54,6 +55,7 @@ CFComposerRelationElement >> initialize [
 	super initialize.
 	itemMementos := OrderedCollection new.
 	itemElements := OrderedCollection new.
+	dropHint := self newDropHint.
 	self
 		hMatchParent;
 		vFitContent;
@@ -95,15 +97,32 @@ CFComposerRelationElement >> installRelationObserver [
 
 { #category : 'private - building' }
 CFComposerRelationElement >> newItemElementFor: aMemento [
-	| aChildViewModel anElement |
+	| aChildViewModel aCard anElement aHandle |
 	aChildViewModel := CFComposerEditorViewModel
 		forMemento: aMemento
 		formController: formController.
-	anElement := aChildViewModel asEmbeddedElement
+	aCard := aChildViewModel asEmbeddedElement
 		hMatchParent;
 		vFitContent;
 		yourself.
-	anElement addEventHandler: (BlDragHandler new
+	anElement := BrFrame new
+		hMatchParent;
+		vFitContent;
+		addChild: aCard;
+		yourself.
+	aHandle := BrLabel new
+		fitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.28));
+		text: '⠿';
+		padding: (BlInsets all: 5);
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c ignored horizontal alignRight.
+			c ignored vertical alignBottom ];
+		margin: (BlInsets bottom: 2 right: 4);
+		yourself.
+	aHandle addEventHandler: (BlDragHandler new
 		liftItem: [ :aSourceElement |
 			BlDragItem new
 				sourceElement: aSourceElement;
@@ -113,17 +132,62 @@ CFComposerRelationElement >> newItemElementFor: aMemento [
 						text: aDragItem domainObject printString;
 						padding: (BlInsets all: 8);
 						yourself ] ]).
+	anElement addChild: aHandle.
 	^ anElement
+]
+
+{ #category : 'private - building' }
+CFComposerRelationElement >> newDropHint [
+	^ BrLabel new
+		hMatchParent;
+		vExact: 44;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.35));
+		text: 'Drop compatible objects here';
+		padding: (BlInsets left: 12 right: 12);
+		margin: (BlInsets top: 2 bottom: 2);
+		background: (Color black alpha: 0.025);
+		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
+		yourself
 ]
 
 { #category : 'private - drag and drop' }
 CFComposerRelationElement >> installDropHandler [
 	self addEventHandler: (BlDropHandler new
 		acceptItemsSuchThat: [ :aDragItem :aDropArea |
-			aDragItem sourceElement parent ~~ aDropArea ];
+			aDragItem sourceElement parent
+				ifNil: [ true ]
+				ifNotNil: [ :anItemElement | anItemElement parent ~~ aDropArea ] ];
 		acceptDomainObjectsSuchThat: [ :anObject | self canAcceptDroppedObject: anObject ];
+		whenDragEnteredDo: [ :anEvent |
+			anEvent mayAcceptItems ifTrue: [ self emphasizeDropHint ] ];
+		whenDragLeftDo: [ :anEvent | self deEmphasizeDropHint ];
 		whenDroppedDo: [ :anEvent |
+			self deEmphasizeDropHint.
 			self addDroppedObjects: (anEvent items collect: #domainObject) ])
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> emphasizeDropHint [
+	self animateDropHintTo: 1.0
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> deEmphasizeDropHint [
+	self animateDropHintTo: 0.55
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> animateDropHintTo: anOpacity [
+	dropHint isAttachedToSceneGraph
+		ifFalse: [ dropHint opacity: anOpacity ]
+		ifTrue: [
+			(dropHint motion
+				duration: 120 milliSeconds;
+				holdAtDestination;
+				opacity: anOpacity;
+				build)
+				start ]
 ]
 
 { #category : 'private - drag and drop' }
@@ -182,7 +246,8 @@ CFComposerRelationElement >> synchronizeItems: desiredItems [
 		newElements add: anElement ].
 	unmatchedMementos do: [ :each |
 		formController unregisterMementoAndDescendants: each ].
-	(newElements asArray = itemElements asArray) ifTrue: [
+	(newElements asArray = itemElements asArray and: [
+		newElements notEmpty or: [ self children notEmpty ] ]) ifTrue: [
 		itemMementos := newMementos.
 		^ self ].
 	self replaceItemsWith: newElements created: createdElements.
@@ -201,7 +266,25 @@ CFComposerRelationElement >> synchronizeItemsFromValue: aValue [
 { #category : 'private - updating' }
 CFComposerRelationElement >> replaceItemsWith: newElements created: createdElements [
 	| existingElements insertedElement insertionIndex |
-	existingElements := self children asArray.
+	existingElements := itemElements asArray.
+	newElements isEmpty ifTrue: [
+		self removeChildren.
+		dropHint opacity: 0.55.
+		self addChild: dropHint.
+		^ self ].
+	existingElements isEmpty ifTrue: [
+		self removeChildren.
+		createdElements size = 1
+			ifTrue: [
+				insertedElement := createdElements first.
+				insertedElement opacity: 0.0.
+				self addChild: insertedElement.
+				insertedElement isAttachedToSceneGraph ifTrue: [
+					(insertedElement motion
+						duration: 180 milliSeconds;
+						riseAndFadeIn) ] ]
+			ifFalse: [ self addChildren: newElements ].
+		^ self ].
 	(createdElements size = 1 and: [ existingElements notEmpty and: [
 		self isAttachedToSceneGraph and: [
 			insertedElement := createdElements first.
