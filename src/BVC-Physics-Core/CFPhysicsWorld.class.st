@@ -650,7 +650,9 @@ CFPhysicsWorld >> capturePreparedState [
 	self applyForcesForStep: step timeStep.
 	capturedBodyStates := IdentityDictionary new.
 	orderedBodyStates := Array new: bodies size + (containmentBody isNil ifTrue: [ 0 ] ifFalse: [ 1 ]).
-	capturedJoints := self joints collect: #capturedForStep.
+	capturedJoints := (self joints select: [ :joint |
+		joint isActive and: [ step constraintParticipatesInActiveSimulation: joint ] ])
+		collect: #capturedForStep.
 	index := 0.
 	bodies do: [ :body |
 		| bodyState |

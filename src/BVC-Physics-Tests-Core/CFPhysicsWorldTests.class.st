@@ -1006,3 +1006,88 @@ CFPhysicsWorldTests >> testFailedAsyncBackgroundSolveReleasesCapturedInputs [
 	self assert: world hasSolveInFlight not.
 	^ world
 ]
+
+{ #category : 'tests - world state capture' }
+CFPhysicsWorldTests >> testWorldCaptureOmitsSleepingJointButPreservesItsCollisionSuppression [
+	<gtExample>
+	| owner firstElement secondElement world first second joint state suppressedPair |
+	owner := BlElement new size: 200 @ 200.
+	firstElement := BlElement new size: 20 @ 20.
+	secondElement := BlElement new size: 20 @ 20.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	world addJoint: joint.
+	world sleepBody: first.
+	self deny: first isAwake.
+	self deny: second isAwake.
+	state := world capturePreparedState.
+	self assert: state joints isEmpty.
+	self assert: state collisionSuppressedBodyPairs size equals: 1.
+	suppressedPair := state collisionSuppressedBodyPairs first.
+	self assert: suppressedPair first == first.
+	self assert: suppressedPair second == second.
+	world abandonSolveTicket: state solveTicket.
+	^ state
+]
+
+{ #category : 'tests - world state capture' }
+CFPhysicsWorldTests >> testWakingSleepingJointRestoresCapturedWarmStartState [
+	<gtExample>
+	| owner firstElement secondElement world first second joint sleepingState awakeState capturedJoint |
+	owner := BlElement new size: 200 @ 200.
+	firstElement := BlElement new size: 20 @ 20.
+	secondElement := BlElement new size: 20 @ 20.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	joint impulse: 3.0.
+	world addJoint: joint.
+	world sleepBody: first.
+	sleepingState := world capturePreparedState.
+	self assert: sleepingState joints isEmpty.
+	world abandonSolveTicket: sleepingState solveTicket.
+	world wakeBody: first.
+	self assert: first isAwake.
+	self assert: second isAwake.
+	awakeState := world capturePreparedState.
+	self assert: awakeState joints size equals: 1.
+	capturedJoint := awakeState joints first.
+	self assert: capturedJoint solverCommitTarget == joint.
+	self assert: capturedJoint impulse equals: 3.0.
+	world abandonSolveTicket: awakeState solveTicket.
+	^ capturedJoint
+]
+
+{ #category : 'tests - world state capture' }
+CFPhysicsWorldTests >> testWorldCaptureIncludesJointWhenEitherDynamicEndpointIsAwake [
+	<gtExample>
+	| owner firstElement secondElement world first second joint state |
+	owner := BlElement new size: 200 @ 200.
+	firstElement := BlElement new size: 20 @ 20.
+	secondElement := BlElement new size: 20 @ 20.
+	owner addChildren: { firstElement. secondElement }.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
+	first := firstElement physics body.
+	second := secondElement physics body.
+	joint := CFPhysicsDistanceJoint between: first and: second.
+	world addJoint: joint.
+	second sleepLocally.
+	self assert: first isAwake.
+	self deny: second isAwake.
+	state := world capturePreparedState.
+	self assert: state joints size equals: 1.
+	self assert: state joints first solverCommitTarget == joint.
+	world abandonSolveTicket: state solveTicket.
+	^ state
+]

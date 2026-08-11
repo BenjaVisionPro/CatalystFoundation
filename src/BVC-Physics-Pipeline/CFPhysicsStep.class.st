@@ -183,3 +183,17 @@ CFPhysicsStep >> broadphaseAABBMargin [
 CFPhysicsStep >> broadphaseAABBMargin: aNumber [
 	broadphaseAABBMargin := aNumber asFloat max: 0.0
 ]
+
+{ #category : 'simulation participation' }
+CFPhysicsStep >> bodyParticipatesInActiveSimulation: aBody [
+	^ aBody isStatic not and: [ aBody isAwake ]
+]
+
+{ #category : 'simulation participation' }
+CFPhysicsStep >> constraintParticipatesInActiveSimulation: aConstraint [
+	| bodyA bodyB |
+	bodyA := aConstraint bodyA.
+	bodyB := aConstraint bodyB.
+	^ (bodyA notNil and: [ self bodyParticipatesInActiveSimulation: bodyA ]) or: [
+		bodyB notNil and: [ self bodyParticipatesInActiveSimulation: bodyB ] ]
+]

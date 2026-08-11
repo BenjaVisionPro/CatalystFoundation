@@ -248,16 +248,12 @@ CFPhysicsStepPipelineResult >> islandBodyGroups: aCollection [
 
 { #category : 'simulation participation' }
 CFPhysicsStepPipelineResult >> bodyParticipatesInActiveSimulation: aBody [
-	^ aBody isStatic not and: [ aBody isAwake ]
+	^ step bodyParticipatesInActiveSimulation: aBody
 ]
 
 { #category : 'simulation participation' }
 CFPhysicsStepPipelineResult >> constraintParticipatesInActiveSimulation: aConstraint [
-	| bodyA bodyB |
-	bodyA := aConstraint bodyA.
-	bodyB := aConstraint bodyB.
-	^ (bodyA notNil and: [ self bodyParticipatesInActiveSimulation: bodyA ]) or: [
-		bodyB notNil and: [ self bodyParticipatesInActiveSimulation: bodyB ] ]
+	^ step constraintParticipatesInActiveSimulation: aConstraint
 ]
 
 { #category : 'simulation participation' }
