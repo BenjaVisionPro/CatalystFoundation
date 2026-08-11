@@ -101,7 +101,7 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
 	spec package: 'BVC-Foundation-Composer'
-		with: [ spec requires: #('BVC-Foundation-Magritte-GT') ].
+		with: [ spec requires: #('BVC-Foundation-Magritte-GT' 'CatalystMotion') ].
 	spec package: 'BVC-Foundation-Magritte-Seaside'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-UI-Core'

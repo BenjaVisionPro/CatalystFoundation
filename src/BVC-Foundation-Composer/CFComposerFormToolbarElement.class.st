@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'formController',
 		'commitButton',
-		'resetButton'
+		'resetButton',
+		'observedMementos'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -31,12 +32,16 @@ CFComposerFormToolbarElement >> build [
 
 { #category : 'accessing' }
 CFComposerFormToolbarElement >> formController: aComposerFormController [
-	formController := aComposerFormController
+	formController := aComposerFormController.
+	formController whenMementosChangedDo: [ :aController |
+		self installStatusObservers.
+		self updateButtonEnablement ]
 ]
 
 { #category : 'initialization' }
 CFComposerFormToolbarElement >> initialize [
 	super initialize.
+	observedMementos := IdentitySet new.
 	self
 		aptitude: GtMagritteToolbarAptitude new;
 		hFitContentLimited;
@@ -51,11 +56,18 @@ CFComposerFormToolbarElement >> initialize [
 { #category : 'private - building' }
 CFComposerFormToolbarElement >> installStatusObservers [
 	formController mementos do: [ :aMemento |
-		self withAsyncSinkDo: [ :anElementSink |
-			anElementSink
-				sink: AsyncPeekSink new;
-				whenUpdate: [ :anElement :aSink | anElement updateButtonEnablement ].
-			aMemento overallStatus observe: anElementSink ] ]
+		self observeStatusOf: aMemento ]
+]
+
+{ #category : 'private - building' }
+CFComposerFormToolbarElement >> observeStatusOf: aMemento [
+	(observedMementos includes: aMemento) ifTrue: [ ^ self ].
+	observedMementos add: aMemento.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink | anElement updateButtonEnablement ].
+		aMemento overallStatus observe: anElementSink ]
 ]
 
 { #category : 'private - building' }

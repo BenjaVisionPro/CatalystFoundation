@@ -50,6 +50,16 @@ CFComposerEditorViewModelExamples >> composerRendersStandardToManyRelation [
 ]
 
 { #category : 'examples' }
+CFComposerEditorViewModelExamples >> composerComposesBetweenStandardRelations [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFComposerEditorViewModel forObject: CFComposerExampleBoard new.
+	aViewModel showCommitAndResetControls.
+
+	^ aViewModel asElement
+]
+
+{ #category : 'examples' }
 CFComposerEditorViewModelExamples >> deferredComposerCanShowCommitAndResetControls [
 	<gtExample>
 	| aViewModel |

@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'memento',
 		'description',
-		'formController'
+		'formController',
+		'itemMementos',
+		'itemElements'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -22,18 +24,9 @@ CFComposerRelationElement class >> memento: aMemento description: aDescription f
 
 { #category : 'private - building' }
 CFComposerRelationElement >> build [
-	self relationItems do: [ :each |
-		| aChildMemento aChildViewModel |
-		aChildMemento := formController
-			registerMemento: (GtMagritteMemento model: each)
-			below: memento.
-		aChildViewModel := CFComposerEditorViewModel
-			forMemento: aChildMemento
-			formController: formController.
-		self addChild: (aChildViewModel asEmbeddedElement
-			hMatchParent;
-			vFitContent;
-			yourself) ]
+	self synchronizeItems: self relationItems.
+	self installRelationObserver.
+	self installDropHandler
 ]
 
 { #category : 'accessing' }
@@ -59,6 +52,8 @@ CFComposerRelationElement >> formController: aComposerFormController [
 { #category : 'initialization' }
 CFComposerRelationElement >> initialize [
 	super initialize.
+	itemMementos := OrderedCollection new.
+	itemElements := OrderedCollection new.
 	self
 		hMatchParent;
 		vFitContent;
@@ -86,4 +81,139 @@ CFComposerRelationElement >> relationItems [
 	(description isKindOf: MAToManyRelationDescription) ifTrue: [
 		^ aValue asArray ].
 	^ { aValue }
+]
+
+{ #category : 'private - building' }
+CFComposerRelationElement >> installRelationObserver [
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				anElement synchronizeItemsFromValue: aSink value currentValue ].
+		(memento readObservableValueUsing: description) observe: anElementSink ]
+]
+
+{ #category : 'private - building' }
+CFComposerRelationElement >> newItemElementFor: aMemento [
+	| aChildViewModel anElement |
+	aChildViewModel := CFComposerEditorViewModel
+		forMemento: aMemento
+		formController: formController.
+	anElement := aChildViewModel asEmbeddedElement
+		hMatchParent;
+		vFitContent;
+		yourself.
+	anElement addEventHandler: (BlDragHandler new
+		liftItem: [ :aSourceElement |
+			BlDragItem new
+				sourceElement: aSourceElement;
+				domainObject: aMemento model;
+				stencil: [ :aDragItem |
+					BrLabel new
+						text: aDragItem domainObject printString;
+						padding: (BlInsets all: 8);
+						yourself ] ]).
+	^ anElement
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> installDropHandler [
+	self addEventHandler: (BlDropHandler new
+		acceptItemsSuchThat: [ :aDragItem :aDropArea |
+			aDragItem sourceElement parent ~~ aDropArea ];
+		acceptDomainObjectsSuchThat: [ :anObject | self canAcceptDroppedObject: anObject ];
+		whenDroppedDo: [ :anEvent |
+			self addDroppedObjects: (anEvent items collect: #domainObject) ])
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> canAcceptDroppedObject: anObject [
+	description isReadOnly ifTrue: [ ^ false ].
+	^ [ description validate: (self valueByAddingDroppedObjects: { anObject }) . true ]
+		on: MAValidationError
+		do: [ :anError | false ]
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> addDroppedObjects: aCollection [
+	| aNewValue |
+	aCollection ifEmpty: [ ^ self ].
+	aNewValue := self valueByAddingDroppedObjects: aCollection.
+	GtMagritteBuilderUtility
+		write: aNewValue
+		using: description
+		memento: memento
+		element: self
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> valueByAddingDroppedObjects: aCollection [
+	| currentValue |
+	currentValue := memento readUsing: description.
+	(description isKindOf: MAToManyRelationDescription) ifFalse: [
+		^ aCollection first ].
+	currentValue ifNil: [ currentValue := #() ].
+	^ aCollection inject: currentValue into: [ :aValue :each |
+		aValue copyWith: each ]
+]
+
+{ #category : 'private - updating' }
+CFComposerRelationElement >> synchronizeItems: desiredItems [
+	| unmatchedMementos unmatchedElements newMementos newElements createdElements |
+	unmatchedMementos := itemMementos copy.
+	unmatchedElements := itemElements copy.
+	newMementos := OrderedCollection new.
+	newElements := OrderedCollection new.
+	createdElements := OrderedCollection new.
+	desiredItems do: [ :anItem |
+		| index aMemento anElement |
+		index := unmatchedMementos findFirst: [ :each | each model == anItem ].
+		index = 0
+			ifTrue: [
+				aMemento := formController
+					registerMemento: (GtMagritteMemento model: anItem)
+					below: memento.
+				anElement := self newItemElementFor: aMemento.
+				createdElements add: anElement ]
+			ifFalse: [
+				aMemento := unmatchedMementos removeAt: index.
+				anElement := unmatchedElements removeAt: index ].
+		newMementos add: aMemento.
+		newElements add: anElement ].
+	unmatchedMementos do: [ :each |
+		formController unregisterMementoAndDescendants: each ].
+	(newElements asArray = itemElements asArray) ifTrue: [
+		itemMementos := newMementos.
+		^ self ].
+	self replaceItemsWith: newElements created: createdElements.
+	itemMementos := newMementos.
+	itemElements := newElements
+]
+
+{ #category : 'private - updating' }
+CFComposerRelationElement >> synchronizeItemsFromValue: aValue [
+	aValue ifNil: [ ^ self synchronizeItems: #() ].
+	(description isKindOf: MAToManyRelationDescription)
+		ifTrue: [ self synchronizeItems: aValue asArray ]
+		ifFalse: [ self synchronizeItems: { aValue } ]
+]
+
+{ #category : 'private - updating' }
+CFComposerRelationElement >> replaceItemsWith: newElements created: createdElements [
+	| existingElements insertedElement insertionIndex |
+	existingElements := self children asArray.
+	(createdElements size = 1 and: [ existingElements notEmpty and: [
+		self isAttachedToSceneGraph and: [
+			insertedElement := createdElements first.
+			(existingElements = (newElements copyWithout: insertedElement)) ]]])
+		ifTrue: [
+			insertionIndex := newElements indexOf: insertedElement.
+			(CFMotionLayoutTransaction on: self)
+				affecting: existingElements;
+				insert: insertedElement into: self at: insertionIndex;
+				fadeIn: insertedElement;
+				play ]
+		ifFalse: [
+			self removeChildren.
+			self addChildren: newElements ]
 ]

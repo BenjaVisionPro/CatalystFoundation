@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'rootMemento',
 		'childMementos',
-		'mementoChildren'
+		'mementoChildren',
+		'mementoParents',
+		'mementosChangedActions'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -44,7 +46,9 @@ CFComposerFormController >> canReset [
 CFComposerFormController >> initialize [
 	super initialize.
 	childMementos := IdentitySet new.
-	mementoChildren := IdentityDictionary new
+	mementoChildren := IdentityDictionary new.
+	mementoParents := IdentityDictionary new.
+	mementosChangedActions := OrderedCollection new
 ]
 
 { #category : 'testing' }
@@ -76,10 +80,19 @@ CFComposerFormController >> registerMemento: aMemento [
 
 { #category : 'registering' }
 CFComposerFormController >> registerMemento: aMemento below: aParentMemento [
+	| previousParent |
 	aMemento == rootMemento ifTrue: [ ^ aMemento ].
+	previousParent := mementoParents at: aMemento ifAbsent: [ nil ].
+	previousParent == aParentMemento ifTrue: [ ^ aMemento ].
+	previousParent ifNotNil: [
+		(mementoChildren at: previousParent ifAbsent: [ #() ])
+			remove: aMemento
+			ifAbsent: [ ] ].
 	childMementos add: aMemento.
 	(mementoChildren at: aParentMemento ifAbsentPut: [ OrderedCollection new ])
 		add: aMemento.
+	mementoParents at: aMemento put: aParentMemento.
+	self announceMementosChanged.
 	^ aMemento
 ]
 
@@ -99,6 +112,33 @@ CFComposerFormController >> rootMemento [
 { #category : 'accessing' }
 CFComposerFormController >> rootMemento: aMemento [
 	rootMemento := aMemento
+]
+
+{ #category : 'registering' }
+CFComposerFormController >> unregisterMementoAndDescendants: aMemento [
+	| allMementos parent |
+	aMemento == rootMemento ifTrue: [ self error: 'The root memento belongs to the form controller' ].
+	allMementos := self mementosBelow: aMemento.
+	parent := mementoParents at: aMemento ifAbsent: [ nil ].
+	parent ifNotNil: [
+		(mementoChildren at: parent ifAbsent: [ #() ])
+			remove: aMemento
+			ifAbsent: [ ] ].
+	allMementos do: [ :each |
+		childMementos remove: each ifAbsent: [ ].
+		mementoChildren removeKey: each ifAbsent: [ ].
+		mementoParents removeKey: each ifAbsent: [ ] ].
+	self announceMementosChanged
+]
+
+{ #category : 'announcing' }
+CFComposerFormController >> whenMementosChangedDo: aBlock [
+	mementosChangedActions add: aBlock
+]
+
+{ #category : 'announcing' }
+CFComposerFormController >> announceMementosChanged [
+	mementosChangedActions do: [ :each | each value: self ]
 ]
 
 { #category : 'private' }
