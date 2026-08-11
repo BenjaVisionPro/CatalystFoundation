@@ -959,3 +959,50 @@ CFPhysicsWorldTests >> testForegroundSteppingRequirementInvalidatesActiveBackgro
 	self assert: world effectiveBackgroundStepping.
 	^ world
 ]
+
+{ #category : 'tests - background stepping' }
+CFPhysicsWorldTests >> testAsyncBackgroundSolveReleasesCapturedInputsBeforeCommitHandoff [
+	| world state backgroundStep completion solution |
+	world := self newWorldAfterOneStep.
+	state := world captureStateIfIdle.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: world stepPipeline;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: false;
+		instVarNamed: 'solveTicket' put: state solveTicket.
+	completion := backgroundStep solveCapturedStateForAsyncCompletion.
+	self assert: completion equals: #physicsSolveCompleted.
+	self assert: backgroundStep state isNil.
+	self assert: backgroundStep pipeline isNil.
+	solution := backgroundStep takeSolvedSolution.
+	self assert: solution notNil.
+	self assert: solution solveTicket equals: state solveTicket.
+	self assert: backgroundStep takeSolvedSolution isNil.
+	self assert: world hasSolveInFlight.
+	self assert: (world commit: solution) notNil.
+	self assert: world hasSolveInFlight not.
+	^ world
+]
+
+{ #category : 'tests - background stepping' }
+CFPhysicsWorldTests >> testFailedAsyncBackgroundSolveReleasesCapturedInputs [
+	| world state backgroundStep |
+	world := self newWorldAfterOneStep.
+	state := world captureStateIfIdle.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep
+		instVarNamed: 'pipeline' put: Object new;
+		instVarNamed: 'state' put: state;
+		instVarNamed: 'telemetryEnabled' put: false;
+		instVarNamed: 'solveTicket' put: state solveTicket.
+	self
+		should: [ backgroundStep solveCapturedStateForAsyncCompletion ]
+		raise: MessageNotUnderstood.
+	self assert: backgroundStep state isNil.
+	self assert: backgroundStep pipeline isNil.
+	self assert: backgroundStep takeSolvedSolution isNil.
+	world abandonSolveTicket: state solveTicket.
+	self assert: world hasSolveInFlight not.
+	^ world
+]

@@ -6,7 +6,7 @@ My responsibility is to capture the configured pipeline task, execute its solve 
 Class {
 	#name : 'CFPhysicsWorldBackgroundStep',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'telemetryContext', 'promise' ],
+	#instVars : [ 'world', 'state', 'pipeline', 'telemetryEnabled', 'telemetryContext', 'promise', 'solution', 'solveTicket' ],
 	#category : 'BVC-Physics-Motion',
 	#package : 'BVC-Physics-Motion'
 }
@@ -49,23 +49,33 @@ CFPhysicsWorldBackgroundStep >> start [
 	telemetryEnabled := world telemetryEnabled.
 	state := world captureStateIfIdle.
 	state ifNil: [ ^ false ].
+	solveTicket := state solveTicket.
 	(world claimBackgroundExecution: self) ifFalse: [
-		world abandonSolveTicket: state solveTicket.
+		world abandonSolveTicket: solveTicket.
+		self releaseCapturedSolveInputs.
 		^ false ].
 	telemetryEnabled ifTrue: [
 		telemetryContext := world telemetryContextForState: state ].
-	promise := [ self solveCapturedState ]
+	promise := [ self solveCapturedStateForAsyncCompletion ]
 		asAsyncPromiseWithPriority: AsyncFutureExecutionHighPriority uniqueInstance
 		inCustomGroup: #'Physics Pipeline'.
 	promise
-		then: [ :solution |
+		then: [ :completion |
+			| solutionToCommit |
+			completion = #physicsSolveCompleted ifFalse: [
+				self error: 'Unexpected Physics background completion value' ].
+			solutionToCommit := self takeSolvedSolution.
+			promise := nil.
 			world backgroundExecutionFinished: self.
 			owner enqueueTask: (BlTaskAction new action: [
-				world commit: solution ]) ]
+				world commit: solutionToCommit ]) ]
 		otherwise: [ :anError |
+			promise := nil.
+			solution := nil.
+			self releaseCapturedSolveInputs.
 			world backgroundExecutionFinished: self.
 			owner enqueueTask: (BlTaskAction new action: [
-				world abandonSolveTicket: state solveTicket.
+				world abandonSolveTicket: solveTicket.
 				anError class = AsyncFutureCancelled ifFalse: [
 					NonInteractiveTranscript stdout
 						nextPutAll: anError printString;
@@ -78,6 +88,28 @@ CFPhysicsWorldBackgroundStep >> world: aPhysicsWorld [
 	world := aPhysicsWorld
 ]
 
+
+{ #category : 'private - solving' }
+CFPhysicsWorldBackgroundStep >> solveCapturedStateForAsyncCompletion [
+	[ solution := self solveCapturedState ]
+		ensure: [ self releaseCapturedSolveInputs ].
+	^ #physicsSolveCompleted
+]
+
+{ #category : 'private - solving' }
+CFPhysicsWorldBackgroundStep >> releaseCapturedSolveInputs [
+	state := nil.
+	pipeline := nil.
+	telemetryContext := nil
+]
+
+{ #category : 'private - solving' }
+CFPhysicsWorldBackgroundStep >> takeSolvedSolution [
+	| solvedSolution |
+	solvedSolution := solution.
+	solution := nil.
+	^ solvedSolution
+]
 
 { #category : 'private - solving' }
 CFPhysicsWorldBackgroundStep >> solveCapturedState [
