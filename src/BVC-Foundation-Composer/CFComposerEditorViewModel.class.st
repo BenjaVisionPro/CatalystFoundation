@@ -2,7 +2,8 @@ Class {
 	#name : 'CFComposerEditorViewModel',
 	#superclass : 'CFMaViewModel',
 	#instVars : [
-		'formController'
+		'formController',
+		'showCommitAndResetControls'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -29,7 +30,8 @@ CFComposerEditorViewModel >> formController: aComposerFormController [
 { #category : 'initialization' }
 CFComposerEditorViewModel >> initialize [
 	super initialize.
-	self ignoreImplicitActions
+	self ignoreImplicitActions.
+	showCommitAndResetControls := false
 ]
 
 { #category : 'initialization' }
@@ -52,9 +54,16 @@ CFComposerEditorViewModel >> initializeForm: theFrame forMemento: aMemento [
 		form: theFrame;
 		memento: aMemento;
 		formController: formController;
+		showCommitAndResetControls: (aMemento == formController rootMemento
+			and: [ showCommitAndResetControls ]);
 		addButtons: (aMemento == formController rootMemento
 			ifTrue: [ self actions ]
 			ifFalse: [ #() ]);
 		build.
 	^ self onElementCreated cull: theFrame
+]
+
+{ #category : 'configuration' }
+CFComposerEditorViewModel >> showCommitAndResetControls [
+	showCommitAndResetControls := true
 ]

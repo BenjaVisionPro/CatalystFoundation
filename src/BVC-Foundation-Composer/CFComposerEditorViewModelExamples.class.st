@@ -48,3 +48,13 @@ CFComposerEditorViewModelExamples >> composerRendersStandardToManyRelation [
 	self assert: aViewModel mementoFuture isAsyncFuture.
 	^ aViewModel asElement
 ]
+
+{ #category : 'examples' }
+CFComposerEditorViewModelExamples >> deferredComposerCanShowCommitAndResetControls [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFComposerEditorViewModel forObject: CFComposerExampleGroup new.
+	aViewModel showCommitAndResetControls.
+
+	^ aViewModel asElement
+]

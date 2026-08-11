@@ -2,7 +2,8 @@ Class {
 	#name : 'CFComposerElementBuilder',
 	#superclass : 'CFMaElementBuilder',
 	#instVars : [
-		'formController'
+		'formController',
+		'showCommitAndResetControls'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -19,6 +20,15 @@ CFComposerElementBuilder >> formController: aComposerFormController [
 ]
 
 { #category : 'private - building' }
+CFComposerElementBuilder >> buildActions [
+	super buildActions.
+	showCommitAndResetControls ifTrue: [
+		self formElement footerElement
+			addChild: (CFComposerFormToolbarElement for: formController)
+			as: #composerToolbar ]
+]
+
+{ #category : 'private - building' }
 CFComposerElementBuilder >> addComposerRelationUsing: aDescription [
 	| anElement |
 	anElement := CFComposerRelationElement
@@ -31,6 +41,11 @@ CFComposerElementBuilder >> addComposerRelationUsing: aDescription [
 { #category : 'private - building' }
 CFComposerElementBuilder >> addFormResetShortcutTo: anElement [
 	"Composer reset is coordinated by the root form controller; child fields must not reset independently."
+]
+
+{ #category : 'accessing' }
+CFComposerElementBuilder >> showCommitAndResetControls: aBoolean [
+	showCommitAndResetControls := aBoolean
 ]
 
 { #category : 'visiting-description' }

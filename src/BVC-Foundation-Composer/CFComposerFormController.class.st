@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'rootMemento',
-		'childMementos'
+		'childMementos',
+		'mementoChildren'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -18,8 +19,10 @@ CFComposerFormController class >> withRootMemento: aMemento [
 
 { #category : 'actions' }
 CFComposerFormController >> commit [
-	childMementos do: #commit.
-	^ rootMemento commit
+	| allMementos |
+	allMementos := self mementos.
+	allMementos allButLast do: #commit.
+	^ allMementos last commit
 ]
 
 { #category : 'accessing' }
@@ -27,22 +30,65 @@ CFComposerFormController >> childMementos [
 	^ childMementos
 ]
 
+{ #category : 'testing' }
+CFComposerFormController >> canCommit [
+	^ self hasChanges and: [ self isValid and: [ self isInactive ] ]
+]
+
+{ #category : 'testing' }
+CFComposerFormController >> canReset [
+	^ self hasChanges and: [ self isInactive ]
+]
+
 { #category : 'initialization' }
 CFComposerFormController >> initialize [
 	super initialize.
-	childMementos := IdentitySet new
+	childMementos := IdentitySet new.
+	mementoChildren := IdentityDictionary new
+]
+
+{ #category : 'testing' }
+CFComposerFormController >> hasChanges [
+	^ self statuses anySatisfy: [ :each | each isChanged ]
+]
+
+{ #category : 'testing' }
+CFComposerFormController >> isInactive [
+	^ self statuses size = self mementos size
+		and: [ self statuses allSatisfy: [ :each | each isInactive ] ]
+]
+
+{ #category : 'testing' }
+CFComposerFormController >> isValid [
+	^ self statuses size = self mementos size
+		and: [ self statuses allSatisfy: [ :each | each isValid ] ]
+]
+
+{ #category : 'accessing' }
+CFComposerFormController >> mementos [
+	^ self mementosBelow: rootMemento
 ]
 
 { #category : 'registering' }
 CFComposerFormController >> registerMemento: aMemento [
-	aMemento == rootMemento ifFalse: [ childMementos add: aMemento ].
+	^ self registerMemento: aMemento below: rootMemento
+]
+
+{ #category : 'registering' }
+CFComposerFormController >> registerMemento: aMemento below: aParentMemento [
+	aMemento == rootMemento ifTrue: [ ^ aMemento ].
+	childMementos add: aMemento.
+	(mementoChildren at: aParentMemento ifAbsentPut: [ OrderedCollection new ])
+		add: aMemento.
 	^ aMemento
 ]
 
 { #category : 'actions' }
 CFComposerFormController >> reset [
-	childMementos do: #reset.
-	^ rootMemento reset
+	| allMementos |
+	allMementos := self mementos.
+	allMementos allButLast do: #reset.
+	^ allMementos last reset
 ]
 
 { #category : 'accessing' }
@@ -53,4 +99,20 @@ CFComposerFormController >> rootMemento [
 { #category : 'accessing' }
 CFComposerFormController >> rootMemento: aMemento [
 	rootMemento := aMemento
+]
+
+{ #category : 'private' }
+CFComposerFormController >> mementosBelow: aMemento [
+	| allMementos |
+	allMementos := OrderedCollection new.
+	(mementoChildren at: aMemento ifAbsent: [ #() ]) do: [ :each |
+		allMementos addAll: (self mementosBelow: each) ].
+	allMementos add: aMemento.
+	^ allMementos
+]
+
+{ #category : 'private' }
+CFComposerFormController >> statuses [
+	^ self mementos collect: [ :each |
+		each overallStatus valueOrNil ] thenSelect: #isNotNil
 ]

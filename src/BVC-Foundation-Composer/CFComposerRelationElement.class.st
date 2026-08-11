@@ -24,7 +24,9 @@ CFComposerRelationElement class >> memento: aMemento description: aDescription f
 CFComposerRelationElement >> build [
 	self relationItems do: [ :each |
 		| aChildMemento aChildViewModel |
-		aChildMemento := formController registerMemento: (GtMagritteMemento model: each).
+		aChildMemento := formController
+			registerMemento: (GtMagritteMemento model: each)
+			below: memento.
 		aChildViewModel := CFComposerEditorViewModel
 			forMemento: aChildMemento
 			formController: formController.
