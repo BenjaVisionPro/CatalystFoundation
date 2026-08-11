@@ -38,3 +38,13 @@ CFComposerEditorViewModelExamples >> ordinaryMagritteObjectCanUseComposer [
 	self assert: aViewModel mementoFuture isAsyncFuture.
 	^ aViewModel
 ]
+
+{ #category : 'examples' }
+CFComposerEditorViewModelExamples >> composerRendersStandardToManyRelation [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFComposerEditorViewModel forObject: CFComposerExampleGroup new.
+
+	self assert: aViewModel mementoFuture isAsyncFuture.
+	^ aViewModel asElement
+]
