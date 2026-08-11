@@ -23,8 +23,8 @@ CFPhysicsProfileHealthElementTests >> worldWithOneJoint [
 ]
 
 { #category : 'tests - retention' }
-CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesLiveAndCapturedJointsFromTheirOwnState [
-	| world live captured state backgroundStep solution result health row |
+CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesLiveCapturedAndRetainedSolveOwners [
+	| world live captured state backgroundStep solution result promise health row |
 	world := self worldWithOneJoint.
 	live := world joints first.
 	captured := live capturedForStep.
@@ -41,13 +41,17 @@ CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesLiveAndCapt
 		world: world;
 		pipelineResult: result;
 		yourself.
+	promise := AsyncFuturePromise new.
+	promise fulfillWithValue: solution.
+	world instVarNamed: 'lastStepResult' put: result.
 	health := CFPhysicsProfileHealthElement new world: world.
 	row := health
 		jointRetentionRowFrom: { live. captured }
 		worldStates: { state }
 		backgroundSteps: { backgroundStep }
 		solutions: { solution }
-		pipelineResults: { result }.
+		pipelineResults: { result }
+		futurePromises: { promise }.
 	self assert: (row at: #owned) equals: 2.
 	self assert: (row at: #live) equals: 1.
 	self assert: (row at: #captured) equals: 1.
@@ -55,7 +59,11 @@ CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesLiveAndCapt
 	self assert: (row at: #worldStateCount) equals: 1.
 	self assert: (row at: #backgroundStepCount) equals: 1.
 	self assert: (row at: #solutionCount) equals: 1.
-	self assert: (row at: #pipelineResultCount) equals: 1
+	self assert: (row at: #futureHeldSolutionCount) equals: 1.
+	self assert: (row at: #pipelineResultCount) equals: 1.
+	self assert: (row at: #worldLastPipelineResultCount) equals: 1.
+	self assert: (row at: #solutionPipelineResultCount) equals: 1.
+	self assert: (row at: #otherPipelineResultCount) equals: 0
 ]
 
 { #category : 'tests - retention' }
@@ -71,7 +79,8 @@ CFPhysicsProfileHealthElementTests >> testJointRetentionRowReportsRelatedJointOu
 		worldStates: #()
 		backgroundSteps: #()
 		solutions: #()
-		pipelineResults: #().
+		pipelineResults: #()
+		futurePromises: #().
 	self assert: (row at: #owned) equals: 2.
 	self assert: (row at: #live) equals: 1.
 	self assert: (row at: #captured) equals: 0.
@@ -101,9 +110,15 @@ CFPhysicsProfileHealthElementTests >> testJointHolderSummaryUsesNamedCounts [
 		#worldStateCount -> 2.
 		#backgroundStepCount -> 2.
 		#solutionCount -> 1.
-		#pipelineResultCount -> 3 } asDictionary.
+		#futureHeldSolutionCount -> 1.
+		#pipelineResultCount -> 3.
+		#worldLastPipelineResultCount -> 1.
+		#solutionPipelineResultCount -> 1.
+		#otherPipelineResultCount -> 1 } asDictionary.
 	self assert: (health jointHolderSummaryFor: row)
-		equals: 'states 2 · background steps 2 · solutions 1 · pipeline results 3'
+		equals: 'states 2 · background steps 2 · solutions 1 · held by future promises 1'.
+	self assert: (health jointPipelineSummaryFor: row)
+		equals: 'results 3 · world last 1 · solution-owned 1 · other 1'
 ]
 
 { #category : 'tests - formatting' }

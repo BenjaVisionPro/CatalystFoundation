@@ -140,7 +140,7 @@ CFPhysicsProfileHealthElement >> collectRetentionSample [
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectSample [
-	| bodies contacts joints islands worldStates backgroundSteps solutions pipelineResults loggers |
+	| bodies contacts joints islands worldStates backgroundSteps solutions pipelineResults futurePromises loggers |
 	bodies := CFPhysicsBody allInstances.
 	contacts := CFPhysicsContact allInstances.
 	joints := CFPhysicsJoint withAllSubclasses
@@ -150,6 +150,7 @@ CFPhysicsProfileHealthElement >> collectSample [
 	backgroundSteps := CFPhysicsWorldBackgroundStep allInstances.
 	solutions := CFPhysicsWorldSolution allInstances.
 	pipelineResults := CFPhysicsStepPipelineResult allInstances.
+	futurePromises := AsyncFuturePromise allInstances.
 	loggers := CFPhysicsTelemetryLogger allInstances.
 	^ {
 		#timestamp -> DateAndTime now.
@@ -169,7 +170,8 @@ CFPhysicsProfileHealthElement >> collectSample [
 				worldStates: worldStates
 				backgroundSteps: backgroundSteps
 				solutions: solutions
-				pipelineResults: pipelineResults.
+				pipelineResults: pipelineResults
+				futurePromises: futurePromises.
 			self rowNamed: 'PhysicsIsland'
 				total: islands size
 				owned: (islands count: [ :each | self island: each belongsTo: world ])
@@ -186,14 +188,23 @@ CFPhysicsProfileHealthElement >> collectSample [
 ]
 
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: allWorldStates backgroundSteps: allBackgroundSteps solutions: allSolutions pipelineResults: allPipelineResults [
-	| related live captured unexplained |
+CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: allWorldStates backgroundSteps: allBackgroundSteps solutions: allSolutions pipelineResults: allPipelineResults futurePromises: allFuturePromises [
+	| related live captured unexplained worldSolutions relatedPipelineResults solutionPipelineResults worldLastPipelineResult futureHeldSolutions |
 	related := (allJoints select: [ :each | self joint: each belongsTo: world ]) asIdentitySet.
 	live := (allJoints select: [ :each | each world == world ]) asIdentitySet.
 	captured := (allJoints select: [ :each |
 		each world isNil and: [ each solverCommitTarget world == world ] ]) asIdentitySet.
 	unexplained := related reject: [ :each |
 		(live includes: each) or: [ captured includes: each ] ].
+
+	worldSolutions := allSolutions select: [ :each | each world == world ].
+	relatedPipelineResults := allPipelineResults select: [ :each |
+		self pipelineResult: each belongsTo: world ].
+	solutionPipelineResults := (worldSolutions collect: #pipelineResult) asIdentitySet.
+	worldLastPipelineResult := world lastStepResult.
+	futureHeldSolutions := worldSolutions count: [ :solution |
+		self solution: solution isHeldByAny: allFuturePromises ].
+
 	^ {
 		#name -> 'PhysicsJoint'.
 		#total -> allJoints size.
@@ -205,15 +216,30 @@ CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: a
 		#worldStateCount -> (allWorldStates count: [ :each | each world == world ]).
 		#backgroundStepCount -> (allBackgroundSteps count: [ :each |
 			each state notNil and: [ each state world == world ] ]).
-		#solutionCount -> (allSolutions count: [ :each | each world == world ]).
-		#pipelineResultCount -> (allPipelineResults count: [ :each |
-			self pipelineResult: each belongsTo: world ]) } asDictionary
+		#solutionCount -> worldSolutions size.
+		#futureHeldSolutionCount -> futureHeldSolutions.
+		#pipelineResultCount -> relatedPipelineResults size.
+		#worldLastPipelineResultCount -> ((worldLastPipelineResult notNil and: [
+			relatedPipelineResults identityIncludes: worldLastPipelineResult ])
+				ifTrue: [ 1 ]
+				ifFalse: [ 0 ]).
+		#solutionPipelineResultCount -> (relatedPipelineResults count: [ :each |
+			solutionPipelineResults includes: each ]).
+		#otherPipelineResultCount -> (relatedPipelineResults count: [ :each |
+			(each == worldLastPipelineResult) not and: [
+				(solutionPipelineResults includes: each) not ] ]) } asDictionary
 ]
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWorld [
 	^ aPipelineResult joints anySatisfy: [ :joint |
 		joint solverCommitTarget world == aWorld ]
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> solution: aSolution isHeldByAny: futurePromises [
+	^ futurePromises anySatisfy: [ :promise |
+		promise isFulfilled and: [ promise state value == aSolution ] ]
 ]
 
 { #category : 'private - sampling' }
@@ -323,10 +349,14 @@ CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: current
 	lines := OrderedCollection new.
 	lines add: 'Retained' -> (self retainedSummaryFor: row).
 	(self isJointRetentionRow: row) ifTrue: [
-		lines add: 'Holders' -> (self jointHolderSummaryFor: row) ].
+		lines
+			add: 'Holders' -> (self jointHolderSummaryFor: row);
+			add: 'Pipeline' -> (self jointPipelineSummaryFor: row) ].
 	lines add: 'Current' -> (self currentSummaryFor: currentRow).
 	(self isJointRetentionRow: currentRow) ifTrue: [
-		lines add: 'Current holders' -> (self jointHolderSummaryFor: currentRow) ].
+		lines
+			add: 'Current holders' -> (self jointHolderSummaryFor: currentRow);
+			add: 'Current pipeline' -> (self jointPipelineSummaryFor: currentRow) ].
 	^ self
 		instanceStatisticsRowNamed: (row at: #name)
 		trend: (self retentionTrendFor: (row at: #name))
@@ -444,7 +474,15 @@ CFPhysicsProfileHealthElement >> jointHolderSummaryFor: row [
 	^ 'states ', (row at: #worldStateCount) asString,
 		' · background steps ', (row at: #backgroundStepCount) asString,
 		' · solutions ', (row at: #solutionCount) asString,
-		' · pipeline results ', (row at: #pipelineResultCount) asString
+		' · held by future promises ', (row at: #futureHeldSolutionCount) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointPipelineSummaryFor: row [
+	^ 'results ', (row at: #pipelineResultCount) asString,
+		' · world last ', (row at: #worldLastPipelineResultCount) asString,
+		' · solution-owned ', (row at: #solutionPipelineResultCount) asString,
+		' · other ', (row at: #otherPipelineResultCount) asString
 ]
 
 { #category : 'private - analysis' }
