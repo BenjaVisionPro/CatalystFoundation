@@ -1091,3 +1091,55 @@ CFPhysicsWorldTests >> testWorldCaptureIncludesJointWhenEitherDynamicEndpointIsA
 	world abandonSolveTicket: state solveTicket.
 	^ state
 ]
+
+{ #category : 'tests - containment' }
+CFPhysicsWorldTests >> testRebuildingContainmentUnlinksRetiredBoundaryContactsFromPersistentIslands [
+	<gtExample>
+	| owner element world body firstResult contact oldContainment graph |
+	owner := BlElement new size: 200 @ 200.
+	element := BlElement new size: 20 @ 20.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
+	body := element physics body.
+	body position: 0 @ 90.
+	firstResult := world step.
+	contact := firstResult activeContacts
+		detect: [ :each |
+			each firstBody == world containmentBoundaryBody
+				or: [ each secondBody == world containmentBoundaryBody ] ]
+		ifNone: [ self error: 'Expected a containment contact' ].
+	oldContainment := world containmentBoundaryBody.
+	graph := world persistentIslandGraph.
+	self assert: (graph islandForConstraint: contact) notNil.
+	owner size: 240 @ 200.
+	world prepareForStateCapture.
+	self assert: world containmentBoundaryBody ~~ oldContainment.
+	self assert: (graph islandForConstraint: contact) isNil.
+	self deny: (world contacts anySatisfy: [ :each |
+		each firstBody == oldContainment or: [ each secondBody == oldContainment ] ]).
+	^ world
+]
+
+{ #category : 'tests - containment' }
+CFPhysicsWorldTests >> testRemovingContainmentBoundaryRetiresItsBroadphaseProxiesImmediately [
+	<gtExample>
+	| owner element world oldContainment pairFinder broadphase proxyCountBefore |
+	owner := BlElement new size: 200 @ 200.
+	element := BlElement new size: 20 @ 20.
+	owner addChild: element.
+	world := owner physics beWorld.
+	world gravity: 0 @ 0.
+	world owner physics makeChildrenDynamic.
+	world step.
+	oldContainment := world containmentBoundaryBody.
+	pairFinder := (world stepPipeline stageOfType: CFPhysicsPairFinderStage) pairFinder.
+	broadphase := pairFinder.
+	proxyCountBefore := broadphase proxyCount.
+	world containment disable.
+	world prepareForStateCapture.
+	self assert: world containmentBoundaryBody isNil.
+	self assert: broadphase proxyCount < proxyCountBefore.
+	^ world
+]

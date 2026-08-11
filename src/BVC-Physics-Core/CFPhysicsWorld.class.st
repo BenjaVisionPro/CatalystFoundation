@@ -1528,13 +1528,11 @@ CFPhysicsWorld >> removeContainmentBoundary [
 
 { #category : 'containment - internal' }
 CFPhysicsWorld >> removeContainmentBoundaryPreservingBounds [
+	| retiredContainmentBody |
 	containmentBody ifNil: [ ^ self ].
-	contacts := contacts reject: [ :contact |
-		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
-	activeContacts := activeContacts reject: [ :contact |
-		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
-	calculationContacts := calculationContacts reject: [ :contact |
-		contact firstBody == containmentBody or: [ contact secondBody == containmentBody ] ].
+	retiredContainmentBody := containmentBody.
+	self removeContactsUsingBody: retiredContainmentBody.
+	stepPipeline resetBroadphaseProxiesFor: retiredContainmentBody.
 	containmentBody := nil.
 	containmentChain := nil.
 	containmentGeometry := nil.
