@@ -105,3 +105,28 @@ CFPhysicsProfileHealthElementTests >> testJointHolderSummaryUsesNamedCounts [
 	self assert: (health jointHolderSummaryFor: row)
 		equals: 'states 2 · background steps 2 · solutions 1 · pipeline results 3'
 ]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testInstanceStatisticsRowUsesSeparateNameAndValuesColumns [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := health
+		instanceStatisticsRowNamed: 'PhysicsJoint'
+		lines: { 'Current' -> 'image 100 · related 50 · live 10 · captured 40 · unexplained 0' }.
+	self assert: row children size equals: 2.
+	self assert: row children first children first text asString equals: 'PhysicsJoint'.
+	self assert: row children second children size equals: 1
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testInstanceStatisticsLineSeparatesLabelFromValue [
+	| health line |
+	health := CFPhysicsProfileHealthElement new.
+	line := health
+		instanceStatisticsLineNamed: 'Retained'
+		value: 'image 455 · related 116 · live 29 · captured 87 · unexplained 0'.
+	self assert: line children size equals: 2.
+	self assert: line children first text asString equals: 'Retained'.
+	self assert: line children second text asString
+		equals: 'image 455 · related 116 · live 29 · captured 87 · unexplained 0'
+]

@@ -311,36 +311,100 @@ CFPhysicsProfileHealthElement >> renderStopped [
 
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> labelForCurrentRow: row [
-	^ BrLabel new
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets top: 3 right: 0 bottom: 5 left: 0);
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
-		text: (row at: #name), String cr,
-			'Current   ', (self currentSummaryFor: row);
-		yourself
+	^ self instanceStatisticsRowNamed: (row at: #name) lines: {
+		'Current' -> (self currentSummaryFor: row) }
 ]
 
 { #category : 'private - building' }
 CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: currentSample [
-	| currentRow |
+	| currentRow lines |
 	currentRow := (currentSample at: #rows)
 		detect: [ :each | (each at: #name) = (row at: #name) ].
-	^ BrLabel new
+	lines := OrderedCollection new.
+	lines add: 'Retained' -> (self retainedSummaryFor: row).
+	(self isJointRetentionRow: row) ifTrue: [
+		lines add: 'Holders' -> (self jointHolderSummaryFor: row) ].
+	lines add: 'Current' -> (self currentSummaryFor: currentRow).
+	(self isJointRetentionRow: currentRow) ifTrue: [
+		lines add: 'Current holders' -> (self jointHolderSummaryFor: currentRow) ].
+	^ self
+		instanceStatisticsRowNamed: (row at: #name)
+		trend: (self retentionTrendFor: (row at: #name))
+		lines: lines
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName lines: labelledLines [
+	^ self instanceStatisticsRowNamed: aName trend: nil lines: labelledLines
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName trend: aTrend lines: labelledLines [
+	| row nameColumn valuesColumn title |
+	row := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets top: 3 right: 0 bottom: 6 left: 0);
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
-		text: (row at: #name), '  ', (self retentionTrendFor: (row at: #name)), String cr,
-			'Retained  ', (self retainedSummaryFor: row), String cr,
-			((self isJointRetentionRow: row)
-				ifTrue: [ 'Holders   ', (self jointHolderSummaryFor: row), String cr ]
-				ifFalse: [ '' ]),
-			'Current   ', (self currentSummaryFor: currentRow),
-			((self isJointRetentionRow: currentRow)
-				ifTrue: [ String cr, 'Holders   ', (self jointHolderSummaryFor: currentRow) ]
-				ifFalse: [ '' ]);
-		yourself
+		cellSpacing: 10;
+		padding: (BlInsets top: 4 right: 2 bottom: 6 left: 0);
+		yourself.
+	nameColumn := BrVerticalPane new
+		hExact: 180;
+		vFitContent;
+		yourself.
+	title := aTrend
+		ifNil: [ aName ]
+		ifNotNil: [ aName, '  ', aTrend ].
+	nameColumn addChild: (BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 11);
+		text: title;
+		yourself).
+	valuesColumn := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 2;
+		yourself.
+	labelledLines do: [ :association |
+		valuesColumn addChild: (self
+			instanceStatisticsLineNamed: association key
+			value: association value) ].
+	row
+		addChild: nameColumn;
+		addChild: valuesColumn.
+	^ row
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsLineNamed: aName value: aValue [
+	| line nameLabel valueLabel |
+	line := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
+	nameLabel := BrLabel new
+		hExact: 105;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.5);
+			fontSize: 10);
+		text: aName;
+		yourself.
+	valueLabel := BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 10);
+		text: aValue;
+		yourself.
+	line
+		addChild: nameLabel;
+		addChild: valueLabel.
+	^ line
 ]
 
 { #category : 'private - building' }
