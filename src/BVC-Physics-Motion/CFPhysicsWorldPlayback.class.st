@@ -58,6 +58,12 @@ CFPhysicsWorldPlayback >> isActive [
 		motion isRunning or: [ motion isPaused ] ]
 ]
 
+
+{ #category : 'testing' }
+CFPhysicsWorldPlayback >> isRunning [
+	^ motion notNil and: [ motion isRunning ]
+]
+
 { #category : 'accessing' }
 CFPhysicsWorldPlayback >> motion [
 	^ motion

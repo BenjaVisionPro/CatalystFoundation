@@ -94,6 +94,12 @@ CFPhysicsWorldMotionIntegration >> isStepping [
 	^ playback notNil and: [ playback isActive ]
 ]
 
+
+{ #category : 'testing' }
+CFPhysicsWorldMotionIntegration >> isSteppingRunning [
+	^ playback notNil and: [ playback isRunning ]
+]
+
 { #category : 'private - continuous stepping' }
 CFPhysicsWorldMotionIntegration >> playback [
 	^ playback ifNil: [ playback := CFPhysicsWorldPlayback on: world ]

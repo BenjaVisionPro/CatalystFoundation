@@ -203,3 +203,61 @@ CFPhysicsProfileHealthElementTests >> testSolutionInstanceSummaryUsesLifecycleRo
 	self assert: (health solutionInstanceSummaryFor: row)
 		equals: 'image 3 · world 3 · background-step 0 · future 0 · other 3'
 ]
+
+{ #category : 'tests - retention observation' }
+CFPhysicsProfileHealthElementTests >> testRetentionObservationPausesAndRestoresRunningPhysicsPlayback [
+	| space owner world motion health |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 200 @ 120.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	motion := world startStepping.
+	space pulse.
+	self assert: motion isRunning.
+	health := CFPhysicsProfileHealthElement new world: world.
+	health beginRetentionObservation.
+	self assert: motion isPaused.
+	self deny: world effectiveBackgroundStepping.
+	health finishRetentionObservation.
+	self assert: motion isRunning.
+	world stopStepping
+]
+
+{ #category : 'tests - retention observation' }
+CFPhysicsProfileHealthElementTests >> testRetentionObservationPreservesAlreadyPausedPlayback [
+	| space owner world motion health |
+	space := BlSpace new.
+	space time: BlTime simulated.
+	owner := BlElement new size: 200 @ 120.
+	space root addChild: owner.
+	space pulse.
+	world := owner physics beWorld.
+	motion := world startStepping.
+	space pulse.
+	world pauseStepping.
+	self assert: motion isPaused.
+	health := CFPhysicsProfileHealthElement new world: world.
+	health beginRetentionObservation.
+	self assert: motion isPaused.
+	health finishRetentionObservation.
+	self assert: motion isPaused.
+	world stopStepping
+]
+
+{ #category : 'tests - retention observation' }
+CFPhysicsProfileHealthElementTests >> testRetentionObservationInvalidatesBackgroundSolveWithoutChangingPreference [
+	| world state health |
+	world := CFPhysicsWorld new.
+	world backgroundStepping: true.
+	state := world captureStateIfIdle.
+	self assert: world activeSolveTicket equals: state solveTicket.
+	health := CFPhysicsProfileHealthElement new world: world.
+	health beginRetentionObservation.
+	self assert: world backgroundStepping.
+	self deny: world effectiveBackgroundStepping.
+	self assert: world activeSolveTicket isNil.
+	health finishRetentionObservation.
+	self assert: world effectiveBackgroundStepping
+]

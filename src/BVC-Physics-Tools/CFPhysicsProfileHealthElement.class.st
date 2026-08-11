@@ -2,7 +2,7 @@
 Class {
 	#name : 'CFPhysicsProfileHealthElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'scrollPane', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData' ],
+	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'scrollPane', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData', 'retentionObservationActive', 'resumeSteppingAfterRetentionObservation' ],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -24,6 +24,8 @@ CFPhysicsProfileHealthElement >> initialize [
 	lastRetentionSampleMilliseconds := nil.
 	running := false.
 	sampling := false.
+	retentionObservationActive := false.
+	resumeSteppingAfterRetentionObservation := false.
 	self
 		hMatchParent;
 		vMatchParent
@@ -66,8 +68,11 @@ CFPhysicsProfileHealthElement >> build [
 			executionConfiguration: (AsyncFutureExecutionConfiguration new
 				customGroup: #'Physics Profile Health');
 			cancelSoft;
-			whenSuccess: [ :anElement :sample | self acceptSample: sample ];
+			whenSuccess: [ :anElement :sample |
+				self finishRetentionObservation.
+				self acceptSample: sample ];
 			whenError: [ :anElement :anError |
+				self finishRetentionObservation.
 				sampling := false.
 				anError class = AsyncFutureCancelled
 					ifFalse: [ anElement showNotification: anError asNotification ] ] ].
@@ -98,14 +103,22 @@ CFPhysicsProfileHealthElement >> startProfiling [
 CFPhysicsProfileHealthElement >> stopProfiling [
 	running := false.
 	sampling := false.
-	profileContent ifNotNil: [ profileContent asyncFuture interrupt ]
+	profileContent ifNotNil: [ profileContent asyncFuture interrupt ].
+	self finishRetentionObservation
 ]
 
 { #category : 'profiling' }
 CFPhysicsProfileHealthElement >> collectRetainedNow [
 	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	sampling := true.
-	profileContent asyncFuture future: [ self collectRetentionSample ] asAsyncFuture
+	[
+		self beginRetentionObservation.
+		profileContent asyncFuture future: [ self collectRetentionSample ] asAsyncFuture ]
+		on: Error
+		do: [ :anError |
+			self finishRetentionObservation.
+			sampling := false.
+			anError pass ]
 ]
 
 { #category : 'private - sampling' }
@@ -129,7 +142,37 @@ CFPhysicsProfileHealthElement >> sampleNow [
 ]
 
 { #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> beginRetentionObservation [
+	| integration |
+	retentionObservationActive ifTrue: [ ^ self ].
+	retentionObservationActive := true.
+	resumeSteppingAfterRetentionObservation := false.
+	integration := CFPhysicsWorldMotionIntegration existingFor: world.
+	(integration notNil and: [ integration isSteppingRunning ]) ifTrue: [
+		resumeSteppingAfterRetentionObservation := true.
+		world pauseStepping ].
+	world requireForegroundSteppingFor: self
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> finishRetentionObservation [
+	retentionObservationActive ifFalse: [ ^ self ].
+	world releaseForegroundSteppingFor: self.
+	(resumeSteppingAfterRetentionObservation and: [ world isReleased not ]) ifTrue: [
+		world resumeStepping ].
+	resumeSteppingAfterRetentionObservation := false.
+	retentionObservationActive := false
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> waitForBackgroundExecutionToFinishForRetentionObservation [
+	[ world hasBackgroundExecutionInFlight ] whileTrue: [
+		10 milliSeconds wait ]
+]
+
+{ #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectRetentionSample [
+	self waitForBackgroundExecutionToFinishForRetentionObservation.
 	Smalltalk garbageCollect.
 	500 milliSeconds wait.
 	Smalltalk garbageCollect.
