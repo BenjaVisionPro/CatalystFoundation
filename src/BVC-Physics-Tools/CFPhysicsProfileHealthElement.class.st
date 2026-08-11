@@ -140,17 +140,17 @@ CFPhysicsProfileHealthElement >> collectRetentionSample [
 
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> collectSample [
-	| bodies contacts joints islands solutions loggers backgroundStates |
+	| bodies contacts joints islands worldStates backgroundSteps solutions pipelineResults loggers |
 	bodies := CFPhysicsBody allInstances.
 	contacts := CFPhysicsContact allInstances.
 	joints := CFPhysicsJoint withAllSubclasses
 		flatCollect: [ :each | each allInstances ].
 	islands := CFPhysicsIsland allInstances.
+	worldStates := CFPhysicsWorldState allInstances.
+	backgroundSteps := CFPhysicsWorldBackgroundStep allInstances.
 	solutions := CFPhysicsWorldSolution allInstances.
+	pipelineResults := CFPhysicsStepPipelineResult allInstances.
 	loggers := CFPhysicsTelemetryLogger allInstances.
-	backgroundStates := CFPhysicsWorldBackgroundStep allInstances
-		collect: #state
-		thenSelect: [ :each | each notNil and: [ each world == world ] ].
 	^ {
 		#timestamp -> DateAndTime now.
 		#retention -> false.
@@ -166,10 +166,10 @@ CFPhysicsProfileHealthElement >> collectSample [
 				expected: world contacts size.
 			self
 				jointRetentionRowFrom: joints
-				committedJoints: (world lastStepResult
-					ifNil: [ #() ]
-					ifNotNil: [ :result | result joints ])
-				backgroundStates: backgroundStates.
+				worldStates: worldStates
+				backgroundSteps: backgroundSteps
+				solutions: solutions
+				pipelineResults: pipelineResults.
 			self rowNamed: 'PhysicsIsland'
 				total: islands size
 				owned: (islands count: [ :each | self island: each belongsTo: world ])
@@ -186,28 +186,34 @@ CFPhysicsProfileHealthElement >> collectSample [
 ]
 
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints committedJoints: committedJoints backgroundStates: backgroundStates [
-	| owned live committed background known other |
-	owned := (allJoints select: [ :each | self joint: each belongsTo: world ]) asIdentitySet.
-	live := world joints asIdentitySet.
-	committed := committedJoints asIdentitySet.
-	background := IdentitySet new.
-	backgroundStates do: [ :state |
-		state ifNotNil: [ background addAll: state joints ] ].
-	known := IdentitySet new.
-	known addAll: live; addAll: committed; addAll: background.
-	other := owned reject: [ :each | known includes: each ].
+CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: allWorldStates backgroundSteps: allBackgroundSteps solutions: allSolutions pipelineResults: allPipelineResults [
+	| related live captured unexplained |
+	related := (allJoints select: [ :each | self joint: each belongsTo: world ]) asIdentitySet.
+	live := (allJoints select: [ :each | each world == world ]) asIdentitySet.
+	captured := (allJoints select: [ :each |
+		each world isNil and: [ each solverCommitTarget world == world ] ]) asIdentitySet.
+	unexplained := related reject: [ :each |
+		(live includes: each) or: [ captured includes: each ] ].
 	^ {
 		#name -> 'PhysicsJoint'.
 		#total -> allJoints size.
-		#owned -> owned size.
+		#owned -> related size.
 		#live -> live size.
-		#committed -> (committed reject: [ :each | live includes: each ]) size.
-		#background -> (background reject: [ :each |
-			(live includes: each) or: [ committed includes: each ] ]) size.
-		#backgroundStateCount -> (backgroundStates count: #notNil).
-		#other -> other size.
-		#difference -> other size } asDictionary
+		#captured -> captured size.
+		#unexplained -> unexplained size.
+		#difference -> unexplained size.
+		#worldStateCount -> (allWorldStates count: [ :each | each world == world ]).
+		#backgroundStepCount -> (allBackgroundSteps count: [ :each |
+			each state notNil and: [ each state world == world ] ]).
+		#solutionCount -> (allSolutions count: [ :each | each world == world ]).
+		#pipelineResultCount -> (allPipelineResults count: [ :each |
+			self pipelineResult: each belongsTo: world ]) } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWorld [
+	^ aPipelineResult joints anySatisfy: [ :joint |
+		joint solverCommitTarget world == aWorld ]
 ]
 
 { #category : 'private - sampling' }
@@ -280,7 +286,7 @@ CFPhysicsProfileHealthElement >> renderSample: aSample [
 			profileContent addChild: (BrLabel new
 				vFitContent;
 				aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.58));
-				text: 'After GC counts classify world-related joints by retained lifecycle. Current pre-GC counts shown below.';
+				text: 'Retained counts follow two garbage collections. Current counts show allocation pressure before collection.';
 				yourself).
 			(retainedSample at: #rows) do: [ :row |
 				profileContent addChild: (self labelForRetainedRow: row currentSample: aSample) ] ].
@@ -307,9 +313,11 @@ CFPhysicsProfileHealthElement >> renderStopped [
 CFPhysicsProfileHealthElement >> labelForCurrentRow: row [
 	^ BrLabel new
 		hMatchParent;
-		vExact: 28;
+		vFitContent;
+		padding: (BlInsets top: 3 right: 0 bottom: 5 left: 0);
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
-		text: (row at: #name), '  ', (self rowSummary: row), ' ·';
+		text: (row at: #name), String cr,
+			'Current   ', (self currentSummaryFor: row);
 		yourself
 ]
 
@@ -320,38 +328,59 @@ CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: current
 		detect: [ :each | (each at: #name) = (row at: #name) ].
 	^ BrLabel new
 		hMatchParent;
-		vExact: 42;
+		vFitContent;
+		padding: (BlInsets top: 3 right: 0 bottom: 6 left: 0);
 		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.78));
-		text: (row at: #name), '  ', (self rowSummary: row), ' ',
-			(self retentionTrendFor: (row at: #name)), String cr,
-			'Current  ', (self rowSummary: currentRow);
+		text: (row at: #name), '  ', (self retentionTrendFor: (row at: #name)), String cr,
+			'Retained  ', (self retainedSummaryFor: row), String cr,
+			((self isJointRetentionRow: row)
+				ifTrue: [ 'Holders   ', (self jointHolderSummaryFor: row), String cr ]
+				ifFalse: [ '' ]),
+			'Current   ', (self currentSummaryFor: currentRow),
+			((self isJointRetentionRow: currentRow)
+				ifTrue: [ String cr, 'Holders   ', (self jointHolderSummaryFor: currentRow) ]
+				ifFalse: [ '' ]);
 		yourself
 ]
 
 { #category : 'private - building' }
-CFPhysicsProfileHealthElement >> rowSummary: row [
-	(self isJointRetentionRow: row) ifTrue: [ ^ self jointRowSummary: row ].
-	^ self standardRowSummary: row
+CFPhysicsProfileHealthElement >> retainedSummaryFor: row [
+	(self isJointRetentionRow: row) ifTrue: [ ^ self jointInstanceSummaryFor: row ].
+	^ self standardInstanceSummaryFor: row
 ]
 
 { #category : 'private - building' }
-CFPhysicsProfileHealthElement >> standardRowSummary: row [
+CFPhysicsProfileHealthElement >> currentSummaryFor: row [
+	(self isJointRetentionRow: row) ifTrue: [ ^ self jointInstanceSummaryFor: row ].
+	^ self standardInstanceSummaryFor: row
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
 	| difference sign |
 	difference := row at: #difference.
 	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
-	^ (row at: #total) asString, '/',
-		(row at: #owned) asString, '/',
-		(row at: #expected) asString, ' (', sign, difference asString, ')'
+	^ 'image ', (row at: #total) asString,
+		' · world ', (row at: #owned) asString,
+		' · expected ', (row at: #expected) asString,
+		' · excess ', sign, difference asString
 ]
 
 { #category : 'private - building' }
-CFPhysicsProfileHealthElement >> jointRowSummary: row [
-	^ (row at: #total) asString, '/', (row at: #owned) asString,
-		'  live ', (row at: #live) asString,
-		' · committed ', (row at: #committed) asString,
-		' · background ', (row at: #background) asString,
-		' (', (row at: #backgroundStateCount) asString, ' states)',
-		' · other ', (row at: #other) asString
+CFPhysicsProfileHealthElement >> jointInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · live ', (row at: #live) asString,
+		' · captured ', (row at: #captured) asString,
+		' · unexplained ', (row at: #unexplained) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointHolderSummaryFor: row [
+	^ 'states ', (row at: #worldStateCount) asString,
+		' · background steps ', (row at: #backgroundStepCount) asString,
+		' · solutions ', (row at: #solutionCount) asString,
+		' · pipeline results ', (row at: #pipelineResultCount) asString
 ]
 
 { #category : 'private - analysis' }
@@ -405,7 +434,7 @@ CFPhysicsProfileHealthElement >> alerts [
 		(self retentionTrendFor: (row at: #name)) = '↗' ifTrue: [
 			result add: '⚠ ', (row at: #name),
 				((self isJointRetentionRow: row)
-					ifTrue: [ ' unexplained retained instance count is increasing after GC.' ]
+					ifTrue: [ ' structurally unexplained retained joint count is increasing after GC.' ]
 					ifFalse: [ ' retained excess instance count is increasing after GC.' ]) ] ].
 	^ result
 ]

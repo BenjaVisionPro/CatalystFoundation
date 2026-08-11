@@ -23,41 +23,85 @@ CFPhysicsProfileHealthElementTests >> worldWithOneJoint [
 ]
 
 { #category : 'tests - retention' }
-CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesKnownSnapshotLifetimesByIdentity [
-	| world live committedOnly backgroundOnly backgroundState health row |
+CFPhysicsProfileHealthElementTests >> testJointRetentionRowClassifiesLiveAndCapturedJointsFromTheirOwnState [
+	| world live captured state backgroundStep solution result health row |
 	world := self worldWithOneJoint.
 	live := world joints first.
-	committedOnly := live capturedForStep.
-	backgroundOnly := live capturedForStep.
-	backgroundState := CFPhysicsWorldState new
-		joints: { committedOnly. backgroundOnly. CFPhysicsDistanceJoint new };
+	captured := live capturedForStep.
+	state := CFPhysicsWorldState new
+		world: world;
+		joints: { captured };
+		yourself.
+	backgroundStep := CFPhysicsWorldBackgroundStep on: world.
+	backgroundStep instVarNamed: 'state' put: state.
+	result := CFPhysicsStepPipelineResult new
+		joints: { captured };
+		yourself.
+	solution := CFPhysicsWorldSolution new
+		world: world;
+		pipelineResult: result;
 		yourself.
 	health := CFPhysicsProfileHealthElement new world: world.
 	row := health
-		jointRetentionRowFrom: { live. committedOnly. backgroundOnly }
-		committedJoints: { committedOnly }
-		backgroundStates: { backgroundState }.
-	self assert: (row at: #owned) equals: 3.
+		jointRetentionRowFrom: { live. captured }
+		worldStates: { state }
+		backgroundSteps: { backgroundStep }
+		solutions: { solution }
+		pipelineResults: { result }.
+	self assert: (row at: #owned) equals: 2.
 	self assert: (row at: #live) equals: 1.
-	self assert: (row at: #committed) equals: 1.
-	self assert: (row at: #background) equals: 1.
-	self assert: (row at: #backgroundStateCount) equals: 1.
-	self assert: (row at: #other) equals: 0
+	self assert: (row at: #captured) equals: 1.
+	self assert: (row at: #unexplained) equals: 0.
+	self assert: (row at: #worldStateCount) equals: 1.
+	self assert: (row at: #backgroundStepCount) equals: 1.
+	self assert: (row at: #solutionCount) equals: 1.
+	self assert: (row at: #pipelineResultCount) equals: 1
 ]
 
 { #category : 'tests - retention' }
-CFPhysicsProfileHealthElementTests >> testJointRetentionRowReportsOnlyUnclassifiedJointsAsDifference [
+CFPhysicsProfileHealthElementTests >> testJointRetentionRowReportsRelatedJointOutsideLiveAndCapturedAsUnexplained [
 	| world live unexplained health row |
 	world := self worldWithOneJoint.
 	live := world joints first.
 	unexplained := live capturedForStep.
+	unexplained sourceJoint: CFPhysicsDistanceJoint new.
 	health := CFPhysicsProfileHealthElement new world: world.
 	row := health
 		jointRetentionRowFrom: { live. unexplained }
-		committedJoints: #()
-		backgroundStates: #().
-	self assert: (row at: #other) equals: 1.
-	self assert: (row at: #difference) equals: 1.
-	self assert: (health jointRowSummary: row)
-		equals: '2/2  live 1 · committed 0 · background 0 (0 states) · other 1'
+		worldStates: #()
+		backgroundSteps: #()
+		solutions: #()
+		pipelineResults: #().
+	self assert: (row at: #owned) equals: 2.
+	self assert: (row at: #live) equals: 1.
+	self assert: (row at: #captured) equals: 0.
+	self assert: (row at: #unexplained) equals: 1.
+	self assert: (row at: #difference) equals: 1
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testJointInstanceSummaryUsesNamedCounts [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := {
+		#total -> 368.
+		#owned -> 116.
+		#live -> 29.
+		#captured -> 87.
+		#unexplained -> 0 } asDictionary.
+	self assert: (health jointInstanceSummaryFor: row)
+		equals: 'image 368 · related 116 · live 29 · captured 87 · unexplained 0'
+]
+
+{ #category : 'tests - formatting' }
+CFPhysicsProfileHealthElementTests >> testJointHolderSummaryUsesNamedCounts [
+	| health row |
+	health := CFPhysicsProfileHealthElement new.
+	row := {
+		#worldStateCount -> 2.
+		#backgroundStepCount -> 2.
+		#solutionCount -> 1.
+		#pipelineResultCount -> 3 } asDictionary.
+	self assert: (health jointHolderSummaryFor: row)
+		equals: 'states 2 · background steps 2 · solutions 1 · pipeline results 3'
 ]
