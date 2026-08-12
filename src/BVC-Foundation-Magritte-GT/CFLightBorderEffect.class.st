@@ -184,26 +184,26 @@ CFLightBorderEffect >> drawTreatmentFrom: aStartCoordinate to: anEndCoordinate r
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawTreatmentBandInside: isInside from: innerDistance to: outerDistance raised: isRaised for: anElement onSpartaCanvas: aCanvas [
-	"Build the treatment as an alpha mask first, using only solid strokes on the
-	real element path. Sparta/Skia computes the parallel stroke contours, so the
-	corner geometry remains aligned with arbitrary element geometry. Then paint
-	the directional gradient through that mask with SrcIn composition."
-	| path bounds gradient |
+	"Rasterise the treatment from the same centred stroke geometry Bloc uses for
+	native borders. The two stroke widths therefore define true parallel contours
+	of the element path, including rounded corners, without constructing an inset
+	path. Clip that annulus to the requested side, then replace the complete mask
+	with the lighting paint using SrcIn. The lighting fill deliberately covers the
+	whole canvas: SrcIn only survives where the mask has alpha, and covering the
+	whole mask prevents the unpainted rectangular remnants produced by the old
+	local-bounds fill."
+	| path gradient |
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	bounds := anElement boundsInLocal expandBy: outerDistance + 2.
 	gradient := self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas.
 
 	aCanvas layer during: [
-		"Start with the complete band at the requested distance from the real path."
 		aCanvas stroke
 			path: path;
 			paint: Color white;
 			width: outerDistance * 2.0;
 			draw.
 
-		"Turn the wide stroke into an annular slice when the treatment starts
-		away from the geometry boundary."
 		innerDistance > 0 ifTrue: [
 			aCanvas stroke
 				path: path;
@@ -212,7 +212,6 @@ CFLightBorderEffect >> drawTreatmentBandInside: isInside from: innerDistance to:
 				composeDestOut;
 				draw ].
 
-		"Keep only the requested side of the geometry path."
 		aCanvas fill
 			path: path;
 			paint: Color white;
@@ -222,10 +221,8 @@ CFLightBorderEffect >> drawTreatmentBandInside: isInside from: innerDistance to:
 					ifFalse: [ aFill composeDestOut ] ];
 			draw.
 
-		"The destination now contains only the treatment mask. Paint the
-		directional gradient through it; SrcIn preserves only mask-covered pixels."
 		aCanvas fill
-			path: bounds;
+			path: aCanvas bounds;
 			paint: gradient;
 			composeIn;
 			draw ]

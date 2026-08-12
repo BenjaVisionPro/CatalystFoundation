@@ -38,7 +38,7 @@ CFLightBorderAptitudeExamples >> aptitudeConfiguredBy: aBlock [
 	| aptitude |
 	aptitude := CFLightBorderAptitude new
 		beFlat;
-		effectWidth: 10;
+		effectWidth: 5;
 		opacity: 0.9;
 		lightDirection: -1 @ -1;
 		yourself.
@@ -53,10 +53,10 @@ CFLightBorderAptitudeExamples >> cardWith: anAptitude [
 			c horizontal matchParent.
 			c vertical matchParent.
 			c linear weight: 1 ];
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 18);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 24);
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.75) width: 12);
+		border: (BlBorder paint: (Color blue alpha: 0.75) width: 8);
 		addAptitude: anAptitude;
 		yourself
 ]
