@@ -8,7 +8,9 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'style'
+		'raised',
+		'drawOuter',
+		'drawInner'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -46,7 +48,8 @@ CFLightBorderAptitude class >> defaultShadowColor [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beFlat [
-	style := #flat.
+	drawOuter := false.
+	drawInner := false.
 	^ self
 ]
 
@@ -57,7 +60,17 @@ CFLightBorderAptitude >> beInset [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	style := #lowered.
+	raised := false.
+	drawOuter := false.
+	drawInner := true.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beLoweredBorder [
+	raised := false.
+	drawOuter := true.
+	drawInner := true.
 	^ self
 ]
 
@@ -73,7 +86,17 @@ CFLightBorderAptitude >> bePressed [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaised [
-	style := #raised.
+	raised := true.
+	drawOuter := true.
+	drawInner := false.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beRaisedBorder [
+	raised := true.
+	drawOuter := true.
+	drawInner := true.
 	^ self
 ]
 
@@ -84,13 +107,7 @@ CFLightBorderAptitude >> depth [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> depth: aNumber [
-	depth := aNumber rounded max: 0
-]
-
-{ #category : 'private - effects' }
-CFLightBorderAptitude >> effectComposedWith: anEffect [
-	self hasLighting ifFalse: [ ^ anEffect ].
-	^ self lightingEffect underlyingEffect: anEffect
+	depth := aNumber max: 0
 ]
 
 { #category : 'accessing' }
@@ -103,9 +120,15 @@ CFLightBorderAptitude >> effectWidth: aNumber [
 	effectWidth := aNumber max: 0
 ]
 
+{ #category : 'private - effects' }
+CFLightBorderAptitude >> effectComposedWith: anEffect [
+	self hasLighting ifFalse: [ ^ anEffect ].
+	^ self lightingEffect underlyingEffect: anEffect
+]
+
 { #category : 'testing' }
 CFLightBorderAptitude >> hasLighting [
-	^ style ~= #flat
+	^ drawOuter or: [ drawInner ]
 ]
 
 { #category : 'accessing' }
@@ -127,7 +150,7 @@ CFLightBorderAptitude >> initialize [
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	style := #raised.
+	self beRaised.
 
 	self
 		addChangeProperty: #(widget effect)
@@ -136,7 +159,7 @@ CFLightBorderAptitude >> initialize [
 
 { #category : 'testing' }
 CFLightBorderAptitude >> lowered [
-	^ style = #lowered
+	^ self hasLighting and: [ raised not ]
 ]
 
 { #category : 'accessing' }
@@ -173,7 +196,9 @@ CFLightBorderAptitude >> lightingEffect [
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
-		style: style;
+		raised: raised;
+		drawOuter: drawOuter;
+		drawInner: drawInner;
 		yourself
 ]
 
@@ -195,7 +220,7 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 
 { #category : 'testing' }
 CFLightBorderAptitude >> raised [
-	^ style = #raised
+	^ self hasLighting and: [ raised ]
 ]
 
 { #category : 'accessing' }
@@ -206,9 +231,4 @@ CFLightBorderAptitude >> shadowColor [
 { #category : 'accessing' }
 CFLightBorderAptitude >> shadowColor: aColor [
 	shadowColor := aColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> style [
-	^ style
 ]
