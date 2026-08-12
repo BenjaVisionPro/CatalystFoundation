@@ -6,6 +6,7 @@ Class {
 		'lightOffsetFactor',
 		'lightDirection',
 		'highlightColor',
+		'borderColor',
 		'shadowColor',
 		'insetShadowColor',
 		'insetShadowDepth',
@@ -26,6 +27,16 @@ CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
 { #category : 'private - drawing' }
 CFLightBorderEffect >> applyLightAfterOnSpartaCanvas: aCanvas for: anElement [
 	style = #raised ifTrue: [
+		self
+			drawPathFor: anElement
+			onSpartaCanvas: aCanvas
+			color: shadowColor
+			offset: self shadowVector asPoint * self lightOffset.
+		self
+			drawPathFor: anElement
+			onSpartaCanvas: aCanvas
+			color: borderColor
+			offset: 0 @ 0.
 		^ self
 			drawPathFor: anElement
 			onSpartaCanvas: aCanvas
@@ -33,6 +44,11 @@ CFLightBorderEffect >> applyLightAfterOnSpartaCanvas: aCanvas for: anElement [
 			offset: self lightVector asPoint * self lightOffset ].
 
 	(style = #inset or: [ style = #pressed ]) ifFalse: [ ^ self ].
+	self
+		drawPathFor: anElement
+		onSpartaCanvas: aCanvas
+		color: borderColor
+		offset: 0 @ 0.
 	self drawSoftInsetShadowFor: anElement onSpartaCanvas: aCanvas.
 	self
 		drawClippedPathFor: anElement
@@ -44,26 +60,15 @@ CFLightBorderEffect >> applyLightAfterOnSpartaCanvas: aCanvas for: anElement [
 { #category : 'drawing' }
 CFLightBorderEffect >> applyBeforeOnSpartaCanvas: aCanvas for: anElement [
 	underlyingEffect ifNotNil: [
-		underlyingEffect applyBeforeOnSpartaCanvas: aCanvas for: anElement ].
-	self applyLightBeforeOnSpartaCanvas: aCanvas for: anElement
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> applyLightBeforeOnSpartaCanvas: aCanvas for: anElement [
-	style = #raised ifFalse: [ ^ self ].
-	self
-		drawPathFor: anElement
-		onSpartaCanvas: aCanvas
-		color: shadowColor
-		offset: self shadowVector asPoint * self lightOffset
+		underlyingEffect applyBeforeOnSpartaCanvas: aCanvas for: anElement ]
 ]
 
 { #category : 'geometry' }
 CFLightBorderEffect >> computeBounds: aBlBounds [
-	"The raised shadow extends beyond the native, centred BlBorder."
+	"The raised light stack extends beyond the element's geometry."
 	| lightBounds |
 	lightBounds := style = #raised
-		ifTrue: [ aBlBounds expandBy: self lightOffset ]
+		ifTrue: [ aBlBounds expandBy: (width / 2.0) + self lightOffset ]
 		ifFalse: [ aBlBounds ].
 	^ underlyingEffect
 		ifNil: [ lightBounds ]
@@ -124,6 +129,11 @@ CFLightBorderEffect >> drawSoftInsetShadowFor: anElement onSpartaCanvas: aCanvas
 { #category : 'accessing' }
 CFLightBorderEffect >> highlightColor: aColor [
 	highlightColor := aColor
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> borderColor: aColor [
+	borderColor := aColor
 ]
 
 { #category : 'accessing' }

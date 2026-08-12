@@ -87,7 +87,11 @@ CFLightBorderAptitude >> beRaised [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> border [
-	^ BlBorder paint: borderColor width: width
+	"BlBorder is the native flat-border representation. Raised and inset
+	styles are multi-pass surface effects; their base stroke must be painted
+	between their shadow and highlight to preserve the original rendering."
+	style = #flat ifTrue: [ ^ BlBorder paint: borderColor width: width ].
+	^ BlBorder empty
 ]
 
 { #category : 'accessing' }
@@ -134,9 +138,8 @@ CFLightBorderAptitude >> initialize [
 	borderColor := self class defaultBorderColor.
 	style := #raised.
 
-	"BlBorder is the owning element's border. The directional light is an
-	effect, so it never participates in the widget's child layout. Centred
-	outskirts reproduce the original CFLitBorderAptitude stroke geometry."
+	"The flat style is a native BlBorder. The lit styles are a multi-pass
+	effect, so they never participate in the widget's child layout."
 	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts centered ].
 	self addChangeProperty: #(widget border) with: [ self border ].
 	self
@@ -196,6 +199,7 @@ CFLightBorderAptitude >> lightingEffect [
 		lightOffsetFactor: lightOffsetFactor;
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
+		borderColor: borderColor;
 		shadowColor: shadowColor;
 		insetShadowColor: insetShadowColor;
 		insetShadowDepth: insetShadowDepth;
