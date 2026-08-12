@@ -72,25 +72,6 @@ CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas pai
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawOuterClippedPathFor: anElement onSpartaCanvas: aCanvas paint: aPaint width: aWidth [
-	| path |
-	path := self pathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	aCanvas layer during: [
-		self
-			drawPath: path
-			onSpartaCanvas: aCanvas
-			paint: aPaint
-			width: aWidth
-			offset: 0 @ 0.
-		aCanvas fill
-			path: path;
-			paint: Color white;
-			composeDestOut;
-			draw ]
-]
-
-{ #category : 'private - drawing' }
 CFLightBorderEffect >> drawInnerBevelFor: anElement onSpartaCanvas: aCanvas lightColor: aLightColor lightDirection: aLightDirection shadowColor: aShadowColor shadowDirection: aShadowDirection [
 	"The native inside border begins at the geometry edge. These fixed-width,
 	alpha-blended layers are clipped inside that edge, over the border."
@@ -145,26 +126,40 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint wid
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
-	"A raised surface uses concentric exterior rings so rounded corners remain
-	exactly aligned with the native border."
-	self drawDirectionalOuterLayersFor: anElement onSpartaCanvas: aCanvas
+	"This initial edge treatment deliberately spans the boundary. It proves the
+	directional path rendering before outer and inner anchors are separated."
+	self drawDirectionalEdgeLayersFor: anElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawDirectionalOuterLayersFor: anElement onSpartaCanvas: aCanvas [
-	"Each wider stroke is clipped to the exterior. Drawing the faint outer rings
-	first leaves a directional, four-layer edge treatment without translating
-	the element path."
+CFLightBorderEffect >> drawDirectionalEdgeLayersFor: anElement onSpartaCanvas: aCanvas [
+	"Each wider stroke is concentric with the element geometry. Drawing faint
+	layers first produces a directional four-layer treatment on both sides of
+	the edge without distorting rounded corners."
 	self depth to: 1 by: -1 do: [ :layer |
 		self
-			drawOuterClippedPathFor: anElement
+			drawPathFor: anElement
 			onSpartaCanvas: aCanvas
 			paint: (self
 				directionalPaintFor: anElement
 				onSpartaCanvas: aCanvas
 				lightColor: (self layerColor: highlightColor at: layer)
 				shadowColor: (self layerColor: shadowColor at: layer))
-			width: layer * self effectWidth ]
+			width: layer * 2 * self effectWidth
+			offset: 0 @ 0 ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawPathFor: anElement onSpartaCanvas: aCanvas paint: aPaint width: aWidth offset: aPoint [
+	| path |
+	path := self pathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	self
+		drawPath: path
+		onSpartaCanvas: aCanvas
+		paint: aPaint
+		width: aWidth
+		offset: aPoint
 ]
 
 { #category : 'private - drawing' }
