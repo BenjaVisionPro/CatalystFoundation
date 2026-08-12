@@ -12,7 +12,8 @@ Class {
 		'bodyInside',
 		'borderRelief',
 		'borderInside',
-		'underlyingEffect'
+		'underlyingEffect',
+		'opacity'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -30,7 +31,8 @@ CFLightBorderEffect >> initialize [
 	bodyRelief := 1.
 	bodyInside := true.
 	borderRelief := 1.
-	borderInside := false
+	borderInside := false.
+	opacity := 1.0
 ]
 
 { #category : 'drawing' }
@@ -126,6 +128,8 @@ CFLightBorderEffect >> lightingPaintOn: aCanvas for: anElement relief: aRelief [
 	aRelief > 0
 		ifTrue: [ firstColor := highlightColor. lastColor := shadowColor ]
 		ifFalse: [ firstColor := shadowColor. lastColor := highlightColor ].
+	firstColor := firstColor alpha: firstColor alpha * self opacity.
+	lastColor := lastColor alpha: lastColor alpha * self opacity.
 	^ aCanvas paint linearGradient
 		stops: {
 			0.0 -> firstColor.
@@ -211,3 +215,10 @@ CFLightBorderEffect >> borderInside: aBoolean [ borderInside := aBoolean ]
 CFLightBorderEffect >> underlyingEffect [ ^ underlyingEffect ]
 { #category : 'accessing' }
 CFLightBorderEffect >> underlyingEffect: anEffect [ underlyingEffect := anEffect. ^ self ]
+
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> opacity [ ^ opacity ifNil: [ 1.0 ] ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> opacity: aNumber [ opacity := (aNumber max: 0.0) min: 1.0 ]

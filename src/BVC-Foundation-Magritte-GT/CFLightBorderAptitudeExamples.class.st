@@ -182,3 +182,57 @@ CFLightBorderAptitudeExamples >> lowerBorderOutside [
 	<gtExample>
 	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
 ]
+
+{ #category : 'private - placement grid' }
+CFLightBorderAptitudeExamples >> placementGridCellNamed: aString aptitude: anAptitude [
+	| card |
+	card := self cardWith: anAptitude borderWidth: 6.
+	card size: 220 @ 120.
+	^ BrVerticalPane new
+		fitContent;
+		cellSpacing: 8;
+		addChild: (BrLabel new
+			aptitude: (BrGlamorousLabelAptitude new foreground: Color white);
+			text: aString;
+			fitContent;
+			yourself);
+		addChild: card;
+		yourself
+]
+
+{ #category : 'private - placement grid' }
+CFLightBorderAptitudeExamples >> placementGridRowWith: aLeftCell and: aRightCell [
+	^ BrHorizontalPane new
+		fitContent;
+		cellSpacing: 24;
+		addChild: aLeftCell;
+		addChild: aRightCell;
+		yourself
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> allTreatments [
+	<gtExample>
+	<return: #BlElement>
+	| width opacity |
+	width := 6.
+	opacity := 0.8.
+	^ BrVerticalPane new
+		fitContent;
+		padding: (BlInsets all: 24);
+		cellSpacing: 20;
+		background: Color gray;
+		addChild: (self placementGridRowWith:
+			(self placementGridCellNamed: 'Raise body inside' aptitude: (CFLightBorderAptitude new beFlat; raiseBodyInside; effectWidth: width; opacity: opacity; yourself))
+			and: (self placementGridCellNamed: 'Raise body outside' aptitude: (CFLightBorderAptitude new beFlat; raiseBodyOutside; effectWidth: width; opacity: opacity; yourself)));
+		addChild: (self placementGridRowWith:
+			(self placementGridCellNamed: 'Lower body inside' aptitude: (CFLightBorderAptitude new beFlat; lowerBodyInside; effectWidth: width; opacity: opacity; yourself))
+			and: (self placementGridCellNamed: 'Lower body outside' aptitude: (CFLightBorderAptitude new beFlat; lowerBodyOutside; effectWidth: width; opacity: opacity; yourself)));
+		addChild: (self placementGridRowWith:
+			(self placementGridCellNamed: 'Raise border inside' aptitude: (CFLightBorderAptitude new beFlat; raiseBorderInside; effectWidth: width; opacity: opacity; yourself))
+			and: (self placementGridCellNamed: 'Raise border outside' aptitude: (CFLightBorderAptitude new beFlat; raiseBorderOutside; effectWidth: width; opacity: opacity; yourself)));
+		addChild: (self placementGridRowWith:
+			(self placementGridCellNamed: 'Lower border inside' aptitude: (CFLightBorderAptitude new beFlat; lowerBorderInside; effectWidth: width; opacity: opacity; yourself))
+			and: (self placementGridCellNamed: 'Lower border outside' aptitude: (CFLightBorderAptitude new beFlat; lowerBorderOutside; effectWidth: width; opacity: opacity; yourself)));
+		yourself
+]

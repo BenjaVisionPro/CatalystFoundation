@@ -11,7 +11,8 @@ Class {
 		'bodyRelief',
 		'bodyInside',
 		'borderRelief',
-		'borderInside'
+		'borderInside',
+		'opacity'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -42,6 +43,11 @@ CFLightBorderAptitude class >> defaultLightDirection [
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultLightOffsetFactor [
 	^ 0.75
+]
+
+{ #category : 'defaults' }
+CFLightBorderAptitude class >> defaultOpacity [
+	^ 1.0
 ]
 
 { #category : 'defaults' }
@@ -165,6 +171,7 @@ CFLightBorderAptitude >> initialize [
 	bodyInside := true.
 	borderRelief := 1.
 	borderInside := false.
+	opacity := self class defaultOpacity.
 
 	self
 		addChangeProperty: #(widget effect)
@@ -209,6 +216,7 @@ CFLightBorderAptitude >> lightingEffect [
 		bodyInside: bodyInside;
 		borderRelief: borderRelief;
 		borderInside: borderInside;
+		opacity: self opacity;
 		yourself
 ]
 
@@ -231,6 +239,17 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 ]
 
 
+
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> opacity [
+	^ opacity ifNil: [ self class defaultOpacity ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> opacity: aNumber [
+	opacity := (aNumber max: 0.0) min: 1.0
+]
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> shadowColor [
