@@ -11,12 +11,15 @@ CFLightBorderAptitudeExamples >> allTreatments [
 	<return: #BlElement>
 	| grid |
 	grid := BlElement new
-		size: 760 @ 1040;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
 		background: Color gray;
-		padding: (BlInsets all: 24);
+		padding: (BlInsets all: 18);
 		layout: (BlGridLayout new
 			columnCount: 2;
-			cellSpacing: 28);
+			rowCount: 4;
+			cellSpacing: 18);
 		yourself.
 
 	grid addChild: (self treatmentCellNamed: 'Raise body inside' configure: [ :a | a raiseBodyInside ]).
@@ -46,7 +49,10 @@ CFLightBorderAptitudeExamples >> aptitudeConfiguredBy: aBlock [
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> cardWith: anAptitude [
 	^ BlElement new
-		size: 300 @ 180;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent.
+			c linear weight: 1 ];
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 18);
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
@@ -99,10 +105,12 @@ CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock [
 		aptitude: (BrGlamorousLabelAptitude new foreground: Color white);
 		text: aString;
 		fitContent;
-		margin: (BlInsets bottom: 10);
+		margin: (BlInsets bottom: 8);
 		yourself.
 	pane := BrVerticalPane new
-		size: 330 @ 230;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
 		addChild: label;
 		addChild: (self cardWith: aptitude);
 		yourself.

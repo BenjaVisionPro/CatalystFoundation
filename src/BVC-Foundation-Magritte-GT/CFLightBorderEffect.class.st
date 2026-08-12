@@ -80,8 +80,8 @@ CFLightBorderEffect >> boundaryPathFor: anElement onSpartaCanvas: aCanvas insetB
 	| path |
 	path := anElement geometry pathOnSpartaCanvas: aCanvas of: anElement.
 	anInset isZero ifTrue: [ ^ path ].
-	(path respondsTo: #insetBy:) ifFalse: [ ^ nil ].
-	^ path insetBy: anInset
+	(path respondsTo: #insetBy:) ifTrue: [ ^ path insetBy: anInset ].
+	^ path
 ]
 
 { #category : 'geometry' }
