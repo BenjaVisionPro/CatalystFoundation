@@ -109,30 +109,53 @@ CFLightBorderEffect >> drawInsideLightingFor: anElement onSpartaCanvas: aCanvas 
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean [
-	aBoolean
-		ifTrue: [
-			self drawLightFor: anElement onSpartaCanvas: aCanvas color: highlightColor offset: self lightOffset.
-			self drawLightFor: anElement onSpartaCanvas: aCanvas color: shadowColor offset: self shadowOffset ]
-		ifFalse: [
-			self drawLightFor: anElement onSpartaCanvas: aCanvas color: shadowColor offset: self lightOffset.
-			self drawLightFor: anElement onSpartaCanvas: aCanvas color: highlightColor offset: self shadowOffset ]
+	| path paint |
+	path := self pathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	paint := self
+		lightingPaintOn: aCanvas
+		for: anElement
+		highlightAlongLightDirection: aBoolean.
+	aCanvas stroke
+		path: path;
+		paint: paint;
+		width: self lightingStrokeWidth;
+		draw
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawLightFor: anElement onSpartaCanvas: aCanvas color: aColor offset: anOffset [
-	| path unitDirection |
-	path := self pathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	unitDirection := anOffset asBlocVector normalized.
-	1 to: self depth do: [ :aLayer |
-		aCanvas transform
-			by: [ :aTransform | aTransform translateBy: (unitDirection asPoint * (lightOffsetFactor * aLayer)) ]
-			during: [
-				aCanvas stroke
-					path: path;
-					paint: (self layerColor: aColor at: aLayer);
-					width: self effectWidth;
-					draw ] ]
+CFLightBorderEffect >> lightingPaintOn: aCanvas for: anElement highlightAlongLightDirection: aBoolean [
+	| bounds center direction span begin end lightColor darkColor transparentLight transparentDark |
+	bounds := anElement boundsInLocal.
+	center := bounds origin + (bounds extent / 2.0).
+	direction := self lightVector asPoint.
+	span := (bounds extent x abs + bounds extent y abs) / 2.0.
+	begin := center - (direction * span).
+	end := center + (direction * span).
+
+	aBoolean
+		ifTrue: [
+			darkColor := shadowColor.
+			lightColor := highlightColor ]
+		ifFalse: [
+			darkColor := highlightColor.
+			lightColor := shadowColor ].
+	transparentDark := darkColor alpha: 0.
+	transparentLight := lightColor alpha: 0.
+
+	^ aCanvas paint linearGradient
+		begin: begin;
+		end: end;
+		stops: {
+			0.0 -> darkColor.
+			0.42 -> transparentDark.
+			0.58 -> transparentLight.
+			1.0 -> lightColor }
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> lightingStrokeWidth [
+	^ (self effectWidth + (self depth * lightOffsetFactor)) * 2.0
 ]
 
 { #category : 'private - drawing' }
@@ -159,13 +182,6 @@ CFLightBorderEffect >> initialize [
 	super initialize.
 	bodyRelief := #raised.
 	borderRelief := #raised
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> layerColor: aColor at: aLayer [
-	| falloff |
-	falloff := (self depth - aLayer + 1) / self depth.
-	^ aColor alpha: aColor alpha * falloff squared
 ]
 
 { #category : 'accessing' }
