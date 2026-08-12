@@ -26,7 +26,14 @@ CFLightBorderAptitudeExamples >> flat [
 CFLightBorderAptitudeExamples >> inset [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beInset
+	^ self lowered
+]
+
+{ #category : 'examples' }
+CFLightBorderAptitudeExamples >> lowered [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: CFLightBorderAptitude new beLowered
 ]
 
 { #category : 'examples' }
@@ -34,27 +41,6 @@ CFLightBorderAptitudeExamples >> raised [
 	<gtExample>
 	<return: #BlElement>
 	^ self elementWith: CFLightBorderAptitude new
-]
-
-{ #category : 'examples - comparison' }
-CFLightBorderAptitudeExamples >> runtimePrototypeComparison [
-	"Diagnostic only: the left element uses the Runtime prototype and the
-	right element uses the Foundation implementation. Both use the same
-	geometry, size, and surface so a visual difference is renderer-related."
-	<gtExample>
-	<return: #BlElement>
-	| aPane prototypeClass |
-	prototypeClass := Smalltalk
-		at: #CFLitBorderAptitude
-		ifAbsent: [ self error: 'CFLitBorderAptitude is not loaded' ].
-	aPane := BrHorizontalPane new
-		cellSpacing: 16;
-		hFitContent;
-		vFitContent.
-	aPane
-		addChild: (self elementWith: prototypeClass new);
-		addChild: (self elementWith: CFLightBorderAptitude new).
-	^ aPane
 ]
 
 { #category : 'examples' }

@@ -3,13 +3,12 @@ Class {
 	#superclass : 'BlElementEffect',
 	#instVars : [
 		'width',
+		'depth',
 		'lightOffsetFactor',
 		'lightDirection',
 		'highlightColor',
-		'borderColor',
 		'shadowColor',
-		'insetShadowColor',
-		'insetShadowDepth',
+		'borderColor',
 		'style',
 		'underlyingEffect'
 	],
@@ -19,60 +18,29 @@ Class {
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
-	self applyLightAfterOnSpartaCanvas: aCanvas for: anElement.
-	underlyingEffect ifNotNil: [
-		underlyingEffect applyAfterOnSpartaCanvas: aCanvas for: anElement ]
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> applyLightAfterOnSpartaCanvas: aCanvas for: anElement [
 	style = #raised ifTrue: [
-		self
-			drawPathFor: anElement
-			onSpartaCanvas: aCanvas
-			color: shadowColor
-			offset: self shadowVector asPoint * self lightOffset.
-		self
-			drawPathFor: anElement
-			onSpartaCanvas: aCanvas
-			color: borderColor
-			offset: 0 @ 0.
-		^ self
-			drawPathFor: anElement
-			onSpartaCanvas: aCanvas
-			color: highlightColor
-			offset: self lightVector asPoint * self lightOffset ].
-
-	(style = #inset or: [ style = #pressed ]) ifFalse: [ ^ self ].
-	self
-		drawPathFor: anElement
-		onSpartaCanvas: aCanvas
-		color: borderColor
-		offset: 0 @ 0.
-	self drawSoftInsetShadowFor: anElement onSpartaCanvas: aCanvas.
-	self
-		drawClippedPathFor: anElement
-		onSpartaCanvas: aCanvas
-		color: highlightColor
-		offset: self lightVector asPoint * self lightOffset
-]
-
-{ #category : 'drawing' }
-CFLightBorderEffect >> applyBeforeOnSpartaCanvas: aCanvas for: anElement [
-	underlyingEffect ifNotNil: [
-		underlyingEffect applyBeforeOnSpartaCanvas: aCanvas for: anElement ]
+		^ self drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas ].
+	style = #lowered ifTrue: [
+		^ self drawLoweredBevelFor: anElement onSpartaCanvas: aCanvas ]
 ]
 
 { #category : 'geometry' }
 CFLightBorderEffect >> computeBounds: aBlBounds [
-	"The raised light stack extends beyond the element's geometry."
-	| lightBounds |
-	lightBounds := style = #raised
-		ifTrue: [ aBlBounds expandBy: (width / 2.0) + self lightOffset ]
-		ifFalse: [ aBlBounds ].
+	"Every lit pass is clipped to the owner geometry, so it adds no external
+	bounds. The wrapped effect retains its normal bounds semantics."
 	^ underlyingEffect
-		ifNil: [ lightBounds ]
-		ifNotNil: [ underlyingEffect computeBounds: lightBounds ]
+		ifNil: [ aBlBounds ]
+		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> borderColor: aColor [
+	borderColor := aColor
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> depth: aNumber [
+	depth := aNumber rounded max: 0
 ]
 
 { #category : 'private - drawing' }
@@ -91,6 +59,51 @@ CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas col
 ]
 
 { #category : 'private - drawing' }
+CFLightBorderEffect >> drawInnerBevelFor: anElement onSpartaCanvas: aCanvas lightColor: aLightColor lightDirection: aLightDirection shadowColor: aShadowColor shadowDirection: aShadowDirection [
+	"Moving the path opposite an edge direction places the clipped half-stroke
+	on that inner edge. This gives each side a directional, alpha-blended bevel
+	without relying on an accidental child clipping boundary."
+	self
+		drawClippedPathFor: anElement
+		onSpartaCanvas: aCanvas
+		color: borderColor
+		offset: 0 @ 0.
+	self
+		drawInnerLayersFor: anElement
+		onSpartaCanvas: aCanvas
+		color: aShadowColor
+		direction: aShadowDirection.
+	self
+		drawInnerLayersFor: anElement
+		onSpartaCanvas: aCanvas
+		color: aLightColor
+		direction: aLightDirection
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawInnerLayersFor: anElement onSpartaCanvas: aCanvas color: aColor direction: aVector [
+	1 to: depth do: [ :layer |
+		self
+			drawClippedPathFor: anElement
+			onSpartaCanvas: aCanvas
+			color: (self layerColor: aColor at: layer)
+			offset: aVector asPoint * (self lightOffset + ((layer - 1) * width)) ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawLoweredBevelFor: anElement onSpartaCanvas: aCanvas [
+	"A lowered surface reverses the raised bevel: the light-facing inner edge
+	is shaded, while the opposing inner edge catches the highlight."
+	self
+		drawInnerBevelFor: anElement
+		onSpartaCanvas: aCanvas
+		lightColor: highlightColor
+		lightDirection: self lightVector
+		shadowColor: shadowColor
+		shadowDirection: self shadowVector
+]
+
+{ #category : 'private - drawing' }
 CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas color: aColor offset: aPoint [
 	aColor isTransparent ifTrue: [ ^ self ].
 	width <= 0 ifTrue: [ ^ self ].
@@ -105,25 +118,16 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas color: aColor off
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawPathFor: anElement onSpartaCanvas: aCanvas color: aColor offset: aPoint [
-	| path |
-	path := self pathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	self drawPath: path onSpartaCanvas: aCanvas color: aColor offset: aPoint
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawSoftInsetShadowFor: anElement onSpartaCanvas: aCanvas [
-	| layerCount direction |
-	layerCount := insetShadowDepth rounded max: 0.
-	layerCount isZero ifTrue: [ ^ self ].
-	direction := self shadowVector.
-	1 to: layerCount do: [ :layer |
-		self
-			drawClippedPathFor: anElement
-			onSpartaCanvas: aCanvas
-			color: (self insetShadowColorForLayer: layer of: layerCount)
-			offset: direction asPoint * (self lightOffset + ((layer - 1) * width)) ]
+CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
+	"A raised surface catches light on the light-facing inner edge and shades
+	the opposing inner edge."
+	self
+		drawInnerBevelFor: anElement
+		onSpartaCanvas: aCanvas
+		lightColor: highlightColor
+		lightDirection: self shadowVector
+		shadowColor: shadowColor
+		shadowDirection: self lightVector
 ]
 
 { #category : 'accessing' }
@@ -131,28 +135,12 @@ CFLightBorderEffect >> highlightColor: aColor [
 	highlightColor := aColor
 ]
 
-{ #category : 'accessing' }
-CFLightBorderEffect >> borderColor: aColor [
-	borderColor := aColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> insetShadowColor: aColor [
-	insetShadowColor := aColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> insetShadowColorForLayer: layerIndex of: layerCount [
-	| progress falloff |
-	layerCount <= 1 ifTrue: [ ^ insetShadowColor ].
-	progress := (layerIndex - 1) / (layerCount - 1).
-	falloff := (1 - progress) squared.
-	^ insetShadowColor alpha: insetShadowColor alpha * falloff
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> insetShadowDepth: aNumber [
-	insetShadowDepth := aNumber max: 0
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> layerColor: aColor at: aLayerIndex [
+	| falloff |
+	depth isZero ifTrue: [ ^ Color transparent ].
+	falloff := ((depth - aLayerIndex + 1) / depth) squared.
+	^ aColor alpha: aColor alpha * falloff
 ]
 
 { #category : 'accessing' }
@@ -162,8 +150,6 @@ CFLightBorderEffect >> lightDirection: aVector [
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> lightOffset [
-	"A factor keeps the directional light proportional to the native border width.
-	The default (0.75 at width 1) preserves the original CFLitBorderAptitude dimensions."
 	^ lightOffsetFactor * width
 ]
 
@@ -183,14 +169,48 @@ CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 	^ anElement geometry pathOnSpartaCanvas: aCanvas of: anElement
 ]
 
-{ #category : 'accessing' }
-CFLightBorderEffect >> shadowColor: aColor [
-	shadowColor := aColor
+{ #category : 'drawing' }
+CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anElement thenPaint: aBlock [
+	underlyingEffect ifNil: [
+		^ super
+			paintOn: aCompositorPainter
+			offset: anOffset
+			for: anElement
+			thenPaint: aBlock ].
+	underlyingEffect
+		paintOn: aCompositorPainter
+		offset: anOffset
+		for: anElement
+		thenPaint: [ :anInnerPainter :anInnerOffset |
+			aBlock cull: anInnerPainter cull: anInnerOffset.
+			anInnerPainter canvas transform
+				by: [ :aTransform | aTransform translateBy: anInnerOffset ]
+				during: [ self applyAfterOnSpartaCanvas: anInnerPainter canvas for: anElement ] ]
+]
+
+{ #category : 'drawing' }
+CFLightBorderEffect >> applyEffectOnSpartaCanvas: aCanvas for: anElement around: aBlock [
+	underlyingEffect ifNil: [
+		^ super
+			applyEffectOnSpartaCanvas: aCanvas
+			for: anElement
+			around: aBlock ].
+	underlyingEffect
+		applyEffectOnSpartaCanvas: aCanvas
+		for: anElement
+		around: [ :anInnerCanvas |
+			aBlock value: anInnerCanvas.
+			self applyAfterOnSpartaCanvas: anInnerCanvas for: anElement ]
 ]
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> shadowVector [
 	^ self lightVector negated
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> shadowColor: aColor [
+	shadowColor := aColor
 ]
 
 { #category : 'accessing' }

@@ -3,12 +3,11 @@ Class {
 	#superclass : 'BrAptitude',
 	#instVars : [
 		'width',
+		'depth',
 		'lightOffsetFactor',
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'insetShadowColor',
-		'insetShadowDepth',
 		'borderColor',
 		'style'
 	],
@@ -22,18 +21,13 @@ CFLightBorderAptitude class >> defaultBorderColor [
 ]
 
 { #category : 'defaults' }
+CFLightBorderAptitude class >> defaultDepth [
+	^ 4
+]
+
+{ #category : 'defaults' }
 CFLightBorderAptitude class >> defaultHighlightColor [
 	^ Color white alpha: 0.55
-]
-
-{ #category : 'defaults' }
-CFLightBorderAptitude class >> defaultInsetShadowColor [
-	^ Color black alpha: 0.2
-]
-
-{ #category : 'defaults' }
-CFLightBorderAptitude class >> defaultInsetShadowDepth [
-	^ 4
 ]
 
 { #category : 'defaults' }
@@ -64,19 +58,23 @@ CFLightBorderAptitude >> beFlat [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beInset [
-	style := #inset.
+	^ self beLowered
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beLowered [
+	style := #lowered.
 	^ self
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beOutset [
-	self beRaised
+	^ self beRaised
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> bePressed [
-	style := #pressed.
-	^ self
+	^ self beLowered
 ]
 
 { #category : 'configuration' }
@@ -87,9 +85,9 @@ CFLightBorderAptitude >> beRaised [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> border [
-	"BlBorder is the native flat-border representation. Raised and inset
-	styles are multi-pass surface effects; their base stroke must be painted
-	between their shadow and highlight to preserve the original rendering."
+	"Flat is represented by Bloc's native border. Raised and lowered are
+	inner, multi-layer bevel effects whose alpha is composited over the
+	widget's own surface."
 	style = #flat ifTrue: [ ^ BlBorder paint: borderColor width: width ].
 	^ BlBorder empty
 ]
@@ -102,6 +100,16 @@ CFLightBorderAptitude >> borderColor [
 { #category : 'accessing' }
 CFLightBorderAptitude >> borderColor: aColor [
 	borderColor := aColor
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> depth [
+	^ depth
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> depth: aNumber [
+	depth := aNumber rounded max: 0
 ]
 
 { #category : 'private - effects' }
@@ -129,17 +137,14 @@ CFLightBorderAptitude >> highlightColor: aColor [
 CFLightBorderAptitude >> initialize [
 	super initialize.
 	width := self class defaultWidth.
+	depth := self class defaultDepth.
 	lightOffsetFactor := self class defaultLightOffsetFactor.
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	insetShadowColor := self class defaultInsetShadowColor.
-	insetShadowDepth := self class defaultInsetShadowDepth.
 	borderColor := self class defaultBorderColor.
 	style := #raised.
 
-	"The flat style is a native BlBorder. The lit styles are a multi-pass
-	effect, so they never participate in the widget's child layout."
 	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts centered ].
 	self addChangeProperty: #(widget border) with: [ self border ].
 	self
@@ -147,24 +152,9 @@ CFLightBorderAptitude >> initialize [
 		with: [ :anEffect | self effectComposedWith: anEffect ]
 ]
 
-{ #category : 'accessing' }
-CFLightBorderAptitude >> insetShadowColor [
-	^ insetShadowColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> insetShadowColor: aColor [
-	insetShadowColor := aColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> insetShadowDepth [
-	^ insetShadowDepth
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> insetShadowDepth: aNumber [
-	insetShadowDepth := aNumber max: 0
+{ #category : 'testing' }
+CFLightBorderAptitude >> lowered [
+	^ style = #lowered
 ]
 
 { #category : 'accessing' }
@@ -196,13 +186,12 @@ CFLightBorderAptitude >> lightOffsetFactor: aNumber [
 CFLightBorderAptitude >> lightingEffect [
 	^ CFLightBorderEffect new
 		width: width;
+		depth: depth;
 		lightOffsetFactor: lightOffsetFactor;
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
-		borderColor: borderColor;
 		shadowColor: shadowColor;
-		insetShadowColor: insetShadowColor;
-		insetShadowDepth: insetShadowDepth;
+		borderColor: borderColor;
 		style: style;
 		yourself
 ]
@@ -221,6 +210,11 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 	| radians |
 	radians := aNumber * Float pi / 180.0.
 	^ (radians cos @ radians sin) asBlocVector normalized
+]
+
+{ #category : 'testing' }
+CFLightBorderAptitude >> raised [
+	^ style = #raised
 ]
 
 { #category : 'accessing' }
