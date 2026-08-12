@@ -9,7 +9,9 @@ Class {
 		'highlightColor',
 		'shadowColor',
 		'bodyRelief',
-		'borderRelief'
+		'bodyInside',
+		'borderRelief',
+		'borderInside'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -49,8 +51,8 @@ CFLightBorderAptitude class >> defaultShadowColor [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beFlat [
-	bodyRelief := #flat.
-	borderRelief := #flat.
+	bodyRelief := 0.
+	borderRelief := 0.
 	^ self
 ]
 
@@ -61,8 +63,10 @@ CFLightBorderAptitude >> beInset [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	bodyRelief := #lowered.
-	borderRelief := #lowered.
+	bodyRelief := -1.
+	bodyInside := true.
+	borderRelief := -1.
+	borderInside := false.
 	^ self
 ]
 
@@ -78,8 +82,10 @@ CFLightBorderAptitude >> bePressed [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaised [
-	bodyRelief := #raised.
-	borderRelief := #raised.
+	bodyRelief := 1.
+	bodyInside := true.
+	borderRelief := 1.
+	borderInside := false.
 	^ self
 ]
 
@@ -121,19 +127,19 @@ CFLightBorderAptitude >> effectComposedWith: anEffect [
 
 { #category : 'configuration - body' }
 CFLightBorderAptitude >> flattenBody [
-	bodyRelief := #flat.
+	bodyRelief := 0.
 	^ self
 ]
 
 { #category : 'configuration - border' }
 CFLightBorderAptitude >> flattenBorder [
-	borderRelief := #flat.
+	borderRelief := 0.
 	^ self
 ]
 
 { #category : 'testing' }
 CFLightBorderAptitude >> hasLighting [
-	^ bodyRelief ~= #flat or: [ borderRelief ~= #flat ]
+	^ bodyRelief ~= 0 or: [ borderRelief ~= 0 ]
 ]
 
 { #category : 'accessing' }
@@ -155,7 +161,10 @@ CFLightBorderAptitude >> initialize [
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	self beRaised.
+	bodyRelief := 1.
+	bodyInside := true.
+	borderRelief := 1.
+	borderInside := false.
 
 	self
 		addChangeProperty: #(widget effect)
@@ -197,21 +206,13 @@ CFLightBorderAptitude >> lightingEffect [
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
 		bodyRelief: bodyRelief;
+		bodyInside: bodyInside;
 		borderRelief: borderRelief;
+		borderInside: borderInside;
 		yourself
 ]
 
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> lowerBody [
-	bodyRelief := #lowered.
-	^ self
-]
 
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> lowerBorder [
-	borderRelief := #lowered.
-	^ self
-]
 
 { #category : 'private - geometry' }
 CFLightBorderAptitude >> normalizedVectorFrom: aPointOrVector [
@@ -229,17 +230,7 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 	^ (radians cos @ radians sin) asBlocVector normalized
 ]
 
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> raiseBody [
-	bodyRelief := #raised.
-	^ self
-]
 
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> raiseBorder [
-	borderRelief := #raised.
-	^ self
-]
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> shadowColor [
@@ -250,3 +241,66 @@ CFLightBorderAptitude >> shadowColor [
 CFLightBorderAptitude >> shadowColor: aColor [
 	shadowColor := aColor
 ]
+
+
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> raiseBodyInside [
+	bodyRelief := 1.
+	bodyInside := true.
+	^ self
+]
+
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> raiseBodyOutside [
+	bodyRelief := 1.
+	bodyInside := false.
+	^ self
+]
+
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> lowerBodyInside [
+	bodyRelief := -1.
+	bodyInside := true.
+	^ self
+]
+
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> lowerBodyOutside [
+	bodyRelief := -1.
+	bodyInside := false.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> raiseBorderInside [
+	borderRelief := 1.
+	borderInside := true.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> raiseBorderOutside [
+	borderRelief := 1.
+	borderInside := false.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> lowerBorderInside [
+	borderRelief := -1.
+	borderInside := true.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> lowerBorderOutside [
+	borderRelief := -1.
+	borderInside := false.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> bodyInside [ ^ bodyInside ]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> borderInside [ ^ borderInside ]

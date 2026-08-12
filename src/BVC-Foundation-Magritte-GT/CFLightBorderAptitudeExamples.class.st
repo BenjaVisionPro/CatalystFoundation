@@ -49,21 +49,21 @@ CFLightBorderAptitudeExamples >> bodyFlatBorderFlat [
 CFLightBorderAptitudeExamples >> bodyFlatBorderLowered [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorder; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
 CFLightBorderAptitudeExamples >> bodyFlatBorderRaised [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorder; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
 CFLightBorderAptitudeExamples >> bodyLoweredBorderFlat [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBody; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
@@ -77,21 +77,21 @@ CFLightBorderAptitudeExamples >> bodyLoweredBorderLowered [
 CFLightBorderAptitudeExamples >> bodyLoweredBorderRaised [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBody; raiseBorder; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; raiseBorderInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
 CFLightBorderAptitudeExamples >> bodyRaisedBorderFlat [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBody; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
 CFLightBorderAptitudeExamples >> bodyRaisedBorderLowered [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBody; lowerBorder; yourself)
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; lowerBorderInside; yourself)
 ]
 
 { #category : 'examples - relief matrix' }
@@ -139,4 +139,46 @@ CFLightBorderAptitudeExamples >> stageWith: aCard [
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ]);
 		yourself
+]
+
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
 ]
