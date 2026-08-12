@@ -12,8 +12,8 @@ CFMaFormStencilBuilder >> buildDefault [
 	three standard insertion points that GtMagritteElementBuilder uses."
 	aForm := BrVerticalPane new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		background: (Color black alpha: 0.025);
-		border: (BlBorder paint: (Color black alpha: 0.13) width: 1);
+		background: (Color black alpha: 0.1);
+		addAptitude: CFLitBorderAptitude new;
 		margin: (BlInsets all: 8);
 		hFitContentLimited;
 		vFitContent.
