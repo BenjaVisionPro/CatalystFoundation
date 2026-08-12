@@ -12,6 +12,11 @@ CFLightBorderAptitudeExamples >> elementWith: anAptitude [
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
+	^ self stageWith: (self cardWith: anAptitude borderWidth: aNumber)
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> cardWith: anAptitude borderWidth: aNumber [
 	^ BlElement new
 		size: 280 @ 160;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
@@ -19,6 +24,18 @@ CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
 		outskirts: BlOutskirts inside;
 		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber);
 		addAptitude: anAptitude;
+		yourself
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> stageWith: aCard [
+	^ BlElement new
+		size: 360 @ 240;
+		background: (Color gray alpha: 0.35);
+		layout: BlFrameLayout new;
+		addChild: (aCard constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ]);
 		yourself
 ]
 
