@@ -5,6 +5,13 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : #'instance creation' }
+CFMaFormRootElement class >> testingBackgroundForm [
+	"A temporary visual-test asset. BlImagePatternPaint repeats this Form behind
+	the generated Magritte form so translucent Foundation chrome is visible."
+	^ (SkiaImage fromFile: '/opt/git/BenjaVisionPro/gt-runtime-workspace/CatalystFoundation/media/silverTexture.png') asForm
+]
+
 { #category : 'converting' }
 CFMaFormRootElement >> asScrollableElement [
 	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
@@ -20,6 +27,7 @@ CFMaFormRootElement >> initialize [
 	super initialize.
 
 	self
+		background: (BlImagePatternPaint form: self class testingBackgroundForm);
 		hMatchParent;
 		vMatchParent
 ]
