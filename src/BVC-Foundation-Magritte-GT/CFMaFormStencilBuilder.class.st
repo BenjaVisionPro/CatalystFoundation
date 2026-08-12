@@ -15,8 +15,7 @@ CFMaFormStencilBuilder >> buildDefault [
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
 		border: (BlBorder paint: (Color blue alpha: 0.5) width: 1);
-		addAptitude: CFLightBorderAptitude new beRaisedCard;
-		addAptitude: CFLightBorderAptitude new beRaisedBorder;
+		addAptitude: CFLightBorderAptitude new beRaised;
 		margin: (BlInsets all: 8);
 		hFitContentLimited;
 		vFitContent.

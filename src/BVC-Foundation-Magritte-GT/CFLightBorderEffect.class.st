@@ -8,10 +8,8 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'outerHighlightAlongLightDirection',
-		'innerHighlightAlongLightDirection',
-		'drawOuter',
-		'drawInner',
+		'bodyRelief',
+		'borderRelief',
 		'underlyingEffect'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
@@ -19,41 +17,43 @@ Class {
 }
 
 { #category : 'defaults' }
-CFLightBorderEffect class >> defaultDepth [
-	^ 4
-]
+CFLightBorderEffect class >> defaultDepth [ ^ 4 ]
 
 { #category : 'defaults' }
-CFLightBorderEffect class >> defaultEffectWidth [
-	"Width of each alpha-blended bevel layer. It is independent from the
-	element's BlBorder width."
-	^ 1
-]
+CFLightBorderEffect class >> defaultEffectWidth [ ^ 1 ]
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
-	drawInner ifTrue: [ self drawInnerLightingFor: anElement onSpartaCanvas: aCanvas ]
+	self drawBodyAfterFor: anElement onSpartaCanvas: aCanvas.
+	self drawBorderAfterFor: anElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyBeforeOnSpartaCanvas: aCanvas for: anElement [
-	drawOuter ifTrue: [ self drawOuterLightingFor: anElement onSpartaCanvas: aCanvas ]
+	self drawBodyBeforeFor: anElement onSpartaCanvas: aCanvas.
+	self drawBorderBeforeFor: anElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyEffectOnSpartaCanvas: aCanvas for: anElement around: aBlock [
-	underlyingEffect ifNil: [
-		^ super
-			applyEffectOnSpartaCanvas: aCanvas
-			for: anElement
-			around: aBlock ].
 	self applyBeforeOnSpartaCanvas: aCanvas for: anElement.
 	underlyingEffect
-		applyEffectOnSpartaCanvas: aCanvas
-		for: anElement
-		around: aBlock.
+		ifNil: [ aBlock cull: aCanvas ]
+		ifNotNil: [ underlyingEffect applyEffectOnSpartaCanvas: aCanvas for: anElement around: aBlock ].
 	self applyAfterOnSpartaCanvas: aCanvas for: anElement
 ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> bodyRelief [ ^ bodyRelief ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> bodyRelief: aSymbol [ bodyRelief := aSymbol ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> borderRelief [ ^ borderRelief ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> borderRelief: aSymbol [ borderRelief := aSymbol ]
 
 { #category : 'geometry' }
 CFLightBorderEffect >> computeBounds: aBlBounds [
@@ -61,61 +61,61 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 	effectBounds := underlyingEffect
 		ifNil: [ aBlBounds ]
 		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ].
-	^ drawOuter
+	^ self drawsOutside
 		ifTrue: [ effectBounds expandBy: self outsideExtent ]
 		ifFalse: [ effectBounds ]
 ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> depth [
-	^ depth ifNil: [ self class defaultDepth ]
-]
+CFLightBorderEffect >> depth [ ^ depth ifNil: [ self class defaultDepth ] ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> depth: aNumber [
-	depth := aNumber max: 0
+CFLightBorderEffect >> depth: aNumber [ depth := aNumber max: 0 ]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBodyAfterFor: anElement onSpartaCanvas: aCanvas [
+	bodyRelief = #lowered ifTrue: [
+		self drawInsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: true ].
+	(bodyRelief = #raised and: [ borderRelief ~= #raised ]) ifTrue: [
+		self drawInsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: false ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawInnerLightingFor: anElement onSpartaCanvas: aCanvas [
+CFLightBorderEffect >> drawBodyBeforeFor: anElement onSpartaCanvas: aCanvas [
+	(bodyRelief = #raised and: [ borderRelief = #raised ]) ifTrue: [
+		self drawOutsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: true ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBorderAfterFor: anElement onSpartaCanvas: aCanvas [
+	borderRelief = #raised ifTrue: [
+		self drawInsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: false ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBorderBeforeFor: anElement onSpartaCanvas: aCanvas [
+	borderRelief = #lowered ifTrue: [
+		self drawOutsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: false ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawInsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean [
 	| path |
 	path := self pathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	aCanvas clip
-		by: path
-		during: [
-			self
-				drawLightingFor: anElement
-				onSpartaCanvas: aCanvas
-				highlightAlongLightDirection: innerHighlightAlongLightDirection ]
+	aCanvas clip by: path during: [
+		self drawLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean ]
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean [
-	"The direction controls the highlight pass explicitly. This accommodates the
-	opposite spatial meaning of the same transformed path inside and outside a
-	closed geometry."
 	aBoolean
 		ifTrue: [
-			self
-				drawLightFor: anElement
-				onSpartaCanvas: aCanvas
-				color: highlightColor
-				offset: self lightOffset;
-				drawLightFor: anElement
-				onSpartaCanvas: aCanvas
-				color: shadowColor
-				offset: self shadowOffset ]
+			self drawLightFor: anElement onSpartaCanvas: aCanvas color: highlightColor offset: self lightOffset.
+			self drawLightFor: anElement onSpartaCanvas: aCanvas color: shadowColor offset: self shadowOffset ]
 		ifFalse: [
-			self
-				drawLightFor: anElement
-				onSpartaCanvas: aCanvas
-				color: shadowColor
-				offset: self lightOffset;
-				drawLightFor: anElement
-				onSpartaCanvas: aCanvas
-				color: highlightColor
-				offset: self shadowOffset ]
+			self drawLightFor: anElement onSpartaCanvas: aCanvas color: shadowColor offset: self lightOffset.
+			self drawLightFor: anElement onSpartaCanvas: aCanvas color: highlightColor offset: self shadowOffset ]
 ]
 
 { #category : 'private - drawing' }
@@ -126,8 +126,7 @@ CFLightBorderEffect >> drawLightFor: anElement onSpartaCanvas: aCanvas color: aC
 	unitDirection := anOffset asBlocVector normalized.
 	1 to: self depth do: [ :aLayer |
 		aCanvas transform
-			by: [ :aTransform |
-				aTransform translateBy: (unitDirection asPoint * (lightOffsetFactor * aLayer)) ]
+			by: [ :aTransform | aTransform translateBy: (unitDirection asPoint * (lightOffsetFactor * aLayer)) ]
 			during: [
 				aCanvas stroke
 					path: path;
@@ -137,58 +136,40 @@ CFLightBorderEffect >> drawLightFor: anElement onSpartaCanvas: aCanvas color: aC
 ]
 
 { #category : 'private - drawing' }
+CFLightBorderEffect >> drawOutsideLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean [
+	self drawLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean
+]
+
+{ #category : 'testing' }
+CFLightBorderEffect >> drawsOutside [
+	^ borderRelief = #lowered or: [ bodyRelief = #raised and: [ borderRelief = #raised ] ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> effectWidth [ ^ effectWidth ifNil: [ self class defaultEffectWidth ] ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> effectWidth: aNumber [ effectWidth := aNumber max: 0 ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> highlightColor: aColor [ highlightColor := aColor ]
+
+{ #category : 'initialization' }
+CFLightBorderEffect >> initialize [
+	super initialize.
+	bodyRelief := #raised.
+	borderRelief := #raised
+]
+
+{ #category : 'private - drawing' }
 CFLightBorderEffect >> layerColor: aColor at: aLayer [
 	| falloff |
 	falloff := (self depth - aLayer + 1) / self depth.
 	^ aColor alpha: aColor alpha * falloff squared
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawOuterLightingFor: anElement onSpartaCanvas: aCanvas [
-	self
-		drawLightingFor: anElement
-		onSpartaCanvas: aCanvas
-		highlightAlongLightDirection: outerHighlightAlongLightDirection
-]
-
 { #category : 'accessing' }
-CFLightBorderEffect >> drawInner: aBoolean [
-	drawInner := aBoolean
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> drawOuter: aBoolean [
-	drawOuter := aBoolean
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> effectWidth [
-	^ effectWidth ifNil: [ self class defaultEffectWidth ]
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> effectWidth: aNumber [
-	effectWidth := aNumber max: 0
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> highlightColor: aColor [
-	highlightColor := aColor
-]
-
-{ #category : 'initialization' }
-CFLightBorderEffect >> initialize [
-	super initialize.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := true.
-	drawOuter := true.
-	drawInner := false
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> lightDirection: aVector [
-	lightDirection := aVector
-]
+CFLightBorderEffect >> lightDirection: aVector [ lightDirection := aVector ]
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> lightOffset [
@@ -196,14 +177,10 @@ CFLightBorderEffect >> lightOffset [
 ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> lightOffsetFactor: aNumber [
-	lightOffsetFactor := aNumber max: 0
-]
+CFLightBorderEffect >> lightOffsetFactor: aNumber [ lightOffsetFactor := aNumber max: 0 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> lightVector [
-	^ lightDirection asBlocVector normalized
-]
+CFLightBorderEffect >> lightVector [ ^ lightDirection asBlocVector normalized ]
 
 { #category : 'geometry' }
 CFLightBorderEffect >> outsideExtent [
@@ -223,44 +200,28 @@ CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anEleme
 		during: [ self applyBeforeOnSpartaCanvas: aCompositorPainter canvas for: anElement ].
 	underlyingEffect
 		ifNil: [ aBlock cull: aCompositorPainter cull: anOffset ]
-		ifNotNil: [
-			underlyingEffect
-				paintOn: aCompositorPainter
-				offset: anOffset
-				for: anElement
-				thenPaint: aBlock ].
+		ifNotNil: [ underlyingEffect paintOn: aCompositorPainter offset: anOffset for: anElement thenPaint: aBlock ].
 	aCompositorPainter canvas transform
 		by: [ :aTransform | aTransform translateBy: anOffset ]
 		during: [ self applyAfterOnSpartaCanvas: aCompositorPainter canvas for: anElement ]
 ]
 
-{ #category : 'accessing' }
-CFLightBorderEffect >> innerHighlightAlongLightDirection: aBoolean [
-	innerHighlightAlongLightDirection := aBoolean
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> outerHighlightAlongLightDirection: aBoolean [
-	outerHighlightAlongLightDirection := aBoolean
-]
-
 { #category : 'private - geometry' }
-CFLightBorderEffect >> shadowOffset [
-	^ self lightOffset negated
-]
+CFLightBorderEffect >> shadowOffset [ ^ self lightOffset negated ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> shadowColor: aColor [
-	shadowColor := aColor
-]
+CFLightBorderEffect >> shadowColor: aColor [ shadowColor := aColor ]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> underlyingEffect [ ^ underlyingEffect ]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> underlyingEffect: anEffect [
-	underlyingEffect := anEffect
+	underlyingEffect := anEffect.
+	^ self
 ]
 
 { #category : 'testing' }
 CFLightBorderEffect >> wantsCompositionLayer [
-	^ drawOuter
-		or: [ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ] ]
+	^ self drawsOutside or: [ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ] ]
 ]

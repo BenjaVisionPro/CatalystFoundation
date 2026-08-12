@@ -8,10 +8,8 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'outerHighlightAlongLightDirection',
-		'innerHighlightAlongLightDirection',
-		'drawOuter',
-		'drawInner'
+		'bodyRelief',
+		'borderRelief'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -51,8 +49,8 @@ CFLightBorderAptitude class >> defaultShadowColor [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beFlat [
-	drawOuter := false.
-	drawInner := false.
+	bodyRelief := #flat.
+	borderRelief := #flat.
 	^ self
 ]
 
@@ -63,27 +61,8 @@ CFLightBorderAptitude >> beInset [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	^ self beLoweredCard
-]
-
-{ #category : 'configuration' }
-CFLightBorderAptitude >> beLoweredBorder [
-	"Light the outer face of a lowered native border. Combine this aptitude
-	with #beLoweredCard to make a recessed card and its border."
-	drawOuter := true.
-	drawInner := false.
-	outerHighlightAlongLightDirection := false.
-	innerHighlightAlongLightDirection := true.
-	^ self
-]
-
-{ #category : 'configuration' }
-CFLightBorderAptitude >> beLoweredCard [
-	"A recessed card has its shadow on the light-facing inner wall."
-	drawOuter := false.
-	drawInner := true.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := true.
+	bodyRelief := #lowered.
+	borderRelief := #lowered.
 	^ self
 ]
 
@@ -99,29 +78,19 @@ CFLightBorderAptitude >> bePressed [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaised [
-	^ self beRaisedCard
-]
-
-{ #category : 'configuration' }
-CFLightBorderAptitude >> beRaisedBorder [
-	"Light the inner face of a raised native border. Combine this aptitude
-	with #beRaisedCard to make a raised card and its border."
-	drawOuter := false.
-	drawInner := true.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := false.
+	bodyRelief := #raised.
+	borderRelief := #raised.
 	^ self
 ]
 
-{ #category : 'configuration' }
-CFLightBorderAptitude >> beRaisedCard [
-	"Light the exterior of a raised card. The element continues to own and
-	render its normal BlBorder."
-	drawOuter := true.
-	drawInner := false.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := true.
-	^ self
+{ #category : 'accessing' }
+CFLightBorderAptitude >> bodyRelief [
+	^ bodyRelief
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> borderRelief [
+	^ borderRelief
 ]
 
 { #category : 'accessing' }
@@ -150,9 +119,21 @@ CFLightBorderAptitude >> effectComposedWith: anEffect [
 	^ self lightingEffect underlyingEffect: anEffect
 ]
 
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> flattenBody [
+	bodyRelief := #flat.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> flattenBorder [
+	borderRelief := #flat.
+	^ self
+]
+
 { #category : 'testing' }
 CFLightBorderAptitude >> hasLighting [
-	^ drawOuter or: [ drawInner ]
+	^ bodyRelief ~= #flat or: [ borderRelief ~= #flat ]
 ]
 
 { #category : 'accessing' }
@@ -174,18 +155,11 @@ CFLightBorderAptitude >> initialize [
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := true.
 	self beRaised.
 
 	self
 		addChangeProperty: #(widget effect)
 		with: [ :anEffect | self effectComposedWith: anEffect ]
-]
-
-{ #category : 'testing' }
-CFLightBorderAptitude >> lowered [
-	^ self hasLighting and: [ outerHighlightAlongLightDirection not ]
 ]
 
 { #category : 'accessing' }
@@ -222,11 +196,21 @@ CFLightBorderAptitude >> lightingEffect [
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
-		outerHighlightAlongLightDirection: outerHighlightAlongLightDirection;
-		innerHighlightAlongLightDirection: innerHighlightAlongLightDirection;
-		drawOuter: drawOuter;
-		drawInner: drawInner;
+		bodyRelief: bodyRelief;
+		borderRelief: borderRelief;
 		yourself
+]
+
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> lowerBody [
+	bodyRelief := #lowered.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> lowerBorder [
+	borderRelief := #lowered.
+	^ self
 ]
 
 { #category : 'private - geometry' }
@@ -245,9 +229,16 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 	^ (radians cos @ radians sin) asBlocVector normalized
 ]
 
-{ #category : 'testing' }
-CFLightBorderAptitude >> raised [
-	^ self hasLighting and: [ outerHighlightAlongLightDirection ]
+{ #category : 'configuration - body' }
+CFLightBorderAptitude >> raiseBody [
+	bodyRelief := #raised.
+	^ self
+]
+
+{ #category : 'configuration - border' }
+CFLightBorderAptitude >> raiseBorder [
+	borderRelief := #raised.
+	^ self
 ]
 
 { #category : 'accessing' }

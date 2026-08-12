@@ -7,36 +7,25 @@ Class {
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> cardWith: anAptitude borderWidth: aNumber [
-	^ self
-		cardWith: anAptitude
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 16)
-		borderWidth: aNumber
+	^ self cardWith: anAptitude geometry: (BlRoundedRectangleGeometry cornerRadius: 16) borderWidth: aNumber
 ]
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> cardWith: anAptitude geometry: aGeometry borderWidth: aNumber [
-	^ self
-		cardWithAptitudes: { anAptitude }
-		geometry: aGeometry
-		borderWidth: aNumber
-]
-
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> cardWithAptitudes: aptitudes geometry: aGeometry borderWidth: aNumber [
 	| anElement |
 	anElement := BlElement new
 		size: 280 @ 160;
 		geometry: aGeometry;
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber).
-	aptitudes do: [ :anAptitude | anElement addAptitude: anAptitude ].
+		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber);
+		addAptitude: anAptitude.
 	^ anElement
 ]
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> elementWith: anAptitude [
-	^ self elementWith: anAptitude borderWidth: 1
+	^ self elementWith: anAptitude borderWidth: 6
 ]
 
 { #category : 'private - instance creation' }
@@ -46,96 +35,98 @@ CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> elementWith: anAptitude geometry: aGeometry [
-	^ self stageWith: (self cardWith: anAptitude geometry: aGeometry borderWidth: 1)
+	^ self stageWith: (self cardWith: anAptitude geometry: aGeometry borderWidth: 6)
 ]
 
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> elementWithAptitudes: aptitudes [
-	^ self stageWith: (self
-		cardWithAptitudes: aptitudes
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 16)
-		borderWidth: 1)
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> ellipse [
-	<gtExample>
-	<return: #BlElement>
-	^ self
-		elementWith: CFLightBorderAptitude new beRaised
-		geometry: BlEllipseGeometry new
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> flat [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderFlat [
 	<gtExample>
 	<return: #BlElement>
 	^ self elementWith: CFLightBorderAptitude new beFlat
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> inset [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderLowered [
 	<gtExample>
 	<return: #BlElement>
-	^ self lowered
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorder; yourself)
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> lowered [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderRaised [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorder; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderFlat [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBody; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderLowered [
 	<gtExample>
 	<return: #BlElement>
 	^ self elementWith: CFLightBorderAptitude new beLowered
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> loweredBorder [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderRaised [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beLoweredBorder
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBody; raiseBorder; yourself)
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> loweredCardAndBorder [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderFlat [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWithAptitudes: {
-		CFLightBorderAptitude new beLoweredCard.
-		CFLightBorderAptitude new beLoweredBorder }
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBody; yourself)
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> raised [
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderLowered [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBody; lowerBorder; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderRaised [
 	<gtExample>
 	<return: #BlElement>
 	^ self elementWith: CFLightBorderAptitude new beRaised
 ]
 
 { #category : 'examples' }
-CFLightBorderAptitudeExamples >> raisedBorder [
+CFLightBorderAptitudeExamples >> ellipse [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beRaisedBorder
+	^ self elementWith: CFLightBorderAptitude new beRaised geometry: BlEllipseGeometry new
 ]
 
 { #category : 'examples' }
-CFLightBorderAptitudeExamples >> raisedCardAndBorder [
+CFLightBorderAptitudeExamples >> lowered [
 	<gtExample>
 	<return: #BlElement>
-	"Brick composes the two visual concerns. The first aptitude lights the
-	card exterior; the second lights the inside face of its native BlBorder."
-	^ self elementWithAptitudes: {
-		CFLightBorderAptitude new beRaisedCard.
-		CFLightBorderAptitude new beRaisedBorder }
+	^ self bodyLoweredBorderLowered
+]
+
+{ #category : 'examples' }
+CFLightBorderAptitudeExamples >> raised [
+	<gtExample>
+	<return: #BlElement>
+	^ self bodyRaisedBorderRaised
 ]
 
 { #category : 'examples' }
 CFLightBorderAptitudeExamples >> raisedFromTopRight [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new
-		beRaised;
-		lightDirection: 1 @ -1;
-		yourself)
+	^ self elementWith: (CFLightBorderAptitude new beRaised; lightDirection: 1 @ -1; yourself)
 ]
 
 { #category : 'private - instance creation' }
@@ -148,11 +139,4 @@ CFLightBorderAptitudeExamples >> stageWith: aCard [
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ]);
 		yourself
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> wideRaised [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new borderWidth: 3
 ]
