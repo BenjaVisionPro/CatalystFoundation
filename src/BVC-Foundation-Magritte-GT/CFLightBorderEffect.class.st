@@ -125,35 +125,23 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint wid
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inLightFacingSidesOf: anElement [
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inLightFacingRegionOf: anElement [
 	self
 		drawPath: aPath
 		onSpartaCanvas: aCanvas
 		paint: aPaint
 		width: aWidth
-		inSide: (self verticalLightFacingSideFor: anElement).
-	self
-		drawPath: aPath
-		onSpartaCanvas: aCanvas
-		paint: aPaint
-		width: aWidth
-		inSide: (self horizontalLightFacingSideFor: anElement)
+		inSide: (self lightFacingRegionFor: anElement onSpartaCanvas: aCanvas)
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inShadowFacingSidesOf: anElement [
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inShadowFacingRegionOf: anElement [
 	self
 		drawPath: aPath
 		onSpartaCanvas: aCanvas
 		paint: aPaint
 		width: aWidth
-		inSide: (self verticalShadowFacingSideFor: anElement).
-	self
-		drawPath: aPath
-		onSpartaCanvas: aCanvas
-		paint: aPaint
-		width: aWidth
-		inSide: (self horizontalShadowFacingSideFor: anElement)
+		inSide: (self shadowFacingRegionFor: anElement onSpartaCanvas: aCanvas)
 ]
 
 { #category : 'private - drawing' }
@@ -189,13 +177,13 @@ CFLightBorderEffect >> drawRaisedLayer: aLayer for: anElement onSpartaCanvas: aC
 		onSpartaCanvas: aCanvas
 		paint: (self layerColor: highlightColor at: aLayer)
 		width: self effectWidth
-		inLightFacingSidesOf: anElement.
+		inLightFacingRegionOf: anElement.
 	self
 		drawPath: path
 		onSpartaCanvas: aCanvas
 		paint: (self layerColor: shadowColor at: aLayer)
 		width: self effectWidth
-		inShadowFacingSidesOf: anElement
+		inShadowFacingRegionOf: anElement
 ]
 
 { #category : 'private - drawing' }
@@ -256,23 +244,21 @@ CFLightBorderEffect >> lightVector [
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> horizontalLightFacingSideFor: anElement [
-	| extent margin |
+CFLightBorderEffect >> lightFacingRegionFor: anElement onSpartaCanvas: aCanvas [
+	| extent margin topLeft topRight bottomLeft bottomRight |
 	extent := anElement extent.
 	margin := self outsideExtent.
+	topLeft := margin negated @ margin negated.
+	topRight := (extent x + margin) @ margin negated.
+	bottomLeft := margin negated @ (extent y + margin).
+	bottomRight := (extent x + margin) @ (extent y + margin).
 	^ self lightVector x <= 0
-		ifTrue: [ margin negated @ margin negated corner: (extent x / 2.0) @ (extent y + margin) ]
-		ifFalse: [ (extent x / 2.0) @ margin negated corner: (extent x + margin) @ (extent y + margin) ]
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> horizontalShadowFacingSideFor: anElement [
-	| extent margin |
-	extent := anElement extent.
-	margin := self outsideExtent.
-	^ self lightVector x <= 0
-		ifTrue: [ (extent x / 2.0) @ margin negated corner: (extent x + margin) @ (extent y + margin) ]
-		ifFalse: [ margin negated @ margin negated corner: (extent x / 2.0) @ (extent y + margin) ]
+		ifTrue: [ self lightVector y <= 0
+			ifTrue: [ aCanvas shape polygon: { topLeft. topRight. bottomLeft } ]
+			ifFalse: [ aCanvas shape polygon: { bottomLeft. topLeft. bottomRight } ] ]
+		ifFalse: [ self lightVector y <= 0
+			ifTrue: [ aCanvas shape polygon: { topRight. bottomRight. topLeft } ]
+			ifFalse: [ aCanvas shape polygon: { bottomRight. bottomLeft. topRight } ] ]
 ]
 
 { #category : 'private - geometry' }
@@ -348,23 +334,21 @@ CFLightBorderEffect >> shadowVector [
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> verticalLightFacingSideFor: anElement [
-	| extent margin |
+CFLightBorderEffect >> shadowFacingRegionFor: anElement onSpartaCanvas: aCanvas [
+	| extent margin topLeft topRight bottomLeft bottomRight |
 	extent := anElement extent.
 	margin := self outsideExtent.
-	^ self lightVector y <= 0
-		ifTrue: [ margin negated @ margin negated corner: (extent x + margin) @ (extent y / 2.0) ]
-		ifFalse: [ margin negated @ (extent y / 2.0) corner: (extent x + margin) @ (extent y + margin) ]
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> verticalShadowFacingSideFor: anElement [
-	| extent margin |
-	extent := anElement extent.
-	margin := self outsideExtent.
-	^ self lightVector y <= 0
-		ifTrue: [ margin negated @ (extent y / 2.0) corner: (extent x + margin) @ (extent y + margin) ]
-		ifFalse: [ margin negated @ margin negated corner: (extent x + margin) @ (extent y / 2.0) ]
+	topLeft := margin negated @ margin negated.
+	topRight := (extent x + margin) @ margin negated.
+	bottomLeft := margin negated @ (extent y + margin).
+	bottomRight := (extent x + margin) @ (extent y + margin).
+	^ self lightVector x <= 0
+		ifTrue: [ self lightVector y <= 0
+			ifTrue: [ aCanvas shape polygon: { bottomRight. bottomLeft. topRight } ]
+			ifFalse: [ aCanvas shape polygon: { topRight. bottomRight. topLeft } ] ]
+		ifFalse: [ self lightVector y <= 0
+			ifTrue: [ aCanvas shape polygon: { bottomLeft. topLeft. bottomRight } ]
+			ifFalse: [ aCanvas shape polygon: { topLeft. topRight. bottomLeft } ] ]
 ]
 
 { #category : 'accessing' }
