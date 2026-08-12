@@ -26,7 +26,7 @@ CFComposerElementBuilder >> buildActions [
 		self toolbarContainerDo: [ :aContainer |
 			aContainer
 				addChild: (CFComposerFormToolbarElement for: formController)
-				as: #composerToolbar ]
+				as: #composerToolbar ] ]
 ]
 
 { #category : 'private - building' }
