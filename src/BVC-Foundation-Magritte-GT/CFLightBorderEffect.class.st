@@ -31,18 +31,17 @@ CFLightBorderEffect class >> defaultOpacity [
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
+	"Body treatments are element-facing and must remain visible over the body or native border."
+	bodyActive ifTrue: [ self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas ].
 	borderActive ifTrue: [
-		borderInside ifTrue: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ].
-	bodyActive ifTrue: [
-		bodyInside ifTrue: [ self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
+		borderInside ifTrue: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
 ]
 
 { #category : 'drawing' }
 CFLightBorderEffect >> applyBeforeOnSpartaCanvas: aCanvas for: anElement [
+	"An outside-border treatment belongs beyond the native element paint."
 	borderActive ifTrue: [
-		borderInside ifFalse: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ].
-	bodyActive ifTrue: [
-		bodyInside ifFalse: [ self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
+		borderInside ifFalse: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
 ]
 
 { #category : 'drawing' }
@@ -68,7 +67,9 @@ CFLightBorderEffect >> bodyActive: isActive raised: isRaised inside: isInside [
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> bodyBoundaryInsetFor: anElement [
+CFLightBorderEffect >> bodyBoundaryCoordinateFor: anElement [
+	"Signed distance from the element geometry path to the inner/native body edge.
+	Positive is toward the element interior; negative is toward the exterior."
 	| width |
 	width := anElement border width.
 	anElement outskirts = BlOutskirts inside ifTrue: [ ^ width ].
@@ -85,7 +86,9 @@ CFLightBorderEffect >> borderActive: isActive raised: isRaised inside: isInside 
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> borderOuterBoundaryInsetFor: anElement [
+CFLightBorderEffect >> borderOuterBoundaryCoordinateFor: anElement [
+	"Signed distance from the element geometry path to the outer/native border edge.
+	Positive is toward the element interior; negative is toward the exterior."
 	| width |
 	width := anElement border width.
 	anElement outskirts = BlOutskirts inside ifTrue: [ ^ 0 ].
@@ -95,12 +98,9 @@ CFLightBorderEffect >> borderOuterBoundaryInsetFor: anElement [
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> boundaryPathFor: anElement onSpartaCanvas: aCanvas insetBy: anInset [
-	| path |
-	path := anElement geometry pathOnSpartaCanvas: aCanvas of: anElement.
-	anInset isZero ifTrue: [ ^ path ].
-	(path respondsTo: #insetBy:) ifTrue: [ ^ path insetBy: anInset ].
-	^ path
+CFLightBorderEffect >> geometryPathFor: anElement onSpartaCanvas: aCanvas [
+	(anElement geometry respondsTo: #pathOnSpartaCanvas:of:) ifFalse: [ ^ nil ].
+	^ anElement geometry pathOnSpartaCanvas: aCanvas of: anElement
 ]
 
 { #category : 'geometry' }
@@ -110,25 +110,24 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 		ifNil: [ aBlBounds ]
 		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ].
 	^ self hasLighting
-		ifTrue: [ effectBounds expandBy: self effectWidth + self maximumBorderOutset ]
+		ifTrue: [ effectBounds expandBy: self effectWidth ]
 		ifFalse: [ effectBounds ]
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
-	| boundaryInset treatmentInset path |
+	| boundary start finish |
 	bodyActive ifFalse: [ ^ self ].
-	boundaryInset := self bodyBoundaryInsetFor: anElement.
-	treatmentInset := bodyInside
-		ifTrue: [ boundaryInset + (self effectWidth / 2.0) ]
-		ifFalse: [ boundaryInset - (self effectWidth / 2.0) ].
-	path := self
-		boundaryPathFor: anElement
-		onSpartaCanvas: aCanvas
-		insetBy: treatmentInset.
-	path ifNil: [ ^ self ].
+	boundary := self bodyBoundaryCoordinateFor: anElement.
+	start := bodyInside
+		ifTrue: [ boundary ]
+		ifFalse: [ boundary - self effectWidth ].
+	finish := bodyInside
+		ifTrue: [ boundary + self effectWidth ]
+		ifFalse: [ boundary ].
 	self
-		drawTreatmentPath: path
+		drawTreatmentFrom: start
+		to: finish
 		raised: bodyRaised
 		for: anElement
 		onSpartaCanvas: aCanvas
@@ -136,33 +135,97 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas [
-	| boundaryInset treatmentInset path |
+	| boundary start finish |
 	borderActive ifFalse: [ ^ self ].
-	boundaryInset := self borderOuterBoundaryInsetFor: anElement.
-	treatmentInset := borderInside
-		ifTrue: [ boundaryInset + (self effectWidth / 2.0) ]
-		ifFalse: [ boundaryInset - (self effectWidth / 2.0) ].
-	path := self
-		boundaryPathFor: anElement
-		onSpartaCanvas: aCanvas
-		insetBy: treatmentInset.
-	path ifNil: [ ^ self ].
+	boundary := self borderOuterBoundaryCoordinateFor: anElement.
+	start := borderInside
+		ifTrue: [ boundary ]
+		ifFalse: [ boundary - self effectWidth ].
+	finish := borderInside
+		ifTrue: [ boundary + self effectWidth ]
+		ifFalse: [ boundary ].
 	self
-		drawTreatmentPath: path
+		drawTreatmentFrom: start
+		to: finish
 		raised: borderRaised
 		for: anElement
 		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawTreatmentPath: aPath raised: isRaised for: anElement onSpartaCanvas: aCanvas [
-	aCanvas stroke
-		paint: (self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas);
-		path: aPath;
-		width: self effectWidth;
-		draw
+CFLightBorderEffect >> drawTreatmentFrom: aStartCoordinate to: anEndCoordinate raised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	"Coordinates are signed distances from the element geometry path. Positive
+	coordinates are inside the element; negative coordinates are outside. Split
+	a treatment crossing the geometry path into the two native path sides."
+	| insideStart insideEnd outsideStart outsideEnd |
+	anEndCoordinate > 0 ifTrue: [
+		insideStart := aStartCoordinate max: 0.
+		insideEnd := anEndCoordinate.
+		insideEnd > insideStart ifTrue: [
+			self
+				drawTreatmentBandInside: true
+				from: insideStart
+				to: insideEnd
+				raised: isRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ] ].
+	aStartCoordinate < 0 ifTrue: [
+		outsideStart := (anEndCoordinate min: 0) abs.
+		outsideEnd := aStartCoordinate abs.
+		outsideEnd > outsideStart ifTrue: [
+			self
+				drawTreatmentBandInside: false
+				from: outsideStart
+				to: outsideEnd
+				raised: isRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ] ]
 ]
 
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawTreatmentBandInside: isInside from: innerDistance to: outerDistance raised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	"Render a directional gradient through an alpha mask made only from operations
+	that Sparta already supports for arbitrary paths: solid strokes, path fills,
+	layers and Porter-Duff composition. No gradient path stroke is required."
+	| path bounds gradient |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	bounds := anElement boundsInLocal expandBy: outerDistance + 2.
+	gradient := self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas.
+
+	aCanvas layer during: [
+		aCanvas fill
+			path: bounds;
+			paint: gradient;
+			draw.
+
+		"Keep only the wide stroke band around the real geometry path."
+		aCanvas stroke
+			path: path;
+			paint: Color white;
+			width: outerDistance * 2.0;
+			composeDestIn;
+			draw.
+
+		"Remove the part nearer the boundary when this is an annular slice."
+		innerDistance > 0 ifTrue: [
+			aCanvas stroke
+				path: path;
+				paint: Color white;
+				width: innerDistance * 2.0;
+				composeDestOut;
+				draw ].
+
+		"Finally select the requested side of the geometry path."
+		aCanvas fill
+			path: path;
+			paint: Color white;
+			in: [ :aFill |
+				isInside
+					ifTrue: [ aFill composeDestIn ]
+					ifFalse: [ aFill composeDestOut ] ];
+			draw ]
+]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> effectWidth [
@@ -229,10 +292,6 @@ CFLightBorderEffect >> lightDirection: aVector [
 	lightDirection := aVector
 ]
 
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> maximumBorderOutset [
-	^ self effectWidth
-]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> opacity [
