@@ -158,12 +158,15 @@ CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawOuterLayersFor: anElement onSpartaCanvas: aCanvas color: aColor direction: aVector [
+	"The first external layer is centred on the geometry boundary. Once the
+	interior is removed, its outer half meets the native inside border exactly.
+	Only later layers move away from that edge."
 	1 to: self depth do: [ :layer |
 		self
 			drawOuterClippedPathFor: anElement
 			onSpartaCanvas: aCanvas
 			color: (self layerColor: aColor at: layer)
-			offset: aVector asPoint * (self lightOffset + ((layer - 1) * self effectWidth)) ]
+			offset: aVector asPoint * ((layer - 1) * self effectWidth) ]
 ]
 
 { #category : 'accessing' }
@@ -218,7 +221,7 @@ CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> outsideExtent [
-	^ self lightOffset + ((self depth - 1) * self effectWidth) + (self effectWidth / 2.0)
+	^ ((self depth - 1) * self effectWidth) + (self effectWidth / 2.0)
 ]
 
 { #category : 'drawing' }
