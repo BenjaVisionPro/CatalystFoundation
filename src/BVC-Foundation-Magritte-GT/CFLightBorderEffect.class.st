@@ -126,27 +126,21 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint wid
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
-	"This initial edge treatment deliberately spans the boundary. It proves the
-	directional path rendering before outer and inner anchors are separated."
-	self drawDirectionalEdgeLayersFor: anElement onSpartaCanvas: aCanvas
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawDirectionalEdgeLayersFor: anElement onSpartaCanvas: aCanvas [
-	"Each wider stroke is concentric with the element geometry. Drawing faint
-	layers first produces a directional four-layer treatment on both sides of
-	the edge without distorting rounded corners."
-	self depth to: 1 by: -1 do: [ :layer |
-		self
-			drawPathFor: anElement
-			onSpartaCanvas: aCanvas
-			paint: (self
-				directionalPaintFor: anElement
-				onSpartaCanvas: aCanvas
-				lightColor: (self layerColor: highlightColor at: layer)
-				shadowColor: (self layerColor: shadowColor at: layer))
-			width: layer * 2 * self effectWidth
-			offset: 0 @ 0 ]
+	"The raised passes remain solid alpha colours. The compositor's recorded
+	gradient stroke is not rendered here; the two independent passes are both
+	visible and preserve the underlying surface through alpha blending."
+	self
+		drawPathFor: anElement
+		onSpartaCanvas: aCanvas
+		paint: shadowColor
+		width: self effectWidth
+		offset: self shadowVector asPoint * self lightOffset.
+	self
+		drawPathFor: anElement
+		onSpartaCanvas: aCanvas
+		paint: highlightColor
+		width: self effectWidth
+		offset: self lightVector asPoint * self lightOffset
 ]
 
 { #category : 'private - drawing' }
@@ -163,22 +157,6 @@ CFLightBorderEffect >> drawPathFor: anElement onSpartaCanvas: aCanvas paint: aPa
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> directionalPaintFor: anElement onSpartaCanvas: aCanvas lightColor: aLightColor shadowColor: aShadowColor [
-	| extent lightPoint shadowPoint |
-	extent := anElement extent.
-	lightPoint := (self lightVector x < 0
-		ifTrue: [ 0 ]
-		ifFalse: [ extent x ]) @ (self lightVector y < 0
-		ifTrue: [ 0 ]
-		ifFalse: [ extent y ]).
-	shadowPoint := extent - lightPoint.
-	^ aCanvas paint linearGradient
-		begin: lightPoint;
-		end: shadowPoint;
-		stops: { 0 -> aLightColor. 1 -> aShadowColor }
-]
-
-{ #category : 'accessing' }
 CFLightBorderEffect >> effectWidth [
 	^ effectWidth ifNil: [ self class defaultEffectWidth ]
 ]
