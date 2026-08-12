@@ -105,7 +105,7 @@ CFLightBorderAptitudeExamples >> raisedFromTopRight [
 CFLightBorderAptitudeExamples >> stageWith: aCard [
 	^ BlElement new
 		size: 400 @ 280;
-		background: (Color gray alpha: 0.35);
+		background: Color gray;
 		layout: BlFrameLayout new;
 		addChild: (aCard constraintsDo: [ :c |
 			c frame horizontal alignCenter.

@@ -8,7 +8,8 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'raised',
+		'outerHighlightAlongLightDirection',
+		'innerHighlightAlongLightDirection',
 		'drawOuter',
 		'drawInner'
 	],
@@ -23,6 +24,8 @@ CFLightBorderAptitude class >> defaultDepth [
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultEffectWidth [
+	"Width of each alpha-blended bevel layer. It is independent from the
+	element's BlBorder width."
 	^ 1
 ]
 
@@ -60,17 +63,21 @@ CFLightBorderAptitude >> beInset [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	raised := false.
+	"A recessed card has its shadow on the light-facing inner wall."
 	drawOuter := false.
 	drawInner := true.
+	outerHighlightAlongLightDirection := false.
+	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLoweredBorder [
-	raised := false.
+	"The two faces of a lowered rim are reversed from a raised rim."
 	drawOuter := true.
 	drawInner := true.
+	outerHighlightAlongLightDirection := false.
+	innerHighlightAlongLightDirection := false.
 	^ self
 ]
 
@@ -86,17 +93,20 @@ CFLightBorderAptitude >> bePressed [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaised [
-	raised := true.
 	drawOuter := true.
 	drawInner := false.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaisedBorder [
-	raised := true.
+	"A raised rim lights its outer and inner faces in opposite directions."
 	drawOuter := true.
 	drawInner := true.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
@@ -150,6 +160,8 @@ CFLightBorderAptitude >> initialize [
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	self beRaised.
 
 	self
@@ -159,7 +171,7 @@ CFLightBorderAptitude >> initialize [
 
 { #category : 'testing' }
 CFLightBorderAptitude >> lowered [
-	^ self hasLighting and: [ raised not ]
+	^ self hasLighting and: [ outerHighlightAlongLightDirection not ]
 ]
 
 { #category : 'accessing' }
@@ -196,7 +208,8 @@ CFLightBorderAptitude >> lightingEffect [
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
-		raised: raised;
+		outerHighlightAlongLightDirection: outerHighlightAlongLightDirection;
+		innerHighlightAlongLightDirection: innerHighlightAlongLightDirection;
 		drawOuter: drawOuter;
 		drawInner: drawInner;
 		yourself
@@ -220,7 +233,7 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 
 { #category : 'testing' }
 CFLightBorderAptitude >> raised [
-	^ self hasLighting and: [ raised ]
+	^ self hasLighting and: [ outerHighlightAlongLightDirection ]
 ]
 
 { #category : 'accessing' }

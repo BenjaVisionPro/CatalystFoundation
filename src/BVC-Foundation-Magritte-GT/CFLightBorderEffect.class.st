@@ -8,7 +8,8 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'raised',
+		'outerHighlightAlongLightDirection',
+		'innerHighlightAlongLightDirection',
 		'drawOuter',
 		'drawInner',
 		'underlyingEffect'
@@ -24,6 +25,8 @@ CFLightBorderEffect class >> defaultDepth [
 
 { #category : 'defaults' }
 CFLightBorderEffect class >> defaultEffectWidth [
+	"Width of each alpha-blended bevel layer. It is independent from the
+	element's BlBorder width."
 	^ 1
 ]
 
@@ -81,47 +84,18 @@ CFLightBorderEffect >> drawInnerLightingFor: anElement onSpartaCanvas: aCanvas [
 	aCanvas clip
 		by: path
 		during: [
-			self raised
-				ifTrue: [
-					self
-						drawLightFor: anElement
-						onSpartaCanvas: aCanvas
-						color: shadowColor
-						offset: self lightOffset;
-						drawLightFor: anElement
-						onSpartaCanvas: aCanvas
-						color: highlightColor
-						offset: self shadowOffset ]
-				ifFalse: [
-					self
-						drawLightFor: anElement
-						onSpartaCanvas: aCanvas
-						color: highlightColor
-						offset: self lightOffset;
-						drawLightFor: anElement
-						onSpartaCanvas: aCanvas
-						color: shadowColor
-						offset: self shadowOffset ] ]
+			self
+				drawLightingFor: anElement
+				onSpartaCanvas: aCanvas
+				highlightAlongLightDirection: innerHighlightAlongLightDirection ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawLightFor: anElement onSpartaCanvas: aCanvas color: aColor offset: anOffset [
-	| path |
-	path := self pathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	aCanvas stroke
-		path: path;
-		paint: (aCanvas paint boxShadow
-			color: aColor;
-			offset: anOffset;
-			radius: self depth);
-		width: self effectWidth;
-		draw
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawOuterLightingFor: anElement onSpartaCanvas: aCanvas [
-	self raised
+CFLightBorderEffect >> drawLightingFor: anElement onSpartaCanvas: aCanvas highlightAlongLightDirection: aBoolean [
+	"The direction controls the highlight pass explicitly. This accommodates the
+	opposite spatial meaning of the same transformed path inside and outside a
+	closed geometry."
+	aBoolean
 		ifTrue: [
 			self
 				drawLightFor: anElement
@@ -142,6 +116,39 @@ CFLightBorderEffect >> drawOuterLightingFor: anElement onSpartaCanvas: aCanvas [
 				onSpartaCanvas: aCanvas
 				color: highlightColor
 				offset: self shadowOffset ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawLightFor: anElement onSpartaCanvas: aCanvas color: aColor offset: anOffset [
+	| path unitDirection |
+	path := self pathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	unitDirection := anOffset asBlocVector normalized.
+	1 to: self depth do: [ :aLayer |
+		aCanvas transform
+			by: [ :aTransform |
+				aTransform translateBy: (unitDirection asPoint * (lightOffsetFactor * aLayer)) ]
+			during: [
+				aCanvas stroke
+					path: path;
+					paint: (self layerColor: aColor at: aLayer);
+					width: self effectWidth;
+					draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> layerColor: aColor at: aLayer [
+	| falloff |
+	falloff := (self depth - aLayer + 1) / self depth.
+	^ aColor alpha: aColor alpha * falloff squared
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawOuterLightingFor: anElement onSpartaCanvas: aCanvas [
+	self
+		drawLightingFor: anElement
+		onSpartaCanvas: aCanvas
+		highlightAlongLightDirection: outerHighlightAlongLightDirection
 ]
 
 { #category : 'accessing' }
@@ -172,7 +179,8 @@ CFLightBorderEffect >> highlightColor: aColor [
 { #category : 'initialization' }
 CFLightBorderEffect >> initialize [
 	super initialize.
-	raised := true.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	drawOuter := true.
 	drawInner := false
 ]
@@ -227,13 +235,13 @@ CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anEleme
 ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> raised [
-	^ raised
+CFLightBorderEffect >> innerHighlightAlongLightDirection: aBoolean [
+	innerHighlightAlongLightDirection := aBoolean
 ]
 
 { #category : 'accessing' }
-CFLightBorderEffect >> raised: aBoolean [
-	raised := aBoolean
+CFLightBorderEffect >> outerHighlightAlongLightDirection: aBoolean [
+	outerHighlightAlongLightDirection := aBoolean
 ]
 
 { #category : 'private - geometry' }
