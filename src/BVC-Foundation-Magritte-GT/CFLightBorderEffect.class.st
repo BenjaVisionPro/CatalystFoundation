@@ -294,5 +294,8 @@ CFLightBorderEffect >> underlyingEffect: anEffect [
 
 { #category : 'composition' }
 CFLightBorderEffect >> wantsCompositionLayer [
-	^ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ]
+	"Raised lighting expands beyond the element and cuts its interior from a
+	temporary layer. Bloc must allocate that layer at the effect bounds."
+	^ style = #raised
+		or: [ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ] ]
 ]

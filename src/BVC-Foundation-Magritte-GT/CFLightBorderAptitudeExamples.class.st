@@ -7,10 +7,17 @@ Class {
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> elementWith: anAptitude [
+	^ self elementWith: anAptitude borderWidth: 1
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
 	^ BlElement new
 		size: 280 @ 160;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 		background: (Color black alpha: 0.1);
+		outskirts: BlOutskirts inside;
+		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber);
 		addAptitude: anAptitude;
 		yourself
 ]
@@ -47,5 +54,5 @@ CFLightBorderAptitudeExamples >> raised [
 CFLightBorderAptitudeExamples >> wideRaised [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new width: 3)
+	^ self elementWith: CFLightBorderAptitude new borderWidth: 3
 ]

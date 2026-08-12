@@ -2,24 +2,17 @@ Class {
 	#name : 'CFLightBorderAptitude',
 	#superclass : 'BrAptitude',
 	#instVars : [
-		'width',
 		'effectWidth',
 		'depth',
 		'lightOffsetFactor',
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'borderColor',
 		'style'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
-
-{ #category : 'defaults' }
-CFLightBorderAptitude class >> defaultBorderColor [
-	^ Color blue alpha: 0.5
-]
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultDepth [
@@ -49,11 +42,6 @@ CFLightBorderAptitude class >> defaultLightOffsetFactor [
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultShadowColor [
 	^ Color black alpha: 0.28
-]
-
-{ #category : 'defaults' }
-CFLightBorderAptitude class >> defaultWidth [
-	^ 1
 ]
 
 { #category : 'configuration' }
@@ -87,23 +75,6 @@ CFLightBorderAptitude >> bePressed [
 CFLightBorderAptitude >> beRaised [
 	style := #raised.
 	^ self
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> border [
-	"The native border provides the base edge for every style. Lit styles add
-	geometry-clipped alpha layers over it; they never replace the border."
-	^ BlBorder paint: borderColor width: width
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> borderColor [
-	^ borderColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> borderColor: aColor [
-	borderColor := aColor
 ]
 
 { #category : 'accessing' }
@@ -150,18 +121,14 @@ CFLightBorderAptitude >> highlightColor: aColor [
 { #category : 'initialization' }
 CFLightBorderAptitude >> initialize [
 	super initialize.
-	width := self class defaultWidth.
 	effectWidth := self class defaultEffectWidth.
 	depth := self class defaultDepth.
 	lightOffsetFactor := self class defaultLightOffsetFactor.
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	borderColor := self class defaultBorderColor.
 	style := #raised.
 
-	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts inside ].
-	self addChangeProperty: #(widget border) with: [ self border ].
 	self
 		addChangeProperty: #(widget effect)
 		with: [ :anEffect | self effectComposedWith: anEffect ]
@@ -244,14 +211,4 @@ CFLightBorderAptitude >> shadowColor: aColor [
 { #category : 'accessing' }
 CFLightBorderAptitude >> style [
 	^ style
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> width [
-	^ width
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> width: aNumber [
-	width := aNumber max: 0
 ]
