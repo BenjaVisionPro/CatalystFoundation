@@ -21,10 +21,10 @@ CFMaViewModel >> elementBuilderDo: aBlock [
 
 { #category : 'initialization' }
 CFMaViewModel >> formContainerStencilForMemento: aMemento [
+	"An explicitly supplied Magritte form stencil is consumer-owned. Do not
+	adapt it to Foundation's default stencil builder."
 	^ aMemento magritteDescription
 		propertyAt: #blocElementContainerStencil
-		"An explicitly supplied Magritte form stencil is consumer-owned. Do not
-		adapt it to Foundation's default stencil builder."
 		ifPresent: [ :aStencil | aStencil ]
 		ifAbsent: [ CFMaFormStencilBuilder new ]
 ]
