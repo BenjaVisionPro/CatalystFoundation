@@ -2,7 +2,7 @@ Class {
 	#name : 'CFLightBorderEffect',
 	#superclass : 'BlElementEffect',
 	#instVars : [
-		'width',
+		'effectWidth',
 		'depth',
 		'lightOffsetFactor',
 		'lightDirection',
@@ -20,6 +20,11 @@ CFLightBorderEffect class >> defaultDepth [
 	^ 4
 ]
 
+{ #category : 'defaults' }
+CFLightBorderEffect class >> defaultEffectWidth [
+	^ 1
+]
+
 { #category : 'drawing' }
 CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
 	style = #raised ifTrue: [
@@ -30,11 +35,13 @@ CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
 
 { #category : 'geometry' }
 CFLightBorderEffect >> computeBounds: aBlBounds [
-	"Every lit pass is clipped to the owner geometry, so it adds no external
-	bounds. The wrapped effect retains its normal bounds semantics."
-	^ underlyingEffect
+	| effectBounds |
+	effectBounds := underlyingEffect
 		ifNil: [ aBlBounds ]
-		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ]
+		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ].
+	^ style = #raised
+		ifTrue: [ effectBounds expandBy: self outsideExtent ]
+		ifFalse: [ effectBounds ]
 ]
 
 { #category : 'accessing' }
@@ -64,10 +71,27 @@ CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas col
 ]
 
 { #category : 'private - drawing' }
+CFLightBorderEffect >> drawOuterClippedPathFor: anElement onSpartaCanvas: aCanvas color: aColor offset: aPoint [
+	| path |
+	path := self pathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	aCanvas layer during: [
+		self
+			drawPath: path
+			onSpartaCanvas: aCanvas
+			color: aColor
+			offset: aPoint.
+		aCanvas fill
+			path: path;
+			paint: Color white;
+			composeDestOut;
+			draw ]
+]
+
+{ #category : 'private - drawing' }
 CFLightBorderEffect >> drawInnerBevelFor: anElement onSpartaCanvas: aCanvas lightColor: aLightColor lightDirection: aLightDirection shadowColor: aShadowColor shadowDirection: aShadowDirection [
-	"Moving the path opposite an edge direction places the clipped half-stroke
-	on that inner edge. This gives each side a directional, alpha-blended bevel
-	without relying on an accidental child clipping boundary."
+	"The native inside border begins at the geometry edge. These fixed-width,
+	alpha-blended layers are clipped inside that edge, over the border."
 	self
 		drawInnerLayersFor: anElement
 		onSpartaCanvas: aCanvas
@@ -87,7 +111,7 @@ CFLightBorderEffect >> drawInnerLayersFor: anElement onSpartaCanvas: aCanvas col
 			drawClippedPathFor: anElement
 			onSpartaCanvas: aCanvas
 			color: (self layerColor: aColor at: layer)
-			offset: aVector asPoint * (self lightOffset + ((layer - 1) * width)) ]
+			offset: aVector asPoint * (self lightOffset + ((layer - 1) * self effectWidth)) ]
 ]
 
 { #category : 'private - drawing' }
@@ -106,28 +130,50 @@ CFLightBorderEffect >> drawLoweredBevelFor: anElement onSpartaCanvas: aCanvas [
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas color: aColor offset: aPoint [
 	aColor isTransparent ifTrue: [ ^ self ].
-	width <= 0 ifTrue: [ ^ self ].
+	self effectWidth <= 0 ifTrue: [ ^ self ].
 	aCanvas transform
 		by: [ :aTransform | aTransform translateBy: aPoint ]
 		during: [
 			aCanvas stroke
 				path: aPath;
 				paint: aColor;
-				width: width;
+				width: self effectWidth;
 				draw ]
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
-	"A raised surface catches light on the light-facing inner edge and shades
-	the opposing inner edge."
+	"A raised surface lights and shades outside the native border's outer edge."
 	self
-		drawInnerBevelFor: anElement
+		drawOuterLayersFor: anElement
 		onSpartaCanvas: aCanvas
-		lightColor: highlightColor
-		lightDirection: self shadowVector
-		shadowColor: shadowColor
-		shadowDirection: self lightVector
+		color: highlightColor
+		direction: self lightVector.
+	self
+		drawOuterLayersFor: anElement
+		onSpartaCanvas: aCanvas
+		color: shadowColor
+		direction: self shadowVector
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawOuterLayersFor: anElement onSpartaCanvas: aCanvas color: aColor direction: aVector [
+	1 to: self depth do: [ :layer |
+		self
+			drawOuterClippedPathFor: anElement
+			onSpartaCanvas: aCanvas
+			color: (self layerColor: aColor at: layer)
+			offset: aVector asPoint * (self lightOffset + ((layer - 1) * self effectWidth)) ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> effectWidth [
+	^ effectWidth ifNil: [ self class defaultEffectWidth ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> effectWidth: aNumber [
+	effectWidth := aNumber max: 0
 ]
 
 { #category : 'accessing' }
@@ -151,7 +197,7 @@ CFLightBorderEffect >> lightDirection: aVector [
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> lightOffset [
-	^ lightOffsetFactor * width
+	^ lightOffsetFactor * self effectWidth
 ]
 
 { #category : 'accessing' }
@@ -168,6 +214,11 @@ CFLightBorderEffect >> lightVector [
 CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 	(anElement geometry respondsTo: #pathOnSpartaCanvas:of:) ifFalse: [ ^ nil ].
 	^ anElement geometry pathOnSpartaCanvas: aCanvas of: anElement
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> outsideExtent [
+	^ self lightOffset + ((self depth - 1) * self effectWidth) + (self effectWidth / 2.0)
 ]
 
 { #category : 'drawing' }
@@ -227,9 +278,4 @@ CFLightBorderEffect >> underlyingEffect: anEffect [
 { #category : 'composition' }
 CFLightBorderEffect >> wantsCompositionLayer [
 	^ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ]
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> width: aNumber [
-	width := aNumber max: 0
 ]

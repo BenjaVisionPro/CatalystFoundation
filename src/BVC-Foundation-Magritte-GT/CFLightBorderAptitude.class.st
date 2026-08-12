@@ -3,6 +3,7 @@ Class {
 	#superclass : 'BrAptitude',
 	#instVars : [
 		'width',
+		'effectWidth',
 		'depth',
 		'lightOffsetFactor',
 		'lightDirection',
@@ -23,6 +24,11 @@ CFLightBorderAptitude class >> defaultBorderColor [
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultDepth [
 	^ 4
+]
+
+{ #category : 'defaults' }
+CFLightBorderAptitude class >> defaultEffectWidth [
+	^ 1
 ]
 
 { #category : 'defaults' }
@@ -116,6 +122,16 @@ CFLightBorderAptitude >> effectComposedWith: anEffect [
 	^ self lightingEffect underlyingEffect: anEffect
 ]
 
+{ #category : 'accessing' }
+CFLightBorderAptitude >> effectWidth [
+	^ effectWidth ifNil: [ self class defaultEffectWidth ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> effectWidth: aNumber [
+	effectWidth := aNumber max: 0
+]
+
 { #category : 'testing' }
 CFLightBorderAptitude >> hasLighting [
 	^ style ~= #flat
@@ -135,6 +151,7 @@ CFLightBorderAptitude >> highlightColor: aColor [
 CFLightBorderAptitude >> initialize [
 	super initialize.
 	width := self class defaultWidth.
+	effectWidth := self class defaultEffectWidth.
 	depth := self class defaultDepth.
 	lightOffsetFactor := self class defaultLightOffsetFactor.
 	lightDirection := self class defaultLightDirection.
@@ -143,7 +160,7 @@ CFLightBorderAptitude >> initialize [
 	borderColor := self class defaultBorderColor.
 	style := #raised.
 
-	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts centered ].
+	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts inside ].
 	self addChangeProperty: #(widget border) with: [ self border ].
 	self
 		addChangeProperty: #(widget effect)
@@ -183,7 +200,7 @@ CFLightBorderAptitude >> lightOffsetFactor: aNumber [
 { #category : 'private - effects' }
 CFLightBorderAptitude >> lightingEffect [
 	^ CFLightBorderEffect new
-		width: width;
+		effectWidth: self effectWidth;
 		depth: self depth;
 		lightOffsetFactor: lightOffsetFactor;
 		lightDirection: lightDirection;
