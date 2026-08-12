@@ -15,6 +15,11 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'defaults' }
+CFLightBorderEffect class >> defaultDepth [
+	^ 4
+]
+
 { #category : 'drawing' }
 CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
 	style = #raised ifTrue: [
@@ -35,6 +40,12 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 { #category : 'accessing' }
 CFLightBorderEffect >> depth: aNumber [
 	depth := aNumber rounded max: 0
+]
+
+{ #category : 'accessing' }
+CFLightBorderEffect >> depth [
+	"Existing live instances can predate the depth instance variable."
+	^ depth ifNil: [ self class defaultDepth ]
 ]
 
 { #category : 'private - drawing' }
@@ -71,7 +82,7 @@ CFLightBorderEffect >> drawInnerBevelFor: anElement onSpartaCanvas: aCanvas ligh
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawInnerLayersFor: anElement onSpartaCanvas: aCanvas color: aColor direction: aVector [
-	1 to: depth do: [ :layer |
+	1 to: self depth do: [ :layer |
 		self
 			drawClippedPathFor: anElement
 			onSpartaCanvas: aCanvas
@@ -126,9 +137,10 @@ CFLightBorderEffect >> highlightColor: aColor [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> layerColor: aColor at: aLayerIndex [
-	| falloff |
-	depth isZero ifTrue: [ ^ Color transparent ].
-	falloff := ((depth - aLayerIndex + 1) / depth) squared.
+	| aDepth falloff |
+	aDepth := self depth.
+	aDepth isZero ifTrue: [ ^ Color transparent ].
+	falloff := ((aDepth - aLayerIndex + 1) / aDepth) squared.
 	^ aColor alpha: aColor alpha * falloff
 ]
 

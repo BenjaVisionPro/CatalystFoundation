@@ -17,7 +17,7 @@ Class {
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultBorderColor [
-	^ Color white alpha: 0.12
+	^ Color blue alpha: 0.5
 ]
 
 { #category : 'defaults' }
@@ -102,7 +102,7 @@ CFLightBorderAptitude >> borderColor: aColor [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> depth [
-	^ depth
+	^ depth ifNil: [ self class defaultDepth ]
 ]
 
 { #category : 'accessing' }
@@ -184,7 +184,7 @@ CFLightBorderAptitude >> lightOffsetFactor: aNumber [
 CFLightBorderAptitude >> lightingEffect [
 	^ CFLightBorderEffect new
 		width: width;
-		depth: depth;
+		depth: self depth;
 		lightOffsetFactor: lightOffsetFactor;
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
