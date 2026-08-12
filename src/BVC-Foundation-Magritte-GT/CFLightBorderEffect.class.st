@@ -56,7 +56,7 @@ CFLightBorderEffect >> depth [
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas color: aColor offset: aPoint [
+CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas paint: aPaint width: aWidth offset: aPoint [
 	| path |
 	path := self pathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
@@ -66,12 +66,13 @@ CFLightBorderEffect >> drawClippedPathFor: anElement onSpartaCanvas: aCanvas col
 			self
 				drawPath: path
 				onSpartaCanvas: aCanvas
-				color: aColor
+				paint: aPaint
+				width: aWidth
 				offset: aPoint ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawOuterClippedPathFor: anElement onSpartaCanvas: aCanvas color: aColor offset: aPoint [
+CFLightBorderEffect >> drawOuterClippedPathFor: anElement onSpartaCanvas: aCanvas paint: aPaint width: aWidth [
 	| path |
 	path := self pathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
@@ -79,8 +80,9 @@ CFLightBorderEffect >> drawOuterClippedPathFor: anElement onSpartaCanvas: aCanva
 		self
 			drawPath: path
 			onSpartaCanvas: aCanvas
-			color: aColor
-			offset: aPoint.
+			paint: aPaint
+			width: aWidth
+			offset: 0 @ 0.
 		aCanvas fill
 			path: path;
 			paint: Color white;
@@ -110,7 +112,8 @@ CFLightBorderEffect >> drawInnerLayersFor: anElement onSpartaCanvas: aCanvas col
 		self
 			drawClippedPathFor: anElement
 			onSpartaCanvas: aCanvas
-			color: (self layerColor: aColor at: layer)
+			paint: (self layerColor: aColor at: layer)
+			width: self effectWidth
 			offset: aVector asPoint * (self lightOffset + ((layer - 1) * self effectWidth)) ]
 ]
 
@@ -128,45 +131,56 @@ CFLightBorderEffect >> drawLoweredBevelFor: anElement onSpartaCanvas: aCanvas [
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas color: aColor offset: aPoint [
-	aColor isTransparent ifTrue: [ ^ self ].
-	self effectWidth <= 0 ifTrue: [ ^ self ].
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth offset: aPoint [
+	aWidth <= 0 ifTrue: [ ^ self ].
 	aCanvas transform
 		by: [ :aTransform | aTransform translateBy: aPoint ]
 		during: [
 			aCanvas stroke
 				path: aPath;
-				paint: aColor;
-				width: self effectWidth;
+				paint: aPaint;
+				width: aWidth;
 				draw ]
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
-	"A raised surface lights and shades outside the native border's outer edge."
-	self
-		drawOuterLayersFor: anElement
-		onSpartaCanvas: aCanvas
-		color: highlightColor
-		direction: self lightVector.
-	self
-		drawOuterLayersFor: anElement
-		onSpartaCanvas: aCanvas
-		color: shadowColor
-		direction: self shadowVector
+	"A raised surface uses concentric exterior rings so rounded corners remain
+	exactly aligned with the native border."
+	self drawDirectionalOuterLayersFor: anElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawOuterLayersFor: anElement onSpartaCanvas: aCanvas color: aColor direction: aVector [
-	"The first external layer is centred on the geometry boundary. Once the
-	interior is removed, its outer half meets the native inside border exactly.
-	Only later layers move away from that edge."
-	1 to: self depth do: [ :layer |
+CFLightBorderEffect >> drawDirectionalOuterLayersFor: anElement onSpartaCanvas: aCanvas [
+	"Each wider stroke is clipped to the exterior. Drawing the faint outer rings
+	first leaves a directional, four-layer edge treatment without translating
+	the element path."
+	self depth to: 1 by: -1 do: [ :layer |
 		self
 			drawOuterClippedPathFor: anElement
 			onSpartaCanvas: aCanvas
-			color: (self layerColor: aColor at: layer)
-			offset: aVector asPoint * ((layer - 1) * self effectWidth) ]
+			paint: (self
+				directionalPaintFor: anElement
+				onSpartaCanvas: aCanvas
+				lightColor: (self layerColor: highlightColor at: layer)
+				shadowColor: (self layerColor: shadowColor at: layer))
+			width: layer * self effectWidth ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> directionalPaintFor: anElement onSpartaCanvas: aCanvas lightColor: aLightColor shadowColor: aShadowColor [
+	| extent lightPoint shadowPoint |
+	extent := anElement extent.
+	lightPoint := (self lightVector x < 0
+		ifTrue: [ 0 ]
+		ifFalse: [ extent x ]) @ (self lightVector y < 0
+		ifTrue: [ 0 ]
+		ifFalse: [ extent y ]).
+	shadowPoint := extent - lightPoint.
+	^ aCanvas paint linearGradient
+		begin: lightPoint;
+		end: shadowPoint;
+		stops: { 0 -> aLightColor. 1 -> aShadowColor }
 ]
 
 { #category : 'accessing' }
@@ -221,7 +235,7 @@ CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> outsideExtent [
-	^ ((self depth - 1) * self effectWidth) + (self effectWidth / 2.0)
+	^ self depth * self effectWidth
 ]
 
 { #category : 'drawing' }
