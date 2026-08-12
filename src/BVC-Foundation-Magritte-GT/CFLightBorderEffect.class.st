@@ -125,22 +125,77 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint wid
 ]
 
 { #category : 'private - drawing' }
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inLightFacingSidesOf: anElement [
+	self
+		drawPath: aPath
+		onSpartaCanvas: aCanvas
+		paint: aPaint
+		width: aWidth
+		inSide: (self verticalLightFacingSideFor: anElement).
+	self
+		drawPath: aPath
+		onSpartaCanvas: aCanvas
+		paint: aPaint
+		width: aWidth
+		inSide: (self horizontalLightFacingSideFor: anElement)
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inShadowFacingSidesOf: anElement [
+	self
+		drawPath: aPath
+		onSpartaCanvas: aCanvas
+		paint: aPaint
+		width: aWidth
+		inSide: (self verticalShadowFacingSideFor: anElement).
+	self
+		drawPath: aPath
+		onSpartaCanvas: aCanvas
+		paint: aPaint
+		width: aWidth
+		inSide: (self horizontalShadowFacingSideFor: anElement)
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inSide: aRectangle [
+	aCanvas clip
+		by: aRectangle
+		during: [
+			self
+				drawPath: aPath
+				onSpartaCanvas: aCanvas
+				paint: aPaint
+				width: aWidth
+				offset: 0 @ 0 ]
+]
+
+{ #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
-	"The raised passes remain solid alpha colours. The compositor's recorded
-	gradient stroke is not rendered here; the two independent passes are both
-	visible and preserve the underlying surface through alpha blending."
+	"Each pass follows a concentric outer path: the rectangle and its corner
+	radii grow by the same amount. Unlike a translated path, it remains exactly
+	aligned at straight edges and rounded corners."
+	self depth to: 1 by: -1 do: [ :layer |
+		self drawRaisedLayer: layer for: anElement onSpartaCanvas: aCanvas ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedLayer: aLayer for: anElement onSpartaCanvas: aCanvas [
+	| path distance |
+	distance := (aLayer - 0.5) * self effectWidth.
+	path := self outerPathFor: anElement onSpartaCanvas: aCanvas distance: distance.
+	path ifNil: [ ^ self ].
 	self
-		drawPathFor: anElement
+		drawPath: path
 		onSpartaCanvas: aCanvas
-		paint: shadowColor
+		paint: (self layerColor: highlightColor at: aLayer)
 		width: self effectWidth
-		offset: self shadowVector asPoint * self lightOffset.
+		inLightFacingSidesOf: anElement.
 	self
-		drawPathFor: anElement
+		drawPath: path
 		onSpartaCanvas: aCanvas
-		paint: highlightColor
+		paint: (self layerColor: shadowColor at: aLayer)
 		width: self effectWidth
-		offset: self lightVector asPoint * self lightOffset
+		inShadowFacingSidesOf: anElement
 ]
 
 { #category : 'private - drawing' }
@@ -201,6 +256,26 @@ CFLightBorderEffect >> lightVector [
 ]
 
 { #category : 'private - geometry' }
+CFLightBorderEffect >> horizontalLightFacingSideFor: anElement [
+	| extent margin |
+	extent := anElement extent.
+	margin := self outsideExtent.
+	^ self lightVector x <= 0
+		ifTrue: [ margin negated @ margin negated corner: (extent x / 2.0) @ (extent y + margin) ]
+		ifFalse: [ (extent x / 2.0) @ margin negated corner: (extent x + margin) @ (extent y + margin) ]
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> horizontalShadowFacingSideFor: anElement [
+	| extent margin |
+	extent := anElement extent.
+	margin := self outsideExtent.
+	^ self lightVector x <= 0
+		ifTrue: [ (extent x / 2.0) @ margin negated corner: (extent x + margin) @ (extent y + margin) ]
+		ifFalse: [ margin negated @ margin negated corner: (extent x / 2.0) @ (extent y + margin) ]
+]
+
+{ #category : 'private - geometry' }
 CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 	(anElement geometry respondsTo: #pathOnSpartaCanvas:of:) ifFalse: [ ^ nil ].
 	^ anElement geometry pathOnSpartaCanvas: aCanvas of: anElement
@@ -209,6 +284,28 @@ CFLightBorderEffect >> pathFor: anElement onSpartaCanvas: aCanvas [
 { #category : 'private - geometry' }
 CFLightBorderEffect >> outsideExtent [
 	^ self depth * self effectWidth
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> outerPathFor: anElement onSpartaCanvas: aCanvas distance: aDistance [
+	| path |
+	path := self pathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ nil ].
+	(path respondsTo: #cornerRadii) ifTrue: [
+		^ aCanvas shape
+			roundedRectangle: (path asRectangle expandBy: aDistance)
+			radii: (self expandedRadiiOf: path cornerRadii by: aDistance) ].
+	path isRectangle ifTrue: [ ^ path expandBy: aDistance ].
+	^ nil
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> expandedRadiiOf: aCornerRadii by: aNumber [
+	^ {
+		aCornerRadii topLeft + aNumber.
+		aCornerRadii topRight + aNumber.
+		aCornerRadii bottomRight + aNumber.
+		aCornerRadii bottomLeft + aNumber }
 ]
 
 { #category : 'drawing' }
@@ -248,6 +345,26 @@ CFLightBorderEffect >> applyEffectOnSpartaCanvas: aCanvas for: anElement around:
 { #category : 'private - geometry' }
 CFLightBorderEffect >> shadowVector [
 	^ self lightVector negated
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> verticalLightFacingSideFor: anElement [
+	| extent margin |
+	extent := anElement extent.
+	margin := self outsideExtent.
+	^ self lightVector y <= 0
+		ifTrue: [ margin negated @ margin negated corner: (extent x + margin) @ (extent y / 2.0) ]
+		ifFalse: [ margin negated @ (extent y / 2.0) corner: (extent x + margin) @ (extent y + margin) ]
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> verticalShadowFacingSideFor: anElement [
+	| extent margin |
+	extent := anElement extent.
+	margin := self outsideExtent.
+	^ self lightVector y <= 0
+		ifTrue: [ margin negated @ (extent y / 2.0) corner: (extent x + margin) @ (extent y + margin) ]
+		ifFalse: [ margin negated @ margin negated corner: (extent x + margin) @ (extent y / 2.0) ]
 ]
 
 { #category : 'accessing' }
