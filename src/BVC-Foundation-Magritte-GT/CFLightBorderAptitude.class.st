@@ -85,11 +85,9 @@ CFLightBorderAptitude >> beRaised [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> border [
-	"Flat is represented by Bloc's native border. Raised and lowered are
-	inner, multi-layer bevel effects whose alpha is composited over the
-	widget's own surface."
-	style = #flat ifTrue: [ ^ BlBorder paint: borderColor width: width ].
-	^ BlBorder empty
+	"The native border provides the base edge for every style. Lit styles add
+	geometry-clipped alpha layers over it; they never replace the border."
+	^ BlBorder paint: borderColor width: width
 ]
 
 { #category : 'accessing' }
@@ -191,7 +189,6 @@ CFLightBorderAptitude >> lightingEffect [
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
-		borderColor: borderColor;
 		style: style;
 		yourself
 ]

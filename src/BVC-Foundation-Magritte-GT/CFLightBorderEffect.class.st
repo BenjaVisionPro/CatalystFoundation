@@ -8,7 +8,6 @@ Class {
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'borderColor',
 		'style',
 		'underlyingEffect'
 	],
@@ -31,11 +30,6 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 	^ underlyingEffect
 		ifNil: [ aBlBounds ]
 		ifNotNil: [ underlyingEffect computeBounds: aBlBounds ]
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> borderColor: aColor [
-	borderColor := aColor
 ]
 
 { #category : 'accessing' }
@@ -63,11 +57,6 @@ CFLightBorderEffect >> drawInnerBevelFor: anElement onSpartaCanvas: aCanvas ligh
 	"Moving the path opposite an edge direction places the clipped half-stroke
 	on that inner edge. This gives each side a directional, alpha-blended bevel
 	without relying on an accidental child clipping boundary."
-	self
-		drawClippedPathFor: anElement
-		onSpartaCanvas: aCanvas
-		color: borderColor
-		offset: 0 @ 0.
 	self
 		drawInnerLayersFor: anElement
 		onSpartaCanvas: aCanvas
