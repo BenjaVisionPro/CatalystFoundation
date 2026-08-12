@@ -125,39 +125,6 @@ CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint wid
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inLightFacingRegionOf: anElement [
-	self
-		drawPath: aPath
-		onSpartaCanvas: aCanvas
-		paint: aPaint
-		width: aWidth
-		inSide: (self lightFacingRegionFor: anElement onSpartaCanvas: aCanvas)
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inShadowFacingRegionOf: anElement [
-	self
-		drawPath: aPath
-		onSpartaCanvas: aCanvas
-		paint: aPaint
-		width: aWidth
-		inSide: (self shadowFacingRegionFor: anElement onSpartaCanvas: aCanvas)
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawPath: aPath onSpartaCanvas: aCanvas paint: aPaint width: aWidth inSide: aRectangle [
-	aCanvas clip
-		by: aRectangle
-		during: [
-			self
-				drawPath: aPath
-				onSpartaCanvas: aCanvas
-				paint: aPaint
-				width: aWidth
-				offset: 0 @ 0 ]
-]
-
-{ #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBevelFor: anElement onSpartaCanvas: aCanvas [
 	"Each pass follows a concentric outer path: the rectangle and its corner
 	radii grow by the same amount. Unlike a translated path, it remains exactly
@@ -172,18 +139,134 @@ CFLightBorderEffect >> drawRaisedLayer: aLayer for: anElement onSpartaCanvas: aC
 	distance := (aLayer - 0.5) * self effectWidth.
 	path := self outerPathFor: anElement onSpartaCanvas: aCanvas distance: distance.
 	path ifNil: [ ^ self ].
+	(path respondsTo: #cornerRadii) ifFalse: [
+		^ self
+			drawPath: path
+			onSpartaCanvas: aCanvas
+			paint: (self layerColor: highlightColor at: aLayer)
+			width: self effectWidth
+			offset: 0 @ 0 ].
+	self drawRoundedPerimeter: path layer: aLayer onSpartaCanvas: aCanvas
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRoundedPerimeter: aRoundedRectangle layer: aLayer onSpartaCanvas: aCanvas [
+	| rectangle radii left top right bottom |
+	rectangle := aRoundedRectangle asRectangle.
+	radii := aRoundedRectangle cornerRadii.
+	left := rectangle left.
+	top := rectangle top.
+	right := rectangle right.
+	bottom := rectangle bottom.
 	self
-		drawPath: path
-		onSpartaCanvas: aCanvas
-		paint: (self layerColor: highlightColor at: aLayer)
-		width: self effectWidth
-		inLightFacingRegionOf: anElement.
+		drawSegmentFrom: (left + radii topLeft) @ top
+		to: (right - radii topRight) @ top
+		normalAngle: Float pi negated / 2.0
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
 	self
-		drawPath: path
+		drawSegmentFrom: right @ (top + radii topRight)
+		to: right @ (bottom - radii bottomRight)
+		normalAngle: 0
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawSegmentFrom: (right - radii bottomRight) @ bottom
+		to: (left + radii bottomLeft) @ bottom
+		normalAngle: Float pi / 2.0
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawSegmentFrom: left @ (bottom - radii bottomLeft)
+		to: left @ (top + radii topLeft)
+		normalAngle: Float pi
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawCornerAt: (left + radii topLeft) @ (top + radii topLeft)
+		radius: radii topLeft
+		from: Float pi
+		to: Float pi * 1.5
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawCornerAt: (right - radii topRight) @ (top + radii topRight)
+		radius: radii topRight
+		from: Float pi * 1.5
+		to: Float pi * 2
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawCornerAt: (right - radii bottomRight) @ (bottom - radii bottomRight)
+		radius: radii bottomRight
+		from: 0
+		to: Float pi / 2.0
+		layer: aLayer
+		onSpartaCanvas: aCanvas.
+	self
+		drawCornerAt: (left + radii bottomLeft) @ (bottom - radii bottomLeft)
+		radius: radii bottomLeft
+		from: Float pi / 2.0
+		to: Float pi
+		layer: aLayer
 		onSpartaCanvas: aCanvas
-		paint: (self layerColor: shadowColor at: aLayer)
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawCornerAt: aCenterPoint radius: aRadius from: aStartAngle to: anEndAngle layer: aLayer onSpartaCanvas: aCanvas [
+	"Skia has no generic gradient-path stroke. Subdivide the arc into solid,
+	alpha-blended strokes instead. Each segment uses its outward normal, making
+	the transition through the corner continuous rather than mask-shaped."
+	| segmentCount angleStep |
+	aRadius isZero ifTrue: [ ^ self ].
+	segmentCount := 12.
+	angleStep := (anEndAngle - aStartAngle) / segmentCount.
+	0 to: segmentCount - 1 do: [ :anIndex |
+		| segmentStart segmentEnd normalAngle path |
+		segmentStart := aStartAngle + (anIndex * angleStep).
+		segmentEnd := segmentStart + angleStep.
+		normalAngle := (segmentStart + segmentEnd) / 2.0.
+		path := aCanvas path
+			absolute;
+			arcAround: aCenterPoint
+				radius: aRadius
+				startAngle: segmentStart
+				endAngle: segmentEnd;
+			build.
+		self
+			drawPath: path
+			onSpartaCanvas: aCanvas
+			paint: (self colorForNormalAngle: normalAngle layer: aLayer)
+			width: self effectWidth
+			offset: 0 @ 0 ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> colorForNormalAngle: anAngle layer: aLayer [
+	"The dot product of the outward edge normal and the light direction gives
+	a continuous signed intensity: positive is the illuminated half; negative
+	is the shaded half. The square-root normalisation retains full intensity on
+	the cardinal edges for the default diagonal light."
+	| intensity color |
+	intensity := ((anAngle cos * self lightVector x) + (anAngle sin * self lightVector y)) * 2.0 sqrt.
+	intensity >= 0
+		ifTrue: [
+			color := self layerColor: highlightColor at: aLayer.
+			intensity := intensity min: 1.0 ]
+		ifFalse: [
+			color := self layerColor: shadowColor at: aLayer.
+			intensity := intensity negated min: 1.0 ].
+	^ color alpha: color alpha * intensity
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawSegmentFrom: aStartPoint to: anEndPoint normalAngle: anAngle layer: aLayer onSpartaCanvas: aCanvas [
+	self
+		drawPath: (aCanvas shape line: aStartPoint to: anEndPoint)
+		onSpartaCanvas: aCanvas
+		paint: (self colorForNormalAngle: anAngle layer: aLayer)
 		width: self effectWidth
-		inShadowFacingRegionOf: anElement
+		offset: 0 @ 0
 ]
 
 { #category : 'private - drawing' }
@@ -241,24 +324,6 @@ CFLightBorderEffect >> lightOffsetFactor: aNumber [
 { #category : 'private - geometry' }
 CFLightBorderEffect >> lightVector [
 	^ lightDirection asBlocVector normalized
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> lightFacingRegionFor: anElement onSpartaCanvas: aCanvas [
-	| extent margin topLeft topRight bottomLeft bottomRight |
-	extent := anElement extent.
-	margin := self outsideExtent.
-	topLeft := margin negated @ margin negated.
-	topRight := (extent x + margin) @ margin negated.
-	bottomLeft := margin negated @ (extent y + margin).
-	bottomRight := (extent x + margin) @ (extent y + margin).
-	^ self lightVector x <= 0
-		ifTrue: [ self lightVector y <= 0
-			ifTrue: [ aCanvas shape polygon: { topLeft. topRight. bottomLeft } ]
-			ifFalse: [ aCanvas shape polygon: { bottomLeft. topLeft. bottomRight } ] ]
-		ifFalse: [ self lightVector y <= 0
-			ifTrue: [ aCanvas shape polygon: { topRight. bottomRight. topLeft } ]
-			ifFalse: [ aCanvas shape polygon: { bottomRight. bottomLeft. topRight } ] ]
 ]
 
 { #category : 'private - geometry' }
@@ -331,24 +396,6 @@ CFLightBorderEffect >> applyEffectOnSpartaCanvas: aCanvas for: anElement around:
 { #category : 'private - geometry' }
 CFLightBorderEffect >> shadowVector [
 	^ self lightVector negated
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> shadowFacingRegionFor: anElement onSpartaCanvas: aCanvas [
-	| extent margin topLeft topRight bottomLeft bottomRight |
-	extent := anElement extent.
-	margin := self outsideExtent.
-	topLeft := margin negated @ margin negated.
-	topRight := (extent x + margin) @ margin negated.
-	bottomLeft := margin negated @ (extent y + margin).
-	bottomRight := (extent x + margin) @ (extent y + margin).
-	^ self lightVector x <= 0
-		ifTrue: [ self lightVector y <= 0
-			ifTrue: [ aCanvas shape polygon: { bottomRight. bottomLeft. topRight } ]
-			ifFalse: [ aCanvas shape polygon: { topRight. bottomRight. topLeft } ] ]
-		ifFalse: [ self lightVector y <= 0
-			ifTrue: [ aCanvas shape polygon: { bottomLeft. topLeft. bottomRight } ]
-			ifFalse: [ aCanvas shape polygon: { topLeft. topRight. bottomLeft } ] ]
 ]
 
 { #category : 'accessing' }
