@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFConfigurationMaElementBuilder',
-	#superclass : 'CFMaElementBuilder',
+	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
 		'visitedConfigurations',
 		'selectedConfiguration',
@@ -60,6 +60,11 @@ CFConfigurationMaElementBuilder >> addFlowListUsing: aDescription [
 { #category : 'private - building' }
 CFConfigurationMaElementBuilder >> addToOneUsing: aDescription [
 	self addConfigurationRelationUsing: aDescription
+]
+
+{ #category : 'visiting-description' }
+CFConfigurationMaElementBuilder >> visitToOneRelationDescription: aDescription [
+	self addToOneUsing: aDescription
 ]
 
 { #category : 'accessing' }

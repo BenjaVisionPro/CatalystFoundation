@@ -6,8 +6,7 @@ Class {
 		'description',
 		'formController',
 		'itemMementos',
-		'itemElements',
-		'dropHint'
+		'itemElements'
 	],
 	#category : 'BVC-Foundation-Composer',
 	#package : 'BVC-Foundation-Composer'
@@ -55,7 +54,6 @@ CFComposerRelationElement >> initialize [
 	super initialize.
 	itemMementos := OrderedCollection new.
 	itemElements := OrderedCollection new.
-	dropHint := self newDropHint.
 	self
 		hMatchParent;
 		vFitContent;
@@ -136,21 +134,6 @@ CFComposerRelationElement >> newItemElementFor: aMemento [
 	^ anElement
 ]
 
-{ #category : 'private - building' }
-CFComposerRelationElement >> newDropHint [
-	^ BrLabel new
-		hMatchParent;
-		vExact: 44;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.35));
-		text: 'Drop compatible objects here';
-		padding: (BlInsets left: 12 right: 12);
-		margin: (BlInsets top: 2 bottom: 2);
-		background: (Color black alpha: 0.025);
-		border: (BlBorder paint: (Color black alpha: 0.10) width: 1);
-		yourself
-]
-
 { #category : 'private - drag and drop' }
 CFComposerRelationElement >> installDropHandler [
 	self addEventHandler: (BlDropHandler new
@@ -159,35 +142,8 @@ CFComposerRelationElement >> installDropHandler [
 				ifNil: [ true ]
 				ifNotNil: [ :anItemElement | anItemElement parent ~~ aDropArea ] ];
 		acceptDomainObjectsSuchThat: [ :anObject | self canAcceptDroppedObject: anObject ];
-		whenDragEnteredDo: [ :anEvent |
-			anEvent mayAcceptItems ifTrue: [ self emphasizeDropHint ] ];
-		whenDragLeftDo: [ :anEvent | self deEmphasizeDropHint ];
 		whenDroppedDo: [ :anEvent |
-			self deEmphasizeDropHint.
 			self addDroppedObjects: (anEvent items collect: #domainObject) ])
-]
-
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> emphasizeDropHint [
-	self animateDropHintTo: 1.0
-]
-
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> deEmphasizeDropHint [
-	self animateDropHintTo: 0.55
-]
-
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> animateDropHintTo: anOpacity [
-	dropHint isAttachedToSceneGraph
-		ifFalse: [ dropHint opacity: anOpacity ]
-		ifTrue: [
-			(dropHint motion
-				duration: 120 milliSeconds;
-				holdAtDestination;
-				opacity: anOpacity;
-				build)
-				start ]
 ]
 
 { #category : 'private - drag and drop' }
@@ -246,8 +202,7 @@ CFComposerRelationElement >> synchronizeItems: desiredItems [
 		newElements add: anElement ].
 	unmatchedMementos do: [ :each |
 		formController unregisterMementoAndDescendants: each ].
-	(newElements asArray = itemElements asArray and: [
-		newElements notEmpty or: [ self children notEmpty ] ]) ifTrue: [
+	(newElements asArray = itemElements asArray) ifTrue: [
 		itemMementos := newMementos.
 		^ self ].
 	self replaceItemsWith: newElements created: createdElements.
@@ -269,11 +224,8 @@ CFComposerRelationElement >> replaceItemsWith: newElements created: createdEleme
 	existingElements := itemElements asArray.
 	newElements isEmpty ifTrue: [
 		self removeChildren.
-		dropHint opacity: 0.55.
-		self addChild: dropHint.
 		^ self ].
 	existingElements isEmpty ifTrue: [
-		self removeChildren.
 		createdElements size = 1
 			ifTrue: [
 				insertedElement := createdElements first.

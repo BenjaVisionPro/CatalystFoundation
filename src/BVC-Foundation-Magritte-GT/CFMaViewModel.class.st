@@ -23,7 +23,9 @@ CFMaViewModel >> elementBuilderDo: aBlock [
 CFMaViewModel >> formContainerStencilForMemento: aMemento [
 	^ aMemento magritteDescription
 		propertyAt: #blocElementContainerStencil
-		ifPresent: [ :aStencil | aStencil asStencilBuilder: CFMaFormStencilBuilder ]
+		"An explicitly supplied Magritte form stencil is consumer-owned. Do not
+		adapt it to Foundation's default stencil builder."
+		ifPresent: [ :aStencil | aStencil ]
 		ifAbsent: [ CFMaFormStencilBuilder new ]
 ]
 
@@ -45,7 +47,7 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	aContainer requestStyle.
 
 	(elementBuilderBlock
-		ifNil: [ CFMaElementBuilder new ]
+		ifNil: [ GtMagritteElementBuilder new ]
 		ifNotNil: [ :aBlock | aBlock value ])
 		includeImplicitActions: includeImplicitActions;
 		form: theFrame;

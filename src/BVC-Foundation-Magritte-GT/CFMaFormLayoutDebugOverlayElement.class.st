@@ -31,12 +31,12 @@ CFMaFormLayoutDebugOverlayElement class >> overlayIn: anElement [
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement class >> targetFormElementIn: anElement [
-	(anElement isKindOf: CFMaFormElement)
+	(anElement magritte isFieldContainer)
 		ifTrue: [ ^ anElement ].
 
 	^ anElement
 		allChildrenBreadthFirstDetect: [ :eachElement |
-			eachElement isKindOf: CFMaFormElement ]
+			eachElement magritte isFieldContainer ]
 		ifFound: [ :aFormElement | aFormElement ]
 ]
 

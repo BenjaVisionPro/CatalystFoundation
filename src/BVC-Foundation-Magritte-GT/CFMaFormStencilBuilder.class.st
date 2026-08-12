@@ -7,16 +7,19 @@ Class {
 
 { #category : 'api - instantiation' }
 CFMaFormStencilBuilder >> buildDefault [
-	| aFormElement aHeaderElement aBodyElement aFooterElement |
-	aFormElement := CFMaFormElement new.
-	aHeaderElement := CFMaFormHeaderElement new
-		memento: memento;
-		yourself.
-	aBodyElement := CFMaFormBodyElement new.
-	aFooterElement := CFMaFormFooterElement new.
-	aFormElement
-		header: aHeaderElement
-		body: aBodyElement
-		footer: aFooterElement.
-	^ aFormElement
+	"GT Magritte owns field construction. A form stencil only supplies the
+	three standard insertion points that GtMagritteElementBuilder uses."
+	| aContainer |
+	aContainer := BrHorizontalGrid new.
+	aContainer magritte
+		beLabelContainer;
+		beFieldContainer;
+		beToolbarContainer.
+	aContainer
+		cellSpacing: 0;
+		columnCount: 2;
+		hFitContentLimited;
+		vFitContent;
+		padding: (BlInsets all: 8).
+	^ aContainer
 ]
