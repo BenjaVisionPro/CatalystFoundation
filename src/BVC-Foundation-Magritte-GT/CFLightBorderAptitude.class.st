@@ -63,21 +63,27 @@ CFLightBorderAptitude >> beInset [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	"A recessed card has its shadow on the light-facing inner wall."
-	drawOuter := false.
-	drawInner := true.
+	^ self beLoweredCard
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beLoweredBorder [
+	"Light the outer face of a lowered native border. Combine this aptitude
+	with #beLoweredCard to make a recessed card and its border."
+	drawOuter := true.
+	drawInner := false.
 	outerHighlightAlongLightDirection := false.
 	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
 { #category : 'configuration' }
-CFLightBorderAptitude >> beLoweredBorder [
-	"The two faces of a lowered rim are reversed from a raised rim."
-	drawOuter := true.
+CFLightBorderAptitude >> beLoweredCard [
+	"A recessed card has its shadow on the light-facing inner wall."
+	drawOuter := false.
 	drawInner := true.
-	outerHighlightAlongLightDirection := false.
-	innerHighlightAlongLightDirection := false.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
@@ -93,18 +99,26 @@ CFLightBorderAptitude >> bePressed [
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaised [
-	drawOuter := true.
-	drawInner := false.
-	outerHighlightAlongLightDirection := true.
-	innerHighlightAlongLightDirection := true.
-	^ self
+	^ self beRaisedCard
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beRaisedBorder [
-	"A raised rim lights its outer and inner faces in opposite directions."
-	drawOuter := true.
+	"Light the inner face of a raised native border. Combine this aptitude
+	with #beRaisedCard to make a raised card and its border."
+	drawOuter := false.
 	drawInner := true.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := false.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beRaisedCard [
+	"Light the exterior of a raised card. The element continues to own and
+	render its normal BlBorder."
+	drawOuter := true.
+	drawInner := false.
 	outerHighlightAlongLightDirection := true.
 	innerHighlightAlongLightDirection := true.
 	^ self

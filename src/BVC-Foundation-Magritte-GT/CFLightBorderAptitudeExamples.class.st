@@ -15,14 +15,23 @@ CFLightBorderAptitudeExamples >> cardWith: anAptitude borderWidth: aNumber [
 
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> cardWith: anAptitude geometry: aGeometry borderWidth: aNumber [
-	^ BlElement new
+	^ self
+		cardWithAptitudes: { anAptitude }
+		geometry: aGeometry
+		borderWidth: aNumber
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> cardWithAptitudes: aptitudes geometry: aGeometry borderWidth: aNumber [
+	| anElement |
+	anElement := BlElement new
 		size: 280 @ 160;
 		geometry: aGeometry;
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber);
-		addAptitude: anAptitude;
-		yourself
+		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber).
+	aptitudes do: [ :anAptitude | anElement addAptitude: anAptitude ].
+	^ anElement
 ]
 
 { #category : 'private - instance creation' }
@@ -38,6 +47,14 @@ CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
 { #category : 'private - instance creation' }
 CFLightBorderAptitudeExamples >> elementWith: anAptitude geometry: aGeometry [
 	^ self stageWith: (self cardWith: anAptitude geometry: aGeometry borderWidth: 1)
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> elementWithAptitudes: aptitudes [
+	^ self stageWith: (self
+		cardWithAptitudes: aptitudes
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 16)
+		borderWidth: 1)
 ]
 
 { #category : 'examples' }
@@ -78,6 +95,15 @@ CFLightBorderAptitudeExamples >> loweredBorder [
 ]
 
 { #category : 'examples' }
+CFLightBorderAptitudeExamples >> loweredCardAndBorder [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWithAptitudes: {
+		CFLightBorderAptitude new beLoweredCard.
+		CFLightBorderAptitude new beLoweredBorder }
+]
+
+{ #category : 'examples' }
 CFLightBorderAptitudeExamples >> raised [
 	<gtExample>
 	<return: #BlElement>
@@ -89,6 +115,17 @@ CFLightBorderAptitudeExamples >> raisedBorder [
 	<gtExample>
 	<return: #BlElement>
 	^ self elementWith: CFLightBorderAptitude new beRaisedBorder
+]
+
+{ #category : 'examples' }
+CFLightBorderAptitudeExamples >> raisedCardAndBorder [
+	<gtExample>
+	<return: #BlElement>
+	"Brick composes the two visual concerns. The first aptitude lights the
+	card exterior; the second lights the inside face of its native BlBorder."
+	^ self elementWithAptitudes: {
+		CFLightBorderAptitude new beRaisedCard.
+		CFLightBorderAptitude new beRaisedBorder }
 ]
 
 { #category : 'examples' }
