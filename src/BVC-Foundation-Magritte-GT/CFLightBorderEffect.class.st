@@ -30,15 +30,34 @@ CFLightBorderEffect class >> defaultOpacity [
 ]
 
 { #category : 'drawing' }
+CFLightBorderEffect >> applyAfterOnSpartaCanvas: aCanvas for: anElement [
+	borderActive ifTrue: [
+		borderInside ifTrue: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ].
+	bodyActive ifTrue: [
+		bodyInside ifTrue: [ self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
+]
+
+{ #category : 'drawing' }
+CFLightBorderEffect >> applyBeforeOnSpartaCanvas: aCanvas for: anElement [
+	borderActive ifTrue: [
+		borderInside ifFalse: [ self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas ] ].
+	bodyActive ifTrue: [
+		bodyInside ifFalse: [ self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas ] ]
+]
+
+{ #category : 'drawing' }
 CFLightBorderEffect >> applyEffectOnSpartaCanvas: aCanvas for: anElement around: aBlock [
+	underlyingEffect ifNil: [
+		^ super
+			applyEffectOnSpartaCanvas: aCanvas
+			for: anElement
+			around: aBlock ].
+	self applyBeforeOnSpartaCanvas: aCanvas for: anElement.
 	underlyingEffect
-		ifNil: [ aBlock value ]
-		ifNotNil: [
-			underlyingEffect
-				applyEffectOnSpartaCanvas: aCanvas
-				for: anElement
-				around: aBlock ].
-	self drawTreatmentsFor: anElement onSpartaCanvas: aCanvas
+		applyEffectOnSpartaCanvas: aCanvas
+		for: anElement
+		around: aBlock.
+	self applyAfterOnSpartaCanvas: aCanvas for: anElement
 ]
 
 { #category : 'accessing' }
@@ -144,11 +163,6 @@ CFLightBorderEffect >> drawTreatmentPath: aPath raised: isRaised for: anElement 
 		draw
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawTreatmentsFor: anElement onSpartaCanvas: aCanvas [
-	self drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas.
-	self drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas
-]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> effectWidth [
@@ -232,6 +246,9 @@ CFLightBorderEffect >> opacity: aNumber [
 
 { #category : 'drawing' }
 CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anElement thenPaint: aBlock [
+	aCompositorPainter canvas transform
+		by: [ :aTransform | aTransform translateBy: anOffset ]
+		during: [ self applyBeforeOnSpartaCanvas: aCompositorPainter canvas for: anElement ].
 	underlyingEffect
 		ifNil: [ aBlock cull: aCompositorPainter cull: anOffset ]
 		ifNotNil: [
@@ -242,7 +259,7 @@ CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anEleme
 				thenPaint: aBlock ].
 	aCompositorPainter canvas transform
 		by: [ :aTransform | aTransform translateBy: anOffset ]
-		during: [ self drawTreatmentsFor: anElement onSpartaCanvas: aCompositorPainter canvas ]
+		during: [ self applyAfterOnSpartaCanvas: aCompositorPainter canvas for: anElement ]
 ]
 
 { #category : 'accessing' }
@@ -259,10 +276,4 @@ CFLightBorderEffect >> underlyingEffect [
 CFLightBorderEffect >> underlyingEffect: anEffect [
 	underlyingEffect := anEffect.
 	^ self
-]
-
-{ #category : 'testing' }
-CFLightBorderEffect >> wantsCompositionLayer [
-	^ self hasLighting
-		or: [ underlyingEffect notNil and: [ underlyingEffect wantsCompositionLayer ] ]
 ]
