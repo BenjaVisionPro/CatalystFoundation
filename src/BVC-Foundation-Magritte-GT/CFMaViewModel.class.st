@@ -47,7 +47,7 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	aContainer requestStyle.
 
 	(elementBuilderBlock
-		ifNil: [ GtMagritteElementBuilder new ]
+		ifNil: [ CFMaElementBuilder new ]
 		ifNotNil: [ :aBlock | aBlock value ])
 		includeImplicitActions: includeImplicitActions;
 		form: theFrame;
