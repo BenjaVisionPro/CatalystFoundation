@@ -121,6 +121,8 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	bodyActive ifFalse: [ ^ self ].
 	(bodyInside and: [ bodyRaised ]) ifTrue: [
 		^ self drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
+	(bodyInside not and: [ bodyRaised ]) ifTrue: [
+		^ self drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
 	bodyInside
 		ifTrue: [
 			self
@@ -491,3 +493,113 @@ CFLightBorderEffect >> underlyingEffect: anEffect [
 	underlyingEffect := anEffect.
 	^ self
 ]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas [
+	"For a rounded rectangle, derive B from the same corrected Sparta inset geometry
+	 used by the native border. This keeps the treatment exactly concentric with the
+	 border after SpartaRoundedRectangle>>insetBy: adjusts its radii."
+	| geometry inset rounded |
+	geometry := anElement geometry.
+	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
+	rounded := aCanvas shape
+		roundedRectangle: geometry geometryBounds
+		radii: geometry cornerRadii asArray.
+	inset := self bodyBoundaryCoordinateFor: anElement.
+	^ inset isZero
+		ifTrue: [ rounded ]
+		ifFalse: [ rounded insetBy: inset ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas [
+	"Raised body outside uses B as the source boundary but keeps the relief strictly
+	 on the non-body side of B. The rounded-rectangle B path comes from Sparta's
+	 corrected inset geometry, so the treatment remains concentric with the native
+	 border."
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset boundaryPath |
+	self effectWidth isZero ifTrue: [ ^ self ].
+	boundaryPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
+	boundaryPath ifNil: [
+		^ self
+			drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+			clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
+			raised: true
+			for: anElement
+			onSpartaCanvas: aCanvas ].
+
+	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
+	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
+	maskCanvas := aCanvas class extent: maskExtent.
+	[
+		maskCanvas transform
+			by: [ :transform | transform translateBy: margin @ margin ]
+			during: [ self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
+		maskCanvas flush.
+
+		magnitude := self effectWidth / 2.0.
+		vector := lightDirection asBlocVector normalized asPoint * magnitude.
+		highlightOffset := vector negated.
+		shadowOffset := vector.
+
+		self
+			drawBodyOutsideBlurredMask: maskCanvas
+			offset: highlightOffset
+			color: (self effectiveColor: highlightColor)
+			margin: margin
+			boundaryPath: boundaryPath
+			for: anElement
+			onSpartaCanvas: aCanvas.
+		self
+			drawBodyOutsideBlurredMask: maskCanvas
+			offset: shadowOffset
+			color: (self effectiveColor: shadowColor)
+			margin: margin
+			boundaryPath: boundaryPath
+			for: anElement
+			onSpartaCanvas: aCanvas
+	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBodyOutsideBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin boundaryPath: aBoundaryPath for: anElement onSpartaCanvas: aCanvas [
+	"Keep the blurred body lighting only on the border/outside side of B.
+	 For an inside native border this is exactly the element geometry minus B."
+	| sigma destination fillBounds outerPath |
+	sigma := (self effectWidth / 2.0) max: 0.5.
+	destination := (aMargin negated @ aMargin negated) + anOffset.
+	fillBounds := anElement boundsInLocal expandBy: aMargin.
+	outerPath := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	outerPath ifNil: [ ^ self ].
+
+	anElement outskirts = BlOutskirts inside ifFalse: [
+		^ self
+			drawBlurredMask: aMaskCanvas
+			offset: anOffset
+			color: aColor
+			margin: aMargin
+			clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
+			for: anElement
+			onSpartaCanvas: aCanvas ].
+
+	aCanvas layer during: [
+		aCanvas clip by: outerPath during: [
+			aCanvas filter
+				area: aMaskCanvas bounds;
+				to: destination;
+				type: (aCanvas filters blur
+					source: aMaskCanvas;
+					stdDeviation: sigma);
+				draw.
+			aCanvas fill
+				path: aBoundaryPath;
+				paint: Color white;
+				composeDestOut;
+				draw.
+			aCanvas fill
+				path: fillBounds;
+				paint: aColor;
+				composeIn;
+				draw ] ]
+]
+
