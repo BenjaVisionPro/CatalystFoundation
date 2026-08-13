@@ -9,32 +9,145 @@ Class {
 CFLightBorderAptitudeExamples >> allTreatments [
 	<gtExample>
 	<return: #BlElement>
-	| grid |
-	grid := BlElement new
+	| root controls grid borderColor borderWidth effectWidth intensity rebuildGallery |
+	borderColor := Color blue alpha: 0.75.
+	borderWidth := 8.
+	effectWidth := 2.5.
+	intensity := 0.9.
+
+	root := BrVerticalPane new
 		clipChildren: false;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent ];
 		background: Color gray;
 		padding: (BlInsets all: 18);
+		cellSpacing: 12;
+		yourself.
+
+	controls := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 4;
+		yourself.
+
+	grid := BlElement new
+		clipChildren: false;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent.
+			c linear weight: 1 ];
 		layout: (BlGridLayout new
-			columnCount: 2;
-			rowCount: 4;
+			columnCount: 3;
+			rowCount: 3;
 			cellSpacing: 18);
 		yourself.
 
-	grid addChild: (self treatmentCellNamed: 'Raise body inside' configure: [ :a | a raiseBodyInside ]).
-	grid addChild: (self treatmentCellNamed: 'Raise body outside' configure: [ :a | a raiseBodyOutside ]).
-	grid addChild: (self treatmentCellNamed: 'Lower body inside' configure: [ :a | a lowerBodyInside ]).
-	grid addChild: (self treatmentCellNamed: 'Lower body outside' configure: [ :a | a lowerBodyOutside ]).
-	grid addChild: (self treatmentCellNamed: 'Raise border inside' configure: [ :a |
-		a
-			raiseBorderInside;
-			effectWidth: 2.5 ]).
-	grid addChild: (self treatmentCellNamed: 'Raise border outside' configure: [ :a | a raiseBorderOutside ]).
-	grid addChild: (self treatmentCellNamed: 'Lower border inside' configure: [ :a | a lowerBorderInside ]).
-	grid addChild: (self treatmentCellNamed: 'Lower border outside' configure: [ :a | a lowerBorderOutside ]).
-	^ grid
+	rebuildGallery := [
+		grid removeChildren.
+		grid addChild: (self
+			treatmentCellNamed: 'Flat'
+			configure: [ :a | a beFlat ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Raise body inside'
+			configure: [ :a | a raiseBodyInside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Raise body outside'
+			configure: [ :a | a raiseBodyOutside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Lower body inside'
+			configure: [ :a | a lowerBodyInside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Lower body outside'
+			configure: [ :a | a lowerBodyOutside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Raise border inside'
+			configure: [ :a | a raiseBorderInside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Raise border outside'
+			configure: [ :a | a raiseBorderOutside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Lower border inside'
+			configure: [ :a | a lowerBorderInside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity).
+		grid addChild: (self
+			treatmentCellNamed: 'Lower border outside'
+			configure: [ :a | a lowerBorderOutside ]
+			borderColor: borderColor
+			borderWidth: borderWidth
+			effectWidth: effectWidth
+			intensity: intensity) ].
+
+	controls addChild: (self
+		colorControlNamed: 'Border colour'
+		color: borderColor
+		changed: [ :aColor |
+			borderColor := aColor.
+			rebuildGallery value ]).
+	controls addChild: (self
+		sliderNamed: 'Border width'
+		min: 0
+		max: 12
+		value: borderWidth
+		quantum: 1
+		changed: [ :aNumber |
+			borderWidth := aNumber.
+			rebuildGallery value ]).
+	controls addChild: (self
+		sliderNamed: 'Effect width'
+		min: 0
+		max: 12
+		value: effectWidth
+		quantum: 0.25
+		changed: [ :aNumber |
+			effectWidth := aNumber.
+			rebuildGallery value ]).
+	controls addChild: (self
+		sliderNamed: 'Effect intensity'
+		min: 0
+		max: 1
+		value: intensity
+		quantum: 0.05
+		changed: [ :aNumber |
+			intensity := aNumber.
+			rebuildGallery value ]).
+
+	root
+		addChild: controls;
+		addChild: grid.
+	rebuildGallery value.
+	^ root
 ]
 
 { #category : 'private - instance creation' }
@@ -493,3 +606,173 @@ CFLightBorderAptitudeExamples >> borderGeometryProbe [
 		yourself.
 	^ stage
 ]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock borderColor: aColor borderWidth: borderWidth effectWidth: effectWidth intensity: intensity [
+	| pane label aptitude |
+	aptitude := CFLightBorderAptitude new
+		beFlat;
+		effectWidth: effectWidth;
+		opacity: intensity;
+		lightDirection: -1 @ -1;
+		yourself.
+	aBlock value: aptitude.
+	label := BrLabel new
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color white);
+		text: aString;
+		fitContent;
+		margin: (BlInsets bottom: 6);
+		yourself.
+	pane := BrVerticalPane new
+		clipChildren: false;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		addChild: label;
+		addChild: (self
+			cardWith: aptitude
+			borderColor: aColor
+			borderWidth: borderWidth);
+		yourself.
+	^ pane
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> cardWith: anAptitude borderColor: aColor borderWidth: aNumber [
+	^ BlElement new
+		clipChildren: false;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent.
+			c linear weight: 1 ];
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 24);
+		background: (Color black alpha: 0.1);
+		outskirts: BlOutskirts inside;
+		border: (BlBorder paint: aColor width: aNumber);
+		addAptitude: anAptitude;
+		yourself
+]
+
+{ #category : 'private - controls' }
+CFLightBorderAptitudeExamples >> colorControlNamed: aString color: initialColor changed: aBlock [
+	| row label swatch currentColor |
+	currentColor := initialColor.
+	row := BrHorizontalPane new
+		hMatchParent;
+		vExact: 22;
+		cellSpacing: 8;
+		yourself.
+	label := BrLabel new
+		hExact: 110;
+		vMatchParent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color white; fontSize: 10);
+		text: aString;
+		yourself.
+	swatch := BlElement new
+		size: 48 @ 18;
+		background: currentColor;
+		border: (BlBorder paint: (Color white alpha: 0.45) width: 1);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		allowMeAndChildrenMouseEvents;
+		yourself.
+	swatch when: BlClickEvent do: [ :event |
+		| selected |
+		event consumed: true.
+		selected := BlBlocUIManager new
+			chooseColor: currentColor
+			title: 'Border colour'.
+		selected ifNotNil: [
+			currentColor := selected.
+			swatch background: currentColor.
+			aBlock value: currentColor ] ].
+	row
+		addChild: label;
+		addChild: swatch.
+	^ row
+]
+
+{ #category : 'private - controls' }
+CFLightBorderAptitudeExamples >> sliderNamed: aString min: minimum max: maximum value: initialValue quantum: quantum changed: aBlock [
+	| row label track handle valueLabel pullHandler currentValue positionHandle writeFraction |
+	currentValue := initialValue.
+	row := BrHorizontalPane new
+		hMatchParent;
+		vExact: 22;
+		cellSpacing: 8;
+		yourself.
+	label := BrLabel new
+		hExact: 110;
+		vMatchParent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color white; fontSize: 10);
+		text: aString;
+		yourself.
+	track := BlElement new
+		size: 160 @ 12;
+		layout: BlFrameLayout new;
+		background: (Color black alpha: 0.14);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		allowMeAndChildrenMouseEvents;
+		yourself.
+	handle := BlElement new
+		size: 10 @ 10;
+		background: (Color white alpha: 0.85);
+		geometry: BlCircleGeometry new;
+		allowMeAndChildrenMouseEvents;
+		yourself.
+	valueLabel := BrLabel new
+		hExact: 50;
+		vMatchParent;
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color white; fontSize: 9);
+		yourself.
+
+	positionHandle := [ :aValue |
+		| fraction usable x alignment |
+		fraction := ((aValue asFloat - minimum) / (maximum - minimum)) min: 1.0 max: 0.0.
+		usable := (track extent x - handle extent x) max: 1.
+		x := (fraction * usable) rounded.
+		alignment := track extent x isZero
+			ifTrue: [ 0.0 ]
+			ifFalse: [ x / track extent x ].
+		handle constraintsDo: [ :c |
+			c frame horizontal alignLeftAt: alignment.
+			c frame vertical alignCenter ].
+		handle relocate: x @ ((track extent y - handle extent y) / 2.0) rounded.
+		valueLabel text: aValue printString ].
+
+	writeFraction := [ :aFraction |
+		| fraction raw value |
+		fraction := aFraction min: 1.0 max: 0.0.
+		raw := minimum + (fraction * (maximum - minimum)).
+		value := ((raw / quantum) rounded * quantum) min: maximum max: minimum.
+		currentValue = value ifFalse: [
+			currentValue := value.
+			positionHandle value: currentValue.
+			aBlock value: currentValue ] ].
+
+	pullHandler := BlPullHandler new
+		targetElement: handle;
+		beHorizontal;
+		disallowOutOfBounds;
+		yourself.
+	handle addEventHandler: pullHandler.
+	handle when: BlPullEvent do: [ :event |
+		| usable fraction |
+		usable := (track extent x - handle extent x) max: 1.
+		fraction := handle constraints position x / usable.
+		writeFraction value: fraction ].
+	track when: BlClickEvent do: [ :event |
+		| local usable fraction |
+		local := track globalPointToLocal: event position.
+		usable := (track extent x - handle extent x) max: 1.
+		fraction := (local x - (handle extent x / 2.0)) / usable.
+		writeFraction value: fraction ].
+
+	track addChild: handle.
+	row
+		addChild: label;
+		addChild: track;
+		addChild: valueLabel.
+	positionHandle value: currentValue.
+	^ row
+]
+
