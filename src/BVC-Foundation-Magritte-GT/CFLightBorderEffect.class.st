@@ -731,14 +731,14 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 	| paint base amount |
 	paint := anElement border paint.
 	(paint isKindOf: BlColorPaint) ifFalse: [
-		^ Color black alpha: (0.68 * opacity) ].
+		^ Color black alpha: (0.60 * opacity) ].
 	base := paint color.
-	amount := 0.12.
+	amount := 0.18.
 	^ Color
 		r: base red * amount
 		g: base green * amount
 		b: base blue * amount
-		alpha: (0.68 * opacity)
+		alpha: (0.60 * opacity)
 ]
 
 { #category : 'private - drawing' }
@@ -877,7 +877,7 @@ CFLightBorderEffect >> drawRaisedBorderInsideSpecularBandFor: anElement path: aP
 	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
 
 	highlight := Color white
-		alpha: (highlightColor alpha * opacity * 0.70 * strength).
+		alpha: (highlightColor alpha * opacity * 0.88 * strength).
 	shadow := Color black
 		alpha: (0.78 * opacity * strength).
 
