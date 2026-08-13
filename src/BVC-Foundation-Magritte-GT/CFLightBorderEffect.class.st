@@ -715,7 +715,7 @@ CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
 	paint := anElement border paint.
 	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: highlightColor ].
 	base := paint color.
-	amount := 0.60.
+	amount := 0.72.
 	^ Color
 		r: base red + ((1.0 - base red) * amount)
 		g: base green + ((1.0 - base green) * amount)
@@ -731,7 +731,7 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 	paint := anElement border paint.
 	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: shadowColor ].
 	base := paint color.
-	amount := 0.40.
+	amount := 0.28.
 	^ Color
 		r: base red * amount
 		g: base green * amount
@@ -743,8 +743,11 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
 	"Render the raised-border lighting only within the configured treatment band.
 	 The band starts at A and extends inward by effectWidth; the remainder of the
-	 native border toward B is left untouched."
-	| treatmentInnerPath |
+	 native border toward B is left untouched. The lighting lobe is deliberately
+	 narrower than the band so the specular/shadow is strongest at A and falls away
+	 toward the untouched border."
+	| treatmentInnerPath lightingRadius |
+	lightingRadius := (aRadius / 2.0) max: 0.5.
 	treatmentInnerPath := self borderInsideTreatmentInnerPathFor: anElement onSpartaCanvas: aCanvas.
 	treatmentInnerPath ifNil: [
 		^ aCanvas clip by: aPath during: [
@@ -752,13 +755,13 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 				drawBorderShadowPath: aPath
 				offset: highlightOffset
 				color: (self raisedBorderHighlightColorFor: anElement)
-				radius: aRadius
+				radius: lightingRadius
 				onSpartaCanvas: aCanvas.
 			self
 				drawBorderShadowPath: aPath
 				offset: shadowOffset
 				color: (self raisedBorderShadowColorFor: anElement)
-				radius: aRadius
+				radius: lightingRadius
 				onSpartaCanvas: aCanvas ] ].
 
 	aCanvas clip by: aPath during: [
@@ -767,13 +770,13 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 				drawBorderShadowPath: aPath
 				offset: highlightOffset
 				color: (self raisedBorderHighlightColorFor: anElement)
-				radius: aRadius
+				radius: lightingRadius
 				onSpartaCanvas: aCanvas.
 			self
 				drawBorderShadowPath: aPath
 				offset: shadowOffset
 				color: (self raisedBorderShadowColorFor: anElement)
-				radius: aRadius
+				radius: lightingRadius
 				onSpartaCanvas: aCanvas.
 			aCanvas fill
 				path: treatmentInnerPath;
