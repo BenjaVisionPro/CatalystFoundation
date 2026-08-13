@@ -3,29 +3,35 @@ Class {
 	#superclass : 'BrAptitude',
 	#instVars : [
 		'effectWidth',
-		'opacity',
+		'depth',
+		'lightOffsetFactor',
 		'lightDirection',
 		'highlightColor',
 		'shadowColor',
-		'bodyActive',
-		'bodyRaised',
-		'bodyInside',
-		'borderActive',
-		'borderRaised',
-		'borderInside'
+		'outerHighlightAlongLightDirection',
+		'innerHighlightAlongLightDirection',
+		'drawOuter',
+		'drawInner'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'defaults' }
+CFLightBorderAptitude class >> defaultDepth [
+	^ 4
+]
+
+{ #category : 'defaults' }
 CFLightBorderAptitude class >> defaultEffectWidth [
-	^ 8
+	"Width of each alpha-blended bevel layer. It is independent from the
+	element's BlBorder width."
+	^ 1
 ]
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultHighlightColor [
-	^ Color white alpha: 0.75
+	^ Color white alpha: 0.55
 ]
 
 { #category : 'defaults' }
@@ -34,34 +40,98 @@ CFLightBorderAptitude class >> defaultLightDirection [
 ]
 
 { #category : 'defaults' }
-CFLightBorderAptitude class >> defaultOpacity [
-	^ 1.0
+CFLightBorderAptitude class >> defaultLightOffsetFactor [
+	^ 0.75
 ]
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultShadowColor [
-	^ Color black alpha: 0.45
+	^ Color black alpha: 0.28
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beFlat [
-	bodyActive := false.
-	borderActive := false.
+	drawOuter := false.
+	drawInner := false.
 	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beInset [
+	^ self beLowered
 ]
 
 { #category : 'configuration' }
 CFLightBorderAptitude >> beLowered [
-	self lowerBodyInside.
-	self lowerBorderOutside.
+	^ self beLoweredCard
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beLoweredBorder [
+	"Light the outer face of a lowered native border. Combine this aptitude
+	with #beLoweredCard to make a recessed card and its border."
+	drawOuter := true.
+	drawInner := false.
+	outerHighlightAlongLightDirection := false.
+	innerHighlightAlongLightDirection := true.
 	^ self
 ]
 
 { #category : 'configuration' }
-CFLightBorderAptitude >> beRaised [
-	self raiseBodyInside.
-	self raiseBorderOutside.
+CFLightBorderAptitude >> beLoweredCard [
+	"A recessed card has its shadow on the light-facing inner wall."
+	drawOuter := false.
+	drawInner := true.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beOutset [
+	^ self beRaised
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> bePressed [
+	^ self beLowered
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beRaised [
+	^ self beRaisedCard
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beRaisedBorder [
+	"Light the inner face of a raised native border. Combine this aptitude
+	with #beRaisedCard to make a raised card and its border."
+	drawOuter := false.
+	drawInner := true.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := false.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> beRaisedCard [
+	"Light the exterior of a raised card. The element continues to own and
+	render its normal BlBorder."
+	drawOuter := true.
+	drawInner := false.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> depth [
+	^ depth ifNil: [ self class defaultDepth ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> depth: aNumber [
+	depth := aNumber max: 0
 ]
 
 { #category : 'accessing' }
@@ -77,14 +147,12 @@ CFLightBorderAptitude >> effectWidth: aNumber [
 { #category : 'private - effects' }
 CFLightBorderAptitude >> effectComposedWith: anEffect [
 	self hasLighting ifFalse: [ ^ anEffect ].
-	^ self lightingEffect
-		underlyingEffect: anEffect;
-		yourself
+	^ self lightingEffect underlyingEffect: anEffect
 ]
 
 { #category : 'testing' }
 CFLightBorderAptitude >> hasLighting [
-	^ bodyActive or: [ borderActive ]
+	^ drawOuter or: [ drawInner ]
 ]
 
 { #category : 'accessing' }
@@ -101,17 +169,23 @@ CFLightBorderAptitude >> highlightColor: aColor [
 CFLightBorderAptitude >> initialize [
 	super initialize.
 	effectWidth := self class defaultEffectWidth.
-	opacity := self class defaultOpacity.
+	depth := self class defaultDepth.
+	lightOffsetFactor := self class defaultLightOffsetFactor.
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
-	bodyActive := false.
-	borderActive := false.
+	outerHighlightAlongLightDirection := true.
+	innerHighlightAlongLightDirection := true.
 	self beRaised.
 
 	self
 		addChangeProperty: #(widget effect)
 		with: [ :anEffect | self effectComposedWith: anEffect ]
+]
+
+{ #category : 'testing' }
+CFLightBorderAptitude >> lowered [
+	^ self hasLighting and: [ outerHighlightAlongLightDirection not ]
 ]
 
 { #category : 'accessing' }
@@ -129,49 +203,30 @@ CFLightBorderAptitude >> lightDirectionDegrees: aNumber [
 	lightDirection := self normalizedVectorFromDegrees: aNumber
 ]
 
+{ #category : 'accessing' }
+CFLightBorderAptitude >> lightOffsetFactor [
+	^ lightOffsetFactor
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> lightOffsetFactor: aNumber [
+	lightOffsetFactor := aNumber max: 0
+]
+
 { #category : 'private - effects' }
 CFLightBorderAptitude >> lightingEffect [
 	^ CFLightBorderEffect new
 		effectWidth: self effectWidth;
-		opacity: self opacity;
+		depth: self depth;
+		lightOffsetFactor: lightOffsetFactor;
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
-		bodyActive: bodyActive raised: bodyRaised inside: bodyInside;
-		borderActive: borderActive raised: borderRaised inside: borderInside;
+		outerHighlightAlongLightDirection: outerHighlightAlongLightDirection;
+		innerHighlightAlongLightDirection: innerHighlightAlongLightDirection;
+		drawOuter: drawOuter;
+		drawInner: drawInner;
 		yourself
-]
-
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> lowerBodyInside [
-	bodyActive := true.
-	bodyRaised := false.
-	bodyInside := true.
-	^ self
-]
-
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> lowerBodyOutside [
-	bodyActive := true.
-	bodyRaised := false.
-	bodyInside := false.
-	^ self
-]
-
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> lowerBorderInside [
-	borderActive := true.
-	borderRaised := false.
-	borderInside := true.
-	^ self
-]
-
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> lowerBorderOutside [
-	borderActive := true.
-	borderRaised := false.
-	borderInside := false.
-	^ self
 ]
 
 { #category : 'private - geometry' }
@@ -190,58 +245,9 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 	^ (radians cos @ radians sin) asBlocVector normalized
 ]
 
-{ #category : 'accessing' }
-CFLightBorderAptitude >> opacity [
-	^ opacity ifNil: [ self class defaultOpacity ]
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> opacity: aNumber [
-	opacity := (aNumber max: 0.0) min: 1.0
-]
-
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> raiseBodyInside [
-	bodyActive := true.
-	bodyRaised := true.
-	bodyInside := true.
-	^ self
-]
-
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> raiseBodyOutside [
-	bodyActive := true.
-	bodyRaised := true.
-	bodyInside := false.
-	^ self
-]
-
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> raiseBorderInside [
-	borderActive := true.
-	borderRaised := true.
-	borderInside := true.
-	^ self
-]
-
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> raiseBorderOutside [
-	borderActive := true.
-	borderRaised := true.
-	borderInside := false.
-	^ self
-]
-
-{ #category : 'configuration - body' }
-CFLightBorderAptitude >> removeBodyTreatment [
-	bodyActive := false.
-	^ self
-]
-
-{ #category : 'configuration - border' }
-CFLightBorderAptitude >> removeBorderTreatment [
-	borderActive := false.
-	^ self
+{ #category : 'testing' }
+CFLightBorderAptitude >> raised [
+	^ self hasLighting and: [ outerHighlightAlongLightDirection ]
 ]
 
 { #category : 'accessing' }
