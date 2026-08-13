@@ -123,14 +123,14 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 		ifTrue: [
 			self
 				drawRegionLightingFrom: [ :maskCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				target: [ :targetCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: targetCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToBodyRegionFor: anElement onSpartaCanvas: targetCanvas ]
 				raised: bodyRaised
 				for: anElement
 				onSpartaCanvas: aCanvas ]
 		ifFalse: [
 			self
 				drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				target: [ :targetCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: targetCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
 				raised: bodyRaised
 				for: anElement
 				onSpartaCanvas: aCanvas ]
@@ -140,29 +140,53 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	borderActive ifFalse: [ ^ self ].
 	anElement border width isZero ifTrue: [ ^ self ].
-	borderInside
-		ifTrue: [
-			self
-				drawRegionLightingFrom: [ :maskCanvas | self drawExteriorRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				target: [ :targetCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: targetCanvas ]
-				raised: borderRaised
-				for: anElement
-				onSpartaCanvas: aCanvas ]
-		ifFalse: [
-			self
-				drawRegionLightingFrom: [ :maskCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				target: [ :targetCanvas | self drawExteriorRegionMaskFor: anElement onSpartaCanvas: targetCanvas ]
-				raised: borderRaised
-				for: anElement
-				onSpartaCanvas: aCanvas ]
+	self drawBorderBoundaryLightingFor: anElement onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRegionLightingFrom: aSourceMaskBlock target: aTargetMaskBlock raised: isRaised for: anElement onSpartaCanvas: aCanvas [
-	"I derive lighting from Bloc's exact visual regions. The target region is
-	 established first. A full blurred source image is then composited with SrcIn,
-	 so pixels outside either region are cleared across the complete treatment
-	 extent. Finally the colour is applied with SrcIn through that intersection."
+CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: aCanvas [
+	"The border treatment is anchored at the element geometry boundary A. Sparta's
+	 box-shadow paint follows that exact path and is supported directly by Skia on
+	 the recording canvas. For an inside treatment I clip to the element geometry;
+	 for an outside treatment the native element paint later covers the inward half."
+	| path availableWidth magnitude vector highlightOffset shadowOffset radius |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	availableWidth := self effectWidth min: anElement border width.
+	availableWidth isZero ifTrue: [ ^ self ].
+	radius := availableWidth max: 0.5.
+	magnitude := availableWidth / 2.0.
+	vector := lightDirection asBlocVector normalized asPoint * magnitude.
+	highlightOffset := vector negated.
+	shadowOffset := vector.
+	borderInside
+		ifTrue: [
+			aCanvas clip by: path during: [
+				self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
+				self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ] ]
+		ifFalse: [
+			self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
+			self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBorderShadowPath: aPath offset: anOffset color: aColor radius: aRadius onSpartaCanvas: aCanvas [
+	aCanvas stroke
+		path: aPath;
+		paint: (aCanvas paint boxShadow
+			color: aColor;
+			offset: anOffset;
+			radius: aRadius);
+		width: 1;
+		draw
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRegionLightingFrom: aSourceMaskBlock clipTo: aTargetClipBlock raised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	"I derive lighting from the exact visual regions that Bloc itself paints. The
+	 source region is blurred and directionally displaced across its shared boundary
+	 with the target region. The result is then clipped back to the exact target
+	 region. No secondary boundary path or radius is constructed."
 	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
@@ -181,45 +205,34 @@ CFLightBorderEffect >> drawRegionLightingFrom: aSourceMaskBlock target: aTargetM
 
 		isRaised
 			ifTrue: [
-				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: highlightColor) margin: margin target: aTargetMaskBlock for: anElement onSpartaCanvas: aCanvas.
-				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: shadowColor) margin: margin target: aTargetMaskBlock for: anElement onSpartaCanvas: aCanvas ]
+				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: highlightColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas.
+				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: shadowColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas ]
 			ifFalse: [
-				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: shadowColor) margin: margin target: aTargetMaskBlock for: anElement onSpartaCanvas: aCanvas.
-				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: highlightColor) margin: margin target: aTargetMaskBlock for: anElement onSpartaCanvas: aCanvas ]
+				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: shadowColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas.
+				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: highlightColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas ]
 	] ensure: [ maskCanvas release ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin target: aTargetMaskBlock for: anElement onSpartaCanvas: aCanvas [
-	| blurCanvas sigma imageRectangle |
+CFLightBorderEffect >> drawBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas [
+	| fillBounds sigma destination |
+	fillBounds := anElement boundsInLocal expandBy: aMargin.
 	sigma := (self effectWidth / 2.0) max: 0.5.
-	blurCanvas := aCanvas class extent: aMaskCanvas extent.
-	[
-		blurCanvas filter
+	destination := (aMargin negated @ aMargin negated) + anOffset.
+	aCanvas layer during: [
+		aCanvas filter
 			area: aMaskCanvas bounds;
-			to: anOffset;
-			type: (blurCanvas filters blur
+			to: destination;
+			type: (aCanvas filters blur
 				source: aMaskCanvas;
 				stdDeviation: sigma);
 			draw.
-		blurCanvas flush.
-
-		imageRectangle := (aMargin negated @ aMargin negated)
-			extent: blurCanvas extent.
-		aCanvas layer during: [
-			aTargetMaskBlock value: aCanvas.
-			blurCanvas snapshotDuring: [ :blurImage |
-				aCanvas fill
-					path: imageRectangle;
-					paint: blurImage;
-					composeIn;
-					draw ].
-			aCanvas fill
-				path: imageRectangle;
-				paint: aColor;
-				composeIn;
-				draw ]
-	] ensure: [ blurCanvas release ]
+		aCanvas fill
+			path: fillBounds;
+			paint: aColor;
+			composeIn;
+			draw.
+		aTargetClipBlock value: aCanvas ]
 ]
 
 { #category : 'private - regions' }
