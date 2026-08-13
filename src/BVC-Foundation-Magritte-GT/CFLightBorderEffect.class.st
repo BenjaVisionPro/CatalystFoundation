@@ -125,6 +125,8 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 		^ self drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
 	(bodyInside not and: [ bodyRaised ]) ifTrue: [
 		^ self drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
+	(bodyInside not and: [ bodyRaised not ]) ifTrue: [
+		^ self drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
 	bodyInside
 		ifTrue: [
 			self
@@ -640,6 +642,54 @@ CFLightBorderEffect >> drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanv
 			offset: shadowOffset
 			color: (self effectiveColor: highlightColor)
 			margin: margin
+			for: anElement
+			onSpartaCanvas: aCanvas
+	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCanvas [
+	"Lowered body outside uses exactly the same B geometry and border-side clipping
+	 as raised body outside. Only the lighting polarity is reversed."
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset boundaryPath |
+	self effectWidth isZero ifTrue: [ ^ self ].
+	boundaryPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
+	boundaryPath ifNil: [
+		^ self
+			drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+			clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
+			raised: false
+			for: anElement
+			onSpartaCanvas: aCanvas ].
+
+	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
+	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
+	maskCanvas := aCanvas class extent: maskExtent.
+	[
+		maskCanvas transform
+			by: [ :transform | transform translateBy: margin @ margin ]
+			during: [ self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
+		maskCanvas flush.
+
+		magnitude := self effectWidth / 2.0.
+		vector := lightDirection asBlocVector normalized asPoint * magnitude.
+		highlightOffset := vector.
+		shadowOffset := vector negated.
+
+		self
+			drawBodyOutsideBlurredMask: maskCanvas
+			offset: highlightOffset
+			color: (self effectiveColor: shadowColor)
+			margin: margin
+			boundaryPath: boundaryPath
+			for: anElement
+			onSpartaCanvas: aCanvas.
+		self
+			drawBodyOutsideBlurredMask: maskCanvas
+			offset: shadowOffset
+			color: (self effectiveColor: highlightColor)
+			margin: margin
+			boundaryPath: boundaryPath
 			for: anElement
 			onSpartaCanvas: aCanvas
 	] ensure: [ maskCanvas release ]
