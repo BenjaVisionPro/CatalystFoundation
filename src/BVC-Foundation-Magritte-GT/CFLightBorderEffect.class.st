@@ -241,8 +241,13 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 			highlightOffset := vector.
 			shadowOffset := vector negated.
 			aCanvas clip by: path during: [
-				self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
-				self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ] ]
+				borderRaised
+					ifTrue: [
+						self drawBorderHighlightPath: path offset: highlightOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas.
+						self drawBorderDarkeningPath: path offset: shadowOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas ]
+					ifFalse: [
+						self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas.
+						self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas ] ] ]
 		ifFalse: [
 			highlightOffset := vector negated.
 			shadowOffset := vector.
@@ -695,5 +700,33 @@ CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCan
 			for: anElement
 			onSpartaCanvas: aCanvas
 	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBorderHighlightPath: aPath offset: anOffset color: aColor radius: aRadius onSpartaCanvas: aCanvas [
+	"Lighten the underlying border colour rather than alpha-painting over it."
+	aCanvas stroke
+		path: aPath;
+		paint: (aCanvas paint boxShadow
+			color: aColor;
+			offset: anOffset;
+			radius: aRadius);
+		width: 1;
+		composeScreen;
+		draw
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBorderDarkeningPath: aPath offset: anOffset color: aColor radius: aRadius onSpartaCanvas: aCanvas [
+	"Darken the underlying border colour rather than alpha-painting over it."
+	aCanvas stroke
+		path: aPath;
+		paint: (aCanvas paint boxShadow
+			color: aColor;
+			offset: anOffset;
+			radius: aRadius);
+		width: 1;
+		composeMultiply;
+		draw
 ]
 
