@@ -115,151 +115,195 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 ]
 
 
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> boundaryPathAt: aSignedInset for: anElement onSpartaCanvas: aCanvas [
-    "Answer a path for a boundary parallel to the element geometry. Zero is the
-    element geometry itself; positive values move inward and negative values
-    move outward. For the concrete geometries used by Bloc forms we construct
-    the true parallel geometry explicitly. For arbitrary vector paths there is
-    no generic offset-path operation in Sparta, so only the zero boundary is
-    supported rather than faking it."
-    | geometry bounds |
-    aSignedInset isZero ifTrue: [ ^ self geometryPathFor: anElement onSpartaCanvas: aCanvas ].
-    geometry := anElement geometry.
-    bounds := anElement boundsInLocal insetBy: aSignedInset.
-
-    (geometry isKindOf: BlRoundedRectangleGeometry) ifTrue: [
-        | radii |
-        radii := geometry cornerRadii asArray collect: [ :each | (each - aSignedInset) max: 0 ].
-        ^ aCanvas shape roundedRectangle: bounds radii: radii ].
-
-    (geometry isKindOf: BlRectangleGeometry) ifTrue: [ ^ bounds ].
-
-    (geometry isKindOf: BlEllipseGeometry) ifTrue: [
-        ^ aCanvas shape ellipse: bounds ].
-
-    ^ nil
-]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
-    | bodyPath outerPath |
-    bodyActive ifFalse: [ ^ self ].
-    bodyPath := self
-        boundaryPathAt: (self bodyBoundaryCoordinateFor: anElement)
-        for: anElement
-        onSpartaCanvas: aCanvas.
-    bodyPath ifNil: [ ^ self ].
+	| bodyBoundary borderBoundary width from to |
+	bodyActive ifFalse: [ ^ self ].
+	bodyBoundary := self bodyBoundaryCoordinateFor: anElement.
+	borderBoundary := self borderOuterBoundaryCoordinateFor: anElement.
+	width := self effectWidth.
 
-    bodyInside ifTrue: [
-        ^ aCanvas clip
-            by: bodyPath
-            during: [ self
-                drawReliefAround: bodyPath
-                raised: bodyRaised
-                onSpartaCanvas: aCanvas ] ].
+	bodyInside
+		ifTrue: [
+			from := bodyBoundary.
+			to := bodyBoundary + width ]
+		ifFalse: [
+			from := bodyBoundary - width.
+			anElement border width isZero ifFalse: [ from := from max: borderBoundary ].
+			to := bodyBoundary ].
 
-    "Outside the body means the border side of the body boundary. With a native
-    border, confine the treatment to that exact border band. Without a border,
-    it is simply the exterior of the body."
-    anElement border width isZero ifTrue: [
-        ^ self
-            drawReliefOutside: bodyPath
-            raised: bodyRaised
-            onSpartaCanvas: aCanvas ].
-
-    outerPath := self
-        boundaryPathAt: (self borderOuterBoundaryCoordinateFor: anElement)
-        for: anElement
-        onSpartaCanvas: aCanvas.
-    outerPath ifNil: [ ^ self ].
-    aCanvas clip
-        by: outerPath
-        during: [
-            aCanvas layer during: [
-                self drawReliefAround: bodyPath raised: bodyRaised onSpartaCanvas: aCanvas.
-                aCanvas fill
-                    path: bodyPath;
-                    paint: Color white;
-                    composeDestOut;
-                    draw ] ]
+	self
+		drawTreatmentBandFrom: from
+		to: to
+		raised: bodyRaised
+		for: anElement
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas [
-    | outerPath bodyPath |
-    borderActive ifFalse: [ ^ self ].
-    anElement border width isZero ifTrue: [ ^ self ].
-    outerPath := self
-        boundaryPathAt: (self borderOuterBoundaryCoordinateFor: anElement)
-        for: anElement
-        onSpartaCanvas: aCanvas.
-    outerPath ifNil: [ ^ self ].
+	| outerBoundary bodyBoundary width from to |
+	borderActive ifFalse: [ ^ self ].
+	anElement border width isZero ifTrue: [ ^ self ].
+	outerBoundary := self borderOuterBoundaryCoordinateFor: anElement.
+	bodyBoundary := self bodyBoundaryCoordinateFor: anElement.
+	width := self effectWidth.
 
-    borderInside ifFalse: [
-        ^ self
-            drawReliefOutside: outerPath
-            raised: borderRaised
-            onSpartaCanvas: aCanvas ].
+	borderInside
+		ifTrue: [
+			from := outerBoundary.
+			to := (outerBoundary + width) min: bodyBoundary ]
+		ifFalse: [
+			from := outerBoundary - width.
+			to := outerBoundary ].
 
-    bodyPath := self
-        boundaryPathAt: (self bodyBoundaryCoordinateFor: anElement)
-        for: anElement
-        onSpartaCanvas: aCanvas.
-    bodyPath ifNil: [ ^ self ].
-    aCanvas clip
-        by: outerPath
-        during: [
-            aCanvas layer during: [
-                self drawReliefAround: outerPath raised: borderRaised onSpartaCanvas: aCanvas.
-                aCanvas fill
-                    path: bodyPath;
-                    paint: Color white;
-                    composeDestOut;
-                    draw ] ]
+	self
+		drawTreatmentBandFrom: from
+		to: to
+		raised: borderRaised
+		for: anElement
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawReliefAround: aPath raised: isRaised onSpartaCanvas: aCanvas [
-    | lightVector offset highlight shadow |
-    lightVector := lightDirection asBlocVector normalized asPoint.
-    offset := lightVector * (self effectWidth / 2.0 max: 1.0).
-    highlight := self effectiveColor: highlightColor.
-    shadow := self effectiveColor: shadowColor.
+CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedDistance raised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	"I rasterize the treatment from the same element path and centered-stroke
+	geometry that Bloc uses for native borders. Positive distances are inside the
+	element path; negative distances are outside. I never construct an offset
+	shape, so rounded corners and arbitrary geometries share Bloc's own stroke
+	semantics."
+	| low high |
+	self effectWidth isZero ifTrue: [ ^ self ].
+	low := aSignedDistance min: anotherSignedDistance.
+	high := aSignedDistance max: anotherSignedDistance.
+	low = high ifTrue: [ ^ self ].
 
-    isRaised
-        ifTrue: [
-            self drawShadowOf: aPath color: highlight offset: offset radius: self effectWidth onSpartaCanvas: aCanvas.
-            self drawShadowOf: aPath color: shadow offset: offset negated radius: self effectWidth onSpartaCanvas: aCanvas ]
-        ifFalse: [
-            self drawShadowOf: aPath color: shadow offset: offset radius: self effectWidth onSpartaCanvas: aCanvas.
-            self drawShadowOf: aPath color: highlight offset: offset negated radius: self effectWidth onSpartaCanvas: aCanvas ]
+	aCanvas similar: aCanvas extent during: [ :treatmentCanvas |
+		| path |
+		path := self geometryPathFor: anElement onSpartaCanvas: treatmentCanvas.
+		path ifNil: [ ^ self ].
+		self
+			drawOpaqueBandFrom: low
+			to: high
+			path: path
+			onSpartaCanvas: treatmentCanvas.
+
+		treatmentCanvas fill
+			path: treatmentCanvas bounds;
+			paint: (self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: treatmentCanvas);
+			composeIn;
+			draw.
+
+		aCanvas fill
+			path: aCanvas bounds;
+			paint: treatmentCanvas;
+			draw ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawReliefOutside: aPath raised: isRaised onSpartaCanvas: aCanvas [
-    "Draw the shadows on an isolated layer and remove the interior of the same
-    path. The surviving treatment is therefore geometrically outside that exact
-    boundary; no translated or independently-rounded contour is involved."
-    aCanvas layer during: [
-        self drawReliefAround: aPath raised: isRaised onSpartaCanvas: aCanvas.
-        aCanvas fill
-            path: aPath;
-            paint: Color white;
-            composeDestOut;
-            draw ]
+CFLightBorderEffect >> drawOpaqueBandFrom: aSignedDistance to: anotherSignedDistance path: aPath onSpartaCanvas: aCanvas [
+	| low high |
+	low := aSignedDistance min: anotherSignedDistance.
+	high := aSignedDistance max: anotherSignedDistance.
+
+	high <= 0 ifTrue: [
+		^ self
+			drawOpaqueOutsideBandFrom: high negated
+			to: low negated
+			path: aPath
+			onSpartaCanvas: aCanvas ].
+
+	low >= 0 ifTrue: [
+		^ self
+			drawOpaqueInsideBandFrom: low
+			to: high
+			path: aPath
+			onSpartaCanvas: aCanvas ].
+
+	"The interval crosses the element path. Draw the exterior half first because
+	its interior-removal step intentionally clears everything inside the path."
+	self
+		drawOpaqueOutsideBandFrom: 0
+		to: low negated
+		path: aPath
+		onSpartaCanvas: aCanvas.
+	self
+		drawOpaqueInsideBandFrom: 0
+		to: high
+		path: aPath
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawShadowOf: aPath color: aColor offset: anOffset radius: aRadius onSpartaCanvas: aCanvas [
-    aCanvas stroke
-        path: aPath;
-        paint: (aCanvas paint boxShadow
-            color: aColor;
-            offset: anOffset;
-            radius: aRadius);
-        width: self effectWidth;
-        draw
+CFLightBorderEffect >> drawOpaqueInsideBandFrom: aNearDistance to: aFarDistance path: aPath onSpartaCanvas: aCanvas [
+	aFarDistance <= aNearDistance ifTrue: [ ^ self ].
+	aCanvas clip
+		by: aPath
+		during: [
+			aCanvas stroke
+				path: aPath;
+				paint: Color white;
+				width: aFarDistance * 2.0;
+				draw.
+			aNearDistance isZero ifFalse: [
+				aCanvas stroke
+					path: aPath;
+					paint: Color white;
+					width: aNearDistance * 2.0;
+					composeDestOut;
+					draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawOpaqueOutsideBandFrom: aNearDistance to: aFarDistance path: aPath onSpartaCanvas: aCanvas [
+	aFarDistance <= aNearDistance ifTrue: [ ^ self ].
+	aCanvas stroke
+		path: aPath;
+		paint: Color white;
+		width: aFarDistance * 2.0;
+		draw.
+	"Remove the complete interior half of the centered stroke."
+	aCanvas fill
+		path: aPath;
+		paint: Color white;
+		composeDestOut;
+		draw.
+	aNearDistance isZero ifFalse: [
+		aCanvas stroke
+			path: aPath;
+			paint: Color white;
+			width: aNearDistance * 2.0;
+			composeDestOut;
+			draw ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas [
+	| bounds center vector halfLength start finish highlight shadow |
+	bounds := anElement boundsInLocal.
+	center := bounds center.
+	vector := lightDirection asBlocVector normalized asPoint.
+	halfLength := ((bounds width squared + bounds height squared) sqrt) / 2.0.
+	start := center + (vector * halfLength).
+	finish := center - (vector * halfLength).
+	highlight := self effectiveColor: highlightColor.
+	shadow := self effectiveColor: shadowColor.
+	^ aCanvas paint linearGradient
+		stops: (isRaised
+			ifTrue: [ {
+				0 -> highlight.
+				0.45 -> (highlight alpha: 0.12 * self opacity).
+				0.55 -> (shadow alpha: 0.12 * self opacity).
+				1 -> shadow } ]
+			ifFalse: [ {
+				0 -> shadow.
+				0.45 -> (shadow alpha: 0.12 * self opacity).
+				0.55 -> (highlight alpha: 0.12 * self opacity).
+				1 -> highlight } ]);
+		begin: start;
+		end: finish;
+		yourself
 ]
 
 { #category : 'accessing' }
