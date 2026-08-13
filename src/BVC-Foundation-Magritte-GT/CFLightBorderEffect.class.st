@@ -765,7 +765,15 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 			highlightOffset: highlightOffset
 			shadowOffset: shadowOffset
 			radius: aRadius
-			onSpartaCanvas: aCanvas ]
+			onSpartaCanvas: aCanvas ].
+
+	self
+		drawRaisedBorderInsideSpecularFor: anElement
+		path: aPath
+		highlightOffset: highlightOffset
+		shadowOffset: shadowOffset
+		radius: aRadius
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - geometry' }
@@ -821,6 +829,47 @@ CFLightBorderEffect >> drawRaisedBorderInsideBandFor: anElement path: aPath from
 				offset: shadowOffset
 				color: shadow
 				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			aCanvas fill
+				path: innerPath;
+				paint: Color white;
+				composeDestOut;
+				draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	"Add a separate, tight specular layer at A. The broad concentric bands describe
+	 the bevel; this layer supplies the crisp highlight and opposing contact shadow."
+	| width specularWidth innerPath highlight shadow specularRadius |
+	width := self effectWidth min: anElement border width.
+	width isZero ifTrue: [ ^ self ].
+	specularWidth := width * 0.30.
+	innerPath := self
+		borderInsidePathFor: anElement
+		inset: specularWidth
+		onSpartaCanvas: aCanvas.
+	innerPath ifNil: [ ^ self ].
+
+	specularRadius := (aRadius * 0.35) max: 0.35.
+	highlight := Color white
+		alpha: (highlightColor alpha * opacity * 0.55).
+	shadow := Color black
+		alpha: (shadowColor alpha * opacity * 0.55).
+
+	aCanvas clip by: aPath during: [
+		aCanvas layer during: [
+			self
+				drawBorderShadowPath: aPath
+				offset: highlightOffset * 0.55
+				color: highlight
+				radius: specularRadius
+				onSpartaCanvas: aCanvas.
+			self
+				drawBorderShadowPath: aPath
+				offset: shadowOffset * 0.55
+				color: shadow
+				radius: specularRadius
 				onSpartaCanvas: aCanvas.
 			aCanvas fill
 				path: innerPath;
