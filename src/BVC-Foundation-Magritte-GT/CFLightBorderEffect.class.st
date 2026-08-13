@@ -119,6 +119,8 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	bodyActive ifFalse: [ ^ self ].
+	(bodyInside and: [ bodyRaised ]) ifTrue: [
+		^ self drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
 	bodyInside
 		ifTrue: [
 			self
@@ -134,6 +136,73 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 				raised: bodyRaised
 				for: anElement
 				onSpartaCanvas: aCanvas ]
+]
+
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas [
+	"This is intentionally isolated while the eight treatment placements are verified.
+	 For raised-body-inside, B is the shared border/body boundary. The border region
+	 supplies the blurred light, but the result is composed into an exact body-region
+	 destination mask before it is colourised. Nothing can survive on the border side
+	 of B."
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
+	self effectWidth isZero ifTrue: [ ^ self ].
+	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
+	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
+	maskCanvas := aCanvas class extent: maskExtent.
+	[
+		maskCanvas transform
+			by: [ :transform | transform translateBy: margin @ margin ]
+			during: [ self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
+		maskCanvas flush.
+
+		magnitude := self effectWidth / 2.0.
+		vector := lightDirection asBlocVector normalized asPoint * magnitude.
+		highlightOffset := vector negated.
+		shadowOffset := vector.
+
+		self
+			drawBodyInsideBlurredMask: maskCanvas
+			offset: highlightOffset
+			color: (self effectiveColor: highlightColor)
+			margin: margin
+			for: anElement
+			onSpartaCanvas: aCanvas.
+		self
+			drawBodyInsideBlurredMask: maskCanvas
+			offset: shadowOffset
+			color: (self effectiveColor: shadowColor)
+			margin: margin
+			for: anElement
+			onSpartaCanvas: aCanvas
+	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBodyInsideBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin for: anElement onSpartaCanvas: aCanvas [
+	"Build the exact body region first. The blur filter is then drawn with SrcIn,
+	 so its alpha can exist only where the body-region destination already exists.
+	 The final colour fill is also SrcIn and therefore cannot cross B."
+	| sigma destination fillBounds |
+	sigma := (self effectWidth / 2.0) max: 0.5.
+	destination := (aMargin negated @ aMargin negated) + anOffset.
+	fillBounds := anElement boundsInLocal expandBy: aMargin.
+	aCanvas layer during: [
+		self drawBodyRegionMaskFor: anElement onSpartaCanvas: aCanvas.
+		aCanvas filter
+			area: aMaskCanvas bounds;
+			to: destination;
+			type: (aCanvas filters blur
+				source: aMaskCanvas;
+				stdDeviation: sigma);
+			drawOptions: (aCanvas drawOptions composeIn);
+			draw.
+		aCanvas fill
+			path: fillBounds;
+			paint: aColor;
+			composeIn;
+			draw ]
 ]
 
 { #category : 'private - drawing' }
