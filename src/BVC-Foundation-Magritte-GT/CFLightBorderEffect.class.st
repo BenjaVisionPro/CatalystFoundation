@@ -218,7 +218,7 @@ CFLightBorderEffect >> drawBodyInsideBlurredMask: aMaskCanvas offset: anOffset c
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	borderActive ifFalse: [ ^ self ].
-	anElement border width isZero ifTrue: [ ^ self ].
+	self effectWidth isZero ifTrue: [ ^ self ].
 	self drawBorderBoundaryLightingFor: anElement onSpartaCanvas: aCanvas
 ]
 
@@ -231,7 +231,7 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 	| path availableWidth magnitude vector highlightOffset shadowOffset radius |
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	availableWidth := self effectWidth min: anElement border width.
+	availableWidth := self effectWidth.
 	availableWidth isZero ifTrue: [ ^ self ].
 	radius := availableWidth max: 0.5.
 	magnitude := availableWidth / 2.0.
@@ -345,7 +345,8 @@ CFLightBorderEffect >> drawBorderRegionMaskFor: anElement onSpartaCanvas: aCanva
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
 	width := anElement border width.
-	width isZero ifTrue: [ ^ self ].
+	width isZero ifTrue: [
+		^ self drawExteriorRegionMaskFor: anElement onSpartaCanvas: aCanvas ].
 	anElement outskirts = BlOutskirts inside ifTrue: [
 		^ aCanvas clip by: path during: [
 			aCanvas stroke path: path; paint: Color white; width: width * 2.0; draw ] ].
@@ -384,7 +385,7 @@ CFLightBorderEffect >> clipCurrentLayerToBorderRegionFor: anElement onSpartaCanv
 	path ifNil: [ ^ self ].
 	width := anElement border width.
 	width isZero ifTrue: [
-		aCanvas fill path: aCanvas bounds; paint: Color white; composeClear; draw.
+		aCanvas fill path: path; paint: Color white; composeDestOut; draw.
 		^ self ].
 	anElement outskirts = BlOutskirts inside ifTrue: [
 		aCanvas fill path: path; paint: Color white; composeDestIn; draw.
@@ -748,7 +749,7 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 	 the inner edge of effectWidth. Because each sub-band is produced by insetBy:,
 	 the falloff remains normal to the border through rounded corners."
 	| width bandCount bandWidth |
-	width := self effectWidth min: anElement border width.
+	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
 	bandCount := 5.
 	bandWidth := width / bandCount.
@@ -786,7 +787,7 @@ CFLightBorderEffect >> borderInsideTreatmentInnerPathFor: anElement onSpartaCanv
 	| geometry rounded width |
 	geometry := anElement geometry.
 	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
-	width := self effectWidth min: anElement border width.
+	width := self effectWidth.
 	rounded := aCanvas shape
 		roundedRectangle: geometry geometryBounds
 		radii: geometry cornerRadii asArray.
@@ -845,7 +846,7 @@ CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath 
 	 treatment. Several concentric sub-bands avoid a visible hard edge between the
 	 specular and the underlying screen/darken shading."
 	| width specularWidth bandCount bandWidth specularRadius |
-	width := self effectWidth min: anElement border width.
+	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
 	specularWidth := width * 0.45.
 	bandCount := 4.
