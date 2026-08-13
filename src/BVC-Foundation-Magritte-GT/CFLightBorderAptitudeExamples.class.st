@@ -38,20 +38,15 @@ CFLightBorderAptitudeExamples >> allTreatments [
 			c vertical matchParent.
 			c linear weight: 1 ];
 		layout: (BlGridLayout new
-			columnCount: 3;
-			rowCount: 3;
+			columnCount: 2;
+			rowCount: 4;
 			cellSpacing: 18);
 		yourself.
 
 	rebuildGallery := [
 		grid removeChildren.
-		grid addChild: (self
-			treatmentCellNamed: 'Flat'
-			configure: [ :a | a beFlat ]
-			borderColor: borderColor
-			borderWidth: borderWidth
-			effectWidth: effectWidth
-			intensity: intensity).
+
+		"Column 1: body treatments. Opposites are stacked vertically."
 		grid addChild: (self
 			treatmentCellNamed: 'Raise body inside'
 			configure: [ :a | a raiseBodyInside ]
@@ -66,6 +61,7 @@ CFLightBorderAptitudeExamples >> allTreatments [
 			borderWidth: borderWidth
 			effectWidth: effectWidth
 			intensity: intensity).
+
 		grid addChild: (self
 			treatmentCellNamed: 'Lower body inside'
 			configure: [ :a | a lowerBodyInside ]
@@ -80,6 +76,8 @@ CFLightBorderAptitudeExamples >> allTreatments [
 			borderWidth: borderWidth
 			effectWidth: effectWidth
 			intensity: intensity).
+
+		"Column 2: border treatments. Opposites are stacked vertically."
 		grid addChild: (self
 			treatmentCellNamed: 'Raise border inside'
 			configure: [ :a | a raiseBorderInside ]
@@ -94,6 +92,7 @@ CFLightBorderAptitudeExamples >> allTreatments [
 			borderWidth: borderWidth
 			effectWidth: effectWidth
 			intensity: intensity).
+
 		grid addChild: (self
 			treatmentCellNamed: 'Lower border inside'
 			configure: [ :a | a lowerBorderInside ]
