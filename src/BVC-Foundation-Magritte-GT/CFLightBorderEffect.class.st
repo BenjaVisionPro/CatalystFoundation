@@ -240,22 +240,17 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 		ifTrue: [
 			highlightOffset := vector.
 			shadowOffset := vector negated.
-			aCanvas clip by: path during: [
-				borderRaised
-					ifTrue: [
-						self
-							drawBorderShadowPath: path
-							offset: highlightOffset
-							color: (self raisedBorderHighlightColorFor: anElement)
-							radius: radius
-							onSpartaCanvas: aCanvas.
-						self
-							drawBorderShadowPath: path
-							offset: shadowOffset
-							color: (self raisedBorderShadowColorFor: anElement)
-							radius: radius
-							onSpartaCanvas: aCanvas ]
-					ifFalse: [
+			borderRaised
+				ifTrue: [
+					self
+						drawRaisedBorderInsideFor: anElement
+						path: path
+						highlightOffset: highlightOffset
+						shadowOffset: shadowOffset
+						radius: radius
+						onSpartaCanvas: aCanvas ]
+				ifFalse: [
+					aCanvas clip by: path during: [
 						self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas.
 						self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas ] ] ]
 		ifFalse: [
@@ -742,5 +737,47 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 		g: base green * amount
 		b: base blue * amount
 		alpha: (shadowColor alpha * opacity)
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	"Render the raised-border lighting into an isolated layer, then remove the body
+	 region so only the native border band remains."
+	| bodyPath |
+	bodyPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
+	bodyPath ifNil: [
+		^ aCanvas clip by: aPath during: [
+			self
+				drawBorderShadowPath: aPath
+				offset: highlightOffset
+				color: (self raisedBorderHighlightColorFor: anElement)
+				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			self
+				drawBorderShadowPath: aPath
+				offset: shadowOffset
+				color: (self raisedBorderShadowColorFor: anElement)
+				radius: aRadius
+				onSpartaCanvas: aCanvas ] ].
+
+	aCanvas clip by: aPath during: [
+		aCanvas layer during: [
+			self
+				drawBorderShadowPath: aPath
+				offset: highlightOffset
+				color: (self raisedBorderHighlightColorFor: anElement)
+				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			self
+				drawBorderShadowPath: aPath
+				offset: shadowOffset
+				color: (self raisedBorderShadowColorFor: anElement)
+				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			aCanvas fill
+				path: bodyPath;
+				paint: Color white;
+				composeDestOut;
+				draw ] ]
 ]
 
