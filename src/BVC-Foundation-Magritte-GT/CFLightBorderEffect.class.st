@@ -181,28 +181,32 @@ CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanva
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyInsideBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin for: anElement onSpartaCanvas: aCanvas [
-	"Build the exact body region first. The blur filter is then drawn with SrcIn,
-	 so its alpha can exist only where the body-region destination already exists.
-	 The final colour fill is also SrcIn and therefore cannot cross B."
-	| sigma destination fillBounds |
+	"The Skia filter painter ignores Sparta drawOptions, so composing the blur with
+	 SrcIn does not clip it to the body. Instead I use the canvas clip for the
+	 element geometry, then remove the exact native-border overlap from the blurred
+	 result. What remains is strictly the body side of B."
+	| sigma destination fillBounds path |
 	sigma := (self effectWidth / 2.0) max: 0.5.
 	destination := (aMargin negated @ aMargin negated) + anOffset.
 	fillBounds := anElement boundsInLocal expandBy: aMargin.
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
 	aCanvas layer during: [
-		self drawBodyRegionMaskFor: anElement onSpartaCanvas: aCanvas.
-		aCanvas filter
-			area: aMaskCanvas bounds;
-			to: destination;
-			type: (aCanvas filters blur
-				source: aMaskCanvas;
-				stdDeviation: sigma);
-			drawOptions: (aCanvas drawOptions composeIn);
-			draw.
-		aCanvas fill
-			path: fillBounds;
-			paint: aColor;
-			composeIn;
-			draw ]
+		aCanvas clip by: path during: [
+			aCanvas filter
+				area: aMaskCanvas bounds;
+				to: destination;
+				type: (aCanvas filters blur
+					source: aMaskCanvas;
+					stdDeviation: sigma);
+				draw.
+			anElement outskirts = BlOutskirts outside ifFalse: [
+				self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ].
+			aCanvas fill
+				path: fillBounds;
+				paint: aColor;
+				composeIn;
+				draw ] ]
 ]
 
 { #category : 'private - drawing' }
