@@ -141,36 +141,52 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas [
-	"Raised-body-inside is anchored on B, the exact body-side edge of the native
-	 border. For rounded rectangles I construct that boundary with the same inset
-	 as the visible border width and reduce each corner radius by that inset. The
-	 highlight and shadow are then clipped to the inside of B, so their boundary
-	 is concentric with the native border instead of being inferred from a shifted
-	 blurred border mask."
-	| path availableWidth magnitude vector highlightOffset shadowOffset radius |
+	"Raised-body-inside is anchored on B. The falloff is generated with zero
+	 geometric offset so its rounded contour remains concentric with B. Light
+	 direction affects only the colour applied through that falloff mask."
+	| path radius fillBounds paint |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	path := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	availableWidth := self effectWidth.
-	radius := availableWidth max: 0.5.
-	magnitude := availableWidth / 2.0.
-	vector := lightDirection asBlocVector normalized asPoint * magnitude.
-	highlightOffset := vector negated.
-	shadowOffset := vector.
+	radius := self effectWidth max: 0.5.
+	fillBounds := anElement boundsInLocal.
+	paint := self raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement.
 
 	aCanvas clip by: path during: [
-		self
-			drawBorderShadowPath: path
-			offset: highlightOffset
-			color: (self effectiveColor: highlightColor)
-			radius: radius
-			onSpartaCanvas: aCanvas.
-		self
-			drawBorderShadowPath: path
-			offset: shadowOffset
-			color: (self effectiveColor: shadowColor)
-			radius: radius
-			onSpartaCanvas: aCanvas ]
+		aCanvas layer during: [
+			"Create an unshifted alpha falloff from the exact B contour."
+			self
+				drawBorderShadowPath: path
+				offset: 0 @ 0
+				color: Color white
+				radius: radius
+				onSpartaCanvas: aCanvas.
+			"Colour the existing falloff without moving it."
+			aCanvas fill
+				path: fillBounds;
+				paint: paint;
+				composeIn;
+				draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement [
+	| bounds center direction span begin end transparent |
+	bounds := anElement boundsInLocal.
+	center := bounds center.
+	direction := lightDirection asBlocVector normalized asPoint.
+	span := ((direction x abs * bounds width) + (direction y abs * bounds height)) / 2.0.
+	begin := center + (direction * span).
+	end := center - (direction * span).
+	transparent := Color transparent.
+	^ aCanvas paint linearGradient
+		begin: begin;
+		end: end;
+		stops: {
+			0.0 -> (self effectiveColor: highlightColor).
+			0.45 -> transparent.
+			0.55 -> transparent.
+			1.0 -> (self effectiveColor: shadowColor) }
 ]
 
 { #category : 'private - geometry' }
