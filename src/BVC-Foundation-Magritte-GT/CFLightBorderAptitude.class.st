@@ -20,7 +20,7 @@ Class {
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultEffectWidth [
-	^ 8
+	^ 2
 ]
 
 { #category : 'defaults' }
@@ -34,7 +34,7 @@ CFLightBorderAptitude class >> defaultLightDirection [
 ]
 
 { #category : 'defaults' }
-CFLightBorderAptitude class >> defaultOpacity [
+CFLightBorderAptitude class >> defaultIntensity [
 	^ 1.0
 ]
 
@@ -101,7 +101,7 @@ CFLightBorderAptitude >> highlightColor: aColor [
 CFLightBorderAptitude >> initialize [
 	super initialize.
 	effectWidth := self class defaultEffectWidth.
-	opacity := self class defaultOpacity.
+	opacity := self class defaultIntensity.
 	lightDirection := self class defaultLightDirection.
 	highlightColor := self class defaultHighlightColor.
 	shadowColor := self class defaultShadowColor.
@@ -190,18 +190,6 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 	^ (radians cos @ radians sin) asBlocVector normalized
 ]
 
-{ #category : 'accessing' }
-CFLightBorderAptitude >> opacity [
-	"Compatibility alias for intensity."
-	^ self intensity
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> opacity: aNumber [
-	"Compatibility alias for intensity."
-	self intensity: aNumber
-]
-
 { #category : 'configuration - body' }
 CFLightBorderAptitude >> raiseBodyInside [
 	bodyActive := true.
@@ -258,10 +246,24 @@ CFLightBorderAptitude >> shadowColor: aColor [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> intensity [
-	^ opacity ifNil: [ self class defaultOpacity ]
+	^ opacity ifNil: [ self class defaultIntensity ]
 ]
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> intensity: aNumber [
 	opacity := (aNumber max: 0.0) min: 1.0
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> lowerBodyInsideRaiseBorderOutside [
+	self lowerBodyInside.
+	self raiseBorderOutside.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> raiseBodyInsideLowerBorderOutside [
+	self raiseBodyInside.
+	self lowerBorderOutside.
+	^ self
 ]

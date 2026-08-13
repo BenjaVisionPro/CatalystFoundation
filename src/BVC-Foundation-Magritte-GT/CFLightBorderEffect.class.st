@@ -376,19 +376,6 @@ CFLightBorderEffect >> lightDirection: aVector [
 	lightDirection := aVector
 ]
 
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> opacity [
-	"Compatibility alias. Lighting strength is expressed publicly as intensity."
-	^ self intensity
-]
-
-{ #category : 'accessing' }
-CFLightBorderEffect >> opacity: aNumber [
-	"Compatibility alias. Lighting strength is expressed publicly as intensity."
-	self intensity: aNumber
-]
-
 { #category : 'drawing' }
 CFLightBorderEffect >> paintOn: aCompositorPainter offset: anOffset for: anElement thenPaint: aBlock [
 	aCompositorPainter canvas transform

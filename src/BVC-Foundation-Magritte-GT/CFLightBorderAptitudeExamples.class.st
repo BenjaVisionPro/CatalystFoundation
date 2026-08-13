@@ -155,7 +155,6 @@ CFLightBorderAptitudeExamples >> aptitudeConfiguredBy: aBlock [
 	aptitude := CFLightBorderAptitude new
 		beFlat;
 		effectWidth: 5;
-		opacity: 0.9;
 		lightDirection: -1 @ -1;
 		yourself.
 	aBlock value: aptitude.
