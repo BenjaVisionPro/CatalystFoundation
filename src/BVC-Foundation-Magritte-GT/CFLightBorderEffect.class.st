@@ -243,8 +243,18 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 			aCanvas clip by: path during: [
 				borderRaised
 					ifTrue: [
-						self drawBorderHighlightPath: path offset: highlightOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas.
-						self drawBorderDarkeningPath: path offset: shadowOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas ]
+						self
+							drawBorderShadowPath: path
+							offset: highlightOffset
+							color: (self raisedBorderHighlightColorFor: anElement)
+							radius: radius
+							onSpartaCanvas: aCanvas.
+						self
+							drawBorderShadowPath: path
+							offset: shadowOffset
+							color: (self raisedBorderShadowColorFor: anElement)
+							radius: radius
+							onSpartaCanvas: aCanvas ]
 					ifFalse: [
 						self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas.
 						self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas ] ] ]
@@ -702,31 +712,35 @@ CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCan
 	] ensure: [ maskCanvas release ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawBorderHighlightPath: aPath offset: anOffset color: aColor radius: aRadius onSpartaCanvas: aCanvas [
-	"Lighten the underlying border colour rather than alpha-painting over it."
-	aCanvas stroke
-		path: aPath;
-		paint: (aCanvas paint boxShadow
-			color: aColor;
-			offset: anOffset;
-			radius: aRadius);
-		width: 1;
-		composeScreen;
-		draw
+{ #category : 'private - colour' }
+CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
+	"Lighten the underlying solid border colour toward white while retaining its hue.
+	 The configured highlight alpha and aptitude opacity control treatment strength."
+	| paint base amount |
+	paint := anElement border paint.
+	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: highlightColor ].
+	base := paint color.
+	amount := 0.45.
+	^ Color
+		r: base red + ((1.0 - base red) * amount)
+		g: base green + ((1.0 - base green) * amount)
+		b: base blue + ((1.0 - base blue) * amount)
+		alpha: (highlightColor alpha * opacity)
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawBorderDarkeningPath: aPath offset: anOffset color: aColor radius: aRadius onSpartaCanvas: aCanvas [
-	"Darken the underlying border colour rather than alpha-painting over it."
-	aCanvas stroke
-		path: aPath;
-		paint: (aCanvas paint boxShadow
-			color: aColor;
-			offset: anOffset;
-			radius: aRadius);
-		width: 1;
-		composeMultiply;
-		draw
+{ #category : 'private - colour' }
+CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
+	"Darken the underlying solid border colour toward black while retaining its hue.
+	 The configured shadow alpha and aptitude opacity control treatment strength."
+	| paint base amount |
+	paint := anElement border paint.
+	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: shadowColor ].
+	base := paint color.
+	amount := 0.55.
+	^ Color
+		r: base red * amount
+		g: base green * amount
+		b: base blue * amount
+		alpha: (shadowColor alpha * opacity)
 ]
 
