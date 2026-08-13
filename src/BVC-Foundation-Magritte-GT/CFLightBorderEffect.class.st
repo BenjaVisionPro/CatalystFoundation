@@ -725,18 +725,20 @@ CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
 
 { #category : 'private - colour' }
 CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
-	"Darken the underlying solid border colour toward black while retaining its hue.
-	 The configured shadow alpha and aptitude opacity control treatment strength."
+	"Darken the underlying solid border colour decisively toward black. Raised-border
+	 shadow strength is intentionally independent of the generic shadowColor alpha so
+	 it can balance the much brighter white specular side."
 	| paint base amount |
 	paint := anElement border paint.
-	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: shadowColor ].
+	(paint isKindOf: BlColorPaint) ifFalse: [
+		^ Color black alpha: (0.68 * opacity) ].
 	base := paint color.
-	amount := 0.28.
+	amount := 0.12.
 	^ Color
 		r: base red * amount
 		g: base green * amount
 		b: base blue * amount
-		alpha: (shadowColor alpha * opacity)
+		alpha: (0.68 * opacity)
 ]
 
 { #category : 'private - drawing' }
@@ -877,7 +879,7 @@ CFLightBorderEffect >> drawRaisedBorderInsideSpecularBandFor: anElement path: aP
 	highlight := Color white
 		alpha: (highlightColor alpha * opacity * 0.70 * strength).
 	shadow := Color black
-		alpha: (shadowColor alpha * opacity * 0.70 * strength squared).
+		alpha: (0.78 * opacity * strength).
 
 	aCanvas clip by: outerPath during: [
 		aCanvas layer during: [
