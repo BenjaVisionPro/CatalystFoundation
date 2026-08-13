@@ -173,13 +173,14 @@ CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedD
 	element path; negative distances are outside. I never construct an offset
 	shape, so rounded corners and arbitrary geometries share Bloc's own stroke
 	semantics."
-	| low high |
+	| low high treatmentCanvas |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	low := aSignedDistance min: anotherSignedDistance.
 	high := aSignedDistance max: anotherSignedDistance.
 	low = high ifTrue: [ ^ self ].
 
-	aCanvas similar: anElement extent during: [ :treatmentCanvas |
+	treatmentCanvas := aCanvas class extent: anElement extent.
+	[
 		| path |
 		path := self geometryPathFor: anElement onSpartaCanvas: treatmentCanvas.
 		path ifNil: [ ^ self ].
@@ -198,7 +199,8 @@ CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedD
 		aCanvas fill
 			path: aCanvas bounds;
 			paint: treatmentCanvas;
-			draw ]
+			draw
+	] ensure: [ treatmentCanvas release ]
 ]
 
 { #category : 'private - drawing' }
