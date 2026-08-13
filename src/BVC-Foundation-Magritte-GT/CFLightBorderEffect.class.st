@@ -179,7 +179,7 @@ CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedD
 	high := aSignedDistance max: anotherSignedDistance.
 	low = high ifTrue: [ ^ self ].
 
-	aCanvas similar: aCanvas extent during: [ :treatmentCanvas |
+	aCanvas similar: anElement extent during: [ :treatmentCanvas |
 		| path |
 		path := self geometryPathFor: anElement onSpartaCanvas: treatmentCanvas.
 		path ifNil: [ ^ self ].
