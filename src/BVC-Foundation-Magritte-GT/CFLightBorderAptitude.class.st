@@ -192,12 +192,14 @@ CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> opacity [
-	^ opacity ifNil: [ self class defaultOpacity ]
+	"Compatibility alias for intensity."
+	^ self intensity
 ]
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> opacity: aNumber [
-	opacity := (aNumber max: 0.0) min: 1.0
+	"Compatibility alias for intensity."
+	self intensity: aNumber
 ]
 
 { #category : 'configuration - body' }
@@ -256,10 +258,10 @@ CFLightBorderAptitude >> shadowColor: aColor [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> intensity [
-	^ self opacity
+	^ opacity ifNil: [ self class defaultOpacity ]
 ]
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> intensity: aNumber [
-	self opacity: aNumber
+	opacity := (aNumber max: 0.0) min: 1.0
 ]

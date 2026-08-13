@@ -176,6 +176,7 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 	path ifNil: [ ^ self ].
 	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
+
 	radius := width max: 0.5.
 	magnitude := width / 2.0.
 	vector := lightDirection asBlocVector normalized asPoint * magnitude.
@@ -302,16 +303,6 @@ CFLightBorderEffect >> drawExteriorRegionMaskFor: anElement onSpartaCanvas: aCan
 ]
 
 { #category : 'private - regions' }
-CFLightBorderEffect >> clipCurrentLayerToBodyRegionFor: anElement onSpartaCanvas: aCanvas [
-	| path |
-	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	aCanvas fill path: path; paint: Color white; composeDestIn; draw.
-	anElement outskirts = BlOutskirts outside ifFalse: [
-		self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ]
-]
-
-{ #category : 'private - regions' }
 CFLightBorderEffect >> clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: aCanvas [
 	| path width |
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
@@ -330,20 +321,6 @@ CFLightBorderEffect >> clipCurrentLayerToBorderRegionFor: anElement onSpartaCanv
 	anElement outskirts = BlOutskirts outside ifTrue: [
 		aCanvas stroke path: path; paint: Color white; width: width * 2.0; composeDestIn; draw.
 		aCanvas fill path: path; paint: Color white; composeDestOut; draw ]
-]
-
-{ #category : 'private - regions' }
-CFLightBorderEffect >> clipCurrentLayerToExteriorRegionFor: anElement onSpartaCanvas: aCanvas [
-	| path width |
-	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
-	path ifNil: [ ^ self ].
-	aCanvas fill path: path; paint: Color white; composeDestOut; draw.
-	width := anElement border width.
-	width isZero ifTrue: [ ^ self ].
-	anElement outskirts = BlOutskirts centered ifTrue: [
-		aCanvas stroke path: path; paint: Color white; width: width; composeDestOut; draw ].
-	anElement outskirts = BlOutskirts outside ifTrue: [
-		aCanvas stroke path: path; paint: Color white; width: width * 2.0; composeDestOut; draw ]
 ]
 
 { #category : 'private - regions' }
@@ -402,11 +379,13 @@ CFLightBorderEffect >> lightDirection: aVector [
 
 { #category : 'accessing' }
 CFLightBorderEffect >> opacity [
+	"Compatibility alias. Lighting strength is expressed publicly as intensity."
 	^ self intensity
 ]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> opacity: aNumber [
+	"Compatibility alias. Lighting strength is expressed publicly as intensity."
 	self intensity: aNumber
 ]
 
@@ -570,15 +549,6 @@ CFLightBorderEffect >> drawBorderFor: anElement path: aPath inside: isInside rai
 		lightOffset: lightOffset
 		darkOffset: darkOffset
 		radius: aRadius
-		onSpartaCanvas: aCanvas
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCanvas: aCanvas [
-	^ self
-		pathAtBoundary: #border
-		offset: anInset
-		for: anElement
 		onSpartaCanvas: aCanvas
 ]
 
@@ -812,8 +782,7 @@ CFLightBorderEffect >> drawTreatmentBandFor: anElement path: aPath fromOffset: n
 		onSpartaCanvas: aCanvas.
 	(nearPath isNil or: [ farPath isNil ]) ifTrue: [ ^ self ].
 
-	"Positive offsets move inward. Negative offsets move outward.
-	 Clip to the geometrically larger path and remove the smaller one."
+	"Positive offsets move inward from A; negative offsets move outward."
 	nearOffset <= farOffset
 		ifTrue: [
 			outerPath := nearPath.
