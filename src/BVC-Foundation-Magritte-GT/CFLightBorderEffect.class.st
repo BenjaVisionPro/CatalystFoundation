@@ -141,12 +141,11 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas [
-	"This is intentionally isolated while the eight treatment placements are verified.
-	 For raised-body-inside, B is the shared border/body boundary. The border region
-	 supplies the blurred light, but the result is composed into an exact body-region
-	 destination mask before it is colourised. Nothing can survive on the border side
-	 of B."
-	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
+	"Raised-body-inside is anchored on the exact body boundary B. I blur the
+	 exact native-border region without translating it, then clip that falloff to
+	 the body region. Direction changes only the colour across the falloff; it
+	 never moves the geometry, so the visible treatment remains concentric with B."
+	| margin maskExtent maskCanvas |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
 	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
@@ -157,26 +156,60 @@ CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanva
 			during: [ self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
 		maskCanvas flush.
 
-		magnitude := self effectWidth / 2.0.
-		vector := lightDirection asBlocVector normalized asPoint * magnitude.
-		highlightOffset := vector negated.
-		shadowOffset := vector.
-
 		self
-			drawBodyInsideBlurredMask: maskCanvas
-			offset: highlightOffset
-			color: (self effectiveColor: highlightColor)
-			margin: margin
-			for: anElement
-			onSpartaCanvas: aCanvas.
-		self
-			drawBodyInsideBlurredMask: maskCanvas
-			offset: shadowOffset
-			color: (self effectiveColor: shadowColor)
+			drawAlignedRaisedBodyInsideFrom: maskCanvas
 			margin: margin
 			for: anElement
 			onSpartaCanvas: aCanvas
 	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawAlignedRaisedBodyInsideFrom: aMaskCanvas margin: aMargin for: anElement onSpartaCanvas: aCanvas [
+	| sigma destination fillBounds path paint |
+	sigma := (self effectWidth / 2.0) max: 0.5.
+	destination := aMargin negated @ aMargin negated.
+	fillBounds := anElement boundsInLocal expandBy: aMargin.
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	paint := self raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement.
+
+	aCanvas layer during: [
+		aCanvas clip by: path during: [
+			aCanvas filter
+				area: aMaskCanvas bounds;
+				to: destination;
+				type: (aCanvas filters blur
+					source: aMaskCanvas;
+					stdDeviation: sigma);
+				draw.
+			anElement outskirts = BlOutskirts outside ifFalse: [
+				self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ].
+			aCanvas fill
+				path: fillBounds;
+				paint: paint;
+				composeIn;
+				draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement [
+	| bounds center direction span begin end transparent |
+	bounds := anElement boundsInLocal.
+	center := bounds center.
+	direction := lightDirection asBlocVector normalized asPoint.
+	span := ((direction x abs * bounds width) + (direction y abs * bounds height)) / 2.0.
+	begin := center + (direction * span).
+	end := center - (direction * span).
+	transparent := Color transparent.
+	^ aCanvas paint linearGradient
+		begin: begin;
+		end: end;
+		stops: {
+			0.0 -> (self effectiveColor: highlightColor).
+			0.42 -> transparent.
+			0.58 -> transparent.
+			1.0 -> (self effectiveColor: shadowColor) }
 ]
 
 { #category : 'private - drawing' }
