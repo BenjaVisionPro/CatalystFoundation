@@ -118,187 +118,199 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
-	| bodyBoundary borderBoundary width from to |
 	bodyActive ifFalse: [ ^ self ].
-	bodyBoundary := self bodyBoundaryCoordinateFor: anElement.
-	borderBoundary := self borderOuterBoundaryCoordinateFor: anElement.
-	width := self effectWidth.
-
 	bodyInside
 		ifTrue: [
-			from := bodyBoundary.
-			to := bodyBoundary + width ]
+			self
+				drawRegionLightingFrom: [ :maskCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToBodyRegionFor: anElement onSpartaCanvas: targetCanvas ]
+				raised: bodyRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ]
 		ifFalse: [
-			from := bodyBoundary - width.
-			anElement border width isZero ifFalse: [ from := from max: borderBoundary ].
-			to := bodyBoundary ].
-
-	self
-		drawTreatmentBandFrom: from
-		to: to
-		raised: bodyRaised
-		for: anElement
-		onSpartaCanvas: aCanvas
+			self
+				drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
+				raised: bodyRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ]
 ]
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas [
-	| outerBoundary bodyBoundary width from to |
 	borderActive ifFalse: [ ^ self ].
 	anElement border width isZero ifTrue: [ ^ self ].
-	outerBoundary := self borderOuterBoundaryCoordinateFor: anElement.
-	bodyBoundary := self bodyBoundaryCoordinateFor: anElement.
-	width := self effectWidth.
-
 	borderInside
 		ifTrue: [
-			from := outerBoundary.
-			to := (outerBoundary + width) min: bodyBoundary ]
+			self
+				drawRegionLightingFrom: [ :maskCanvas | self drawExteriorRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
+				raised: borderRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ]
 		ifFalse: [
-			from := outerBoundary - width.
-			to := outerBoundary ].
-
-	self
-		drawTreatmentBandFrom: from
-		to: to
-		raised: borderRaised
-		for: anElement
-		onSpartaCanvas: aCanvas
+			self
+				drawRegionLightingFrom: [ :maskCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
+				clipTo: [ :targetCanvas | self clipCurrentLayerToExteriorRegionFor: anElement onSpartaCanvas: targetCanvas ]
+				raised: borderRaised
+				for: anElement
+				onSpartaCanvas: aCanvas ]
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedDistance raised: isRaised for: anElement onSpartaCanvas: aCanvas [
-	"I build the treatment directly in an isolated Sparta layer on the same canvas
-	that paints the element. The opaque band and the native border therefore use the
-	same geometry path, transform and backend stroke rasterisation. The lighting is
-	then composited through that band before the layer is restored."
-	| low high fillBounds |
+CFLightBorderEffect >> drawRegionLightingFrom: aSourceMaskBlock clipTo: aTargetClipBlock raised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	"I derive lighting from the exact visual regions that Bloc itself paints. The
+	 source region is blurred and directionally displaced across its shared boundary
+	 with the target region. The result is then clipped back to the exact target
+	 region. No secondary boundary path or radius is constructed."
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
 	self effectWidth isZero ifTrue: [ ^ self ].
-	low := aSignedDistance min: anotherSignedDistance.
-	high := aSignedDistance max: anotherSignedDistance.
-	low = high ifTrue: [ ^ self ].
-	fillBounds := anElement boundsInLocal expandBy: self effectWidth.
+	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
+	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
+	maskCanvas := aCanvas class extent: maskExtent.
+	[
+		maskCanvas transform
+			by: [ :transform | transform translateBy: margin @ margin ]
+			during: [ aSourceMaskBlock value: maskCanvas ].
+		maskCanvas flush.
 
+		magnitude := self effectWidth / 2.0.
+		vector := lightDirection asBlocVector normalized asPoint * magnitude.
+		highlightOffset := vector negated.
+		shadowOffset := vector.
+
+		isRaised
+			ifTrue: [
+				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: highlightColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas.
+				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: shadowColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas ]
+			ifFalse: [
+				self drawBlurredMask: maskCanvas offset: highlightOffset color: (self effectiveColor: shadowColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas.
+				self drawBlurredMask: maskCanvas offset: shadowOffset color: (self effectiveColor: highlightColor) margin: margin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas ]
+	] ensure: [ maskCanvas release ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBlurredMask: aMaskCanvas offset: anOffset color: aColor margin: aMargin clipTo: aTargetClipBlock for: anElement onSpartaCanvas: aCanvas [
+	| fillBounds sigma destination |
+	fillBounds := anElement boundsInLocal expandBy: aMargin.
+	sigma := (self effectWidth / 2.0) max: 0.5.
+	destination := (aMargin negated @ aMargin negated) + anOffset.
 	aCanvas layer during: [
-		| path |
-		path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
-		path ifNil: [ ^ self ].
-		self
-			drawOpaqueBandFrom: low
-			to: high
-			path: path
-			onSpartaCanvas: aCanvas.
-
+		aCanvas filter
+			area: aMaskCanvas bounds;
+			to: destination;
+			type: (aCanvas filters blur
+				source: aMaskCanvas;
+				stdDeviation: sigma);
+			draw.
 		aCanvas fill
 			path: fillBounds;
-			paint: (self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas);
+			paint: aColor;
 			composeIn;
-			draw ]
+			draw.
+		aTargetClipBlock value: aCanvas ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawOpaqueBandFrom: aSignedDistance to: anotherSignedDistance path: aPath onSpartaCanvas: aCanvas [
-	| low high |
-	low := aSignedDistance min: anotherSignedDistance.
-	high := aSignedDistance max: anotherSignedDistance.
-
-	high <= 0 ifTrue: [
-		^ self
-			drawOpaqueOutsideBandFrom: high negated
-			to: low negated
-			path: aPath
-			onSpartaCanvas: aCanvas ].
-
-	low >= 0 ifTrue: [
-		^ self
-			drawOpaqueInsideBandFrom: low
-			to: high
-			path: aPath
-			onSpartaCanvas: aCanvas ].
-
-	"The interval crosses the element path. Draw the exterior half first because
-	its interior-removal step intentionally clears everything inside the path."
-	self
-		drawOpaqueOutsideBandFrom: 0
-		to: low negated
-		path: aPath
-		onSpartaCanvas: aCanvas.
-	self
-		drawOpaqueInsideBandFrom: 0
-		to: high
-		path: aPath
-		onSpartaCanvas: aCanvas
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawOpaqueInsideBandFrom: aNearDistance to: aFarDistance path: aPath onSpartaCanvas: aCanvas [
-	aFarDistance <= aNearDistance ifTrue: [ ^ self ].
-	aCanvas clip
-		by: aPath
-		during: [
-			aCanvas stroke
-				path: aPath;
-				paint: Color white;
-				width: aFarDistance * 2.0;
-				draw.
-			aNearDistance isZero ifFalse: [
-				aCanvas stroke
-					path: aPath;
-					paint: Color white;
-					width: aNearDistance * 2.0;
-					composeDestOut;
-					draw ] ]
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawOpaqueOutsideBandFrom: aNearDistance to: aFarDistance path: aPath onSpartaCanvas: aCanvas [
-	aFarDistance <= aNearDistance ifTrue: [ ^ self ].
-	aCanvas stroke
-		path: aPath;
-		paint: Color white;
-		width: aFarDistance * 2.0;
-		draw.
-	"Remove the complete interior half of the centered stroke."
+{ #category : 'private - regions' }
+CFLightBorderEffect >> drawBodyRegionMaskFor: anElement onSpartaCanvas: aCanvas [
+	| path |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
 	aCanvas fill
-		path: aPath;
+		path: path;
 		paint: Color white;
-		composeDestOut;
 		draw.
-	aNearDistance isZero ifFalse: [
-		aCanvas stroke
-			path: aPath;
-			paint: Color white;
-			width: aNearDistance * 2.0;
-			composeDestOut;
-			draw ]
+	anElement outskirts = BlOutskirts outside ifFalse: [
+		self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas [
-	| bounds center vector halfLength start finish highlight shadow |
-	bounds := anElement boundsInLocal.
-	center := bounds center.
-	vector := lightDirection asBlocVector normalized asPoint.
-	halfLength := ((bounds width squared + bounds height squared) sqrt) / 2.0.
-	start := center + (vector * halfLength).
-	finish := center - (vector * halfLength).
-	highlight := self effectiveColor: highlightColor.
-	shadow := self effectiveColor: shadowColor.
-	^ aCanvas paint linearGradient
-		stops: (isRaised
-			ifTrue: [ {
-				0 -> highlight.
-				0.45 -> (highlight alpha: 0.12 * self opacity).
-				0.55 -> (shadow alpha: 0.12 * self opacity).
-				1 -> shadow } ]
-			ifFalse: [ {
-				0 -> shadow.
-				0.45 -> (shadow alpha: 0.12 * self opacity).
-				0.55 -> (highlight alpha: 0.12 * self opacity).
-				1 -> highlight } ]);
-		begin: start;
-		end: finish;
-		yourself
+{ #category : 'private - regions' }
+CFLightBorderEffect >> drawBorderRegionMaskFor: anElement onSpartaCanvas: aCanvas [
+	| path width |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	width := anElement border width.
+	width isZero ifTrue: [ ^ self ].
+	anElement outskirts = BlOutskirts inside ifTrue: [
+		^ aCanvas clip by: path during: [
+			aCanvas stroke path: path; paint: Color white; width: width * 2.0; draw ] ].
+	anElement outskirts = BlOutskirts centered ifTrue: [
+		^ aCanvas stroke path: path; paint: Color white; width: width; draw ].
+	anElement outskirts = BlOutskirts outside ifTrue: [
+		aCanvas stroke path: path; paint: Color white; width: width * 2.0; draw.
+		aCanvas fill path: path; paint: Color white; composeDestOut; draw ]
+]
+
+{ #category : 'private - regions' }
+CFLightBorderEffect >> drawExteriorRegionMaskFor: anElement onSpartaCanvas: aCanvas [
+	| path bounds |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	bounds := anElement boundsInLocal expandBy: ((self effectWidth * 4.0) + anElement border width).
+	aCanvas fill path: bounds; paint: Color white; draw.
+	aCanvas fill path: path; paint: Color white; composeDestOut; draw.
+	self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas
+]
+
+{ #category : 'private - regions' }
+CFLightBorderEffect >> clipCurrentLayerToBodyRegionFor: anElement onSpartaCanvas: aCanvas [
+	| path |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	aCanvas fill path: path; paint: Color white; composeDestIn; draw.
+	anElement outskirts = BlOutskirts outside ifFalse: [
+		self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ]
+]
+
+{ #category : 'private - regions' }
+CFLightBorderEffect >> clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: aCanvas [
+	| path width |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	width := anElement border width.
+	width isZero ifTrue: [
+		aCanvas fill path: aCanvas bounds; paint: Color white; composeClear; draw.
+		^ self ].
+	anElement outskirts = BlOutskirts inside ifTrue: [
+		aCanvas fill path: path; paint: Color white; composeDestIn; draw.
+		aCanvas stroke path: path; paint: Color white; width: width * 2.0; composeDestIn; draw.
+		^ self ].
+	anElement outskirts = BlOutskirts centered ifTrue: [
+		aCanvas stroke path: path; paint: Color white; width: width; composeDestIn; draw.
+		^ self ].
+	anElement outskirts = BlOutskirts outside ifTrue: [
+		aCanvas stroke path: path; paint: Color white; width: width * 2.0; composeDestIn; draw.
+		aCanvas fill path: path; paint: Color white; composeDestOut; draw ]
+]
+
+{ #category : 'private - regions' }
+CFLightBorderEffect >> clipCurrentLayerToExteriorRegionFor: anElement onSpartaCanvas: aCanvas [
+	| path width |
+	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path ifNil: [ ^ self ].
+	aCanvas fill path: path; paint: Color white; composeDestOut; draw.
+	width := anElement border width.
+	width isZero ifTrue: [ ^ self ].
+	anElement outskirts = BlOutskirts centered ifTrue: [
+		aCanvas stroke path: path; paint: Color white; width: width; composeDestOut; draw ].
+	anElement outskirts = BlOutskirts outside ifTrue: [
+		aCanvas stroke path: path; paint: Color white; width: width * 2.0; composeDestOut; draw ]
+]
+
+{ #category : 'private - regions' }
+CFLightBorderEffect >> removeNativeBorderMaskFor: anElement path: aPath onSpartaCanvas: aCanvas [
+	| width |
+	width := anElement border width.
+	width isZero ifTrue: [ ^ self ].
+	anElement outskirts = BlOutskirts inside ifTrue: [
+		^ aCanvas clip by: aPath during: [
+			aCanvas stroke path: aPath; paint: Color white; width: width * 2.0; composeDestOut; draw ] ].
+	anElement outskirts = BlOutskirts centered ifTrue: [
+		^ aCanvas stroke path: aPath; paint: Color white; width: width; composeDestOut; draw ].
+	anElement outskirts = BlOutskirts outside ifTrue: [
+		"The body region does not overlap an outside border. Callers that already
+		 removed the element fill can safely remove the complete centered stroke."
+		^ aCanvas stroke path: aPath; paint: Color white; width: width * 2.0; composeDestOut; draw ]
 ]
 
 { #category : 'accessing' }
