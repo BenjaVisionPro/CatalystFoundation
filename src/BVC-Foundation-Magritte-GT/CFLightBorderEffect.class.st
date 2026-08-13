@@ -196,10 +196,12 @@ CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedD
 			composeIn;
 			draw.
 
-		aCanvas fill
-			path: (0 @ 0 extent: anElement extent);
-			paint: treatmentCanvas;
-			draw
+		treatmentCanvas flush.
+		treatmentCanvas snapshotDuring: [ :treatmentImage |
+			aCanvas fill
+				path: treatmentImage bounds;
+				paint: treatmentImage;
+				draw ]
 	] ensure: [ treatmentCanvas release ]
 ]
 
