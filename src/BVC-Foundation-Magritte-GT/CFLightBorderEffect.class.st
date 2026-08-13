@@ -171,40 +171,55 @@ CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: aCanvas [
-	"The border treatment is anchored at the element geometry boundary A. Sparta's
-	 box-shadow paint follows that exact path and is supported directly by Skia on
-	 the recording canvas. For an inside treatment I clip to the element geometry;
-	 for an outside treatment the native element paint later covers the inward half."
-	| path availableWidth magnitude vector highlightOffset shadowOffset radius |
+	| path width magnitude vector highlightOffset shadowOffset radius |
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	availableWidth := self effectWidth.
-	availableWidth isZero ifTrue: [ ^ self ].
-	radius := availableWidth max: 0.5.
-	magnitude := availableWidth / 2.0.
+	width := self effectWidth.
+	width isZero ifTrue: [ ^ self ].
+	radius := width max: 0.5.
+	magnitude := width / 2.0.
 	vector := lightDirection asBlocVector normalized asPoint * magnitude.
+	highlightOffset := vector.
+	shadowOffset := vector negated.
+
+	borderRaised ifTrue: [
+		^ self
+			drawRaisedBorderFor: anElement
+			path: path
+			inside: borderInside
+			highlightOffset: highlightOffset
+			shadowOffset: shadowOffset
+			radius: radius
+			onSpartaCanvas: aCanvas ].
+
 	borderInside
 		ifTrue: [
-			highlightOffset := vector.
-			shadowOffset := vector negated.
-			borderRaised
-				ifTrue: [
-					self
-						drawRaisedBorderInsideFor: anElement
-						path: path
-						highlightOffset: highlightOffset
-						shadowOffset: shadowOffset
-						radius: radius
-						onSpartaCanvas: aCanvas ]
-				ifFalse: [
-					aCanvas clip by: path during: [
-						self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: shadowColor) radius: radius onSpartaCanvas: aCanvas.
-						self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: highlightColor) radius: radius onSpartaCanvas: aCanvas ] ] ]
+			aCanvas clip by: path during: [
+				self
+					drawBorderShadowPath: path
+					offset: highlightOffset
+					color: (self effectiveColor: shadowColor)
+					radius: radius
+					onSpartaCanvas: aCanvas.
+				self
+					drawBorderShadowPath: path
+					offset: shadowOffset
+					color: (self effectiveColor: highlightColor)
+					radius: radius
+					onSpartaCanvas: aCanvas ] ]
 		ifFalse: [
-			highlightOffset := vector negated.
-			shadowOffset := vector.
-			self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
-			self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ]
+			self
+				drawBorderShadowPath: path
+				offset: highlightOffset
+				color: (self effectiveColor: shadowColor)
+				radius: radius
+				onSpartaCanvas: aCanvas.
+			self
+				drawBorderShadowPath: path
+				offset: shadowOffset
+				color: (self effectiveColor: highlightColor)
+				radius: radius
+				onSpartaCanvas: aCanvas ]
 ]
 
 { #category : 'private - drawing' }
@@ -544,25 +559,26 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| width bandCount bandWidth baseHighlight baseShadow |
+CFLightBorderEffect >> drawRaisedBorderFor: anElement path: aPath inside: isInside highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| width bandCount bandWidth baseHighlight baseShadow direction |
 	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
+	direction := isInside ifTrue: [ 1.0 ] ifFalse: [ -1.0 ].
 	bandCount := self broadBandCount.
 	bandWidth := width / bandCount.
 	baseHighlight := self raisedBorderHighlightColorFor: anElement.
 	baseShadow := self raisedBorderShadowColorFor: anElement.
 
 	1 to: bandCount do: [ :index |
-		| outerInset innerInset strength |
-		outerInset := (index - 1) * bandWidth.
-		innerInset := index * bandWidth.
+		| nearOffset farOffset strength |
+		nearOffset := (index - 1) * bandWidth * direction.
+		farOffset := index * bandWidth * direction.
 		strength := (bandCount - index + 1) / bandCount.
 		self
 			drawTreatmentBandFor: anElement
 			path: aPath
-			fromInset: outerInset
-			toInset: innerInset
+			fromOffset: nearOffset
+			toOffset: farOffset
 			highlight: (baseHighlight alpha: baseHighlight alpha * strength)
 			shadow: (baseShadow alpha: baseShadow alpha * strength)
 			highlightOffset: highlightOffset
@@ -571,8 +587,9 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 			onSpartaCanvas: aCanvas ].
 
 	self
-		drawRaisedBorderInsideSpecularFor: anElement
+		drawRaisedBorderSpecularFor: anElement
 		path: aPath
+		inside: isInside
 		highlightOffset: highlightOffset
 		shadowOffset: shadowOffset
 		radius: aRadius
@@ -589,25 +606,26 @@ CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCan
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| width strengths specularWidth bandWidth specularRadius |
+CFLightBorderEffect >> drawRaisedBorderSpecularFor: anElement path: aPath inside: isInside highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| width strengths specularWidth bandWidth specularRadius direction |
 	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
+	direction := isInside ifTrue: [ 1.0 ] ifFalse: [ -1.0 ].
 	strengths := self specularBandStrengths.
 	specularWidth := width * self specularWidthFraction.
 	bandWidth := specularWidth / strengths size.
 	specularRadius := (aRadius * self specularRadiusFraction) max: 0.30.
 
 	1 to: strengths size do: [ :index |
-		| outerInset innerInset strength |
-		outerInset := (index - 1) * bandWidth.
-		innerInset := index * bandWidth.
+		| nearOffset farOffset strength |
+		nearOffset := (index - 1) * bandWidth * direction.
+		farOffset := index * bandWidth * direction.
 		strength := strengths at: index.
 		self
 			drawTreatmentBandFor: anElement
 			path: aPath
-			fromInset: outerInset
-			toInset: innerInset
+			fromOffset: nearOffset
+			toOffset: farOffset
 			highlight: (Color white alpha:
 				highlightColor alpha * self intensity * self specularHighlightStrength * strength)
 			shadow: (Color black alpha:
@@ -779,11 +797,29 @@ CFLightBorderEffect >> specularShadowStrength [
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawTreatmentBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset highlight: highlight shadow: shadow highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| outerPath innerPath |
-	outerPath := self borderInsidePathFor: anElement inset: outerInset onSpartaCanvas: aCanvas.
-	innerPath := self borderInsidePathFor: anElement inset: innerInset onSpartaCanvas: aCanvas.
-	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
+CFLightBorderEffect >> drawTreatmentBandFor: anElement path: aPath fromOffset: nearOffset toOffset: farOffset highlight: highlight shadow: shadow highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| nearPath farPath outerPath innerPath |
+	nearPath := self
+		pathAtBoundary: #border
+		offset: nearOffset
+		for: anElement
+		onSpartaCanvas: aCanvas.
+	farPath := self
+		pathAtBoundary: #border
+		offset: farOffset
+		for: anElement
+		onSpartaCanvas: aCanvas.
+	(nearPath isNil or: [ farPath isNil ]) ifTrue: [ ^ self ].
+
+	"Positive offsets move inward. Negative offsets move outward.
+	 Clip to the geometrically larger path and remove the smaller one."
+	nearOffset <= farOffset
+		ifTrue: [
+			outerPath := nearPath.
+			innerPath := farPath ]
+		ifFalse: [
+			outerPath := farPath.
+			innerPath := nearPath ].
 
 	aCanvas clip by: outerPath during: [
 		aCanvas layer during: [
