@@ -121,6 +121,8 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	bodyActive ifFalse: [ ^ self ].
 	(bodyInside and: [ bodyRaised ]) ifTrue: [
 		^ self drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
+	(bodyInside and: [ bodyRaised not ]) ifTrue: [
+		^ self drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
 	(bodyInside not and: [ bodyRaised ]) ifTrue: [
 		^ self drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
 	bodyInside
@@ -604,5 +606,42 @@ CFLightBorderEffect >> drawBodyOutsideBlurredMask: aMaskCanvas offset: anOffset 
 				paint: aColor;
 				composeIn;
 				draw ] ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanvas [
+	"Lowered body inside uses the same exact body-side clipping as raised body inside.
+	 Only the lighting polarity is reversed."
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
+	self effectWidth isZero ifTrue: [ ^ self ].
+	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
+	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
+	maskCanvas := aCanvas class extent: maskExtent.
+	[
+		maskCanvas transform
+			by: [ :transform | transform translateBy: margin @ margin ]
+			during: [ self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
+		maskCanvas flush.
+
+		magnitude := self effectWidth / 2.0.
+		vector := lightDirection asBlocVector normalized asPoint * magnitude.
+		highlightOffset := vector negated.
+		shadowOffset := vector.
+
+		self
+			drawBodyInsideBlurredMask: maskCanvas
+			offset: highlightOffset
+			color: (self effectiveColor: shadowColor)
+			margin: margin
+			for: anElement
+			onSpartaCanvas: aCanvas.
+		self
+			drawBodyInsideBlurredMask: maskCanvas
+			offset: shadowOffset
+			color: (self effectiveColor: highlightColor)
+			margin: margin
+			for: anElement
+			onSpartaCanvas: aCanvas
+	] ensure: [ maskCanvas release ]
 ]
 
