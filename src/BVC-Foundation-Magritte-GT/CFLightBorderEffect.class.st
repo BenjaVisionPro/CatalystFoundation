@@ -844,18 +844,18 @@ CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath 
 	| width specularWidth innerPath highlight shadow specularRadius |
 	width := self effectWidth min: anElement border width.
 	width isZero ifTrue: [ ^ self ].
-	specularWidth := width * 0.30.
+	specularWidth := width * 0.35.
 	innerPath := self
 		borderInsidePathFor: anElement
 		inset: specularWidth
 		onSpartaCanvas: aCanvas.
 	innerPath ifNil: [ ^ self ].
 
-	specularRadius := (aRadius * 0.35) max: 0.35.
+	specularRadius := (aRadius * 0.30) max: 0.30.
 	highlight := Color white
-		alpha: (highlightColor alpha * opacity * 0.55).
+		alpha: (highlightColor alpha * opacity * 0.70).
 	shadow := Color black
-		alpha: (shadowColor alpha * opacity * 0.55).
+		alpha: (shadowColor alpha * opacity * 0.70).
 
 	aCanvas clip by: aPath during: [
 		aCanvas layer during: [
