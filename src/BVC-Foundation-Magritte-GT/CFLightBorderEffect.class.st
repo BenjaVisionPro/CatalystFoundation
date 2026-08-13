@@ -236,14 +236,16 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 	radius := availableWidth max: 0.5.
 	magnitude := availableWidth / 2.0.
 	vector := lightDirection asBlocVector normalized asPoint * magnitude.
-	highlightOffset := vector negated.
-	shadowOffset := vector.
 	borderInside
 		ifTrue: [
+			highlightOffset := vector.
+			shadowOffset := vector negated.
 			aCanvas clip by: path during: [
 				self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
 				self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ] ]
 		ifFalse: [
+			highlightOffset := vector negated.
+			shadowOffset := vector.
 			self drawBorderShadowPath: path offset: highlightOffset color: (self effectiveColor: (borderRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ])) radius: radius onSpartaCanvas: aCanvas.
 			self drawBorderShadowPath: path offset: shadowOffset color: (self effectiveColor: (borderRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ])) radius: radius onSpartaCanvas: aCanvas ]
 ]
