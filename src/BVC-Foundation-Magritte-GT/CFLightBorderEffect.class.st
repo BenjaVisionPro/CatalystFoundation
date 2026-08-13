@@ -741,48 +741,31 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	"Render the raised-border lighting only within the configured treatment band.
-	 The band starts at A and extends inward by effectWidth; the remainder of the
-	 native border toward B is left untouched. The lighting lobe is deliberately
-	 narrower than the band so the specular/shadow is strongest at A and falls away
-	 toward the untouched border."
-	| treatmentInnerPath lightingRadius |
-	lightingRadius := (aRadius / 2.0) max: 0.5.
-	treatmentInnerPath := self borderInsideTreatmentInnerPathFor: anElement onSpartaCanvas: aCanvas.
-	treatmentInnerPath ifNil: [
-		^ aCanvas clip by: aPath during: [
-			self
-				drawBorderShadowPath: aPath
-				offset: highlightOffset
-				color: (self raisedBorderHighlightColorFor: anElement)
-				radius: lightingRadius
-				onSpartaCanvas: aCanvas.
-			self
-				drawBorderShadowPath: aPath
-				offset: shadowOffset
-				color: (self raisedBorderShadowColorFor: anElement)
-				radius: lightingRadius
-				onSpartaCanvas: aCanvas ] ].
+	"Render raised-border lighting in concentric sub-bands. The treatment is
+	 strongest at A and progressively returns to the untouched border colour toward
+	 the inner edge of effectWidth. Because each sub-band is produced by insetBy:,
+	 the falloff remains normal to the border through rounded corners."
+	| width bandCount bandWidth |
+	width := self effectWidth min: anElement border width.
+	width isZero ifTrue: [ ^ self ].
+	bandCount := 5.
+	bandWidth := width / bandCount.
 
-	aCanvas clip by: aPath during: [
-		aCanvas layer during: [
-			self
-				drawBorderShadowPath: aPath
-				offset: highlightOffset
-				color: (self raisedBorderHighlightColorFor: anElement)
-				radius: lightingRadius
-				onSpartaCanvas: aCanvas.
-			self
-				drawBorderShadowPath: aPath
-				offset: shadowOffset
-				color: (self raisedBorderShadowColorFor: anElement)
-				radius: lightingRadius
-				onSpartaCanvas: aCanvas.
-			aCanvas fill
-				path: treatmentInnerPath;
-				paint: Color white;
-				composeDestOut;
-				draw ] ]
+	1 to: bandCount do: [ :index |
+		| outerInset innerInset strength |
+		outerInset := (index - 1) * bandWidth.
+		innerInset := index * bandWidth.
+		strength := (bandCount - index + 1) / bandCount.
+		self
+			drawRaisedBorderInsideBandFor: anElement
+			path: aPath
+			fromInset: outerInset
+			toInset: innerInset
+			strength: strength
+			highlightOffset: highlightOffset
+			shadowOffset: shadowOffset
+			radius: aRadius
+			onSpartaCanvas: aCanvas ]
 ]
 
 { #category : 'private - geometry' }
@@ -798,5 +781,51 @@ CFLightBorderEffect >> borderInsideTreatmentInnerPathFor: anElement onSpartaCanv
 		roundedRectangle: geometry geometryBounds
 		radii: geometry cornerRadii asArray.
 	^ rounded insetBy: width
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCanvas: aCanvas [
+	| geometry rounded |
+	geometry := anElement geometry.
+	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
+	rounded := aCanvas shape
+		roundedRectangle: geometry geometryBounds
+		radii: geometry cornerRadii asArray.
+	^ anInset isZero
+		ifTrue: [ rounded ]
+		ifFalse: [ rounded insetBy: anInset ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBorderInsideBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset strength: strength highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| outerPath innerPath highlight shadow |
+	outerPath := self borderInsidePathFor: anElement inset: outerInset onSpartaCanvas: aCanvas.
+	innerPath := self borderInsidePathFor: anElement inset: innerInset onSpartaCanvas: aCanvas.
+	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
+
+	highlight := (self raisedBorderHighlightColorFor: anElement)
+		alpha: ((self raisedBorderHighlightColorFor: anElement) alpha * strength).
+	shadow := (self raisedBorderShadowColorFor: anElement)
+		alpha: ((self raisedBorderShadowColorFor: anElement) alpha * strength).
+
+	aCanvas clip by: outerPath during: [
+		aCanvas layer during: [
+			self
+				drawBorderShadowPath: aPath
+				offset: highlightOffset
+				color: highlight
+				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			self
+				drawBorderShadowPath: aPath
+				offset: shadowOffset
+				color: shadow
+				radius: aRadius
+				onSpartaCanvas: aCanvas.
+			aCanvas fill
+				path: innerPath;
+				paint: Color white;
+				composeDestOut;
+				draw ] ]
 ]
 
