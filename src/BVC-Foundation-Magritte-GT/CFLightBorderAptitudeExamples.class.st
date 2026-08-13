@@ -11,6 +11,7 @@ CFLightBorderAptitudeExamples >> allTreatments [
 	<return: #BlElement>
 	| grid |
 	grid := BlElement new
+		clipChildren: false;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent ];
@@ -108,6 +109,7 @@ CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock [
 		margin: (BlInsets bottom: 8);
 		yourself.
 	pane := BrVerticalPane new
+		clipChildren: false;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent ];
