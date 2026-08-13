@@ -715,7 +715,7 @@ CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
 	paint := anElement border paint.
 	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: highlightColor ].
 	base := paint color.
-	amount := 0.45.
+	amount := 0.60.
 	^ Color
 		r: base red + ((1.0 - base red) * amount)
 		g: base green + ((1.0 - base green) * amount)
@@ -731,7 +731,7 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 	paint := anElement border paint.
 	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: shadowColor ].
 	base := paint color.
-	amount := 0.55.
+	amount := 0.40.
 	^ Color
 		r: base red * amount
 		g: base green * amount
