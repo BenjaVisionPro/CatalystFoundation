@@ -877,9 +877,9 @@ CFLightBorderEffect >> drawRaisedBorderInsideSpecularBandFor: anElement path: aP
 	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
 
 	highlight := Color white
-		alpha: (highlightColor alpha * opacity * 0.88 * strength).
+		alpha: (highlightColor alpha * opacity * 0.96 * strength).
 	shadow := Color black
-		alpha: (0.78 * opacity * strength).
+		alpha: (0.66 * opacity * strength).
 
 	aCanvas clip by: outerPath during: [
 		aCanvas layer during: [
