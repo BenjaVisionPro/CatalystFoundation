@@ -141,75 +141,53 @@ CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas [
-	"Raised-body-inside is anchored on the exact body boundary B. I blur the
-	 exact native-border region without translating it, then clip that falloff to
-	 the body region. Direction changes only the colour across the falloff; it
-	 never moves the geometry, so the visible treatment remains concentric with B."
-	| margin maskExtent maskCanvas |
+	"Raised-body-inside is anchored on B, the exact body-side edge of the native
+	 border. For rounded rectangles I construct that boundary with the same inset
+	 as the visible border width and reduce each corner radius by that inset. The
+	 highlight and shadow are then clipped to the inside of B, so their boundary
+	 is concentric with the native border instead of being inferred from a shifted
+	 blurred border mask."
+	| path availableWidth magnitude vector highlightOffset shadowOffset radius |
 	self effectWidth isZero ifTrue: [ ^ self ].
-	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
-	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
-	maskCanvas := aCanvas class extent: maskExtent.
-	[
-		maskCanvas transform
-			by: [ :transform | transform translateBy: margin @ margin ]
-			during: [ self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
-		maskCanvas flush.
-
-		self
-			drawAlignedRaisedBodyInsideFrom: maskCanvas
-			margin: margin
-			for: anElement
-			onSpartaCanvas: aCanvas
-	] ensure: [ maskCanvas release ]
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawAlignedRaisedBodyInsideFrom: aMaskCanvas margin: aMargin for: anElement onSpartaCanvas: aCanvas [
-	| sigma destination fillBounds path paint |
-	sigma := (self effectWidth / 2.0) max: 0.5.
-	destination := aMargin negated @ aMargin negated.
-	fillBounds := anElement boundsInLocal expandBy: aMargin.
-	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
+	path := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
-	paint := self raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement.
+	availableWidth := self effectWidth.
+	radius := availableWidth max: 0.5.
+	magnitude := availableWidth / 2.0.
+	vector := lightDirection asBlocVector normalized asPoint * magnitude.
+	highlightOffset := vector negated.
+	shadowOffset := vector.
 
-	aCanvas layer during: [
-		aCanvas clip by: path during: [
-			aCanvas filter
-				area: aMaskCanvas bounds;
-				to: destination;
-				type: (aCanvas filters blur
-					source: aMaskCanvas;
-					stdDeviation: sigma);
-				draw.
-			anElement outskirts = BlOutskirts outside ifFalse: [
-				self removeNativeBorderMaskFor: anElement path: path onSpartaCanvas: aCanvas ].
-			aCanvas fill
-				path: fillBounds;
-				paint: paint;
-				composeIn;
-				draw ] ]
+	aCanvas clip by: path during: [
+		self
+			drawBorderShadowPath: path
+			offset: highlightOffset
+			color: (self effectiveColor: highlightColor)
+			radius: radius
+			onSpartaCanvas: aCanvas.
+		self
+			drawBorderShadowPath: path
+			offset: shadowOffset
+			color: (self effectiveColor: shadowColor)
+			radius: radius
+			onSpartaCanvas: aCanvas ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> raisedBodyInsideDirectionalPaintOn: aCanvas for: anElement [
-	| bounds center direction span begin end transparent |
-	bounds := anElement boundsInLocal.
-	center := bounds center.
-	direction := lightDirection asBlocVector normalized asPoint.
-	span := ((direction x abs * bounds width) + (direction y abs * bounds height)) / 2.0.
-	begin := center + (direction * span).
-	end := center - (direction * span).
-	transparent := Color transparent.
-	^ aCanvas paint linearGradient
-		begin: begin;
-		end: end;
-		stops: {
-			0.0 -> (self effectiveColor: highlightColor).
-			0.42 -> transparent.
-			0.58 -> transparent.
-			1.0 -> (self effectiveColor: shadowColor) }
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas [
+	| inset geometry bounds radii |
+	inset := self bodyBoundaryCoordinateFor: anElement.
+	geometry := anElement geometry.
+	geometry class = BlRoundedRectangleGeometry ifFalse: [
+		"The generic boundary still comes from Bloc's native path. I keep this
+		 fallback so the isolated experiment remains usable for non-rounded geometry;
+		 no shape-specific approximation is introduced for other geometry types."
+		^ self geometryPathFor: anElement onSpartaCanvas: aCanvas ].
+	bounds := anElement boundsInLocal insetBy: inset.
+	radii := geometry cornerRadii asArray collect: [ :each | (each - inset) max: 0 ].
+	^ radii max isZero
+		ifTrue: [ bounds ]
+		ifFalse: [ aCanvas shape roundedRectangle: bounds radii: radii ]
 ]
 
 { #category : 'private - drawing' }
