@@ -613,7 +613,7 @@ CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock b
 	aptitude := CFLightBorderAptitude new
 		beFlat;
 		effectWidth: effectWidth;
-		opacity: intensity;
+		intensity: intensity;
 		lightDirection: -1 @ -1;
 		yourself.
 	aBlock value: aptitude.

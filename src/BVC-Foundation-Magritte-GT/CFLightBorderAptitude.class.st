@@ -133,7 +133,7 @@ CFLightBorderAptitude >> lightDirectionDegrees: aNumber [
 CFLightBorderAptitude >> lightingEffect [
 	^ CFLightBorderEffect new
 		effectWidth: self effectWidth;
-		opacity: self opacity;
+		intensity: self intensity;
 		lightDirection: lightDirection;
 		highlightColor: highlightColor;
 		shadowColor: shadowColor;
@@ -252,4 +252,14 @@ CFLightBorderAptitude >> shadowColor [
 { #category : 'accessing' }
 CFLightBorderAptitude >> shadowColor: aColor [
 	shadowColor := aColor
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> intensity [
+	^ self opacity
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> intensity: aNumber [
+	self opacity: aNumber
 ]

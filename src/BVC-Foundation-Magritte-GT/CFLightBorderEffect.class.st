@@ -119,70 +119,17 @@ CFLightBorderEffect >> computeBounds: aBlBounds [
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBodyTreatmentFor: anElement onSpartaCanvas: aCanvas [
 	bodyActive ifFalse: [ ^ self ].
-	(bodyInside and: [ bodyRaised ]) ifTrue: [
-		^ self drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
-	(bodyInside and: [ bodyRaised not ]) ifTrue: [
-		^ self drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanvas ].
-	(bodyInside not and: [ bodyRaised ]) ifTrue: [
-		^ self drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
-	(bodyInside not and: [ bodyRaised not ]) ifTrue: [
-		^ self drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCanvas ].
 	bodyInside
 		ifTrue: [
 			self
-				drawRegionLightingFrom: [ :maskCanvas | self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				clipTo: [ :targetCanvas | self clipCurrentLayerToBodyRegionFor: anElement onSpartaCanvas: targetCanvas ]
-				raised: bodyRaised
+				drawBodyInsideTreatmentRaised: bodyRaised
 				for: anElement
 				onSpartaCanvas: aCanvas ]
 		ifFalse: [
 			self
-				drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-				clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
-				raised: bodyRaised
+				drawBodyOutsideTreatmentRaised: bodyRaised
 				for: anElement
 				onSpartaCanvas: aCanvas ]
-]
-
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBodyInsideFor: anElement onSpartaCanvas: aCanvas [
-	"This is intentionally isolated while the eight treatment placements are verified.
-	 For raised-body-inside, B is the shared border/body boundary. The border region
-	 supplies the blurred light, but the result is composed into an exact body-region
-	 destination mask before it is colourised. Nothing can survive on the border side
-	 of B."
-	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
-	self effectWidth isZero ifTrue: [ ^ self ].
-	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
-	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
-	maskCanvas := aCanvas class extent: maskExtent.
-	[
-		maskCanvas transform
-			by: [ :transform | transform translateBy: margin @ margin ]
-			during: [ self drawBorderRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
-		maskCanvas flush.
-
-		magnitude := self effectWidth / 2.0.
-		vector := lightDirection asBlocVector normalized asPoint * magnitude.
-		highlightOffset := vector negated.
-		shadowOffset := vector.
-
-		self
-			drawBodyInsideBlurredMask: maskCanvas
-			offset: highlightOffset
-			color: (self effectiveColor: highlightColor)
-			margin: margin
-			for: anElement
-			onSpartaCanvas: aCanvas.
-		self
-			drawBodyInsideBlurredMask: maskCanvas
-			offset: shadowOffset
-			color: (self effectiveColor: shadowColor)
-			margin: margin
-			for: anElement
-			onSpartaCanvas: aCanvas
-	] ensure: [ maskCanvas release ]
 ]
 
 { #category : 'private - drawing' }
@@ -441,7 +388,7 @@ CFLightBorderEffect >> effectWidth: aNumber [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> effectiveColor: aColor [
-	^ aColor alpha: aColor alpha * self opacity
+	^ aColor alpha: aColor alpha * self intensity
 ]
 
 { #category : 'testing' }
@@ -469,12 +416,12 @@ CFLightBorderEffect >> lightDirection: aVector [
 
 { #category : 'accessing' }
 CFLightBorderEffect >> opacity [
-	^ opacity ifNil: [ self class defaultOpacity ]
+	^ self intensity
 ]
 
 { #category : 'accessing' }
 CFLightBorderEffect >> opacity: aNumber [
-	opacity := (aNumber max: 0.0) min: 1.0
+	self intensity: aNumber
 ]
 
 { #category : 'drawing' }
@@ -513,72 +460,11 @@ CFLightBorderEffect >> underlyingEffect: anEffect [
 
 { #category : 'private - geometry' }
 CFLightBorderEffect >> bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas [
-	"For a rounded rectangle, derive B from the same corrected Sparta inset geometry
-	 used by the native border. This keeps the treatment exactly concentric with the
-	 border after SpartaRoundedRectangle>>insetBy: adjusts its radii."
-	| geometry inset rounded |
-	geometry := anElement geometry.
-	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
-	rounded := aCanvas shape
-		roundedRectangle: geometry geometryBounds
-		radii: geometry cornerRadii asArray.
-	inset := self bodyBoundaryCoordinateFor: anElement.
-	^ inset isZero
-		ifTrue: [ rounded ]
-		ifFalse: [ rounded insetBy: inset ]
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanvas [
-	"Raised body outside uses B as the source boundary but keeps the relief strictly
-	 on the non-body side of B. The rounded-rectangle B path comes from Sparta's
-	 corrected inset geometry, so the treatment remains concentric with the native
-	 border."
-	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset boundaryPath |
-	self effectWidth isZero ifTrue: [ ^ self ].
-	boundaryPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
-	boundaryPath ifNil: [
-		^ self
-			drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
-			clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
-			raised: true
-			for: anElement
-			onSpartaCanvas: aCanvas ].
-
-	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
-	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
-	maskCanvas := aCanvas class extent: maskExtent.
-	[
-		maskCanvas transform
-			by: [ :transform | transform translateBy: margin @ margin ]
-			during: [ self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ].
-		maskCanvas flush.
-
-		magnitude := self effectWidth / 2.0.
-		vector := lightDirection asBlocVector normalized asPoint * magnitude.
-		"Outside-body relief extends from B into the border region. Move the
-		 body-source blur toward the light for the highlight and away from the
-		 light for the shadow."
-		highlightOffset := vector.
-		shadowOffset := vector negated.
-
-		self
-			drawBodyOutsideBlurredMask: maskCanvas
-			offset: highlightOffset
-			color: (self effectiveColor: highlightColor)
-			margin: margin
-			boundaryPath: boundaryPath
-			for: anElement
-			onSpartaCanvas: aCanvas.
-		self
-			drawBodyOutsideBlurredMask: maskCanvas
-			offset: shadowOffset
-			color: (self effectiveColor: shadowColor)
-			margin: margin
-			boundaryPath: boundaryPath
-			for: anElement
-			onSpartaCanvas: aCanvas
-	] ensure: [ maskCanvas release ]
+	^ self
+		pathAtBoundary: #body
+		offset: 0
+		for: anElement
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
@@ -623,11 +509,118 @@ CFLightBorderEffect >> drawBodyOutsideBlurredMask: aMaskCanvas offset: anOffset 
 				draw ] ]
 ]
 
+{ #category : 'private - colour' }
+CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
+	"Lighten the underlying solid border colour toward white while retaining its hue.
+	 The configured highlight alpha and aptitude opacity control treatment strength."
+	| paint base amount |
+	paint := anElement border paint.
+	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: highlightColor ].
+	base := paint color.
+	amount := self broadHighlightMix.
+	^ Color
+		r: base red + ((1.0 - base red) * amount)
+		g: base green + ((1.0 - base green) * amount)
+		b: base blue + ((1.0 - base blue) * amount)
+		alpha: (highlightColor alpha * self intensity)
+]
+
+{ #category : 'private - colour' }
+CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
+	"Darken the underlying solid border colour decisively toward black. Raised-border
+	 shadow strength is intentionally independent of the generic shadowColor alpha so
+	 it can balance the much brighter white specular side."
+	| paint base amount |
+	paint := anElement border paint.
+	(paint isKindOf: BlColorPaint) ifFalse: [
+		^ Color black alpha: (self broadShadowOpacity * self intensity) ].
+	base := paint color.
+	amount := self broadShadowMix.
+	^ Color
+		r: base red * amount
+		g: base green * amount
+		b: base blue * amount
+		alpha: (self broadShadowOpacity * self intensity)
+]
+
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanvas [
-	"Lowered body inside uses the same exact body-side clipping as raised body inside.
-	 Only the lighting polarity is reversed."
-	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset |
+CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| width bandCount bandWidth baseHighlight baseShadow |
+	width := self effectWidth.
+	width isZero ifTrue: [ ^ self ].
+	bandCount := self broadBandCount.
+	bandWidth := width / bandCount.
+	baseHighlight := self raisedBorderHighlightColorFor: anElement.
+	baseShadow := self raisedBorderShadowColorFor: anElement.
+
+	1 to: bandCount do: [ :index |
+		| outerInset innerInset strength |
+		outerInset := (index - 1) * bandWidth.
+		innerInset := index * bandWidth.
+		strength := (bandCount - index + 1) / bandCount.
+		self
+			drawTreatmentBandFor: anElement
+			path: aPath
+			fromInset: outerInset
+			toInset: innerInset
+			highlight: (baseHighlight alpha: baseHighlight alpha * strength)
+			shadow: (baseShadow alpha: baseShadow alpha * strength)
+			highlightOffset: highlightOffset
+			shadowOffset: shadowOffset
+			radius: aRadius
+			onSpartaCanvas: aCanvas ].
+
+	self
+		drawRaisedBorderInsideSpecularFor: anElement
+		path: aPath
+		highlightOffset: highlightOffset
+		shadowOffset: shadowOffset
+		radius: aRadius
+		onSpartaCanvas: aCanvas
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCanvas: aCanvas [
+	^ self
+		pathAtBoundary: #border
+		offset: anInset
+		for: anElement
+		onSpartaCanvas: aCanvas
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| width strengths specularWidth bandWidth specularRadius |
+	width := self effectWidth.
+	width isZero ifTrue: [ ^ self ].
+	strengths := self specularBandStrengths.
+	specularWidth := width * self specularWidthFraction.
+	bandWidth := specularWidth / strengths size.
+	specularRadius := (aRadius * self specularRadiusFraction) max: 0.30.
+
+	1 to: strengths size do: [ :index |
+		| outerInset innerInset strength |
+		outerInset := (index - 1) * bandWidth.
+		innerInset := index * bandWidth.
+		strength := strengths at: index.
+		self
+			drawTreatmentBandFor: anElement
+			path: aPath
+			fromInset: outerInset
+			toInset: innerInset
+			highlight: (Color white alpha:
+				highlightColor alpha * self intensity * self specularHighlightStrength * strength)
+			shadow: (Color black alpha:
+				self specularShadowStrength * self intensity * strength)
+			highlightOffset: highlightOffset * self specularOffsetFraction
+			shadowOffset: shadowOffset * self specularOffsetFraction
+			radius: specularRadius
+			onSpartaCanvas: aCanvas ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawBodyInsideTreatmentRaised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset highlight shadow |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	margin := ((self effectWidth * 4.0) + anElement border width) ceiling.
 	maskExtent := anElement extent + ((margin * 2) @ (margin * 2)).
@@ -642,18 +635,22 @@ CFLightBorderEffect >> drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanv
 		vector := lightDirection asBlocVector normalized asPoint * magnitude.
 		highlightOffset := vector negated.
 		shadowOffset := vector.
+		highlight := self effectiveColor:
+			(isRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ]).
+		shadow := self effectiveColor:
+			(isRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ]).
 
 		self
 			drawBodyInsideBlurredMask: maskCanvas
 			offset: highlightOffset
-			color: (self effectiveColor: shadowColor)
+			color: highlight
 			margin: margin
 			for: anElement
 			onSpartaCanvas: aCanvas.
 		self
 			drawBodyInsideBlurredMask: maskCanvas
 			offset: shadowOffset
-			color: (self effectiveColor: highlightColor)
+			color: shadow
 			margin: margin
 			for: anElement
 			onSpartaCanvas: aCanvas
@@ -661,17 +658,15 @@ CFLightBorderEffect >> drawLoweredBodyInsideFor: anElement onSpartaCanvas: aCanv
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCanvas [
-	"Lowered body outside uses exactly the same B geometry and border-side clipping
-	 as raised body outside. Only the lighting polarity is reversed."
-	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset boundaryPath |
+CFLightBorderEffect >> drawBodyOutsideTreatmentRaised: isRaised for: anElement onSpartaCanvas: aCanvas [
+	| margin maskExtent maskCanvas magnitude vector highlightOffset shadowOffset boundaryPath highlight shadow |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	boundaryPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
 	boundaryPath ifNil: [
 		^ self
 			drawRegionLightingFrom: [ :maskCanvas | self drawBodyRegionMaskFor: anElement onSpartaCanvas: maskCanvas ]
 			clipTo: [ :targetCanvas | self clipCurrentLayerToBorderRegionFor: anElement onSpartaCanvas: targetCanvas ]
-			raised: false
+			raised: isRaised
 			for: anElement
 			onSpartaCanvas: aCanvas ].
 
@@ -688,11 +683,15 @@ CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCan
 		vector := lightDirection asBlocVector normalized asPoint * magnitude.
 		highlightOffset := vector.
 		shadowOffset := vector negated.
+		highlight := self effectiveColor:
+			(isRaised ifTrue: [ highlightColor ] ifFalse: [ shadowColor ]).
+		shadow := self effectiveColor:
+			(isRaised ifTrue: [ shadowColor ] ifFalse: [ highlightColor ]).
 
 		self
 			drawBodyOutsideBlurredMask: maskCanvas
 			offset: highlightOffset
-			color: (self effectiveColor: shadowColor)
+			color: highlight
 			margin: margin
 			boundaryPath: boundaryPath
 			for: anElement
@@ -700,7 +699,7 @@ CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCan
 		self
 			drawBodyOutsideBlurredMask: maskCanvas
 			offset: shadowOffset
-			color: (self effectiveColor: highlightColor)
+			color: shadow
 			margin: margin
 			boundaryPath: boundaryPath
 			for: anElement
@@ -708,116 +707,83 @@ CFLightBorderEffect >> drawLoweredBodyOutsideFor: anElement onSpartaCanvas: aCan
 	] ensure: [ maskCanvas release ]
 ]
 
-{ #category : 'private - colour' }
-CFLightBorderEffect >> raisedBorderHighlightColorFor: anElement [
-	"Lighten the underlying solid border colour toward white while retaining its hue.
-	 The configured highlight alpha and aptitude opacity control treatment strength."
-	| paint base amount |
-	paint := anElement border paint.
-	(paint isKindOf: BlColorPaint) ifFalse: [ ^ self effectiveColor: highlightColor ].
-	base := paint color.
-	amount := 0.72.
-	^ Color
-		r: base red + ((1.0 - base red) * amount)
-		g: base green + ((1.0 - base green) * amount)
-		b: base blue + ((1.0 - base blue) * amount)
-		alpha: (highlightColor alpha * opacity)
-]
-
-{ #category : 'private - colour' }
-CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
-	"Darken the underlying solid border colour decisively toward black. Raised-border
-	 shadow strength is intentionally independent of the generic shadowColor alpha so
-	 it can balance the much brighter white specular side."
-	| paint base amount |
-	paint := anElement border paint.
-	(paint isKindOf: BlColorPaint) ifFalse: [
-		^ Color black alpha: (0.60 * opacity) ].
-	base := paint color.
-	amount := 0.18.
-	^ Color
-		r: base red * amount
-		g: base green * amount
-		b: base blue * amount
-		alpha: (0.60 * opacity)
-]
-
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	"Render raised-border lighting in concentric sub-bands. The treatment is
-	 strongest at A and progressively returns to the untouched border colour toward
-	 the inner edge of effectWidth. Because each sub-band is produced by insetBy:,
-	 the falloff remains normal to the border through rounded corners."
-	| width bandCount bandWidth |
-	width := self effectWidth.
-	width isZero ifTrue: [ ^ self ].
-	bandCount := 5.
-	bandWidth := width / bandCount.
-
-	1 to: bandCount do: [ :index |
-		| outerInset innerInset strength |
-		outerInset := (index - 1) * bandWidth.
-		innerInset := index * bandWidth.
-		strength := (bandCount - index + 1) / bandCount.
-		self
-			drawRaisedBorderInsideBandFor: anElement
-			path: aPath
-			fromInset: outerInset
-			toInset: innerInset
-			strength: strength
-			highlightOffset: highlightOffset
-			shadowOffset: shadowOffset
-			radius: aRadius
-			onSpartaCanvas: aCanvas ].
-
-	self
-		drawRaisedBorderInsideSpecularFor: anElement
-		path: aPath
-		highlightOffset: highlightOffset
-		shadowOffset: shadowOffset
-		radius: aRadius
-		onSpartaCanvas: aCanvas
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> boundaryCoordinateFor: aBoundary for: anElement [
+	aBoundary = #body ifTrue: [ ^ self bodyBoundaryCoordinateFor: anElement ].
+	aBoundary = #border ifTrue: [ ^ self borderOuterBoundaryCoordinateFor: anElement ].
+	self error: 'Unknown light-border boundary: ', aBoundary printString
 ]
 
 { #category : 'private - geometry' }
-CFLightBorderEffect >> borderInsideTreatmentInnerPathFor: anElement onSpartaCanvas: aCanvas [
-	"Answer the inner edge of the configured A-side treatment band. For the rounded
-	 rectangle geometry used by the examples this uses the same corrected Sparta
-	 inset semantics as the native border, so the band remains concentric."
-	| geometry rounded width |
-	geometry := anElement geometry.
-	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
-	width := self effectWidth.
-	rounded := aCanvas shape
-		roundedRectangle: geometry geometryBounds
-		radii: geometry cornerRadii asArray.
-	^ rounded insetBy: width
-]
-
-{ #category : 'private - geometry' }
-CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCanvas: aCanvas [
-	| geometry rounded |
+CFLightBorderEffect >> pathAtBoundary: aBoundary offset: anOffset for: anElement onSpartaCanvas: aCanvas [
+	| geometry rounded distance |
 	geometry := anElement geometry.
 	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
 	rounded := aCanvas shape
 		roundedRectangle: geometry geometryBounds
 		radii: geometry cornerRadii asArray.
-	^ anInset isZero
+	distance := (self boundaryCoordinateFor: aBoundary for: anElement) + anOffset.
+	^ distance isZero
 		ifTrue: [ rounded ]
-		ifFalse: [ rounded insetBy: anInset ]
+		ifFalse: [ rounded insetBy: distance ]
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> broadBandCount [
+	^ 5
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> broadHighlightMix [
+	^ 0.72
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> broadShadowMix [
+	^ 0.18
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> broadShadowOpacity [
+	^ 0.60
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularBandStrengths [
+	^ #(1.0 0.70 0.40 0.16)
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularWidthFraction [
+	^ 0.45
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularRadiusFraction [
+	^ 0.30
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularOffsetFraction [
+	^ 0.55
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularHighlightStrength [
+	^ 0.96
+]
+
+{ #category : 'private - lighting profile' }
+CFLightBorderEffect >> specularShadowStrength [
+	^ 0.66
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset strength: strength highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| outerPath innerPath highlight shadow |
+CFLightBorderEffect >> drawTreatmentBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset highlight: highlight shadow: shadow highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| outerPath innerPath |
 	outerPath := self borderInsidePathFor: anElement inset: outerInset onSpartaCanvas: aCanvas.
 	innerPath := self borderInsidePathFor: anElement inset: innerInset onSpartaCanvas: aCanvas.
 	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
-
-	highlight := (self raisedBorderHighlightColorFor: anElement)
-		alpha: ((self raisedBorderHighlightColorFor: anElement) alpha * strength).
-	shadow := (self raisedBorderShadowColorFor: anElement)
-		alpha: ((self raisedBorderShadowColorFor: anElement) alpha * strength).
 
 	aCanvas clip by: outerPath during: [
 		aCanvas layer during: [
@@ -840,66 +806,12 @@ CFLightBorderEffect >> drawRaisedBorderInsideBandFor: anElement path: aPath from
 				draw ] ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	"Add a tight specular layer at A and fade it smoothly into the broader bevel
-	 treatment. Several concentric sub-bands avoid a visible hard edge between the
-	 specular and the underlying screen/darken shading."
-	| width specularWidth bandCount bandWidth specularRadius |
-	width := self effectWidth.
-	width isZero ifTrue: [ ^ self ].
-	specularWidth := width * 0.45.
-	bandCount := 4.
-	bandWidth := specularWidth / bandCount.
-	specularRadius := (aRadius * 0.30) max: 0.30.
-
-	1 to: bandCount do: [ :index |
-		| outerInset innerInset strength |
-		outerInset := (index - 1) * bandWidth.
-		innerInset := index * bandWidth.
-		strength := #(1.0 0.70 0.40 0.16) at: index.
-		self
-			drawRaisedBorderInsideSpecularBandFor: anElement
-			path: aPath
-			fromInset: outerInset
-			toInset: innerInset
-			strength: strength
-			highlightOffset: highlightOffset
-			shadowOffset: shadowOffset
-			radius: specularRadius
-			onSpartaCanvas: aCanvas ]
+{ #category : 'accessing' }
+CFLightBorderEffect >> intensity [
+	^ opacity ifNil: [ self class defaultOpacity ]
 ]
 
-{ #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderInsideSpecularBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset strength: strength highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| outerPath innerPath highlight shadow |
-	outerPath := self borderInsidePathFor: anElement inset: outerInset onSpartaCanvas: aCanvas.
-	innerPath := self borderInsidePathFor: anElement inset: innerInset onSpartaCanvas: aCanvas.
-	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
-
-	highlight := Color white
-		alpha: (highlightColor alpha * opacity * 0.96 * strength).
-	shadow := Color black
-		alpha: (0.66 * opacity * strength).
-
-	aCanvas clip by: outerPath during: [
-		aCanvas layer during: [
-			self
-				drawBorderShadowPath: aPath
-				offset: highlightOffset * 0.55
-				color: highlight
-				radius: aRadius
-				onSpartaCanvas: aCanvas.
-			self
-				drawBorderShadowPath: aPath
-				offset: shadowOffset * 0.55
-				color: shadow
-				radius: aRadius
-				onSpartaCanvas: aCanvas.
-			aCanvas fill
-				path: innerPath;
-				paint: Color white;
-				composeDestOut;
-				draw ] ]
+{ #category : 'accessing' }
+CFLightBorderEffect >> intensity: aNumber [
+	opacity := (aNumber max: 0.0) min: 1.0
 ]
-
