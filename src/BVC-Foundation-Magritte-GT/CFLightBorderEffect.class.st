@@ -171,7 +171,7 @@ CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: aCanvas [
-	| path width magnitude vector highlightOffset shadowOffset radius |
+	| path width magnitude vector lightOffset darkOffset radius |
 	path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 	path ifNil: [ ^ self ].
 	width := self effectWidth.
@@ -179,47 +179,18 @@ CFLightBorderEffect >> drawBorderBoundaryLightingFor: anElement onSpartaCanvas: 
 	radius := width max: 0.5.
 	magnitude := width / 2.0.
 	vector := lightDirection asBlocVector normalized asPoint * magnitude.
-	highlightOffset := vector.
-	shadowOffset := vector negated.
+	lightOffset := vector.
+	darkOffset := vector negated.
 
-	borderRaised ifTrue: [
-		^ self
-			drawRaisedBorderFor: anElement
-			path: path
-			inside: borderInside
-			highlightOffset: highlightOffset
-			shadowOffset: shadowOffset
-			radius: radius
-			onSpartaCanvas: aCanvas ].
-
-	borderInside
-		ifTrue: [
-			aCanvas clip by: path during: [
-				self
-					drawBorderShadowPath: path
-					offset: highlightOffset
-					color: (self effectiveColor: shadowColor)
-					radius: radius
-					onSpartaCanvas: aCanvas.
-				self
-					drawBorderShadowPath: path
-					offset: shadowOffset
-					color: (self effectiveColor: highlightColor)
-					radius: radius
-					onSpartaCanvas: aCanvas ] ]
-		ifFalse: [
-			self
-				drawBorderShadowPath: path
-				offset: highlightOffset
-				color: (self effectiveColor: shadowColor)
-				radius: radius
-				onSpartaCanvas: aCanvas.
-			self
-				drawBorderShadowPath: path
-				offset: shadowOffset
-				color: (self effectiveColor: highlightColor)
-				radius: radius
-				onSpartaCanvas: aCanvas ]
+	self
+		drawBorderFor: anElement
+		path: path
+		inside: borderInside
+		raised: borderRaised
+		lightOffset: lightOffset
+		darkOffset: darkOffset
+		radius: radius
+		onSpartaCanvas: aCanvas
 ]
 
 { #category : 'private - drawing' }
@@ -559,15 +530,20 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderFor: anElement path: aPath inside: isInside highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	| width bandCount bandWidth baseHighlight baseShadow direction |
+CFLightBorderEffect >> drawBorderFor: anElement path: aPath inside: isInside raised: isRaised lightOffset: lightOffset darkOffset: darkOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| width bandCount bandWidth baseLight baseDark direction |
 	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
 	direction := isInside ifTrue: [ 1.0 ] ifFalse: [ -1.0 ].
 	bandCount := self broadBandCount.
 	bandWidth := width / bandCount.
-	baseHighlight := self raisedBorderHighlightColorFor: anElement.
-	baseShadow := self raisedBorderShadowColorFor: anElement.
+
+	baseLight := isRaised
+		ifTrue: [ self raisedBorderHighlightColorFor: anElement ]
+		ifFalse: [ self raisedBorderShadowColorFor: anElement ].
+	baseDark := isRaised
+		ifTrue: [ self raisedBorderShadowColorFor: anElement ]
+		ifFalse: [ self raisedBorderHighlightColorFor: anElement ].
 
 	1 to: bandCount do: [ :index |
 		| nearOffset farOffset strength |
@@ -579,19 +555,20 @@ CFLightBorderEffect >> drawRaisedBorderFor: anElement path: aPath inside: isInsi
 			path: aPath
 			fromOffset: nearOffset
 			toOffset: farOffset
-			highlight: (baseHighlight alpha: baseHighlight alpha * strength)
-			shadow: (baseShadow alpha: baseShadow alpha * strength)
-			highlightOffset: highlightOffset
-			shadowOffset: shadowOffset
+			highlight: (baseLight alpha: baseLight alpha * strength)
+			shadow: (baseDark alpha: baseDark alpha * strength)
+			highlightOffset: lightOffset
+			shadowOffset: darkOffset
 			radius: aRadius
 			onSpartaCanvas: aCanvas ].
 
 	self
-		drawRaisedBorderSpecularFor: anElement
+		drawBorderSpecularFor: anElement
 		path: aPath
 		inside: isInside
-		highlightOffset: highlightOffset
-		shadowOffset: shadowOffset
+		raised: isRaised
+		lightOffset: lightOffset
+		darkOffset: darkOffset
 		radius: aRadius
 		onSpartaCanvas: aCanvas
 ]
@@ -606,7 +583,7 @@ CFLightBorderEffect >> borderInsidePathFor: anElement inset: anInset onSpartaCan
 ]
 
 { #category : 'private - drawing' }
-CFLightBorderEffect >> drawRaisedBorderSpecularFor: anElement path: aPath inside: isInside highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+CFLightBorderEffect >> drawBorderSpecularFor: anElement path: aPath inside: isInside raised: isRaised lightOffset: lightOffset darkOffset: darkOffset radius: aRadius onSpartaCanvas: aCanvas [
 	| width strengths specularWidth bandWidth specularRadius direction |
 	width := self effectWidth.
 	width isZero ifTrue: [ ^ self ].
@@ -617,21 +594,45 @@ CFLightBorderEffect >> drawRaisedBorderSpecularFor: anElement path: aPath inside
 	specularRadius := (aRadius * self specularRadiusFraction) max: 0.30.
 
 	1 to: strengths size do: [ :index |
-		| nearOffset farOffset strength |
+		| nearOffset farOffset strength lightColor darkColor |
 		nearOffset := (index - 1) * bandWidth * direction.
 		farOffset := index * bandWidth * direction.
 		strength := strengths at: index.
+
+		lightColor := isRaised
+			ifTrue: [
+				Color white alpha:
+					highlightColor alpha
+						* self intensity
+						* self specularHighlightStrength
+						* strength ]
+			ifFalse: [
+				Color black alpha:
+					self specularShadowStrength
+						* self intensity
+						* strength ].
+		darkColor := isRaised
+			ifTrue: [
+				Color black alpha:
+					self specularShadowStrength
+						* self intensity
+						* strength ]
+			ifFalse: [
+				Color white alpha:
+					highlightColor alpha
+						* self intensity
+						* self specularHighlightStrength
+						* strength ].
+
 		self
 			drawTreatmentBandFor: anElement
 			path: aPath
 			fromOffset: nearOffset
 			toOffset: farOffset
-			highlight: (Color white alpha:
-				highlightColor alpha * self intensity * self specularHighlightStrength * strength)
-			shadow: (Color black alpha:
-				self specularShadowStrength * self intensity * strength)
-			highlightOffset: highlightOffset * self specularOffsetFraction
-			shadowOffset: shadowOffset * self specularOffsetFraction
+			highlight: lightColor
+			shadow: darkColor
+			highlightOffset: lightOffset * self specularOffsetFraction
+			shadowOffset: darkOffset * self specularOffsetFraction
 			radius: specularRadius
 			onSpartaCanvas: aCanvas ]
 ]
