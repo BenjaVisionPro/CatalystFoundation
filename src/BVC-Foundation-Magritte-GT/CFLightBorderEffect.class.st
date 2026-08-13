@@ -839,37 +839,59 @@ CFLightBorderEffect >> drawRaisedBorderInsideBandFor: anElement path: aPath from
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBorderInsideSpecularFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	"Add a separate, tight specular layer at A. The broad concentric bands describe
-	 the bevel; this layer supplies the crisp highlight and opposing contact shadow."
-	| width specularWidth innerPath highlight shadow specularRadius |
+	"Add a tight specular layer at A and fade it smoothly into the broader bevel
+	 treatment. Several concentric sub-bands avoid a visible hard edge between the
+	 specular and the underlying screen/darken shading."
+	| width specularWidth bandCount bandWidth specularRadius |
 	width := self effectWidth min: anElement border width.
 	width isZero ifTrue: [ ^ self ].
-	specularWidth := width * 0.35.
-	innerPath := self
-		borderInsidePathFor: anElement
-		inset: specularWidth
-		onSpartaCanvas: aCanvas.
-	innerPath ifNil: [ ^ self ].
-
+	specularWidth := width * 0.45.
+	bandCount := 4.
+	bandWidth := specularWidth / bandCount.
 	specularRadius := (aRadius * 0.30) max: 0.30.
-	highlight := Color white
-		alpha: (highlightColor alpha * opacity * 0.70).
-	shadow := Color black
-		alpha: (shadowColor alpha * opacity * 0.70).
 
-	aCanvas clip by: aPath during: [
+	1 to: bandCount do: [ :index |
+		| outerInset innerInset strength |
+		outerInset := (index - 1) * bandWidth.
+		innerInset := index * bandWidth.
+		strength := #(1.0 0.70 0.40 0.16) at: index.
+		self
+			drawRaisedBorderInsideSpecularBandFor: anElement
+			path: aPath
+			fromInset: outerInset
+			toInset: innerInset
+			strength: strength
+			highlightOffset: highlightOffset
+			shadowOffset: shadowOffset
+			radius: specularRadius
+			onSpartaCanvas: aCanvas ]
+]
+
+{ #category : 'private - drawing' }
+CFLightBorderEffect >> drawRaisedBorderInsideSpecularBandFor: anElement path: aPath fromInset: outerInset toInset: innerInset strength: strength highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
+	| outerPath innerPath highlight shadow |
+	outerPath := self borderInsidePathFor: anElement inset: outerInset onSpartaCanvas: aCanvas.
+	innerPath := self borderInsidePathFor: anElement inset: innerInset onSpartaCanvas: aCanvas.
+	(outerPath isNil or: [ innerPath isNil ]) ifTrue: [ ^ self ].
+
+	highlight := Color white
+		alpha: (highlightColor alpha * opacity * 0.70 * strength).
+	shadow := Color black
+		alpha: (shadowColor alpha * opacity * 0.70 * strength).
+
+	aCanvas clip by: outerPath during: [
 		aCanvas layer during: [
 			self
 				drawBorderShadowPath: aPath
 				offset: highlightOffset * 0.55
 				color: highlight
-				radius: specularRadius
+				radius: aRadius
 				onSpartaCanvas: aCanvas.
 			self
 				drawBorderShadowPath: aPath
 				offset: shadowOffset * 0.55
 				color: shadow
-				radius: specularRadius
+				radius: aRadius
 				onSpartaCanvas: aCanvas.
 			aCanvas fill
 				path: innerPath;
