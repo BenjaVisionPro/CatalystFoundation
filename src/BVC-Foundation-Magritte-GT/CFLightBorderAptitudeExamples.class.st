@@ -5,219 +5,85 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> cardWith: anAptitude borderWidth: aNumber [
-	^ self
-		cardWith: anAptitude
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 16)
-		borderWidth: aNumber
+{ #category : 'examples' }
+CFLightBorderAptitudeExamples >> allTreatments [
+	<gtExample>
+	<return: #BlElement>
+	| grid |
+	grid := BlElement new
+		clipChildren: false;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		background: Color gray;
+		padding: (BlInsets all: 18);
+		layout: (BlGridLayout new
+			columnCount: 2;
+			rowCount: 4;
+			cellSpacing: 18);
+		yourself.
+
+	grid addChild: (self treatmentCellNamed: 'Raise body inside' configure: [ :a | a raiseBodyInside ]).
+	grid addChild: (self treatmentCellNamed: 'Raise body outside' configure: [ :a | a raiseBodyOutside ]).
+	grid addChild: (self treatmentCellNamed: 'Lower body inside' configure: [ :a | a lowerBodyInside ]).
+	grid addChild: (self treatmentCellNamed: 'Lower body outside' configure: [ :a | a lowerBodyOutside ]).
+	grid addChild: (self treatmentCellNamed: 'Raise border inside' configure: [ :a | a raiseBorderInside ]).
+	grid addChild: (self treatmentCellNamed: 'Raise border outside' configure: [ :a | a raiseBorderOutside ]).
+	grid addChild: (self treatmentCellNamed: 'Lower border inside' configure: [ :a | a lowerBorderInside ]).
+	grid addChild: (self treatmentCellNamed: 'Lower border outside' configure: [ :a | a lowerBorderOutside ]).
+	^ grid
 ]
 
 { #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> cardWith: anAptitude geometry: aGeometry borderWidth: aNumber [
-	^ self
-		cardWithAptitudes: { anAptitude }
-		geometry: aGeometry
-		borderWidth: aNumber
+CFLightBorderAptitudeExamples >> aptitudeConfiguredBy: aBlock [
+	| aptitude |
+	aptitude := CFLightBorderAptitude new
+		beFlat;
+		effectWidth: 5;
+		opacity: 0.9;
+		lightDirection: -1 @ -1;
+		yourself.
+	aBlock value: aptitude.
+	^ aptitude
 ]
 
 { #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> cardWithAptitudes: aptitudes geometry: aGeometry borderWidth: aNumber [
-	| anElement |
-	anElement := BlElement new
-		size: 280 @ 160;
-		geometry: aGeometry;
+CFLightBorderAptitudeExamples >> cardWith: anAptitude [
+	^ BlElement new
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent.
+			c linear weight: 1 ];
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 24);
 		background: (Color black alpha: 0.1);
 		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber).
-	aptitudes do: [ :anAptitude | anElement addAptitude: anAptitude ].
-	^ anElement
-]
-
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> elementWith: anAptitude [
-	^ self elementWith: anAptitude borderWidth: 1
-]
-
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
-	^ self stageWith: (self cardWith: anAptitude borderWidth: aNumber)
-]
-
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> elementWith: anAptitude geometry: aGeometry [
-	^ self stageWith: (self cardWith: anAptitude geometry: aGeometry borderWidth: 1)
-]
-
-{ #category : 'private - instance creation' }
-CFLightBorderAptitudeExamples >> elementWithAptitudes: aptitudes [
-	^ self stageWith: (self
-		cardWithAptitudes: aptitudes
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 16)
-		borderWidth: 1)
-]
-
-
-{ #category : 'diagnostics' }
-CFLightBorderAptitudeExamples >> borderGeometryProbe [
-	<gtExample>
-	<return: #BlElement>
-	| radius borderWidth card stage |
-	radius := 40.
-	borderWidth := 16.
-
-	card := BlSpartaElement new
-		size: 320 @ 180;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: radius);
-		background: (Color black alpha: 0.08);
-		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.75) width: borderWidth);
-		rendering: [ :aCanvas :anElement |
-			| bounds currentOuter currentInner idealOuter idealInner currentOuterRadius currentInnerRadius idealInnerRadius |
-			bounds := anElement geometryBounds.
-
-			"SpartaFigurePainter>>drawGeometry: implements an inside border by
-			insetting the stroke geometry by half the border width while
-			SpartaRoundedRectangle>>insetBy: preserves its radius. These two
-			outlines are the resulting visible stroke edges."
-			currentOuterRadius := radius + (borderWidth / 2.0).
-			currentInnerRadius := radius - (borderWidth / 2.0).
-			currentOuter := aCanvas shape
-				roundedRectangle: bounds
-				radii: { currentOuterRadius . currentOuterRadius . currentOuterRadius . currentOuterRadius }.
-			currentInner := aCanvas shape
-				roundedRectangle: (bounds insetBy: borderWidth)
-				radii: { currentInnerRadius . currentInnerRadius . currentInnerRadius . currentInnerRadius }.
-
-			"A concentric inside border keeps the original corner centre fixed:
-			the outer edge is the element geometry and the inner radius reduces
-			by the full border width."
-			idealInnerRadius := (radius - borderWidth) max: 0.
-			idealOuter := aCanvas shape
-				roundedRectangle: bounds
-				radii: { radius . radius . radius . radius }.
-			idealInner := aCanvas shape
-				roundedRectangle: (bounds insetBy: borderWidth)
-				radii: { idealInnerRadius . idealInnerRadius . idealInnerRadius . idealInnerRadius }.
-
-			"Red = the edges implied by the current native Sparta implementation.
-			 Green = geometrically concentric edges."
-			aCanvas stroke
-				path: currentOuter;
-				paint: (Color red alpha: 0.9);
-				width: 2;
-				draw.
-			aCanvas stroke
-				path: currentInner;
-				paint: (Color red alpha: 0.9);
-				width: 2;
-				draw.
-			aCanvas stroke
-				path: idealOuter;
-				paint: (Color green alpha: 0.9);
-				width: 2;
-				draw.
-			aCanvas stroke
-				path: idealInner;
-				paint: (Color green alpha: 0.9);
-				width: 2;
-				draw ];
-		yourself.
-
-	stage := BlElement new
-		size: 440 @ 300;
-		background: Color gray;
-		layout: BlFrameLayout new;
-		addChild: (card constraintsDo: [ :c |
-			c frame horizontal alignCenter.
-			c frame vertical alignCenter ]);
-		yourself.
-	^ stage
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> ellipse [
-	<gtExample>
-	<return: #BlElement>
-	^ self
-		elementWith: CFLightBorderAptitude new beRaised
-		geometry: BlEllipseGeometry new
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> flat [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beFlat
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> inset [
-	<gtExample>
-	<return: #BlElement>
-	^ self lowered
+		border: (BlBorder paint: (Color blue alpha: 0.75) width: 8);
+		addAptitude: anAptitude;
+		yourself
 ]
 
 { #category : 'examples' }
 CFLightBorderAptitudeExamples >> lowered [
 	<gtExample>
 	<return: #BlElement>
-	"The ordinary lowered example is the complete treatment: a recessed card
-	and the complementary inner face of its native border."
-	^ self loweredCardAndBorder
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> loweredBorder [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beLoweredBorder
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> loweredCardAndBorder [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWithAptitudes: {
-		CFLightBorderAptitude new beLoweredCard.
-		CFLightBorderAptitude new beLoweredBorder }
+	^ self stageWith: (self cardWith: CFLightBorderAptitude new beLowered)
 ]
 
 { #category : 'examples' }
 CFLightBorderAptitudeExamples >> raised [
 	<gtExample>
 	<return: #BlElement>
-	"The ordinary raised example is the complete treatment: an elevated card
-	and the complementary inner face of its native border."
-	^ self raisedCardAndBorder
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> raisedBorder [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new beRaisedBorder
-]
-
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> raisedCardAndBorder [
-	<gtExample>
-	<return: #BlElement>
-	"Brick composes the two visual concerns. The first aptitude lights the
-	card exterior; the second lights the inside face of its native BlBorder."
-	^ self elementWithAptitudes: {
-		CFLightBorderAptitude new beRaisedCard.
-		CFLightBorderAptitude new beRaisedBorder }
+	^ self stageWith: (self cardWith: CFLightBorderAptitude new beRaised)
 ]
 
 { #category : 'examples' }
 CFLightBorderAptitudeExamples >> raisedFromTopRight [
 	<gtExample>
 	<return: #BlElement>
-	^ self elementWith: (CFLightBorderAptitude new
+	^ self stageWith: (self cardWith: (CFLightBorderAptitude new
 		beRaised;
 		lightDirection: 1 @ -1;
-		yourself)
+		yourself))
 ]
 
 { #category : 'private - instance creation' }
@@ -232,9 +98,23 @@ CFLightBorderAptitudeExamples >> stageWith: aCard [
 		yourself
 ]
 
-{ #category : 'examples' }
-CFLightBorderAptitudeExamples >> wideRaised [
-	<gtExample>
-	<return: #BlElement>
-	^ self elementWith: CFLightBorderAptitude new borderWidth: 3
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock [
+	| pane label aptitude |
+	aptitude := self aptitudeConfiguredBy: aBlock.
+	label := BrLabel new
+		aptitude: (BrGlamorousLabelAptitude new foreground: Color white);
+		text: aString;
+		fitContent;
+		margin: (BlInsets bottom: 8);
+		yourself.
+	pane := BrVerticalPane new
+		clipChildren: false;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		addChild: label;
+		addChild: (self cardWith: aptitude);
+		yourself.
+	^ pane
 ]
