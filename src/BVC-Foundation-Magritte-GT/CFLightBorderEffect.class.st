@@ -741,11 +741,12 @@ CFLightBorderEffect >> raisedBorderShadowColorFor: anElement [
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highlightOffset: highlightOffset shadowOffset: shadowOffset radius: aRadius onSpartaCanvas: aCanvas [
-	"Render the raised-border lighting into an isolated layer, then remove the body
-	 region so only the native border band remains."
-	| bodyPath |
-	bodyPath := self bodyBoundaryPathFor: anElement onSpartaCanvas: aCanvas.
-	bodyPath ifNil: [
+	"Render the raised-border lighting only within the configured treatment band.
+	 The band starts at A and extends inward by effectWidth; the remainder of the
+	 native border toward B is left untouched."
+	| treatmentInnerPath |
+	treatmentInnerPath := self borderInsideTreatmentInnerPathFor: anElement onSpartaCanvas: aCanvas.
+	treatmentInnerPath ifNil: [
 		^ aCanvas clip by: aPath during: [
 			self
 				drawBorderShadowPath: aPath
@@ -775,9 +776,24 @@ CFLightBorderEffect >> drawRaisedBorderInsideFor: anElement path: aPath highligh
 				radius: aRadius
 				onSpartaCanvas: aCanvas.
 			aCanvas fill
-				path: bodyPath;
+				path: treatmentInnerPath;
 				paint: Color white;
 				composeDestOut;
 				draw ] ]
+]
+
+{ #category : 'private - geometry' }
+CFLightBorderEffect >> borderInsideTreatmentInnerPathFor: anElement onSpartaCanvas: aCanvas [
+	"Answer the inner edge of the configured A-side treatment band. For the rounded
+	 rectangle geometry used by the examples this uses the same corrected Sparta
+	 inset semantics as the native border, so the band remains concentric."
+	| geometry rounded width |
+	geometry := anElement geometry.
+	(geometry isKindOf: BlRoundedRectangleGeometry) ifFalse: [ ^ nil ].
+	width := self effectWidth min: anElement border width.
+	rounded := aCanvas shape
+		roundedRectangle: geometry geometryBounds
+		radii: geometry cornerRadii asArray.
+	^ rounded insetBy: width
 ]
 
