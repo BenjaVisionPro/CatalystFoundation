@@ -118,3 +118,371 @@ CFLightBorderAptitudeExamples >> treatmentCellNamed: aString configure: aBlock [
 		yourself.
 	^ pane
 ]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> cardWith: anAptitude borderWidth: aNumber [
+	^ self cardWith: anAptitude geometry: (BlRoundedRectangleGeometry cornerRadius: 16) borderWidth: aNumber
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> cardWith: anAptitude geometry: aGeometry borderWidth: aNumber [
+	| anElement |
+	anElement := BlElement new
+		size: 280 @ 160;
+		geometry: aGeometry;
+		background: (Color black alpha: 0.1);
+		outskirts: BlOutskirts inside;
+		border: (BlBorder paint: (Color blue alpha: 0.5) width: aNumber);
+		addAptitude: anAptitude.
+	^ anElement
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> elementWith: anAptitude [
+	^ self elementWith: anAptitude borderWidth: 6
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> elementWith: anAptitude borderWidth: aNumber [
+	^ self stageWith: (self cardWith: anAptitude borderWidth: aNumber)
+]
+
+{ #category : 'private - instance creation' }
+CFLightBorderAptitudeExamples >> elementWith: anAptitude geometry: aGeometry [
+	^ self stageWith: (self cardWith: anAptitude geometry: aGeometry borderWidth: 6)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderFlat [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: CFLightBorderAptitude new beFlat
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderLowered [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyFlatBorderRaised [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderFlat [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderLowered [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: CFLightBorderAptitude new beLowered
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyLoweredBorderRaised [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; raiseBorderInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderFlat [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderLowered [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; lowerBorderInside; yourself)
+]
+
+{ #category : 'examples - relief matrix' }
+CFLightBorderAptitudeExamples >> bodyRaisedBorderRaised [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: CFLightBorderAptitude new beRaised
+]
+
+{ #category : 'examples' }
+CFLightBorderAptitudeExamples >> ellipse [
+	<gtExample>
+	<return: #BlElement>
+	^ self elementWith: CFLightBorderAptitude new beRaised geometry: BlEllipseGeometry new
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBodyOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBodyOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> raiseBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderOutside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderInside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderInside; yourself)
+]
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'examples - placement' }
+CFLightBorderAptitudeExamples >> lowerBorderOutside [
+	<gtExample>
+	^ self elementWith: (CFLightBorderAptitude new beFlat; lowerBorderOutside; yourself)
+]
+
+{ #category : 'diagnostics' }
+CFLightBorderAptitudeExamples >> borderGeometryProbe [
+	<gtExample>
+	<return: #BlElement>
+	| radius borderWidth card stage |
+	radius := 40.
+	borderWidth := 16.
+
+	card := BlSpartaElement new
+		size: 320 @ 180;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: radius);
+		background: (Color black alpha: 0.08);
+		outskirts: BlOutskirts inside;
+		border: (BlBorder paint: (Color blue alpha: 0.75) width: borderWidth);
+		rendering: [ :aCanvas :anElement |
+			| bounds currentOuter currentInner idealOuter idealInner currentOuterRadius currentInnerRadius idealInnerRadius |
+			bounds := anElement geometryBounds.
+
+			"SpartaFigurePainter>>drawGeometry: implements an inside border by
+			insetting the stroke geometry by half the border width while
+			SpartaRoundedRectangle>>insetBy: preserves its radius. These two
+			outlines are the resulting visible stroke edges."
+			currentOuterRadius := radius + (borderWidth / 2.0).
+			currentInnerRadius := radius - (borderWidth / 2.0).
+			currentOuter := aCanvas shape
+				roundedRectangle: bounds
+				radii: { currentOuterRadius . currentOuterRadius . currentOuterRadius . currentOuterRadius }.
+			currentInner := aCanvas shape
+				roundedRectangle: (bounds insetBy: borderWidth)
+				radii: { currentInnerRadius . currentInnerRadius . currentInnerRadius . currentInnerRadius }.
+
+			"A concentric inside border keeps the original corner centre fixed:
+			the outer edge is the element geometry and the inner radius reduces
+			by the full border width."
+			idealInnerRadius := (radius - borderWidth) max: 0.
+			idealOuter := aCanvas shape
+				roundedRectangle: bounds
+				radii: { radius . radius . radius . radius }.
+			idealInner := aCanvas shape
+				roundedRectangle: (bounds insetBy: borderWidth)
+				radii: { idealInnerRadius . idealInnerRadius . idealInnerRadius . idealInnerRadius }.
+
+			"Red = the edges implied by the current native Sparta implementation.
+			 Green = geometrically concentric edges."
+			aCanvas stroke
+				path: currentOuter;
+				paint: (Color red alpha: 0.9);
+				width: 2;
+				draw.
+			aCanvas stroke
+				path: currentInner;
+				paint: (Color red alpha: 0.9);
+				width: 2;
+				draw.
+			aCanvas stroke
+				path: idealOuter;
+				paint: (Color green alpha: 0.9);
+				width: 2;
+				draw.
+			aCanvas stroke
+				path: idealInner;
+				paint: (Color green alpha: 0.9);
+				width: 2;
+				draw ];
+		yourself.
+
+	stage := BlElement new
+		size: 440 @ 300;
+		background: Color gray;
+		layout: BlFrameLayout new;
+		addChild: (card constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ]);
+		yourself.
+	^ stage
+]
