@@ -197,7 +197,7 @@ CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedD
 			draw.
 
 		aCanvas fill
-			path: aCanvas bounds;
+			path: (0 @ 0 extent: anElement extent);
 			paint: treatmentCanvas;
 			draw
 	] ensure: [ treatmentCanvas release ]
