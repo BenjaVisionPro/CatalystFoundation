@@ -539,8 +539,11 @@ CFLightBorderEffect >> drawRaisedBodyOutsideFor: anElement onSpartaCanvas: aCanv
 
 		magnitude := self effectWidth / 2.0.
 		vector := lightDirection asBlocVector normalized asPoint * magnitude.
-		highlightOffset := vector negated.
-		shadowOffset := vector.
+		"Outside-body relief extends from B into the border region. Move the
+		 body-source blur toward the light for the highlight and away from the
+		 light for the shadow."
+		highlightOffset := vector.
+		shadowOffset := vector negated.
 
 		self
 			drawBodyOutsideBlurredMask: maskCanvas
