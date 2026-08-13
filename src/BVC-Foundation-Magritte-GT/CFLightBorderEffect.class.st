@@ -168,41 +168,32 @@ CFLightBorderEffect >> drawBorderTreatmentFor: anElement onSpartaCanvas: aCanvas
 
 { #category : 'private - drawing' }
 CFLightBorderEffect >> drawTreatmentBandFrom: aSignedDistance to: anotherSignedDistance raised: isRaised for: anElement onSpartaCanvas: aCanvas [
-	"I rasterize the treatment from the same element path and centered-stroke
-	geometry that Bloc uses for native borders. Positive distances are inside the
-	element path; negative distances are outside. I never construct an offset
-	shape, so rounded corners and arbitrary geometries share Bloc's own stroke
-	semantics."
-	| low high treatmentCanvas |
+	"I build the treatment directly in an isolated Sparta layer on the same canvas
+	that paints the element. The opaque band and the native border therefore use the
+	same geometry path, transform and backend stroke rasterisation. The lighting is
+	then composited through that band before the layer is restored."
+	| low high fillBounds |
 	self effectWidth isZero ifTrue: [ ^ self ].
 	low := aSignedDistance min: anotherSignedDistance.
 	high := aSignedDistance max: anotherSignedDistance.
 	low = high ifTrue: [ ^ self ].
+	fillBounds := anElement boundsInLocal expandBy: self effectWidth.
 
-	treatmentCanvas := aCanvas class extent: anElement extent.
-	[
+	aCanvas layer during: [
 		| path |
-		path := self geometryPathFor: anElement onSpartaCanvas: treatmentCanvas.
+		path := self geometryPathFor: anElement onSpartaCanvas: aCanvas.
 		path ifNil: [ ^ self ].
 		self
 			drawOpaqueBandFrom: low
 			to: high
 			path: path
-			onSpartaCanvas: treatmentCanvas.
+			onSpartaCanvas: aCanvas.
 
-		treatmentCanvas fill
-			path: treatmentCanvas bounds;
-			paint: (self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: treatmentCanvas);
+		aCanvas fill
+			path: fillBounds;
+			paint: (self gradientPaintFor: anElement raised: isRaised onSpartaCanvas: aCanvas);
 			composeIn;
-			draw.
-
-		treatmentCanvas flush.
-		treatmentCanvas snapshotDuring: [ :treatmentImage |
-			aCanvas fill
-				path: treatmentImage bounds;
-				paint: treatmentImage;
-				draw ]
-	] ensure: [ treatmentCanvas release ]
+			draw ]
 ]
 
 { #category : 'private - drawing' }
