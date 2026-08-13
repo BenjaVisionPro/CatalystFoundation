@@ -27,7 +27,10 @@ CFLightBorderAptitudeExamples >> allTreatments [
 	grid addChild: (self treatmentCellNamed: 'Raise body outside' configure: [ :a | a raiseBodyOutside ]).
 	grid addChild: (self treatmentCellNamed: 'Lower body inside' configure: [ :a | a lowerBodyInside ]).
 	grid addChild: (self treatmentCellNamed: 'Lower body outside' configure: [ :a | a lowerBodyOutside ]).
-	grid addChild: (self treatmentCellNamed: 'Raise border inside' configure: [ :a | a raiseBorderInside ]).
+	grid addChild: (self treatmentCellNamed: 'Raise border inside' configure: [ :a |
+		a
+			raiseBorderInside;
+			effectWidth: 2.5 ]).
 	grid addChild: (self treatmentCellNamed: 'Raise border outside' configure: [ :a | a raiseBorderOutside ]).
 	grid addChild: (self treatmentCellNamed: 'Lower border inside' configure: [ :a | a lowerBorderInside ]).
 	grid addChild: (self treatmentCellNamed: 'Lower border outside' configure: [ :a | a lowerBorderOutside ]).
@@ -245,7 +248,11 @@ CFLightBorderAptitudeExamples >> lowerBodyOutside [
 { #category : 'examples - placement' }
 CFLightBorderAptitudeExamples >> raiseBorderInside [
 	<gtExample>
-	^ self elementWith: (CFLightBorderAptitude new beFlat; raiseBorderInside; yourself)
+	^ self elementWith: (CFLightBorderAptitude new
+		beFlat;
+		raiseBorderInside;
+		effectWidth: 2.5;
+		yourself)
 ]
 { #category : 'examples - placement' }
 CFLightBorderAptitudeExamples >> raiseBorderOutside [
