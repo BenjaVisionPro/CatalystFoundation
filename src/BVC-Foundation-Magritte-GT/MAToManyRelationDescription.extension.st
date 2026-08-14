@@ -1,5 +1,30 @@
 Extension { #name : 'MAToManyRelationDescription' }
 
+
+{ #category : '*bvc-foundation-magritte-gt' }
+MAToManyRelationDescription >> itemsAsCompactObjects [
+	self
+		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemStencil: ([ :anItemViewModel :anIndex :aListElement |
+			CFCompactObjectStencil new
+				object: anItemViewModel object;
+				create ] asStencilBuilder: BrListRowStencilBuilder)
+]
+
+{ #category : '*bvc-foundation-magritte-gt' }
+MAToManyRelationDescription >> itemsAsEmbeddedForms [
+	self
+		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new
+]
+
+{ #category : '*bvc-foundation-magritte-gt' }
+MAToManyRelationDescription >> itemsAsPhlowLinks [
+	self
+		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemStencil: CFMaPhlowLinkItemStencilBuilder new
+]
+
 { #category : '*bvc-foundation-magritte-gt' }
 MAToManyRelationDescription >> beAccordionList [
 	self

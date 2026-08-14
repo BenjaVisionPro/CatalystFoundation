@@ -135,3 +135,85 @@ CFMaToManyRelationExamples >> compatibilityDescriptionUsesOrdinaryFoundationProt
 	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
 	^ aDescription
 ]
+
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> embeddedFormsDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beSimpleList;
+		itemsAsEmbeddedForms;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> gridOfEmbeddedFormsDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beGrid;
+		itemsAsEmbeddedForms;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> phlowLinksDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beSimpleList;
+		itemsAsPhlowLinks;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaPhlowLinkItemStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> gridOfPhlowLinksDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beGrid;
+		itemsAsPhlowLinks;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaPhlowLinkItemStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> compactItemsCanReplaceAnotherItemRepresentation [
+	<gtExample>
+	| aDescription |
+	aDescription := self embeddedFormsDescription.
+	aDescription itemsAsCompactObjects.
+
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: BrListRowStencilBuilder.
+	^ aDescription
+]
