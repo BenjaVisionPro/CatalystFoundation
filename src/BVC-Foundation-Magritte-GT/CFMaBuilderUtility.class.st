@@ -154,7 +154,7 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 	aContainer addChild: (self newRelationBodyContainerWith: aList).
 
 	canModify ifTrue: [
-		anActionContainer := self newRelationActionContainer.
+		anActionContainer := self newRelationActionContainerFor: aContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaAddItemViewModel new
@@ -322,12 +322,20 @@ CFMaBuilderUtility class >> relationActionContainerMargin [
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newRelationActionContainer [
+CFMaBuilderUtility class >> newRelationActionContainerFor: aRelationContainer [
+	| aBorderWidth |
+	aBorderWidth := aRelationContainer border width.
+
 	^ BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		cellSpacing: 8;
-		margin: self relationActionContainerMargin;
+		margin: (self relationActionContainerMargin
+			+ (BlInsets
+				top: 0
+				right: aBorderWidth
+				bottom: aBorderWidth
+				left: aBorderWidth));
 		padding: (BlInsets top: 5 right: 6 bottom: 5 left: 6);
 		background: (Color white alpha: 0.16);
 		yourself
@@ -602,7 +610,7 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 	aContainer addChild: (self newRelationBodyContainerWith: aList).
 
 	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
-		anActionContainer := self newRelationActionContainer.
+		anActionContainer := self newRelationActionContainerFor: aContainer.
 
 		anAddElement ifNotNil: [ anActionContainer addChild: anAddElement ].
 		aRemoveButton ifNotNil: [ anActionContainer addChild: aRemoveButton ].
@@ -916,7 +924,7 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
 
 	(canAdd or: [ canModify ]) ifTrue: [
-		anActionContainer := self newRelationActionContainer.
+		anActionContainer := self newRelationActionContainerFor: aContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaToOneAddItemViewModel new
