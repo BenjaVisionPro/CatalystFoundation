@@ -52,3 +52,78 @@ CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
 					asElement)
 				using: aDescription ]
 ]
+
+
+{ #category : 'private - focus' }
+CFMaElementBuilder >> navigationRootFor: anElement [
+	| aCurrentElement aRootElement |
+	aCurrentElement := anElement.
+	aRootElement := self form.
+
+	[ aCurrentElement isNotNil ] whileTrue: [
+		(aCurrentElement isKindOf: CFMaFormRootElement)
+			ifTrue: [ aRootElement := aCurrentElement ].
+		aCurrentElement := aCurrentElement parent ].
+
+	^ aRootElement
+]
+
+{ #category : 'private - focus' }
+CFMaElementBuilder >> moveFocusFrom: anElement inDirection: aDirection [
+	BlFocusFinder new
+		direction: aDirection;
+		root: (self navigationRootFor: anElement);
+		referenceElement: anElement;
+		nextFocusDo: #requestFocus ifNone: [  ]
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement [
+	anElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Discard form contents';
+			description: 'Discards the form contents and resets the form to its original state';
+			combination: BlKeyCombination escape;
+			overrideChildren: true;
+			action: [ :anEvent |
+				| aNavigationRoot aNavigationMemento aFuture |
+				aNavigationRoot := self navigationRootFor: anEvent target.
+				aNavigationMemento := aNavigationRoot userData
+					at: GtMagritteViewModel gtMementoSymbol
+					ifAbsent: [ self memento ].
+				aFuture := [ self
+					resetFrom: aNavigationRoot
+					usingModel: aNavigationMemento model
+					andMemento: aNavigationMemento ] asAsyncFuture.
+				GtMagritteBuilderUtility
+					awaitFuture: aFuture
+					from: anEvent currentTarget ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to next form item';
+			description: 'Moves to the next form item in the complete Foundation form.';
+			combination: (BlKeyCombination tab or: BlKeyCombination enter);
+			overrideChildren: true;
+			action: [ :anEvent |
+				self
+					moveFocusFrom: anEvent target
+					inDirection: BlFocusSearchDirectionForward new ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Move to previous form item';
+			description: 'Moves to the previous form item in the complete Foundation form.';
+			combination: BlKeyCombination shiftTab;
+			overrideChildren: true;
+			action: [ :anEvent |
+				self
+					moveFocusFrom: anEvent target
+					inDirection: BlFocusSearchDirectionBackward new ])
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
+	self addShortcutsTo: anElement.
+
+	aDescription blocShortcuts
+		ifNotNil: [ :aBlockReturningCollection |
+			aBlockReturningCollection value do: [ :aShortcut |
+				anElement addShortcut: aShortcut ] ]
+]
