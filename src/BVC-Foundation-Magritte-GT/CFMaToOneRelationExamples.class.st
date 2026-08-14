@@ -79,3 +79,43 @@ CFMaToOneRelationExamples >> readOnlyRelationCannotRemoveCurrentObject [
 		currentValue: anObject) not.
 	^ aDescription
 ]
+
+{ #category : 'examples' }
+CFMaToOneRelationExamples >> compactListRepresentation [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToOneRelationDescription new
+		classes: { CFMagritteEditorExample };
+		beCompactList;
+		yourself.
+
+	self assert: aDescription blocStencil class equals: CFMaToOneElementStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToOneRelationExamples >> columnedListRepresentation [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToOneRelationDescription new
+		classes: { CFMagritteEditorExample };
+		beColumnedList;
+		yourself.
+
+	self assert: aDescription blocStencil class equals: CFMaColumnedToOneElementStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToOneRelationExamples >> compatibilityDescriptionUsesOrdinaryFoundationProtocol [
+	<gtExample>
+	| aDescription |
+	aDescription := CFToOneRelationDescription new
+		classes: { CFMagritteEditorExample };
+		beEmbeddedForm;
+		yourself.
+
+	self assert: aDescription blocStencil class equals: CFMaToOneEmbeddedFormStencilBuilder.
+	^ aDescription
+]
+

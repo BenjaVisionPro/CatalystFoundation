@@ -161,138 +161,7 @@ CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: 
 ]
 
 
-{ #category : 'api - ui' }
-CFMaBuilderUtility class >> newToOneListMemento: aMemento using: aDescription [
-	| aContainer aList anActionContainer isModifiable canAdd anAddElement aRemoveButton |
-	isModifiable := true.
-	canAdd := aDescription newItemStencil isNotNil.
 
-	aContainer := self newRelationEditorContainer.
-
-	aList := self newRelationListUsing: aDescription.
-	aList constraintsDo: [ :c | c padding: self relationListPadding ].
-
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
-
-	aContainer addChild: aList.
-
-	(isModifiable or: [ canAdd ]) ifTrue: [
-		anActionContainer := self newRelationActionContainer.
-
-		canAdd ifTrue: [
-			anAddElement := CFMaToOneAddItemViewModel new
-				memento: aMemento;
-				description: aDescription;
-				stencil: aDescription newItemStencil;
-				asElement.
-			anActionContainer addChild: anAddElement ].
-
-		isModifiable ifTrue: [
-			aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
-			anActionContainer addChild: aRemoveButton.
-			aList
-				when: BrSelectionChanged
-				do: [ :anEvent |
-					self updateToOneRemoveButton: aRemoveButton list: aList ] ].
-
-		aContainer addChild: anActionContainer ].
-
-	self
-		installRelationEditorShortcutsOn: aContainer
-		primaryFocusElement: aList
-		addElement: anAddElement
-		memento: aMemento
-		description: aDescription
-		removeAction: [ :anElement |
-			GtMagritteBuilderUtility
-				write: nil
-				using: aDescription
-				memento: aMemento
-				element: anElement ].
-
-	aContainer withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :theContainer :aSink |
-				self
-					onToOneList: aList
-					sinkUpdate: aSink
-					memento: aMemento
-					description: aDescription.
-				isModifiable ifTrue: [
-					self
-						updateToOneRemoveButton: aRemoveButton
-						sinkUpdate: aSink ] ].
-		(aMemento readObservableValueUsing: aDescription)
-			observe: anElementSink ].
-
-	^ aContainer
-]
-
-{ #category : 'api - ui' }
-CFMaBuilderUtility class >> newEmbeddedToOneMemento: aMemento using: aDescription [
-	| aContainer aFrame anActionContainer isModifiable canAdd anAddElement aRemoveButton |
-	isModifiable := true.
-	canAdd := aDescription newItemStencil isNotNil.
-
-	aContainer := self newRelationEditorContainer.
-
-	aFrame := BrFrame new
-		hMatchParent;
-		vFitContent;
-		yourself.
-	aContainer addChild: aFrame.
-
-	(isModifiable or: [ canAdd ]) ifTrue: [
-		anActionContainer := self newRelationActionContainer.
-
-		canAdd ifTrue: [
-			anAddElement := CFMaToOneAddItemViewModel new
-				memento: aMemento;
-				description: aDescription;
-				stencil: aDescription newItemStencil;
-				asElement.
-			anActionContainer addChild: anAddElement ].
-
-		isModifiable ifTrue: [
-			aRemoveButton := self newToOneRemoveButtonMemento: aMemento using: aDescription.
-			anActionContainer addChild: aRemoveButton ].
-
-		aContainer addChild: anActionContainer ].
-
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aFrame.
-
-	self
-		installRelationEditorShortcutsOn: aContainer
-		primaryFocusElement: aFrame
-		addElement: anAddElement
-		memento: aMemento
-		description: aDescription
-		removeAction: [ :anElement |
-			GtMagritteBuilderUtility
-				write: nil
-				using: aDescription
-				memento: aMemento
-				element: anElement ].
-
-	aContainer withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :theContainer :aSink |
-				self
-					onEmbeddedToOneFrame: aFrame
-					sinkUpdate: aSink
-					memento: aMemento
-					description: aDescription.
-				isModifiable ifTrue: [
-					self
-						updateToOneRemoveButton: aRemoveButton
-						sinkUpdate: aSink ] ].
-		(aMemento readObservableValueUsing: aDescription)
-			observe: anElementSink ].
-
-	^ aContainer
-]
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onToOneList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
@@ -306,25 +175,6 @@ CFMaBuilderUtility class >> onToOneList: aListElement sinkUpdate: aSink memento:
 		description: aDescription)
 ]
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> onEmbeddedToOneFrame: aFrame sinkUpdate: aSink memento: aMemento description: aDescription [
-	| anObject anItemViewModel anElement |
-	anObject := aSink value currentValue.
-	aFrame removeChildren.
-	anObject ifNil: [ ^ self ].
-
-	anItemViewModel := aDescription blocItemViewModelStencil
-		model: anObject;
-		description: aDescription;
-		memento: aMemento;
-		build.
-	anElement := aDescription blocItemStencil
-		listElement: aFrame;
-		rowValue: anItemViewModel;
-		rowIndex: 1;
-		build.
-	aFrame addChild: anElement
-]
 
 { #category : 'private - instance creation' }
 CFMaBuilderUtility class >> newToManyRemoveButtonMemento: aMemento using: aDescription list: aListElement [
@@ -355,43 +205,8 @@ CFMaBuilderUtility class >> updateToManyRemoveButton: aButton list: aListElement
 		ifFalse: [ aButton disable ]
 ]
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> updateToOneRemoveButton: aButton list: aListElement [
-	| hasSelection |
-	hasSelection := false.
-	aListElement selectedIndices do: [ :anIndex |
-		(anIndex between: 1 and: aListElement maxSelectionIndex)
-			ifTrue: [ hasSelection := true ] ].
-	hasSelection
-		ifTrue: [ aButton enable ]
-		ifFalse: [ aButton disable ]
-]
 
-{ #category : 'private - instance creation' }
-CFMaBuilderUtility class >> newToOneRemoveButtonMemento: aMemento using: aDescription [
-	^ BrButton new
-		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: BrGlamorousVectorIcons remove;
-		label: 'Remove';
-		action: [ :anElement |
-			GtMagritteBuilderUtility
-				write: nil
-				using: aDescription
-				memento: aMemento
-				element: anElement ];
-		disable;
-		constraintsDo: [ :c | c flow vertical alignCenter ];
-		yourself
-]
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> updateToOneRemoveButton: aButton sinkUpdate: aSink [
-	| anObject |
-	anObject := aSink value currentValue.
-	anObject
-		ifNil: [ aButton disable ]
-		ifNotNil: [ aButton enable ]
-]
 
 
 
@@ -613,41 +428,6 @@ CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
 ]
 
 
-{ #category : 'api - ui' }
-CFMaBuilderUtility class >> newColumnedToOneListMemento: aMemento using: aDescription [
-	| canAdd anAddElement |
-	canAdd := aDescription newItemStencil isNotNil.
-
-	canAdd ifTrue: [
-		anAddElement := CFMaToOneAddItemViewModel new
-			memento: aMemento;
-			description: aDescription;
-			stencil: aDescription newItemStencil;
-			asElement ].
-
-	^ self
-		newColumnedRelationEditorMemento: aMemento
-		using: aDescription
-		addElement: anAddElement
-		removeButtonBuilder: [ :aList |
-			self newToOneRemoveButtonMemento: aMemento using: aDescription ]
-		removeAction: [ :aList :anElement |
-			GtMagritteBuilderUtility
-				write: nil
-				using: aDescription
-				memento: aMemento
-				element: anElement ]
-		sinkUpdate: [ :aList :aSink |
-			self
-				onToOneList: aList
-				sinkUpdate: aSink
-				memento: aMemento
-				description: aDescription ]
-		updateRemoveButton: [ :aButton :aList :aSink |
-			aSink
-				ifNil: [ self updateToOneRemoveButton: aButton list: aList ]
-				ifNotNil: [ self updateToOneRemoveButton: aButton sinkUpdate: aSink ] ]
-]
 
 
 { #category : 'api - ui' }
@@ -963,6 +743,43 @@ CFMaBuilderUtility class >> relationSelectionFrom: aListElement indices: theIndi
 		ifFalse: [ theItems ]
 ]
 
+
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newCompactListToOneMemento: aMemento using: aDescription [
+	| aList |
+	aList := self newRelationListUsing: aDescription.
+	aList constraintsDo: [ :c | c padding: self relationListPadding ].
+
+	^ self
+		newToOneRelationEditorMemento: aMemento
+		using: aDescription
+		contentElement: aList
+		updateContent: [ :theList :aSink |
+			self
+				onToOneList: theList
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
+]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newColumnedListToOneMemento: aMemento using: aDescription [
+	| aList |
+	aList := self newColumnedRelationListElementMemento: aMemento using: aDescription.
+	self configureColumnedRelationList: aList.
+
+	^ self
+		newToOneRelationEditorMemento: aMemento
+		using: aDescription
+		contentElement: aList
+		updateContent: [ :theList :aSink |
+			self
+				onToOneList: theList
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
+]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> canRemoveToOneUsing: aDescription currentValue: anObject [

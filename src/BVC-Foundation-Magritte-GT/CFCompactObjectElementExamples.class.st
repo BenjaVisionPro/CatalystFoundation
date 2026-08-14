@@ -97,7 +97,7 @@ CFCompactObjectElementExamples >> toOneDefaultItemUsesCompactPresentation [
 	| anObject aViewModel aDescription anElement |
 	anObject := CFMagritteEditorExample exampleDefault.
 	aViewModel := anObject asGtMagritteViewModel.
-	aDescription := CFToOneRelationDescription new.
+	aDescription := MAToOneRelationDescription new.
 	anElement := aDescription blocItemStencil
 		listElement: BrFrame new;
 		rowValue: aViewModel;

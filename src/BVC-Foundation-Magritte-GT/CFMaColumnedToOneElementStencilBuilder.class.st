@@ -1,26 +1,23 @@
 Class {
 	#name : 'CFMaColumnedToOneElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',
-	#category : 'BVC-Foundation-Magritte-GT',
-	#package : 'BVC-Foundation-Magritte-GT'
+	#category : 'BVC-Foundation-Magritte-GT-Stencils',
+	#package : 'BVC-Foundation-Magritte-GT',
+	#tag : 'Stencils'
 }
 
 { #category : 'api - instantiation' }
 CFMaColumnedToOneElementStencilBuilder >> buildDefault [
 	<return: #BlElement>
-	| anElement |
 	(self memento isNil or: [ self description isNil ])
 		ifTrue: [ ^ BrFrame new fitContent ].
 
-	anElement := CFMaBuilderUtility
-		newColumnedToOneListMemento: self memento
-		using: self description.
-
-
 	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: anElement;
+		memento: self memento;
+		description: self description;
+		element: (CFMaBuilderUtility
+			newColumnedListToOneMemento: self memento
+			using: self description);
 		hMatchParent;
 		vFitContentLimited;
 		yourself
