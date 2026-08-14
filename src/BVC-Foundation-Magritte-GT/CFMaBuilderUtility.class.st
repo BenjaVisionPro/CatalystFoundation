@@ -133,7 +133,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDescription list: aList [
 	| aContainer canModify canAdd anActionContainer anAddElement aRemoveButton |
-	canModify := aDescription definitive not.
+	canModify := aDescription isReadOnly not and: [ aDescription definitive not ].
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	aContainer := self newRelationEditorContainer.
@@ -377,6 +377,9 @@ CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: 
 		anExistingItems ifNil: [ ^ self ].
 		aNewItems := anExistingItems copyWithout: anObject.
 		anExistingItems = aNewItems ifTrue: [ ^ self ].
+		[ aDescription validate: aNewItems ]
+			on: Error
+			do: [ :anException | ^ self ].
 		GtMagritteBuilderUtility
 			write: aNewItems
 			using: aDescription
@@ -485,7 +488,7 @@ CFMaBuilderUtility class >> newRelationListItemDataBinderUsing: aDescription [
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newColumnedRelationListMemento: aMemento using: aDescription [
 	| canModify canAdd anAddElement aRemoveButtonBuilder |
-	canModify := aDescription definitive not.
+	canModify := aDescription isReadOnly not and: [ aDescription definitive not ].
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	canAdd ifTrue: [

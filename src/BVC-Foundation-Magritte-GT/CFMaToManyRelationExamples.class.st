@@ -73,3 +73,65 @@ CFMaToManyRelationExamples >> gridElement [
 	self assert: anElement class equals: GtMagritteValidatedFieldElement.
 	^ anElement
 ]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> ordinaryDescriptionUsesFoundationDefaults [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> simpleListDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := self expandableListDescription.
+	aDescription beSimpleList.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> columnedListDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := self expandableListDescription.
+	aDescription beColumnedList.
+
+	self assert: aDescription blocListStencil class equals: CFMaColumnedListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> accordionListDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beAccordionList;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaAccordionListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: CFMaExpanderItemViewModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> compatibilityDescriptionUsesOrdinaryFoundationProtocol [
+	<gtExample>
+	| aDescription |
+	aDescription := CFToManyRelationDescription new beGrid; yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]

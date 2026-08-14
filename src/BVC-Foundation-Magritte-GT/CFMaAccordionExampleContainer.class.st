@@ -14,7 +14,7 @@ CFMaAccordionExampleContainer >> descriptionItems [
 	<magritteDescription>
 	| aReferenceModel |
 	aReferenceModel := CFMagritteEditorExample new.
-	^ CFToManyRelationDescription new
+	^ MAToManyRelationDescription new
 		accessor: #items;
 		label: 'Items';
 		classes: { CFMagritteEditorExample };
