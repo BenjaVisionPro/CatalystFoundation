@@ -12,11 +12,10 @@ CFMaFormStencilBuilder >> buildDefault [
 	three standard insertion points that GtMagritteElementBuilder uses."
 	aForm := BrVerticalPane new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		background: (Color black alpha: 0.1);
+		background: (Color black alpha: 0.035);
 		outskirts: BlOutskirts inside;
-		border: (BlBorder paint: (Color blue alpha: 0.5) width: 1);
 		addAptitude: CFLightBorderAptitude new beRaised;
-		margin: (BlInsets all: 8);
+		margin: (BlInsets all: 6);
 		hFitContentLimited;
 		vFitContent.
 
@@ -26,11 +25,11 @@ CFMaFormStencilBuilder >> buildDefault [
 		beFieldContainer;
 		beToolbarContainer.
 	aGrid
-		cellSpacing: 0;
+		cellSpacing: 4;
 		columnCount: 2;
 		hFitContentLimited;
 		vFitContent;
-		padding: (BlInsets top: 12 right: 14 bottom: 12 left: 14).
+		padding: (BlInsets top: 14 right: 16 bottom: 14 left: 16).
 	aForm addChild: aGrid.
 	^ aForm
 ]
