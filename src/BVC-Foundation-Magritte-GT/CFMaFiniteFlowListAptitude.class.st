@@ -10,22 +10,14 @@ Class {
 
 { #category : 'initialization' }
 CFMaFiniteFlowListAptitude >> initialize [
-	BrAptitude initialize.
+	super initialize.
 
-	items := #().
-	itemElements := #().
-	selection := BlSelection empty.
-
-	listElement := BlElement new.
-	listElement
-		layout: BlFlowLayout horizontal;
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical fitContent ].
-
-	self itemStencilBuilder: BrSimpleListRowStencilBuilder new.
-
+	"BrFlowListAptitude installs its list through an internal match-parent
+	 scrollable. Foundation relation grids are finite content inside a form whose
+	 outer element owns scrolling, so replace only that installation change while
+	 retaining Brick's normal aptitude state and listener initialization."
+	self changes changes removeAll.
 	self
 		addChangeAddChildAs: #(content list)
-		with: [ listElement ]
+		with: [ self listElement ]
 ]
