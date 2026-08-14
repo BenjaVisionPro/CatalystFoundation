@@ -102,25 +102,9 @@ CFMaBuilderUtility class >> newGridListMemento: aMemento using: aDescription [
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> configureGridRelationList: aList [
-	| aScrollable |
-	aList
-		hMatchParent;
-		vFitContent.
-
-	aScrollable := aList childNamed: #scrollable.
-	aScrollable constraintsDo: [ :c |
-		c horizontal matchParent.
-		c vertical fitContent ].
-	^ aList
-]
-
-
-{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 	| aList |
-	aList := BrFlowList new.
-	self configureGridRelationList: aList.
+	aList := CFMaFiniteFlowList new.
 	aList
 		stencil: ([ :anItemViewModel :anItemIndex :anInternalListElement |
 			| anItemContent anItemElement |
