@@ -6,11 +6,6 @@ Class {
 }
 
 
-{ #category : 'converting' }
-CFMaFormRootElement >> asScrollableElement [
-	^ super asScrollableElement
-]
-
 { #category : 'initialization' }
 CFMaFormRootElement >> initialize [
 	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
