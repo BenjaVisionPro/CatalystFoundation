@@ -12,12 +12,14 @@ Class {
 CFMaFiniteFlowListAptitude >> initialize [
 	super initialize.
 
-	"BrFlowListAptitude installs its list through an internal match-parent
-	 scrollable. Foundation relation grids are finite content inside a form whose
-	 outer element owns scrolling, so replace only that installation change while
-	 retaining Brick's normal aptitude state and listener initialization."
+	"BrFlowListAptitude creates the flow content and installs it inside its own
+	 match-parent scrollable. Foundation relation grids are finite content inside
+	 a form whose outer element owns scrolling. Keep Brick's normal flow-list
+	 state, stencil, selection and listeners, but replace only that composition
+	 before the aptitude is installed."
+	scrollableElement removeChild: listElement.
 	self changes changes removeAll.
 	self
 		addChangeAddChildAs: #(content list)
-		with: [ self listElement ]
+		with: [ listElement ]
 ]
