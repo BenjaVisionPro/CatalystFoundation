@@ -143,7 +143,7 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addChild: aList.
+	aContainer addChild: (self newRelationBodyContainerWith: aList).
 
 	canModify ifTrue: [
 		anActionContainer := self newRelationActionContainer.
@@ -265,7 +265,7 @@ CFMaBuilderUtility class >> updateToManyRemoveButton: aButton list: aListElement
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationEditorPadding [
-	^ BlInsets top: 0 right: 0 bottom: 0 left: 0
+	^ BlInsets empty
 ]
 
 { #category : 'private - relation editor' }
@@ -275,23 +275,37 @@ CFMaBuilderUtility class >> relationEditorCellSpacing [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationListPadding [
-	^ BlInsets top: 0 right: 0 bottom: 0 left: 0
+	^ BlInsets empty
 ]
 
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationActionContainerMargin [
-	^ BlInsets all: 8
+	^ BlInsets empty
 ]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationActionContainer [
 	^ BrHorizontalPane new
-		fitContent;
+		hMatchParent;
+		vFitContent;
 		cellSpacing: 8;
 		margin: self relationActionContainerMargin;
+		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
+		background: (Color white alpha: 0.18);
 		yourself
 ]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement [
+	^ BrFrame new
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets all: 8);
+		addChild: anElement;
+		yourself
+]
+
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationEditorContainer [
@@ -304,6 +318,7 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
 		outskirts: BlOutskirts inside;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		clipChildren: true;
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
 			lowerBodyInside;
@@ -858,7 +873,7 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	aContainer := self newRelationEditorContainer.
-	aContainer addChild: aContentElement.
+	aContainer addChild: (self newRelationBodyContainerWith: aContentElement).
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
 
 	(canAdd or: [ canModify ]) ifTrue: [

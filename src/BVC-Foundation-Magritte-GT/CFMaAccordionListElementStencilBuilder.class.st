@@ -17,13 +17,15 @@ CFMaAccordionListElementStencilBuilder >> buildDefault [
 		newAccordionListMemento: self memento
 		using: self description.
 	anAccordionElement
-		matchParent;
+		hMatchParent;
+		vFitContentLimited;
 		background: Color transparent.
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
 		element: anAccordionElement;
-		matchParent;
+		hMatchParent;
+		vFitContentLimited;
 		yourself
 ]

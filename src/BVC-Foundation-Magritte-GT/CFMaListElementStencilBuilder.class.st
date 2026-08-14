@@ -17,9 +17,6 @@ CFMaListElementStencilBuilder >> buildDefault [
 	aFlowElement := CFMaBuilderUtility
 		newFlowListMemento: self memento
 		using: self description.
-	aFlowElement constraintsDo: [ :c | c minHeight: 200 ].
-
-
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description

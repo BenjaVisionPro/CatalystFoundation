@@ -19,13 +19,15 @@ CFMaExpandableListElementStencilBuilder >> buildDefault [
 		newExpandableListMemento: self memento
 		using: self description.
 	aListElement
-		matchParent;
+		hMatchParent;
+		vFitContentLimited;
 		background: Color transparent.
 
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
 		element: aListElement;
-		matchParent;
+		hMatchParent;
+		vFitContentLimited;
 		yourself
 ]
