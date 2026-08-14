@@ -302,7 +302,7 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 		background: (Color black alpha: 0.025);
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
 		outskirts: BlOutskirts inside;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
 			lowerBodyInside;

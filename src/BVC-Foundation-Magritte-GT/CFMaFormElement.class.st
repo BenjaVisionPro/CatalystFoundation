@@ -49,7 +49,7 @@ CFMaFormElement >> initialize [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
 		background: (Color black alpha: 0.025);
 		border: (BlBorder paint: (Color black alpha: 0.13) width: 1);
-		margin: (BlInsets all: 4);
+		margin: BlInsets empty;
 		cellSpacing: 0;
 		hMatchParent;
 		vFitContent

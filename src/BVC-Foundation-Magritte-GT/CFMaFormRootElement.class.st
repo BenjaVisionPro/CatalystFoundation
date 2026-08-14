@@ -19,6 +19,8 @@ CFMaFormRootElement >> initialize [
 
 	self
 		background: CFInterfaceLighting backgroundPaint;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
 		hMatchParent;
 		vFitContent
 ]
