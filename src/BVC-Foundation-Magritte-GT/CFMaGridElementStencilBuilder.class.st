@@ -24,6 +24,6 @@ CFMaGridElementStencilBuilder >> buildDefault [
 		description: self description
 		element: aGridElement;
 		hMatchParent;
-		vFitContentLimited;
+		vFitContent;
 		yourself
 ]

@@ -23,6 +23,7 @@ CFMaFormRootElement >> initialize [
 { #category : 'configuration' }
 CFMaFormRootElement >> beEmbedded [
 	self
+		background: Color transparent;
 		hMatchParent;
 		vFitContent
 ]
