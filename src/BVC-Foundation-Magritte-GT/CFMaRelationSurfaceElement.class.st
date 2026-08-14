@@ -104,14 +104,13 @@ CFMaRelationSurfaceElement >> drawChildrenOnSpartaCanvas: aCanvas [
 	anInnerBounds := anInset corner: self extent - anInset.
 
 	aCanvas clip
-		by: [
-			aCanvas shape
-				roundedRectangle: anInnerBounds
-				radii: {
-					anInnerRadius.
-					anInnerRadius.
-					anInnerRadius.
-					anInnerRadius } ]
+		by: (aCanvas shape
+			roundedRectangle: anInnerBounds
+			radii: {
+				anInnerRadius.
+				anInnerRadius.
+				anInnerRadius.
+				anInnerRadius })
 		during: [
 			self children sortedByElevation
 				do: [ :anElement | anElement fullDrawOnSpartaCanvas: aCanvas ] ]
