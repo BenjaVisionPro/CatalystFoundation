@@ -84,3 +84,22 @@ CFSmoothScrollableElement >> smoothScrollBy: aPoint [
 			smoothScrollBy: aDelta
 			during: self defaultSmoothScrollDuration ]
 ]
+
+
+{ #category : 'scrolling - input' }
+CFSmoothScrollableElement >> smoothScrollWheelEvent: anEvent [
+	| dY |
+	anEvent vector isZero ifTrue: [ ^ false ].
+	anEvent isPrimarilyHorizontal ifTrue: [ ^ false ].
+
+	dY := anEvent isScrollDown
+		ifTrue: [ anEvent vector length negated ]
+		ifFalse: [
+			anEvent isScrollUp
+				ifTrue: [ anEvent vector length ]
+				ifFalse: [ 0 ] ].
+	dY isZero ifTrue: [ ^ false ].
+
+	self smoothScrollBy: 0 @ (dY * 10.0).
+	^ true
+]

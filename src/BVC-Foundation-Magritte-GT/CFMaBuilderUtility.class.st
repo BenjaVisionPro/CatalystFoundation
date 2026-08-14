@@ -125,6 +125,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 			anItemElement ] asStencilBuilder: BrListRowStencilBuilder);
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ].
+	self installOuterFormScrollForwardingOn: aList.
 	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
 ]
@@ -397,6 +398,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
+	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
 	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
@@ -421,11 +423,20 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
+	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
 	aList addAptitude: CFMaFocusWithinAptitude.
 	^ aList
 ]
 
+
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> installOuterFormScrollForwardingOn: aListElement [
+	aListElement addEventFilter: CFMaRelationListScrollEventFilter new.
+	^ aListElement
+]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installListClickToPhlowSelectOn: aListElement [
@@ -596,6 +607,7 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 
+	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
 	self addReferenceColumnsTo: aList memento: aMemento using: aDescription.
 	^ aList
