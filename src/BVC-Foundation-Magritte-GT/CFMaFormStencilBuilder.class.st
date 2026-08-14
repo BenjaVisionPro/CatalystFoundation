@@ -14,7 +14,7 @@ CFMaFormStencilBuilder >> buildDefault [
 		background: Color transparent;
 		border: BlBorder empty;
 		margin: BlInsets empty;
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent.
 
 	aGrid := BrHorizontalGrid new.
@@ -25,7 +25,7 @@ CFMaFormStencilBuilder >> buildDefault [
 	aGrid
 		cellSpacing: 4;
 		columnCount: 2;
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent;
 		padding: (BlInsets top: 14 right: 16 bottom: 14 left: 16).
 	aForm addChild: aGrid.
