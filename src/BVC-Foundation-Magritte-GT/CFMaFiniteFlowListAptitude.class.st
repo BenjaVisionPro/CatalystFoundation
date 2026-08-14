@@ -23,3 +23,15 @@ CFMaFiniteFlowListAptitude >> initialize [
 		addChangeAddChildAs: #(content list)
 		with: [ listElement ]
 ]
+
+
+{ #category : 'accessing' }
+CFMaFiniteFlowListAptitude >> contentElement [
+	^ listElement
+]
+
+{ #category : 'updating' }
+CFMaFiniteFlowListAptitude >> updateList [
+	super updateList.
+	widget ifNotNil: [ widget updateResponsiveItemWidths ]
+]

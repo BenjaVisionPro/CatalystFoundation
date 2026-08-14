@@ -3,6 +3,10 @@
 Class {
 	#name : 'CFMaFiniteFlowList',
 	#superclass : 'BrFlowList',
+	#instVars : [
+		'minimumItemWidth',
+		'itemSpacing'
+	],
 	#category : 'BVC-Foundation-Magritte-GT-Elements',
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Elements'
@@ -12,8 +16,65 @@ Class {
 CFMaFiniteFlowList >> initialize [
 	super initialize.
 
+	minimumItemWidth := 280.
+	itemSpacing := 8.
+
 	self
 		aptitude: CFMaFiniteFlowListAptitude new;
 		hMatchParent;
-		vFitContent
+		vFitContent;
+		when: BlElementExtentChangedEvent
+			do: [ :anEvent | anEvent currentTarget updateResponsiveItemWidths ]
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> itemSpacing [
+	^ itemSpacing
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> itemSpacing: aNumber [
+	itemSpacing := aNumber.
+	self updateResponsiveItemWidths
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> minimumItemWidth [
+	^ minimumItemWidth
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> minimumItemWidth: aNumber [
+	minimumItemWidth := aNumber.
+	self updateResponsiveItemWidths
+]
+
+{ #category : 'private - layout' }
+CFMaFiniteFlowList >> responsiveContentElement [
+	self aptitudeDo: [ :anAptitude |
+		(anAptitude isKindOf: CFMaFiniteFlowListAptitude)
+			ifTrue: [ ^ anAptitude contentElement ] ].
+	^ nil
+]
+
+{ #category : 'private - layout' }
+CFMaFiniteFlowList >> responsiveItemWidthFor: anAvailableWidth [
+	| aColumnCount |
+	anAvailableWidth <= 0 ifTrue: [ ^ minimumItemWidth ].
+
+	aColumnCount := (anAvailableWidth / (minimumItemWidth + itemSpacing)) floor max: 1.
+	^ ((anAvailableWidth / aColumnCount) - itemSpacing) max: minimumItemWidth
+]
+
+{ #category : 'layout' }
+CFMaFiniteFlowList >> updateResponsiveItemWidths [
+	| aContentElement anItemWidth |
+	self width <= 0 ifTrue: [ ^ self ].
+
+	aContentElement := self responsiveContentElement.
+	aContentElement ifNil: [ ^ self ].
+
+	anItemWidth := self responsiveItemWidthFor: self width.
+	aContentElement children do: [ :anItemElement |
+		anItemElement hExact: anItemWidth ].
 ]

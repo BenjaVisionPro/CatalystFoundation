@@ -102,8 +102,8 @@ CFMaBuilderUtility class >> newGridListMemento: aMemento using: aDescription [
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> relationGridItemWidth [
-	^ 320
+CFMaBuilderUtility class >> relationGridMinimumItemWidth [
+	^ 280
 ]
 
 
@@ -112,6 +112,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 	| aList |
 	aList := CFMaFiniteFlowList new.
 	aList
+		minimumItemWidth: self relationGridMinimumItemWidth;
 		stencil: ([ :anItemViewModel :anItemIndex :anInternalListElement |
 			| anItemContent anItemElement |
 			anItemContent := aDescription blocItemStencil
@@ -120,7 +121,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 				rowIndex: anItemIndex;
 				build.
 			anItemElement := BrFrame new
-				hExact: self relationGridItemWidth;
+				hExact: self relationGridMinimumItemWidth;
 				vFitContent;
 				margin: (BlInsets all: 4);
 				addChild: anItemContent;
