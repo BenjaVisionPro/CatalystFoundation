@@ -16,7 +16,7 @@ CFMaToOnePhlowLinkStencilBuilder >> buildDefault [
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
-		element: (CFMaBuilderUtility
+		element: (CFMaBuilderUtility;
 			newPhlowLinkToOneMemento: self memento
 			using: self description);
 		hMatchParent;

@@ -16,7 +16,7 @@ CFMaToOneEmbeddedFormStencilBuilder >> buildDefault [
 	^ GtMagritteValidatedFieldElement new
 		memento: self memento
 		description: self description
-		element: (CFMaBuilderUtility
+		element: (CFMaBuilderUtility;
 			newEmbeddedFormToOneMemento: self memento
 			using: self description);
 		hMatchParent;
