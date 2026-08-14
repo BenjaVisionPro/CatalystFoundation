@@ -1,3 +1,5 @@
+"I provide executable examples of Foundation representations for Magritte to-one relations."
+
 Class {
 	#name : 'CFMaToOneRelationExamples',
 	#superclass : 'Object',
@@ -106,16 +108,4 @@ CFMaToOneRelationExamples >> columnedListRepresentation [
 	^ aDescription
 ]
 
-{ #category : 'examples' }
-CFMaToOneRelationExamples >> compatibilityDescriptionUsesOrdinaryFoundationProtocol [
-	<gtExample>
-	| aDescription |
-	aDescription := CFToOneRelationDescription new
-		classes: { CFMagritteEditorExample };
-		beEmbeddedForm;
-		yourself.
-
-	self assert: aDescription blocStencil class equals: CFMaToOneEmbeddedFormStencilBuilder.
-	^ aDescription
-]
 

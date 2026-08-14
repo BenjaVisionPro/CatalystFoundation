@@ -1,3 +1,5 @@
+"I am responsible for presenting a to-one relation as a compact Foundation list editor."
+
 Class {
 	#name : 'CFMaToOneElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',

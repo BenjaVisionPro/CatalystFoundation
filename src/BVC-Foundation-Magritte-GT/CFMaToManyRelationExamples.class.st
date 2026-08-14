@@ -1,3 +1,5 @@
+"I provide executable examples of Foundation layouts and item representations for Magritte to-many relations."
+
 Class {
 	#name : 'CFMaToManyRelationExamples',
 	#superclass : 'Object',
@@ -125,16 +127,6 @@ CFMaToManyRelationExamples >> accordionListDescription [
 	^ aDescription
 ]
 
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> compatibilityDescriptionUsesOrdinaryFoundationProtocol [
-	<gtExample>
-	| aDescription |
-	aDescription := CFToManyRelationDescription new beGrid; yourself.
-
-	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
-	^ aDescription
-]
 
 
 { #category : 'examples' }

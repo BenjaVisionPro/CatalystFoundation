@@ -1,13 +1,13 @@
 Extension { #name : 'CFObject' }
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 CFObject >> asGtMagritteViewModel [
 	"Hijack GT's Magritte rendering while preserving the GT rendering contract."
 	^ CFMaViewModel forObject: self
 ]
 
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 CFObject >> gtMagritteFor: aView [
 	<gtView>
 	self hasMagritteDescription ifFalse: [ ^ aView empty ].

@@ -1,3 +1,5 @@
+"I am responsible for presenting a to-many relation as a columned Foundation list editor."
+
 Class {
 	#name : 'CFMaColumnedListElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',

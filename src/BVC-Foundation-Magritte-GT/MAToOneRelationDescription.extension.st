@@ -1,40 +1,40 @@
 Extension { #name : 'MAToOneRelationDescription' }
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> beEmbeddedForm [
 	self blocStencil: CFMaToOneEmbeddedFormStencilBuilder new
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> bePhlowLink [
 	self blocStencil: CFMaToOnePhlowLinkStencilBuilder new
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> beCompactList [
 	self blocStencil: CFMaToOneElementStencilBuilder new
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> beColumnedList [
 	self blocStencil: CFMaColumnedToOneElementStencilBuilder new
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemViewModelStencil [
 	^ self
 		propertyAt: #blocItemViewModelStencil
 		ifAbsent: [ GtMagritteModelStencilBuilder new ]
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemViewModelStencil: aStencil [
 	self
 		propertyAt: #blocItemViewModelStencil
 		put: (aStencil asStencilBuilder: GtMagritteModelStencilBuilder)
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemStencil [
 	^ self
 		propertyAt: #blocItemStencil
@@ -45,14 +45,14 @@ MAToOneRelationDescription >> blocItemStencil [
 					create ] asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemStencil: aStencil [
 	self
 		propertyAt: #blocItemStencil
 		put: (aStencil asStencilBuilder: BrListRowStencilBuilder)
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> newItemStencil [
 	| theClasses |
 	^ self
@@ -64,7 +64,7 @@ MAToOneRelationDescription >> newItemStencil [
 				ifFalse: [ [ :aClass | aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder ] ]
 ]
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> newItemStencil: aStencil [
 	(aStencil isKindOf: BrStencil)
 		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].

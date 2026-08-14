@@ -1,3 +1,5 @@
+"I am responsible for presenting a to-many relation using a Foundation grid layout."
+
 Class {
 	#name : 'CFMaGridElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',

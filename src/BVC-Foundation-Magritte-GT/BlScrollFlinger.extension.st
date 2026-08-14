@@ -1,6 +1,6 @@
 Extension { #name : 'BlScrollFlinger' }
 
-{ #category : '*bvc-foundation-magritte-gt' }
+{ #category : '*BVC-Foundation-Magritte-GT' }
 BlScrollFlinger >> cfSpringBackFrom: aStartPoint min: aMinPoint max: aMaxPoint [
 	| didStart |
 

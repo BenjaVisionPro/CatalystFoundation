@@ -1,3 +1,5 @@
+"I am responsible for presenting a to-one relation as an embedded Foundation Magritte form."
+
 Class {
 	#name : 'CFMaToOneEmbeddedFormStencilBuilder',
 	#superclass : 'GtMagritteDescriptionElementStencilBuilder',

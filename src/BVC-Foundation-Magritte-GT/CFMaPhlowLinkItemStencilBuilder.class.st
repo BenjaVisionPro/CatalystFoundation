@@ -1,3 +1,5 @@
+"I am responsible for presenting one relation item as a Foundation Phlow link."
+
 Class {
 	#name : 'CFMaPhlowLinkItemStencilBuilder',
 	#superclass : 'BrListRowStencilBuilder',
