@@ -593,7 +593,7 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 		anAddElement ifNotNil: [ anActionContainer addChild: anAddElement ].
 		aRemoveButton ifNotNil: [ anActionContainer addChild: aRemoveButton ].
 
-		aContainer addChild: anActionContainer ].
+		aContainer addContentChild: anActionContainer ].
 
 	aRemoveButton ifNotNil: [
 		aList
@@ -918,7 +918,7 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 				using: aDescription.
 			anActionContainer addChild: aRemoveButton ].
 
-		aContainer addChild: anActionContainer ].
+		aContainer addContentChild: anActionContainer ].
 
 	self
 		installRelationEditorShortcutsOn: aContainer

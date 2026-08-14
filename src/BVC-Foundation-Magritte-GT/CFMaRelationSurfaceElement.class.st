@@ -28,6 +28,7 @@ CFMaRelationSurfaceElement >> initialize [
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
 		outskirts: BlOutskirts inside;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius);
+		clipChildren: true;
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
 			lowerBodyInside;
