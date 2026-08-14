@@ -11,11 +11,9 @@ CFMaFormStencilBuilder >> buildDefault [
 	"GT Magritte owns field construction. A form stencil only supplies the
 	three standard insertion points that GtMagritteElementBuilder uses."
 	aForm := BrVerticalPane new
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		background: (Color black alpha: 0.035);
-		outskirts: BlOutskirts inside;
-		addAptitude: CFLightBorderAptitude new beRaised;
-		margin: (BlInsets all: 6);
+		background: Color transparent;
+		border: BlBorder empty;
+		margin: BlInsets empty;
 		hFitContentLimited;
 		vFitContent.
 

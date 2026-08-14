@@ -294,27 +294,20 @@ CFMaBuilderUtility class >> newRelationActionContainer [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationEditorContainer [
-	| aContainer |
-	aContainer := BrVerticalPane new
+	^ BrVerticalPane new
 		matchParent;
 		vFitContent;
 		cellSpacing: self relationEditorCellSpacing;
 		padding: self relationEditorPadding;
-		border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1);
-		background: Color white;
-		yourself.
-
-	aContainer
-		when: BlFocusInEvent
-		do: [ :anEvent |
-			aContainer border: (BlBorder paint: BrGlamorousColors focusedEditorBorderColor width: 1) ];
-		when: BlFocusOutEvent
-		do: [ :anEvent |
-			aContainer border: (BlBorder paint: BrGlamorousColors disabledButtonBorderColor width: 1) ].
-
-	^ aContainer
+		background: (Color black alpha: 0.025);
+		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
+		outskirts: BlOutskirts inside;
+		addAptitude: (CFLightBorderAptitude new
+			beFlat;
+			lowerBodyInside;
+			yourself);
+		yourself
 ]
-
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newAutoSizingRelationEditorContainer [

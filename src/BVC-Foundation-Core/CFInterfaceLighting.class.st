@@ -9,9 +9,10 @@ Class {
 
 { #category : 'accessing' }
 CFInterfaceLighting class >> backgroundPaint [
+	"Deliberately high contrast while the shared light direction is being verified visually."
 	^ (BlLinearGradientPaint direction: self lightDirection asPoint)
-		from: (Color black alpha: 0.10)
-		to: (Color black alpha: 0.075)
+		from: (Color black alpha: 0.30)
+		to: Color transparent
 ]
 
 { #category : 'accessing' }
