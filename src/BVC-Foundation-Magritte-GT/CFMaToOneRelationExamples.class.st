@@ -42,9 +42,9 @@ CFMaToOneRelationExamples >> requiredRelationCannotRemoveCurrentObject [
 		beRequired;
 		yourself.
 
-	self deny: (CFMaBuilderUtility
+	self assert: (CFMaBuilderUtility
 		canRemoveToOneUsing: aDescription
-		currentValue: anObject).
+		currentValue: anObject) not.
 	^ aDescription
 ]
 
@@ -74,8 +74,8 @@ CFMaToOneRelationExamples >> readOnlyRelationCannotRemoveCurrentObject [
 		beReadOnly;
 		yourself.
 
-	self deny: (CFMaBuilderUtility
+	self assert: (CFMaBuilderUtility
 		canRemoveToOneUsing: aDescription
-		currentValue: anObject).
+		currentValue: anObject) not.
 	^ aDescription
 ]
