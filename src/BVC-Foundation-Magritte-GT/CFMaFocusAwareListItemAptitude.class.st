@@ -12,8 +12,8 @@ CFMaFocusAwareListItemAptitude >> initialize [
 	self
 		when: CFMaFocusWithinState uniqueInstance & BlElementState selected
 		style: [ :aStyle |
-			aStyle background: self theme item selectedColor ];
+			aStyle background: (Color black alpha: 0.08) ];
 		when: CFMaFocusWithinState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
-			aStyle background: self theme item hoveredColor ]
+			aStyle background: (Color black alpha: 0.04) ]
 ]

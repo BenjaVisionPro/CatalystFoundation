@@ -55,7 +55,7 @@ CFCompactObjectElement >> initialize [
 		hMatchParent;
 		vFitContent;
 		cellSpacing: 8;
-		padding: (BlInsets top: 4 left: 6 bottom: 4 right: 6);
+		padding: (BlInsets top: 5 left: 6 bottom: 5 right: 6);
 		layout: BlLinearLayout horizontal alignCenterLeft;
 		addChild: iconContainer as: #icon;
 		addChild: titleElement as: #title;

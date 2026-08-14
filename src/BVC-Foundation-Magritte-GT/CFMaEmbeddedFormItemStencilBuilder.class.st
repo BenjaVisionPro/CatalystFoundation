@@ -18,7 +18,7 @@ CFMaEmbeddedFormItemStencilBuilder >> buildDefault [
 	^ BrFrame new
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets bottom: 8);
+		margin: (BlInsets bottom: 6);
 		addChild: anEmbeddedElement;
 		yourself
 ]

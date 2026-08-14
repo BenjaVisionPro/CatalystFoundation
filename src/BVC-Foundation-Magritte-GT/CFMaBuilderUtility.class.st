@@ -298,8 +298,8 @@ CFMaBuilderUtility class >> newRelationActionContainer [
 		vFitContent;
 		cellSpacing: 8;
 		margin: self relationActionContainerMargin;
-		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
-		background: (Color white alpha: 0.18);
+		padding: (BlInsets top: 5 right: 6 bottom: 5 left: 6);
+		background: (Color white alpha: 0.16);
 		yourself
 ]
 
@@ -308,7 +308,7 @@ CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement [
 	^ BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets all: 8);
+		padding: (BlInsets all: 6);
 		addChild: anElement;
 		yourself
 ]

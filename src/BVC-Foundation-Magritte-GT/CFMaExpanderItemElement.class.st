@@ -43,7 +43,7 @@ CFMaExpanderItemElement >> initialize [
 	self
 		vFitContent;
 		hMatchParent;
-		margin: (BlInsets all: 4);
+		margin: (BlInsets top: 2 right: 0 bottom: 2 left: 0);
 		aptitude: ((GtCoderExpanderAptitude new padding: BlInsets empty)
 			+ (BrStyleCommonAptitude new
 				default: [ :aStyle | aStyle background: Color transparent ]));
