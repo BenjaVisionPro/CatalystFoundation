@@ -56,6 +56,23 @@ CFMaRelationSurfaceElement >> addContentChild: anElement [
 	^ anElement
 ]
 
+
+{ #category : 'children' }
+CFMaRelationSurfaceElement >> addFooterChild: anElement [
+	| anInnerRadius |
+	anInnerRadius := (cornerRadius - self border width) max: 0.
+
+	anElement geometry: (BlRoundedRectangleGeometry
+		cornerRadii: (BlCornerRadii new
+			topLeft: 0;
+			topRight: 0;
+			bottomRight: anInnerRadius;
+			bottomLeft: anInnerRadius;
+			yourself)).
+
+	^ self addContentChild: anElement
+]
+
 { #category : 'accessing' }
 CFMaRelationSurfaceElement >> cornerRadius [
 	^ cornerRadius
