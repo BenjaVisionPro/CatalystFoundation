@@ -151,10 +151,10 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addChild: (self newRelationBodyContainerWith: aList).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aList).
 
 	canModify ifTrue: [
-		anActionContainer := self newRelationActionContainerFor: aContainer.
+		anActionContainer := self newRelationActionContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaAddItemViewModel new
@@ -170,7 +170,7 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 			list: aList.
 		anActionContainer addChild: aRemoveButton.
 
-		aContainer addChild: anActionContainer.
+		aContainer addContentChild: anActionContainer.
 
 		aList
 			when: BrSelectionChanged
@@ -322,20 +322,12 @@ CFMaBuilderUtility class >> relationActionContainerMargin [
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newRelationActionContainerFor: aRelationContainer [
-	| aBorderWidth |
-	aBorderWidth := aRelationContainer border width.
-
+CFMaBuilderUtility class >> newRelationActionContainer [
 	^ BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		cellSpacing: 8;
-		margin: (self relationActionContainerMargin
-			+ (BlInsets
-				top: 0
-				right: aBorderWidth
-				bottom: aBorderWidth
-				left: aBorderWidth));
+		margin: self relationActionContainerMargin;
 		padding: (BlInsets top: 5 right: 6 bottom: 5 left: 6);
 		background: (Color white alpha: 0.16);
 		yourself
@@ -354,21 +346,7 @@ CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationEditorContainer [
-	^ BrVerticalPane new
-		matchParent;
-		vFitContent;
-		focusability: BlFocusability after;
-		cellSpacing: self relationEditorCellSpacing;
-		padding: self relationEditorPadding;
-		background: (Color black alpha: 0.025);
-		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
-		outskirts: BlOutskirts inside;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
-		clipChildren: true;
-		addAptitude: (CFLightBorderAptitude new
-			beFlat;
-			lowerBodyInside;
-			yourself);
+	^ CFMaRelationSurfaceElement new
 		yourself
 ]
 
@@ -607,10 +585,10 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addChild: (self newRelationBodyContainerWith: aList).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aList).
 
 	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
-		anActionContainer := self newRelationActionContainerFor: aContainer.
+		anActionContainer := self newRelationActionContainer.
 
 		anAddElement ifNotNil: [ anActionContainer addChild: anAddElement ].
 		aRemoveButton ifNotNil: [ anActionContainer addChild: aRemoveButton ].
@@ -920,11 +898,11 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	aContainer := self newRelationEditorContainer.
-	aContainer addChild: (self newRelationBodyContainerWith: aContentElement).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aContentElement).
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
 
 	(canAdd or: [ canModify ]) ifTrue: [
-		anActionContainer := self newRelationActionContainerFor: aContainer.
+		anActionContainer := self newRelationActionContainer.
 
 		canAdd ifTrue: [
 			anAddElement := CFMaToOneAddItemViewModel new
