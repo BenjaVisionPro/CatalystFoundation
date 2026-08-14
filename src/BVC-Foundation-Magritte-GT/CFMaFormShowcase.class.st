@@ -180,6 +180,18 @@ CFMaFormShowcase >> derivedValueDescription [
 		yourself
 ]
 
+
+{ #category : 'descriptions - relations' }
+CFMaFormShowcase >> showcaseItemReferenceDescription [
+	^ MAContainer new
+		add: (MAStringDescription new
+			accessor: #label;
+			label: 'Label';
+			priority: 10;
+			yourself);
+		yourself
+]
+
 { #category : 'accessing' }
 CFMaFormShowcase >> embeddedObject [
 	^ embeddedObject
@@ -200,6 +212,7 @@ CFMaFormShowcase >> embeddedObjectDescription [
 		group: 'To one';
 		priority: 100;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beEmbeddedForm;
 		yourself
 ]
@@ -224,6 +237,7 @@ CFMaFormShowcase >> phlowObjectDescription [
 		group: 'To one';
 		priority: 110;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		bePhlowLink;
 		yourself
 ]
@@ -247,6 +261,7 @@ CFMaFormShowcase >> compactObjectDescription [
 		group: 'To one';
 		priority: 120;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beCompactList;
 		yourself
 ]
@@ -270,6 +285,7 @@ CFMaFormShowcase >> columnedObjectDescription [
 		group: 'To one';
 		priority: 130;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beColumnedList;
 		yourself
 ]
@@ -293,6 +309,7 @@ CFMaFormShowcase >> compactItemsDescription [
 		group: 'To many';
 		priority: 200;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beSimpleList;
 		itemsAsCompactObjects;
@@ -319,6 +336,7 @@ CFMaFormShowcase >> expandableItemsDescription [
 		group: 'To many';
 		priority: 210;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beExpandableList;
 		newItemStencil: CFMaNewItemStencilBuilder new;
@@ -344,6 +362,7 @@ CFMaFormShowcase >> accordionItemsDescription [
 		group: 'To many';
 		priority: 220;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beAccordionList;
 		newItemStencil: CFMaNewItemStencilBuilder new;
@@ -369,6 +388,7 @@ CFMaFormShowcase >> gridItemsDescription [
 		group: 'To many';
 		priority: 230;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beGrid;
 		itemsAsCompactObjects;
@@ -395,6 +415,7 @@ CFMaFormShowcase >> embeddedItemsDescription [
 		group: 'To many';
 		priority: 240;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beSimpleList;
 		itemsAsEmbeddedForms;
@@ -421,6 +442,7 @@ CFMaFormShowcase >> gridEmbeddedItemsDescription [
 		group: 'To many';
 		priority: 250;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beGrid;
 		itemsAsEmbeddedForms;
@@ -447,6 +469,7 @@ CFMaFormShowcase >> phlowItemsDescription [
 		group: 'To many';
 		priority: 260;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beSimpleList;
 		itemsAsPhlowLinks;
@@ -473,6 +496,7 @@ CFMaFormShowcase >> gridPhlowItemsDescription [
 		group: 'To many';
 		priority: 270;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beGrid;
 		itemsAsPhlowLinks;
