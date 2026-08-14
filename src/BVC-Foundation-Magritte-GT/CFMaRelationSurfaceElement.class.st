@@ -87,7 +87,32 @@ CFMaRelationSurfaceElement >> updateContentGeometry [
 
 	contentElement
 		margin: BlInsets empty;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: anInnerRadius);
-		clipChildren: true.
+		geometry: BlRectangleGeometry new;
+		clipChildren: false.
 	^ self
+]
+
+
+{ #category : 'drawing' }
+CFMaRelationSurfaceElement >> drawChildrenOnSpartaCanvas: aCanvas [
+	| aBorderWidth anInnerRadius anInset anInnerBounds |
+	self hasChildren ifFalse: [ ^ self ].
+
+	aBorderWidth := self border width.
+	anInnerRadius := (cornerRadius - aBorderWidth) max: 0.
+	anInset := aBorderWidth @ aBorderWidth.
+	anInnerBounds := anInset corner: self extent - anInset.
+
+	aCanvas clip
+		by: [
+			aCanvas shape
+				roundedRectangle: anInnerBounds
+				radii: {
+					anInnerRadius.
+					anInnerRadius.
+					anInnerRadius.
+					anInnerRadius } ]
+		during: [
+			self children sortedByElevation
+				do: [ :anElement | anElement fullDrawOnSpartaCanvas: aCanvas ] ]
 ]
