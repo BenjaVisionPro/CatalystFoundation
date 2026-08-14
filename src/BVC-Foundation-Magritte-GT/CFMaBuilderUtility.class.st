@@ -638,9 +638,7 @@ CFMaBuilderUtility class >> addReferenceColumnsTo: aColumnedList memento: aMemen
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> referenceDescriptionsFor: aDescription [
-	^ Array streamContents: [ :aStream |
-		aDescription reference do: [ :eachReferenceDescription |
-			aStream nextPut: eachReferenceDescription ] ]
+	^ aDescription reference asContainer children asArray
 ]
 
 { #category : 'private - relation editor' }
