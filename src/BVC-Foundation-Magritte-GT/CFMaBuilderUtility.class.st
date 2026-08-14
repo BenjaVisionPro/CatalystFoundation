@@ -124,6 +124,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 				hExact: self relationGridMinimumItemWidth;
 				vFitContent;
 				margin: (BlInsets all: 4);
+				addAptitude: CFMaListItemAptitude;
 				addChild: anItemContent;
 				yourself.
 			anItemElement
@@ -133,7 +134,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ].
 	self installOuterFormScrollForwardingOn: aList.
-	aList addAptitude: CFMaFocusWithinAptitude.
+	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -451,7 +452,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
-	aList addAptitude: CFMaFocusWithinAptitude.
+	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -477,7 +478,7 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
-	aList addAptitude: CFMaFocusWithinAptitude.
+	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -655,7 +656,7 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		rowDataBinder: [ :anItemElement :anItemViewModel :anItemIndex | anItemElement ];
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
-		addAptitude: CFMaFocusWithinAptitude;
+		addAptitude: CFMaActiveSelectionAptitude;
 		addEventHandler: (GtPhlowListToSelectHandler new
 			transformation: GtPhlowSendTransformation default).
 

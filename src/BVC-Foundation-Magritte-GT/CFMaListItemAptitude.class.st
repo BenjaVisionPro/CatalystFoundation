@@ -1,19 +1,21 @@
+"I am responsible for presenting a selected Foundation list item according to whether its selection context is active."
+
 Class {
-	#name : 'CFMaFocusAwareListItemAptitude',
+	#name : 'CFMaListItemAptitude',
 	#superclass : 'BrGlamorousListItemAptitude',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'initialization' }
-CFMaFocusAwareListItemAptitude >> initialize [
+CFMaListItemAptitude >> initialize [
 	super initialize.
 
 	self
-		when: CFMaFocusWithinState uniqueInstance & BlElementState selected
+		when: CFMaActiveSelectionState uniqueInstance & BlElementState selected
 		style: [ :aStyle |
 			aStyle background: (Color black alpha: 0.08) ];
-		when: CFMaFocusWithinState uniqueInstance not & BlElementState selected
+		when: CFMaActiveSelectionState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
 			aStyle background: (Color black alpha: 0.04) ]
 ]

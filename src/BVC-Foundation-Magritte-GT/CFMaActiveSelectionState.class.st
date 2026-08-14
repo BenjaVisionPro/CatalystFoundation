@@ -1,23 +1,25 @@
+"I represent a selection context that currently contains focus and propagate that state to its descendants."
+
 Class {
-	#name : 'CFMaFocusWithinState',
+	#name : 'CFMaActiveSelectionState',
 	#superclass : 'BlElementUniqueState',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'printing' }
-CFMaFocusWithinState >> printOn: aStream [
-	aStream nextPutAll: 'cfMaFocusWithin'
+CFMaActiveSelectionState >> printOn: aStream [
+	aStream nextPutAll: 'cfMaActiveSelection'
 ]
 
 { #category : 'accessing' }
-CFMaFocusWithinState >> priority [
+CFMaActiveSelectionState >> priority [
 	"Use the same precedence as the built-in focused state so composed
 	selected + focus-within styles apply after the standard selected style."
 	^ BlElementState focused priority
 ]
 
 { #category : 'testing' }
-CFMaFocusWithinState >> shouldPropagateToChildren [
+CFMaActiveSelectionState >> shouldPropagateToChildren [
 	^ true
 ]

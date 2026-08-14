@@ -21,7 +21,7 @@ CFMaListItemElementStencilBuilder >> buildDefault [
 		itemType: self itemType;
 		build.
 
-	anElement addAptitude: CFMaFocusAwareListItemAptitude.
+	anElement addAptitude: CFMaListItemAptitude.
 
 	^ anElement
 ]

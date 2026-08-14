@@ -35,3 +35,12 @@ CFMaFiniteFlowListAptitude >> updateList [
 	super updateList.
 	widget ifNotNil: [ widget updateResponsiveItemWidths ]
 ]
+
+
+{ #category : 'updating' }
+CFMaFiniteFlowListAptitude >> updateSelection [
+	itemElements withIndexDo: [ :anItemElement :anIndex |
+		(selection contains: anIndex)
+			ifTrue: [ anItemElement states addState: BlElementState selected ]
+			ifFalse: [ anItemElement states removeState: BlElementState selected ] ]
+]

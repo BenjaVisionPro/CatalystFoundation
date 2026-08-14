@@ -9,7 +9,7 @@ Class {
 CFMaColumnedListItemElementStencilBuilder >> buildDefault [
 	| anElement |
 	anElement := super buildDefault
-		addAptitude: CFMaFocusAwareListItemAptitude;
+		addAptitude: CFMaListItemAptitude;
 		yourself.
 	^ anElement
 ]
