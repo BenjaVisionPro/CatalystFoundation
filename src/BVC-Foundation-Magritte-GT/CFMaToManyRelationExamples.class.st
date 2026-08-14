@@ -143,7 +143,7 @@ CFMaToManyRelationExamples >> embeddedFormsDescription [
 
 	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
 	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
 	^ aDescription
 ]
 
@@ -161,6 +161,7 @@ CFMaToManyRelationExamples >> gridOfEmbeddedFormsDescription [
 
 	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
 	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
 	^ aDescription
 ]
 
