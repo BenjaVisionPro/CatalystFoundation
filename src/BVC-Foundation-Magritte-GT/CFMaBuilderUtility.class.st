@@ -425,11 +425,12 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 	| aList |
 	aList := BrSimpleList new.
 	aList
-		matchParent;
+		hMatchParent;
+		vFitContent;
 		itemType: [ :anItemTypeFactory :anItemViewModel |
 			anItemViewModel elementClass ];
 		itemStencil: [ :anItemElementClass |
-			anItemElementClass new vFitContentLimited ];
+			anItemElementClass new vFitContent ];
 		itemId: [ :anItemViewModel | anItemViewModel object ];
 		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
 			anItemElement expanderItemViewModel: anItemViewModel ];

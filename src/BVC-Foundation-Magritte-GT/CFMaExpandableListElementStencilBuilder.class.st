@@ -20,7 +20,7 @@ CFMaExpandableListElementStencilBuilder >> buildDefault [
 		using: self description.
 	aListElement
 		hMatchParent;
-		vFitContentLimited;
+		vFitContent;
 		background: Color transparent.
 
 	^ GtMagritteValidatedFieldElement new
@@ -28,6 +28,6 @@ CFMaExpandableListElementStencilBuilder >> buildDefault [
 		description: self description
 		element: aListElement;
 		hMatchParent;
-		vFitContentLimited;
+		vFitContent;
 		yourself
 ]
