@@ -14,10 +14,7 @@ CFMaFormRootElement class >> testingBackgroundForm [
 
 { #category : 'converting' }
 CFMaFormRootElement >> asScrollableElement [
-	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
-	Phlow wraps ordinary elements in a BlScrollableElement before installing them in an explicit view.
-	Foundation forms own their internal body scroller and must fill the available view area, so the host must opt out of that wrapping."
-	^ self
+	^ super asScrollableElement
 ]
 
 { #category : 'initialization' }
@@ -29,7 +26,7 @@ CFMaFormRootElement >> initialize [
 	self
 		background: (BlImagePatternPaint form: self class testingBackgroundForm);
 		hMatchParent;
-		vMatchParent
+		vFitContent
 ]
 
 { #category : 'configuration' }

@@ -65,10 +65,10 @@ CFMaViewModel >> asElement [
 	aResizerAptitude := BrLayoutResizerAptitude new.
 	"The generated Foundation form child should fill the Phlow-facing async host."
 	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
-	aResizerAptitude vAnyToMatchParent: [ aFrame children ].
 
 	aFrame
-		matchParent;
+		hMatchParent;
+		vFitContent;
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];
