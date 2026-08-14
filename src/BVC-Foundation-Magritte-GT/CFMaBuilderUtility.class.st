@@ -962,3 +962,175 @@ CFMaBuilderUtility class >> relationSelectionFrom: aListElement indices: theIndi
 		ifTrue: [ theItems first ]
 		ifFalse: [ theItems ]
 ]
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> canRemoveToOneUsing: aDescription currentValue: anObject [
+	anObject ifNil: [ ^ false ].
+	aDescription isReadOnly ifTrue: [ ^ false ].
+
+	[ aDescription validate: nil ]
+		on: Error
+		do: [ :anException | ^ false ].
+	^ true
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDescription contentElement: aContentElement updateContent: anUpdateBlock [
+	| aContainer canModify canAdd anActionContainer anAddElement aRemoveButton |
+	canModify := aDescription isReadOnly not.
+	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
+
+	aContainer := self newRelationEditorContainer.
+	aContainer addChild: aContentElement.
+	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
+
+	(canAdd or: [ canModify ]) ifTrue: [
+		anActionContainer := self newRelationActionContainer.
+
+		canAdd ifTrue: [
+			anAddElement := CFMaToOneAddItemViewModel new
+				memento: aMemento;
+				description: aDescription;
+				stencil: aDescription newItemStencil;
+				asElement.
+			anActionContainer addChild: anAddElement ].
+
+		canModify ifTrue: [
+			aRemoveButton := self
+				newToOneEditorRemoveButtonMemento: aMemento
+				using: aDescription.
+			anActionContainer addChild: aRemoveButton ].
+
+		aContainer addChild: anActionContainer ].
+
+	self
+		installRelationEditorShortcutsOn: aContainer
+		primaryFocusElement: aContentElement
+		addElement: anAddElement
+		memento: aMemento
+		description: aDescription
+		removeAction: [ :anElement |
+			self
+				removeToOneMemento: aMemento
+				using: aDescription
+				element: anElement ].
+
+	aContainer withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theContainer :aSink |
+				anUpdateBlock value: aContentElement value: aSink.
+				aRemoveButton ifNotNil: [
+					self
+						updateToOneRemoveButton: aRemoveButton
+						description: aDescription
+						sinkUpdate: aSink ] ].
+		(aMemento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	^ aContainer
+]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newEmbeddedFormToOneMemento: aMemento using: aDescription [
+	| aFrame |
+	aFrame := BrFrame new
+		hMatchParent;
+		vFitContent;
+		yourself.
+
+	^ self
+		newToOneRelationEditorMemento: aMemento
+		using: aDescription
+		contentElement: aFrame
+		updateContent: [ :theFrame :aSink |
+			self
+				onFoundationEmbeddedToOneFrame: theFrame
+				sinkUpdate: aSink ]
+]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newPhlowLinkToOneMemento: aMemento using: aDescription [
+	| aFrame |
+	aFrame := BrFrame new
+		hMatchParent;
+		vFitContent;
+		yourself.
+
+	^ self
+		newToOneRelationEditorMemento: aMemento
+		using: aDescription
+		contentElement: aFrame
+		updateContent: [ :theFrame :aSink |
+			self
+				onPhlowToOneFrame: theFrame
+				sinkUpdate: aSink ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newToOneEditorRemoveButtonMemento: aMemento using: aDescription [
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: BrGlamorousVectorIcons remove;
+		label: 'Remove';
+		action: [ :anElement |
+			self
+				removeToOneMemento: aMemento
+				using: aDescription
+				element: anElement ];
+		disable;
+		constraintsDo: [ :c | c flow vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> removeToOneMemento: aMemento using: aDescription element: anElement [
+	| aCurrentValue |
+	aCurrentValue := aMemento readUsing: aDescription.
+	(self canRemoveToOneUsing: aDescription currentValue: aCurrentValue)
+		ifFalse: [ ^ self ].
+
+	GtMagritteBuilderUtility
+		write: nil
+		using: aDescription
+		memento: aMemento
+		element: anElement
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> updateToOneRemoveButton: aButton description: aDescription sinkUpdate: aSink [
+	(self
+		canRemoveToOneUsing: aDescription
+		currentValue: aSink value currentValue)
+		ifTrue: [ aButton enable ]
+		ifFalse: [ aButton disable ]
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: aSink [
+	| anObject |
+	anObject := aSink value currentValue.
+	aFrame removeChildren.
+	anObject ifNil: [ ^ self ].
+
+	aFrame addChild: ((CFMaViewModel forObject: anObject) asEmbeddedElement)
+]
+
+{ #category : 'private - support' }
+CFMaBuilderUtility class >> onPhlowToOneFrame: aFrame sinkUpdate: aSink [
+	| anObject aButton |
+	anObject := aSink value currentValue.
+	aFrame removeChildren.
+	anObject ifNil: [ ^ self ].
+
+	aButton := BrButton new
+		aptitude: BrGlamorousLinkButtonWithLabelAptitude new;
+		label: anObject gtDisplayText asString;
+		alignCenterLeft;
+		hFitContent;
+		vFitContent;
+		action: [ :theButton | theButton phlow spawnObject: anObject ];
+		yourself.
+	aFrame addChild: aButton
+]

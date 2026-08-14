@@ -8,8 +8,9 @@ Class {
 { #category : 'elements' }
 CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel aText aLabelAptitude |
-	"The only Foundation override of GT's visitor contract is label chrome.
-	GT still creates the editor, validation element, shortcuts, and actions."
+	"Foundation keeps GT field construction wherever its behaviour is sufficient.
+	This method supplies Foundation's shared label chrome; relation visitors may
+	provide Foundation editors where GT does not provide the required capability."
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude
@@ -32,4 +33,18 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
 	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
 	^ aLabel
+]
+
+
+{ #category : 'visiting-description' }
+CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
+	aDescription blocStencil
+		ifNil: [ ^ super visitToOneRelationDescription: aDescription ]
+		ifNotNil: [ :aStencil |
+			self
+				addFieldElement: (aStencil
+					memento: self memento;
+					description: aDescription;
+					asElement)
+				using: aDescription ]
 ]
