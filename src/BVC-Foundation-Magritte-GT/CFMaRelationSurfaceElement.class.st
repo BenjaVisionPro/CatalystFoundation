@@ -1,11 +1,11 @@
-"I am responsible for presenting a relation as a bordered Foundation surface whose content is kept inside the structural border."
+"I am responsible for presenting a relation as a bordered Foundation surface with content laid out naturally inside its structural border."
 
 Class {
 	#name : 'CFMaRelationSurfaceElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'contentElement',
-		'cornerRadius'
+		'cornerRadius',
+		'footerElement'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Elements',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -23,54 +23,35 @@ CFMaRelationSurfaceElement >> initialize [
 		vFitContent;
 		focusability: BlFocusability after;
 		cellSpacing: 0;
-		padding: BlInsets empty;
 		background: (Color black alpha: 0.025);
 		border: (BlBorder paint: (Color black alpha: 0.10) width: 2);
 		outskirts: BlOutskirts inside;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius);
-		clipChildren: true;
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
 			lowerBodyInside;
 			yourself).
 
-	contentElement := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 0;
-		background: Color transparent;
-		yourself.
-
-	super addChild: contentElement.
-	self updateContentGeometry
-]
-
-{ #category : 'accessing' }
-CFMaRelationSurfaceElement >> contentElement [
-	^ contentElement
+	self updateSurfaceLayout
 ]
 
 { #category : 'children' }
 CFMaRelationSurfaceElement >> addContentChild: anElement [
-	contentElement addChild: anElement.
+	super addChild: anElement.
 	^ anElement
 ]
 
-
 { #category : 'children' }
 CFMaRelationSurfaceElement >> addFooterChild: anElement [
-	| anInnerRadius |
-	anInnerRadius := (cornerRadius - self border width) max: 0.
-
-	anElement geometry: (BlRoundedRectangleGeometry
-		cornerRadii: (BlCornerRadii new
-			topLeft: 0;
-			topRight: 0;
-			bottomRight: anInnerRadius;
-			bottomLeft: anInnerRadius;
-			yourself)).
-
+	footerElement := anElement.
+	self updateFooterGeometry.
 	^ self addContentChild: anElement
+]
+
+{ #category : 'accessing' }
+CFMaRelationSurfaceElement >> border: aBorder [
+	super border: aBorder.
+	self updateSurfaceLayout
 ]
 
 { #category : 'accessing' }
@@ -81,54 +62,32 @@ CFMaRelationSurfaceElement >> cornerRadius [
 { #category : 'accessing' }
 CFMaRelationSurfaceElement >> cornerRadius: aNumber [
 	cornerRadius := aNumber.
-	self
-		geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius);
-		updateContentGeometry
+	self geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius).
+	self updateFooterGeometry
 ]
 
-{ #category : 'accessing' }
-CFMaRelationSurfaceElement >> border: aBorder [
-	super border: aBorder.
-	contentElement ifNotNil: [ self updateContentGeometry ]
+{ #category : 'private - geometry' }
+CFMaRelationSurfaceElement >> innerCornerRadius [
+	^ (cornerRadius - self border width) max: 0
+]
+
+{ #category : 'private - geometry' }
+CFMaRelationSurfaceElement >> updateFooterGeometry [
+	| anInnerRadius |
+	footerElement ifNil: [ ^ self ].
+
+	anInnerRadius := self innerCornerRadius.
+	footerElement geometry: (BlRoundedRectangleGeometry
+		cornerRadii: (BlCornerRadii new
+			topLeft: 0;
+			topRight: 0;
+			bottomRight: anInnerRadius;
+			bottomLeft: anInnerRadius;
+			yourself))
 ]
 
 { #category : 'private - layout' }
-CFMaRelationSurfaceElement >> updateContentGeometry [
-	| aBorderWidth anInnerRadius |
-	contentElement ifNil: [ ^ self ].
-
-	aBorderWidth := self border width.
-	anInnerRadius := (cornerRadius - aBorderWidth) max: 0.
-
-	self padding: (BlInsets all: aBorderWidth).
-
-	contentElement
-		margin: BlInsets empty;
-		geometry: BlRectangleGeometry new;
-		clipChildren: false.
-	^ self
-]
-
-
-{ #category : 'drawing' }
-CFMaRelationSurfaceElement >> drawChildrenOnSpartaCanvas: aCanvas [
-	| aBorderWidth anInnerRadius anInset anInnerBounds |
-	self hasChildren ifFalse: [ ^ self ].
-
-	aBorderWidth := self border width.
-	anInnerRadius := (cornerRadius - aBorderWidth) max: 0.
-	anInset := aBorderWidth @ aBorderWidth.
-	anInnerBounds := anInset corner: self extent - anInset.
-
-	aCanvas clip
-		by: (aCanvas shape
-			roundedRectangle: anInnerBounds
-			radii: {
-				anInnerRadius.
-				anInnerRadius.
-				anInnerRadius.
-				anInnerRadius })
-		during: [
-			self children sortedByElevation
-				do: [ :anElement | anElement fullDrawOnSpartaCanvas: aCanvas ] ]
+CFMaRelationSurfaceElement >> updateSurfaceLayout [
+	self padding: (BlInsets all: self border width).
+	self updateFooterGeometry
 ]
