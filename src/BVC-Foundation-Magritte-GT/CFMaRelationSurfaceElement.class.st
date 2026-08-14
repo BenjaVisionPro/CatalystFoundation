@@ -82,8 +82,10 @@ CFMaRelationSurfaceElement >> updateContentGeometry [
 	aBorderWidth := self border width.
 	anInnerRadius := (cornerRadius - aBorderWidth) max: 0.
 
+	self padding: (BlInsets all: aBorderWidth).
+
 	contentElement
-		margin: (BlInsets all: aBorderWidth);
+		margin: BlInsets empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: anInnerRadius);
 		clipChildren: true.
 	^ self
