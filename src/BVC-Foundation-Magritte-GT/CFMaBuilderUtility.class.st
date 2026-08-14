@@ -78,6 +78,58 @@ CFMaBuilderUtility class >> newAccordionListMemento: aMemento using: aDescriptio
 ]
 
 
+
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newExpandableListMemento: aMemento using: aDescription [
+	^ self
+		newToManyRelationEditorMemento: aMemento
+		using: aDescription
+		list: (self newExpandableRelationListUsing: aDescription)
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newExpandableRelationListUsing: aDescription [
+	^ self newAccordionRelationListUsing: aDescription
+]
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newGridListMemento: aMemento using: aDescription [
+	^ self
+		newToManyRelationEditorMemento: aMemento
+		using: aDescription
+		list: (self newGridRelationListUsing: aDescription)
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
+	| aList |
+	aList := BrFlowList new.
+	aList
+		hMatchParent;
+		vFitContentLimited;
+		stencil: ([ :anItemViewModel :anItemIndex :anInternalListElement |
+			| anItemContent anItemElement |
+			anItemContent := aDescription blocItemStencil
+				listElement: aList;
+				rowValue: anItemViewModel;
+				rowIndex: anItemIndex;
+				build.
+			anItemElement := BrFrame new
+				fitContent;
+				addChild: anItemContent;
+				yourself.
+			anItemElement
+				when: BlClickEvent
+				do: [ :anEvent | aList selectOne: anItemIndex dueTo: anEvent ].
+			anItemElement ] asStencilBuilder: BrListRowStencilBuilder);
+		selectionCallback: [ :theIndices |
+			self relationSelectionFrom: aList indices: theIndices ].
+	aList addAptitude: CFMaFocusWithinAptitude.
+	^ aList
+]
+
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDescription list: aList [
 	| aContainer canModify canAdd anActionContainer anAddElement aRemoveButton |
