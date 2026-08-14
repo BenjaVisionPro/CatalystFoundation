@@ -1,10 +1,12 @@
-"I am responsible for extending a GT Magritte transaction across embedded relation objects."
+"I am responsible for extending a GT Magritte editing transaction across embedded relation objects."
 
 Class {
 	#name : 'CFMaMemento',
 	#superclass : 'GtMagritteMemento',
 	#instVars : [
-		'childMementosByDescription'
+		'childMementosByDescription',
+		'statusPulse',
+		'compositeOverallStatus'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Models',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -14,7 +16,15 @@ Class {
 { #category : 'initialization' }
 CFMaMemento >> initialize [
 	super initialize.
-	childMementosByDescription := Dictionary new
+
+	childMementosByDescription := Dictionary new.
+	statusPulse := AsyncObservableValue
+		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
+	compositeOverallStatus := (statusPulse observe
+		map: [ :anIgnoredValue | self computeCompositeOverallStatus ])
+			asAsyncObservable: GtMagritteBuilderUtility executionConfiguration.
+
+	super overallStatus observe: statusPulse
 ]
 
 { #category : 'private - children' }
@@ -36,7 +46,8 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 		ifAbsentPut: [
 			| aMemento |
 			aMemento := self class model: anObject.
-			aMemento overallStatus observe: internalStatus.
+			aMemento overallStatus observe: statusPulse.
+			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
 ]
 
@@ -52,25 +63,33 @@ CFMaMemento >> retainChildMementosFor: aCollection inRelation: aDescription [
 			ifFalse: [ theRelationMementos removeKey: anObject ifAbsent: [ ] ] ].
 
 	theRelationMementos ifEmpty: [
-		childMementosByDescription removeKey: aDescription ifAbsent: [ ] ]
+		childMementosByDescription removeKey: aDescription ifAbsent: [ ] ].
+
+	statusPulse value: super overallStatus valueOrNil
 ]
 
 { #category : 'private - status' }
-CFMaMemento >> computeOverallStatus: anInternalStatus [
-	| aStatus theChildStatuses |
-	aStatus := super computeOverallStatus: anInternalStatus.
+CFMaMemento >> computeCompositeOverallStatus [
+	| aParentStatus theChildStatuses |
+	aParentStatus := super overallStatus valueOrNil.
+	aParentStatus ifNil: [ ^ GtMagritteOverallStatus new ].
+
 	theChildStatuses := self allChildMementos
 		collect: [ :aMemento | aMemento overallStatus valueOrNil ].
 	theChildStatuses := theChildStatuses reject: #isNil.
 
-	theChildStatuses ifNotEmpty: [
-		aStatus
-			isValid: (aStatus isValid
-				and: [ theChildStatuses allSatisfy: #isValid ]);
-			isChanged: (aStatus isChanged
-				or: [ theChildStatuses anySatisfy: #isChanged ]) ].
+	^ GtMagritteOverallStatus new
+		isValid: (aParentStatus isValid
+			and: [ theChildStatuses allSatisfy: #isValid ]);
+		isChanged: (aParentStatus isChanged
+			or: [ theChildStatuses anySatisfy: #isChanged ]);
+		executionStatus: aParentStatus executionStatus;
+		yourself
+]
 
-	^ aStatus
+{ #category : 'accessing' }
+CFMaMemento >> overallStatus [
+	^ compositeOverallStatus
 ]
 
 { #category : 'actions' }

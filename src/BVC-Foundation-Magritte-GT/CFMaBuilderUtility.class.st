@@ -209,15 +209,34 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 
 
 
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationModels: aCollection matchViewModels: aViewModelCollection [
+	| theModels |
+	theModels := aCollection asArray.
+	theModels size = aViewModelCollection size ifFalse: [ ^ false ].
+
+	1 to: theModels size do: [ :anIndex |
+		((aViewModelCollection at: anIndex) object == (theModels at: anIndex))
+			ifFalse: [ ^ false ] ].
+	^ true
+]
+
+
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
-	| aModels |
+	| aModels theExistingViewModels |
 	aModels := aSink value currentValue ifNil: [ #() ].
+	theExistingViewModels := aListElement viewModel items.
+
 	(aMemento isKindOf: CFMaMemento)
 		ifTrue: [ aMemento retainChildMementosFor: aModels inRelation: aDescription ].
+
+	(self relationModels: aModels matchViewModels: theExistingViewModels)
+		ifTrue: [ ^ aListElement ].
+
 	^ aListElement items: (self
 		relationItemViewModelsForModels: aModels
-		existingViewModels: aListElement viewModel items
+		existingViewModels: theExistingViewModels
 		memento: aMemento
 		description: aDescription)
 ]
@@ -227,12 +246,20 @@ CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: 
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onToOneList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
-	| anObject aModels |
+	| anObject aModels theExistingViewModels |
 	anObject := aSink value currentValue.
 	aModels := anObject ifNil: [ #() ] ifNotNil: [ { anObject } ].
+	theExistingViewModels := aListElement viewModel items.
+
+	(aMemento isKindOf: CFMaMemento)
+		ifTrue: [ aMemento retainChildMementosFor: aModels inRelation: aDescription ].
+
+	(self relationModels: aModels matchViewModels: theExistingViewModels)
+		ifTrue: [ ^ aListElement ].
+
 	^ aListElement items: (self
 		relationItemViewModelsForModels: aModels
-		existingViewModels: aListElement viewModel items
+		existingViewModels: theExistingViewModels
 		memento: aMemento
 		description: aDescription)
 ]
@@ -1012,14 +1039,22 @@ CFMaBuilderUtility class >> updateToOneRemoveButton: aButton description: aDescr
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: aSink memento: aMemento description: aDescription [
-	| anObject aChildMemento |
+	| anObject aChildMemento hasPresentedObject |
 	anObject := aSink value currentValue.
-	aFrame removeChildren.
+	hasPresentedObject := aFrame userData includesKey: #cfMaPresentedObject.
+
+	(hasPresentedObject
+		and: [ (aFrame userData at: #cfMaPresentedObject) == anObject ])
+			ifTrue: [ ^ aFrame ].
+
+	aFrame
+		removeChildren;
+		userData at: #cfMaPresentedObject put: anObject.
 
 	anObject ifNil: [
 		(aMemento isKindOf: CFMaMemento)
 			ifTrue: [ aMemento retainChildMementosFor: #() inRelation: aDescription ].
-		^ self ].
+		^ aFrame ].
 
 	aChildMemento := (aMemento isKindOf: CFMaMemento)
 		ifTrue: [
@@ -1029,7 +1064,8 @@ CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: a
 
 	aFrame addChild: ((CFMaViewModel
 		forObject: anObject
-		memento: aChildMemento) asEmbeddedElement)
+		memento: aChildMemento) asEmbeddedElement).
+	^ aFrame
 ]
 
 { #category : 'private - support' }
@@ -1049,10 +1085,19 @@ CFMaBuilderUtility class >> newPhlowObjectElementFor: anObject [
 
 { #category : 'private - support' }
 CFMaBuilderUtility class >> onPhlowToOneFrame: aFrame sinkUpdate: aSink [
-	| anObject |
+	| anObject hasPresentedObject |
 	anObject := aSink value currentValue.
-	aFrame removeChildren.
-	anObject ifNil: [ ^ self ].
+	hasPresentedObject := aFrame userData includesKey: #cfMaPresentedObject.
 
-	aFrame addChild: (self newPhlowObjectElementFor: anObject)
+	(hasPresentedObject
+		and: [ (aFrame userData at: #cfMaPresentedObject) == anObject ])
+			ifTrue: [ ^ aFrame ].
+
+	aFrame
+		removeChildren;
+		userData at: #cfMaPresentedObject put: anObject.
+
+	anObject ifNotNil: [
+		aFrame addChild: (self newPhlowObjectElementFor: anObject) ].
+	^ aFrame
 ]
