@@ -298,7 +298,7 @@ CFMaBuilderUtility class >> newRelationActionContainer [
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement [
-	^ BrFrame new
+	^ BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		padding: (BlInsets all: 8);
@@ -560,7 +560,7 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addChild: aList.
+	aContainer addChild: (self newRelationBodyContainerWith: aList).
 
 	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
 		anActionContainer := self newRelationActionContainer.
