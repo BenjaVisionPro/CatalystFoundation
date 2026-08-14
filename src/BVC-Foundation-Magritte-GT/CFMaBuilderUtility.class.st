@@ -102,6 +102,12 @@ CFMaBuilderUtility class >> newGridListMemento: aMemento using: aDescription [
 ]
 
 { #category : 'private - relation editor' }
+CFMaBuilderUtility class >> relationGridItemWidth [
+	^ 320
+]
+
+
+{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 	| aList |
 	aList := CFMaFiniteFlowList new.
@@ -114,7 +120,8 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 				rowIndex: anItemIndex;
 				build.
 			anItemElement := BrFrame new
-				fitContent;
+				hExact: self relationGridItemWidth;
+				vFitContent;
 				margin: (BlInsets all: 4);
 				addChild: anItemContent;
 				yourself.
@@ -1009,19 +1016,26 @@ CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: a
 ]
 
 { #category : 'private - support' }
+CFMaBuilderUtility class >> newPhlowObjectElementFor: anObject [
+	| anElement |
+	anElement := CFCompactObjectStencil new
+		object: anObject;
+		create.
+	anElement
+		when: BlClickEvent
+		do: [ :anEvent |
+			anEvent consumed: true.
+			anEvent currentTarget phlow spawnObject: anObject ].
+	^ anElement
+]
+
+
+{ #category : 'private - support' }
 CFMaBuilderUtility class >> onPhlowToOneFrame: aFrame sinkUpdate: aSink [
-	| anObject aButton |
+	| anObject |
 	anObject := aSink value currentValue.
 	aFrame removeChildren.
 	anObject ifNil: [ ^ self ].
 
-	aButton := BrButton new
-		aptitude: BrGlamorousLinkButtonWithLabelAptitude new;
-		label: anObject gtDisplayText asString;
-		alignCenterLeft;
-		hFitContent;
-		vFitContent;
-		action: [ :theButton | theButton phlow spawnObject: anObject ];
-		yourself.
-	aFrame addChild: aButton
+	aFrame addChild: (self newPhlowObjectElementFor: anObject)
 ]

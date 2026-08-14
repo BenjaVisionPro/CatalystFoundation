@@ -10,8 +10,15 @@ Class {
 
 { #category : 'api - instantiation' }
 CFMaEmbeddedFormItemStencilBuilder >> buildDefault [
-	| anObject |
+	| anObject anEmbeddedElement |
 	self rowValue ifNil: [ ^ BrFrame new fitContent ].
 	anObject := self rowValue object.
-	^ (CFMaViewModel forObject: anObject) asEmbeddedElement
+	anEmbeddedElement := (CFMaViewModel forObject: anObject) asEmbeddedElement.
+
+	^ BrFrame new
+		hMatchParent;
+		vFitContent;
+		margin: (BlInsets bottom: 8);
+		addChild: anEmbeddedElement;
+		yourself
 ]
