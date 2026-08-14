@@ -31,8 +31,9 @@ CFMaFormRootElement >> beEmbedded [
 { #category : 'conversion' }
 CFMaFormRootElement >> asScrollableElement [
 	^ CFSmoothScrollableElement new
-		hMatchParent;
-		vMatchParent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
 		addChild: self;
 		yourself
 ]
