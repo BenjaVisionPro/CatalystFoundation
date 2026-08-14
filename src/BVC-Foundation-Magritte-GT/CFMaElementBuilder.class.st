@@ -148,31 +148,14 @@ CFMaElementBuilder >> isRelationDescription: aDescription [
 	^ aDescription isKindOf: MAReferenceDescription
 ]
 
-{ #category : 'private - focus' }
-CFMaElementBuilder >> primaryFocusableControlIn: anElement [
-	(anElement isKindOf: BrEditor) ifTrue: [ ^ anElement ].
-	(anElement isKindOf: BrCheckbox) ifTrue: [ ^ anElement ].
-	(anElement isKindOf: BrButton) ifTrue: [ ^ anElement ].
-	(anElement isKindOf: BrList) ifTrue: [ ^ anElement ].
 
-	anElement children do: [ :aChild |
-		(self primaryFocusableControlIn: aChild)
-			ifNotNil: [ :aControl | ^ aControl ] ].
-	^ nil
-]
+
 
 { #category : 'private - focus' }
 CFMaElementBuilder >> configureTabStopFor: aFieldElement using: aDescription [
-	| aFocusTarget |
-	(self isRelationDescription: aDescription)
-		ifTrue: [
-			aFieldElement focusability: BlFocusability before.
-			self installFormNavigationOn: aFieldElement.
-			^ aFieldElement ].
-
-	aFocusTarget := self primaryFocusableControlIn: aFieldElement.
-	aFocusTarget ifNil: [ aFocusTarget := aFieldElement ].
-	aFocusTarget beFocusable.
-	self installFormNavigationOn: aFocusTarget.
-	^ aFocusTarget
+	"Keep GT/Brick's native focusable descendants. The field surface only
+	participates when there are no focusable descendants of its own."
+	aFieldElement focusability: BlFocusability after.
+	self installFormNavigationOn: aFieldElement.
+	^ aFieldElement
 ]

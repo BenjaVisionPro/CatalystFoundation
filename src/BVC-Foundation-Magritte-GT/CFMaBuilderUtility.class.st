@@ -349,6 +349,7 @@ CFMaBuilderUtility class >> newRelationEditorContainer [
 	^ BrVerticalPane new
 		matchParent;
 		vFitContent;
+		focusability: BlFocusability after;
 		cellSpacing: self relationEditorCellSpacing;
 		padding: self relationEditorPadding;
 		background: (Color black alpha: 0.025);
