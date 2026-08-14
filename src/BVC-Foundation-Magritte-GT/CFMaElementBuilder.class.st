@@ -30,6 +30,10 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
 		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
+	aFieldElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c grid horizontal weight: 1 ].
+
 	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
 	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
 	^ aLabel
