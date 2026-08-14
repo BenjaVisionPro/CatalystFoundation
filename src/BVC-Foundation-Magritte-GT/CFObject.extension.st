@@ -17,9 +17,7 @@ CFObject >> gtMagritteFor: aView [
 		priority: 49;
 		disableAsync;
 		stencil: [
-			self asGtMagritteViewModel asElement
-				margin: (BlInsets all: 10);
-				yourself ];
+			self asGtMagritteViewModel asElement ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
 			label: 'Layout Debug'
 			tooltip: 'Toggle form layout debug overlay'
