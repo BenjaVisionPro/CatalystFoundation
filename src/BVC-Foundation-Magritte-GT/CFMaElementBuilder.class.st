@@ -34,6 +34,8 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		c horizontal matchParent.
 		c grid horizontal weight: 1 ].
 
+	self configureTabStopFor: aFieldElement using: aDescription.
+
 	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
 	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
 	^ aLabel
@@ -77,12 +79,16 @@ CFMaElementBuilder >> moveFocusFrom: anElement inDirection: aDirection [
 		nextFocusDo: #requestFocus ifNone: [  ]
 ]
 
-{ #category : 'private - building' }
-CFMaElementBuilder >> addShortcutsTo: anElement [
+{ #category : 'private - focus' }
+CFMaElementBuilder >> installFormNavigationOn: anElement [
+	(anElement userData includesKey: #cfMaFormNavigation)
+		ifTrue: [ ^ anElement ].
+
+	anElement userData at: #cfMaFormNavigation put: true.
 	anElement
 		addShortcut: (BlShortcutWithAction new
 			name: 'Discard form contents';
-			description: 'Discards the form contents and resets the form to its original state';
+			description: 'Discards the complete Foundation form transaction.';
 			combination: BlKeyCombination escape;
 			overrideChildren: true;
 			action: [ :anEvent |
@@ -99,31 +105,74 @@ CFMaElementBuilder >> addShortcutsTo: anElement [
 					awaitFuture: aFuture
 					from: anEvent currentTarget ]);
 		addShortcut: (BlShortcutWithAction new
-			name: 'Move to next form item';
-			description: 'Moves to the next form item in the complete Foundation form.';
+			name: 'Move to next form description';
+			description: 'Moves to the next Magritte description in the complete Foundation form.';
 			combination: (BlKeyCombination tab or: BlKeyCombination enter);
 			overrideChildren: true;
 			action: [ :anEvent |
+				anEvent consumed: true.
 				self
 					moveFocusFrom: anEvent target
 					inDirection: BlFocusSearchDirectionForward new ]);
 		addShortcut: (BlShortcutWithAction new
-			name: 'Move to previous form item';
-			description: 'Moves to the previous form item in the complete Foundation form.';
+			name: 'Move to previous form description';
+			description: 'Moves to the previous Magritte description in the complete Foundation form.';
 			combination: BlKeyCombination shiftTab;
 			overrideChildren: true;
 			action: [ :anEvent |
+				anEvent consumed: true.
 				self
 					moveFocusFrom: anEvent target
-					inDirection: BlFocusSearchDirectionBackward new ])
+					inDirection: BlFocusSearchDirectionBackward new ]).
+	^ anElement
+]
+
+{ #category : 'private - building' }
+CFMaElementBuilder >> addShortcutsTo: anElement [
+	self installFormNavigationOn: anElement
 ]
 
 { #category : 'private - building' }
 CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
-	self addShortcutsTo: anElement.
+	self installFormNavigationOn: anElement.
 
 	aDescription blocShortcuts
 		ifNotNil: [ :aBlockReturningCollection |
 			aBlockReturningCollection value do: [ :aShortcut |
 				anElement addShortcut: aShortcut ] ]
+]
+
+
+{ #category : 'private - focus' }
+CFMaElementBuilder >> isRelationDescription: aDescription [
+	^ aDescription isKindOf: MAReferenceDescription
+]
+
+{ #category : 'private - focus' }
+CFMaElementBuilder >> primaryFocusableControlIn: anElement [
+	(anElement isKindOf: BrEditor) ifTrue: [ ^ anElement ].
+	(anElement isKindOf: BrCheckbox) ifTrue: [ ^ anElement ].
+	(anElement isKindOf: BrButton) ifTrue: [ ^ anElement ].
+	(anElement isKindOf: BrList) ifTrue: [ ^ anElement ].
+
+	anElement children do: [ :aChild |
+		(self primaryFocusableControlIn: aChild)
+			ifNotNil: [ :aControl | ^ aControl ] ].
+	^ nil
+]
+
+{ #category : 'private - focus' }
+CFMaElementBuilder >> configureTabStopFor: aFieldElement using: aDescription [
+	| aFocusTarget |
+	(self isRelationDescription: aDescription)
+		ifTrue: [
+			aFieldElement focusability: BlFocusability before.
+			self installFormNavigationOn: aFieldElement.
+			^ aFieldElement ].
+
+	aFocusTarget := self primaryFocusableControlIn: aFieldElement.
+	aFocusTarget ifNil: [ aFocusTarget := aFieldElement ].
+	aFocusTarget beFocusable.
+	self installFormNavigationOn: aFocusTarget.
+	^ aFocusTarget
 ]
