@@ -1047,9 +1047,8 @@ CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: a
 		and: [ (aFrame userData at: #cfMaPresentedObject) == anObject ])
 			ifTrue: [ ^ aFrame ].
 
-	aFrame
-		removeChildren;
-		userData at: #cfMaPresentedObject put: anObject.
+	aFrame removeChildren.
+	aFrame userData at: #cfMaPresentedObject put: anObject.
 
 	anObject ifNil: [
 		(aMemento isKindOf: CFMaMemento)
@@ -1093,9 +1092,8 @@ CFMaBuilderUtility class >> onPhlowToOneFrame: aFrame sinkUpdate: aSink [
 		and: [ (aFrame userData at: #cfMaPresentedObject) == anObject ])
 			ifTrue: [ ^ aFrame ].
 
-	aFrame
-		removeChildren;
-		userData at: #cfMaPresentedObject put: anObject.
+	aFrame removeChildren.
+	aFrame userData at: #cfMaPresentedObject put: anObject.
 
 	anObject ifNotNil: [
 		aFrame addChild: (self newPhlowObjectElementFor: anObject) ].
