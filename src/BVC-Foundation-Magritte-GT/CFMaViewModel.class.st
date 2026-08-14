@@ -31,6 +31,14 @@ CFMaViewModel >> formContainerStencilForMemento: aMemento [
 
 { #category : 'initialization' }
 CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
+	^ self
+		initializeForm: theFrame
+		forMemento: aMemento
+		includeImplicitActions: includeImplicitActions
+]
+
+{ #category : 'initialization' }
+CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitActions: aBoolean [
 	| aContainer aStencil |
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
 
@@ -49,7 +57,7 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 	(elementBuilderBlock
 		ifNil: [ CFMaElementBuilder new ]
 		ifNotNil: [ :aBlock | aBlock value ])
-		includeImplicitActions: includeImplicitActions;
+		includeImplicitActions: aBoolean;
 		form: theFrame;
 		memento: aMemento;
 		addButtons: self actions;
@@ -140,7 +148,10 @@ CFMaViewModel >> asEmbeddedElement [
 								c frame horizontal alignCenter.
 								c frame vertical alignTop ]) ];
 				whenSuccess: [ :theFrame :aMemento |
-					self initializeForm: theFrame forMemento: aMemento ] ].
+					self
+						initializeForm: theFrame
+						forMemento: aMemento
+						includeImplicitActions: false ] ].
 
 	aFrame asyncFuture
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
