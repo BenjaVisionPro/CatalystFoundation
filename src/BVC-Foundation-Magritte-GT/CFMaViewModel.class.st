@@ -9,6 +9,21 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'api - instance creation' }
+CFMaViewModel class >> forObject: anObject [
+	^ self new
+		mementoBlock: [ CFMaMemento model: anObject ] object: anObject;
+		yourself
+]
+
+{ #category : 'api - instance creation' }
+CFMaViewModel class >> forObject: anObject memento: aMemento [
+	^ self new
+		mementoBlock: [ aMemento ] object: anObject;
+		yourself
+]
+
+
 { #category : 'callbacks' }
 CFMaViewModel >> formElementDo: aBlock [
 	formElementBlock := aBlock

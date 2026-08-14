@@ -81,7 +81,7 @@ CFMaExpanderItemElement >> newExpandedElement [
 		hMatchParent;
 		vExact: self editorHeight;
 		padding: (BlInsets top: 0 left: 10 bottom: 10 right: 10);
-		addChild: expanderItemViewModel asElement;
+		addChild: expanderItemViewModel asEmbeddedElement;
 		yourself
 ]
 

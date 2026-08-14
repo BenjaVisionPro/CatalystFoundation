@@ -12,8 +12,13 @@ Class {
 
 { #category : 'api - instance creation' }
 CFMaExpanderItemViewModel class >> forObject: anObject [
-	| aMemento |
-	aMemento := GtMagritteMemento model: anObject.
+	^ self
+		forObject: anObject
+		memento: (CFMaMemento model: anObject)
+]
+
+{ #category : 'api - instance creation' }
+CFMaExpanderItemViewModel class >> forObject: anObject memento: aMemento [
 	^ self new
 		itemMemento: aMemento;
 		mementoBlock: [ aMemento ] object: anObject;

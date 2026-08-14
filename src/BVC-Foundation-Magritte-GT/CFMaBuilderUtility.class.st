@@ -213,6 +213,8 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 CFMaBuilderUtility class >> onFlowList: aListElement sinkUpdate: aSink memento: aMemento description: aDescription [
 	| aModels |
 	aModels := aSink value currentValue ifNil: [ #() ].
+	(aMemento isKindOf: CFMaMemento)
+		ifTrue: [ aMemento retainChildMementosFor: aModels inRelation: aDescription ].
 	^ aListElement items: (self
 		relationItemViewModelsForModels: aModels
 		existingViewModels: aListElement viewModel items
@@ -946,7 +948,9 @@ CFMaBuilderUtility class >> newEmbeddedFormToOneMemento: aMemento using: aDescri
 		updateContent: [ :theFrame :aSink |
 			self
 				onFoundationEmbeddedToOneFrame: theFrame
-				sinkUpdate: aSink ]
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
 ]
 
 { #category : 'api - ui' }
@@ -1007,13 +1011,25 @@ CFMaBuilderUtility class >> updateToOneRemoveButton: aButton description: aDescr
 ]
 
 { #category : 'private - support' }
-CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: aSink [
-	| anObject |
+CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: aSink memento: aMemento description: aDescription [
+	| anObject aChildMemento |
 	anObject := aSink value currentValue.
 	aFrame removeChildren.
-	anObject ifNil: [ ^ self ].
 
-	aFrame addChild: ((CFMaViewModel forObject: anObject) asEmbeddedElement)
+	anObject ifNil: [
+		(aMemento isKindOf: CFMaMemento)
+			ifTrue: [ aMemento retainChildMementosFor: #() inRelation: aDescription ].
+		^ self ].
+
+	aChildMemento := (aMemento isKindOf: CFMaMemento)
+		ifTrue: [
+			aMemento retainChildMementosFor: { anObject } inRelation: aDescription.
+			aMemento childMementoFor: anObject inRelation: aDescription ]
+		ifFalse: [ CFMaMemento model: anObject ].
+
+	aFrame addChild: ((CFMaViewModel
+		forObject: anObject
+		memento: aChildMemento) asEmbeddedElement)
 ]
 
 { #category : 'private - support' }

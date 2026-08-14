@@ -14,7 +14,7 @@ MAToManyRelationDescription >> itemsAsCompactObjects [
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> itemsAsEmbeddedForms [
 	self
-		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemViewModelStencil: CFMaEmbeddedItemViewModelStencilBuilder new;
 		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new
 ]
 
