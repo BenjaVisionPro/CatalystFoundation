@@ -30,7 +30,7 @@ CFLightBorderAptitude class >> defaultHighlightColor [
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultLightDirection [
-	^ (-1 @ -1) asBlocVector normalized
+	^ CFInterfaceLighting lightDirection
 ]
 
 { #category : 'defaults' }
