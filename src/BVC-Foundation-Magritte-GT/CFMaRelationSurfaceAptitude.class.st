@@ -16,8 +16,7 @@ CFMaRelationSurfaceAptitude >> initialize [
 			aStyle border: (BlBorder
 				paint: (Color black alpha: 0.10)
 				width: 2) ];
-		when: CFMaActiveSelectionState uniqueInstance
-		style: [ :aStyle |
+		focused: [ :aStyle |
 			aStyle border: (BlBorder
 				paint: self theme editor focusedBorderColor
 				width: 2) ]
