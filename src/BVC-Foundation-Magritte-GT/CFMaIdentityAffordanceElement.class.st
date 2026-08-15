@@ -36,8 +36,9 @@ CFMaIdentityAffordanceElement >> initialize [
 		newEditableTextWithFontSize: 14
 		foreground: (Color black alpha: 0.92).
 	identifierElement := self
-		newEditableTextWithFontSize: 11
+		newEditableTextWithFontSize: 10
 		foreground: (Color black alpha: 0.82).
+	identifierElement margin: (BlInsets top: -3).
 
 	textContainer
 		addChild: labelElement as: #label;
