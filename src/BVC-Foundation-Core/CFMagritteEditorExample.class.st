@@ -170,9 +170,9 @@ CFMagritteEditorExample >> summaryDescription [
 
 
 { #category : 'examples' }
-CFMagritteEditorExample class >> exampleWithCollapsibleGroups [
+CFMagritteEditorExample class >> exampleWithAccordionGroups [
 	<gtExample>
 	^ (CFMaViewModel forObject: self exampleDefault)
-		useCollapsibleGroups;
+		beAccordionGroups;
 		asElement
 ]

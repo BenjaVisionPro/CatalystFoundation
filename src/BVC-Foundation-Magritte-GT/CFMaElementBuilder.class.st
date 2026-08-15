@@ -2,10 +2,9 @@ Class {
 	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
-		'labelLayout',
-		'currentGroup',
-		'currentGroupSection',
-		'collapsibleGroups'
+		'labelPresentation',
+		'groupPresentation',
+		'groupPresentationContext'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -14,41 +13,62 @@ Class {
 { #category : 'initialization' }
 CFMaElementBuilder >> initialize [
 	super initialize.
-	labelLayout := CFMaInlineLabelLayout new.
-	currentGroup := nil.
-	currentGroupSection := nil.
-	collapsibleGroups := false
+	labelPresentation := CFMaInlineLabelPresentation new.
+	groupPresentation := CFMaInlineGroupPresentation new
 ]
 
 { #category : 'accessing' }
-CFMaElementBuilder >> labelLayout [
-	^ labelLayout
+CFMaElementBuilder >> labelPresentation [
+	^ labelPresentation
 ]
 
 { #category : 'accessing' }
-CFMaElementBuilder >> labelLayout: aLabelLayout [
-	labelLayout := aLabelLayout
+CFMaElementBuilder >> labelPresentation: aPresentation [
+	labelPresentation := aPresentation
+]
+
+{ #category : 'accessing' }
+CFMaElementBuilder >> groupPresentation [
+	^ groupPresentation
+]
+
+{ #category : 'accessing' }
+CFMaElementBuilder >> groupPresentation: aPresentation [
+	groupPresentation := aPresentation
 ]
 
 { #category : 'configuration' }
-CFMaElementBuilder >> useCollapsibleGroups [
-	collapsibleGroups := true
+CFMaElementBuilder >> beInlineLabels [
+	labelPresentation := CFMaInlineLabelPresentation new
 ]
 
 { #category : 'configuration' }
-CFMaElementBuilder >> useStaticGroups [
-	collapsibleGroups := false
-]
-
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> useInlineLabels [
-	labelLayout := CFMaInlineLabelLayout new
+CFMaElementBuilder >> beLeftLabels [
+	labelPresentation := CFMaLeftLabelPresentation new
 ]
 
 { #category : 'configuration' }
-CFMaElementBuilder >> useLeftLabels [
-	labelLayout := CFMaLeftLabelLayout new
+CFMaElementBuilder >> beInlineGroups [
+	groupPresentation := CFMaInlineGroupPresentation new
+]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> beAccordionGroups [
+	groupPresentation := CFMaAccordionGroupPresentation new
+]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> beTabbedGroups [
+	groupPresentation := CFMaTabbedGroupPresentation new
+]
+
+{ #category : 'api - building' }
+CFMaElementBuilder >> build [
+	self fieldContainerDo: [ :aHostElement |
+		groupPresentationContext := groupPresentation
+			newContextIn: aHostElement
+			labelPresentation: labelPresentation ].
+	^ super build
 ]
 
 
@@ -58,7 +78,6 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	"Foundation keeps GT field construction wherever its behaviour is sufficient.
 	This method supplies Foundation's shared label chrome; relation visitors may
 	provide Foundation editors where GT does not provide the required capability."
-	self emitGroupLabelIfNeededFor: aDescription.
 
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
@@ -77,40 +96,13 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
 		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
-	labelLayout configureLabel: aLabel field: aFieldElement.
+		self configureTabStopFor: aFieldElement using: aDescription.
 
-	self configureTabStopFor: aFieldElement using: aDescription.
-
-	currentGroupSection
-		ifNil: [
-			self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
-			self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ] ]
-		ifNotNil: [
-			currentGroupSection addLabel: aLabel field: aFieldElement ].
+	groupPresentationContext
+		addLabel: aLabel
+		field: aFieldElement
+		for: aDescription.
 	^ aLabel
-]
-
-
-{ #category : 'private - groups' }
-CFMaElementBuilder >> emitGroupLabelIfNeededFor: aDescription [
-	| aGroup |
-	aGroup := aDescription group.
-
-	aGroup = currentGroup ifTrue: [ ^ self ].
-	currentGroup := aGroup.
-	currentGroupSection := nil.
-	aGroup ifNil: [ ^ self ].
-
-	currentGroupSection := CFMaGroupSectionElement new
-		labelLayout: labelLayout;
-		groupName: aGroup;
-		collapsible: collapsibleGroups;
-		configure;
-		yourself.
-
-	labelLayout configureGroupSection: currentGroupSection.
-	self labelContainerDo: [ :aContainer |
-		aContainer addChild: currentGroupSection ]
 ]
 
 

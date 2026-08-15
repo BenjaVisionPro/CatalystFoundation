@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'formElementBlock',
 		'elementBuilderBlock',
-		'labelLayout',
-		'collapsibleGroups'
+		'labelPresentation',
+		'groupPresentation'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -21,8 +21,8 @@ CFMaViewModel class >> forObject: anObject [
 { #category : 'api - instance creation' }
 CFMaViewModel class >> forObject: anObject memento: aMemento [
 	^ self new
-		labelLayout: aMemento labelLayout;
-		collapsibleGroups: aMemento collapsibleGroups;
+		labelPresentation: aMemento labelPresentation;
+		groupPresentation: aMemento groupPresentation;
 		mementoBlock: [ aMemento ] object: anObject;
 		yourself
 ]
@@ -31,49 +31,53 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 { #category : 'initialization' }
 CFMaViewModel >> initialize [
 	super initialize.
-	labelLayout := CFMaInlineLabelLayout new.
-	collapsibleGroups := false
+	labelPresentation := CFMaInlineLabelPresentation new.
+	groupPresentation := CFMaInlineGroupPresentation new
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> labelLayout [
-	^ labelLayout
+CFMaViewModel >> labelPresentation [
+	^ labelPresentation
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> labelLayout: aLabelLayout [
-	labelLayout := aLabelLayout
+CFMaViewModel >> labelPresentation: aPresentation [
+	labelPresentation := aPresentation
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> collapsibleGroups [
-	^ collapsibleGroups
+CFMaViewModel >> groupPresentation [
+	^ groupPresentation
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> collapsibleGroups: aBoolean [
-	collapsibleGroups := aBoolean
+CFMaViewModel >> groupPresentation: aPresentation [
+	groupPresentation := aPresentation
 ]
 
 { #category : 'configuration' }
-CFMaViewModel >> useCollapsibleGroups [
-	collapsibleGroups := true
+CFMaViewModel >> beInlineLabels [
+	labelPresentation := CFMaInlineLabelPresentation new
 ]
 
 { #category : 'configuration' }
-CFMaViewModel >> useStaticGroups [
-	collapsibleGroups := false
-]
-
-
-{ #category : 'configuration' }
-CFMaViewModel >> useInlineLabels [
-	labelLayout := CFMaInlineLabelLayout new
+CFMaViewModel >> beLeftLabels [
+	labelPresentation := CFMaLeftLabelPresentation new
 ]
 
 { #category : 'configuration' }
-CFMaViewModel >> useLeftLabels [
-	labelLayout := CFMaLeftLabelLayout new
+CFMaViewModel >> beInlineGroups [
+	groupPresentation := CFMaInlineGroupPresentation new
+]
+
+{ #category : 'configuration' }
+CFMaViewModel >> beAccordionGroups [
+	groupPresentation := CFMaAccordionGroupPresentation new
+]
+
+{ #category : 'configuration' }
+CFMaViewModel >> beTabbedGroups [
+	groupPresentation := CFMaTabbedGroupPresentation new
 ]
 
 
@@ -94,10 +98,7 @@ CFMaViewModel >> formContainerStencilForMemento: aMemento [
 	^ aMemento magritteDescription
 		propertyAt: #blocElementContainerStencil
 		ifPresent: [ :aStencil | aStencil ]
-		ifAbsent: [
-			CFMaFormStencilBuilder new
-				labelLayout: labelLayout;
-				yourself ]
+		ifAbsent: [ CFMaFormStencilBuilder new ]
 ]
 
 { #category : 'initialization' }
@@ -116,8 +117,8 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	(aMemento isKindOf: CFMaMemento)
 		ifTrue: [
 			aMemento
-				labelLayout: labelLayout;
-				collapsibleGroups: collapsibleGroups ].
+				labelPresentation: labelPresentation;
+				groupPresentation: groupPresentation ].
 
 	theFrame removeChildren.
 
@@ -135,15 +136,11 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 		ifNil: [ CFMaElementBuilder new ]
 		ifNotNil: [ :aBlock | aBlock value ].
 
-	(anElementBuilder respondsTo: #labelLayout:)
-		ifTrue: [ anElementBuilder labelLayout: labelLayout ].
-	collapsibleGroups
+	(anElementBuilder respondsTo: #labelPresentation:)
 		ifTrue: [
-			(anElementBuilder respondsTo: #useCollapsibleGroups)
-				ifTrue: [ anElementBuilder useCollapsibleGroups ] ]
-		ifFalse: [
-			(anElementBuilder respondsTo: #useStaticGroups)
-				ifTrue: [ anElementBuilder useStaticGroups ] ].
+			anElementBuilder
+				labelPresentation: labelPresentation;
+				groupPresentation: groupPresentation ].
 
 	anElementBuilder
 		includeImplicitActions: aBoolean;

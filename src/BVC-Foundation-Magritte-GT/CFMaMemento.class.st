@@ -5,8 +5,8 @@ Class {
 	#superclass : 'GtMagritteMemento',
 	#instVars : [
 		'childMementosByDescription',
-		'labelLayout',
-		'collapsibleGroups',
+		'labelPresentation',
+		'groupPresentation',
 		'statusPulse',
 		'compositeOverallStatus'
 	],
@@ -20,8 +20,8 @@ CFMaMemento >> initialize [
 	super initialize.
 
 	childMementosByDescription := Dictionary new.
-	labelLayout := CFMaInlineLabelLayout new.
-	collapsibleGroups := false.
+	labelPresentation := CFMaInlineLabelPresentation new.
+	groupPresentation := CFMaInlineGroupPresentation new.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -51,8 +51,8 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 			| aMemento |
 			aMemento := self class model: anObject.
 			aMemento
-				labelLayout: self labelLayout;
-				collapsibleGroups: self collapsibleGroups.
+				labelPresentation: self labelPresentation;
+				groupPresentation: self groupPresentation.
 			aMemento overallStatus observe: statusPulse.
 			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
@@ -112,23 +112,23 @@ CFMaMemento >> reset [
 ]
 
 
+
 { #category : 'accessing' }
-CFMaMemento >> labelLayout [
-	^ labelLayout
+CFMaMemento >> labelPresentation [
+	^ labelPresentation
 ]
 
 { #category : 'accessing' }
-CFMaMemento >> labelLayout: aLabelLayout [
-	labelLayout := aLabelLayout
-]
-
-
-{ #category : 'accessing' }
-CFMaMemento >> collapsibleGroups [
-	^ collapsibleGroups
+CFMaMemento >> labelPresentation: aPresentation [
+	labelPresentation := aPresentation
 ]
 
 { #category : 'accessing' }
-CFMaMemento >> collapsibleGroups: aBoolean [
-	collapsibleGroups := aBoolean
+CFMaMemento >> groupPresentation [
+	^ groupPresentation
+]
+
+{ #category : 'accessing' }
+CFMaMemento >> groupPresentation: aPresentation [
+	groupPresentation := aPresentation
 ]
