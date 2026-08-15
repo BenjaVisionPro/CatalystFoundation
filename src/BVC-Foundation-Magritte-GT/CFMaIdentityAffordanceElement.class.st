@@ -28,8 +28,8 @@ CFMaIdentityAffordanceElement >> initialize [
 	textContainer := BrVerticalPane new
 		hFitContent;
 		vFitContent;
-		cellSpacing: -4;
-		margin: (BlInsets top: 5);
+		cellSpacing: -9;
+		margin: (BlInsets top: 7);
 		yourself.
 
 	labelElement := self
