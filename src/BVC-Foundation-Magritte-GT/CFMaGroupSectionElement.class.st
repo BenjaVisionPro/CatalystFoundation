@@ -1,4 +1,4 @@
-"I am responsible for presenting one Magritte description group as a Foundation section. When configured as collapsible I use Brick's accordion expansion model while keeping one persistent group header."
+"I am responsible for presenting one Magritte description group as a Foundation section. I use Brick's BrAccordion lifecycle directly: configure header and content first, then establish expansion state."
 
 Class {
 	#name : 'CFMaGroupSectionElement',
@@ -7,7 +7,8 @@ Class {
 		'groupName',
 		'labelLayout',
 		'collapsible',
-		'groupContentElement'
+		'groupContentElement',
+		'isConfigured'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Elements',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -19,31 +20,28 @@ CFMaGroupSectionElement >> initialize [
 	super initialize.
 
 	collapsible := false.
+	isConfigured := false.
+
 	self
 		hMatchParent;
 		vFitContent;
-		aptitude: BrGlamorousAccordionAptitude new;
-		expand
+		aptitude: BrGlamorousAccordionAptitude new
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> collapsible: aBoolean [
-	collapsible := aBoolean.
-	self installHeader
+	collapsible := aBoolean
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> groupName: aString [
-	groupName := aString.
-	self installHeader
+	groupName := aString
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout.
-	groupContentElement := labelLayout newGroupContentContainer.
-	self content: [ groupContentElement ].
-	self installHeader
+	groupContentElement := labelLayout newGroupContentContainer
 ]
 
 { #category : 'building' }
@@ -52,18 +50,27 @@ CFMaGroupSectionElement >> addLabel: aLabel field: aFieldElement [
 	groupContentElement addChild: aFieldElement
 ]
 
-{ #category : 'private - building' }
-CFMaGroupSectionElement >> installHeader [
-	groupName ifNil: [ ^ self ].
-	labelLayout ifNil: [ ^ self ].
+{ #category : 'building' }
+CFMaGroupSectionElement >> configure [
+	isConfigured ifTrue: [ ^ self ].
 
-	self header: [
-		| aHeader |
-		aHeader := collapsible
-			ifTrue: [ self newCollapsibleHeader ]
-			ifFalse: [ self newStaticHeader ].
-		labelLayout configureGroupLabel: aHeader.
-		aHeader ]
+	self
+		header: [ self newHeader ];
+		content: [ groupContentElement ];
+		expand.
+
+	isConfigured := true
+]
+
+{ #category : 'private - building' }
+CFMaGroupSectionElement >> newHeader [
+	| aHeader |
+	aHeader := collapsible
+		ifTrue: [ self newCollapsibleHeader ]
+		ifFalse: [ self newStaticHeader ].
+
+	labelLayout configureGroupLabel: aHeader.
+	^ aHeader
 ]
 
 { #category : 'private - building' }

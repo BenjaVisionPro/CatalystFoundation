@@ -105,6 +105,7 @@ CFMaElementBuilder >> emitGroupLabelIfNeededFor: aDescription [
 		labelLayout: labelLayout;
 		groupName: aGroup;
 		collapsible: collapsibleGroups;
+		configure;
 		yourself.
 
 	labelLayout configureGroupSection: currentGroupSection.
