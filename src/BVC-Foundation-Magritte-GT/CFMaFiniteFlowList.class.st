@@ -23,6 +23,7 @@ CFMaFiniteFlowList >> initialize [
 
 	self
 		aptitude: CFMaFiniteFlowListAptitude new;
+		beFocusable;
 		hMatchParent;
 		vFitContent;
 		when: BlElementExtentChangedEvent
