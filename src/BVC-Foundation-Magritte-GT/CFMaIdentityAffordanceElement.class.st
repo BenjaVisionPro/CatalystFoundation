@@ -23,15 +23,16 @@ CFMaIdentityAffordanceElement >> initialize [
 		hExact: 36;
 		vExact: 36;
 		layout: BlFrameLayout new;
+		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.
 
 	textContainer := BrFrame new
 		hFitContent;
-		vExact: 34;
+		vFitContent;
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
 			c linear vertical alignTop.
-			c margin: (BlInsets top: 3) ];
+			c margin: (BlInsets top: 4) ];
 		yourself.
 
 	labelElement := self
@@ -58,7 +59,7 @@ CFMaIdentityAffordanceElement >> initialize [
 		vExact: 43;
 		cellSpacing: 4;
 		padding: (BlInsets top: 0 right: 4 bottom: 0 left: 3);
-		layout: BlLinearLayout horizontal alignCenterLeft;
+		layout: BlLinearLayout horizontal;
 		addChild: iconContainer as: #icon;
 		addChild: textContainer as: #text;
 		yourself
