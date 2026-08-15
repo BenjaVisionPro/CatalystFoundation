@@ -93,3 +93,34 @@ CFMaFiniteFlowList >> updateResponsiveItemWidths [
 	aContentElement children do: [ :anItemElement |
 		anItemElement hExact: anItemWidth ].
 ]
+
+
+{ #category : 'api - selection' }
+CFMaFiniteFlowList >> selectNext [
+	| aMaximum anIndex |
+	aMaximum := self maxSelectionIndex.
+	aMaximum isZero ifTrue: [ ^ self ].
+
+	self selectedIndices
+		ifEmpty: [ ^ self selectOne: 1 ]
+		ifNotEmpty: [ :theIndices |
+			anIndex := theIndices first.
+			^ self selectOne: (anIndex >= aMaximum
+				ifTrue: [ 1 ]
+				ifFalse: [ anIndex + 1 ]) ]
+]
+
+{ #category : 'api - selection' }
+CFMaFiniteFlowList >> selectPrevious [
+	| aMaximum anIndex |
+	aMaximum := self maxSelectionIndex.
+	aMaximum isZero ifTrue: [ ^ self ].
+
+	self selectedIndices
+		ifEmpty: [ ^ self selectOne: aMaximum ]
+		ifNotEmpty: [ :theIndices |
+			anIndex := theIndices first.
+			^ self selectOne: (anIndex <= 1
+				ifTrue: [ aMaximum ]
+				ifFalse: [ anIndex - 1 ]) ]
+]

@@ -449,7 +449,7 @@ CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 	| aList |
-	aList := BrSimpleList new.
+	aList := CFMaRelationList new.
 	aList
 		matchParent;
 		itemType: [ :anItemTypeFactory :anItemObject :anItemIndex |
@@ -469,7 +469,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 	| aList |
-	aList := BrSimpleList new.
+	aList := CFMaRelationList new.
 	aList
 		hMatchParent;
 		vFitContent;
@@ -656,7 +656,7 @@ CFMaBuilderUtility class >> configureColumnedRelationList: aList [
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento using: aDescription [
 	| aList |
-	aList := BrColumnedList new.
+	aList := CFMaRelationColumnedList new.
 	aList
 		matchParent;
 		rowStencil: CFMaColumnedListItemElementStencilBuilder new;
