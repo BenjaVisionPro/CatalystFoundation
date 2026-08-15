@@ -40,7 +40,10 @@ CFMaFormShowcase class >> exampleElement [
 
 { #category : 'converting' }
 CFMaFormShowcase >> asElement [
-	^ self asGtMagritteViewModel asElement
+	| aViewModel |
+	aViewModel := self asGtMagritteViewModel.
+	aViewModel useCollapsibleGroups.
+	^ aViewModel asElement
 ]
 
 { #category : 'initialization' }

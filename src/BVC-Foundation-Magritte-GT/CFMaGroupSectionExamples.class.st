@@ -59,3 +59,15 @@ CFMaGroupSectionExamples >> groupSectionCanToggle [
 
 	^ aSection
 ]
+
+
+{ #category : 'examples' }
+CFMaGroupSectionExamples >> showcaseUsesCollapsibleGroups [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaFormShowcase example asGtMagritteViewModel.
+	aViewModel useCollapsibleGroups.
+
+	self assert: aViewModel class equals: CFMaViewModel.
+	^ aViewModel asElement
+]
