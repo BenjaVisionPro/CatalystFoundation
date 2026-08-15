@@ -25,11 +25,11 @@ CFMaIdentityAffordanceElement >> initialize [
 		layout: BlFrameLayout new;
 		yourself.
 
-	textContainer := BrVerticalPane new
+	textContainer := BrFrame new
 		hFitContent;
-		vFitContent;
-		cellSpacing: -12;
+		vExact: 30;
 		margin: (BlInsets top: 7);
+		layout: BlFrameLayout new;
 		yourself.
 
 	labelElement := self
@@ -38,6 +38,14 @@ CFMaIdentityAffordanceElement >> initialize [
 	identifierElement := self
 		newEditableTextWithFontSize: 10
 		foreground: (Color black alpha: 0.82)..
+
+	labelElement constraintsDo: [ :c |
+		c frame horizontal alignLeft.
+		c frame vertical alignTop ].
+	identifierElement constraintsDo: [ :c |
+		c frame horizontal alignLeft.
+		c frame vertical alignTop.
+		c margin: (BlInsets top: 14) ].
 
 	textContainer
 		addChild: labelElement as: #label;
