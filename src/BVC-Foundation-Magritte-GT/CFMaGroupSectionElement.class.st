@@ -22,8 +22,7 @@ CFMaGroupSectionElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		aptitude: (BrGlamorousAccordionAptitude new
-			doNotReplaceHeader);
+		aptitude: BrGlamorousAccordionAptitude new;
 		expand
 ]
 
