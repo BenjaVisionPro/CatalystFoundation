@@ -113,6 +113,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 	aList := CFMaFiniteFlowList new.
 	aList
 		minimumItemWidth: self relationGridMinimumItemWidth;
+		itemSpacing: aDescription relationGridItemInsets width;
 		stencil: ([ :anItemViewModel :anItemIndex :anInternalListElement |
 			| anItemContent anItemElement |
 			anItemContent := aDescription blocItemStencil
