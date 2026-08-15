@@ -33,7 +33,13 @@ CFMaRelationSurfaceElement >> initialize [
 			beFlat;
 			lowerBodyInside;
 			yourself);
-		addEventFilter: CFMaRelationFocusEventFilter new.
+		addEventFilter: CFMaRelationFocusEventFilter new;
+		when: BlClickEvent
+		do: [ :anEvent |
+			"Clicks not consumed by an interactive descendant belong to the
+			 relation. Keep them from escaping to outer GT containers that
+			 use click-to-focus behaviour of their own."
+			anEvent consumed: true ].
 
 	self updateSurfaceLayout
 ]
