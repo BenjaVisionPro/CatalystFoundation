@@ -56,14 +56,14 @@ CFMaIdentityAffordanceElement >> initialize [
 { #category : 'private - building' }
 CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground: aColor [
 	| anAptitude |
-	anAptitude := BrGlamorousEditableLabelAptitude new
-		glamorousRegularFont;
-		fontSize: aNumber;
-		defaultBackground: Color transparent;
-		focusedBackground: Color transparent;
-		defaultForeground: aColor;
-		minWidth: 1;
-		yourself.
+	anAptitude := (BrGlamorousEditableLabelAptitude
+		background: Color transparent
+		focused: Color transparent)
+			glamorousRegularFont;
+			fontSize: aNumber;
+			defaultForeground: aColor;
+			minWidth: 1;
+			yourself.
 
 	^ BrEditableLabel new
 		aptitude: anAptitude;
