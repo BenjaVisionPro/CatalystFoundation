@@ -23,9 +23,10 @@ CFMaGroupSectionElement >> initialize [
 	isConfigured := false.
 
 	self
+		layout: BlLinearLayout vertical;
 		hMatchParent;
 		vFitContent;
-		aptitude: BrGlamorousAccordionAptitude new
+		aptitude: BrAccordionAptitude new
 ]
 
 { #category : 'accessing' }
@@ -76,7 +77,10 @@ CFMaGroupSectionElement >> newHeader [
 { #category : 'private - building' }
 CFMaGroupSectionElement >> newCollapsibleHeader [
 	^ BrButton new
-		aptitude: BrGlamorousAccordionHeaderAptitude new;
+		aptitude: (BrGlamorousButtonWithLabelAptitude new
+			foreground: (Color black alpha: 0.68);
+			fontSize: 14;
+			bold);
 		label: groupName asString;
 		action: [ self toggleExpanded ];
 		yourself

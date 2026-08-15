@@ -25,13 +25,20 @@ CFMaGroupSectionExamples >> collapsibleGroupSection [
 	aSection addLabel: aLabel field: aField.
 
 	self assert: aSection isExpanded.
-	self assert: aSection children isNotEmpty.
+	self assert: aSection children size equals: 2.
 
+	^ aSection
+]
+
+{ #category : 'examples' }
+CFMaGroupSectionExamples >> collapsedGroupKeepsOnlyHeader [
+	<gtExample>
+	| aSection |
+	aSection := self collapsibleGroupSection.
 	aSection collapse.
-	self assert: aSection isCollapsed.
 
-	aSection expand.
-	self assert: aSection isExpanded.
+	self assert: aSection isCollapsed.
+	self assert: aSection children size equals: 1.
 
 	^ aSection
 ]
@@ -44,9 +51,11 @@ CFMaGroupSectionExamples >> groupSectionCanToggle [
 
 	aSection toggleExpanded.
 	self assert: aSection isCollapsed.
+	self assert: aSection children size equals: 1.
 
 	aSection toggleExpanded.
 	self assert: aSection isExpanded.
+	self assert: aSection children size equals: 2.
 
 	^ aSection
 ]
