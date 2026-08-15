@@ -123,7 +123,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 			anItemElement := BrFrame new
 				hExact: self relationGridMinimumItemWidth;
 				vFitContent;
-				margin: (BlInsets all: 4);
+				margin: aDescription relationGridItemInsets;
 				addAptitude: CFMaListItemAptitude;
 				addChild: anItemContent;
 				yourself.

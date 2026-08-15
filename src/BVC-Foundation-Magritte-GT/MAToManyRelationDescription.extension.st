@@ -16,7 +16,8 @@ MAToManyRelationDescription >> itemsAsEmbeddedForms [
 	self
 		blocItemViewModelStencil: CFMaEmbeddedItemViewModelStencilBuilder new;
 		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new;
-		relationBodyInsets: BlInsets empty
+		relationBodyInsets: BlInsets empty;
+		relationGridItemInsets: BlInsets empty
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
@@ -119,4 +120,17 @@ MAToManyRelationDescription >> relationBodyInsets [
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> relationBodyInsets: anInsets [
 	self propertyAt: #cfMaRelationBodyInsets put: anInsets
+]
+
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> relationGridItemInsets [
+	^ self
+		propertyAt: #cfMaRelationGridItemInsets
+		ifAbsent: [ BlInsets all: 4 ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> relationGridItemInsets: anInsets [
+	self propertyAt: #cfMaRelationGridItemInsets put: anInsets
 ]

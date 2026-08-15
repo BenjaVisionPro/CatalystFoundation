@@ -160,6 +160,9 @@ CFMaToManyRelationExamples >> gridOfEmbeddedFormsDescription [
 		yourself.
 
 	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
+
+	self assert: aDescription relationBodyInsets equals: BlInsets empty.
+	self assert: aDescription relationGridItemInsets equals: BlInsets empty.
 	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
 	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
 	^ aDescription
