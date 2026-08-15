@@ -5,6 +5,7 @@ Class {
 	#superclass : 'GtMagritteMemento',
 	#instVars : [
 		'childMementosByDescription',
+		'labelLayout',
 		'statusPulse',
 		'compositeOverallStatus'
 	],
@@ -18,6 +19,7 @@ CFMaMemento >> initialize [
 	super initialize.
 
 	childMementosByDescription := Dictionary new.
+	labelLayout := CFMaInlineLabelLayout new.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -46,6 +48,7 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 		ifAbsentPut: [
 			| aMemento |
 			aMemento := self class model: anObject.
+			aMemento labelLayout: self labelLayout.
 			aMemento overallStatus observe: statusPulse.
 			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
@@ -102,4 +105,15 @@ CFMaMemento >> commit [
 CFMaMemento >> reset [
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
+]
+
+
+{ #category : 'accessing' }
+CFMaMemento >> labelLayout [
+	^ labelLayout
+]
+
+{ #category : 'accessing' }
+CFMaMemento >> labelLayout: aLabelLayout [
+	labelLayout := aLabelLayout
 ]

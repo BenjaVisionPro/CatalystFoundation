@@ -3,7 +3,8 @@ Class {
 	#superclass : 'GtMagritteViewModel',
 	#instVars : [
 		'formElementBlock',
-		'elementBuilderBlock'
+		'elementBuilderBlock',
+		'labelLayout'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -19,8 +20,36 @@ CFMaViewModel class >> forObject: anObject [
 { #category : 'api - instance creation' }
 CFMaViewModel class >> forObject: anObject memento: aMemento [
 	^ self new
+		labelLayout: aMemento labelLayout;
 		mementoBlock: [ aMemento ] object: anObject;
 		yourself
+]
+
+
+{ #category : 'initialization' }
+CFMaViewModel >> initialize [
+	super initialize.
+	labelLayout := CFMaInlineLabelLayout new
+]
+
+{ #category : 'accessing' }
+CFMaViewModel >> labelLayout [
+	^ labelLayout
+]
+
+{ #category : 'accessing' }
+CFMaViewModel >> labelLayout: aLabelLayout [
+	labelLayout := aLabelLayout
+]
+
+{ #category : 'configuration' }
+CFMaViewModel >> useInlineLabels [
+	labelLayout := CFMaInlineLabelLayout new
+]
+
+{ #category : 'configuration' }
+CFMaViewModel >> useLeftLabels [
+	labelLayout := CFMaLeftLabelLayout new
 ]
 
 
@@ -41,7 +70,10 @@ CFMaViewModel >> formContainerStencilForMemento: aMemento [
 	^ aMemento magritteDescription
 		propertyAt: #blocElementContainerStencil
 		ifPresent: [ :aStencil | aStencil ]
-		ifAbsent: [ CFMaFormStencilBuilder new ]
+		ifAbsent: [
+			CFMaFormStencilBuilder new
+				labelLayout: labelLayout;
+				yourself ]
 ]
 
 { #category : 'initialization' }
@@ -54,8 +86,11 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
 
 { #category : 'initialization' }
 CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitActions: aBoolean [
-	| aContainer aStencil |
+	| aContainer aStencil anElementBuilder |
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
+
+	(aMemento isKindOf: CFMaMemento)
+		ifTrue: [ aMemento labelLayout: labelLayout ].
 
 	theFrame removeChildren.
 
@@ -69,9 +104,14 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	formElementBlock ifNotNil: [ :aBlock | aBlock cull: aContainer ].
 	aContainer requestStyle.
 
-	(elementBuilderBlock
+	anElementBuilder := elementBuilderBlock
 		ifNil: [ CFMaElementBuilder new ]
-		ifNotNil: [ :aBlock | aBlock value ])
+		ifNotNil: [ :aBlock | aBlock value ].
+
+	(anElementBuilder respondsTo: #labelLayout:)
+		ifTrue: [ anElementBuilder labelLayout: labelLayout ].
+
+	anElementBuilder
 		includeImplicitActions: aBoolean;
 		form: theFrame;
 		memento: aMemento;

@@ -1,9 +1,39 @@
 Class {
 	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
+	#instVars : [
+		'labelLayout'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
+
+{ #category : 'initialization' }
+CFMaElementBuilder >> initialize [
+	super initialize.
+	labelLayout := CFMaInlineLabelLayout new
+]
+
+{ #category : 'accessing' }
+CFMaElementBuilder >> labelLayout [
+	^ labelLayout
+]
+
+{ #category : 'accessing' }
+CFMaElementBuilder >> labelLayout: aLabelLayout [
+	labelLayout := aLabelLayout
+]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> useInlineLabels [
+	labelLayout := CFMaInlineLabelLayout new
+]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> useLeftLabels [
+	labelLayout := CFMaLeftLabelLayout new
+]
+
 
 { #category : 'elements' }
 CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
@@ -22,17 +52,13 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		id: (GtMagritteFieldLabelId new description: aDescription);
 		text: aText;
 		aptitude: aLabelAptitude;
-		fitContent;
-		margin: (BlInsets top: 3 right: 12 bottom: 6 left: 0);
-		constraintsDo: [ :c | c grid vertical alignTop ].
+		fitContent.
 
 	aDescription hasComment ifTrue: [
 		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
 		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
-	aFieldElement constraintsDo: [ :c |
-		c horizontal matchParent.
-		c grid horizontal weight: 1 ].
+	labelLayout configureLabel: aLabel field: aFieldElement.
 
 	self configureTabStopFor: aFieldElement using: aDescription.
 
