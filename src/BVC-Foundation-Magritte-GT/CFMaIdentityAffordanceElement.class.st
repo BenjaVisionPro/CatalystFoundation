@@ -28,7 +28,7 @@ CFMaIdentityAffordanceElement >> initialize [
 	textContainer := BrFrame new
 		hFitContent;
 		vExact: 30;
-		margin: (BlInsets top: 5);
+		margin: (BlInsets top: 1);
 		layout: BlFrameLayout new;
 		yourself.
 
