@@ -438,9 +438,7 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 		itemStencil: self newRelationListItemStencil;
 		itemDataBinder: (self newRelationListItemDataBinderUsing: aDescription);
 		selectionCallback: [ :theIndices |
-			self relationSelectionFrom: aList indices: theIndices ];
-		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+			self relationSelectionFrom: aList indices: theIndices ].
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
@@ -464,9 +462,7 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 		itemDataBinder: [ :anItemElement :anItemViewModel :anItemIndex |
 			anItemElement expanderItemViewModel: anItemViewModel ];
 		selectionCallback: [ :theIndices |
-			self relationSelectionFrom: aList indices: theIndices ];
-		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+			self relationSelectionFrom: aList indices: theIndices ].
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
@@ -648,9 +644,7 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		rowDataBinder: [ :anItemElement :anItemViewModel :anItemIndex | anItemElement ];
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ];
-		addAptitude: CFMaActiveSelectionAptitude;
-		addEventHandler: (GtPhlowListToSelectHandler new
-			transformation: GtPhlowSendTransformation default).
+		addAptitude: CFMaActiveSelectionAptitude.
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
