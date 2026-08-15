@@ -31,29 +31,28 @@ CFMaListClickToPhlowSelectHandler >> transformation: aGtPhlowSendTransformation 
 
 { #category : 'api - accessing' }
 CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
-	| anItemIndex wasAlreadySelected hasInteractiveTarget |
+	| anItemIndex wasAlreadySelected itemHasFocus |
 
 	anItemIndex := aBlClickEvent currentTarget constraints infinite holder dataSourcePosition.
-	anItemIndex <= 0
-		ifTrue: [ ^ self ].
-
-	hasInteractiveTarget := CFMaFocusUtility
-		hasFocusableElementFrom: aBlClickEvent target
-		before: aBlClickEvent currentTarget.
-
-	hasInteractiveTarget ifTrue: [
-		self listWidget selectOne: anItemIndex dueTo: aBlClickEvent.
-		aBlClickEvent consumed: true.
-		^ self ].
+	anItemIndex <= 0 ifTrue: [ ^ self ].
 
 	wasAlreadySelected := self
 		isListWidget: self listWidget
 		selectedAt: anItemIndex.
 
-	super clickEvent: aBlClickEvent.
+	"Descendants own their own focus. If one actually owns focus after handling
+	 the click, preserve it and only update selection. Otherwise delegate the
+	 complete interaction to Brick."
+	itemHasFocus := aBlClickEvent currentTarget hasFocus.
+	itemHasFocus
+		ifTrue: [
+			self listWidget selectOne: anItemIndex dueTo: aBlClickEvent.
+			aBlClickEvent consumed: true ]
+		ifFalse: [
+			super clickEvent: aBlClickEvent ].
 
-	wasAlreadySelected ifTrue: [
-		self selectCurrentSelectionFrom: self listWidget ]
+	(wasAlreadySelected and: [ itemHasFocus not ])
+		ifTrue: [ self selectCurrentSelectionFrom: self listWidget ]
 ]
 
 { #category : 'private - testing' }

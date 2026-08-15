@@ -21,10 +21,9 @@ CFMaFormRootElement >> initialize [
 		vFitContent;
 		when: BlClickEvent
 		do: [ :anEvent |
-			(CFMaFocusUtility
-				hasFocusableElementFrom: anEvent target
-				before: self)
-				ifFalse: [ self requestFocus ] ]
+			"Descendants own focus. I only provide focus when a click leaves
+			 this form without a focused descendant."
+			self hasFocus ifFalse: [ self requestFocus ] ]
 ]
 
 { #category : 'configuration' }

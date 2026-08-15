@@ -44,15 +44,14 @@ CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
 	wasAlreadySelected := listWidget selectedIndices
 		anySatisfy: [ :eachIndex | eachIndex = itemIndex ].
 
-	"By the time a bubbling handler runs, embedded controls and embedded form
-	 roots have already had the opportunity to claim focus. Use the actual focus
-	 state, not whether some descendant happens to be focusable."
 	itemHasFocus := anEvent currentTarget hasFocus.
-
-	anEvent consumed: true.
-	itemHasFocus
-		ifFalse: [ listWidget requestFocus ].
 	listWidget selectOne: itemIndex dueTo: anEvent.
+
+	itemHasFocus
+		ifTrue: [
+			"Protect focus already owned by embedded content from the list's
+			 normal bubbling click handler."
+			anEvent consumed: true ].
 
 	(wasAlreadySelected and: [ itemHasFocus not ])
 		ifTrue: [ self activateCurrentSelection ]

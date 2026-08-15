@@ -155,7 +155,6 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ].
 	self installOuterFormScrollForwardingOn: aList.
-	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -170,7 +169,6 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 
 	aList constraintsDo: [ :c | c padding: self relationListPadding ].
 
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
 	aContainer addContentChild: (self newRelationBodyContainerWith: aList using: aDescription).
 
@@ -380,17 +378,6 @@ CFMaBuilderUtility class >> newAutoSizingRelationEditorContainer [
 ]
 
 
-{ #category : 'private - relation editor' }
-CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocusElement: anElement [
-	aContainer
-		when: BlClickEvent
-		do: [ :anEvent |
-			(CFMaFocusUtility
-				hasFocusableElementFrom: anEvent target
-				before: aContainer)
-				ifFalse: [ anElement requestFocus ] ].
-	^ aContainer
-]
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> installRelationEditorShortcutsOn: aContainer primaryFocusElement: aList addElement: anAddElement memento: aMemento description: aDescription removeAction: aRemoveAction [
@@ -461,7 +448,6 @@ CFMaBuilderUtility class >> newRelationListUsing: aDescription [
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
-	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -485,7 +471,6 @@ CFMaBuilderUtility class >> newAccordionRelationListUsing: aDescription [
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
-	aList addAptitude: CFMaActiveSelectionAptitude.
 	^ aList
 ]
 
@@ -603,7 +588,6 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 	aRemoveButtonBuilder ifNotNil: [
 		aRemoveButton := aRemoveButtonBuilder value: aList ].
 
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
 	aContainer addContentChild: (self newRelationBodyContainerWith: aList using: aDescription).
 
@@ -662,8 +646,7 @@ CFMaBuilderUtility class >> newColumnedRelationListElementMemento: aMemento usin
 		rowStencil: CFMaColumnedListItemElementStencilBuilder new;
 		rowDataBinder: [ :anItemElement :anItemViewModel :anItemIndex | anItemElement ];
 		selectionCallback: [ :theIndices |
-			self relationSelectionFrom: aList indices: theIndices ];
-		addAptitude: CFMaActiveSelectionAptitude.
+			self relationSelectionFrom: aList indices: theIndices ].
 
 	self installOuterFormScrollForwardingOn: aList.
 	self installListClickToPhlowSelectOn: aList.
@@ -917,7 +900,6 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 
 	aContainer := self newRelationEditorContainer.
 	aContainer addContentChild: (self newRelationBodyContainerWith: aContentElement using: aDescription).
-	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
 
 	(canAdd or: [ canModify ]) ifTrue: [
 		anActionContainer := self newRelationActionContainer.
