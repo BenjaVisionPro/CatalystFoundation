@@ -27,9 +27,11 @@ CFMaIdentityAffordanceElement >> initialize [
 
 	textContainer := BrFrame new
 		hFitContent;
-		vExact: 30;
-		margin: (BlInsets top: 1);
+		vExact: 34;
 		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c linear vertical alignTop.
+			c margin: (BlInsets top: 3) ];
 		yourself.
 
 	labelElement := self
