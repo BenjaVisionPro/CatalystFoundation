@@ -33,11 +33,7 @@ CFMaRelationSurfaceElement >> initialize [
 			beFlat;
 			lowerBodyInside;
 			yourself);
-		when: BlClickEvent
-		do: [ :anEvent |
-			"Children get the click first. If none of them owns focus afterwards,
-		 the relation surface is the natural fallback focus owner."
-			self hasFocus ifFalse: [ self requestFocus ] ].
+		addEventFilter: CFMaRelationFocusEventFilter new.
 
 	self updateSurfaceLayout
 ]
