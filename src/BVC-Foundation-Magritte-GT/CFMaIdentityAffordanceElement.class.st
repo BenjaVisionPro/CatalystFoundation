@@ -28,7 +28,7 @@ CFMaIdentityAffordanceElement >> initialize [
 	textContainer := BrVerticalPane new
 		hFitContent;
 		vFitContent;
-		cellSpacing: -9;
+		cellSpacing: -12;
 		margin: (BlInsets top: 7);
 		yourself.
 
@@ -37,8 +37,7 @@ CFMaIdentityAffordanceElement >> initialize [
 		foreground: (Color black alpha: 0.92).
 	identifierElement := self
 		newEditableTextWithFontSize: 10
-		foreground: (Color black alpha: 0.82).
-	identifierElement margin: (BlInsets top: -3).
+		foreground: (Color black alpha: 0.82)..
 
 	textContainer
 		addChild: labelElement as: #label;
