@@ -66,3 +66,14 @@ CFMaPresentationExamples >> leftLabelsWithTabbedGroupsElement [
 		beTabbedGroups.
 	^ aViewModel asElement
 ]
+
+
+{ #category : 'examples - forms' }
+CFMaPresentationExamples >> tabbedRootWithAccordionEmbeddedForms [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaFormShowcase example asGtMagritteViewModel.
+
+	self assert: aViewModel groupPresentation class equals: CFMaTabbedGroupPresentation.
+	^ aViewModel asElement
+]

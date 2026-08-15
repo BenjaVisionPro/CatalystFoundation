@@ -18,7 +18,9 @@ CFMaEmbeddedItemViewModelStencilBuilder >> buildDefault [
 				childMementoFor: self model
 				inRelation: self description ].
 
-	^ CFMaViewModel
+	^ (CFMaViewModel
 		forObject: self model
-		memento: aChildMemento
+		memento: aChildMemento)
+			beAccordionGroups;
+			yourself
 ]
