@@ -147,7 +147,7 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 				addAptitude: CFMaListItemAptitude;
 				addChild: anItemContent;
 				yourself.
-			anItemElement addEventFilter: (CFMaFiniteListItemSelectionHandler new
+			anItemElement addEventHandler: (CFMaFiniteListItemSelectionHandler new
 				listWidget: aList;
 				itemIndex: anItemIndex;
 				yourself).

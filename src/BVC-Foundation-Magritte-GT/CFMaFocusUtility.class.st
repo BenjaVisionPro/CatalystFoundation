@@ -19,3 +19,16 @@ CFMaFocusUtility class >> hasFocusableElementFrom: anElement before: anAncestor 
 
 	^ false
 ]
+
+
+{ #category : 'testing' }
+CFMaFocusUtility class >> hasFocusedElementFrom: anElement before: anAncestor [
+	| aCurrentElement |
+	aCurrentElement := anElement.
+
+	[ aCurrentElement isNotNil and: [ aCurrentElement ~~ anAncestor ] ] whileTrue: [
+		aCurrentElement hasFocus ifTrue: [ ^ true ].
+		aCurrentElement := aCurrentElement parent ].
+
+	^ false
+]

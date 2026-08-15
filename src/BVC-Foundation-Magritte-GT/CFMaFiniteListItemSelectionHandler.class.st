@@ -40,19 +40,19 @@ CFMaFiniteListItemSelectionHandler >> eventClass [
 
 { #category : 'api - event managing' }
 CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
-	| wasAlreadySelected hasInteractiveTarget |
+	| wasAlreadySelected hasFocusedTarget |
 	wasAlreadySelected := listWidget selectedIndices
 		anySatisfy: [ :eachIndex | eachIndex = itemIndex ].
 
-	hasInteractiveTarget := CFMaFocusUtility
-		hasFocusableElementFrom: anEvent target
-		before: anEvent currentTarget.
-
 	listWidget selectOne: itemIndex dueTo: anEvent.
-	hasInteractiveTarget
-		ifFalse: [ self focusRelationSurfaceFrom: anEvent currentTarget ].
 
-	(wasAlreadySelected and: [ hasInteractiveTarget not ])
+	hasFocusedTarget := CFMaFocusUtility
+		hasFocusedElementFrom: anEvent target
+		before: anEvent currentTarget.
+	hasFocusedTarget
+		ifFalse: [ listWidget requestFocus ].
+
+	(wasAlreadySelected and: [ hasFocusedTarget not ])
 		ifTrue: [ self activateCurrentSelection ]
 ]
 
@@ -77,17 +77,3 @@ CFMaFiniteListItemSelectionHandler >> wantsEvent: anEvent [
 ]
 
 
-{ #category : 'private - focus' }
-CFMaFiniteListItemSelectionHandler >> focusRelationSurfaceFrom: anElement [
-	| aCurrentElement |
-	aCurrentElement := anElement.
-
-	[ aCurrentElement isNotNil ] whileTrue: [
-		(aCurrentElement isKindOf: CFMaRelationSurfaceElement)
-			ifTrue: [
-				aCurrentElement requestFocus.
-				^ aCurrentElement ].
-		aCurrentElement := aCurrentElement parent ].
-
-	^ nil
-]
