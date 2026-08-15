@@ -1073,18 +1073,5 @@ CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: a
 	^ aFrame
 ]
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> newPhlowObjectElementFor: anObject [
-	| anElement |
-	anElement := CFCompactObjectStencil new
-		object: anObject;
-		create.
-	anElement
-		when: BlClickEvent
-		do: [ :anEvent |
-			anEvent consumed: true.
-			anEvent currentTarget phlow spawnObject: anObject ].
-	^ anElement
-]
 
 

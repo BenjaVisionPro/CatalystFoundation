@@ -1,4 +1,4 @@
-"I am responsible for presenting one relation item as a Foundation Phlow link."
+"I am responsible for presenting one relation item as passive Foundation Phlow-link content; the enclosing relation item owns selection, focus and activation."
 
 Class {
 	#name : 'CFMaPhlowLinkItemStencilBuilder',
@@ -10,8 +10,8 @@ Class {
 
 { #category : 'api - instantiation' }
 CFMaPhlowLinkItemStencilBuilder >> buildDefault [
-	| anObject |
 	self rowValue ifNil: [ ^ BrFrame new fitContent ].
-	anObject := self rowValue object.
-	^ CFMaBuilderUtility newPhlowObjectElementFor: anObject
+	^ CFCompactObjectStencil new
+		object: self rowValue object;
+		create
 ]
