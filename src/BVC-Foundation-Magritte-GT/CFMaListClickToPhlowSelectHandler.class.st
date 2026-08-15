@@ -31,11 +31,19 @@ CFMaListClickToPhlowSelectHandler >> transformation: aGtPhlowSendTransformation 
 
 { #category : 'api - accessing' }
 CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
-	| anItemIndex wasAlreadySelected |
+	| anItemIndex wasAlreadySelected hasInteractiveTarget |
 
 	anItemIndex := aBlClickEvent currentTarget constraints infinite holder dataSourcePosition.
 	anItemIndex <= 0
 		ifTrue: [ ^ self ].
+
+	hasInteractiveTarget := CFMaFocusUtility
+		hasFocusableElementFrom: aBlClickEvent target
+		before: aBlClickEvent currentTarget.
+
+	hasInteractiveTarget ifTrue: [
+		self listWidget selectOne: anItemIndex dueTo: aBlClickEvent.
+		^ self ].
 
 	wasAlreadySelected := self
 		isListWidget: self listWidget
