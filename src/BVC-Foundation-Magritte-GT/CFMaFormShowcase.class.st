@@ -38,12 +38,17 @@ CFMaFormShowcase class >> exampleElement [
 	^ self example asElement
 ]
 
+
+{ #category : 'converting' }
+CFMaFormShowcase >> asGtMagritteViewModel [
+	^ (CFMaViewModel forObject: self)
+		useCollapsibleGroups;
+		yourself
+]
+
 { #category : 'converting' }
 CFMaFormShowcase >> asElement [
-	| aViewModel |
-	aViewModel := self asGtMagritteViewModel.
-	aViewModel useCollapsibleGroups.
-	^ aViewModel asElement
+	^ self asGtMagritteViewModel asElement
 ]
 
 { #category : 'initialization' }

@@ -22,6 +22,7 @@ CFMaViewModel class >> forObject: anObject [
 CFMaViewModel class >> forObject: anObject memento: aMemento [
 	^ self new
 		labelLayout: aMemento labelLayout;
+		collapsibleGroups: aMemento collapsibleGroups;
 		mementoBlock: [ aMemento ] object: anObject;
 		yourself
 ]
@@ -42,6 +43,16 @@ CFMaViewModel >> labelLayout [
 { #category : 'accessing' }
 CFMaViewModel >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout
+]
+
+{ #category : 'accessing' }
+CFMaViewModel >> collapsibleGroups [
+	^ collapsibleGroups
+]
+
+{ #category : 'accessing' }
+CFMaViewModel >> collapsibleGroups: aBoolean [
+	collapsibleGroups := aBoolean
 ]
 
 { #category : 'configuration' }
@@ -103,7 +114,10 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
 
 	(aMemento isKindOf: CFMaMemento)
-		ifTrue: [ aMemento labelLayout: labelLayout ].
+		ifTrue: [
+			aMemento
+				labelLayout: labelLayout;
+				collapsibleGroups: collapsibleGroups ].
 
 	theFrame removeChildren.
 

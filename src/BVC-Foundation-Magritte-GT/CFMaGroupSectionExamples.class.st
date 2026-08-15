@@ -71,3 +71,32 @@ CFMaGroupSectionExamples >> showcaseUsesCollapsibleGroups [
 	self assert: aViewModel class equals: CFMaViewModel.
 	^ aViewModel asElement
 ]
+
+
+{ #category : 'examples' }
+CFMaGroupSectionExamples >> showcaseViewModelEnablesCollapsibleGroups [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaFormShowcase example asGtMagritteViewModel.
+
+	self assert: aViewModel collapsibleGroups.
+	^ aViewModel
+]
+
+{ #category : 'examples' }
+CFMaGroupSectionExamples >> childMementoInheritsCollapsibleGroups [
+	<gtExample>
+	| aModel aMemento aDescription aChildMemento |
+	aModel := CFMaFormShowcase example.
+	aMemento := CFMaMemento model: aModel.
+	aMemento collapsibleGroups: true.
+	aDescription := aMemento magritteDescription
+		detect: [ :each | each handlesSelector: #embeddedObject ].
+
+	aChildMemento := aMemento
+		childMementoFor: aModel embeddedObject
+		inRelation: aDescription.
+
+	self assert: aChildMemento collapsibleGroups.
+	^ aChildMemento
+]

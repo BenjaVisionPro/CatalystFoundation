@@ -6,6 +6,7 @@ Class {
 	#instVars : [
 		'childMementosByDescription',
 		'labelLayout',
+		'collapsibleGroups',
 		'statusPulse',
 		'compositeOverallStatus'
 	],
@@ -20,6 +21,7 @@ CFMaMemento >> initialize [
 
 	childMementosByDescription := Dictionary new.
 	labelLayout := CFMaInlineLabelLayout new.
+	collapsibleGroups := false.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -48,7 +50,9 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 		ifAbsentPut: [
 			| aMemento |
 			aMemento := self class model: anObject.
-			aMemento labelLayout: self labelLayout.
+			aMemento
+				labelLayout: self labelLayout;
+				collapsibleGroups: self collapsibleGroups.
 			aMemento overallStatus observe: statusPulse.
 			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
@@ -116,4 +120,15 @@ CFMaMemento >> labelLayout [
 { #category : 'accessing' }
 CFMaMemento >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout
+]
+
+
+{ #category : 'accessing' }
+CFMaMemento >> collapsibleGroups [
+	^ collapsibleGroups
+]
+
+{ #category : 'accessing' }
+CFMaMemento >> collapsibleGroups: aBoolean [
+	collapsibleGroups := aBoolean
 ]
