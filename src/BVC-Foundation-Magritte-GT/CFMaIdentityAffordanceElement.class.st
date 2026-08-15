@@ -1,0 +1,154 @@
+"I am responsible for presenting and editing an object's icon, label, and identifier as one compact Foundation identity affordance."
+
+Class {
+	#name : 'CFMaIdentityAffordanceElement',
+	#superclass : 'BrHorizontalPane',
+	#instVars : [
+		'memento',
+		'iconContainer',
+		'textContainer',
+		'labelElement',
+		'identifierElement'
+	],
+	#category : 'BVC-Foundation-Magritte-GT-Widgets',
+	#package : 'BVC-Foundation-Magritte-GT',
+	#tag : 'Widgets'
+}
+
+{ #category : 'initialization' }
+CFMaIdentityAffordanceElement >> initialize [
+	super initialize.
+
+	iconContainer := BrFrame new
+		hExact: 36;
+		vExact: 36;
+		layout: BlFrameLayout new;
+		yourself.
+
+	textContainer := BrVerticalPane new
+		hFitContent;
+		vFitContent;
+		cellSpacing: -4;
+		yourself.
+
+	labelElement := self
+		newEditableTextWithFontSize: 14
+		foreground: (Color black alpha: 0.92).
+	identifierElement := self
+		newEditableTextWithFontSize: 11
+		foreground: (Color black alpha: 0.82).
+
+	textContainer
+		addChild: labelElement as: #label;
+		addChild: identifierElement as: #identifier.
+
+	self
+		hFitContent;
+		vExact: 43;
+		cellSpacing: 4;
+		padding: (BlInsets top: 0 right: 4 bottom: 0 left: 3);
+		layout: BlLinearLayout horizontal alignCenterLeft;
+		addChild: iconContainer as: #icon;
+		addChild: textContainer as: #text;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground: aColor [
+	| anAptitude |
+	anAptitude := BrGlamorousEditableLabelAptitude new
+		glamorousRegularFont;
+		fontSize: aNumber;
+		defaultBackground: Color transparent;
+		focusedBackground: Color transparent;
+		defaultForeground: aColor;
+		minWidth: 1;
+		yourself.
+
+	^ BrEditableLabel new
+		aptitude: anAptitude;
+		fitContent;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> memento [
+	^ memento
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> memento: aMemento [
+	memento := aMemento.
+	self
+		buildIconEditor;
+		bindEditable: labelElement toSelector: #label;
+		bindEditable: identifierElement toSelector: #identifier
+]
+
+{ #category : 'private - accessing' }
+CFMaIdentityAffordanceElement >> descriptionHandling: aSelector [
+	memento ifNil: [ ^ nil ].
+	^ memento magritteDescription
+		detect: [ :each | each handlesSelector: aSelector ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - building' }
+CFMaIdentityAffordanceElement >> buildIconEditor [
+	| aDescription anEditor |
+	iconContainer removeChildren.
+	aDescription := self descriptionHandling: #icon.
+	aDescription ifNil: [ ^ self ].
+
+	anEditor := GtMagritteBuilderUtility
+		newIconWithMemento: memento
+		using: aDescription.
+	anEditor constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	iconContainer addChild: anEditor
+]
+
+{ #category : 'private - binding' }
+CFMaIdentityAffordanceElement >> bindEditable: anEditableLabel toSelector: aSelector [
+	| aDescription |
+	aDescription := self descriptionHandling: aSelector.
+	aDescription ifNil: [
+		anEditableLabel visibility: BlVisibility gone.
+		^ self ].
+
+	anEditableLabel
+		visibility: BlVisibility visible;
+		when: BrEditorAcceptWish
+		do: [ :aWish |
+			GtMagritteBuilderUtility
+				writeText: aWish text
+				using: aDescription
+				memento: memento
+				element: anEditableLabel ].
+
+	anEditableLabel withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theLabel :aSink |
+				| aValue |
+				aValue := aSink value currentValue.
+				theLabel text: (aValue ifNil: [ '' ] ifNotNil: #asString) ].
+		(memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> iconContainer [
+	^ iconContainer
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> labelElement [
+	^ labelElement
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> identifierElement [
+	^ identifierElement
+]

@@ -1,6 +1,9 @@
 Class {
 	#name : 'CFObject',
 	#superclass : 'Object',
+	#instVars : [
+		'icon'
+	],
 	#category : 'BVC-Foundation-Core',
 	#package : 'BVC-Foundation-Core'
 }
@@ -15,6 +18,7 @@ CFObject >> defaultIcon [
 	^ self class defaultIcon
 ]
 
+
 { #category : 'accessing' }
 CFObject class >> icon [
 	"Answer an icon stencil, not an icon element."
@@ -23,15 +27,19 @@ CFObject class >> icon [
 
 { #category : 'accessing' }
 CFObject >> icon [
-	"Answer an icon stencil, not an icon element."
-	^ self class icon
+	^ icon
+]
+
+{ #category : 'accessing' }
+CFObject >> icon: anIcon [
+	icon := anIcon
 ]
 
 { #category : 'as yet unclassified' }
 CFObject >> iconDescription [
 	<magritteDescription>
 	^ FontAwesomeIconDescription new
-		accessor: #defaultIcon;
+		accessor: #icon;
 		label: 'Icon';
 		default: self defaultIcon;
 		priority: 5;

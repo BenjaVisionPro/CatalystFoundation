@@ -1,6 +1,14 @@
 Extension { #name : 'MAToManyRelationDescription' }
 
 
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> itemsAsIdentityAffordances [
+	self
+		blocItemViewModelStencil: CFMaIdentityItemViewModelStencilBuilder new;
+		blocItemStencil: CFMaIdentityAffordanceItemStencilBuilder new
+]
+
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> itemsAsCompactObjects [
 	self

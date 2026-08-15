@@ -9,10 +9,12 @@ Class {
 		'priority',
 		'status',
 		'embeddedObject',
+		'identityObject',
 		'phlowObject',
 		'compactObject',
 		'columnedObject',
 		'compactItems',
+		'identityItems',
 		'expandableItems',
 		'accordionItems',
 		'gridItems',
@@ -66,10 +68,12 @@ CFMaFormShowcase >> initialize [
 	gamma := CFMaFormShowcaseItem exampleNamed: 'Gamma' score: 90 status: #archived.
 
 	embeddedObject := alpha.
+	identityObject := beta.
 	phlowObject := beta.
 	compactObject := gamma.
 	columnedObject := alpha.
 	compactItems := { alpha. beta. gamma }.
+	identityItems := { alpha. beta. gamma }.
 	expandableItems := { alpha. beta. gamma }.
 	accordionItems := { alpha. beta. gamma }.
 	gridItems := { alpha. beta. gamma }.
@@ -225,6 +229,32 @@ CFMaFormShowcase >> embeddedObjectDescription [
 		yourself
 ]
 
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> identityObject [
+	^ identityObject
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> identityObject: anObject [
+	identityObject := anObject
+]
+
+{ #category : 'descriptions - to one' }
+CFMaFormShowcase >> identityObjectDescription [
+	<magritteDescription>
+	^ MAToOneRelationDescription new
+		accessor: #identityObject;
+		label: 'Editable identity affordance';
+		comment: 'Icon, label, and identifier are edited directly in the compact affordance.';
+		group: 'To one';
+		priority: 105;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
+		beIdentityAffordance;
+		yourself
+]
+
 { #category : 'accessing' }
 CFMaFormShowcase >> phlowObject [
 	^ phlowObject
@@ -321,6 +351,34 @@ CFMaFormShowcase >> compactItemsDescription [
 		beModifiable;
 		beSimpleList;
 		itemsAsCompactObjects;
+		newItemStencil: CFMaNewItemStencilBuilder new;
+		yourself
+]
+
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> identityItems [
+	^ identityItems
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> identityItems: aCollection [
+	identityItems := aCollection
+]
+
+{ #category : 'descriptions - to many' }
+CFMaFormShowcase >> identityItemsDescription [
+	<magritteDescription>
+	^ MAToManyRelationDescription new
+		accessor: #identityItems;
+		label: 'Editable identity affordances';
+		group: 'To many';
+		priority: 205;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
+		beModifiable;
+		beSimpleList;
+		itemsAsIdentityAffordances;
 		newItemStencil: CFMaNewItemStencilBuilder new;
 		yourself
 ]

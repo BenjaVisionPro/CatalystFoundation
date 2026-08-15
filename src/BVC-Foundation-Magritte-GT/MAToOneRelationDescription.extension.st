@@ -1,5 +1,14 @@
 Extension { #name : 'MAToOneRelationDescription' }
 
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> beIdentityAffordance [
+	self
+		blocStencil: CFMaToOneElementStencilBuilder new;
+		blocItemViewModelStencil: CFMaIdentityItemViewModelStencilBuilder new;
+		blocItemStencil: CFMaIdentityAffordanceItemStencilBuilder new
+]
+
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> beEmbeddedForm [
 	self
