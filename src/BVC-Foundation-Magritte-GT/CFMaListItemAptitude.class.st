@@ -14,8 +14,10 @@ CFMaListItemAptitude >> initialize [
 	self
 		when: CFMaActiveSelectionState uniqueInstance & BlElementState selected
 		style: [ :aStyle |
-			aStyle background: self theme item selectedColor ];
+			aStyle effect: (BlOverlayAboveEffect new
+				paint: self theme item selectedColor) ];
 		when: CFMaActiveSelectionState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
-			aStyle background: (Color black alpha: 0.04) ]
+			aStyle effect: (BlOverlayAboveEffect new
+				paint: (Color black alpha: 0.04)) ]
 ]

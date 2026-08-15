@@ -40,7 +40,7 @@ CFMaFiniteFlowListAptitude >> updateList [
 { #category : 'updating' }
 CFMaFiniteFlowListAptitude >> updateSelection [
 	itemElements withIndexDo: [ :anItemElement :anIndex |
-		(selection contains: anIndex)
+		(selection containsIndex: anIndex)
 			ifTrue: [ anItemElement states addState: BlElementState selected ]
 			ifFalse: [ anItemElement states removeState: BlElementState selected ] ]
 ]

@@ -128,9 +128,10 @@ CFMaBuilderUtility class >> newGridRelationListUsing: aDescription [
 				addAptitude: CFMaListItemAptitude;
 				addChild: anItemContent;
 				yourself.
-			anItemElement
-				when: BlClickEvent
-				do: [ :anEvent | aList selectOne: anItemIndex dueTo: anEvent ].
+			anItemElement addEventFilter: (CFMaFiniteListItemSelectionHandler new
+				listWidget: aList;
+				itemIndex: anItemIndex;
+				yourself).
 			anItemElement ] asStencilBuilder: BrListRowStencilBuilder);
 		selectionCallback: [ :theIndices |
 			self relationSelectionFrom: aList indices: theIndices ].
