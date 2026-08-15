@@ -17,6 +17,5 @@ CFMaActiveSelectionAptitude >> initializeListeners [
 			self widget states addState: CFMaActiveSelectionState uniqueInstance ];
 		when: BlFocusOutEvent
 		do: [ :anEvent |
-			self widget hasFocus ifFalse: [
-				self widget states removeState: CFMaActiveSelectionState uniqueInstance ] ]
+			self widget states removeState: CFMaActiveSelectionState uniqueInstance ]
 ]

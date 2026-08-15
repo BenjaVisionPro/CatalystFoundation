@@ -149,10 +149,6 @@ CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
 ]
 
 
-{ #category : 'private - focus' }
-CFMaElementBuilder >> isRelationDescription: aDescription [
-	^ aDescription isKindOf: MAReferenceDescription
-]
 
 
 

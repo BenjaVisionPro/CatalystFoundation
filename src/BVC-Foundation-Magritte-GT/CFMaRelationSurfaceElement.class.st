@@ -33,12 +33,13 @@ CFMaRelationSurfaceElement >> initialize [
 			beFlat;
 			lowerBodyInside;
 			yourself);
-		addEventFilter: CFMaRelationFocusEventFilter new;
+		addEventFilterOn: BlMouseDownEvent
+		do: [ :anEvent |
+			anEvent primaryButtonPressed ifTrue: [ self requestFocus ] ];
 		when: BlClickEvent
 		do: [ :anEvent |
-			"Clicks not consumed by an interactive descendant belong to the
-			 relation. Keep them from escaping to outer GT containers that
-			 use click-to-focus behaviour of their own."
+			"Keep an otherwise unconsumed relation click inside this interaction
+			 boundary so an outer GT surface cannot claim focus afterwards."
 			anEvent consumed: true ].
 
 	self updateSurfaceLayout
