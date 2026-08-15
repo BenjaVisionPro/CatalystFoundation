@@ -1,4 +1,4 @@
-"I am responsible for making a Foundation relation the focus owner when a click enters its subtree. Descendants remain free to take final focus through their own behaviour."
+"I am responsible for establishing a Foundation relation as the focus context when primary pointer interaction begins anywhere in its subtree. I do not consume the event; descendants remain responsible for their own focus and interaction."
 
 Class {
 	#name : 'CFMaRelationFocusEventFilter',
@@ -10,10 +10,11 @@ Class {
 
 { #category : 'api - event managing' }
 CFMaRelationFocusEventFilter >> eventsToHandle [
-	^ { BlClickEvent }
+	^ { BlMouseDownEvent }
 ]
 
 { #category : 'api - event managing' }
-CFMaRelationFocusEventFilter >> clickEvent: anEvent [
-	anEvent currentTarget requestFocus
+CFMaRelationFocusEventFilter >> mouseDownEvent: anEvent [
+	anEvent primaryButtonPressed ifTrue: [
+		anEvent currentTarget requestFocus ]
 ]
