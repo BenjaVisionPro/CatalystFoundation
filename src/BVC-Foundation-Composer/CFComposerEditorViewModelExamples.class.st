@@ -22,6 +22,7 @@ CFComposerEditorViewModelExamples >> foundationMagritteViewRemainsTheDefaultForm
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMagritteEditorExample exampleDefault asGtMagritteViewModel.
+	aViewModel useCollapsibleGroups.
 
 	self assert: aViewModel class equals: CFMaViewModel.
 	^ aViewModel
