@@ -50,7 +50,7 @@ CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
 
 	listWidget selectOne: itemIndex dueTo: anEvent.
 	hasInteractiveTarget
-		ifFalse: [ listWidget requestFocus ].
+		ifFalse: [ self focusRelationSurfaceFrom: anEvent currentTarget ].
 
 	(wasAlreadySelected and: [ hasInteractiveTarget not ])
 		ifTrue: [ self activateCurrentSelection ]
