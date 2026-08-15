@@ -16,8 +16,15 @@ CFMaFormRootElement >> initialize [
 		background: CFInterfaceLighting backgroundPaint;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
+		focusability: BlFocusability after;
 		hMatchParent;
-		vFitContent
+		vFitContent;
+		when: BlClickEvent
+		do: [ :anEvent |
+			(CFMaFocusUtility
+				hasFocusableElementFrom: anEvent target
+				before: self)
+				ifFalse: [ self requestFocus ] ]
 ]
 
 { #category : 'configuration' }

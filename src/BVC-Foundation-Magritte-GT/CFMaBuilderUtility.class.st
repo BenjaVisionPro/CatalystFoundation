@@ -365,7 +365,10 @@ CFMaBuilderUtility class >> installRelationEditorFocusOn: aContainer primaryFocu
 	aContainer
 		when: BlClickEvent
 		do: [ :anEvent |
-			anElement requestFocus ].
+			(CFMaFocusUtility
+				hasFocusableElementFrom: anEvent target
+				before: aContainer)
+				ifFalse: [ anElement requestFocus ] ].
 	^ aContainer
 ]
 
