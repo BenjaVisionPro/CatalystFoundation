@@ -72,10 +72,16 @@ CFMaElementBuilder >> navigationRootFor: anElement [
 
 { #category : 'private - focus' }
 CFMaElementBuilder >> moveFocusFrom: anElement inDirection: aDirection [
+	| aNavigationRoot aReferenceElement |
+	aNavigationRoot := self navigationRootFor: anElement.
+	aReferenceElement := anElement space
+		ifNil: [ anElement ]
+		ifNotNil: [ :aSpace | aSpace focusOwner ifNil: [ anElement ] ].
+
 	BlFocusFinder new
 		direction: aDirection;
-		root: (self navigationRootFor: anElement);
-		referenceElement: anElement;
+		root: aNavigationRoot;
+		referenceElement: aReferenceElement;
 		nextFocusDo: #requestFocus ifNone: [  ]
 ]
 
