@@ -75,3 +75,19 @@ CFMaFiniteListItemSelectionHandler >> wantsEvent: anEvent [
 	^ anEvent class == self eventClass
 		or: [ anEvent class inheritsFrom: self eventClass ]
 ]
+
+
+{ #category : 'private - focus' }
+CFMaFiniteListItemSelectionHandler >> focusRelationSurfaceFrom: anElement [
+	| aCurrentElement |
+	aCurrentElement := anElement.
+
+	[ aCurrentElement isNotNil ] whileTrue: [
+		(aCurrentElement isKindOf: CFMaRelationSurfaceElement)
+			ifTrue: [
+				aCurrentElement requestFocus.
+				^ aCurrentElement ].
+		aCurrentElement := aCurrentElement parent ].
+
+	^ nil
+]
