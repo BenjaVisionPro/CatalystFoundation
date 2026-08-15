@@ -40,29 +40,22 @@ CFMaFiniteListItemSelectionHandler >> eventClass [
 
 { #category : 'api - event managing' }
 CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
-	| wasAlreadySelected hasInteractiveTarget |
-	hasInteractiveTarget := CFMaFocusUtility
-		hasFocusableElementFrom: anEvent target
-		before: anEvent currentTarget.
-
-	hasInteractiveTarget ifTrue: [
-		"The descendant already had first opportunity to handle the click. Select
-		 the enclosing item but preserve descendant focus and stop the enclosing
-		 list/relation from subsequently stealing it."
-		listWidget selectOne: itemIndex dueTo: anEvent.
-		anEvent consumed: true.
-		^ self ].
-
+	| wasAlreadySelected itemHasFocus |
 	wasAlreadySelected := listWidget selectedIndices
 		anySatisfy: [ :eachIndex | eachIndex = itemIndex ].
 
-	"Match BrListClickToSelectHandler: focus precedes the synchronous
-	 BrSelectionChanged notification, and the row owns the click."
+	"By the time a bubbling handler runs, embedded controls and embedded form
+	 roots have already had the opportunity to claim focus. Use the actual focus
+	 state, not whether some descendant happens to be focusable."
+	itemHasFocus := anEvent currentTarget hasFocus.
+
 	anEvent consumed: true.
-	listWidget requestFocus.
+	itemHasFocus
+		ifFalse: [ listWidget requestFocus ].
 	listWidget selectOne: itemIndex dueTo: anEvent.
 
-	wasAlreadySelected ifTrue: [ self activateCurrentSelection ]
+	(wasAlreadySelected and: [ itemHasFocus not ])
+		ifTrue: [ self activateCurrentSelection ]
 ]
 
 { #category : 'private - activation' }
