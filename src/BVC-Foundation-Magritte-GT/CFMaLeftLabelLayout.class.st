@@ -35,3 +35,13 @@ CFMaLeftLabelLayout >> configureLabel: aLabel field: aFieldElement [
 		c horizontal matchParent.
 		c grid horizontal weight: 1 ].
 ]
+
+
+{ #category : 'configuration' }
+CFMaLeftLabelLayout >> configureGroupLabel: aLabel [
+	aLabel
+		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c grid horizontal span: 2 ]
+]

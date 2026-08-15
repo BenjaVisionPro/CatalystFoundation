@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaElementBuilder',
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
-		'labelLayout'
+		'labelLayout',
+		'currentGroup'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -11,7 +12,8 @@ Class {
 { #category : 'initialization' }
 CFMaElementBuilder >> initialize [
 	super initialize.
-	labelLayout := CFMaInlineLabelLayout new
+	labelLayout := CFMaInlineLabelLayout new.
+	currentGroup := nil
 ]
 
 { #category : 'accessing' }
@@ -41,6 +43,8 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 	"Foundation keeps GT field construction wherever its behaviour is sufficient.
 	This method supplies Foundation's shared label chrome; relation visitors may
 	provide Foundation editors where GT does not provide the required capability."
+	self emitGroupLabelIfNeededFor: aDescription.
+
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude
@@ -64,6 +68,36 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 
 	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
 	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
+	^ aLabel
+]
+
+
+{ #category : 'private - groups' }
+CFMaElementBuilder >> emitGroupLabelIfNeededFor: aDescription [
+	| aGroup |
+	aGroup := aDescription group.
+
+	aGroup = currentGroup ifTrue: [ ^ self ].
+	currentGroup := aGroup.
+	aGroup ifNil: [ ^ self ].
+
+	self labelContainerDo: [ :aContainer |
+		aContainer addChild: (self newGroupLabelFor: aGroup) ]
+]
+
+{ #category : 'private - groups' }
+CFMaElementBuilder >> newGroupLabelFor: aGroup [
+	| aLabel |
+	aLabel := BrLabel new
+		text: aGroup asString;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.68);
+			fontSize: 14;
+			bold);
+		fitContent;
+		yourself.
+
+	labelLayout configureGroupLabel: aLabel.
 	^ aLabel
 ]
 

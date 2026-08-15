@@ -36,3 +36,11 @@ CFMaInlineLabelLayout >> configureLabel: aLabel field: aFieldElement [
 	aFieldElement constraintsDo: [ :c |
 		c horizontal matchParent ].
 ]
+
+
+{ #category : 'configuration' }
+CFMaInlineLabelLayout >> configureGroupLabel: aLabel [
+	aLabel
+		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
+		constraintsDo: [ :c | c horizontal matchParent ]
+]
