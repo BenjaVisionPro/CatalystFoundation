@@ -52,6 +52,7 @@ CFMagritteEditorExample >> enabledDescription [
 	^ MABooleanDescription new
 		accessor: #enabled;
 		label: 'Enabled';
+		group: 'Behaviour';
 		priority: 40;
 		yourself
 ]
@@ -83,6 +84,7 @@ CFMagritteEditorExample >> priorityDescription [
 	^ MANumberDescription new
 		accessor: #priority;
 		label: 'Priority';
+		group: 'Behaviour';
 		priority: 50;
 		beRequired;
 		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ] labelled: 'Priority must be between 0 and 100';
@@ -111,6 +113,7 @@ CFMagritteEditorExample >> slugDescription [
 	^ MAStringDescription new
 		accessor: #slug;
 		label: 'Slug';
+		group: 'Generated';
 		priority: 70;
 		beReadOnly;
 		yourself
@@ -132,6 +135,7 @@ CFMagritteEditorExample >> statusDescription [
 	^ MASingleOptionDescription new
 		accessor: #status;
 		label: 'Status';
+		group: 'Behaviour';
 		priority: 60;
 		options: self statusOptions;
 		beRequired;
@@ -159,6 +163,7 @@ CFMagritteEditorExample >> summaryDescription [
 	^ MAMemoDescription new
 		accessor: #summary;
 		label: 'Summary';
+		group: 'Content';
 		priority: 30;
 		yourself
 ]
