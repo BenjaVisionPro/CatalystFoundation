@@ -5,7 +5,8 @@ Class {
 	#superclass : 'BrFlowList',
 	#instVars : [
 		'minimumItemWidth',
-		'itemSpacing'
+		'itemSpacing',
+		'singleColumn'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Elements',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -18,6 +19,7 @@ CFMaFiniteFlowList >> initialize [
 
 	minimumItemWidth := 280.
 	itemSpacing := 8.
+	singleColumn := false.
 
 	self
 		aptitude: CFMaFiniteFlowListAptitude new;
@@ -49,6 +51,18 @@ CFMaFiniteFlowList >> minimumItemWidth: aNumber [
 	self updateResponsiveItemWidths
 ]
 
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> singleColumn [
+	^ singleColumn
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> singleColumn: aBoolean [
+	singleColumn := aBoolean.
+	self updateResponsiveItemWidths
+]
+
 { #category : 'private - layout' }
 CFMaFiniteFlowList >> responsiveContentElement [
 	self aptitudeDo: [ :anAptitude |
@@ -61,6 +75,7 @@ CFMaFiniteFlowList >> responsiveContentElement [
 CFMaFiniteFlowList >> responsiveItemWidthFor: anAvailableWidth [
 	| aColumnCount |
 	anAvailableWidth <= 0 ifTrue: [ ^ minimumItemWidth ].
+	singleColumn ifTrue: [ ^ anAvailableWidth ].
 
 	aColumnCount := (anAvailableWidth / (minimumItemWidth + itemSpacing)) floor max: 1.
 	^ ((anAvailableWidth / aColumnCount) - itemSpacing) max: minimumItemWidth

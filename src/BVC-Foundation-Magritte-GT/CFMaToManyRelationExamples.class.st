@@ -141,7 +141,7 @@ CFMaToManyRelationExamples >> embeddedFormsDescription [
 		itemsAsEmbeddedForms;
 		yourself.
 
-	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocListStencil class equals: CFMaFiniteListElementStencilBuilder.
 	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
 	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
 	^ aDescription

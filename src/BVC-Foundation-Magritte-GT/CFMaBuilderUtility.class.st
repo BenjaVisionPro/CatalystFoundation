@@ -101,6 +101,25 @@ CFMaBuilderUtility class >> newGridListMemento: aMemento using: aDescription [
 		list: (self newGridRelationListUsing: aDescription)
 ]
 
+
+{ #category : 'api - ui' }
+CFMaBuilderUtility class >> newFiniteListMemento: aMemento using: aDescription [
+	^ self
+		newToManyRelationEditorMemento: aMemento
+		using: aDescription
+		list: (self newFiniteRelationListUsing: aDescription)
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> newFiniteRelationListUsing: aDescription [
+	| aList |
+	aList := self newGridRelationListUsing: aDescription.
+	aList
+		singleColumn: true;
+		itemSpacing: 0.
+	^ aList
+]
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> relationGridMinimumItemWidth [
 	^ 280
