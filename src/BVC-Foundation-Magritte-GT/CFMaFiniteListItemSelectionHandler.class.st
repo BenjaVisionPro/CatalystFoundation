@@ -1,4 +1,4 @@
-"I am responsible for applying standard Foundation relation selection to a finite flow-list item without stealing focus from interactive descendants. A repeat click activates the selected object through Phlow, matching ordinary relation lists."
+"I am responsible for applying Brick-compatible selection and focus behaviour to a finite Foundation relation item."
 
 Class {
 	#name : 'CFMaFiniteListItemSelectionHandler',
@@ -40,20 +40,29 @@ CFMaFiniteListItemSelectionHandler >> eventClass [
 
 { #category : 'api - event managing' }
 CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
-	| wasAlreadySelected hasFocusedTarget |
+	| wasAlreadySelected hasInteractiveTarget |
+	hasInteractiveTarget := CFMaFocusUtility
+		hasFocusableElementFrom: anEvent target
+		before: anEvent currentTarget.
+
+	hasInteractiveTarget ifTrue: [
+		"The descendant already had first opportunity to handle the click. Select
+		 the enclosing item but preserve descendant focus and stop the enclosing
+		 list/relation from subsequently stealing it."
+		listWidget selectOne: itemIndex dueTo: anEvent.
+		anEvent consumed: true.
+		^ self ].
+
 	wasAlreadySelected := listWidget selectedIndices
 		anySatisfy: [ :eachIndex | eachIndex = itemIndex ].
 
+	"Match BrListClickToSelectHandler: focus precedes the synchronous
+	 BrSelectionChanged notification, and the row owns the click."
+	anEvent consumed: true.
+	listWidget requestFocus.
 	listWidget selectOne: itemIndex dueTo: anEvent.
 
-	hasFocusedTarget := CFMaFocusUtility
-		hasFocusedElementFrom: anEvent target
-		before: anEvent currentTarget.
-	hasFocusedTarget
-		ifFalse: [ listWidget requestFocus ].
-
-	(wasAlreadySelected and: [ hasFocusedTarget not ])
-		ifTrue: [ self activateCurrentSelection ]
+	wasAlreadySelected ifTrue: [ self activateCurrentSelection ]
 ]
 
 { #category : 'private - activation' }
@@ -75,5 +84,3 @@ CFMaFiniteListItemSelectionHandler >> wantsEvent: anEvent [
 	^ anEvent class == self eventClass
 		or: [ anEvent class inheritsFrom: self eventClass ]
 ]
-
-
