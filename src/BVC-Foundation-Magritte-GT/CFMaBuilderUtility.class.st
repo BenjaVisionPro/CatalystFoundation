@@ -975,20 +975,20 @@ CFMaBuilderUtility class >> newEmbeddedFormToOneMemento: aMemento using: aDescri
 
 { #category : 'api - ui' }
 CFMaBuilderUtility class >> newPhlowLinkToOneMemento: aMemento using: aDescription [
-	| aFrame |
-	aFrame := BrFrame new
-		hMatchParent;
-		vFitContent;
-		yourself.
+	| aList |
+	aList := self newRelationListUsing: aDescription.
+	aList constraintsDo: [ :c | c padding: self relationListPadding ].
 
 	^ self
 		newToOneRelationEditorMemento: aMemento
 		using: aDescription
-		contentElement: aFrame
-		updateContent: [ :theFrame :aSink |
+		contentElement: aList
+		updateContent: [ :theList :aSink |
 			self
-				onPhlowToOneFrame: theFrame
-				sinkUpdate: aSink ]
+				onToOneList: theList
+				sinkUpdate: aSink
+				memento: aMemento
+				description: aDescription ]
 ]
 
 { #category : 'private - relation editor' }
@@ -1075,20 +1075,3 @@ CFMaBuilderUtility class >> newPhlowObjectElementFor: anObject [
 ]
 
 
-{ #category : 'private - support' }
-CFMaBuilderUtility class >> onPhlowToOneFrame: aFrame sinkUpdate: aSink [
-	| anObject hasPresentedObject |
-	anObject := aSink value currentValue.
-	hasPresentedObject := aFrame userData includesKey: #cfMaPresentedObject.
-
-	(hasPresentedObject
-		and: [ (aFrame userData at: #cfMaPresentedObject) == anObject ])
-			ifTrue: [ ^ aFrame ].
-
-	aFrame removeChildren.
-	aFrame userData at: #cfMaPresentedObject put: anObject.
-
-	anObject ifNotNil: [
-		aFrame addChild: (self newPhlowObjectElementFor: anObject) ].
-	^ aFrame
-]

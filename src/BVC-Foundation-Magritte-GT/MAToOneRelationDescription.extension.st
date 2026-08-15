@@ -9,7 +9,9 @@ MAToOneRelationDescription >> beEmbeddedForm [
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> bePhlowLink [
-	self blocStencil: CFMaToOnePhlowLinkStencilBuilder new
+	self
+		blocStencil: CFMaToOnePhlowLinkStencilBuilder new;
+		blocItemStencil: CFMaPhlowLinkItemStencilBuilder new
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }

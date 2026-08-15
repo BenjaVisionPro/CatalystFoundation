@@ -31,6 +31,7 @@ CFMaToOneRelationExamples >> phlowLinkRepresentation [
 		yourself.
 
 	self assert: aDescription blocStencil class equals: CFMaToOnePhlowLinkStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaPhlowLinkItemStencilBuilder.
 	^ aDescription
 ]
 
