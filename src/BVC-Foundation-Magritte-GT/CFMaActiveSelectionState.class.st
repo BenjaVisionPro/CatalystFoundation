@@ -15,7 +15,7 @@ CFMaActiveSelectionState >> printOn: aStream [
 { #category : 'accessing' }
 CFMaActiveSelectionState >> priority [
 	"Use the same precedence as the built-in focused state so composed
-	selected + focus-within styles apply after the standard selected style."
+	selected + active-selection styles apply after the standard selected style."
 	^ BlElementState focused priority
 ]
 

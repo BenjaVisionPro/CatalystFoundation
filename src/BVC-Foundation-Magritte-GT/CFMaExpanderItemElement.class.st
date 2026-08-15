@@ -47,6 +47,7 @@ CFMaExpanderItemElement >> initialize [
 		aptitude: ((GtCoderExpanderAptitude new padding: BlInsets empty)
 			+ (BrStyleCommonAptitude new
 				default: [ :aStyle | aStyle background: Color transparent ]));
+		addAptitude: CFMaListItemAptitude new;
 		beInSingleCompositionLayer.
 
 	self states withExpansion.

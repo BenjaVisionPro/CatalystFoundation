@@ -214,3 +214,22 @@ CFMaToManyRelationExamples >> compactItemsCanReplaceAnotherItemRepresentation [
 	self assert: aDescription blocItemStencil class equals: BrListRowStencilBuilder.
 	^ aDescription
 ]
+
+
+{ #category : 'examples - selection' }
+CFMaToManyRelationExamples >> relationItemAptitude [
+	<gtExample>
+	| anAptitude |
+	anAptitude := CFMaListItemAptitude new.
+	self assert: anAptitude class equals: CFMaListItemAptitude.
+	^ anAptitude
+]
+
+{ #category : 'examples - selection' }
+CFMaToManyRelationExamples >> expandableItemsUseFoundationSelectionAptitude [
+	<gtExample>
+	| anElement |
+	anElement := CFMaExpanderItemElement new.
+	self assert: anElement class equals: CFMaExpanderItemElement.
+	^ anElement
+]

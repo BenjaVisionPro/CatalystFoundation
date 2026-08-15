@@ -14,7 +14,7 @@ CFMaListItemAptitude >> initialize [
 	self
 		when: CFMaActiveSelectionState uniqueInstance & BlElementState selected
 		style: [ :aStyle |
-			aStyle background: (Color black alpha: 0.08) ];
+			aStyle background: self theme item selectedColor ];
 		when: CFMaActiveSelectionState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
 			aStyle background: (Color black alpha: 0.04) ]
