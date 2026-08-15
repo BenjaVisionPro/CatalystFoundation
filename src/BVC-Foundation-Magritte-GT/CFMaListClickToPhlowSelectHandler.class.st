@@ -43,6 +43,7 @@ CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
 
 	hasInteractiveTarget ifTrue: [
 		self listWidget selectOne: anItemIndex dueTo: aBlClickEvent.
+		aBlClickEvent consumed: true.
 		^ self ].
 
 	wasAlreadySelected := self

@@ -493,7 +493,7 @@ CFMaBuilderUtility class >> installListClickToPhlowSelectOn: aListElement [
 			anItemElement userData
 				at: #cfMaListClickToPhlowSelectHandlerInstalled
 				ifAbsentPut: [
-					anItemElement addEventFilter: (CFMaListClickToPhlowSelectHandler new
+					anItemElement addEventHandler: (CFMaListClickToPhlowSelectHandler new
 						listWidget: aListElement;
 						transformation: GtPhlowSendTransformation default;
 						yourself).
