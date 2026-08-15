@@ -29,6 +29,7 @@ CFMaIdentityAffordanceElement >> initialize [
 		hFitContent;
 		vFitContent;
 		cellSpacing: -4;
+		margin: (BlInsets top: 5);
 		yourself.
 
 	labelElement := self
