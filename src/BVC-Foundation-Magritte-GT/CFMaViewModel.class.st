@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'formElementBlock',
 		'elementBuilderBlock',
-		'labelLayout'
+		'labelLayout',
+		'collapsibleGroups'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -29,7 +30,8 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 { #category : 'initialization' }
 CFMaViewModel >> initialize [
 	super initialize.
-	labelLayout := CFMaInlineLabelLayout new
+	labelLayout := CFMaInlineLabelLayout new.
+	collapsibleGroups := false
 ]
 
 { #category : 'accessing' }
@@ -41,6 +43,17 @@ CFMaViewModel >> labelLayout [
 CFMaViewModel >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout
 ]
+
+{ #category : 'configuration' }
+CFMaViewModel >> useCollapsibleGroups [
+	collapsibleGroups := true
+]
+
+{ #category : 'configuration' }
+CFMaViewModel >> useStaticGroups [
+	collapsibleGroups := false
+]
+
 
 { #category : 'configuration' }
 CFMaViewModel >> useInlineLabels [
@@ -110,6 +123,13 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 
 	(anElementBuilder respondsTo: #labelLayout:)
 		ifTrue: [ anElementBuilder labelLayout: labelLayout ].
+	collapsibleGroups
+		ifTrue: [
+			(anElementBuilder respondsTo: #useCollapsibleGroups)
+				ifTrue: [ anElementBuilder useCollapsibleGroups ] ]
+		ifFalse: [
+			(anElementBuilder respondsTo: #useStaticGroups)
+				ifTrue: [ anElementBuilder useStaticGroups ] ].
 
 	anElementBuilder
 		includeImplicitActions: aBoolean;

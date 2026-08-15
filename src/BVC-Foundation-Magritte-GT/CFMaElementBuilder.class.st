@@ -3,7 +3,9 @@ Class {
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
 		'labelLayout',
-		'currentGroup'
+		'currentGroup',
+		'currentGroupSection',
+		'collapsibleGroups'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -13,7 +15,9 @@ Class {
 CFMaElementBuilder >> initialize [
 	super initialize.
 	labelLayout := CFMaInlineLabelLayout new.
-	currentGroup := nil
+	currentGroup := nil.
+	currentGroupSection := nil.
+	collapsibleGroups := false
 ]
 
 { #category : 'accessing' }
@@ -25,6 +29,17 @@ CFMaElementBuilder >> labelLayout [
 CFMaElementBuilder >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout
 ]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> useCollapsibleGroups [
+	collapsibleGroups := true
+]
+
+{ #category : 'configuration' }
+CFMaElementBuilder >> useStaticGroups [
+	collapsibleGroups := false
+]
+
 
 { #category : 'configuration' }
 CFMaElementBuilder >> useInlineLabels [
@@ -66,8 +81,12 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 
 	self configureTabStopFor: aFieldElement using: aDescription.
 
-	self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
-	self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ].
+	currentGroupSection
+		ifNil: [
+			self labelContainerDo: [ :aContainer | aContainer addChild: aLabel ].
+			self fieldContainerDo: [ :aContainer | aContainer addChild: aFieldElement ] ]
+		ifNotNil: [
+			currentGroupSection addLabel: aLabel field: aFieldElement ].
 	^ aLabel
 ]
 
@@ -79,27 +98,20 @@ CFMaElementBuilder >> emitGroupLabelIfNeededFor: aDescription [
 
 	aGroup = currentGroup ifTrue: [ ^ self ].
 	currentGroup := aGroup.
+	currentGroupSection := nil.
 	aGroup ifNil: [ ^ self ].
 
-	self labelContainerDo: [ :aContainer |
-		aContainer addChild: (self newGroupLabelFor: aGroup) ]
-]
-
-{ #category : 'private - groups' }
-CFMaElementBuilder >> newGroupLabelFor: aGroup [
-	| aLabel |
-	aLabel := BrLabel new
-		text: aGroup asString;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.68);
-			fontSize: 14;
-			bold);
-		fitContent;
+	currentGroupSection := CFMaGroupSectionElement new
+		labelLayout: labelLayout;
+		groupName: aGroup;
+		collapsible: collapsibleGroups;
 		yourself.
 
-	labelLayout configureGroupLabel: aLabel.
-	^ aLabel
+	labelLayout configureGroupSection: currentGroupSection.
+	self labelContainerDo: [ :aContainer |
+		aContainer addChild: currentGroupSection ]
 ]
+
 
 
 { #category : 'visiting-description' }

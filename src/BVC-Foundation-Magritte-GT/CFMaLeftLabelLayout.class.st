@@ -45,3 +45,25 @@ CFMaLeftLabelLayout >> configureGroupLabel: aLabel [
 			c horizontal matchParent.
 			c grid horizontal span: 2 ]
 ]
+
+
+{ #category : 'building' }
+CFMaLeftLabelLayout >> newGroupContentContainer [
+	^ BrHorizontalGrid new
+		background: Color transparent;
+		border: BlBorder empty;
+		margin: BlInsets empty;
+		cellSpacing: 4;
+		columnCount: 2;
+		hMatchParent;
+		vFitContent;
+		yourself
+]
+
+
+{ #category : 'configuration' }
+CFMaLeftLabelLayout >> configureGroupSection: aGroupSection [
+	aGroupSection constraintsDo: [ :c |
+		c horizontal matchParent.
+		c grid horizontal span: 2 ]
+]

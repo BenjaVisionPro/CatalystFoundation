@@ -167,3 +167,12 @@ CFMagritteEditorExample >> summaryDescription [
 		priority: 30;
 		yourself
 ]
+
+
+{ #category : 'examples' }
+CFMagritteEditorExample class >> exampleWithCollapsibleGroups [
+	<gtExample>
+	^ CFMaViewModel forObject: self exampleDefault
+		useCollapsibleGroups;
+		yourself
+]
