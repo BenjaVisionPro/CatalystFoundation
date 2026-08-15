@@ -31,6 +31,13 @@ CFMaInlineGroupPresentationContext >> labelPresentation: aPresentation [
 ]
 
 { #category : 'building' }
+CFMaInlineGroupPresentationContext >> addElement: anElement for: aDescription [
+	| aContainer |
+	aContainer := self containerForGroup: aDescription group.
+	labelPresentation addElement: anElement to: aContainer
+]
+
+{ #category : 'building' }
 CFMaInlineGroupPresentationContext >> addLabel: aLabel field: aFieldElement for: aDescription [
 	| aContainer |
 	aContainer := self containerForGroup: aDescription group.

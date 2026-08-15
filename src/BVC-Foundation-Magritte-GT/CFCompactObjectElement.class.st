@@ -112,14 +112,22 @@ CFCompactObjectElement >> refresh [
 
 { #category : 'private - updating' }
 CFCompactObjectElement >> refreshIcon [
-	| anIconElement |
+	| anIconName anIconElement aDescription |
 	iconContainer removeChildren.
-	(object notNil and: [ object respondsTo: #icon ])
-		ifFalse: [ iconContainer visibility: BlVisibility gone.
+	(object notNil and: [ object respondsTo: #iconDescription ])
+		ifFalse: [
+			iconContainer visibility: BlVisibility gone.
 			^ self ].
+
+	aDescription := object iconDescription.
+	anIconName := object icon ifNil: [ aDescription default ].
+	anIconName ifNil: [
+		iconContainer visibility: BlVisibility gone.
+		^ self ].
+
 	iconContainer visibility: BlVisibility visible.
-	anIconElement := object icon asElement
-		size: 16 @ 16;
+	anIconElement := (FontAwesomeIcons defaultStyle icon: anIconName)
+		height: 16;
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];

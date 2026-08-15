@@ -35,3 +35,12 @@ CFMaLeftLabelPresentation >> addLabel: aLabel field: aFieldElement to: aContaine
 		addChild: aLabel;
 		addChild: aFieldElement
 ]
+
+
+{ #category : 'building' }
+CFMaLeftLabelPresentation >> addElement: anElement to: aContainer [
+	anElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c grid horizontal span: 2 ].
+	aContainer addChild: anElement
+]

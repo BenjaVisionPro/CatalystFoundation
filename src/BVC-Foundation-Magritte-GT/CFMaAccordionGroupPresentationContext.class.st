@@ -31,6 +31,13 @@ CFMaAccordionGroupPresentationContext >> labelPresentation: aPresentation [
 ]
 
 { #category : 'building' }
+CFMaAccordionGroupPresentationContext >> addElement: anElement for: aDescription [
+	| aContainer |
+	aContainer := self containerForGroup: aDescription group.
+	labelPresentation addElement: anElement to: aContainer
+]
+
+{ #category : 'building' }
 CFMaAccordionGroupPresentationContext >> addLabel: aLabel field: aFieldElement for: aDescription [
 	| aContainer |
 	aContainer := self containerForGroup: aDescription group.

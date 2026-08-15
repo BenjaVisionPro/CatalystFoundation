@@ -44,3 +44,54 @@ CFMaIdentityAffordanceExamples >> labelEditUsesMemento [
 	self assert: aMemento overallStatus valueOrNil isChanged.
 	^ anElement
 ]
+
+
+{ #category : 'examples - canonical identity' }
+CFMaIdentityAffordanceExamples >> objectIdentitySurface [
+	<gtExample>
+	| aMemento anElement |
+	aMemento := CFMaMemento model: CFObject new.
+	anElement := CFMaIdentityAffordanceElement new
+		memento: aMemento;
+		yourself.
+
+	self assert: (aMemento magritteDescription
+		select: [ :each | each cfCategory = #identity ]) size equals: 1.
+	self assert: anElement iconContainer children size equals: 1.
+	^ anElement
+]
+
+{ #category : 'examples - canonical identity' }
+CFMaIdentityAffordanceExamples >> identifiableObjectIdentitySurface [
+	<gtExample>
+	| anObject aMemento anElement |
+	anObject := CFIdentifiableObject new.
+	aMemento := CFMaMemento model: anObject.
+	anElement := CFMaIdentityAffordanceElement new
+		memento: aMemento;
+		yourself.
+
+	self assert: (aMemento magritteDescription
+		select: [ :each | each cfCategory = #identity ]) size equals: 2.
+	self assert: anElement identifierElement visibility equals: BlVisibility visible.
+	^ anElement
+]
+
+{ #category : 'examples - canonical identity' }
+CFMaIdentityAffordanceExamples >> labelledObjectIdentitySurface [
+	<gtExample>
+	| anObject aMemento anElement |
+	anObject := CFLabelledObject new
+		label: 'Label';
+		yourself.
+	aMemento := CFMaMemento model: anObject.
+	anElement := CFMaIdentityAffordanceElement new
+		memento: aMemento;
+		yourself.
+
+	self assert: (aMemento magritteDescription
+		select: [ :each | each cfCategory = #identity ]) size equals: 3.
+	self assert: anElement labelElement visibility equals: BlVisibility visible.
+	self assert: anElement identifierElement visibility equals: BlVisibility visible.
+	^ anElement
+]

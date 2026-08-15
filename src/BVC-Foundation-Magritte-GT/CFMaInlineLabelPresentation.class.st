@@ -29,3 +29,9 @@ CFMaInlineLabelPresentation >> addLabel: aLabel field: aFieldElement to: aContai
 		addChild: aLabel;
 		addChild: aFieldElement
 ]
+
+
+{ #category : 'building' }
+CFMaInlineLabelPresentation >> addElement: anElement to: aContainer [
+	aContainer addChild: anElement
+]

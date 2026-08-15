@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'labelPresentation',
 		'groupPresentation',
-		'groupPresentationContext'
+		'groupPresentationContext',
+		'identityAffordanceEmitted'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -14,7 +15,8 @@ Class {
 CFMaElementBuilder >> initialize [
 	super initialize.
 	labelPresentation := CFMaInlineLabelPresentation new.
-	groupPresentation := CFMaInlineGroupPresentation new
+	groupPresentation := CFMaInlineGroupPresentation new.
+	identityAffordanceEmitted := false
 ]
 
 { #category : 'accessing' }
@@ -64,11 +66,36 @@ CFMaElementBuilder >> beTabbedGroups [
 
 { #category : 'api - building' }
 CFMaElementBuilder >> build [
+	identityAffordanceEmitted := false.
 	self fieldContainerDo: [ :aHostElement |
 		groupPresentationContext := groupPresentation
 			newContextIn: aHostElement
 			labelPresentation: labelPresentation ].
 	^ super build
+]
+
+
+{ #category : 'visiting' }
+CFMaElementBuilder >> visit: aDescription [
+	(aDescription respondsTo: #cfCategory)
+		ifTrue: [
+			aDescription cfCategory = #identity
+				ifTrue: [
+					self emitIdentityAffordanceUsing: aDescription.
+					^ self ] ].
+	^ super visit: aDescription
+]
+
+{ #category : 'private - identity' }
+CFMaElementBuilder >> emitIdentityAffordanceUsing: aDescription [
+	identityAffordanceEmitted ifTrue: [ ^ self ].
+	identityAffordanceEmitted := true.
+
+	groupPresentationContext
+		addElement: (CFMaIdentityAffordanceElement new
+			memento: self memento;
+			yourself)
+		for: aDescription
 ]
 
 

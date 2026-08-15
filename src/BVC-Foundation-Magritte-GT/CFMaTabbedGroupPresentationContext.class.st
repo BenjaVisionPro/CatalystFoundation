@@ -32,6 +32,13 @@ CFMaTabbedGroupPresentationContext >> labelPresentation: aPresentation [
 ]
 
 { #category : 'building' }
+CFMaTabbedGroupPresentationContext >> addElement: anElement for: aDescription [
+	| aContainer |
+	aContainer := self containerForGroup: aDescription group.
+	labelPresentation addElement: anElement to: aContainer
+]
+
+{ #category : 'building' }
 CFMaTabbedGroupPresentationContext >> addLabel: aLabel field: aFieldElement for: aDescription [
 	| aContainer |
 	aContainer := self containerForGroup: aDescription group.

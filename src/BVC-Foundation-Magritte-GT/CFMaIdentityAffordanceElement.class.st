@@ -82,7 +82,8 @@ CFMaIdentityAffordanceElement >> memento: aMemento [
 	self
 		buildIconEditor;
 		bindEditable: labelElement toSelector: #label;
-		bindEditable: identifierElement toSelector: #identifier
+		bindEditable: identifierElement toSelector: #identifier;
+		updateTextContainerVisibility
 ]
 
 { #category : 'private - accessing' }
@@ -151,4 +152,13 @@ CFMaIdentityAffordanceElement >> labelElement [
 { #category : 'accessing' }
 CFMaIdentityAffordanceElement >> identifierElement [
 	^ identifierElement
+]
+
+
+{ #category : 'private - updating' }
+CFMaIdentityAffordanceElement >> updateTextContainerVisibility [
+	((self descriptionHandling: #label) isNil
+		and: [ (self descriptionHandling: #identifier) isNil ])
+		ifTrue: [ textContainer visibility: BlVisibility gone ]
+		ifFalse: [ textContainer visibility: BlVisibility visible ]
 ]
