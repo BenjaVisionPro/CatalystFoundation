@@ -1,4 +1,4 @@
-"I am responsible for presenting one Magritte description group as a Foundation section. When configured as collapsible I use Brick's standard accordion interaction."
+"I am responsible for presenting one Magritte description group as a Foundation section. When configured as collapsible I use Brick's accordion expansion model while keeping one persistent group header."
 
 Class {
 	#name : 'CFMaGroupSectionElement',
@@ -22,33 +22,49 @@ CFMaGroupSectionElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		aptitude: BrGlamorousAccordionAptitude new;
+		aptitude: (BrGlamorousAccordionAptitude new
+			doNotReplaceHeader);
 		expand
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> collapsible: aBoolean [
 	collapsible := aBoolean.
-	self rebuildHeader
+	self installHeader
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> groupName: aString [
 	groupName := aString.
-	self rebuildHeader
+	self installHeader
 ]
 
 { #category : 'accessing' }
 CFMaGroupSectionElement >> labelLayout: aLabelLayout [
 	labelLayout := aLabelLayout.
 	groupContentElement := labelLayout newGroupContentContainer.
-	self content: [ groupContentElement ]
+	self content: [ groupContentElement ].
+	self installHeader
 ]
 
 { #category : 'building' }
 CFMaGroupSectionElement >> addLabel: aLabel field: aFieldElement [
 	groupContentElement addChild: aLabel.
 	groupContentElement addChild: aFieldElement
+]
+
+{ #category : 'private - building' }
+CFMaGroupSectionElement >> installHeader [
+	groupName ifNil: [ ^ self ].
+	labelLayout ifNil: [ ^ self ].
+
+	self header: [
+		| aHeader |
+		aHeader := collapsible
+			ifTrue: [ self newCollapsibleHeader ]
+			ifFalse: [ self newStaticHeader ].
+		labelLayout configureGroupLabel: aHeader.
+		aHeader ]
 ]
 
 { #category : 'private - building' }
@@ -70,20 +86,4 @@ CFMaGroupSectionElement >> newStaticHeader [
 			bold);
 		fitContent;
 		yourself
-]
-
-{ #category : 'private - building' }
-CFMaGroupSectionElement >> rebuildHeader [
-	| aHeader |
-	groupName ifNil: [ ^ self ].
-
-	aHeader := collapsible
-		ifTrue: [ self newCollapsibleHeader ]
-		ifFalse: [ self newStaticHeader ].
-
-	labelLayout ifNotNil: [
-		labelLayout configureGroupLabel: aHeader ].
-
-	self header: [ aHeader ].
-	self expand
 ]
