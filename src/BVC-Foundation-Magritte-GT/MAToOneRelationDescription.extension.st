@@ -2,7 +2,9 @@ Extension { #name : 'MAToOneRelationDescription' }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> beEmbeddedForm [
-	self blocStencil: CFMaToOneEmbeddedFormStencilBuilder new
+	self
+		blocStencil: CFMaToOneEmbeddedFormStencilBuilder new;
+		relationBodyInsets: BlInsets empty
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
@@ -71,4 +73,17 @@ MAToOneRelationDescription >> newItemStencil: aStencil [
 	self
 		propertyAt: #newItemStencil
 		put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
+]
+
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> relationBodyInsets [
+	^ self
+		propertyAt: #cfMaRelationBodyInsets
+		ifAbsent: [ BlInsets all: 6 ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> relationBodyInsets: anInsets [
+	self propertyAt: #cfMaRelationBodyInsets put: anInsets
 ]

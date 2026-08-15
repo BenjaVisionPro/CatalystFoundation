@@ -151,7 +151,7 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addContentChild: (self newRelationBodyContainerWith: aList).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aList using: aDescription).
 
 	canModify ifTrue: [
 		anActionContainer := self newRelationActionContainer.
@@ -334,11 +334,11 @@ CFMaBuilderUtility class >> newRelationActionContainer [
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement [
+CFMaBuilderUtility class >> newRelationBodyContainerWith: anElement using: aDescription [
 	^ BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets all: 6);
+		padding: aDescription relationBodyInsets;
 		addChild: anElement;
 		yourself
 ]
@@ -585,7 +585,7 @@ CFMaBuilderUtility class >> newColumnedRelationEditorMemento: aMemento using: aD
 
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aList.
 
-	aContainer addContentChild: (self newRelationBodyContainerWith: aList).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aList using: aDescription).
 
 	(anAddElement isNotNil or: [ aRemoveButton isNotNil ]) ifTrue: [
 		anActionContainer := self newRelationActionContainer.
@@ -898,7 +898,7 @@ CFMaBuilderUtility class >> newToOneRelationEditorMemento: aMemento using: aDesc
 	canAdd := canModify and: [ aDescription newItemStencil isNotNil ].
 
 	aContainer := self newRelationEditorContainer.
-	aContainer addContentChild: (self newRelationBodyContainerWith: aContentElement).
+	aContainer addContentChild: (self newRelationBodyContainerWith: aContentElement using: aDescription).
 	self installRelationEditorFocusOn: aContainer primaryFocusElement: aContentElement.
 
 	(canAdd or: [ canModify ]) ifTrue: [

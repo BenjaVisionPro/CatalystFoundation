@@ -15,7 +15,8 @@ MAToManyRelationDescription >> itemsAsCompactObjects [
 MAToManyRelationDescription >> itemsAsEmbeddedForms [
 	self
 		blocItemViewModelStencil: CFMaEmbeddedItemViewModelStencilBuilder new;
-		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new
+		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new;
+		relationBodyInsets: BlInsets empty
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
@@ -105,4 +106,17 @@ MAToManyRelationDescription >> newItemStencil: aStencil [
 	self
 		propertyAt: #newItemStencil
 		put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
+]
+
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> relationBodyInsets [
+	^ self
+		propertyAt: #cfMaRelationBodyInsets
+		ifAbsent: [ BlInsets all: 6 ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> relationBodyInsets: anInsets [
+	self propertyAt: #cfMaRelationBodyInsets put: anInsets
 ]
