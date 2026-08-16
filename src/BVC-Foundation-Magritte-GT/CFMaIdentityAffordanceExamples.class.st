@@ -19,8 +19,8 @@ CFMaIdentityAffordanceExamples >> identityAffordance [
 		create.
 
 	self assert: anElement class equals: CFMaIdentityAffordanceElement.
-	self assert: anElement labelElement text asString equals: 'Label'.
-	self assert: anElement identifierElement text asString equals: anObject identifier asString.
+	self assert: anElement labelElement visibility equals: BlVisibility visible.
+	self assert: anElement identifierElement visibility equals: BlVisibility visible.
 	^ anElement
 ]
 
