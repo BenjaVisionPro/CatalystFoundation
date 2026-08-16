@@ -32,7 +32,7 @@ CFMaIdentityAffordanceElement >> initialize [
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
 			c linear vertical alignTop.
-			c margin: (BlInsets top: 3) ];
+			c margin: (BlInsets top: 2) ];
 		yourself.
 
 	labelElement := self
@@ -48,7 +48,7 @@ CFMaIdentityAffordanceElement >> initialize [
 	identifierElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.
 		c frame vertical alignTop.
-		c margin: (BlInsets top: 16) ].
+		c margin: (BlInsets top: 17) ].
 
 	textContainer
 		addChild: labelElement as: #label;
