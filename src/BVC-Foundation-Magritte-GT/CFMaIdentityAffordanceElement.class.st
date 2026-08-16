@@ -70,7 +70,7 @@ CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground
 	| anAptitude |
 	anAptitude := (BrGlamorousEditableLabelAptitude
 		background: Color transparent
-		focused: Color transparent)
+		focused: self theme item selectedColor)
 			glamorousRegularFont;
 			fontSize: aNumber;
 			foreground: aColor;
@@ -78,7 +78,7 @@ CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground
 			minWidth: 1;
 			yourself.
 
-	^ BrEditableLabel new
+	^ CFEditableLabel new
 		aptitude: anAptitude;
 		fitContent;
 		yourself
