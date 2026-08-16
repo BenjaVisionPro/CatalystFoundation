@@ -16,7 +16,6 @@ Class {
 		'date',
 		'time',
 		'dateAndTime',
-		'color',
 		'classValue',
 		'tags',
 		'file',
@@ -94,7 +93,6 @@ CFMaFormShowcase >> initialize [
 	date := Date newDay: 16 month: (Date nameOfMonth: 8) year: 2026.
 	time := Time hour: 14 minute: 30 second: 0.
 	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
-	color := Color blue.
 	classValue := String.
 	tags := #(foundation magritte bloc).
 	file := FileLocator imageDirectory.
@@ -389,28 +387,6 @@ CFMaFormShowcase >> dateAndTimeDescription [
 		comment: 'A Magritte DateAndTime value.';
 		group: 'Fields';
 		priority: 120;
-		yourself
-]
-
-{ #category : 'accessing' }
-CFMaFormShowcase >> color [
-	^ color
-]
-
-{ #category : 'accessing' }
-CFMaFormShowcase >> color: aColor [
-	color := aColor
-]
-
-{ #category : 'descriptions - fields' }
-CFMaFormShowcase >> colorDescription [
-	<magritteDescription>
-	^ MAColorDescription new
-		accessor: #color;
-		label: 'Color';
-		comment: 'A Magritte Color value.';
-		group: 'Fields';
-		priority: 130;
 		yourself
 ]
 
