@@ -90,10 +90,11 @@ CFMaSettingsPresentation >> addSeparatorTo: aContainer [
 	| aSeparator |
 	aSeparator := BlElement new
 		background: self separatorColor;
-		hMatchParent;
-		vExact: 1;
 		margin: (BlInsets left: 16 right: 16);
 		yourself.
+	aSeparator constraintsDo: [ :c |
+		c horizontal matchParent.
+		c vertical exact: 1 ].
 	aContainer addChild: aSeparator
 ]
 
@@ -179,9 +180,8 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 	self prepareRowIn: aContainer.
-	anElement
-		hMatchParent;
-		margin: (BlInsets top: 10 right: 16 bottom: 10 left: 16).
+	anElement margin: (BlInsets top: 10 right: 16 bottom: 10 left: 16).
+	anElement constraintsDo: [ :c | c horizontal matchParent ].
 	aContainer addChild: anElement
 ]
 
