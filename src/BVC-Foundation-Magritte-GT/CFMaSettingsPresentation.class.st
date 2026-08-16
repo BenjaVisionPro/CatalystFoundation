@@ -52,23 +52,18 @@ CFMaSettingsPresentation >> cardCornerRadius [
 ]
 
 { #category : 'private - metrics' }
-CFMaSettingsPresentation >> compactRowHeight [
-	^ 42
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> commentRowHeight [
-	^ 58
-]
-
-{ #category : 'private - metrics' }
 CFMaSettingsPresentation >> rowHorizontalInset [
-	^ 10
+	^ 8
 ]
 
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> rowHorizontalSpacing [
 	^ 12
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> rowVerticalInset [
+	^ 7
 ]
 
 { #category : 'private - metrics' }
@@ -143,6 +138,17 @@ CFMaSettingsPresentation >> prepareRowIn: aContainer [
 	rowCountsByContainer at: aContainer put: aCount + 1
 ]
 
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
+	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
+		ifTrue: [ aFieldElement margin: BlInsets empty ].
+	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
+		(aChild isKindOf: GtMagritteOneLineEditorElement)
+			ifTrue: [ aChild margin: BlInsets empty ] ].
+	^ aFieldElement
+]
+
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
 	self
@@ -160,12 +166,15 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aLabel
 		aptitude: (BrGlamorousLabelAptitude new
 			foreground: self primaryTextColor;
-			fontSize: 13);
+			fontSize: 13;
+			padding: BlInsets empty);
 		margin: BlInsets empty.
 	aLabel constraintsDo: [ :c |
 		c horizontal matchParent.
 		c linear weight: 1.
 		c linear vertical alignCenter ].
+
+	self prepareTrailingField: aFieldElement.
 
 	aTrailing := BrFrame new
 		hFitContent;
@@ -186,9 +195,12 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 
 	aRow := BrVerticalPane new
 		hMatchParent;
+		vFitContent;
 		cellSpacing: 1;
 		padding: (BlInsets
+			top: self rowVerticalInset
 			left: self rowHorizontalInset
+			bottom: self rowVerticalInset
 			right: self rowHorizontalInset);
 		addChild: aTopLine;
 		yourself.
@@ -198,16 +210,12 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 			text: aDescription comment;
 			aptitude: (BrGlamorousLabelAptitude new
 				foreground: self secondaryTextColor;
-				fontSize: 11);
+				fontSize: 11;
+				padding: BlInsets empty);
 			hMatchParent;
 			vFitContent;
 			yourself.
 		aRow addChild: aComment ].
-
-	aRow constraintsDo: [ :c |
-		c vertical exact: (aDescription hasComment
-			ifTrue: [ self commentRowHeight ]
-			ifFalse: [ self compactRowHeight ]) ].
 
 	aContainer addChild: aRow
 ]
