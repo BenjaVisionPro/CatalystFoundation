@@ -114,9 +114,17 @@ CFMaIdentityAffordanceElement >> buildIconEditor [
 	aDescription := self descriptionHandling: #icon.
 	aDescription ifNil: [ ^ self ].
 
-	anEditor := GtMagritteBuilderUtility
-		newIconWithMemento: memento
-		using: aDescription.
+	anEditor := aDescription isReadOnly
+		ifTrue: [
+			GtMagritteBuilderUtility
+				newIconWithMemento: memento
+				using: aDescription ]
+		ifFalse: [
+			FontAwesomeIconFieldStencilBuilder new
+				memento: memento;
+				description: aDescription;
+				asElement ].
+
 	anEditor constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].

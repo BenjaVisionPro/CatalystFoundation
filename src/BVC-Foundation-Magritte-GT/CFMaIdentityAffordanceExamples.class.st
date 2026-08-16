@@ -106,3 +106,20 @@ CFMaIdentityAffordanceExamples >> showcaseIconIsEditable [
 	self deny: aDescription isReadOnly.
 	^ aDescription
 ]
+
+
+{ #category : 'examples - canonical identity' }
+CFMaIdentityAffordanceExamples >> showcaseUsesEditableFontAwesomeField [
+	<gtExample>
+	| anObject aMemento anElement |
+	anObject := CFMaFormShowcase new.
+	aMemento := CFMaMemento model: anObject.
+	anElement := CFMaIdentityAffordanceElement new
+		memento: aMemento;
+		yourself.
+
+	self deny: anObject iconDescription isReadOnly.
+	self assert: anElement iconContainer children size equals: 1.
+	self assert: anElement iconContainer children first class equals: FontAwesomeIconFieldElement.
+	^ anElement
+]
