@@ -212,7 +212,6 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aRow := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 1;
 		padding: (BlInsets
 			top: self rowTopInset
 			left: self rowHorizontalInset
@@ -230,6 +229,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 				padding: BlInsets empty);
 			hMatchParent;
 			vFitContent;
+			margin: (BlInsets top: 1);
 			yourself.
 		aRow addChild: aComment ].
 
