@@ -40,7 +40,7 @@ CFMaFormShowcaseItem >> detailDescription [
 	^ MAMemoDescription new
 		accessor: #detail;
 		label: 'Detail';
-		comment: 'A multi-line field inside a related object.';
+		comment: 'A semantic memo field inside a related object; GT currently renders it through the string-field path.';
 		group: 'Details';
 		priority: 20;
 		yourself

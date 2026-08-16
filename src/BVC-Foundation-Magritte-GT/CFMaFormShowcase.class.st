@@ -1,13 +1,20 @@
-"I provide one object whose Magritte descriptions expose the Foundation form and relation representations used during UI development."
+"I am Foundation's singular Magritte rendering showcase. My descriptions expose every field and relation rendering Foundation currently supports so they can be evaluated together during UI development."
 
 Class {
 	#name : 'CFMaFormShowcase',
 	#superclass : 'CFLabelledObject',
 	#instVars : [
+		'text',
 		'summary',
+		'password',
+		'symbolValue',
 		'enabled',
 		'priority',
 		'status',
+		'file',
+		'directory',
+		'fieldIcon',
+		'derivedValue',
 		'embeddedObject',
 		'identityObject',
 		'phlowObject',
@@ -67,10 +74,17 @@ CFMaFormShowcase >> initialize [
 	| alpha beta gamma |
 	super initialize.
 	self label: 'Foundation Magritte showcase'.
-	summary := 'One deliberately busy object for evaluating Foundation form spacing, hierarchy, controls, validation and relation representations.'.
+	text := 'Editable text'.
+	summary := 'A semantic memo field kept separate so Foundation can verify its rendering alongside ordinary text.'.
+	password := 'secret password'.
+	symbolValue := #foundation.
 	enabled := true.
 	priority := 60.
 	status := #active.
+	file := FileLocator imageDirectory.
+	directory := FileLocator imageDirectory.
+	fieldIcon := self defaultIcon.
+	derivedValue := 'foundation-magritte-showcase'.
 
 	alpha := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
 	beta := CFMaFormShowcaseAccentItem exampleNamed: 'Beta' score: 60 status: #draft.
@@ -93,6 +107,28 @@ CFMaFormShowcase >> initialize [
 ]
 
 { #category : 'accessing' }
+CFMaFormShowcase >> text [
+	^ text
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> text: aString [
+	text := aString
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> textDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Text';
+		comment: 'The canonical editable one-line string field.';
+		group: 'Fields';
+		priority: 10;
+		yourself
+]
+
+{ #category : 'accessing' }
 CFMaFormShowcase >> summary [
 	^ summary
 ]
@@ -108,9 +144,53 @@ CFMaFormShowcase >> summaryDescription [
 	^ MAMemoDescription new
 		accessor: #summary;
 		label: 'Summary';
-		comment: 'A memo editor with enough content to expose field sizing and label alignment.';
+		comment: 'A semantic memo field. GT currently routes it through the string-field rendering path.';
 		group: 'Fields';
 		priority: 20;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> password [
+	^ password
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> password: aString [
+	password := aString
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> passwordDescription [
+	<magritteDescription>
+	^ MAPasswordDescription new
+		accessor: #password;
+		label: 'Password';
+		comment: 'A password string rendered by GT through its dedicated password stencil.';
+		group: 'Fields';
+		priority: 30;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> symbolValue [
+	^ symbolValue
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> symbolValue: aSymbol [
+	symbolValue := aSymbol
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> symbolValueDescription [
+	<magritteDescription>
+	^ MASymbolDescription new
+		accessor: #symbolValue;
+		label: 'Symbol';
+		comment: 'A symbol-valued string field using Magritte symbol conversion.';
+		group: 'Fields';
+		priority: 40;
 		yourself
 ]
 
@@ -131,7 +211,7 @@ CFMaFormShowcase >> enabledDescription [
 		accessor: #enabled;
 		label: 'Enabled';
 		group: 'Fields';
-		priority: 30;
+		priority: 50;
 		yourself
 ]
 
@@ -153,7 +233,7 @@ CFMaFormShowcase >> priorityDescription [
 		label: 'Priority';
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
-		priority: 40;
+		priority: 60;
 		beRequired;
 		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ]
 			labelled: 'Priority must be between 0 and 100';
@@ -177,15 +257,86 @@ CFMaFormShowcase >> statusDescription [
 		accessor: #status;
 		label: 'Status';
 		group: 'Fields';
-		priority: 50;
+		priority: 70;
 		options: #(draft active archived);
 		beRequired;
 		yourself
 ]
 
 { #category : 'accessing' }
+CFMaFormShowcase >> file [
+	^ file
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> file: aFileReference [
+	file := aFileReference
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> fileDescription [
+	<magritteDescription>
+	^ MAFileDescription new
+		accessor: #file;
+		label: 'File';
+		comment: 'The GT file-selector field.';
+		kind: AbstractFileReference;
+		display: #printString;
+		group: 'Fields';
+		priority: 80;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> directory [
+	^ directory
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> directory: aFileReference [
+	directory := aFileReference
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> directoryDescription [
+	<magritteDescription>
+	^ MADirectoryDescription new
+		accessor: #directory;
+		label: 'Directory';
+		comment: 'The GT directory-selector field.';
+		kind: AbstractFileReference;
+		display: #printString;
+		group: 'Fields';
+		priority: 90;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> fieldIcon [
+	^ fieldIcon
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> fieldIcon: anIcon [
+	fieldIcon := anIcon
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> fieldIconDescription [
+	<magritteDescription>
+	^ FontAwesomeIconDescription new
+		accessor: #fieldIcon;
+		label: 'Font Awesome icon';
+		comment: 'The editable Font Awesome icon field using GT''s selector element.';
+		default: self defaultIcon;
+		group: 'Fields';
+		priority: 100;
+		yourself
+]
+
+{ #category : 'accessing' }
 CFMaFormShowcase >> derivedValue [
-	^ self label asLowercase copyReplaceAll: ' ' with: '-'
+	^ derivedValue
 ]
 
 { #category : 'descriptions - fields' }
@@ -196,7 +347,7 @@ CFMaFormShowcase >> derivedValueDescription [
 		label: 'Derived value';
 		comment: 'A read-only field.';
 		group: 'Fields';
-		priority: 60;
+		priority: 110;
 		beReadOnly;
 		yourself
 ]
