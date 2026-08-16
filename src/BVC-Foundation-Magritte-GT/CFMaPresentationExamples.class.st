@@ -27,6 +27,12 @@ CFMaPresentationExamples >> tabbedPresentation [
 ]
 
 { #category : 'examples - presentations' }
+CFMaPresentationExamples >> settingsPresentation [
+	<gtExample>
+	^ CFMaSettingsPresentation new
+]
+
+{ #category : 'examples - presentations' }
 CFMaPresentationExamples >> leftTabbedPresentation [
 	<gtExample>
 	^ CFMaLeftTabbedPresentation new
@@ -51,6 +57,15 @@ CFMaPresentationExamples >> tabbedPresentationElement [
 ]
 
 { #category : 'examples - forms' }
+CFMaPresentationExamples >> settingsPresentationElement [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
+	aViewModel presentationClass: CFMaSettingsPresentation.
+	^ aViewModel asElement
+]
+
+{ #category : 'examples - forms' }
 CFMaPresentationExamples >> leftTabbedPresentationElement [
 	<gtExample>
 	| aViewModel |
@@ -60,11 +75,11 @@ CFMaPresentationExamples >> leftTabbedPresentationElement [
 ]
 
 { #category : 'examples - forms' }
-CFMaPresentationExamples >> showcaseUsesTabbedPresentation [
+CFMaPresentationExamples >> showcaseUsesSettingsPresentation [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMaFormShowcase example asGtMagritteViewModel.
 
-	self assert: aViewModel presentationClass equals: CFMaTabbedPresentation.
+	self assert: aViewModel presentationClass equals: CFMaSettingsPresentation.
 	^ aViewModel asElement
 ]

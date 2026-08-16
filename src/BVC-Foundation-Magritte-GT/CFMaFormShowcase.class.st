@@ -54,11 +54,27 @@ CFMaFormShowcase class >> exampleElement [
 	^ self example asElement
 ]
 
+{ #category : 'examples' }
+CFMaFormShowcase class >> exampleCurrentPresentationElement [
+	<gtExample>
+	^ ((CFMaViewModel forObject: self example)
+		presentationClass: CFMaTabbedPresentation;
+		yourself) asElement
+]
+
+{ #category : 'examples' }
+CFMaFormShowcase class >> exampleSettingsElement [
+	<gtExample>
+	^ ((CFMaViewModel forObject: self example)
+		presentationClass: CFMaSettingsPresentation;
+		yourself) asElement
+]
+
 
 { #category : 'converting' }
 CFMaFormShowcase >> asGtMagritteViewModel [
 	^ (CFMaViewModel forObject: self)
-		presentationClass: CFMaTabbedPresentation;
+		presentationClass: CFMaSettingsPresentation;
 		yourself
 ]
 
