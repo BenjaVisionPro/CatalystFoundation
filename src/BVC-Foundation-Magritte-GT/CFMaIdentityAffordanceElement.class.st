@@ -44,7 +44,8 @@ CFMaIdentityAffordanceElement >> initialize [
 
 	labelElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.
-		c frame vertical alignTop ].
+		c frame vertical alignTop.
+		c margin: (BlInsets top: -1) ].
 	identifierElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.
 		c frame vertical alignTop.
