@@ -58,7 +58,7 @@ CFMaFormShowcase >> asElement [
 CFMaFormShowcase >> iconDescription [
 	<magritteDescription>
 	^ super iconDescription
-		readOnly: false;
+		beWriteable;
 		yourself
 ]
 

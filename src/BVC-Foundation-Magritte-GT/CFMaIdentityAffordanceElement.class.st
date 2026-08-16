@@ -56,7 +56,7 @@ CFMaIdentityAffordanceElement >> initialize [
 
 	self
 		hFitContent;
-		vExact: 43;
+		vFitContent;
 		cellSpacing: 4;
 		padding: (BlInsets top: 0 right: 4 bottom: 0 left: 3);
 		layout: BlLinearLayout horizontal;
