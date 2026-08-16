@@ -15,7 +15,7 @@ CFMaFormStencilBuilder >> buildDefault [
 		cellSpacing: 4;
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets top: 14 right: 16 bottom: 14 left: 16).
+		padding: (BlInsets top: 0 right: 16 bottom: 0 left: 16).
 
 	aContainer magritte
 		beLabelContainer;
