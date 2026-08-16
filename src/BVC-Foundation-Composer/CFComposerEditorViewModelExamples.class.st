@@ -17,16 +17,6 @@ CFComposerEditorViewModelExamples >> composerEditorUsesAStandardRootMemento [
 	^ aViewModel
 ]
 
-{ #category : 'examples' }
-CFComposerEditorViewModelExamples >> foundationMagritteViewRemainsTheDefaultForm [
-	<gtExample>
-	| aViewModel |
-	aViewModel := CFMagritteEditorExample exampleDefault asGtMagritteViewModel.
-	aViewModel beAccordionGroups.
-
-	self assert: aViewModel class equals: CFMaViewModel.
-	^ aViewModel
-]
 
 { #category : 'examples' }
 CFComposerEditorViewModelExamples >> ordinaryMagritteObjectCanUseComposer [

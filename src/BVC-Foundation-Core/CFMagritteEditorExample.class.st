@@ -169,10 +169,3 @@ CFMagritteEditorExample >> summaryDescription [
 ]
 
 
-{ #category : 'examples' }
-CFMagritteEditorExample class >> exampleWithAccordionGroups [
-	<gtExample>
-	^ (CFMaViewModel forObject: self exampleDefault)
-		beAccordionGroups;
-		asElement
-]
