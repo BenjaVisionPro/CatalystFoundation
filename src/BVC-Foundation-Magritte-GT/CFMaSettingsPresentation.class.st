@@ -73,7 +73,7 @@ CFMaSettingsPresentation >> rowHorizontalSpacing [
 
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> sectionHorizontalInset [
-	^ 12
+	^ 6
 ]
 
 { #category : 'private - composition' }
@@ -144,36 +144,6 @@ CFMaSettingsPresentation >> prepareRowIn: aContainer [
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> newLeadingContentFor: aDescription label: aLabel [
-	| aLeading aComment |
-	aLabel
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: self primaryTextColor;
-			fontSize: 13);
-		margin: BlInsets empty.
-
-	aLeading := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 2;
-		addChild: aLabel;
-		yourself.
-
-	aDescription hasComment ifTrue: [
-		aComment := BrLabel new
-			text: aDescription comment;
-			aptitude: (BrGlamorousLabelAptitude new
-				foreground: self secondaryTextColor;
-				fontSize: 11);
-			hMatchParent;
-			vFitContent;
-			yourself.
-		aLeading addChild: aComment ].
-
-	^ aLeading
-]
-
-{ #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
 	self
 		addLabel: aLabel
@@ -184,11 +154,15 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aLeading aTrailing |
+	| aRow aTopLine aTrailing aComment |
 	self prepareRowIn: aContainer.
 
-	aLeading := self newLeadingContentFor: aDescription label: aLabel.
-	aLeading constraintsDo: [ :c |
+	aLabel
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: self primaryTextColor;
+			fontSize: 13);
+		margin: BlInsets empty.
+	aLabel constraintsDo: [ :c |
 		c horizontal matchParent.
 		c linear weight: 1.
 		c linear vertical alignCenter ].
@@ -202,15 +176,34 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		c frame horizontal alignRight.
 		c frame vertical alignCenter ].
 
-	aRow := BrHorizontalPane new
+	aTopLine := BrHorizontalPane new
 		hMatchParent;
+		vFitContent;
+		cellSpacing: self rowHorizontalSpacing;
+		addChild: aLabel;
+		addChild: aTrailing;
+		yourself.
+
+	aRow := BrVerticalPane new
+		hMatchParent;
+		cellSpacing: 1;
 		padding: (BlInsets
 			left: self rowHorizontalInset
 			right: self rowHorizontalInset);
-		cellSpacing: self rowHorizontalSpacing;
-		addChild: aLeading;
-		addChild: aTrailing;
+		addChild: aTopLine;
 		yourself.
+
+	aDescription hasComment ifTrue: [
+		aComment := BrLabel new
+			text: aDescription comment;
+			aptitude: (BrGlamorousLabelAptitude new
+				foreground: self secondaryTextColor;
+				fontSize: 11);
+			hMatchParent;
+			vFitContent;
+			yourself.
+		aRow addChild: aComment ].
+
 	aRow constraintsDo: [ :c |
 		c vertical exact: (aDescription hasComment
 			ifTrue: [ self commentRowHeight ]
