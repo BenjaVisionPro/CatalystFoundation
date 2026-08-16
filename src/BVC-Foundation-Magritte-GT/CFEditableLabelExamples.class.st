@@ -32,3 +32,26 @@ CFEditableLabelExamples >> editableLabelCanEnterEditorMode [
 	self assert: aLabel isEditable.
 	^ aLabel
 ]
+
+
+{ #category : 'examples' }
+CFEditableLabelExamples >> readOnlyLabelHasNoCursor [
+	<gtExample>
+	| aLabel |
+	aLabel := self editableLabel.
+	aLabel switchToEditor.
+	self assert: aLabel editor cursors isNotEmpty.
+
+	aLabel switchToLabel.
+	self assert: aLabel isReadOnly.
+	self assert: aLabel editor cursors isEmpty.
+	^ aLabel
+]
+
+{ #category : 'examples' }
+CFEditableLabelExamples >> foundationEditableLabelAptitude [
+	<gtExample>
+	^ CFGlamorousEditableLabelAptitude
+		background: Color transparent
+		focused: Color transparent
+]

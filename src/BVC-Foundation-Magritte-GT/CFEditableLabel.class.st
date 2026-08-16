@@ -15,3 +15,13 @@ CFEditableLabel >> initialize [
 	self editor: CFEditableLabelModel new.
 	self switchToLabel
 ]
+
+
+{ #category : 'api  - mode' }
+CFEditableLabel >> switchToLabel [
+	super switchToLabel.
+
+	self navigator
+		removeAll;
+		apply
+]
