@@ -234,7 +234,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		addChild: aTrailing;
 		yourself.
 	aLeading constraintsDo: [ :c |
-		c frame horizontal matchParent.
+		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
 
 	aContainer addChild: aRow
