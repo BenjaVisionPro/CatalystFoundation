@@ -201,8 +201,8 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aRow := BrHorizontalPane new
 		hMatchParent;
 		padding: (BlInsets
-			right: self rowHorizontalInset
-			left: self rowHorizontalInset);
+			left: self rowHorizontalInset
+			right: self rowHorizontalInset);
 		cellSpacing: self rowHorizontalSpacing;
 		addChild: aLeading;
 		addChild: aTrailing;
