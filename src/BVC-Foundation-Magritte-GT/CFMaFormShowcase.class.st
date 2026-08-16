@@ -11,6 +11,14 @@ Class {
 		'enabled',
 		'priority',
 		'status',
+		'multipleStatuses',
+		'duration',
+		'date',
+		'time',
+		'dateAndTime',
+		'color',
+		'classValue',
+		'tags',
 		'file',
 		'directory',
 		'fieldIcon',
@@ -81,6 +89,14 @@ CFMaFormShowcase >> initialize [
 	enabled := true.
 	priority := 60.
 	status := #active.
+	multipleStatuses := #(draft active).
+	duration := Duration days: 1 hours: 2 minutes: 3 seconds: 4.
+	date := Date newDay: 16 month: (Date nameOfMonth: 8) year: 2026.
+	time := Time hour: 14 minute: 30 second: 0.
+	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
+	color := Color blue.
+	classValue := String.
+	tags := #(foundation magritte bloc).
 	file := FileLocator imageDirectory.
 	directory := FileLocator imageDirectory.
 	fieldIcon := self defaultIcon.
@@ -264,6 +280,189 @@ CFMaFormShowcase >> statusDescription [
 ]
 
 { #category : 'accessing' }
+CFMaFormShowcase >> multipleStatuses [
+	^ multipleStatuses
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> multipleStatuses: aCollection [
+	multipleStatuses := aCollection
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> multipleStatusesDescription [
+	<magritteDescription>
+	^ MAMultipleOptionDescription new
+		accessor: #multipleStatuses;
+		label: 'Multiple option';
+		comment: 'A collection-valued selection from a fixed option set.';
+		group: 'Fields';
+		priority: 80;
+		options: #(draft active archived);
+		reference: MASymbolDescription new;
+		beOrdered;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> duration [
+	^ duration
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> duration: aDuration [
+	duration := aDuration
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> durationDescription [
+	<magritteDescription>
+	^ MADurationDescription new
+		accessor: #duration;
+		label: 'Duration';
+		comment: 'A Magritte Duration value.';
+		group: 'Fields';
+		priority: 90;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> date [
+	^ date
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> date: aDate [
+	date := aDate
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> dateDescription [
+	<magritteDescription>
+	^ MADateDescription new
+		accessor: #date;
+		label: 'Date';
+		comment: 'A Magritte Date value.';
+		group: 'Fields';
+		priority: 100;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> time [
+	^ time
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> time: aTime [
+	time := aTime
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> timeDescription [
+	<magritteDescription>
+	^ MATimeDescription new
+		accessor: #time;
+		label: 'Time';
+		comment: 'A Magritte Time value.';
+		group: 'Fields';
+		priority: 110;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> dateAndTime [
+	^ dateAndTime
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> dateAndTime: aDateAndTime [
+	dateAndTime := aDateAndTime
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> dateAndTimeDescription [
+	<magritteDescription>
+	^ MADateAndTimeDescription new
+		accessor: #dateAndTime;
+		label: 'Date and time';
+		comment: 'A Magritte DateAndTime value.';
+		group: 'Fields';
+		priority: 120;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> color [
+	^ color
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> color: aColor [
+	color := aColor
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> colorDescription [
+	<magritteDescription>
+	^ MAColorDescription new
+		accessor: #color;
+		label: 'Color';
+		comment: 'A Magritte Color value.';
+		group: 'Fields';
+		priority: 130;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> classValue [
+	^ classValue
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> classValue: aClass [
+	classValue := aClass
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> classValueDescription [
+	<magritteDescription>
+	^ MAClassDescription new
+		accessor: #classValue;
+		label: 'Class';
+		comment: 'A Smalltalk class value.';
+		group: 'Fields';
+		priority: 140;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> tags [
+	^ tags
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> tags: aCollection [
+	tags := aCollection
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> tagsDescription [
+	<magritteDescription>
+	^ MAToManyScalarRelationDescription new
+		accessor: #tags;
+		label: 'Tags';
+		comment: 'A to-many scalar relation reserved for Foundation''s tag-editor rendering.';
+		group: 'Fields';
+		priority: 150;
+		classes: { String };
+		reference: (MAStringDescription new
+			accessor: MANullAccessor new;
+			yourself);
+		yourself
+]
+
+{ #category : 'accessing' }
 CFMaFormShowcase >> file [
 	^ file
 ]
@@ -283,7 +482,7 @@ CFMaFormShowcase >> fileDescription [
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
-		priority: 80;
+		priority: 160;
 		yourself
 ]
 
@@ -307,7 +506,7 @@ CFMaFormShowcase >> directoryDescription [
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
-		priority: 90;
+		priority: 170;
 		yourself
 ]
 
@@ -330,7 +529,7 @@ CFMaFormShowcase >> fieldIconDescription [
 		comment: 'The editable Font Awesome icon field using GT''s selector element.';
 		default: self defaultIcon;
 		group: 'Fields';
-		priority: 100;
+		priority: 180;
 		yourself
 ]
 
@@ -347,7 +546,7 @@ CFMaFormShowcase >> derivedValueDescription [
 		label: 'Derived value';
 		comment: 'A read-only field.';
 		group: 'Fields';
-		priority: 110;
+		priority: 190;
 		beReadOnly;
 		yourself
 ]
