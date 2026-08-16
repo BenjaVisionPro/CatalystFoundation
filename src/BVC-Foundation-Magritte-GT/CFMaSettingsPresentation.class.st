@@ -175,7 +175,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aTopLine aTrailing aComment |
+	| aRow aLeading aTrailing aComment |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -183,41 +183,13 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 			foreground: self primaryTextColor;
 			fontSize: 13;
 			padding: BlInsets empty);
-		margin: BlInsets empty.
-	aLabel constraintsDo: [ :c |
-		c horizontal matchParent.
-		c linear weight: 1.
-		c linear vertical alignCenter ].
-
-	self prepareTrailingField: aFieldElement.
-
-	aTrailing := BrFrame new
-		hFitContent;
-		vFitContent;
 		margin: BlInsets empty;
-		padding: BlInsets empty;
-		addChild: aFieldElement;
-		yourself.
-	aFieldElement constraintsDo: [ :c |
-		c frame horizontal alignRight.
-		c frame vertical alignCenter ].
+		fitContent.
 
-	aTopLine := BrHorizontalPane new
+	aLeading := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		addChild: aLabel;
-		addChild: aTrailing;
-		yourself.
-
-	aRow := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets
-			top: self rowTopInset
-			left: self rowHorizontalInset
-			bottom: self rowBottomInset
-			right: self rowHorizontalInset);
-		addChild: aTopLine;
 		yourself.
 
 	aDescription hasComment ifTrue: [
@@ -231,7 +203,39 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 			vFitContent;
 			margin: (BlInsets top: 1);
 			yourself.
-		aRow addChild: aComment ].
+		aLeading addChild: aComment ].
+
+	self prepareTrailingField: aFieldElement.
+
+	aTrailing := BrFrame new
+		hFitContent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		addChild: aFieldElement;
+		yourself.
+	aFieldElement constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignCenter ].
+	aTrailing constraintsDo: [ :c |
+		c ignoreByLayout.
+		c ignored horizontal alignRight.
+		c ignored vertical alignTop ].
+
+	aRow := BrFrame new
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets
+			top: self rowTopInset
+			left: self rowHorizontalInset
+			bottom: self rowBottomInset
+			right: self rowHorizontalInset);
+		addChild: aLeading;
+		addChild: aTrailing;
+		yourself.
+	aLeading constraintsDo: [ :c |
+		c frame horizontal matchParent.
+		c frame vertical alignTop ].
 
 	aContainer addChild: aRow
 ]
