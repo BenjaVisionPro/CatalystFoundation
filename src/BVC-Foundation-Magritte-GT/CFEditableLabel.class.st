@@ -1,4 +1,4 @@
-"I am Foundation's in-place editable label. A single click gives me ordinary Bloc focus without an editor caret; double-click or Enter uses Brick's normal editable-label lifecycle."
+"I am Foundation's in-place editable label. I retain BrEditableLabel's complete editor and edition lifecycle while hiding the rendered caret in read-only focus."
 
 Class {
 	#name : 'CFEditableLabel',
@@ -12,16 +12,34 @@ Class {
 CFEditableLabel >> initialize [
 	super initialize.
 
-	self editor: CFEditableLabelModel new.
-	self switchToLabel
+	self
+		when: BlFocusEvent
+		do: [ :anEvent |
+			self isReadOnly ifTrue: [ self hideRenderedCursors ] ]
 ]
 
+{ #category : 'api  - mode' }
+CFEditableLabel >> switchToEditor [
+	super switchToEditor.
+	self showRenderedCursors
+]
 
 { #category : 'api  - mode' }
 CFEditableLabel >> switchToLabel [
 	super switchToLabel.
+	self hideRenderedCursors
+]
 
-	self navigator
-		removeAll;
-		apply
+{ #category : 'private - cursor presentation' }
+CFEditableLabel >> hideRenderedCursors [
+	self allChildrenBreadthFirstDo: [ :anElement |
+		(anElement respondsTo: #hideCursors)
+			ifTrue: [ anElement hideCursors ] ]
+]
+
+{ #category : 'private - cursor presentation' }
+CFEditableLabel >> showRenderedCursors [
+	self allChildrenBreadthFirstDo: [ :anElement |
+		(anElement respondsTo: #showCursors)
+			ifTrue: [ anElement showCursors ] ]
 ]
