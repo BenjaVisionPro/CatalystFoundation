@@ -57,8 +57,13 @@ CFMaSettingsPresentation >> rowHorizontalInset [
 ]
 
 { #category : 'private - metrics' }
-CFMaSettingsPresentation >> rowVerticalInset [
+CFMaSettingsPresentation >> rowBottomInset [
 	^ 7
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> rowTopInset [
+	^ 4
 ]
 
 { #category : 'private - metrics' }
@@ -209,9 +214,9 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		vFitContent;
 		cellSpacing: 1;
 		padding: (BlInsets
-			top: self rowVerticalInset
+			top: self rowTopInset
 			left: self rowHorizontalInset
-			bottom: self rowVerticalInset
+			bottom: self rowBottomInset
 			right: self rowHorizontalInset);
 		addChild: aTopLine;
 		yourself.
