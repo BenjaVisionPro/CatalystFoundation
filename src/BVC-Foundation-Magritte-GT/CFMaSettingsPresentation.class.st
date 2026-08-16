@@ -67,6 +67,11 @@ CFMaSettingsPresentation >> rowTopInset [
 ]
 
 { #category : 'private - metrics' }
+CFMaSettingsPresentation >> fieldBaselineOffset [
+	^ 1
+]
+
+{ #category : 'private - metrics' }
 CFMaSettingsPresentation >> sectionHorizontalInset [
 	^ 6
 ]
@@ -155,9 +160,9 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 	"GT's normal form renderers may add outer margins for grid presentation.
 	The settings row owns the outer positioning, so its trailing root starts
 	and ends exactly on the row content bounds."
-	aFieldElement margin: BlInsets empty.
+	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
 	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
-		ifTrue: [ aFieldElement margin: BlInsets empty ].
+		ifTrue: [ aFieldElement margin: (BlInsets top: self fieldBaselineOffset) ].
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
 		(aChild isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ aChild margin: BlInsets empty ] ].
