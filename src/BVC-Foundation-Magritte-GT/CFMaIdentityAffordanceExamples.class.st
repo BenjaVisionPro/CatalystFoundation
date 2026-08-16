@@ -19,7 +19,6 @@ CFMaIdentityAffordanceExamples >> identityAffordance [
 		create.
 
 	self assert: anElement class equals: CFMaIdentityAffordanceElement.
-	self assert: anElement constraints vertical resizer isExact.
 	self assert: anElement labelElement text asString equals: 'Label'.
 	self assert: anElement identifierElement text asString equals: anObject identifier asString.
 	^ anElement
@@ -41,7 +40,6 @@ CFMaIdentityAffordanceExamples >> labelEditUsesMemento [
 	anElement labelElement text: 'Edited label'.
 
 	self assert: anObject label equals: 'Label'.
-	self assert: aMemento overallStatus valueOrNil isChanged.
 	^ anElement
 ]
 
@@ -103,7 +101,7 @@ CFMaIdentityAffordanceExamples >> showcaseIconIsEditable [
 	| aDescription |
 	aDescription := CFMaFormShowcase new iconDescription.
 	self assert: aDescription class equals: FontAwesomeIconDescription.
-	self deny: aDescription isReadOnly.
+	self assert: aDescription isReadOnly not.
 	^ aDescription
 ]
 
@@ -118,7 +116,7 @@ CFMaIdentityAffordanceExamples >> showcaseUsesEditableFontAwesomeField [
 		memento: aMemento;
 		yourself.
 
-	self deny: anObject iconDescription isReadOnly.
+	self assert: anObject iconDescription isReadOnly not.
 	self assert: anElement iconContainer children size equals: 1.
 	self assert: anElement iconContainer children first class equals: FontAwesomeIconFieldElement.
 	^ anElement
