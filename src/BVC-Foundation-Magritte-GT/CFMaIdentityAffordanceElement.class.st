@@ -36,10 +36,10 @@ CFMaIdentityAffordanceElement >> initialize [
 		yourself.
 
 	labelElement := self
-		newEditableTextWithFontSize: 14
+		newEditableTextWithFontSize: 15
 		foreground: (Color black alpha: 0.92).
 	identifierElement := self
-		newEditableTextWithFontSize: 10
+		newEditableTextWithFontSize: 11
 		foreground: (Color black alpha: 0.55)..
 
 	labelElement constraintsDo: [ :c |
