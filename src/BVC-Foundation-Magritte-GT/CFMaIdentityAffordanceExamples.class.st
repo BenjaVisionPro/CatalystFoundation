@@ -95,3 +95,14 @@ CFMaIdentityAffordanceExamples >> labelledObjectIdentitySurface [
 	self assert: anElement identifierElement visibility equals: BlVisibility visible.
 	^ anElement
 ]
+
+
+{ #category : 'examples - canonical identity' }
+CFMaIdentityAffordanceExamples >> showcaseIconIsEditable [
+	<gtExample>
+	| aDescription |
+	aDescription := CFMaFormShowcase new iconDescription.
+	self assert: aDescription class equals: FontAwesomeIconDescription.
+	self deny: aDescription isReadOnly.
+	^ aDescription
+]

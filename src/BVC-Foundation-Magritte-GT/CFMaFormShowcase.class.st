@@ -53,6 +53,15 @@ CFMaFormShowcase >> asElement [
 	^ self asGtMagritteViewModel asElement
 ]
 
+
+{ #category : 'descriptions - identity' }
+CFMaFormShowcase >> iconDescription [
+	<magritteDescription>
+	^ super iconDescription
+		readOnly: false;
+		yourself
+]
+
 { #category : 'initialization' }
 CFMaFormShowcase >> initialize [
 	| alpha beta gamma |
