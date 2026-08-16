@@ -63,7 +63,7 @@ CFMaSettingsPresentation >> commentRowHeight [
 
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> rowHorizontalInset [
-	^ 16
+	^ 10
 ]
 
 { #category : 'private - metrics' }
@@ -100,7 +100,11 @@ CFMaSettingsPresentation >> newGroupNamed: aGroup [
 			fontSize: 13;
 			bold);
 		fitContent;
-		margin: (BlInsets top: 22 right: 16 bottom: 8 left: 16);
+		margin: (BlInsets
+			top: 22
+			right: self rowHorizontalInset
+			bottom: 8
+			left: self sectionHorizontalInset + self rowHorizontalInset);
 		yourself.
 
 	aContainer := self newFieldContainer.
