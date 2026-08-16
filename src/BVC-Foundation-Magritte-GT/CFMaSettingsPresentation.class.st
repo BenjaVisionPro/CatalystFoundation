@@ -46,12 +46,42 @@ CFMaSettingsPresentation >> separatorColor [
 	^ Color r: 229 g: 229 b: 229 range: 255
 ]
 
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> cardCornerRadius [
+	^ 12
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> compactRowHeight [
+	^ 42
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> commentRowHeight [
+	^ 58
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> rowHorizontalInset [
+	^ 16
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> rowHorizontalSpacing [
+	^ 12
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> sectionHorizontalInset [
+	^ 12
+]
+
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newFieldContainer [
 	^ BrVerticalPane new
 		background: self cardBackground;
 		border: BlBorder empty;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 16);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: self cardCornerRadius);
 		clipChildren: true;
 		margin: BlInsets empty;
 		cellSpacing: 0;
@@ -67,10 +97,10 @@ CFMaSettingsPresentation >> newGroupNamed: aGroup [
 		text: aGroup asString;
 		aptitude: (BrGlamorousLabelAptitude new
 			foreground: self primaryTextColor;
-			fontSize: 15;
+			fontSize: 13;
 			bold);
 		fitContent;
-		margin: (BlInsets top: 24 right: 16 bottom: 10 left: 16);
+		margin: (BlInsets top: 22 right: 16 bottom: 8 left: 16);
 		yourself.
 
 	aContainer := self newFieldContainer.
@@ -79,7 +109,7 @@ CFMaSettingsPresentation >> newGroupNamed: aGroup [
 	aSection := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets left: 12 right: 12);
+		margin: (BlInsets left: self sectionHorizontalInset right: self sectionHorizontalInset);
 		addChild: aHeading;
 		addChild: aContainer;
 		yourself.
@@ -93,7 +123,7 @@ CFMaSettingsPresentation >> addSeparatorTo: aContainer [
 	| aSeparator |
 	aSeparator := BlElement new
 		background: self separatorColor;
-		margin: (BlInsets left: 16 right: 16);
+		margin: (BlInsets left: self rowHorizontalInset right: self rowHorizontalInset);
 		yourself.
 	aSeparator constraintsDo: [ :c |
 		c horizontal matchParent.
@@ -115,7 +145,7 @@ CFMaSettingsPresentation >> newLeadingContentFor: aDescription label: aLabel [
 	aLabel
 		aptitude: (BrGlamorousLabelAptitude new
 			foreground: self primaryTextColor;
-			fontSize: 15);
+			fontSize: 13);
 		margin: BlInsets empty.
 
 	aLeading := BrVerticalPane new
@@ -130,7 +160,7 @@ CFMaSettingsPresentation >> newLeadingContentFor: aDescription label: aLabel [
 			text: aDescription comment;
 			aptitude: (BrGlamorousLabelAptitude new
 				foreground: self secondaryTextColor;
-				fontSize: 12);
+				fontSize: 11);
 			hMatchParent;
 			vFitContent;
 			yourself.
@@ -170,12 +200,17 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 
 	aRow := BrHorizontalPane new
 		hMatchParent;
-		vFitContent;
-		padding: (BlInsets top: 11 right: 16 bottom: 11 left: 16);
-		cellSpacing: 16;
+		padding: (BlInsets
+			right: self rowHorizontalInset
+			left: self rowHorizontalInset);
+		cellSpacing: self rowHorizontalSpacing;
 		addChild: aLeading;
 		addChild: aTrailing;
 		yourself.
+	aRow constraintsDo: [ :c |
+		c vertical exact: (aDescription hasComment
+			ifTrue: [ self commentRowHeight ]
+			ifFalse: [ self compactRowHeight ]) ].
 
 	aContainer addChild: aRow
 ]
@@ -183,7 +218,11 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 	self prepareRowIn: aContainer.
-	anElement margin: (BlInsets top: 10 right: 16 bottom: 10 left: 16).
+	anElement margin: (BlInsets
+		top: 6
+		right: self rowHorizontalInset
+		bottom: 6
+		left: self rowHorizontalInset).
 	anElement constraintsDo: [ :c | c horizontal matchParent ].
 	aContainer addChild: anElement
 ]
