@@ -152,7 +152,6 @@ CFMaFormShowcase >> textDescription [
 	^ MAStringDescription new
 		accessor: #text;
 		label: 'Text';
-		comment: 'The canonical editable one-line string field.';
 		group: 'Fields';
 		priority: 10;
 		yourself
@@ -196,7 +195,6 @@ CFMaFormShowcase >> passwordDescription [
 	^ MAPasswordDescription new
 		accessor: #password;
 		label: 'Password';
-		comment: 'A password string rendered by GT through its dedicated password stencil.';
 		group: 'Fields';
 		priority: 30;
 		yourself
@@ -218,7 +216,6 @@ CFMaFormShowcase >> symbolValueDescription [
 	^ MASymbolDescription new
 		accessor: #symbolValue;
 		label: 'Symbol';
-		comment: 'A symbol-valued string field using Magritte symbol conversion.';
 		group: 'Fields';
 		priority: 40;
 		yourself
@@ -309,7 +306,6 @@ CFMaFormShowcase >> multipleStatusesDescription [
 	^ MAMultipleOptionDescription new
 		accessor: #multipleStatuses;
 		label: 'Multiple option';
-		comment: 'A collection-valued selection from a fixed option set.';
 		group: 'Fields';
 		priority: 80;
 		options: #(draft active archived);
@@ -334,7 +330,6 @@ CFMaFormShowcase >> durationDescription [
 	^ MADurationDescription new
 		accessor: #duration;
 		label: 'Duration';
-		comment: 'A Magritte Duration value.';
 		group: 'Fields';
 		priority: 90;
 		yourself
@@ -356,7 +351,6 @@ CFMaFormShowcase >> dateDescription [
 	^ MADateDescription new
 		accessor: #date;
 		label: 'Date';
-		comment: 'A Magritte Date value.';
 		group: 'Fields';
 		priority: 100;
 		yourself
@@ -378,7 +372,6 @@ CFMaFormShowcase >> timeDescription [
 	^ MATimeDescription new
 		accessor: #time;
 		label: 'Time';
-		comment: 'A Magritte Time value.';
 		group: 'Fields';
 		priority: 110;
 		yourself
@@ -400,7 +393,6 @@ CFMaFormShowcase >> dateAndTimeDescription [
 	^ MADateAndTimeDescription new
 		accessor: #dateAndTime;
 		label: 'Date and time';
-		comment: 'A Magritte DateAndTime value.';
 		group: 'Fields';
 		priority: 120;
 		yourself
@@ -422,7 +414,6 @@ CFMaFormShowcase >> classValueDescription [
 	^ MAClassDescription new
 		accessor: #classValue;
 		label: 'Class';
-		comment: 'A Smalltalk class value.';
 		group: 'Fields';
 		priority: 140;
 		yourself
@@ -470,7 +461,6 @@ CFMaFormShowcase >> fileDescription [
 	^ MAFileDescription new
 		accessor: #file;
 		label: 'File';
-		comment: 'The GT file-selector field.';
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -494,7 +484,6 @@ CFMaFormShowcase >> directoryDescription [
 	^ MADirectoryDescription new
 		accessor: #directory;
 		label: 'Directory';
-		comment: 'The GT directory-selector field.';
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -518,7 +507,6 @@ CFMaFormShowcase >> fieldIconDescription [
 	^ FontAwesomeIconDescription new
 		accessor: #fieldIcon;
 		label: 'Font Awesome icon';
-		comment: 'The editable Font Awesome icon field using GT''s selector element.';
 		default: self defaultIcon;
 		group: 'Fields';
 		priority: 180;
@@ -536,7 +524,6 @@ CFMaFormShowcase >> derivedValueDescription [
 	^ MAStringDescription new
 		accessor: #derivedValue;
 		label: 'Derived value';
-		comment: 'A read-only field.';
 		group: 'Fields';
 		priority: 190;
 		beReadOnly;
