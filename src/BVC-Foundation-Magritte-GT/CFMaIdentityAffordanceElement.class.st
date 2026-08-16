@@ -40,7 +40,7 @@ CFMaIdentityAffordanceElement >> initialize [
 		foreground: (Color black alpha: 0.92).
 	identifierElement := self
 		newEditableTextWithFontSize: 11
-		foreground: (Color black alpha: 0.55)..
+		foreground: (Color black alpha: 0.45)..
 
 	labelElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.
