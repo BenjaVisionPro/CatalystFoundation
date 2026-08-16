@@ -119,15 +119,26 @@ CFMaSettingsPresentation >> newGroupNamed: aGroup [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addSeparatorTo: aContainer [
-	| aSeparator |
+	| aSeparator aSeparatorFrame |
 	aSeparator := BlElement new
 		background: self separatorColor;
-		margin: (BlInsets left: self rowHorizontalInset right: self rowHorizontalInset);
 		yourself.
 	aSeparator constraintsDo: [ :c |
 		c horizontal matchParent.
-		c vertical exact: 1 ].
-	aContainer addChild: aSeparator
+		c vertical exact: 1.
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+
+	aSeparatorFrame := BrFrame new
+		hMatchParent;
+		vExact: 1;
+		padding: (BlInsets
+			left: self rowHorizontalInset
+			right: self rowHorizontalInset);
+		addChild: aSeparator;
+		yourself.
+
+	aContainer addChild: aSeparatorFrame
 ]
 
 { #category : 'private - composition' }
@@ -141,6 +152,10 @@ CFMaSettingsPresentation >> prepareRowIn: aContainer [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
+	"GT's normal form renderers may add outer margins for grid presentation.
+	The settings row owns the outer positioning, so its trailing root starts
+	and ends exactly on the row content bounds."
+	aFieldElement margin: BlInsets empty.
 	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
 		ifTrue: [ aFieldElement margin: BlInsets empty ].
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
@@ -179,6 +194,8 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aTrailing := BrFrame new
 		hFitContent;
 		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
 		addChild: aFieldElement;
 		yourself.
 	aFieldElement constraintsDo: [ :c |
