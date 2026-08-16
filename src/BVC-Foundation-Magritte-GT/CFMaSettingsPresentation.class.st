@@ -152,7 +152,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aLeading := self newLeadingContentFor: aDescription label: aLabel.
 	aLeading constraintsDo: [ :c |
 		c horizontal matchParent.
-		c linear horizontal weight: 1.
+		c linear weight: 1.
 		c linear vertical alignCenter ].
 
 	aTrailing := BrFrame new
