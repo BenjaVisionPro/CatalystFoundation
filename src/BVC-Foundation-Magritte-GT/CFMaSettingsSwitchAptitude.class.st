@@ -30,7 +30,7 @@ CFMaSettingsSwitchAptitude >> initialize [
 		addChangeProperty: #(widget size) with: [ 46 @ 26 ];
 		addChangeProperty: #(widget padding) with: [ BlInsets all: 3 ];
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
-		addChangeAddChildAs: #cfSettingsSwitchThumb with: [ thumb ].
+		addChangeAddChildAs: #(cfSettingsSwitchThumb) with: [ thumb ].
 
 	self deactivated: [ :aStyle |
 		aStyle background: (Color r: 224 g: 224 b: 224 range: 255) ].

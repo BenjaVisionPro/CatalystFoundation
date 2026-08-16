@@ -19,28 +19,31 @@ CFMaSettingsPresentation >> initialize [
 
 { #category : 'api - building' }
 CFMaSettingsPresentation >> build [
+	| anElement |
 	rowCountsByContainer removeAll.
-	^ super build
+	anElement := super build.
+	self hostElement background: Color white.
+	^ anElement
 ]
 
 { #category : 'private - appearance' }
 CFMaSettingsPresentation >> cardBackground [
-	^ Color r: 247 g: 247 b: 247 range: 255
+	^ Color r: 248 g: 248 b: 248 range: 255
 ]
 
 { #category : 'private - appearance' }
 CFMaSettingsPresentation >> primaryTextColor [
-	^ Color r: 36 g: 36 b: 38 range: 255
+	^ Color r: 39 g: 39 b: 39 range: 255
 ]
 
 { #category : 'private - appearance' }
 CFMaSettingsPresentation >> secondaryTextColor [
-	^ Color r: 128 g: 128 b: 128 range: 255
+	^ Color r: 125 g: 125 b: 125 range: 255
 ]
 
 { #category : 'private - appearance' }
 CFMaSettingsPresentation >> separatorColor [
-	^ Color r: 224 g: 224 b: 224 range: 255
+	^ Color r: 229 g: 229 b: 229 range: 255
 ]
 
 { #category : 'private - composition' }
