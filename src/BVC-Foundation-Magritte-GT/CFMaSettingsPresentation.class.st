@@ -57,11 +57,6 @@ CFMaSettingsPresentation >> rowHorizontalInset [
 ]
 
 { #category : 'private - metrics' }
-CFMaSettingsPresentation >> rowHorizontalSpacing [
-	^ 12
-]
-
-{ #category : 'private - metrics' }
 CFMaSettingsPresentation >> rowVerticalInset [
 	^ 7
 ]
@@ -205,7 +200,6 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aTopLine := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: self rowHorizontalSpacing;
 		addChild: aLabel;
 		addChild: aTrailing;
 		yourself.
