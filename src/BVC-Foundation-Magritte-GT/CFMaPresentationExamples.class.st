@@ -1,4 +1,4 @@
-"I provide executable examples for Foundation Magritte presentation strategies."
+"I provide executable examples for Foundation Magritte presentations."
 
 Class {
 	#name : 'CFMaPresentationExamples',
@@ -8,72 +8,63 @@ Class {
 	#tag : 'Examples'
 }
 
-{ #category : 'examples - labels' }
-CFMaPresentationExamples >> inlineLabelPresentation [
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> defaultPresentation [
 	<gtExample>
-	^ CFMaInlineLabelPresentation new
+	^ CFMaPresentation new
 ]
 
-{ #category : 'examples - labels' }
-CFMaPresentationExamples >> leftLabelPresentation [
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> accordionPresentation [
 	<gtExample>
-	^ CFMaLeftLabelPresentation new
+	^ CFMaAccordionPresentation new
 ]
 
-{ #category : 'examples - groups' }
-CFMaPresentationExamples >> inlineGroupPresentation [
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> tabbedPresentation [
 	<gtExample>
-	^ CFMaInlineGroupPresentation new
+	^ CFMaTabbedPresentation new
 ]
 
-{ #category : 'examples - groups' }
-CFMaPresentationExamples >> accordionGroupPresentation [
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> leftTabbedPresentation [
 	<gtExample>
-	^ CFMaAccordionGroupPresentation new
-]
-
-{ #category : 'examples - groups' }
-CFMaPresentationExamples >> tabbedGroupPresentation [
-	<gtExample>
-	^ CFMaTabbedGroupPresentation new
+	^ CFMaLeftTabbedPresentation new
 ]
 
 { #category : 'examples - forms' }
-CFMaPresentationExamples >> accordionGroupsElement [
+CFMaPresentationExamples >> accordionPresentationElement [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel beAccordionGroups.
+	aViewModel presentationClass: CFMaAccordionPresentation.
 	^ aViewModel asElement
 ]
 
 { #category : 'examples - forms' }
-CFMaPresentationExamples >> tabbedGroupsElement [
+CFMaPresentationExamples >> tabbedPresentationElement [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel beTabbedGroups.
+	aViewModel presentationClass: CFMaTabbedPresentation.
 	^ aViewModel asElement
 ]
 
 { #category : 'examples - forms' }
-CFMaPresentationExamples >> leftLabelsWithTabbedGroupsElement [
+CFMaPresentationExamples >> leftTabbedPresentationElement [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel
-		beLeftLabels;
-		beTabbedGroups.
+	aViewModel presentationClass: CFMaLeftTabbedPresentation.
 	^ aViewModel asElement
 ]
 
-
 { #category : 'examples - forms' }
-CFMaPresentationExamples >> tabbedRootWithAccordionEmbeddedForms [
+CFMaPresentationExamples >> showcaseUsesTabbedPresentation [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFMaFormShowcase example asGtMagritteViewModel.
 
-	self assert: aViewModel groupPresentation class equals: CFMaTabbedGroupPresentation.
+	self assert: aViewModel presentationClass equals: CFMaTabbedPresentation.
 	^ aViewModel asElement
 ]

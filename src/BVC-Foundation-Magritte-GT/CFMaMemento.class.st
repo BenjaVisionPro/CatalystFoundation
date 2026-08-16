@@ -5,8 +5,6 @@ Class {
 	#superclass : 'GtMagritteMemento',
 	#instVars : [
 		'childMementosByDescription',
-		'labelPresentation',
-		'groupPresentation',
 		'statusPulse',
 		'compositeOverallStatus'
 	],
@@ -20,8 +18,6 @@ CFMaMemento >> initialize [
 	super initialize.
 
 	childMementosByDescription := Dictionary new.
-	labelPresentation := CFMaInlineLabelPresentation new.
-	groupPresentation := CFMaInlineGroupPresentation new.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -50,9 +46,6 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 		ifAbsentPut: [
 			| aMemento |
 			aMemento := self class model: anObject.
-			aMemento
-				labelPresentation: self labelPresentation;
-				groupPresentation: self groupPresentation.
 			aMemento overallStatus observe: statusPulse.
 			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
@@ -109,26 +102,4 @@ CFMaMemento >> commit [
 CFMaMemento >> reset [
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
-]
-
-
-
-{ #category : 'accessing' }
-CFMaMemento >> labelPresentation [
-	^ labelPresentation
-]
-
-{ #category : 'accessing' }
-CFMaMemento >> labelPresentation: aPresentation [
-	labelPresentation := aPresentation
-]
-
-{ #category : 'accessing' }
-CFMaMemento >> groupPresentation [
-	^ groupPresentation
-]
-
-{ #category : 'accessing' }
-CFMaMemento >> groupPresentation: aPresentation [
-	groupPresentation := aPresentation
 ]

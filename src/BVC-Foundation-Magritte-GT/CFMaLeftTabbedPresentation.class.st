@@ -1,15 +1,15 @@
-"I am responsible for presenting Magritte field labels in a shared column to the left of their editors."
+"I preserve the prototype's left-label/tabbed rendering as one complete presentation."
 
 Class {
-	#name : 'CFMaLeftLabelPresentation',
-	#superclass : 'Object',
+	#name : 'CFMaLeftTabbedPresentation',
+	#superclass : 'CFMaTabbedPresentation',
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Presentations'
 }
 
-{ #category : 'building' }
-CFMaLeftLabelPresentation >> newFieldContainer [
+{ #category : 'private - composition' }
+CFMaLeftTabbedPresentation >> newFieldContainer [
 	^ BrHorizontalGrid new
 		background: Color transparent;
 		border: BlBorder empty;
@@ -21,8 +21,8 @@ CFMaLeftLabelPresentation >> newFieldContainer [
 		yourself
 ]
 
-{ #category : 'building' }
-CFMaLeftLabelPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
+{ #category : 'private - composition' }
+CFMaLeftTabbedPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
 	aLabel
 		margin: (BlInsets top: 3 right: 12 bottom: 6 left: 0);
 		constraintsDo: [ :c | c grid vertical alignTop ].
@@ -36,9 +36,8 @@ CFMaLeftLabelPresentation >> addLabel: aLabel field: aFieldElement to: aContaine
 		addChild: aFieldElement
 ]
 
-
-{ #category : 'building' }
-CFMaLeftLabelPresentation >> addElement: anElement to: aContainer [
+{ #category : 'private - composition' }
+CFMaLeftTabbedPresentation >> addElement: anElement to: aContainer [
 	anElement constraintsDo: [ :c |
 		c horizontal matchParent.
 		c grid horizontal span: 2 ].

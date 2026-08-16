@@ -1,82 +1,37 @@
+"I am Foundation's Magritte presentation. I participate directly in Magritte's visitor rendering path and own the composition of fields and groups for one form build."
+
 Class {
-	#name : 'CFMaElementBuilder',
+	#name : 'CFMaPresentation',
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
-		'labelPresentation',
-		'groupPresentation',
-		'groupPresentationContext',
+		'hostElement',
+		'containersByGroup',
+		'ungroupedContainer',
 		'identityAffordanceEmitted'
 	],
-	#category : 'BVC-Foundation-Magritte-GT',
-	#package : 'BVC-Foundation-Magritte-GT'
+	#category : 'BVC-Foundation-Magritte-GT-Presentations',
+	#package : 'BVC-Foundation-Magritte-GT',
+	#tag : 'Presentations'
 }
 
 { #category : 'initialization' }
-CFMaElementBuilder >> initialize [
+CFMaPresentation >> initialize [
 	super initialize.
-	labelPresentation := CFMaInlineLabelPresentation new.
-	groupPresentation := CFMaInlineGroupPresentation new.
+	containersByGroup := Dictionary new.
 	identityAffordanceEmitted := false
 ]
 
-{ #category : 'accessing' }
-CFMaElementBuilder >> labelPresentation [
-	^ labelPresentation
-]
-
-{ #category : 'accessing' }
-CFMaElementBuilder >> labelPresentation: aPresentation [
-	labelPresentation := aPresentation
-]
-
-{ #category : 'accessing' }
-CFMaElementBuilder >> groupPresentation [
-	^ groupPresentation
-]
-
-{ #category : 'accessing' }
-CFMaElementBuilder >> groupPresentation: aPresentation [
-	groupPresentation := aPresentation
-]
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> beInlineLabels [
-	labelPresentation := CFMaInlineLabelPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> beLeftLabels [
-	labelPresentation := CFMaLeftLabelPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> beInlineGroups [
-	groupPresentation := CFMaInlineGroupPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> beAccordionGroups [
-	groupPresentation := CFMaAccordionGroupPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaElementBuilder >> beTabbedGroups [
-	groupPresentation := CFMaTabbedGroupPresentation new
-]
-
 { #category : 'api - building' }
-CFMaElementBuilder >> build [
+CFMaPresentation >> build [
 	identityAffordanceEmitted := false.
-	self fieldContainerDo: [ :aHostElement |
-		groupPresentationContext := groupPresentation
-			newContextIn: aHostElement
-			labelPresentation: labelPresentation ].
+	containersByGroup removeAll.
+	ungroupedContainer := nil.
+	self fieldContainerDo: [ :anElement | hostElement := anElement ].
 	^ super build
 ]
 
-
 { #category : 'visiting' }
-CFMaElementBuilder >> visit: aDescription [
+CFMaPresentation >> visit: aDescription [
 	(aDescription respondsTo: #cfCategory)
 		ifTrue: [
 			aDescription cfCategory = #identity
@@ -87,25 +42,20 @@ CFMaElementBuilder >> visit: aDescription [
 ]
 
 { #category : 'private - identity' }
-CFMaElementBuilder >> emitIdentityAffordanceUsing: aDescription [
+CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
 	identityAffordanceEmitted ifTrue: [ ^ self ].
 	identityAffordanceEmitted := true.
 
-	groupPresentationContext
+	self
 		addElement: (CFMaIdentityAffordanceElement new
 			memento: self memento;
 			yourself)
 		for: aDescription
 ]
 
-
 { #category : 'elements' }
-CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
+CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel aText aLabelAptitude |
-	"Foundation keeps GT field construction wherever its behaviour is sufficient.
-	This method supplies Foundation's shared label chrome; relation visitors may
-	provide Foundation editors where GT does not provide the required capability."
-
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude
@@ -123,19 +73,98 @@ CFMaElementBuilder >> addFieldElement: aFieldElement using: aDescription [
 		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
 		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
 
-		self configureTabStopFor: aFieldElement using: aDescription.
-
-	groupPresentationContext
-		addLabel: aLabel
-		field: aFieldElement
-		for: aDescription.
+	self configureTabStopFor: aFieldElement using: aDescription.
+	self addLabel: aLabel field: aFieldElement for: aDescription.
 	^ aLabel
 ]
 
+{ #category : 'private - composition' }
+CFMaPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
+	self
+		addLabel: aLabel
+		field: aFieldElement
+		to: (self containerForGroup: aDescription group)
+]
 
+{ #category : 'private - composition' }
+CFMaPresentation >> addElement: anElement for: aDescription [
+	self
+		addElement: anElement
+		to: (self containerForGroup: aDescription group)
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
+	aLabel margin: (BlInsets top: 3 right: 0 bottom: 2 left: 0).
+	aFieldElement constraintsDo: [ :c | c horizontal matchParent ].
+
+	aContainer
+		addChild: aLabel;
+		addChild: aFieldElement
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addElement: anElement to: aContainer [
+	aContainer addChild: anElement
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> newFieldContainer [
+	^ BrVerticalPane new
+		background: Color transparent;
+		border: BlBorder empty;
+		margin: BlInsets empty;
+		cellSpacing: 4;
+		hMatchParent;
+		vFitContent;
+		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaPresentation >> containerForGroup: aGroup [
+	aGroup ifNil: [
+		^ ungroupedContainer ifNil: [
+			ungroupedContainer := self newFieldContainer.
+			hostElement addChild: ungroupedContainer.
+			ungroupedContainer ] ].
+
+	^ containersByGroup
+		at: aGroup
+		ifAbsentPut: [ self newGroupNamed: aGroup ]
+]
+
+{ #category : 'private - groups' }
+CFMaPresentation >> newGroupNamed: aGroup [
+	| aSection aHeading aContainer |
+	aHeading := BrLabel new
+		text: aGroup asString;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.68);
+			fontSize: 14;
+			bold);
+		fitContent;
+		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
+		yourself.
+
+	aContainer := self newFieldContainer.
+	aSection := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		addChild: aHeading;
+		addChild: aContainer;
+		yourself.
+
+	hostElement addChild: aSection.
+	^ aContainer
+]
+
+{ #category : 'private - groups' }
+CFMaPresentation >> hostElement [
+	^ hostElement
+]
 
 { #category : 'visiting-description' }
-CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
+CFMaPresentation >> visitToOneRelationDescription: aDescription [
 	aDescription blocStencil
 		ifNil: [ ^ super visitToOneRelationDescription: aDescription ]
 		ifNotNil: [ :aStencil |
@@ -149,7 +178,7 @@ CFMaElementBuilder >> visitToOneRelationDescription: aDescription [
 
 
 { #category : 'private - focus' }
-CFMaElementBuilder >> navigationRootFor: anElement [
+CFMaPresentation >> navigationRootFor: anElement [
 	| aCurrentElement aRootElement |
 	aCurrentElement := anElement.
 	aRootElement := self form.
@@ -163,7 +192,7 @@ CFMaElementBuilder >> navigationRootFor: anElement [
 ]
 
 { #category : 'private - focus' }
-CFMaElementBuilder >> moveFocusFrom: anElement inDirection: aDirection [
+CFMaPresentation >> moveFocusFrom: anElement inDirection: aDirection [
 	| aNavigationRoot aReferenceElement |
 	aNavigationRoot := self navigationRootFor: anElement.
 	aReferenceElement := anElement space
@@ -178,7 +207,7 @@ CFMaElementBuilder >> moveFocusFrom: anElement inDirection: aDirection [
 ]
 
 { #category : 'private - focus' }
-CFMaElementBuilder >> installFormNavigationOn: anElement [
+CFMaPresentation >> installFormNavigationOn: anElement [
 	(anElement userData includesKey: #cfMaFormNavigation)
 		ifTrue: [ ^ anElement ].
 
@@ -226,12 +255,12 @@ CFMaElementBuilder >> installFormNavigationOn: anElement [
 ]
 
 { #category : 'private - building' }
-CFMaElementBuilder >> addShortcutsTo: anElement [
+CFMaPresentation >> addShortcutsTo: anElement [
 	self installFormNavigationOn: anElement
 ]
 
 { #category : 'private - building' }
-CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
+CFMaPresentation >> addShortcutsTo: anElement using: aDescription [
 	self installFormNavigationOn: anElement.
 
 	aDescription blocShortcuts
@@ -246,7 +275,7 @@ CFMaElementBuilder >> addShortcutsTo: anElement using: aDescription [
 
 
 { #category : 'private - focus' }
-CFMaElementBuilder >> configureTabStopFor: aFieldElement using: aDescription [
+CFMaPresentation >> configureTabStopFor: aFieldElement using: aDescription [
 	"Keep GT/Brick's native focusable descendants. The field surface only
 	participates when there are no focusable descendants of its own."
 	aFieldElement focusability: BlFocusability after.

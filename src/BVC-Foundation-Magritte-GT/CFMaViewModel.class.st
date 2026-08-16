@@ -4,8 +4,7 @@ Class {
 	#instVars : [
 		'formElementBlock',
 		'elementBuilderBlock',
-		'labelPresentation',
-		'groupPresentation'
+		'presentationClass'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -21,8 +20,6 @@ CFMaViewModel class >> forObject: anObject [
 { #category : 'api - instance creation' }
 CFMaViewModel class >> forObject: anObject memento: aMemento [
 	^ self new
-		labelPresentation: aMemento labelPresentation;
-		groupPresentation: aMemento groupPresentation;
 		mementoBlock: [ aMemento ] object: anObject;
 		yourself
 ]
@@ -31,55 +28,18 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 { #category : 'initialization' }
 CFMaViewModel >> initialize [
 	super initialize.
-	labelPresentation := CFMaInlineLabelPresentation new.
-	groupPresentation := CFMaInlineGroupPresentation new
+	presentationClass := CFMaPresentation
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> labelPresentation [
-	^ labelPresentation
+CFMaViewModel >> presentationClass [
+	^ presentationClass
 ]
 
 { #category : 'accessing' }
-CFMaViewModel >> labelPresentation: aPresentation [
-	labelPresentation := aPresentation
+CFMaViewModel >> presentationClass: aPresentationClass [
+	presentationClass := aPresentationClass
 ]
-
-{ #category : 'accessing' }
-CFMaViewModel >> groupPresentation [
-	^ groupPresentation
-]
-
-{ #category : 'accessing' }
-CFMaViewModel >> groupPresentation: aPresentation [
-	groupPresentation := aPresentation
-]
-
-{ #category : 'configuration' }
-CFMaViewModel >> beInlineLabels [
-	labelPresentation := CFMaInlineLabelPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaViewModel >> beLeftLabels [
-	labelPresentation := CFMaLeftLabelPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaViewModel >> beInlineGroups [
-	groupPresentation := CFMaInlineGroupPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaViewModel >> beAccordionGroups [
-	groupPresentation := CFMaAccordionGroupPresentation new
-]
-
-{ #category : 'configuration' }
-CFMaViewModel >> beTabbedGroups [
-	groupPresentation := CFMaTabbedGroupPresentation new
-]
-
 
 { #category : 'callbacks' }
 CFMaViewModel >> formElementDo: aBlock [
@@ -114,12 +74,6 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	| aContainer aStencil anElementBuilder |
 	theFrame userData at: self class gtMementoSymbol put: aMemento.
 
-	(aMemento isKindOf: CFMaMemento)
-		ifTrue: [
-			aMemento
-				labelPresentation: labelPresentation;
-				groupPresentation: groupPresentation ].
-
 	theFrame removeChildren.
 
 	aStencil := self formContainerStencilForMemento: aMemento.
@@ -133,14 +87,8 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	aContainer requestStyle.
 
 	anElementBuilder := elementBuilderBlock
-		ifNil: [ CFMaElementBuilder new ]
+		ifNil: [ presentationClass new ]
 		ifNotNil: [ :aBlock | aBlock value ].
-
-	(anElementBuilder respondsTo: #labelPresentation:)
-		ifTrue: [
-			anElementBuilder
-				labelPresentation: labelPresentation;
-				groupPresentation: groupPresentation ].
 
 	anElementBuilder
 		includeImplicitActions: aBoolean;

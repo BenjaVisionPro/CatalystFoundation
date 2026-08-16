@@ -58,7 +58,7 @@ CFMaFormShowcase class >> exampleElement [
 { #category : 'converting' }
 CFMaFormShowcase >> asGtMagritteViewModel [
 	^ (CFMaViewModel forObject: self)
-		beTabbedGroups;
+		presentationClass: CFMaTabbedPresentation;
 		yourself
 ]
 
