@@ -73,6 +73,7 @@ CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground
 		focused: Color transparent)
 			glamorousRegularFont;
 			fontSize: aNumber;
+			foreground: aColor;
 			defaultForeground: aColor;
 			minWidth: 1;
 			yourself.
