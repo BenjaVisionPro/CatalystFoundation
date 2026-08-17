@@ -226,7 +226,7 @@ CFMaSettingsRowElement >> useWrappedMultilineArrangement [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> bottomInset [
-	^ 5
+	^ 6
 ]
 
 { #category : 'private - metrics' }
