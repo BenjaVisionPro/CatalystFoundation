@@ -208,6 +208,8 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 CFMaSettingsPresentation >> prepareField: aFieldElement [
 	self prepareEditorChromeIn: aFieldElement.
 	aFieldElement margin: BlInsets empty.
+	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
+		ifFalse: [ aFieldElement padding: BlInsets empty ].
 	^ aFieldElement
 ]
 
@@ -247,7 +249,11 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 		background: Color transparent;
 		border: BlBorder empty;
 		padding: BlInsets empty;
-		margin: (BlInsets top: 1);
+		margin: (BlInsets
+			top: 1
+			right: 0
+			bottom: 0
+			left: 0.5);
 		yourself
 ]
 

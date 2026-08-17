@@ -436,3 +436,30 @@ CFMaPresentationExamples >> settingsRowAndCardEdgeSpacing [
 	self assert: aCard edgeInset equals: 2.
 	^ aCard
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsFieldRootDoesNotAddHorizontalPadding [
+	<gtExample>
+	| aPresentation aField |
+	aPresentation := CFMaSettingsPresentation new.
+	aField := BrFrame new
+		padding: (BlInsets all: 12);
+		yourself.
+	aPresentation prepareField: aField.
+
+	self assert: aField padding equals: BlInsets empty.
+	^ aField
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsCommentUsesHalfPixelOpticalInset [
+	<gtExample>
+	| aDescription aComment |
+	aDescription := MAStringDescription new
+		comment: 'Comment';
+		yourself.
+	aComment := CFMaSettingsPresentation new newCommentFor: aDescription.
+
+	self assert: aComment margin left equals: 0.5.
+	^ aComment
+]
