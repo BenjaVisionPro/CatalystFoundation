@@ -75,7 +75,9 @@ CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex par
 
 	theRectangles ifEmpty: [
 		aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
-		^ aTop extent: 0 @ (aParagraph lineHeightAt: aLineIndex) ].
+		^ BlBounds
+			origin: 0 @ aTop
+			extent: 0 @ (aParagraph lineHeightAt: aLineIndex) ].
 
 	aTop := theRectangles first top.
 	aBottom := theRectangles first bottom.
@@ -83,7 +85,9 @@ CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex par
 		aTop := aTop min: aRectangle top.
 		aBottom := aBottom max: aRectangle bottom ].
 
-	^ aTop extent: 0 @ (aBottom - aTop)
+	^ BlBounds
+		origin: 0 @ aTop
+		extent: 0 @ (aBottom - aTop)
 ]
 
 { #category : 'private - drawing' }
@@ -100,7 +104,7 @@ CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanv
 			alignmentOffsetForLine: anIndex
 			paragraph: aParagraph.
 		aClipBounds := BlBounds
-			origin: anOrigin + (0 @ aVerticalBounds origin x)
+			origin: anOrigin + (0 @ aVerticalBounds origin y)
 			extent: aContentWidth @ aVerticalBounds height.
 		aCanvas clip
 			by: aClipBounds
