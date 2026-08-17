@@ -17,8 +17,24 @@ CFMaSettingsMemoEditorElement >> initialize [
 		margin: BlInsets empty
 ]
 
-{ #category : 'private - updating' }
-CFMaSettingsMemoEditorElement >> updateEditorAptitude [
-	super updateEditorAptitude.
-	editorAptitude fontSize: 13
+{ #category : 'layout' }
+CFMaSettingsMemoEditorElement >> baselineOffset [
+	^ self
+		allChildrenBreadthFirstDetect: [ :each |
+			each isKindOf: BrTextEditorParagraphElement ]
+		ifFound: [ :aParagraphElement |
+			aParagraphElement
+				allChildrenBreadthFirstDetect: [ :each |
+					each isKindOf: BlTextElement ]
+				ifFound: [ :aTextElement |
+					aTextElement baselineOffset
+						+ aParagraphElement padding top
+						+ self padding top ]
+				ifNone: [ 0 ] ]
+		ifNone: [ 0 ]
+]
+
+{ #category : 'layout' }
+CFMaSettingsMemoEditorElement >> supportsBaseline [
+	^ true
 ]

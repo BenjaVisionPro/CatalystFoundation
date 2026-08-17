@@ -333,7 +333,7 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aLabelColumn aFieldColumn aComment |
+	| aRow aLabelColumn aComment |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -344,36 +344,28 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		margin: BlInsets empty;
 		fitContent.
 
-	aLabelColumn := BrVerticalPane new
+	aLabelColumn := CFMaSettingsBaselineColumn new
 		hMatchParent;
 		vFitContent;
 		addChild: aLabel;
 		yourself.
 	aLabelColumn constraintsDo: [ :c |
-		c linear weight: 1 ].
+		c grid horizontal weight: 1 ].
 
 	aDescription hasComment ifTrue: [
 		aComment := self newCommentFor: aDescription.
 		aLabelColumn addChild: aComment ].
 
 	self prepareTrailingField: aFieldElement.
-	aFieldElement margin: BlInsets empty.
-
-	aFieldColumn := BrFrame new
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: BlInsets empty;
-		addChild: aFieldElement;
-		yourself.
-	aFieldColumn constraintsDo: [ :c |
-		c linear weight: 1 ].
 	aFieldElement
 		hMatchParent;
+		margin: BlInsets empty;
 		constraintsDo: [ :c |
-			c frame vertical alignTop ].
+			c grid horizontal weight: 1 ].
 
-	aRow := BrHorizontalPane new
+	aRow := BrHorizontalGrid new
+		columnCount: 2;
+		cellSpacing: 0;
 		hMatchParent;
 		vFitContent;
 		addAptitude: CFMaActiveSelectionAptitude new;
@@ -384,7 +376,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 			bottom: self rowBottomInset
 			right: self rowHorizontalInset);
 		addChild: aLabelColumn;
-		addChild: aFieldColumn;
+		addChild: aFieldElement;
 		yourself.
 
 	aContainer addChild: aRow.
