@@ -613,6 +613,8 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			segmentClass: CFMaSettingsRightAlignedParagraphSegment;
 			yourself).
 	anEditor
+		when: BlFocusInEvent
+		do: [ :anEvent | anEditor selecter all select ];
 		when: BlFocusOutEvent
 		do: [ :anEvent | anEditor deselecter all deselect ].
 
