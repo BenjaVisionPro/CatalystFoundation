@@ -334,3 +334,42 @@ CFMaPresentationExamples >> settingsBooleanUsesSharedRightTextInset [
 	self assert: aField margin right equals: aRow editorTextHorizontalInset.
 	^ aRow
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowUsesSymmetricVerticalInsets [
+	<gtExample>
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	self assert: aRow topInset equals: aRow bottomInset.
+	^ aRow
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsStandardRowHasFitContentTrailingRegion [
+	<gtExample>
+	| aLabel aField aRow aContent aTrailing |
+	aLabel := BrLabel new
+		text: 'Text';
+		aptitude: BrGlamorousLabelAptitude new;
+		fitContent;
+		yourself.
+	aField := BrLabel new
+		text: 'Editable text';
+		aptitude: BrGlamorousLabelAptitude new;
+		fitContent;
+		yourself.
+
+	aRow := CFMaSettingsRowElement new
+		label: aLabel
+		comment: nil
+		field: aField
+		multiline: false;
+		yourself.
+	aContent := aRow children first.
+	aTrailing := aContent children last.
+
+	self assert: aContent class equals: BrHorizontalPane.
+	self assert: aTrailing class equals: BrFrame.
+	self assert: aTrailing constraints horizontal resizer isFitContent.
+	^ aRow
+]

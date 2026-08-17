@@ -44,7 +44,7 @@ CFMaSettingsRowElement >> label: aLabel comment: aComment field: aField multilin
 
 { #category : 'private - building' }
 CFMaSettingsRowElement >> buildStandard [
-	| aContent aLeading |
+	| aContent aLeading aTrailing |
 	(label isNil and: [ comment isNil ]) ifTrue: [
 		field
 			hMatchParent;
@@ -58,25 +58,37 @@ CFMaSettingsRowElement >> buildStandard [
 		yourself.
 	label ifNotNil: [ aLeading addChild: label ].
 	comment ifNotNil: [ aLeading addChild: comment ].
+	aLeading constraintsDo: [ :c |
+		c linear weight: 1.
+		c linear vertical alignTop ].
 
+	field
+		hFitContent;
+		vFitContent.
 	(field isKindOf: CFMaSettingsBooleanElement)
 		ifTrue: [ field margin: (BlInsets right: self editorTextHorizontalInset) ].
 
-	aContent := BrFrame new
+	aTrailing := BrFrame new
+		hFitContent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		addChild: field;
+		yourself.
+	aTrailing constraintsDo: [ :c |
+		c linear vertical alignTop ].
+	field constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignCenter ].
+
+	aContent := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		addChild: aLeading;
-		addChild: field;
+		addChild: aTrailing;
 		yourself.
-
-	aLeading constraintsDo: [ :c |
-		c frame horizontal alignLeft.
-		c frame vertical alignTop ].
-	field constraintsDo: [ :c |
-		c frame horizontal alignRight.
-		c frame vertical alignCenter ].
 
 	self addChild: aContent
 ]
@@ -183,7 +195,7 @@ CFMaSettingsRowElement >> useWrappedMultilineArrangement [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> bottomInset [
-	^ 7
+	^ 4
 ]
 
 { #category : 'private - metrics' }
@@ -203,7 +215,7 @@ CFMaSettingsRowElement >> horizontalInset [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> topInset [
-	^ 1
+	^ 4
 ]
 
 
