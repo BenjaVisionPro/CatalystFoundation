@@ -333,7 +333,7 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aTopLine aLabelContainer aFieldContainer aComment |
+	| aRow aLabelColumn aFieldColumn aComment |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -344,41 +344,35 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		margin: BlInsets empty;
 		fitContent.
 
-	self prepareTrailingField: aFieldElement.
-
-	aLabelContainer := BrFrame new
+	aLabelColumn := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		addChild: aLabel;
 		yourself.
-	aLabelContainer constraintsDo: [ :c |
+	aLabelColumn constraintsDo: [ :c |
 		c linear weight: 1 ].
-	aLabel constraintsDo: [ :c |
-		c frame horizontal alignLeft.
-		c frame vertical alignTop ].
 
-	aFieldContainer := BrFrame new
+	aDescription hasComment ifTrue: [
+		aComment := self newCommentFor: aDescription.
+		aLabelColumn addChild: aComment ].
+
+	self prepareTrailingField: aFieldElement.
+
+	aFieldColumn := BrFrame new
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		addChild: aFieldElement;
 		yourself.
-	aFieldContainer constraintsDo: [ :c |
+	aFieldColumn constraintsDo: [ :c |
 		c linear weight: 1 ].
 	aFieldElement
 		hMatchParent;
 		constraintsDo: [ :c |
 			c frame vertical alignTop ].
 
-	aTopLine := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		addChild: aLabelContainer;
-		addChild: aFieldContainer;
-		yourself.
-
-	aRow := BrVerticalPane new
+	aRow := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		addAptitude: CFMaActiveSelectionAptitude new;
@@ -388,12 +382,9 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 			left: self rowHorizontalInset
 			bottom: self rowBottomInset
 			right: self rowHorizontalInset);
-		addChild: aTopLine;
+		addChild: aLabelColumn;
+		addChild: aFieldColumn;
 		yourself.
-
-	aDescription hasComment ifTrue: [
-		aComment := self newCommentFor: aDescription.
-		aRow addChild: aComment ].
 
 	aContainer addChild: aRow.
 	self installFocusOverlayFor: aRow in: aContainer
