@@ -532,6 +532,10 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 				using: aDescription ]
 		ifFalse: [ anInputElement ].
 
+	aDescription isWithChangeIndicator ifTrue: [
+		anInputElement constraintsDo: [ :c |
+			c grid vertical alignTop ] ].
+
 	aLabel := self newFieldLabelFor: aDescription.
 	self configureTabStopFor: aValidationElement using: aDescription.
 	self
