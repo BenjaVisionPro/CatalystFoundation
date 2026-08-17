@@ -149,3 +149,21 @@ CFMaPresentationExamples >> settingsFocusOverlayUsesBlocOverlay [
 	self assert: anOverlay parent equals: aContainer.
 	^ anOverlay
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsCommentUsesMultilineParagraph [
+	<gtExample>
+	| anElement |
+	anElement := CFMaMultilineTextElement new.
+	self assert: anElement createTextParagraph class equals: BlMultiLineTextParagraph.
+	^ anElement
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsCommentAptitude [
+	<gtExample>
+	| anAptitude |
+	anAptitude := CFMaSettingsCommentAptitude new.
+	self assert: anAptitude label class equals: CFMaMultilineTextElement.
+	^ anAptitude
+]

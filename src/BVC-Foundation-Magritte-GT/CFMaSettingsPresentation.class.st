@@ -362,10 +362,9 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aDescription hasComment ifTrue: [
 		aComment := BrLabel new
 			text: aDescription comment;
-			aptitude: (BrGlamorousLabelAptitude new
+			aptitude: (CFMaSettingsCommentAptitude new
 				foreground: self secondaryTextColor;
-				fontSize: 11;
-				padding: BlInsets empty);
+				fontSize: 11);
 			hMatchParent;
 			vFitContent;
 			margin: (BlInsets top: 1);
