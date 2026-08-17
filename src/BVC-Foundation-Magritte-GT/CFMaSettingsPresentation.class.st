@@ -535,20 +535,17 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		hFitContent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: ((aFieldElement isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ BlInsets right: self editorTextHorizontalInset ]
-			ifFalse: [ BlInsets empty ]);
+		padding: BlInsets empty;
 		addChild: aFieldElement;
 		yourself.
 	aFieldElement constraintsDo: [ :c |
 		c frame horizontal alignRight.
 		c frame vertical alignCenter ].
 	aTrailing constraintsDo: [ :c |
-		c ignoreByLayout.
-		c ignored horizontal alignRight.
+		c frame horizontal alignRight.
 		(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ c ignored vertical alignCenter ]
-			ifFalse: [ c ignored vertical alignTop ] ].
+			ifTrue: [ c frame vertical alignCenter ]
+			ifFalse: [ c frame vertical alignTop ] ].
 
 	aRow := BrFrame new
 		hMatchParent;
