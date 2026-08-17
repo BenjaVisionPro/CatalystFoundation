@@ -240,3 +240,18 @@ CFMaPresentationExamples >> settingsMemoWrappedArrangement [
 	self assert: aComment parent equals: aLabelColumn.
 	^ aRow
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsMemoDeselectsOnFocusOut [
+	<gtExample>
+	| anEditor |
+	anEditor := BrEditor new
+		inputFilter: BrTextEditorNoInputFilter new;
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		yourself.
+	anEditor
+		when: BlFocusOutEvent
+		do: [ :anEvent | anEditor deselecter all deselect ].
+	self assert: anEditor class equals: BrEditor.
+	^ anEditor
+]

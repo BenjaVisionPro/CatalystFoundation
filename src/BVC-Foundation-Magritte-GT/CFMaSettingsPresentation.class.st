@@ -612,6 +612,9 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 		(BrTextEditorSplitter new
 			segmentClass: CFMaSettingsRightAlignedParagraphSegment;
 			yourself).
+	anEditor
+		when: BlFocusOutEvent
+		do: [ :anEvent | anEditor deselecter all deselect ].
 
 	aDescription isReadOnly
 		ifTrue: [ anEditor beReadOnlyWithSelection ]
