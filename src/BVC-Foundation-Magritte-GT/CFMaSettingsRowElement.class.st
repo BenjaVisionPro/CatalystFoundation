@@ -9,7 +9,9 @@ Class {
 		'labelColumn',
 		'fieldColumn',
 		'topLine',
-		'wrappedMultiline'
+		'wrappedMultiline',
+		'cardTopInset',
+		'cardBottomInset'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -21,16 +23,36 @@ CFMaSettingsRowElement >> initialize [
 	super initialize.
 	multiline := false.
 	wrappedMultiline := false.
+	cardTopInset := 0.
+	cardBottomInset := 0.
 	self
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets
-			top: self topInset
-			left: self horizontalInset
-			bottom: self bottomInset
-			right: self trailingInset);
+		updatePadding;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new
+]
+
+
+{ #category : 'private - card geometry' }
+CFMaSettingsRowElement >> cardBottomInset: aNumber [
+	cardBottomInset := aNumber.
+	self updatePadding
+]
+
+{ #category : 'private - card geometry' }
+CFMaSettingsRowElement >> cardTopInset: aNumber [
+	cardTopInset := aNumber.
+	self updatePadding
+]
+
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> updatePadding [
+	self padding: (BlInsets
+		top: self topInset + cardTopInset
+		left: self horizontalInset
+		bottom: self bottomInset + cardBottomInset
+		right: self trailingInset)
 ]
 
 { #category : 'initialization' }

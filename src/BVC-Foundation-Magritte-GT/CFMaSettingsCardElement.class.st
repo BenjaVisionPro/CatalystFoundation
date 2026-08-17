@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaSettingsCardElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'rowCount'
+		'rowCount',
+		'lastRow'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -13,13 +14,14 @@ Class {
 CFMaSettingsCardElement >> initialize [
 	super initialize.
 	rowCount := 0.
+	lastRow := nil.
 	self
 		background: (Color r: 248 g: 248 b: 248 range: 255);
 		border: BlBorder empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius);
 		clipChildren: true;
 		margin: BlInsets empty;
-		padding: (BlInsets top: self edgeInset bottom: self edgeInset);
+		padding: BlInsets empty;
 		cellSpacing: 0;
 		hMatchParent;
 		vFitContent
@@ -27,8 +29,12 @@ CFMaSettingsCardElement >> initialize [
 
 { #category : 'adding' }
 CFMaSettingsCardElement >> addRow: aRow [
+	lastRow ifNotNil: [ lastRow cardBottomInset: 0 ].
 	rowCount > 0 ifTrue: [ self addChild: self newSeparator ].
+	rowCount = 0 ifTrue: [ aRow cardTopInset: self edgeInset ].
+	aRow cardBottomInset: self edgeInset.
 	self addChild: aRow.
+	lastRow := aRow.
 	rowCount := rowCount + 1
 ]
 
