@@ -59,39 +59,12 @@ CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex par
 	| aTop aBottom |
 	aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
 	aBottom := aLineIndex = aParagraph lineCount
-		ifTrue: [ aParagraph height + (self paragraphBottomOverflow: aParagraph) ]
+		ifTrue: [ aParagraph height ]
 		ifFalse: [ self lineTopAt: aLineIndex + 1 paragraph: aParagraph ].
 
 	^ BlBounds
 		origin: 0 @ aTop
 		extent: 0 @ ((aBottom - aTop) max: 0)
-]
-
-
-{ #category : 'private - measurement' }
-CFMaSettingsRightAlignedParagraphElement >> paragraphBottomOverflow: aParagraph [
-	| theRectangles aBottom |
-	aParagraph charCount <= 0 ifTrue: [ ^ 0 ].
-	theRectangles := aParagraph
-		rectanglesForChars: (0 to: aParagraph charCount)
-		width: SkiaParagraphRectWidthStyle Max
-		height: SkiaParagraphRectHeightStyle Max.
-	theRectangles ifEmpty: [ ^ 0 ].
-	aBottom := theRectangles first bottom.
-	theRectangles allButFirstDo: [ :aRectangle |
-		aBottom := aBottom max: aRectangle bottom ].
-	^ (aBottom - aParagraph height) max: 0
-]
-
-{ #category : 'layout' }
-CFMaSettingsRightAlignedParagraphElement >> onMeasure: anExtentMeasurementSpec [
-	| anOverflow |
-	super onMeasure: anExtentMeasurementSpec.
-	paragraph valueDo: [ :aParagraph |
-		anOverflow := self paragraphBottomOverflow: aParagraph.
-		anOverflow > 0 ifTrue: [
-			self measuredExtent:
-				self measuredWidth @ (self measuredHeight + anOverflow ceiling) ] ]
 ]
 
 { #category : 'private - drawing' }
@@ -100,16 +73,19 @@ CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanv
 	aContentWidth := (self measuredWidth - self padding width) max: 0.
 
 	1 to: aParagraph lineCount do: [ :anIndex |
-		| aVerticalBounds anOffset aClipBounds |
+		| aVerticalBounds anOffset aClipBounds aClipHeight |
 		aVerticalBounds := self
 			lineVerticalBoundsAt: anIndex
 			paragraph: aParagraph.
 		anOffset := self
 			alignmentOffsetForLine: anIndex
 			paragraph: aParagraph.
+		aClipHeight := anIndex = aParagraph lineCount
+			ifTrue: [ (aCanvas bounds bottom - (anOrigin y + aVerticalBounds origin y)) max: aVerticalBounds height ]
+			ifFalse: [ aVerticalBounds height ].
 		aClipBounds := BlBounds
 			origin: anOrigin + (0 @ aVerticalBounds origin y)
-			extent: aContentWidth @ aVerticalBounds height.
+			extent: aContentWidth @ aClipHeight.
 		aCanvas clip
 			by: aClipBounds
 			during: [

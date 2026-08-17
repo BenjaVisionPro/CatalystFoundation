@@ -137,12 +137,14 @@ CFMaSettingsRowElement >> buildMultiline [
 	field
 		hMatchParent;
 		vFitContent;
+		clipChildren: false;
 		margin: BlInsets empty;
 		padding: (BlInsets right: self multilineEditorTrailingInset).
 
 	fieldColumn := BrFrame new
 		hMatchParent;
 		vFitContent;
+		clipChildren: false;
 		margin: (BlInsets top: self fieldVerticalAdjustment);
 		padding: (BlInsets left: self compactFieldGap);
 		addChild: field;
@@ -156,6 +158,7 @@ CFMaSettingsRowElement >> buildMultiline [
 	topLine := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
+		clipChildren: false;
 		addChild: labelColumn;
 		addChild: fieldColumn;
 		yourself.

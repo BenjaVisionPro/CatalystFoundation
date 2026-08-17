@@ -10,6 +10,7 @@ Class {
 CFMaSettingsRightAlignedParagraphSegmentHolder >> createSegmentElement [
 	^ CFMaSettingsRightAlignedParagraphElement new
 		beInSeparateCompositionLayer;
+		clipChildren: false;
 		focusability: BlFocusability block;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
