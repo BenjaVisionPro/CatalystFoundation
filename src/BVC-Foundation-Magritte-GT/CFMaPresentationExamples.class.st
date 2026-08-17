@@ -463,3 +463,12 @@ CFMaPresentationExamples >> settingsCommentUsesHalfPixelOpticalInset [
 	self assert: aComment margin left equals: 0.5.
 	^ aComment
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRightAlignedParagraphKeepsDescenderAllowance [
+	<gtExample>
+	| anElement |
+	anElement := CFMaSettingsRightAlignedParagraphElement new.
+	self assert: anElement descentAllowance equals: 1.
+	^ anElement
+]

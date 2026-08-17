@@ -6,6 +6,11 @@ Class {
 	#tag : 'Elements'
 }
 
+{ #category : 'private - metrics' }
+CFMaSettingsRightAlignedParagraphElement >> descentAllowance [
+	^ 1
+]
+
 { #category : 'private - alignment' }
 CFMaSettingsRightAlignedParagraphElement >> alignmentOffsetForLine: aLineIndex paragraph: aParagraph [
 	| aContentWidth |
@@ -52,12 +57,15 @@ CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanv
 	aContentWidth := (self measuredWidth - self padding width) max: 0.
 
 	1 to: aParagraph lineCount do: [ :anIndex |
-		| aHeight anOffset aClipBounds |
+		| aHeight aClipHeight anOffset aClipBounds |
 		aHeight := aParagraph lineHeightAt: anIndex.
+		aClipHeight := anIndex = aParagraph lineCount
+			ifTrue: [ aHeight + self descentAllowance ]
+			ifFalse: [ aHeight ].
 		anOffset := self alignmentOffsetForLine: anIndex paragraph: aParagraph.
 		aClipBounds := BlBounds
 			origin: anOrigin + (0 @ aTop)
-			extent: aContentWidth @ aHeight.
+			extent: aContentWidth @ aClipHeight.
 		aCanvas clip
 			by: aClipBounds
 			during: [
@@ -154,6 +162,13 @@ CFMaSettingsRightAlignedParagraphElement >> handleMouseEvent: anEvent paragraph:
 				handleEvent: anEvent
 				in: anEditorElement editor
 				on: self segment ]
+]
+
+{ #category : 'layout' }
+CFMaSettingsRightAlignedParagraphElement >> onMeasure: anExtentMeasurementSpec [
+	super onMeasure: anExtentMeasurementSpec.
+	self measuredExtent:
+		self measuredExtent + (0 @ self descentAllowance)
 ]
 
 { #category : 'layout' }
