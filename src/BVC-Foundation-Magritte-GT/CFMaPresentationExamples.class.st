@@ -424,3 +424,15 @@ CFMaPresentationExamples >> settingsRowOwnsCanonicalOpticalAdjustments [
 	self assert: aRow fieldVerticalAdjustment equals: -2.
 	^ aRow
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowAndCardEdgeSpacing [
+	<gtExample>
+	| aRow aCard |
+	aRow := CFMaSettingsRowElement new.
+	aCard := CFMaSettingsCardElement new.
+	self assert: aRow topInset equals: 5.
+	self assert: aRow bottomInset equals: 5.
+	self assert: aCard edgeInset equals: 2.
+	^ aCard
+]

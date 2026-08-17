@@ -59,7 +59,7 @@ CFMaSettingsCardElement >> cornerRadius [
 
 { #category : 'private - metrics' }
 CFMaSettingsCardElement >> edgeInset [
-	^ 3
+	^ 2
 ]
 
 { #category : 'private - metrics' }
