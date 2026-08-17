@@ -70,7 +70,11 @@ CFMaSettingsRowElement >> buildStandard [
 		vFitContent.
 	(field isKindOf: CFMaSettingsBooleanElement)
 		ifTrue: [ field margin: (BlInsets right: self horizontalInset - self trailingInset) ]
-		ifFalse: [ field margin: (BlInsets top: self fieldVerticalAdjustment) ].
+		ifFalse: [ field margin: (BlInsets
+			top: self fieldVerticalAdjustment
+			right: self standardEditorTrailingAdjustment
+			bottom: 0
+			left: 0) ].
 
 	aTrailing := BrFrame new
 		hFitContent;
@@ -112,7 +116,7 @@ CFMaSettingsRowElement >> buildMultiline [
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: (BlInsets right: self editorTextHorizontalInset).
+		padding: (BlInsets right: self multilineEditorTrailingInset).
 
 	fieldColumn := BrFrame new
 		hMatchParent;
@@ -257,6 +261,17 @@ CFMaSettingsRowElement >> fieldVerticalAdjustment [
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> horizontalInset [
 	^ 8
+]
+
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> multilineEditorTrailingInset [
+	^ 6
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> standardEditorTrailingAdjustment [
+	^ -4
 ]
 
 { #category : 'private - metrics' }
