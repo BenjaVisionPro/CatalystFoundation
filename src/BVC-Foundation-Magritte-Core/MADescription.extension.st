@@ -31,3 +31,14 @@ MADescription >> cfSerializable: aBoolean [
 MADescription >> cfSerializableSymbol [
 	^ #cfSerializable
 ]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> path [
+	^ self propertyAt: #cfPath ifAbsent: [ #() ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> path: aCollection [
+	^ self propertyAt: #cfPath put: aCollection
+]
+

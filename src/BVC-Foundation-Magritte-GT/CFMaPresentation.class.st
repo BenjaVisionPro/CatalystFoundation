@@ -83,14 +83,14 @@ CFMaPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
 	self
 		addLabel: aLabel
 		field: aFieldElement
-		to: (self containerForGroup: aDescription group)
+		to: (self containerForDescription: aDescription)
 ]
 
 { #category : 'private - composition' }
 CFMaPresentation >> addElement: anElement for: aDescription [
 	self
 		addElement: anElement
-		to: (self containerForGroup: aDescription group)
+		to: (self containerForDescription: aDescription)
 ]
 
 { #category : 'private - composition' }
@@ -118,6 +118,11 @@ CFMaPresentation >> newFieldContainer [
 		hMatchParent;
 		vFitContent;
 		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaPresentation >> containerForDescription: aDescription [
+	^ self containerForGroup: aDescription group
 ]
 
 { #category : 'private - groups' }

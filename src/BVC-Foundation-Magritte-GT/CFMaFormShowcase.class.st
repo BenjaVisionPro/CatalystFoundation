@@ -153,6 +153,7 @@ CFMaFormShowcase >> textDescription [
 		accessor: #text;
 		label: 'Text';
 		group: 'Fields';
+		path: #(text);
 		priority: 10;
 		yourself
 ]
@@ -175,6 +176,7 @@ CFMaFormShowcase >> summaryDescription [
 		label: 'Summary';
 		comment: 'A semantic memo field. GT currently routes it through the string-field rendering path.';
 		group: 'Fields';
+		path: #(text);
 		priority: 20;
 		yourself
 ]
@@ -196,6 +198,7 @@ CFMaFormShowcase >> passwordDescription [
 		accessor: #password;
 		label: 'Password';
 		group: 'Fields';
+		path: #(text);
 		priority: 30;
 		yourself
 ]
@@ -217,6 +220,7 @@ CFMaFormShowcase >> symbolValueDescription [
 		accessor: #symbolValue;
 		label: 'Symbol';
 		group: 'Fields';
+		path: #(text);
 		priority: 40;
 		yourself
 ]
@@ -238,6 +242,7 @@ CFMaFormShowcase >> enabledDescription [
 		accessor: #enabled;
 		label: 'Enabled';
 		group: 'Fields';
+		path: #(values);
 		priority: 50;
 		yourself
 ]
@@ -260,6 +265,7 @@ CFMaFormShowcase >> priorityDescription [
 		label: 'Priority';
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
+		path: #(values);
 		priority: 60;
 		beRequired;
 		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ]
@@ -284,6 +290,7 @@ CFMaFormShowcase >> statusDescription [
 		accessor: #status;
 		label: 'Status';
 		group: 'Fields';
+		path: #(values);
 		priority: 70;
 		options: #(draft active archived);
 		beRequired;
@@ -307,6 +314,7 @@ CFMaFormShowcase >> multipleStatusesDescription [
 		accessor: #multipleStatuses;
 		label: 'Multiple option';
 		group: 'Fields';
+		path: #(values);
 		priority: 80;
 		options: #(draft active archived);
 		reference: MASymbolDescription new;
@@ -331,6 +339,7 @@ CFMaFormShowcase >> durationDescription [
 		accessor: #duration;
 		label: 'Duration';
 		group: 'Fields';
+		path: #(temporal);
 		priority: 90;
 		yourself
 ]
@@ -352,6 +361,7 @@ CFMaFormShowcase >> dateDescription [
 		accessor: #date;
 		label: 'Date';
 		group: 'Fields';
+		path: #(temporal);
 		priority: 100;
 		yourself
 ]
@@ -373,6 +383,7 @@ CFMaFormShowcase >> timeDescription [
 		accessor: #time;
 		label: 'Time';
 		group: 'Fields';
+		path: #(temporal);
 		priority: 110;
 		yourself
 ]
@@ -394,6 +405,7 @@ CFMaFormShowcase >> dateAndTimeDescription [
 		accessor: #dateAndTime;
 		label: 'Date and time';
 		group: 'Fields';
+		path: #(temporal);
 		priority: 120;
 		yourself
 ]
@@ -415,6 +427,7 @@ CFMaFormShowcase >> classValueDescription [
 		accessor: #classValue;
 		label: 'Class';
 		group: 'Fields';
+		path: #(metadata);
 		priority: 140;
 		yourself
 ]
@@ -437,6 +450,7 @@ CFMaFormShowcase >> tagsDescription [
 		label: 'Tags';
 		comment: 'A to-many scalar relation reserved for Foundation''s tag-editor rendering.';
 		group: 'Fields';
+		path: #(metadata);
 		priority: 150;
 		classes: { String };
 		reference: (MAStringDescription new
@@ -464,6 +478,7 @@ CFMaFormShowcase >> fileDescription [
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
+		path: #(resources);
 		priority: 160;
 		yourself
 ]
@@ -487,6 +502,7 @@ CFMaFormShowcase >> directoryDescription [
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
+		path: #(resources);
 		priority: 170;
 		yourself
 ]
@@ -509,6 +525,7 @@ CFMaFormShowcase >> fieldIconDescription [
 		label: 'Font Awesome icon';
 		default: self defaultIcon;
 		group: 'Fields';
+		path: #(resources);
 		priority: 180;
 		yourself
 ]
@@ -525,6 +542,7 @@ CFMaFormShowcase >> derivedValueDescription [
 		accessor: #derivedValue;
 		label: 'Derived value';
 		group: 'Fields';
+		path: #(resources);
 		priority: 190;
 		beReadOnly;
 		yourself

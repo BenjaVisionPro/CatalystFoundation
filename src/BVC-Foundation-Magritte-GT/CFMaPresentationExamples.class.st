@@ -83,3 +83,30 @@ CFMaPresentationExamples >> showcaseUsesSettingsPresentation [
 	self assert: aViewModel presentationClass equals: CFMaSettingsPresentation.
 	^ aViewModel asElement
 ]
+
+{ #category : 'examples - paths' }
+CFMaPresentationExamples >> descriptionPath [
+	<gtExample>
+	| aDescription |
+	aDescription := MAStringDescription new.
+	self assert: aDescription path equals: #().
+	aDescription path: #(appearance display).
+	self assert: aDescription path equals: #(appearance display).
+	self assert: (aDescription propertyAt: #cfPath) equals: #(appearance display).
+	^ aDescription
+]
+
+{ #category : 'examples - paths' }
+CFMaPresentationExamples >> showcasePathsAreScopedToFields [
+	<gtExample>
+	| aShowcase descriptions fieldDescriptions relationDescriptions |
+	aShowcase := CFMaFormShowcase example.
+	descriptions := aShowcase magritteDescription children.
+	fieldDescriptions := descriptions select: [ :each | each group = 'Fields' ].
+	relationDescriptions := descriptions reject: [ :each | each group = 'Fields' ].
+
+	self assert: fieldDescriptions isNotEmpty.
+	self assert: (fieldDescriptions allSatisfy: [ :each | each path isNotEmpty ]).
+	self assert: (relationDescriptions allSatisfy: [ :each | each path isEmpty ]).
+	^ aShowcase
+]

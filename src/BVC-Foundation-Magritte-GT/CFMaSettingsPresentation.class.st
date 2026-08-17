@@ -4,7 +4,13 @@ Class {
 	#name : 'CFMaSettingsPresentation',
 	#superclass : 'CFMaPresentation',
 	#instVars : [
-		'rowCountsByContainer'
+		'rowCountsByContainer',
+		'sectionsByGroup',
+		'ungroupedSection',
+		'cardCountsBySection',
+		'currentGroup',
+		'currentPath',
+		'currentPathContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -14,13 +20,21 @@ Class {
 { #category : 'initialization' }
 CFMaSettingsPresentation >> initialize [
 	super initialize.
-	rowCountsByContainer := IdentityDictionary new
+	rowCountsByContainer := IdentityDictionary new.
+	sectionsByGroup := Dictionary new.
+	cardCountsBySection := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
 CFMaSettingsPresentation >> build [
 	| anElement |
 	rowCountsByContainer removeAll.
+	sectionsByGroup removeAll.
+	cardCountsBySection removeAll.
+	ungroupedSection := nil.
+	currentGroup := nil.
+	currentPath := nil.
+	currentPathContainer := nil.
 	anElement := super build.
 	self hostElement background: Color white.
 	^ anElement
@@ -91,35 +105,93 @@ CFMaSettingsPresentation >> newFieldContainer [
 ]
 
 { #category : 'private - groups' }
-CFMaSettingsPresentation >> newGroupNamed: aGroup [
-	| aSection aHeading aContainer |
-	aHeading := BrLabel new
-		text: aGroup asString;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: self primaryTextColor;
-			fontSize: 13;
-			bold);
-		fitContent;
-		margin: (BlInsets
-			top: 22
-			right: self rowHorizontalInset
-			bottom: 8
-			left: self sectionHorizontalInset + self rowHorizontalInset);
+CFMaSettingsPresentation >> newSectionNamed: aGroup [
+	| aSection aHeading aBody |
+	aBody := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
 		yourself.
-
-	aContainer := self newFieldContainer.
-	aContainer margin: (BlInsets left: 0 right: 0).
 
 	aSection := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets left: self sectionHorizontalInset right: self sectionHorizontalInset);
-		addChild: aHeading;
-		addChild: aContainer;
+		margin: (BlInsets
+			left: self sectionHorizontalInset
+			right: self sectionHorizontalInset);
 		yourself.
 
+	aGroup ifNotNil: [
+		aHeading := BrLabel new
+			text: aGroup asString;
+			aptitude: (BrGlamorousLabelAptitude new
+				foreground: self primaryTextColor;
+				fontSize: 13;
+				bold);
+			fitContent;
+			margin: (BlInsets
+				top: 22
+				right: self rowHorizontalInset
+				bottom: 8
+				left: self rowHorizontalInset);
+			yourself.
+		aSection addChild: aHeading ].
+
+	aSection addChild: aBody.
 	self hostElement addChild: aSection.
+	^ aBody
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> sectionForGroup: aGroup [
+	aGroup ifNil: [
+		^ ungroupedSection ifNil: [
+			ungroupedSection := self newSectionNamed: nil ] ].
+
+	^ sectionsByGroup
+		at: aGroup
+		ifAbsentPut: [ self newSectionNamed: aGroup ]
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> newPathContainerFor: aPath in: aSection [
+	| aContainer aCount |
+	aContainer := self newFieldContainer.
+	aCount := cardCountsBySection at: aSection ifAbsent: [ 0 ].
+	aCount > 0 ifTrue: [
+		aContainer margin: (BlInsets top: 10) ].
+	cardCountsBySection at: aSection put: aCount + 1.
+	aSection addChild: aContainer.
 	^ aContainer
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> containerForDescription: aDescription [
+	| aGroup aPath aSection |
+	aGroup := aDescription group.
+	aPath := aDescription path.
+
+	((currentGroup = aGroup)
+		and: [ currentPath = aPath ]
+		and: [ currentPathContainer isNotNil ])
+		ifTrue: [ ^ currentPathContainer ].
+
+	aSection := self sectionForGroup: aGroup.
+	currentGroup := aGroup.
+	currentPath := aPath copy.
+	currentPathContainer := self
+		newPathContainerFor: aPath
+		in: aSection.
+	^ currentPathContainer
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> newGroupNamed: aGroup [
+	"Compatibility with the inherited group API. Settings rendering normally
+	enters through #containerForDescription: so description paths can choose cards."
+	^ self
+		newPathContainerFor: #()
+		in: (self sectionForGroup: aGroup)
 ]
 
 { #category : 'private - composition' }
@@ -175,7 +247,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		addLabel: aLabel
 		field: aFieldElement
 		for: aDescription
-		to: (self containerForGroup: aDescription group)
+		to: (self containerForDescription: aDescription)
 ]
 
 { #category : 'private - composition' }
