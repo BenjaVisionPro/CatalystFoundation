@@ -199,47 +199,7 @@ CFMaPresentationExamples >> settingsRightAlignedMemoSegment [
 	^ aSegment
 ]
 
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsMemoCompactArrangement [
-	<gtExample>
-	| aRow aLabelColumn aFieldColumn aComment aPresentation |
-	aPresentation := CFMaSettingsPresentation new.
-	aRow := BrVerticalPane new.
-	aLabelColumn := BrVerticalPane new.
-	aFieldColumn := BrFrame new.
-	aComment := BrEditor new.
-	aRow addChild: aComment.
 
-	aPresentation
-		arrangeCompactMemoRow: aRow
-		labelColumn: aLabelColumn
-		fieldColumn: aFieldColumn
-		comment: aComment.
-
-	self assert: aComment parent equals: aRow.
-	^ aRow
-]
-
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsMemoWrappedArrangement [
-	<gtExample>
-	| aRow aLabelColumn aFieldColumn aComment aPresentation |
-	aPresentation := CFMaSettingsPresentation new.
-	aRow := BrVerticalPane new.
-	aLabelColumn := BrVerticalPane new.
-	aFieldColumn := BrFrame new.
-	aComment := BrEditor new.
-	aRow addChild: aComment.
-
-	aPresentation
-		arrangeWrappedMemoRow: aRow
-		labelColumn: aLabelColumn
-		fieldColumn: aFieldColumn
-		comment: aComment.
-
-	self assert: aComment parent equals: aLabelColumn.
-	^ aRow
-]
 
 { #category : 'examples - settings' }
 CFMaPresentationExamples >> settingsMemoDeselectsOnFocusOut [
@@ -288,80 +248,42 @@ CFMaPresentationExamples >> settingsCommentIsNotATabStop [
 	^ aComment
 ]
 
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsSingleRowHasBothEdgeInsets [
-	<gtExample>
-	| aPresentation aContainer aRow |
-	aPresentation := CFMaSettingsPresentation new.
-	aContainer := BrVerticalPane new.
-	aRow := BrFrame new.
-	aPresentation addRow: aRow to: aContainer.
 
-	self assert: aRow padding top equals:
-		aPresentation rowTopInset + aPresentation rowEdgeInset.
-	self assert: aRow padding bottom equals:
-		aPresentation rowBottomInset + aPresentation rowEdgeInset.
+
+
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowOwnsCanonicalInsets [
+	<gtExample>
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	self assert: aRow padding top equals: aRow topInset.
+	self assert: aRow padding left equals: aRow horizontalInset.
+	self assert: aRow padding bottom equals: aRow bottomInset.
+	self assert: aRow padding right equals: aRow horizontalInset.
 	^ aRow
 ]
 
 { #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsFirstAndLastRowsOwnCardEdgeSpacing [
+CFMaPresentationExamples >> settingsCardOwnsEdgeSpacingAndSeparators [
 	<gtExample>
-	| aPresentation aContainer aFirstRow aLastRow |
-	aPresentation := CFMaSettingsPresentation new.
-	aContainer := BrVerticalPane new.
-	aFirstRow := BrFrame new.
-	aLastRow := BrFrame new.
-
-	aPresentation addRow: aFirstRow to: aContainer.
-	aPresentation addRow: aLastRow to: aContainer.
-
-	self assert: aFirstRow padding top equals:
-		aPresentation rowTopInset + aPresentation rowEdgeInset.
-	self assert: aFirstRow padding bottom equals:
-		aPresentation rowBottomInset.
-	self assert: aLastRow padding top equals:
-		aPresentation rowTopInset.
-	self assert: aLastRow padding bottom equals:
-		aPresentation rowBottomInset + aPresentation rowEdgeInset.
-	^ aContainer
+	| aCard aFirstRow aSecondRow |
+	aCard := CFMaSettingsCardElement new.
+	aFirstRow := CFMaSettingsRowElement new.
+	aSecondRow := CFMaSettingsRowElement new.
+	aCard addRow: aFirstRow.
+	aCard addRow: aSecondRow.
+	self assert: aCard padding top equals: aCard edgeInset.
+	self assert: aCard padding bottom equals: aCard edgeInset.
+	self assert: aCard children size equals: 3.
+	^ aCard
 ]
 
 { #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsRowsShareExactBaseInsets [
+CFMaPresentationExamples >> settingsSectionOwnsCardSpacing [
 	<gtExample>
-	| aPresentation aRow |
-	aPresentation := CFMaSettingsPresentation new.
-	aRow := aPresentation newRow.
-
-	self assert: aRow padding top equals: aPresentation rowTopInset.
-	self assert: aRow padding left equals: aPresentation rowHorizontalInset.
-	self assert: aRow padding bottom equals: aPresentation rowBottomInset.
-	self assert: aRow padding right equals: aPresentation rowHorizontalInset.
-	^ aRow
-]
-
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsEdgeInsetsOnlyExtendBaseRowInsets [
-	<gtExample>
-	| aPresentation aContainer aFirst aMiddle aLast |
-	aPresentation := CFMaSettingsPresentation new.
-	aContainer := BrVerticalPane new.
-	aFirst := aPresentation newRow.
-	aMiddle := aPresentation newRow.
-	aLast := aPresentation newRow.
-
-	aPresentation addRow: aFirst to: aContainer.
-	aPresentation addRow: aMiddle to: aContainer.
-	aPresentation addRow: aLast to: aContainer.
-
-	self assert: aFirst padding top equals:
-		aPresentation rowTopInset + aPresentation rowEdgeInset.
-	self assert: aFirst padding bottom equals: aPresentation rowBottomInset.
-	self assert: aMiddle padding top equals: aPresentation rowTopInset.
-	self assert: aMiddle padding bottom equals: aPresentation rowBottomInset.
-	self assert: aLast padding top equals: aPresentation rowTopInset.
-	self assert: aLast padding bottom equals:
-		aPresentation rowBottomInset + aPresentation rowEdgeInset.
-	^ aContainer
+	| aSection |
+	aSection := CFMaSettingsSectionElement new.
+	self assert: aSection class equals: CFMaSettingsSectionElement.
+	^ aSection
 ]

@@ -4,16 +4,10 @@ Class {
 	#name : 'CFMaSettingsPresentation',
 	#superclass : 'CFMaPresentation',
 	#instVars : [
-		'rowCountsByContainer',
 		'sectionsByGroup',
 		'ungroupedSection',
-		'cardCountsBySection',
-		'currentGroup',
-		'currentPath',
-		'currentPathContainer',
-		'focusOverlaysByContainer',
-		'firstRowsByContainer',
-		'lastRowsByContainer'
+		'cardsBySectionAndPath',
+		'focusOverlaysByContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -23,35 +17,21 @@ Class {
 { #category : 'initialization' }
 CFMaSettingsPresentation >> initialize [
 	super initialize.
-	rowCountsByContainer := IdentityDictionary new.
 	sectionsByGroup := Dictionary new.
-	cardCountsBySection := IdentityDictionary new.
-	focusOverlaysByContainer := IdentityDictionary new.
-	firstRowsByContainer := IdentityDictionary new.
-	lastRowsByContainer := IdentityDictionary new
+	cardsBySectionAndPath := Dictionary new.
+	focusOverlaysByContainer := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
 CFMaSettingsPresentation >> build [
 	| anElement |
-	rowCountsByContainer removeAll.
 	sectionsByGroup removeAll.
-	cardCountsBySection removeAll.
+	cardsBySectionAndPath removeAll.
 	focusOverlaysByContainer removeAll.
-	firstRowsByContainer removeAll.
-	lastRowsByContainer removeAll.
 	ungroupedSection := nil.
-	currentGroup := nil.
-	currentPath := nil.
-	currentPathContainer := nil.
 	anElement := super build.
 	self hostElement background: Color white.
 	^ anElement
-]
-
-{ #category : 'private - appearance' }
-CFMaSettingsPresentation >> cardBackground [
-	^ Color r: 248 g: 248 b: 248 range: 255
 ]
 
 { #category : 'private - appearance' }
@@ -64,78 +44,20 @@ CFMaSettingsPresentation >> secondaryTextColor [
 	^ Color r: 125 g: 125 b: 125 range: 255
 ]
 
-{ #category : 'private - appearance' }
-CFMaSettingsPresentation >> separatorColor [
-	^ Color r: 229 g: 229 b: 229 range: 255
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> cardCornerRadius [
-	^ 12
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> rowHorizontalInset [
-	^ 8
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> rowBottomInset [
-	^ 7
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> rowTopInset [
-	^ 1
-]
-
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> fieldBaselineOffset [
 	^ 1
 ]
 
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> editorTextHorizontalInset [
-	"Match BrEditor>>initialize horizontal text padding without affecting memo vertical alignment."
-	^ 5
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> sectionHorizontalInset [
-	^ 6
-]
-
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newFieldContainer [
-	^ BrVerticalPane new
-		background: self cardBackground;
-		border: BlBorder empty;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: self cardCornerRadius);
-		clipChildren: true;
-		margin: BlInsets empty;
-		cellSpacing: 0;
-		hMatchParent;
-		vFitContent;
-		yourself
+	^ CFMaSettingsCardElement new
 ]
 
 { #category : 'private - groups' }
 CFMaSettingsPresentation >> newSectionNamed: aGroup [
-	| aSection aHeading aBody |
-	aBody := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		yourself.
-
-	aSection := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		margin: (BlInsets
-			left: self sectionHorizontalInset
-			right: self sectionHorizontalInset);
-		yourself.
-
+	| aSection aHeading |
+	aSection := CFMaSettingsSectionElement new.
 	aGroup ifNotNil: [
 		aHeading := BrLabel new
 			text: aGroup asString;
@@ -144,17 +66,11 @@ CFMaSettingsPresentation >> newSectionNamed: aGroup [
 				fontSize: 13;
 				bold);
 			fitContent;
-			margin: (BlInsets
-				top: 22
-				right: self rowHorizontalInset
-				bottom: 8
-				left: self rowHorizontalInset);
+			margin: (BlInsets top: 22 right: 8 bottom: 8 left: 8);
 			yourself.
-		aSection addChild: aHeading ].
-
-	aSection addChild: aBody.
+		aSection heading: aHeading ].
 	self hostElement addChild: aSection.
-	^ aBody
+	^ aSection
 ]
 
 { #category : 'private - groups' }
@@ -162,51 +78,37 @@ CFMaSettingsPresentation >> sectionForGroup: aGroup [
 	aGroup ifNil: [
 		^ ungroupedSection ifNil: [
 			ungroupedSection := self newSectionNamed: nil ] ].
-
 	^ sectionsByGroup
 		at: aGroup
 		ifAbsentPut: [ self newSectionNamed: aGroup ]
 ]
 
 { #category : 'private - groups' }
-CFMaSettingsPresentation >> newPathContainerFor: aPath in: aSection [
-	| aContainer aCount |
-	aContainer := self newFieldContainer.
-	aCount := cardCountsBySection at: aSection ifAbsent: [ 0 ].
-	aCount > 0 ifTrue: [
-		aContainer margin: (BlInsets top: 10) ].
-	cardCountsBySection at: aSection put: aCount + 1.
-	aSection addChild: aContainer.
-	^ aContainer
+CFMaSettingsPresentation >> cardForDescription: aDescription [
+	| aSection aKey |
+	aSection := self sectionForGroup: aDescription group.
+	aKey := { aSection. aDescription path }.
+	^ cardsBySectionAndPath
+		at: aKey
+		ifAbsentPut: [
+			| aCard |
+			aCard := CFMaSettingsCardElement new.
+			aSection addCard: aCard.
+			aCard ]
 ]
 
 { #category : 'private - groups' }
 CFMaSettingsPresentation >> containerForDescription: aDescription [
-	| aGroup aPath aSection |
-	aGroup := aDescription group.
-	aPath := aDescription path.
-
-	((currentGroup = aGroup)
-		and: [ (currentPath = aPath)
-			and: [ currentPathContainer isNotNil ] ])
-		ifTrue: [ ^ currentPathContainer ].
-
-	aSection := self sectionForGroup: aGroup.
-	currentGroup := aGroup.
-	currentPath := aPath copy.
-	currentPathContainer := self
-		newPathContainerFor: aPath
-		in: aSection.
-	^ currentPathContainer
+	^ self cardForDescription: aDescription
 ]
 
 { #category : 'private - groups' }
 CFMaSettingsPresentation >> newGroupNamed: aGroup [
-	"Compatibility with the inherited group API. Settings rendering normally
-	enters through #containerForDescription: so description paths can choose cards."
-	^ self
-		newPathContainerFor: #()
-		in: (self sectionForGroup: aGroup)
+	| aSection aCard |
+	aSection := self sectionForGroup: aGroup.
+	aCard := CFMaSettingsCardElement new.
+	aSection addCard: aCard.
+	^ aCard
 ]
 
 { #category : 'private - focus' }
@@ -260,11 +162,13 @@ CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer
 	anOverlay hasParent ifFalse: [ ^ self ].
 
 	overlayBounds := (anOverlay bounds inParent: aContainer) asRectangle.
-	topRadius := (overlayBounds top closeTo: 0 epsilon: BlElement epsilon)
-		ifTrue: [ self cardCornerRadius ]
+	topRadius := (overlayBounds top closeTo: aContainer padding top epsilon: BlElement epsilon)
+		ifTrue: [ aContainer cornerRadius ]
 		ifFalse: [ 0 ].
-	bottomRadius := (overlayBounds bottom closeTo: aContainer extent y epsilon: BlElement epsilon)
-		ifTrue: [ self cardCornerRadius ]
+	bottomRadius := (overlayBounds bottom
+		closeTo: aContainer extent y - aContainer padding bottom
+		epsilon: BlElement epsilon)
+		ifTrue: [ aContainer cornerRadius ]
 		ifFalse: [ 0 ].
 
 	radii := BlCornerRadii new
@@ -278,97 +182,6 @@ CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> addSeparatorTo: aContainer [
-	| aSeparator aSeparatorFrame |
-	aSeparator := BlElement new
-		background: self separatorColor;
-		yourself.
-	aSeparator constraintsDo: [ :c |
-		c horizontal matchParent.
-		c vertical exact: 1.
-		c frame horizontal alignCenter.
-		c frame vertical alignCenter ].
-
-	aSeparatorFrame := BrFrame new
-		hMatchParent;
-		vExact: 1;
-		padding: (BlInsets
-			left: self rowHorizontalInset
-			right: self rowHorizontalInset + self editorTextHorizontalInset);
-		addChild: aSeparator;
-		yourself.
-
-	aContainer addChild: aSeparatorFrame
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> addRow: aRow to: aContainer [
-	| aFirstRow aPreviousLast |
-	aFirstRow := firstRowsByContainer at: aContainer ifAbsent: [ nil ].
-	aPreviousLast := lastRowsByContainer at: aContainer ifAbsent: [ nil ].
-
-	aPreviousLast ifNotNil: [
-		self
-			setRowPaddingFor: aPreviousLast
-			top: (aPreviousLast == aFirstRow
-				ifTrue: [ self rowTopInset + self rowEdgeInset ]
-				ifFalse: [ self rowTopInset ])
-			bottom: self rowBottomInset ].
-
-	aFirstRow ifNil: [
-		aFirstRow := aRow.
-		firstRowsByContainer at: aContainer put: aRow ].
-
-	self
-		setRowPaddingFor: aRow
-		top: (aRow == aFirstRow
-			ifTrue: [ self rowTopInset + self rowEdgeInset ]
-			ifFalse: [ self rowTopInset ])
-		bottom: self rowBottomInset + self rowEdgeInset.
-
-	aContainer addChild: aRow.
-	lastRowsByContainer at: aContainer put: aRow
-]
-
-{ #category : 'private - geometry' }
-CFMaSettingsPresentation >> rowEdgeInset [
-	^ 3
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> setRowPaddingFor: aRow top: aTopInset bottom: aBottomInset [
-	aRow padding: (BlInsets
-		top: aTopInset
-		left: self rowHorizontalInset
-		bottom: aBottomInset
-		right: self rowHorizontalInset)
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> newRow [
-	^ BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		addAptitude: CFMaActiveSelectionAptitude new;
-		addAptitude: CFMaSettingsRowAptitude new;
-		padding: (BlInsets
-			top: self rowTopInset
-			left: self rowHorizontalInset
-			bottom: self rowBottomInset
-			right: self rowHorizontalInset);
-		yourself
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> prepareRowIn: aContainer [
-	| aCount |
-	aCount := rowCountsByContainer at: aContainer ifAbsent: [ 0 ].
-	aCount > 0 ifTrue: [ self addSeparatorTo: aContainer ].
-	rowCountsByContainer at: aContainer put: aCount + 1
-]
-
-
-{ #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	| editors |
 	editors := OrderedCollection new.
@@ -377,17 +190,13 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
 		(aChild isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ editors add: aChild ] ].
-
 	editors do: [ :anEditor |
 		anEditor addAptitude: CFMaSettingsEditorAptitude new ].
 	^ aFieldElement
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
-	"GT's normal form renderers may add outer margins for grid presentation.
-	The settings row owns the outer positioning, so its trailing root starts
-	and ends exactly on the row content bounds."
+CFMaSettingsPresentation >> prepareField: aFieldElement [
 	self prepareEditorChromeIn: aFieldElement.
 	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
 	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
@@ -399,138 +208,25 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aTopLine aLabelColumn aFieldColumn aComment updateArrangement |
-	self prepareRowIn: aContainer.
-
-	aLabel
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: self primaryTextColor;
-			fontSize: 13;
-			padding: BlInsets empty);
-		margin: BlInsets empty;
-		fitContent.
-
-	aLabelColumn := BrVerticalPane new
-		hFitContent;
-		vFitContent;
-		addChild: aLabel;
-		yourself.
-
-	aDescription hasComment ifTrue: [
-		aComment := self newCommentFor: aDescription ].
-
-	aFieldElement
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: (BlInsets right: self editorTextHorizontalInset).
-
-	aFieldColumn := BrFrame new
-		hMatchParent;
-		vFitContent;
-		margin: (BlInsets top: -1);
-		padding: (BlInsets left: 12);
-		addChild: aFieldElement;
-		yourself.
-	aFieldColumn constraintsDo: [ :c |
-		c linear weight: 1.
-		c linear vertical alignTop ].
-	aFieldElement constraintsDo: [ :c |
-		c frame vertical alignTop ].
-
-	aTopLine := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		addChild: aLabelColumn;
-		addChild: aFieldColumn;
-		yourself.
-
-	aRow := self newRow
-		addChild: aTopLine;
-		yourself.
-
-	aComment ifNotNil: [ aRow addChild: aComment ].
-
-	updateArrangement := [
-		(self memoEditorIsWrapped: aFieldElement)
-			ifTrue: [
-				self
-					arrangeWrappedMemoRow: aRow
-					labelColumn: aLabelColumn
-					fieldColumn: aFieldColumn
-					comment: aComment ]
-			ifFalse: [
-				self
-					arrangeCompactMemoRow: aRow
-					labelColumn: aLabelColumn
-					fieldColumn: aFieldColumn
-					comment: aComment ] ].
-
-	aFieldElement
-		when: BlElementExtentChangedEvent
-		do: [ :anEvent |
-			aRow enqueueTask: (BlTaskAction new action: updateArrangement) ].
-
-	self addRow: aRow to: aContainer.
-	self installFocusOverlayFor: aRow in: aContainer.
-	aRow enqueueTask: (BlTaskAction new action: updateArrangement)
-]
-
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> arrangeCompactMemoRow: aRow labelColumn: aLabelColumn fieldColumn: aFieldColumn comment: aComment [
-	aComment ifNotNil: [
-		aComment hasParent ifTrue: [
-			aComment parent == aRow ifFalse: [
-				aComment parent removeChild: aComment.
-				aRow addChild: aComment ] ] ].
-
-	aLabelColumn
-		hFitContent;
-		padding: BlInsets empty;
-		constraintsDo: [ :c |
-			c linear weight: 0.
-			c linear vertical alignTop ].
-
-	aFieldColumn
-		padding: (BlInsets left: 12);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ]
+CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multiline: aBoolean [
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	aRow
+		label: (self newFieldLabelFor: aDescription)
+		comment: (aDescription hasComment
+			ifTrue: [ self newCommentFor: aDescription ]
+			ifFalse: [ nil ])
+		field: (self prepareField: aFieldElement)
+		multiline: aBoolean.
+	^ aRow
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> arrangeWrappedMemoRow: aRow labelColumn: aLabelColumn fieldColumn: aFieldColumn comment: aComment [
-	aComment ifNotNil: [
-		aComment hasParent ifTrue: [
-			aComment parent == aLabelColumn ifFalse: [
-				aComment parent removeChild: aComment.
-				aLabelColumn addChild: aComment ] ] ].
-
-	aLabelColumn
-		hMatchParent;
-		padding: (BlInsets right: 6);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ].
-
-	aFieldColumn
-		padding: (BlInsets left: 6);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ]
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> memoEditorIsWrapped: anEditor [
-	| paragraphElements |
-	paragraphElements := anEditor allChildrenBreadthFirstSelect: [ :each |
-		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
-
-	paragraphElements isEmpty ifTrue: [ ^ false ].
-	paragraphElements size > 1 ifTrue: [ ^ true ].
-	^ paragraphElements first visualLineCount > 1
+CFMaSettingsPresentation >> addRow: aRow for: aDescription [
+	| aCard |
+	aCard := self cardForDescription: aDescription.
+	aCard addRow: aRow.
+	self installFocusOverlayFor: aRow in: aCard
 ]
 
 { #category : 'private - composition' }
@@ -552,104 +248,44 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	self
-		addLabel: aLabel
-		field: aFieldElement
-		for: aDescription
-		to: (self containerForDescription: aDescription)
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aContent aLeading aTrailing aComment |
-	self prepareRowIn: aContainer.
-
-	aLabel
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: self primaryTextColor;
-			fontSize: 13;
-			padding: BlInsets empty);
-		margin: BlInsets empty;
-		fitContent.
-
-	aLeading := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		addChild: aLabel;
-		yourself.
-
-	aDescription hasComment ifTrue: [
-		aComment := self newCommentFor: aDescription.
-		aLeading addChild: aComment ].
-
-	self prepareTrailingField: aFieldElement.
-
-	aTrailing := BrFrame new
-		hFitContent;
-		vFitContent;
-		margin: ((aFieldElement isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [
-				BlInsets right:
-					self rowHorizontalInset + self editorTextHorizontalInset ]
-			ifFalse: [ BlInsets empty ]);
-		padding: BlInsets empty;
-		addChild: aFieldElement;
-		yourself.
-	aFieldElement constraintsDo: [ :c |
-		c frame horizontal alignRight.
-		c frame vertical alignCenter ].
-	aTrailing constraintsDo: [ :c |
-		c ignoreByLayout.
-		c ignored horizontal alignRight.
-		(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ c ignored vertical alignCenter ]
-			ifFalse: [ c ignored vertical alignTop ] ].
-
-	aContent := BrFrame new
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: BlInsets empty;
-		addChild: aLeading;
-		addChild: aTrailing;
-		yourself.
-	aLeading constraintsDo: [ :c |
-		c frame horizontal alignLeft.
-		c frame vertical alignTop ].
-
-	aRow := self newRow
-		addChild: aContent;
-		yourself.
-
-	self addRow: aRow to: aContainer.
-	self installFocusOverlayFor: aRow in: aContainer
+CFMaSettingsPresentation >> addElement: anElement for: aDescription [
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	aRow
+		label: nil
+		comment: nil
+		field: anElement
+		multiline: false.
+	self addRow: aRow for: aDescription
 ]
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addElement: anElement to: aContainer [
-	self prepareRowIn: aContainer.
-	anElement margin: (BlInsets
-		top: 6
-		right: self rowHorizontalInset
-		bottom: 6
-		left: self rowHorizontalInset).
-	anElement constraintsDo: [ :c | c horizontal matchParent ].
-	aContainer addChild: anElement
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	aRow
+		label: nil
+		comment: nil
+		field: anElement
+		multiline: false.
+	aContainer addRow: aRow
 ]
 
 { #category : 'elements' }
 CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
-	| aLabel |
-	aLabel := self newFieldLabelFor: aDescription.
 	self configureTabStopFor: aFieldElement using: aDescription.
-	self addLabel: aLabel field: aFieldElement for: aDescription.
-	^ aLabel
+	self
+		addRow: (self
+			newRowFor: aDescription
+			field: aFieldElement
+			multiline: false)
+		for: aDescription.
+	^ aFieldElement
 ]
 
 { #category : 'private - building' }
 CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
-	| anEditor aLabel aCompletionStrategy |
+	| anEditor aCompletionStrategy |
 	anEditor := BrEditor new
 		inputFilter: BrTextEditorNoInputFilter new;
 		aptitude: (aDescription editorAptitude
@@ -709,12 +345,12 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			on: anEditor
 			strategy: aCompletionStrategy) install ].
 
-	aLabel := self newFieldLabelFor: aDescription.
 	self
-		addMemoLabel: aLabel
-		field: anEditor
-		for: aDescription
-		to: (self containerForDescription: aDescription).
+		addRow: (self
+			newRowFor: aDescription
+			field: anEditor
+			multiline: true)
+		for: aDescription.
 	^ anEditor
 ]
 
@@ -726,6 +362,11 @@ CFMaSettingsPresentation >> newFieldLabelFor: aDescription [
 	aLabel := BrLabel new
 		id: (GtMagritteFieldLabelId new description: aDescription);
 		text: aText;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: self primaryTextColor;
+			fontSize: 13;
+			padding: BlInsets empty);
+		margin: BlInsets empty;
 		fitContent;
 		yourself.
 	^ aLabel
