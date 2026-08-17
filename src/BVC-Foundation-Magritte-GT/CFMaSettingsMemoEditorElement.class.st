@@ -16,3 +16,9 @@ CFMaSettingsMemoEditorElement >> initialize [
 		padding: BlInsets empty;
 		margin: BlInsets empty
 ]
+
+{ #category : 'private - updating' }
+CFMaSettingsMemoEditorElement >> updateEditorAptitude [
+	super updateEditorAptitude.
+	editorAptitude fontSize: 13
+]

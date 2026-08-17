@@ -357,6 +357,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		aLabelColumn addChild: aComment ].
 
 	self prepareTrailingField: aFieldElement.
+	aFieldElement margin: BlInsets empty.
 
 	aFieldColumn := BrFrame new
 		hMatchParent;
