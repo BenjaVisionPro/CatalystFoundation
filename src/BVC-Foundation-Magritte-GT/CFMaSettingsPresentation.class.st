@@ -330,9 +330,7 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 	self prepareEditorChromeIn: aFieldElement.
 	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
 	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-		ifTrue: [
-			aFieldElement margin:
-				(BlInsets right: self editorTextHorizontalInset) ].
+		ifTrue: [ aFieldElement margin: BlInsets empty ].
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
 		(aChild isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ aChild margin: BlInsets empty ] ].
@@ -537,7 +535,9 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		hFitContent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: BlInsets empty;
+		padding: ((aFieldElement isKindOf: CFMaSettingsBooleanElement)
+			ifTrue: [ BlInsets right: self editorTextHorizontalInset ]
+			ifFalse: [ BlInsets empty ]);
 		addChild: aFieldElement;
 		yourself.
 	aFieldElement constraintsDo: [ :c |
