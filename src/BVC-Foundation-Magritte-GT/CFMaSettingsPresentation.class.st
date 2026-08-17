@@ -330,7 +330,9 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 	self prepareEditorChromeIn: aFieldElement.
 	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
 	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-		ifTrue: [ aFieldElement margin: BlInsets empty ].
+		ifTrue: [
+			aFieldElement margin:
+				(BlInsets right: self editorTextHorizontalInset) ].
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
 		(aChild isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ aChild margin: BlInsets empty ] ].
