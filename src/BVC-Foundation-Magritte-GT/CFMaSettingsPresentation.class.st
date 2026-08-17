@@ -333,7 +333,7 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aLabelColumn aComment |
+	| aRow aLabelColumn aFieldColumn aComment |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -358,13 +358,24 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		aLabelColumn addChild: aComment ].
 
 	aFieldElement
+		hFitContentLimited;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty.
+
+	aFieldColumn := BrFrame new
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ].
+		addChild: aFieldElement;
+		yourself.
+	aFieldColumn constraintsDo: [ :c |
+		c linear weight: 1.
+		c linear vertical alignTop ].
+	aFieldElement constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignTop ].
 
 	aRow := BrHorizontalPane new
 		hMatchParent;
@@ -378,7 +389,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 			bottom: self rowBottomInset
 			right: self rowHorizontalInset);
 		addChild: aLabelColumn;
-		addChild: aFieldElement;
+		addChild: aFieldColumn;
 		yourself.
 
 	aContainer addChild: aRow.
