@@ -59,7 +59,7 @@ CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex par
 	| aTop aBottom |
 	aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
 	aBottom := aLineIndex = aParagraph lineCount
-		ifTrue: [ aParagraph height ]
+		ifTrue: [ aParagraph height + (self paragraphBottomOverflow: aParagraph) ]
 		ifFalse: [ self lineTopAt: aLineIndex + 1 paragraph: aParagraph ].
 
 	^ BlBounds
