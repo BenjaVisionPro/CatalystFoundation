@@ -366,9 +366,10 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		yourself.
 	aFieldContainer constraintsDo: [ :c |
 		c linear weight: 1 ].
-	aFieldElement constraintsDo: [ :c |
-		c frame horizontal matchParent.
-		c frame vertical alignTop ].
+	aFieldElement
+		hMatchParent;
+		constraintsDo: [ :c |
+			c frame vertical alignTop ].
 
 	aTopLine := BrHorizontalPane new
 		hMatchParent;
