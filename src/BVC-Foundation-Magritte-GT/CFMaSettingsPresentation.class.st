@@ -369,6 +369,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 	aRow := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
+		cellSpacing: 12;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new;
 		padding: (BlInsets
@@ -498,8 +499,13 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 	anEditor := BrEditor new
 		inputFilter: BrTextEditorNoInputFilter new;
 		aptitude: (aDescription editorAptitude
-			ifNil: [ BrGlamorousRegularEditorAptitude new fontSize: 13 ]
-			ifNotNil: #value);
+			ifNil: [
+				BrGlamorousRegularEditorAptitude new
+					fontSize: 13;
+					textAlignment: BlTextAlignment right ]
+			ifNotNil: [ :anAptitude |
+				anAptitude value
+					textAlignment: BlTextAlignment right ])
 		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty;
