@@ -55,6 +55,7 @@ CFMaSettingsRowElement >> buildStandard [
 	aLeading := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
+		margin: (BlInsets top: self labelVerticalAdjustment);
 		yourself.
 	label ifNotNil: [ aLeading addChild: label ].
 	comment ifNotNil: [ aLeading addChild: comment ].
@@ -66,7 +67,8 @@ CFMaSettingsRowElement >> buildStandard [
 		hFitContent;
 		vFitContent.
 	(field isKindOf: CFMaSettingsBooleanElement)
-		ifTrue: [ field margin: (BlInsets right: self editorTextHorizontalInset) ].
+		ifTrue: [ field margin: (BlInsets right: self editorTextHorizontalInset) ]
+		ifFalse: [ field margin: (BlInsets top: self fieldVerticalAdjustment) ].
 
 	aTrailing := BrFrame new
 		hFitContent;
@@ -100,6 +102,7 @@ CFMaSettingsRowElement >> buildMultiline [
 	labelColumn := BrVerticalPane new
 		hFitContent;
 		vFitContent;
+		margin: (BlInsets top: self labelVerticalAdjustment);
 		yourself.
 	label ifNotNil: [ labelColumn addChild: label ].
 
@@ -112,7 +115,7 @@ CFMaSettingsRowElement >> buildMultiline [
 	fieldColumn := BrFrame new
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets top: -1);
+		margin: (BlInsets top: self fieldVerticalAdjustment);
 		padding: (BlInsets left: self compactFieldGap);
 		addChild: field;
 		yourself.
@@ -208,6 +211,16 @@ CFMaSettingsRowElement >> compactFieldGap [
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> editorTextHorizontalInset [
 	^ 5
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> labelVerticalAdjustment [
+	^ 1
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> fieldVerticalAdjustment [
+	^ -2
 ]
 
 { #category : 'private - metrics' }

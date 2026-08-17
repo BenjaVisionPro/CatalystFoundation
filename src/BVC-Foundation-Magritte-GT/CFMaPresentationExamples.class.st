@@ -414,3 +414,13 @@ CFMaPresentationExamples >> settingsLabelUsesStandardEditorTypography [
 	self assert: aLabel text attributes fontSize equals: 14.
 	^ aLabel
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowOwnsCanonicalOpticalAdjustments [
+	<gtExample>
+	| aRow |
+	aRow := CFMaSettingsRowElement new.
+	self assert: aRow labelVerticalAdjustment equals: 1.
+	self assert: aRow fieldVerticalAdjustment equals: -2.
+	^ aRow
+]
