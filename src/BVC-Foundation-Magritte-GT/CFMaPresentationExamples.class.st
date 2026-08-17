@@ -287,3 +287,42 @@ CFMaPresentationExamples >> settingsCommentIsNotATabStop [
 	self assert: aComment focusability equals: BlFocusability none.
 	^ aComment
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsSingleRowHasBothEdgeInsets [
+	<gtExample>
+	| aPresentation aContainer aRow |
+	aPresentation := CFMaSettingsPresentation new.
+	aContainer := BrVerticalPane new.
+	aRow := BrFrame new.
+	aPresentation addRow: aRow to: aContainer.
+
+	self assert: aRow padding top equals:
+		aPresentation rowTopInset + aPresentation rowEdgeInset.
+	self assert: aRow padding bottom equals:
+		aPresentation rowBottomInset + aPresentation rowEdgeInset.
+	^ aRow
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsFirstAndLastRowsOwnCardEdgeSpacing [
+	<gtExample>
+	| aPresentation aContainer aFirstRow aLastRow |
+	aPresentation := CFMaSettingsPresentation new.
+	aContainer := BrVerticalPane new.
+	aFirstRow := BrFrame new.
+	aLastRow := BrFrame new.
+
+	aPresentation addRow: aFirstRow to: aContainer.
+	aPresentation addRow: aLastRow to: aContainer.
+
+	self assert: aFirstRow padding top equals:
+		aPresentation rowTopInset + aPresentation rowEdgeInset.
+	self assert: aFirstRow padding bottom equals:
+		aPresentation rowBottomInset.
+	self assert: aLastRow padding top equals:
+		aPresentation rowTopInset.
+	self assert: aLastRow padding bottom equals:
+		aPresentation rowBottomInset + aPresentation rowEdgeInset.
+	^ aContainer
+]

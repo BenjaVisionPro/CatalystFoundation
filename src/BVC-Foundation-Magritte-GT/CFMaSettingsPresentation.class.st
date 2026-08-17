@@ -11,7 +11,9 @@ Class {
 		'currentGroup',
 		'currentPath',
 		'currentPathContainer',
-		'focusOverlaysByContainer'
+		'focusOverlaysByContainer',
+		'firstRowsByContainer',
+		'lastRowsByContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -24,7 +26,9 @@ CFMaSettingsPresentation >> initialize [
 	rowCountsByContainer := IdentityDictionary new.
 	sectionsByGroup := Dictionary new.
 	cardCountsBySection := IdentityDictionary new.
-	focusOverlaysByContainer := IdentityDictionary new
+	focusOverlaysByContainer := IdentityDictionary new.
+	firstRowsByContainer := IdentityDictionary new.
+	lastRowsByContainer := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
@@ -34,6 +38,8 @@ CFMaSettingsPresentation >> build [
 	sectionsByGroup removeAll.
 	cardCountsBySection removeAll.
 	focusOverlaysByContainer removeAll.
+	firstRowsByContainer removeAll.
+	lastRowsByContainer removeAll.
 	ungroupedSection := nil.
 	currentGroup := nil.
 	currentPath := nil.
@@ -296,6 +302,49 @@ CFMaSettingsPresentation >> addSeparatorTo: aContainer [
 ]
 
 { #category : 'private - composition' }
+CFMaSettingsPresentation >> addRow: aRow to: aContainer [
+	| aFirstRow aPreviousLast |
+	aFirstRow := firstRowsByContainer at: aContainer ifAbsent: [ nil ].
+	aPreviousLast := lastRowsByContainer at: aContainer ifAbsent: [ nil ].
+
+	aPreviousLast ifNotNil: [
+		self
+			setRowPaddingFor: aPreviousLast
+			top: (aPreviousLast == aFirstRow
+				ifTrue: [ self rowTopInset + self rowEdgeInset ]
+				ifFalse: [ self rowTopInset ])
+			bottom: self rowBottomInset ].
+
+	aFirstRow ifNil: [
+		aFirstRow := aRow.
+		firstRowsByContainer at: aContainer put: aRow ].
+
+	self
+		setRowPaddingFor: aRow
+		top: (aRow == aFirstRow
+			ifTrue: [ self rowTopInset + self rowEdgeInset ]
+			ifFalse: [ self rowTopInset ])
+		bottom: self rowBottomInset + self rowEdgeInset.
+
+	aContainer addChild: aRow.
+	lastRowsByContainer at: aContainer put: aRow
+]
+
+{ #category : 'private - geometry' }
+CFMaSettingsPresentation >> rowEdgeInset [
+	^ 3
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> setRowPaddingFor: aRow top: aTopInset bottom: aBottomInset [
+	aRow padding: (BlInsets
+		top: aTopInset
+		left: self rowHorizontalInset
+		bottom: aBottomInset
+		right: self rowHorizontalInset)
+]
+
+{ #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareRowIn: aContainer [
 	| aCount |
 	aCount := rowCountsByContainer at: aContainer ifAbsent: [ 0 ].
@@ -417,7 +466,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		do: [ :anEvent |
 			aRow enqueueTask: (BlTaskAction new action: updateArrangement) ].
 
-	aContainer addChild: aRow.
+	self addRow: aRow to: aContainer.
 	self installFocusOverlayFor: aRow in: aContainer.
 	aRow enqueueTask: (BlTaskAction new action: updateArrangement)
 ]
@@ -568,7 +617,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
 
-	aContainer addChild: aRow.
+	self addRow: aRow to: aContainer.
 	self installFocusOverlayFor: aRow in: aContainer
 ]
 
