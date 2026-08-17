@@ -67,6 +67,33 @@ CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex par
 		extent: 0 @ ((aBottom - aTop) max: 0)
 ]
 
+
+{ #category : 'private - measurement' }
+CFMaSettingsRightAlignedParagraphElement >> paragraphBottomOverflow: aParagraph [
+	| theRectangles aBottom |
+	aParagraph charCount <= 0 ifTrue: [ ^ 0 ].
+	theRectangles := aParagraph
+		rectanglesForChars: (0 to: aParagraph charCount)
+		width: SkiaParagraphRectWidthStyle Max
+		height: SkiaParagraphRectHeightStyle Max.
+	theRectangles ifEmpty: [ ^ 0 ].
+	aBottom := theRectangles first bottom.
+	theRectangles allButFirstDo: [ :aRectangle |
+		aBottom := aBottom max: aRectangle bottom ].
+	^ (aBottom - aParagraph height) max: 0
+]
+
+{ #category : 'layout' }
+CFMaSettingsRightAlignedParagraphElement >> onMeasure: anExtentMeasurementSpec [
+	| anOverflow |
+	super onMeasure: anExtentMeasurementSpec.
+	paragraph valueDo: [ :aParagraph |
+		anOverflow := self paragraphBottomOverflow: aParagraph.
+		anOverflow > 0 ifTrue: [
+			self measuredExtent:
+				self measuredWidth @ (self measuredHeight + anOverflow ceiling) ] ]
+]
+
 { #category : 'private - drawing' }
 CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanvas at: anOrigin [
 	| aContentWidth |
