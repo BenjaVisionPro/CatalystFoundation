@@ -195,6 +195,7 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	editors do: [ :anEditor |
 		anEditor
 			addAptitude: CFMaSettingsEditorAptitude new;
+			geometry: BlRectangleGeometry new;
 			margin: BlInsets empty;
 			padding: (BlInsets
 				top: 0
