@@ -79,7 +79,9 @@ CFMaSettingsRowElement >> buildStandard [
 		c linear vertical alignTop ].
 	field constraintsDo: [ :c |
 		c frame horizontal alignRight.
-		c frame vertical alignCenter ].
+		(field isKindOf: CFMaSettingsBooleanElement)
+			ifTrue: [ c frame vertical alignCenter ]
+			ifFalse: [ c frame vertical alignTop ] ].
 
 	aContent := BrHorizontalPane new
 		hMatchParent;

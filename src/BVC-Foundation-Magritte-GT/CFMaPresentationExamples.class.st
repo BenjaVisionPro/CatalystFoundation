@@ -373,3 +373,32 @@ CFMaPresentationExamples >> settingsStandardRowHasFitContentTrailingRegion [
 	self assert: aTrailing constraints horizontal resizer isFitContent.
 	^ aRow
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsOneLineEditorsUseFoundationVerticalTextInsets [
+	<gtExample>
+	| aPresentation anEditor |
+	aPresentation := CFMaSettingsPresentation new.
+	anEditor := GtMagritteOneLineEditorElement new.
+	aPresentation prepareEditorChromeIn: anEditor.
+
+	self assert: anEditor padding top equals: 0.
+	self assert: anEditor padding bottom equals: 0.
+	self assert: anEditor padding left equals:
+		aPresentation editorTextHorizontalInset.
+	self assert: anEditor padding right equals:
+		aPresentation editorTextHorizontalInset.
+	^ anEditor
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsFieldPreparationDoesNotAddBaselineMargin [
+	<gtExample>
+	| aPresentation anEditor |
+	aPresentation := CFMaSettingsPresentation new.
+	anEditor := GtMagritteOneLineEditorElement new.
+	aPresentation prepareField: anEditor.
+
+	self assert: anEditor margin equals: BlInsets empty.
+	^ anEditor
+]

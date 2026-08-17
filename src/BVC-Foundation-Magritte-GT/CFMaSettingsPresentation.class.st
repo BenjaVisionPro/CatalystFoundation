@@ -44,10 +44,6 @@ CFMaSettingsPresentation >> secondaryTextColor [
 	^ Color r: 125 g: 125 b: 125 range: 255
 ]
 
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> fieldBaselineOffset [
-	^ 1
-]
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newFieldContainer [
@@ -181,6 +177,11 @@ CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer
 	anOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
 ]
 
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> editorTextHorizontalInset [
+	^ 5
+]
+
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	| editors |
@@ -190,20 +191,23 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
 		(aChild isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ editors add: aChild ] ].
+
 	editors do: [ :anEditor |
-		anEditor addAptitude: CFMaSettingsEditorAptitude new ].
+		anEditor
+			addAptitude: CFMaSettingsEditorAptitude new;
+			margin: BlInsets empty;
+			padding: (BlInsets
+				top: 0
+				right: self editorTextHorizontalInset
+				bottom: 0
+				left: self editorTextHorizontalInset) ].
 	^ aFieldElement
 ]
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareField: aFieldElement [
 	self prepareEditorChromeIn: aFieldElement.
-	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
-	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-		ifTrue: [ aFieldElement margin: BlInsets empty ].
-	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
-		(aChild isKindOf: GtMagritteOneLineEditorElement)
-			ifTrue: [ aChild margin: BlInsets empty ] ].
+	aFieldElement margin: BlInsets empty.
 	^ aFieldElement
 ]
 
