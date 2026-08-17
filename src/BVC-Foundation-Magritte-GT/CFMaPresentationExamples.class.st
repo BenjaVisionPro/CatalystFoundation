@@ -128,3 +128,24 @@ CFMaPresentationExamples >> settingsEditorAptitude [
 	self assert: anAptitude class equals: CFMaSettingsEditorAptitude.
 	^ anAptitude
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsFocusOverlayUsesBlocOverlay [
+	<gtExample>
+	| aRow anOverlay aContainer |
+	aContainer := BrFrame new
+		hExact: 200;
+		vExact: 40;
+		yourself.
+	aRow := BrFrame new
+		hExact: 200;
+		vExact: 40;
+		yourself.
+	aContainer addChild: aRow.
+	anOverlay := BlOverlayElement on: aRow.
+	aContainer addChild: anOverlay.
+
+	self assert: anOverlay isAttached.
+	self assert: anOverlay parent equals: aContainer.
+	^ anOverlay
+]

@@ -10,7 +10,8 @@ Class {
 		'cardCountsBySection',
 		'currentGroup',
 		'currentPath',
-		'currentPathContainer'
+		'currentPathContainer',
+		'focusOverlaysByContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -22,7 +23,8 @@ CFMaSettingsPresentation >> initialize [
 	super initialize.
 	rowCountsByContainer := IdentityDictionary new.
 	sectionsByGroup := Dictionary new.
-	cardCountsBySection := IdentityDictionary new
+	cardCountsBySection := IdentityDictionary new.
+	focusOverlaysByContainer := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
@@ -31,6 +33,7 @@ CFMaSettingsPresentation >> build [
 	rowCountsByContainer removeAll.
 	sectionsByGroup removeAll.
 	cardCountsBySection removeAll.
+	focusOverlaysByContainer removeAll.
 	ungroupedSection := nil.
 	currentGroup := nil.
 	currentPath := nil.
@@ -194,6 +197,74 @@ CFMaSettingsPresentation >> newGroupNamed: aGroup [
 		in: (self sectionForGroup: aGroup)
 ]
 
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> focusOverlayFor: aRow in: aContainer [
+	^ focusOverlaysByContainer
+		at: aContainer
+		ifAbsentPut: [
+			| anOverlay |
+			anOverlay := BlOverlayElement on: aRow.
+			anOverlay
+				border: BlBorder empty;
+				background: Color transparent;
+				zIndex: 100.
+			anOverlay
+				when: BlElementPositionChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ];
+				when: BlElementExtentChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
+			aContainer
+				when: BlElementExtentChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
+			aContainer addChild: anOverlay.
+			anOverlay ]
+]
+
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> installFocusOverlayFor: aRow in: aContainer [
+	| anOverlay |
+	anOverlay := self focusOverlayFor: aRow in: aContainer.
+
+	aRow
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			anOverlay
+				attachTo: aRow;
+				border: (BlBorder
+					paint: anOverlay theme editor focusedBorderColor
+					width: 1).
+			self updateFocusOverlayGeometry: anOverlay in: aContainer ];
+		when: BlFocusOutEvent
+		do: [ :anEvent |
+			anOverlay border: BlBorder empty ]
+]
+
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer [
+	| overlayBounds topRadius bottomRadius radii |
+	anOverlay hasParent ifFalse: [ ^ self ].
+
+	overlayBounds := (anOverlay bounds inParent: aContainer) asRectangle.
+	topRadius := (overlayBounds top closeTo: 0 epsilon: BlElement epsilon)
+		ifTrue: [ self cardCornerRadius ]
+		ifFalse: [ 0 ].
+	bottomRadius := (overlayBounds bottom closeTo: aContainer extent y epsilon: BlElement epsilon)
+		ifTrue: [ self cardCornerRadius ]
+		ifFalse: [ 0 ].
+
+	radii := BlCornerRadii new
+		topLeft: topRadius;
+		topRight: topRadius;
+		bottomLeft: bottomRadius;
+		bottomRight: bottomRadius;
+		yourself.
+
+	anOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
+]
+
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addSeparatorTo: aContainer [
 	| aSeparator aSeparatorFrame |
@@ -335,7 +406,8 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
 
-	aContainer addChild: aRow
+	aContainer addChild: aRow.
+	self installFocusOverlayFor: aRow in: aContainer
 ]
 
 { #category : 'private - composition' }

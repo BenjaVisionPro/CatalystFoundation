@@ -16,10 +16,5 @@ CFMaSettingsRowAptitude >> initialize [
 		default: [ :aStyle |
 			aStyle border: BlBorder empty ];
 		hovered: [ :aStyle |
-			aStyle background: (Color black alpha: 0.025) ];
-		when: CFMaActiveSelectionState uniqueInstance
-		style: [ :aStyle |
-			aStyle border: (BlBorder
-				paint: self theme editor focusedBorderColor
-				width: 1) ]
+			aStyle background: (Color black alpha: 0.025) ]
 ]
