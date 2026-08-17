@@ -246,7 +246,7 @@ CFMaSettingsRowElement >> labelVerticalAdjustment [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> fieldVerticalAdjustment [
-	^ -3
+	^ -1
 ]
 
 { #category : 'private - metrics' }
