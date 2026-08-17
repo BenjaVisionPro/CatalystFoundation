@@ -333,7 +333,7 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aLabelColumn aComment |
+	| aRow aTopLine aLabelColumn aFieldColumn aComment updateArrangement |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -345,29 +345,41 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		fitContent.
 
 	aLabelColumn := BrVerticalPane new
-		hMatchParent;
+		hFitContent;
 		vFitContent;
-		padding: (BlInsets right: 6);
 		addChild: aLabel;
 		yourself.
-	aLabelColumn constraintsDo: [ :c |
-		c linear weight: 1.
-		c linear vertical alignTop ].
 
 	aDescription hasComment ifTrue: [
-		aComment := self newCommentFor: aDescription.
-		aLabelColumn addChild: aComment ].
+		aComment := self newCommentFor: aDescription ].
 
 	aFieldElement
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: (BlInsets left: 6);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ].
+		padding: BlInsets empty.
 
-	aRow := BrHorizontalPane new
+	aFieldColumn := BrFrame new
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets left: 12);
+		addChild: aFieldElement;
+		yourself.
+	aFieldColumn constraintsDo: [ :c |
+		c linear weight: 1.
+		c linear vertical alignTop ].
+	aFieldElement constraintsDo: [ :c |
+		c frame horizontal matchParent.
+		c frame vertical alignTop ].
+
+	aTopLine := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		addChild: aLabelColumn;
+		addChild: aFieldColumn;
+		yourself.
+
+	aRow := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		addAptitude: CFMaActiveSelectionAptitude new;
@@ -377,12 +389,90 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 			left: self rowHorizontalInset
 			bottom: self rowBottomInset
 			right: self rowHorizontalInset);
-		addChild: aLabelColumn;
-		addChild: aFieldElement;
+		addChild: aTopLine;
 		yourself.
 
+	aComment ifNotNil: [ aRow addChild: aComment ].
+
+	updateArrangement := [
+		(self memoEditorIsWrapped: aFieldElement)
+			ifTrue: [
+				self
+					arrangeWrappedMemoRow: aRow
+					labelColumn: aLabelColumn
+					fieldColumn: aFieldColumn
+					comment: aComment ]
+			ifFalse: [
+				self
+					arrangeCompactMemoRow: aRow
+					labelColumn: aLabelColumn
+					fieldColumn: aFieldColumn
+					comment: aComment ] ].
+
+	aFieldElement
+		when: BlElementExtentChangedEvent
+		do: [ :anEvent |
+			aRow enqueueTask: (BlTaskAction new action: updateArrangement) ].
+
 	aContainer addChild: aRow.
-	self installFocusOverlayFor: aRow in: aContainer
+	self installFocusOverlayFor: aRow in: aContainer.
+	aRow enqueueTask: (BlTaskAction new action: updateArrangement)
+]
+
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> arrangeCompactMemoRow: aRow labelColumn: aLabelColumn fieldColumn: aFieldColumn comment: aComment [
+	aComment ifNotNil: [
+		aComment hasParent ifTrue: [
+			aComment parent == aRow ifFalse: [
+				aComment parent removeChild: aComment.
+				aRow addChild: aComment ] ] ].
+
+	aLabelColumn
+		hFitContent;
+		padding: BlInsets empty;
+		constraintsDo: [ :c |
+			c linear weight: 0.
+			c linear vertical alignTop ].
+
+	aFieldColumn
+		padding: (BlInsets left: 12);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ]
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> arrangeWrappedMemoRow: aRow labelColumn: aLabelColumn fieldColumn: aFieldColumn comment: aComment [
+	aComment ifNotNil: [
+		aComment hasParent ifTrue: [
+			aComment parent == aLabelColumn ifFalse: [
+				aComment parent removeChild: aComment.
+				aLabelColumn addChild: aComment ] ] ].
+
+	aLabelColumn
+		hMatchParent;
+		padding: (BlInsets right: 6);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ].
+
+	aFieldColumn
+		padding: (BlInsets left: 6);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ]
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> memoEditorIsWrapped: anEditor [
+	| paragraphElements |
+	paragraphElements := anEditor allChildrenBreadthFirstSelect: [ :each |
+		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
+
+	paragraphElements isEmpty ifTrue: [ ^ false ].
+	paragraphElements size > 1 ifTrue: [ ^ true ].
+	^ paragraphElements first visualLineCount > 1
 ]
 
 { #category : 'private - composition' }

@@ -198,3 +198,45 @@ CFMaPresentationExamples >> settingsRightAlignedMemoSegment [
 	self assert: aHolder createSegmentElement class equals: CFMaSettingsRightAlignedParagraphElement.
 	^ aSegment
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsMemoCompactArrangement [
+	<gtExample>
+	| aRow aLabelColumn aFieldColumn aComment aPresentation |
+	aPresentation := CFMaSettingsPresentation new.
+	aRow := BrVerticalPane new.
+	aLabelColumn := BrVerticalPane new.
+	aFieldColumn := BrFrame new.
+	aComment := BrEditor new.
+	aRow addChild: aComment.
+
+	aPresentation
+		arrangeCompactMemoRow: aRow
+		labelColumn: aLabelColumn
+		fieldColumn: aFieldColumn
+		comment: aComment.
+
+	self assert: aComment parent equals: aRow.
+	^ aRow
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsMemoWrappedArrangement [
+	<gtExample>
+	| aRow aLabelColumn aFieldColumn aComment aPresentation |
+	aPresentation := CFMaSettingsPresentation new.
+	aRow := BrVerticalPane new.
+	aLabelColumn := BrVerticalPane new.
+	aFieldColumn := BrFrame new.
+	aComment := BrEditor new.
+	aRow addChild: aComment.
+
+	aPresentation
+		arrangeWrappedMemoRow: aRow
+		labelColumn: aLabelColumn
+		fieldColumn: aFieldColumn
+		comment: aComment.
+
+	self assert: aComment parent equals: aLabelColumn.
+	^ aRow
+]

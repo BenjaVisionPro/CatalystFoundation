@@ -213,3 +213,10 @@ CFMaSettingsRightAlignedParagraphElement >> screenToCursor: aTransformation of: 
 		aTransformation transformed:
 			(self positionWithinSegmentOf: aCharOffsetInParagraph) + self segment textStart ]
 ]
+
+{ #category : 'accessing' }
+CFMaSettingsRightAlignedParagraphElement >> visualLineCount [
+	^ paragraph
+		valueDo: [ :aParagraph | aParagraph lineCount ]
+		ifNone: [ 1 ]
+]
