@@ -16,19 +16,19 @@ CFMaSettingsSwitchAptitude >> initialize [
 	super initialize.
 	thumb := BlElement new
 		background: Color white;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
 		constraintsDo: [ :c |
-			c horizontal exact: 18.
-			c vertical exact: 18.
+			c horizontal exact: 20.
+			c vertical exact: 14.
 			c frame horizontal alignLeft.
 			c frame vertical alignCenter ];
 		yourself.
 
 	self
 		addChangeProperty: #(widget layout) with: [ BlFrameLayout new ];
-		addChangeProperty: #(widget geometry) with: [ BlRoundedRectangleGeometry cornerRadius: 11 ];
-		addChangeProperty: #(widget size) with: [ 48 @ 22 ];
-		addChangeProperty: #(widget padding) with: [ BlInsets all: 2 ];
+		addChangeProperty: #(widget geometry) with: [ BlRoundedRectangleGeometry cornerRadius: 8 ];
+		addChangeProperty: #(widget size) with: [ 36 @ 16 ];
+		addChangeProperty: #(widget padding) with: [ BlInsets all: 1 ];
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
 		addChangeAddChildAs: #(cfSettingsSwitchThumb) with: [ thumb ].
 
