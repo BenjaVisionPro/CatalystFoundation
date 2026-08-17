@@ -315,10 +315,7 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 			ifTrue: [ editors add: aChild ] ].
 
 	editors do: [ :anEditor |
-		anEditor
-			addAptitude: CFMaSettingsEditorAptitude new;
-			when: BlFocusInEvent
-			do: [ :anEvent | anEditor deselecter all deselect ] ].
+		anEditor addAptitude: CFMaSettingsEditorAptitude new ].
 	^ aFieldElement
 ]
 
@@ -656,7 +653,6 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			strategy: aCompletionStrategy) install ].
 
 	aLabel := self newFieldLabelFor: aDescription.
-	self configureTabStopFor: anEditor using: aDescription.
 	self
 		addMemoLabel: aLabel
 		field: anEditor

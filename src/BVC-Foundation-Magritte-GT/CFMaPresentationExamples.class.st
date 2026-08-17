@@ -255,3 +255,23 @@ CFMaPresentationExamples >> settingsMemoDeselectsOnFocusOut [
 	self assert: anEditor class equals: BrEditor.
 	^ anEditor
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsOneLineEditorKeepsNativeSelectionBehaviour [
+	<gtExample>
+	| anEditor aPresentation |
+	anEditor := GtMagritteOneLineEditorElement new.
+	aPresentation := CFMaSettingsPresentation new.
+	aPresentation prepareEditorChromeIn: anEditor.
+	self assert: anEditor class equals: GtMagritteOneLineEditorElement.
+	^ anEditor
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsMemoKeepsNativeEditorFocusability [
+	<gtExample>
+	| anEditor |
+	anEditor := BrEditor new.
+	self assert: anEditor focusability equals: BlFocusability block.
+	^ anEditor
+]
