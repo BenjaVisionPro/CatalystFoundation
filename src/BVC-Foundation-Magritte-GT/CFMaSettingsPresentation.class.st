@@ -80,7 +80,7 @@ CFMaSettingsPresentation >> rowBottomInset [
 
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> rowTopInset [
-	^ 4
+	^ 1
 ]
 
 { #category : 'private - metrics' }
@@ -368,6 +368,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 	aFieldColumn := BrFrame new
 		hMatchParent;
 		vFitContent;
+		margin: (BlInsets top: -1);
 		padding: (BlInsets left: 12);
 		addChild: aFieldElement;
 		yourself.
