@@ -28,7 +28,7 @@ CFMaSettingsRowElement >> initialize [
 			top: self topInset
 			left: self horizontalInset
 			bottom: self bottomInset
-			right: self horizontalInset);
+			right: self trailingInset);
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new
 ]
@@ -69,7 +69,7 @@ CFMaSettingsRowElement >> buildStandard [
 		hFitContent;
 		vFitContent.
 	(field isKindOf: CFMaSettingsBooleanElement)
-		ifTrue: [ field margin: (BlInsets right: self editorTextHorizontalInset) ]
+		ifTrue: [ field margin: (BlInsets right: self horizontalInset - self trailingInset) ]
 		ifFalse: [ field margin: (BlInsets top: self fieldVerticalAdjustment) ].
 
 	aTrailing := BrFrame new
@@ -237,6 +237,11 @@ CFMaSettingsRowElement >> compactFieldGap [
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> editorTextHorizontalInset [
 	^ 0
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> trailingInset [
+	^ 2
 ]
 
 { #category : 'private - metrics' }
