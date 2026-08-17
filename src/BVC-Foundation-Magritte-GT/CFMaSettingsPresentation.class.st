@@ -172,8 +172,8 @@ CFMaSettingsPresentation >> containerForDescription: aDescription [
 	aPath := aDescription path.
 
 	((currentGroup = aGroup)
-		and: [ currentPath = aPath ]
-		and: [ currentPathContainer isNotNil ])
+		and: [ (currentPath = aPath)
+			and: [ currentPathContainer isNotNil ] ])
 		ifTrue: [ ^ currentPathContainer ].
 
 	aSection := self sectionForGroup: aGroup.
