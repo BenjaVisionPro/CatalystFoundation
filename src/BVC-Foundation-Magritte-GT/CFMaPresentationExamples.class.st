@@ -166,3 +166,12 @@ CFMaPresentationExamples >> settingsCommentEditor [
 	self assert: anEditor class equals: BrEditor.
 	^ anEditor
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsMemoEditorAllowsLineBreaks [
+	<gtExample>
+	| anEditor |
+	anEditor := CFMaSettingsMemoEditorElement new.
+	self assert: anEditor inputFilter class equals: BrTextEditorNoInputFilter.
+	^ anEditor
+]

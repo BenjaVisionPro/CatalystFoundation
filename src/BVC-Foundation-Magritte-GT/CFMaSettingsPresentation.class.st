@@ -332,6 +332,90 @@ CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 ]
 
 { #category : 'private - composition' }
+CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
+	| aRow aTopLine aLabelContainer aFieldContainer aComment |
+	self prepareRowIn: aContainer.
+
+	aLabel
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: self primaryTextColor;
+			fontSize: 13;
+			padding: BlInsets empty);
+		margin: BlInsets empty;
+		fitContent.
+
+	self prepareTrailingField: aFieldElement.
+
+	aLabelContainer := BrFrame new
+		hMatchParent;
+		vFitContent;
+		addChild: aLabel;
+		yourself.
+	aLabelContainer constraintsDo: [ :c |
+		c linear weight: 1 ].
+	aLabel constraintsDo: [ :c |
+		c frame horizontal alignLeft.
+		c frame vertical alignTop ].
+
+	aFieldContainer := BrFrame new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		addChild: aFieldElement;
+		yourself.
+	aFieldContainer constraintsDo: [ :c |
+		c linear weight: 1 ].
+	aFieldElement constraintsDo: [ :c |
+		c frame horizontal matchParent.
+		c frame vertical alignTop ].
+
+	aTopLine := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		addChild: aLabelContainer;
+		addChild: aFieldContainer;
+		yourself.
+
+	aRow := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaSettingsRowAptitude new;
+		padding: (BlInsets
+			top: self rowTopInset
+			left: self rowHorizontalInset
+			bottom: self rowBottomInset
+			right: self rowHorizontalInset);
+		addChild: aTopLine;
+		yourself.
+
+	aDescription hasComment ifTrue: [
+		aComment := self newCommentFor: aDescription.
+		aRow addChild: aComment ].
+
+	aContainer addChild: aRow.
+	self installFocusOverlayFor: aRow in: aContainer
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> newCommentFor: aDescription [
+	^ BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		text: (aDescription comment asRopedText
+			foreground: self secondaryTextColor;
+			fontSize: 11);
+		hMatchParent;
+		vFitContent;
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: BlInsets empty;
+		margin: (BlInsets top: 1);
+		yourself
+]
+
+{ #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
 	self
 		addLabel: aLabel
@@ -360,19 +444,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		yourself.
 
 	aDescription hasComment ifTrue: [
-		aComment := BrEditor new
-			aptitude: BrGlamorousRegularEditorAptitude new;
-			beReadOnlyWithoutSelection;
-			text: (aDescription comment asRopedText
-				foreground: self secondaryTextColor;
-				fontSize: 11);
-			hMatchParent;
-			vFitContent;
-			background: Color transparent;
-			border: BlBorder empty;
-			padding: BlInsets empty;
-			margin: (BlInsets top: 1);
-			yourself.
+		aComment := self newCommentFor: aDescription.
 		aLeading addChild: aComment ].
 
 	self prepareTrailingField: aFieldElement.
@@ -427,6 +499,59 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 
 { #category : 'elements' }
 CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
+	| aLabel |
+	aLabel := self newFieldLabelFor: aDescription.
+	self configureTabStopFor: aFieldElement using: aDescription.
+	self addLabel: aLabel field: aFieldElement for: aDescription.
+	^ aLabel
+]
+
+{ #category : 'private - building' }
+CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
+	| anInputElement aValidationElement aLabel aCompletionStrategy |
+	anInputElement := aDescription blocStencil
+		ifNotNil: [ :aStencil |
+			aStencil
+				memento: self memento;
+				description: aDescription;
+				asElement ]
+		ifNil: [
+			CFMaSettingsMemoEditorElement new
+				fieldViewModel: (GtMagritteFieldViewModel new
+					memento: self memento;
+					description: aDescription) ].
+
+	self addShortcutsTo: anInputElement using: aDescription.
+
+	aDescription blocCompletion ifNotNil: [ :aStencil |
+		aCompletionStrategy := aStencil
+			memento: self memento;
+			description: aDescription;
+			build.
+		(GtCompletionController
+			on: anInputElement
+			strategy: aCompletionStrategy) install ].
+
+	aValidationElement := aDescription isWithChangeIndicator
+		ifTrue: [
+			GtMagritteBuilderUtility
+				newValidationContainerWith: anInputElement
+				memento: self memento
+				using: aDescription ]
+		ifFalse: [ anInputElement ].
+
+	aLabel := self newFieldLabelFor: aDescription.
+	self configureTabStopFor: aValidationElement using: aDescription.
+	self
+		addMemoLabel: aLabel
+		field: aValidationElement
+		for: aDescription
+		to: (self containerForDescription: aDescription).
+	^ anInputElement
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> newFieldLabelFor: aDescription [
 	| aLabel aText |
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
@@ -435,10 +560,12 @@ CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
 		text: aText;
 		fitContent;
 		yourself.
-
-	self configureTabStopFor: aFieldElement using: aDescription.
-	self addLabel: aLabel field: aFieldElement for: aDescription.
 	^ aLabel
+]
+
+{ #category : 'visiting-description' }
+CFMaSettingsPresentation >> visitMemoDescription: aDescription [
+	self addMemoFieldUsing: aDescription
 ]
 
 { #category : 'visiting-description' }
