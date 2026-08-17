@@ -500,7 +500,7 @@ CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
 
 { #category : 'private - building' }
 CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
-	| anInputElement aValidationElement aLabel aCompletionStrategy |
+	| anInputElement aLabel aCompletionStrategy |
 	anInputElement := aDescription blocStencil
 		ifNotNil: [ :aStencil |
 			aStencil
@@ -524,23 +524,11 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			on: anInputElement
 			strategy: aCompletionStrategy) install ].
 
-	aValidationElement := aDescription isWithChangeIndicator
-		ifTrue: [
-			GtMagritteBuilderUtility
-				newValidationContainerWith: anInputElement
-				memento: self memento
-				using: aDescription ]
-		ifFalse: [ anInputElement ].
-
-	aDescription isWithChangeIndicator ifTrue: [
-		anInputElement constraintsDo: [ :c |
-			c grid vertical alignTop ] ].
-
 	aLabel := self newFieldLabelFor: aDescription.
-	self configureTabStopFor: aValidationElement using: aDescription.
+	self configureTabStopFor: anInputElement using: aDescription.
 	self
 		addMemoLabel: aLabel
-		field: aValidationElement
+		field: anInputElement
 		for: aDescription
 		to: (self containerForDescription: aDescription).
 	^ anInputElement
