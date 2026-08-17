@@ -358,13 +358,12 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		aLabelColumn addChild: aComment ].
 
 	aFieldElement
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		constraintsDo: [ :c |
 			c linear weight: 1.
-			c linear horizontal alignRight.
 			c linear vertical alignTop ].
 
 	aRow := BrHorizontalPane new
@@ -502,7 +501,7 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 		aptitude: (aDescription editorAptitude
 			ifNil: [ BrGlamorousRegularEditorAptitude new fontSize: 13 ]
 			ifNotNil: #value);
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty;
 		margin: BlInsets empty;
