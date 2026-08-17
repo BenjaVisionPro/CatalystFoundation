@@ -150,20 +150,19 @@ CFMaPresentationExamples >> settingsFocusOverlayUsesBlocOverlay [
 	^ anOverlay
 ]
 
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsCommentUsesMultilineParagraph [
-	<gtExample>
-	| anElement |
-	anElement := CFMaMultilineTextElement new.
-	self assert: anElement createTextParagraph class equals: BlMultiLineTextParagraph.
-	^ anElement
-]
+
 
 { #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsCommentAptitude [
+CFMaPresentationExamples >> settingsCommentEditor [
 	<gtExample>
-	| anAptitude |
-	anAptitude := CFMaSettingsCommentAptitude new.
-	self assert: anAptitude label class equals: CFMaMultilineTextElement.
-	^ anAptitude
+	| anEditor |
+	anEditor := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		text: 'A long settings comment that may wrap onto more than one line.' asRopedText;
+		hMatchParent;
+		vFitContent;
+		yourself.
+	self assert: anEditor class equals: BrEditor.
+	^ anEditor
 ]

@@ -360,13 +360,17 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 		yourself.
 
 	aDescription hasComment ifTrue: [
-		aComment := BrLabel new
-			text: aDescription comment;
-			aptitude: (CFMaSettingsCommentAptitude new
+		aComment := BrEditor new
+			aptitude: BrGlamorousRegularEditorAptitude new;
+			beReadOnlyWithoutSelection;
+			text: (aDescription comment asRopedText
 				foreground: self secondaryTextColor;
 				fontSize: 11);
 			hMatchParent;
 			vFitContent;
+			background: Color transparent;
+			border: BlBorder empty;
+			padding: BlInsets empty;
 			margin: (BlInsets top: 1);
 			yourself.
 		aLeading addChild: aComment ].
