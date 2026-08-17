@@ -8,7 +8,8 @@ Class {
 		'multiline',
 		'labelColumn',
 		'fieldColumn',
-		'topLine'
+		'topLine',
+		'wrappedMultiline'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -19,6 +20,7 @@ Class {
 CFMaSettingsRowElement >> initialize [
 	super initialize.
 	multiline := false.
+	wrappedMultiline := false.
 	self
 		hMatchParent;
 		vFitContent;
@@ -134,28 +136,52 @@ CFMaSettingsRowElement >> buildMultiline [
 	self addChild: topLine.
 	comment ifNotNil: [ self addChild: comment ].
 
+	self
+		when: BlElementExtentChangedEvent
+		do: [ :anEvent | self scheduleMultilineArrangementUpdate ].
 	field
 		when: BlElementExtentChangedEvent
-		do: [ :anEvent |
-			self enqueueTask: (BlTaskAction new action: [ self updateMultilineArrangement ]) ].
+		do: [ :anEvent | self scheduleMultilineArrangementUpdate ].
+	self scheduleMultilineArrangementUpdate
+]
+
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> scheduleMultilineArrangementUpdate [
 	self enqueueTask: (BlTaskAction new action: [ self updateMultilineArrangement ])
 ]
 
 { #category : 'private - layout' }
 CFMaSettingsRowElement >> updateMultilineArrangement [
-	(self fieldIsWrapped)
+	| shouldWrap |
+	shouldWrap := self shouldUseWrappedMultilineArrangement.
+	shouldWrap = wrappedMultiline ifTrue: [ ^ self ].
+
+	wrappedMultiline := shouldWrap.
+	wrappedMultiline
 		ifTrue: [ self useWrappedMultilineArrangement ]
 		ifFalse: [ self useCompactMultilineArrangement ]
 ]
 
 { #category : 'private - layout' }
-CFMaSettingsRowElement >> fieldIsWrapped [
-	| paragraphs |
+CFMaSettingsRowElement >> shouldUseWrappedMultilineArrangement [
+	| paragraphs availableWidth labelWidth fieldWidth requiredWidth |
 	paragraphs := field allChildrenBreadthFirstSelect: [ :each |
 		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
 	paragraphs isEmpty ifTrue: [ ^ false ].
+
+	"More than one paragraph represents explicit multiline content."
 	paragraphs size > 1 ifTrue: [ ^ true ].
-	^ paragraphs first visualLineCount > 1
+
+	availableWidth := (self extent x - self padding width) max: 0.
+	availableWidth <= 0 ifTrue: [ ^ false ].
+
+	labelWidth := label
+		ifNil: [ 0 ]
+		ifNotNil: [ label measuredWidth ].
+	fieldWidth := paragraphs first unwrappedWidth + field padding width.
+	requiredWidth := labelWidth + self compactFieldGap + fieldWidth.
+
+	^ requiredWidth > availableWidth
 ]
 
 { #category : 'private - layout' }

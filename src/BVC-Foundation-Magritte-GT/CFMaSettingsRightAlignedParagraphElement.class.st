@@ -46,16 +46,6 @@ CFMaSettingsRightAlignedParagraphElement >> pointInParagraphFromAlignedPoint: aP
 ]
 
 { #category : 'private - drawing' }
-CFMaSettingsRightAlignedParagraphElement >> lineCharacterIntervalAt: aLineIndex paragraph: aParagraph [
-	| aStart aEnd |
-	aStart := aLineIndex = 1
-		ifTrue: [ 0 ]
-		ifFalse: [ aParagraph lineEndAt: aLineIndex - 1 ].
-	aEnd := aParagraph lineEndAt: aLineIndex.
-	^ aStart to: aEnd
-]
-
-{ #category : 'private - drawing' }
 CFMaSettingsRightAlignedParagraphElement >> lineTopAt: aLineIndex paragraph: aParagraph [
 	| aTop |
 	aTop := 0.
@@ -66,28 +56,15 @@ CFMaSettingsRightAlignedParagraphElement >> lineTopAt: aLineIndex paragraph: aPa
 
 { #category : 'private - drawing' }
 CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex paragraph: aParagraph [
-	| theRectangles aTop aBottom |
-	theRectangles := aParagraph
-		rectanglesForChars:
-			(self lineCharacterIntervalAt: aLineIndex paragraph: aParagraph)
-		width: SkiaParagraphRectWidthStyle Max
-		height: SkiaParagraphRectHeightStyle Max.
-
-	theRectangles ifEmpty: [
-		aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
-		^ BlBounds
-			origin: 0 @ aTop
-			extent: 0 @ (aParagraph lineHeightAt: aLineIndex) ].
-
-	aTop := theRectangles first top.
-	aBottom := theRectangles first bottom.
-	theRectangles allButFirstDo: [ :aRectangle |
-		aTop := aTop min: aRectangle top.
-		aBottom := aBottom max: aRectangle bottom ].
+	| aTop aBottom |
+	aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
+	aBottom := aLineIndex = aParagraph lineCount
+		ifTrue: [ aParagraph height ]
+		ifFalse: [ self lineTopAt: aLineIndex + 1 paragraph: aParagraph ].
 
 	^ BlBounds
 		origin: 0 @ aTop
-		extent: 0 @ (aBottom - aTop)
+		extent: 0 @ ((aBottom - aTop) max: 0)
 ]
 
 { #category : 'private - drawing' }
@@ -259,6 +236,14 @@ CFMaSettingsRightAlignedParagraphElement >> screenToCursor: aTransformation of: 
 		aCharOffsetInParagraph := aParagraph charOffsetForPoint: aPoint.
 		aTransformation transformed:
 			(self positionWithinSegmentOf: aCharOffsetInParagraph) + self segment textStart ]
+]
+
+{ #category : 'accessing' }
+CFMaSettingsRightAlignedParagraphElement >> unwrappedWidth [
+	| anUnwrappedParagraph |
+	anUnwrappedParagraph := self buildParagraph.
+	anUnwrappedParagraph layoutWithWidth: SmallInteger maxVal.
+	^ anUnwrappedParagraph longestLine
 ]
 
 { #category : 'accessing' }
