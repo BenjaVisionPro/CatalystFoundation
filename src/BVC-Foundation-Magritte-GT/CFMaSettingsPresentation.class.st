@@ -228,10 +228,29 @@ CFMaSettingsPresentation >> prepareRowIn: aContainer [
 
 
 { #category : 'private - composition' }
+CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
+	| editors |
+	editors := OrderedCollection new.
+	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
+		ifTrue: [ editors add: aFieldElement ].
+	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
+		(aChild isKindOf: GtMagritteOneLineEditorElement)
+			ifTrue: [ editors add: aChild ] ].
+
+	editors do: [ :anEditor |
+		anEditor
+			addAptitude: CFMaSettingsEditorAptitude new;
+			when: BlFocusInEvent
+			do: [ :anEvent | anEditor deselecter all deselect ] ].
+	^ aFieldElement
+]
+
+{ #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareTrailingField: aFieldElement [
 	"GT's normal form renderers may add outer margins for grid presentation.
 	The settings row owns the outer positioning, so its trailing root starts
 	and ends exactly on the row content bounds."
+	self prepareEditorChromeIn: aFieldElement.
 	aFieldElement margin: (BlInsets top: self fieldBaselineOffset).
 	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
 		ifTrue: [ aFieldElement margin: (BlInsets top: self fieldBaselineOffset) ].
@@ -302,6 +321,8 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aRow := BrFrame new
 		hMatchParent;
 		vFitContent;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaSettingsRowAptitude new;
 		padding: (BlInsets
 			top: self rowTopInset
 			left: self rowHorizontalInset

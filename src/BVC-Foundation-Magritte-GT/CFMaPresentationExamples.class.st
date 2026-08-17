@@ -110,3 +110,21 @@ CFMaPresentationExamples >> showcasePathsAreScopedToFields [
 	self assert: (relationDescriptions allSatisfy: [ :each | each path isEmpty ]).
 	^ aShowcase
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowAptitude [
+	<gtExample>
+	| anAptitude |
+	anAptitude := CFMaSettingsRowAptitude new.
+	self assert: anAptitude class equals: CFMaSettingsRowAptitude.
+	^ anAptitude
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsEditorAptitude [
+	<gtExample>
+	| anAptitude |
+	anAptitude := CFMaSettingsEditorAptitude new.
+	self assert: anAptitude class equals: CFMaSettingsEditorAptitude.
+	^ anAptitude
+]
