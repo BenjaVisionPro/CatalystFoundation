@@ -13,6 +13,6 @@ CFMaSettingsMemoEditorElement >> initialize [
 		inputFilter: BrTextEditorNoInputFilter new;
 		hMatchParent;
 		vFitContent;
-		padding: BlInsets empty;
+		padding: (BlInsets top: 4);
 		margin: BlInsets empty
 ]
