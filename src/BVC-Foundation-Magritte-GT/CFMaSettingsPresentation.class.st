@@ -675,7 +675,7 @@ CFMaSettingsPresentation >> visitMemoDescription: aDescription [
 
 { #category : 'visiting-description' }
 CFMaSettingsPresentation >> visitBooleanDescription: aDescription [
-	| aBooleanElement aValidationElement |
+	| aBooleanElement |
 	aBooleanElement := aDescription blocStencil
 		ifNotNil: [ :aStencil |
 			aStencil
@@ -688,10 +688,5 @@ CFMaSettingsPresentation >> visitBooleanDescription: aDescription [
 					memento: self memento;
 					description: aDescription) ].
 
-	aValidationElement := GtMagritteBuilderUtility
-		newValidationContainerWith: aBooleanElement
-		memento: self memento
-		using: aDescription.
-
-	self addFieldElement: aValidationElement using: aDescription
+	self addFieldElement: aBooleanElement using: aDescription
 ]
