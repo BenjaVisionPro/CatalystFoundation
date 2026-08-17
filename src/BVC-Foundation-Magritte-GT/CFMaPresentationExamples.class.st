@@ -185,3 +185,16 @@ CFMaPresentationExamples >> settingsMemoEditor [
 	self assert: anEditor inputFilter class equals: BrTextEditorNoInputFilter.
 	^ anEditor
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRightAlignedMemoSegment [
+	<gtExample>
+	| aSegment aType aHolder |
+	aSegment := CFMaSettingsRightAlignedParagraphSegment new.
+	aType := aSegment segmentType.
+	aHolder := aType holder.
+	self assert: aType class equals: CFMaSettingsRightAlignedParagraphSegmentType.
+	self assert: aHolder class equals: CFMaSettingsRightAlignedParagraphSegmentHolder.
+	self assert: aHolder createSegmentElement class equals: CFMaSettingsRightAlignedParagraphElement.
+	^ aSegment
+]
