@@ -293,7 +293,7 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 	anEditor := BrEditor new
 		inputFilter: BrTextEditorNoInputFilter new;
 		aptitude: (aDescription editorAptitude
-			ifNil: [ BrGlamorousRegularEditorAptitude new fontSize: 13 ]
+			ifNil: [ BrGlamorousRegularEditorAptitude new glamorousRegularFontAndSize ]
 			ifNotNil: #value);
 		hMatchParent;
 		vFitContent;
@@ -367,8 +367,8 @@ CFMaSettingsPresentation >> newFieldLabelFor: aDescription [
 		id: (GtMagritteFieldLabelId new description: aDescription);
 		text: aText;
 		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFontAndSize;
 			foreground: self primaryTextColor;
-			fontSize: 13;
 			padding: BlInsets empty);
 		margin: BlInsets empty;
 		fitContent;

@@ -402,3 +402,15 @@ CFMaPresentationExamples >> settingsFieldPreparationDoesNotAddBaselineMargin [
 	self assert: anEditor margin equals: BlInsets empty.
 	^ anEditor
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsLabelUsesStandardEditorTypography [
+	<gtExample>
+	| aDescription aLabel |
+	aDescription := MAStringDescription new
+		label: 'Text';
+		yourself.
+	aLabel := CFMaSettingsPresentation new newFieldLabelFor: aDescription.
+	self assert: aLabel text attributes fontSize equals: 14.
+	^ aLabel
+]
