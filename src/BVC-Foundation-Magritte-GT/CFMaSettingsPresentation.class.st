@@ -544,7 +544,9 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 	aTrailing constraintsDo: [ :c |
 		c ignoreByLayout.
 		c ignored horizontal alignRight.
-		c ignored vertical alignTop ].
+		(aFieldElement isKindOf: CFMaSettingsBooleanElement)
+			ifTrue: [ c ignored vertical alignCenter ]
+			ifFalse: [ c ignored vertical alignTop ] ].
 
 	aRow := BrFrame new
 		hMatchParent;
