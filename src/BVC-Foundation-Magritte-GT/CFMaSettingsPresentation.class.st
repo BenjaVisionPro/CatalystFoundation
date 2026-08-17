@@ -347,6 +347,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 	aLabelColumn := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
+		padding: (BlInsets right: 6);
 		addChild: aLabel;
 		yourself.
 	aLabelColumn constraintsDo: [ :c |
@@ -361,7 +362,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: BlInsets empty;
+		padding: (BlInsets left: 6);
 		constraintsDo: [ :c |
 			c linear weight: 1.
 			c linear vertical alignTop ].
@@ -369,7 +370,6 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 	aRow := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 12;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new;
 		padding: (BlInsets
