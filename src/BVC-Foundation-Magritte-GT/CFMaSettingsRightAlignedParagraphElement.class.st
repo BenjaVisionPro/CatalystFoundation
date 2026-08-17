@@ -6,11 +6,6 @@ Class {
 	#tag : 'Elements'
 }
 
-{ #category : 'private - metrics' }
-CFMaSettingsRightAlignedParagraphElement >> descentAllowance [
-	^ 1
-]
-
 { #category : 'private - alignment' }
 CFMaSettingsRightAlignedParagraphElement >> alignmentOffsetForLine: aLineIndex paragraph: aParagraph [
 	| aContentWidth |
@@ -51,28 +46,68 @@ CFMaSettingsRightAlignedParagraphElement >> pointInParagraphFromAlignedPoint: aP
 ]
 
 { #category : 'private - drawing' }
-CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanvas at: anOrigin [
-	| aTop aContentWidth |
+CFMaSettingsRightAlignedParagraphElement >> lineCharacterIntervalAt: aLineIndex paragraph: aParagraph [
+	| aStart aEnd |
+	aStart := aLineIndex = 1
+		ifTrue: [ 0 ]
+		ifFalse: [ aParagraph lineEndAt: aLineIndex - 1 ].
+	aEnd := aParagraph lineEndAt: aLineIndex.
+	^ aStart to: aEnd
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> lineTopAt: aLineIndex paragraph: aParagraph [
+	| aTop |
 	aTop := 0.
+	1 to: aLineIndex - 1 do: [ :anIndex |
+		aTop := aTop + (aParagraph lineHeightAt: anIndex) ].
+	^ aTop
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex paragraph: aParagraph [
+	| theRectangles aTop aBottom |
+	theRectangles := aParagraph
+		rectanglesForChars:
+			(self lineCharacterIntervalAt: aLineIndex paragraph: aParagraph)
+		width: SkiaParagraphRectWidthStyle Max
+		height: SkiaParagraphRectHeightStyle Max.
+
+	theRectangles ifEmpty: [
+		aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
+		^ aTop extent: 0 @ (aParagraph lineHeightAt: aLineIndex) ].
+
+	aTop := theRectangles first top.
+	aBottom := theRectangles first bottom.
+	theRectangles allButFirstDo: [ :aRectangle |
+		aTop := aTop min: aRectangle top.
+		aBottom := aBottom max: aRectangle bottom ].
+
+	^ aTop extent: 0 @ (aBottom - aTop)
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanvas at: anOrigin [
+	| aContentWidth |
 	aContentWidth := (self measuredWidth - self padding width) max: 0.
 
 	1 to: aParagraph lineCount do: [ :anIndex |
-		| aHeight aClipHeight anOffset aClipBounds |
-		aHeight := aParagraph lineHeightAt: anIndex.
-		aClipHeight := anIndex = aParagraph lineCount
-			ifTrue: [ aHeight + self descentAllowance ]
-			ifFalse: [ aHeight ].
-		anOffset := self alignmentOffsetForLine: anIndex paragraph: aParagraph.
+		| aVerticalBounds anOffset aClipBounds |
+		aVerticalBounds := self
+			lineVerticalBoundsAt: anIndex
+			paragraph: aParagraph.
+		anOffset := self
+			alignmentOffsetForLine: anIndex
+			paragraph: aParagraph.
 		aClipBounds := BlBounds
-			origin: anOrigin + (0 @ aTop)
-			extent: aContentWidth @ aClipHeight.
+			origin: anOrigin + (0 @ aVerticalBounds origin x)
+			extent: aContentWidth @ aVerticalBounds height.
 		aCanvas clip
 			by: aClipBounds
 			during: [
 				aParagraph
 					paintOn: aCanvas
-					at: anOrigin + (anOffset @ 0) ].
-		aTop := aTop + aHeight ]
+					at: anOrigin + (anOffset @ 0) ] ]
 ]
 
 { #category : 'api - cursor' }
@@ -162,13 +197,6 @@ CFMaSettingsRightAlignedParagraphElement >> handleMouseEvent: anEvent paragraph:
 				handleEvent: anEvent
 				in: anEditorElement editor
 				on: self segment ]
-]
-
-{ #category : 'layout' }
-CFMaSettingsRightAlignedParagraphElement >> onMeasure: anExtentMeasurementSpec [
-	super onMeasure: anExtentMeasurementSpec.
-	self measuredExtent:
-		self measuredExtent + (0 @ self descentAllowance)
 ]
 
 { #category : 'layout' }

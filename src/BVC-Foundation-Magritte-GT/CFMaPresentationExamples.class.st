@@ -465,10 +465,15 @@ CFMaPresentationExamples >> settingsCommentUsesHalfPixelOpticalInset [
 ]
 
 { #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsRightAlignedParagraphKeepsDescenderAllowance [
+CFMaPresentationExamples >> settingsRightAlignedParagraphHasNoDescenderPatch [
 	<gtExample>
 	| anElement |
 	anElement := CFMaSettingsRightAlignedParagraphElement new.
-	self assert: anElement descentAllowance equals: 1.
+	self assert:
+		(anElement class canUnderstand: #lineVerticalBoundsAt:paragraph:).
+	self assert:
+		(anElement class canUnderstand: #lineCharacterIntervalAt:paragraph:).
+	self assert:
+		(anElement class canUnderstand: #descentAllowance) not.
 	^ anElement
 ]
