@@ -610,10 +610,12 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			segmentClass: CFMaSettingsRightAlignedParagraphSegment;
 			yourself).
 	anEditor
+		focusability: BlFocusability block;
 		when: BlFocusInEvent
 		do: [ :anEvent | anEditor selecter all select ];
 		when: BlFocusOutEvent
 		do: [ :anEvent | anEditor deselecter all deselect ].
+	self installFormNavigationOn: anEditor.
 
 	aDescription isReadOnly
 		ifTrue: [ anEditor beReadOnlyWithSelection ]
