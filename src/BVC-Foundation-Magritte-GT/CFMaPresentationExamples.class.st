@@ -326,3 +326,42 @@ CFMaPresentationExamples >> settingsFirstAndLastRowsOwnCardEdgeSpacing [
 		aPresentation rowBottomInset + aPresentation rowEdgeInset.
 	^ aContainer
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsRowsShareExactBaseInsets [
+	<gtExample>
+	| aPresentation aRow |
+	aPresentation := CFMaSettingsPresentation new.
+	aRow := aPresentation newRow.
+
+	self assert: aRow padding top equals: aPresentation rowTopInset.
+	self assert: aRow padding left equals: aPresentation rowHorizontalInset.
+	self assert: aRow padding bottom equals: aPresentation rowBottomInset.
+	self assert: aRow padding right equals: aPresentation rowHorizontalInset.
+	^ aRow
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsEdgeInsetsOnlyExtendBaseRowInsets [
+	<gtExample>
+	| aPresentation aContainer aFirst aMiddle aLast |
+	aPresentation := CFMaSettingsPresentation new.
+	aContainer := BrVerticalPane new.
+	aFirst := aPresentation newRow.
+	aMiddle := aPresentation newRow.
+	aLast := aPresentation newRow.
+
+	aPresentation addRow: aFirst to: aContainer.
+	aPresentation addRow: aMiddle to: aContainer.
+	aPresentation addRow: aLast to: aContainer.
+
+	self assert: aFirst padding top equals:
+		aPresentation rowTopInset + aPresentation rowEdgeInset.
+	self assert: aFirst padding bottom equals: aPresentation rowBottomInset.
+	self assert: aMiddle padding top equals: aPresentation rowTopInset.
+	self assert: aMiddle padding bottom equals: aPresentation rowBottomInset.
+	self assert: aLast padding top equals: aPresentation rowTopInset.
+	self assert: aLast padding bottom equals:
+		aPresentation rowBottomInset + aPresentation rowEdgeInset.
+	^ aContainer
+]

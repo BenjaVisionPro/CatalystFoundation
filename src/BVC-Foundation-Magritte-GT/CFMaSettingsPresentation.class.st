@@ -345,6 +345,21 @@ CFMaSettingsPresentation >> setRowPaddingFor: aRow top: aTopInset bottom: aBotto
 ]
 
 { #category : 'private - composition' }
+CFMaSettingsPresentation >> newRow [
+	^ BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaSettingsRowAptitude new;
+		padding: (BlInsets
+			top: self rowTopInset
+			left: self rowHorizontalInset
+			bottom: self rowBottomInset
+			right: self rowHorizontalInset);
+		yourself
+]
+
+{ #category : 'private - composition' }
 CFMaSettingsPresentation >> prepareRowIn: aContainer [
 	| aCount |
 	aCount := rowCountsByContainer at: aContainer ifAbsent: [ 0 ].
@@ -431,16 +446,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		addChild: aFieldColumn;
 		yourself.
 
-	aRow := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		addAptitude: CFMaActiveSelectionAptitude new;
-		addAptitude: CFMaSettingsRowAptitude new;
-		padding: (BlInsets
-			top: self rowTopInset
-			left: self rowHorizontalInset
-			bottom: self rowBottomInset
-			right: self rowHorizontalInset);
+	aRow := self newRow
 		addChild: aTopLine;
 		yourself.
 
@@ -556,7 +562,7 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescription to: aContainer [
-	| aRow aLeading aTrailing aComment |
+	| aRow aContent aLeading aTrailing aComment |
 	self prepareRowIn: aContainer.
 
 	aLabel
@@ -600,22 +606,21 @@ CFMaSettingsPresentation >> addLabel: aLabel field: aFieldElement for: aDescript
 			ifTrue: [ c ignored vertical alignCenter ]
 			ifFalse: [ c ignored vertical alignTop ] ].
 
-	aRow := BrFrame new
+	aContent := BrFrame new
 		hMatchParent;
 		vFitContent;
-		addAptitude: CFMaActiveSelectionAptitude new;
-		addAptitude: CFMaSettingsRowAptitude new;
-		padding: (BlInsets
-			top: self rowTopInset
-			left: self rowHorizontalInset
-			bottom: self rowBottomInset
-			right: self rowHorizontalInset);
+		margin: BlInsets empty;
+		padding: BlInsets empty;
 		addChild: aLeading;
 		addChild: aTrailing;
 		yourself.
 	aLeading constraintsDo: [ :c |
 		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
+
+	aRow := self newRow
+		addChild: aContent;
+		yourself.
 
 	self addRow: aRow to: aContainer.
 	self installFocusOverlayFor: aRow in: aContainer
