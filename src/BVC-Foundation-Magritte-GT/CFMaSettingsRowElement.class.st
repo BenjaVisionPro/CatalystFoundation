@@ -271,7 +271,7 @@ CFMaSettingsRowElement >> multilineEditorTrailingInset [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> standardEditorTrailingAdjustment [
-	^ -4
+	^ -2
 ]
 
 { #category : 'private - metrics' }
