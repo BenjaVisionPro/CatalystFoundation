@@ -179,7 +179,7 @@ CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer
 
 { #category : 'private - metrics' }
 CFMaSettingsPresentation >> editorTextHorizontalInset [
-	^ 5
+	^ 0
 ]
 
 { #category : 'private - composition' }

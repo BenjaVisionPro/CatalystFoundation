@@ -64,7 +64,7 @@ CFMaSettingsCardElement >> edgeInset [
 
 { #category : 'private - metrics' }
 CFMaSettingsCardElement >> editorTextHorizontalInset [
-	^ 5
+	^ 0
 ]
 
 { #category : 'private - metrics' }

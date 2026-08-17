@@ -236,7 +236,7 @@ CFMaSettingsRowElement >> compactFieldGap [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> editorTextHorizontalInset [
-	^ 5
+	^ 0
 ]
 
 { #category : 'private - metrics' }
