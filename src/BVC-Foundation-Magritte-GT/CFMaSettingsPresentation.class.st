@@ -344,28 +344,29 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		margin: BlInsets empty;
 		fitContent.
 
-	aLabelColumn := CFMaSettingsBaselineColumn new
+	aLabelColumn := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
 		addChild: aLabel;
 		yourself.
 	aLabelColumn constraintsDo: [ :c |
-		c grid horizontal weight: 1 ].
+		c linear weight: 1.
+		c linear vertical alignTop ].
 
 	aDescription hasComment ifTrue: [
 		aComment := self newCommentFor: aDescription.
 		aLabelColumn addChild: aComment ].
 
-	self prepareTrailingField: aFieldElement.
 	aFieldElement
 		hMatchParent;
+		vFitContent;
 		margin: BlInsets empty;
+		padding: BlInsets empty;
 		constraintsDo: [ :c |
-			c grid horizontal weight: 1 ].
+			c linear weight: 1.
+			c linear vertical alignTop ].
 
-	aRow := BrHorizontalGrid new
-		columnCount: 2;
-		cellSpacing: 0;
+	aRow := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		addAptitude: CFMaActiveSelectionAptitude new;
@@ -493,20 +494,45 @@ CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
 
 { #category : 'private - building' }
 CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
-	| anInputElement aLabel aCompletionStrategy |
-	anInputElement := aDescription blocStencil
-		ifNotNil: [ :aStencil |
-			aStencil
-				memento: self memento;
-				description: aDescription;
-				asElement ]
-		ifNil: [
-			CFMaSettingsMemoEditorElement new
-				fieldViewModel: (GtMagritteFieldViewModel new
-					memento: self memento;
-					description: aDescription) ].
+	| anEditor aLabel aCompletionStrategy |
+	anEditor := BrEditor new
+		inputFilter: BrTextEditorNoInputFilter new;
+		aptitude: (aDescription editorAptitude
+			ifNil: [ BrGlamorousRegularEditorAptitude new fontSize: 13 ]
+			ifNotNil: #value);
+		hMatchParent;
+		vFitContent;
+		padding: BlInsets empty;
+		margin: BlInsets empty;
+		yourself.
 
-	self addShortcutsTo: anInputElement using: aDescription.
+	aDescription isReadOnly
+		ifTrue: [ anEditor beReadOnlyWithSelection ]
+		ifFalse: [ anEditor beEditable ].
+
+	anEditor
+		withAsyncSinkDo: [ :anElementSink |
+			anElementSink
+				sink: AsyncPeekSink new;
+				whenUpdate: [ :theEditor :aSink |
+					| aValue aText |
+					aValue := aSink value currentValue.
+					aText := aValue ifNil: [ '' ] ifNotNil: [ aValue asString ].
+					theEditor text characters = aText asRopedText characters
+						ifFalse: [ theEditor text: aText ] ].
+			(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+
+	aDescription isReadOnly ifFalse: [
+		anEditor editor
+			when: BrTextEditorModifiedEvent
+			do: [ :anEvent |
+				GtMagritteBuilderUtility
+					writeText: anEvent text
+					using: aDescription
+					memento: self memento
+					element: anEditor ] ].
+
+	self addShortcutsTo: anEditor using: aDescription.
 
 	aDescription blocCompletion ifNotNil: [ :aStencil |
 		aCompletionStrategy := aStencil
@@ -514,17 +540,17 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 			description: aDescription;
 			build.
 		(GtCompletionController
-			on: anInputElement
+			on: anEditor
 			strategy: aCompletionStrategy) install ].
 
 	aLabel := self newFieldLabelFor: aDescription.
-	self configureTabStopFor: anInputElement using: aDescription.
+	self configureTabStopFor: anEditor using: aDescription.
 	self
 		addMemoLabel: aLabel
-		field: anInputElement
+		field: anEditor
 		for: aDescription
 		to: (self containerForDescription: aDescription).
-	^ anInputElement
+	^ anEditor
 ]
 
 { #category : 'private - composition' }

@@ -167,30 +167,21 @@ CFMaPresentationExamples >> settingsCommentEditor [
 	^ anEditor
 ]
 
+
+
 { #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsMemoEditorAllowsLineBreaks [
+CFMaPresentationExamples >> settingsMemoEditor [
 	<gtExample>
 	| anEditor |
-	anEditor := CFMaSettingsMemoEditorElement new.
+	anEditor := BrEditor new
+		inputFilter: BrTextEditorNoInputFilter new;
+		aptitude: (BrGlamorousRegularEditorAptitude new fontSize: 13);
+		hMatchParent;
+		vFitContent;
+		padding: BlInsets empty;
+		margin: BlInsets empty;
+		yourself.
+	self assert: anEditor class equals: BrEditor.
 	self assert: anEditor inputFilter class equals: BrTextEditorNoInputFilter.
 	^ anEditor
-]
-
-{ #category : 'examples - settings' }
-CFMaPresentationExamples >> settingsMemoUsesGridBaselineAlignment [
-	<gtExample>
-	| aColumn anEditor |
-	aColumn := CFMaSettingsBaselineColumn new
-		addChild: (BrLabel new
-			text: 'Summary';
-			aptitude: (BrGlamorousLabelAptitude new fontSize: 13);
-			fitContent);
-		yourself.
-	anEditor := CFMaSettingsMemoEditorElement new.
-
-	self assert: aColumn supportsBaseline.
-	self assert: anEditor supportsBaseline.
-	self assert: aColumn constraints grid vertical spec alignment equals: BlGridAlignment undefined.
-	self assert: anEditor constraints grid vertical spec alignment equals: BlGridAlignment undefined.
-	^ { aColumn. anEditor }
 ]
