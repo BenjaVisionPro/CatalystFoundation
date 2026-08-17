@@ -483,6 +483,7 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 	^ BrEditor new
 		aptitude: BrGlamorousRegularEditorAptitude new;
 		beReadOnlyWithoutSelection;
+		focusability: BlFocusability none;
 		text: (aDescription comment asRopedText
 			foreground: self secondaryTextColor;
 			fontSize: 11);

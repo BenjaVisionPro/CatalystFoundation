@@ -275,3 +275,15 @@ CFMaPresentationExamples >> settingsMemoKeepsNativeEditorFocusability [
 	self assert: anEditor focusability equals: BlFocusability block.
 	^ anEditor
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsCommentIsNotATabStop [
+	<gtExample>
+	| aComment |
+	aComment := BrEditor new
+		beReadOnlyWithoutSelection;
+		focusability: BlFocusability none;
+		yourself.
+	self assert: aComment focusability equals: BlFocusability none.
+	^ aComment
+]
