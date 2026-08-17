@@ -8,11 +8,14 @@ Class {
 
 { #category : 'default' }
 CFMaSettingsCommentAptitude >> defaultLabelElement [
-	^ CFMaMultilineTextElement new
+	| anElement |
+	anElement := CFMaMultilineTextElement new
 		text: 'Label' asRopedText;
 		tightMeasurement;
-		hMatchParent;
-		vFitContent;
 		padding: BlInsets empty;
-		yourself
+		yourself.
+	anElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c vertical fitContent ].
+	^ anElement
 ]
