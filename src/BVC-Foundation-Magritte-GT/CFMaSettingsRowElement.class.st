@@ -44,12 +44,11 @@ CFMaSettingsRowElement >> label: aLabel comment: aComment field: aField multilin
 
 { #category : 'private - building' }
 CFMaSettingsRowElement >> buildStandard [
-	| aContent aLeading aTrailing |
+	| aContent aLeading |
 	(label isNil and: [ comment isNil ]) ifTrue: [
 		field
 			hMatchParent;
-			vFitContent;
-			margin: BlInsets empty.
+			vFitContent.
 		self addChild: field.
 		^ self ].
 
@@ -60,24 +59,8 @@ CFMaSettingsRowElement >> buildStandard [
 	label ifNotNil: [ aLeading addChild: label ].
 	comment ifNotNil: [ aLeading addChild: comment ].
 
-	aTrailing := BrFrame new
-		hFitContent;
-		vFitContent;
-		margin: ((field isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ BlInsets right: self trailingControlInset ]
-			ifFalse: [ BlInsets empty ]);
-		padding: BlInsets empty;
-		addChild: field;
-		yourself.
-	field constraintsDo: [ :c |
-		c frame horizontal alignRight.
-		c frame vertical alignCenter ].
-	aTrailing constraintsDo: [ :c |
-		c ignoreByLayout.
-		c ignored horizontal alignRight.
-		(field isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ c ignored vertical alignCenter ]
-			ifFalse: [ c ignored vertical alignTop ] ].
+	(field isKindOf: CFMaSettingsBooleanElement)
+		ifTrue: [ field margin: (BlInsets right: self editorTextHorizontalInset) ].
 
 	aContent := BrFrame new
 		hMatchParent;
@@ -85,11 +68,16 @@ CFMaSettingsRowElement >> buildStandard [
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		addChild: aLeading;
-		addChild: aTrailing;
+		addChild: field;
 		yourself.
+
 	aLeading constraintsDo: [ :c |
 		c frame horizontal alignLeft.
 		c frame vertical alignTop ].
+	field constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignCenter ].
+
 	self addChild: aContent
 ]
 
@@ -218,10 +206,6 @@ CFMaSettingsRowElement >> topInset [
 	^ 1
 ]
 
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> trailingControlInset [
-	^ self horizontalInset + self editorTextHorizontalInset
-]
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> wrappedColumnGap [

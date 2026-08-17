@@ -287,3 +287,50 @@ CFMaPresentationExamples >> settingsSectionOwnsCardSpacing [
 	self assert: aSection class equals: CFMaSettingsSectionElement.
 	^ aSection
 ]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsStandardRowDoesNotIgnoreTrailingField [
+	<gtExample>
+	| aRow aLabel aField aContent |
+	aLabel := BrLabel new
+		text: 'Label';
+		aptitude: BrGlamorousLabelAptitude new;
+		fitContent;
+		yourself.
+	aField := BrEditor new
+		hExact: 80;
+		vExact: 24;
+		yourself.
+	aRow := CFMaSettingsRowElement new
+		label: aLabel
+		comment: nil
+		field: aField
+		multiline: false;
+		yourself.
+
+	aContent := aRow children first.
+	self assert: aContent children includes: aField.
+	self assert: aField constraints isIgnoredByLayout not.
+	^ aRow
+]
+
+{ #category : 'examples - settings' }
+CFMaPresentationExamples >> settingsBooleanUsesSharedRightTextInset [
+	<gtExample>
+	| aRow aLabel aField |
+	aLabel := BrLabel new
+		text: 'Enabled';
+		aptitude: BrGlamorousLabelAptitude new;
+		fitContent;
+		yourself.
+	aField := CFMaSettingsBooleanElement new.
+	aRow := CFMaSettingsRowElement new
+		label: aLabel
+		comment: nil
+		field: aField
+		multiline: false;
+		yourself.
+
+	self assert: aField margin right equals: aRow editorTextHorizontalInset.
+	^ aRow
+]
