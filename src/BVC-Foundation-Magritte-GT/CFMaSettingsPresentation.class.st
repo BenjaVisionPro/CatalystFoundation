@@ -89,6 +89,12 @@ CFMaSettingsPresentation >> fieldBaselineOffset [
 ]
 
 { #category : 'private - metrics' }
+CFMaSettingsPresentation >> editorTextHorizontalInset [
+	"Match BrEditor>>initialize horizontal text padding without affecting memo vertical alignment."
+	^ 5
+]
+
+{ #category : 'private - metrics' }
 CFMaSettingsPresentation >> sectionHorizontalInset [
 	^ 6
 ]
@@ -282,7 +288,7 @@ CFMaSettingsPresentation >> addSeparatorTo: aContainer [
 		vExact: 1;
 		padding: (BlInsets
 			left: self rowHorizontalInset
-			right: self rowHorizontalInset);
+			right: self rowHorizontalInset + self editorTextHorizontalInset);
 		addChild: aSeparator;
 		yourself.
 
@@ -357,7 +363,7 @@ CFMaSettingsPresentation >> addMemoLabel: aLabel field: aFieldElement for: aDesc
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
-		padding: BlInsets empty.
+		padding: (BlInsets right: self editorTextHorizontalInset).
 
 	aFieldColumn := BrFrame new
 		hMatchParent;
