@@ -70,7 +70,7 @@ CFMaSettingsIconElement >> gradientShadowFor: aColor [
 
 { #category : 'private - appearance' }
 CFMaSettingsIconElement >> defaultBackgroundColor [
-	^ Color black alpha: 0.4
+	^ Color black alpha: 0.45
 ]
 
 { #category : 'private - metrics' }
