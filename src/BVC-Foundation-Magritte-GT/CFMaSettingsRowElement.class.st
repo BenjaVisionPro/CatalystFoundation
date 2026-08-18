@@ -59,6 +59,7 @@ CFMaSettingsRowElement >> updatePadding [
 { #category : 'initialization' }
 CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField multiline: aBoolean [
 	icon := anIcon.
+	self updatePadding.
 	label := aLabel.
 	comment := aComment.
 	field := aField.
@@ -270,7 +271,9 @@ CFMaSettingsRowElement >> iconGap [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> bottomInset [
-	^ 6
+	^ icon
+		ifNil: [ 6 ]
+		ifNotNil: [ 5 ]
 ]
 
 { #category : 'private - metrics' }
@@ -316,7 +319,9 @@ CFMaSettingsRowElement >> standardEditorTrailingAdjustment [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> topInset [
-	^ 5
+	^ icon
+		ifNil: [ 5 ]
+		ifNotNil: [ 4 ]
 ]
 
 

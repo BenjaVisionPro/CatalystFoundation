@@ -18,7 +18,7 @@ CFMaSettingsIconElement >> initialize [
 		clipChildren: true;
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
-			effectWidth: 2;
+			effectWidth: 1.5;
 			raiseBorderInside;
 			yourself)
 ]
