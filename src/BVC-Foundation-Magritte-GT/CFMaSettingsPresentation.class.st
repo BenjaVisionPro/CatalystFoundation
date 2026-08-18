@@ -221,8 +221,10 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multili
 	aRow := CFMaSettingsRowElement new.
 	aRow
 		icon: (metadata icon ifNotNil: [ :anIcon |
-			CFMaSettingsIconElement new
-				icon: anIcon background: metadata iconBackground;
+			CFIconTile new
+				icon: anIcon;
+				background: metadata iconBackground;
+				beMedium;
 				yourself ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment
