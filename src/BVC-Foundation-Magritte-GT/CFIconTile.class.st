@@ -1,4 +1,4 @@
-"I present icon content inside Foundation's square icon chrome. I am presentation-neutral: callers choose my size and supply the icon and optional background colour."
+"I present icon content inside Foundation's square icon chrome. I am presentation-neutral: callers choose my size and supply an icon that understands #color: and #fitInto:."
 
 Class {
 	#name : 'CFIconTile',
@@ -14,6 +14,12 @@ Class {
 	#tag : 'Widgets'
 }
 
+
+{ #category : 'initialization' }
+CFIconTile >> defaultGeometry [
+	^ BlRoundedRectangleGeometry new
+]
+
 { #category : 'initialization' }
 CFIconTile >> initialize [
 	super initialize.
@@ -27,8 +33,7 @@ CFIconTile >> initialize [
 		border: BlBorder empty;
 		clipChildren: true;
 		addAptitude: lightBorderAptitude;
-		beMedium.
-	self updateTileBackground
+		beMedium
 ]
 
 { #category : 'sizing' }
@@ -50,18 +55,20 @@ CFIconTile >> beLarge [
 CFIconTile >> size: aNumber [
 	tileSize := aNumber asFloat.
 	super size: tileSize @ tileSize.
-	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
+	self geometry cornerRadius: self cornerRadius.
 	lightBorderAptitude effectWidth: self borderWidth.
-	self updateIconSize.
+	iconElement ifNotNil: [ iconElement fitInto: self iconExtent ].
+	self background: (self backgroundPaintFor: backgroundColor).
 	^ self
 ]
 
 { #category : 'accessing' }
 CFIconTile >> icon: anIconElement [
 	iconElement ifNotNil: [ self removeChild: iconElement ].
-	iconElement := anIconElement.
-	self applyIconColorTo: iconElement.
-	self updateIconSize.
+	iconElement := anIconElement
+		color: Color white;
+		fitInto: self iconExtent;
+		yourself.
 	iconElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
@@ -69,49 +76,21 @@ CFIconTile >> icon: anIconElement [
 	^ self
 ]
 
-
-{ #category : 'private - appearance' }
-CFIconTile >> applyIconColorTo: anElement [
-	(anElement respondsTo: #color:) ifTrue: [ anElement color: Color white ].
-	(anElement respondsTo: #children) ifTrue: [
-		anElement children do: [ :aChild | self applyIconColorTo: aChild ] ]
-]
-
-
-{ #category : 'hooks - layout' }
-CFIconTile >> onLayout: aBounds context: aBlElementBoundsUpdateContext [
-	super onLayout: aBounds context: aBlElementBoundsUpdateContext.
-	iconElement ifNotNil: [ self applyIconColorTo: iconElement ]
-]
-
 { #category : 'accessing' }
 CFIconTile >> backgroundColor: aColor [
 	backgroundColor := aColor.
-	self updateTileBackground.
+	self background: (self backgroundPaintFor: backgroundColor).
 	^ self
-]
-
-{ #category : 'private - updating' }
-CFIconTile >> updateIconSize [
-	iconElement ifNil: [ ^ self ].
-	(iconElement respondsTo: #fitInto:) ifTrue: [ iconElement fitInto: self iconExtent ]
-]
-
-{ #category : 'private - updating' }
-CFIconTile >> updateTileBackground [
-	self background: (self backgroundPaintFor: backgroundColor)
 ]
 
 { #category : 'private - appearance' }
 CFIconTile >> backgroundPaintFor: aColor [
 	| aBaseColor |
-	aBaseColor := aColor ifNil: [ self defaultBackgroundColor ].
-	aBaseColor := self appearanceBaseColorFor: aBaseColor.
+	aBaseColor := self appearanceBaseColorFor: (aColor ifNil: [ self defaultBackgroundColor ]).
 	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
 		from: (self gradientShadowFor: aBaseColor)
 		to: (self gradientHighlightFor: aBaseColor)
 ]
-
 
 { #category : 'private - appearance' }
 CFIconTile >> appearanceBaseColorFor: aColor [
@@ -151,7 +130,6 @@ CFIconTile >> gradientShadowFor: aColor [
 
 { #category : 'private - appearance' }
 CFIconTile >> defaultBackgroundColor [
-	"Use an opaque neutral base so the tile has the same appearance regardless of the background behind it. This is the opaque equivalent of 45% black over white."
 	^ Color r: 140 g: 140 b: 140 range: 255
 ]
 

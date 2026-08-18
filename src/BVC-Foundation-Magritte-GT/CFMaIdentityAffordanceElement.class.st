@@ -109,30 +109,54 @@ CFMaIdentityAffordanceElement >> descriptionHandling: aSelector [
 
 { #category : 'private - building' }
 CFMaIdentityAffordanceElement >> buildIconEditor [
-	| aDescription anEditor anIconTile |
+	| aDescription anIconTile |
 	iconContainer removeChildren.
 	aDescription := self descriptionHandling: #icon.
 	aDescription ifNil: [ ^ self ].
 
-	anEditor := aDescription isReadOnly
-		ifTrue: [
-			GtMagritteBuilderUtility
-				newIconWithMemento: memento
-				using: aDescription ]
-		ifFalse: [
-			FontAwesomeIconFieldStencilBuilder new
-				memento: memento;
-				description: aDescription;
-				asElement ].
-
 	anIconTile := CFIconTile new
-		icon: anEditor;
 		beLarge;
 		yourself.
 	anIconTile constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
-	iconContainer addChild: anIconTile
+	self bindIconTile: anIconTile using: aDescription.
+	iconContainer addChild: anIconTile.
+
+	aDescription isReadOnly ifFalse: [
+		iconContainer addChild: (self newIconFieldFor: aDescription) ]
+]
+
+{ #category : 'private - binding' }
+CFMaIdentityAffordanceElement >> bindIconTile: anIconTile using: aDescription [
+	anIconTile withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :aTile :aSink |
+				| aValue anIcon |
+				aValue := aSink value currentValue.
+				anIcon := aDescription blocStencil
+					model: aValue;
+					description: aDescription;
+					memento: memento;
+					asElement.
+				aTile icon: anIcon ].
+
+		(memento readObservableValueUsing: aDescription) observe: anElementSink ]
+]
+
+{ #category : 'private - building' }
+CFMaIdentityAffordanceElement >> newIconFieldFor: aDescription [
+	^ FontAwesomeIconFieldElement new
+		fieldViewModel: (GtMagritteFieldViewModel new
+			memento: memento;
+			description: aDescription;
+			yourself);
+		opacity: 0;
+		hMatchParent;
+		vMatchParent;
+		padding: BlInsets empty;
+		yourself
 ]
 
 { #category : 'private - binding' }
