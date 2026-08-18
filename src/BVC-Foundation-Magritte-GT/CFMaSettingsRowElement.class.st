@@ -123,7 +123,7 @@ CFMaSettingsRowElement >> buildStandard [
 		yourself.
 	icon ifNotNil: [
 		icon
-			size: 16 @ 16;
+			size: 20 @ 20;
 			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
 		aContent addChild: icon ].
 	aContent
@@ -170,7 +170,7 @@ CFMaSettingsRowElement >> buildMultiline [
 		yourself.
 	icon ifNotNil: [
 		icon
-			size: 16 @ 16;
+			size: 20 @ 20;
 			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
 		topLine addChild: icon ].
 	topLine
