@@ -14,9 +14,11 @@ CFMaSettingsIconElement >> initialize [
 	self
 		size: self tileExtent;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius);
+		border: BlBorder empty;
 		clipChildren: true;
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
+			effectWidth: 2;
 			raiseBorderInside;
 			yourself)
 ]
@@ -39,13 +41,13 @@ CFMaSettingsIconElement >> icon: anIcon background: aColor [
 { #category : 'private - appearance' }
 CFMaSettingsIconElement >> defaultBackgroundPaint [
 	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-		from: (Color black alpha: 0.34)
-		to: (Color black alpha: 0.26)
+		from: (Color black alpha: 0.42)
+		to: (Color black alpha: 0.18)
 ]
 
 { #category : 'private - metrics' }
 CFMaSettingsIconElement >> tileExtent [
-	^ 32 @ 32
+	^ 28 @ 28
 ]
 
 { #category : 'private - metrics' }
