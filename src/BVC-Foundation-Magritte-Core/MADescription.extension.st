@@ -54,11 +54,22 @@ MADescription >> icon: anIcon [
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
+MADescription >> iconBackground [
+	^ self propertyAt: #cfIconBackground ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> iconBackground: aColor [
+	^ self propertyAt: #cfIconBackground put: aColor
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
 MADescription >> fieldMetadataFor: anObject [
 	| contextualMetadata |
 	contextualMetadata := anObject fieldMetadataFor: self.
 	^ CFFieldMetadata new
 		icon: (contextualMetadata icon ifNil: [ self icon ]);
+		iconBackground: (contextualMetadata iconBackground ifNil: [ self iconBackground ]);
 		badges: contextualMetadata badges;
 		information: contextualMetadata information;
 		yourself

@@ -3,6 +3,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'icon',
+		'iconBackground',
 		'badges',
 		'information'
 	],
@@ -18,6 +19,17 @@ CFFieldMetadata >> icon [
 { #category : 'accessing' }
 CFFieldMetadata >> icon: anIcon [
 	icon := anIcon
+]
+
+
+{ #category : 'accessing' }
+CFFieldMetadata >> iconBackground [
+	^ iconBackground
+]
+
+{ #category : 'accessing' }
+CFFieldMetadata >> iconBackground: aColor [
+	iconBackground := aColor
 ]
 
 { #category : 'accessing' }

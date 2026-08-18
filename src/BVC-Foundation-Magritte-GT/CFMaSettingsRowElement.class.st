@@ -122,9 +122,7 @@ CFMaSettingsRowElement >> buildStandard [
 		padding: BlInsets empty;
 		yourself.
 	icon ifNotNil: [
-		icon
-			size: 20 @ 20;
-			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
+		icon margin: (BlInsets top: self labelVerticalAdjustment right: self iconGap).
 		aContent addChild: icon ].
 	aContent
 		addChild: aLeading;
@@ -169,9 +167,7 @@ CFMaSettingsRowElement >> buildMultiline [
 		clipChildren: false;
 		yourself.
 	icon ifNotNil: [
-		icon
-			size: 20 @ 20;
-			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
+		icon margin: (BlInsets top: self labelVerticalAdjustment right: self iconGap).
 		topLine addChild: icon ].
 	topLine
 		addChild: labelColumn;
@@ -265,6 +261,11 @@ CFMaSettingsRowElement >> useWrappedMultilineArrangement [
 		constraintsDo: [ :c |
 			c linear weight: 1.
 			c linear vertical alignTop ]
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> iconGap [
+	^ 10
 ]
 
 { #category : 'private - metrics' }

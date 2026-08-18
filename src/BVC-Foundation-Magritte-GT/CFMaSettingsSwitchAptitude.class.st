@@ -11,6 +11,11 @@ Class {
 	#tag : 'Presentations-Settings'
 }
 
+{ #category : 'defaults' }
+CFMaSettingsSwitchAptitude class >> activeTrackColor [
+	^ Color r: 10 g: 132 b: 255 range: 255
+]
+
 { #category : 'initialization' }
 CFMaSettingsSwitchAptitude >> initialize [
 	super initialize.
@@ -35,7 +40,7 @@ CFMaSettingsSwitchAptitude >> initialize [
 	self deactivated: [ :aStyle |
 		aStyle background: (Color r: 220 g: 220 b: 220 range: 255) ].
 	self activated: [ :aStyle |
-		aStyle background: (Color r: 10 g: 132 b: 255 range: 255) ]
+		aStyle background: self class activeTrackColor ]
 ]
 
 { #category : 'event handling' }

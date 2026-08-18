@@ -265,6 +265,7 @@ CFMaFormShowcase >> priorityDescription [
 		accessor: #priority;
 		label: 'Priority';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
 		path: #(values);
