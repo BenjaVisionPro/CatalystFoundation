@@ -14,15 +14,10 @@ Class {
 	#tag : 'Widgets'
 }
 
-
-{ #category : 'initialization' }
-CFIconTile >> defaultGeometry [
-	^ BlRoundedRectangleGeometry new
-]
-
 { #category : 'initialization' }
 CFIconTile >> initialize [
 	super initialize.
+	self geometry: BlRoundedRectangleGeometry new.
 	backgroundColor := nil.
 	lightBorderAptitude := CFLightBorderAptitude new
 		beFlat;
