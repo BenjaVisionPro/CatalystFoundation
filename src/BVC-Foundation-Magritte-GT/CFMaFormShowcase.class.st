@@ -264,7 +264,7 @@ CFMaFormShowcase >> priorityDescription [
 	^ MANumberDescription new
 		accessor: #priority;
 		label: 'Priority';
-		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
 		path: #(values);
