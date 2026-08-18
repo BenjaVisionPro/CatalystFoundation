@@ -129,7 +129,7 @@ CFMaSettingsRowElement >> buildStandard [
 	icon ifNotNil: [
 		comment
 			ifNil: [
-				icon margin: (BlInsets top: 1 right: self iconGap bottom: 0 left: 0).
+				icon margin: (BlInsets top: 0 right: self iconGap bottom: 0 left: 0).
 				icon constraintsDo: [ :c | c linear vertical alignCenter ] ]
 			ifNotNil: [
 				icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: 0 left: 0).
