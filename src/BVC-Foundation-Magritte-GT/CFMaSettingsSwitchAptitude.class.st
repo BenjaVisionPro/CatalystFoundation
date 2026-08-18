@@ -16,6 +16,11 @@ CFMaSettingsSwitchAptitude class >> activeTrackColor [
 	^ Color r: 10 g: 132 b: 255 range: 255
 ]
 
+{ #category : 'defaults' }
+CFMaSettingsSwitchAptitude class >> inactiveTrackColor [
+	^ Color r: 220 g: 220 b: 220 range: 255
+]
+
 { #category : 'initialization' }
 CFMaSettingsSwitchAptitude >> initialize [
 	super initialize.
@@ -37,8 +42,10 @@ CFMaSettingsSwitchAptitude >> initialize [
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
 		addChangeAddChildAs: #(cfSettingsSwitchThumb) with: [ thumb ].
 
+	self default: [ :aStyle |
+		aStyle background: self class inactiveTrackColor ].
 	self deactivated: [ :aStyle |
-		aStyle background: (Color r: 220 g: 220 b: 220 range: 255) ].
+		aStyle background: self class inactiveTrackColor ].
 	self activated: [ :aStyle |
 		aStyle background: self class activeTrackColor ]
 ]
