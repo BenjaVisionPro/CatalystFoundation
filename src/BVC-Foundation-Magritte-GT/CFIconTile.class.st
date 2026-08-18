@@ -28,7 +28,7 @@ CFIconTile >> initialize [
 		clipChildren: true;
 		addAptitude: lightBorderAptitude;
 		beMedium.
-	self updateBackground
+	self updateTileBackground
 ]
 
 { #category : 'sizing' }
@@ -70,9 +70,9 @@ CFIconTile >> icon: anIconElement [
 ]
 
 { #category : 'accessing' }
-CFIconTile >> background: aColor [
+CFIconTile >> backgroundColor: aColor [
 	backgroundColor := aColor.
-	self updateBackground.
+	self updateTileBackground.
 	^ self
 ]
 
@@ -83,8 +83,8 @@ CFIconTile >> updateIconSize [
 ]
 
 { #category : 'private - updating' }
-CFIconTile >> updateBackground [
-	super background: (self backgroundPaintFor: backgroundColor)
+CFIconTile >> updateTileBackground [
+	self background: (self backgroundPaintFor: backgroundColor)
 ]
 
 { #category : 'private - appearance' }

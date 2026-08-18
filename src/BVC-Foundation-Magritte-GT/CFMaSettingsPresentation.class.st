@@ -223,7 +223,7 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multili
 		icon: (metadata icon ifNotNil: [ :anIcon |
 			CFIconTile new
 				icon: anIcon;
-				background: metadata iconBackground;
+				backgroundColor: metadata iconBackground;
 				beMedium;
 				yourself ])
 		label: (self newFieldLabelFor: aDescription)
