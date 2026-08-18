@@ -26,9 +26,7 @@ CFMaSettingsIconElement >> initialize [
 { #category : 'accessing' }
 CFMaSettingsIconElement >> icon: anIcon background: aColor [
 	| anIconElement |
-	self background: (aColor
-		ifNil: [ self defaultBackgroundPaint ]
-		ifNotNil: [ aColor ]).
+	self background: (self backgroundPaintFor: aColor).
 	anIconElement := anIcon.
 	(anIconElement respondsTo: #color:) ifTrue: [ anIconElement color: Color white ].
 	(anIconElement respondsTo: #fitInto:) ifTrue: [ anIconElement fitInto: self iconExtent ].
@@ -36,6 +34,16 @@ CFMaSettingsIconElement >> icon: anIcon background: aColor [
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	self addChild: anIconElement
+]
+
+{ #category : 'private - appearance' }
+CFMaSettingsIconElement >> backgroundPaintFor: aColor [
+	^ aColor
+		ifNil: [ self defaultBackgroundPaint ]
+		ifNotNil: [
+			(BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
+				from: aColor lighter
+				to: aColor darker ]
 ]
 
 { #category : 'private - appearance' }
