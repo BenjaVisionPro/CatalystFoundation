@@ -19,6 +19,7 @@ CFMaSettingsIconElement >> initialize [
 		addAptitude: (CFLightBorderAptitude new
 			beFlat;
 			effectWidth: 1.5;
+			intensity: 0.5;
 			raiseBorderInside;
 			yourself)
 ]
