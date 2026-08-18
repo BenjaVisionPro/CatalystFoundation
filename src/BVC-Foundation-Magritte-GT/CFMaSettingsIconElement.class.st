@@ -42,8 +42,8 @@ CFMaSettingsIconElement >> backgroundPaintFor: aColor [
 	| aBaseColor |
 	aBaseColor := aColor ifNil: [ self defaultBackgroundColor ].
 	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-		from: (self gradientHighlightFor: aBaseColor)
-		to: (self gradientShadowFor: aBaseColor)
+		from: (self gradientShadowFor: aBaseColor)
+		to: (self gradientHighlightFor: aBaseColor)
 ]
 
 { #category : 'private - appearance' }
