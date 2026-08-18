@@ -77,6 +77,13 @@ CFIconTile >> applyIconColorTo: anElement [
 		anElement children do: [ :aChild | self applyIconColorTo: aChild ] ]
 ]
 
+
+{ #category : 'hooks - layout' }
+CFIconTile >> onLayout: aBounds context: aBlElementBoundsUpdateContext [
+	super onLayout: aBounds context: aBlElementBoundsUpdateContext.
+	iconElement ifNotNil: [ self applyIconColorTo: iconElement ]
+]
+
 { #category : 'accessing' }
 CFIconTile >> backgroundColor: aColor [
 	backgroundColor := aColor.
