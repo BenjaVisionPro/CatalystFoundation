@@ -136,6 +136,117 @@ CFMaFormShowcase >> initialize [
 	gridPhlowItems := { alpha. beta. gamma }
 ]
 
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> editableLabelOnlyDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Editable label only';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 1;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> readOnlyLabelOnlyDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Read only label only';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 2;
+		beReadOnly;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> editableLabelAndCommentDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Editable label + comment';
+		comment: 'Secondary information for the field.';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 3;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> readOnlyLabelAndCommentDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Read only label + comment';
+		comment: 'Secondary information for the field.';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 4;
+		beReadOnly;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> editableIconAndLabelDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Editable icon + label';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		group: 'Fields';
+		path: #(presentation);
+		priority: 5;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> readOnlyIconAndLabelDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Read only icon + label';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		group: 'Fields';
+		path: #(presentation);
+		priority: 6;
+		beReadOnly;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> editableIconLabelAndCommentDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Editable icon + label + comment';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
+		comment: 'Secondary information for the field.';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 7;
+		yourself
+]
+
+{ #category : 'descriptions - fields - presentation variants' }
+CFMaFormShowcase >> readOnlyIconLabelAndCommentDescription [
+	<magritteDescription>
+	^ MAStringDescription new
+		accessor: #text;
+		label: 'Read only icon + label + comment';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
+		comment: 'Secondary information for the field.';
+		group: 'Fields';
+		path: #(presentation);
+		priority: 8;
+		beReadOnly;
+		yourself
+]
+
 { #category : 'accessing' }
 CFMaFormShowcase >> text [
 	^ text
