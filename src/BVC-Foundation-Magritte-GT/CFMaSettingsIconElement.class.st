@@ -41,8 +41,30 @@ CFMaSettingsIconElement >> backgroundPaintFor: aColor [
 	| aBaseColor |
 	aBaseColor := aColor ifNil: [ self defaultBackgroundColor ].
 	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-		from: aBaseColor lighter lighter
-		to: aBaseColor darker darker
+		from: (self gradientHighlightFor: aBaseColor)
+		to: (self gradientShadowFor: aBaseColor)
+]
+
+{ #category : 'private - appearance' }
+CFMaSettingsIconElement >> gradientHighlightFor: aColor [
+	| strength |
+	strength := 0.35.
+	^ Color
+		r: aColor red + ((1.0 - aColor red) * strength)
+		g: aColor green + ((1.0 - aColor green) * strength)
+		b: aColor blue + ((1.0 - aColor blue) * strength)
+		alpha: aColor alpha
+]
+
+{ #category : 'private - appearance' }
+CFMaSettingsIconElement >> gradientShadowFor: aColor [
+	| strength |
+	strength := 0.30.
+	^ Color
+		r: aColor red * (1.0 - strength)
+		g: aColor green * (1.0 - strength)
+		b: aColor blue * (1.0 - strength)
+		alpha: aColor alpha
 ]
 
 { #category : 'private - appearance' }
