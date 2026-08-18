@@ -59,10 +59,10 @@ CFMaSettingsRowElement >> updatePadding [
 { #category : 'initialization' }
 CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField multiline: aBoolean [
 	icon := anIcon.
-	self updatePadding.
 	label := aLabel.
 	comment := aComment.
 	field := aField.
+	self updatePadding.
 	multiline := aBoolean.
 	multiline
 		ifTrue: [ self buildMultiline ]
@@ -129,10 +129,10 @@ CFMaSettingsRowElement >> buildStandard [
 	icon ifNotNil: [
 		comment
 			ifNil: [
-				icon margin: (BlInsets top: 2 right: self iconGap bottom: -2 left: 0).
+				icon margin: (BlInsets top: 2 right: self iconGap bottom: 0 left: 0).
 				icon constraintsDo: [ :c | c linear vertical alignCenter ] ]
 			ifNotNil: [
-				icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: -2 left: 0).
+				icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: 0 left: 0).
 				icon constraintsDo: [ :c | c linear vertical alignTop ] ].
 		aContent addChild: icon ].
 	aContent
@@ -178,7 +178,7 @@ CFMaSettingsRowElement >> buildMultiline [
 		clipChildren: false;
 		yourself.
 	icon ifNotNil: [
-		icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: -2 left: 0).
+		icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: 0 left: 0).
 		topLine addChild: icon ].
 	topLine
 		addChild: labelColumn;
@@ -281,9 +281,9 @@ CFMaSettingsRowElement >> iconGap [
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> bottomInset [
-	^ icon
-		ifNil: [ 6 ]
-		ifNotNil: [ 5 ]
+	icon ifNil: [ ^ 6 ].
+	comment ifNil: [ ^ 3 ].
+	^ 5
 ]
 
 { #category : 'private - metrics' }
