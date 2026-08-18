@@ -88,7 +88,9 @@ CFMaSettingsRowElement >> buildStandard [
 	comment ifNotNil: [ aLeading addChild: comment ].
 	aLeading constraintsDo: [ :c |
 		c linear weight: 1.
-		c linear vertical alignTop ].
+		comment
+			ifNil: [ c linear vertical alignCenter ]
+			ifNotNil: [ c linear vertical alignTop ] ].
 
 	field
 		hFitContent;
@@ -109,7 +111,9 @@ CFMaSettingsRowElement >> buildStandard [
 		addChild: field;
 		yourself.
 	aTrailing constraintsDo: [ :c |
-		c linear vertical alignTop ].
+		comment
+			ifNil: [ c linear vertical alignCenter ]
+			ifNotNil: [ c linear vertical alignTop ] ].
 	field constraintsDo: [ :c |
 		c frame horizontal alignRight.
 		(field isKindOf: CFMaSettingsBooleanElement)
@@ -123,7 +127,8 @@ CFMaSettingsRowElement >> buildStandard [
 		padding: BlInsets empty;
 		yourself.
 	icon ifNotNil: [
-		icon margin: (BlInsets top: self labelVerticalAdjustment right: self iconGap).
+		icon margin: (BlInsets right: self iconGap).
+		icon constraintsDo: [ :c | c linear vertical alignCenter ].
 		aContent addChild: icon ].
 	aContent
 		addChild: aLeading;
