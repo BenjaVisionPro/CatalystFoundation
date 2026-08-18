@@ -60,13 +60,21 @@ CFIconTile >> size: aNumber [
 CFIconTile >> icon: anIconElement [
 	iconElement ifNotNil: [ self removeChild: iconElement ].
 	iconElement := anIconElement.
-	(iconElement respondsTo: #color:) ifTrue: [ iconElement color: Color white ].
+	self applyIconColorTo: iconElement.
 	self updateIconSize.
 	iconElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	self addChild: iconElement.
 	^ self
+]
+
+
+{ #category : 'private - appearance' }
+CFIconTile >> applyIconColorTo: anElement [
+	(anElement respondsTo: #color:) ifTrue: [ anElement color: Color white ].
+	(anElement respondsTo: #children) ifTrue: [
+		anElement children do: [ :aChild | self applyIconColorTo: aChild ] ]
 ]
 
 { #category : 'accessing' }
