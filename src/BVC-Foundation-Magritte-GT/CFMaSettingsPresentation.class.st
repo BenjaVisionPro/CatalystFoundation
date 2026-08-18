@@ -216,9 +216,11 @@ CFMaSettingsPresentation >> prepareField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multiline: aBoolean [
-	| aRow |
+	| aRow metadata |
+	metadata := aDescription fieldMetadataFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
 	aRow
+		icon: metadata icon
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment
 			ifTrue: [ self newCommentFor: aDescription ]
@@ -263,6 +265,7 @@ CFMaSettingsPresentation >> addElement: anElement for: aDescription [
 	| aRow |
 	aRow := CFMaSettingsRowElement new.
 	aRow
+		icon: nil
 		label: nil
 		comment: nil
 		field: anElement
@@ -275,6 +278,7 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 	| aRow |
 	aRow := CFMaSettingsRowElement new.
 	aRow
+		icon: nil
 		label: nil
 		comment: nil
 		field: anElement

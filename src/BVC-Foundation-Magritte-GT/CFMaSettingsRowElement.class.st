@@ -2,6 +2,7 @@ Class {
 	#name : 'CFMaSettingsRowElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
+		'icon',
 		'label',
 		'comment',
 		'field',
@@ -56,7 +57,8 @@ CFMaSettingsRowElement >> updatePadding [
 ]
 
 { #category : 'initialization' }
-CFMaSettingsRowElement >> label: aLabel comment: aComment field: aField multiline: aBoolean [
+CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField multiline: aBoolean [
+	icon := anIcon.
 	label := aLabel.
 	comment := aComment.
 	field := aField.
@@ -118,9 +120,15 @@ CFMaSettingsRowElement >> buildStandard [
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
-		addChild: aLeading;
-		addChild: aTrailing;
 		yourself.
+	icon ifNotNil: [
+		icon
+			size: 16 @ 16;
+			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
+		aContent addChild: icon ].
+	aContent
+		addChild: aLeading;
+		addChild: aTrailing.
 
 	self addChild: aContent
 ]
@@ -159,9 +167,15 @@ CFMaSettingsRowElement >> buildMultiline [
 		hMatchParent;
 		vFitContent;
 		clipChildren: false;
-		addChild: labelColumn;
-		addChild: fieldColumn;
 		yourself.
+	icon ifNotNil: [
+		icon
+			size: 16 @ 16;
+			margin: (BlInsets top: self labelVerticalAdjustment right: 8).
+		topLine addChild: icon ].
+	topLine
+		addChild: labelColumn;
+		addChild: fieldColumn.
 	self addChild: topLine.
 	comment ifNotNil: [ self addChild: comment ].
 

@@ -241,6 +241,7 @@ CFMaFormShowcase >> enabledDescription [
 	^ MABooleanDescription new
 		accessor: #enabled;
 		label: 'Enabled';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		group: 'Fields';
 		path: #(values);
 		priority: 50;
@@ -263,6 +264,7 @@ CFMaFormShowcase >> priorityDescription [
 	^ MANumberDescription new
 		accessor: #priority;
 		label: 'Priority';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
 		path: #(values);
@@ -289,6 +291,7 @@ CFMaFormShowcase >> statusDescription [
 	^ MASingleOptionDescription new
 		accessor: #status;
 		label: 'Status';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		group: 'Fields';
 		path: #(values);
 		priority: 70;
