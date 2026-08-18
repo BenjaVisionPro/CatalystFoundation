@@ -127,8 +127,13 @@ CFMaSettingsRowElement >> buildStandard [
 		padding: BlInsets empty;
 		yourself.
 	icon ifNotNil: [
-		icon margin: (BlInsets right: self iconGap).
-		icon constraintsDo: [ :c | c linear vertical alignCenter ].
+		comment
+			ifNil: [
+				icon margin: (BlInsets right: self iconGap).
+				icon constraintsDo: [ :c | c linear vertical alignCenter ] ]
+			ifNotNil: [
+				icon margin: (BlInsets top: self labelVerticalAdjustment right: self iconGap).
+				icon constraintsDo: [ :c | c linear vertical alignTop ] ].
 		aContent addChild: icon ].
 	aContent
 		addChild: aLeading;
