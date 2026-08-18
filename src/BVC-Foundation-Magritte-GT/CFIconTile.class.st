@@ -91,9 +91,25 @@ CFIconTile >> updateTileBackground [
 CFIconTile >> backgroundPaintFor: aColor [
 	| aBaseColor |
 	aBaseColor := aColor ifNil: [ self defaultBackgroundColor ].
+	aBaseColor := self appearanceBaseColorFor: aBaseColor.
 	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
 		from: (self gradientShadowFor: aBaseColor)
 		to: (self gradientHighlightFor: aBaseColor)
+]
+
+
+{ #category : 'private - appearance' }
+CFIconTile >> appearanceBaseColorFor: aColor [
+	| strength |
+	strength := tileSize > self mediumSize
+		ifTrue: [ 0.10 ]
+		ifFalse: [ 0.0 ].
+	strength = 0.0 ifTrue: [ ^ aColor ].
+	^ Color
+		r: aColor red + ((1.0 - aColor red) * strength)
+		g: aColor green + ((1.0 - aColor green) * strength)
+		b: aColor blue + ((1.0 - aColor blue) * strength)
+		alpha: aColor alpha
 ]
 
 { #category : 'private - appearance' }
