@@ -38,19 +38,16 @@ CFMaSettingsIconElement >> icon: anIcon background: aColor [
 
 { #category : 'private - appearance' }
 CFMaSettingsIconElement >> backgroundPaintFor: aColor [
-	^ aColor
-		ifNil: [ self defaultBackgroundPaint ]
-		ifNotNil: [
-			(BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-				from: aColor lighter
-				to: aColor darker ]
+	| aBaseColor |
+	aBaseColor := aColor ifNil: [ self defaultBackgroundColor ].
+	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
+		from: aBaseColor lighter
+		to: aBaseColor darker
 ]
 
 { #category : 'private - appearance' }
-CFMaSettingsIconElement >> defaultBackgroundPaint [
-	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-		from: (Color black alpha: 0.42)
-		to: (Color black alpha: 0.18)
+CFMaSettingsIconElement >> defaultBackgroundColor [
+	^ Color black alpha: 0.3
 ]
 
 { #category : 'private - metrics' }
