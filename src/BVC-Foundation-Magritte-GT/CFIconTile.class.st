@@ -17,7 +17,6 @@ Class {
 { #category : 'initialization' }
 CFIconTile >> initialize [
 	super initialize.
-	self geometry: BlRoundedRectangleGeometry new.
 	backgroundColor := nil.
 	lightBorderAptitude := CFLightBorderAptitude new
 		beFlat;
@@ -50,7 +49,7 @@ CFIconTile >> beLarge [
 CFIconTile >> size: aNumber [
 	tileSize := aNumber asFloat.
 	super size: tileSize @ tileSize.
-	self geometry cornerRadius: self cornerRadius.
+	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
 	lightBorderAptitude effectWidth: self borderWidth.
 	iconElement ifNotNil: [ iconElement fitInto: self iconExtent ].
 	self background: (self backgroundPaintFor: backgroundColor).
