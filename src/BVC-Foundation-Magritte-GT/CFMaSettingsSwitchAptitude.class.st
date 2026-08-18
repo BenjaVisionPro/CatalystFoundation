@@ -50,6 +50,18 @@ CFMaSettingsSwitchAptitude >> initialize [
 		aStyle background: self class activeTrackColor ]
 ]
 
+
+{ #category : 'initialization' }
+CFMaSettingsSwitchAptitude >> initializeListeners [
+	super initializeListeners.
+	self
+		when: BrToggleActivatedEvent
+		do: [ :anEvent | self toggleActivated ].
+	self
+		when: BrToggleDeactivatedEvent
+		do: [ :anEvent | self toggleDeactivated ]
+]
+
 { #category : 'event handling' }
 CFMaSettingsSwitchAptitude >> toggleActivated [
 	thumb constraintsDo: [ :c | c frame horizontal alignRight ]
