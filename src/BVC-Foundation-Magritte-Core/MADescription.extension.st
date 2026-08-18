@@ -53,6 +53,17 @@ MADescription >> icon: anIcon [
 	^ self propertyAt: #cfIcon put: anIcon
 ]
 
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> iconSize [
+	^ self propertyAt: #cfIconSize ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> iconSize: aNumber [
+	^ self propertyAt: #cfIconSize put: aNumber
+]
+
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> iconBackground [
 	^ self propertyAt: #cfIconBackground ifAbsent: [ nil ]

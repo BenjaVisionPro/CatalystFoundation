@@ -20,8 +20,8 @@ CFMaIdentityAffordanceElement >> initialize [
 	super initialize.
 
 	iconContainer := BrFrame new
-		hExact: 36;
-		vExact: 36;
+		hExact: 44;
+		vExact: 44;
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.
@@ -109,7 +109,7 @@ CFMaIdentityAffordanceElement >> descriptionHandling: aSelector [
 
 { #category : 'private - building' }
 CFMaIdentityAffordanceElement >> buildIconEditor [
-	| aDescription anEditor |
+	| aDescription anEditor anIconTile |
 	iconContainer removeChildren.
 	aDescription := self descriptionHandling: #icon.
 	aDescription ifNil: [ ^ self ].
@@ -125,10 +125,14 @@ CFMaIdentityAffordanceElement >> buildIconEditor [
 				description: aDescription;
 				asElement ].
 
-	anEditor constraintsDo: [ :c |
+	anIconTile := CFIconTile new
+		icon: anEditor;
+		beLarge;
+		yourself.
+	anIconTile constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
-	iconContainer addChild: anEditor
+	iconContainer addChild: anIconTile
 ]
 
 { #category : 'private - binding' }
