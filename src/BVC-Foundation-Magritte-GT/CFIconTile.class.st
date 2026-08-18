@@ -120,7 +120,8 @@ CFIconTile >> gradientShadowFor: aColor [
 
 { #category : 'private - appearance' }
 CFIconTile >> defaultBackgroundColor [
-	^ Color black alpha: 0.45
+	"Use an opaque neutral base so the tile has the same appearance regardless of the background behind it. This is the opaque equivalent of 45% black over white."
+	^ Color r: 140 g: 140 b: 140 range: 255
 ]
 
 { #category : 'private - sizing' }
