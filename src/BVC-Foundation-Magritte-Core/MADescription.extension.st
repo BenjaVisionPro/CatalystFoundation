@@ -55,16 +55,6 @@ MADescription >> icon: anIcon [
 
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> iconSize [
-	^ self propertyAt: #cfIconSize ifAbsent: [ nil ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> iconSize: aNumber [
-	^ self propertyAt: #cfIconSize put: aNumber
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
 MADescription >> iconBackground [
 	^ self propertyAt: #cfIconBackground ifAbsent: [ nil ]
 ]
@@ -75,13 +65,61 @@ MADescription >> iconBackground: aColor [
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> fieldMetadataFor: anObject [
-	| contextualMetadata |
-	contextualMetadata := anObject fieldMetadataFor: self.
-	^ CFFieldMetadata new
-		icon: (contextualMetadata icon ifNil: [ self icon ]);
-		iconBackground: (contextualMetadata iconBackground ifNil: [ self iconBackground ]);
-		badges: contextualMetadata badges;
-		information: contextualMetadata information;
-		yourself
+MADescription >> iconFor: anObject [
+	| aValue |
+	aValue := self icon.
+	aValue ifNil: [ ^ nil ].
+	^ (aValue isBlock or: [ aValue isSymbol ])
+		ifTrue: [ aValue cull: anObject cull: self ]
+		ifFalse: [ aValue ]
 ]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> iconBackgroundFor: anObject [
+	| aValue |
+	aValue := self iconBackground.
+	aValue ifNil: [ ^ nil ].
+	^ (aValue isBlock or: [ aValue isSymbol ])
+		ifTrue: [ aValue cull: anObject cull: self ]
+		ifFalse: [ aValue ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> badges [
+	^ self propertyAt: #cfBadges ifAbsent: [ #() ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> badges: aValue [
+	^ self propertyAt: #cfBadges put: aValue
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> badgesFor: anObject [
+	| aValue |
+	aValue := self badges.
+	^ (aValue isBlock or: [ aValue isSymbol ])
+		ifTrue: [ aValue cull: anObject cull: self ]
+		ifFalse: [ aValue ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> information [
+	^ self propertyAt: #cfInformation ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> information: aValue [
+	^ self propertyAt: #cfInformation put: aValue
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> informationFor: anObject [
+	| aValue |
+	aValue := self information.
+	aValue ifNil: [ ^ nil ].
+	^ (aValue isBlock or: [ aValue isSymbol ])
+		ifTrue: [ aValue cull: anObject cull: self ]
+		ifFalse: [ aValue ]
+]
+

@@ -6,7 +6,7 @@ Class {
 		'label',
 		'comment',
 		'field',
-		'fieldState',
+		'trailingActions',
 		'multiline',
 		'labelColumn',
 		'fieldColumn',
@@ -25,6 +25,7 @@ CFMaSettingsRowElement >> initialize [
 	super initialize.
 	multiline := false.
 	wrappedMultiline := false.
+	trailingActions := #().
 	cardTopInset := 0.
 	cardBottomInset := 0.
 	self
@@ -57,22 +58,13 @@ CFMaSettingsRowElement >> updatePadding [
 		right: self trailingInset)
 ]
 
-{ #category : 'accessing' }
-CFMaSettingsRowElement >> fieldState [
-	^ fieldState
-]
-
-{ #category : 'accessing' }
-CFMaSettingsRowElement >> fieldState: aFieldState [
-	fieldState := aFieldState
-]
-
 { #category : 'initialization' }
-CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField multiline: aBoolean [
+CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField trailingActions: aCollection multiline: aBoolean [
 	icon := anIcon.
 	label := aLabel.
 	comment := aComment.
 	field := aField.
+	trailingActions := aCollection ifNil: [ #() ].
 	self updatePadding.
 	multiline := aBoolean.
 	multiline
@@ -117,22 +109,24 @@ CFMaSettingsRowElement >> buildStandard [
 		bottom: 0
 		left: 0).
 
-	aTrailing := BrFrame new
+	aTrailing := BrHorizontalPane new
 		hFitContent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		addChild: field;
 		yourself.
+	trailingActions do: [ :anAction |
+		anAction constraintsDo: [ :c | c linear vertical alignCenter ].
+		aTrailing addChild: anAction ].
 	aTrailing constraintsDo: [ :c |
 		comment
 			ifNil: [ c linear vertical alignCenter ]
 			ifNotNil: [ c linear vertical alignTop ] ].
 	field constraintsDo: [ :c |
-		c frame horizontal alignRight.
-		(field isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ c frame vertical alignCenter ]
-			ifFalse: [ c frame vertical alignTop ] ].
+		comment
+			ifNil: [ c linear vertical alignCenter ]
+			ifNotNil: [ c linear vertical alignTop ] ].
 
 	aContent := BrHorizontalPane new
 		hMatchParent;
@@ -197,6 +191,9 @@ CFMaSettingsRowElement >> buildMultiline [
 	topLine
 		addChild: labelColumn;
 		addChild: fieldColumn.
+	trailingActions do: [ :anAction |
+		anAction constraintsDo: [ :c | c linear vertical alignTop ].
+		topLine addChild: anAction ].
 	self addChild: topLine.
 	comment ifNotNil: [ self addChild: comment ].
 

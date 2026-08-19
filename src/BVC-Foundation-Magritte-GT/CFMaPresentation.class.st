@@ -7,8 +7,7 @@ Class {
 		'hostElement',
 		'containersByGroup',
 		'ungroupedContainer',
-		'identityAffordanceEmitted',
-		'fieldStatesByDescription'
+		'identityAffordanceEmitted'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -19,20 +18,9 @@ Class {
 CFMaPresentation >> initialize [
 	super initialize.
 	containersByGroup := Dictionary new.
-	fieldStatesByDescription := IdentityDictionary new.
 	identityAffordanceEmitted := false
 ]
 
-
-{ #category : 'private - field state' }
-CFMaPresentation >> fieldStateFor: aDescription [
-	^ fieldStatesByDescription
-		at: aDescription
-		ifAbsentPut: [
-			CFMaFieldState
-				memento: self memento
-				description: aDescription ]
-]
 
 { #category : 'private - building' }
 CFMaPresentation >> addBooleanField: aDescription [
@@ -113,7 +101,6 @@ CFMaPresentation >> addStringFieldUsing: aDescription [
 CFMaPresentation >> build [
 	identityAffordanceEmitted := false.
 	containersByGroup removeAll.
-	fieldStatesByDescription removeAll.
 	ungroupedContainer := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].
 	^ super build
@@ -145,7 +132,6 @@ CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
 { #category : 'elements' }
 CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel aText aLabelAptitude |
-	self fieldStateFor: aDescription.
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude

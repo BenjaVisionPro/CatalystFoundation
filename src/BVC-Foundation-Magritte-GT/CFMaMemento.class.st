@@ -103,3 +103,14 @@ CFMaMemento >> reset [
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
 ]
+
+{ #category : 'actions' }
+CFMaMemento >> revertUsing: aDescription [
+	| anObservable aValue aFuture |
+	anObservable := self readObservableValueUsing: aDescription.
+	aValue := anObservable valueOrNil.
+	aFuture := (self validatorUsing: aDescription) observeNext next.
+	anObservable value: (aValue copyWithCurrentValue: aValue originalValue).
+	^ aFuture
+]
+

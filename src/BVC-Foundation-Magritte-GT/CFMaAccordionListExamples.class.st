@@ -64,7 +64,7 @@ CFMaAccordionListExamples >> accordionRelationElement [
 		description: aDescription;
 		asElement.
 
-	self assert: anElement class equals: GtMagritteValidatedFieldElement.
+	self assert: (anElement isKindOf: GtMagritteValidatedFieldElement) not.
 	^ anElement
 ]
 

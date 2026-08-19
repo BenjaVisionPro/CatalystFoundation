@@ -17,11 +17,8 @@ CFMaListElementStencilBuilder >> buildDefault [
 	aFlowElement := CFMaBuilderUtility
 		newFlowListMemento: self memento
 		using: self description.
-	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: aFlowElement;
+	aFlowElement
 		hMatchParent;
-		vFitContent;
-		yourself
+		vFitContent.
+	^ aFlowElement
 ]

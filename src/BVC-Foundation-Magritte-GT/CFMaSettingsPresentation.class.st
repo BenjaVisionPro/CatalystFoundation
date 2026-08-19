@@ -217,26 +217,22 @@ CFMaSettingsPresentation >> prepareField: aFieldElement [
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multiline: aBoolean [
-	| aRow metadata |
-	metadata := aDescription fieldMetadataFor: self memento model.
+	| aRow anIcon |
+	anIcon := aDescription iconFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
-	aRow fieldState: (self fieldStateFor: aDescription).
 	aRow
-		icon: (metadata icon ifNotNil: [ :anIcon |
-			| anIconTile |
-			anIconTile := CFIconTile new
+		icon: (anIcon ifNotNil: [
+			CFIconTile new
 				icon: anIcon;
-				backgroundColor: metadata iconBackground;
-				yourself.
-			aDescription iconSize
-				ifNil: [ anIconTile beMedium ]
-				ifNotNil: [ :aSize | anIconTile size: aSize ].
-			anIconTile ])
+				backgroundColor: (aDescription iconBackgroundFor: self memento model);
+				beMedium;
+				yourself ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment
 			ifTrue: [ self newCommentFor: aDescription ]
 			ifFalse: [ nil ])
 		field: (self prepareField: aFieldElement)
+		trailingActions: (self newRowActionsFor: aDescription)
 		multiline: aBoolean.
 	^ aRow
 ]
@@ -420,3 +416,81 @@ CFMaSettingsPresentation >> visitBooleanDescription: aDescription [
 
 	self addFieldElement: aBooleanElement using: aDescription
 ]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newRowActionsFor: aDescription [
+	| theActions information |
+	theActions := OrderedCollection new.
+	aDescription isWithChangeIndicator ifTrue: [
+		theActions add: (self newRevertActionFor: aDescription) ].
+	theActions add: (self newValidationActionFor: aDescription).
+	information := aDescription informationFor: self memento model.
+	information ifNotNil: [
+		theActions add: (self newInformationActionFor: information) ].
+	^ theActions
+]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
+	| anIcon |
+	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
+	anIcon
+		color: (Color black alpha: 0.48);
+		fitInto: 16 @ 16.
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		icon: anIcon;
+		hExact: 24;
+		vExact: 24;
+		margin: (BlInsets left: 4);
+		yourself
+]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newRevertActionFor: aDescription [
+	| aButton |
+	aButton := self newRowActionButtonIconNamed: #undo.
+	aButton
+		label: 'Revert to saved value';
+		action: [ self memento revertUsing: aDescription ];
+		visibility: BlVisibility gone.
+	aButton withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink value isChanged
+					ifTrue: [ anElement visibility: BlVisibility visible ]
+					ifFalse: [ anElement visibility: BlVisibility gone ] ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	^ aButton
+]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newValidationActionFor: aDescription [
+	| aButton |
+	aButton := self newRowActionButtonIconNamed: #exclamationCircle.
+	aButton
+		label: 'Validation failed';
+		visibility: BlVisibility gone.
+	aButton withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				| aValidationResult |
+				aValidationResult := aSink value.
+				aValidationResult isSuccess
+					ifTrue: [ anElement visibility: BlVisibility gone ]
+					ifFalse: [ anElement
+						label: aValidationResult issuesDescription;
+						visibility: BlVisibility visible ] ].
+		(self memento validatorUsing: aDescription) observe: anElementSink ].
+	^ aButton
+]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newInformationActionFor: information [
+	^ (self newRowActionButtonIconNamed: #infoCircle)
+		label: information asString;
+		yourself
+]
+

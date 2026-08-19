@@ -21,11 +21,5 @@ CFMaAccordionListElementStencilBuilder >> buildDefault [
 		vFitContent;
 		background: Color transparent.
 
-	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: anAccordionElement;
-		hMatchParent;
-		vFitContent;
-		yourself
+	^ anAccordionElement
 ]

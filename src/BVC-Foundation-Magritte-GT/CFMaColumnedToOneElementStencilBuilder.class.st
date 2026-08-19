@@ -14,12 +14,9 @@ CFMaColumnedToOneElementStencilBuilder >> buildDefault [
 	(self memento isNil or: [ self description isNil ])
 		ifTrue: [ ^ BrFrame new fitContent ].
 
-	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: (CFMaBuilderUtility
-			newColumnedListToOneMemento: self memento
-			using: self description);
+	^ (CFMaBuilderUtility
+		newColumnedListToOneMemento: self memento
+		using: self description)
 		hMatchParent;
 		vFitContentLimited;
 		yourself

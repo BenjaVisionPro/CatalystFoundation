@@ -19,11 +19,8 @@ CFMaGridElementStencilBuilder >> buildDefault [
 		newGridListMemento: self memento
 		using: self description.
 
-	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: aGridElement;
+	aGridElement
 		hMatchParent;
-		vFitContent;
-		yourself
+		vFitContent.
+	^ aGridElement
 ]

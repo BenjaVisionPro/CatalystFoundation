@@ -35,11 +35,6 @@ CFObject >> icon: anIcon [
 	icon := anIcon
 ]
 
-{ #category : 'presentation metadata' }
-CFObject >> fieldMetadataFor: aDescription [
-	^ CFFieldMetadata new
-]
-
 { #category : 'as yet unclassified' }
 CFObject >> iconDescription [
 	<magritteDescription>

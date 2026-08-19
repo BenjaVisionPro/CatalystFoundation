@@ -19,11 +19,8 @@ CFMaFiniteListElementStencilBuilder >> buildDefault [
 		newFiniteListMemento: self memento
 		using: self description.
 
-	^ GtMagritteValidatedFieldElement new
-		memento: self memento
-		description: self description
-		element: aListElement;
+	aListElement
 		hMatchParent;
-		vFitContent;
-		yourself
+		vFitContent.
+	^ aListElement
 ]
