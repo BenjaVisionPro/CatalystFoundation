@@ -97,24 +97,28 @@ CFMaSettingsRowElement >> buildStandard [
 
 	field
 		hFitContent;
-		vFitContent.
-	field margin: (BlInsets right: self contentTrailingInset).
+		vFitContent;
+		margin: (BlInsets
+			top: ((field isKindOf: CFMaSettingsBooleanElement)
+				ifTrue: [ 0 ]
+				ifFalse: [
+					comment
+						ifNil: [ self fieldVerticalAdjustment ]
+						ifNotNil: [ self labelVerticalAdjustment ] ])
+			right: self contentTrailingInset
+			bottom: 0
+			left: 0).
 
 	aTrailing := BrHorizontalPane new
 		hFitContent;
 		vFitContent;
-		margin: (BlInsets top: ((field isKindOf: CFMaSettingsBooleanElement)
-			ifTrue: [ 0 ]
-			ifFalse: [
-				comment
-					ifNil: [ self fieldVerticalAdjustment ]
-					ifNotNil: [ self labelVerticalAdjustment ] ]));
+		margin: BlInsets empty;
 		padding: BlInsets empty;
 		addChild: field;
 		yourself.
 	trailingActions do: [ :anAction |
 		anAction
-			margin: (BlInsets left: 4);
+			margin: (BlInsets top: self labelVerticalAdjustment left: 4);
 			constraintsDo: [ :c | c linear vertical alignCenter ].
 		aTrailing addChild: anAction ].
 	aTrailing constraintsDo: [ :c |
@@ -191,7 +195,7 @@ CFMaSettingsRowElement >> buildMultiline [
 		addChild: fieldColumn.
 	trailingActions do: [ :anAction |
 		anAction
-			margin: (BlInsets top: self fieldVerticalAdjustment left: 4);
+			margin: (BlInsets top: self labelVerticalAdjustment left: 4);
 			constraintsDo: [ :c | c linear vertical alignTop ].
 		topLine addChild: anAction ].
 	self addChild: topLine.
