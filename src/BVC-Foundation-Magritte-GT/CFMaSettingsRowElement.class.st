@@ -117,7 +117,9 @@ CFMaSettingsRowElement >> buildStandard [
 		addChild: field;
 		yourself.
 	trailingActions do: [ :anAction |
-		anAction constraintsDo: [ :c | c linear vertical alignCenter ].
+		anAction
+			margin: (BlInsets top: self rowActionVerticalAdjustment left: 4);
+			constraintsDo: [ :c | c linear vertical alignCenter ].
 		aTrailing addChild: anAction ].
 	aTrailing constraintsDo: [ :c |
 		comment
@@ -327,6 +329,11 @@ CFMaSettingsRowElement >> horizontalInset [
 	^ 8
 ]
 
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> rowActionVerticalAdjustment [
+	^ 4
+]
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> topInset [
