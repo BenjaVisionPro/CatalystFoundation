@@ -59,8 +59,8 @@ CFMaSettingsPresentation >> newSectionNamed: aGroup [
 			text: aGroup asString;
 			aptitude: (BrGlamorousLabelAptitude new
 				foreground: self primaryTextColor;
-				fontSize: 13;
-				bold);
+				fontSize: 14;
+				weightSemiBold);
 			fitContent;
 			margin: (BlInsets top: 22 right: 8 bottom: 8 left: 8);
 			yourself.
