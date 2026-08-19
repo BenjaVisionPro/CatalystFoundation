@@ -109,7 +109,10 @@ CFMaSettingsRowElement >> buildStandard [
 	field margin: (BlInsets
 		top: ((field isKindOf: CFMaSettingsBooleanElement)
 			ifTrue: [ 0 ]
-			ifFalse: [ self fieldVerticalAdjustment ])
+			ifFalse: [
+				comment
+					ifNil: [ self fieldVerticalAdjustment ]
+					ifNotNil: [ self labelVerticalAdjustment ] ])
 		right: self contentTrailingInset
 		bottom: 0
 		left: 0).
