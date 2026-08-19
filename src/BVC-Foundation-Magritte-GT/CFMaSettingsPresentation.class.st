@@ -62,7 +62,7 @@ CFMaSettingsPresentation >> newSectionNamed: aGroup [
 				fontSize: 14;
 				bold);
 			fitContent;
-			margin: (BlInsets top: 22 right: 8 bottom: 8 left: 8);
+			margin: (BlInsets top: 22 right: 8 bottom: 2 left: 8);
 			yourself.
 		aSection heading: aHeading ].
 	self hostElement addChild: aSection.
