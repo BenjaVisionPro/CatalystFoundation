@@ -276,6 +276,7 @@ CFMaSettingsPresentation >> addElement: anElement for: aDescription [
 		label: nil
 		comment: nil
 		field: anElement
+		trailingActions: #()
 		multiline: false.
 	self addRow: aRow for: aDescription
 ]
@@ -289,6 +290,7 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 		label: nil
 		comment: nil
 		field: anElement
+		trailingActions: #()
 		multiline: false.
 	aContainer addRow: aRow
 ]
