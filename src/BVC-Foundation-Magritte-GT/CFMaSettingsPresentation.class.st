@@ -201,7 +201,8 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 				top: 0
 				right: self editorTextHorizontalInset
 				bottom: 0
-				left: self editorTextHorizontalInset) ].
+				left: self editorTextHorizontalInset).
+		anEditor constraintsDo: [ :c | c minWidth: 0 ] ].
 	^ aFieldElement
 ]
 
