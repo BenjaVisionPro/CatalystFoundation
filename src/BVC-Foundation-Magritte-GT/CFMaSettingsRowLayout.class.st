@@ -92,7 +92,7 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 	labelHeight := aRow labelElement ifNil: [ 0 ] ifNotNil: [ aRow labelElement measuredHeight ].
 	primaryHeight := iconHeight max: actionsHeight.
 	primaryHeight := primaryHeight max: labelHeight.
-	(primaryHeight isZero or: [ editorHeight <= (labelHeight max: primaryHeight) * 1.5 ])
+	(primaryHeight isZero or: [ editorHeight <= ((labelHeight max: primaryHeight) * 1.5) ])
 		ifTrue: [ primaryHeight := primaryHeight max: editorHeight ].
 	contentHeight := primaryHeight max: labelsHeight.
 	contentHeight := contentHeight max: editorHeight.
@@ -132,7 +132,7 @@ CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUp
 	actionsHeight := actions ifNil: [ 0 ] ifNotNil: [ actions measuredHeight ].
 	primaryHeight := iconHeight max: actionsHeight.
 	primaryHeight := primaryHeight max: labelHeight.
-	(primaryHeight isZero or: [ editorHeight <= (labelHeight max: primaryHeight) * 1.5 ])
+	(primaryHeight isZero or: [ editorHeight <= ((labelHeight max: primaryHeight) * 1.5) ])
 		ifTrue: [ primaryHeight := primaryHeight max: editorHeight ].
 
 	labelsY := contentBounds top + ((primaryHeight - labelHeight) / 2 max: 0).
