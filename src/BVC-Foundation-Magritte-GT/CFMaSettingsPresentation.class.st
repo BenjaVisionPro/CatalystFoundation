@@ -216,7 +216,7 @@ CFMaSettingsPresentation >> prepareField: aFieldElement [
 ]
 
 { #category : 'private - composition' }
-CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multiline: aBoolean [
+CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
 	| aRow anIcon |
 	anIcon := aDescription iconFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
@@ -232,8 +232,7 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multili
 			ifTrue: [ self newCommentFor: aDescription ]
 			ifFalse: [ nil ])
 		field: (self prepareField: aFieldElement)
-		trailingActions: (self newRowActionsFor: aDescription)
-		multiline: aBoolean.
+		trailingActions: (self newRowActionsFor: aDescription).
 	^ aRow
 ]
 
@@ -276,8 +275,7 @@ CFMaSettingsPresentation >> addElement: anElement for: aDescription [
 		label: nil
 		comment: nil
 		field: anElement
-		trailingActions: #()
-		multiline: false.
+		trailingActions: #().
 	self addRow: aRow for: aDescription
 ]
 
@@ -290,8 +288,7 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 		label: nil
 		comment: nil
 		field: anElement
-		trailingActions: #()
-		multiline: false.
+		trailingActions: #().
 	aContainer addRow: aRow
 ]
 
@@ -301,8 +298,7 @@ CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
 	self
 		addRow: (self
 			newRowFor: aDescription
-			field: aFieldElement
-			multiline: false)
+			field: aFieldElement)
 		for: aDescription.
 	^ aFieldElement
 ]
@@ -372,8 +368,7 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 	self
 		addRow: (self
 			newRowFor: aDescription
-			field: anEditor
-			multiline: true)
+			field: anEditor)
 		for: aDescription.
 	^ anEditor
 ]

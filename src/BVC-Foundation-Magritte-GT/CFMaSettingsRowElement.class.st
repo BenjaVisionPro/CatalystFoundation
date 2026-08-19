@@ -7,11 +7,8 @@ Class {
 		'comment',
 		'field',
 		'trailingActions',
-		'multiline',
-		'labelColumn',
-		'fieldColumn',
-		'topLine',
-		'wrappedMultiline',
+		'labelsElement',
+		'actionsElement',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -23,19 +20,95 @@ Class {
 { #category : 'initialization' }
 CFMaSettingsRowElement >> initialize [
 	super initialize.
-	multiline := false.
-	wrappedMultiline := false.
 	trailingActions := #().
 	cardTopInset := 0.
 	cardBottomInset := 0.
 	self
 		hMatchParent;
 		vFitContent;
+		layout: CFMaSettingsRowLayout new;
 		updatePadding;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new
 ]
 
+{ #category : 'initialization' }
+CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField trailingActions: aCollection [
+	icon := anIcon.
+	label := aLabel.
+	comment := aComment.
+	field := aField.
+	trailingActions := aCollection ifNil: [ #() ].
+	self
+		updatePadding;
+		buildRegions
+]
+
+{ #category : 'private - building' }
+CFMaSettingsRowElement >> buildRegions [
+	self removeChildren.
+
+	labelsElement := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		yourself.
+	label ifNotNil: [ labelsElement addChild: label ].
+	comment ifNotNil: [ labelsElement addChild: comment ].
+
+	actionsElement := BrHorizontalPane new
+		hFitContent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		layoutDo: [ :aLayout | aLayout cellSpacing: self actionSpacing ];
+		yourself.
+	trailingActions do: [ :anAction |
+		anAction margin: BlInsets empty.
+		actionsElement addChild: anAction ].
+
+	field ifNotNil: [
+		field
+			margin: BlInsets empty;
+			clipChildren: false ].
+
+	icon ifNotNil: [ self addChild: icon ].
+	self addChild: labelsElement.
+	field ifNotNil: [ self addChild: field ].
+	self addChild: actionsElement
+]
+
+
+{ #category : 'testing - layout' }
+CFMaSettingsRowElement >> hasLabels [
+	^ label notNil or: [ comment notNil ]
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> iconElement [
+	^ icon
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> labelsElement [
+	^ labelsElement
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> labelElement [
+	^ label
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> editorElement [
+	^ field
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> actionsElement [
+	^ actionsElement
+]
 
 { #category : 'private - card geometry' }
 CFMaSettingsRowElement >> cardBottomInset: aNumber [
@@ -55,243 +128,27 @@ CFMaSettingsRowElement >> updatePadding [
 		top: self topInset + cardTopInset
 		left: self horizontalInset
 		bottom: self bottomInset + cardBottomInset
-		right: self trailingInset)
-]
-
-{ #category : 'initialization' }
-CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField trailingActions: aCollection multiline: aBoolean [
-	icon := anIcon.
-	label := aLabel.
-	comment := aComment.
-	field := aField.
-	trailingActions := aCollection ifNil: [ #() ].
-	self updatePadding.
-	multiline := aBoolean.
-	multiline
-		ifTrue: [ self buildMultiline ]
-		ifFalse: [ self buildStandard ]
-]
-
-{ #category : 'private - building' }
-CFMaSettingsRowElement >> buildStandard [
-	| aContent aLeading aTrailing |
-	(label isNil and: [ comment isNil ]) ifTrue: [
-		field
-			hMatchParent;
-			vFitContent.
-		self addChild: field.
-		^ self ].
-
-	aLeading := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		margin: (BlInsets top: self labelVerticalAdjustment);
-		yourself.
-	label ifNotNil: [ aLeading addChild: label ].
-	comment ifNotNil: [ aLeading addChild: comment ].
-	aLeading constraintsDo: [ :c |
-		c linear weight: 1.
-		comment
-			ifNil: [ c linear vertical alignCenter ]
-			ifNotNil: [ c linear vertical alignTop ] ].
-
-	field
-		hFitContent;
-		vFitContent;
-		margin: (BlInsets
-			top: ((field isKindOf: CFMaSettingsBooleanElement)
-				ifTrue: [ 0 ]
-				ifFalse: [
-					comment
-						ifNil: [ self fieldVerticalAdjustment ]
-						ifNotNil: [ self labelVerticalAdjustment ] ])
-			right: self contentTrailingInset
-			bottom: 0
-			left: 0).
-
-	aTrailing := BrHorizontalPane new
-		hFitContent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: BlInsets empty;
-		addChild: field;
-		yourself.
-	trailingActions do: [ :anAction |
-		anAction
-			margin: (BlInsets top: self labelVerticalAdjustment left: 4);
-			constraintsDo: [ :c | c linear vertical alignCenter ].
-		aTrailing addChild: anAction ].
-	aTrailing constraintsDo: [ :c |
-		comment
-			ifNil: [ c linear vertical alignCenter ]
-			ifNotNil: [ c linear vertical alignTop ] ].
-	field constraintsDo: [ :c |
-		comment
-			ifNil: [ c linear vertical alignCenter ]
-			ifNotNil: [ c linear vertical alignTop ] ].
-
-	aContent := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: BlInsets empty;
-		yourself.
-	icon ifNotNil: [
-		comment
-			ifNil: [
-				icon margin: (BlInsets top: 0 right: self iconGap bottom: 0 left: 0).
-				icon constraintsDo: [ :c | c linear vertical alignCenter ] ]
-			ifNotNil: [
-				icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: 0 left: 0).
-				icon constraintsDo: [ :c | c linear vertical alignTop ] ].
-		aContent addChild: icon ].
-	aContent
-		addChild: aLeading;
-		addChild: aTrailing.
-
-	self addChild: aContent
-]
-
-{ #category : 'private - building' }
-CFMaSettingsRowElement >> buildMultiline [
-	labelColumn := BrVerticalPane new
-		hFitContent;
-		vFitContent;
-		margin: (BlInsets top: self labelVerticalAdjustment);
-		yourself.
-	label ifNotNil: [ labelColumn addChild: label ].
-
-	field
-		hMatchParent;
-		vFitContent;
-		clipChildren: false;
-		margin: BlInsets empty;
-		padding: (BlInsets right: self contentTrailingInset).
-
-	fieldColumn := BrFrame new
-		hMatchParent;
-		vFitContent;
-		clipChildren: false;
-		margin: (BlInsets top: self fieldVerticalAdjustment);
-		padding: (BlInsets left: self compactFieldGap);
-		addChild: field;
-		yourself.
-	fieldColumn constraintsDo: [ :c |
-		c linear weight: 1.
-		c linear vertical alignTop ].
-	field constraintsDo: [ :c |
-		c frame vertical alignTop ].
-
-	topLine := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		clipChildren: false;
-		yourself.
-	icon ifNotNil: [
-		icon margin: (BlInsets top: self labelVerticalAdjustment + 2 right: self iconGap bottom: 0 left: 0).
-		topLine addChild: icon ].
-	topLine
-		addChild: labelColumn;
-		addChild: fieldColumn.
-	trailingActions do: [ :anAction |
-		anAction
-			margin: (BlInsets top: self labelVerticalAdjustment left: 4);
-			constraintsDo: [ :c | c linear vertical alignTop ].
-		topLine addChild: anAction ].
-	self addChild: topLine.
-	comment ifNotNil: [ self addChild: comment ].
-
-	self
-		when: BlElementExtentChangedEvent
-		do: [ :anEvent | self scheduleMultilineArrangementUpdate ].
-	field
-		when: BlElementExtentChangedEvent
-		do: [ :anEvent | self scheduleMultilineArrangementUpdate ].
-	self scheduleMultilineArrangementUpdate
-]
-
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> scheduleMultilineArrangementUpdate [
-	self enqueueTask: (BlTaskAction new action: [ self updateMultilineArrangement ])
-]
-
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> updateMultilineArrangement [
-	| shouldWrap |
-	shouldWrap := self shouldUseWrappedMultilineArrangement.
-	shouldWrap = wrappedMultiline ifTrue: [ ^ self ].
-
-	wrappedMultiline := shouldWrap.
-	wrappedMultiline
-		ifTrue: [ self useWrappedMultilineArrangement ]
-		ifFalse: [ self useCompactMultilineArrangement ]
-]
-
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> shouldUseWrappedMultilineArrangement [
-	| paragraphs availableWidth labelWidth fieldWidth requiredWidth |
-	paragraphs := field allChildrenBreadthFirstSelect: [ :each |
-		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
-	paragraphs isEmpty ifTrue: [ ^ false ].
-
-	"More than one paragraph represents explicit multiline content."
-	paragraphs size > 1 ifTrue: [ ^ true ].
-
-	availableWidth := (self extent x - self padding width) max: 0.
-	availableWidth <= 0 ifTrue: [ ^ false ].
-
-	labelWidth := label
-		ifNil: [ 0 ]
-		ifNotNil: [ label measuredWidth ].
-	fieldWidth := paragraphs first unwrappedWidth + field padding width.
-	requiredWidth := labelWidth + self compactFieldGap + fieldWidth.
-
-	^ requiredWidth > availableWidth
-]
-
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> useCompactMultilineArrangement [
-	comment ifNotNil: [
-		comment hasParent ifTrue: [
-			comment parent == self ifFalse: [
-				comment parent removeChild: comment.
-				self addChild: comment ] ] ].
-	labelColumn
-		hFitContent;
-		padding: BlInsets empty;
-		constraintsDo: [ :c |
-			c linear weight: 0.
-			c linear vertical alignTop ].
-	fieldColumn
-		padding: (BlInsets left: self compactFieldGap);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ]
-]
-
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> useWrappedMultilineArrangement [
-	comment ifNotNil: [
-		comment hasParent ifTrue: [
-			comment parent == labelColumn ifFalse: [
-				comment parent removeChild: comment.
-				labelColumn addChild: comment ] ] ].
-	labelColumn
-		hMatchParent;
-		padding: (BlInsets right: self wrappedColumnGap / 2);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ].
-	fieldColumn
-		padding: (BlInsets left: self wrappedColumnGap / 2);
-		constraintsDo: [ :c |
-			c linear weight: 1.
-			c linear vertical alignTop ]
+		right: self horizontalInset)
 ]
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> iconGap [
 	^ 10
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> fieldGap [
+	^ 12
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> actionsGap [
+	^ 4
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> actionSpacing [
+	^ 4
 ]
 
 { #category : 'private - metrics' }
@@ -302,46 +159,13 @@ CFMaSettingsRowElement >> bottomInset [
 ]
 
 { #category : 'private - metrics' }
-CFMaSettingsRowElement >> compactFieldGap [
-	^ 12
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> trailingInset [
-	^ 2
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> contentTrailingInset [
-	^ self horizontalInset - self trailingInset
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> labelVerticalAdjustment [
-	^ 1
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> fieldVerticalAdjustment [
-	^ -3
-]
-
-{ #category : 'private - metrics' }
 CFMaSettingsRowElement >> horizontalInset [
 	^ 8
 ]
-
-
 
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> topInset [
 	^ icon
 		ifNil: [ 5 ]
 		ifNotNil: [ 4 ]
-]
-
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> wrappedColumnGap [
-	^ 12
 ]
