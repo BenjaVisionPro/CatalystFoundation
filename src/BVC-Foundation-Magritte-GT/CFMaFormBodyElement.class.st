@@ -11,7 +11,7 @@ CFMaFormBodyElement >> initialize [
 	super initialize.
 	self magritte beFieldContainer.
 	self
-		padding: (BlInsets top: 5 right: 11 bottom: 7 left: 11);
+		padding: (BlInsets top: 2.5 right: 11 bottom: 3.5 left: 11);
 		cellSpacing: 7;
 		hMatchParent;
 		vFitContent
