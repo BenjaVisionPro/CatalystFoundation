@@ -6,6 +6,7 @@ Class {
 		'label',
 		'comment',
 		'field',
+		'fieldState',
 		'multiline',
 		'labelColumn',
 		'fieldColumn',
@@ -54,6 +55,16 @@ CFMaSettingsRowElement >> updatePadding [
 		left: self horizontalInset
 		bottom: self bottomInset + cardBottomInset
 		right: self trailingInset)
+]
+
+{ #category : 'accessing' }
+CFMaSettingsRowElement >> fieldState [
+	^ fieldState
+]
+
+{ #category : 'accessing' }
+CFMaSettingsRowElement >> fieldState: aFieldState [
+	fieldState := aFieldState
 ]
 
 { #category : 'initialization' }

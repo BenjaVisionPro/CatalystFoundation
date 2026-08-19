@@ -7,7 +7,8 @@ Class {
 		'hostElement',
 		'containersByGroup',
 		'ungroupedContainer',
-		'identityAffordanceEmitted'
+		'identityAffordanceEmitted',
+		'fieldStatesByDescription'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -18,13 +19,106 @@ Class {
 CFMaPresentation >> initialize [
 	super initialize.
 	containersByGroup := Dictionary new.
+	fieldStatesByDescription := IdentityDictionary new.
 	identityAffordanceEmitted := false
+]
+
+
+{ #category : 'private - field state' }
+CFMaPresentation >> fieldStateFor: aDescription [
+	^ fieldStatesByDescription
+		at: aDescription
+		ifAbsentPut: [
+			CFMaFieldState
+				memento: self memento
+				description: aDescription ]
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addBooleanField: aDescription [
+	| aCheckBoxElement aMemento aLabel |
+	aMemento := self memento.
+
+	aDescription blocStencil
+		ifNotNil: [ :stencil |
+			aCheckBoxElement := stencil
+				memento: aMemento;
+				description: aDescription;
+				asElement ]
+		ifNil: [
+			aCheckBoxElement := GtMagritteBooleanElement new
+				fieldViewModel: (GtMagritteFieldViewModel new
+					memento: aMemento;
+					description: aDescription) ].
+
+	aLabel := self addFieldElement: aCheckBoxElement using: aDescription.
+	aDescription hasCustomLabels ifTrue: [
+		aLabel padding: aLabel padding + (BlInsets top: self defaultSpacing) ]
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addDirectoryDropdown: aDescription [
+	| aButton |
+	aButton := GtMagritteBuilderUtility
+		newDirectoryDropdownMemento: self memento
+		using: aDescription.
+	self addFieldElement: aButton using: aDescription
+]
+
+{ #category : 'visiting-description' }
+CFMaPresentation >> addFileDropdown: aDescription [
+	| aButton |
+	aButton := GtMagritteBuilderUtility
+		newFileDropdownMemento: self memento
+		using: aDescription.
+	self addFieldElement: aButton using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addSingleOptionDropdownUsing: aDescription [
+	| aButton |
+	aButton := GtMagritteBuilderUtility
+		newSingleOptionDropdownMemento: self memento
+		using: aDescription.
+	self addShortcutsTo: aButton.
+	self addFieldElement: aButton using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addStringFieldUsing: aDescription [
+	| anInputElement aLabel |
+
+	aDescription blocStencil
+		ifNotNil: [ :stencil |
+			anInputElement := stencil
+				memento: self memento;
+				description: aDescription;
+				asElement ]
+		ifNil: [
+			anInputElement := GtMagritteBuilderUtility
+				newOneLineEditorWithMemento: self memento
+				using: aDescription ].
+
+	self addShortcutsTo: anInputElement using: aDescription.
+
+	aDescription blocCompletion ifNotNil: [ :aStencil |
+		| aCompletionStrategy |
+		aCompletionStrategy := aStencil
+			memento: self memento;
+			description: aDescription;
+			build.
+		(GtCompletionController on: anInputElement strategy: aCompletionStrategy) install ].
+
+	aLabel := self addFieldElement: anInputElement using: aDescription.
+	aLabel padding: aLabel padding + (BlInsets top: self defaultSpacing).
+	^ anInputElement
 ]
 
 { #category : 'api - building' }
 CFMaPresentation >> build [
 	identityAffordanceEmitted := false.
 	containersByGroup removeAll.
+	fieldStatesByDescription removeAll.
 	ungroupedContainer := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].
 	^ super build
@@ -56,6 +150,7 @@ CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
 { #category : 'elements' }
 CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 	| aLabel aText aLabelAptitude |
+	self fieldStateFor: aDescription.
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude

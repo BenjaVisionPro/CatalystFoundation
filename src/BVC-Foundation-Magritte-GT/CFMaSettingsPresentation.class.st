@@ -219,6 +219,7 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement multili
 	| aRow metadata |
 	metadata := aDescription fieldMetadataFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
+	aRow fieldState: (self fieldStateFor: aDescription).
 	aRow
 		icon: (metadata icon ifNotNil: [ :anIcon |
 			| anIconTile |
