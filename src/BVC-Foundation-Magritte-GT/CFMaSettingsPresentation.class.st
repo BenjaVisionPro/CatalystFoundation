@@ -440,8 +440,11 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 		color: (Color black alpha: 0.48);
 		fitInto: 16 @ 16.
 	^ BrButton new
-		aptitude: BrGlamorousButtonWithIconCircularAptitude;
+		aptitude: BrGlamorousButtonIconAptitude new
+			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
 		icon: anIcon;
+		background: Color transparent;
+		border: BlBorder empty;
 		hExact: 24;
 		vExact: 24;
 		margin: (BlInsets left: 4);
