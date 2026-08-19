@@ -86,31 +86,26 @@ CFMaPresentation >> addSingleOptionDropdownUsing: aDescription [
 
 { #category : 'private - building' }
 CFMaPresentation >> addStringFieldUsing: aDescription [
-	| anInputElement aLabel |
+	| aStencil anInputElement |
 
-	aDescription blocStencil
-		ifNotNil: [ :stencil |
-			anInputElement := stencil
-				memento: self memento;
-				description: aDescription;
-				asElement ]
-		ifNil: [
-			anInputElement := GtMagritteBuilderUtility
-				newOneLineEditorWithMemento: self memento
-				using: aDescription ].
+	aStencil := aDescription blocStencil
+		ifNil: [ GtMagritteStringEditorElementStencilBuilder new ].
+	anInputElement := aStencil
+		memento: self memento;
+		description: aDescription;
+		asElement.
 
 	self addShortcutsTo: anInputElement using: aDescription.
 
-	aDescription blocCompletion ifNotNil: [ :aStencil |
+	aDescription blocCompletion ifNotNil: [ :aCompletionStencil |
 		| aCompletionStrategy |
-		aCompletionStrategy := aStencil
+		aCompletionStrategy := aCompletionStencil
 			memento: self memento;
 			description: aDescription;
 			build.
 		(GtCompletionController on: anInputElement strategy: aCompletionStrategy) install ].
 
-	aLabel := self addFieldElement: anInputElement using: aDescription.
-	aLabel padding: aLabel padding + (BlInsets top: self defaultSpacing).
+	self addFieldElement: anInputElement using: aDescription.
 	^ anInputElement
 ]
 
