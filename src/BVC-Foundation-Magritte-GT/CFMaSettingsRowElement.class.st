@@ -113,7 +113,11 @@ CFMaSettingsRowElement >> buildRegions [
 				yourself) ].
 		editorColumn addChild: field ].
 	actionsElement childrenCount > 0 ifTrue: [
-		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
+		actionsElement margin: (BlInsets
+			top: 1
+			right: 0
+			bottom: 0
+			left: (field ifNil: [ 0 ] ifNotNil: [ self actionsGap ])).
 		editorColumn addChild: actionsElement ].
 
 	topLine := BrHorizontalPane new
