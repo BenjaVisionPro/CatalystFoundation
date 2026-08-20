@@ -60,7 +60,7 @@ CFMaSettingsRowElement >> buildRegions [
 		vMatchParent;
 		clipChildren: false;
 		margin: BlInsets empty;
-		padding: BlInsets empty;
+		padding: (BlInsets top: 4);
 		layoutDo: [ :aLayout | aLayout cellSpacing: self actionSpacing ];
 		yourself.
 	trailingActions do: [ :anAction |
