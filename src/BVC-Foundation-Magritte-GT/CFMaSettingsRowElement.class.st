@@ -8,6 +8,7 @@ Class {
 		'field',
 		'trailingActions',
 		'actionsElement',
+		'primaryLine',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -58,18 +59,38 @@ CFMaSettingsRowElement >> buildRegions [
 		anAction margin: BlInsets empty.
 		actionsElement addChild: anAction ].
 
-	label ifNotNil: [ label margin: BlInsets empty ].
+	primaryLine := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		layout: BlLinearLayout horizontal alignTopLeft;
+		yourself.
+
+	label ifNotNil: [
+		label
+			margin: BlInsets empty;
+			hFitContentLimited ].
 	comment ifNotNil: [ comment margin: BlInsets empty ].
 	field ifNotNil: [
 		field
 			margin: BlInsets empty;
 			clipChildren: false ].
 
-	icon ifNotNil: [ self addChild: icon ].
-	label ifNotNil: [ self addChild: label ].
-	comment ifNotNil: [ self addChild: comment ].
-	field ifNotNil: [ self addChild: field ].
-	self addChild: actionsElement
+	icon ifNotNil: [
+		icon margin: (BlInsets right: self iconGap).
+		primaryLine addChild: icon ].
+	label ifNotNil: [ primaryLine addChild: label ].
+	field ifNotNil: [
+		(label notNil or: [ comment notNil ]) ifTrue: [
+			field margin: (BlInsets left: self fieldGap) ].
+		primaryLine addChild: field ].
+	actionsElement childrenCount > 0 ifTrue: [
+		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
+		primaryLine addChild: actionsElement ].
+
+	self addChild: primaryLine.
+	comment ifNotNil: [ self addChild: comment ]
 ]
 
 { #category : 'testing - layout' }
@@ -100,6 +121,11 @@ CFMaSettingsRowElement >> editorElement [
 { #category : 'accessing - layout' }
 CFMaSettingsRowElement >> actionsElement [
 	^ actionsElement
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> primaryLineElement [
+	^ primaryLine
 ]
 
 { #category : 'private - card geometry' }

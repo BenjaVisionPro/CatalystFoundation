@@ -253,7 +253,7 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 		text: (aDescription comment asRopedText
 			foreground: self secondaryTextColor;
 			fontSize: 11);
-		hMatchParent;
+		hFitContentLimited;
 		vFitContent;
 		background: Color transparent;
 		border: BlBorder empty;
@@ -294,9 +294,6 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 
 { #category : 'elements' }
 CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
-	aFieldElement
-		hFitContentLimited;
-		vFitContent.
 	self configureTabStopFor: aFieldElement using: aDescription.
 	self
 		addRow: (self
@@ -314,7 +311,7 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 		aptitude: (aDescription editorAptitude
 			ifNil: [ BrGlamorousRegularEditorAptitude new glamorousRegularFontAndSize ]
 			ifNotNil: #value);
-		hMatchParent;
+		hFitContentLimited;
 		vFitContent;
 		padding: BlInsets empty;
 		margin: BlInsets empty;
