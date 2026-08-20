@@ -10,6 +10,7 @@ Class {
 		'actionsElement',
 		'primaryLine',
 		'flexibleSpace',
+		'commentRegion',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -49,6 +50,7 @@ CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aF
 CFMaSettingsRowElement >> buildRegions [
 	self removeChildren.
 	flexibleSpace := nil.
+	commentRegion := nil.
 
 	actionsElement := BrHorizontalPane new
 		hFitContent;
@@ -73,7 +75,15 @@ CFMaSettingsRowElement >> buildRegions [
 		label
 			margin: BlInsets empty;
 			hFitContentLimited ].
-	comment ifNotNil: [ comment margin: BlInsets empty ].
+	comment ifNotNil: [
+		comment margin: BlInsets empty.
+		commentRegion := BrVerticalPane new
+			hMatchParent;
+			vFitContent;
+			margin: BlInsets empty;
+			padding: BlInsets empty;
+			addChild: comment;
+			yourself ].
 	field ifNotNil: [
 		field
 			margin: BlInsets empty;
@@ -102,7 +112,7 @@ CFMaSettingsRowElement >> buildRegions [
 		primaryLine addChild: actionsElement ].
 
 	self addChild: primaryLine.
-	comment ifNotNil: [ self addChild: comment ]
+	commentRegion ifNotNil: [ self addChild: commentRegion ]
 ]
 
 { #category : 'testing - layout' }
@@ -123,6 +133,11 @@ CFMaSettingsRowElement >> labelElement [
 { #category : 'accessing - layout' }
 CFMaSettingsRowElement >> commentElement [
 	^ comment
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> commentRegionElement [
+	^ commentRegion
 ]
 
 { #category : 'accessing - layout' }

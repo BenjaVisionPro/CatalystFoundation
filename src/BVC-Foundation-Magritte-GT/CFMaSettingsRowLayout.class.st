@@ -81,7 +81,7 @@ CFMaSettingsRowLayout >> constrainResponsiveColumnsFor: aRow contentWidth: aCont
 { #category : 'private - geometry' }
 CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
 	| comment iconWidth actionsWidth commentWidth commentY hasFreeHorizontalSpace |
-	comment := aRow commentElement.
+	comment := aRow commentRegionElement.
 	comment ifNil: [ ^ { 0. 0 } ].
 
 	iconWidth := aRow iconElement
@@ -106,7 +106,7 @@ CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
 CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 	| primaryLine comment padding measuredWidth contentWidth geometry commentWidth commentY contentHeight |
 	primaryLine := aRow primaryLineElement.
-	comment := aRow commentElement.
+	comment := aRow commentRegionElement.
 	padding := aRow padding.
 
 	measuredWidth := anExtentSpec widthSpec sizeFor: padding width.
@@ -142,7 +142,7 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
 	| primaryLine comment padding contentBounds geometry commentWidth commentY commentX |
 	primaryLine := aRow primaryLineElement.
-	comment := aRow commentElement.
+	comment := aRow commentRegionElement.
 	padding := aRow padding.
 	contentBounds := padding inset: (0 @ 0 extent: aRectangle extent).
 
