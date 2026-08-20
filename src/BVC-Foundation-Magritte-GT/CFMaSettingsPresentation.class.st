@@ -186,15 +186,16 @@ CFMaSettingsPresentation >> editorTextHorizontalInset [
 CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 	| editors |
 	editors := OrderedCollection new.
-	(aFieldElement isKindOf: GtMagritteOneLineEditorElement)
+	(aFieldElement isKindOf: BrEditor)
 		ifTrue: [ editors add: aFieldElement ].
 	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
-		(aChild isKindOf: GtMagritteOneLineEditorElement)
+		(aChild isKindOf: BrEditor)
 			ifTrue: [ editors add: aChild ] ].
 
 	editors do: [ :anEditor |
+		(anEditor isKindOf: GtMagritteOneLineEditorElement)
+			ifTrue: [ anEditor addAptitude: CFMaSettingsEditorAptitude new ].
 		anEditor
-			addAptitude: CFMaSettingsEditorAptitude new;
 			geometry: BlRectangleGeometry new;
 			margin: BlInsets empty;
 			padding: (BlInsets
@@ -443,6 +444,8 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 		icon: anIcon;
 		background: Color transparent;
 		border: BlBorder empty;
+		padding: BlInsets empty;
+		alignCenterRight;
 		hExact: 24;
 		vExact: 24;
 		yourself
