@@ -35,8 +35,7 @@ CFMaSettingsRowLayout >> measureComment: aComment with: anExtentSpec width: aWid
 
 { #category : 'private - geometry' }
 CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
-	| label editor comment iconWidth actionsWidth editorHeight labelHeight descriptionWidth commentWidth commentY |
-	label := aRow labelElement.
+	| editor comment iconWidth actionsWidth descriptionWidth commentWidth commentY hasFreeHorizontalSpace |
 	editor := aRow editorElement.
 	comment := aRow commentElement.
 	comment ifNil: [ ^ { 0. 0. 0 } ].
@@ -47,25 +46,30 @@ CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
 	actionsWidth := aRow actionsElement measuredWidth > 0
 		ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
 		ifFalse: [ 0 ].
-	editorHeight := editor ifNil: [ 0 ] ifNotNil: [ editor measuredHeight ].
-	labelHeight := label ifNil: [ 0 ] ifNotNil: [ label measuredHeight ].
 
-	"The horizontal linear layout owns width negotiation. If the editor has
-	grown below the primary line, the description column is exactly the space
-	left beside the measured editor. Otherwise the comment may flow beneath the
-	editor and use the whole content width after the icon and actions."
+	"The linear layout's flexible spacer is the authoritative indication that
+	the primary-line contents fit at their preferred widths. While it retains
+	space, the comment can continue beneath the editor. Once it collapses, the
+	limited label/editor regions are sharing constrained width and the comment
+	stays in the description region beside the editor."
+	hasFreeHorizontalSpace := aRow flexibleSpaceElement
+		ifNil: [ false ]
+		ifNotNil: [ aRow flexibleSpaceElement measuredWidth > 0 ].
+
 	descriptionWidth := (aContentWidth
 		- iconWidth
 		- actionsWidth
 		- (editor ifNil: [ 0 ] ifNotNil: [ editor measuredWidth ])
 		- (editor ifNil: [ 0 ] ifNotNil: [ aRow fieldGap ])) max: 0.
 
-	(editor notNil and: [ label notNil and: [ editorHeight > labelHeight ] ])
-		ifTrue: [ commentWidth := descriptionWidth ]
-		ifFalse: [ commentWidth := aContentWidth - iconWidth - actionsWidth ].
+	commentWidth := hasFreeHorizontalSpace
+		ifTrue: [ aContentWidth - iconWidth - actionsWidth ]
+		ifFalse: [ descriptionWidth ].
 
 	commentWidth := (commentWidth - aRow commentLeftInset) max: 0.
-	commentY := labelHeight + aRow commentTopGap.
+	commentY := (aRow labelElement
+		ifNil: [ 0 ]
+		ifNotNil: [ aRow labelElement measuredHeight ]) + aRow commentTopGap.
 	^ { commentWidth. commentY. descriptionWidth }
 ]
 

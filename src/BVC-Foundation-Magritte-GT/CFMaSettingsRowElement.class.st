@@ -48,6 +48,7 @@ CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aF
 { #category : 'private - building' }
 CFMaSettingsRowElement >> buildRegions [
 	self removeChildren.
+	flexibleSpace := nil.
 
 	actionsElement := BrHorizontalPane new
 		hFitContent;
@@ -137,6 +138,11 @@ CFMaSettingsRowElement >> actionsElement [
 { #category : 'accessing - layout' }
 CFMaSettingsRowElement >> primaryLineElement [
 	^ primaryLine
+]
+
+{ #category : 'accessing - layout' }
+CFMaSettingsRowElement >> flexibleSpaceElement [
+	^ flexibleSpace
 ]
 
 { #category : 'private - card geometry' }
