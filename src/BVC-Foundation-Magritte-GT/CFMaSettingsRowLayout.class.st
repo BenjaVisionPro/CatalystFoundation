@@ -34,11 +34,55 @@ CFMaSettingsRowLayout >> measureComment: aComment with: anExtentSpec width: aWid
 ]
 
 { #category : 'private - geometry' }
+CFMaSettingsRowLayout >> hasFreeHorizontalSpaceIn: aRow [
+	^ aRow flexibleSpaceElement
+		ifNil: [ false ]
+		ifNotNil: [ aRow flexibleSpaceElement measuredWidth > 0 ]
+]
+
+{ #category : 'private - geometry' }
+CFMaSettingsRowLayout >> fixedWidthFor: aRow [
+	| iconWidth actionsWidth |
+	iconWidth := aRow iconElement
+		ifNil: [ 0 ]
+		ifNotNil: [ aRow iconElement measuredWidth + aRow iconGap ].
+	actionsWidth := aRow actionsElement measuredWidth > 0
+		ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
+		ifFalse: [ 0 ].
+	^ iconWidth + actionsWidth
+]
+
+{ #category : 'private - geometry' }
+CFMaSettingsRowLayout >> balancedColumnWidthFor: aRow contentWidth: aContentWidth [
+	| flexibleWidth gutter |
+	gutter := aRow editorElement ifNil: [ 0 ] ifNotNil: [ aRow wrappedColumnGap ].
+	flexibleWidth := (aContentWidth - (self fixedWidthFor: aRow) - gutter) max: 0.
+	^ flexibleWidth / 2
+]
+
+{ #category : 'private - measurement' }
+CFMaSettingsRowLayout >> resetResponsiveWidthConstraintsFor: aRow [
+	aRow labelElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ].
+	aRow editorElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ]
+]
+
+{ #category : 'private - measurement' }
+CFMaSettingsRowLayout >> constrainResponsiveColumnsFor: aRow contentWidth: aContentWidth [
+	| columnWidth |
+	columnWidth := self balancedColumnWidthFor: aRow contentWidth: aContentWidth.
+	aRow labelElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: columnWidth ] ].
+	aRow editorElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: columnWidth ] ]
+]
+
+{ #category : 'private - geometry' }
 CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
-	| editor comment iconWidth actionsWidth descriptionWidth commentWidth commentY hasFreeHorizontalSpace |
-	editor := aRow editorElement.
+	| comment iconWidth actionsWidth commentWidth commentY hasFreeHorizontalSpace |
 	comment := aRow commentElement.
-	comment ifNil: [ ^ { 0. 0. 0 } ].
+	comment ifNil: [ ^ { 0. 0 } ].
 
 	iconWidth := aRow iconElement
 		ifNil: [ 0 ]
@@ -46,31 +90,16 @@ CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
 	actionsWidth := aRow actionsElement measuredWidth > 0
 		ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
 		ifFalse: [ 0 ].
-
-	"The linear layout's flexible spacer is the authoritative indication that
-	the primary-line contents fit at their preferred widths. While it retains
-	space, the comment can continue beneath the editor. Once it collapses, the
-	limited label/editor regions are sharing constrained width and the comment
-	stays in the description region beside the editor."
-	hasFreeHorizontalSpace := aRow flexibleSpaceElement
-		ifNil: [ false ]
-		ifNotNil: [ aRow flexibleSpaceElement measuredWidth > 0 ].
-
-	descriptionWidth := (aContentWidth
-		- iconWidth
-		- actionsWidth
-		- (editor ifNil: [ 0 ] ifNotNil: [ editor measuredWidth ])
-		- (editor ifNil: [ 0 ] ifNotNil: [ aRow fieldGap ])) max: 0.
+	hasFreeHorizontalSpace := self hasFreeHorizontalSpaceIn: aRow.
 
 	commentWidth := hasFreeHorizontalSpace
 		ifTrue: [ aContentWidth - iconWidth - actionsWidth ]
-		ifFalse: [ descriptionWidth ].
-
+		ifFalse: [ self balancedColumnWidthFor: aRow contentWidth: aContentWidth ].
 	commentWidth := (commentWidth - aRow commentLeftInset) max: 0.
 	commentY := (aRow labelElement
 		ifNil: [ 0 ]
 		ifNotNil: [ aRow labelElement measuredHeight ]) + aRow commentTopGap.
-	^ { commentWidth. commentY. descriptionWidth }
+	^ { commentWidth. commentY }
 ]
 
 { #category : 'measure' }
@@ -82,7 +111,19 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 
 	measuredWidth := anExtentSpec widthSpec sizeFor: padding width.
 	contentWidth := (measuredWidth - padding width) max: 0.
+
+	"Always begin from the children's native width contracts. This makes widening
+	reversible after a previous constrained pass."
+	self resetResponsiveWidthConstraintsFor: aRow.
 	self measurePrimaryLine: primaryLine with: anExtentSpec width: contentWidth.
+
+	"When the primary line has no flexible space left, description and editor
+	become equal columns separated by the wrapped gutter. The same rule applies
+	to every row; it is derived solely from the measured horizontal layout."
+	comment ifNotNil: [
+		(self hasFreeHorizontalSpaceIn: aRow) ifFalse: [
+			self constrainResponsiveColumnsFor: aRow contentWidth: contentWidth.
+			self measurePrimaryLine: primaryLine with: anExtentSpec width: contentWidth ] ].
 
 	geometry := self commentGeometryFor: aRow contentWidth: contentWidth.
 	commentWidth := geometry first.

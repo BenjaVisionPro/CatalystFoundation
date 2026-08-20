@@ -181,6 +181,12 @@ CFMaSettingsRowElement >> actionsGap [
 	^ 4
 ]
 
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> wrappedColumnGap [
+	^ 12
+]
+
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> actionSpacing [
 	^ 4
