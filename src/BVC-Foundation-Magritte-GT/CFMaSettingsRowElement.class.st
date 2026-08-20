@@ -57,7 +57,8 @@ CFMaSettingsRowElement >> buildRegions [
 
 	actionsElement := BrHorizontalPane new
 		hFitContent;
-		vFitContent;
+		vMatchParent;
+		clipChildren: false;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		layoutDo: [ :aLayout | aLayout cellSpacing: self actionSpacing ];
