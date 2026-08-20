@@ -187,7 +187,7 @@ CFMaSettingsRowElement >> updateResponsiveArrangement [
 
 { #category : 'private - layout' }
 CFMaSettingsRowElement >> shouldUseWrappedArrangement [
-	| paragraphs availableWidth descriptionWidth editorWidth requiredWidth |
+	| paragraphs availableWidth editorWidth editorRegionWidth |
 	field ifNil: [ ^ false ].
 	availableWidth := bodyColumn extent x max: 0.
 	availableWidth <= 0 ifTrue: [
@@ -199,17 +199,14 @@ CFMaSettingsRowElement >> shouldUseWrappedArrangement [
 		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
 	paragraphs size > 1 ifTrue: [ ^ true ].
 
-	descriptionWidth := descriptionLine
-		ifNil: [ 0 ]
-		ifNotNil: [ descriptionLine measuredWidth ].
 	editorWidth := paragraphs isEmpty
 		ifTrue: [ field measuredWidth ]
 		ifFalse: [ paragraphs first unwrappedWidth + field padding width ].
 	actionsElement childrenCount > 0 ifTrue: [
 		editorWidth := editorWidth + self actionsGap + actionsElement measuredWidth ].
-	requiredWidth := descriptionWidth + self fieldGap + editorWidth.
+	editorRegionWidth := ((availableWidth - self fieldGap) max: 0) / 2.
 
-	^ requiredWidth > availableWidth
+	^ editorWidth > editorRegionWidth
 ]
 
 { #category : 'private - layout' }
