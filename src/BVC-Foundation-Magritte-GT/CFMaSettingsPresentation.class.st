@@ -476,8 +476,10 @@ CFMaSettingsPresentation >> newRevertActionFor: aDescription [
 { #category : 'private - row actions' }
 CFMaSettingsPresentation >> newValidationActionFor: aDescription [
 	| aButton |
-	aButton := self newRowActionButtonIconNamed: #exclamationCircle.
+	aButton := self newRowActionButtonIconNamed: #exclamationTriangle.
 	aButton
+		hExact: 12;
+		icon: (aButton icon fitInto: 12 @ 12);
 		label: 'Validation failed';
 		visibility: BlVisibility gone.
 	aButton withAsyncSinkDo: [ :anElementSink |
