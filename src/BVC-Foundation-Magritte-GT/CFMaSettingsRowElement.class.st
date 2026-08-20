@@ -10,6 +10,8 @@ Class {
 		'actionsElement',
 		'descriptionLine',
 		'descriptionColumn',
+		'bodyColumn',
+		'contentLine',
 		'editorColumn',
 		'topLine',
 		'wrapped',
@@ -71,9 +73,6 @@ CFMaSettingsRowElement >> buildRegions [
 		padding: BlInsets empty;
 		layout: BlLinearLayout horizontal alignTopLeft;
 		yourself.
-	icon ifNotNil: [
-		icon margin: (BlInsets right: self iconGap).
-		descriptionLine addChild: icon ].
 	label ifNotNil: [
 		label
 			margin: BlInsets empty;
@@ -120,13 +119,36 @@ CFMaSettingsRowElement >> buildRegions [
 	descriptionColumn childrenCount > 0 ifTrue: [ topLine addChild: descriptionColumn ].
 	field ifNotNil: [ topLine addChild: editorColumn ].
 
-	self addChild: topLine.
+	bodyColumn := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		addChild: topLine;
+		yourself.
+	bodyColumn constraintsDo: [ :c |
+		c linear weight: 1.
+		c linear vertical alignTop ].
+
 	comment ifNotNil: [
 		comment
 			margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self commentLeftInset);
 			hMatchParent;
 			vFitContent.
-		self addChild: comment ].
+		bodyColumn addChild: comment ].
+
+	contentLine := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		layout: BlLinearLayout horizontal alignTopLeft;
+		yourself.
+	icon ifNotNil: [
+		icon margin: (BlInsets right: self iconGap).
+		contentLine addChild: icon ].
+	contentLine addChild: bodyColumn.
+	self addChild: contentLine.
 
 	self
 		when: BlElementExtentChangedEvent
@@ -158,7 +180,10 @@ CFMaSettingsRowElement >> updateResponsiveArrangement [
 CFMaSettingsRowElement >> shouldUseWrappedArrangement [
 	| paragraphs availableWidth descriptionWidth editorWidth requiredWidth |
 	field ifNil: [ ^ false ].
-	availableWidth := (self extent x - self padding width) max: 0.
+	availableWidth := bodyColumn extent x max: 0.
+	availableWidth <= 0 ifTrue: [
+		availableWidth := (self extent x - self padding width
+			- (icon ifNil: [ 0 ] ifNotNil: [ icon measuredWidth + self iconGap ])) max: 0 ].
 	availableWidth <= 0 ifTrue: [ ^ false ].
 
 	paragraphs := field allChildrenBreadthFirstSelect: [ :each |
@@ -182,10 +207,10 @@ CFMaSettingsRowElement >> shouldUseWrappedArrangement [
 CFMaSettingsRowElement >> useWideArrangement [
 	comment ifNotNil: [
 		comment hasParent ifTrue: [
-			comment parent == self ifFalse: [
+			comment parent == bodyColumn ifFalse: [
 				comment parent removeChild: comment.
-				self addChild: comment ] ].
-		comment margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self wideCommentLeftInset) ].
+				bodyColumn addChild: comment ] ].
+		comment margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self commentLeftInset) ].
 	descriptionColumn
 		hFitContent;
 		padding: BlInsets empty;
@@ -222,10 +247,6 @@ CFMaSettingsRowElement >> useWrappedArrangement [
 	self requestLayout
 ]
 
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> wideCommentLeftInset [
-	^ (icon ifNil: [ 0 ] ifNotNil: [ icon measuredWidth + self iconGap ]) + self commentLeftInset
-]
 
 { #category : 'private - card geometry' }
 CFMaSettingsRowElement >> cardBottomInset: aNumber [
