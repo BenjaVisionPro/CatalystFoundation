@@ -256,7 +256,7 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 		text: (aDescription comment asRopedText
 			foreground: self secondaryTextColor;
 			fontSize: 11);
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent;
 		background: Color transparent;
 		border: BlBorder empty;
