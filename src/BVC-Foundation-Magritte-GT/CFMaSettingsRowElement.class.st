@@ -7,7 +7,6 @@ Class {
 		'comment',
 		'field',
 		'trailingActions',
-		'labelsElement',
 		'actionsElement',
 		'cardTopInset',
 		'cardBottomInset'
@@ -48,15 +47,6 @@ CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aF
 CFMaSettingsRowElement >> buildRegions [
 	self removeChildren.
 
-	labelsElement := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		margin: BlInsets empty;
-		padding: BlInsets empty;
-		yourself.
-	label ifNotNil: [ labelsElement addChild: label ].
-	comment ifNotNil: [ labelsElement addChild: comment ].
-
 	actionsElement := BrHorizontalPane new
 		hFitContent;
 		vFitContent;
@@ -68,20 +58,22 @@ CFMaSettingsRowElement >> buildRegions [
 		anAction margin: BlInsets empty.
 		actionsElement addChild: anAction ].
 
+	label ifNotNil: [ label margin: BlInsets empty ].
+	comment ifNotNil: [ comment margin: BlInsets empty ].
 	field ifNotNil: [
 		field
 			margin: BlInsets empty;
 			clipChildren: false ].
 
 	icon ifNotNil: [ self addChild: icon ].
-	self addChild: labelsElement.
+	label ifNotNil: [ self addChild: label ].
+	comment ifNotNil: [ self addChild: comment ].
 	field ifNotNil: [ self addChild: field ].
 	self addChild: actionsElement
 ]
 
-
 { #category : 'testing - layout' }
-CFMaSettingsRowElement >> hasLabels [
+CFMaSettingsRowElement >> hasDescription [
 	^ label notNil or: [ comment notNil ]
 ]
 
@@ -91,13 +83,13 @@ CFMaSettingsRowElement >> iconElement [
 ]
 
 { #category : 'accessing - layout' }
-CFMaSettingsRowElement >> labelsElement [
-	^ labelsElement
+CFMaSettingsRowElement >> labelElement [
+	^ label
 ]
 
 { #category : 'accessing - layout' }
-CFMaSettingsRowElement >> labelElement [
-	^ label
+CFMaSettingsRowElement >> commentElement [
+	^ comment
 ]
 
 { #category : 'accessing - layout' }
@@ -149,6 +141,16 @@ CFMaSettingsRowElement >> actionsGap [
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> actionSpacing [
 	^ 4
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> commentTopGap [
+	^ 1
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> commentLeftInset [
+	^ 0.5
 ]
 
 { #category : 'private - metrics' }
