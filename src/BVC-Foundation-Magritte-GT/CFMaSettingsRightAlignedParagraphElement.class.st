@@ -243,3 +243,11 @@ CFMaSettingsRightAlignedParagraphElement >> screenToCursor: aTransformation of: 
 
 
 
+
+{ #category : 'accessing' }
+CFMaSettingsRightAlignedParagraphElement >> unwrappedWidth [
+	| anUnwrappedParagraph |
+	anUnwrappedParagraph := self buildParagraph.
+	anUnwrappedParagraph layoutWithWidth: SmallInteger maxVal.
+	^ anUnwrappedParagraph longestLine
+]

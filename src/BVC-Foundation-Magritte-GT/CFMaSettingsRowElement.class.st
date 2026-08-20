@@ -8,8 +8,11 @@ Class {
 		'field',
 		'trailingActions',
 		'actionsElement',
-		'primaryLine',
-		'flexibleSpace',
+		'descriptionLine',
+		'descriptionColumn',
+		'editorColumn',
+		'topLine',
+		'wrapped',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -22,12 +25,12 @@ Class {
 CFMaSettingsRowElement >> initialize [
 	super initialize.
 	trailingActions := #().
+	wrapped := false.
 	cardTopInset := 0.
 	cardBottomInset := 0.
 	self
 		hMatchParent;
 		vFitContent;
-		layout: CFMaSettingsRowLayout new;
 		updatePadding;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaSettingsRowAptitude new
@@ -48,7 +51,7 @@ CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aF
 { #category : 'private - building' }
 CFMaSettingsRowElement >> buildRegions [
 	self removeChildren.
-	flexibleSpace := nil.
+	wrapped := nil.
 
 	actionsElement := BrHorizontalPane new
 		hFitContent;
@@ -61,88 +64,167 @@ CFMaSettingsRowElement >> buildRegions [
 		anAction margin: BlInsets empty.
 		actionsElement addChild: anAction ].
 
-	primaryLine := BrHorizontalPane new
+	descriptionLine := BrHorizontalPane new
+		hFitContent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		layout: BlLinearLayout horizontal alignTopLeft;
+		yourself.
+	icon ifNotNil: [
+		icon margin: (BlInsets right: self iconGap).
+		descriptionLine addChild: icon ].
+	label ifNotNil: [
+		label
+			margin: BlInsets empty;
+			hFitContentLimited.
+		descriptionLine addChild: label ].
+
+	descriptionColumn := BrVerticalPane new
+		hFitContent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		yourself.
+	descriptionLine childrenCount > 0 ifTrue: [ descriptionColumn addChild: descriptionLine ].
+
+	editorColumn := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		padding: (BlInsets left: ((descriptionLine childrenCount > 0) ifTrue: [ self fieldGap ] ifFalse: [ 0 ]));
+		layout: BlLinearLayout horizontal alignTopRight;
+		yourself.
+	editorColumn constraintsDo: [ :c |
+		c linear weight: 1.
+		c linear vertical alignTop ].
+
+	field ifNotNil: [
+		field
+			margin: BlInsets empty;
+			clipChildren: false.
+		field constraints horizontal resizer isMatchParent
+			ifTrue: [ field constraintsDo: [ :c | c linear weight: 1 ] ].
+		editorColumn addChild: field ].
+	actionsElement childrenCount > 0 ifTrue: [
+		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
+		editorColumn addChild: actionsElement ].
+
+	topLine := BrHorizontalPane new
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		layout: BlLinearLayout horizontal alignTopLeft;
 		yourself.
+	descriptionColumn childrenCount > 0 ifTrue: [ topLine addChild: descriptionColumn ].
+	field ifNotNil: [ topLine addChild: editorColumn ].
 
-	label ifNotNil: [
-		label
-			margin: BlInsets empty;
-			hFitContentLimited ].
-	comment ifNotNil: [ comment margin: BlInsets empty ].
+	self addChild: topLine.
+	comment ifNotNil: [
+		comment
+			margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self commentLeftInset);
+			hMatchParent;
+			vFitContent.
+		self addChild: comment ].
+
+	self
+		when: BlElementExtentChangedEvent
+		do: [ :anEvent | self scheduleResponsiveArrangementUpdate ].
 	field ifNotNil: [
 		field
-			margin: BlInsets empty;
-			clipChildren: false ].
+			when: BlElementExtentChangedEvent
+			do: [ :anEvent | self scheduleResponsiveArrangementUpdate ] ].
+	self scheduleResponsiveArrangementUpdate
+]
 
-	icon ifNotNil: [
-		icon margin: (BlInsets right: self iconGap).
-		primaryLine addChild: icon ].
-	label ifNotNil: [ primaryLine addChild: label ].
-	field ifNotNil: [
-		(label notNil or: [ comment notNil ]) ifTrue: [
-			field constraints horizontal resizer isMatchParent
-				ifTrue: [ field margin: (BlInsets left: self fieldGap) ]
-				ifFalse: [
-					flexibleSpace := BlElement new
-						margin: (BlInsets left: self fieldGap);
-						constraintsDo: [ :c |
-							c horizontal resizer: BlLayoutResizer matchParent.
-							c vertical resizer: (BlLayoutResizer exact: 0).
-							c linear weight: 1 ];
-						yourself.
-					primaryLine addChild: flexibleSpace ] ].
-		primaryLine addChild: field ].
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> scheduleResponsiveArrangementUpdate [
+	self enqueueTask: (BlTaskAction new action: [ self updateResponsiveArrangement ])
+]
+
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> updateResponsiveArrangement [
+	| shouldWrap |
+	shouldWrap := self shouldUseWrappedArrangement.
+	shouldWrap = wrapped ifTrue: [ ^ self ].
+	wrapped := shouldWrap.
+	wrapped
+		ifTrue: [ self useWrappedArrangement ]
+		ifFalse: [ self useWideArrangement ]
+]
+
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> shouldUseWrappedArrangement [
+	| paragraphs availableWidth descriptionWidth editorWidth requiredWidth |
+	field ifNil: [ ^ false ].
+	availableWidth := (self extent x - self padding width) max: 0.
+	availableWidth <= 0 ifTrue: [ ^ false ].
+
+	paragraphs := field allChildrenBreadthFirstSelect: [ :each |
+		each isKindOf: CFMaSettingsRightAlignedParagraphElement ].
+	paragraphs size > 1 ifTrue: [ ^ true ].
+
+	descriptionWidth := descriptionLine
+		ifNil: [ 0 ]
+		ifNotNil: [ descriptionLine measuredWidth ].
+	editorWidth := paragraphs isEmpty
+		ifTrue: [ field measuredWidth ]
+		ifFalse: [ paragraphs first unwrappedWidth + field padding width ].
 	actionsElement childrenCount > 0 ifTrue: [
-		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
-		primaryLine addChild: actionsElement ].
+		editorWidth := editorWidth + self actionsGap + actionsElement measuredWidth ].
+	requiredWidth := descriptionWidth + self fieldGap + editorWidth.
 
-	self addChild: primaryLine.
-	comment ifNotNil: [ self addChild: comment ]
+	^ requiredWidth > availableWidth
 ]
 
-{ #category : 'testing - layout' }
-CFMaSettingsRowElement >> hasDescription [
-	^ label notNil or: [ comment notNil ]
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> useWideArrangement [
+	comment ifNotNil: [
+		comment hasParent ifTrue: [
+			comment parent == self ifFalse: [
+				comment parent removeChild: comment.
+				self addChild: comment ] ].
+		comment margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self wideCommentLeftInset) ].
+	descriptionColumn
+		hFitContent;
+		padding: BlInsets empty;
+		constraintsDo: [ :c |
+			c linear weight: 0.
+			c linear vertical alignTop ].
+	editorColumn
+		padding: (BlInsets left: self fieldGap);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ].
+	self requestLayout
 ]
 
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> iconElement [
-	^ icon
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> useWrappedArrangement [
+	comment ifNotNil: [
+		comment hasParent ifTrue: [
+			comment parent == descriptionColumn ifFalse: [
+				comment parent removeChild: comment.
+				descriptionColumn addChild: comment ] ].
+		comment margin: (BlInsets top: self commentTopGap right: 0 bottom: 0 left: self commentLeftInset) ].
+	descriptionColumn
+		hMatchParent;
+		padding: (BlInsets right: self fieldGap / 2);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ].
+	editorColumn
+		padding: (BlInsets left: self fieldGap / 2);
+		constraintsDo: [ :c |
+			c linear weight: 1.
+			c linear vertical alignTop ].
+	self requestLayout
 ]
 
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> labelElement [
-	^ label
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> commentElement [
-	^ comment
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> editorElement [
-	^ field
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> actionsElement [
-	^ actionsElement
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> primaryLineElement [
-	^ primaryLine
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> flexibleSpaceElement [
-	^ flexibleSpace
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> wideCommentLeftInset [
+	^ (icon ifNil: [ 0 ] ifNotNil: [ icon measuredWidth + self iconGap ]) + self commentLeftInset
 ]
 
 { #category : 'private - card geometry' }
