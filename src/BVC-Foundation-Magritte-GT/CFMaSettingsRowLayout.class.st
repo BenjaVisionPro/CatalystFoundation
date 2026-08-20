@@ -48,6 +48,7 @@ CFMaSettingsRowLayout >> paragraphsIn: anEditor [
 		each isKindOf: CFMaSettingsRightAlignedParagraphElement ]
 ]
 
+
 { #category : 'private - editor' }
 CFMaSettingsRowLayout >> preferredEditorWidthFor: anEditor [
 	| paragraphs |
@@ -55,9 +56,6 @@ CFMaSettingsRowLayout >> preferredEditorWidthFor: anEditor [
 	paragraphs := self paragraphsIn: anEditor.
 	paragraphs isEmpty ifTrue: [
 		^ (self measureNaturally: anEditor) x ].
-	paragraphs size > 1 ifTrue: [
-		^ paragraphs inject: 0 into: [ :aWidth :aParagraph |
-			aWidth max: aParagraph unwrappedWidth ] ].
 	^ paragraphs first unwrappedWidth + anEditor padding width
 ]
 

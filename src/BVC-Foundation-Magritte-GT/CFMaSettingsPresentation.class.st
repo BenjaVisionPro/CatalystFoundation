@@ -294,6 +294,9 @@ CFMaSettingsPresentation >> addElement: anElement to: aContainer [
 
 { #category : 'elements' }
 CFMaSettingsPresentation >> addFieldElement: aFieldElement using: aDescription [
+	aFieldElement
+		hFitContent;
+		vFitContent.
 	self configureTabStopFor: aFieldElement using: aDescription.
 	self
 		addRow: (self
