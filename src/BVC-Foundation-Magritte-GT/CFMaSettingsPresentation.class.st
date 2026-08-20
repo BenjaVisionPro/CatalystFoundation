@@ -455,6 +455,7 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 CFMaSettingsPresentation >> newRevertActionFor: aDescription [
 	| aButton |
 	aButton := self newRowActionButtonIconNamed: #undo.
+	aButton icon fitInto: 14 @ 14.
 	aButton
 		label: 'Revert to saved value';
 		action: [ self memento revertUsing: aDescription ];
