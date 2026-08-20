@@ -240,14 +240,3 @@ CFMaSettingsRightAlignedParagraphElement >> screenToCursor: aTransformation of: 
 		aTransformation transformed:
 			(self positionWithinSegmentOf: aCharOffsetInParagraph) + self segment textStart ]
 ]
-
-
-
-
-{ #category : 'accessing' }
-CFMaSettingsRightAlignedParagraphElement >> unwrappedWidth [
-	| anUnwrappedParagraph |
-	anUnwrappedParagraph := self buildParagraph.
-	anUnwrappedParagraph layoutWithWidth: SmallInteger maxVal.
-	^ anUnwrappedParagraph longestLine
-]
