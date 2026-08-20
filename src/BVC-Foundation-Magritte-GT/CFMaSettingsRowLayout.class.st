@@ -35,28 +35,35 @@ CFMaSettingsRowLayout >> measureComment: aComment with: anExtentSpec width: aWid
 
 { #category : 'private - geometry' }
 CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
-	| label editor comment labelWidth editorHeight labelHeight descriptionWidth commentWidth commentY |
+	| label editor comment iconWidth actionsWidth editorHeight labelHeight descriptionWidth commentWidth commentY |
 	label := aRow labelElement.
 	editor := aRow editorElement.
 	comment := aRow commentElement.
 	comment ifNil: [ ^ { 0. 0. 0 } ].
 
-	labelWidth := label ifNil: [ 0 ] ifNotNil: [ label measuredWidth ].
+	iconWidth := aRow iconElement
+		ifNil: [ 0 ]
+		ifNotNil: [ aRow iconElement measuredWidth + aRow iconGap ].
+	actionsWidth := aRow actionsElement measuredWidth > 0
+		ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
+		ifFalse: [ 0 ].
 	editorHeight := editor ifNil: [ 0 ] ifNotNil: [ editor measuredHeight ].
 	labelHeight := label ifNil: [ 0 ] ifNotNil: [ label measuredHeight ].
-	descriptionWidth := labelWidth.
 
-	"When the editor remains on the primary text line, the comment may use the
-	remaining row width beneath it. Once the editor grows downward, the comment
-	stays in the description column so both can grow vertically without overlap."
+	"The horizontal linear layout owns width negotiation. If the editor has
+	grown below the primary line, the description column is exactly the space
+	left beside the measured editor. Otherwise the comment may flow beneath the
+	editor and use the whole content width after the icon and actions."
+	descriptionWidth := (aContentWidth
+		- iconWidth
+		- actionsWidth
+		- (editor ifNil: [ 0 ] ifNotNil: [ editor measuredWidth ])
+		- (editor ifNil: [ 0 ] ifNotNil: [ aRow fieldGap ])) max: 0.
+
 	(editor notNil and: [ label notNil and: [ editorHeight > labelHeight ] ])
 		ifTrue: [ commentWidth := descriptionWidth ]
-		ifFalse: [
-			commentWidth := aContentWidth
-				- (aRow iconElement ifNil: [ 0 ] ifNotNil: [ aRow iconElement measuredWidth + aRow iconGap ])
-				- (aRow actionsElement measuredWidth > 0
-					ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
-					ifFalse: [ 0 ]) ].
+		ifFalse: [ commentWidth := aContentWidth - iconWidth - actionsWidth ].
+
 	commentWidth := (commentWidth - aRow commentLeftInset) max: 0.
 	commentY := labelHeight + aRow commentTopGap.
 	^ { commentWidth. commentY. descriptionWidth }

@@ -9,6 +9,7 @@ Class {
 		'trailingActions',
 		'actionsElement',
 		'primaryLine',
+		'flexibleSpace',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -83,7 +84,16 @@ CFMaSettingsRowElement >> buildRegions [
 	label ifNotNil: [ primaryLine addChild: label ].
 	field ifNotNil: [
 		(label notNil or: [ comment notNil ]) ifTrue: [
-			field margin: (BlInsets left: self fieldGap) ].
+			field constraints horizontal resizer isMatchParent
+				ifTrue: [ field margin: (BlInsets left: self fieldGap) ]
+				ifFalse: [
+					flexibleSpace := BlElement new
+						hMatchParent;
+						vExact: 0;
+						margin: (BlInsets left: self fieldGap);
+						constraintsDo: [ :c | c linear weight: 1 ];
+						yourself.
+					primaryLine addChild: flexibleSpace ] ].
 		primaryLine addChild: field ].
 	actionsElement childrenCount > 0 ifTrue: [
 		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
