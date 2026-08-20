@@ -221,12 +221,15 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
 	anIcon := aDescription iconFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
 	aRow
-		icon: (anIcon ifNotNil: [
-			CFIconTile new
+		icon: (anIcon ifNotNil: [ | aTile |
+			aTile := CFIconTile new
 				icon: anIcon;
 				backgroundColor: (aDescription iconBackgroundFor: self memento model);
-				beSmall;
-				yourself ])
+				yourself.
+			aDescription usesSmallSettingsIcon
+				ifTrue: [ aTile beSmall ]
+				ifFalse: [ aTile beMedium ].
+			aTile ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment
 			ifTrue: [ self newCommentFor: aDescription ]

@@ -592,6 +592,7 @@ CFMaFormShowcase >> fileDescription [
 		accessor: #file;
 		label: 'File';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		smallSettingsIcon;
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -617,6 +618,7 @@ CFMaFormShowcase >> directoryDescription [
 		accessor: #directory;
 		label: 'Directory';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		smallSettingsIcon;
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -642,6 +644,7 @@ CFMaFormShowcase >> fieldIconDescription [
 		accessor: #fieldIcon;
 		label: 'Font Awesome icon';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		smallSettingsIcon;
 		default: self defaultIcon;
 		group: 'Fields';
 		path: #(resources);
@@ -661,6 +664,7 @@ CFMaFormShowcase >> derivedValueDescription [
 		accessor: #derivedValue;
 		label: 'Derived value';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		smallSettingsIcon;
 		group: 'Fields';
 		path: #(resources);
 		priority: 190;
