@@ -88,10 +88,11 @@ CFMaSettingsRowElement >> buildRegions [
 				ifTrue: [ field margin: (BlInsets left: self fieldGap) ]
 				ifFalse: [
 					flexibleSpace := BlElement new
-						hMatchParent;
-						vExact: 0;
 						margin: (BlInsets left: self fieldGap);
-						constraintsDo: [ :c | c linear weight: 1 ];
+						constraintsDo: [ :c |
+							c horizontal resizer: BlLayoutResizer matchParent.
+							c vertical resizer: (BlLayoutResizer exact: 0).
+							c linear weight: 1 ];
 						yourself.
 					primaryLine addChild: flexibleSpace ] ].
 		primaryLine addChild: field ].
