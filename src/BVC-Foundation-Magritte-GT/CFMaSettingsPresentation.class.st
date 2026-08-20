@@ -446,7 +446,7 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 		border: BlBorder empty;
 		padding: BlInsets empty;
 		alignCenterRight;
-		hExact: 24;
+		hExact: 16;
 		vExact: 24;
 		yourself
 ]
