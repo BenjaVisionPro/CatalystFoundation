@@ -499,8 +499,12 @@ CFMaSettingsPresentation >> newValidationActionFor: aDescription [
 
 { #category : 'private - row actions' }
 CFMaSettingsPresentation >> newInformationActionFor: information [
-	^ (self newRowActionButtonIconNamed: #infoCircle)
-		label: information asString;
-		yourself
+	| aButton |
+	aButton := self newRowActionButtonIconNamed: #infoCircle.
+	aButton
+		hExact: 12;
+		icon: (aButton icon fitInto: 12 @ 12);
+		label: information asString.
+	^ aButton
 ]
 
