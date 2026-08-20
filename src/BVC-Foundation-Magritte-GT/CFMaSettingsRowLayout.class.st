@@ -7,8 +7,7 @@ Class {
 		'primaryHeight',
 		'commentWidth',
 		'commentSpansFlexibleWidth',
-		'editorFillsRegion',
-		'editorUsesMultipleLines'
+		'editorFillsRegion'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -23,21 +22,21 @@ CFMaSettingsRowLayout class >> constraints [
 { #category : 'private - measurement' }
 CFMaSettingsRowLayout >> measureNaturally: anElement [
 	anElement ifNil: [ ^ 0 @ 0 ].
-	anElement measure: BlExtentMeasurementSpec unspecified.
+	self
+		measureChild: anElement
+		parentSpec: BlExtentMeasurementSpec unspecified.
 	^ anElement measuredExtent
 ]
 
 { #category : 'private - measurement' }
 CFMaSettingsRowLayout >> measure: anElement withinWidth: aWidth [
+	| aParentSpec |
 	anElement ifNil: [ ^ 0 @ 0 ].
-	anElement measure: ((BlMeasurementSpec atMost: (aWidth max: 0)) @ BlMeasurementSpec unspecified).
-	^ anElement measuredExtent
-]
-
-{ #category : 'private - measurement' }
-CFMaSettingsRowLayout >> measure: anElement exactlyWidth: aWidth [
-	anElement ifNil: [ ^ 0 @ 0 ].
-	anElement measure: ((BlMeasurementSpec exact: (aWidth max: 0)) @ BlMeasurementSpec unspecified).
+	aParentSpec := (BlMeasurementSpec exact: (aWidth max: 0))
+		@ BlMeasurementSpec unspecified.
+	self
+		measureChild: anElement
+		parentSpec: aParentSpec.
 	^ anElement measuredExtent
 ]
 
@@ -68,16 +67,6 @@ CFMaSettingsRowLayout >> editorHasExplicitMultipleParagraphs: anEditor [
 ]
 
 { #category : 'private - editor' }
-CFMaSettingsRowLayout >> editorUsesMultipleLines: anEditor [
-	| paragraphs |
-	anEditor ifNil: [ ^ false ].
-	paragraphs := self paragraphsIn: anEditor.
-	paragraphs size > 1 ifTrue: [ ^ true ].
-	paragraphs isEmpty ifTrue: [ ^ false ].
-	^ paragraphs first visualLineCount > 1
-]
-
-{ #category : 'private - editor' }
 CFMaSettingsRowLayout >> editorFillsRegion: anEditor in: aRow [
 	anEditor ifNil: [ ^ false ].
 	aRow hasDescription ifFalse: [ ^ true ].
@@ -86,7 +75,7 @@ CFMaSettingsRowLayout >> editorFillsRegion: anEditor in: aRow [
 
 { #category : 'measure' }
 CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
-	| icon label comment editor actions padding naturalIcon naturalActions preferredLabelWidth preferredEditorWidth preferredContentWidth measuredWidth contentWidth fixedWidth flexibleWidth fieldGap actionsGap preferredLineFits availableForColumns columnWidth labelHeight iconHeight actionsHeight editorHeight primaryEditorHeight commentHeight commentY contentHeight descriptionHeight editorY |
+	| icon label comment editor actions padding naturalIcon naturalActions preferredLabelWidth preferredEditorWidth preferredContentWidth measuredWidth contentWidth fixedWidth flexibleWidth fieldGap actionsGap preferredLineFits availableForColumns columnWidth labelHeight iconHeight actionsHeight editorHeight commentHeight commentY contentHeight descriptionHeight editorY |
 	icon := aRow iconElement.
 	label := aRow labelElement.
 	comment := aRow commentElement.
@@ -128,10 +117,10 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 			ifFalse: [
 				preferredLineFits
 					ifTrue: [
-					editorRegionWidth := editorFillsRegion
-						ifTrue: [ (flexibleWidth - preferredLabelWidth - fieldGap) max: 0 ]
-						ifFalse: [ preferredEditorWidth min: ((flexibleWidth - fieldGap) max: 0) ].
-					descriptionWidth := (flexibleWidth - fieldGap - editorRegionWidth) max: 0 ]
+						editorRegionWidth := editorFillsRegion
+							ifTrue: [ (flexibleWidth - preferredLabelWidth - fieldGap) max: 0 ]
+							ifFalse: [ preferredEditorWidth min: ((flexibleWidth - fieldGap) max: 0) ].
+						descriptionWidth := (flexibleWidth - fieldGap - editorRegionWidth) max: 0 ]
 					ifFalse: [
 						availableForColumns := (flexibleWidth - fieldGap) max: 0.
 						columnWidth := availableForColumns / 2.
@@ -139,9 +128,7 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 						editorRegionWidth := columnWidth ] ] ].
 
 	self measure: label withinWidth: descriptionWidth.
-	editorFillsRegion
-		ifTrue: [ self measure: editor exactlyWidth: editorRegionWidth ]
-		ifFalse: [ self measure: editor withinWidth: editorRegionWidth ].
+	self measure: editor withinWidth: editorRegionWidth.
 
 	commentSpansFlexibleWidth := comment notNil
 		and: [ editorFillsRegion and: [ preferredLineFits ] ].
@@ -149,23 +136,19 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 		((commentSpansFlexibleWidth
 			ifTrue: [ flexibleWidth ]
 			ifFalse: [ descriptionWidth ]) - aRow commentLeftInset) max: 0 ].
-	self measure: comment exactlyWidth: commentWidth.
+	self measure: comment withinWidth: commentWidth.
 
 	iconHeight := icon ifNil: [ 0 ] ifNotNil: [ icon measuredHeight ].
 	actionsHeight := actions ifNil: [ 0 ] ifNotNil: [ actions measuredHeight ].
 	labelHeight := label ifNil: [ 0 ] ifNotNil: [ label measuredHeight ].
 	editorHeight := editor ifNil: [ 0 ] ifNotNil: [ editor measuredHeight ].
-	editorUsesMultipleLines := self editorUsesMultipleLines: editor.
-	primaryEditorHeight := editorUsesMultipleLines
-		ifTrue: [ 0 ]
-		ifFalse: [ editorHeight ].
 	primaryHeight := iconHeight max: actionsHeight.
 	primaryHeight := primaryHeight max: labelHeight.
-	primaryHeight := primaryHeight max: primaryEditorHeight.
+	primaryHeight isZero ifTrue: [ primaryHeight := editorHeight ].
 
-	editorY := editorUsesMultipleLines
-		ifTrue: [ 0 ]
-		ifFalse: [ ((primaryHeight - editorHeight) / 2) max: 0 ].
+	editorY := label
+		ifNil: [ 0 ]
+		ifNotNil: [ ((primaryHeight - labelHeight) / 2) max: 0 ].
 	commentHeight := comment ifNil: [ 0 ] ifNotNil: [ comment measuredHeight ].
 	commentY := comment ifNil: [ 0 ] ifNotNil: [
 		commentSpansFlexibleWidth
@@ -209,9 +192,9 @@ CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUp
 	actionsHeight := actions ifNil: [ 0 ] ifNotNil: [ actions measuredHeight ].
 	iconHeight := icon ifNil: [ 0 ] ifNotNil: [ icon measuredHeight ].
 	labelY := contentBounds top + (((primaryHeight - labelHeight) / 2) max: 0).
-	editorY := contentBounds top + (editorUsesMultipleLines
-		ifTrue: [ 0 ]
-		ifFalse: [ ((primaryHeight - editorHeight) / 2) max: 0 ]).
+	editorY := contentBounds top + (label
+		ifNil: [ 0 ]
+		ifNotNil: [ ((primaryHeight - labelHeight) / 2) max: 0 ]).
 	actionsY := contentBounds top + (((primaryHeight - actionsHeight) / 2) max: 0).
 	iconY := contentBounds top + (((primaryHeight - iconHeight) / 2) max: 0).
 	commentY := comment ifNil: [ contentBounds top ] ifNotNil: [
