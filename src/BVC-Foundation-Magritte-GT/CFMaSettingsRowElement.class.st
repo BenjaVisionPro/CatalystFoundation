@@ -103,7 +103,14 @@ CFMaSettingsRowElement >> buildRegions [
 			margin: BlInsets empty;
 			clipChildren: false.
 		field constraints horizontal resizer isMatchParent
-			ifTrue: [ field constraintsDo: [ :c | c linear weight: 1 ] ].
+			ifTrue: [ field constraintsDo: [ :c | c linear weight: 1 ] ]
+			ifFalse: [
+			editorColumn addChild: (BlElement new
+				constraintsDo: [ :c |
+					c horizontal resizer: BlLayoutResizer matchParent.
+					c vertical resizer: (BlLayoutResizer exact: 0).
+					c linear weight: 1 ];
+				yourself) ].
 		editorColumn addChild: field ].
 	actionsElement childrenCount > 0 ifTrue: [
 		field ifNotNil: [ actionsElement margin: (BlInsets left: self actionsGap) ].
