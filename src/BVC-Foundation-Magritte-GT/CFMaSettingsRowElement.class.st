@@ -114,7 +114,7 @@ CFMaSettingsRowElement >> buildRegions [
 		editorColumn addChild: field ].
 	actionsElement childrenCount > 0 ifTrue: [
 		actionsElement margin: (BlInsets
-			top: 1
+			top: 3
 			right: 0
 			bottom: 0
 			left: (field ifNil: [ 0 ] ifNotNil: [ self actionsGap ])).
