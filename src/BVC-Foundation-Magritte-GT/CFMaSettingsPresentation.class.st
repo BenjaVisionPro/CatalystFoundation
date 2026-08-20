@@ -225,7 +225,7 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
 			CFIconTile new
 				icon: anIcon;
 				backgroundColor: (aDescription iconBackgroundFor: self memento model);
-				beMedium;
+				beSmall;
 				yourself ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment
