@@ -65,6 +65,7 @@ CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
 { #category : 'measure' }
 CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 	| primaryLine comment padding measuredWidth contentWidth geometry commentWidth commentY contentHeight |
+	primaryLine := aRow primaryLineElement.
 	comment := aRow commentElement.
 	padding := aRow padding.
 
@@ -88,6 +89,7 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 { #category : 'layout' }
 CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
 	| primaryLine comment padding contentBounds geometry commentWidth commentY commentX |
+	primaryLine := aRow primaryLineElement.
 	comment := aRow commentElement.
 	padding := aRow padding.
 	contentBounds := padding inset: (0 @ 0 extent: aRectangle extent).
