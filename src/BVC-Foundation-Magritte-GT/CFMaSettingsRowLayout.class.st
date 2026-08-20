@@ -63,7 +63,7 @@ CFMaSettingsRowLayout >> fixedWidthFor: aRow [
 { #category : 'private - geometry' }
 CFMaSettingsRowLayout >> balancedColumnWidthFor: aRow contentWidth: aContentWidth [
 	| flexibleWidth gutter |
-	gutter := aRow editorElement ifNil: [ 0 ] ifNotNil: [ aRow wrappedColumnGap ].
+	gutter := aRow editorElement ifNil: [ 0 ] ifNotNil: [ aRow fieldGap ].
 	flexibleWidth := (aContentWidth - (self fixedWidthFor: aRow) - gutter) max: 0.
 	^ flexibleWidth / 2
 ]
