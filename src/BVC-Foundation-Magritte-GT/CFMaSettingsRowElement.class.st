@@ -10,7 +10,6 @@ Class {
 		'actionsElement',
 		'primaryLine',
 		'flexibleSpace',
-		'commentRegion',
 		'cardTopInset',
 		'cardBottomInset'
 	],
@@ -50,7 +49,6 @@ CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aF
 CFMaSettingsRowElement >> buildRegions [
 	self removeChildren.
 	flexibleSpace := nil.
-	commentRegion := nil.
 
 	actionsElement := BrHorizontalPane new
 		hFitContent;
@@ -75,15 +73,7 @@ CFMaSettingsRowElement >> buildRegions [
 		label
 			margin: BlInsets empty;
 			hFitContentLimited ].
-	comment ifNotNil: [
-		comment margin: BlInsets empty.
-		commentRegion := BrVerticalPane new
-			hMatchParent;
-			vFitContent;
-			margin: BlInsets empty;
-			padding: BlInsets empty;
-			addChild: comment;
-			yourself ].
+	comment ifNotNil: [ comment margin: BlInsets empty ].
 	field ifNotNil: [
 		field
 			margin: BlInsets empty;
@@ -112,7 +102,7 @@ CFMaSettingsRowElement >> buildRegions [
 		primaryLine addChild: actionsElement ].
 
 	self addChild: primaryLine.
-	commentRegion ifNotNil: [ self addChild: commentRegion ]
+	comment ifNotNil: [ self addChild: comment ]
 ]
 
 { #category : 'testing - layout' }
@@ -133,11 +123,6 @@ CFMaSettingsRowElement >> labelElement [
 { #category : 'accessing - layout' }
 CFMaSettingsRowElement >> commentElement [
 	^ comment
-]
-
-{ #category : 'accessing - layout' }
-CFMaSettingsRowElement >> commentRegionElement [
-	^ commentRegion
 ]
 
 { #category : 'accessing - layout' }
@@ -194,12 +179,6 @@ CFMaSettingsRowElement >> fieldGap [
 { #category : 'private - metrics' }
 CFMaSettingsRowElement >> actionsGap [
 	^ 4
-]
-
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> wrappedColumnGap [
-	^ 12
 ]
 
 { #category : 'private - metrics' }

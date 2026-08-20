@@ -1,6 +1,9 @@
 Class {
 	#name : 'CFMaSettingsRowLayout',
 	#superclass : 'BlLayout',
+	#instVars : [
+		'balancedColumns'
+	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations-Settings',
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Presentations-Settings'
@@ -11,33 +14,38 @@ CFMaSettingsRowLayout class >> constraints [
 	^ BlLayoutCommonConstraints new
 ]
 
+{ #category : 'initialization' }
+CFMaSettingsRowLayout >> initialize [
+	super initialize.
+	balancedColumns := false
+]
+
 { #category : 'private - measurement' }
-CFMaSettingsRowLayout >> measurePrimaryLine: aPrimaryLine with: anExtentSpec width: aWidth [
+CFMaSettingsRowLayout >> measureElement: anElement width: aWidth [
 	| aParentSpec |
-	aPrimaryLine ifNil: [ ^ self ].
+	anElement ifNil: [ ^ self ].
 	aParentSpec := (BlMeasurementSpec exact: (aWidth max: 0))
 		@ BlMeasurementSpec unspecified.
 	self
-		measureChild: aPrimaryLine
+		measureChild: anElement
 		parentSpec: aParentSpec
 ]
 
 { #category : 'private - measurement' }
-CFMaSettingsRowLayout >> measureComment: aComment with: anExtentSpec width: aWidth [
-	| aParentSpec |
-	aComment ifNil: [ ^ self ].
-	aParentSpec := (BlMeasurementSpec exact: (aWidth max: 0))
-		@ BlMeasurementSpec unspecified.
+CFMaSettingsRowLayout >> naturalHeightOf: anElement [
+	anElement ifNil: [ ^ 0 ].
 	self
-		measureChild: aComment
-		parentSpec: aParentSpec
+		measureChild: anElement
+		parentSpec: BlMeasurementSpec unspecified @ BlMeasurementSpec unspecified.
+	^ anElement measuredHeight
 ]
 
-{ #category : 'private - geometry' }
-CFMaSettingsRowLayout >> hasFreeHorizontalSpaceIn: aRow [
-	^ aRow flexibleSpaceElement
-		ifNil: [ false ]
-		ifNotNil: [ aRow flexibleSpaceElement measuredWidth > 0 ]
+{ #category : 'private - measurement' }
+CFMaSettingsRowLayout >> resetResponsiveWidthConstraintsFor: aRow [
+	aRow labelElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ].
+	aRow editorElement ifNotNil: [ :anElement |
+		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ]
 ]
 
 { #category : 'private - geometry' }
@@ -61,15 +69,7 @@ CFMaSettingsRowLayout >> balancedColumnWidthFor: aRow contentWidth: aContentWidt
 ]
 
 { #category : 'private - measurement' }
-CFMaSettingsRowLayout >> resetResponsiveWidthConstraintsFor: aRow [
-	aRow labelElement ifNotNil: [ :anElement |
-		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ].
-	aRow editorElement ifNotNil: [ :anElement |
-		anElement constraintsDo: [ :c | c maxWidth: Float infinity ] ]
-]
-
-{ #category : 'private - measurement' }
-CFMaSettingsRowLayout >> constrainResponsiveColumnsFor: aRow contentWidth: aContentWidth [
+CFMaSettingsRowLayout >> constrainBalancedColumnsFor: aRow contentWidth: aContentWidth [
 	| columnWidth |
 	columnWidth := self balancedColumnWidthFor: aRow contentWidth: aContentWidth.
 	aRow labelElement ifNotNil: [ :anElement |
@@ -78,58 +78,72 @@ CFMaSettingsRowLayout >> constrainResponsiveColumnsFor: aRow contentWidth: aCont
 		anElement constraintsDo: [ :c | c maxWidth: columnWidth ] ]
 ]
 
-{ #category : 'private - geometry' }
-CFMaSettingsRowLayout >> commentGeometryFor: aRow contentWidth: aContentWidth [
-	| comment iconWidth actionsWidth commentWidth commentY hasFreeHorizontalSpace |
-	comment := aRow commentRegionElement.
-	comment ifNil: [ ^ { 0. 0 } ].
+{ #category : 'private - testing' }
+CFMaSettingsRowLayout >> didElement: anElement growVerticallyFrom: aNaturalHeight [
+	anElement ifNil: [ ^ false ].
+	^ anElement measuredHeight > (aNaturalHeight + 0.5)
+]
 
+{ #category : 'private - geometry' }
+CFMaSettingsRowLayout >> commentWidthFor: aRow contentWidth: aContentWidth [
+	| iconWidth actionsWidth width |
+	aRow commentElement ifNil: [ ^ 0 ].
 	iconWidth := aRow iconElement
 		ifNil: [ 0 ]
 		ifNotNil: [ aRow iconElement measuredWidth + aRow iconGap ].
 	actionsWidth := aRow actionsElement measuredWidth > 0
 		ifTrue: [ aRow actionsElement measuredWidth + aRow actionsGap ]
 		ifFalse: [ 0 ].
-	hasFreeHorizontalSpace := self hasFreeHorizontalSpaceIn: aRow.
+	width := balancedColumns
+		ifTrue: [ self balancedColumnWidthFor: aRow contentWidth: aContentWidth ]
+		ifFalse: [ aContentWidth - iconWidth - actionsWidth ].
+	^ (width - aRow commentLeftInset) max: 0
+]
 
-	commentWidth := hasFreeHorizontalSpace
-		ifTrue: [ aContentWidth - iconWidth - actionsWidth ]
-		ifFalse: [ self balancedColumnWidthFor: aRow contentWidth: aContentWidth ].
-	commentWidth := (commentWidth - aRow commentLeftInset) max: 0.
-	commentY := (aRow labelElement
+{ #category : 'private - geometry' }
+CFMaSettingsRowLayout >> commentYFor: aRow [
+	^ (aRow labelElement
 		ifNil: [ 0 ]
-		ifNotNil: [ aRow labelElement measuredHeight ]) + aRow commentTopGap.
-	^ { commentWidth. commentY }
+		ifNotNil: [ aRow labelElement measuredHeight ]) + aRow commentTopGap
 ]
 
 { #category : 'measure' }
 CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
-	| primaryLine comment padding measuredWidth contentWidth geometry commentWidth commentY contentHeight |
+	| primaryLine comment padding measuredWidth contentWidth naturalPrimaryHeight naturalCommentHeight commentWidth commentY contentHeight |
 	primaryLine := aRow primaryLineElement.
-	comment := aRow commentRegionElement.
+	comment := aRow commentElement.
 	padding := aRow padding.
 
 	measuredWidth := anExtentSpec widthSpec sizeFor: padding width.
 	contentWidth := (measuredWidth - padding width) max: 0.
 
-	"Always begin from the children's native width contracts. This makes widening
-	reversible after a previous constrained pass."
+	"Measure the row once without a width constraint to establish its stable,
+	content-driven single-line heights. These values are independent of any
+	previous constrained layout pass."
 	self resetResponsiveWidthConstraintsFor: aRow.
-	self measurePrimaryLine: primaryLine with: anExtentSpec width: contentWidth.
+	naturalPrimaryHeight := self naturalHeightOf: primaryLine.
+	naturalCommentHeight := self naturalHeightOf: comment.
 
-	"When the primary line has no flexible space left, description and editor
-	become equal columns separated by the wrapped gutter. The same rule applies
-	to every row; it is derived solely from the measured horizontal layout."
-	comment ifNotNil: [
-		(self hasFreeHorizontalSpaceIn: aRow) ifFalse: [
-			self constrainResponsiveColumnsFor: aRow contentWidth: contentWidth.
-			self measurePrimaryLine: primaryLine with: anExtentSpec width: contentWidth ] ].
+	"Now measure the normal presentation at the actual available width."
+	balancedColumns := false.
+	self measureElement: primaryLine width: contentWidth.
+	commentWidth := self commentWidthFor: aRow contentWidth: contentWidth.
+	self measureElement: comment width: commentWidth.
 
-	geometry := self commentGeometryFor: aRow contentWidth: contentWidth.
-	commentWidth := geometry first.
-	commentY := geometry second.
-	self measureComment: comment with: anExtentSpec width: commentWidth.
+	"The balanced presentation is required when either semantic region actually
+	reflows vertically. This is determined from measured geometry, not editor
+	classes, cached spacer widths, or text implementation details."
+	balancedColumns :=
+		(self didElement: primaryLine growVerticallyFrom: naturalPrimaryHeight)
+			or: [ self didElement: comment growVerticallyFrom: naturalCommentHeight ].
 
+	balancedColumns ifTrue: [
+		self constrainBalancedColumnsFor: aRow contentWidth: contentWidth.
+		self measureElement: primaryLine width: contentWidth.
+		commentWidth := self commentWidthFor: aRow contentWidth: contentWidth.
+		self measureElement: comment width: commentWidth ].
+
+	commentY := self commentYFor: aRow.
 	contentHeight := primaryLine ifNil: [ 0 ] ifNotNil: [ primaryLine measuredHeight ].
 	comment ifNotNil: [
 		contentHeight := contentHeight max: (commentY + comment measuredHeight) ].
@@ -140,9 +154,9 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 
 { #category : 'layout' }
 CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| primaryLine comment padding contentBounds geometry commentWidth commentY commentX |
+	| primaryLine comment padding contentBounds commentWidth commentY commentX |
 	primaryLine := aRow primaryLineElement.
-	comment := aRow commentRegionElement.
+	comment := aRow commentElement.
 	padding := aRow padding.
 	contentBounds := padding inset: (0 @ 0 extent: aRectangle extent).
 
@@ -152,9 +166,8 @@ CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUp
 			context: aBlElementBoundsUpdateContext ].
 
 	comment ifNotNil: [
-		geometry := self commentGeometryFor: aRow contentWidth: contentBounds width.
-		commentWidth := geometry first.
-		commentY := geometry second.
+		commentWidth := self commentWidthFor: aRow contentWidth: contentBounds width.
+		commentY := self commentYFor: aRow.
 		commentX := contentBounds left
 			+ (aRow iconElement ifNil: [ 0 ] ifNotNil: [ aRow iconElement measuredWidth + aRow iconGap ])
 			+ aRow commentLeftInset.

@@ -256,7 +256,7 @@ CFMaSettingsPresentation >> newCommentFor: aDescription [
 		text: (aDescription comment asRopedText
 			foreground: self secondaryTextColor;
 			fontSize: 11);
-		hMatchParent;
+		hFitContentLimited;
 		vFitContent;
 		background: Color transparent;
 		border: BlBorder empty;
@@ -314,7 +314,7 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 		aptitude: (aDescription editorAptitude
 			ifNil: [ BrGlamorousRegularEditorAptitude new glamorousRegularFontAndSize ]
 			ifNotNil: #value);
-		hFitContentLimited;
+		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty;
 		margin: BlInsets empty;
