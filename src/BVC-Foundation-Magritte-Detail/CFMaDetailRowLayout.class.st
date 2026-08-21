@@ -173,22 +173,21 @@ CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent 
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth content: aContent [
-	| fullWidthHeight inlineWidth inlineHeight |
+CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth content: aContent unwrappedHeight: unwrappedContentHeight [
+	| inlineWidth inlineHeight |
 	aContent ifNil: [ ^ false ].
 
-	"BrEditor is horizontally match-parent by default, so an unspecified
-	measurement is not a meaningful intrinsic-width test. Measure the real two
-	candidates instead. If constraining the editor to the space beside the label
-	makes it taller than it is with the whole body width, the editor has started
-	to wrap internally. At that point the row wraps the editor instead."
-	self measure: aContent widthExactly: bodyWidth.
-	fullWidthHeight := aContent measuredHeight.
+	"The content has already been measured unconstrained at the start of this
+	measure pass. Its resulting height is our stable unwrapped-height reference.
+	Measure the real inline allocation beside the description. If that allocation
+	makes the content taller, it has begun wrapping internally and the row must
+	wrap the content instead. Comparing with the current full body width is
+	non-monotonic because the full-width content can itself wrap at narrow sizes."
 	inlineWidth := (bodyWidth - naturalDescriptionWidth - gap) max: 0.0.
 	inlineWidth <= 0.0 ifTrue: [ ^ true ].
 	self measure: aContent widthExactly: inlineWidth.
 	inlineHeight := aContent measuredHeight.
-	^ inlineHeight > fullWidthHeight
+	^ inlineHeight > unwrappedContentHeight
 ]
 
 { #category : 'private - measurement' }
@@ -248,7 +247,7 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 
 { #category : 'measure' }
 CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
-	| padding leadingChildren aDescription aSupporting aContent accessoryChildren leadingWidth accessoriesWidth bodyPresent bodyGap naturalDescriptionWidth naturalContentWidth availableWidth bodyHeight contentHeight desiredWidth desiredHeight |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren leadingWidth accessoriesWidth bodyPresent bodyGap naturalDescriptionWidth naturalContentWidth unwrappedContentHeight availableWidth bodyHeight contentHeight desiredWidth desiredHeight |
 	padding := aRow padding.
 	leadingChildren := self leadingChildrenIn: aRow.
 	aDescription := self descriptionChildIn: aRow.
@@ -267,6 +266,7 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 	bodyGap := self bodyGapLeading: leadingChildren bodyPresent: bodyPresent accessories: accessoryChildren.
 	naturalDescriptionWidth := aDescription ifNil: [ 0.0 ] ifNotNil: [ aDescription measuredWidth ].
 	naturalContentWidth := aContent ifNil: [ 0.0 ] ifNotNil: [ aContent measuredWidth ].
+	unwrappedContentHeight := aContent ifNil: [ 0.0 ] ifNotNil: [ aContent measuredHeight ].
 
 	availableWidth := anExtentSpec widthSpec isUnspecified
 		ifTrue: [
@@ -276,7 +276,10 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 	bodyWidth := (availableWidth - leadingWidth - accessoriesWidth - bodyGap) max: 0.0.
 
 	bodyHeight := (aSupporting notNil and: [ aContent notNil and: [
-		self shouldWrapDescriptionWidth: naturalDescriptionWidth content: aContent ] ])
+		self
+			shouldWrapDescriptionWidth: naturalDescriptionWidth
+			content: aContent
+			unwrappedHeight: unwrappedContentHeight ] ])
 		ifTrue: [ self measureWrappedDescription: aDescription supporting: aSupporting content: aContent ]
 		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth ].
 
