@@ -59,6 +59,16 @@ CFMaDetailPresentation >> newFieldConfiguration [
 
 
 { #category : 'private - building' }
+CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
+	aDropdown
+		margin: BlInsets empty;
+		padding: (BlInsets top: 2 right: CFMaDetailScalarFieldMetrics trailingControlInset bottom: 2 left: 5);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		background: (Color black alpha: 0.05).
+	^ aDropdown
+]
+
+{ #category : 'private - building' }
 CFMaDetailPresentation >> addBooleanField: aDescription [
 	| aBooleanElement aMemento aLabel |
 	aMemento := self memento.
@@ -78,6 +88,26 @@ CFMaDetailPresentation >> addBooleanField: aDescription [
 	aLabel := self addFieldElement: aBooleanElement using: aDescription.
 	aDescription hasCustomLabels ifTrue: [
 		aLabel padding: aLabel padding + (BlInsets top: self defaultSpacing) ]
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addDirectoryDropdown: aDescription [
+	| aDropdown |
+	aDropdown := GtMagritteBuilderUtility
+		newDirectoryDropdownMemento: self memento
+		using: aDescription.
+	self prepareResourceDropdown: aDropdown.
+	self addFieldElement: aDropdown using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addFileDropdown: aDescription [
+	| aDropdown |
+	aDropdown := GtMagritteBuilderUtility
+		newFileDropdownMemento: self memento
+		using: aDescription.
+	self prepareResourceDropdown: aDropdown.
+	self addFieldElement: aDropdown using: aDescription
 ]
 
 { #category : 'private - composition' }
