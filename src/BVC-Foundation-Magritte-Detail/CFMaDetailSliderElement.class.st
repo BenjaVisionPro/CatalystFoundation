@@ -153,7 +153,7 @@ CFMaDetailSliderElement >> updateLabels [
 	minimumLabel text: (self valueLabelTextFor: (displayBlock cull: minimum)).
 	currentLabel
 		text: (self valueLabelTextFor: (displayBlock cull: value rounded));
-		visibility: ((self normalizedValue = 0.0 or: [ self normalizedValue = 1.0 ])
+		visibility: ((value = minimum or: [ value = maximum ])
 			ifTrue: [ BlVisibility hidden ]
 			ifFalse: [ BlVisibility visible ]).
 	maximumLabel text: (self valueLabelTextFor: (displayBlock cull: maximum))
@@ -165,4 +165,50 @@ CFMaDetailSliderElement >> valueLabelTextFor: aString [
 		foreground: (Color black alpha: 0.8);
 		fontSize: 11;
 		yourself
+]
+
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> sliderTrack [
+	^ track
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> sliderFill [
+	^ fill
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> sliderThumb [
+	^ thumb
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> minimumTick [
+	^ minimumTick
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> middleTick [
+	^ middleTick
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> maximumTick [
+	^ maximumTick
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> minimumLabel [
+	^ minimumLabel
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> currentLabel [
+	^ currentLabel
+]
+
+{ #category : 'private - layout' }
+CFMaDetailSliderElement >> maximumLabel [
+	^ maximumLabel
 ]

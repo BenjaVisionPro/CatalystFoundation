@@ -375,7 +375,7 @@ CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBl
 
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> addNumberSliderUsing: aDescription configuration: aSliderConfiguration [
+CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 	| aMinimum aMaximum aSlider |
 	aMinimum := aDescription min.
 	aMaximum := aDescription max.
@@ -413,6 +413,6 @@ CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	(aRepresentation isKindOf: CFMaPopupConfiguration) ifTrue: [
 		^ self addNumberPopupUsing: aDescription configuration: aRepresentation ].
 	(aRepresentation isKindOf: CFMaSliderConfiguration) ifTrue: [
-		^ self addNumberSliderUsing: aDescription configuration: aRepresentation ].
+		^ self addNumberSliderUsing: aDescription ].
 	^ self error: 'Unsupported number field representation'
 ]

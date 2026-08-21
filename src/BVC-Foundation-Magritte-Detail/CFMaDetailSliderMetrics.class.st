@@ -46,10 +46,6 @@ CFMaDetailSliderMetrics class >> labelY [
 	^ 17.0
 ]
 
-{ #category : 'measurement' }
-CFMaDetailSliderMetrics class >> contentHeightBeforeLabels [
-	^ self labelY
-]
 
 { #category : 'track' }
 CFMaDetailSliderMetrics class >> trackEndOcclusion [

@@ -8,35 +8,33 @@ Class {
 
 { #category : 'measure' }
 CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
-	| children minLabel currentLabel maxLabel desiredWidth desiredHeight labelHeight |
-	children := anElement children accountedByLayout.
-	minLabel := children at: 7.
-	currentLabel := children at: 8.
-	maxLabel := children at: 9.
+	| minLabel currentLabel maxLabel desiredWidth desiredHeight labelHeight |
+	minLabel := anElement minimumLabel.
+	currentLabel := anElement currentLabel.
+	maxLabel := anElement maximumLabel.
 	{ minLabel. currentLabel. maxLabel } do: [ :aLabel |
 		self measureChild: aLabel parentSpec: BlExtentMeasurementSpec unspecified ].
 	desiredWidth := anExtentSpec widthSpec isUnspecified
 		ifTrue: [ 180.0 ]
 		ifFalse: [ anExtentSpec widthSpec size ].
 	labelHeight := (minLabel measuredHeight max: currentLabel measuredHeight) max: maxLabel measuredHeight.
-	desiredHeight := CFMaDetailSliderMetrics contentHeightBeforeLabels + labelHeight.
+	desiredHeight := CFMaDetailSliderMetrics labelY + labelHeight.
 	anElement measuredExtent: (anExtentSpec sizeFor: desiredWidth @ desiredHeight).
 	self measureIgnored: anElement with: (BlExtentMeasurementSpec exact: anElement measuredExtent)
 ]
 
 { #category : 'layout' }
 CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBoundsUpdateContext [
-	| children track fill minTick middleTick maxTick thumb minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight trackInset trackWidth thumbExtent thumbCenterX tickExtent tickY labelY minX maxX currentX |
-	children := anElement children accountedByLayout.
-	track := children at: 1.
-	fill := children at: 2.
-	minTick := children at: 3.
-	middleTick := children at: 4.
-	maxTick := children at: 5.
-	thumb := children at: 6.
-	minLabel := children at: 7.
-	currentLabel := children at: 8.
-	maxLabel := children at: 9.
+	| track fill minTick middleTick maxTick thumb minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight trackInset trackWidth thumbExtent thumbCenterX tickExtent tickY labelY minX maxX currentX |
+	track := anElement sliderTrack.
+	fill := anElement sliderFill.
+	minTick := anElement minimumTick.
+	middleTick := anElement middleTick.
+	maxTick := anElement maximumTick.
+	thumb := anElement sliderThumb.
+	minLabel := anElement minimumLabel.
+	currentLabel := anElement currentLabel.
+	maxLabel := anElement maximumLabel.
 	fraction := anElement normalizedValue.
 	axisInset := CFMaDetailSliderMetrics axisInset.
 	axisStart := axisInset.
