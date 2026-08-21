@@ -201,22 +201,44 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
-	| aPopup aDropdownAptitude |
+	| aPopup aDropdownAptitude aCurrentValue aCurrentIndex |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
+	aCurrentValue := self memento readUsing: aDescription.
+	aCurrentIndex := aDescription options indexOf: aCurrentValue ifAbsent: [ 1 ].
 	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
 		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
-	aDropdownAptitude menuContainerDo: [ :aContainer |
-		aContainer
-			padding: BlInsets empty;
-			addAptitude: (BrStyleCommonAptitude new
-				default: [ :aStyle |
-					aStyle
-						background: (Color white alpha: 0.96);
-						border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
-						geometry: (BlRoundedRectangleGeometry cornerRadius: 6) ]) ].
+	aDropdownAptitude
+		withContainerAreaBuilders: {
+			self singleOptionPopupAreaBuilderForIndex: aCurrentIndex };
+		menuContainerDo: [ :aContainer |
+			aContainer
+				padding: BlInsets empty;
+				aptitude: (BrStyleCommonAptitude new
+					default: [ :aStyle |
+						aStyle
+							background: Color transparent;
+							border: BlBorder empty ]) ].
 	aPopup addAptitude: aDropdownAptitude.
 	^ aPopup
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> singleOptionPopupAreaBuilderForIndex: anIndex [
+	| selectedOffset |
+	selectedOffset := 4 + (((anIndex max: 1) - 1) * 24).
+	^ BlSteppedLayoutAreaBuilder new
+		mark: BlSteppedLayoutMark bottomRight;
+		direction: #right;
+		alignTopLeft;
+		bounds: [ :aState |
+			| left top |
+			left := (aState occupiedBounds left - 14)
+				max: aState containerPositionXWithPadding.
+			top := (aState occupiedBounds top - selectedOffset)
+				max: aState containerPositionYWithPadding.
+			left @ top corner: aState containerExtentWithPadding ];
+		yourself
 ]
 
 { #category : 'private - building' }
@@ -235,7 +257,10 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: 4);
-		background: Color transparent;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		background: (Color white alpha: 0.96);
+		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
+		addAptitude: BrShadowAptitude new;
 		items: aDescription options;
 		yourself.
 
