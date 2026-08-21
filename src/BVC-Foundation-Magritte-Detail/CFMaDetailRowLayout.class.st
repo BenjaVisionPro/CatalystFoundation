@@ -396,8 +396,7 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 
 	leadingChildren doWithIndex: [ :aChild :anIndex |
 		aChild
-			applyLayoutIn: (x @ (self centeredYFor: aChild top: y innerHeight: innerHeight)
-				extent: aChild measuredExtent)
+			applyLayoutIn: (x @ y extent: aChild measuredExtent)
 			context: aBlElementBoundsUpdateContext.
 		x := x + aChild measuredWidth.
 		anIndex < leadingChildren size ifTrue: [ x := x + accessoryGap ] ].
