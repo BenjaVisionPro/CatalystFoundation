@@ -18,8 +18,8 @@ CFMaDetailPopupElement >> initialize [
 	self
 		alignCenterLeft;
 		fitContent;
-		cellSpacing: 8;
-		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 12);
+		cellSpacing: 0;
+		padding: (BlInsets top: 2 right: 0 bottom: 2 left: 0);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: Color transparent;
 		border: BlBorder empty;
@@ -30,7 +30,10 @@ CFMaDetailPopupElement >> initialize [
 			focused: [ :aStyle | aStyle background: self popupBackgroundColor ]).
 
 	valueLabel := BrLabel new
-		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFontAndSize;
+			padding: BlInsets empty;
+			yourself);
 		fitContent;
 		yourself.
 
