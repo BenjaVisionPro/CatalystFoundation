@@ -18,7 +18,7 @@ CFMaDetailPopupOptionElement >> initialize [
 		hMatchParent;
 		vExact: 24;
 		padding: (BlInsets top: 0 right: 8 bottom: 0 left: 1);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
 		background: Color transparent;
 		border: BlBorder empty;
 		cellSpacing: 2.

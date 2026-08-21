@@ -22,7 +22,7 @@ CFMaDetailPopupElement >> initialize [
 		fitContent;
 		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-		background: Color transparent;
+		background: BlBackground transparent;
 		border: BlBorder empty;
 		beFocusable.
 
@@ -75,9 +75,9 @@ CFMaDetailPopupElement >> updatePopupAppearance [
 	isActive := popupOpen or: [ hovered or: [ self hasFocus ] ].
 	self background: (isActive
 		ifTrue: [ self popupBackgroundColor ]
-		ifFalse: [ Color transparent ]).
+		ifFalse: [ BlBackground transparent ]).
 	indicatorHost background: (isActive
-		ifTrue: [ Color transparent ]
+		ifTrue: [ BlBackground transparent ]
 		ifFalse: [ self popupBackgroundColor ])
 ]
 
