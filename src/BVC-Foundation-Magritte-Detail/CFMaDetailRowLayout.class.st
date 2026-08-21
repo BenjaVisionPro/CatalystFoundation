@@ -173,12 +173,22 @@ CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent 
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth [
-	"Keep the editor on the first line until its natural left edge would cross
-	the description's right edge plus the field gutter. The supporting text does
-	not participate in this decision: while inline it always spans the full body
-	width beneath both description and editor."
-	^ naturalDescriptionWidth + gap + naturalContentWidth > bodyWidth
+CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth content: aContent [
+	| fullWidthHeight inlineWidth inlineHeight |
+	aContent ifNil: [ ^ false ].
+
+	"BrEditor is horizontally match-parent by default, so an unspecified
+	measurement is not a meaningful intrinsic-width test. Measure the real two
+	candidates instead. If constraining the editor to the space beside the label
+	makes it taller than it is with the whole body width, the editor has started
+	to wrap internally. At that point the row wraps the editor instead."
+	self measure: aContent widthExactly: bodyWidth.
+	fullWidthHeight := aContent measuredHeight.
+	inlineWidth := (bodyWidth - naturalDescriptionWidth - gap) max: 0.0.
+	inlineWidth <= 0.0 ifTrue: [ ^ true ].
+	self measure: aContent widthExactly: inlineWidth.
+	inlineHeight := aContent measuredHeight.
+	^ inlineHeight > fullWidthHeight
 ]
 
 { #category : 'private - measurement' }
@@ -266,7 +276,7 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 	bodyWidth := (availableWidth - leadingWidth - accessoriesWidth - bodyGap) max: 0.0.
 
 	bodyHeight := (aSupporting notNil and: [ aContent notNil and: [
-		self shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth ] ])
+		self shouldWrapDescriptionWidth: naturalDescriptionWidth content: aContent ] ])
 		ifTrue: [ self measureWrappedDescription: aDescription supporting: aSupporting content: aContent ]
 		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth ].
 
