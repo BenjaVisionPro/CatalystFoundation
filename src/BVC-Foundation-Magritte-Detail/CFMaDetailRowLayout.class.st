@@ -174,10 +174,11 @@ CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent 
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth [
-	| halfWidth |
-	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
-	^ naturalContentWidth > halfWidth
-		or: [ naturalDescriptionWidth + gap + naturalContentWidth > bodyWidth ]
+	"Keep the editor on the first line until its natural left edge would cross
+	the description's right edge plus the field gutter. The supporting text does
+	not participate in this decision: while inline it always spans the full body
+	width beneath both description and editor."
+	^ naturalDescriptionWidth + gap + naturalContentWidth > bodyWidth
 ]
 
 { #category : 'private - measurement' }
