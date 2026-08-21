@@ -1,0 +1,71 @@
+Class {
+	#name : 'CFMaDetailRowLayoutConstraints',
+	#superclass : 'BlLayoutConstraints',
+	#instVars : [
+		'leading',
+		'description',
+		'content',
+		'accessory'
+	],
+	#category : 'BVC-Foundation-Magritte-Detail-Layout',
+	#package : 'BVC-Foundation-Magritte-Detail',
+	#tag : 'Layout'
+}
+
+{ #category : 'initialization' }
+CFMaDetailRowLayoutConstraints >> initialize [
+	super initialize.
+	self clearRole
+]
+
+{ #category : 'private' }
+CFMaDetailRowLayoutConstraints >> clearRole [
+	leading := false.
+	description := false.
+	content := false.
+	accessory := false
+]
+
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beLeading [
+	self clearRole.
+	leading := true
+]
+
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beDescription [
+	self clearRole.
+	description := true
+]
+
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beContent [
+	self clearRole.
+	content := true
+]
+
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beAccessory [
+	self clearRole.
+	accessory := true
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isLeading [
+	^ leading
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isDescription [
+	^ description
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isContent [
+	^ content
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isAccessory [
+	^ accessory
+]

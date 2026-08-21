@@ -66,3 +66,27 @@ CFMaDetailPresentationExamples >> presentationStencilCreatesFreshInstances [
 	self assert: (first groupConfigurationFor: 'General') ~~ (second groupConfigurationFor: 'General').
 	^ first
 ]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
+	<gtExample>
+	| aRow aLabel aContent aLayout |
+	aLayout := CFMaDetailRowLayout new.
+	aLabel := BrLabel new text: 'Name'; fitContent.
+	aContent := BrLabel new text: 'Jupiter'; fitContent.
+	aLabel constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beDescription ].
+	aContent constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beContent ].
+	aRow := BlElement new
+		layout: aLayout;
+		padding: (BlInsets all: 8);
+		hExact: 320;
+		vFitContent;
+		addChild: aLabel;
+		addChild: aContent;
+		yourself.
+
+	self assert: (aLabel constraints at: CFMaDetailRowLayout) isDescription.
+	self assert: (aContent constraints at: CFMaDetailRowLayout) isContent.
+	self assert: aRow layout == aLayout.
+	^ aRow
+]
