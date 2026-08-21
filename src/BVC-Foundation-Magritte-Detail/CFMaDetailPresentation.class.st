@@ -44,6 +44,29 @@ CFMaDetailPresentation >> newFieldConfiguration [
 	^ aConfiguration
 ]
 
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addBooleanField: aDescription [
+	| aBooleanElement aMemento aLabel |
+	aMemento := self memento.
+
+	aDescription blocStencil
+		ifNotNil: [ :aStencil |
+			aBooleanElement := aStencil
+				memento: aMemento;
+				description: aDescription;
+				asElement ]
+		ifNil: [
+			aBooleanElement := CFMaDetailBooleanElement new
+				fieldViewModel: (GtMagritteFieldViewModel new
+					memento: aMemento;
+					description: aDescription) ].
+
+	aLabel := self addFieldElement: aBooleanElement using: aDescription.
+	aDescription hasCustomLabels ifTrue: [
+		aLabel padding: aLabel padding + (BlInsets top: self defaultSpacing) ]
+]
+
 { #category : 'private - composition' }
 CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
 	| aSupportingElement aRow aFieldConfiguration aLeadingElement |

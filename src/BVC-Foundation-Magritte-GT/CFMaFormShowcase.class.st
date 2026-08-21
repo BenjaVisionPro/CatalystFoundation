@@ -228,7 +228,7 @@ CFMaFormShowcase >> editableIconLabelAndCommentDescription [
 		fieldConfigure: [ :field |
 			field icon
 				beLarge;
-				backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
+				backgroundColor: (Color r: 10 g: 132 b: 255 range: 255) ];
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
 		categories: #(presentation);
@@ -244,7 +244,7 @@ CFMaFormShowcase >> readOnlyIconLabelAndCommentDescription [
 		label: 'Read only icon + label + comment';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
 		fieldConfigure: [ :field |
-			field icon backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
+			field icon backgroundColor: (Color r: 10 g: 132 b: 255 range: 255) ];
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
 		categories: #(presentation);
@@ -384,7 +384,7 @@ CFMaFormShowcase >> priorityDescription [
 		label: 'Priority';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
 		fieldConfigure: [ :field |
-			field icon backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
+			field icon backgroundColor: (Color r: 10 g: 132 b: 255 range: 255) ];
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
 		categories: #(values);
