@@ -18,10 +18,14 @@ CFMaDetailPopupElement >> initialize [
 	hovered := false.
 	popupOpen := false.
 	self
-		layout: (CFMaDetailPopupLayout new gap: 12; yourself);
+		layout: CFMaDetailPopupLayout new;
 		fitContent;
-		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		padding: (BlInsets
+			top: (CFMaDetailPopupMetrics controlHeight - CFMaDetailPopupMetrics indicatorExtent y) / 2
+			right: CFMaDetailPopupMetrics controlRightInset
+			bottom: (CFMaDetailPopupMetrics controlHeight - CFMaDetailPopupMetrics indicatorExtent y) / 2
+			left: CFMaDetailPopupMetrics controlLeftInset);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics controlCornerRadius);
 		background: BlBackground transparent;
 		border: BlBorder empty;
 		beFocusable.
@@ -35,7 +39,7 @@ CFMaDetailPopupElement >> initialize [
 		yourself.
 
 	anIndicator := (FontAwesomeIcons icon: #chevronDoubleDown)
-		fitInto: 10 @ 10;
+		fitInto: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
 		yourself.
 	anIndicator constraintsDo: [ :c |
@@ -43,7 +47,7 @@ CFMaDetailPopupElement >> initialize [
 		c frame vertical alignCenter ].
 
 	indicatorHost := BrFrame new
-		size: 20 @ 20;
+		size: CFMaDetailPopupMetrics indicatorExtent;
 		geometry: BlCircleGeometry new;
 		background: self popupBackgroundColor;
 		padding: BlInsets empty;
@@ -66,7 +70,7 @@ CFMaDetailPopupElement >> initialize [
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> popupBackgroundColor [
-	^ Color black alpha: 0.1
+	^ CFMaDetailPopupMetrics controlBackgroundColor
 ]
 
 { #category : 'private - appearance' }

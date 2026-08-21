@@ -16,12 +16,16 @@ CFMaDetailPopupOptionElement >> initialize [
 	super initialize.
 	self
 		hMatchParent;
-		vExact: 24;
-		padding: (BlInsets top: 0 right: 8 bottom: 0 left: 1);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
+		vExact: CFMaDetailPopupMetrics optionHeight;
+		padding: (BlInsets
+			top: 0
+			right: CFMaDetailPopupMetrics optionRightInset
+			bottom: 0
+			left: CFMaDetailPopupMetrics optionLeftInset);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics optionCornerRadius);
 		background: Color transparent;
 		border: BlBorder empty;
-		cellSpacing: 2.
+		cellSpacing: CFMaDetailPopupMetrics checkLabelGap.
 
 	checkLabelAptitude := BrGlamorousLabelAptitude new
 		glamorousRegularFontAndSize;
@@ -30,7 +34,7 @@ CFMaDetailPopupOptionElement >> initialize [
 	checkLabel := BrLabel new
 		aptitude: checkLabelAptitude;
 		text: '✓';
-		hExact: 14;
+		hExact: CFMaDetailPopupMetrics checkWidth;
 		vFitContent;
 		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.

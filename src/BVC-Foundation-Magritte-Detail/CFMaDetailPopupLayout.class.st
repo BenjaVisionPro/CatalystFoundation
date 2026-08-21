@@ -1,29 +1,13 @@
 Class {
 	#name : 'CFMaDetailPopupLayout',
 	#superclass : 'BlLayout',
-	#instVars : [
-		'gap'
-	],
 	#category : 'BVC-Foundation-Magritte-Detail-Layout',
 	#package : 'BVC-Foundation-Magritte-Detail',
 	#tag : 'Layout'
 }
 
-{ #category : 'initialization' }
-CFMaDetailPopupLayout >> initialize [
-	super initialize.
-	gap := 12.0
-]
 
-{ #category : 'accessing' }
-CFMaDetailPopupLayout >> gap [
-	^ gap
-]
 
-{ #category : 'accessing' }
-CFMaDetailPopupLayout >> gap: aNumber [
-	gap := aNumber asFloat
-]
 
 { #category : 'measure' }
 CFMaDetailPopupLayout >> measure: anElement with: anExtentSpec [
@@ -40,7 +24,7 @@ CFMaDetailPopupLayout >> measure: anElement with: anExtentSpec [
 	padding := anElement padding.
 	desiredWidth := padding width
 		+ (label ifNil: [ 0.0 ] ifNotNil: [ label measuredWidth ])
-		+ ((label notNil and: [ indicator notNil ]) ifTrue: [ gap ] ifFalse: [ 0.0 ])
+		+ ((label notNil and: [ indicator notNil ]) ifTrue: [ CFMaDetailPopupMetrics labelIndicatorGap ] ifFalse: [ 0.0 ])
 		+ (indicator ifNil: [ 0.0 ] ifNotNil: [ indicator measuredWidth ]).
 	desiredHeight := padding height + ((label ifNil: [ 0.0 ] ifNotNil: [ label measuredHeight ])
 		max: (indicator ifNil: [ 0.0 ] ifNotNil: [ indicator measuredHeight ])).
@@ -66,7 +50,7 @@ CFMaDetailPopupLayout >> layout: anElement in: aRectangle context: aBlElementBou
 			context: aBlElementBoundsUpdateContext.
 		x := x + label measuredWidth ].
 
-	(label notNil and: [ indicator notNil ]) ifTrue: [ x := x + gap ].
+	(label notNil and: [ indicator notNil ]) ifTrue: [ x := x + CFMaDetailPopupMetrics labelIndicatorGap ].
 	indicator ifNotNil: [
 		indicatorY := padding top + ((innerHeight - indicator measuredHeight) / 2.0).
 		indicator

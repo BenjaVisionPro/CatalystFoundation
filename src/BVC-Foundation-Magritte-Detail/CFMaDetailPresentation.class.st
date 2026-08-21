@@ -204,10 +204,7 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 	| aPopup aDropdownAptitude |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
 	aDropdownAptitude := CFMaDetailDropdownAptitude
-		handle: [
-			(self newSingleOptionPopupDisplayUsing: aDescription)
-				visibility: BlVisibility hidden;
-				yourself ]
+		handle: [ self newSingleOptionPopupHandleUsing: aDescription ]
 		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
 	aDropdownAptitude
 		withContainerAreaBuilders: {
@@ -234,8 +231,8 @@ CFMaDetailPresentation >> singleOptionPopupAreaBuilderUsing: aDescription [
 			| currentValue currentIndex selectedOffset left top |
 			currentValue := self memento readUsing: aDescription.
 			currentIndex := aDescription options indexOf: currentValue ifAbsent: [ 1 ].
-			selectedOffset := 5 + (((currentIndex max: 1) - 1) * 24).
-			left := (aState occupiedBounds left - 10)
+			selectedOffset := CFMaDetailPopupMetrics selectedRowOffsetForIndex: currentIndex.
+			left := (aState occupiedBounds left + CFMaDetailPopupMetrics menuHorizontalOffset)
 				max: aState containerPositionXWithPadding.
 			top := (aState occupiedBounds top - selectedOffset)
 				max: aState containerPositionYWithPadding.
@@ -262,8 +259,8 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 						ifTrue: [ aPopup fireEvent: BrDropdownHideWish new ] ] ];
 		hFitContent;
 		vFitContent;
-		padding: (BlInsets all: 5);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
 		background: (Color white alpha: 0.96);
 		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
 		addAptitude: BrShadowAptitude new;
@@ -287,6 +284,16 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 				element: aPopup.
 			aPopup fireEvent: BrDropdownHideWish new ] ].
 	^ aList
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newSingleOptionPopupHandleUsing: aDescription [
+	| aValue |
+	aValue := self memento readUsing: aDescription.
+	^ CFMaDetailPopupElement new
+		text: (aDescription displayStringFor: aValue);
+		visibility: BlVisibility hidden;
+		yourself
 ]
 
 { #category : 'private - building' }
