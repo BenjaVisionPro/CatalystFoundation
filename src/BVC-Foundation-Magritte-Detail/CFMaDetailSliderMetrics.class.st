@@ -43,7 +43,7 @@ CFMaDetailSliderMetrics class >> tickY [
 
 { #category : 'labels' }
 CFMaDetailSliderMetrics class >> labelY [
-	^ 18.0
+	^ 17.0
 ]
 
 { #category : 'measurement' }
