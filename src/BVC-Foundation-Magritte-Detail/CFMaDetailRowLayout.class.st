@@ -4,8 +4,14 @@ Class {
 	#instVars : [
 		'gap',
 		'accessoryGap',
+		'supportingGap',
+		'wrapped',
+		'bodyWidth',
 		'descriptionWidth',
+		'supportingWidth',
 		'contentWidth',
+		'firstLineHeight',
+		'secondLineTop',
 		'baseline'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail-Layout',
@@ -23,8 +29,14 @@ CFMaDetailRowLayout >> initialize [
 	super initialize.
 	gap := 12.0.
 	accessoryGap := 6.0.
+	supportingGap := 1.0.
+	wrapped := false.
+	bodyWidth := 0.0.
 	descriptionWidth := 0.0.
+	supportingWidth := 0.0.
 	contentWidth := 0.0.
+	firstLineHeight := 0.0.
+	secondLineTop := 0.0.
 	baseline := nil
 ]
 
@@ -48,6 +60,16 @@ CFMaDetailRowLayout >> accessoryGap: aNumber [
 	accessoryGap := aNumber asFloat
 ]
 
+{ #category : 'accessing' }
+CFMaDetailRowLayout >> supportingGap [
+	^ supportingGap
+]
+
+{ #category : 'accessing' }
+CFMaDetailRowLayout >> supportingGap: aNumber [
+	supportingGap := aNumber asFloat
+]
+
 { #category : 'private - children' }
 CFMaDetailRowLayout >> childrenWithRole: aBlock in: anElement [
 	^ anElement children accountedByLayout
@@ -69,6 +91,11 @@ CFMaDetailRowLayout >> leadingChildrenIn: anElement [
 { #category : 'private - children' }
 CFMaDetailRowLayout >> descriptionChildIn: anElement [
 	^ self firstChildWithRole: [ :c | c isDescription ] in: anElement
+]
+
+{ #category : 'private - children' }
+CFMaDetailRowLayout >> supportingChildIn: anElement [
+	^ self firstChildWithRole: [ :c | c isSupporting ] in: anElement
 ]
 
 { #category : 'private - children' }
@@ -101,6 +128,13 @@ CFMaDetailRowLayout >> totalMeasuredWidthOf: aCollection spacing: aSpacing [
 ]
 
 { #category : 'private - measurement' }
+CFMaDetailRowLayout >> maximumMeasuredHeightOf: aCollection [
+	^ aCollection
+		inject: 0.0
+		into: [ :aMaximum :aChild | aMaximum max: aChild measuredHeight ]
+]
+
+{ #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineFor: firstChild and: secondChild [
 	| firstBaseline secondBaseline |
 	firstBaseline := (firstChild notNil and: [ firstChild supportsBaseline ])
@@ -114,29 +148,103 @@ CFMaDetailRowLayout >> baselineFor: firstChild and: secondChild [
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> regionCountLeading: leadingChildren description: aDescription content: aContent accessories: accessoryChildren [
-	| aCount |
-	aCount := 0.
-	leadingChildren ifNotEmpty: [ aCount := aCount + 1 ].
-	aDescription ifNotNil: [ aCount := aCount + 1 ].
-	aContent ifNotNil: [ aCount := aCount + 1 ].
-	accessoryChildren ifNotEmpty: [ aCount := aCount + 1 ].
-	^ aCount
+CFMaDetailRowLayout >> measure: aChild widthAtMost: aWidth [
+	aChild ifNil: [ ^ self ].
+	self
+		measureChild: aChild
+		parentSpec: ((BlMeasurementSpec atMost: (aWidth max: 0.0)) @ BlMeasurementSpec unspecified)
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> maximumMeasuredHeightOf: aCollection [
-	^ aCollection
-		inject: 0.0
-		into: [ :aMaximum :aChild | aMaximum max: aChild measuredHeight ]
+CFMaDetailRowLayout >> measure: aChild widthExactly: aWidth [
+	aChild ifNil: [ ^ self ].
+	self
+		measureChild: aChild
+		parentSpec: ((BlMeasurementSpec exact: (aWidth max: 0.0)) @ BlMeasurementSpec unspecified)
+]
+
+{ #category : 'private - measurement' }
+CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent accessories: accessoryChildren [
+	| aGap |
+	aGap := 0.0.
+	(leadingChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + gap ].
+	(accessoryChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + gap ].
+	^ aGap
+]
+
+{ #category : 'private - measurement' }
+CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth [
+	| halfWidth |
+	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
+	^ naturalContentWidth > halfWidth
+		or: [ naturalDescriptionWidth + gap + naturalContentWidth > bodyWidth ]
+]
+
+{ #category : 'private - measurement' }
+CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalContentWidth: naturalContentWidth [
+	| labelAvailableWidth descriptionTop contentTop supportingHeight |
+	wrapped := false.
+	contentWidth := aContent
+		ifNil: [ 0.0 ]
+		ifNotNil: [ naturalContentWidth min: bodyWidth ].
+	labelAvailableWidth := aContent
+		ifNil: [ bodyWidth ]
+		ifNotNil: [ (bodyWidth - contentWidth - gap) max: 0.0 ].
+	descriptionWidth := labelAvailableWidth.
+	supportingWidth := bodyWidth.
+
+	self measure: aDescription widthAtMost: descriptionWidth.
+	self measure: aContent widthAtMost: contentWidth.
+	self measure: aSupporting widthExactly: supportingWidth.
+
+	baseline := self baselineFor: aDescription and: aContent.
+	descriptionTop := 0.0.
+	contentTop := 0.0.
+	baseline ifNotNil: [
+		descriptionTop := baseline - aDescription baselineOffset.
+		contentTop := baseline - aContent baselineOffset ].
+	firstLineHeight := 0.0.
+	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
+	aContent ifNotNil: [ firstLineHeight := firstLineHeight max: contentTop + aContent measuredHeight ].
+
+	supportingHeight := aSupporting ifNil: [ 0.0 ] ifNotNil: [ aSupporting measuredHeight ].
+	secondLineTop := aSupporting
+		ifNil: [ firstLineHeight ]
+		ifNotNil: [ firstLineHeight + supportingGap ].
+	^ aSupporting
+		ifNil: [ firstLineHeight ]
+		ifNotNil: [ secondLineTop + supportingHeight ]
+]
+
+{ #category : 'private - measurement' }
+CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupporting content: aContent [
+	| halfWidth secondLineHeight |
+	wrapped := true.
+	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
+	descriptionWidth := bodyWidth.
+	supportingWidth := halfWidth.
+	contentWidth := halfWidth.
+
+	self measure: aDescription widthAtMost: descriptionWidth.
+	self measure: aSupporting widthExactly: supportingWidth.
+	self measure: aContent widthExactly: contentWidth.
+
+	baseline := nil.
+	firstLineHeight := aDescription ifNil: [ 0.0 ] ifNotNil: [ aDescription measuredHeight ].
+	secondLineTop := firstLineHeight + supportingGap.
+	secondLineHeight := 0.0.
+	aSupporting ifNotNil: [ secondLineHeight := secondLineHeight max: aSupporting measuredHeight ].
+	aContent ifNotNil: [ secondLineHeight := secondLineHeight max: aContent measuredHeight ].
+	^ secondLineTop + secondLineHeight
 ]
 
 { #category : 'measure' }
 CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
-	| padding leadingChildren aDescription aContent accessoryChildren leadingWidth accessoriesWidth regionCount regionGaps availableWidth flexibleWidth naturalDescriptionWidth naturalContentWidth contentIsFlexible desiredWidth contentHeight descriptionTop contentTop desiredHeight |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren leadingWidth accessoriesWidth bodyPresent bodyGap naturalDescriptionWidth naturalContentWidth availableWidth bodyHeight contentHeight desiredWidth desiredHeight |
 	padding := aRow padding.
 	leadingChildren := self leadingChildrenIn: aRow.
 	aDescription := self descriptionChildIn: aRow.
+	aSupporting := self supportingChildIn: aRow.
 	aContent := self contentChildIn: aRow.
 	accessoryChildren := self accessoryChildrenIn: aRow.
 
@@ -147,59 +255,26 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 
 	leadingWidth := self totalMeasuredWidthOf: leadingChildren spacing: accessoryGap.
 	accessoriesWidth := self totalMeasuredWidthOf: accessoryChildren spacing: accessoryGap.
-	regionCount := self
-		regionCountLeading: leadingChildren
-		description: aDescription
-		content: aContent
-		accessories: accessoryChildren.
-	regionGaps := ((regionCount - 1) max: 0) * gap.
-
+	bodyPresent := aDescription notNil or: [ aSupporting notNil or: [ aContent notNil ] ].
+	bodyGap := self bodyGapLeading: leadingChildren bodyPresent: bodyPresent accessories: accessoryChildren.
 	naturalDescriptionWidth := aDescription ifNil: [ 0.0 ] ifNotNil: [ aDescription measuredWidth ].
 	naturalContentWidth := aContent ifNil: [ 0.0 ] ifNotNil: [ aContent measuredWidth ].
 
 	availableWidth := anExtentSpec widthSpec isUnspecified
-		ifTrue: [ leadingWidth + regionGaps + naturalDescriptionWidth + naturalContentWidth + accessoriesWidth ]
+		ifTrue: [
+			leadingWidth + bodyGap + accessoriesWidth + naturalDescriptionWidth
+				+ (aContent ifNil: [ 0.0 ] ifNotNil: [ gap + naturalContentWidth ]) ]
 		ifFalse: [ (anExtentSpec widthSpec size - padding width) max: 0.0 ].
-	flexibleWidth := (availableWidth - leadingWidth - accessoriesWidth - regionGaps) max: 0.0.
+	bodyWidth := (availableWidth - leadingWidth - accessoriesWidth - bodyGap) max: 0.0.
 
-	contentIsFlexible := (aContent notNil
-		and: [ aContent constraints horizontal resizer isMatchParent ]).
+	bodyHeight := (aSupporting notNil and: [ aContent notNil and: [
+		self shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth ] ])
+		ifTrue: [ self measureWrappedDescription: aDescription supporting: aSupporting content: aContent ]
+		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalContentWidth: naturalContentWidth ].
 
-	aContent
-		ifNil: [
-			contentWidth := 0.0.
-			descriptionWidth := naturalDescriptionWidth min: flexibleWidth ]
-		ifNotNil: [
-			contentIsFlexible
-				ifTrue: [
-				descriptionWidth := naturalDescriptionWidth min: flexibleWidth.
-				contentWidth := (flexibleWidth - descriptionWidth) max: 0.0 ]
-				ifFalse: [
-				contentWidth := naturalContentWidth min: flexibleWidth.
-				descriptionWidth := naturalDescriptionWidth min: ((flexibleWidth - contentWidth) max: 0.0) ] ].
-
-	aDescription ifNotNil: [
-		self measureChild: aDescription parentSpec:
-			((BlMeasurementSpec atMost: descriptionWidth) @ BlMeasurementSpec unspecified) ].
-	aContent ifNotNil: [
-		self measureChild: aContent parentSpec:
-			(((contentIsFlexible
-				ifTrue: [ BlMeasurementSpec exact: contentWidth ]
-				ifFalse: [ BlMeasurementSpec atMost: contentWidth ]))
-				@ BlMeasurementSpec unspecified) ].
-
-	baseline := self baselineFor: aDescription and: aContent.
-	descriptionTop := 0.0.
-	contentTop := 0.0.
-	baseline ifNotNil: [
-		descriptionTop := baseline - aDescription baselineOffset.
-		contentTop := baseline - aContent baselineOffset ].
-
-	contentHeight := self maximumMeasuredHeightOf: leadingChildren.
+	contentHeight := bodyHeight.
+	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: leadingChildren).
 	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: accessoryChildren).
-	aDescription ifNotNil: [ contentHeight := contentHeight max: descriptionTop + aDescription measuredHeight ].
-	aContent ifNotNil: [ contentHeight := contentHeight max: contentTop + aContent measuredHeight ].
-
 	desiredWidth := availableWidth + padding width.
 	desiredHeight := contentHeight + padding height.
 	aRow measuredExtent: (anExtentSpec sizeFor: desiredWidth @ desiredHeight).
@@ -211,15 +286,61 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 	^ aTop + ((anInnerHeight - aChild measuredHeight) / 2.0)
 ]
 
+{ #category : 'private - layout' }
+CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSupporting content: aContent bodyX: bodyX bodyRight: bodyRight top: aTop context: aBlElementBoundsUpdateContext [
+	| descriptionY contentY contentX |
+	descriptionY := aTop.
+	contentY := aTop.
+	baseline ifNotNil: [
+		descriptionY := aTop + baseline - aDescription baselineOffset.
+		contentY := aTop + baseline - aContent baselineOffset ].
+
+	aDescription ifNotNil: [
+		aDescription
+			applyLayoutIn: (bodyX @ descriptionY extent: aDescription measuredWidth @ aDescription measuredHeight)
+			context: aBlElementBoundsUpdateContext ].
+
+	aContent ifNotNil: [
+		contentX := bodyRight - aContent measuredWidth.
+		aContent
+			applyLayoutIn: (contentX @ contentY extent: aContent measuredExtent)
+			context: aBlElementBoundsUpdateContext ].
+
+	aSupporting ifNotNil: [
+		aSupporting
+			applyLayoutIn: (bodyX @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
+			context: aBlElementBoundsUpdateContext ]
+]
+
+{ #category : 'private - layout' }
+CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSupporting content: aContent bodyX: bodyX top: aTop context: aBlElementBoundsUpdateContext [
+	aDescription ifNotNil: [
+		aDescription
+			applyLayoutIn: (bodyX @ aTop extent: aDescription measuredWidth @ aDescription measuredHeight)
+			context: aBlElementBoundsUpdateContext ].
+
+	aSupporting ifNotNil: [
+		aSupporting
+			applyLayoutIn: (bodyX @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
+			context: aBlElementBoundsUpdateContext ].
+
+	aContent ifNotNil: [
+		aContent
+			applyLayoutIn: ((bodyX + supportingWidth + gap) @ (aTop + secondLineTop)
+				extent: contentWidth @ aContent measuredHeight)
+			context: aBlElementBoundsUpdateContext ]
+]
+
 { #category : 'layout' }
 CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| padding leadingChildren aDescription aContent accessoryChildren x y innerHeight rightEdge descriptionY contentY contentX |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren x y innerHeight rightEdge bodyX bodyRight |
 	padding := aRow padding.
 	x := padding left.
 	y := padding top.
 	innerHeight := (aRectangle height - padding height) max: 0.0.
 	leadingChildren := self leadingChildrenIn: aRow.
 	aDescription := self descriptionChildIn: aRow.
+	aSupporting := self supportingChildIn: aRow.
 	aContent := self contentChildIn: aRow.
 	accessoryChildren := self accessoryChildrenIn: aRow.
 
@@ -231,6 +352,7 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 		x := x + aChild measuredWidth.
 		anIndex < leadingChildren size ifTrue: [ x := x + accessoryGap ] ].
 	leadingChildren ifNotEmpty: [ x := x + gap ].
+	bodyX := x.
 
 	rightEdge := aRectangle width - padding right.
 	accessoryChildren asArray reverseDo: [ :aChild |
@@ -242,29 +364,26 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 		aChild == accessoryChildren first
 			ifFalse: [ rightEdge := rightEdge - accessoryGap ] ].
 	accessoryChildren ifNotEmpty: [ rightEdge := rightEdge - gap ].
+	bodyRight := rightEdge.
 
-	descriptionY := y.
-	contentY := y.
-	baseline
-		ifNil: [
-			aDescription ifNotNil: [ descriptionY := self centeredYFor: aDescription top: y innerHeight: innerHeight ].
-			aContent ifNotNil: [ contentY := self centeredYFor: aContent top: y innerHeight: innerHeight ] ]
-		ifNotNil: [
-			descriptionY := y + baseline - aDescription baselineOffset.
-			contentY := y + baseline - aContent baselineOffset ].
-
-	aDescription ifNotNil: [
-		aDescription
-			applyLayoutIn: (x @ descriptionY extent: descriptionWidth @ aDescription measuredHeight)
-			context: aBlElementBoundsUpdateContext ].
-
-	aContent ifNotNil: [
-		contentX := aContent constraints horizontal resizer isMatchParent
-			ifTrue: [ x + descriptionWidth + (aDescription ifNil: [ 0.0 ] ifNotNil: [ gap ]) ]
-			ifFalse: [ rightEdge - contentWidth ].
-		aContent
-			applyLayoutIn: (contentX @ contentY extent: contentWidth @ aContent measuredHeight)
-			context: aBlElementBoundsUpdateContext ].
+	wrapped
+		ifTrue: [
+			self
+				layoutWrappedDescription: aDescription
+				supporting: aSupporting
+				content: aContent
+				bodyX: bodyX
+				top: y
+				context: aBlElementBoundsUpdateContext ]
+		ifFalse: [
+			self
+				layoutInlineDescription: aDescription
+				supporting: aSupporting
+				content: aContent
+				bodyX: bodyX
+				bodyRight: bodyRight
+				top: y
+				context: aBlElementBoundsUpdateContext ].
 
 	self layoutIgnored: aRow context: aBlElementBoundsUpdateContext
 ]

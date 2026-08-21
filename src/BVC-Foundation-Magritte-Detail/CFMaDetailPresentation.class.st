@@ -36,22 +36,17 @@ CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 
 { #category : 'private - composition' }
 CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	| aDescriptionElement aRow |
-	aDescriptionElement := self descriptionElementFor: aDescription label: aLabel.
+	| aSupportingElement aRow |
+	aSupportingElement := aDescription hasComment
+		ifTrue: [ self supportingElementFor: aDescription ]
+		ifFalse: [ nil ].
 	aRow := self
 		newRowLeading: nil
-		description: aDescriptionElement
+		description: aLabel
+		supporting: aSupportingElement
 		content: aFieldElement
 		accessories: #().
 	(self containerForDescription: aDescription) addChild: aRow
-]
-
-{ #category : 'private - composition' }
-CFMaDetailPresentation >> descriptionElementFor: aDescription label: aLabel [
-	aDescription hasComment ifFalse: [ ^ aLabel ].
-	^ CFMaDetailDescriptionElement new
-		primary: aLabel supporting: (self supportingElementFor: aDescription);
-		yourself
 ]
 
 { #category : 'private - composition' }
@@ -74,7 +69,7 @@ CFMaDetailPresentation >> supportingElementFor: aDescription [
 ]
 
 { #category : 'private - composition' }
-CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescriptionElement content: aContentElement accessories: accessoryElements [
+CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescriptionElement supporting: aSupportingElement content: aContentElement accessories: accessoryElements [
 	| aRow |
 	aRow := BlElement new
 		layout: CFMaDetailRowLayout new;
@@ -94,6 +89,10 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 		aDescriptionElement margin: BlInsets empty.
 		aDescriptionElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beDescription ].
 		aRow addChild: aDescriptionElement ].
+	aSupportingElement ifNotNil: [
+		aSupportingElement margin: BlInsets empty.
+		aSupportingElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beSupporting ].
+		aRow addChild: aSupportingElement ].
 	aContentElement ifNotNil: [
 		aContentElement
 			margin: BlInsets empty;

@@ -4,6 +4,7 @@ Class {
 	#instVars : [
 		'leading',
 		'description',
+		'supporting',
 		'content',
 		'accessory'
 	],
@@ -22,6 +23,7 @@ CFMaDetailRowLayoutConstraints >> initialize [
 CFMaDetailRowLayoutConstraints >> clearRole [
 	leading := false.
 	description := false.
+	supporting := false.
 	content := false.
 	accessory := false
 ]
@@ -36,6 +38,12 @@ CFMaDetailRowLayoutConstraints >> beLeading [
 CFMaDetailRowLayoutConstraints >> beDescription [
 	self clearRole.
 	description := true
+]
+
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beSupporting [
+	self clearRole.
+	supporting := true
 ]
 
 { #category : 'api - role' }
@@ -58,6 +66,11 @@ CFMaDetailRowLayoutConstraints >> isLeading [
 { #category : 'testing' }
 CFMaDetailRowLayoutConstraints >> isDescription [
 	^ description
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isSupporting [
+	^ supporting
 ]
 
 { #category : 'testing' }

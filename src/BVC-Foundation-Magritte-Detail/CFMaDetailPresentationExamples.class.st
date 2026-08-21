@@ -131,16 +131,18 @@ CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
 
 	aRow := aPresentation
 		newRowLeading: aLeading
-		description: aDescription
+		description: aDescription primaryElement
+		supporting: aDescription supportingElement
 		content: aContent
 		accessories: { firstAccessory. secondAccessory }.
 
 	self assert: (aLeading constraints at: CFMaDetailRowLayout) isLeading.
-	self assert: (aDescription constraints at: CFMaDetailRowLayout) isDescription.
+	self assert: (aDescription primaryElement constraints at: CFMaDetailRowLayout) isDescription.
+	self assert: (aDescription supportingElement constraints at: CFMaDetailRowLayout) isSupporting.
 	self assert: (aContent constraints at: CFMaDetailRowLayout) isContent.
 	self assert: (firstAccessory constraints at: CFMaDetailRowLayout) isAccessory.
 	self assert: (secondAccessory constraints at: CFMaDetailRowLayout) isAccessory.
-	self assert: aRow children size equals: 5.
+	self assert: aRow children size equals: 6.
 	^ aRow
 ]
 
@@ -161,6 +163,7 @@ CFMaDetailPresentationExamples >> detailRowGoneAccessoryDoesNotParticipateInLayo
 	aRow := aPresentation
 		newRowLeading: nil
 		description: aDescription
+		supporting: nil
 		content: aContent
 		accessories: { aVisibleAccessory. aGoneAccessory }.
 	accountedChildren := aRow children accountedByLayout.
