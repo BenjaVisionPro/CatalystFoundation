@@ -391,10 +391,17 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 			context: aBlElementBoundsUpdateContext ].
 
 	aContent ifNotNil: [
-		contentX := bodyX + supportingWidth + gap + (contentWidth - aContent measuredWidth).
-		aContent
-			applyLayoutIn: (contentX @ contentY extent: aContent measuredExtent)
-			context: aBlElementBoundsUpdateContext ]
+		(self contentUsesAvailableWidth: aContent)
+			ifTrue: [
+				contentX := bodyX + supportingWidth + gap.
+				aContent
+					applyLayoutIn: (contentX @ contentY extent: contentWidth @ aContent measuredHeight)
+					context: aBlElementBoundsUpdateContext ]
+			ifFalse: [
+				contentX := bodyX + supportingWidth + gap + (contentWidth - aContent measuredWidth).
+				aContent
+					applyLayoutIn: (contentX @ contentY extent: aContent measuredExtent)
+					context: aBlElementBoundsUpdateContext ] ]
 ]
 
 { #category : 'layout' }
