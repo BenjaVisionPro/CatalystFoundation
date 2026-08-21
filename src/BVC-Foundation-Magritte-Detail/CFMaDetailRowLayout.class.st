@@ -62,10 +62,10 @@ CFMaDetailRowLayout >> measureNatural: aChild [
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineFor: firstChild and: secondChild [
 	| firstBaseline secondBaseline |
-	firstBaseline := firstChild notNil and: [ firstChild supportsBaseline ]
+	firstBaseline := (firstChild notNil and: [ firstChild supportsBaseline ])
 		ifTrue: [ firstChild baselineOffset ]
 		ifFalse: [ nil ].
-	secondBaseline := secondChild notNil and: [ secondChild supportsBaseline ]
+	secondBaseline := (secondChild notNil and: [ secondChild supportsBaseline ])
 		ifTrue: [ secondChild baselineOffset ]
 		ifFalse: [ nil ].
 	(firstBaseline notNil and: [ secondBaseline notNil ]) ifFalse: [ ^ nil ].
