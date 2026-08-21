@@ -7,6 +7,13 @@ Class {
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
+
+{ #category : 'initialization' }
+CFMaDetailBooleanElement >> initialize [
+	super initialize.
+	self padding: (BlInsets right: CFMaDetailScalarFieldMetrics trailingControlInset)
+]
+
 { #category : 'initialization' }
 CFMaDetailBooleanElement >> initializeCheckboxElement [
 	checkboxElement := BrToggle new

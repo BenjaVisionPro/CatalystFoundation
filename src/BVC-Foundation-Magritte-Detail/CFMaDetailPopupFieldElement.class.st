@@ -14,7 +14,7 @@ CFMaDetailPopupFieldElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		padding: BlInsets empty;
+		padding: (BlInsets right: CFMaDetailScalarFieldMetrics trailingControlInset);
 		margin: BlInsets empty;
 		background: Color transparent;
 		border: BlBorder empty
