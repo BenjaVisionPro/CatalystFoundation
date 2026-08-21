@@ -14,6 +14,19 @@ CFMaDetailPresentation >> initialize [
 	groupConfigurations := Dictionary new
 ]
 
+{ #category : 'api - building' }
+CFMaDetailPresentation >> build [
+	self form background: self formBackgroundPaint.
+	^ super build
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailPresentation >> formBackgroundPaint [
+	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
+		from: (Color black alpha: 0.06)
+		to: (Color black alpha: 0.04)
+]
+
 { #category : 'configuration' }
 CFMaDetailPresentation >> group: aGroup configure: aBlock [
 	| aConfiguration |

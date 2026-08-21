@@ -2,7 +2,9 @@ Class {
 	#name : 'CFMaDetailPopupElement',
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
-		'valueLabel'
+		'valueLabel',
+		'indicatorHost',
+		'hovered'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -10,8 +12,9 @@ Class {
 
 { #category : 'initialization' }
 CFMaDetailPopupElement >> initialize [
-	| anIndicatorHost anIndicator |
+	| anIndicator |
 	super initialize.
+	hovered := false.
 	self
 		alignCenter;
 		fitContent;
@@ -39,7 +42,7 @@ CFMaDetailPopupElement >> initialize [
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 
-	anIndicatorHost := BrFrame new
+	indicatorHost := BrFrame new
 		size: 20 @ 20;
 		geometry: BlCircleGeometry new;
 		background: self popupBackgroundColor;
@@ -49,13 +52,27 @@ CFMaDetailPopupElement >> initialize [
 
 	self
 		addChild: valueLabel;
-		addChild: anIndicatorHost
+		addChild: indicatorHost;
+		when: BlMouseEnterEvent do: [ :anEvent |
+			hovered := true.
+			self updateIndicatorBackground ];
+		when: BlMouseLeaveEvent do: [ :anEvent |
+			hovered := false.
+			self updateIndicatorBackground ];
+		when: BlFocusInEvent do: [ :anEvent | self updateIndicatorBackground ];
+		when: BlFocusOutEvent do: [ :anEvent | self updateIndicatorBackground ]
 ]
-
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> popupBackgroundColor [
-	^ Color r: 228 g: 228 b: 228 range: 255
+	^ Color black alpha: 0.1
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailPopupElement >> updateIndicatorBackground [
+	(hovered or: [ self hasFocus ])
+		ifTrue: [ indicatorHost background: Color transparent ]
+		ifFalse: [ indicatorHost background: self popupBackgroundColor ]
 ]
 
 { #category : 'layout' }
