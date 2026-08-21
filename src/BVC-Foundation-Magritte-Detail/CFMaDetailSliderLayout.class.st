@@ -46,8 +46,8 @@ CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBo
 	trackHeight := CFMaDetailSliderMetrics trackHeight.
 	thumbExtent := CFMaDetailSliderMetrics thumbExtent.
 	thumbCenterX := axisStart + (fraction * axisWidth).
-	track applyLayoutIn: (axisStart @ trackY extent: axisWidth @ trackHeight) context: aBlElementBoundsUpdateContext.
-	fill applyLayoutIn: (axisStart @ trackY extent: (thumbCenterX - axisStart) @ trackHeight) context: aBlElementBoundsUpdateContext.
+	track applyLayoutIn: (0.0 @ trackY extent: aRectangle width @ trackHeight) context: aBlElementBoundsUpdateContext.
+	fill applyLayoutIn: (0.0 @ trackY extent: thumbCenterX @ trackHeight) context: aBlElementBoundsUpdateContext.
 	thumb applyLayoutIn: ((thumbCenterX - (thumbExtent x / 2.0)) @ (trackY + (trackHeight / 2.0) - (thumbExtent y / 2.0)) extent: thumbExtent) context: aBlElementBoundsUpdateContext.
 	tickExtent := CFMaDetailSliderMetrics tickExtent.
 	tickY := CFMaDetailSliderMetrics tickY.
