@@ -93,12 +93,12 @@ CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 ]
 
 { #category : 'examples - layout' }
-CFMaDetailPresentationExamples >> detailDescriptionWithSupportingText [
+CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
 	<gtExample>
-	| aPrimary aSupporting aDescription |
-	aPrimary := BrLabel new
-		text: 'Wi-Fi';
-		fitContent.
+	| aPresentation aLeading aDescription aSupporting aContent firstAccessory secondAccessory aRow |
+	aPresentation := CFMaDetailPresentation new.
+	aLeading := BrLabel new text: '●'; fitContent.
+	aDescription := BrLabel new text: 'Wi-Fi'; fitContent.
 	aSupporting := BrEditor new
 		aptitude: BrGlamorousRegularEditorAptitude new;
 		beReadOnlyWithoutSelection;
@@ -108,37 +108,20 @@ CFMaDetailPresentationExamples >> detailDescriptionWithSupportingText [
 			c horizontal matchParent.
 			c vertical fitContent ];
 		yourself.
-	aDescription := CFMaDetailDescriptionElement new
-		primary: aPrimary supporting: aSupporting;
-		yourself.
-
-	self assert: aDescription primaryElement == aPrimary.
-	self assert: aDescription supportingElement == aSupporting.
-	self assert: aDescription supportsBaseline.
-	^ aDescription
-]
-
-{ #category : 'examples - layout' }
-CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
-	<gtExample>
-	| aPresentation aLeading aDescription aContent firstAccessory secondAccessory aRow |
-	aPresentation := CFMaDetailPresentation new.
-	aLeading := BrLabel new text: '●'; fitContent.
-	aDescription := self detailDescriptionWithSupportingText.
 	aContent := BrLabel new text: 'On'; fitContent.
 	firstAccessory := BrLabel new text: 'i'; fitContent.
 	secondAccessory := BrLabel new text: '›'; fitContent.
 
 	aRow := aPresentation
 		newRowLeading: aLeading
-		description: aDescription primaryElement
-		supporting: aDescription supportingElement
+		description: aDescription
+		supporting: aSupporting
 		content: aContent
 		accessories: { firstAccessory. secondAccessory }.
 
 	self assert: (aLeading constraints at: CFMaDetailRowLayout) isLeading.
-	self assert: (aDescription primaryElement constraints at: CFMaDetailRowLayout) isDescription.
-	self assert: (aDescription supportingElement constraints at: CFMaDetailRowLayout) isSupporting.
+	self assert: (aDescription constraints at: CFMaDetailRowLayout) isDescription.
+	self assert: (aSupporting constraints at: CFMaDetailRowLayout) isSupporting.
 	self assert: (aContent constraints at: CFMaDetailRowLayout) isContent.
 	self assert: (firstAccessory constraints at: CFMaDetailRowLayout) isAccessory.
 	self assert: (secondAccessory constraints at: CFMaDetailRowLayout) isAccessory.
