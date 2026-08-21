@@ -222,7 +222,7 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 { #category : 'private - building' }
 CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescription [
 	| aList aCurrentValue aCurrentIndex |
-	aDescription hasProperty: #blocItemStencil ifTrue: [
+	(aDescription hasProperty: #blocItemStencil) ifTrue: [
 		^ GtMagritteBuilderUtility
 			newSingleOptionDropdownContent: aPopup
 			memento: self memento
