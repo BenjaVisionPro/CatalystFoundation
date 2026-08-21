@@ -12,6 +12,9 @@ Class {
 		'minimumLabel',
 		'currentLabel',
 		'maximumLabel',
+		'minimumTick',
+		'middleTick',
+		'maximumTick',
 		'displayBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
@@ -45,11 +48,14 @@ CFMaDetailSliderElement >> initialize [
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	thumb := BlElement new
-		geometry: BlEllipseGeometry new;
+		geometry: BlCircleGeometry new;
 		background: Color white;
 		border: (BlBorder paint: (Color black alpha: 0.16) width: 0.5);
 		preventMeAndChildrenMouseEvents;
 		yourself.
+	minimumTick := self newScaleTick.
+	middleTick := self newScaleTick.
+	maximumTick := self newScaleTick.
 	minimumLabel := self newValueLabel.
 	currentLabel := self newValueLabel.
 	maximumLabel := self newValueLabel.
@@ -57,6 +63,9 @@ CFMaDetailSliderElement >> initialize [
 		addChild: track;
 		addChild: fill;
 		addChild: thumb;
+		addChild: minimumTick;
+		addChild: middleTick;
+		addChild: maximumTick;
 		addChild: minimumLabel;
 		addChild: currentLabel;
 		addChild: maximumLabel.
@@ -69,10 +78,22 @@ CFMaDetailSliderElement >> initialize [
 ]
 
 { #category : 'private - building' }
+CFMaDetailSliderElement >> newScaleTick [
+	^ BlElement new
+		geometry: BlCircleGeometry new;
+		background: (Color black alpha: 0.22);
+		preventMeAndChildrenMouseEvents;
+		yourself
+]
+
+{ #category : 'private - building' }
 CFMaDetailSliderElement >> newValueLabel [
 	^ BrLabel new
 		fitContent;
-		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFont;
+			fontSize: 10;
+			yourself);
 		text: '';
 		preventMeAndChildrenMouseEvents;
 		yourself
@@ -130,6 +151,6 @@ CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
 { #category : 'private - updating' }
 CFMaDetailSliderElement >> updateLabels [
 	minimumLabel text: (displayBlock cull: minimum).
-	currentLabel text: (displayBlock cull: value).
+	currentLabel text: (displayBlock cull: value rounded).
 	maximumLabel text: (displayBlock cull: maximum)
 ]
