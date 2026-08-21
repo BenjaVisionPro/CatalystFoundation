@@ -204,7 +204,10 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 	| aPopup aDropdownAptitude |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
 	aDropdownAptitude := CFMaDetailDropdownAptitude
-		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
+		handle: [
+			self newSingleOptionPopupDisplayUsing: aDescription
+				visibility: BlVisibility hidden;
+				yourself ]
 		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
 	aDropdownAptitude
 		withContainerAreaBuilders: {
