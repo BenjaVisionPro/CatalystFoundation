@@ -8,7 +8,7 @@ Class {
 
 { #category : 'measure' }
 CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
-	| children minLabel currentLabel maxLabel desiredWidth desiredHeight |
+	| children minLabel currentLabel maxLabel desiredWidth desiredHeight labelHeight |
 	children := anElement children accountedByLayout.
 	minLabel := children at: 7.
 	currentLabel := children at: 8.
@@ -18,14 +18,15 @@ CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
 	desiredWidth := anExtentSpec widthSpec isUnspecified
 		ifTrue: [ 180.0 ]
 		ifFalse: [ anExtentSpec widthSpec size ].
-	desiredHeight := 28.0 + ((minLabel measuredHeight max: currentLabel measuredHeight) max: maxLabel measuredHeight).
+	labelHeight := (minLabel measuredHeight max: currentLabel measuredHeight) max: maxLabel measuredHeight.
+	desiredHeight := CFMaDetailSliderMetrics contentHeightBeforeLabels + labelHeight.
 	anElement measuredExtent: (anExtentSpec sizeFor: desiredWidth @ desiredHeight).
 	self measureIgnored: anElement with: (BlExtentMeasurementSpec exact: anElement measuredExtent)
 ]
 
 { #category : 'layout' }
 CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBoundsUpdateContext [
-	| children track fill thumb minTick middleTick maxTick minLabel currentLabel maxLabel fraction trackY trackHeight thumbExtent thumbCenterX tickExtent tickY labelY currentX |
+	| children track fill thumb minTick middleTick maxTick minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight thumbExtent thumbCenterX tickExtent tickY labelY currentX |
 	children := anElement children accountedByLayout.
 	track := children at: 1.
 	fill := children at: 2.
@@ -37,19 +38,23 @@ CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBo
 	currentLabel := children at: 8.
 	maxLabel := children at: 9.
 	fraction := anElement normalizedValue.
-	trackY := 8.0.
-	trackHeight := 4.0.
-	thumbExtent := 20.0 @ 20.0.
-	thumbCenterX := fraction * aRectangle width.
-	track applyLayoutIn: (0.0 @ trackY extent: aRectangle width @ trackHeight) context: aBlElementBoundsUpdateContext.
-	fill applyLayoutIn: (0.0 @ trackY extent: thumbCenterX @ trackHeight) context: aBlElementBoundsUpdateContext.
+	axisInset := CFMaDetailSliderMetrics axisInset.
+	axisStart := axisInset.
+	axisEnd := aRectangle width - axisInset.
+	axisWidth := (axisEnd - axisStart) max: 0.0.
+	trackY := CFMaDetailSliderMetrics trackY.
+	trackHeight := CFMaDetailSliderMetrics trackHeight.
+	thumbExtent := CFMaDetailSliderMetrics thumbExtent.
+	thumbCenterX := axisStart + (fraction * axisWidth).
+	track applyLayoutIn: (axisStart @ trackY extent: axisWidth @ trackHeight) context: aBlElementBoundsUpdateContext.
+	fill applyLayoutIn: (axisStart @ trackY extent: (thumbCenterX - axisStart) @ trackHeight) context: aBlElementBoundsUpdateContext.
 	thumb applyLayoutIn: ((thumbCenterX - (thumbExtent x / 2.0)) @ (trackY + (trackHeight / 2.0) - (thumbExtent y / 2.0)) extent: thumbExtent) context: aBlElementBoundsUpdateContext.
-	tickExtent := 2.5 @ 2.5.
-	tickY := 20.0.
-	minTick applyLayoutIn: (0.0 @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
-	middleTick applyLayoutIn: (((aRectangle width - tickExtent x) / 2.0) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
-	maxTick applyLayoutIn: ((aRectangle width - tickExtent x) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
-	labelY := 25.0.
+	tickExtent := CFMaDetailSliderMetrics tickExtent.
+	tickY := CFMaDetailSliderMetrics tickY.
+	minTick applyLayoutIn: ((axisStart - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
+	middleTick applyLayoutIn: (((axisStart + (axisWidth / 2.0)) - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
+	maxTick applyLayoutIn: ((axisEnd - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
+	labelY := CFMaDetailSliderMetrics labelY.
 	minLabel applyLayoutIn: (0.0 @ labelY extent: minLabel measuredExtent) context: aBlElementBoundsUpdateContext.
 	maxLabel applyLayoutIn: ((aRectangle width - maxLabel measuredWidth) @ labelY extent: maxLabel measuredExtent) context: aBlElementBoundsUpdateContext.
 	currentX := (thumbCenterX - (currentLabel measuredWidth / 2.0))

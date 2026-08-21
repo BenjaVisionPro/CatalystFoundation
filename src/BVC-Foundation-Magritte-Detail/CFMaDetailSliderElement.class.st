@@ -48,7 +48,7 @@ CFMaDetailSliderElement >> initialize [
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	thumb := BlElement new
-		geometry: BlCircleGeometry new;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailSliderMetrics thumbCornerRadius);
 		background: Color white;
 		border: (BlBorder paint: (Color black alpha: 0.16) width: 0.5);
 		preventMeAndChildrenMouseEvents;
@@ -139,10 +139,11 @@ CFMaDetailSliderElement >> normalizedValue [
 
 { #category : 'private - interaction' }
 CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
-	| aWidth aFraction aValue |
-	aWidth := self width.
-	aWidth <= 0 ifTrue: [ ^ self ].
-	aFraction := ((anEvent localPosition x / aWidth) max: 0.0) min: 1.0.
+	| anAxisInset anAxisWidth aFraction aValue |
+	anAxisInset := CFMaDetailSliderMetrics axisInset.
+	anAxisWidth := self width - (anAxisInset * 2.0).
+	anAxisWidth <= 0 ifTrue: [ ^ self ].
+	aFraction := (((anEvent localPosition x - anAxisInset) / anAxisWidth) max: 0.0) min: 1.0.
 	aValue := minimum + ((maximum - minimum) * aFraction).
 	self value: aValue.
 	valueChangedBlock cull: aValue
