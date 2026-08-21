@@ -26,14 +26,14 @@ CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
 
 { #category : 'layout' }
 CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBoundsUpdateContext [
-	| children track fill thumb minTick middleTick maxTick minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight thumbExtent thumbCenterX tickExtent tickY labelY minX maxX currentX |
+	| children track fill minTick middleTick maxTick thumb minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight trackInset trackWidth thumbExtent thumbCenterX tickExtent tickY labelY minX maxX currentX |
 	children := anElement children accountedByLayout.
 	track := children at: 1.
 	fill := children at: 2.
-	thumb := children at: 3.
-	minTick := children at: 4.
-	middleTick := children at: 5.
-	maxTick := children at: 6.
+	minTick := children at: 3.
+	middleTick := children at: 4.
+	maxTick := children at: 5.
+	thumb := children at: 6.
 	minLabel := children at: 7.
 	currentLabel := children at: 8.
 	maxLabel := children at: 9.
@@ -44,10 +44,12 @@ CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBo
 	axisWidth := (axisEnd - axisStart) max: 0.0.
 	trackY := CFMaDetailSliderMetrics trackY.
 	trackHeight := CFMaDetailSliderMetrics trackHeight.
+	trackInset := CFMaDetailSliderMetrics trackEndOcclusion.
+	trackWidth := (aRectangle width - (trackInset * 2.0)) max: 0.0.
 	thumbExtent := CFMaDetailSliderMetrics thumbExtent.
 	thumbCenterX := axisStart + (fraction * axisWidth).
-	track applyLayoutIn: (0.0 @ trackY extent: aRectangle width @ trackHeight) context: aBlElementBoundsUpdateContext.
-	fill applyLayoutIn: (0.0 @ trackY extent: thumbCenterX @ trackHeight) context: aBlElementBoundsUpdateContext.
+	track applyLayoutIn: (trackInset @ trackY extent: trackWidth @ trackHeight) context: aBlElementBoundsUpdateContext.
+	fill applyLayoutIn: (trackInset @ trackY extent: ((thumbCenterX - trackInset) max: 0.0) @ trackHeight) context: aBlElementBoundsUpdateContext.
 	thumb applyLayoutIn: ((thumbCenterX - (thumbExtent x / 2.0)) @ (trackY + (trackHeight / 2.0) - (thumbExtent y / 2.0)) extent: thumbExtent) context: aBlElementBoundsUpdateContext.
 	tickExtent := CFMaDetailSliderMetrics tickExtent.
 	tickY := CFMaDetailSliderMetrics tickY.

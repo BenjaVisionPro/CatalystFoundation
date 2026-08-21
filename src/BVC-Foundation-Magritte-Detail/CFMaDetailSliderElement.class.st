@@ -62,10 +62,10 @@ CFMaDetailSliderElement >> initialize [
 	self
 		addChild: track;
 		addChild: fill;
-		addChild: thumb;
 		addChild: minimumTick;
 		addChild: middleTick;
 		addChild: maximumTick;
+		addChild: thumb;
 		addChild: minimumLabel;
 		addChild: currentLabel;
 		addChild: maximumLabel.
