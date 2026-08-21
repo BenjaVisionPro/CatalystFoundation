@@ -10,9 +10,9 @@ Class {
 CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
 	| children minLabel currentLabel maxLabel desiredWidth desiredHeight |
 	children := anElement children accountedByLayout.
-	minLabel := children fourth.
-	currentLabel := children fifth.
-	maxLabel := children sixth.
+	minLabel := children at: 4.
+	currentLabel := children at: 5.
+	maxLabel := children at: 6.
 	{ minLabel. currentLabel. maxLabel } do: [ :aLabel |
 		self measureChild: aLabel parentSpec: BlExtentMeasurementSpec unspecified ].
 	desiredWidth := anExtentSpec widthSpec isUnspecified
@@ -27,12 +27,12 @@ CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
 CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBoundsUpdateContext [
 	| children track fill thumb minLabel currentLabel maxLabel fraction trackY trackHeight thumbExtent thumbCenterX labelY currentX |
 	children := anElement children accountedByLayout.
-	track := children first.
-	fill := children second.
-	thumb := children third.
-	minLabel := children fourth.
-	currentLabel := children fifth.
-	maxLabel := children sixth.
+	track := children at: 1.
+	fill := children at: 2.
+	thumb := children at: 3.
+	minLabel := children at: 4.
+	currentLabel := children at: 5.
+	maxLabel := children at: 6.
 	fraction := anElement normalizedValue.
 	trackY := 6.0.
 	trackHeight := 4.0.
