@@ -79,7 +79,7 @@ CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	aRow := BlElement new
 		layout: aLayout;
 		padding: (BlInsets all: 8);
-		hExact: 320;
+		hMatchParent;
 		vFitContent;
 		addChild: aLabel;
 		addChild: aContent;
