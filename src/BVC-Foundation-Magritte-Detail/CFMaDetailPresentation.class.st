@@ -54,8 +54,9 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
 		background: Color transparent;
 		border: BlBorder empty;
 		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
-		hMatchParent;
-		vFitContent;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
 		addChild: aLabel;
 		addChild: aFieldElement;
 		yourself.
