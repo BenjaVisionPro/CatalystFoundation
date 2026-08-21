@@ -11,6 +11,7 @@ Class {
 
 { #category : 'initialization' }
 CFMaDetailPopupOptionElement >> initialize [
+	| checkLabelAptitude valueLabelAptitude |
 	super initialize.
 	self
 		hMatchParent;
@@ -21,38 +22,49 @@ CFMaDetailPopupOptionElement >> initialize [
 		border: BlBorder empty;
 		cellSpacing: 2.
 
+	checkLabelAptitude := BrGlamorousLabelAptitude new
+		glamorousRegularFontAndSize;
+		padding: BlInsets empty;
+		yourself.
 	checkLabel := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFontAndSize;
-			padding: BlInsets empty;
-			yourself);
-		text: ('✓' asRopedText foreground: Color transparent);
+		aptitude: checkLabelAptitude;
+		text: '✓';
 		hExact: 14;
 		vFitContent;
+		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.
 
+	valueLabelAptitude := BrGlamorousLabelAptitude new
+		glamorousRegularFontAndSize;
+		padding: BlInsets empty;
+		yourself.
 	valueLabel := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFontAndSize;
-			padding: BlInsets empty;
-			yourself);
+		aptitude: valueLabelAptitude;
 		fitContent;
+		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.
 
 	self
 		addChild: checkLabel;
 		addChild: valueLabel;
 		addAptitude: (BrStyleCommonAptitude new
-			default: [ :aStyle |
-				aStyle background: Color transparent.
-				checkLabel text: ('✓' asRopedText foreground: Color transparent).
-				valueLabel text: (valueLabel text asString asRopedText foreground: Color black) ];
+			default: [ :aStyle | aStyle background: Color transparent ];
 			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.06) ];
 			selected: [ :aStyle |
-				aStyle background: (Color r: 10 g: 132 b: 255 range: 255).
-				checkLabel text: ('✓' asRopedText foreground: Color white).
-				valueLabel text: (valueLabel text asString asRopedText foreground: Color white) ])
+				aStyle background: (Color r: 10 g: 132 b: 255 range: 255) ]);
+		addAptitude: (BrStyleCommonAptitude new
+			@ checkLabel;
+			deselected: [ :aStyle | aStyle hidden ];
+			selected: [ :aStyle | aStyle visible ]);
+		addAptitude: (BrStyleCommonAptitude new
+			@ checkLabelAptitude label;
+			default: [ :aStyle | aStyle foreground: Color white ]);
+		addAptitude: (BrStyleCommonAptitude new
+			@ valueLabelAptitude label;
+			default: [ :aStyle | aStyle foreground: Color black ];
+			selected: [ :aStyle | aStyle foreground: Color white ])
 ]
+
 
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> text [
@@ -61,5 +73,5 @@ CFMaDetailPopupOptionElement >> text [
 
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> text: aTextOrString [
-	valueLabel text: (aTextOrString asRopedText foreground: Color black)
+	valueLabel text: aTextOrString
 ]
