@@ -19,7 +19,7 @@ CFMaDetailPopupElement >> initialize [
 		alignCenterLeft;
 		fitContent;
 		cellSpacing: 8;
-		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
+		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 12);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: Color transparent;
 		border: BlBorder empty;
