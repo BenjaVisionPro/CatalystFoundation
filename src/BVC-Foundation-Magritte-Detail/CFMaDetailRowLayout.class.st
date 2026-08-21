@@ -316,7 +316,12 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth ].
 
 	contentHeight := bodyHeight.
-	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: leadingChildren).
+	leadingChildren ifNotEmpty: [
+		| leadingTop |
+		leadingTop := (aDescription notNil and: [ baseline notNil ])
+			ifTrue: [ baseline - (self baselineOffsetFor: aDescription) ]
+			ifFalse: [ 0.0 ].
+		contentHeight := contentHeight max: (leadingTop + (self maximumMeasuredHeightOf: leadingChildren)) ].
 	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: accessoryChildren).
 	desiredWidth := availableWidth + padding width.
 	desiredHeight := contentHeight + padding height.
@@ -383,7 +388,7 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 
 { #category : 'layout' }
 CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| padding leadingChildren aDescription aSupporting aContent accessoryChildren x y innerHeight rightEdge bodyX bodyRight |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren x y innerHeight rightEdge bodyX bodyRight leadingY |
 	padding := aRow padding.
 	x := padding left.
 	y := padding top.
@@ -394,9 +399,12 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 	aContent := self contentChildIn: aRow.
 	accessoryChildren := self accessoryChildrenIn: aRow.
 
+	leadingY := (aDescription notNil and: [ baseline notNil ])
+		ifTrue: [ y + baseline - (self baselineOffsetFor: aDescription) ]
+		ifFalse: [ y ].
 	leadingChildren doWithIndex: [ :aChild :anIndex |
 		aChild
-			applyLayoutIn: (x @ y extent: aChild measuredExtent)
+			applyLayoutIn: (x @ leadingY extent: aChild measuredExtent)
 			context: aBlElementBoundsUpdateContext.
 		x := x + aChild measuredWidth.
 		anIndex < leadingChildren size ifTrue: [ x := x + accessoryGap ] ].
