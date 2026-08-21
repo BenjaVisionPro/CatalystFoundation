@@ -8,7 +8,8 @@ Class {
 		'containersByGroup',
 		'ungroupedContainer',
 		'identityAffordanceEmitted',
-		'fieldConfigurationOverrides'
+		'fieldConfigurationOverrides',
+		'fieldConfigurations'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -22,12 +23,14 @@ CFMaPresentation >> initialize [
 	super initialize.
 	containersByGroup := Dictionary new.
 	identityAffordanceEmitted := false.
-	fieldConfigurationOverrides := Dictionary new
+	fieldConfigurationOverrides := Dictionary new.
+	fieldConfigurations := Dictionary new
 ]
 
 { #category : 'configuration - fields' }
 CFMaPresentation >> description: aDescription configure: aBlock [
 	fieldConfigurationOverrides at: aDescription put: aBlock.
+	fieldConfigurations removeKey: aDescription ifAbsent: [ ].
 	^ self
 ]
 
@@ -38,13 +41,16 @@ CFMaPresentation >> newFieldConfiguration [
 
 { #category : 'configuration - fields' }
 CFMaPresentation >> fieldConfigurationFor: aDescription [
-	| aConfiguration |
-	aConfiguration := self newFieldConfiguration.
-	aDescription configureField: aConfiguration.
-	fieldConfigurationOverrides
+	^ fieldConfigurations
 		at: aDescription
-		ifPresent: [ :aBlock | aBlock cull: aConfiguration ].
-	^ aConfiguration
+		ifAbsentPut: [
+			| aConfiguration |
+			aConfiguration := self newFieldConfiguration.
+			aDescription configureField: aConfiguration.
+			fieldConfigurationOverrides
+				at: aDescription
+				ifPresent: [ :aBlock | aBlock cull: aConfiguration ].
+			aConfiguration ]
 ]
 
 
@@ -126,6 +132,7 @@ CFMaPresentation >> addStringFieldUsing: aDescription [
 { #category : 'api - building' }
 CFMaPresentation >> build [
 	identityAffordanceEmitted := false.
+	fieldConfigurations removeAll.
 	containersByGroup removeAll.
 	ungroupedContainer := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].

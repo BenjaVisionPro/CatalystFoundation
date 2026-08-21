@@ -233,3 +233,90 @@ CFMaDetailPresentationExamples >> fieldConfigurationHintSurvivesDescriptionCopy 
 	self assert: aConfiguration icon isLarge.
 	^ aConfiguration
 ]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationDefaultsToTextRepresentation [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MANumberDescription new accessor: #priority; yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration representation class equals: CFMaTextConfiguration.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationPopupOwnsItsValues [
+	<gtExample>
+	| aDescription aConfiguration aPopupConfiguration |
+	aDescription := MANumberDescription new
+		accessor: #priority;
+		fieldConfigure: [ :field | field bePopup values: #(25 50 75 100) ];
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+	aPopupConfiguration := aConfiguration representation.
+
+	self assert: aPopupConfiguration class equals: CFMaPopupConfiguration.
+	self assert: aPopupConfiguration values equals: #(25 50 75 100).
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationRepresentationReplacementIsTyped [
+	<gtExample>
+	| aFieldConfiguration aPopupConfiguration aSliderConfiguration |
+	aFieldConfiguration := CFMaFieldConfiguration new.
+	aPopupConfiguration := aFieldConfiguration bePopup.
+	aPopupConfiguration values: #(25 50 75 100).
+	aSliderConfiguration := aFieldConfiguration beSlider.
+
+	self assert: aPopupConfiguration class equals: CFMaPopupConfiguration.
+	self assert: aSliderConfiguration class equals: CFMaSliderConfiguration.
+	self assert: aFieldConfiguration representation == aSliderConfiguration.
+	^ aFieldConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationRepresentationDoesNotDisturbIcon [
+	<gtExample>
+	| aFieldConfiguration |
+	aFieldConfiguration := CFMaFieldConfiguration new.
+	aFieldConfiguration icon beLarge.
+	aFieldConfiguration bePopup values: #(1 2 3).
+	aFieldConfiguration beSlider.
+
+	self assert: aFieldConfiguration icon isLarge.
+	self assert: aFieldConfiguration representation class equals: CFMaSliderConfiguration.
+	^ aFieldConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationPresentationOverrideReplacesRepresentation [
+	<gtExample>
+	| aDescription aPresentation aConfiguration |
+	aDescription := MANumberDescription new
+		accessor: #priority;
+		fieldConfigure: [ :field | field bePopup values: #(25 50 75 100) ];
+		yourself.
+	aPresentation := CFMaDetailPresentation new
+		description: aDescription configure: [ :field | field beText ];
+		yourself.
+	aConfiguration := aPresentation fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration representation class equals: CFMaTextConfiguration.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationIsResolvedOncePerPresentation [
+	<gtExample>
+	| aDescription aPresentation firstConfiguration secondConfiguration |
+	aDescription := MANumberDescription new accessor: #priority; yourself.
+	aPresentation := CFMaDetailPresentation new.
+	firstConfiguration := aPresentation fieldConfigurationFor: aDescription.
+	secondConfiguration := aPresentation fieldConfigurationFor: aDescription.
+
+	self assert: firstConfiguration == secondConfiguration.
+	^ firstConfiguration
+]
+

@@ -4,14 +4,44 @@ Class {
 	#name : 'CFMaFieldConfiguration',
 	#superclass : 'Object',
 	#instVars : [
-		'icon'
+		'icon',
+		'representation'
 	],
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
 	#tag : 'Field'
 }
 
+{ #category : 'initialization' }
+CFMaFieldConfiguration >> initialize [
+	super initialize.
+	representation := CFMaTextConfiguration new
+]
+
 { #category : 'accessing' }
 CFMaFieldConfiguration >> icon [
 	^ icon ifNil: [ icon := CFMaFieldIconConfiguration new ]
+]
+
+{ #category : 'accessing' }
+CFMaFieldConfiguration >> representation [
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beText [
+	representation := CFMaTextConfiguration new.
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
+CFMaFieldConfiguration >> bePopup [
+	representation := CFMaPopupConfiguration new.
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beSlider [
+	representation := CFMaSliderConfiguration new.
+	^ representation
 ]

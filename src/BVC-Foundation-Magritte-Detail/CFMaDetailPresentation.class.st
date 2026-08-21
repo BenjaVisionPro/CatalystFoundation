@@ -220,8 +220,34 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
+	self
+		addPopupFieldUsing: aDescription
+		values: aDescription options
+		display: [ :aValue | aDescription displayStringFor: aValue ]
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addNumberPopupUsing: aDescription configuration: aPopupConfiguration [
+	| someValues aCurrentValue |
+	someValues := aPopupConfiguration values.
+	someValues isEmpty ifTrue: [
+		self error: 'A popup field representation requires values' ].
+	aCurrentValue := self memento readUsing: aDescription.
+	(someValues includes: aCurrentValue) ifFalse: [
+		self error: 'The current field value must be present in the popup values' ].
+	self
+		addPopupFieldUsing: aDescription
+		values: someValues
+		display: [ :aValue | aDescription displayStringFor: aValue ]
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues display: aDisplayBlock [
 	| aPopup aField |
-	aPopup := self newSingleOptionPopupUsing: aDescription.
+	aPopup := self
+		newPopupUsing: aDescription
+		values: someValues
+		display: aDisplayBlock.
 	aField := CFMaDetailPopupFieldElement new
 		popup: aPopup;
 		yourself.
@@ -230,15 +256,20 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
+CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display: aDisplayBlock [
 	| aPopup aDropdownAptitude |
-	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
+	aPopup := self newPopupDisplayUsing: aDescription display: aDisplayBlock.
 	aDropdownAptitude := CFMaDetailDropdownAptitude
-		handle: [ self newSingleOptionPopupHandleUsing: aDescription ]
-		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
+		handle: [ self newPopupHandleUsing: aDescription display: aDisplayBlock ]
+		content: [
+			self
+				newPopupContent: aPopup
+				using: aDescription
+				values: someValues
+				display: aDisplayBlock ].
 	aDropdownAptitude
 		withContainerAreaBuilders: {
-			self singleOptionPopupAreaBuilderUsing: aDescription };
+			self popupAreaBuilderUsing: aDescription values: someValues };
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
@@ -252,7 +283,7 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> singleOptionPopupAreaBuilderUsing: aDescription [
+CFMaDetailPresentation >> popupAreaBuilderUsing: aDescription values: someValues [
 	^ BlSteppedLayoutAreaBuilder new
 		mark: BlSteppedLayoutMark bottomRight;
 		direction: #right;
@@ -260,7 +291,7 @@ CFMaDetailPresentation >> singleOptionPopupAreaBuilderUsing: aDescription [
 		bounds: [ :aState |
 			| currentValue currentIndex selectedOffset left top |
 			currentValue := self memento readUsing: aDescription.
-			currentIndex := aDescription options indexOf: currentValue ifAbsent: [ 1 ].
+			currentIndex := someValues indexOf: currentValue ifAbsent: [ 1 ].
 			selectedOffset := CFMaDetailPopupMetrics selectedRowOffsetForIndex: currentIndex.
 			left := (aState occupiedBounds left + CFMaDetailPopupMetrics menuHorizontalOffset)
 				max: aState containerPositionXWithPadding.
@@ -271,9 +302,10 @@ CFMaDetailPresentation >> singleOptionPopupAreaBuilderUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescription [
+CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: someValues display: aDisplayBlock [
 	| aList aCurrentValue aCurrentIndex |
-	(aDescription hasProperty: #blocItemStencil) ifTrue: [
+	((aDescription isKindOf: MAOptionDescription)
+		and: [ aDescription hasProperty: #blocItemStencil ]) ifTrue: [
 		^ GtMagritteBuilderUtility
 			newSingleOptionDropdownContent: aPopup
 			memento: self memento
@@ -283,7 +315,7 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
 			anItemElement
-				text: (aDescription displayStringFor: anItemObject);
+				text: (aDisplayBlock cull: anItemObject);
 				activateBlock: [
 					(aList isSelectedAt: anItemIndex)
 						ifTrue: [ aPopup fireEvent: BrDropdownHideWish new ] ] ];
@@ -294,11 +326,11 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 		background: (Color white alpha: 0.96);
 		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
 		addAptitude: BrShadowAptitude new;
-		items: aDescription options;
+		items: someValues;
 		yourself.
 
-	aCurrentValue := (self memento readUsing: aDescription).
-	aCurrentIndex := aDescription options indexOf: aCurrentValue ifAbsent: [ 0 ].
+	aCurrentValue := self memento readUsing: aDescription.
+	aCurrentIndex := someValues indexOf: aCurrentValue ifAbsent: [ 0 ].
 	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
 
 	aList when: BrSelectionChanged do: [ :anEvent |
@@ -317,28 +349,39 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> newSingleOptionPopupHandleUsing: aDescription [
+CFMaDetailPresentation >> newPopupHandleUsing: aDescription display: aDisplayBlock [
 	| aValue |
 	aValue := self memento readUsing: aDescription.
 	^ CFMaDetailPopupElement new
-		text: (aDescription displayStringFor: aValue);
+		text: (aDisplayBlock cull: aValue);
 		visibility: BlVisibility hidden;
 		yourself
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> newSingleOptionPopupDisplayUsing: aDescription [
+CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBlock [
 	| aPopup |
 	aPopup := CFMaDetailPopupElement new.
 	aPopup withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :thePopup :aSink |
-				| aValue aText |
+				| aValue |
 				aValue := aSink value currentValue.
-				aText := aDescription displayStringFor: aValue.
-				thePopup text: aText ].
+				thePopup text: (aDisplayBlock cull: aValue) ].
 		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
 	^ aPopup
 ]
 
+{ #category : 'visiting-description' }
+CFMaDetailPresentation >> visitNumberDescription: aDescription [
+	| aRepresentation |
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	(aRepresentation isKindOf: CFMaTextConfiguration) ifTrue: [
+		^ super visitNumberDescription: aDescription ].
+	(aRepresentation isKindOf: CFMaPopupConfiguration) ifTrue: [
+		^ self addNumberPopupUsing: aDescription configuration: aRepresentation ].
+	(aRepresentation isKindOf: CFMaSliderConfiguration) ifTrue: [
+		^ self error: 'Slider field representation is not implemented yet' ].
+	^ self error: 'Unsupported number field representation'
+]

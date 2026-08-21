@@ -10,6 +10,7 @@ Class {
 		'symbolValue',
 		'enabled',
 		'priority',
+		'popupPriority',
 		'status',
 		'multipleStatuses',
 		'duration',
@@ -103,6 +104,7 @@ CFMaFormShowcase >> initialize [
 	symbolValue := #foundation.
 	enabled := true.
 	priority := 60.
+	popupPriority := 75.
 	status := #active.
 	multipleStatuses := #(draft active).
 	duration := Duration days: 1 hours: 2 minutes: 3 seconds: 4.
@@ -392,6 +394,35 @@ CFMaFormShowcase >> priorityDescription [
 		beRequired;
 		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ]
 			labelled: 'Priority must be between 0 and 100';
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> popupPriority [
+	^ popupPriority
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> popupPriority: aNumber [
+	popupPriority := aNumber
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> popupPriorityDescription [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #popupPriority;
+		label: 'Popup priority';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		fieldConfigure: [ :field |
+			field icon backgroundColor: (Color r: 10 g: 132 b: 255 range: 255).
+			field bePopup values: #(0 25 50 75 100) ];
+		comment: 'The same bounded numeric semantics represented as an explicit popup.';
+		group: 'Fields';
+		categories: #(values);
+		priority: 65;
+		min: 0;
+		max: 100;
 		yourself
 ]
 
