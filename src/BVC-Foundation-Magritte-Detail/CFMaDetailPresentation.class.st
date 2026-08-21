@@ -373,6 +373,37 @@ CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBl
 	^ aPopup
 ]
 
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addNumberSliderUsing: aDescription configuration: aSliderConfiguration [
+	| aMinimum aMaximum aSlider |
+	aMinimum := aDescription min.
+	aMaximum := aDescription max.
+	(aMinimum isNil or: [ aMaximum isNil ]) ifTrue: [
+		self error: 'A slider field representation requires both minimum and maximum values' ].
+	aMinimum < aMaximum ifFalse: [
+		self error: 'A slider field representation requires minimum to be less than maximum' ].
+	aSlider := CFMaDetailSliderElement new
+		minimum: aMinimum maximum: aMaximum;
+		displayBlock: [ :aValue | aDescription displayStringFor: aValue ];
+		value: (self memento readUsing: aDescription);
+		valueChangedBlock: [ :aValue |
+			GtMagritteBuilderUtility
+				write: aValue
+				using: aDescription
+				memento: self memento
+				element: aSlider ];
+		yourself.
+	aSlider withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theSlider :aSink |
+				theSlider value: aSink value currentValue ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	self addShortcutsTo: aSlider.
+	self addFieldElement: aSlider using: aDescription
+]
+
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	| aRepresentation |
@@ -382,6 +413,6 @@ CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	(aRepresentation isKindOf: CFMaPopupConfiguration) ifTrue: [
 		^ self addNumberPopupUsing: aDescription configuration: aRepresentation ].
 	(aRepresentation isKindOf: CFMaSliderConfiguration) ifTrue: [
-		^ self error: 'Slider field representation is not implemented yet' ].
+		^ self addNumberSliderUsing: aDescription configuration: aRepresentation ].
 	^ self error: 'Unsupported number field representation'
 ]

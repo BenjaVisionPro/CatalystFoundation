@@ -11,6 +11,7 @@ Class {
 		'enabled',
 		'priority',
 		'popupPriority',
+		'sliderPriority',
 		'status',
 		'multipleStatuses',
 		'duration',
@@ -104,6 +105,7 @@ CFMaFormShowcase >> initialize [
 	symbolValue := #foundation.
 	enabled := true.
 	priority := 60.
+	sliderPriority := 65.
 	popupPriority := 75.
 	status := #active.
 	multipleStatuses := #(draft active).
@@ -421,6 +423,36 @@ CFMaFormShowcase >> popupPriorityDescription [
 		group: 'Fields';
 		categories: #(values);
 		priority: 65;
+		min: 0;
+		max: 100;
+		yourself
+]
+
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> sliderPriority [
+	^ sliderPriority
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> sliderPriority: aNumber [
+	sliderPriority := aNumber
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> sliderPriorityDescription [
+	<magritteDescription>
+	^ MANumberDescription new
+		accessor: #sliderPriority;
+		label: 'Slider priority';
+		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		fieldConfigure: [ :field |
+			field icon backgroundColor: (Color r: 10 g: 132 b: 255 range: 255).
+			field beSlider ];
+		comment: 'The same bounded numeric semantics represented as a continuous slider.';
+		group: 'Fields';
+		categories: #(values);
+		priority: 67;
 		min: 0;
 		max: 100;
 		yourself
