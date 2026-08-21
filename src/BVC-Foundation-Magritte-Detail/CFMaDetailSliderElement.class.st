@@ -44,7 +44,7 @@ CFMaDetailSliderElement >> initialize [
 		yourself.
 	fill := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 2);
-		background: BrGlamorousColors primaryBorderColor;
+		background: CFMaDetailColours highlight;
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	thumb := BlElement new
@@ -177,7 +177,7 @@ CFMaDetailSliderElement >> updateLabels [
 { #category : 'private - styling' }
 CFMaDetailSliderElement >> valueLabelTextFor: aString [
 	^ aString asRopedText
-		foreground: (Color black alpha: 0.8);
+		foreground: CFMaDetailColours secondaryForeground;
 		fontSize: 11;
 		yourself
 ]

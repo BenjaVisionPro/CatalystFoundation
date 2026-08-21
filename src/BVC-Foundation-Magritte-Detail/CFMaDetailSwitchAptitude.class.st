@@ -12,7 +12,7 @@ Class {
 
 { #category : 'defaults' }
 CFMaDetailSwitchAptitude class >> activeTrackColor [
-	^ Color r: 10 g: 132 b: 255 range: 255
+	^ CFMaDetailColours highlight
 ]
 
 { #category : 'defaults' }

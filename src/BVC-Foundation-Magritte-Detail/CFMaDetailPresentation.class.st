@@ -136,7 +136,7 @@ CFMaDetailPresentation >> supportingElementFor: aDescription [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aDescription comment asRopedText
-			foreground: (Color black alpha: 0.52);
+			foreground: CFMaDetailColours tertiaryForeground;
 			fontSize: 11);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
