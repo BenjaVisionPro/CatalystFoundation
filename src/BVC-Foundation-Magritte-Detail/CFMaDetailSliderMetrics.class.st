@@ -23,7 +23,7 @@ CFMaDetailSliderMetrics class >> axisInset [
 
 { #category : 'track' }
 CFMaDetailSliderMetrics class >> trackHeight [
-	^ 5.0
+	^ 6.0
 ]
 
 { #category : 'track' }

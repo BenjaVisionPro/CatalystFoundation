@@ -26,7 +26,7 @@ CFMaDetailSliderLayout >> measure: anElement with: anExtentSpec [
 
 { #category : 'layout' }
 CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBoundsUpdateContext [
-	| children track fill thumb minTick middleTick maxTick minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight thumbExtent thumbCenterX tickExtent tickY labelY currentX |
+	| children track fill thumb minTick middleTick maxTick minLabel currentLabel maxLabel fraction axisInset axisStart axisEnd axisWidth trackY trackHeight thumbExtent thumbCenterX tickExtent tickY labelY minX maxX currentX |
 	children := anElement children accountedByLayout.
 	track := children at: 1.
 	fill := children at: 2.
@@ -55,8 +55,10 @@ CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBo
 	middleTick applyLayoutIn: (((axisStart + (axisWidth / 2.0)) - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
 	maxTick applyLayoutIn: ((axisEnd - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
 	labelY := CFMaDetailSliderMetrics labelY.
-	minLabel applyLayoutIn: ((axisStart - (minLabel measuredWidth / 2.0)) @ labelY extent: minLabel measuredExtent) context: aBlElementBoundsUpdateContext.
-	maxLabel applyLayoutIn: ((axisEnd - (maxLabel measuredWidth / 2.0)) @ labelY extent: maxLabel measuredExtent) context: aBlElementBoundsUpdateContext.
+	minX := (axisStart - (minLabel measuredWidth / 2.0)) max: 0.0.
+	maxX := (axisEnd - (maxLabel measuredWidth / 2.0)) min: aRectangle width - maxLabel measuredWidth.
+	minLabel applyLayoutIn: (minX @ labelY extent: minLabel measuredExtent) context: aBlElementBoundsUpdateContext.
+	maxLabel applyLayoutIn: (maxX @ labelY extent: maxLabel measuredExtent) context: aBlElementBoundsUpdateContext.
 	currentX := (thumbCenterX - (currentLabel measuredWidth / 2.0))
 		max: minLabel measuredWidth + 6.0.
 	currentX := currentX min: aRectangle width - maxLabel measuredWidth - currentLabel measuredWidth - 6.0.

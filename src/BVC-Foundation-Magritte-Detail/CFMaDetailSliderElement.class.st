@@ -152,6 +152,10 @@ CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
 { #category : 'private - updating' }
 CFMaDetailSliderElement >> updateLabels [
 	minimumLabel text: (displayBlock cull: minimum).
-	currentLabel text: (displayBlock cull: value rounded).
+	currentLabel
+		text: (displayBlock cull: value rounded);
+		visibility: ((self normalizedValue = 0.0 or: [ self normalizedValue = 1.0 ])
+			ifTrue: [ BlVisibility hidden ]
+			ifFalse: [ BlVisibility visible ]).
 	maximumLabel text: (displayBlock cull: maximum)
 ]
