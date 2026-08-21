@@ -174,3 +174,42 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 		aRow addChild: anAccessory ].
 	^ aRow
 ]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
+	| aPopup |
+	aPopup := self newSingleOptionPopupUsing: aDescription.
+	self addShortcutsTo: aPopup.
+	self addFieldElement: aPopup using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
+	| aPopup |
+	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
+	aPopup addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
+		content: [
+			GtMagritteBuilderUtility
+				newSingleOptionDropdownContent: aPopup
+				memento: self memento
+				description: aDescription ]).
+	^ aPopup
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newSingleOptionPopupDisplayUsing: aDescription [
+	| aPopup |
+	aPopup := CFMaDetailPopupElement new.
+	aPopup withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :thePopup :aSink |
+				| aValue aText |
+				aValue := aSink value currentValue.
+				aText := aDescription displayStringFor: aValue.
+				thePopup text: aText ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	^ aPopup
+]
+
