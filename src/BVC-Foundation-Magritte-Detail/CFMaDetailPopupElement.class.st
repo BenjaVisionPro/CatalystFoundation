@@ -16,10 +16,15 @@ CFMaDetailPopupElement >> initialize [
 		alignCenter;
 		fitContent;
 		cellSpacing: 8;
-		padding: BlInsets empty;
+		padding: (BlInsets top: 4 right: 4 bottom: 4 left: 12);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
 		background: Color transparent;
 		border: BlBorder empty;
-		beFocusable.
+		beFocusable;
+		addAptitude: (BrStyleCommonAptitude new
+			default: [ :aStyle | aStyle background: Color transparent ];
+			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.07) ];
+			focused: [ :aStyle | aStyle background: (Color black alpha: 0.07) ]).
 
 	valueLabel := BrLabel new
 		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
