@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'valueLabel',
 		'indicatorHost',
-		'hovered'
+		'hovered',
+		'popupOpen'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -15,6 +16,7 @@ CFMaDetailPopupElement >> initialize [
 	| anIndicator |
 	super initialize.
 	hovered := false.
+	popupOpen := false.
 	self
 		layout: (CFMaDetailPopupLayout new gap: 12; yourself);
 		fitContent;
@@ -22,11 +24,7 @@ CFMaDetailPopupElement >> initialize [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: Color transparent;
 		border: BlBorder empty;
-		beFocusable;
-		addAptitude: (BrStyleCommonAptitude new
-			default: [ :aStyle | aStyle background: Color transparent ];
-			hovered: [ :aStyle | aStyle background: self popupBackgroundColor ];
-			focused: [ :aStyle | aStyle background: self popupBackgroundColor ]).
+		beFocusable.
 
 	valueLabel := BrLabel new
 		aptitude: (BrGlamorousLabelAptitude new
@@ -57,12 +55,13 @@ CFMaDetailPopupElement >> initialize [
 		addChild: indicatorHost;
 		when: BlMouseEnterEvent do: [ :anEvent |
 			hovered := true.
-			self updateIndicatorBackground ];
+			self updatePopupAppearance ];
 		when: BlMouseLeaveEvent do: [ :anEvent |
 			hovered := false.
-			self updateIndicatorBackground ];
-		when: BlFocusInEvent do: [ :anEvent | self updateIndicatorBackground ];
-		when: BlFocusOutEvent do: [ :anEvent | self updateIndicatorBackground ]
+			self updatePopupAppearance ];
+		when: BlFocusInEvent do: [ :anEvent | self updatePopupAppearance ];
+		when: BlFocusOutEvent do: [ :anEvent | self updatePopupAppearance ]
+
 ]
 
 { #category : 'private - appearance' }
@@ -71,11 +70,23 @@ CFMaDetailPopupElement >> popupBackgroundColor [
 ]
 
 { #category : 'private - appearance' }
-CFMaDetailPopupElement >> updateIndicatorBackground [
-	(hovered or: [ self hasFocus ])
-		ifTrue: [ indicatorHost background: Color transparent ]
-		ifFalse: [ indicatorHost background: self popupBackgroundColor ]
+CFMaDetailPopupElement >> updatePopupAppearance [
+	| isActive |
+	isActive := popupOpen or: [ hovered or: [ self hasFocus ] ].
+	self background: (isActive
+		ifTrue: [ self popupBackgroundColor ]
+		ifFalse: [ Color transparent ]).
+	indicatorHost background: (isActive
+		ifTrue: [ Color transparent ]
+		ifFalse: [ self popupBackgroundColor ])
 ]
+
+{ #category : 'accessing' }
+CFMaDetailPopupElement >> popupOpen: aBoolean [
+	popupOpen := aBoolean.
+	self updatePopupAppearance
+]
+
 
 { #category : 'layout' }
 CFMaDetailPopupElement >> baselineOffset [

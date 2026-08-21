@@ -203,7 +203,7 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 	| aPopup aDropdownAptitude |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
-	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
+	aDropdownAptitude := CFMaDetailDropdownAptitude
 		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
 		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
 	aDropdownAptitude
