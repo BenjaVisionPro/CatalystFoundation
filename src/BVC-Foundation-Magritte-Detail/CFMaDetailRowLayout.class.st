@@ -149,14 +149,32 @@ CFMaDetailRowLayout >> maximumMeasuredHeightOf: aCollection [
 ]
 
 { #category : 'private - measurement' }
+CFMaDetailRowLayout >> baselineOffsetFor: anElement [
+	| aParagraphElement aTextElement |
+	anElement ifNil: [ ^ nil ].
+	anElement supportsBaseline ifTrue: [ ^ anElement baselineOffset ].
+
+	(anElement isKindOf: BrEditorElement) ifFalse: [ ^ nil ].
+	aParagraphElement := anElement children accountedByLayout
+		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
+		ifNone: [ ^ nil ].
+	aTextElement := aParagraphElement children accountedByLayout
+		detect: [ :each | each isKindOf: BlTextElement ]
+		ifNone: [ ^ nil ].
+
+	"Editor text pieces use BlTextElement>>editorMeasurement, whose baseline is
+	BlTextParagraphAscentLooseBaseline. Measure the real first text piece so the
+	row aligns to the editor's actual first-line typography rather than a fixed
+	pixel offset."
+	aTextElement measure: BlExtentMeasurementSpec unspecified.
+	^ anElement padding top + aParagraphElement padding top + aTextElement baselineOffset
+]
+
+{ #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineFor: firstChild and: secondChild [
 	| firstBaseline secondBaseline |
-	firstBaseline := (firstChild notNil and: [ firstChild supportsBaseline ])
-		ifTrue: [ firstChild baselineOffset ]
-		ifFalse: [ nil ].
-	secondBaseline := (secondChild notNil and: [ secondChild supportsBaseline ])
-		ifTrue: [ secondChild baselineOffset ]
-		ifFalse: [ nil ].
+	firstBaseline := self baselineOffsetFor: firstChild.
+	secondBaseline := self baselineOffsetFor: secondChild.
 	(firstBaseline notNil and: [ secondBaseline notNil ]) ifFalse: [ ^ nil ].
 	^ firstBaseline max: secondBaseline
 ]
@@ -217,8 +235,8 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	descriptionTop := 0.0.
 	contentTop := 0.0.
 	baseline ifNotNil: [
-		descriptionTop := baseline - aDescription baselineOffset.
-		contentTop := baseline - aContent baselineOffset ].
+		descriptionTop := baseline - (self baselineOffsetFor: aDescription).
+		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineHeight := 0.0.
 	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
 	aContent ifNotNil: [ firstLineHeight := firstLineHeight max: contentTop + aContent measuredHeight ].
@@ -234,10 +252,10 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupporting content: aContent [
-	| halfWidth secondLineHeight |
+	| halfWidth descriptionTop contentTop supportingBottom contentBottom |
 	wrapped := true.
 	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
-	descriptionWidth := bodyWidth.
+	descriptionWidth := halfWidth.
 	supportingWidth := halfWidth.
 	contentWidth := halfWidth.
 
@@ -245,13 +263,20 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 	self measure: aSupporting widthExactly: supportingWidth.
 	self measure: aContent widthExactly: contentWidth.
 
-	baseline := nil.
-	firstLineHeight := aDescription ifNil: [ 0.0 ] ifNotNil: [ aDescription measuredHeight ].
-	secondLineTop := firstLineHeight + supportingGap.
-	secondLineHeight := 0.0.
-	aSupporting ifNotNil: [ secondLineHeight := secondLineHeight max: aSupporting measuredHeight ].
-	aContent ifNotNil: [ secondLineHeight := secondLineHeight max: aContent measuredHeight ].
-	^ secondLineTop + secondLineHeight
+	baseline := self baselineFor: aDescription and: aContent.
+	descriptionTop := 0.0.
+	contentTop := 0.0.
+	baseline ifNotNil: [
+		descriptionTop := baseline - (self baselineOffsetFor: aDescription).
+		contentTop := baseline - (self baselineOffsetFor: aContent) ].
+	firstLineHeight := 0.0.
+	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
+	secondLineTop := aDescription
+		ifNil: [ 0.0 ]
+		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
+	supportingBottom := aSupporting ifNil: [ 0.0 ] ifNotNil: [ secondLineTop + aSupporting measuredHeight ].
+	contentBottom := aContent ifNil: [ 0.0 ] ifNotNil: [ contentTop + aContent measuredHeight ].
+	^ firstLineHeight max: (supportingBottom max: contentBottom)
 ]
 
 { #category : 'measure' }
@@ -310,8 +335,8 @@ CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSuppor
 	descriptionY := aTop.
 	contentY := aTop.
 	baseline ifNotNil: [
-		descriptionY := aTop + baseline - aDescription baselineOffset.
-		contentY := aTop + baseline - aContent baselineOffset ].
+		descriptionY := aTop + baseline - (self baselineOffsetFor: aDescription).
+		contentY := aTop + baseline - (self baselineOffsetFor: aContent) ].
 
 	aDescription ifNotNil: [
 		aDescription
@@ -332,9 +357,16 @@ CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSuppor
 
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSupporting content: aContent bodyX: bodyX top: aTop context: aBlElementBoundsUpdateContext [
+	| descriptionY contentY |
+	descriptionY := aTop.
+	contentY := aTop.
+	baseline ifNotNil: [
+		descriptionY := aTop + baseline - (self baselineOffsetFor: aDescription).
+		contentY := aTop + baseline - (self baselineOffsetFor: aContent) ].
+
 	aDescription ifNotNil: [
 		aDescription
-			applyLayoutIn: (bodyX @ aTop extent: aDescription measuredWidth @ aDescription measuredHeight)
+			applyLayoutIn: (bodyX @ descriptionY extent: descriptionWidth @ aDescription measuredHeight)
 			context: aBlElementBoundsUpdateContext ].
 
 	aSupporting ifNotNil: [
@@ -344,7 +376,7 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 
 	aContent ifNotNil: [
 		aContent
-			applyLayoutIn: ((bodyX + supportingWidth + gap) @ (aTop + secondLineTop)
+			applyLayoutIn: ((bodyX + supportingWidth + gap) @ contentY
 				extent: contentWidth @ aContent measuredHeight)
 			context: aBlElementBoundsUpdateContext ]
 ]
