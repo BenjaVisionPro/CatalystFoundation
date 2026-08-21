@@ -138,11 +138,14 @@ CFMaDetailSliderElement >> normalizedValue [
 
 { #category : 'private - interaction' }
 CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
-	| anAxisInset anAxisWidth aFraction aValue |
+	| padding anAxisInset anAxisStart anAxisEnd anAxisWidth aFraction aValue |
+	padding := self padding.
 	anAxisInset := CFMaDetailSliderMetrics axisInset.
-	anAxisWidth := self width - (anAxisInset * 2.0).
+	anAxisStart := padding left + anAxisInset.
+	anAxisEnd := self width - padding right - anAxisInset.
+	anAxisWidth := anAxisEnd - anAxisStart.
 	anAxisWidth <= 0 ifTrue: [ ^ self ].
-	aFraction := (((anEvent localPosition x - anAxisInset) / anAxisWidth) max: 0.0) min: 1.0.
+	aFraction := (((anEvent localPosition x - anAxisStart) / anAxisWidth) max: 0.0) min: 1.0.
 	aValue := minimum + ((maximum - minimum) * aFraction).
 	self value: aValue.
 	valueChangedBlock cull: aValue
