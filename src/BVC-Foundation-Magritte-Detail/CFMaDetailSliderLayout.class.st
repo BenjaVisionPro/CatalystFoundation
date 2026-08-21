@@ -55,8 +55,8 @@ CFMaDetailSliderLayout >> layout: anElement in: aRectangle context: aBlElementBo
 	middleTick applyLayoutIn: (((axisStart + (axisWidth / 2.0)) - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
 	maxTick applyLayoutIn: ((axisEnd - (tickExtent x / 2.0)) @ tickY extent: tickExtent) context: aBlElementBoundsUpdateContext.
 	labelY := CFMaDetailSliderMetrics labelY.
-	minLabel applyLayoutIn: (0.0 @ labelY extent: minLabel measuredExtent) context: aBlElementBoundsUpdateContext.
-	maxLabel applyLayoutIn: ((aRectangle width - maxLabel measuredWidth) @ labelY extent: maxLabel measuredExtent) context: aBlElementBoundsUpdateContext.
+	minLabel applyLayoutIn: ((axisStart - (minLabel measuredWidth / 2.0)) @ labelY extent: minLabel measuredExtent) context: aBlElementBoundsUpdateContext.
+	maxLabel applyLayoutIn: ((axisEnd - (maxLabel measuredWidth / 2.0)) @ labelY extent: maxLabel measuredExtent) context: aBlElementBoundsUpdateContext.
 	currentX := (thumbCenterX - (currentLabel measuredWidth / 2.0))
 		max: minLabel measuredWidth + 6.0.
 	currentX := currentX min: aRectangle width - maxLabel measuredWidth - currentLabel measuredWidth - 6.0.
