@@ -168,9 +168,7 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude
-		ifNil: [ BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.52);
-			fontSize: 13 ]
+		ifNil: [ self defaultLabelAptitude ]
 		ifNotNil: #value.
 	aLabel := BrLabel new
 		id: (GtMagritteFieldLabelId new description: aDescription);
@@ -185,6 +183,14 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 	self configureTabStopFor: aFieldElement using: aDescription.
 	self addLabel: aLabel field: aFieldElement for: aDescription.
 	^ aLabel
+]
+
+
+{ #category : 'defaults' }
+CFMaPresentation >> defaultLabelAptitude [
+	^ BrGlamorousLabelAptitude new
+		foreground: (Color black alpha: 0.52);
+		fontSize: 13
 ]
 
 { #category : 'private - composition' }

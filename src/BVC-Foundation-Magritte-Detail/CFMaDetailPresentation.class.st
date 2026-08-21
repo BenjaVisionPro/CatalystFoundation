@@ -129,6 +129,14 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 	(self containerForDescription: aDescription) addChild: aRow
 ]
 
+
+{ #category : 'defaults' }
+CFMaDetailPresentation >> defaultLabelAptitude [
+	^ BrGlamorousLabelAptitude new
+		foreground: CFMaDetailColours primaryForeground;
+		fontSize: 13
+]
+
 { #category : 'private - composition' }
 CFMaDetailPresentation >> supportingElementFor: aDescription [
 	^ BrEditor new
