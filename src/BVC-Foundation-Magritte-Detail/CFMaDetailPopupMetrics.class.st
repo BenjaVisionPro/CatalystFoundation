@@ -93,7 +93,7 @@ CFMaDetailPopupMetrics class >> optionLabelOffset [
 
 { #category : 'menu' }
 CFMaDetailPopupMetrics class >> menuHorizontalOffset [
-	^ self controlLeftInset - self optionLabelOffset
+	^ self controlLeftInset - self optionLabelOffset - 2
 ]
 
 { #category : 'menu' }
