@@ -144,7 +144,7 @@ CFMaFormShowcase >> editableLabelOnlyDescription [
 		accessor: #text;
 		label: 'Editable label only';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 1;
 		yourself
 ]
@@ -156,7 +156,7 @@ CFMaFormShowcase >> readOnlyLabelOnlyDescription [
 		accessor: #text;
 		label: 'Read only label only';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 2;
 		beReadOnly;
 		yourself
@@ -170,7 +170,7 @@ CFMaFormShowcase >> editableLabelAndCommentDescription [
 		label: 'Editable label + comment';
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 3;
 		yourself
 ]
@@ -183,7 +183,7 @@ CFMaFormShowcase >> readOnlyLabelAndCommentDescription [
 		label: 'Read only label + comment';
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 4;
 		beReadOnly;
 		yourself
@@ -197,7 +197,7 @@ CFMaFormShowcase >> editableIconAndLabelDescription [
 		label: 'Editable icon + label';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 5;
 		yourself
 ]
@@ -210,7 +210,7 @@ CFMaFormShowcase >> readOnlyIconAndLabelDescription [
 		label: 'Read only icon + label';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 6;
 		beReadOnly;
 		yourself
@@ -226,7 +226,7 @@ CFMaFormShowcase >> editableIconLabelAndCommentDescription [
 		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 7;
 		yourself
 ]
@@ -241,7 +241,7 @@ CFMaFormShowcase >> readOnlyIconLabelAndCommentDescription [
 		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
-		path: #(presentation);
+		categories: #(presentation);
 		priority: 8;
 		beReadOnly;
 		yourself
@@ -264,7 +264,7 @@ CFMaFormShowcase >> textDescription [
 		accessor: #text;
 		label: 'Text';
 		group: 'Fields';
-		path: #(text);
+		categories: #(text);
 		priority: 10;
 		yourself
 ]
@@ -287,7 +287,7 @@ CFMaFormShowcase >> summaryDescription [
 		label: 'Summary';
 		comment: 'A semantic memo field. GT currently routes it through the string-field rendering path.';
 		group: 'Fields';
-		path: #(text);
+		categories: #(text);
 		priority: 20;
 		yourself
 ]
@@ -309,7 +309,7 @@ CFMaFormShowcase >> passwordDescription [
 		accessor: #password;
 		label: 'Password';
 		group: 'Fields';
-		path: #(text);
+		categories: #(text);
 		priority: 30;
 		yourself
 ]
@@ -331,7 +331,7 @@ CFMaFormShowcase >> symbolValueDescription [
 		accessor: #symbolValue;
 		label: 'Symbol';
 		group: 'Fields';
-		path: #(text);
+		categories: #(text);
 		priority: 40;
 		yourself
 ]
@@ -355,7 +355,7 @@ CFMaFormShowcase >> enabledDescription [
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		information: 'Controls whether this example feature is enabled.';
 		group: 'Fields';
-		path: #(values);
+		categories: #(values);
 		priority: 50;
 		yourself
 ]
@@ -380,7 +380,7 @@ CFMaFormShowcase >> priorityDescription [
 		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
-		path: #(values);
+		categories: #(values);
 		priority: 60;
 		beRequired;
 		addCondition: [ :aValue | aValue isNumber and: [ aValue between: 0 and: 100 ] ]
@@ -406,7 +406,7 @@ CFMaFormShowcase >> statusDescription [
 		label: 'Status';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
 		group: 'Fields';
-		path: #(values);
+		categories: #(values);
 		priority: 70;
 		options: #(draft active archived);
 		beRequired;
@@ -430,7 +430,7 @@ CFMaFormShowcase >> multipleStatusesDescription [
 		accessor: #multipleStatuses;
 		label: 'Multiple option';
 		group: 'Fields';
-		path: #(values);
+		categories: #(values);
 		priority: 80;
 		options: #(draft active archived);
 		reference: MASymbolDescription new;
@@ -455,7 +455,7 @@ CFMaFormShowcase >> durationDescription [
 		accessor: #duration;
 		label: 'Duration';
 		group: 'Fields';
-		path: #(temporal);
+		categories: #(temporal);
 		priority: 90;
 		yourself
 ]
@@ -477,7 +477,7 @@ CFMaFormShowcase >> dateDescription [
 		accessor: #date;
 		label: 'Date';
 		group: 'Fields';
-		path: #(temporal);
+		categories: #(temporal);
 		priority: 100;
 		yourself
 ]
@@ -499,7 +499,7 @@ CFMaFormShowcase >> timeDescription [
 		accessor: #time;
 		label: 'Time';
 		group: 'Fields';
-		path: #(temporal);
+		categories: #(temporal);
 		priority: 110;
 		yourself
 ]
@@ -521,7 +521,7 @@ CFMaFormShowcase >> dateAndTimeDescription [
 		accessor: #dateAndTime;
 		label: 'Date and time';
 		group: 'Fields';
-		path: #(temporal);
+		categories: #(temporal);
 		priority: 120;
 		yourself
 ]
@@ -543,7 +543,7 @@ CFMaFormShowcase >> classValueDescription [
 		accessor: #classValue;
 		label: 'Class';
 		group: 'Fields';
-		path: #(metadata);
+		categories: #(metadata);
 		priority: 140;
 		yourself
 ]
@@ -566,7 +566,7 @@ CFMaFormShowcase >> tagsDescription [
 		label: 'Tags';
 		comment: 'A to-many scalar relation reserved for Foundation''s tag-editor rendering.';
 		group: 'Fields';
-		path: #(metadata);
+		categories: #(metadata);
 		priority: 150;
 		classes: { String };
 		reference: (MAStringDescription new
@@ -592,11 +592,10 @@ CFMaFormShowcase >> fileDescription [
 		accessor: #file;
 		label: 'File';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
-		smallSettingsIcon;
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
-		path: #(resources);
+		categories: #(resources);
 		priority: 160;
 		yourself
 ]
@@ -618,11 +617,10 @@ CFMaFormShowcase >> directoryDescription [
 		accessor: #directory;
 		label: 'Directory';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
-		smallSettingsIcon;
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
-		path: #(resources);
+		categories: #(resources);
 		priority: 170;
 		yourself
 ]
@@ -644,10 +642,9 @@ CFMaFormShowcase >> fieldIconDescription [
 		accessor: #fieldIcon;
 		label: 'Font Awesome icon';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
-		smallSettingsIcon;
 		default: self defaultIcon;
 		group: 'Fields';
-		path: #(resources);
+		categories: #(resources);
 		priority: 180;
 		yourself
 ]
@@ -664,9 +661,8 @@ CFMaFormShowcase >> derivedValueDescription [
 		accessor: #derivedValue;
 		label: 'Derived value';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
-		smallSettingsIcon;
 		group: 'Fields';
-		path: #(resources);
+		categories: #(resources);
 		priority: 190;
 		beReadOnly;
 		yourself

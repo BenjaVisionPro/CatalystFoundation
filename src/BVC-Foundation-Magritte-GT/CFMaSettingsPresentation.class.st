@@ -83,7 +83,7 @@ CFMaSettingsPresentation >> sectionForGroup: aGroup [
 CFMaSettingsPresentation >> cardForDescription: aDescription [
 	| aSection aKey |
 	aSection := self sectionForGroup: aDescription group.
-	aKey := { aSection. aDescription path }.
+	aKey := { aSection. aDescription categories }.
 	^ cardsBySectionAndPath
 		at: aKey
 		ifAbsentPut: [
@@ -227,9 +227,7 @@ CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
 				icon: anIcon;
 				backgroundColor: (aDescription iconBackgroundFor: self memento model);
 				yourself.
-			aDescription usesSmallSettingsIcon
-				ifTrue: [ aTile beSmall ]
-				ifFalse: [ aTile beMedium ].
+			aTile beMedium.
 			aTile ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment

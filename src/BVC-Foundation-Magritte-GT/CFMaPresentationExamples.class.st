@@ -79,10 +79,10 @@ CFMaPresentationExamples >> descriptionPath [
 	<gtExample>
 	| aDescription |
 	aDescription := MAStringDescription new.
-	self assert: aDescription path equals: #().
-	aDescription path: #(appearance display).
-	self assert: aDescription path equals: #(appearance display).
-	self assert: (aDescription propertyAt: #cfPath) equals: #(appearance display).
+	self assert: aDescription categories equals: #().
+	aDescription categories: #(appearance display).
+	self assert: aDescription categories equals: #(appearance display).
+	self assert: (aDescription propertyAt: #cfCategories) equals: #(appearance display).
 	^ aDescription
 ]
 
@@ -96,7 +96,7 @@ CFMaPresentationExamples >> showcasePathsAreScopedToFields [
 	relationDescriptions := descriptions reject: [ :each | each group = 'Fields' ].
 
 	self assert: fieldDescriptions isNotEmpty.
-	self assert: (fieldDescriptions allSatisfy: [ :each | each path isNotEmpty ]).
-	self assert: (relationDescriptions allSatisfy: [ :each | each path isEmpty ]).
+	self assert: (fieldDescriptions allSatisfy: [ :each | each categories isNotEmpty ]).
+	self assert: (relationDescriptions allSatisfy: [ :each | each categories isEmpty ]).
 	^ aShowcase
 ]

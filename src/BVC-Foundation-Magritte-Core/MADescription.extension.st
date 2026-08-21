@@ -33,13 +33,15 @@ MADescription >> cfSerializableSymbol [
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> path [
-	^ self propertyAt: #cfPath ifAbsent: [ #() ]
+MADescription >> categories [
+	^ self propertyAt: #cfCategories ifAbsent: [ #() ]
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> path: aCollection [
-	^ self propertyAt: #cfPath put: aCollection
+MADescription >> categories: aCollection [
+	^ self
+		propertyAt: #cfCategories
+		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
 ]
 
 

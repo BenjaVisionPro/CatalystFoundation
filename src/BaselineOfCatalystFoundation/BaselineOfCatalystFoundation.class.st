@@ -76,6 +76,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'CatalystMotion'
 		'CatalystPhysics'
 		'BVC-Foundation-Magritte-GT'
+		'BVC-Foundation-Magritte-Detail'
 		'BVC-Foundation-Composer'
 		'BVC-Foundation-Magritte-Seaside'
 		'BVC-Foundation-Config-UI-Core'
@@ -100,6 +101,8 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec repository: 'git@github.com:BenjaVisionPro/gt4FontAwesome.git' ].
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
+	spec package: 'BVC-Foundation-Magritte-Detail'
+		with: [ spec requires: #('BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Composer'
 		with: [ spec requires: #('BVC-Foundation-Magritte-GT' 'CatalystMotion') ].
 	spec package: 'BVC-Foundation-Magritte-Seaside'

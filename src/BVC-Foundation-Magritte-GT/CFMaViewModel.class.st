@@ -3,8 +3,7 @@ Class {
 	#superclass : 'GtMagritteViewModel',
 	#instVars : [
 		'formElementBlock',
-		'elementBuilderBlock',
-		'presentationClass'
+		'elementBuilderBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -25,20 +24,10 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 ]
 
 
-{ #category : 'initialization' }
-CFMaViewModel >> initialize [
-	super initialize.
-	presentationClass := CFMaPresentation
-]
-
-{ #category : 'accessing' }
-CFMaViewModel >> presentationClass [
-	^ presentationClass
-]
-
-{ #category : 'accessing' }
+{ #category : 'accessing - compatibility' }
 CFMaViewModel >> presentationClass: aPresentationClass [
-	presentationClass := aPresentationClass
+	"Compatibility for the experimental GT presentations. New production presentations are selected from the container description."
+	elementBuilderBlock := [ aPresentationClass new ]
 ]
 
 { #category : 'callbacks' }
@@ -87,7 +76,7 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	aContainer requestStyle.
 
 	anElementBuilder := elementBuilderBlock
-		ifNil: [ presentationClass new ]
+		ifNil: [ aMemento magritteDescription presentation ]
 		ifNotNil: [ :aBlock | aBlock value ].
 
 	anElementBuilder
