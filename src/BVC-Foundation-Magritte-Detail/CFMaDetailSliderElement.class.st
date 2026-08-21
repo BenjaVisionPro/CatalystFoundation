@@ -34,7 +34,6 @@ CFMaDetailSliderElement >> initialize [
 		background: Color transparent;
 		border: BlBorder empty;
 		padding: (BlInsets right: CFMaDetailScalarFieldMetrics trailingControlInset);
-		margin: (BlInsets top: 2);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ].
@@ -76,6 +75,17 @@ CFMaDetailSliderElement >> initialize [
 		addEventHandlerOn: BlMouseMoveEvent do: [ :anEvent |
 			anEvent primaryButtonPressed ifTrue: [ self updateFromMouseEvent: anEvent ] ].
 	self updateLabels
+]
+
+
+{ #category : 'layout' }
+CFMaDetailSliderElement >> supportsBaseline [
+	^ true
+]
+
+{ #category : 'layout' }
+CFMaDetailSliderElement >> baselineOffset [
+	^ CFMaDetailSliderMetrics labelY + 4.0
 ]
 
 { #category : 'private - building' }
