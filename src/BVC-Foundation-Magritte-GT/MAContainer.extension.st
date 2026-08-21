@@ -1,28 +1,17 @@
 Extension { #name : 'MAContainer' }
 
 { #category : '*bvc-foundation-magritte-gt' }
-MAContainer >> presentation [
+MAContainer >> blocPresentationStencil [
 	^ self
-		propertyAt: #cfPresentationFactory
-		ifPresent: [ :aFactory | aFactory value ]
-		ifAbsent: [ CFMaPresentation new ]
+		propertyAt: #blocPresentationStencil
+		ifAbsent: [ CFMaPresentationStencilBuilder new ]
 ]
 
 { #category : '*bvc-foundation-magritte-gt' }
-MAContainer >> presentation: aFactory [
+MAContainer >> blocPresentationStencil: aStencilBuilder [
+	"Stencil builder may be a block that receives the current memento and
+	builds a fresh Magritte presentation for this form."
 	self
-		propertyAt: #cfPresentationFactory
-		put: aFactory
-]
-
-{ #category : '*bvc-foundation-magritte-gt' }
-MAContainer >> foundationPresentation [
-	"Compatibility for the experimental Foundation Magritte code. New production descriptions use #presentation / #presentation:."
-	^ self presentation
-]
-
-{ #category : '*bvc-foundation-magritte-gt' }
-MAContainer >> foundationPresentation: aPresentationClass configure: aBlock [
-	"Compatibility for the experimental Foundation Magritte code."
-	self presentation: [ aPresentationClass configured: aBlock ]
+		propertyAt: #blocPresentationStencil
+		put: (aStencilBuilder asStencilBuilder: CFMaPresentationStencilBuilder)
 ]

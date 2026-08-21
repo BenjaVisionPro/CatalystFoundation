@@ -23,15 +23,18 @@ CFMaDetailPresentationExamples >> configuredPresentation [
 	<gtExample>
 	| aContainer aPresentation aGeneral aMain anExtension |
 	aContainer := MAContainer new.
-	aContainer presentation: [
-		CFMaDetailPresentation configured: [ :detail |
-			detail group: 'General' configure: [ :general |
+	aContainer blocPresentationStencil: [ :aMemento |
+		CFMaDetailPresentation new
+			group: 'General' configure: [ :general |
 				general category: #main configure: [ :main |
 					main asTabs.
 					main category: #extension configure: [ :extension |
-						extension asAccordions ] ] ] ] ].
+						extension asAccordions ] ] ];
+			yourself ].
 
-	aPresentation := aContainer presentation.
+	aPresentation := aContainer blocPresentationStencil
+		memento: nil;
+		build.
 	aGeneral := aPresentation groupConfigurationFor: 'General'.
 	aMain := aGeneral categoryConfigurationFor: #main.
 	anExtension := aMain categoryConfigurationFor: #extension.
@@ -42,18 +45,22 @@ CFMaDetailPresentationExamples >> configuredPresentation [
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> presentationFactoryCreatesFreshInstances [
+CFMaDetailPresentationExamples >> presentationStencilCreatesFreshInstances [
 	<gtExample>
 	| aContainer first second |
-	aContainer := MAContainer new
-		presentation: [
-			CFMaDetailPresentation configured: [ :detail |
-				detail group: 'General' configure: [ :general |
-					general category: #main configure: [ :main | main asTabs ] ] ] ];
-		yourself.
+	aContainer := MAContainer new.
+	aContainer blocPresentationStencil: [ :aMemento |
+		CFMaDetailPresentation new
+			group: 'General' configure: [ :general |
+				general category: #main configure: [ :main | main asTabs ] ];
+			yourself ].
 
-	first := aContainer presentation.
-	second := aContainer presentation.
+	first := aContainer blocPresentationStencil
+		memento: nil;
+		build.
+	second := aContainer blocPresentationStencil
+		memento: nil;
+		build.
 
 	self assert: first ~~ second.
 	self assert: (first groupConfigurationFor: 'General') ~~ (second groupConfigurationFor: 'General').

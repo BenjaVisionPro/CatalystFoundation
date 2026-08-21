@@ -76,7 +76,10 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	aContainer requestStyle.
 
 	anElementBuilder := elementBuilderBlock
-		ifNil: [ aMemento magritteDescription presentation ]
+		ifNil: [
+			aMemento magritteDescription blocPresentationStencil
+				memento: aMemento;
+				build ]
 		ifNotNil: [ :aBlock | aBlock value ].
 
 	anElementBuilder

@@ -15,19 +15,6 @@ Class {
 }
 
 
-{ #category : 'instance creation' }
-CFMaPresentation class >> configured: aBlock [
-	^ self new
-		configure: aBlock;
-		yourself
-]
-
-
-{ #category : 'configuration' }
-CFMaPresentation >> configure: aBlock [
-	aBlock cull: self.
-	^ self
-]
 
 { #category : 'initialization' }
 CFMaPresentation >> initialize [
