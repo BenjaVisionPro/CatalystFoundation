@@ -182,20 +182,17 @@ CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth conte
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalContentWidth: naturalContentWidth [
-	| labelAvailableWidth descriptionTop contentTop supportingHeight |
+CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth [
+	| descriptionTop contentTop supportingHeight contentBottom supportingBottom |
 	wrapped := false.
+	descriptionWidth := naturalDescriptionWidth min: bodyWidth.
 	contentWidth := aContent
 		ifNil: [ 0.0 ]
-		ifNotNil: [ naturalContentWidth min: bodyWidth ].
-	labelAvailableWidth := aContent
-		ifNil: [ bodyWidth ]
-		ifNotNil: [ (bodyWidth - contentWidth - gap) max: 0.0 ].
-	descriptionWidth := labelAvailableWidth.
+		ifNotNil: [ (bodyWidth - descriptionWidth - gap) max: 0.0 ].
 	supportingWidth := bodyWidth.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
-	self measure: aContent widthAtMost: contentWidth.
+	self measure: aContent widthExactly: contentWidth.
 	self measure: aSupporting widthExactly: supportingWidth.
 
 	baseline := self baselineFor: aDescription and: aContent.
@@ -208,13 +205,13 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
 	aContent ifNotNil: [ firstLineHeight := firstLineHeight max: contentTop + aContent measuredHeight ].
 
+	secondLineTop := aDescription
+		ifNil: [ 0.0 ]
+		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
 	supportingHeight := aSupporting ifNil: [ 0.0 ] ifNotNil: [ aSupporting measuredHeight ].
-	secondLineTop := aSupporting
-		ifNil: [ firstLineHeight ]
-		ifNotNil: [ firstLineHeight + supportingGap ].
-	^ aSupporting
-		ifNil: [ firstLineHeight ]
-		ifNotNil: [ secondLineTop + supportingHeight ]
+	contentBottom := aContent ifNil: [ 0.0 ] ifNotNil: [ contentTop + aContent measuredHeight ].
+	supportingBottom := aSupporting ifNil: [ 0.0 ] ifNotNil: [ secondLineTop + supportingHeight ].
+	^ firstLineHeight max: (contentBottom max: supportingBottom)
 ]
 
 { #category : 'private - measurement' }
@@ -271,7 +268,7 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 	bodyHeight := (aSupporting notNil and: [ aContent notNil and: [
 		self shouldWrapDescriptionWidth: naturalDescriptionWidth contentWidth: naturalContentWidth ] ])
 		ifTrue: [ self measureWrappedDescription: aDescription supporting: aSupporting content: aContent ]
-		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalContentWidth: naturalContentWidth ].
+		ifFalse: [ self measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth ].
 
 	contentHeight := bodyHeight.
 	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: leadingChildren).
