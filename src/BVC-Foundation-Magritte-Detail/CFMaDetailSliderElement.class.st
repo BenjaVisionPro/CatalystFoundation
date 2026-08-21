@@ -71,9 +71,17 @@ CFMaDetailSliderElement >> initialize [
 		addChild: maximumLabel.
 	self
 		addEventHandlerOn: BlMouseDownEvent do: [ :anEvent |
-			anEvent primaryButtonPressed ifTrue: [ self updateFromMouseEvent: anEvent ] ];
-		addEventHandlerOn: BlMouseMoveEvent do: [ :anEvent |
-			anEvent primaryButtonPressed ifTrue: [ self updateFromMouseEvent: anEvent ] ].
+			anEvent primaryButtonPressed ifTrue: [ self updateFromPointerEvent: anEvent ] ];
+		addEventHandlerOn: BlDragStartEvent do: [ :anEvent |
+			anEvent isPrimaryButtonDrag ifTrue: [
+				anEvent consumed: true.
+				self updateFromPointerEvent: anEvent ] ];
+		addEventHandlerOn: BlDragEvent do: [ :anEvent |
+			anEvent isPrimaryButtonDrag ifTrue: [
+				anEvent consumed: true.
+				self updateFromPointerEvent: anEvent ] ];
+		addEventHandlerOn: BlDragEndEvent do: [ :anEvent |
+			anEvent isPrimaryButtonDrag ifTrue: [ anEvent consumed: true ] ].
 	self updateLabels
 ]
 
@@ -149,15 +157,16 @@ CFMaDetailSliderElement >> normalizedValue [
 ]
 
 { #category : 'private - interaction' }
-CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
-	| padding anAxisInset anAxisStart anAxisEnd anAxisWidth aFraction aValue |
+CFMaDetailSliderElement >> updateFromPointerEvent: anEvent [
+	| padding anAxisInset anAxisStart anAxisEnd anAxisWidth aLocalPosition aFraction aValue |
 	padding := self padding.
 	anAxisInset := CFMaDetailSliderMetrics axisInset.
 	anAxisStart := padding left + anAxisInset.
 	anAxisEnd := self width - padding right - anAxisInset.
 	anAxisWidth := anAxisEnd - anAxisStart.
 	anAxisWidth <= 0 ifTrue: [ ^ self ].
-	aFraction := (((anEvent localPosition x - anAxisStart) / anAxisWidth) max: 0.0) min: 1.0.
+	aLocalPosition := self globalPointToLocal: anEvent position.
+	aFraction := (((aLocalPosition x - anAxisStart) / anAxisWidth) max: 0.0) min: 1.0.
 	aValue := minimum + ((maximum - minimum) * aFraction).
 	self value: aValue.
 	valueChangedBlock cull: aValue
