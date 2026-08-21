@@ -16,11 +16,11 @@ CFMaDetailPopupElement >> initialize [
 	super initialize.
 	hovered := false.
 	self
-		alignCenter;
+		alignCenterLeft;
 		fitContent;
 		cellSpacing: 8;
 		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: Color transparent;
 		border: BlBorder empty;
 		beFocusable;
