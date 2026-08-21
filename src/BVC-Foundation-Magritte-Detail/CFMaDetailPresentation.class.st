@@ -35,20 +35,47 @@ CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 ]
 
 { #category : 'private - composition' }
-CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
+CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
+	| aDescriptionElement aRow |
+	aDescriptionElement := self descriptionElementFor: aDescription label: aLabel.
+	aRow := self
+		newRowLeading: nil
+		description: aDescriptionElement
+		content: aFieldElement
+		accessories: #().
+	(self containerForDescription: aDescription) addChild: aRow
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> descriptionElementFor: aDescription label: aLabel [
+	aDescription hasComment ifFalse: [ ^ aLabel ].
+	^ CFMaDetailDescriptionElement new
+		primary: aLabel supporting: (self supportingElementFor: aDescription);
+		yourself
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> supportingElementFor: aDescription [
+	^ BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		focusability: BlFocusability none;
+		text: (aDescription comment asRopedText
+			foreground: (Color black alpha: 0.52);
+			fontSize: 11);
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: BlInsets empty;
+		margin: BlInsets empty;
+		yourself
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescriptionElement content: aContentElement accessories: accessoryElements [
 	| aRow |
-	aLabel
-		margin: BlInsets empty;
-		hFitContentLimited.
-	aFieldElement
-		margin: BlInsets empty;
-		clipChildren: false.
-
-	aLabel constraintsDo: [ :c |
-		(c at: CFMaDetailRowLayout) beDescription ].
-	aFieldElement constraintsDo: [ :c |
-		(c at: CFMaDetailRowLayout) beContent ].
-
 	aRow := BlElement new
 		layout: CFMaDetailRowLayout new;
 		background: Color transparent;
@@ -57,9 +84,25 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
-		addChild: aLabel;
-		addChild: aFieldElement;
 		yourself.
 
-	aContainer addChild: aRow
+	aLeadingElement ifNotNil: [
+		aLeadingElement margin: BlInsets empty.
+		aLeadingElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beLeading ].
+		aRow addChild: aLeadingElement ].
+	aDescriptionElement ifNotNil: [
+		aDescriptionElement margin: BlInsets empty.
+		aDescriptionElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beDescription ].
+		aRow addChild: aDescriptionElement ].
+	aContentElement ifNotNil: [
+		aContentElement
+			margin: BlInsets empty;
+			clipChildren: false.
+		aContentElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beContent ].
+		aRow addChild: aContentElement ].
+	accessoryElements do: [ :anAccessory |
+		anAccessory margin: BlInsets empty.
+		anAccessory constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beAccessory ].
+		aRow addChild: anAccessory ].
+	^ aRow
 ]

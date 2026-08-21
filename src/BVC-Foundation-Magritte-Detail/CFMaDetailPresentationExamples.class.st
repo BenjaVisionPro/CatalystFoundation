@@ -91,3 +91,81 @@ CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	self assert: aRow layout == aLayout.
 	^ aRow
 ]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailDescriptionWithSupportingText [
+	<gtExample>
+	| aPrimary aSupporting aDescription |
+	aPrimary := BrLabel new
+		text: 'Wi-Fi';
+		fitContent.
+	aSupporting := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		focusability: BlFocusability none;
+		text: 'Connect automatically to known networks';
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
+		yourself.
+	aDescription := CFMaDetailDescriptionElement new
+		primary: aPrimary supporting: aSupporting;
+		yourself.
+
+	self assert: aDescription primaryElement == aPrimary.
+	self assert: aDescription supportingElement == aSupporting.
+	self assert: aDescription supportsBaseline.
+	^ aDescription
+]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
+	<gtExample>
+	| aPresentation aLeading aDescription aContent firstAccessory secondAccessory aRow |
+	aPresentation := CFMaDetailPresentation new.
+	aLeading := BrLabel new text: '●'; fitContent.
+	aDescription := self detailDescriptionWithSupportingText.
+	aContent := BrLabel new text: 'On'; fitContent.
+	firstAccessory := BrLabel new text: 'i'; fitContent.
+	secondAccessory := BrLabel new text: '›'; fitContent.
+
+	aRow := aPresentation
+		newRowLeading: aLeading
+		description: aDescription
+		content: aContent
+		accessories: { firstAccessory. secondAccessory }.
+
+	self assert: (aLeading constraints at: CFMaDetailRowLayout) isLeading.
+	self assert: (aDescription constraints at: CFMaDetailRowLayout) isDescription.
+	self assert: (aContent constraints at: CFMaDetailRowLayout) isContent.
+	self assert: (firstAccessory constraints at: CFMaDetailRowLayout) isAccessory.
+	self assert: (secondAccessory constraints at: CFMaDetailRowLayout) isAccessory.
+	self assert: aRow children size equals: 5.
+	^ aRow
+]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailRowGoneAccessoryDoesNotParticipateInLayout [
+	<gtExample>
+	| aPresentation aDescription aContent aVisibleAccessory aGoneAccessory aRow accountedChildren |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := BrLabel new text: 'Name'; fitContent.
+	aContent := BrLabel new text: 'Jupiter'; fitContent.
+	aVisibleAccessory := BrLabel new text: 'i'; fitContent.
+	aGoneAccessory := BrLabel new
+		text: '›';
+		fitContent;
+		visibility: BlVisibility gone;
+		yourself.
+
+	aRow := aPresentation
+		newRowLeading: nil
+		description: aDescription
+		content: aContent
+		accessories: { aVisibleAccessory. aGoneAccessory }.
+	accountedChildren := aRow children accountedByLayout.
+
+	self assert: (accountedChildren includes: aVisibleAccessory).
+	self assert: (accountedChildren includes: aGoneAccessory) not.
+	^ aRow
+]
