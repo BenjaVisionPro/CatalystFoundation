@@ -92,9 +92,8 @@ CFMaDetailSliderElement >> newValueLabel [
 		fitContent;
 		aptitude: (BrGlamorousLabelAptitude new
 			glamorousRegularFont;
-			fontSize: 10;
 			yourself);
-		text: '';
+		text: (self valueLabelTextFor: '');
 		preventMeAndChildrenMouseEvents;
 		yourself
 ]
@@ -151,11 +150,19 @@ CFMaDetailSliderElement >> updateFromMouseEvent: anEvent [
 
 { #category : 'private - updating' }
 CFMaDetailSliderElement >> updateLabels [
-	minimumLabel text: (displayBlock cull: minimum).
+	minimumLabel text: (self valueLabelTextFor: (displayBlock cull: minimum)).
 	currentLabel
-		text: (displayBlock cull: value rounded);
+		text: (self valueLabelTextFor: (displayBlock cull: value rounded));
 		visibility: ((self normalizedValue = 0.0 or: [ self normalizedValue = 1.0 ])
 			ifTrue: [ BlVisibility hidden ]
 			ifFalse: [ BlVisibility visible ]).
-	maximumLabel text: (displayBlock cull: maximum)
+	maximumLabel text: (self valueLabelTextFor: (displayBlock cull: maximum))
+]
+
+{ #category : 'private - styling' }
+CFMaDetailSliderElement >> valueLabelTextFor: aString [
+	^ aString asRopedText
+		foreground: (Color black alpha: 0.8);
+		fontSize: 11;
+		yourself
 ]
