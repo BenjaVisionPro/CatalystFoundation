@@ -34,6 +34,7 @@ CFMaDetailSliderElement >> initialize [
 		background: Color transparent;
 		border: BlBorder empty;
 		padding: (BlInsets right: CFMaDetailScalarFieldMetrics trailingControlInset);
+		margin: (BlInsets top: 2);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ].
