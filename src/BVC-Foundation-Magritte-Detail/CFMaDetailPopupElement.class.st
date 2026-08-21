@@ -16,15 +16,15 @@ CFMaDetailPopupElement >> initialize [
 		alignCenter;
 		fitContent;
 		cellSpacing: 8;
-		padding: (BlInsets top: 4 right: 4 bottom: 4 left: 12);
+		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
 		background: Color transparent;
 		border: BlBorder empty;
 		beFocusable;
 		addAptitude: (BrStyleCommonAptitude new
 			default: [ :aStyle | aStyle background: Color transparent ];
-			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.07) ];
-			focused: [ :aStyle | aStyle background: (Color black alpha: 0.07) ]).
+			hovered: [ :aStyle | aStyle background: self popupBackgroundColor ];
+			focused: [ :aStyle | aStyle background: self popupBackgroundColor ]).
 
 	valueLabel := BrLabel new
 		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
@@ -40,9 +40,9 @@ CFMaDetailPopupElement >> initialize [
 		c frame vertical alignCenter ].
 
 	anIndicatorHost := BrFrame new
-		size: 26 @ 26;
+		size: 20 @ 20;
 		geometry: BlCircleGeometry new;
-		background: (Color black alpha: 0.07);
+		background: self popupBackgroundColor;
 		padding: BlInsets empty;
 		addChild: anIndicator;
 		yourself.
@@ -50,6 +50,12 @@ CFMaDetailPopupElement >> initialize [
 	self
 		addChild: valueLabel;
 		addChild: anIndicatorHost
+]
+
+
+{ #category : 'private - appearance' }
+CFMaDetailPopupElement >> popupBackgroundColor [
+	^ Color r: 228 g: 228 b: 228 range: 255
 ]
 
 { #category : 'layout' }
