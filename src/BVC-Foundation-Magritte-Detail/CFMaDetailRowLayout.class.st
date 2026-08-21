@@ -217,13 +217,6 @@ CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth conte
 	^ (inlineWidth closeTo: preferredContentWidth epsilon: 0.5) not
 ]
 
-
-{ #category : 'private - measurement' }
-CFMaDetailRowLayout >> contentUsesAvailableWidth: aContent [
-	aContent ifNil: [ ^ false ].
-	^ aContent constraints horizontal resizer isMatchParent
-]
-
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth [
 	| descriptionTop contentTop supportingHeight contentBottom supportingBottom |
@@ -235,9 +228,7 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	supportingWidth := bodyWidth.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
-	(self contentUsesAvailableWidth: aContent)
-		ifTrue: [ self measure: aContent widthExactly: contentWidth ]
-		ifFalse: [ self measure: aContent widthAtMost: contentWidth ].
+	self measure: aContent widthExactly: contentWidth.
 	self measure: aSupporting widthExactly: supportingWidth.
 
 	baseline := self baselineFor: aDescription and: aContent.
@@ -270,9 +261,7 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 
 	self measure: aDescription widthAtMost: descriptionWidth.
 	self measure: aSupporting widthExactly: supportingWidth.
-	(self contentUsesAvailableWidth: aContent)
-		ifTrue: [ self measure: aContent widthExactly: contentWidth ]
-		ifFalse: [ self measure: aContent widthAtMost: contentWidth ].
+	self measure: aContent widthExactly: contentWidth.
 
 	baseline := self baselineFor: aDescription and: aContent.
 	descriptionTop := 0.0.
@@ -373,7 +362,7 @@ CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSuppor
 
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSupporting content: aContent bodyX: bodyX top: aTop context: aBlElementBoundsUpdateContext [
-	| descriptionY contentY contentX |
+	| descriptionY contentY |
 	descriptionY := aTop.
 	contentY := aTop.
 	baseline ifNotNil: [
@@ -391,9 +380,9 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 			context: aBlElementBoundsUpdateContext ].
 
 	aContent ifNotNil: [
-		contentX := bodyX + supportingWidth + gap + (contentWidth - aContent measuredWidth).
 		aContent
-			applyLayoutIn: (contentX @ contentY extent: aContent measuredExtent)
+			applyLayoutIn: ((bodyX + supportingWidth + gap) @ contentY
+				extent: contentWidth @ aContent measuredHeight)
 			context: aBlElementBoundsUpdateContext ]
 ]
 
