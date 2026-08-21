@@ -155,3 +155,81 @@ CFMaDetailPresentationExamples >> detailRowGoneAccessoryDoesNotParticipateInLayo
 	self assert: (accountedChildren includes: aGoneAccessory) not.
 	^ aRow
 ]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationUsesDetailDefaults [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MAStringDescription new accessor: #name; yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration icon isMedium.
+	self assert: aConfiguration icon isChromed.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationAppliesDescriptionHints [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MAStringDescription new
+		accessor: #name;
+		fieldConfigure: [ :field |
+			field icon
+				beLarge;
+				backgroundColor: Color blue ];
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration icon isLarge.
+	self assert: aConfiguration icon backgroundColor equals: Color blue.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationPresentationOverrideWins [
+	<gtExample>
+	| aDescription aPresentation aConfiguration |
+	aDescription := MAStringDescription new
+		accessor: #name;
+		fieldConfigure: [ :field | field icon beLarge ];
+		yourself.
+	aPresentation := CFMaDetailPresentation new
+		description: aDescription configure: [ :field | field icon beSmall ];
+		yourself.
+	aConfiguration := aPresentation fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration icon isSmall.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationOverrideUsesMagritteEquality [
+	<gtExample>
+	| configuredDescription visitedDescription aPresentation aConfiguration |
+	configuredDescription := MAStringDescription new accessor: #name; yourself.
+	visitedDescription := MAStringDescription new accessor: #name; yourself.
+	aPresentation := CFMaDetailPresentation new
+		description: configuredDescription configure: [ :field | field icon beLarge ];
+		yourself.
+	aConfiguration := aPresentation fieldConfigurationFor: visitedDescription.
+
+	self assert: configuredDescription equals: visitedDescription.
+	self assert: aConfiguration icon isLarge.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationHintSurvivesDescriptionCopy [
+	<gtExample>
+	| originalDescription copiedDescription aConfiguration |
+	originalDescription := MAStringDescription new
+		accessor: #name;
+		fieldConfigure: [ :field | field icon beLarge ];
+		yourself.
+	copiedDescription := originalDescription copy.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: copiedDescription.
+
+	self assert: aConfiguration icon isLarge.
+	^ aConfiguration
+]

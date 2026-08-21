@@ -216,18 +216,31 @@ CFMaSettingsPresentation >> prepareField: aFieldElement [
 	^ aFieldElement
 ]
 
+{ #category : 'configuration - fields' }
+CFMaSettingsPresentation >> newFieldConfiguration [
+	| aConfiguration |
+	aConfiguration := super newFieldConfiguration.
+	aConfiguration icon
+		beMedium;
+		beChromed.
+	^ aConfiguration
+]
+
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
-	| aRow anIcon |
+	| aRow anIcon aFieldConfiguration |
+	aFieldConfiguration := self fieldConfigurationFor: aDescription.
 	anIcon := aDescription iconFor: self memento model.
 	aRow := CFMaSettingsRowElement new.
 	aRow
 		icon: (anIcon ifNotNil: [ | aTile |
 			aTile := CFIconTile new
 				icon: anIcon;
-				backgroundColor: (aDescription iconBackgroundFor: self memento model);
+				backgroundColor: aFieldConfiguration icon backgroundColor;
 				yourself.
-			aTile beMedium.
+			aFieldConfiguration icon isSmall ifTrue: [ aTile beSmall ].
+			aFieldConfiguration icon isMedium ifTrue: [ aTile beMedium ].
+			aFieldConfiguration icon isLarge ifTrue: [ aTile beLarge ].
 			aTile ])
 		label: (self newFieldLabelFor: aDescription)
 		comment: (aDescription hasComment

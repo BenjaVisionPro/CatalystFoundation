@@ -34,14 +34,28 @@ CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 	^ groupConfigurations at: aGroup ifAbsent: aBlock
 ]
 
+{ #category : 'configuration - fields' }
+CFMaDetailPresentation >> newFieldConfiguration [
+	| aConfiguration |
+	aConfiguration := super newFieldConfiguration.
+	aConfiguration icon
+		beMedium;
+		beChromed.
+	^ aConfiguration
+]
+
 { #category : 'private - composition' }
 CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	| aSupportingElement aRow |
+	| aSupportingElement aRow aFieldConfiguration aLeadingElement |
+	aFieldConfiguration := self fieldConfigurationFor: aDescription.
+	aLeadingElement := self
+		leadingElementFor: aDescription
+		configuration: aFieldConfiguration.
 	aSupportingElement := aDescription hasComment
 		ifTrue: [ self supportingElementFor: aDescription ]
 		ifFalse: [ nil ].
 	aRow := self
-		newRowLeading: nil
+		newRowLeading: aLeadingElement
 		description: aLabel
 		supporting: aSupportingElement
 		content: aFieldElement
@@ -66,6 +80,38 @@ CFMaDetailPresentation >> supportingElementFor: aDescription [
 		padding: BlInsets empty;
 		margin: BlInsets empty;
 		yourself
+]
+
+{ #category : 'private - icons' }
+CFMaDetailPresentation >> leadingElementFor: aDescription configuration: aFieldConfiguration [
+	| anIcon anIconConfiguration |
+	anIcon := aDescription iconFor: self memento model.
+	anIcon ifNil: [ ^ nil ].
+	anIconConfiguration := aFieldConfiguration icon.
+	^ anIconConfiguration isUnadorned
+		ifTrue: [ self unadornedIconElement: anIcon configuration: anIconConfiguration ]
+		ifFalse: [ self chromedIconElement: anIcon configuration: anIconConfiguration ]
+]
+
+{ #category : 'private - icons' }
+CFMaDetailPresentation >> chromedIconElement: anIcon configuration: anIconConfiguration [
+	| aTile |
+	aTile := CFIconTile new
+		icon: anIcon;
+		backgroundColor: anIconConfiguration backgroundColor;
+		yourself.
+	anIconConfiguration isSmall ifTrue: [ aTile beSmall ].
+	anIconConfiguration isMedium ifTrue: [ aTile beMedium ].
+	anIconConfiguration isLarge ifTrue: [ aTile beLarge ].
+	^ aTile
+]
+
+{ #category : 'private - icons' }
+CFMaDetailPresentation >> unadornedIconElement: anIcon configuration: anIconConfiguration [
+	anIconConfiguration isSmall ifTrue: [ anIcon size: 20 @ 20 ].
+	anIconConfiguration isMedium ifTrue: [ anIcon size: 28 @ 28 ].
+	anIconConfiguration isLarge ifTrue: [ anIcon size: 44 @ 44 ].
+	^ anIcon
 ]
 
 { #category : 'private - composition' }

@@ -44,6 +44,22 @@ MADescription >> categories: aCollection [
 		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
 ]
 
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> fieldConfigure [
+	^ self propertyAt: #cfFieldConfigure ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> fieldConfigure: aBlock [
+	^ self propertyAt: #cfFieldConfigure put: aBlock
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> configureField: aFieldConfiguration [
+	self fieldConfigure ifNotNil: [ :aBlock | aBlock cull: aFieldConfiguration ].
+	^ aFieldConfiguration
+]
+
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> icon [
@@ -53,17 +69,6 @@ MADescription >> icon [
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> icon: anIcon [
 	^ self propertyAt: #cfIcon put: anIcon
-]
-
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> iconBackground [
-	^ self propertyAt: #cfIconBackground ifAbsent: [ nil ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> iconBackground: aColor [
-	^ self propertyAt: #cfIconBackground put: aColor
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
@@ -76,15 +81,6 @@ MADescription >> iconFor: anObject [
 		ifFalse: [ aValue ]
 ]
 
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> iconBackgroundFor: anObject [
-	| aValue |
-	aValue := self iconBackground.
-	aValue ifNil: [ ^ nil ].
-	^ (aValue isBlock or: [ aValue isSymbol ])
-		ifTrue: [ aValue cull: anObject cull: self ]
-		ifFalse: [ aValue ]
-]
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> badges [

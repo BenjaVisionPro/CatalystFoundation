@@ -7,7 +7,8 @@ Class {
 		'hostElement',
 		'containersByGroup',
 		'ungroupedContainer',
-		'identityAffordanceEmitted'
+		'identityAffordanceEmitted',
+		'fieldConfigurationOverrides'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -20,7 +21,30 @@ Class {
 CFMaPresentation >> initialize [
 	super initialize.
 	containersByGroup := Dictionary new.
-	identityAffordanceEmitted := false
+	identityAffordanceEmitted := false.
+	fieldConfigurationOverrides := Dictionary new
+]
+
+{ #category : 'configuration - fields' }
+CFMaPresentation >> description: aDescription configure: aBlock [
+	fieldConfigurationOverrides at: aDescription put: aBlock.
+	^ self
+]
+
+{ #category : 'configuration - fields' }
+CFMaPresentation >> newFieldConfiguration [
+	^ CFMaFieldConfiguration new
+]
+
+{ #category : 'configuration - fields' }
+CFMaPresentation >> fieldConfigurationFor: aDescription [
+	| aConfiguration |
+	aConfiguration := self newFieldConfiguration.
+	aDescription configureField: aConfiguration.
+	fieldConfigurationOverrides
+		at: aDescription
+		ifPresent: [ :aBlock | aBlock cull: aConfiguration ].
+	^ aConfiguration
 ]
 
 

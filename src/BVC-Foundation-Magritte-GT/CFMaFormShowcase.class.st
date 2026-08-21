@@ -196,6 +196,7 @@ CFMaFormShowcase >> editableIconAndLabelDescription [
 		accessor: #text;
 		label: 'Editable icon + label';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		fieldConfigure: [ :field | field icon beSmall ];
 		group: 'Fields';
 		categories: #(presentation);
 		priority: 5;
@@ -209,6 +210,7 @@ CFMaFormShowcase >> readOnlyIconAndLabelDescription [
 		accessor: #text;
 		label: 'Read only icon + label';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		fieldConfigure: [ :field | field icon beUnadorned ];
 		group: 'Fields';
 		categories: #(presentation);
 		priority: 6;
@@ -223,7 +225,10 @@ CFMaFormShowcase >> editableIconLabelAndCommentDescription [
 		accessor: #text;
 		label: 'Editable icon + label + comment';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
-		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
+		fieldConfigure: [ :field |
+			field icon
+				beLarge;
+				backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
 		categories: #(presentation);
@@ -238,7 +243,8 @@ CFMaFormShowcase >> readOnlyIconLabelAndCommentDescription [
 		accessor: #text;
 		label: 'Read only icon + label + comment';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
-		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
+		fieldConfigure: [ :field |
+			field icon backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
 		comment: 'Secondary information for the field.';
 		group: 'Fields';
 		categories: #(presentation);
@@ -377,7 +383,8 @@ CFMaFormShowcase >> priorityDescription [
 		accessor: #priority;
 		label: 'Priority';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
-		iconBackground: CFMaSettingsSwitchAptitude activeTrackColor;
+		fieldConfigure: [ :field |
+			field icon backgroundColor: CFMaSettingsSwitchAptitude activeTrackColor ];
 		comment: 'Required numeric validation: enter a value outside 0..100 to inspect validation presentation.';
 		group: 'Fields';
 		categories: #(values);
@@ -592,6 +599,7 @@ CFMaFormShowcase >> fileDescription [
 		accessor: #file;
 		label: 'File';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		fieldConfigure: [ :field | field icon beSmall ];
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -617,6 +625,7 @@ CFMaFormShowcase >> directoryDescription [
 		accessor: #directory;
 		label: 'Directory';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		fieldConfigure: [ :field | field icon beSmall ];
 		kind: AbstractFileReference;
 		display: #printString;
 		group: 'Fields';
@@ -642,6 +651,7 @@ CFMaFormShowcase >> fieldIconDescription [
 		accessor: #fieldIcon;
 		label: 'Font Awesome icon';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressCard);
+		fieldConfigure: [ :field | field icon beSmall ];
 		default: self defaultIcon;
 		group: 'Fields';
 		categories: #(resources);
@@ -661,6 +671,7 @@ CFMaFormShowcase >> derivedValueDescription [
 		accessor: #derivedValue;
 		label: 'Derived value';
 		icon: (FontAwesomeIcons defaultStyle icon: #addressBook);
+		fieldConfigure: [ :field | field icon beSmall ];
 		group: 'Fields';
 		categories: #(resources);
 		priority: 190;
