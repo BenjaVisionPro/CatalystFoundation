@@ -13,9 +13,9 @@ Class {
 CFMaDetailPopupOptionElement >> initialize [
 	super initialize.
 	self
-		hFitContent;
+		hMatchParent;
 		vExact: 24;
-		padding: (BlInsets top: 0 right: 8 bottom: 0 left: 6);
+		padding: (BlInsets top: 0 right: 8 bottom: 0 left: 1);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
 		background: Color transparent;
 		border: BlBorder empty;

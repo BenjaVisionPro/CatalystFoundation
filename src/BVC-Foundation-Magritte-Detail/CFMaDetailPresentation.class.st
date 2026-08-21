@@ -226,7 +226,7 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 { #category : 'private - building' }
 CFMaDetailPresentation >> singleOptionPopupAreaBuilderForIndex: anIndex [
 	| selectedOffset |
-	selectedOffset := 4 + (((anIndex max: 1) - 1) * 24).
+	selectedOffset := 5 + (((anIndex max: 1) - 1) * 24).
 	^ BlSteppedLayoutAreaBuilder new
 		mark: BlSteppedLayoutMark bottomRight;
 		direction: #right;
@@ -256,8 +256,8 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 			anItemElement text: (aDescription displayStringFor: anItemObject) ];
 		hFitContent;
 		vFitContent;
-		padding: (BlInsets all: 4);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		padding: (BlInsets all: 5);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 		background: (Color white alpha: 0.96);
 		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
 		addAptitude: BrShadowAptitude new;
