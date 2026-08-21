@@ -201,16 +201,61 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
-	| aPopup |
+	| aPopup aDropdownAptitude |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
-	aPopup addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
-		content: [
-			GtMagritteBuilderUtility
-				newSingleOptionDropdownContent: aPopup
-				memento: self memento
-				description: aDescription ]).
+		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
+	aDropdownAptitude menuContainerDo: [ :aContainer |
+		aContainer
+			padding: BlInsets empty;
+			addAptitude: (BrStyleCommonAptitude new
+				default: [ :aStyle |
+					aStyle
+						background: (Color white alpha: 0.96);
+						border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
+						geometry: (BlRoundedRectangleGeometry cornerRadius: 6) ]) ].
+	aPopup addAptitude: aDropdownAptitude.
 	^ aPopup
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescription [
+	| aList aCurrentValue aCurrentIndex |
+	aDescription hasProperty: #blocItemStencil ifTrue: [
+		^ GtMagritteBuilderUtility
+			newSingleOptionDropdownContent: aPopup
+			memento: self memento
+			description: aDescription ].
+
+	aList := BrSimpleList new
+		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
+		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
+			anItemElement text: (aDescription displayStringFor: anItemObject) ];
+		hFitContent;
+		vFitContent;
+		padding: (BlInsets all: 4);
+		background: Color transparent;
+		items: aDescription options;
+		yourself.
+
+	aCurrentValue := (self memento readUsing: aDescription).
+	aCurrentIndex := aDescription options indexOf: aCurrentValue ifAbsent: [ 0 ].
+	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
+
+	aList when: BrSelectionChanged do: [ :anEvent |
+		| aWidgetElement |
+		aWidgetElement := anEvent currentTarget.
+		anEvent selectedDo: [ :anInterval |
+			| selectedObject |
+			selectedObject := aWidgetElement viewModel itemAt: anInterval first.
+			GtMagritteBuilderUtility
+				write: selectedObject
+				using: aDescription
+				memento: self memento
+				element: aPopup.
+			aPopup fireEvent: BrDropdownHideWish new ] ].
+	^ aList
 ]
 
 { #category : 'private - building' }
