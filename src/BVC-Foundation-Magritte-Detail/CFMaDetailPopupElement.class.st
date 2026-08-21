@@ -19,7 +19,7 @@ CFMaDetailPopupElement >> initialize [
 		alignCenterLeft;
 		fitContent;
 		cellSpacing: 12;
-		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 6);
+		padding: (BlInsets top: 2 right: 4 bottom: 2 left: 12);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: Color transparent;
 		border: BlBorder empty;
@@ -29,13 +29,12 @@ CFMaDetailPopupElement >> initialize [
 			hovered: [ :aStyle | aStyle background: self popupBackgroundColor ];
 			focused: [ :aStyle | aStyle background: self popupBackgroundColor ]).
 
-	valueLabel := BlTextElement new
-		text: '' asRopedText glamorousRegularFontAndSize;
-		padding: BlInsets empty;
-		margin: BlInsets empty;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent ];
+	valueLabel := BrLabel new
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFontAndSize;
+			padding: BlInsets empty;
+			yourself);
+		fitContent;
 		yourself.
 
 	anIndicator := (FontAwesomeIcons icon: #chevronDoubleDown)
@@ -96,5 +95,5 @@ CFMaDetailPopupElement >> text [
 
 { #category : 'accessing' }
 CFMaDetailPopupElement >> text: aTextOrString [
-	valueLabel text: aTextOrString asRopedText glamorousRegularFontAndSize
+	valueLabel text: aTextOrString
 ]

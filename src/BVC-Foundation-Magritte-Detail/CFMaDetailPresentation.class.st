@@ -190,10 +190,13 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
-	| aPopup |
+	| aPopup aField |
 	aPopup := self newSingleOptionPopupUsing: aDescription.
-	self addShortcutsTo: aPopup.
-	self addFieldElement: aPopup using: aDescription
+	aField := CFMaDetailPopupFieldElement new
+		popup: aPopup;
+		yourself.
+	self addShortcutsTo: aField.
+	self addFieldElement: aField using: aDescription
 ]
 
 { #category : 'private - building' }
