@@ -201,16 +201,14 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
-	| aPopup aDropdownAptitude aCurrentValue aCurrentIndex |
+	| aPopup aDropdownAptitude |
 	aPopup := self newSingleOptionPopupDisplayUsing: aDescription.
-	aCurrentValue := self memento readUsing: aDescription.
-	aCurrentIndex := aDescription options indexOf: aCurrentValue ifAbsent: [ 1 ].
 	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ self newSingleOptionPopupDisplayUsing: aDescription ]
 		content: [ self newSingleOptionPopupContent: aPopup using: aDescription ].
 	aDropdownAptitude
 		withContainerAreaBuilders: {
-			self singleOptionPopupAreaBuilderForIndex: aCurrentIndex };
+			self singleOptionPopupAreaBuilderUsing: aDescription };
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
@@ -224,16 +222,17 @@ CFMaDetailPresentation >> newSingleOptionPopupUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> singleOptionPopupAreaBuilderForIndex: anIndex [
-	| selectedOffset |
-	selectedOffset := 5 + (((anIndex max: 1) - 1) * 24).
+CFMaDetailPresentation >> singleOptionPopupAreaBuilderUsing: aDescription [
 	^ BlSteppedLayoutAreaBuilder new
 		mark: BlSteppedLayoutMark bottomRight;
 		direction: #right;
 		alignTopLeft;
 		bounds: [ :aState |
-			| left top |
-			left := (aState occupiedBounds left - 14)
+			| currentValue currentIndex selectedOffset left top |
+			currentValue := self memento readUsing: aDescription.
+			currentIndex := aDescription options indexOf: currentValue ifAbsent: [ 1 ].
+			selectedOffset := 5 + (((currentIndex max: 1) - 1) * 24).
+			left := (aState occupiedBounds left - 10)
 				max: aState containerPositionXWithPadding.
 			top := (aState occupiedBounds top - selectedOffset)
 				max: aState containerPositionYWithPadding.
