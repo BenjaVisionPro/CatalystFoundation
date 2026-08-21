@@ -26,8 +26,7 @@ CFMaDetailPopupOptionElement >> initialize [
 			glamorousRegularFontAndSize;
 			padding: BlInsets empty;
 			yourself);
-		text: '✓';
-		foreground: Color transparent;
+		text: ('✓' asRopedText foreground: Color transparent);
 		hExact: 14;
 		vFitContent;
 		yourself.
@@ -38,7 +37,6 @@ CFMaDetailPopupOptionElement >> initialize [
 			padding: BlInsets empty;
 			yourself);
 		fitContent;
-		foreground: Color black;
 		yourself.
 
 	self
@@ -47,13 +45,13 @@ CFMaDetailPopupOptionElement >> initialize [
 		addAptitude: (BrStyleCommonAptitude new
 			default: [ :aStyle |
 				aStyle background: Color transparent.
-				checkLabel foreground: Color transparent.
-				valueLabel foreground: Color black ];
+				checkLabel text: ('✓' asRopedText foreground: Color transparent).
+				valueLabel text: (valueLabel text asString asRopedText foreground: Color black) ];
 			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.06) ];
 			selected: [ :aStyle |
 				aStyle background: (Color r: 10 g: 132 b: 255 range: 255).
-				checkLabel foreground: Color white.
-				valueLabel foreground: Color white ])
+				checkLabel text: ('✓' asRopedText foreground: Color white).
+				valueLabel text: (valueLabel text asString asRopedText foreground: Color white) ])
 ]
 
 { #category : 'accessing' }
@@ -63,5 +61,5 @@ CFMaDetailPopupOptionElement >> text [
 
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> text: aTextOrString [
-	valueLabel text: aTextOrString
+	valueLabel text: (aTextOrString asRopedText foreground: Color black)
 ]
