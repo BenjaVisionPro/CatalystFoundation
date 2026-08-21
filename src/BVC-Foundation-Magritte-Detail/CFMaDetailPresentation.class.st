@@ -252,7 +252,11 @@ CFMaDetailPresentation >> newSingleOptionPopupContent: aPopup using: aDescriptio
 	aList := BrSimpleList new
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
-			anItemElement text: (aDescription displayStringFor: anItemObject) ];
+			anItemElement
+				text: (aDescription displayStringFor: anItemObject);
+				activateBlock: [
+					(aList isSelectedAt: anItemIndex)
+						ifTrue: [ aPopup fireEvent: BrDropdownHideWish new ] ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: 5);

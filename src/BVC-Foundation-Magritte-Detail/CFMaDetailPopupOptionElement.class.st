@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
 		'checkLabel',
-		'valueLabel'
+		'valueLabel',
+		'activateBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -44,7 +45,9 @@ CFMaDetailPopupOptionElement >> initialize [
 		constraintsDo: [ :c | c linear vertical alignCenter ];
 		yourself.
 
+	activateBlock := nil.
 	self
+		when: BlClickEvent do: [ :anEvent | activateBlock ifNotNil: [ activateBlock value ] ];
 		addChild: checkLabel;
 		addChild: valueLabel;
 		addAptitude: (BrStyleCommonAptitude new
@@ -65,6 +68,12 @@ CFMaDetailPopupOptionElement >> initialize [
 			selected: [ :aStyle | aStyle foreground: Color white ])
 ]
 
+
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> activateBlock: aBlock [
+	activateBlock := aBlock
+]
 
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> text [
