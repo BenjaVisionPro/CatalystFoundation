@@ -24,7 +24,7 @@ CFMaDetailGroupElement >> group: aGroup [
 			fontSize: 14;
 			bold);
 		fitContent;
-		margin: (BlInsets top: 22 right: 8 bottom: 2 left: 8);
+		margin: (BlInsets top: 22 right: 14 bottom: 2 left: 14);
 		yourself)
 ]
 
@@ -33,17 +33,19 @@ CFMaDetailGroupElement >> initialize [
 	super initialize.
 	card := CFMaDetailGroupCardElement new
 		visibility: BlVisibility gone;
+		margin: (BlInsets left: 6 right: 6);
 		yourself.
 	groups := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 10;
+		cellSpacing: 4;
+		margin: (BlInsets top: 4);
 		yourself.
 	self
 		hMatchParent;
 		vFitContent;
-		margin: (BlInsets left: 6 right: 6);
-		cellSpacing: 10;
+		margin: BlInsets empty;
+		cellSpacing: 0;
 		addChild: card;
 		addChild: groups
 ]
