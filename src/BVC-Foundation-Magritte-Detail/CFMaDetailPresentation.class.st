@@ -72,16 +72,20 @@ CFMaDetailPresentation >> category: aCategory in: aParentGroup [
 	aKey := { aParentGroup. aCategory }.
 	^ categoryGroups
 		at: aKey
-		ifAbsentPut: [
-			self
-				newGroup: aCategory
-				in: aParentGroup ]
+		ifAbsentPut: [ self newGroupIn: aParentGroup ]
 ]
 
 { #category : 'private - groups' }
 CFMaDetailPresentation >> newGroup: aGroup in: aParent [
+	^ (self newGroupIn: aParent)
+		group: aGroup;
+		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> newGroupIn: aParent [
 	| anElement |
-	anElement := CFMaDetailGroupElement new group: aGroup.
+	anElement := CFMaDetailGroupElement new.
 	(aParent isKindOf: CFMaDetailGroupElement)
 		ifTrue: [ aParent addGroup: anElement ]
 		ifFalse: [ aParent addChild: anElement ].
