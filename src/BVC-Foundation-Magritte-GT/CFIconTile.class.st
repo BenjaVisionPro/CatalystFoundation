@@ -1,5 +1,5 @@
 "
-I present icon content inside Foundation's square icon chrome. I am presentation-neutral: callers choose my size and supply an icon that understands #color: and #fitInto:.
+I present icon content inside Foundation's square icon chrome. I am presentation-neutral: callers choose my size and supply a Bloc icon element. I assign the icon its available extent; scalable icons preserve their own proportions within that space.
 "
 Class {
 	#name : 'CFIconTile',
@@ -102,7 +102,7 @@ CFIconTile >> icon: anIconElement [
 	iconElement ifNotNil: [ self removeChild: iconElement ].
 	iconElement := anIconElement
 		color: Color white;
-		fitInto: self iconExtent;
+		size: self iconExtent;
 		yourself.
 	iconElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
@@ -150,7 +150,7 @@ CFIconTile >> size: aNumber [
 	super size: tileSize @ tileSize.
 	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
 	lightBorderAptitude effectWidth: self borderWidth.
-	iconElement ifNotNil: [ iconElement fitInto: self iconExtent ].
+	iconElement ifNotNil: [ iconElement size: self iconExtent ].
 	self background: (self backgroundPaintFor: backgroundColor).
 	^ self
 ]
