@@ -3,8 +3,10 @@ Class {
 	#superclass : 'BlLayout',
 	#instVars : [
 		'gap',
+		'leadingGap',
 		'accessoryGap',
 		'supportingGap',
+		'supportingInset',
 		'wrapped',
 		'bodyWidth',
 		'descriptionWidth',
@@ -28,8 +30,10 @@ CFMaDetailRowLayout class >> constraints [
 CFMaDetailRowLayout >> initialize [
 	super initialize.
 	gap := 12.0.
+	leadingGap := 8.0.
 	accessoryGap := 6.0.
 	supportingGap := 1.0.
+	supportingInset := 1.0.
 	wrapped := false.
 	bodyWidth := 0.0.
 	descriptionWidth := 0.0.
@@ -51,6 +55,16 @@ CFMaDetailRowLayout >> gap: aNumber [
 ]
 
 { #category : 'accessing' }
+CFMaDetailRowLayout >> leadingGap [
+	^ leadingGap
+]
+
+{ #category : 'accessing' }
+CFMaDetailRowLayout >> leadingGap: aNumber [
+	leadingGap := aNumber asFloat
+]
+
+{ #category : 'accessing' }
 CFMaDetailRowLayout >> accessoryGap [
 	^ accessoryGap
 ]
@@ -68,6 +82,16 @@ CFMaDetailRowLayout >> supportingGap [
 { #category : 'accessing' }
 CFMaDetailRowLayout >> supportingGap: aNumber [
 	supportingGap := aNumber asFloat
+]
+
+{ #category : 'accessing' }
+CFMaDetailRowLayout >> supportingInset [
+	^ supportingInset
+]
+
+{ #category : 'accessing' }
+CFMaDetailRowLayout >> supportingInset: aNumber [
+	supportingInset := aNumber asFloat
 ]
 
 { #category : 'private - children' }
@@ -199,7 +223,7 @@ CFMaDetailRowLayout >> measure: aChild widthExactly: aWidth [
 CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent accessories: accessoryChildren [
 	| aGap |
 	aGap := 0.0.
-	(leadingChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + gap ].
+	(leadingChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + leadingGap ].
 	(accessoryChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + gap ].
 	^ aGap
 ]
@@ -232,7 +256,7 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	contentWidth := aContent
 		ifNil: [ 0.0 ]
 		ifNotNil: [ (bodyWidth - descriptionWidth - gap) max: 0.0 ].
-	supportingWidth := bodyWidth.
+	supportingWidth := (bodyWidth - supportingInset) max: 0.0.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
 	(self contentUsesAvailableWidth: aContent)
@@ -265,7 +289,7 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 	wrapped := true.
 	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
 	descriptionWidth := halfWidth.
-	supportingWidth := halfWidth.
+	supportingWidth := (halfWidth - supportingInset) max: 0.0.
 	contentWidth := halfWidth.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
@@ -367,7 +391,7 @@ CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSuppor
 
 	aSupporting ifNotNil: [
 		aSupporting
-			applyLayoutIn: (bodyX @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
+			applyLayoutIn: ((bodyX + supportingInset) @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
 			context: aBlElementBoundsUpdateContext ]
 ]
 
@@ -387,18 +411,18 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 
 	aSupporting ifNotNil: [
 		aSupporting
-			applyLayoutIn: (bodyX @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
+			applyLayoutIn: ((bodyX + supportingInset) @ (aTop + secondLineTop) extent: supportingWidth @ aSupporting measuredHeight)
 			context: aBlElementBoundsUpdateContext ].
 
 	aContent ifNotNil: [
 		(self contentUsesAvailableWidth: aContent)
 			ifTrue: [
-				contentX := bodyX + supportingWidth + gap.
+				contentX := bodyX + supportingWidth + supportingInset + gap.
 				aContent
 					applyLayoutIn: (contentX @ contentY extent: contentWidth @ aContent measuredHeight)
 					context: aBlElementBoundsUpdateContext ]
 			ifFalse: [
-				contentX := bodyX + supportingWidth + gap + (contentWidth - aContent measuredWidth).
+				contentX := bodyX + supportingWidth + supportingInset + gap + (contentWidth - aContent measuredWidth).
 				aContent
 					applyLayoutIn: (contentX @ contentY extent: aContent measuredExtent)
 					context: aBlElementBoundsUpdateContext ] ]
@@ -426,7 +450,7 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 			context: aBlElementBoundsUpdateContext.
 		x := x + aChild measuredWidth.
 		anIndex < leadingChildren size ifTrue: [ x := x + accessoryGap ] ].
-	leadingChildren ifNotEmpty: [ x := x + gap ].
+	leadingChildren ifNotEmpty: [ x := x + leadingGap ].
 	bodyX := x.
 
 	rightEdge := aRectangle width - padding right.
