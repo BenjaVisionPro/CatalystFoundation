@@ -38,8 +38,8 @@ CFMaDetailGroupElement >> initialize [
 	groups := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 4;
-		margin: (BlInsets top: 4);
+		cellSpacing: 0;
+		margin: BlInsets empty;
 		yourself.
 	self
 		hMatchParent;
