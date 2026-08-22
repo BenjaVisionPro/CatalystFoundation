@@ -3,15 +3,50 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'card',
-		'groups'
+		'groups',
+		'configuration'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
 { #category : 'adding' }
-CFMaDetailGroupElement >> addGroup: aGroup [
-	groups addChild: aGroup
+CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
+	self ensureGroups.
+	(configuration presentation isKindOf: CFMaDetailTabsConfiguration)
+		ifTrue: [
+			groups addTab: (BrTab new
+				aptitude: BrGlamorousTabAptitude new;
+				label: aLabel asString;
+				stencil: [ aGroup ];
+				yourself) ]
+		ifFalse: [ groups addChild: aGroup ]
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupElement >> configuration: aConfiguration [
+	configuration := aConfiguration
+]
+
+{ #category : 'private' }
+CFMaDetailGroupElement >> ensureGroups [
+	groups ifNotNil: [ ^ groups ].
+	groups := (configuration presentation isKindOf: CFMaDetailTabsConfiguration)
+		ifTrue: [
+			BrTabGroup new
+				hMatchParent;
+				vFitContent;
+				aptitude: BrGlamorousTabGroupAptitude new;
+				yourself ]
+		ifFalse: [
+			BrVerticalPane new
+				hMatchParent;
+				vFitContent;
+				cellSpacing: 10;
+				margin: BlInsets empty;
+				yourself ].
+	self addChild: groups.
+	^ groups
 ]
 
 { #category : 'accessing' }
@@ -35,19 +70,12 @@ CFMaDetailGroupElement >> initialize [
 		visibility: BlVisibility gone;
 		margin: (BlInsets left: 6 right: 6);
 		yourself.
-	groups := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 10;
-		margin: BlInsets empty;
-		yourself.
 	self
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		cellSpacing: 0;
-		addChild: card;
-		addChild: groups
+		addChild: card
 ]
 
 { #category : 'accessing' }

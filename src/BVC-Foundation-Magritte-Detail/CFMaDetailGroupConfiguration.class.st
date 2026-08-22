@@ -4,7 +4,8 @@ Class {
 	#name : 'CFMaDetailGroupConfiguration',
 	#superclass : 'Object',
 	#instVars : [
-		'categories'
+		'categories',
+		'presentation'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -15,7 +16,6 @@ CFMaDetailGroupConfiguration >> initialize [
 	super initialize.
 	categories := Dictionary new
 ]
-
 
 { #category : 'configuration' }
 CFMaDetailGroupConfiguration >> category: aCategory configure: aBlock [
@@ -32,3 +32,13 @@ CFMaDetailGroupConfiguration >> categoryConfigurationFor: aCategory [
 		ifAbsentPut: [ self class new ]
 ]
 
+{ #category : 'configuration - presentation' }
+CFMaDetailGroupConfiguration >> beTabs [
+	presentation := CFMaDetailTabsConfiguration new.
+	^ presentation
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupConfiguration >> presentation [
+	^ presentation
+]

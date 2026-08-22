@@ -49,46 +49,70 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
-	| aGroup |
-	aGroup := self groupFor: aDescription group.
+	| aGroup aConfiguration |
+	aConfiguration := self groupConfigurationFor: aDescription group.
+	aGroup := self
+		groupFor: aDescription group
+		configuredBy: aConfiguration.
 	aDescription categories do: [ :aCategory |
-		aGroup := self category: aCategory in: aGroup ].
+		aConfiguration := aConfiguration categoryConfigurationFor: aCategory.
+		aGroup := self
+			category: aCategory
+			in: aGroup
+			configuredBy: aConfiguration ].
 	^ aGroup rows
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> groupFor: aGroup [
+CFMaDetailPresentation >> groupFor: aGroup configuredBy: aConfiguration [
 	^ groups
 		at: aGroup
 		ifAbsentPut: [
 			self
 				newGroup: aGroup
-				in: self hostElement ]
+				in: self hostElement
+				configuredBy: aConfiguration ]
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> category: aCategory in: aParentGroup [
+CFMaDetailPresentation >> category: aCategory in: aParentGroup configuredBy: aConfiguration [
 	| aKey |
 	aKey := { aParentGroup. aCategory }.
 	^ categoryGroups
 		at: aKey
-		ifAbsentPut: [ self newGroupIn: aParentGroup ]
+		ifAbsentPut: [
+			self
+				newGroupIn: aParentGroup
+				label: aCategory
+				configuredBy: aConfiguration ]
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newGroup: aGroup in: aParent [
-	^ (self newGroupIn: aParent)
+CFMaDetailPresentation >> newGroup: aGroup in: aParent configuredBy: aConfiguration [
+	^ (self
+		newGroupIn: aParent
+		configuredBy: aConfiguration)
 		group: aGroup;
 		yourself
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newGroupIn: aParent [
+CFMaDetailPresentation >> newGroupIn: aParent configuredBy: aConfiguration [
 	| anElement |
-	anElement := CFMaDetailGroupElement new.
-	(aParent isKindOf: CFMaDetailGroupElement)
-		ifTrue: [ aParent addGroup: anElement ]
-		ifFalse: [ aParent addChild: anElement ].
+	anElement := CFMaDetailGroupElement new
+		configuration: aConfiguration;
+		yourself.
+	aParent addChild: anElement.
+	^ anElement
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> newGroupIn: aParent label: aLabel configuredBy: aConfiguration [
+	| anElement |
+	anElement := CFMaDetailGroupElement new
+		configuration: aConfiguration;
+		yourself.
+	aParent addGroup: anElement label: aLabel.
 	^ anElement
 ]
 

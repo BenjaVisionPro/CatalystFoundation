@@ -54,6 +54,19 @@ CFMaDetailPresentationExamples >> groupConfigurationsAreCreatedLazily [
 	^ aPresentation
 ]
 
+
+{ #category : 'examples' }
+CFMaDetailPresentationExamples >> groupCanPresentChildrenAsTabs [
+	<gtExample>
+	| aConfiguration aTabs |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+	aTabs := aConfiguration beTabs.
+
+	self assert: aTabs class equals: CFMaDetailTabsConfiguration.
+	self assert: aConfiguration presentation == aTabs.
+	^ aConfiguration
+]
+
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	<gtExample>

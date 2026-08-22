@@ -68,6 +68,36 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #();
 			priority: 90;
 			yourself);
+		add: (self summaryDescription copy
+			label: 'Direct tab field';
+			group: 'Tabs';
+			categories: #();
+			priority: 100;
+			yourself);
+		add: (self statusDescription copy
+			label: 'First status';
+			group: 'Tabs';
+			categories: #('First');
+			priority: 110;
+			yourself);
+		add: (self classValueDescription copy
+			label: 'First class';
+			group: 'Tabs';
+			categories: #('First');
+			priority: 120;
+			yourself);
+		add: (self dateDescription copy
+			label: 'Second date';
+			group: 'Tabs';
+			categories: #('Second');
+			priority: 130;
+			yourself);
+		add: (self timeDescription copy
+			label: 'Second time';
+			group: 'Tabs';
+			categories: #('Second');
+			priority: 140;
+			yourself);
 		yourself
 ]
 
@@ -77,7 +107,9 @@ CFMaFormShowcase >> exampleDetailGroupsElement [
 	| aDescription aMemento |
 	aDescription := self detailGroupsDescription.
 	aDescription blocPresentationStencil: [ :theMemento |
-		CFMaDetailPresentation new ].
+		CFMaDetailPresentation new
+			group: 'Tabs' configure: [ :aGroup | aGroup beTabs ];
+			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement
 ]
