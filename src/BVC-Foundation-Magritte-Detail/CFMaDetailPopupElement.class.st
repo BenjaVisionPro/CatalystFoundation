@@ -38,7 +38,7 @@ CFMaDetailPopupElement >> initialize [
 		fitContent;
 		yourself.
 
-	anIndicator := (FontAwesomeIcons icon: #chevronDoubleDown)
+	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
 		fitInto: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
 		yourself.
