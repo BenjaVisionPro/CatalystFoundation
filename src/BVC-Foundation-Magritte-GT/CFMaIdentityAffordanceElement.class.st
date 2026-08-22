@@ -1,5 +1,6 @@
-"I am responsible for presenting and editing an object's icon, label, and identifier as one compact Foundation identity affordance."
-
+"
+I am responsible for presenting and editing an object's icon, label, and identifier as one compact Foundation identity affordance.
+"
 Class {
 	#name : 'CFMaIdentityAffordanceElement',
 	#superclass : 'BrHorizontalPane',
@@ -14,6 +15,91 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Widgets'
 }
+
+{ #category : 'private - binding' }
+CFMaIdentityAffordanceElement >> bindEditable: anEditableLabel toSelector: aSelector [
+	| aDescription |
+	aDescription := self descriptionHandling: aSelector.
+	aDescription ifNil: [
+		anEditableLabel visibility: BlVisibility gone.
+		^ self ].
+
+	anEditableLabel
+		visibility: BlVisibility visible;
+		when: BrEditorAcceptWish
+		do: [ :aWish |
+			GtMagritteBuilderUtility
+				writeText: aWish text
+				using: aDescription
+				memento: memento
+				element: anEditableLabel ].
+
+	anEditableLabel withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theLabel :aSink |
+				| aValue |
+				aValue := aSink value currentValue.
+				theLabel text: (aValue ifNil: [ '' ] ifNotNil: #asString) ].
+		(memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'private - binding' }
+CFMaIdentityAffordanceElement >> bindIconTile: anIconTile using: aDescription [
+	anIconTile withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :aTile :aSink |
+				| aValue anIcon |
+				aValue := aSink value currentValue.
+				anIcon := aDescription blocStencil
+					model: aValue;
+					description: aDescription;
+					memento: memento;
+					asElement.
+				aTile icon: anIcon ].
+
+		(memento readObservableValueUsing: aDescription) observe: anElementSink ]
+]
+
+{ #category : 'private - building' }
+CFMaIdentityAffordanceElement >> buildIconEditor [
+	| aDescription anIconTile |
+	iconContainer removeChildren.
+	aDescription := self descriptionHandling: #icon.
+	aDescription ifNil: [ ^ self ].
+
+	anIconTile := CFIconTile new
+		beLarge;
+		yourself.
+	anIconTile constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	self bindIconTile: anIconTile using: aDescription.
+	iconContainer addChild: anIconTile.
+
+	aDescription isReadOnly ifFalse: [
+		iconContainer addChild: (self newIconFieldFor: aDescription) ]
+]
+
+{ #category : 'private - accessing' }
+CFMaIdentityAffordanceElement >> descriptionHandling: aSelector [
+	memento ifNil: [ ^ nil ].
+	^ memento magritteDescription
+		detect: [ :each | each handlesSelector: aSelector ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> iconContainer [
+	^ iconContainer
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> identifierElement [
+	^ identifierElement
+]
 
 { #category : 'initialization' }
 CFMaIdentityAffordanceElement >> initialize [
@@ -65,6 +151,26 @@ CFMaIdentityAffordanceElement >> initialize [
 		yourself
 ]
 
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> labelElement [
+	^ labelElement
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> memento [
+	^ memento
+]
+
+{ #category : 'accessing' }
+CFMaIdentityAffordanceElement >> memento: aMemento [
+	memento := aMemento.
+	self
+		buildIconEditor;
+		bindEditable: labelElement toSelector: #label;
+		bindEditable: identifierElement toSelector: #identifier;
+		updateTextContainerVisibility
+]
+
 { #category : 'private - building' }
 CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground: aColor [
 	| anAptitude |
@@ -84,67 +190,6 @@ CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaIdentityAffordanceElement >> memento [
-	^ memento
-]
-
-{ #category : 'accessing' }
-CFMaIdentityAffordanceElement >> memento: aMemento [
-	memento := aMemento.
-	self
-		buildIconEditor;
-		bindEditable: labelElement toSelector: #label;
-		bindEditable: identifierElement toSelector: #identifier;
-		updateTextContainerVisibility
-]
-
-{ #category : 'private - accessing' }
-CFMaIdentityAffordanceElement >> descriptionHandling: aSelector [
-	memento ifNil: [ ^ nil ].
-	^ memento magritteDescription
-		detect: [ :each | each handlesSelector: aSelector ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'private - building' }
-CFMaIdentityAffordanceElement >> buildIconEditor [
-	| aDescription anIconTile |
-	iconContainer removeChildren.
-	aDescription := self descriptionHandling: #icon.
-	aDescription ifNil: [ ^ self ].
-
-	anIconTile := CFIconTile new
-		beLarge;
-		yourself.
-	anIconTile constraintsDo: [ :c |
-		c frame horizontal alignCenter.
-		c frame vertical alignCenter ].
-	self bindIconTile: anIconTile using: aDescription.
-	iconContainer addChild: anIconTile.
-
-	aDescription isReadOnly ifFalse: [
-		iconContainer addChild: (self newIconFieldFor: aDescription) ]
-]
-
-{ #category : 'private - binding' }
-CFMaIdentityAffordanceElement >> bindIconTile: anIconTile using: aDescription [
-	anIconTile withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :aTile :aSink |
-				| aValue anIcon |
-				aValue := aSink value currentValue.
-				anIcon := aDescription blocStencil
-					model: aValue;
-					description: aDescription;
-					memento: memento;
-					asElement.
-				aTile icon: anIcon ].
-
-		(memento readObservableValueUsing: aDescription) observe: anElementSink ]
-]
-
 { #category : 'private - building' }
 CFMaIdentityAffordanceElement >> newIconFieldFor: aDescription [
 	^ FontAwesomeIconFieldElement new
@@ -158,51 +203,6 @@ CFMaIdentityAffordanceElement >> newIconFieldFor: aDescription [
 		padding: BlInsets empty;
 		yourself
 ]
-
-{ #category : 'private - binding' }
-CFMaIdentityAffordanceElement >> bindEditable: anEditableLabel toSelector: aSelector [
-	| aDescription |
-	aDescription := self descriptionHandling: aSelector.
-	aDescription ifNil: [
-		anEditableLabel visibility: BlVisibility gone.
-		^ self ].
-
-	anEditableLabel
-		visibility: BlVisibility visible;
-		when: BrEditorAcceptWish
-		do: [ :aWish |
-			GtMagritteBuilderUtility
-				writeText: aWish text
-				using: aDescription
-				memento: memento
-				element: anEditableLabel ].
-
-	anEditableLabel withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :theLabel :aSink |
-				| aValue |
-				aValue := aSink value currentValue.
-				theLabel text: (aValue ifNil: [ '' ] ifNotNil: #asString) ].
-		(memento readObservableValueUsing: aDescription)
-			observe: anElementSink ]
-]
-
-{ #category : 'accessing' }
-CFMaIdentityAffordanceElement >> iconContainer [
-	^ iconContainer
-]
-
-{ #category : 'accessing' }
-CFMaIdentityAffordanceElement >> labelElement [
-	^ labelElement
-]
-
-{ #category : 'accessing' }
-CFMaIdentityAffordanceElement >> identifierElement [
-	^ identifierElement
-]
-
 
 { #category : 'private - updating' }
 CFMaIdentityAffordanceElement >> updateTextContainerVisibility [

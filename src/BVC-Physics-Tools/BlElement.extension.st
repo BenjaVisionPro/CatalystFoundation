@@ -6,14 +6,9 @@ BlElement >> existingPhysicsOverlay [
 ]
 
 { #category : '*BVC-Physics-Tools' }
-BlElement >> showPhysicsOverlay [
-	| overlay |
-	overlay := self existingPhysicsOverlay.
-	overlay ifNil: [
-		overlay := CFPhysicsOverlay on: self.
-		self userData at: CFPhysicsOverlay put: overlay ].
-	overlay install.
-	^ overlay
+BlElement >> gtTogglePhysicsOverlayFor: anAction [
+	<gtAction>
+	^ CFPhysicsOverlay gtToggleActionFor: self action: anAction
 ]
 
 { #category : '*BVC-Physics-Tools' }
@@ -27,19 +22,24 @@ BlElement >> hidePhysicsOverlay [
 ]
 
 { #category : '*BVC-Physics-Tools' }
-BlElement >> togglePhysicsOverlay [
-	^ self existingPhysicsOverlay
-		ifNil: [ self showPhysicsOverlay ]
-		ifNotNil: [ self hidePhysicsOverlay ]
-]
-
-{ #category : '*BVC-Physics-Tools' }
 BlElement >> physicsOverlayHost [
 	^ self
 ]
 
 { #category : '*BVC-Physics-Tools' }
-BlElement >> gtTogglePhysicsOverlayFor: anAction [
-	<gtAction>
-	^ CFPhysicsOverlay gtToggleActionFor: self action: anAction
+BlElement >> showPhysicsOverlay [
+	| overlay |
+	overlay := self existingPhysicsOverlay.
+	overlay ifNil: [
+		overlay := CFPhysicsOverlay on: self.
+		self userData at: CFPhysicsOverlay put: overlay ].
+	overlay install.
+	^ overlay
+]
+
+{ #category : '*BVC-Physics-Tools' }
+BlElement >> togglePhysicsOverlay [
+	^ self existingPhysicsOverlay
+		ifNil: [ self showPhysicsOverlay ]
+		ifNotNil: [ self hidePhysicsOverlay ]
 ]

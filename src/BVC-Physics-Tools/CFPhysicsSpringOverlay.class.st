@@ -1,8 +1,15 @@
-"I manage the retained spring diagnostics for one Physics overlay. My responsibility is to reconcile the world's springs with their visual representations and resolve spring selections from those visuals."
+"
+I manage the retained spring diagnostics for one Physics overlay. My responsibility is to reconcile the world's springs with their visual representations and resolve spring selections from those visuals.
+"
 Class {
 	#name : 'CFPhysicsSpringOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'world', 'context', 'visualsBySpring' ],
+	#instVars : [
+		'root',
+		'world',
+		'context',
+		'visualsBySpring'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -17,23 +24,27 @@ CFPhysicsSpringOverlay class >> in: aRoot world: aWorld context: aContext [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsSpringOverlay >> root: anElement [ root := anElement ]
+{ #category : 'controlling' }
+CFPhysicsSpringOverlay >> clear [
+	visualsBySpring valuesDo: #release.
+	visualsBySpring removeAll.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsSpringOverlay >> world: aWorld [ world := aWorld ]
+CFPhysicsSpringOverlay >> context: aContext [ context := aContext
+]
+
+{ #category : 'initialization' }
+CFPhysicsSpringOverlay >> initializeOverlay [ visualsBySpring := IdentityDictionary new
+]
+
+{ #category : 'controlling' }
+CFPhysicsSpringOverlay >> release [ ^ self clear
+]
 
 { #category : 'accessing' }
-CFPhysicsSpringOverlay >> context: aContext [ context := aContext ]
-
-{ #category : 'accessing' }
-CFPhysicsSpringOverlay >> visuals [ ^ visualsBySpring values asArray ]
-
-{ #category : 'testing' }
-CFPhysicsSpringOverlay >> visualForEventTarget: anElement [
-	^ visualsBySpring values
-		detect: [ :each | each includesEventTarget: anElement ]
-		ifNone: [ nil ]
+CFPhysicsSpringOverlay >> root: anElement [ root := anElement
 ]
 
 { #category : 'testing' }
@@ -42,9 +53,6 @@ CFPhysicsSpringOverlay >> springForEventTarget: anElement [
 	visual := self visualForEventTarget: anElement.
 	^ visual ifNil: [ nil ] ifNotNil: [ visual spring ]
 ]
-
-{ #category : 'initialization' }
-CFPhysicsSpringOverlay >> initializeOverlay [ visualsBySpring := IdentityDictionary new ]
 
 { #category : 'updating' }
 CFPhysicsSpringOverlay >> update [
@@ -73,12 +81,17 @@ CFPhysicsSpringOverlay >> updateGeometry [
 	^ self
 ]
 
-{ #category : 'controlling' }
-CFPhysicsSpringOverlay >> clear [
-	visualsBySpring valuesDo: #release.
-	visualsBySpring removeAll.
-	^ self
+{ #category : 'testing' }
+CFPhysicsSpringOverlay >> visualForEventTarget: anElement [
+	^ visualsBySpring values
+		detect: [ :each | each includesEventTarget: anElement ]
+		ifNone: [ nil ]
 ]
 
-{ #category : 'controlling' }
-CFPhysicsSpringOverlay >> release [ ^ self clear ]
+{ #category : 'accessing' }
+CFPhysicsSpringOverlay >> visuals [ ^ visualsBySpring values asArray
+]
+
+{ #category : 'accessing' }
+CFPhysicsSpringOverlay >> world: aWorld [ world := aWorld
+]

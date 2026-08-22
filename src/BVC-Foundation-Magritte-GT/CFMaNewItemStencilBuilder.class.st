@@ -10,6 +10,12 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'api - instantiation' }
+CFMaNewItemStencilBuilder >> buildDefault [
+	self itemClass ifNil: [ ^ nil ].
+	^ self itemClass new
+]
+
 { #category : 'accessing' }
 CFMaNewItemStencilBuilder >> description [
 	^ description
@@ -38,12 +44,6 @@ CFMaNewItemStencilBuilder >> memento [
 { #category : 'accessing' }
 CFMaNewItemStencilBuilder >> memento: anObject [
 	memento := anObject
-]
-
-{ #category : 'api - instantiation' }
-CFMaNewItemStencilBuilder >> buildDefault [
-	self itemClass ifNil: [ ^ nil ].
-	^ self itemClass new
 ]
 
 { #category : 'api - instantiation' }

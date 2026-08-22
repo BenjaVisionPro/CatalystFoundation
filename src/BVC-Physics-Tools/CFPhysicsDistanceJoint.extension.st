@@ -1,29 +1,6 @@
 Extension { #name : 'CFPhysicsDistanceJoint' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsDistanceJoint >> physicsOverlayWorldPoints [
-	^ self endpointPair worldPoints
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsDistanceJoint >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsDistanceJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
-	| distance |
-	distance := (worldPoints second - worldPoints first) r.
-	distance isZero
-		ifTrue: [ aVisual hideRestLengthMarker ]
-		ifFalse: [
-			aVisual
-				showRestLengthMarkerAtFraction: self length / distance
-				from: firstPoint
-				to: secondPoint ]
-]
-
-{ #category : '*bvc-physics-tools' }
 CFPhysicsDistanceJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
 	anInspectorContent addGroup: 'Distance' fields: {
 		#length -> 'Length'.
@@ -41,6 +18,16 @@ CFPhysicsDistanceJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent
 		#lowerLimitImpulse -> 'Lower limit impulse'.
 		#upperLimitImpulse -> 'Upper limit impulse'.
 		#motorImpulse -> 'Motor impulse' }
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsDistanceJoint >> inspectInPhysicsOverlay: anInspector [
+	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsDistanceJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -65,4 +52,17 @@ CFPhysicsDistanceJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
 	self maximumLength isInfinite
 		ifTrue: [ anInspectorContent text: 'Unlimited' at: #maximumLength ]
 		ifFalse: [ anInspectorContent diagnosticNumber: self maximumLength at: #maximumLength ]
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsDistanceJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: secondPoint worldPoints: worldPoints [
+	| distance |
+	distance := (worldPoints second - worldPoints first) r.
+	distance isZero
+		ifTrue: [ aVisual hideRestLengthMarker ]
+		ifFalse: [
+			aVisual
+				showRestLengthMarkerAtFraction: self length / distance
+				from: firstPoint
+				to: secondPoint ]
 ]

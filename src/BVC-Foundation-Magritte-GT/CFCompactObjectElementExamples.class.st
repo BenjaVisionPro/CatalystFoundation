@@ -22,6 +22,21 @@ CFCompactObjectElementExamples >> compactObject [
 ]
 
 { #category : 'examples' }
+CFCompactObjectElementExamples >> compactObjectUsesDisplayFallback [
+	<gtExample>
+	| anObject anElement |
+	anObject := CFMagritteEditorExample exampleDefault
+		label: '';
+		yourself.
+	anElement := CFCompactObjectStencil new
+		object: anObject;
+		create.
+
+	self assert: anElement titleText isNotEmpty.
+	^ anElement
+]
+
+{ #category : 'examples' }
 CFCompactObjectElementExamples >> compactObjectUsesMementoValue [
 	<gtExample>
 	| anObject aMemento aDescription anElement |
@@ -42,21 +57,6 @@ CFCompactObjectElementExamples >> compactObjectUsesMementoValue [
 	aMemento reset.
 	anElement refresh.
 	self assert: anElement titleText equals: 'Editor example'.
-	^ anElement
-]
-
-{ #category : 'examples' }
-CFCompactObjectElementExamples >> compactObjectUsesDisplayFallback [
-	<gtExample>
-	| anObject anElement |
-	anObject := CFMagritteEditorExample exampleDefault
-		label: '';
-		yourself.
-	anElement := CFCompactObjectStencil new
-		object: anObject;
-		create.
-
-	self assert: anElement titleText isNotEmpty.
 	^ anElement
 ]
 

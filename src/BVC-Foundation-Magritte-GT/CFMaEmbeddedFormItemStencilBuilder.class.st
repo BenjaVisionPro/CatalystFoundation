@@ -1,5 +1,6 @@
-"I am responsible for presenting one relation item as an embedded Foundation Magritte form."
-
+"
+I am responsible for presenting one relation item as an embedded Foundation Magritte form.
+"
 Class {
 	#name : 'CFMaEmbeddedFormItemStencilBuilder',
 	#superclass : 'BrListRowStencilBuilder',

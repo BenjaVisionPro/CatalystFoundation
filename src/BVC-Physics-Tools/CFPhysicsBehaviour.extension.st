@@ -16,6 +16,13 @@ CFPhysicsBehaviour >> configurationSource [
 ]
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsBehaviour >> configurationSourceSetupOn: aStream [
+	aStream
+		nextPutAll: '    target: aTarget;';
+		cr
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsBehaviour >> configurationSourceUsing: aMemento [
 	^ String streamContents: [ :stream |
 		stream
@@ -36,13 +43,6 @@ CFPhysicsBehaviour >> configurationSourceUsing: aMemento [
 				nextPutAll: ';';
 				cr ].
 		stream nextPutAll: '    start' ]
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsBehaviour >> configurationSourceSetupOn: aStream [
-	aStream
-		nextPutAll: '    target: aTarget;';
-		cr
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -76,7 +76,6 @@ CFPhysicsBehaviour >> gtConfigurationFor: aView [
 							(element userData at: GtMagritteViewModel gtMementoSymbol) ].
 				Clipboard clipboardText: source ]
 ]
-
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsBehaviour >> inspectInPhysicsOverlay: anInspector [

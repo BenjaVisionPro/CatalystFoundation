@@ -1,5 +1,6 @@
-"I am responsible for carrying one relation object and its Foundation child memento into an editable identity affordance."
-
+"
+I am responsible for carrying one relation object and its Foundation child memento into an editable identity affordance.
+"
 Class {
 	#name : 'CFMaIdentityItemViewModel',
 	#superclass : 'Object',

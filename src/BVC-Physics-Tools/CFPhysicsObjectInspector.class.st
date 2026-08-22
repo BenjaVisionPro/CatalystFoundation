@@ -1,4 +1,6 @@
-"I manage the floating inspector used by a Physics overlay. My responsibility is to present the appropriate content for the selected Physics object and animate transitions between selections."
+"
+I manage the floating inspector used by a Physics overlay. My responsibility is to present the appropriate content for the selected Physics object and animate transitions between selections.
+"
 Class {
 	#name : 'CFPhysicsObjectInspector',
 	#superclass : 'Object',
@@ -29,36 +31,200 @@ CFPhysicsObjectInspector class >> on: aHostElement [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsObjectInspector >> host [ ^ host ]
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> addContentElement: anElement [
+	anElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c vertical matchParent.
+		c frame horizontal alignLeft.
+		c frame vertical alignTop ].
+	contentContainer addChild: anElement.
+	^ self
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTargetExtent outgoing: anOutgoingElement incoming: anIncomingElement [
+	| tracks aMotion |
+	tracks := {
+		CFMotionPropertyTrack
+			on: anOutgoingElement
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0.
+		CFMotionPropertyTrack
+			on: anIncomingElement
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0.
+		CFMotionExtentTrack
+			on: panel
+			from: aSourceExtent
+			to: aTargetExtent }.
+	aMotion := CFMotion
+		coordinator: panel space motionCoordinator
+		tracks: tracks.
+	contentTransitionMotion := aMotion.
+	aMotion
+		duration: 180 milliSeconds;
+		easing: (BlDecelerateInterpolator factor: 1.4);
+		onTerminalDo: [ :aCompletedMotion |
+			contentTransitionMotion == aCompletedMotion ifTrue: [
+				outgoingContentElement ifNotNil: [ :anElement |
+					anElement removeFromParent ].
+				outgoingContentElement := nil.
+				panel constraintsDo: [ :c |
+					c horizontal exact: aTargetExtent x.
+					c vertical exact: aTargetExtent y ].
+				contentTransitionMotion := nil ] ];
+		start.
+	^ aMotion
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> animateOpacityTo: anOpacity duration: aDuration [
+	| aMotion |
+	aMotion := panel space motionCoordinator
+		retarget: (CFMotionPropertyTrack
+			on: panel
+			property: CFMotionOpacityProperty uniqueInstance
+			target: anOpacity)
+		duration: aDuration
+		easing: (BlDecelerateInterpolator factor: 1.4).
+	visibilityMotion := aMotion.
+	aMotion onTerminalDo: [ :completedMotion |
+		visibilityMotion == completedMotion ifTrue: [ visibilityMotion := nil ].
+		(selectedObject isNil
+			and: [ completedMotion isCompleted
+			and: [ panel opacity = 0.0 ] ]) ifTrue: [
+			panel visibility: BlVisibility gone ] ].
+	^ aMotion
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> availablePanelHeight [
+	"The overlay receives its presentation extent during layout. Inspection can
+	occur before that first layout pass, so use the host extent until the overlay
+	has a usable extent."
+	| presentationHeight |
+	presentationHeight := root extent y.
+	presentationHeight > 0 ifFalse: [ presentationHeight := host extent y ].
+	^ (presentationHeight - 12) max: 0
+]
+
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> cancelContentTransition [
+	| aMotion |
+	aMotion := contentTransitionMotion.
+	contentTransitionMotion := nil.
+	aMotion ifNotNil: [ aMotion cancelPreservingCurrentPresentation ].
+	outgoingContentElement ifNotNil: [ :anElement |
+		anElement removeFromParent.
+		outgoingContentElement := nil ].
+	content ifNotNil: [ content element opacity: 1.0 ].
+	^ self
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> clampPanelPositionWithinHost [
+	| maximumPosition currentPosition |
+	maximumPosition := (root extent - panel extent) max: 0 @ 0.
+	currentPosition := panel constraints position.
+	panel relocate: (currentPosition min: maximumPosition max: 0 @ 0).
+	^ self
+]
+
+{ #category : 'clearing' }
+CFPhysicsObjectInspector >> clear [
+	selectedObject := nil.
+	self cancelContentTransition.
+	content ifNotNil: [ content clear ].
+	panel constraintsDo: [ :c | c vertical fitContent ].
+	self hidePanel.
+	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> clearWithoutMotion [
+	selectedObject := nil.
+	content ifNotNil: [ content clear ].
+	self cancelContentTransition.
+	panel constraintsDo: [ :c | c vertical fitContent ].
+	visibilityMotion ifNotNil: [
+		visibilityMotion cancelPreservingCurrentPresentation.
+		visibilityMotion := nil ].
+	panel
+		opacity: 0.0;
+		visibility: BlVisibility gone.
+	^ self
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
+	| maximumContentHeight constrainedContentHeight |
+	maximumContentHeight := (self availablePanelHeight - self panelVerticalChromeHeight) max: 0.
+	constrainedContentHeight := aContent preferredHeight min: maximumContentHeight.
+	aContent fitWithinHeight: constrainedContentHeight.
+	^ aContent panelWidth @ (constrainedContentHeight + self panelVerticalChromeHeight)
+]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> host: anElement [ host := anElement ]
+CFPhysicsObjectInspector >> content [ ^ content
+]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> panel [ ^ panel ]
+CFPhysicsObjectInspector >> contentContainer [ ^ contentContainer
+]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> root [ ^ root ]
+CFPhysicsObjectInspector >> contentTransitionMotion [ ^ contentTransitionMotion
+]
+
+{ #category : 'private - sizing' }
+CFPhysicsObjectInspector >> fitPanelToContent [
+	| targetExtent |
+	content ifNil: [ ^ self ].
+	targetExtent := self constrainedPanelExtentFor: content.
+	panel extent: targetExtent.
+	panel constraintsDo: [ :c |
+		c horizontal exact: targetExtent x.
+		c vertical exact: targetExtent y ].
+	self clampPanelPositionWithinHost.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsObjectInspector >> fitWithinHost [
+	selectedObject ifNil: [ ^ self ].
+	self fitPanelToContent.
+	self clampPanelPositionWithinHost.
+	^ self
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> hidePanel [
+	panel visibility == BlVisibility gone ifTrue: [ ^ self ].
+	panel isAttachedToSceneGraph ifFalse: [ ^ self clearWithoutMotion ].
+	panel opacity = 0.0 ifTrue: [
+		panel visibility: BlVisibility gone.
+		^ self ].
+	self animateOpacityTo: 0.0 duration: 140 milliSeconds.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> content [ ^ content ]
+CFPhysicsObjectInspector >> host [ ^ host
+]
 
 { #category : 'accessing' }
-CFPhysicsObjectInspector >> contentContainer [ ^ contentContainer ]
+CFPhysicsObjectInspector >> host: anElement [ host := anElement
+]
 
-{ #category : 'accessing' }
-CFPhysicsObjectInspector >> contentTransitionMotion [ ^ contentTransitionMotion ]
-
-{ #category : 'accessing' }
-CFPhysicsObjectInspector >> selectedObject [ ^ selectedObject ]
-
-{ #category : 'accessing' }
-CFPhysicsObjectInspector >> selectedPhysics [ ^ selectedObject ]
-
-{ #category : 'accessing' }
-CFPhysicsObjectInspector >> valueElementAt: aKey [
-	^ content valueElementAt: aKey
+{ #category : 'testing' }
+CFPhysicsObjectInspector >> includesEventTarget: anElement [
+	| current |
+	current := anElement.
+	[ current notNil ] whileTrue: [
+		current == panel ifTrue: [ ^ true ].
+		current := current parent ].
+	^ false
 ]
 
 { #category : 'initialization' }
@@ -83,77 +249,6 @@ CFPhysicsObjectInspector >> initializeInspector [
 		do: [ :anEvent | self fitWithinHost ].
 	root addEventHandler: extentChangedHandler.
 	self clearWithoutMotion
-]
-
-{ #category : 'private - building' }
-CFPhysicsObjectInspector >> newPanel [
-	^ BrVerticalPane new
-		id: #cfPhysicsObjectInspectorPanel;
-		allowMeAndChildrenMouseEvents;
-		hExact: 230;
-		vFitContent;
-		padding: (BlInsets all: 6);
-		background: (Color black alpha: 0.1);
-		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
-		effect: (BlBlurBelowEffect radius: 14);
-		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
-		constraintsDo: [ :c |
-			c frame horizontal alignLeft.
-			c frame vertical alignTop ];
-		margin: (BlInsets all: 6);
-		yourself
-]
-
-{ #category : 'private - building' }
-CFPhysicsObjectInspector >> newDragHandle [
-	| handle |
-	handle := BrLabel new
-		id: #cfPhysicsObjectInspectorDragHandle;
-		allowMeAndChildrenMouseEvents;
-		hExact: 24;
-		vExact: 10;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.32);
-			fontSize: 8);
-		text: '•••';
-		constraintsDo: [ :c |
-			c ignoreByLayout.
-			c ignored horizontal alignRight.
-			c ignored vertical alignTop ];
-		margin: (BlInsets top: 2 right: 4);
-		yourself.
-	pullHandler := BlPullHandler new
-		targetElement: panel;
-		disallowOutOfBounds;
-		yourself.
-	handle addEventHandler: pullHandler.
-	^ handle
-]
-
-{ #category : 'private - building' }
-CFPhysicsObjectInspector >> newContentContainer [
-	^ BlElement new
-		layout: BlFrameLayout new;
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical matchParent ];
-		yourself
-]
-
-{ #category : 'testing' }
-CFPhysicsObjectInspector >> isInstalled [
-	^ root hasParent
-]
-
-{ #category : 'installing' }
-CFPhysicsObjectInspector >> install [
-	| container |
-	self isInstalled ifTrue: [ ^ self ].
-	container := host parent.
-	(container notNil and: [ host isAttachedToSceneGraph ])
-		ifFalse: [ self error: 'The Physics host must be attached to a Bloc space before its object inspector can be shown' ].
-	container addChild: root.
-	^ self
 ]
 
 { #category : 'inspecting' }
@@ -196,76 +291,79 @@ CFPhysicsObjectInspector >> inspect: anObject usingContent: aContent [
 	^ self
 ]
 
-{ #category : 'clearing' }
-CFPhysicsObjectInspector >> clear [
-	selectedObject := nil.
-	self cancelContentTransition.
-	content ifNotNil: [ content clear ].
-	panel constraintsDo: [ :c | c vertical fitContent ].
-	self hidePanel.
+{ #category : 'installing' }
+CFPhysicsObjectInspector >> install [
+	| container |
+	self isInstalled ifTrue: [ ^ self ].
+	container := host parent.
+	(container notNil and: [ host isAttachedToSceneGraph ])
+		ifFalse: [ self error: 'The Physics host must be attached to a Bloc space before its object inspector can be shown' ].
+	container addChild: root.
 	^ self
 ]
 
-{ #category : 'private - visibility' }
-CFPhysicsObjectInspector >> clearWithoutMotion [
-	selectedObject := nil.
-	content ifNotNil: [ content clear ].
-	self cancelContentTransition.
-	panel constraintsDo: [ :c | c vertical fitContent ].
-	visibilityMotion ifNotNil: [
-		visibilityMotion cancelPreservingCurrentPresentation.
-		visibilityMotion := nil ].
-	panel
-		opacity: 0.0;
-		visibility: BlVisibility gone.
-	^ self
+{ #category : 'testing' }
+CFPhysicsObjectInspector >> isInstalled [
+	^ root hasParent
 ]
 
-{ #category : 'private - content transition' }
-CFPhysicsObjectInspector >> addContentElement: anElement [
-	anElement constraintsDo: [ :c |
-		c horizontal matchParent.
-		c vertical matchParent.
-		c frame horizontal alignLeft.
-		c frame vertical alignTop ].
-	contentContainer addChild: anElement.
-	^ self
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newContentContainer [
+	^ BlElement new
+		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		yourself
 ]
 
-{ #category : 'private - content transition' }
-CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
-	anElement constraintsDo: [ :c |
-		c ignoreByLayout.
-		c ignored horizontal alignLeft.
-		c ignored vertical alignTop ].
-	outgoingContentElement := anElement.
-	^ self
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newDragHandle [
+	| handle |
+	handle := BrLabel new
+		id: #cfPhysicsObjectInspectorDragHandle;
+		allowMeAndChildrenMouseEvents;
+		hExact: 24;
+		vExact: 10;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.32);
+			fontSize: 8);
+		text: '•••';
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c ignored horizontal alignRight.
+			c ignored vertical alignTop ];
+		margin: (BlInsets top: 2 right: 4);
+		yourself.
+	pullHandler := BlPullHandler new
+		targetElement: panel;
+		disallowOutOfBounds;
+		yourself.
+	handle addEventHandler: pullHandler.
+	^ handle
 ]
 
-
-{ #category : 'private - sizing' }
-CFPhysicsObjectInspector >> availablePanelHeight [
-	"The overlay receives its presentation extent during layout. Inspection can
-	occur before that first layout pass, so use the host extent until the overlay
-	has a usable extent."
-	| presentationHeight |
-	presentationHeight := root extent y.
-	presentationHeight > 0 ifFalse: [ presentationHeight := host extent y ].
-	^ (presentationHeight - 12) max: 0
+{ #category : 'private - building' }
+CFPhysicsObjectInspector >> newPanel [
+	^ BrVerticalPane new
+		id: #cfPhysicsObjectInspectorPanel;
+		allowMeAndChildrenMouseEvents;
+		hExact: 230;
+		vFitContent;
+		padding: (BlInsets all: 6);
+		background: (Color black alpha: 0.1);
+		border: (BlBorder paint: (Color black alpha: 0.12) width: 1);
+		effect: (BlBlurBelowEffect radius: 14);
+		geometry: (BlRoundedRectangleGeometry cornerRadii: (BlCornerRadii radius: 8));
+		constraintsDo: [ :c |
+			c frame horizontal alignLeft.
+			c frame vertical alignTop ];
+		margin: (BlInsets all: 6);
+		yourself
 ]
 
-{ #category : 'private - sizing' }
-CFPhysicsObjectInspector >> preparePanelForSizing [
-	panel visibility == BlVisibility gone ifTrue: [
-		panel
-			opacity: 0.0;
-			visibility: BlVisibility visible ].
-	^ self
-]
-
-{ #category : 'private - sizing' }
-CFPhysicsObjectInspector >> panelVerticalPadding [
-	^ 12
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> panel [ ^ panel
 ]
 
 { #category : 'private - sizing' }
@@ -282,142 +380,27 @@ CFPhysicsObjectInspector >> panelVerticalChromeHeight [
 ]
 
 { #category : 'private - sizing' }
-CFPhysicsObjectInspector >> constrainedPanelExtentFor: aContent [
-	| maximumContentHeight constrainedContentHeight |
-	maximumContentHeight := (self availablePanelHeight - self panelVerticalChromeHeight) max: 0.
-	constrainedContentHeight := aContent preferredHeight min: maximumContentHeight.
-	aContent fitWithinHeight: constrainedContentHeight.
-	^ aContent panelWidth @ (constrainedContentHeight + self panelVerticalChromeHeight)
+CFPhysicsObjectInspector >> panelVerticalPadding [
+	^ 12
 ]
 
-{ #category : 'private - sizing' }
-CFPhysicsObjectInspector >> fitPanelToContent [
-	| targetExtent |
-	content ifNil: [ ^ self ].
-	targetExtent := self constrainedPanelExtentFor: content.
-	panel extent: targetExtent.
-	panel constraintsDo: [ :c |
-		c horizontal exact: targetExtent x.
-		c vertical exact: targetExtent y ].
-	self clampPanelPositionWithinHost.
+{ #category : 'private - content transition' }
+CFPhysicsObjectInspector >> prepareOutgoingContent: anElement [
+	anElement constraintsDo: [ :c |
+		c ignoreByLayout.
+		c ignored horizontal alignLeft.
+		c ignored vertical alignTop ].
+	outgoingContentElement := anElement.
 	^ self
 ]
 
 { #category : 'private - sizing' }
-CFPhysicsObjectInspector >> clampPanelPositionWithinHost [
-	| maximumPosition currentPosition |
-	maximumPosition := (root extent - panel extent) max: 0 @ 0.
-	currentPosition := panel constraints position.
-	panel relocate: (currentPosition min: maximumPosition max: 0 @ 0).
+CFPhysicsObjectInspector >> preparePanelForSizing [
+	panel visibility == BlVisibility gone ifTrue: [
+		panel
+			opacity: 0.0;
+			visibility: BlVisibility visible ].
 	^ self
-]
-
-{ #category : 'updating' }
-CFPhysicsObjectInspector >> fitWithinHost [
-	selectedObject ifNil: [ ^ self ].
-	self fitPanelToContent.
-	self clampPanelPositionWithinHost.
-	^ self
-]
-
-{ #category : 'private - content transition' }
-CFPhysicsObjectInspector >> cancelContentTransition [
-	| aMotion |
-	aMotion := contentTransitionMotion.
-	contentTransitionMotion := nil.
-	aMotion ifNotNil: [ aMotion cancelPreservingCurrentPresentation ].
-	outgoingContentElement ifNotNil: [ :anElement |
-		anElement removeFromParent.
-		outgoingContentElement := nil ].
-	content ifNotNil: [ content element opacity: 1.0 ].
-	^ self
-]
-
-{ #category : 'private - content transition' }
-CFPhysicsObjectInspector >> animateContentTransitionFrom: aSourceExtent to: aTargetExtent outgoing: anOutgoingElement incoming: anIncomingElement [
-	| tracks aMotion |
-	tracks := {
-		CFMotionPropertyTrack
-			on: anOutgoingElement
-			property: CFMotionOpacityProperty uniqueInstance
-			target: 0.0.
-		CFMotionPropertyTrack
-			on: anIncomingElement
-			property: CFMotionOpacityProperty uniqueInstance
-			target: 1.0.
-		CFMotionExtentTrack
-			on: panel
-			from: aSourceExtent
-			to: aTargetExtent }.
-	aMotion := CFMotion
-		coordinator: panel space motionCoordinator
-		tracks: tracks.
-	contentTransitionMotion := aMotion.
-	aMotion
-		duration: 180 milliSeconds;
-		easing: (BlDecelerateInterpolator factor: 1.4);
-		onTerminalDo: [ :aCompletedMotion |
-			contentTransitionMotion == aCompletedMotion ifTrue: [
-				outgoingContentElement ifNotNil: [ :anElement |
-					anElement removeFromParent ].
-				outgoingContentElement := nil.
-				panel constraintsDo: [ :c |
-					c horizontal exact: aTargetExtent x.
-					c vertical exact: aTargetExtent y ].
-				contentTransitionMotion := nil ] ];
-		start.
-	^ aMotion
-]
-
-{ #category : 'private - visibility' }
-CFPhysicsObjectInspector >> showPanel [
-	panel visibility: BlVisibility visible.
-	panel isAttachedToSceneGraph ifFalse: [
-		panel opacity: 1.0.
-		^ self ].
-	self animateOpacityTo: 1.0 duration: 180 milliSeconds.
-	^ self
-]
-
-{ #category : 'private - visibility' }
-CFPhysicsObjectInspector >> hidePanel [
-	panel visibility == BlVisibility gone ifTrue: [ ^ self ].
-	panel isAttachedToSceneGraph ifFalse: [ ^ self clearWithoutMotion ].
-	panel opacity = 0.0 ifTrue: [
-		panel visibility: BlVisibility gone.
-		^ self ].
-	self animateOpacityTo: 0.0 duration: 140 milliSeconds.
-	^ self
-]
-
-{ #category : 'private - visibility' }
-CFPhysicsObjectInspector >> animateOpacityTo: anOpacity duration: aDuration [
-	| aMotion |
-	aMotion := panel space motionCoordinator
-		retarget: (CFMotionPropertyTrack
-			on: panel
-			property: CFMotionOpacityProperty uniqueInstance
-			target: anOpacity)
-		duration: aDuration
-		easing: (BlDecelerateInterpolator factor: 1.4).
-	visibilityMotion := aMotion.
-	aMotion onTerminalDo: [ :completedMotion |
-		visibilityMotion == completedMotion ifTrue: [ visibilityMotion := nil ].
-		(selectedObject isNil
-			and: [ completedMotion isCompleted
-			and: [ panel opacity = 0.0 ] ]) ifTrue: [
-			panel visibility: BlVisibility gone ] ].
-	^ aMotion
-]
-
-{ #category : 'testing' }
-CFPhysicsObjectInspector >> includesEventTarget: anElement [
-	| current |
-	current := anElement.
-	[ current notNil ] whileTrue: [
-		current == panel ifTrue: [ ^ true ].
-		current := current parent ].
-	^ false
 ]
 
 { #category : 'updating' }
@@ -442,4 +425,31 @@ CFPhysicsObjectInspector >> release [
 	root detach.
 	root hasParent ifTrue: [ root removeFromParent ].
 	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> root [ ^ root
+]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> selectedObject [ ^ selectedObject
+]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> selectedPhysics [ ^ selectedObject
+]
+
+{ #category : 'private - visibility' }
+CFPhysicsObjectInspector >> showPanel [
+	panel visibility: BlVisibility visible.
+	panel isAttachedToSceneGraph ifFalse: [
+		panel opacity: 1.0.
+		^ self ].
+	self animateOpacityTo: 1.0 duration: 180 milliSeconds.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsObjectInspector >> valueElementAt: aKey [
+	^ content valueElementAt: aKey
 ]

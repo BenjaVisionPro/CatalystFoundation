@@ -1,5 +1,6 @@
-"I am responsible for applying Brick-compatible selection and focus behaviour to a finite Foundation relation item."
-
+"
+I am responsible for applying Brick-compatible selection and focus behaviour to a finite Foundation relation item.
+"
 Class {
 	#name : 'CFMaFiniteListItemSelectionHandler',
 	#superclass : 'BlBasicEventHandler',
@@ -12,25 +13,18 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'initialization' }
-CFMaFiniteListItemSelectionHandler >> initialize [
-	super initialize.
-	transformation := GtPhlowSendTransformation default
-]
+{ #category : 'private - activation' }
+CFMaFiniteListItemSelectionHandler >> activateCurrentSelection [
+	| theIndices selectedObject |
+	theIndices := listWidget selectedIndices.
+	theIndices isEmpty ifTrue: [ ^ self ].
 
-{ #category : 'accessing' }
-CFMaFiniteListItemSelectionHandler >> itemIndex: anInteger [
-	itemIndex := anInteger
-]
-
-{ #category : 'accessing' }
-CFMaFiniteListItemSelectionHandler >> listWidget: aListWidget [
-	listWidget := aListWidget
-]
-
-{ #category : 'accessing' }
-CFMaFiniteListItemSelectionHandler >> transformation: aTransformation [
-	transformation := aTransformation asPhlowSendTransformation
+	selectedObject := listWidget selectionCallback value: theIndices.
+	transformation
+		select: selectedObject
+		indices: theIndices
+		from: listWidget
+		shouldShowSpace: false
 ]
 
 { #category : 'api - event managing' }
@@ -57,18 +51,25 @@ CFMaFiniteListItemSelectionHandler >> handleEvent: anEvent [
 		ifTrue: [ self activateCurrentSelection ]
 ]
 
-{ #category : 'private - activation' }
-CFMaFiniteListItemSelectionHandler >> activateCurrentSelection [
-	| theIndices selectedObject |
-	theIndices := listWidget selectedIndices.
-	theIndices isEmpty ifTrue: [ ^ self ].
+{ #category : 'initialization' }
+CFMaFiniteListItemSelectionHandler >> initialize [
+	super initialize.
+	transformation := GtPhlowSendTransformation default
+]
 
-	selectedObject := listWidget selectionCallback value: theIndices.
-	transformation
-		select: selectedObject
-		indices: theIndices
-		from: listWidget
-		shouldShowSpace: false
+{ #category : 'accessing' }
+CFMaFiniteListItemSelectionHandler >> itemIndex: anInteger [
+	itemIndex := anInteger
+]
+
+{ #category : 'accessing' }
+CFMaFiniteListItemSelectionHandler >> listWidget: aListWidget [
+	listWidget := aListWidget
+]
+
+{ #category : 'accessing' }
+CFMaFiniteListItemSelectionHandler >> transformation: aTransformation [
+	transformation := aTransformation asPhlowSendTransformation
 ]
 
 { #category : 'api - event managing' }

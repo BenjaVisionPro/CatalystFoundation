@@ -1,5 +1,6 @@
-"I preserve GT's Magritte boolean lifecycle while presenting its boolean control as a settings switch."
-
+"
+I preserve GT's Magritte boolean lifecycle while presenting its boolean control as a settings switch.
+"
 Class {
 	#name : 'CFMaSettingsBooleanElement',
 	#superclass : 'GtMagritteBooleanElement',

@@ -1,5 +1,6 @@
-"I present a Foundation settings row. Hover is row-level, and focus is shown whenever focus is within the row hierarchy."
-
+"
+I present a Foundation settings row. Hover is row-level, and focus is shown whenever focus is within the row hierarchy.
+"
 Class {
 	#name : 'CFMaSettingsRowAptitude',
 	#superclass : 'BrStyleCommonAptitude',

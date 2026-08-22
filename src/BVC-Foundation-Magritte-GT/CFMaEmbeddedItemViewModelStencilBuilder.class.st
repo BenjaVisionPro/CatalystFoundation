@@ -1,5 +1,6 @@
-"I am responsible for creating embedded relation view models inside their parent Magritte transaction."
-
+"
+I am responsible for creating embedded relation view models inside their parent Magritte transaction.
+"
 Class {
 	#name : 'CFMaEmbeddedItemViewModelStencilBuilder',
 	#superclass : 'GtMagritteModelStencilBuilder',

@@ -5,6 +5,23 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
+{ #category : 'conversion' }
+CFMaFormRootElement >> asScrollableElement [
+	^ CFSmoothScrollableElement new
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		addChild: self;
+		yourself
+]
+
+{ #category : 'configuration' }
+CFMaFormRootElement >> beEmbedded [
+	self
+		background: Color transparent;
+		hMatchParent;
+		vFitContent
+]
 
 { #category : 'initialization' }
 CFMaFormRootElement >> initialize [
@@ -24,23 +41,4 @@ CFMaFormRootElement >> initialize [
 			"Descendants own focus. I only provide focus when a click leaves
 			 this form without a focused descendant."
 			self hasFocus ifFalse: [ self requestFocus ] ]
-]
-
-{ #category : 'configuration' }
-CFMaFormRootElement >> beEmbedded [
-	self
-		background: Color transparent;
-		hMatchParent;
-		vFitContent
-]
-
-
-{ #category : 'conversion' }
-CFMaFormRootElement >> asScrollableElement [
-	^ CFSmoothScrollableElement new
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical matchParent ];
-		addChild: self;
-		yourself
 ]

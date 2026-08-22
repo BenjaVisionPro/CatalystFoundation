@@ -1,5 +1,6 @@
-"I am Foundation's Magritte presentation. I participate directly in Magritte's visitor rendering path and own the composition of fields and groups for one form build."
-
+"
+I am Foundation's Magritte presentation. I participate directly in Magritte's visitor rendering path and own the composition of fields and groups for one form build.
+"
 Class {
 	#name : 'CFMaPresentation',
 	#superclass : 'GtMagritteElementBuilder',
@@ -15,44 +16,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Presentations'
 }
-
-
-
-{ #category : 'initialization' }
-CFMaPresentation >> initialize [
-	super initialize.
-	containersByGroup := Dictionary new.
-	identityAffordanceEmitted := false.
-	fieldConfigurationOverrides := Dictionary new.
-	fieldConfigurations := Dictionary new
-]
-
-{ #category : 'configuration - fields' }
-CFMaPresentation >> description: aDescription configure: aBlock [
-	fieldConfigurationOverrides at: aDescription put: aBlock.
-	fieldConfigurations removeKey: aDescription ifAbsent: [ ].
-	^ self
-]
-
-{ #category : 'configuration - fields' }
-CFMaPresentation >> newFieldConfiguration [
-	^ CFMaFieldConfiguration new
-]
-
-{ #category : 'configuration - fields' }
-CFMaPresentation >> fieldConfigurationFor: aDescription [
-	^ fieldConfigurations
-		at: aDescription
-		ifAbsentPut: [
-			| aConfiguration |
-			aConfiguration := self newFieldConfiguration.
-			aDescription configureField: aConfiguration.
-			fieldConfigurationOverrides
-				at: aDescription
-				ifPresent: [ :aBlock | aBlock cull: aConfiguration ].
-			aConfiguration ]
-]
-
 
 { #category : 'private - building' }
 CFMaPresentation >> addBooleanField: aDescription [
@@ -85,6 +48,41 @@ CFMaPresentation >> addDirectoryDropdown: aDescription [
 	self addFieldElement: aButton using: aDescription
 ]
 
+{ #category : 'private - composition' }
+CFMaPresentation >> addElement: anElement for: aDescription [
+	self
+		addElement: anElement
+		to: (self containerForDescription: aDescription)
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addElement: anElement to: aContainer [
+	aContainer addChild: anElement
+]
+
+{ #category : 'elements' }
+CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
+	| aLabel aText aLabelAptitude |
+	aText := aDescription label asRopedText.
+	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
+	aLabelAptitude := aDescription labelAptitude
+		ifNil: [ self defaultLabelAptitude ]
+		ifNotNil: #value.
+	aLabel := BrLabel new
+		id: (GtMagritteFieldLabelId new description: aDescription);
+		text: aText;
+		aptitude: aLabelAptitude;
+		fitContent.
+
+	aDescription hasComment ifTrue: [
+		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
+		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
+
+	self configureTabStopFor: aFieldElement using: aDescription.
+	self addLabel: aLabel field: aFieldElement for: aDescription.
+	^ aLabel
+]
+
 { #category : 'visiting-description' }
 CFMaPresentation >> addFileDropdown: aDescription [
 	| aButton |
@@ -92,6 +90,39 @@ CFMaPresentation >> addFileDropdown: aDescription [
 		newFileDropdownMemento: self memento
 		using: aDescription.
 	self addFieldElement: aButton using: aDescription
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
+	self
+		addLabel: aLabel
+		field: aFieldElement
+		to: (self containerForDescription: aDescription)
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
+	aLabel margin: (BlInsets top: 3 right: 0 bottom: 2 left: 0).
+	aFieldElement constraintsDo: [ :c | c horizontal matchParent ].
+
+	aContainer
+		addChild: aLabel;
+		addChild: aFieldElement
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addShortcutsTo: anElement [
+	self installFormNavigationOn: anElement
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> addShortcutsTo: anElement using: aDescription [
+	self installFormNavigationOn: anElement.
+
+	aDescription blocShortcuts
+		ifNotNil: [ :aBlockReturningCollection |
+			aBlockReturningCollection value do: [ :aShortcut |
+				anElement addShortcut: aShortcut ] ]
 ]
 
 { #category : 'private - building' }
@@ -139,100 +170,13 @@ CFMaPresentation >> build [
 	^ super build
 ]
 
-{ #category : 'visiting' }
-CFMaPresentation >> visit: aDescription [
-	(aDescription respondsTo: #cfCategory)
-		ifTrue: [
-			aDescription cfCategory = #identity
-				ifTrue: [
-					self emitIdentityAffordanceUsing: aDescription.
-					^ self ] ].
-	^ super visit: aDescription
-]
-
-{ #category : 'private - identity' }
-CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
-	identityAffordanceEmitted ifTrue: [ ^ self ].
-	identityAffordanceEmitted := true.
-
-	self
-		addElement: (CFMaIdentityAffordanceElement new
-			memento: self memento;
-			yourself)
-		for: aDescription
-]
-
-{ #category : 'elements' }
-CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
-	| aLabel aText aLabelAptitude |
-	aText := aDescription label asRopedText.
-	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
-	aLabelAptitude := aDescription labelAptitude
-		ifNil: [ self defaultLabelAptitude ]
-		ifNotNil: #value.
-	aLabel := BrLabel new
-		id: (GtMagritteFieldLabelId new description: aDescription);
-		text: aText;
-		aptitude: aLabelAptitude;
-		fitContent.
-
-	aDescription hasComment ifTrue: [
-		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
-		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
-
-	self configureTabStopFor: aFieldElement using: aDescription.
-	self addLabel: aLabel field: aFieldElement for: aDescription.
-	^ aLabel
-]
-
-
-{ #category : 'defaults' }
-CFMaPresentation >> defaultLabelAptitude [
-	^ BrGlamorousLabelAptitude new
-		foreground: (Color black alpha: 0.52);
-		fontSize: 13
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	self
-		addLabel: aLabel
-		field: aFieldElement
-		to: (self containerForDescription: aDescription)
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addElement: anElement for: aDescription [
-	self
-		addElement: anElement
-		to: (self containerForDescription: aDescription)
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
-	aLabel margin: (BlInsets top: 3 right: 0 bottom: 2 left: 0).
-	aFieldElement constraintsDo: [ :c | c horizontal matchParent ].
-
-	aContainer
-		addChild: aLabel;
-		addChild: aFieldElement
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addElement: anElement to: aContainer [
-	aContainer addChild: anElement
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> newFieldContainer [
-	^ BrVerticalPane new
-		background: Color transparent;
-		border: BlBorder empty;
-		margin: BlInsets empty;
-		cellSpacing: 4;
-		hMatchParent;
-		vFitContent;
-		yourself
+{ #category : 'private - focus' }
+CFMaPresentation >> configureTabStopFor: aFieldElement using: aDescription [
+	"Keep GT/Brick's native focusable descendants. The field surface only
+	participates when there are no focusable descendants of its own."
+	aFieldElement focusability: BlFocusability after.
+	self installFormNavigationOn: aFieldElement.
+	^ aFieldElement
 ]
 
 { #category : 'private - groups' }
@@ -253,29 +197,44 @@ CFMaPresentation >> containerForGroup: aGroup [
 		ifAbsentPut: [ self newGroupNamed: aGroup ]
 ]
 
-{ #category : 'private - groups' }
-CFMaPresentation >> newGroupNamed: aGroup [
-	| aSection aHeading aContainer |
-	aHeading := BrLabel new
-		text: aGroup asString;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.68);
-			fontSize: 14;
-			bold);
-		fitContent;
-		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
-		yourself.
+{ #category : 'defaults' }
+CFMaPresentation >> defaultLabelAptitude [
+	^ BrGlamorousLabelAptitude new
+		foreground: (Color black alpha: 0.52);
+		fontSize: 13
+]
 
-	aContainer := self newFieldContainer.
-	aSection := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		addChild: aHeading;
-		addChild: aContainer;
-		yourself.
+{ #category : 'configuration - fields' }
+CFMaPresentation >> description: aDescription configure: aBlock [
+	fieldConfigurationOverrides at: aDescription put: aBlock.
+	fieldConfigurations removeKey: aDescription ifAbsent: [ ].
+	^ self
+]
 
-	hostElement addChild: aSection.
-	^ aContainer
+{ #category : 'private - identity' }
+CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
+	identityAffordanceEmitted ifTrue: [ ^ self ].
+	identityAffordanceEmitted := true.
+
+	self
+		addElement: (CFMaIdentityAffordanceElement new
+			memento: self memento;
+			yourself)
+		for: aDescription
+]
+
+{ #category : 'configuration - fields' }
+CFMaPresentation >> fieldConfigurationFor: aDescription [
+	^ fieldConfigurations
+		at: aDescription
+		ifAbsentPut: [
+			| aConfiguration |
+			aConfiguration := self newFieldConfiguration.
+			aDescription configureField: aConfiguration.
+			fieldConfigurationOverrides
+				at: aDescription
+				ifPresent: [ :aBlock | aBlock cull: aConfiguration ].
+			aConfiguration ]
 ]
 
 { #category : 'private - groups' }
@@ -283,47 +242,13 @@ CFMaPresentation >> hostElement [
 	^ hostElement
 ]
 
-{ #category : 'visiting-description' }
-CFMaPresentation >> visitToOneRelationDescription: aDescription [
-	aDescription blocStencil
-		ifNil: [ ^ super visitToOneRelationDescription: aDescription ]
-		ifNotNil: [ :aStencil |
-			self
-				addFieldElement: (aStencil
-					memento: self memento;
-					description: aDescription;
-					asElement)
-				using: aDescription ]
-]
-
-
-{ #category : 'private - focus' }
-CFMaPresentation >> navigationRootFor: anElement [
-	| aCurrentElement aRootElement |
-	aCurrentElement := anElement.
-	aRootElement := self form.
-
-	[ aCurrentElement isNotNil ] whileTrue: [
-		(aCurrentElement isKindOf: CFMaFormRootElement)
-			ifTrue: [ aRootElement := aCurrentElement ].
-		aCurrentElement := aCurrentElement parent ].
-
-	^ aRootElement
-]
-
-{ #category : 'private - focus' }
-CFMaPresentation >> moveFocusFrom: anElement inDirection: aDirection [
-	| aNavigationRoot aReferenceElement |
-	aNavigationRoot := self navigationRootFor: anElement.
-	aReferenceElement := anElement space
-		ifNil: [ anElement ]
-		ifNotNil: [ :aSpace | aSpace focusOwner ifNil: [ anElement ] ].
-
-	BlFocusFinder new
-		direction: aDirection;
-		root: aNavigationRoot;
-		referenceElement: aReferenceElement;
-		nextFocusDo: #requestFocus ifNone: [  ]
+{ #category : 'initialization' }
+CFMaPresentation >> initialize [
+	super initialize.
+	containersByGroup := Dictionary new.
+	identityAffordanceEmitted := false.
+	fieldConfigurationOverrides := Dictionary new.
+	fieldConfigurations := Dictionary new
 ]
 
 { #category : 'private - focus' }
@@ -374,31 +299,97 @@ CFMaPresentation >> installFormNavigationOn: anElement [
 	^ anElement
 ]
 
-{ #category : 'private - building' }
-CFMaPresentation >> addShortcutsTo: anElement [
-	self installFormNavigationOn: anElement
+{ #category : 'private - focus' }
+CFMaPresentation >> moveFocusFrom: anElement inDirection: aDirection [
+	| aNavigationRoot aReferenceElement |
+	aNavigationRoot := self navigationRootFor: anElement.
+	aReferenceElement := anElement space
+		ifNil: [ anElement ]
+		ifNotNil: [ :aSpace | aSpace focusOwner ifNil: [ anElement ] ].
+
+	BlFocusFinder new
+		direction: aDirection;
+		root: aNavigationRoot;
+		referenceElement: aReferenceElement;
+		nextFocusDo: #requestFocus ifNone: [  ]
 ]
-
-{ #category : 'private - building' }
-CFMaPresentation >> addShortcutsTo: anElement using: aDescription [
-	self installFormNavigationOn: anElement.
-
-	aDescription blocShortcuts
-		ifNotNil: [ :aBlockReturningCollection |
-			aBlockReturningCollection value do: [ :aShortcut |
-				anElement addShortcut: aShortcut ] ]
-]
-
-
-
-
-
 
 { #category : 'private - focus' }
-CFMaPresentation >> configureTabStopFor: aFieldElement using: aDescription [
-	"Keep GT/Brick's native focusable descendants. The field surface only
-	participates when there are no focusable descendants of its own."
-	aFieldElement focusability: BlFocusability after.
-	self installFormNavigationOn: aFieldElement.
-	^ aFieldElement
+CFMaPresentation >> navigationRootFor: anElement [
+	| aCurrentElement aRootElement |
+	aCurrentElement := anElement.
+	aRootElement := self form.
+
+	[ aCurrentElement isNotNil ] whileTrue: [
+		(aCurrentElement isKindOf: CFMaFormRootElement)
+			ifTrue: [ aRootElement := aCurrentElement ].
+		aCurrentElement := aCurrentElement parent ].
+
+	^ aRootElement
+]
+
+{ #category : 'configuration - fields' }
+CFMaPresentation >> newFieldConfiguration [
+	^ CFMaFieldConfiguration new
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> newFieldContainer [
+	^ BrVerticalPane new
+		background: Color transparent;
+		border: BlBorder empty;
+		margin: BlInsets empty;
+		cellSpacing: 4;
+		hMatchParent;
+		vFitContent;
+		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaPresentation >> newGroupNamed: aGroup [
+	| aSection aHeading aContainer |
+	aHeading := BrLabel new
+		text: aGroup asString;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.68);
+			fontSize: 14;
+			bold);
+		fitContent;
+		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
+		yourself.
+
+	aContainer := self newFieldContainer.
+	aSection := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		addChild: aHeading;
+		addChild: aContainer;
+		yourself.
+
+	hostElement addChild: aSection.
+	^ aContainer
+]
+
+{ #category : 'visiting' }
+CFMaPresentation >> visit: aDescription [
+	(aDescription respondsTo: #cfCategory)
+		ifTrue: [
+			aDescription cfCategory = #identity
+				ifTrue: [
+					self emitIdentityAffordanceUsing: aDescription.
+					^ self ] ].
+	^ super visit: aDescription
+]
+
+{ #category : 'visiting-description' }
+CFMaPresentation >> visitToOneRelationDescription: aDescription [
+	aDescription blocStencil
+		ifNil: [ ^ super visitToOneRelationDescription: aDescription ]
+		ifNotNil: [ :aStencil |
+			self
+				addFieldElement: (aStencil
+					memento: self memento;
+					description: aDescription;
+					asElement)
+				using: aDescription ]
 ]

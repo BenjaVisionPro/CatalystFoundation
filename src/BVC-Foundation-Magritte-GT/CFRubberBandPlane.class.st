@@ -33,59 +33,33 @@ CFRubberBandPlane class >> vertical [
 		yourself
 ]
 
-{ #category : 'initialization' }
-CFRubberBandPlane >> initialize [
-	super initialize.
-	axes := CFRubberBandProjectionPlane new.
-	position := 0.0 @ 0.0.
-	state := #idle.
-	wantsSnapBack := false
-]
-
 { #category : 'accessing' }
 CFRubberBandPlane >> axes [
 	^ axes
 ]
 
-{ #category : 'accessing' }
-CFRubberBandPlane >> position [
-	^ position
-]
-
-{ #category : 'accessing' }
-CFRubberBandPlane >> position: aPoint [
-	position := self limitedPointFor: aPoint.
+{ #category : 'interaction' }
+CFRubberBandPlane >> beginInteraction [
+	state := #interacting.
+	wantsSnapBack := false.
 	^ self
 ]
 
-{ #category : 'accessing' }
-CFRubberBandPlane >> state [
-	^ state
+{ #category : 'projection' }
+CFRubberBandPlane >> clamp: aPoint [
+	^ axes clamp: aPoint
 ]
 
-{ #category : 'accessing' }
-CFRubberBandPlane >> state: aSymbol [
-	state := aSymbol
+{ #category : 'snapback' }
+CFRubberBandPlane >> clearSnapBackRequest [
+	wantsSnapBack := false
 ]
 
-{ #category : 'configuration' }
-CFRubberBandPlane >> horizontal [
-	^ axes horizontal
-]
-
-{ #category : 'configuration' }
-CFRubberBandPlane >> horizontal: aProjection [
-	axes horizontal: aProjection
-]
-
-{ #category : 'configuration' }
-CFRubberBandPlane >> vertical [
-	^ axes vertical
-]
-
-{ #category : 'configuration' }
-CFRubberBandPlane >> vertical: aProjection [
-	axes vertical: aProjection
+{ #category : 'interaction' }
+CFRubberBandPlane >> endInteraction [
+	state := #idle.
+	self isOverscrolled ifTrue: [ wantsSnapBack := true ].
+	^ wantsSnapBack
 ]
 
 { #category : 'testing' }
@@ -98,23 +72,51 @@ CFRubberBandPlane >> hasVertical [
 	^ axes hasVertical
 ]
 
+{ #category : 'configuration' }
+CFRubberBandPlane >> horizontal [
+	^ axes horizontal
+]
+
+{ #category : 'configuration' }
+CFRubberBandPlane >> horizontal: aProjection [
+	axes horizontal: aProjection
+]
+
+{ #category : 'initialization' }
+CFRubberBandPlane >> initialize [
+	super initialize.
+	axes := CFRubberBandProjectionPlane new.
+	position := 0.0 @ 0.0.
+	state := #idle.
+	wantsSnapBack := false
+]
+
+{ #category : 'testing' }
+CFRubberBandPlane >> isAtOverscrollStop [
+	^ axes isAtOverscrollStop: position
+]
+
+{ #category : 'testing' }
+CFRubberBandPlane >> isAtOverscrollStop: aPoint [
+	^ axes isAtOverscrollStop: aPoint
+]
+
 { #category : 'testing' }
 CFRubberBandPlane >> isEmpty [
 	^ axes isEmpty
 ]
 
-{ #category : 'interaction' }
-CFRubberBandPlane >> beginInteraction [
-	state := #interacting.
-	wantsSnapBack := false.
-	^ self
+{ #category : 'testing' }
+CFRubberBandPlane >> isMovingFartherIntoOverscrollFrom: previousPoint to: currentPoint requestedDelta: deltaPoint [
+	^ axes
+		isMovingFartherIntoOverscrollFrom: previousPoint
+		to: currentPoint
+		requestedDelta: deltaPoint
 ]
 
-{ #category : 'interaction' }
-CFRubberBandPlane >> endInteraction [
-	state := #idle.
-	self isOverscrolled ifTrue: [ wantsSnapBack := true ].
-	^ wantsSnapBack
+{ #category : 'testing' }
+CFRubberBandPlane >> isOverscrolled [
+	^ axes isOutOfBounds: position
 ]
 
 { #category : 'movement' }
@@ -126,23 +128,24 @@ CFRubberBandPlane >> jumpTo: aPoint [
 	^ position
 ]
 
-{ #category : 'movement' }
-CFRubberBandPlane >> moveByUserInput: aDeltaPoint [
-	"Move by user supplied input. This is the rubber-band path: movement farther
-	into overscroll is resisted by the axes. If the movement reaches the configured
-	overscroll stop while still trying to move farther out, request snapback."
+{ #category : 'projection' }
+CFRubberBandPlane >> limitedPointFor: aPoint [
+	^ axes limitedPointFor: aPoint
+]
 
-	| previous |
-	previous := position.
-	position := axes point: position movedBy: aDeltaPoint.
-	((self isOverscrolled)
-		and: [ (self isAtOverscrollStop)
-		and: [ axes
-			isMovingFartherIntoOverscrollFrom: previous
-			to: position
-			requestedDelta: aDeltaPoint ] ])
-		ifTrue: [ wantsSnapBack := true ].
-	^ position
+{ #category : 'overscroll limits' }
+CFRubberBandPlane >> logicalOverscrollLimit [
+	^ axes logicalOverscrollLimit
+]
+
+{ #category : 'bounds' }
+CFRubberBandPlane >> maximumPointWithFallback: aPoint [
+	^ axes maximumPointWithFallback: aPoint
+]
+
+{ #category : 'bounds' }
+CFRubberBandPlane >> minimumPointWithFallback: aPoint [
+	^ axes minimumPointWithFallback: aPoint
 ]
 
 { #category : 'movement' }
@@ -177,54 +180,23 @@ CFRubberBandPlane >> moveBySnapBack: aDeltaPoint [
 	^ position
 ]
 
-{ #category : 'snapback' }
-CFRubberBandPlane >> wantsSnapBack [
-	^ wantsSnapBack
-]
+{ #category : 'movement' }
+CFRubberBandPlane >> moveByUserInput: aDeltaPoint [
+	"Move by user supplied input. This is the rubber-band path: movement farther
+	into overscroll is resisted by the axes. If the movement reaches the configured
+	overscroll stop while still trying to move farther out, request snapback."
 
-{ #category : 'snapback' }
-CFRubberBandPlane >> requestSnapBack [
-	wantsSnapBack := true
-]
-
-{ #category : 'snapback' }
-CFRubberBandPlane >> clearSnapBackRequest [
-	wantsSnapBack := false
-]
-
-{ #category : 'snapback' }
-CFRubberBandPlane >> nearestBoundsPosition [
-	^ axes nearestBoundFor: position
-]
-
-{ #category : 'testing' }
-CFRubberBandPlane >> isOverscrolled [
-	^ axes isOutOfBounds: position
-]
-
-{ #category : 'testing' }
-CFRubberBandPlane >> isAtOverscrollStop [
-	^ axes isAtOverscrollStop: position
-]
-
-{ #category : 'projection' }
-CFRubberBandPlane >> projectedPosition [
-	^ axes project: position
-]
-
-{ #category : 'projection' }
-CFRubberBandPlane >> project: aPoint [
-	^ axes project: aPoint
-]
-
-{ #category : 'projection' }
-CFRubberBandPlane >> limitedPointFor: aPoint [
-	^ axes limitedPointFor: aPoint
-]
-
-{ #category : 'projection' }
-CFRubberBandPlane >> clamp: aPoint [
-	^ axes clamp: aPoint
+	| previous |
+	previous := position.
+	position := axes point: position movedBy: aDeltaPoint.
+	((self isOverscrolled)
+		and: [ (self isAtOverscrollStop)
+		and: [ axes
+			isMovingFartherIntoOverscrollFrom: previous
+			to: position
+			requestedDelta: aDeltaPoint ] ])
+		ifTrue: [ wantsSnapBack := true ].
+	^ position
 ]
 
 { #category : 'projection' }
@@ -232,14 +204,9 @@ CFRubberBandPlane >> nearestBoundFor: aPoint [
 	^ axes nearestBoundFor: aPoint
 ]
 
-{ #category : 'bounds' }
-CFRubberBandPlane >> minimumPointWithFallback: aPoint [
-	^ axes minimumPointWithFallback: aPoint
-]
-
-{ #category : 'bounds' }
-CFRubberBandPlane >> maximumPointWithFallback: aPoint [
-	^ axes maximumPointWithFallback: aPoint
+{ #category : 'snapback' }
+CFRubberBandPlane >> nearestBoundsPosition [
+	^ axes nearestBoundFor: position
 ]
 
 { #category : 'overscroll' }
@@ -247,47 +214,15 @@ CFRubberBandPlane >> overscrollDistanceFor: aPoint [
 	^ axes overscrollDistanceFor: aPoint
 ]
 
-{ #category : 'overscroll' }
-CFRubberBandPlane >> signedOverscrollDistanceFor: aPoint [
-	^ axes signedOverscrollDistanceFor: aPoint
+{ #category : 'accessing' }
+CFRubberBandPlane >> position [
+	^ position
 ]
 
-{ #category : 'overscroll' }
-CFRubberBandPlane >> projectedOverscrollDistanceFor: aPoint [
-	^ axes projectedOverscrollDistanceFor: aPoint
-]
-
-{ #category : 'overscroll' }
-CFRubberBandPlane >> signedProjectedOverscrollDistanceFor: aPoint [
-	^ axes signedProjectedOverscrollDistanceFor: aPoint
-]
-
-{ #category : 'overscroll limits' }
-CFRubberBandPlane >> logicalOverscrollLimit [
-	^ axes logicalOverscrollLimit
-]
-
-{ #category : 'testing' }
-CFRubberBandPlane >> isAtOverscrollStop: aPoint [
-	^ axes isAtOverscrollStop: aPoint
-]
-
-{ #category : 'testing' }
-CFRubberBandPlane >> isMovingFartherIntoOverscrollFrom: previousPoint to: currentPoint requestedDelta: deltaPoint [
-	^ axes
-		isMovingFartherIntoOverscrollFrom: previousPoint
-		to: currentPoint
-		requestedDelta: deltaPoint
-]
-
-{ #category : 'velocity' }
-CFRubberBandPlane >> velocityScaleAt: aPoint [
-	^ axes velocityScaleAt: aPoint
-]
-
-{ #category : 'velocity' }
-CFRubberBandPlane >> projectedVelocityFor: aVelocityPoint at: aPoint [
-	^ axes projectedVelocityFor: aVelocityPoint at: aPoint
+{ #category : 'accessing' }
+CFRubberBandPlane >> position: aPoint [
+	position := self limitedPointFor: aPoint.
+	^ self
 ]
 
 { #category : 'printing' }
@@ -301,4 +236,69 @@ CFRubberBandPlane >> printOn: aStream [
 		nextPutAll: ', wantsSnapBack: ';
 		nextPutAll: wantsSnapBack asString;
 		nextPut: $)
+]
+
+{ #category : 'projection' }
+CFRubberBandPlane >> project: aPoint [
+	^ axes project: aPoint
+]
+
+{ #category : 'overscroll' }
+CFRubberBandPlane >> projectedOverscrollDistanceFor: aPoint [
+	^ axes projectedOverscrollDistanceFor: aPoint
+]
+
+{ #category : 'projection' }
+CFRubberBandPlane >> projectedPosition [
+	^ axes project: position
+]
+
+{ #category : 'velocity' }
+CFRubberBandPlane >> projectedVelocityFor: aVelocityPoint at: aPoint [
+	^ axes projectedVelocityFor: aVelocityPoint at: aPoint
+]
+
+{ #category : 'snapback' }
+CFRubberBandPlane >> requestSnapBack [
+	wantsSnapBack := true
+]
+
+{ #category : 'overscroll' }
+CFRubberBandPlane >> signedOverscrollDistanceFor: aPoint [
+	^ axes signedOverscrollDistanceFor: aPoint
+]
+
+{ #category : 'overscroll' }
+CFRubberBandPlane >> signedProjectedOverscrollDistanceFor: aPoint [
+	^ axes signedProjectedOverscrollDistanceFor: aPoint
+]
+
+{ #category : 'accessing' }
+CFRubberBandPlane >> state [
+	^ state
+]
+
+{ #category : 'accessing' }
+CFRubberBandPlane >> state: aSymbol [
+	state := aSymbol
+]
+
+{ #category : 'velocity' }
+CFRubberBandPlane >> velocityScaleAt: aPoint [
+	^ axes velocityScaleAt: aPoint
+]
+
+{ #category : 'configuration' }
+CFRubberBandPlane >> vertical [
+	^ axes vertical
+]
+
+{ #category : 'configuration' }
+CFRubberBandPlane >> vertical: aProjection [
+	axes vertical: aProjection
+]
+
+{ #category : 'snapback' }
+CFRubberBandPlane >> wantsSnapBack [
+	^ wantsSnapBack
 ]

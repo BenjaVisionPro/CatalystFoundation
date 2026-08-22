@@ -1,5 +1,6 @@
-"I am responsible for presenting a Foundation relation surface according to whether focus is within it."
-
+"
+I am responsible for presenting a Foundation relation surface according to whether focus is within it.
+"
 Class {
 	#name : 'CFMaRelationSurfaceAptitude',
 	#superclass : 'BrStyleCommonAptitude',

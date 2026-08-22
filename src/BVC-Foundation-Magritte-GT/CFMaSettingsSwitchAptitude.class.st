@@ -1,5 +1,6 @@
-"I present a BrToggle as Foundation's compact settings switch."
-
+"
+I present a BrToggle as Foundation's compact settings switch.
+"
 Class {
 	#name : 'CFMaSettingsSwitchAptitude',
 	#superclass : 'BrToggleAptitude',
@@ -49,7 +50,6 @@ CFMaSettingsSwitchAptitude >> initialize [
 	self activated: [ :aStyle |
 		aStyle background: self class activeTrackColor ]
 ]
-
 
 { #category : 'initialization' }
 CFMaSettingsSwitchAptitude >> initializeListeners [

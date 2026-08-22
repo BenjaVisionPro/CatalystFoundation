@@ -1,4 +1,6 @@
-"I stream the latest telemetry change from one Physics world. I keep at most one pending update so inspector consumers cannot accumulate stale announcements."
+"
+I stream the latest telemetry change from one Physics world. I keep at most one pending update so inspector consumers cannot accumulate stale announcements.
+"
 Class {
 	#name : 'CFPhysicsTelemetryStream',
 	#superclass : 'Object',
@@ -20,21 +22,17 @@ CFPhysicsTelemetryStream class >> on: aWorld [
 		yourself
 ]
 
+{ #category : 'finalization' }
+CFPhysicsTelemetryStream >> finalize [
+	super finalize.
+	world ifNotNil: [ world telemetryAnnouncer unsubscribe: self ]
+]
+
 { #category : 'initialization' }
 CFPhysicsTelemetryStream >> initialize [
 	super initialize.
 	updates := AsyncMutex for: LinkedList new.
 	waker := AsyncFutureExecutionAtomicWaker new
-]
-
-{ #category : 'initialization' }
-CFPhysicsTelemetryStream >> registerOn: aWorld [
-	world := aWorld.
-	world telemetryAnnouncer weak
-		when: Announcement
-		send: #onTelemetryChanged:
-		to: self.
-	self class finalizationRegistry add: self
 ]
 
 { #category : 'private - announcements' }
@@ -58,15 +56,19 @@ CFPhysicsTelemetryStream >> pollNext: anAsynchronousContext [
 				AsyncPoll ready: (AsyncOptionalValue some: pendingUpdates removeFirst) ] ]
 ]
 
-{ #category : 'finalization' }
-CFPhysicsTelemetryStream >> finalize [
-	super finalize.
-	world ifNotNil: [ world telemetryAnnouncer unsubscribe: self ]
-]
-
 { #category : 'api - stream copy' }
 CFPhysicsTelemetryStream >> postSimilarCopy [
 	updates := AsyncMutex for: LinkedList new.
 	waker := AsyncFutureExecutionAtomicWaker new.
 	self registerOn: world
+]
+
+{ #category : 'initialization' }
+CFPhysicsTelemetryStream >> registerOn: aWorld [
+	world := aWorld.
+	world telemetryAnnouncer weak
+		when: Announcement
+		send: #onTelemetryChanged:
+		to: self.
+	self class finalizationRegistry add: self
 ]

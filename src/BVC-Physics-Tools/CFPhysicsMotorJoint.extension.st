@@ -1,3 +1,5 @@
 Extension { #name : 'CFPhysicsMotorJoint' }
+
 { #category : '*BVC-Physics-Tools' }
-CFPhysicsMotorJoint >> physicsOverlayWorldPoints [ ^ { bodyA worldBodyOrigin. bodyB worldBodyOrigin } ]
+CFPhysicsMotorJoint >> physicsOverlayWorldPoints [ ^ { bodyA worldBodyOrigin. bodyB worldBodyOrigin }
+]

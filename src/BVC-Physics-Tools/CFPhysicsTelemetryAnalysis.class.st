@@ -1,11 +1,22 @@
-"I analyse a snapshot of Physics telemetry recordings. My responsibility is to select a rolling window of completed steps and aggregate their nested pipeline spans into statistics."
+"
+I analyse a snapshot of Physics telemetry recordings. My responsibility is to select a rolling window of completed steps and aggregate their nested pipeline spans into statistics.
+"
 Class {
 	#name : 'CFPhysicsTelemetryAnalysis',
 	#superclass : 'Object',
-	#instVars : [ 'world', 'recordings', 'windowSeconds' ],
+	#instVars : [
+		'world',
+		'recordings',
+		'windowSeconds'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
+
+{ #category : 'instance creation' }
+CFPhysicsTelemetryAnalysis class >> recordings: aCollection windowSeconds: aNumber [
+	^ self new recordings: aCollection; windowSeconds: aNumber; yourself
+]
 
 { #category : 'instance creation' }
 CFPhysicsTelemetryAnalysis class >> world: aWorld [
@@ -16,35 +27,18 @@ CFPhysicsTelemetryAnalysis class >> world: aWorld [
 		yourself
 ]
 
-{ #category : 'instance creation' }
-CFPhysicsTelemetryAnalysis class >> recordings: aCollection windowSeconds: aNumber [
-	^ self new recordings: aCollection; windowSeconds: aNumber; yourself
+{ #category : 'private - statistics' }
+CFPhysicsTelemetryAnalysis >> averageOf: numbers [
+	^ numbers ifEmpty: [ 0 ] ifNotEmpty: [ numbers average ]
 ]
 
-{ #category : 'accessing' }
-CFPhysicsTelemetryAnalysis >> world: aWorld [ world := aWorld ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetryAnalysis >> recordings: aCollection [ recordings := aCollection asArray ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetryAnalysis >> windowSeconds: aNumber [ windowSeconds := aNumber max: 1 ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetryAnalysis >> stepRecordings [
-	| steps newestTimestamp cutoff |
-	steps := recordings select: [ :signal |
-		| data |
-		data := signal physicsData.
-		data notNil and: [ (data at: #kind ifAbsent: [ nil ]) = #step ] ].
-	steps ifEmpty: [ ^ #() ].
-	newestTimestamp := self recordedAtFor: steps last.
-	newestTimestamp ifNil: [ ^ steps ].
-	cutoff := newestTimestamp - windowSeconds seconds.
-	^ steps select: [ :signal |
-		| timestamp |
-		timestamp := self recordedAtFor: signal.
-		timestamp isNil or: [ timestamp >= cutoff ] ]
+{ #category : 'private - statistics' }
+CFPhysicsTelemetryAnalysis >> percentile: aFraction of: numbers [
+	| sorted rank |
+	numbers ifEmpty: [ ^ 0 ].
+	sorted := numbers sorted.
+	rank := ((sorted size * aFraction) ceiling max: 1) min: sorted size.
+	^ sorted at: rank
 ]
 
 { #category : 'private - accessing' }
@@ -53,7 +47,8 @@ CFPhysicsTelemetryAnalysis >> recordedAtFor: aSignal [
 ]
 
 { #category : 'accessing' }
-CFPhysicsTelemetryAnalysis >> sampleCount [ ^ self stepRecordings size ]
+CFPhysicsTelemetryAnalysis >> recordings: aCollection [ recordings := aCollection asArray
+]
 
 { #category : 'accessing' }
 CFPhysicsTelemetryAnalysis >> rootStatistics [
@@ -68,6 +63,10 @@ CFPhysicsTelemetryAnalysis >> rootStatistics [
 			parent: signal ping
 			sequence: index) ].
 	^ self statisticsForSamples: samples depth: 0
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetryAnalysis >> sampleCount [ ^ self stepRecordings size
 ]
 
 { #category : 'private - aggregation' }
@@ -100,16 +99,27 @@ CFPhysicsTelemetryAnalysis >> statisticsForSamples: samples depth: aDepth [
 	^ node
 ]
 
-{ #category : 'private - statistics' }
-CFPhysicsTelemetryAnalysis >> averageOf: numbers [
-	^ numbers ifEmpty: [ 0 ] ifNotEmpty: [ numbers average ]
+{ #category : 'accessing' }
+CFPhysicsTelemetryAnalysis >> stepRecordings [
+	| steps newestTimestamp cutoff |
+	steps := recordings select: [ :signal |
+		| data |
+		data := signal physicsData.
+		data notNil and: [ (data at: #kind ifAbsent: [ nil ]) = #step ] ].
+	steps ifEmpty: [ ^ #() ].
+	newestTimestamp := self recordedAtFor: steps last.
+	newestTimestamp ifNil: [ ^ steps ].
+	cutoff := newestTimestamp - windowSeconds seconds.
+	^ steps select: [ :signal |
+		| timestamp |
+		timestamp := self recordedAtFor: signal.
+		timestamp isNil or: [ timestamp >= cutoff ] ]
 ]
 
-{ #category : 'private - statistics' }
-CFPhysicsTelemetryAnalysis >> percentile: aFraction of: numbers [
-	| sorted rank |
-	numbers ifEmpty: [ ^ 0 ].
-	sorted := numbers sorted.
-	rank := ((sorted size * aFraction) ceiling max: 1) min: sorted size.
-	^ sorted at: rank
+{ #category : 'accessing' }
+CFPhysicsTelemetryAnalysis >> windowSeconds: aNumber [ windowSeconds := aNumber max: 1
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetryAnalysis >> world: aWorld [ world := aWorld
 ]

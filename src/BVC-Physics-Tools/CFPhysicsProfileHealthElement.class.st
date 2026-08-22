@@ -1,8 +1,26 @@
-"I show low-frequency memory and runtime instance trends for one Physics world."
+"
+I show low-frequency memory and runtime instance trends for one Physics world.
+"
 Class {
 	#name : 'CFPhysicsProfileHealthElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'telemetryUpdatesStream', 'content', 'scrollPane', 'samples', 'retentionSamples', 'lastSampleMilliseconds', 'lastRetentionSampleMilliseconds', 'running', 'sampling', 'liveContent', 'profileContent', 'latestPhysicsData', 'retentionObservationActive', 'resumeSteppingAfterRetentionObservation' ],
+	#instVars : [
+		'world',
+		'telemetryUpdatesStream',
+		'content',
+		'scrollPane',
+		'samples',
+		'retentionSamples',
+		'lastSampleMilliseconds',
+		'lastRetentionSampleMilliseconds',
+		'running',
+		'sampling',
+		'liveContent',
+		'profileContent',
+		'latestPhysicsData',
+		'retentionObservationActive',
+		'resumeSteppingAfterRetentionObservation'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -15,32 +33,97 @@ CFPhysicsProfileHealthElement class >> world: aWorld [
 		yourself
 ]
 
-{ #category : 'initialization' }
-CFPhysicsProfileHealthElement >> initialize [
-	super initialize.
-	samples := OrderedCollection new.
-	retentionSamples := OrderedCollection new.
-	lastSampleMilliseconds := nil.
-	lastRetentionSampleMilliseconds := nil.
-	running := false.
+{ #category : 'private - updating' }
+CFPhysicsProfileHealthElement >> acceptSample: aSample [
 	sampling := false.
-	retentionObservationActive := false.
-	resumeSteppingAfterRetentionObservation := false.
-	self
-		hMatchParent;
-		vMatchParent
+	running ifFalse: [ ^ self ].
+	(aSample at: #retention)
+		ifTrue: [
+			lastRetentionSampleMilliseconds := Time millisecondClockValue.
+			retentionSamples add: aSample.
+			[ retentionSamples size > 100 ] whileTrue: [ retentionSamples removeFirst ] ]
+		ifFalse: [
+			samples add: aSample.
+			[ samples size > 20 ] whileTrue: [ samples removeFirst ] ].
+	self renderSample: aSample
 ]
 
-{ #category : 'accessing' }
-CFPhysicsProfileHealthElement >> world: aWorld [
-	world := aWorld.
-	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
-	self withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :anElement :aSink |
-				aSink peek ifSome: [ anElement updateLiveHealth. anElement sampleIfDue ] ];
-			forwardStream: telemetryUpdatesStream ]
+{ #category : 'private - analysis' }
+CFPhysicsProfileHealthElement >> alerts [
+	| result firstHeap lastHeap |
+	result := OrderedCollection new.
+	retentionSamples size < 3 ifTrue: [ ^ result ].
+	firstHeap := retentionSamples first at: #heapSize.
+	lastHeap := retentionSamples last at: #heapSize.
+	lastHeap - firstHeap > (100 * 1024 * 1024) ifTrue: [
+		result add: '⚠ Image heap after GC has increased by ',
+			(lastHeap - firstHeap) humanReadableSISizeString, '.' ].
+	(retentionSamples last at: #rows) do: [ :row |
+		(self retentionTrendFor: (row at: #name)) = '↗' ifTrue: [
+			result add: '⚠ ', (row at: #name),
+				((self isJointRetentionRow: row)
+					ifTrue: [ ' structurally unexplained retained joint count is increasing after GC.' ]
+					ifFalse: [ ' retained excess instance count is increasing after GC.' ]) ] ].
+	^ result
+]
+
+{ #category : 'private - analysis' }
+CFPhysicsProfileHealthElement >> baselineSample [
+	retentionSamples ifNotEmpty: [ ^ retentionSamples first ].
+	samples ifNotEmpty: [ ^ samples first ].
+	^ { #heapSize -> 0 } asDictionary
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> beginRetentionObservation [
+	| integration |
+	retentionObservationActive ifTrue: [ ^ self ].
+	retentionObservationActive := true.
+	resumeSteppingAfterRetentionObservation := false.
+	integration := CFPhysicsWorldMotionIntegration existingFor: world.
+	(integration notNil and: [ integration isSteppingRunning ]) ifTrue: [
+		resumeSteppingAfterRetentionObservation := true.
+		world pauseStepping ].
+	world requireForegroundSteppingFor: self
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> bodyInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · members ', (row at: #memberCount) asString,
+		' · containment ', (row at: #containmentCount) asString,
+		' · state-owned ', (row at: #stateOwnedCount) asString,
+		' · result-owned ', (row at: #resultOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> bodyRetentionRowFrom: allBodies worldStates: allWorldStates pipelineResults: worldPipelineResults [
+	| related members currentContainment stateOwned resultOwned known other |
+	related := (allBodies select: [ :each | each world == world ]) asIdentitySet.
+	members := world bodyStatesInOrder asIdentitySet.
+	currentContainment := IdentitySet new.
+	world containmentBoundaryBody ifNotNil: [ :body | currentContainment add: body ].
+	stateOwned := IdentitySet new.
+	(allWorldStates select: [ :each | each world == world ]) do: [ :state |
+		state bodies do: [ :body | stateOwned add: body ] ].
+	resultOwned := IdentitySet new.
+	worldPipelineResults do: [ :result |
+		result bodies do: [ :body | resultOwned add: body ] ].
+	known := IdentitySet new.
+	known addAll: members; addAll: currentContainment; addAll: stateOwned; addAll: resultOwned.
+	other := related reject: [ :each | known includes: each ].
+	^ {
+		#name -> 'PhysicsBody'.
+		#total -> allBodies size.
+		#owned -> related size.
+		#memberCount -> members size.
+		#containmentCount -> (related count: [ :each | currentContainment includes: each ]).
+		#stateOwnedCount -> (related count: [ :each | stateOwned includes: each ]).
+		#resultOwnedCount -> (related count: [ :each | resultOwned includes: each ]).
+		#otherCount -> other size.
+		#difference -> other size } asDictionary
 ]
 
 { #category : 'building' }
@@ -89,25 +172,6 @@ CFPhysicsProfileHealthElement >> build [
 ]
 
 { #category : 'profiling' }
-CFPhysicsProfileHealthElement >> startProfiling [
-	samples removeAll.
-	retentionSamples removeAll.
-	lastSampleMilliseconds := nil.
-	lastRetentionSampleMilliseconds := nil.
-	sampling := false.
-	running := true.
-	self sampleNow
-]
-
-{ #category : 'profiling' }
-CFPhysicsProfileHealthElement >> stopProfiling [
-	running := false.
-	sampling := false.
-	profileContent ifNotNil: [ profileContent asyncFuture interrupt ].
-	self finishRetentionObservation
-]
-
-{ #category : 'profiling' }
 CFPhysicsProfileHealthElement >> collectRetainedNow [
 	(running and: [ sampling not ]) ifFalse: [ ^ self ].
 	sampling := true.
@@ -119,55 +183,6 @@ CFPhysicsProfileHealthElement >> collectRetainedNow [
 			self finishRetentionObservation.
 			sampling := false.
 			anError pass ]
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> sampleIfDue [
-	| now |
-	(running and: [ sampling not ]) ifFalse: [ ^ self ].
-	now := Time millisecondClockValue.
-	(lastRetentionSampleMilliseconds isNil
-		or: [ now - lastRetentionSampleMilliseconds >= 600000 ])
-		ifTrue: [ ^ self collectRetainedNow ].
-	(lastSampleMilliseconds isNil or: [ now - lastSampleMilliseconds >= 30000 ])
-		ifTrue: [ self sampleNow ]
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> sampleNow [
-	(running and: [ sampling not ]) ifFalse: [ ^ self ].
-	lastSampleMilliseconds := Time millisecondClockValue.
-	sampling := true.
-	profileContent asyncFuture future: [ self collectSample ] asAsyncFuture
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> beginRetentionObservation [
-	| integration |
-	retentionObservationActive ifTrue: [ ^ self ].
-	retentionObservationActive := true.
-	resumeSteppingAfterRetentionObservation := false.
-	integration := CFPhysicsWorldMotionIntegration existingFor: world.
-	(integration notNil and: [ integration isSteppingRunning ]) ifTrue: [
-		resumeSteppingAfterRetentionObservation := true.
-		world pauseStepping ].
-	world requireForegroundSteppingFor: self
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> finishRetentionObservation [
-	retentionObservationActive ifFalse: [ ^ self ].
-	world releaseForegroundSteppingFor: self.
-	(resumeSteppingAfterRetentionObservation and: [ world isReleased not ]) ifTrue: [
-		world resumeStepping ].
-	resumeSteppingAfterRetentionObservation := false.
-	retentionObservationActive := false
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> waitForBackgroundExecutionToFinishForRetentionObservation [
-	[ world hasBackgroundExecutionInFlight ] whileTrue: [
-		10 milliSeconds wait ]
 ]
 
 { #category : 'private - sampling' }
@@ -234,57 +249,16 @@ CFPhysicsProfileHealthElement >> collectSample [
 	} asDictionary
 ]
 
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> pipelineResultsForWorldFrom: allPipelineResults solutions: worldSolutions [
-	| known |
-	known := IdentitySet new.
-	world lastStepResult ifNotNil: [ :each | known add: each ].
-	worldSolutions do: [ :each |
-		each pipelineResult ifNotNil: [ :result | known add: result ] ].
-	allPipelineResults do: [ :result |
-		((known includes: result) not and: [
-			self pipelineResultStructurallyBelongsToWorld: result ]) ifTrue: [
-				known add: result ] ].
-	^ known asArray
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> pipelineResultStructurallyBelongsToWorld: aPipelineResult [
-	(aPipelineResult bodies anySatisfy: [ :body | body world == world ]) ifTrue: [ ^ true ].
-	(aPipelineResult previousContacts anySatisfy: [ :contact |
-		contact firstBody world == world ]) ifTrue: [ ^ true ].
-	(aPipelineResult contactResult notNil and: [
-		aPipelineResult contacts anySatisfy: [ :contact |
-			contact firstBody world == world ] ]) ifTrue: [ ^ true ].
-	^ false
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> bodyRetentionRowFrom: allBodies worldStates: allWorldStates pipelineResults: worldPipelineResults [
-	| related members currentContainment stateOwned resultOwned known other |
-	related := (allBodies select: [ :each | each world == world ]) asIdentitySet.
-	members := world bodyStatesInOrder asIdentitySet.
-	currentContainment := IdentitySet new.
-	world containmentBoundaryBody ifNotNil: [ :body | currentContainment add: body ].
-	stateOwned := IdentitySet new.
-	(allWorldStates select: [ :each | each world == world ]) do: [ :state |
-		state bodies do: [ :body | stateOwned add: body ] ].
-	resultOwned := IdentitySet new.
-	worldPipelineResults do: [ :result |
-		result bodies do: [ :body | resultOwned add: body ] ].
-	known := IdentitySet new.
-	known addAll: members; addAll: currentContainment; addAll: stateOwned; addAll: resultOwned.
-	other := related reject: [ :each | known includes: each ].
-	^ {
-		#name -> 'PhysicsBody'.
-		#total -> allBodies size.
-		#owned -> related size.
-		#memberCount -> members size.
-		#containmentCount -> (related count: [ :each | currentContainment includes: each ]).
-		#stateOwnedCount -> (related count: [ :each | stateOwned includes: each ]).
-		#resultOwnedCount -> (related count: [ :each | resultOwned includes: each ]).
-		#otherCount -> other size.
-		#difference -> other size } asDictionary
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> contactInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · committed ', (row at: #committedCount) asString,
+		' · calculation ', (row at: #calculationCount) asString,
+		' · state-owned ', (row at: #stateOwnedCount) asString,
+		' · previous-result ', (row at: #previousResultOwnedCount) asString,
+		' · current-result ', (row at: #currentResultOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
 ]
 
 { #category : 'private - sampling' }
@@ -325,29 +299,227 @@ CFPhysicsProfileHealthElement >> contactRetentionRowFrom: allContacts worldState
 		#difference -> other size } asDictionary
 ]
 
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> currentSummaryFor: row [
+	(self isJointRetentionRow: row) ifTrue: [ ^ self jointInstanceSummaryFor: row ].
+	^ self standardInstanceSummaryFor: row
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> decimalAt: aKey in: data [
+	^ (data at: aKey ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3
+]
+
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> solutionRetentionRowFrom: worldSolutions backgroundSteps: allBackgroundSteps futurePromises: allFuturePromises [
-	| stepOwned futureOwned other |
-	stepOwned := IdentitySet new.
-	allBackgroundSteps do: [ :step |
-		| candidate |
-		candidate := step instVarNamed: 'solution'.
-		(candidate notNil and: [ candidate world == world ]) ifTrue: [
-			stepOwned add: candidate ] ].
-	futureOwned := IdentitySet new.
-	worldSolutions do: [ :solution |
-		(self solution: solution isHeldByAny: allFuturePromises) ifTrue: [
-			futureOwned add: solution ] ].
-	other := worldSolutions reject: [ :solution |
-		(stepOwned includes: solution) or: [ futureOwned includes: solution ] ].
-	^ {
-		#name -> 'PhysicsWorldSolution'.
-		#total -> CFPhysicsWorldSolution allInstances size.
-		#owned -> worldSolutions size.
-		#backgroundStepOwnedCount -> stepOwned size.
-		#futureOwnedCount -> futureOwned size.
-		#otherCount -> other size.
-		#difference -> other size } asDictionary
+CFPhysicsProfileHealthElement >> finishRetentionObservation [
+	retentionObservationActive ifFalse: [ ^ self ].
+	world releaseForegroundSteppingFor: self.
+	(resumeSteppingAfterRetentionObservation and: [ world isReleased not ]) ifTrue: [
+		world resumeStepping ].
+	resumeSteppingAfterRetentionObservation := false.
+	retentionObservationActive := false
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthCellNamed: aName value: aValue [
+	^ BrLabel new
+		hExact: 250;
+		vExact: 18;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 10);
+		text: aName, '  ', aValue;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthRowNamed: firstName value: firstValue secondaryNamed: secondName value: secondValue [
+	| row first second |
+	row := BrHorizontalPane new hMatchParent; vExact: 18; cellSpacing: 6; yourself.
+	first := self healthCellNamed: firstName value: firstValue.
+	second := self healthCellNamed: secondName value: secondValue.
+	row addChild: first; addChild: second.
+	^ row
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> healthSectionNamed: aName rows: rows [
+	| section |
+	section := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 1;
+		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 2);
+		yourself.
+	section addChild: (BrLabel new
+		hMatchParent;
+		vExact: 16;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.48);
+			fontSize: 9);
+		text: aName;
+		yourself).
+	rows do: [ :row | section addChild: row ].
+	^ section
+]
+
+{ #category : 'private - analysis' }
+CFPhysicsProfileHealthElement >> heapTrend [
+	| source first last tolerance |
+	source := retentionSamples size >= 3
+		ifTrue: [ retentionSamples ]
+		ifFalse: [ samples ].
+	source size < 3 ifTrue: [ ^ '·' ].
+	first := source first at: #heapSize.
+	last := source last at: #heapSize.
+	tolerance := 10 * 1024 * 1024.
+	last - first > tolerance ifTrue: [ ^ '↗' ].
+	first - last > tolerance ifTrue: [ ^ '↘' ].
+	^ '→'
+]
+
+{ #category : 'initialization' }
+CFPhysicsProfileHealthElement >> initialize [
+	super initialize.
+	samples := OrderedCollection new.
+	retentionSamples := OrderedCollection new.
+	lastSampleMilliseconds := nil.
+	lastRetentionSampleMilliseconds := nil.
+	running := false.
+	sampling := false.
+	retentionObservationActive := false.
+	resumeSteppingAfterRetentionObservation := false.
+	self
+		hMatchParent;
+		vMatchParent
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsLineNamed: aName value: aValue [
+	| line nameLabel valueLabel |
+	line := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 8;
+		yourself.
+	nameLabel := BrLabel new
+		hExact: 105;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.5);
+			fontSize: 10);
+		text: aName;
+		yourself.
+	valueLabel := BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 10);
+		text: aValue;
+		yourself.
+	line
+		addChild: nameLabel;
+		addChild: valueLabel.
+	^ line
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName lines: labelledLines [
+	^ self instanceStatisticsRowNamed: aName trend: nil lines: labelledLines
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName trend: aTrend lines: labelledLines [
+	| row nameColumn valuesColumn title |
+	row := BrHorizontalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 10;
+		padding: (BlInsets top: 4 right: 2 bottom: 6 left: 0);
+		yourself.
+	nameColumn := BrVerticalPane new
+		hExact: 180;
+		vFitContent;
+		yourself.
+	title := aTrend
+		ifNil: [ aName ]
+		ifNotNil: [ aName, '  ', aTrend ].
+	nameColumn addChild: (BrLabel new
+		hMatchParent;
+		vFitContent;
+		aptitude: (BrGlamorousLabelAptitude new
+			foreground: (Color black alpha: 0.78);
+			fontSize: 11);
+		text: title;
+		yourself).
+	valuesColumn := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 2;
+		yourself.
+	labelledLines do: [ :association |
+		valuesColumn addChild: (self
+			instanceStatisticsLineNamed: association key
+			value: association value) ].
+	row
+		addChild: nameColumn;
+		addChild: valuesColumn.
+	^ row
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> integerAt: aKey in: data [
+	^ (data at: aKey ifAbsent: [ 0 ]) printString
+]
+
+{ #category : 'private - formatting' }
+CFPhysicsProfileHealthElement >> integerValueAt: aKey in: data [
+	^ data at: aKey ifAbsent: [ 0 ]
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> isJointRetentionRow: row [
+	^ row includesKey: #live
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> island: anIsland belongsTo: aWorld [
+	^ anIsland bodies anySatisfy: [ :body | body world == aWorld ]
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> joint: aJoint belongsTo: aWorld [
+	| body |
+	((aJoint respondsTo: #endpointPair)
+		and: [ aJoint endpointPair isNil ]) ifTrue: [ ^ false ].
+	body := aJoint bodyA ifNil: [ aJoint bodyB ].
+	^ body notNil and: [ body world == aWorld ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointHolderSummaryFor: row [
+	^ 'states ', (row at: #worldStateCount) asString,
+		' · background steps ', (row at: #backgroundStepCount) asString,
+		' · solutions ', (row at: #solutionCount) asString,
+		' · held by future promises ', (row at: #futureHeldSolutionCount) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · related ', (row at: #owned) asString,
+		' · live ', (row at: #live) asString,
+		' · captured ', (row at: #captured) asString,
+		' · unexplained ', (row at: #unexplained) asString
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> jointPipelineSummaryFor: row [
+	^ 'results ', (row at: #pipelineResultCount) asString,
+		' · world last ', (row at: #worldLastPipelineResultCount) asString,
+		' · solution-owned ', (row at: #solutionPipelineResultCount) asString,
+		' · other ', (row at: #otherPipelineResultCount) asString
 ]
 
 { #category : 'private - sampling' }
@@ -393,6 +565,41 @@ CFPhysicsProfileHealthElement >> jointRetentionRowFrom: allJoints worldStates: a
 				(solutionPipelineResults includes: each) not ] ]) } asDictionary
 ]
 
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> labelForCurrentRow: row [
+	^ self instanceStatisticsRowNamed: (row at: #name) lines: {
+		'Current' -> (self currentSummaryFor: row) }
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: currentSample [
+	| currentRow lines |
+	currentRow := (currentSample at: #rows)
+		detect: [ :each | (each at: #name) = (row at: #name) ].
+	lines := OrderedCollection new.
+	lines add: 'Retained' -> (self retainedSummaryFor: row).
+	(self isJointRetentionRow: row) ifTrue: [
+		lines
+			add: 'Holders' -> (self jointHolderSummaryFor: row);
+			add: 'Pipeline' -> (self jointPipelineSummaryFor: row) ].
+	lines add: 'Current' -> (self currentSummaryFor: currentRow).
+	(self isJointRetentionRow: currentRow) ifTrue: [
+		lines
+			add: 'Current holders' -> (self jointHolderSummaryFor: currentRow);
+			add: 'Current pipeline' -> (self jointPipelineSummaryFor: currentRow) ].
+	^ self
+		instanceStatisticsRowNamed: (row at: #name)
+		trend: (self retentionTrendFor: (row at: #name))
+		lines: lines
+]
+
+{ #category : 'private - updating' }
+CFPhysicsProfileHealthElement >> latestPhysicsFrameDataFrom: recordings [
+	recordings reverseDo: [ :recording |
+		(recording data includesKey: #physicsFrame) ifTrue: [ ^ recording physicsData ] ].
+	^ Dictionary new
+]
+
 { #category : 'private - sampling' }
 CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWorld [
 	(aPipelineResult joints anySatisfy: [ :joint |
@@ -407,53 +614,62 @@ CFPhysicsProfileHealthElement >> pipelineResult: aPipelineResult belongsTo: aWor
 ]
 
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> solution: aSolution isHeldByAny: futurePromises [
-	^ futurePromises anySatisfy: [ :promise |
-		promise isFulfilled and: [ promise state value == aSolution ] ]
+CFPhysicsProfileHealthElement >> pipelineResultStructurallyBelongsToWorld: aPipelineResult [
+	(aPipelineResult bodies anySatisfy: [ :body | body world == world ]) ifTrue: [ ^ true ].
+	(aPipelineResult previousContacts anySatisfy: [ :contact |
+		contact firstBody world == world ]) ifTrue: [ ^ true ].
+	(aPipelineResult contactResult notNil and: [
+		aPipelineResult contacts anySatisfy: [ :contact |
+			contact firstBody world == world ] ]) ifTrue: [ ^ true ].
+	^ false
 ]
 
 { #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> isJointRetentionRow: row [
-	^ row includesKey: #live
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> rowNamed: aName total: totalCount owned: ownedCount expected: expectedCount [
-	^ {
-		#name -> aName.
-		#total -> totalCount.
-		#owned -> ownedCount.
-		#expected -> expectedCount.
-		#difference -> (ownedCount - expectedCount) } asDictionary
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> joint: aJoint belongsTo: aWorld [
-	| body |
-	((aJoint respondsTo: #endpointPair)
-		and: [ aJoint endpointPair isNil ]) ifTrue: [ ^ false ].
-	body := aJoint bodyA ifNil: [ aJoint bodyB ].
-	^ body notNil and: [ body world == aWorld ]
-]
-
-{ #category : 'private - sampling' }
-CFPhysicsProfileHealthElement >> island: anIsland belongsTo: aWorld [
-	^ anIsland bodies anySatisfy: [ :body | body world == aWorld ]
+CFPhysicsProfileHealthElement >> pipelineResultsForWorldFrom: allPipelineResults solutions: worldSolutions [
+	| known |
+	known := IdentitySet new.
+	world lastStepResult ifNotNil: [ :each | known add: each ].
+	worldSolutions do: [ :each |
+		each pipelineResult ifNotNil: [ :result | known add: result ] ].
+	allPipelineResults do: [ :result |
+		((known includes: result) not and: [
+			self pipelineResultStructurallyBelongsToWorld: result ]) ifTrue: [
+				known add: result ] ].
+	^ known asArray
 ]
 
 { #category : 'private - updating' }
-CFPhysicsProfileHealthElement >> acceptSample: aSample [
-	sampling := false.
-	running ifFalse: [ ^ self ].
-	(aSample at: #retention)
-		ifTrue: [
-			lastRetentionSampleMilliseconds := Time millisecondClockValue.
-			retentionSamples add: aSample.
-			[ retentionSamples size > 100 ] whileTrue: [ retentionSamples removeFirst ] ]
-		ifFalse: [
-			samples add: aSample.
-			[ samples size > 20 ] whileTrue: [ samples removeFirst ] ].
-	self renderSample: aSample
+CFPhysicsProfileHealthElement >> renderLiveHealth [
+	| data |
+	liveContent removeChildren.
+	data := latestPhysicsData ifNil: [ Dictionary new ].
+	liveContent addChild: (self healthSectionNamed: 'CONTACT LIFECYCLE' rows: {
+		self healthRowNamed: 'Persistent' value: (self integerAt: #persistentContactCount in: data) secondaryNamed: 'Touching' value: (self integerAt: #contactCount in: data).
+		self healthRowNamed: 'Began' value: (self integerAt: #beganContactCount in: data) secondaryNamed: 'Continued' value: (self integerAt: #continuedContactCount in: data).
+		self healthRowNamed: 'Ended' value: (self integerAt: #endedContactCount in: data) secondaryNamed: 'Pairs visited' value: (self integerAt: #contactUpdateVisitedPairCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'CONTACT UPDATE WORK' rows: {
+		self healthRowNamed: 'Manifolds generated' value: (self integerAt: #contactUpdateManifoldGenerationCount in: data) secondaryNamed: 'Both sleeping' value: (self integerAt: #contactUpdateBothSleepingPairCount in: data).
+		self healthRowNamed: 'Previous matched' value: (self integerAt: #contactUpdatePreviousMatchCount in: data) secondaryNamed: 'Simplex cached' value: (self integerAt: #contactUpdateCachedSimplexCount in: data).
+		self healthRowNamed: 'Contacts reused' value: (self integerAt: #contactUpdateReusedContactCount in: data) secondaryNamed: 'Copied' value: (self integerAt: #contactUpdateCopiedContactCount in: data).
+		self healthRowNamed: 'Created' value: (self integerAt: #contactUpdateCreatedContactCount in: data) secondaryNamed: 'Impact' value: (self integerAt: #contactUpdateImpactContactCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'MANIFOLD DECISIONS' rows: {
+		self healthRowNamed: 'Sleeping retained' value: (self integerAt: #contactUpdateSleepingRetainedContactCount in: data) secondaryNamed: 'Awake generated' value: (self integerAt: #contactUpdateAwakeManifoldGenerationCount in: data).
+		self healthRowNamed: 'Sleeping non-touching' value: (self integerAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) secondaryNamed: 'Sleeping sensor' value: (self integerAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data).
+		self healthRowNamed: 'Sleeping new' value: (self integerAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) secondaryNamed: 'Sleeping impact' value: (self integerAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data).
+		self healthRowNamed: 'Sleeping other' value: (self integerAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data) secondaryNamed: 'Decision total' value: ((self integerValueAt: #contactUpdateAwakeManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data)) printString }).
+	liveContent addChild: (self healthSectionNamed: 'MANIFOLD CONTINUITY' rows: {
+		self healthRowNamed: 'Stable' value: (self integerAt: #stablePreparedManifoldCount in: data) secondaryNamed: 'Changed' value: (self integerAt: #changedPreparedManifoldCount in: data).
+		self healthRowNamed: 'Points reused' value: (self integerAt: #reusablePreparedContactPointCount in: data) secondaryNamed: 'New points' value: (self integerAt: #newPreparedContactPointCount in: data).
+		self healthRowNamed: 'Feature id' value: (self integerAt: #featureIdChangedPreparedManifoldCount in: data) secondaryNamed: 'Normal' value: (self integerAt: #normalChangedPreparedManifoldCount in: data).
+		self healthRowNamed: 'Point count' value: (self integerAt: #pointCountChangedPreparedManifoldCount in: data) secondaryNamed: 'Order' value: (self integerAt: #pointOrderChangedPreparedManifoldCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'SLEEP' rows: {
+		self healthRowNamed: 'Awake' value: (self integerAt: #activeBodyCount in: data) secondaryNamed: 'Sleeping' value: (self integerAt: #sleepingBodyCount in: data).
+		self healthRowNamed: 'Accepted' value: (self integerAt: #sleepMotionAcceptedBodyCount in: data) secondaryNamed: 'Disabled' value: (self integerAt: #sleepDisabledBodyCount in: data).
+		self healthRowNamed: 'Motion rejected' value: (self integerAt: #sleepMotionOnlyRejectedBodyCount in: data) secondaryNamed: 'Correction rejected' value: (self integerAt: #sleepCorrectionOnlyRejectedBodyCount in: data) }).
+	liveContent addChild: (self healthSectionNamed: 'SOLVER' rows: {
+		self healthRowNamed: 'Initial penetration' value: (self decimalAt: #solverMaximumInitialContactPenetration in: data) secondaryNamed: 'Final penetration' value: (self decimalAt: #solverMaximumFinalContactPenetration in: data).
+		self healthRowNamed: 'Average penetration' value: (self decimalAt: #solverAverageFinalContactPenetration in: data) secondaryNamed: 'Max translation' value: (self decimalAt: #solverMaximumBodyTranslation in: data).
+		self healthRowNamed: 'Normal impulse' value: (self decimalAt: #solverTotalNormalImpulse in: data) secondaryNamed: 'Tangent impulse' value: (self decimalAt: #solverTotalTangentImpulse in: data) })
 ]
 
 { #category : 'private - updating' }
@@ -506,195 +722,9 @@ CFPhysicsProfileHealthElement >> renderStopped [
 ]
 
 { #category : 'private - building' }
-CFPhysicsProfileHealthElement >> labelForCurrentRow: row [
-	^ self instanceStatisticsRowNamed: (row at: #name) lines: {
-		'Current' -> (self currentSummaryFor: row) }
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> labelForRetainedRow: row currentSample: currentSample [
-	| currentRow lines |
-	currentRow := (currentSample at: #rows)
-		detect: [ :each | (each at: #name) = (row at: #name) ].
-	lines := OrderedCollection new.
-	lines add: 'Retained' -> (self retainedSummaryFor: row).
-	(self isJointRetentionRow: row) ifTrue: [
-		lines
-			add: 'Holders' -> (self jointHolderSummaryFor: row);
-			add: 'Pipeline' -> (self jointPipelineSummaryFor: row) ].
-	lines add: 'Current' -> (self currentSummaryFor: currentRow).
-	(self isJointRetentionRow: currentRow) ifTrue: [
-		lines
-			add: 'Current holders' -> (self jointHolderSummaryFor: currentRow);
-			add: 'Current pipeline' -> (self jointPipelineSummaryFor: currentRow) ].
-	^ self
-		instanceStatisticsRowNamed: (row at: #name)
-		trend: (self retentionTrendFor: (row at: #name))
-		lines: lines
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName lines: labelledLines [
-	^ self instanceStatisticsRowNamed: aName trend: nil lines: labelledLines
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> instanceStatisticsRowNamed: aName trend: aTrend lines: labelledLines [
-	| row nameColumn valuesColumn title |
-	row := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 10;
-		padding: (BlInsets top: 4 right: 2 bottom: 6 left: 0);
-		yourself.
-	nameColumn := BrVerticalPane new
-		hExact: 180;
-		vFitContent;
-		yourself.
-	title := aTrend
-		ifNil: [ aName ]
-		ifNotNil: [ aName, '  ', aTrend ].
-	nameColumn addChild: (BrLabel new
-		hMatchParent;
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.78);
-			fontSize: 11);
-		text: title;
-		yourself).
-	valuesColumn := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 2;
-		yourself.
-	labelledLines do: [ :association |
-		valuesColumn addChild: (self
-			instanceStatisticsLineNamed: association key
-			value: association value) ].
-	row
-		addChild: nameColumn;
-		addChild: valuesColumn.
-	^ row
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> instanceStatisticsLineNamed: aName value: aValue [
-	| line nameLabel valueLabel |
-	line := BrHorizontalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 8;
-		yourself.
-	nameLabel := BrLabel new
-		hExact: 105;
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.5);
-			fontSize: 10);
-		text: aName;
-		yourself.
-	valueLabel := BrLabel new
-		hMatchParent;
-		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.78);
-			fontSize: 10);
-		text: aValue;
-		yourself.
-	line
-		addChild: nameLabel;
-		addChild: valueLabel.
-	^ line
-]
-
-{ #category : 'private - building' }
 CFPhysicsProfileHealthElement >> retainedSummaryFor: row [
 	(self isJointRetentionRow: row) ifTrue: [ ^ self jointInstanceSummaryFor: row ].
 	^ self standardInstanceSummaryFor: row
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> currentSummaryFor: row [
-	(self isJointRetentionRow: row) ifTrue: [ ^ self jointInstanceSummaryFor: row ].
-	^ self standardInstanceSummaryFor: row
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
-	| difference sign |
-	(row includesKey: #memberCount) ifTrue: [ ^ self bodyInstanceSummaryFor: row ].
-	(row includesKey: #committedCount) ifTrue: [ ^ self contactInstanceSummaryFor: row ].
-	(row includesKey: #backgroundStepOwnedCount) ifTrue: [ ^ self solutionInstanceSummaryFor: row ].
-	difference := row at: #difference.
-	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
-	^ 'image ', (row at: #total) asString,
-		' · world ', (row at: #owned) asString,
-		' · expected ', (row at: #expected) asString,
-		' · excess ', sign, difference asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> bodyInstanceSummaryFor: row [
-	^ 'image ', (row at: #total) asString,
-		' · related ', (row at: #owned) asString,
-		' · members ', (row at: #memberCount) asString,
-		' · containment ', (row at: #containmentCount) asString,
-		' · state-owned ', (row at: #stateOwnedCount) asString,
-		' · result-owned ', (row at: #resultOwnedCount) asString,
-		' · other ', (row at: #otherCount) asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> contactInstanceSummaryFor: row [
-	^ 'image ', (row at: #total) asString,
-		' · related ', (row at: #owned) asString,
-		' · committed ', (row at: #committedCount) asString,
-		' · calculation ', (row at: #calculationCount) asString,
-		' · state-owned ', (row at: #stateOwnedCount) asString,
-		' · previous-result ', (row at: #previousResultOwnedCount) asString,
-		' · current-result ', (row at: #currentResultOwnedCount) asString,
-		' · other ', (row at: #otherCount) asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> solutionInstanceSummaryFor: row [
-	^ 'image ', (row at: #total) asString,
-		' · world ', (row at: #owned) asString,
-		' · background-step ', (row at: #backgroundStepOwnedCount) asString,
-		' · future ', (row at: #futureOwnedCount) asString,
-		' · other ', (row at: #otherCount) asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> jointInstanceSummaryFor: row [
-	^ 'image ', (row at: #total) asString,
-		' · related ', (row at: #owned) asString,
-		' · live ', (row at: #live) asString,
-		' · captured ', (row at: #captured) asString,
-		' · unexplained ', (row at: #unexplained) asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> jointHolderSummaryFor: row [
-	^ 'states ', (row at: #worldStateCount) asString,
-		' · background steps ', (row at: #backgroundStepCount) asString,
-		' · solutions ', (row at: #solutionCount) asString,
-		' · held by future promises ', (row at: #futureHeldSolutionCount) asString
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> jointPipelineSummaryFor: row [
-	^ 'results ', (row at: #pipelineResultCount) asString,
-		' · world last ', (row at: #worldLastPipelineResultCount) asString,
-		' · solution-owned ', (row at: #solutionPipelineResultCount) asString,
-		' · other ', (row at: #otherPipelineResultCount) asString
-]
-
-{ #category : 'private - analysis' }
-CFPhysicsProfileHealthElement >> baselineSample [
-	retentionSamples ifNotEmpty: [ ^ retentionSamples first ].
-	samples ifNotEmpty: [ ^ samples first ].
-	^ { #heapSize -> 0 } asDictionary
 ]
 
 { #category : 'private - analysis' }
@@ -712,40 +742,108 @@ CFPhysicsProfileHealthElement >> retentionTrendFor: aName [
 	^ '→'
 ]
 
-{ #category : 'private - analysis' }
-CFPhysicsProfileHealthElement >> heapTrend [
-	| source first last tolerance |
-	source := retentionSamples size >= 3
-		ifTrue: [ retentionSamples ]
-		ifFalse: [ samples ].
-	source size < 3 ifTrue: [ ^ '·' ].
-	first := source first at: #heapSize.
-	last := source last at: #heapSize.
-	tolerance := 10 * 1024 * 1024.
-	last - first > tolerance ifTrue: [ ^ '↗' ].
-	first - last > tolerance ifTrue: [ ^ '↘' ].
-	^ '→'
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> rowNamed: aName total: totalCount owned: ownedCount expected: expectedCount [
+	^ {
+		#name -> aName.
+		#total -> totalCount.
+		#owned -> ownedCount.
+		#expected -> expectedCount.
+		#difference -> (ownedCount - expectedCount) } asDictionary
 ]
 
-{ #category : 'private - analysis' }
-CFPhysicsProfileHealthElement >> alerts [
-	| result firstHeap lastHeap |
-	result := OrderedCollection new.
-	retentionSamples size < 3 ifTrue: [ ^ result ].
-	firstHeap := retentionSamples first at: #heapSize.
-	lastHeap := retentionSamples last at: #heapSize.
-	lastHeap - firstHeap > (100 * 1024 * 1024) ifTrue: [
-		result add: '⚠ Image heap after GC has increased by ',
-			(lastHeap - firstHeap) humanReadableSISizeString, '.' ].
-	(retentionSamples last at: #rows) do: [ :row |
-		(self retentionTrendFor: (row at: #name)) = '↗' ifTrue: [
-			result add: '⚠ ', (row at: #name),
-				((self isJointRetentionRow: row)
-					ifTrue: [ ' structurally unexplained retained joint count is increasing after GC.' ]
-					ifFalse: [ ' retained excess instance count is increasing after GC.' ]) ] ].
-	^ result
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> sampleIfDue [
+	| now |
+	(running and: [ sampling not ]) ifFalse: [ ^ self ].
+	now := Time millisecondClockValue.
+	(lastRetentionSampleMilliseconds isNil
+		or: [ now - lastRetentionSampleMilliseconds >= 600000 ])
+		ifTrue: [ ^ self collectRetainedNow ].
+	(lastSampleMilliseconds isNil or: [ now - lastSampleMilliseconds >= 30000 ])
+		ifTrue: [ self sampleNow ]
 ]
 
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> sampleNow [
+	(running and: [ sampling not ]) ifFalse: [ ^ self ].
+	lastSampleMilliseconds := Time millisecondClockValue.
+	sampling := true.
+	profileContent asyncFuture future: [ self collectSample ] asAsyncFuture
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> solution: aSolution isHeldByAny: futurePromises [
+	^ futurePromises anySatisfy: [ :promise |
+		promise isFulfilled and: [ promise state value == aSolution ] ]
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> solutionInstanceSummaryFor: row [
+	^ 'image ', (row at: #total) asString,
+		' · world ', (row at: #owned) asString,
+		' · background-step ', (row at: #backgroundStepOwnedCount) asString,
+		' · future ', (row at: #futureOwnedCount) asString,
+		' · other ', (row at: #otherCount) asString
+]
+
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> solutionRetentionRowFrom: worldSolutions backgroundSteps: allBackgroundSteps futurePromises: allFuturePromises [
+	| stepOwned futureOwned other |
+	stepOwned := IdentitySet new.
+	allBackgroundSteps do: [ :step |
+		| candidate |
+		candidate := step instVarNamed: 'solution'.
+		(candidate notNil and: [ candidate world == world ]) ifTrue: [
+			stepOwned add: candidate ] ].
+	futureOwned := IdentitySet new.
+	worldSolutions do: [ :solution |
+		(self solution: solution isHeldByAny: allFuturePromises) ifTrue: [
+			futureOwned add: solution ] ].
+	other := worldSolutions reject: [ :solution |
+		(stepOwned includes: solution) or: [ futureOwned includes: solution ] ].
+	^ {
+		#name -> 'PhysicsWorldSolution'.
+		#total -> CFPhysicsWorldSolution allInstances size.
+		#owned -> worldSolutions size.
+		#backgroundStepOwnedCount -> stepOwned size.
+		#futureOwnedCount -> futureOwned size.
+		#otherCount -> other size.
+		#difference -> other size } asDictionary
+]
+
+{ #category : 'private - building' }
+CFPhysicsProfileHealthElement >> standardInstanceSummaryFor: row [
+	| difference sign |
+	(row includesKey: #memberCount) ifTrue: [ ^ self bodyInstanceSummaryFor: row ].
+	(row includesKey: #committedCount) ifTrue: [ ^ self contactInstanceSummaryFor: row ].
+	(row includesKey: #backgroundStepOwnedCount) ifTrue: [ ^ self solutionInstanceSummaryFor: row ].
+	difference := row at: #difference.
+	sign := difference > 0 ifTrue: [ '+' ] ifFalse: [ '' ].
+	^ 'image ', (row at: #total) asString,
+		' · world ', (row at: #owned) asString,
+		' · expected ', (row at: #expected) asString,
+		' · excess ', sign, difference asString
+]
+
+{ #category : 'profiling' }
+CFPhysicsProfileHealthElement >> startProfiling [
+	samples removeAll.
+	retentionSamples removeAll.
+	lastSampleMilliseconds := nil.
+	lastRetentionSampleMilliseconds := nil.
+	sampling := false.
+	running := true.
+	self sampleNow
+]
+
+{ #category : 'profiling' }
+CFPhysicsProfileHealthElement >> stopProfiling [
+	running := false.
+	sampling := false.
+	profileContent ifNotNil: [ profileContent asyncFuture interrupt ].
+	self finishRetentionObservation
+]
 
 { #category : 'private - updating' }
 CFPhysicsProfileHealthElement >> updateLiveHealth [
@@ -753,102 +851,20 @@ CFPhysicsProfileHealthElement >> updateLiveHealth [
 	self renderLiveHealth
 ]
 
-{ #category : 'private - updating' }
-CFPhysicsProfileHealthElement >> latestPhysicsFrameDataFrom: recordings [
-	recordings reverseDo: [ :recording |
-		(recording data includesKey: #physicsFrame) ifTrue: [ ^ recording physicsData ] ].
-	^ Dictionary new
+{ #category : 'private - sampling' }
+CFPhysicsProfileHealthElement >> waitForBackgroundExecutionToFinishForRetentionObservation [
+	[ world hasBackgroundExecutionInFlight ] whileTrue: [
+		10 milliSeconds wait ]
 ]
 
-{ #category : 'private - updating' }
-CFPhysicsProfileHealthElement >> renderLiveHealth [
-	| data |
-	liveContent removeChildren.
-	data := latestPhysicsData ifNil: [ Dictionary new ].
-	liveContent addChild: (self healthSectionNamed: 'CONTACT LIFECYCLE' rows: {
-		self healthRowNamed: 'Persistent' value: (self integerAt: #persistentContactCount in: data) secondaryNamed: 'Touching' value: (self integerAt: #contactCount in: data).
-		self healthRowNamed: 'Began' value: (self integerAt: #beganContactCount in: data) secondaryNamed: 'Continued' value: (self integerAt: #continuedContactCount in: data).
-		self healthRowNamed: 'Ended' value: (self integerAt: #endedContactCount in: data) secondaryNamed: 'Pairs visited' value: (self integerAt: #contactUpdateVisitedPairCount in: data) }).
-	liveContent addChild: (self healthSectionNamed: 'CONTACT UPDATE WORK' rows: {
-		self healthRowNamed: 'Manifolds generated' value: (self integerAt: #contactUpdateManifoldGenerationCount in: data) secondaryNamed: 'Both sleeping' value: (self integerAt: #contactUpdateBothSleepingPairCount in: data).
-		self healthRowNamed: 'Previous matched' value: (self integerAt: #contactUpdatePreviousMatchCount in: data) secondaryNamed: 'Simplex cached' value: (self integerAt: #contactUpdateCachedSimplexCount in: data).
-		self healthRowNamed: 'Contacts reused' value: (self integerAt: #contactUpdateReusedContactCount in: data) secondaryNamed: 'Copied' value: (self integerAt: #contactUpdateCopiedContactCount in: data).
-		self healthRowNamed: 'Created' value: (self integerAt: #contactUpdateCreatedContactCount in: data) secondaryNamed: 'Impact' value: (self integerAt: #contactUpdateImpactContactCount in: data) }).
-	liveContent addChild: (self healthSectionNamed: 'MANIFOLD DECISIONS' rows: {
-		self healthRowNamed: 'Sleeping retained' value: (self integerAt: #contactUpdateSleepingRetainedContactCount in: data) secondaryNamed: 'Awake generated' value: (self integerAt: #contactUpdateAwakeManifoldGenerationCount in: data).
-		self healthRowNamed: 'Sleeping non-touching' value: (self integerAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) secondaryNamed: 'Sleeping sensor' value: (self integerAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data).
-		self healthRowNamed: 'Sleeping new' value: (self integerAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) secondaryNamed: 'Sleeping impact' value: (self integerAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data).
-		self healthRowNamed: 'Sleeping other' value: (self integerAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data) secondaryNamed: 'Decision total' value: ((self integerValueAt: #contactUpdateAwakeManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonTouchingManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNonSolidManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingNewManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingImpactManifoldGenerationCount in: data) + (self integerValueAt: #contactUpdateSleepingOtherManifoldGenerationCount in: data)) printString }).
-	liveContent addChild: (self healthSectionNamed: 'MANIFOLD CONTINUITY' rows: {
-		self healthRowNamed: 'Stable' value: (self integerAt: #stablePreparedManifoldCount in: data) secondaryNamed: 'Changed' value: (self integerAt: #changedPreparedManifoldCount in: data).
-		self healthRowNamed: 'Points reused' value: (self integerAt: #reusablePreparedContactPointCount in: data) secondaryNamed: 'New points' value: (self integerAt: #newPreparedContactPointCount in: data).
-		self healthRowNamed: 'Feature id' value: (self integerAt: #featureIdChangedPreparedManifoldCount in: data) secondaryNamed: 'Normal' value: (self integerAt: #normalChangedPreparedManifoldCount in: data).
-		self healthRowNamed: 'Point count' value: (self integerAt: #pointCountChangedPreparedManifoldCount in: data) secondaryNamed: 'Order' value: (self integerAt: #pointOrderChangedPreparedManifoldCount in: data) }).
-	liveContent addChild: (self healthSectionNamed: 'SLEEP' rows: {
-		self healthRowNamed: 'Awake' value: (self integerAt: #activeBodyCount in: data) secondaryNamed: 'Sleeping' value: (self integerAt: #sleepingBodyCount in: data).
-		self healthRowNamed: 'Accepted' value: (self integerAt: #sleepMotionAcceptedBodyCount in: data) secondaryNamed: 'Disabled' value: (self integerAt: #sleepDisabledBodyCount in: data).
-		self healthRowNamed: 'Motion rejected' value: (self integerAt: #sleepMotionOnlyRejectedBodyCount in: data) secondaryNamed: 'Correction rejected' value: (self integerAt: #sleepCorrectionOnlyRejectedBodyCount in: data) }).
-	liveContent addChild: (self healthSectionNamed: 'SOLVER' rows: {
-		self healthRowNamed: 'Initial penetration' value: (self decimalAt: #solverMaximumInitialContactPenetration in: data) secondaryNamed: 'Final penetration' value: (self decimalAt: #solverMaximumFinalContactPenetration in: data).
-		self healthRowNamed: 'Average penetration' value: (self decimalAt: #solverAverageFinalContactPenetration in: data) secondaryNamed: 'Max translation' value: (self decimalAt: #solverMaximumBodyTranslation in: data).
-		self healthRowNamed: 'Normal impulse' value: (self decimalAt: #solverTotalNormalImpulse in: data) secondaryNamed: 'Tangent impulse' value: (self decimalAt: #solverTotalTangentImpulse in: data) })
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> healthSectionNamed: aName rows: rows [
-	| section |
-	section := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		cellSpacing: 1;
-		padding: (BlInsets top: 2 right: 2 bottom: 2 left: 2);
-		yourself.
-	section addChild: (BrLabel new
-		hMatchParent;
-		vExact: 16;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.48);
-			fontSize: 9);
-		text: aName;
-		yourself).
-	rows do: [ :row | section addChild: row ].
-	^ section
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> healthRowNamed: firstName value: firstValue secondaryNamed: secondName value: secondValue [
-	| row first second |
-	row := BrHorizontalPane new hMatchParent; vExact: 18; cellSpacing: 6; yourself.
-	first := self healthCellNamed: firstName value: firstValue.
-	second := self healthCellNamed: secondName value: secondValue.
-	row addChild: first; addChild: second.
-	^ row
-]
-
-{ #category : 'private - building' }
-CFPhysicsProfileHealthElement >> healthCellNamed: aName value: aValue [
-	^ BrLabel new
-		hExact: 250;
-		vExact: 18;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.78);
-			fontSize: 10);
-		text: aName, '  ', aValue;
-		yourself
-]
-
-
-{ #category : 'private - formatting' }
-CFPhysicsProfileHealthElement >> integerValueAt: aKey in: data [
-	^ data at: aKey ifAbsent: [ 0 ]
-]
-
-{ #category : 'private - formatting' }
-CFPhysicsProfileHealthElement >> integerAt: aKey in: data [
-	^ (data at: aKey ifAbsent: [ 0 ]) printString
-]
-
-{ #category : 'private - formatting' }
-CFPhysicsProfileHealthElement >> decimalAt: aKey in: data [
-	^ (data at: aKey ifAbsent: [ 0.0 ]) asFloat printShowingDecimalPlaces: 3
+{ #category : 'accessing' }
+CFPhysicsProfileHealthElement >> world: aWorld [
+	world := aWorld.
+	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink peek ifSome: [ anElement updateLiveHealth. anElement sampleIfDue ] ];
+			forwardStream: telemetryUpdatesStream ]
 ]

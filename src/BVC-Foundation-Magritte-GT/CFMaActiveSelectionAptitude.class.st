@@ -1,5 +1,6 @@
-"I am responsible for marking a selection context active while focus is within its widget hierarchy."
-
+"
+I am responsible for marking a selection context active while focus is within its widget hierarchy.
+"
 Class {
 	#name : 'CFMaActiveSelectionAptitude',
 	#superclass : 'BrAptitude',

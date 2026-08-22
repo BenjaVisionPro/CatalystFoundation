@@ -1,8 +1,23 @@
-"I present compact runtime status and processing controls for one Physics overlay. I sample delivered Motion frames and committed Physics steps without enabling telemetry."
+"
+I present compact runtime status and processing controls for one Physics overlay. I sample delivered Motion frames and committed Physics steps without enabling telemetry.
+"
 Class {
 	#name : 'CFPhysicsOverlayStatusPanel',
 	#superclass : 'Object',
-	#instVars : [ 'overlay', 'world', 'host', 'element', 'worldButton', 'motionLabel', 'physicsLabel', 'modeButton', 'sampleTask', 'lastSampleTime', 'lastFrameId', 'lastStepNumber' ],
+	#instVars : [
+		'overlay',
+		'world',
+		'host',
+		'element',
+		'worldButton',
+		'motionLabel',
+		'physicsLabel',
+		'modeButton',
+		'sampleTask',
+		'lastSampleTime',
+		'lastFrameId',
+		'lastStepNumber'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -17,29 +32,13 @@ CFPhysicsOverlayStatusPanel class >> on: anOverlay [
 		yourself
 ]
 
-{ #category : 'private - initialization' }
-CFPhysicsOverlayStatusPanel >> overlay: anOverlay [ overlay := anOverlay ]
-
-{ #category : 'private - initialization' }
-CFPhysicsOverlayStatusPanel >> world: aWorld [ world := aWorld ]
+{ #category : 'accessing' }
+CFPhysicsOverlayStatusPanel >> element [ ^ element
+]
 
 { #category : 'private - initialization' }
-CFPhysicsOverlayStatusPanel >> host: anElement [ host := anElement ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayStatusPanel >> element [ ^ element ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayStatusPanel >> worldButton [ ^ worldButton ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayStatusPanel >> motionLabel [ ^ motionLabel ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayStatusPanel >> physicsLabel [ ^ physicsLabel ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayStatusPanel >> modeButton [ ^ modeButton ]
+CFPhysicsOverlayStatusPanel >> host: anElement [ host := anElement
+]
 
 { #category : 'initialization' }
 CFPhysicsOverlayStatusPanel >> initializePanel [
@@ -60,7 +59,7 @@ CFPhysicsOverlayStatusPanel >> initializePanel [
 	worldButton := BrButton new
 		id: #cfPhysicsWorldInspectorButton;
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: ([ (FontAwesomeIcons defaultStyle icon: #atom) size: 22 @ 22 ] asStencil);
+		icon: ([ (FontAwesomeIcons icon: #atom) size: 22 @ 22 ] asStencil);
 		label: 'Inspect Physics world';
 		size: 34 @ 34;
 		action: [ :aButton | aButton phlow spawnObject: world ];
@@ -83,6 +82,14 @@ CFPhysicsOverlayStatusPanel >> initializePanel [
 	self startSampling
 ]
 
+{ #category : 'accessing' }
+CFPhysicsOverlayStatusPanel >> modeButton [ ^ modeButton
+]
+
+{ #category : 'accessing' }
+CFPhysicsOverlayStatusPanel >> motionLabel [ ^ motionLabel
+]
+
 { #category : 'private - building' }
 CFPhysicsOverlayStatusPanel >> newStatLabelWithId: anId text: aString [
 	^ BrLabel new
@@ -93,16 +100,23 @@ CFPhysicsOverlayStatusPanel >> newStatLabelWithId: anId text: aString [
 		yourself
 ]
 
-{ #category : 'private - sampling' }
-CFPhysicsOverlayStatusPanel >> startSampling [
-	lastSampleTime := nil.
-	lastFrameId := nil.
-	lastStepNumber := nil.
-	sampleTask := BlRepeatedTaskAction new
-		delay: 500 milliSeconds;
-		action: [ :aTask | self sampleAt: aTask time now ];
-		yourself.
-	element enqueueTask: sampleTask
+{ #category : 'private - initialization' }
+CFPhysicsOverlayStatusPanel >> overlay: anOverlay [ overlay := anOverlay
+]
+
+{ #category : 'accessing' }
+CFPhysicsOverlayStatusPanel >> physicsLabel [ ^ physicsLabel
+]
+
+{ #category : 'private - updating' }
+CFPhysicsOverlayStatusPanel >> refreshMode [
+	modeButton label: (world backgroundStepping ifTrue: [ 'BG' ] ifFalse: [ 'FG' ])
+]
+
+{ #category : 'controlling' }
+CFPhysicsOverlayStatusPanel >> release [
+	sampleTask ifNotNil: #stop.
+	element ifNotNil: [ element hasParent ifTrue: [ element removeFromParent ] ]
 ]
 
 { #category : 'private - sampling' }
@@ -132,9 +146,16 @@ CFPhysicsOverlayStatusPanel >> sampleAt: now [
 	self refreshMode
 ]
 
-{ #category : 'private - updating' }
-CFPhysicsOverlayStatusPanel >> refreshMode [
-	modeButton label: (world backgroundStepping ifTrue: [ 'BG' ] ifFalse: [ 'FG' ])
+{ #category : 'private - sampling' }
+CFPhysicsOverlayStatusPanel >> startSampling [
+	lastSampleTime := nil.
+	lastFrameId := nil.
+	lastStepNumber := nil.
+	sampleTask := BlRepeatedTaskAction new
+		delay: 500 milliSeconds;
+		action: [ :aTask | self sampleAt: aTask time now ];
+		yourself.
+	element enqueueTask: sampleTask
 ]
 
 { #category : 'private - actions' }
@@ -144,8 +165,10 @@ CFPhysicsOverlayStatusPanel >> toggleProcessingMode [
 	^ self
 ]
 
-{ #category : 'controlling' }
-CFPhysicsOverlayStatusPanel >> release [
-	sampleTask ifNotNil: #stop.
-	element ifNotNil: [ element hasParent ifTrue: [ element removeFromParent ] ]
+{ #category : 'private - initialization' }
+CFPhysicsOverlayStatusPanel >> world: aWorld [ world := aWorld
+]
+
+{ #category : 'accessing' }
+CFPhysicsOverlayStatusPanel >> worldButton [ ^ worldButton
 ]

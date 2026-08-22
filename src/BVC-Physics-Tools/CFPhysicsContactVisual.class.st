@@ -1,8 +1,23 @@
-"I render one committed contact state in a Physics overlay. I own the markers and lines that show its contact points, normal and separation."
+"
+I render one committed contact state in a Physics overlay. I own the markers and lines that show its contact points, normal and separation.
+"
 Class {
 	#name : 'CFPhysicsContactVisual',
 	#superclass : 'Object',
-	#instVars : [ 'context', 'root', 'state', 'contactLine', 'firstPointMarker', 'secondPointMarker', 'firstNormalLine', 'secondNormalLine', 'firstSeparationLine', 'secondSeparationLine', 'negativeSeparationBorder', 'positiveSeparationBorder' ],
+	#instVars : [
+		'context',
+		'root',
+		'state',
+		'contactLine',
+		'firstPointMarker',
+		'secondPointMarker',
+		'firstNormalLine',
+		'secondNormalLine',
+		'firstSeparationLine',
+		'secondSeparationLine',
+		'negativeSeparationBorder',
+		'positiveSeparationBorder'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -13,9 +28,27 @@ CFPhysicsContactVisual class >> in: aRoot context: aContext [
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsContactVisual >> root: anElement [ root := anElement ]
-{ #category : 'private - initialization' }
-CFPhysicsContactVisual >> context: aContext [ context := aContext ]
+CFPhysicsContactVisual >> context: aContext [ context := aContext
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactVisual >> firstPointPosition [
+	^ firstPointMarker position + (3 @ 3)
+]
+
+{ #category : 'private - updating' }
+CFPhysicsContactVisual >> hideFirstPoint [
+	firstPointMarker visibility: BlVisibility gone.
+	firstNormalLine visibility: BlVisibility gone.
+	firstSeparationLine visibility: BlVisibility gone
+]
+
+{ #category : 'private - updating' }
+CFPhysicsContactVisual >> hideSecondPoint [
+	secondPointMarker visibility: BlVisibility gone.
+	secondNormalLine visibility: BlVisibility gone.
+	secondSeparationLine visibility: BlVisibility gone
+]
 
 { #category : 'initialization' }
 CFPhysicsContactVisual >> initializeVisual [
@@ -34,11 +67,11 @@ CFPhysicsContactVisual >> initializeVisual [
 ]
 
 { #category : 'private - building' }
-CFPhysicsContactVisual >> newPointMarker [
-	^ BlElement new
-		geometry: BlCircleGeometry new;
-		size: 6 @ 6;
-		background: (Color magenta alpha: 0.9);
+CFPhysicsContactVisual >> newLineBorder: aBorder [
+	^ BlLineElement new
+		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		border: aBorder;
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents;
 		visibility: BlVisibility gone;
@@ -51,21 +84,47 @@ CFPhysicsContactVisual >> newLinePaint: aPaint width: aNumber [
 ]
 
 { #category : 'private - building' }
-CFPhysicsContactVisual >> newLineBorder: aBorder [
-	^ BlLineElement new
-		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		border: aBorder;
+CFPhysicsContactVisual >> newPointMarker [
+	^ BlElement new
+		geometry: BlCircleGeometry new;
+		size: 6 @ 6;
+		background: (Color magenta alpha: 0.9);
 		constraintsDo: [ :c | c ignoreByLayout ];
 		preventMeAndChildrenMouseEvents;
 		visibility: BlVisibility gone;
 		yourself
 ]
 
-{ #category : 'updating' }
-CFPhysicsContactVisual >> updateFrom: aState [
-	state := aState.
-	^ self update
+{ #category : 'controlling' }
+CFPhysicsContactVisual >> remove [
+	{ contactLine. firstPointMarker. secondPointMarker. firstNormalLine. secondNormalLine. firstSeparationLine. secondSeparationLine }
+		do: [ :element | element hasParent ifTrue: [ element removeFromParent ] ]
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsContactVisual >> root: anElement [ root := anElement
+]
+
+{ #category : 'private - updating' }
+CFPhysicsContactVisual >> showLine: aLine from: firstPoint to: secondPoint [
+	| geometryChanged |
+	geometryChanged := aLine fromAnchor position ~= firstPoint
+		or: [ aLine toAnchor position ~= secondPoint ].
+	geometryChanged ifTrue: [
+		aLine fromAnchor position: firstPoint.
+		aLine toAnchor position: secondPoint ].
+	aLine visibility: BlVisibility visible.
+	geometryChanged ifTrue: [ aLine requestLayout ]
+]
+
+{ #category : 'private - updating' }
+CFPhysicsContactVisual >> showMarker: anElement at: aPoint [
+	anElement relocate: aPoint - (3 @ 3); visibility: BlVisibility visible
+]
+
+{ #category : 'accessing' }
+CFPhysicsContactVisual >> state [
+	^ state
 ]
 
 { #category : 'updating' }
@@ -102,31 +161,10 @@ CFPhysicsContactVisual >> update [
 	^ self
 ]
 
-{ #category : 'accessing' }
-CFPhysicsContactVisual >> state [
-	^ state
-]
-
-{ #category : 'accessing' }
-CFPhysicsContactVisual >> firstPointPosition [
-	^ firstPointMarker position + (3 @ 3)
-]
-
-{ #category : 'private - updating' }
-CFPhysicsContactVisual >> showMarker: anElement at: aPoint [
-	anElement relocate: aPoint - (3 @ 3); visibility: BlVisibility visible
-]
-
-{ #category : 'private - updating' }
-CFPhysicsContactVisual >> showLine: aLine from: firstPoint to: secondPoint [
-	| geometryChanged |
-	geometryChanged := aLine fromAnchor position ~= firstPoint
-		or: [ aLine toAnchor position ~= secondPoint ].
-	geometryChanged ifTrue: [
-		aLine fromAnchor position: firstPoint.
-		aLine toAnchor position: secondPoint ].
-	aLine visibility: BlVisibility visible.
-	geometryChanged ifTrue: [ aLine requestLayout ]
+{ #category : 'updating' }
+CFPhysicsContactVisual >> updateFrom: aState [
+	state := aState.
+	^ self update
 ]
 
 { #category : 'private - updating' }
@@ -136,24 +174,4 @@ CFPhysicsContactVisual >> updateSeparationLine: aLine from: displayedPoint to: s
 		ifTrue: [ negativeSeparationBorder ]
 		ifFalse: [ positiveSeparationBorder ]).
 	self showLine: aLine from: displayedPoint to: separationPoint
-]
-
-{ #category : 'private - updating' }
-CFPhysicsContactVisual >> hideFirstPoint [
-	firstPointMarker visibility: BlVisibility gone.
-	firstNormalLine visibility: BlVisibility gone.
-	firstSeparationLine visibility: BlVisibility gone
-]
-
-{ #category : 'private - updating' }
-CFPhysicsContactVisual >> hideSecondPoint [
-	secondPointMarker visibility: BlVisibility gone.
-	secondNormalLine visibility: BlVisibility gone.
-	secondSeparationLine visibility: BlVisibility gone
-]
-
-{ #category : 'controlling' }
-CFPhysicsContactVisual >> remove [
-	{ contactLine. firstPointMarker. secondPointMarker. firstNormalLine. secondNormalLine. firstSeparationLine. secondSeparationLine }
-		do: [ :element | element hasParent ifTrue: [ element removeFromParent ] ]
 ]

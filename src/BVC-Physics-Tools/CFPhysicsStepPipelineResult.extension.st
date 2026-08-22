@@ -1,6 +1,20 @@
 Extension { #name : 'CFPhysicsStepPipelineResult' }
 
 { #category : '*bvc-physics-tools' }
+CFPhysicsStepPipelineResult >> gtCandidatePairsFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Candidate pairs';
+		priority: 2;
+		items: [ self pairs ];
+		column: 'First sequence' text: [ :pair | pair firstBody sequence ];
+		column: 'First body' text: #firstBody;
+		column: 'Second sequence' text: [ :pair | pair secondBody sequence ];
+		column: 'Second body' text: #secondBody;
+		send: [ :pair | pair ]
+]
+
+{ #category : '*bvc-physics-tools' }
 CFPhysicsStepPipelineResult >> gtPredictedBodiesFor: aView [
 	<gtView>
 	self bodyStates ifNil: [ ^ aView empty ].
@@ -18,18 +32,4 @@ CFPhysicsStepPipelineResult >> gtPredictedBodiesFor: aView [
 		column: 'Swept bounds' text: [ :state |
 			state predictedSweptAABBFor: self step timeStep ];
 		send: [ :state | state ]
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsStepPipelineResult >> gtCandidatePairsFor: aView [
-	<gtView>
-	^ aView columnedList
-		title: 'Candidate pairs';
-		priority: 2;
-		items: [ self pairs ];
-		column: 'First sequence' text: [ :pair | pair firstBody sequence ];
-		column: 'First body' text: #firstBody;
-		column: 'Second sequence' text: [ :pair | pair secondBody sequence ];
-		column: 'Second body' text: #secondBody;
-		send: [ :pair | pair ]
 ]

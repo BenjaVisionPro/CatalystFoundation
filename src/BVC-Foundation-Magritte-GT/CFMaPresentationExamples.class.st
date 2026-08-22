@@ -1,5 +1,6 @@
-"I provide executable examples for Foundation Magritte presentations."
-
+"
+I provide executable examples for Foundation Magritte presentations.
+"
 Class {
 	#name : 'CFMaPresentationExamples',
 	#superclass : 'Object',
@@ -9,33 +10,9 @@ Class {
 }
 
 { #category : 'examples - presentations' }
-CFMaPresentationExamples >> defaultPresentation [
-	<gtExample>
-	^ CFMaPresentation new
-]
-
-{ #category : 'examples - presentations' }
 CFMaPresentationExamples >> accordionPresentation [
 	<gtExample>
 	^ CFMaAccordionPresentation new
-]
-
-{ #category : 'examples - presentations' }
-CFMaPresentationExamples >> tabbedPresentation [
-	<gtExample>
-	^ CFMaTabbedPresentation new
-]
-
-{ #category : 'examples - presentations' }
-CFMaPresentationExamples >> settingsPresentation [
-	<gtExample>
-	^ CFMaSettingsPresentation new
-]
-
-{ #category : 'examples - presentations' }
-CFMaPresentationExamples >> leftTabbedPresentation [
-	<gtExample>
-	^ CFMaLeftTabbedPresentation new
 ]
 
 { #category : 'examples - forms' }
@@ -47,31 +24,10 @@ CFMaPresentationExamples >> accordionPresentationElement [
 	^ aViewModel asElement
 ]
 
-{ #category : 'examples - forms' }
-CFMaPresentationExamples >> tabbedPresentationElement [
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> defaultPresentation [
 	<gtExample>
-	| aViewModel |
-	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel presentationClass: CFMaTabbedPresentation.
-	^ aViewModel asElement
-]
-
-{ #category : 'examples - forms' }
-CFMaPresentationExamples >> settingsPresentationElement [
-	<gtExample>
-	| aViewModel |
-	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel presentationClass: CFMaSettingsPresentation.
-	^ aViewModel asElement
-]
-
-{ #category : 'examples - forms' }
-CFMaPresentationExamples >> leftTabbedPresentationElement [
-	<gtExample>
-	| aViewModel |
-	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
-	aViewModel presentationClass: CFMaLeftTabbedPresentation.
-	^ aViewModel asElement
+	^ CFMaPresentation new
 ]
 
 { #category : 'examples - paths' }
@@ -84,6 +40,36 @@ CFMaPresentationExamples >> descriptionPath [
 	self assert: aDescription categories equals: #(appearance display).
 	self assert: (aDescription propertyAt: #cfCategories) equals: #(appearance display).
 	^ aDescription
+]
+
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> leftTabbedPresentation [
+	<gtExample>
+	^ CFMaLeftTabbedPresentation new
+]
+
+{ #category : 'examples - forms' }
+CFMaPresentationExamples >> leftTabbedPresentationElement [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
+	aViewModel presentationClass: CFMaLeftTabbedPresentation.
+	^ aViewModel asElement
+]
+
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> settingsPresentation [
+	<gtExample>
+	^ CFMaSettingsPresentation new
+]
+
+{ #category : 'examples - forms' }
+CFMaPresentationExamples >> settingsPresentationElement [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
+	aViewModel presentationClass: CFMaSettingsPresentation.
+	^ aViewModel asElement
 ]
 
 { #category : 'examples - paths' }
@@ -99,4 +85,19 @@ CFMaPresentationExamples >> showcasePathsAreScopedToFields [
 	self assert: (fieldDescriptions allSatisfy: [ :each | each categories isNotEmpty ]).
 	self assert: (relationDescriptions allSatisfy: [ :each | each categories isEmpty ]).
 	^ aShowcase
+]
+
+{ #category : 'examples - presentations' }
+CFMaPresentationExamples >> tabbedPresentation [
+	<gtExample>
+	^ CFMaTabbedPresentation new
+]
+
+{ #category : 'examples - forms' }
+CFMaPresentationExamples >> tabbedPresentationElement [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFMaViewModel forObject: CFMaFormShowcase example.
+	aViewModel presentationClass: CFMaTabbedPresentation.
+	^ aViewModel asElement
 ]

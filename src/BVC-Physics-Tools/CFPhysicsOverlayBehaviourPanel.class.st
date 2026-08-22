@@ -1,8 +1,18 @@
-"I present the running Behaviours for a Physics overlay and let one Behaviour become the overlay scope. I reconcile only when the world's Behaviour revision changes."
+"
+I present the running Behaviours for a Physics overlay and let one Behaviour become the overlay scope. I reconcile only when the world's Behaviour revision changes.
+"
 Class {
 	#name : 'CFPhysicsOverlayBehaviourPanel',
 	#superclass : 'Object',
-	#instVars : [ 'overlay', 'world', 'element', 'headerButton', 'listElement', 'expanded', 'lastBehaviourRevision' ],
+	#instVars : [
+		'overlay',
+		'world',
+		'element',
+		'headerButton',
+		'listElement',
+		'expanded',
+		'lastBehaviourRevision'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -16,23 +26,27 @@ CFPhysicsOverlayBehaviourPanel class >> on: anOverlay [
 		yourself
 ]
 
-{ #category : 'private - initialization' }
-CFPhysicsOverlayBehaviourPanel >> overlay: anOverlay [ overlay := anOverlay ]
-
-{ #category : 'private - initialization' }
-CFPhysicsOverlayBehaviourPanel >> world: aWorld [ world := aWorld ]
+{ #category : 'private - building' }
+CFPhysicsOverlayBehaviourPanel >> buttonFor: aBehaviour selected: isSelected [
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude;
+		label: (isSelected
+			ifTrue: [ '● ', aBehaviour class name asString ]
+			ifFalse: [ aBehaviour class name asString ]);
+		action: [
+			overlay selectBehaviour: aBehaviour.
+			expanded := false.
+			self rebuild ];
+		yourself
+]
 
 { #category : 'accessing' }
-CFPhysicsOverlayBehaviourPanel >> element [ ^ element ]
+CFPhysicsOverlayBehaviourPanel >> element [ ^ element
+]
 
 { #category : 'accessing' }
-CFPhysicsOverlayBehaviourPanel >> headerButton [ ^ headerButton ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayBehaviourPanel >> listElement [ ^ listElement ]
-
-{ #category : 'testing' }
-CFPhysicsOverlayBehaviourPanel >> isExpanded [ ^ expanded ]
+CFPhysicsOverlayBehaviourPanel >> headerButton [ ^ headerButton
+]
 
 { #category : 'initialization' }
 CFPhysicsOverlayBehaviourPanel >> initializePanel [
@@ -68,19 +82,16 @@ CFPhysicsOverlayBehaviourPanel >> initializePanel [
 	self refresh
 ]
 
-{ #category : 'private - actions' }
-CFPhysicsOverlayBehaviourPanel >> toggleExpanded [
-	expanded := expanded not.
-	self rebuild.
-	^ self
+{ #category : 'testing' }
+CFPhysicsOverlayBehaviourPanel >> isExpanded [ ^ expanded
 ]
 
-{ #category : 'updating' }
-CFPhysicsOverlayBehaviourPanel >> refresh [
-	lastBehaviourRevision = world behaviourRevision ifTrue: [ ^ self ].
-	lastBehaviourRevision := world behaviourRevision.
-	self rebuild.
-	^ self
+{ #category : 'accessing' }
+CFPhysicsOverlayBehaviourPanel >> listElement [ ^ listElement
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsOverlayBehaviourPanel >> overlay: anOverlay [ overlay := anOverlay
 ]
 
 { #category : 'updating' }
@@ -105,21 +116,26 @@ CFPhysicsOverlayBehaviourPanel >> rebuild [
 	^ self
 ]
 
-{ #category : 'private - building' }
-CFPhysicsOverlayBehaviourPanel >> buttonFor: aBehaviour selected: isSelected [
-	^ BrButton new
-		aptitude: BrGlamorousButtonWithLabelAptitude;
-		label: (isSelected
-			ifTrue: [ '● ', aBehaviour class name asString ]
-			ifFalse: [ aBehaviour class name asString ]);
-		action: [
-			overlay selectBehaviour: aBehaviour.
-			expanded := false.
-			self rebuild ];
-		yourself
+{ #category : 'updating' }
+CFPhysicsOverlayBehaviourPanel >> refresh [
+	lastBehaviourRevision = world behaviourRevision ifTrue: [ ^ self ].
+	lastBehaviourRevision := world behaviourRevision.
+	self rebuild.
+	^ self
 ]
 
 { #category : 'controlling' }
 CFPhysicsOverlayBehaviourPanel >> release [
 	element ifNotNil: [ element hasParent ifTrue: [ element removeFromParent ] ]
+]
+
+{ #category : 'private - actions' }
+CFPhysicsOverlayBehaviourPanel >> toggleExpanded [
+	expanded := expanded not.
+	self rebuild.
+	^ self
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsOverlayBehaviourPanel >> world: aWorld [ world := aWorld
 ]

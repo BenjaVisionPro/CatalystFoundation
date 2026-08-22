@@ -1,5 +1,6 @@
-"I am responsible for creating a compact editable Foundation identity affordance from a Magritte memento."
-
+"
+I am responsible for creating a compact editable Foundation identity affordance from a Magritte memento.
+"
 Class {
 	#name : 'CFMaIdentityAffordanceStencil',
 	#superclass : 'BrStencil',

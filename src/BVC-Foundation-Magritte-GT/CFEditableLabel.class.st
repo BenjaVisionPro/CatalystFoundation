@@ -1,5 +1,6 @@
-"I am Foundation's in-place editable label. I retain BrEditableLabel's complete editor and edition lifecycle while hiding the rendered caret in read-only focus."
-
+"
+I am Foundation's in-place editable label. I retain BrEditableLabel's complete editor and edition lifecycle while hiding the rendered caret in read-only focus.
+"
 Class {
 	#name : 'CFEditableLabel',
 	#superclass : 'BrEditableLabel',
@@ -7,6 +8,13 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Widgets'
 }
+
+{ #category : 'private - cursor presentation' }
+CFEditableLabel >> hideRenderedCursors [
+	self allChildrenBreadthFirstDo: [ :anElement |
+		(anElement respondsTo: #hideCursors)
+			ifTrue: [ anElement hideCursors ] ]
+]
 
 { #category : 'initialization' }
 CFEditableLabel >> initialize [
@@ -16,6 +24,13 @@ CFEditableLabel >> initialize [
 		when: BlFocusEvent
 		do: [ :anEvent |
 			self isReadOnly ifTrue: [ self hideRenderedCursors ] ]
+]
+
+{ #category : 'private - cursor presentation' }
+CFEditableLabel >> showRenderedCursors [
+	self allChildrenBreadthFirstDo: [ :anElement |
+		(anElement respondsTo: #showCursors)
+			ifTrue: [ anElement showCursors ] ]
 ]
 
 { #category : 'api  - mode' }
@@ -28,18 +43,4 @@ CFEditableLabel >> switchToEditor [
 CFEditableLabel >> switchToLabel [
 	super switchToLabel.
 	self hideRenderedCursors
-]
-
-{ #category : 'private - cursor presentation' }
-CFEditableLabel >> hideRenderedCursors [
-	self allChildrenBreadthFirstDo: [ :anElement |
-		(anElement respondsTo: #hideCursors)
-			ifTrue: [ anElement hideCursors ] ]
-]
-
-{ #category : 'private - cursor presentation' }
-CFEditableLabel >> showRenderedCursors [
-	self allChildrenBreadthFirstDo: [ :anElement |
-		(anElement respondsTo: #showCursors)
-			ifTrue: [ anElement showCursors ] ]
 ]

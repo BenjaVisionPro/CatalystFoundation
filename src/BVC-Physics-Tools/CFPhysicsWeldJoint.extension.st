@@ -1,13 +1,39 @@
 Extension { #name : 'CFPhysicsWeldJoint' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsWeldJoint >> physicsOverlayWorldPoints [
-	^ self endpointPair worldPoints
+CFPhysicsWeldJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+	anInspectorContent
+		addGroup: 'Fixed' fields: {
+			#referenceAngle -> 'Reference angle'.
+			#linearHertz -> 'Linear hertz'.
+			#linearDampingRatio -> 'Linear damping'.
+			#angularHertz -> 'Angular hertz'.
+			#angularDampingRatio -> 'Angular damping' };
+		addGroup: 'Solver' fields: {
+			#accumulatedImpulse -> 'Linear impulse'.
+			#accumulatedAngularImpulse -> 'Angular impulse' }
 ]
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsWeldJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsWeldJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsWeldJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+	anInspectorContent
+		diagnosticNumber: self referenceAngle at: #referenceAngle;
+		diagnosticNumber: self linearHertz at: #linearHertz;
+		diagnosticNumber: self linearDampingRatio at: #linearDampingRatio;
+		diagnosticNumber: self angularHertz at: #angularHertz;
+		diagnosticNumber: self angularDampingRatio at: #angularDampingRatio;
+		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
+		diagnosticNumber: self accumulatedAngularImpulse at: #accumulatedAngularImpulse
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -36,30 +62,3 @@ CFPhysicsWeldJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint to: s
 		showHitTargetFrom: pivotPoint - (referenceDirection * 10.0)
 		to: referenceEnd + (referenceDirection * 6.0)
 ]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsWeldJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
-	anInspectorContent
-		addGroup: 'Fixed' fields: {
-			#referenceAngle -> 'Reference angle'.
-			#linearHertz -> 'Linear hertz'.
-			#linearDampingRatio -> 'Linear damping'.
-			#angularHertz -> 'Angular hertz'.
-			#angularDampingRatio -> 'Angular damping' };
-		addGroup: 'Solver' fields: {
-			#accumulatedImpulse -> 'Linear impulse'.
-			#accumulatedAngularImpulse -> 'Angular impulse' }
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsWeldJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
-	anInspectorContent
-		diagnosticNumber: self referenceAngle at: #referenceAngle;
-		diagnosticNumber: self linearHertz at: #linearHertz;
-		diagnosticNumber: self linearDampingRatio at: #linearDampingRatio;
-		diagnosticNumber: self angularHertz at: #angularHertz;
-		diagnosticNumber: self angularDampingRatio at: #angularDampingRatio;
-		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
-		diagnosticNumber: self accumulatedAngularImpulse at: #accumulatedAngularImpulse
-]
-

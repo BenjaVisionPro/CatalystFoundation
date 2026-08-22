@@ -1,5 +1,6 @@
-"I provide executable examples of Foundation layouts and item representations for Magritte to-many relations."
-
+"
+I provide executable examples of Foundation layouts and item representations for Magritte to-many relations.
+"
 Class {
 	#name : 'CFMaToManyRelationExamples',
 	#superclass : 'Object',
@@ -7,6 +8,73 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Examples'
 }
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> accordionListDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beAccordionList;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaAccordionListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: CFMaExpanderItemViewModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> columnedListDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := self expandableListDescription.
+	aDescription beColumnedList.
+
+	self assert: aDescription blocListStencil class equals: CFMaColumnedListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> compactItemsCanReplaceAnotherItemRepresentation [
+	<gtExample>
+	| aDescription |
+	aDescription := self embeddedFormsDescription.
+	aDescription itemsAsCompactObjects.
+
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: BrListRowStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> embeddedFormsDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beSimpleList;
+		itemsAsEmbeddedForms;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaFiniteListElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples - selection' }
+CFMaToManyRelationExamples >> expandableItemsUseFoundationSelectionAptitude [
+	<gtExample>
+	| anElement |
+	anElement := CFMaExpanderItemElement new.
+	self assert: anElement class equals: CFMaExpanderItemElement.
+	^ anElement
+]
 
 { #category : 'examples' }
 CFMaToManyRelationExamples >> expandableListDescription [
@@ -21,22 +89,6 @@ CFMaToManyRelationExamples >> expandableListDescription [
 
 	self assert: aDescription blocListStencil class equals: CFMaExpandableListElementStencilBuilder.
 	self assert: aDescription blocItemViewModelStencil class equals: CFMaExpanderItemViewModelStencilBuilder.
-	^ aDescription
-]
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> gridDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := MAToManyRelationDescription new
-		accessor: #items;
-		classes: { CFMagritteEditorExample };
-		beModifiable;
-		beGrid;
-		yourself.
-
-	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
 	^ aDescription
 ]
 
@@ -59,6 +111,22 @@ CFMaToManyRelationExamples >> expandableListElement [
 ]
 
 { #category : 'examples' }
+CFMaToManyRelationExamples >> gridDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beGrid;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaGridElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
+]
+
+{ #category : 'examples' }
 CFMaToManyRelationExamples >> gridElement [
 	<gtExample>
 	| aModel aDescription aMemento anElement |
@@ -74,77 +142,6 @@ CFMaToManyRelationExamples >> gridElement [
 
 	self assert: (anElement isKindOf: GtMagritteValidatedFieldElement) not.
 	^ anElement
-]
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> ordinaryDescriptionUsesFoundationDefaults [
-	<gtExample>
-	| aDescription |
-	aDescription := MAToManyRelationDescription new.
-
-	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
-	^ aDescription
-]
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> simpleListDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := self expandableListDescription.
-	aDescription beSimpleList.
-
-	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
-	^ aDescription
-]
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> columnedListDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := self expandableListDescription.
-	aDescription beColumnedList.
-
-	self assert: aDescription blocListStencil class equals: CFMaColumnedListElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
-	^ aDescription
-]
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> accordionListDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := MAToManyRelationDescription new
-		accessor: #items;
-		classes: { CFMagritteEditorExample };
-		beModifiable;
-		beAccordionList;
-		yourself.
-
-	self assert: aDescription blocListStencil class equals: CFMaAccordionListElementStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: CFMaExpanderItemViewModelStencilBuilder.
-	^ aDescription
-]
-
-
-
-{ #category : 'examples' }
-CFMaToManyRelationExamples >> embeddedFormsDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := MAToManyRelationDescription new
-		accessor: #items;
-		classes: { CFMagritteEditorExample };
-		beModifiable;
-		beSimpleList;
-		itemsAsEmbeddedForms;
-		yourself.
-
-	self assert: aDescription blocListStencil class equals: CFMaFiniteListElementStencilBuilder.
-	self assert: aDescription blocItemStencil class equals: CFMaEmbeddedFormItemStencilBuilder.
-	self assert: aDescription blocItemViewModelStencil class equals: CFMaEmbeddedItemViewModelStencilBuilder.
-	^ aDescription
 ]
 
 { #category : 'examples' }
@@ -170,23 +167,6 @@ CFMaToManyRelationExamples >> gridOfEmbeddedFormsDescription [
 ]
 
 { #category : 'examples' }
-CFMaToManyRelationExamples >> phlowLinksDescription [
-	<gtExample>
-	| aDescription |
-	aDescription := MAToManyRelationDescription new
-		accessor: #items;
-		classes: { CFMagritteEditorExample };
-		beModifiable;
-		beSimpleList;
-		itemsAsPhlowLinks;
-		yourself.
-
-	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
-	self assert: aDescription blocItemStencil class equals: CFMaPhlowLinkItemStencilBuilder.
-	^ aDescription
-]
-
-{ #category : 'examples' }
 CFMaToManyRelationExamples >> gridOfPhlowLinksDescription [
 	<gtExample>
 	| aDescription |
@@ -204,17 +184,32 @@ CFMaToManyRelationExamples >> gridOfPhlowLinksDescription [
 ]
 
 { #category : 'examples' }
-CFMaToManyRelationExamples >> compactItemsCanReplaceAnotherItemRepresentation [
+CFMaToManyRelationExamples >> ordinaryDescriptionUsesFoundationDefaults [
 	<gtExample>
 	| aDescription |
-	aDescription := self embeddedFormsDescription.
-	aDescription itemsAsCompactObjects.
+	aDescription := MAToManyRelationDescription new.
 
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
 	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
-	self assert: aDescription blocItemStencil class equals: BrListRowStencilBuilder.
 	^ aDescription
 ]
 
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> phlowLinksDescription [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { CFMagritteEditorExample };
+		beModifiable;
+		beSimpleList;
+		itemsAsPhlowLinks;
+		yourself.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemStencil class equals: CFMaPhlowLinkItemStencilBuilder.
+	^ aDescription
+]
 
 { #category : 'examples - selection' }
 CFMaToManyRelationExamples >> relationItemAptitude [
@@ -225,11 +220,14 @@ CFMaToManyRelationExamples >> relationItemAptitude [
 	^ anAptitude
 ]
 
-{ #category : 'examples - selection' }
-CFMaToManyRelationExamples >> expandableItemsUseFoundationSelectionAptitude [
+{ #category : 'examples' }
+CFMaToManyRelationExamples >> simpleListDescription [
 	<gtExample>
-	| anElement |
-	anElement := CFMaExpanderItemElement new.
-	self assert: anElement class equals: CFMaExpanderItemElement.
-	^ anElement
+	| aDescription |
+	aDescription := self expandableListDescription.
+	aDescription beSimpleList.
+
+	self assert: aDescription blocListStencil class equals: CFMaListElementStencilBuilder.
+	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
+	^ aDescription
 ]

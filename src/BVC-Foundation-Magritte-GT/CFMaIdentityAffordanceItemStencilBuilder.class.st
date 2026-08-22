@@ -1,5 +1,6 @@
-"I am responsible for presenting one relation item as a compact editable identity affordance."
-
+"
+I am responsible for presenting one relation item as a compact editable identity affordance.
+"
 Class {
 	#name : 'CFMaIdentityAffordanceItemStencilBuilder',
 	#superclass : 'BrListRowStencilBuilder',

@@ -1,5 +1,6 @@
-"I represent a small related object used by the Foundation Magritte form showcase."
-
+"
+I represent a small related object used by the Foundation Magritte form showcase.
+"
 Class {
 	#name : 'CFMaFormShowcaseItem',
 	#superclass : 'CFLabelledObject',

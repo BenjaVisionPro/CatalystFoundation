@@ -1,11 +1,6 @@
 Extension { #name : 'CFPhysics' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysics >> inspectInPhysicsOverlay: anInspector [
-	anInspector inspect: self usingContent: CFPhysicsBodyInspector newContent
-]
-
-{ #category : '*bvc-physics-tools' }
 CFPhysics >> bodyTypeName [
 	self isDynamic ifTrue: [ ^ 'Dynamic' ].
 	self isKinematic ifTrue: [ ^ 'Kinematic' ].
@@ -119,6 +114,11 @@ CFPhysics >> descriptionVelocityY [
 		group: 'Motion';
 		beReadOnly;
 		yourself
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysics >> inspectInPhysicsOverlay: anInspector [
+	anInspector inspect: self usingContent: CFPhysicsBodyInspector newContent
 ]
 
 { #category : '*bvc-physics-tools' }

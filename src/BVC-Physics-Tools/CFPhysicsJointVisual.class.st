@@ -1,8 +1,27 @@
-"I render one Physics joint inside an overlay. I show its anchors and the decorations required by its joint type for either diagnostic or selection presentation."
+"
+I render one Physics joint inside an overlay. I show its anchors and the decorations required by its joint type for either diagnostic or selection presentation.
+"
 Class {
 	#name : 'CFPhysicsJointVisual',
 	#superclass : 'BlLineElement',
-	#instVars : [ 'joint', 'context', 'presentationRole', 'hitTarget', 'restLengthMarker', 'rail', 'lowerLimitMarker', 'upperLimitMarker', 'pivotMarker', 'referenceRay', 'lowerAngleMarker', 'upperAngleMarker', 'allowedAngleArc', 'motorCue', 'allowedAngleStartDegrees', 'allowedAngleEndDegrees' ],
+	#instVars : [
+		'joint',
+		'context',
+		'presentationRole',
+		'hitTarget',
+		'restLengthMarker',
+		'rail',
+		'lowerLimitMarker',
+		'upperLimitMarker',
+		'pivotMarker',
+		'referenceRay',
+		'lowerAngleMarker',
+		'upperAngleMarker',
+		'allowedAngleArc',
+		'motorCue',
+		'allowedAngleStartDegrees',
+		'allowedAngleEndDegrees'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -27,78 +46,65 @@ CFPhysicsJointVisual class >> selectionOn: aJoint context: aContext [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> joint [ ^ joint ]
+{ #category : 'installing' }
+CFPhysicsJointVisual >> addTo: aParentElement [
+	aParentElement
+		addChild: self;
+		addChild: rail;
+		addChild: lowerLimitMarker;
+		addChild: upperLimitMarker;
+		addChild: restLengthMarker;
+		addChild: allowedAngleArc;
+		addChild: referenceRay;
+		addChild: lowerAngleMarker;
+		addChild: upperAngleMarker;
+		addChild: motorCue;
+		addChild: pivotMarker;
+		addChild: hitTarget.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsJointVisual >> joint: aJoint [ joint := aJoint ]
+CFPhysicsJointVisual >> allowedAngleArc [ ^ allowedAngleArc
+]
 
 { #category : 'accessing' }
-CFPhysicsJointVisual >> context [ ^ context ]
+CFPhysicsJointVisual >> context [ ^ context
+]
 
 { #category : 'accessing' }
-CFPhysicsJointVisual >> context: aContext [ context := aContext ]
+CFPhysicsJointVisual >> context: aContext [ context := aContext
+]
 
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> presentationRole [ ^ presentationRole ]
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> hideRail [
+	rail visibility: BlVisibility gone.
+	lowerLimitMarker visibility: BlVisibility gone.
+	upperLimitMarker visibility: BlVisibility gone
+]
 
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> presentationRole: aSymbol [ presentationRole := aSymbol ]
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> hideRestLengthMarker [
+	restLengthMarker visibility: BlVisibility gone
+]
 
-{ #category : 'testing' }
-CFPhysicsJointVisual >> isDiagnostic [ ^ presentationRole = #diagnostic ]
-
-{ #category : 'testing' }
-CFPhysicsJointVisual >> isSelection [ ^ presentationRole = #selection ]
-
-{ #category : 'testing' }
-CFPhysicsJointVisual >> matchesSelection: anObject [
-	^ self isSelection and: [ joint == anObject ]
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> hideRevoluteDecoration [
+	pivotMarker visibility: BlVisibility gone.
+	referenceRay visibility: BlVisibility gone.
+	lowerAngleMarker visibility: BlVisibility gone.
+	upperAngleMarker visibility: BlVisibility gone.
+	allowedAngleArc visibility: BlVisibility gone.
+	motorCue visibility: BlVisibility gone
 ]
 
 { #category : 'testing' }
-CFPhysicsJointVisual >> hitTarget [ ^ hitTarget ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> restLengthMarker [ ^ restLengthMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> rail [ ^ rail ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> lowerLimitMarker [ ^ lowerLimitMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> upperLimitMarker [ ^ upperLimitMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> pivotMarker [ ^ pivotMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> referenceRay [ ^ referenceRay ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> lowerAngleMarker [ ^ lowerAngleMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> upperAngleMarker [ ^ upperAngleMarker ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> allowedAngleArc [ ^ allowedAngleArc ]
-
-{ #category : 'accessing' }
-CFPhysicsJointVisual >> motorCue [ ^ motorCue ]
+CFPhysicsJointVisual >> hitTarget [ ^ hitTarget
+]
 
 { #category : 'testing' }
 CFPhysicsJointVisual >> includesEventTarget: anElement [
 	^ anElement == self or: [ anElement == hitTarget ]
-]
-
-{ #category : 'testing' }
-CFPhysicsJointVisual >> jointForEventTarget: anElement [
-	^ (self includesEventTarget: anElement)
-		ifTrue: [ joint ]
-		ifFalse: [ nil ]
 ]
 
 { #category : 'initialization' }
@@ -130,6 +136,70 @@ CFPhysicsJointVisual >> initializeVisual [
 			zIndex: 2 ]
 ]
 
+{ #category : 'testing' }
+CFPhysicsJointVisual >> isDiagnostic [ ^ presentationRole = #diagnostic
+]
+
+{ #category : 'testing' }
+CFPhysicsJointVisual >> isSelection [ ^ presentationRole = #selection
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> joint [ ^ joint
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> joint: aJoint [ joint := aJoint
+]
+
+{ #category : 'testing' }
+CFPhysicsJointVisual >> jointForEventTarget: anElement [
+	^ (self includesEventTarget: anElement)
+		ifTrue: [ joint ]
+		ifFalse: [ nil ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> lowerAngleMarker [ ^ lowerAngleMarker
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> lowerLimitMarker [ ^ lowerLimitMarker
+]
+
+{ #category : 'testing' }
+CFPhysicsJointVisual >> matchesSelection: anObject [
+	^ self isSelection and: [ joint == anObject ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> motorCue [ ^ motorCue
+]
+
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newAllowedAngleArc [
+	^ BlElement new
+		geometry: (BlAnnulusSectorGeometry new innerRadius: 0.82; outerRadius: 1.0);
+		size: 56 @ 56;
+		background: (Color blue muchDarker alpha: 0.18);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		visibility: BlVisibility gone;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newAngularLine [
+	^ BlLineElement new
+		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		border: (BlBorder paint: (Color blue muchDarker alpha: 0.75) width: 2);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		visibility: BlVisibility gone;
+		yourself
+]
+
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newEndpointMarker [
 	^ BlArrowheadCircle new
@@ -139,25 +209,44 @@ CFPhysicsJointVisual >> newEndpointMarker [
 		yourself
 ]
 
-
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newHitTarget [
+	^ BlLineElement new
+		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		border: (BlBorder paint: Color transparent width: 12);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventChildrenMouseEvents;
+		yourself
+]
 
 { #category : 'private - building' }
-CFPhysicsJointVisual >> newRestLengthMarker [
-	| markerColor |
-	markerColor := self isSelection
-		ifTrue: [ Color red alpha: 0.9 ]
-		ifFalse: [ Color blue muchDarker alpha: 0.9 ].
+CFPhysicsJointVisual >> newMotorCue [
+	^ BlLineElement new
+		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
+		toHead: (BlArrowheadSimpleArrow new
+			border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 2));
+		border: (BlBorder paint: (Color blue muchDarker alpha: 0.8) width: 2);
+		constraintsDo: [ :constraints | constraints ignoreByLayout ];
+		preventMeAndChildrenMouseEvents;
+		visibility: BlVisibility gone;
+		yourself
+]
+
+{ #category : 'private - building' }
+CFPhysicsJointVisual >> newPivotMarker [
 	^ BlElement new
-		geometry: (BlPolygonGeometry vertices: { 4 @ 0. 8 @ 4. 4 @ 8. 0 @ 4 });
-		size: 8 @ 8;
-		background: markerColor;
+		geometry: BlCircleGeometry new;
+		size: 10 @ 10;
+		background: (Color blue muchDarker alpha: 0.25);
+		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 2);
 		constraintsDo: [ :constraints | constraints ignoreByLayout ];
 		preventMeAndChildrenMouseEvents;
 		visibility: BlVisibility gone;
 		zIndex: 1;
 		yourself
 ]
-
 
 { #category : 'private - building' }
 CFPhysicsJointVisual >> newRail [
@@ -183,14 +272,16 @@ CFPhysicsJointVisual >> newRailLimitMarker [
 		yourself
 ]
 
-
 { #category : 'private - building' }
-CFPhysicsJointVisual >> newPivotMarker [
+CFPhysicsJointVisual >> newRestLengthMarker [
+	| markerColor |
+	markerColor := self isSelection
+		ifTrue: [ Color red alpha: 0.9 ]
+		ifFalse: [ Color blue muchDarker alpha: 0.9 ].
 	^ BlElement new
-		geometry: BlCircleGeometry new;
-		size: 10 @ 10;
-		background: (Color blue muchDarker alpha: 0.25);
-		border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 2);
+		geometry: (BlPolygonGeometry vertices: { 4 @ 0. 8 @ 4. 4 @ 8. 0 @ 4 });
+		size: 8 @ 8;
+		background: markerColor;
 		constraintsDo: [ :constraints | constraints ignoreByLayout ];
 		preventMeAndChildrenMouseEvents;
 		visibility: BlVisibility gone;
@@ -198,81 +289,130 @@ CFPhysicsJointVisual >> newPivotMarker [
 		yourself
 ]
 
-{ #category : 'private - building' }
-CFPhysicsJointVisual >> newAngularLine [
-	^ BlLineElement new
-		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		border: (BlBorder paint: (Color blue muchDarker alpha: 0.75) width: 2);
-		constraintsDo: [ :constraints | constraints ignoreByLayout ];
-		preventMeAndChildrenMouseEvents;
-		visibility: BlVisibility gone;
-		yourself
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> pivotMarker [ ^ pivotMarker
 ]
 
-{ #category : 'private - building' }
-CFPhysicsJointVisual >> newAllowedAngleArc [
-	^ BlElement new
-		geometry: (BlAnnulusSectorGeometry new innerRadius: 0.82; outerRadius: 1.0);
-		size: 56 @ 56;
-		background: (Color blue muchDarker alpha: 0.18);
-		constraintsDo: [ :constraints | constraints ignoreByLayout ];
-		preventMeAndChildrenMouseEvents;
-		visibility: BlVisibility gone;
-		yourself
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> presentationRole [ ^ presentationRole
 ]
 
-{ #category : 'private - building' }
-CFPhysicsJointVisual >> newMotorCue [
-	^ BlLineElement new
-		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		toHead: (BlArrowheadSimpleArrow new
-			border: (BlBorder paint: (Color blue muchDarker alpha: 0.9) width: 2));
-		border: (BlBorder paint: (Color blue muchDarker alpha: 0.8) width: 2);
-		constraintsDo: [ :constraints | constraints ignoreByLayout ];
-		preventMeAndChildrenMouseEvents;
-		visibility: BlVisibility gone;
-		yourself
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> presentationRole: aSymbol [ presentationRole := aSymbol
 ]
 
-{ #category : 'private - building' }
-CFPhysicsJointVisual >> newHitTarget [
-	^ BlLineElement new
-		fromAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		toAnchor: (BlAbsolutePositionAnchor position: 0 @ 0);
-		border: (BlBorder paint: Color transparent width: 12);
-		constraintsDo: [ :constraints | constraints ignoreByLayout ];
-		preventChildrenMouseEvents;
-		yourself
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> rail [ ^ rail
 ]
 
-{ #category : 'installing' }
-CFPhysicsJointVisual >> addTo: aParentElement [
-	aParentElement
-		addChild: self;
-		addChild: rail;
-		addChild: lowerLimitMarker;
-		addChild: upperLimitMarker;
-		addChild: restLengthMarker;
-		addChild: allowedAngleArc;
-		addChild: referenceRay;
-		addChild: lowerAngleMarker;
-		addChild: upperAngleMarker;
-		addChild: motorCue;
-		addChild: pivotMarker;
-		addChild: hitTarget.
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> referenceRay [ ^ referenceRay
+]
+
+{ #category : 'controlling' }
+CFPhysicsJointVisual >> release [ ^ self remove
+]
+
+{ #category : 'removing' }
+CFPhysicsJointVisual >> remove [
+	self hasParent ifTrue: [ self removeFromParent ].
+	rail hasParent ifTrue: [ rail removeFromParent ].
+	lowerLimitMarker hasParent ifTrue: [ lowerLimitMarker removeFromParent ].
+	upperLimitMarker hasParent ifTrue: [ upperLimitMarker removeFromParent ].
+	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
+	pivotMarker hasParent ifTrue: [ pivotMarker removeFromParent ].
+	referenceRay hasParent ifTrue: [ referenceRay removeFromParent ].
+	lowerAngleMarker hasParent ifTrue: [ lowerAngleMarker removeFromParent ].
+	upperAngleMarker hasParent ifTrue: [ upperAngleMarker removeFromParent ].
+	allowedAngleArc hasParent ifTrue: [ allowedAngleArc removeFromParent ].
+	motorCue hasParent ifTrue: [ motorCue removeFromParent ].
+	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
 	^ self
 ]
 
-{ #category : 'private - updating' }
-CFPhysicsJointVisual >> updateLine: aLine from: firstPoint to: secondPoint [
-	(aLine fromAnchor position = firstPoint and: [ aLine toAnchor position = secondPoint ])
-		ifTrue: [ ^ aLine ].
-	aLine fromAnchor position: firstPoint.
-	aLine toAnchor position: secondPoint.
-	aLine requestLayout.
-	^ aLine
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> restLengthMarker [ ^ restLengthMarker
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showAllowedAngleFromDegrees: startDegrees toDegrees: endDegrees around: pivotPoint [
+	(allowedAngleStartDegrees = startDegrees and: [ allowedAngleEndDegrees = endDegrees ]) ifFalse: [
+		allowedAngleArc geometry
+			startAngle: startDegrees;
+			endAngle: endDegrees.
+		allowedAngleStartDegrees := startDegrees.
+		allowedAngleEndDegrees := endDegrees ].
+	allowedAngleArc
+		relocate: pivotPoint - (28 @ 28);
+		visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showAngleLimitFrom: firstPoint to: secondPoint on: aMarker [
+	self updateLine: aMarker from: firstPoint to: secondPoint.
+	aMarker visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showFixedLockFrom: firstPoint to: secondPoint direction: aDirection [
+	| normal innerPoint outerPoint halfWidth |
+	self showReferenceRayFrom: firstPoint to: secondPoint.
+	normal := aDirection y negated @ aDirection x.
+	halfWidth := 5.0.
+	innerPoint := firstPoint + (aDirection * 12.0).
+	outerPoint := secondPoint.
+	self
+		showAngleLimitFrom: innerPoint - (normal * halfWidth)
+		to: innerPoint + (normal * halfWidth)
+		on: lowerAngleMarker;
+		showAngleLimitFrom: outerPoint - (normal * halfWidth)
+		to: outerPoint + (normal * halfWidth)
+		on: upperAngleMarker
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showHitTargetFrom: firstPoint to: secondPoint [
+	self updateLine: hitTarget from: firstPoint to: secondPoint
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showMotorCueFrom: firstPoint to: secondPoint [
+	self updateLine: motorCue from: firstPoint to: secondPoint.
+	motorCue visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showPivotAt: aPoint [
+	pivotMarker
+		relocate: aPoint - (5 @ 5);
+		visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showRailFrom: firstPoint to: secondPoint [
+	self updateLine: rail from: firstPoint to: secondPoint.
+	rail visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showRailLimitFrom: firstPoint to: secondPoint on: aMarker [
+	self updateLine: aMarker from: firstPoint to: secondPoint.
+	aMarker visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showReferenceRayFrom: firstPoint to: secondPoint [
+	self updateLine: referenceRay from: firstPoint to: secondPoint.
+	referenceRay visibility: BlVisibility visible
+]
+
+{ #category : 'updating - joint decorations' }
+CFPhysicsJointVisual >> showRestLengthMarkerAtFraction: aNumber from: firstPoint to: secondPoint [
+	| restPoint |
+	restPoint := firstPoint + ((secondPoint - firstPoint) * aNumber).
+	restLengthMarker
+		relocate: restPoint - (4 @ 4);
+		visibility: BlVisibility visible
 ]
 
 { #category : 'updating' }
@@ -295,130 +435,20 @@ CFPhysicsJointVisual >> update [
 	^ self
 ]
 
-
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showHitTargetFrom: firstPoint to: secondPoint [
-	self updateLine: hitTarget from: firstPoint to: secondPoint
+{ #category : 'private - updating' }
+CFPhysicsJointVisual >> updateLine: aLine from: firstPoint to: secondPoint [
+	(aLine fromAnchor position = firstPoint and: [ aLine toAnchor position = secondPoint ])
+		ifTrue: [ ^ aLine ].
+	aLine fromAnchor position: firstPoint.
+	aLine toAnchor position: secondPoint.
+	aLine requestLayout.
+	^ aLine
 ]
 
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> hideRail [
-	rail visibility: BlVisibility gone.
-	lowerLimitMarker visibility: BlVisibility gone.
-	upperLimitMarker visibility: BlVisibility gone
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> upperAngleMarker [ ^ upperAngleMarker
 ]
 
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showRailFrom: firstPoint to: secondPoint [
-	self updateLine: rail from: firstPoint to: secondPoint.
-	rail visibility: BlVisibility visible
+{ #category : 'accessing' }
+CFPhysicsJointVisual >> upperLimitMarker [ ^ upperLimitMarker
 ]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showRailLimitFrom: firstPoint to: secondPoint on: aMarker [
-	self updateLine: aMarker from: firstPoint to: secondPoint.
-	aMarker visibility: BlVisibility visible
-]
-
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> hideRevoluteDecoration [
-	pivotMarker visibility: BlVisibility gone.
-	referenceRay visibility: BlVisibility gone.
-	lowerAngleMarker visibility: BlVisibility gone.
-	upperAngleMarker visibility: BlVisibility gone.
-	allowedAngleArc visibility: BlVisibility gone.
-	motorCue visibility: BlVisibility gone
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showPivotAt: aPoint [
-	pivotMarker
-		relocate: aPoint - (5 @ 5);
-		visibility: BlVisibility visible
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showReferenceRayFrom: firstPoint to: secondPoint [
-	self updateLine: referenceRay from: firstPoint to: secondPoint.
-	referenceRay visibility: BlVisibility visible
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showAngleLimitFrom: firstPoint to: secondPoint on: aMarker [
-	self updateLine: aMarker from: firstPoint to: secondPoint.
-	aMarker visibility: BlVisibility visible
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showAllowedAngleFromDegrees: startDegrees toDegrees: endDegrees around: pivotPoint [
-	(allowedAngleStartDegrees = startDegrees and: [ allowedAngleEndDegrees = endDegrees ]) ifFalse: [
-		allowedAngleArc geometry
-			startAngle: startDegrees;
-			endAngle: endDegrees.
-		allowedAngleStartDegrees := startDegrees.
-		allowedAngleEndDegrees := endDegrees ].
-	allowedAngleArc
-		relocate: pivotPoint - (28 @ 28);
-		visibility: BlVisibility visible
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showMotorCueFrom: firstPoint to: secondPoint [
-	self updateLine: motorCue from: firstPoint to: secondPoint.
-	motorCue visibility: BlVisibility visible
-]
-
-
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showFixedLockFrom: firstPoint to: secondPoint direction: aDirection [
-	| normal innerPoint outerPoint halfWidth |
-	self showReferenceRayFrom: firstPoint to: secondPoint.
-	normal := aDirection y negated @ aDirection x.
-	halfWidth := 5.0.
-	innerPoint := firstPoint + (aDirection * 12.0).
-	outerPoint := secondPoint.
-	self
-		showAngleLimitFrom: innerPoint - (normal * halfWidth)
-		to: innerPoint + (normal * halfWidth)
-		on: lowerAngleMarker;
-		showAngleLimitFrom: outerPoint - (normal * halfWidth)
-		to: outerPoint + (normal * halfWidth)
-		on: upperAngleMarker
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> hideRestLengthMarker [
-	restLengthMarker visibility: BlVisibility gone
-]
-
-{ #category : 'updating - joint decorations' }
-CFPhysicsJointVisual >> showRestLengthMarkerAtFraction: aNumber from: firstPoint to: secondPoint [
-	| restPoint |
-	restPoint := firstPoint + ((secondPoint - firstPoint) * aNumber).
-	restLengthMarker
-		relocate: restPoint - (4 @ 4);
-		visibility: BlVisibility visible
-]
-
-{ #category : 'removing' }
-CFPhysicsJointVisual >> remove [
-	self hasParent ifTrue: [ self removeFromParent ].
-	rail hasParent ifTrue: [ rail removeFromParent ].
-	lowerLimitMarker hasParent ifTrue: [ lowerLimitMarker removeFromParent ].
-	upperLimitMarker hasParent ifTrue: [ upperLimitMarker removeFromParent ].
-	restLengthMarker hasParent ifTrue: [ restLengthMarker removeFromParent ].
-	pivotMarker hasParent ifTrue: [ pivotMarker removeFromParent ].
-	referenceRay hasParent ifTrue: [ referenceRay removeFromParent ].
-	lowerAngleMarker hasParent ifTrue: [ lowerAngleMarker removeFromParent ].
-	upperAngleMarker hasParent ifTrue: [ upperAngleMarker removeFromParent ].
-	allowedAngleArc hasParent ifTrue: [ allowedAngleArc removeFromParent ].
-	motorCue hasParent ifTrue: [ motorCue removeFromParent ].
-	hitTarget hasParent ifTrue: [ hitTarget removeFromParent ].
-	^ self
-]
-
-{ #category : 'controlling' }
-CFPhysicsJointVisual >> release [ ^ self remove ]

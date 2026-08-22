@@ -1,5 +1,6 @@
-"I represent a selection context that currently contains focus and propagate that state to its descendants."
-
+"
+I represent a selection context that currently contains focus and propagate that state to its descendants.
+"
 Class {
 	#name : 'CFMaActiveSelectionState',
 	#superclass : 'BlElementUniqueState',

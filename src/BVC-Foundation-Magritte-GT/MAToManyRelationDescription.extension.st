@@ -1,43 +1,5 @@
 Extension { #name : 'MAToManyRelationDescription' }
 
-
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToManyRelationDescription >> itemsAsIdentityAffordances [
-	self
-		blocItemViewModelStencil: CFMaIdentityItemViewModelStencilBuilder new;
-		blocItemStencil: CFMaIdentityAffordanceItemStencilBuilder new
-]
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToManyRelationDescription >> itemsAsCompactObjects [
-	self
-		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
-		blocItemStencil: ([ :anItemViewModel :anIndex :aListElement |
-			CFCompactObjectStencil new
-				object: anItemViewModel object;
-				create ] asStencilBuilder: BrListRowStencilBuilder)
-]
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToManyRelationDescription >> itemsAsEmbeddedForms [
-	(self blocListStencil isKindOf: CFMaListElementStencilBuilder)
-		ifTrue: [ self blocListStencil: CFMaFiniteListElementStencilBuilder new ].
-
-	self
-		blocItemViewModelStencil: CFMaEmbeddedItemViewModelStencilBuilder new;
-		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new;
-		relationBodyInsets: BlInsets empty;
-		relationGridItemInsets: BlInsets empty
-]
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToManyRelationDescription >> itemsAsPhlowLinks [
-	self
-		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
-		blocItemStencil: CFMaPhlowLinkItemStencilBuilder new
-]
-
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> beAccordionList [
 	self
@@ -105,6 +67,42 @@ MAToManyRelationDescription >> blocListStencil: aStencil [
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> itemsAsCompactObjects [
+	self
+		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemStencil: ([ :anItemViewModel :anIndex :aListElement |
+			CFCompactObjectStencil new
+				object: anItemViewModel object;
+				create ] asStencilBuilder: BrListRowStencilBuilder)
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> itemsAsEmbeddedForms [
+	(self blocListStencil isKindOf: CFMaListElementStencilBuilder)
+		ifTrue: [ self blocListStencil: CFMaFiniteListElementStencilBuilder new ].
+
+	self
+		blocItemViewModelStencil: CFMaEmbeddedItemViewModelStencilBuilder new;
+		blocItemStencil: CFMaEmbeddedFormItemStencilBuilder new;
+		relationBodyInsets: BlInsets empty;
+		relationGridItemInsets: BlInsets empty
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> itemsAsIdentityAffordances [
+	self
+		blocItemViewModelStencil: CFMaIdentityItemViewModelStencilBuilder new;
+		blocItemStencil: CFMaIdentityAffordanceItemStencilBuilder new
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToManyRelationDescription >> itemsAsPhlowLinks [
+	self
+		blocItemViewModelStencil: GtMagritteModelStencilBuilder new;
+		blocItemStencil: CFMaPhlowLinkItemStencilBuilder new
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> newItemStencil [
 	^ self propertyAt: #newItemStencil ifAbsent: [ nil ]
 ]
@@ -120,7 +118,6 @@ MAToManyRelationDescription >> newItemStencil: aStencil [
 		put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
 ]
 
-
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> relationBodyInsets [
 	^ self
@@ -132,7 +129,6 @@ MAToManyRelationDescription >> relationBodyInsets [
 MAToManyRelationDescription >> relationBodyInsets: anInsets [
 	self propertyAt: #cfMaRelationBodyInsets put: anInsets
 ]
-
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> relationGridItemInsets [

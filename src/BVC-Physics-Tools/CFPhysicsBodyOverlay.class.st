@@ -1,8 +1,15 @@
-"I manage the retained body diagnostics for one Physics overlay. My responsibility is to reconcile the world's bodies with their visual representations and release those visuals with the overlay."
+"
+I manage the retained body diagnostics for one Physics overlay. My responsibility is to reconcile the world's bodies with their visual representations and release those visuals with the overlay.
+"
 Class {
 	#name : 'CFPhysicsBodyOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'world', 'context', 'visualsByBody' ],
+	#instVars : [
+		'root',
+		'world',
+		'context',
+		'visualsByBody'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -17,20 +24,28 @@ CFPhysicsBodyOverlay class >> in: aRoot world: aWorld context: aContext [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsBodyOverlay >> root: anElement [ root := anElement ]
+{ #category : 'controlling' }
+CFPhysicsBodyOverlay >> clear [
+	visualsByBody valuesDo: #release.
+	visualsByBody removeAll.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsBodyOverlay >> world: aWorld [ world := aWorld ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyOverlay >> context: aContext [ context := aContext ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyOverlay >> visuals [ ^ visualsByBody values asArray ]
+CFPhysicsBodyOverlay >> context: aContext [ context := aContext
+]
 
 { #category : 'initialization' }
-CFPhysicsBodyOverlay >> initializeOverlay [ visualsByBody := IdentityDictionary new ]
+CFPhysicsBodyOverlay >> initializeOverlay [ visualsByBody := IdentityDictionary new
+]
+
+{ #category : 'controlling' }
+CFPhysicsBodyOverlay >> release [ ^ self clear
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyOverlay >> root: anElement [ root := anElement
+]
 
 { #category : 'updating' }
 CFPhysicsBodyOverlay >> update [
@@ -54,12 +69,10 @@ CFPhysicsBodyOverlay >> updateFrom: bodies [
 	^ self
 ]
 
-{ #category : 'controlling' }
-CFPhysicsBodyOverlay >> clear [
-	visualsByBody valuesDo: #release.
-	visualsByBody removeAll.
-	^ self
+{ #category : 'accessing' }
+CFPhysicsBodyOverlay >> visuals [ ^ visualsByBody values asArray
 ]
 
-{ #category : 'controlling' }
-CFPhysicsBodyOverlay >> release [ ^ self clear ]
+{ #category : 'accessing' }
+CFPhysicsBodyOverlay >> world: aWorld [ world := aWorld
+]

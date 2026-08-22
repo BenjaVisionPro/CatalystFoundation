@@ -1,5 +1,6 @@
-"I present the current Foundation field styling with Magritte groups as Brick tabs."
-
+"
+I present the current Foundation field styling with Magritte groups as Brick tabs.
+"
 Class {
 	#name : 'CFMaTabbedPresentation',
 	#superclass : 'CFMaPresentation',

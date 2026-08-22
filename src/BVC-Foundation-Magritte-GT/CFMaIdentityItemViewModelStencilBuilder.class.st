@@ -1,5 +1,6 @@
-"I am responsible for creating editable identity item view models inside their parent Foundation Magritte transaction."
-
+"
+I am responsible for creating editable identity item view models inside their parent Foundation Magritte transaction.
+"
 Class {
 	#name : 'CFMaIdentityItemViewModelStencilBuilder',
 	#superclass : 'GtMagritteModelStencilBuilder',

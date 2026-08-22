@@ -1,8 +1,14 @@
-"I provide the coordinate context shared by Physics overlay visuals. Physics-to-Bloc presentation conversion belongs to BVC-Physics-Bloc; I only adapt displayed Bloc points into overlay-local coordinates."
+"
+I provide the coordinate context shared by Physics overlay visuals. Physics-to-Bloc presentation conversion belongs to BVC-Physics-Bloc; I only adapt displayed Bloc points into overlay-local coordinates.
+"
 Class {
 	#name : 'CFPhysicsOverlayContext',
 	#superclass : 'Object',
-	#instVars : [ 'host', 'world', 'overlay' ],
+	#instVars : [
+		'host',
+		'world',
+		'overlay'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -17,22 +23,20 @@ CFPhysicsOverlayContext class >> host: aHostElement world: aWorld overlay: anOve
 ]
 
 { #category : 'accessing' }
-CFPhysicsOverlayContext >> host [ ^ host ]
+CFPhysicsOverlayContext >> host [ ^ host
+]
 
 { #category : 'accessing' }
-CFPhysicsOverlayContext >> host: anElement [ host := anElement ]
+CFPhysicsOverlayContext >> host: anElement [ host := anElement
+]
 
 { #category : 'accessing' }
-CFPhysicsOverlayContext >> world [ ^ world ]
+CFPhysicsOverlayContext >> overlay [ ^ overlay
+]
 
 { #category : 'accessing' }
-CFPhysicsOverlayContext >> world: aWorld [ world := aWorld ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayContext >> overlay [ ^ overlay ]
-
-{ #category : 'accessing' }
-CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay ]
+CFPhysicsOverlayContext >> overlay: anOverlay [ overlay := anOverlay
+]
 
 { #category : 'geometry' }
 CFPhysicsOverlayContext >> overlayPoint: aPoint from: anElement [
@@ -74,3 +78,10 @@ CFPhysicsOverlayContext >> overlayScaleAtWorldPoint: aPoint [
 	^ (((xUnit - origin) r + (yUnit - origin) r) / 2.0)
 ]
 
+{ #category : 'accessing' }
+CFPhysicsOverlayContext >> world [ ^ world
+]
+
+{ #category : 'accessing' }
+CFPhysicsOverlayContext >> world: aWorld [ world := aWorld
+]

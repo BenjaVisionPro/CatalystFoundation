@@ -147,17 +147,17 @@ CFCompactObjectElement >> refreshTitle [
 	self updateTitleFromValue: aValue
 ]
 
-{ #category : 'accessing' }
-CFCompactObjectElement >> titleElement [
-	^ titleElement
-]
-
 { #category : 'private - accessing' }
 CFCompactObjectElement >> titleDescriptionInMemento [
 	memento ifNil: [ ^ nil ].
 	^ memento magritteDescription
 		detect: [ :each | each handlesSelector: #label ]
 		ifNone: [ nil ]
+]
+
+{ #category : 'accessing' }
+CFCompactObjectElement >> titleElement [
+	^ titleElement
 ]
 
 { #category : 'accessing' }

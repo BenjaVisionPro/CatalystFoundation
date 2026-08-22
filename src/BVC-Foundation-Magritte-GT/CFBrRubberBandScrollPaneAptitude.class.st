@@ -8,7 +8,7 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 CFBrRubberBandScrollPaneAptitude >> initialize [
 	super initialize.
 
@@ -23,7 +23,7 @@ CFBrRubberBandScrollPaneAptitude >> initialize [
 		with: [ BlLinearLayout vertical ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 CFBrRubberBandScrollPaneAptitude >> initializeListeners [
 	super initializeListeners.
 	
@@ -32,14 +32,14 @@ CFBrRubberBandScrollPaneAptitude >> initializeListeners [
 	self when: BrScrollToItemWish do: [ :anEvent | self onScrollToChild: anEvent ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 CFBrRubberBandScrollPaneAptitude >> initializeRequests [
 	super initializeRequests.
 	
 	self request: BrScrollableContentRequest new
 ]
 
-{ #category : #'private - hooks' }
+{ #category : 'private - hooks' }
 CFBrRubberBandScrollPaneAptitude >> onContentChanged: aContentStencil [
 	| aContentElement |
 	
@@ -50,19 +50,19 @@ CFBrRubberBandScrollPaneAptitude >> onContentChanged: aContentStencil [
 	scrollable addChildFirst: aContentElement
 ]
 
-{ #category : #'private - hooks' }
+{ #category : 'private - hooks' }
 CFBrRubberBandScrollPaneAptitude >> onScrollBy: aScrollByWish [
 	aScrollByWish smooth
 		ifTrue: [ scrollable smoothScrollBy: aScrollByWish delta ]
 		ifFalse: [ scrollable scrollBy: aScrollByWish delta ]
 ]
 
-{ #category : #'private - hooks' }
+{ #category : 'private - hooks' }
 CFBrRubberBandScrollPaneAptitude >> onScrollToChild: aScrollToItemWish [
 	
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 CFBrRubberBandScrollPaneAptitude >> scrollable [
 	^ scrollable
 ]

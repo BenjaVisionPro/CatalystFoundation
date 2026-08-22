@@ -1,5 +1,6 @@
-"I remove GT's per-editor hover/focus border in the settings presentation. The enclosing row owns interaction chrome."
-
+"
+I remove GT's per-editor hover/focus border in the settings presentation. The enclosing row owns interaction chrome.
+"
 Class {
 	#name : 'CFMaSettingsEditorAptitude',
 	#superclass : 'BrStyleCommonAptitude',

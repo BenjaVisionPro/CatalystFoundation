@@ -1,5 +1,6 @@
-"I am responsible for extending a GT Magritte editing transaction across embedded relation objects."
-
+"
+I am responsible for extending a GT Magritte editing transaction across embedded relation objects.
+"
 Class {
 	#name : 'CFMaMemento',
 	#superclass : 'GtMagritteMemento',
@@ -12,20 +13,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Models'
 }
-
-{ #category : 'initialization' }
-CFMaMemento >> initialize [
-	super initialize.
-
-	childMementosByDescription := Dictionary new.
-	statusPulse := AsyncObservableValue
-		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
-	compositeOverallStatus := (statusPulse observe
-		map: [ :anIgnoredValue | self computeCompositeOverallStatus ])
-			asAsyncObservable: GtMagritteBuilderUtility executionConfiguration.
-
-	super overallStatus observe: statusPulse
-]
 
 { #category : 'private - children' }
 CFMaMemento >> allChildMementos [
@@ -51,21 +38,10 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 			aMemento ]
 ]
 
-{ #category : 'children' }
-CFMaMemento >> retainChildMementosFor: aCollection inRelation: aDescription [
-	| theRelationMementos |
-	theRelationMementos := childMementosByDescription
-		at: aDescription
-		ifAbsent: [ ^ self ].
-
-	theRelationMementos keys copy do: [ :anObject |
-		(aCollection identityIncludes: anObject)
-			ifFalse: [ theRelationMementos removeKey: anObject ifAbsent: [ ] ] ].
-
-	theRelationMementos ifEmpty: [
-		childMementosByDescription removeKey: aDescription ifAbsent: [ ] ].
-
-	statusPulse value: super overallStatus valueOrNil
+{ #category : 'actions' }
+CFMaMemento >> commit [
+	self allChildMementos do: [ :aMemento | aMemento commit ].
+	^ super commit
 ]
 
 { #category : 'private - status' }
@@ -87,21 +63,46 @@ CFMaMemento >> computeCompositeOverallStatus [
 		yourself
 ]
 
+{ #category : 'initialization' }
+CFMaMemento >> initialize [
+	super initialize.
+
+	childMementosByDescription := Dictionary new.
+	statusPulse := AsyncObservableValue
+		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
+	compositeOverallStatus := (statusPulse observe
+		map: [ :anIgnoredValue | self computeCompositeOverallStatus ])
+			asAsyncObservable: GtMagritteBuilderUtility executionConfiguration.
+
+	super overallStatus observe: statusPulse
+]
+
 { #category : 'accessing' }
 CFMaMemento >> overallStatus [
 	^ compositeOverallStatus
 ]
 
 { #category : 'actions' }
-CFMaMemento >> commit [
-	self allChildMementos do: [ :aMemento | aMemento commit ].
-	^ super commit
-]
-
-{ #category : 'actions' }
 CFMaMemento >> reset [
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
+]
+
+{ #category : 'children' }
+CFMaMemento >> retainChildMementosFor: aCollection inRelation: aDescription [
+	| theRelationMementos |
+	theRelationMementos := childMementosByDescription
+		at: aDescription
+		ifAbsent: [ ^ self ].
+
+	theRelationMementos keys copy do: [ :anObject |
+		(aCollection identityIncludes: anObject)
+			ifFalse: [ theRelationMementos removeKey: anObject ifAbsent: [ ] ] ].
+
+	theRelationMementos ifEmpty: [
+		childMementosByDescription removeKey: aDescription ifAbsent: [ ] ].
+
+	statusPulse value: super overallStatus valueOrNil
 ]
 
 { #category : 'actions' }
@@ -113,4 +114,3 @@ CFMaMemento >> revertUsing: aDescription [
 	anObservable value: (aValue copyWithCurrentValue: aValue originalValue).
 	^ aFuture
 ]
-

@@ -1,13 +1,44 @@
 Extension { #name : 'CFPhysicsRevoluteJoint' }
 
 { #category : '*bvc-physics-tools' }
-CFPhysicsRevoluteJoint >> physicsOverlayWorldPoints [
-	^ self endpointPair worldPoints
+CFPhysicsRevoluteJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
+	anInspectorContent
+		addGroup: 'Rotation' fields: {
+			#referenceAngle -> 'Reference angle'.
+			#accumulatedImpulse -> 'Accumulated impulse' };
+		addGroup: 'Limits' fields: {
+			#limitsEnabled -> 'Enabled'.
+			#lowerAngle -> 'Lower angle'.
+			#upperAngle -> 'Upper angle' };
+		addGroup: 'Motor' fields: {
+			#motorEnabled -> 'Enabled'.
+			#motorSpeed -> 'Speed'.
+			#maximumMotorTorque -> 'Maximum torque'.
+			#motorImpulse -> 'Current impulse' }
 ]
 
 { #category : '*bvc-physics-tools' }
 CFPhysicsRevoluteJoint >> inspectInPhysicsOverlay: anInspector [
 	anInspector inspect: self usingContent: CFPhysicsJointInspector newContent
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsRevoluteJoint >> physicsOverlayWorldPoints [
+	^ self endpointPair worldPoints
+]
+
+{ #category : '*bvc-physics-tools' }
+CFPhysicsRevoluteJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
+	anInspectorContent
+		diagnosticNumber: self referenceAngle at: #referenceAngle;
+		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
+		text: self limitsEnabled printString at: #limitsEnabled;
+		diagnosticNumber: self lowerAngle at: #lowerAngle;
+		diagnosticNumber: self upperAngle at: #upperAngle;
+		text: self motorEnabled printString at: #motorEnabled;
+		diagnosticNumber: self motorSpeed at: #motorSpeed;
+		diagnosticNumber: self maximumMotorTorque at: #maximumMotorTorque;
+		diagnosticNumber: self motorImpulse at: #motorImpulse
 ]
 
 { #category : '*bvc-physics-tools' }
@@ -61,35 +92,3 @@ CFPhysicsRevoluteJoint >> updatePhysicsOverlayVisual: aVisual from: firstPoint t
 			aVisual showMotorCueFrom: motorStart to: motorEnd ]
 		ifFalse: [ aVisual motorCue visibility: BlVisibility gone ]
 ]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsRevoluteJoint >> addPhysicsOverlayInspectorGroupsTo: anInspectorContent [
-	anInspectorContent
-		addGroup: 'Rotation' fields: {
-			#referenceAngle -> 'Reference angle'.
-			#accumulatedImpulse -> 'Accumulated impulse' };
-		addGroup: 'Limits' fields: {
-			#limitsEnabled -> 'Enabled'.
-			#lowerAngle -> 'Lower angle'.
-			#upperAngle -> 'Upper angle' };
-		addGroup: 'Motor' fields: {
-			#motorEnabled -> 'Enabled'.
-			#motorSpeed -> 'Speed'.
-			#maximumMotorTorque -> 'Maximum torque'.
-			#motorImpulse -> 'Current impulse' }
-]
-
-{ #category : '*bvc-physics-tools' }
-CFPhysicsRevoluteJoint >> refreshPhysicsOverlayInspector: anInspectorContent [
-	anInspectorContent
-		diagnosticNumber: self referenceAngle at: #referenceAngle;
-		diagnosticPoint: self accumulatedImpulse at: #accumulatedImpulse;
-		text: self limitsEnabled printString at: #limitsEnabled;
-		diagnosticNumber: self lowerAngle at: #lowerAngle;
-		diagnosticNumber: self upperAngle at: #upperAngle;
-		text: self motorEnabled printString at: #motorEnabled;
-		diagnosticNumber: self motorSpeed at: #motorSpeed;
-		diagnosticNumber: self maximumMotorTorque at: #maximumMotorTorque;
-		diagnosticNumber: self motorImpulse at: #motorImpulse
-]
-

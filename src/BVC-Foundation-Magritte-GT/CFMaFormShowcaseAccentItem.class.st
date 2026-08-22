@@ -1,5 +1,6 @@
-"I provide a second related-object class so the Foundation Magritte showcase exercises class-choice creation."
-
+"
+I provide a second related-object class so the Foundation Magritte showcase exercises class-choice creation.
+"
 Class {
 	#name : 'CFMaFormShowcaseAccentItem',
 	#superclass : 'CFMaFormShowcaseItem',

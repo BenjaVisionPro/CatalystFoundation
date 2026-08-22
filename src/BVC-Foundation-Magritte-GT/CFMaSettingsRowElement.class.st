@@ -19,31 +19,21 @@ Class {
 	#tag : 'Presentations-Settings'
 }
 
-{ #category : 'initialization' }
-CFMaSettingsRowElement >> initialize [
-	super initialize.
-	trailingActions := #().
-	cardTopInset := 0.
-	cardBottomInset := 0.
-	self
-		hMatchParent;
-		vFitContent;
-		layout: CFMaSettingsRowLayout new;
-		updatePadding;
-		addAptitude: CFMaActiveSelectionAptitude new;
-		addAptitude: CFMaSettingsRowAptitude new
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> actionSpacing [
+	^ 4
 ]
 
-{ #category : 'initialization' }
-CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField trailingActions: aCollection [
-	icon := anIcon.
-	label := aLabel.
-	comment := aComment.
-	field := aField.
-	trailingActions := aCollection ifNil: [ #() ].
-	self
-		updatePadding;
-		buildRegions
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> actionsGap [
+	^ 4
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> bottomInset [
+	icon ifNil: [ ^ 6 + cardBottomInset ].
+	comment ifNil: [ ^ 3 + cardBottomInset ].
+	^ 5 + cardBottomInset
 ]
 
 { #category : 'private - building' }
@@ -119,9 +109,26 @@ CFMaSettingsRowElement >> buildRegions [
 	editorRegion ifNotNil: [ self addChild: editorRegion ]
 ]
 
-{ #category : 'private - layout' }
-CFMaSettingsRowElement >> iconElement [
-	^ icon
+{ #category : 'private - card geometry' }
+CFMaSettingsRowElement >> cardBottomInset: aNumber [
+	cardBottomInset := aNumber.
+	self updatePadding
+]
+
+{ #category : 'private - card geometry' }
+CFMaSettingsRowElement >> cardTopInset: aNumber [
+	cardTopInset := aNumber.
+	self updatePadding
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> commentLeftInset [
+	^ 0.5
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> commentTopGap [
+	^ 1
 ]
 
 { #category : 'private - layout' }
@@ -139,16 +146,58 @@ CFMaSettingsRowElement >> editorRegionElement [
 	^ editorRegion
 ]
 
-{ #category : 'private - card geometry' }
-CFMaSettingsRowElement >> cardBottomInset: aNumber [
-	cardBottomInset := aNumber.
-	self updatePadding
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> fieldGap [
+	^ 12
 ]
 
-{ #category : 'private - card geometry' }
-CFMaSettingsRowElement >> cardTopInset: aNumber [
-	cardTopInset := aNumber.
-	self updatePadding
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> horizontalInset [
+	^ 8
+]
+
+{ #category : 'initialization' }
+CFMaSettingsRowElement >> icon: anIcon label: aLabel comment: aComment field: aField trailingActions: aCollection [
+	icon := anIcon.
+	label := aLabel.
+	comment := aComment.
+	field := aField.
+	trailingActions := aCollection ifNil: [ #() ].
+	self
+		updatePadding;
+		buildRegions
+]
+
+{ #category : 'private - layout' }
+CFMaSettingsRowElement >> iconElement [
+	^ icon
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> iconGap [
+	^ 10
+]
+
+{ #category : 'initialization' }
+CFMaSettingsRowElement >> initialize [
+	super initialize.
+	trailingActions := #().
+	cardTopInset := 0.
+	cardBottomInset := 0.
+	self
+		hMatchParent;
+		vFitContent;
+		layout: CFMaSettingsRowLayout new;
+		updatePadding;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaSettingsRowAptitude new
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsRowElement >> topInset [
+	^ (icon
+		ifNil: [ 5 ]
+		ifNotNil: [ 4 ]) + cardTopInset
 ]
 
 { #category : 'private - layout' }
@@ -158,53 +207,4 @@ CFMaSettingsRowElement >> updatePadding [
 		left: self horizontalInset
 		bottom: self bottomInset
 		right: self horizontalInset)
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> iconGap [
-	^ 10
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> fieldGap [
-	^ 12
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> actionsGap [
-	^ 4
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> actionSpacing [
-	^ 4
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> commentTopGap [
-	^ 1
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> commentLeftInset [
-	^ 0.5
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> bottomInset [
-	icon ifNil: [ ^ 6 + cardBottomInset ].
-	comment ifNil: [ ^ 3 + cardBottomInset ].
-	^ 5 + cardBottomInset
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> horizontalInset [
-	^ 8
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsRowElement >> topInset [
-	^ (icon
-		ifNil: [ 5 ]
-		ifNotNil: [ 4 ]) + cardTopInset
 ]

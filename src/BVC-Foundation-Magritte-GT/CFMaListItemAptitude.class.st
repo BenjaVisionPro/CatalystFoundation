@@ -1,5 +1,6 @@
-"I am responsible for presenting a selected Foundation list item according to whether its selection context is active."
-
+"
+I am responsible for presenting a selected Foundation list item according to whether its selection context is active.
+"
 Class {
 	#name : 'CFMaListItemAptitude',
 	#superclass : 'BrGlamorousListItemAptitude',

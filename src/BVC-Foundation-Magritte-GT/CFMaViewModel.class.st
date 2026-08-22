@@ -23,74 +23,6 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 		yourself
 ]
 
-
-{ #category : 'accessing - compatibility' }
-CFMaViewModel >> presentationClass: aPresentationClass [
-	"Compatibility for the experimental GT presentations. New production presentations are selected from the container description."
-	elementBuilderBlock := [ aPresentationClass new ]
-]
-
-{ #category : 'callbacks' }
-CFMaViewModel >> formElementDo: aBlock [
-	formElementBlock := aBlock
-]
-
-{ #category : 'callbacks' }
-CFMaViewModel >> elementBuilderDo: aBlock [
-	elementBuilderBlock := aBlock
-]
-
-{ #category : 'initialization' }
-CFMaViewModel >> formContainerStencilForMemento: aMemento [
-	"An explicitly supplied Magritte form stencil is consumer-owned. Do not
-	adapt it to Foundation's default stencil builder."
-	^ aMemento magritteDescription
-		propertyAt: #blocElementContainerStencil
-		ifPresent: [ :aStencil | aStencil ]
-		ifAbsent: [ CFMaFormStencilBuilder new ]
-]
-
-{ #category : 'initialization' }
-CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
-	^ self
-		initializeForm: theFrame
-		forMemento: aMemento
-		includeImplicitActions: includeImplicitActions
-]
-
-{ #category : 'initialization' }
-CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitActions: aBoolean [
-	| aContainer aStencil anElementBuilder |
-	theFrame userData at: self class gtMementoSymbol put: aMemento.
-
-	theFrame removeChildren.
-
-	aStencil := self formContainerStencilForMemento: aMemento.
-
-	aContainer := aStencil
-		memento: aMemento;
-		asElement.
-
-	theFrame addChild: aContainer.
-	formElementBlock ifNotNil: [ :aBlock | aBlock cull: aContainer ].
-	aContainer requestStyle.
-
-	anElementBuilder := elementBuilderBlock
-		ifNil: [
-			aMemento magritteDescription blocPresentationStencil
-				memento: aMemento;
-				build ]
-		ifNotNil: [ :aBlock | aBlock value ].
-
-	anElementBuilder
-		includeImplicitActions: aBoolean;
-		form: theFrame;
-		memento: aMemento;
-		addButtons: self actions;
-		build.
-	^ self onElementCreated cull: theFrame
-]
-
 { #category : 'api - converting' }
 CFMaViewModel >> asElement [
 	| aFrame aResizerAptitude |
@@ -183,4 +115,71 @@ CFMaViewModel >> asEmbeddedElement [
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	aFrame asyncFuture future: self mementoFuture.
 	^ aFrame
+]
+
+{ #category : 'callbacks' }
+CFMaViewModel >> elementBuilderDo: aBlock [
+	elementBuilderBlock := aBlock
+]
+
+{ #category : 'initialization' }
+CFMaViewModel >> formContainerStencilForMemento: aMemento [
+	"An explicitly supplied Magritte form stencil is consumer-owned. Do not
+	adapt it to Foundation's default stencil builder."
+	^ aMemento magritteDescription
+		propertyAt: #blocElementContainerStencil
+		ifPresent: [ :aStencil | aStencil ]
+		ifAbsent: [ CFMaFormStencilBuilder new ]
+]
+
+{ #category : 'callbacks' }
+CFMaViewModel >> formElementDo: aBlock [
+	formElementBlock := aBlock
+]
+
+{ #category : 'initialization' }
+CFMaViewModel >> initializeForm: theFrame forMemento: aMemento [
+	^ self
+		initializeForm: theFrame
+		forMemento: aMemento
+		includeImplicitActions: includeImplicitActions
+]
+
+{ #category : 'initialization' }
+CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitActions: aBoolean [
+	| aContainer aStencil anElementBuilder |
+	theFrame userData at: self class gtMementoSymbol put: aMemento.
+
+	theFrame removeChildren.
+
+	aStencil := self formContainerStencilForMemento: aMemento.
+
+	aContainer := aStencil
+		memento: aMemento;
+		asElement.
+
+	theFrame addChild: aContainer.
+	formElementBlock ifNotNil: [ :aBlock | aBlock cull: aContainer ].
+	aContainer requestStyle.
+
+	anElementBuilder := elementBuilderBlock
+		ifNil: [
+			aMemento magritteDescription blocPresentationStencil
+				memento: aMemento;
+				build ]
+		ifNotNil: [ :aBlock | aBlock value ].
+
+	anElementBuilder
+		includeImplicitActions: aBoolean;
+		form: theFrame;
+		memento: aMemento;
+		addButtons: self actions;
+		build.
+	^ self onElementCreated cull: theFrame
+]
+
+{ #category : 'accessing - compatibility' }
+CFMaViewModel >> presentationClass: aPresentationClass [
+	"Compatibility for the experimental GT presentations. New production presentations are selected from the container description."
+	elementBuilderBlock := [ aPresentationClass new ]
 ]

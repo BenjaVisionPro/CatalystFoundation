@@ -10,6 +10,32 @@ Class {
 	#tag : 'Presentations-Settings'
 }
 
+{ #category : 'adding' }
+CFMaSettingsCardElement >> addRow: aRow [
+	lastRow ifNotNil: [ lastRow cardBottomInset: 0 ].
+	rowCount > 0 ifTrue: [ self addChild: self newSeparator ].
+	rowCount = 0 ifTrue: [ aRow cardTopInset: self edgeInset ].
+	aRow cardBottomInset: self edgeInset.
+	self addChild: aRow.
+	lastRow := aRow.
+	rowCount := rowCount + 1
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsCardElement >> cornerRadius [
+	^ 12
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsCardElement >> edgeInset [
+	^ 2
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsCardElement >> editorTextHorizontalInset [
+	^ 0
+]
+
 { #category : 'initialization' }
 CFMaSettingsCardElement >> initialize [
 	super initialize.
@@ -25,17 +51,6 @@ CFMaSettingsCardElement >> initialize [
 		cellSpacing: 0;
 		hMatchParent;
 		vFitContent
-]
-
-{ #category : 'adding' }
-CFMaSettingsCardElement >> addRow: aRow [
-	lastRow ifNotNil: [ lastRow cardBottomInset: 0 ].
-	rowCount > 0 ifTrue: [ self addChild: self newSeparator ].
-	rowCount = 0 ifTrue: [ aRow cardTopInset: self edgeInset ].
-	aRow cardBottomInset: self edgeInset.
-	self addChild: aRow.
-	lastRow := aRow.
-	rowCount := rowCount + 1
 ]
 
 { #category : 'private - elements' }
@@ -56,21 +71,6 @@ CFMaSettingsCardElement >> newSeparator [
 		addChild: aSeparator;
 		yourself.
 	^ aFrame
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsCardElement >> cornerRadius [
-	^ 12
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsCardElement >> edgeInset [
-	^ 2
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsCardElement >> editorTextHorizontalInset [
-	^ 0
 ]
 
 { #category : 'private - metrics' }

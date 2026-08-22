@@ -20,7 +20,16 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : #conversion }
+{ #category : 'private - applying' }
+CFBlRubberBandScrollableElement >> applyProjectedPosition [
+	self scrolledElementDo: [ :anElement |
+		anElement relocate: self projectedScrollPosition ].
+	self ensureRequiredSnapBack.
+	self updateDebugOverlay.
+	^ self
+]
+
+{ #category : 'conversion' }
 CFBlRubberBandScrollableElement >> asScrollableElement [
 	^ self
 ]
@@ -33,6 +42,17 @@ CFBlRubberBandScrollableElement >> canScrollHorizontally [
 { #category : 'api - scrolling testing' }
 CFBlRubberBandScrollableElement >> canScrollVertically [
 	^ self hasProjectionPlane and: [ projectionPlane hasVertical ]
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> clearSnapBackIfInBounds [
+	(isSnappingBack and: [ self isOverscrolled not ])
+		ifTrue: [
+			isSnappingBack := false.
+			self projectionPlaneIfPresent ifNotNil: [ :plane |
+				plane state: #idle.
+				plane clearSnapBackRequest ] ].
+	^ self
 ]
 
 { #category : 'api - scrolling thumb' }
@@ -69,49 +89,6 @@ CFBlRubberBandScrollableElement >> computeVerticalScrollRange [
 		ifFalse: [ self height ]
 ]
 
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultHorizontalAlignment [
-	^ BlElementAlignment null horizontal
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultLayout [
-	^ BlFrameLayout new
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultFlingVelocityScale [
-	^ 0.01
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultGestureScrollScale [
-	^ 10.0
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultWheelScrollScale [
-	^ 6.0 @ -6.0
-]
-
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultSmoothScrollDuration [
-	^ 200 milliSeconds
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultOverscrollLimit [
-	"A UI default only. CFRubberBandProjection remains neutral by default."
-
-	^ 1 / 2
-]
-
-{ #category : 'defaults' }
-CFBlRubberBandScrollableElement >> defaultVerticalAlignment [
-	^ BlElementAlignment null vertical
-]
-
 { #category : 'debugging' }
 CFBlRubberBandScrollableElement >> debugOverlay [
 	debugOverlay ifNil: [ debugOverlay := self newDebugOverlay ].
@@ -146,83 +123,46 @@ CFBlRubberBandScrollableElement >> debugValuesString [
 			nextPutAll: 'has vertical: '; nextPutAll: self canScrollVertically asString ]
 ]
 
-{ #category : 'scrolling' }
-CFBlRubberBandScrollableElement >> flingBy: aVelocityPoint [
-	self scrollFlinger flingBy: aVelocityPoint * self flingVelocityScale
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultFlingVelocityScale [
+	^ 0.01
 ]
 
-{ #category : 'testing' }
-CFBlRubberBandScrollableElement >> hasDebugOverlay [
-	^ debugOverlay notNil and: [ debugOverlay hasParent ]
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultGestureScrollScale [
+	^ 10.0
 ]
 
-{ #category : 'testing' }
-CFBlRubberBandScrollableElement >> hasProjectionPlane [
-	^ projectionPlane notNil and: [ projectionPlane isEmpty not ]
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultHorizontalAlignment [
+	^ BlElementAlignment null horizontal
 ]
 
-{ #category : 'testing' }
-CFBlRubberBandScrollableElement >> hasScrolledElement [
-	^ self children isNotEmpty
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultLayout [
+	^ BlFrameLayout new
 ]
 
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultOverscrollLimit [
+	"A UI default only. CFRubberBandProjection remains neutral by default."
 
-{ #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> snapBackMinimum [
-	^ self projectionPlaneIfPresent
-		ifNil: [ self scrollMinimum ]
-		ifNotNil: [ :plane | plane minimumPointWithFallback: self scrollMinimum ]
+	^ 1 / 2
 ]
 
-{ #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> snapBackMaximum [
-	^ self projectionPlaneIfPresent
-		ifNil: [ self scrollMaximum ]
-		ifNotNil: [ :plane | plane maximumPointWithFallback: self scrollMaximum ]
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultSmoothScrollDuration [
+	^ 200 milliSeconds
 ]
 
-
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> isOverscrolled [
-	self updateProjectionBounds.
-	^ self projectionPlaneIfPresent
-		ifNil: [ false ]
-		ifNotNil: [ :plane |
-			plane position: scrollPosition.
-			plane isOverscrolled ]
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultVerticalAlignment [
+	^ BlElementAlignment null vertical
 ]
 
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
-	self updateProjectionBounds.
-	^ self projectionPlaneIfPresent
-		ifNil: [ scrollPosition ]
-		ifNotNil: [ :plane |
-			plane position: scrollPosition.
-			plane nearestBoundsPosition ]
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> snapBack [
-	"Attempt to start the GT springback animation for an already requested
-	snapback. If the flinger cannot start yet, keep the plane request alive so
-	the next layout / position application can try again."
-
-	^ self tryStartSnapBack
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> snapBackIfNeeded [
-	self requestSnapBackIfOverscrolled.
-	^ self ensureRequiredSnapBack
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> requestSnapBackIfOverscrolled [
-	self isOverscrolled ifTrue: [
-		self projectionPlaneIfPresent ifNotNil: [ :plane | plane requestSnapBack ] ].
-	^ self
+{ #category : 'defaults' }
+CFBlRubberBandScrollableElement >> defaultWheelScrollScale [
+	^ 6.0 @ -6.0
 ]
 
 { #category : 'scrolling - snapback' }
@@ -236,56 +176,17 @@ CFBlRubberBandScrollableElement >> ensureRequiredSnapBack [
 	^ self tryStartSnapBack
 ]
 
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> tryStartSnapBack [
-	| plane didStart |
-
-	isSnappingBack ifTrue: [ ^ true ].
-	self hasScrolledElement ifFalse: [ ^ false ].
-	self updateProjectionBounds.
-	self isOverscrolled ifFalse: [
-		self projectionPlaneIfPresent ifNotNil: [ :aPlane |
-			aPlane clearSnapBackRequest.
-			aPlane state: #idle ].
-		self updateDebugOverlay.
-		^ false ].
-
-	plane := self projectionPlaneIfPresent.
-	plane ifNil: [ ^ false ].
-	plane requestSnapBack.
-
-	didStart := self scrollFlinger
-		cfSpringBackFrom: self scrollPosition
-		min: self snapBackMinimum
-		max: self snapBackMaximum.
-	didStart
-		ifTrue: [
-			isSnappingBack := true.
-			plane
-				state: #snappingBack;
-				clearSnapBackRequest ]
-		ifFalse: [
-			"Keep the request alive. Public scrolling must not leave the element
-			overscrolled and idle just because the flinger could not be started at
-			this exact moment, for example before the element is fully live."
-			plane requestSnapBack ].
-	self updateDebugOverlay.
-	^ didStart
-]
-
 { #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> hasUsableScrollExtentFor: aDeltaPoint [
-	"BlScrollFlinger>>smoothScrollBy: computes a duration from the active
-	scroll axis extent. Before layout, that extent can be zero and the
-	flinger duration calculation divides by it. Use a fixed-duration flinger
-	entry point until layout has produced a usable extent."
-
-	(aDeltaPoint x abs > aDeltaPoint y abs)
-		ifTrue: [ ^ self width > 0 ].
-
-	^ self height > 0
+CFBlRubberBandScrollableElement >> finiteOvershot: aNumber fallback: aFallbackNumber [
+	(aNumber = Float infinity or: [ aNumber = Float negativeInfinity ])
+		ifTrue: [ ^ aFallbackNumber ].
+	^ aNumber
 ]
 
+{ #category : 'scrolling' }
+CFBlRubberBandScrollableElement >> flingBy: aVelocityPoint [
+	self scrollFlinger flingBy: aVelocityPoint * self flingVelocityScale
+]
 
 { #category : 'input scaling' }
 CFBlRubberBandScrollableElement >> flingVelocityScale [
@@ -313,21 +214,38 @@ CFBlRubberBandScrollableElement >> gestureScrollScale: aNumber [
 	^ self
 ]
 
-{ #category : 'input scaling' }
-CFBlRubberBandScrollableElement >> wheelScrollScale [
-	^ wheelScrollScale
+{ #category : 'testing' }
+CFBlRubberBandScrollableElement >> hasDebugOverlay [
+	^ debugOverlay notNil and: [ debugOverlay hasParent ]
 ]
 
-{ #category : 'input scaling' }
-CFBlRubberBandScrollableElement >> wheelScrollScale: aPointOrNumber [
-	(aPointOrNumber isNumber and: [ aPointOrNumber < 0 ])
-		ifTrue: [ self error: 'Wheel scroll scale must not be negative.' ].
-	((aPointOrNumber respondsTo: #x) and: [
-		(aPointOrNumber respondsTo: #y) and: [
-			aPointOrNumber x isZero and: [ aPointOrNumber y isZero ] ] ])
-		ifTrue: [ self error: 'Wheel scroll scale point must not be zero.' ].
-	wheelScrollScale := aPointOrNumber.
-	self updateDebugOverlay.
+{ #category : 'testing' }
+CFBlRubberBandScrollableElement >> hasProjectionPlane [
+	^ projectionPlane notNil and: [ projectionPlane isEmpty not ]
+]
+
+{ #category : 'testing' }
+CFBlRubberBandScrollableElement >> hasScrolledElement [
+	^ self children isNotEmpty
+]
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> hasUsableScrollExtentFor: aDeltaPoint [
+	"BlScrollFlinger>>smoothScrollBy: computes a duration from the active
+	scroll axis extent. Before layout, that extent can be zero and the
+	flinger duration calculation divides by it. Use a fixed-duration flinger
+	entry point until layout has produced a usable extent."
+
+	(aDeltaPoint x abs > aDeltaPoint y abs)
+		ifTrue: [ ^ self width > 0 ].
+
+	^ self height > 0
+]
+
+{ #category : 'debugging' }
+CFBlRubberBandScrollableElement >> hideDebugOverlay [
+	debugOverlay ifNotNil: [
+		debugOverlay hasParent ifTrue: [ debugOverlay removeFromParent ] ].
 	^ self
 ]
 
@@ -371,6 +289,21 @@ CFBlRubberBandScrollableElement >> initialize [
 	self addEventHandler: CFBlRubberBandScrollableElementEventHandler new
 ]
 
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> isOverscrolled [
+	self updateProjectionBounds.
+	^ self projectionPlaneIfPresent
+		ifNil: [ false ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane isOverscrolled ]
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> isSnappingBack [
+	^ isSnappingBack
+]
+
 { #category : 'private - geometry' }
 CFBlRubberBandScrollableElement >> limitedScrollPositionFor: aPoint [
 	^ self projectionPlaneIfPresent
@@ -378,15 +311,14 @@ CFBlRubberBandScrollableElement >> limitedScrollPositionFor: aPoint [
 		ifNotNil: [ :plane | plane limitedPointFor: aPoint ]
 ]
 
-
-
-{ #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> scrollPositionMovedBy: aDeltaPoint [
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> nearestScrollBoundsPosition [
+	self updateProjectionBounds.
 	^ self projectionPlaneIfPresent
-		ifNil: [ scrollPosition + aDeltaPoint ]
+		ifNil: [ scrollPosition ]
 		ifNotNil: [ :plane |
 			plane position: scrollPosition.
-			plane moveByUserInput: aDeltaPoint ]
+			plane nearestBoundsPosition ]
 ]
 
 { #category : 'private - debugging' }
@@ -436,13 +368,13 @@ CFBlRubberBandScrollableElement >> onScrolled: aPoint [
 	self updateDebugOverlay
 ]
 
-{ #category : 'private - applying' }
-CFBlRubberBandScrollableElement >> applyProjectedPosition [
-	self scrolledElementDo: [ :anElement |
-		anElement relocate: self projectedScrollPosition ].
-	self ensureRequiredSnapBack.
-	self updateDebugOverlay.
-	^ self
+{ #category : 'api - scrolling accessing' }
+CFBlRubberBandScrollableElement >> projectedScrollPosition [
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane projectedPosition ]
 ]
 
 { #category : 'projection configuration' }
@@ -467,13 +399,31 @@ CFBlRubberBandScrollableElement >> projectionPlaneIfPresent [
 		ifFalse: [ nil ]
 ]
 
-{ #category : 'api - scrolling accessing' }
-CFBlRubberBandScrollableElement >> projectedScrollPosition [
-	^ self projectionPlaneIfPresent
-		ifNil: [ scrollPosition ]
-		ifNotNil: [ :plane |
-			plane position: scrollPosition.
-			plane projectedPosition ]
+{ #category : 'api - scrolling' }
+CFBlRubberBandScrollableElement >> rawScrollTo: aPoint [
+	"Set the logical scroll position without starting snapback. This is for
+	debugging and layout repair; public scrollTo: snaps back by default."
+
+	| previousProjectedPosition |
+	self hasScrolledElement ifFalse: [ ^ self ].
+	self updateProjectionBounds.
+	previousProjectedPosition := self projectedScrollPosition.
+	self projectionPlane jumpTo: aPoint.
+	self projectionPlane
+		clearSnapBackRequest;
+		state: #idle.
+	isSnappingBack := false.
+	scrollPosition := self projectionPlane position.
+	self applyProjectedPosition.
+	self dispatchOnScrolled: self projectedScrollPosition - previousProjectedPosition.
+	^ self
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> requestSnapBackIfOverscrolled [
+	self isOverscrolled ifTrue: [
+		self projectionPlaneIfPresent ifNotNil: [ :plane | plane requestSnapBack ] ].
+	^ self
 ]
 
 { #category : 'scrolling' }
@@ -552,33 +502,22 @@ CFBlRubberBandScrollableElement >> scrollPosition [
 	^ scrollPosition
 ]
 
-
-{ #category : 'api - scrolling' }
-CFBlRubberBandScrollableElement >> rawScrollTo: aPoint [
-	"Set the logical scroll position without starting snapback. This is for
-	debugging and layout repair; public scrollTo: snaps back by default."
-
-	| previousProjectedPosition |
-	self hasScrolledElement ifFalse: [ ^ self ].
-	self updateProjectionBounds.
-	previousProjectedPosition := self projectedScrollPosition.
-	self projectionPlane jumpTo: aPoint.
-	self projectionPlane
-		clearSnapBackRequest;
-		state: #idle.
-	isSnappingBack := false.
-	scrollPosition := self projectionPlane position.
-	self applyProjectedPosition.
-	self dispatchOnScrolled: self projectedScrollPosition - previousProjectedPosition.
-	^ self
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> scrollPositionMovedBy: aDeltaPoint [
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition + aDeltaPoint ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane moveByUserInput: aDeltaPoint ]
 ]
 
-{ #category : 'api - scrolling' }
-CFBlRubberBandScrollableElement >> scrollTo: aPoint [
-	self rawScrollTo: aPoint.
-	self requestSnapBackIfOverscrolled.
-	self ensureRequiredSnapBack.
-	^ self
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> scrollPositionMovedForSnapBackBy: aDeltaPoint [
+	^ self projectionPlaneIfPresent
+		ifNil: [ scrollPosition + aDeltaPoint ]
+		ifNotNil: [ :plane |
+			plane position: scrollPosition.
+			plane moveBySnapBack: aDeltaPoint ]
 ]
 
 { #category : 'private - scrolling accessing' }
@@ -590,6 +529,14 @@ CFBlRubberBandScrollableElement >> scrollState [
 CFBlRubberBandScrollableElement >> scrollState: aScrollState [
 	scrollState := aScrollState.
 	self updateDebugOverlay
+]
+
+{ #category : 'api - scrolling' }
+CFBlRubberBandScrollableElement >> scrollTo: aPoint [
+	self rawScrollTo: aPoint.
+	self requestSnapBackIfOverscrolled.
+	self ensureRequiredSnapBack.
+	^ self
 ]
 
 { #category : 'api - scrolling' }
@@ -629,9 +576,12 @@ CFBlRubberBandScrollableElement >> scrolledElementDo: aBlock [
 ]
 
 { #category : 'debugging' }
-CFBlRubberBandScrollableElement >> hideDebugOverlay [
-	debugOverlay ifNotNil: [
-		debugOverlay hasParent ifTrue: [ debugOverlay removeFromParent ] ].
+CFBlRubberBandScrollableElement >> showDebugOverlay [
+	self hasScrolledElement ifFalse: [ ^ self ].
+	self debugOverlay hasParent
+		ifFalse: [ self addChild: self debugOverlay as: #rubberBandDebugOverlay ].
+	self updateDebugOverlayLayout.
+	self updateDebugOverlay.
 	^ self
 ]
 
@@ -655,21 +605,102 @@ CFBlRubberBandScrollableElement >> smoothScrollBy: aPoint [
 	^ self
 ]
 
-{ #category : 'debugging' }
-CFBlRubberBandScrollableElement >> showDebugOverlay [
-	self hasScrolledElement ifFalse: [ ^ self ].
-	self debugOverlay hasParent
-		ifFalse: [ self addChild: self debugOverlay as: #rubberBandDebugOverlay ].
-	self updateDebugOverlayLayout.
-	self updateDebugOverlay.
-	^ self
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBack [
+	"Attempt to start the GT springback animation for an already requested
+	snapback. If the flinger cannot start yet, keep the plane request alive so
+	the next layout / position application can try again."
+
+	^ self tryStartSnapBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBackIfNeeded [
+	self requestSnapBackIfOverscrolled.
+	^ self ensureRequiredSnapBack
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPosition to: currentPosition requestedDelta: deltaPoint [
+	| plane |
+
+	isSnappingBack ifTrue: [ ^ false ].
+	plane := self projectionPlaneIfPresent.
+	plane ifNil: [ ^ false ].
+	plane wantsSnapBack ifFalse: [ ^ false ].
+	^ self ensureRequiredSnapBack
 ]
 
 { #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> finiteOvershot: aNumber fallback: aFallbackNumber [
-	(aNumber = Float infinity or: [ aNumber = Float negativeInfinity ])
-		ifTrue: [ ^ aFallbackNumber ].
-	^ aNumber
+CFBlRubberBandScrollableElement >> snapBackMaximum [
+	^ self projectionPlaneIfPresent
+		ifNil: [ self scrollMaximum ]
+		ifNotNil: [ :plane | plane maximumPointWithFallback: self scrollMaximum ]
+]
+
+{ #category : 'private - scrolling geometry' }
+CFBlRubberBandScrollableElement >> snapBackMinimum [
+	^ self projectionPlaneIfPresent
+		ifNil: [ self scrollMinimum ]
+		ifNotNil: [ :plane | plane minimumPointWithFallback: self scrollMinimum ]
+]
+
+{ #category : 'scrolling - snapback' }
+CFBlRubberBandScrollableElement >> tryStartSnapBack [
+	| plane didStart |
+
+	isSnappingBack ifTrue: [ ^ true ].
+	self hasScrolledElement ifFalse: [ ^ false ].
+	self updateProjectionBounds.
+	self isOverscrolled ifFalse: [
+		self projectionPlaneIfPresent ifNotNil: [ :aPlane |
+			aPlane clearSnapBackRequest.
+			aPlane state: #idle ].
+		self updateDebugOverlay.
+		^ false ].
+
+	plane := self projectionPlaneIfPresent.
+	plane ifNil: [ ^ false ].
+	plane requestSnapBack.
+
+	didStart := self scrollFlinger
+		cfSpringBackFrom: self scrollPosition
+		min: self snapBackMinimum
+		max: self snapBackMaximum.
+	didStart
+		ifTrue: [
+			isSnappingBack := true.
+			plane
+				state: #snappingBack;
+				clearSnapBackRequest ]
+		ifFalse: [
+			"Keep the request alive. Public scrolling must not leave the element
+			overscrolled and idle just because the flinger could not be started at
+			this exact moment, for example before the element is fully live."
+			plane requestSnapBack ].
+	self updateDebugOverlay.
+	^ didStart
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> updateDebugOverlay [
+	(debugOverlay notNil and: [ debugOverlay hasParent ])
+		ifTrue: [
+			debugOverlay text: self debugValuesString.
+			debugOverlay requestLayout ].
+	^ self
+]
+
+{ #category : 'private - debugging' }
+CFBlRubberBandScrollableElement >> updateDebugOverlayLayout [
+	debugOverlay ifNil: [ ^ self ].
+	debugOverlay
+		fitContent;
+		zIndex: 1000;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignTop ].
+	^ self
 ]
 
 { #category : 'private - configuration' }
@@ -709,25 +740,13 @@ CFBlRubberBandScrollableElement >> updateVerticalProjectionBounds [
 		dimension: (self height max: 1.0)
 ]
 
-{ #category : 'private - debugging' }
-CFBlRubberBandScrollableElement >> updateDebugOverlay [
-	(debugOverlay notNil and: [ debugOverlay hasParent ])
-		ifTrue: [
-			debugOverlay text: self debugValuesString.
-			debugOverlay requestLayout ].
-	^ self
-]
-
-{ #category : 'private - debugging' }
-CFBlRubberBandScrollableElement >> updateDebugOverlayLayout [
-	debugOverlay ifNil: [ ^ self ].
-	debugOverlay
-		fitContent;
-		zIndex: 1000;
-		constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignTop ].
-	^ self
+{ #category : 'projection configuration' }
+CFBlRubberBandScrollableElement >> vertical [
+	| wasPresent axis |
+	wasPresent := self hasProjectionPlane and: [ projectionPlane hasVertical ].
+	axis := self projectionPlane vertical.
+	wasPresent ifFalse: [ axis overscrollLimit: self defaultOverscrollLimit ].
+	^ axis
 ]
 
 { #category : 'accessing' }
@@ -741,49 +760,20 @@ CFBlRubberBandScrollableElement >> verticalAlignment: aBlElementAlignment [
 	self requestLayout
 ]
 
-{ #category : 'projection configuration' }
-CFBlRubberBandScrollableElement >> vertical [
-	| wasPresent axis |
-	wasPresent := self hasProjectionPlane and: [ projectionPlane hasVertical ].
-	axis := self projectionPlane vertical.
-	wasPresent ifFalse: [ axis overscrollLimit: self defaultOverscrollLimit ].
-	^ axis
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> wheelScrollScale [
+	^ wheelScrollScale
 ]
 
-
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> isSnappingBack [
-	^ isSnappingBack
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> clearSnapBackIfInBounds [
-	(isSnappingBack and: [ self isOverscrolled not ])
-		ifTrue: [
-			isSnappingBack := false.
-			self projectionPlaneIfPresent ifNotNil: [ :plane |
-				plane state: #idle.
-				plane clearSnapBackRequest ] ].
+{ #category : 'input scaling' }
+CFBlRubberBandScrollableElement >> wheelScrollScale: aPointOrNumber [
+	(aPointOrNumber isNumber and: [ aPointOrNumber < 0 ])
+		ifTrue: [ self error: 'Wheel scroll scale must not be negative.' ].
+	((aPointOrNumber respondsTo: #x) and: [
+		(aPointOrNumber respondsTo: #y) and: [
+			aPointOrNumber x isZero and: [ aPointOrNumber y isZero ] ] ])
+		ifTrue: [ self error: 'Wheel scroll scale point must not be zero.' ].
+	wheelScrollScale := aPointOrNumber.
+	self updateDebugOverlay.
 	^ self
-]
-
-{ #category : 'private - scrolling geometry' }
-CFBlRubberBandScrollableElement >> scrollPositionMovedForSnapBackBy: aDeltaPoint [
-	^ self projectionPlaneIfPresent
-		ifNil: [ scrollPosition + aDeltaPoint ]
-		ifNotNil: [ :plane |
-			plane position: scrollPosition.
-			plane moveBySnapBack: aDeltaPoint ]
-]
-
-{ #category : 'scrolling - snapback' }
-CFBlRubberBandScrollableElement >> snapBackIfStoppedInOverscrollFrom: previousPosition to: currentPosition requestedDelta: deltaPoint [
-	| plane |
-
-	isSnappingBack ifTrue: [ ^ false ].
-	plane := self projectionPlaneIfPresent.
-	plane ifNil: [ ^ false ].
-	plane wantsSnapBack ifFalse: [ ^ false ].
-	^ self ensureRequiredSnapBack
 ]

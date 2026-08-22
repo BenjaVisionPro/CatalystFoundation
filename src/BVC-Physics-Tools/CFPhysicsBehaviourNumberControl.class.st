@@ -1,8 +1,21 @@
-"I combine a retained horizontal scrubber with precise direct entry for one numeric live Behaviour configuration value. My display range is an editing aid, not a validation range: direct entry may expand it."
+"
+I combine a retained horizontal scrubber with precise direct entry for one numeric live Behaviour configuration value. My display range is an editing aid, not a validation range: direct entry may expand it.
+"
 Class {
 	#name : 'CFPhysicsBehaviourNumberControl',
 	#superclass : 'Object',
-	#instVars : [ 'behaviour', 'description', 'element', 'track', 'handle', 'editor', 'minimum', 'maximum', 'updating', 'pullHandler' ],
+	#instVars : [
+		'behaviour',
+		'description',
+		'element',
+		'track',
+		'handle',
+		'editor',
+		'minimum',
+		'maximum',
+		'updating',
+		'pullHandler'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -13,17 +26,66 @@ CFPhysicsBehaviourNumberControl class >> on: aBehaviour description: aDescriptio
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsBehaviourNumberControl >> behaviour: anObject [ behaviour := anObject ]
+CFPhysicsBehaviourNumberControl >> behaviour: anObject [ behaviour := anObject
+]
+
 { #category : 'private - initialization' }
-CFPhysicsBehaviourNumberControl >> description: anObject [ description := anObject ]
+CFPhysicsBehaviourNumberControl >> description: anObject [ description := anObject
+]
+
 { #category : 'accessing' }
-CFPhysicsBehaviourNumberControl >> element [ ^ element ]
+CFPhysicsBehaviourNumberControl >> editor [ ^ editor
+]
+
+{ #category : 'private - editing' }
+CFPhysicsBehaviourNumberControl >> editorModified [
+	| value |
+	updating ifTrue: [ ^ self ].
+	[ value := description fromString: editor text asString ] on: Error do: [ :error | ^ self ].
+	description write: value to: behaviour.
+	self expandRangeToInclude: (description read: behaviour).
+	self positionHandleFor: (description read: behaviour).
+	^ self
+]
+
 { #category : 'accessing' }
-CFPhysicsBehaviourNumberControl >> editor [ ^ editor ]
+CFPhysicsBehaviourNumberControl >> element [ ^ element
+]
+
+{ #category : 'private - range' }
+CFPhysicsBehaviourNumberControl >> establishRangeFor: aNumber [
+	| value magnitude |
+	value := aNumber asFloat.
+	magnitude := value abs max: 1.0.
+	value negative
+		ifTrue: [ minimum := magnitude * -2.0. maximum := magnitude * 2.0 ]
+		ifFalse: [ minimum := 0.0. maximum := magnitude * 2.0 ]
+]
+
+{ #category : 'private - range' }
+CFPhysicsBehaviourNumberControl >> expandRangeToInclude: aNumber [
+	| value span |
+	value := aNumber asFloat.
+	(value between: minimum and: maximum) ifTrue: [ ^ self ].
+	span := (maximum - minimum) max: 1.0.
+	[ value < minimum ] whileTrue: [ minimum := minimum - span. span := span * 2.0 ].
+	span := (maximum - minimum) max: 1.0.
+	[ value > maximum ] whileTrue: [ maximum := maximum + span. span := span * 2.0 ]
+]
+
 { #category : 'accessing' }
-CFPhysicsBehaviourNumberControl >> track [ ^ track ]
-{ #category : 'accessing' }
-CFPhysicsBehaviourNumberControl >> handle [ ^ handle ]
+CFPhysicsBehaviourNumberControl >> handle [ ^ handle
+]
+
+{ #category : 'private - editing' }
+CFPhysicsBehaviourNumberControl >> handlePulled [
+	| usable fraction value |
+	updating ifTrue: [ ^ self ].
+	usable := (track extent x - handle extent x) max: 1.
+	fraction := (handle constraints position x / usable) min: 1.0 max: 0.0.
+	value := minimum + (fraction * (maximum - minimum)).
+	self writeValue: value
+]
 
 { #category : 'initialization' }
 CFPhysicsBehaviourNumberControl >> initializeControl [
@@ -67,65 +129,6 @@ CFPhysicsBehaviourNumberControl >> initializeControl [
 	self refresh
 ]
 
-{ #category : 'private - range' }
-CFPhysicsBehaviourNumberControl >> establishRangeFor: aNumber [
-	| value magnitude |
-	value := aNumber asFloat.
-	magnitude := value abs max: 1.0.
-	value negative
-		ifTrue: [ minimum := magnitude * -2.0. maximum := magnitude * 2.0 ]
-		ifFalse: [ minimum := 0.0. maximum := magnitude * 2.0 ]
-]
-
-{ #category : 'private - range' }
-CFPhysicsBehaviourNumberControl >> expandRangeToInclude: aNumber [
-	| value span |
-	value := aNumber asFloat.
-	(value between: minimum and: maximum) ifTrue: [ ^ self ].
-	span := (maximum - minimum) max: 1.0.
-	[ value < minimum ] whileTrue: [ minimum := minimum - span. span := span * 2.0 ].
-	span := (maximum - minimum) max: 1.0.
-	[ value > maximum ] whileTrue: [ maximum := maximum + span. span := span * 2.0 ]
-]
-
-{ #category : 'private - editing' }
-CFPhysicsBehaviourNumberControl >> editorModified [
-	| value |
-	updating ifTrue: [ ^ self ].
-	[ value := description fromString: editor text asString ] on: Error do: [ :error | ^ self ].
-	description write: value to: behaviour.
-	self expandRangeToInclude: (description read: behaviour).
-	self positionHandleFor: (description read: behaviour).
-	^ self
-]
-
-{ #category : 'private - editing' }
-CFPhysicsBehaviourNumberControl >> trackClicked: anEvent [
-	| local usable fraction value |
-	local := track globalPointToLocal: anEvent position.
-	usable := (track extent x - handle extent x) max: 1.
-	fraction := ((local x - (handle extent x / 2.0)) / usable) min: 1.0 max: 0.0.
-	value := minimum + (fraction * (maximum - minimum)).
-	self writeValue: value
-]
-
-{ #category : 'private - editing' }
-CFPhysicsBehaviourNumberControl >> handlePulled [
-	| usable fraction value |
-	updating ifTrue: [ ^ self ].
-	usable := (track extent x - handle extent x) max: 1.
-	fraction := (handle constraints position x / usable) min: 1.0 max: 0.0.
-	value := minimum + (fraction * (maximum - minimum)).
-	self writeValue: value
-]
-
-{ #category : 'private - editing' }
-CFPhysicsBehaviourNumberControl >> writeValue: aNumber [
-	description write: aNumber to: behaviour.
-	self refresh.
-	^ self
-]
-
 { #category : 'private - presentation' }
 CFPhysicsBehaviourNumberControl >> positionHandleFor: aNumber [
 	| usable fraction x alignment |
@@ -158,5 +161,26 @@ CFPhysicsBehaviourNumberControl >> refresh [
 { #category : 'controlling' }
 CFPhysicsBehaviourNumberControl >> release [
 	pullHandler ifNotNil: [ handle removeEventHandler: pullHandler ].
+	^ self
+]
+
+{ #category : 'accessing' }
+CFPhysicsBehaviourNumberControl >> track [ ^ track
+]
+
+{ #category : 'private - editing' }
+CFPhysicsBehaviourNumberControl >> trackClicked: anEvent [
+	| local usable fraction value |
+	local := track globalPointToLocal: anEvent position.
+	usable := (track extent x - handle extent x) max: 1.
+	fraction := ((local x - (handle extent x / 2.0)) / usable) min: 1.0 max: 0.0.
+	value := minimum + (fraction * (maximum - minimum)).
+	self writeValue: value
+]
+
+{ #category : 'private - editing' }
+CFPhysicsBehaviourNumberControl >> writeValue: aNumber [
+	description write: aNumber to: behaviour.
+	self refresh.
 	^ self
 ]

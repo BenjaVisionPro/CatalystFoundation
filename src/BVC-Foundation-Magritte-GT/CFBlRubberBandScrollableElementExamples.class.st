@@ -6,6 +6,21 @@ Class {
 }
 
 { #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> debugOverlayCanBeShown [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element showDebugOverlay.
+
+	self assert: element hasDebugOverlay.
+	self assert: element debugOverlay hasParent.
+	self assert: (element debugValuesString includesSubstring: 'logical scroll:').
+
+	^ element
+]
+
+{ #category : 'examples' }
 CFBlRubberBandScrollableElementExamples >> elementCanBeCreated [
 	<gtExample>
 	| element |
@@ -43,34 +58,234 @@ CFBlRubberBandScrollableElementExamples >> elementCanConfigureVerticalProjection
 	^ element
 ]
 
-{ #category : 'examples - visual' }
-CFBlRubberBandScrollableElementExamples >> verticalScrollableElementPreview [
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> flingUsesScrollFlinger [
 	<gtExample>
-	| element content |
+	| element |
 
-	element := CFBlRubberBandScrollableElement new.
+	element := self verticalScrollableElementPreview.
+	element flingBy: 0 @ 1000.
+
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> inputScalesCanBeConfigured [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
 	element
-		background: Color veryVeryLightGray;
-		border: (BlBorder paint: Color lightGray width: 1);
-		clipChildren: true;
-		constraintsDo: [ :c |
-			c horizontal exact: 320.
-			c vertical exact: 240 ].
+		gestureScrollScale: 10;
+		wheelScrollScale: 6 @ -6;
+		flingVelocityScale: 0.01.
 
-	content := BlElement new.
-	content
-		background: (Color blue alpha: 0.12);
-		border: (BlBorder paint: (Color blue alpha: 0.35) width: 1);
-		constraintsDo: [ :c |
-			c horizontal exact: 320.
-			c vertical exact: 900 ].
+	self assert: element gestureScrollScale = 10.
+	self assert: element wheelScrollScale = (6 @ -6).
+	self assert: element flingVelocityScale = 0.01.
 
-	element addChild: content.
-	element vertical.
+	^ element
+]
 
-	self assert: element hasScrolledElement.
-	self assert: element hasProjectionPlane.
-	self assert: element projectionPlane hasVertical.
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> invalidFlingVelocityScaleIsRejected [
+	<gtExample>
+	| element failed |
+
+	element := self elementCanBeCreated.
+	failed := false.
+	[ element flingVelocityScale: -1 ]
+		on: Error
+		do: [ :anError | failed := true ].
+
+	self assert: failed.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> invalidGestureScaleIsRejected [
+	<gtExample>
+	| element failed |
+
+	element := self elementCanBeCreated.
+	failed := false.
+	[ element gestureScrollScale: -1 ]
+		on: Error
+		do: [ :anError | failed := true ].
+
+	self assert: failed.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> movingBackTowardBoundsDoesNotStartSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis afterOverscrollStop.
+
+	element rawScrollTo: 0 @ stop.
+	element scrollVerticallyBy: -10.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y < stop.
+	self assert: element scrollState = #idle.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> rawScrollToOverscrollDoesNotAutoSnap [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	element rawScrollTo: 0 @ 100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollState = #idle.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> reachingBottomOverscrollStopStartsSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis beforeOverscrollStop.
+
+	element rawScrollTo: 0 @ (stop + 0.01).
+	element scrollVerticallyBy: -100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y = stop.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> reachingTopOverscrollStopStartsSnapBack [
+	<gtExample>
+	| element axis stop |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis afterOverscrollStop.
+
+	element rawScrollTo: 0 @ (stop - 0.01).
+	element scrollVerticallyBy: 100.
+
+	self assert: element isOverscrolled.
+	self assert: element scrollPosition y = stop.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> repeatedLargeScrollByApproachesButDoesNotReachOverscrollLimit [
+	<gtExample>
+	| element |
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	100 timesRepeat: [ element scrollBy: 0 @ -1000 ].
+
+	self assert: element scrollPosition y < 1000.
+	self assert: element projectedScrollPosition y > 0.
+	self assert: element projectedScrollPosition y < 120.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> repeatedScrollByDoesNotRunAway [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	100 timesRepeat: [ element scrollBy: 0 @ -1000 ].
+
+	self assert: element scrollPosition y < 1000.
+	self assert: element projectedScrollPosition y <= 120.000001.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> rubberBandEventHandlerCanBeCreated [
+	<gtExample>
+	| handler |
+
+	handler := CFBlRubberBandScrollableElementEventHandler new.
+
+	self assert: handler class = CFBlRubberBandScrollableElementEventHandler.
+	self assert: (handler isKindOf: BlScrollableElementEventHandler).
+
+	^ handler
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> scrollOvershotIsFinite [
+	<gtExample>
+	| element overshot |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+
+	overshot := element scrollOvershot.
+
+	self assert: overshot y > 0.
+	self assert: overshot y < 1000.
 
 	^ element
 ]
@@ -91,26 +306,6 @@ CFBlRubberBandScrollableElementExamples >> scrollToHugeValueDoesNotRunAway [
 	element scrollTo: 0 @ 999999.
 
 	self assert: element scrollPosition y = expectedLimit.
-	self assert: element scrollPosition y < 1000.
-	self assert: element projectedScrollPosition y <= 120.000001.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> repeatedScrollByDoesNotRunAway [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-
-	100 timesRepeat: [ element scrollBy: 0 @ -1000 ].
-
 	self assert: element scrollPosition y < 1000.
 	self assert: element projectedScrollPosition y <= 120.000001.
 
@@ -140,26 +335,6 @@ CFBlRubberBandScrollableElementExamples >> scrollVerticallyByReturnsConsumedDist
 ]
 
 { #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> scrollOvershotIsFinite [
-	<gtExample>
-	| element overshot |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-
-	overshot := element scrollOvershot.
-
-	self assert: overshot y > 0.
-	self assert: overshot y < 1000.
-
-	^ element
-]
-
-{ #category : 'examples' }
 CFBlRubberBandScrollableElementExamples >> smoothScrollUsesScrollFlinger [
 	<gtExample>
 	| element |
@@ -173,29 +348,144 @@ CFBlRubberBandScrollableElementExamples >> smoothScrollUsesScrollFlinger [
 ]
 
 { #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> flingUsesScrollFlinger [
+CFBlRubberBandScrollableElementExamples >> snapBackDoesNotRestartWhileSnappingBack [
+	<gtExample>
+	| element axis stop restarted |
+
+	element := self verticalScrollableElementPreview.
+	axis := element vertical.
+	axis
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	stop := axis beforeOverscrollStop.
+	element rawScrollTo: 0 @ stop.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	restarted := element
+		snapBackIfStoppedInOverscrollFrom: 0 @ (stop + 1)
+		to: 0 @ stop
+		requestedDelta: 0 @ -100.
+
+	self assert: restarted not.
+	self assert: element isSnappingBack.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackFromBottomOverscrollStartsFlinger [
 	<gtExample>
 	| element |
 
 	element := self verticalScrollableElementPreview.
-	element flingBy: 0 @ 1000.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element rawScrollTo: 0 @ -760.
 
+	self assert: element isOverscrolled.
+	self assert: element nearestScrollBoundsPosition = (0 @ -660).
+	self assert: element snapBackIfNeeded.
+	self assert: element scrollState = #settling.
 	self assert: element scrollFlinger isIdle not.
 
 	^ element
 ]
 
 { #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> debugOverlayCanBeShown [
+CFBlRubberBandScrollableElementExamples >> snapBackFromTopOverscrollStartsFlinger [
 	<gtExample>
 	| element |
 
 	element := self verticalScrollableElementPreview.
-	element showDebugOverlay.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element rawScrollTo: 0 @ 100.
 
-	self assert: element hasDebugOverlay.
-	self assert: element debugOverlay hasParent.
-	self assert: (element debugValuesString includesSubstring: 'logical scroll:').
+	self assert: element isOverscrolled.
+	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMaximum y).
+	self assert: element snapBackIfNeeded.
+	self assert: element scrollState = #settling.
+	self assert: element scrollFlinger isIdle not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackInsideBoundsDoesNothing [
+	<gtExample>
+	| element |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element scrollTo: 0 @ -100.
+
+	self assert: element isOverscrolled not.
+	self assert: element snapBackIfNeeded not.
+	self assert: element scrollFlinger isIdle.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackStepClampsWhenCrossingBottomBound [
+	<gtExample>
+	| element consumed |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element rawScrollTo: 0 @ -670.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	consumed := element scrollVerticallyBy: 20.
+
+	self assert: consumed = 10.
+	self assert: element scrollPosition y = -660.
+	self assert: element isOverscrolled not.
+	self assert: element isSnappingBack not.
+
+	^ element
+]
+
+{ #category : 'examples' }
+CFBlRubberBandScrollableElementExamples >> snapBackStepMovesTowardBottomBoundWithoutResistance [
+	<gtExample>
+	| element previous consumed |
+
+	element := self verticalScrollableElementPreview.
+	element vertical
+		minimum: -660;
+		maximum: 0;
+		dimension: 240;
+		overscrollLimit: 120.
+	element rawScrollTo: 0 @ -760.
+
+	self assert: element snapBackIfNeeded.
+	self assert: element isSnappingBack.
+	previous := element scrollPosition y.
+	consumed := element scrollVerticallyBy: 20.
+
+	self assert: consumed = 20.
+	self assert: element scrollPosition y = (previous + 20).
+	self assert: element isOverscrolled.
+	self assert: element isSnappingBack.
 
 	^ element
 ]
@@ -241,151 +531,34 @@ CFBlRubberBandScrollableElementExamples >> verticalScrollableElementDebugPreview
 	^ container
 ]
 
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> repeatedLargeScrollByApproachesButDoesNotReachOverscrollLimit [
+{ #category : 'examples - visual' }
+CFBlRubberBandScrollableElementExamples >> verticalScrollableElementPreview [
 	<gtExample>
-	| element |
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
+	| element content |
 
-	100 timesRepeat: [ element scrollBy: 0 @ -1000 ].
-
-	self assert: element scrollPosition y < 1000.
-	self assert: element projectedScrollPosition y > 0.
-	self assert: element projectedScrollPosition y < 120.
-
-	^ element
-]
-
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> inputScalesCanBeConfigured [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
+	element := CFBlRubberBandScrollableElement new.
 	element
-		gestureScrollScale: 10;
-		wheelScrollScale: 6 @ -6;
-		flingVelocityScale: 0.01.
+		background: Color veryVeryLightGray;
+		border: (BlBorder paint: Color lightGray width: 1);
+		clipChildren: true;
+		constraintsDo: [ :c |
+			c horizontal exact: 320.
+			c vertical exact: 240 ].
 
-	self assert: element gestureScrollScale = 10.
-	self assert: element wheelScrollScale = (6 @ -6).
-	self assert: element flingVelocityScale = 0.01.
+	content := BlElement new.
+	content
+		background: (Color blue alpha: 0.12);
+		border: (BlBorder paint: (Color blue alpha: 0.35) width: 1);
+		constraintsDo: [ :c |
+			c horizontal exact: 320.
+			c vertical exact: 900 ].
 
-	^ element
-]
+	element addChild: content.
+	element vertical.
 
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> invalidGestureScaleIsRejected [
-	<gtExample>
-	| element failed |
-
-	element := self elementCanBeCreated.
-	failed := false.
-	[ element gestureScrollScale: -1 ]
-		on: Error
-		do: [ :anError | failed := true ].
-
-	self assert: failed.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> invalidFlingVelocityScaleIsRejected [
-	<gtExample>
-	| element failed |
-
-	element := self elementCanBeCreated.
-	failed := false.
-	[ element flingVelocityScale: -1 ]
-		on: Error
-		do: [ :anError | failed := true ].
-
-	self assert: failed.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> rubberBandEventHandlerCanBeCreated [
-	<gtExample>
-	| handler |
-
-	handler := CFBlRubberBandScrollableElementEventHandler new.
-
-	self assert: handler class = CFBlRubberBandScrollableElementEventHandler.
-	self assert: (handler isKindOf: BlScrollableElementEventHandler).
-
-	^ handler
-]
-
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackInsideBoundsDoesNothing [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	element scrollTo: 0 @ -100.
-
-	self assert: element isOverscrolled not.
-	self assert: element snapBackIfNeeded not.
-	self assert: element scrollFlinger isIdle.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackFromTopOverscrollStartsFlinger [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	element rawScrollTo: 0 @ 100.
-
-	self assert: element isOverscrolled.
-	self assert: element nearestScrollBoundsPosition = (0 @ element scrollMaximum y).
-	self assert: element snapBackIfNeeded.
-	self assert: element scrollState = #settling.
-	self assert: element scrollFlinger isIdle not.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackFromBottomOverscrollStartsFlinger [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	element rawScrollTo: 0 @ -760.
-
-	self assert: element isOverscrolled.
-	self assert: element nearestScrollBoundsPosition = (0 @ -660).
-	self assert: element snapBackIfNeeded.
-	self assert: element scrollState = #settling.
-	self assert: element scrollFlinger isIdle not.
+	self assert: element hasScrolledElement.
+	self assert: element hasProjectionPlane.
+	self assert: element projectionPlane hasVertical.
 
 	^ element
 ]
@@ -425,179 +598,4 @@ CFBlRubberBandScrollableElementExamples >> verticalSnapBackDebugPreview [
 	self assert: (debugPanel text asString includesSubstring: 'overscrolled:').
 
 	^ container
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> rawScrollToOverscrollDoesNotAutoSnap [
-	<gtExample>
-	| element |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-
-	element rawScrollTo: 0 @ 100.
-
-	self assert: element isOverscrolled.
-	self assert: element scrollState = #idle.
-	self assert: element scrollFlinger isIdle.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> reachingTopOverscrollStopStartsSnapBack [
-	<gtExample>
-	| element axis stop |
-
-	element := self verticalScrollableElementPreview.
-	axis := element vertical.
-	axis
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	stop := axis afterOverscrollStop.
-
-	element rawScrollTo: 0 @ (stop - 0.01).
-	element scrollVerticallyBy: 100.
-
-	self assert: element isOverscrolled.
-	self assert: element scrollPosition y = stop.
-	self assert: element scrollState = #settling.
-	self assert: element scrollFlinger isIdle not.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> reachingBottomOverscrollStopStartsSnapBack [
-	<gtExample>
-	| element axis stop |
-
-	element := self verticalScrollableElementPreview.
-	axis := element vertical.
-	axis
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	stop := axis beforeOverscrollStop.
-
-	element rawScrollTo: 0 @ (stop + 0.01).
-	element scrollVerticallyBy: -100.
-
-	self assert: element isOverscrolled.
-	self assert: element scrollPosition y = stop.
-	self assert: element scrollState = #settling.
-	self assert: element scrollFlinger isIdle not.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> movingBackTowardBoundsDoesNotStartSnapBack [
-	<gtExample>
-	| element axis stop |
-
-	element := self verticalScrollableElementPreview.
-	axis := element vertical.
-	axis
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	stop := axis afterOverscrollStop.
-
-	element rawScrollTo: 0 @ stop.
-	element scrollVerticallyBy: -10.
-
-	self assert: element isOverscrolled.
-	self assert: element scrollPosition y < stop.
-	self assert: element scrollState = #idle.
-	self assert: element scrollFlinger isIdle.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackStepMovesTowardBottomBoundWithoutResistance [
-	<gtExample>
-	| element previous consumed |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	element rawScrollTo: 0 @ -760.
-
-	self assert: element snapBackIfNeeded.
-	self assert: element isSnappingBack.
-	previous := element scrollPosition y.
-	consumed := element scrollVerticallyBy: 20.
-
-	self assert: consumed = 20.
-	self assert: element scrollPosition y = (previous + 20).
-	self assert: element isOverscrolled.
-	self assert: element isSnappingBack.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackStepClampsWhenCrossingBottomBound [
-	<gtExample>
-	| element consumed |
-
-	element := self verticalScrollableElementPreview.
-	element vertical
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	element rawScrollTo: 0 @ -670.
-
-	self assert: element snapBackIfNeeded.
-	self assert: element isSnappingBack.
-	consumed := element scrollVerticallyBy: 20.
-
-	self assert: consumed = 10.
-	self assert: element scrollPosition y = -660.
-	self assert: element isOverscrolled not.
-	self assert: element isSnappingBack not.
-
-	^ element
-]
-
-{ #category : 'examples' }
-CFBlRubberBandScrollableElementExamples >> snapBackDoesNotRestartWhileSnappingBack [
-	<gtExample>
-	| element axis stop restarted |
-
-	element := self verticalScrollableElementPreview.
-	axis := element vertical.
-	axis
-		minimum: -660;
-		maximum: 0;
-		dimension: 240;
-		overscrollLimit: 120.
-	stop := axis beforeOverscrollStop.
-	element rawScrollTo: 0 @ stop.
-
-	self assert: element snapBackIfNeeded.
-	self assert: element isSnappingBack.
-	restarted := element
-		snapBackIfStoppedInOverscrollFrom: 0 @ (stop + 1)
-		to: 0 @ stop
-		requestedDelta: 0 @ -100.
-
-	self assert: restarted not.
-	self assert: element isSnappingBack.
-
-	^ element
 ]

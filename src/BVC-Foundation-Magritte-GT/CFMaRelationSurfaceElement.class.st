@@ -1,5 +1,6 @@
-"I am responsible for presenting a relation as a bordered Foundation surface with content laid out naturally inside its structural border."
-
+"
+I am responsible for presenting a relation as a bordered Foundation surface with content laid out naturally inside its structural border.
+"
 Class {
 	#name : 'CFMaRelationSurfaceElement',
 	#superclass : 'BrVerticalPane',
@@ -11,6 +12,37 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Elements'
 }
+
+{ #category : 'children' }
+CFMaRelationSurfaceElement >> addContentChild: anElement [
+	super addChild: anElement.
+	^ anElement
+]
+
+{ #category : 'children' }
+CFMaRelationSurfaceElement >> addFooterChild: anElement [
+	footerElement := anElement.
+	self updateFooterGeometry.
+	^ self addContentChild: anElement
+]
+
+{ #category : 'accessing' }
+CFMaRelationSurfaceElement >> border: aBorder [
+	super border: aBorder.
+	self updateSurfaceLayout
+]
+
+{ #category : 'accessing' }
+CFMaRelationSurfaceElement >> cornerRadius [
+	^ cornerRadius
+]
+
+{ #category : 'accessing' }
+CFMaRelationSurfaceElement >> cornerRadius: aNumber [
+	cornerRadius := aNumber.
+	self geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius).
+	self updateFooterGeometry
+]
 
 { #category : 'initialization' }
 CFMaRelationSurfaceElement >> initialize [
@@ -43,37 +75,6 @@ CFMaRelationSurfaceElement >> initialize [
 			anEvent consumed: true ].
 
 	self updateSurfaceLayout
-]
-
-{ #category : 'children' }
-CFMaRelationSurfaceElement >> addContentChild: anElement [
-	super addChild: anElement.
-	^ anElement
-]
-
-{ #category : 'children' }
-CFMaRelationSurfaceElement >> addFooterChild: anElement [
-	footerElement := anElement.
-	self updateFooterGeometry.
-	^ self addContentChild: anElement
-]
-
-{ #category : 'accessing' }
-CFMaRelationSurfaceElement >> border: aBorder [
-	super border: aBorder.
-	self updateSurfaceLayout
-]
-
-{ #category : 'accessing' }
-CFMaRelationSurfaceElement >> cornerRadius [
-	^ cornerRadius
-]
-
-{ #category : 'accessing' }
-CFMaRelationSurfaceElement >> cornerRadius: aNumber [
-	cornerRadius := aNumber.
-	self geometry: (BlRoundedRectangleGeometry cornerRadius: cornerRadius).
-	self updateFooterGeometry
 ]
 
 { #category : 'private - geometry' }

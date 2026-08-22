@@ -1,14 +1,22 @@
-"I present the live diagnostic state shared by Physics joints and allow each joint type to add its own compact fields."
+"
+I present the live diagnostic state shared by Physics joints and allow each joint type to add its own compact fields.
+"
 Class {
 	#name : 'CFPhysicsJointInspector',
 	#superclass : 'CFPhysicsOverlayInspector',
-	#instVars : [ 'joint' ],
+	#instVars : [
+		'joint'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
 
-{ #category : 'accessing' }
-CFPhysicsJointInspector >> joint [ ^ joint ]
+{ #category : 'clearing' }
+CFPhysicsJointInspector >> clear [
+	joint := nil.
+	self clearValues.
+	^ self
+]
 
 { #category : 'initialization' }
 CFPhysicsJointInspector >> configureInspector [
@@ -34,11 +42,8 @@ CFPhysicsJointInspector >> inspect: aJoint [
 	^ self
 ]
 
-{ #category : 'clearing' }
-CFPhysicsJointInspector >> clear [
-	joint := nil.
-	self clearValues.
-	^ self
+{ #category : 'accessing' }
+CFPhysicsJointInspector >> joint [ ^ joint
 ]
 
 { #category : 'private - formatting' }

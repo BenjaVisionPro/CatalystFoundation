@@ -1,8 +1,16 @@
-"I manage the contact diagnostics for one Physics overlay. My responsibility is to reconcile transient committed contact state with the contact visuals shown for the current frame."
+"
+I manage the contact diagnostics for one Physics overlay. My responsibility is to reconcile transient committed contact state with the contact visuals shown for the current frame.
+"
 Class {
 	#name : 'CFPhysicsContactOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'context', 'visualsByKey', 'lastVisualState', 'lastScopeBodies' ],
+	#instVars : [
+		'root',
+		'context',
+		'visualsByKey',
+		'lastVisualState',
+		'lastScopeBodies'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -12,28 +20,24 @@ CFPhysicsContactOverlay class >> in: anOverlayRoot context: aContext [
 	^ self new root: anOverlayRoot; context: aContext; initializeOverlay; yourself
 ]
 
+{ #category : 'controlling' }
+CFPhysicsContactOverlay >> clear [
+	visualsByKey valuesDo: #remove.
+	visualsByKey removeAll.
+	lastVisualState := nil.
+	lastScopeBodies := nil.
+	^ self
+]
+
 { #category : 'private - initialization' }
-CFPhysicsContactOverlay >> root: anElement [ root := anElement ]
-{ #category : 'private - initialization' }
-CFPhysicsContactOverlay >> context: aContext [ context := aContext ]
+CFPhysicsContactOverlay >> context: aContext [ context := aContext
+]
 
 { #category : 'initialization' }
 CFPhysicsContactOverlay >> initializeOverlay [
 	visualsByKey := Dictionary new.
 	lastVisualState := nil.
 	lastScopeBodies := nil
-]
-
-{ #category : 'accessing' }
-CFPhysicsContactOverlay >> visuals [ ^ visualsByKey values asArray ]
-{ #category : 'updating' }
-CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
-	^ self updateFrom: aWorldVisualState scopedToBodies: nil
-]
-
-{ #category : 'updating' }
-CFPhysicsContactOverlay >> updateFrom: aWorldVisualState scopedToBodies: scopeBodies [
-	^ self reconcileFrom: aWorldVisualState scopedToBodies: scopeBodies
 ]
 
 { #category : 'updating' }
@@ -56,23 +60,31 @@ CFPhysicsContactOverlay >> reconcileFrom: aWorldVisualState scopedToBodies: scop
 	^ self
 ]
 
+{ #category : 'controlling' }
+CFPhysicsContactOverlay >> release [
+	self clear
+]
+
+{ #category : 'private - initialization' }
+CFPhysicsContactOverlay >> root: anElement [ root := anElement
+]
+
+{ #category : 'updating' }
+CFPhysicsContactOverlay >> updateFrom: aWorldVisualState [
+	^ self updateFrom: aWorldVisualState scopedToBodies: nil
+]
+
+{ #category : 'updating' }
+CFPhysicsContactOverlay >> updateFrom: aWorldVisualState scopedToBodies: scopeBodies [
+	^ self reconcileFrom: aWorldVisualState scopedToBodies: scopeBodies
+]
+
 { #category : 'updating' }
 CFPhysicsContactOverlay >> updateGeometry [
 	visualsByKey valuesDo: #update.
 	^ self
 ]
 
-
-{ #category : 'controlling' }
-CFPhysicsContactOverlay >> clear [
-	visualsByKey valuesDo: #remove.
-	visualsByKey removeAll.
-	lastVisualState := nil.
-	lastScopeBodies := nil.
-	^ self
-]
-
-{ #category : 'controlling' }
-CFPhysicsContactOverlay >> release [
-	self clear
+{ #category : 'accessing' }
+CFPhysicsContactOverlay >> visuals [ ^ visualsByKey values asArray
 ]

@@ -1,5 +1,6 @@
-"I present the current Foundation field styling with Magritte groups as Brick accordions."
-
+"
+I present the current Foundation field styling with Magritte groups as Brick accordions.
+"
 Class {
 	#name : 'CFMaAccordionPresentation',
 	#superclass : 'CFMaPresentation',

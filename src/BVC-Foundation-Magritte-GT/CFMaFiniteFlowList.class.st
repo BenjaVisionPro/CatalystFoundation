@@ -1,5 +1,6 @@
-"I am responsible for a finite Foundation flow list whose surrounding form owns scrolling."
-
+"
+I am responsible for a finite Foundation flow list whose surrounding form owns scrolling.
+"
 Class {
 	#name : 'CFMaFiniteFlowList',
 	#superclass : 'BrFlowList',
@@ -51,18 +52,6 @@ CFMaFiniteFlowList >> minimumItemWidth: aNumber [
 	self updateResponsiveItemWidths
 ]
 
-
-{ #category : 'accessing' }
-CFMaFiniteFlowList >> singleColumn [
-	^ singleColumn
-]
-
-{ #category : 'accessing' }
-CFMaFiniteFlowList >> singleColumn: aBoolean [
-	singleColumn := aBoolean.
-	self updateResponsiveItemWidths
-]
-
 { #category : 'private - layout' }
 CFMaFiniteFlowList >> responsiveContentElement [
 	self aptitudeDo: [ :anAptitude |
@@ -81,6 +70,17 @@ CFMaFiniteFlowList >> responsiveItemWidthFor: anAvailableWidth [
 	^ ((anAvailableWidth / aColumnCount) - itemSpacing) max: minimumItemWidth
 ]
 
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> singleColumn [
+	^ singleColumn
+]
+
+{ #category : 'accessing' }
+CFMaFiniteFlowList >> singleColumn: aBoolean [
+	singleColumn := aBoolean.
+	self updateResponsiveItemWidths
+]
+
 { #category : 'layout' }
 CFMaFiniteFlowList >> updateResponsiveItemWidths [
 	| aContentElement anItemWidth |
@@ -93,6 +93,3 @@ CFMaFiniteFlowList >> updateResponsiveItemWidths [
 	aContentElement children do: [ :anItemElement |
 		anItemElement hExact: anItemWidth ].
 ]
-
-
-

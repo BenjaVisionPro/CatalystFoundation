@@ -1,5 +1,6 @@
-"I am responsible for presenting a to-one relation as a Foundation Phlow link."
-
+"
+I am responsible for presenting a to-one relation as a Foundation Phlow link.
+"
 Class {
 	#name : 'CFMaToOnePhlowLinkStencilBuilder',
 	#superclass : 'GtMagritteDescriptionElementStencilBuilder',

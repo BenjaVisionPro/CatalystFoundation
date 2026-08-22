@@ -97,22 +97,6 @@ CFBrRubberBandScrollPaneAptitudeExamples >> scrollWishRoutesToRubberBandScrollab
 ]
 
 { #category : 'examples - visual' }
-CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPanePreview [
-	<gtExample>
-	| scrollPane |
-
-	scrollPane := self scrollPaneCanUseRubberBandAptitude.
-	scrollPane
-		background: Color veryVeryLightGray;
-		border: (BlBorder paint: Color lightGray width: 1);
-		constraintsDo: [ :constraints |
-			constraints horizontal exact: 320.
-			constraints vertical exact: 240 ].
-
-	^ scrollPane
-]
-
-{ #category : 'examples - visual' }
 CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPaneDebugPreview [
 	<gtExample>
 	| container scrollPane aptitude debugPanel updateDebugPanel |
@@ -163,3 +147,18 @@ CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPaneDebugPre
 	^ container
 ]
 
+{ #category : 'examples - visual' }
+CFBrRubberBandScrollPaneAptitudeExamples >> verticalRubberBandScrollPanePreview [
+	<gtExample>
+	| scrollPane |
+
+	scrollPane := self scrollPaneCanUseRubberBandAptitude.
+	scrollPane
+		background: Color veryVeryLightGray;
+		border: (BlBorder paint: Color lightGray width: 1);
+		constraintsDo: [ :constraints |
+			constraints horizontal exact: 320.
+			constraints vertical exact: 240 ].
+
+	^ scrollPane
+]

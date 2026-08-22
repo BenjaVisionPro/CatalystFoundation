@@ -1,8 +1,15 @@
-"I adapt one recorded telemetry span into a Physics measurement sample. My responsibility is to expose its timing, hierarchy and Physics-specific counters through a stable interface."
+"
+I adapt one recorded telemetry span into a Physics measurement sample. My responsibility is to expose its timing, hierarchy and Physics-specific counters through a stable interface.
+"
 Class {
 	#name : 'CFPhysicsTelemetrySpanSample',
 	#superclass : 'Object',
-	#instVars : [ 'signal', 'ping', 'parentPing', 'sequence' ],
+	#instVars : [
+		'signal',
+		'ping',
+		'parentPing',
+		'sequence'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -18,42 +25,37 @@ CFPhysicsTelemetrySpanSample class >> signal: aSignal ping: aPing parent: aParen
 ]
 
 { #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> signal [ ^ signal ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> signal: anObject [ signal := anObject ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> ping [ ^ ping ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> ping: anObject [ ping := anObject ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> parentPing [ ^ parentPing ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> parentPing: anObject [ parentPing := anObject ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> sequence [ ^ sequence ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> sequence: anInteger [ sequence := anInteger ]
-
-{ #category : 'timing' }
-CFPhysicsTelemetrySpanSample >> start [
-	^ ping startTime - parentPing startTime
+CFPhysicsTelemetrySpanSample >> beganContactCount [ ^ self physicsDataAt: #beganContactCount
 ]
 
-{ #category : 'timing' }
-CFPhysicsTelemetrySpanSample >> end [
-	^ ping endTime - parentPing startTime
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> beganPreparedContactConstraintCount [ ^ self physicsDataAt: #beganPreparedContactConstraintCount
 ]
 
-{ #category : 'timing' }
-CFPhysicsTelemetrySpanSample >> elapsedDuration [
-	^ ping endTime - ping startTime
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> bodyCount [
+	| data |
+	data := signal physicsData.
+	^ data ifNil: [ nil ] ifNotNil: [ data at: #bodyCount ifAbsent: [ nil ] ]
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> changedPreparedManifoldCount [ ^ self physicsDataAt: #changedPreparedManifoldCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> contactCount [
+	| data |
+	data := signal physicsData.
+	^ data ifNil: [ nil ] ifNotNil: [ data at: #contactCount ifAbsent: [ nil ] ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> continuedContactCount [ ^ self physicsDataAt: #continuedContactCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> continuedPreparedContactConstraintCount [ ^ self physicsDataAt: #continuedPreparedContactConstraintCount
 ]
 
 { #category : 'timing' }
@@ -68,8 +70,13 @@ CFPhysicsTelemetrySpanSample >> durationMilliseconds [
 ]
 
 { #category : 'timing' }
-CFPhysicsTelemetrySpanSample >> startMilliseconds [
-	^ self start / 1000.0
+CFPhysicsTelemetrySpanSample >> elapsedDuration [
+	^ ping endTime - ping startTime
+]
+
+{ #category : 'timing' }
+CFPhysicsTelemetrySpanSample >> end [
+	^ ping endTime - parentPing startTime
 ]
 
 { #category : 'timing' }
@@ -78,162 +85,11 @@ CFPhysicsTelemetrySpanSample >> endMilliseconds [
 ]
 
 { #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> stepNumber [
-	| data |
-	data := signal physicsData.
-	^ data ifNil: [ nil ] ifNotNil: [ data at: #stepNumber ifAbsent: [ nil ] ]
+CFPhysicsTelemetrySpanSample >> endedContactCount [ ^ self physicsDataAt: #endedContactCount
 ]
 
 { #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> bodyCount [
-	| data |
-	data := signal physicsData.
-	^ data ifNil: [ nil ] ifNotNil: [ data at: #bodyCount ifAbsent: [ nil ] ]
-]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> contactCount [
-	| data |
-	data := signal physicsData.
-	^ data ifNil: [ nil ] ifNotNil: [ data at: #contactCount ifAbsent: [ nil ] ]
-]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> beganContactCount [ ^ self physicsDataAt: #beganContactCount ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> continuedContactCount [ ^ self physicsDataAt: #continuedContactCount ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> endedContactCount [ ^ self physicsDataAt: #endedContactCount ]
-
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> featureIdChangedPreparedManifoldCount [ ^ self physicsDataAt: #featureIdChangedPreparedManifoldCount ]
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> normalChangedPreparedManifoldCount [ ^ self physicsDataAt: #normalChangedPreparedManifoldCount ]
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> pointCountChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointCountChangedPreparedManifoldCount ]
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> pointOrderChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointOrderChangedPreparedManifoldCount ]
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> separationChangedPreparedManifoldCount [ ^ self physicsDataAt: #separationChangedPreparedManifoldCount ]
-
-{ #category : 'private - accessing' }
-CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
-	| data |
-	data := signal physicsData.
-	^ data ifNil: [ nil ] ifNotNil: [ data at: aKey ifAbsent: [ nil ] ]
-]
-
-
-{ #category : 'accessing - pair finder evidence' }
-CFPhysicsTelemetrySpanSample >> pairFinderEntryCount [
-	^ self physicsDataAt: #pairFinderEntryCount
-]
-
-{ #category : 'accessing - pair finder evidence' }
-CFPhysicsTelemetrySpanSample >> pairFinderComparisonCount [
-	^ self physicsDataAt: #pairFinderComparisonCount
-]
-
-{ #category : 'accessing - pair finder evidence' }
-CFPhysicsTelemetrySpanSample >> pairFinderAcceptedPairCount [
-	^ self physicsDataAt: #pairFinderAcceptedPairCount
-]
-
-{ #category : 'accessing - pair finder evidence' }
-CFPhysicsTelemetrySpanSample >> pairFinderMaximumActiveCount [
-	^ self physicsDataAt: #pairFinderMaximumActiveCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> islandCount [
-	^ self physicsDataAt: #islandCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> solvedIslandCount [
-	^ self physicsDataAt: #solvedIslandCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> largestSolvedIslandBodyCount [
-	^ self physicsDataAt: #largestSolvedIslandBodyCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> largestSolvedIslandDynamicBodyCount [
-	^ self physicsDataAt: #largestSolvedIslandDynamicBodyCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> largestSolvedIslandConstraintCount [
-	^ self physicsDataAt: #largestSolvedIslandConstraintCount
-]
-
-{ #category : 'accessing - solver evidence' }
-CFPhysicsTelemetrySpanSample >> solvedIslandConstraintCount [
-	^ self physicsDataAt: #solvedIslandConstraintCount
-]
-
-
-
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverContactConstraintCount [ ^ self physicsDataAt: #solverContactConstraintCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverContactPointCount [ ^ self physicsDataAt: #solverContactPointCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverWarmStartedContactPointCount [ ^ self physicsDataAt: #solverWarmStartedContactPointCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverRestitutionCandidatePointCount [ ^ self physicsDataAt: #solverRestitutionCandidatePointCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverJointConstraintCount [ ^ self physicsDataAt: #solverJointConstraintCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverDistanceJointConstraintCount [ ^ self physicsDataAt: #solverDistanceJointConstraintCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverPrismaticJointConstraintCount [ ^ self physicsDataAt: #solverPrismaticJointConstraintCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverRevoluteJointConstraintCount [ ^ self physicsDataAt: #solverRevoluteJointConstraintCount ]
-{ #category : 'accessing - solver work evidence' }
-CFPhysicsTelemetrySpanSample >> solverWeldJointConstraintCount [ ^ self physicsDataAt: #solverWeldJointConstraintCount ]
-
-
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> preparedContactConstraintCount [ ^ self physicsDataAt: #preparedContactConstraintCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> continuedPreparedContactConstraintCount [ ^ self physicsDataAt: #continuedPreparedContactConstraintCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> beganPreparedContactConstraintCount [ ^ self physicsDataAt: #beganPreparedContactConstraintCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> preparedContactPointCount [ ^ self physicsDataAt: #preparedContactPointCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> reusablePreparedContactPointCount [ ^ self physicsDataAt: #reusablePreparedContactPointCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> newPreparedContactPointCount [ ^ self physicsDataAt: #newPreparedContactPointCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> stablePreparedManifoldCount [ ^ self physicsDataAt: #stablePreparedManifoldCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> changedPreparedManifoldCount [ ^ self physicsDataAt: #changedPreparedManifoldCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> preparedJointConstraintCount [ ^ self physicsDataAt: #preparedJointConstraintCount ]
-{ #category : 'accessing - constraint preparation evidence' }
-CFPhysicsTelemetrySpanSample >> preparedConstraintObjectCount [ ^ self physicsDataAt: #preparedConstraintObjectCount ]
-
-{ #category : 'accessing' }
-CFPhysicsTelemetrySpanSample >> sender [
-	^ ping sender
-]
-
-{ #category : 'printing' }
-CFPhysicsTelemetrySpanSample >> printOn: aStream [
-	aStream
-		nextPutAll: ping name asString;
-		nextPutAll: ' #';
-		print: sequence;
-		nextPutAll: ' (';
-		nextPutAll: (self durationMilliseconds printShowingDecimalPlaces: 3);
-		nextPutAll: ' ms)'
+CFPhysicsTelemetrySpanSample >> featureIdChangedPreparedManifoldCount [ ^ self physicsDataAt: #featureIdChangedPreparedManifoldCount
 ]
 
 { #category : 'gt - views' }
@@ -293,4 +149,206 @@ CFPhysicsTelemetrySpanSample >> gtDetailsFor: aView [
 		column: 'Property' text: #key;
 		column: 'Value' text: #value;
 		send: #value
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> islandCount [
+	^ self physicsDataAt: #islandCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandBodyCount [
+	^ self physicsDataAt: #largestSolvedIslandBodyCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandConstraintCount [
+	^ self physicsDataAt: #largestSolvedIslandConstraintCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> largestSolvedIslandDynamicBodyCount [
+	^ self physicsDataAt: #largestSolvedIslandDynamicBodyCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> newPreparedContactPointCount [ ^ self physicsDataAt: #newPreparedContactPointCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> normalChangedPreparedManifoldCount [ ^ self physicsDataAt: #normalChangedPreparedManifoldCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderAcceptedPairCount [
+	^ self physicsDataAt: #pairFinderAcceptedPairCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderComparisonCount [
+	^ self physicsDataAt: #pairFinderComparisonCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderEntryCount [
+	^ self physicsDataAt: #pairFinderEntryCount
+]
+
+{ #category : 'accessing - pair finder evidence' }
+CFPhysicsTelemetrySpanSample >> pairFinderMaximumActiveCount [
+	^ self physicsDataAt: #pairFinderMaximumActiveCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> parentPing [ ^ parentPing
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> parentPing: anObject [ parentPing := anObject
+]
+
+{ #category : 'private - accessing' }
+CFPhysicsTelemetrySpanSample >> physicsDataAt: aKey [
+	| data |
+	data := signal physicsData.
+	^ data ifNil: [ nil ] ifNotNil: [ data at: aKey ifAbsent: [ nil ] ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> ping [ ^ ping
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> ping: anObject [ ping := anObject
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> pointCountChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointCountChangedPreparedManifoldCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> pointOrderChangedPreparedManifoldCount [ ^ self physicsDataAt: #pointOrderChangedPreparedManifoldCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedConstraintObjectCount [ ^ self physicsDataAt: #preparedConstraintObjectCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedContactConstraintCount [ ^ self physicsDataAt: #preparedContactConstraintCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedContactPointCount [ ^ self physicsDataAt: #preparedContactPointCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> preparedJointConstraintCount [ ^ self physicsDataAt: #preparedJointConstraintCount
+]
+
+{ #category : 'printing' }
+CFPhysicsTelemetrySpanSample >> printOn: aStream [
+	aStream
+		nextPutAll: ping name asString;
+		nextPutAll: ' #';
+		print: sequence;
+		nextPutAll: ' (';
+		nextPutAll: (self durationMilliseconds printShowingDecimalPlaces: 3);
+		nextPutAll: ' ms)'
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> reusablePreparedContactPointCount [ ^ self physicsDataAt: #reusablePreparedContactPointCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> sender [
+	^ ping sender
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> separationChangedPreparedManifoldCount [ ^ self physicsDataAt: #separationChangedPreparedManifoldCount
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> sequence [ ^ sequence
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> sequence: anInteger [ sequence := anInteger
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> signal [ ^ signal
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> signal: anObject [ signal := anObject
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> solvedIslandConstraintCount [
+	^ self physicsDataAt: #solvedIslandConstraintCount
+]
+
+{ #category : 'accessing - solver evidence' }
+CFPhysicsTelemetrySpanSample >> solvedIslandCount [
+	^ self physicsDataAt: #solvedIslandCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverContactConstraintCount [ ^ self physicsDataAt: #solverContactConstraintCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverContactPointCount [ ^ self physicsDataAt: #solverContactPointCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverDistanceJointConstraintCount [ ^ self physicsDataAt: #solverDistanceJointConstraintCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverJointConstraintCount [ ^ self physicsDataAt: #solverJointConstraintCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverPrismaticJointConstraintCount [ ^ self physicsDataAt: #solverPrismaticJointConstraintCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverRestitutionCandidatePointCount [ ^ self physicsDataAt: #solverRestitutionCandidatePointCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverRevoluteJointConstraintCount [ ^ self physicsDataAt: #solverRevoluteJointConstraintCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverWarmStartedContactPointCount [ ^ self physicsDataAt: #solverWarmStartedContactPointCount
+]
+
+{ #category : 'accessing - solver work evidence' }
+CFPhysicsTelemetrySpanSample >> solverWeldJointConstraintCount [ ^ self physicsDataAt: #solverWeldJointConstraintCount
+]
+
+{ #category : 'accessing - constraint preparation evidence' }
+CFPhysicsTelemetrySpanSample >> stablePreparedManifoldCount [ ^ self physicsDataAt: #stablePreparedManifoldCount
+]
+
+{ #category : 'timing' }
+CFPhysicsTelemetrySpanSample >> start [
+	^ ping startTime - parentPing startTime
+]
+
+{ #category : 'timing' }
+CFPhysicsTelemetrySpanSample >> startMilliseconds [
+	^ self start / 1000.0
+]
+
+{ #category : 'accessing' }
+CFPhysicsTelemetrySpanSample >> stepNumber [
+	| data |
+	data := signal physicsData.
+	^ data ifNil: [ nil ] ifNotNil: [ data at: #stepNumber ifAbsent: [ nil ] ]
 ]

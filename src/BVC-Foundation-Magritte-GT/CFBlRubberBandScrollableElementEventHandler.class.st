@@ -6,6 +6,15 @@ Class {
 }
 
 { #category : 'mouse handlers' }
+CFBlRubberBandScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
+	| aScrollableElement didStart |
+
+	aScrollableElement := anEvent currentTarget.
+	didStart := aScrollableElement snapBackIfNeeded.
+	anEvent consumed: didStart
+]
+
+{ #category : 'mouse handlers' }
 CFBlRubberBandScrollableElementEventHandler >> gestureScrollEvent: anEvent [
 	| aScrollableElement aScrollHappened |
 
@@ -27,14 +36,4 @@ CFBlRubberBandScrollableElementEventHandler >> mouseWheelEvent: anEvent [
 	aScrollHappened := aScrollableElement scrollBy:
 		(anEvent vector * aScrollableElement wheelScrollScale).
 	anEvent consumed: aScrollHappened
-]
-
-
-{ #category : 'mouse handlers' }
-CFBlRubberBandScrollableElementEventHandler >> gestureScrollEndEvent: anEvent [
-	| aScrollableElement didStart |
-
-	aScrollableElement := anEvent currentTarget.
-	didStart := aScrollableElement snapBackIfNeeded.
-	anEvent consumed: didStart
 ]

@@ -1,8 +1,16 @@
-"I provide a compact direct-entry control for one live Behaviour description."
+"
+I provide a compact direct-entry control for one live Behaviour description.
+"
 Class {
 	#name : 'CFPhysicsBehaviourValueControl',
 	#superclass : 'Object',
-	#instVars : [ 'behaviour', 'description', 'element', 'editor', 'updating' ],
+	#instVars : [
+		'behaviour',
+		'description',
+		'element',
+		'editor',
+		'updating'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -13,11 +21,23 @@ CFPhysicsBehaviourValueControl class >> on: aBehaviour description: aDescription
 ]
 
 { #category : 'private - initialization' }
-CFPhysicsBehaviourValueControl >> behaviour: anObject [ behaviour := anObject ]
+CFPhysicsBehaviourValueControl >> behaviour: anObject [ behaviour := anObject
+]
+
 { #category : 'private - initialization' }
-CFPhysicsBehaviourValueControl >> description: anObject [ description := anObject ]
+CFPhysicsBehaviourValueControl >> description: anObject [ description := anObject
+]
+
+{ #category : 'private - editing' }
+CFPhysicsBehaviourValueControl >> editorModified [
+	updating ifTrue: [ ^ self ].
+	[ description writeFromString: editor text asString to: behaviour ] on: Error do: [ :error | ].
+	^ self
+]
+
 { #category : 'accessing' }
-CFPhysicsBehaviourValueControl >> element [ ^ element ]
+CFPhysicsBehaviourValueControl >> element [ ^ element
+]
 
 { #category : 'initialization' }
 CFPhysicsBehaviourValueControl >> initializeControl [
@@ -34,13 +54,6 @@ CFPhysicsBehaviourValueControl >> initializeControl [
 	self refresh
 ]
 
-{ #category : 'private - editing' }
-CFPhysicsBehaviourValueControl >> editorModified [
-	updating ifTrue: [ ^ self ].
-	[ description writeFromString: editor text asString to: behaviour ] on: Error do: [ :error | ].
-	^ self
-]
-
 { #category : 'updating' }
 CFPhysicsBehaviourValueControl >> refresh [
 	| string |
@@ -54,4 +67,5 @@ CFPhysicsBehaviourValueControl >> refresh [
 ]
 
 { #category : 'controlling' }
-CFPhysicsBehaviourValueControl >> release [ ^ self ]
+CFPhysicsBehaviourValueControl >> release [ ^ self
+]

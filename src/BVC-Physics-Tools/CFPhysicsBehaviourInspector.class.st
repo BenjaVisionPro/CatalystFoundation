@@ -1,8 +1,19 @@
-"I present the public live configuration of one Physics Behaviour in the floating Physics inspector. I build from the Behaviour Magritte descriptions, write edits directly through those descriptions, and keep controls synchronised with the running Behaviour."
+"
+I present the public live configuration of one Physics Behaviour in the floating Physics inspector. I build from the Behaviour Magritte descriptions, write edits directly through those descriptions, and keep controls synchronised with the running Behaviour.
+"
 Class {
 	#name : 'CFPhysicsBehaviourInspector',
 	#superclass : 'Object',
-	#instVars : [ 'element', 'titleElement', 'copyButton', 'scrollPane', 'dataElement', 'behaviour', 'controlsByDescription', 'preferredDataHeight' ],
+	#instVars : [
+		'element',
+		'titleElement',
+		'copyButton',
+		'scrollPane',
+		'dataElement',
+		'behaviour',
+		'controlsByDescription',
+		'preferredDataHeight'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -12,11 +23,42 @@ CFPhysicsBehaviourInspector class >> newContent [
 	^ self new initializeContent; yourself
 ]
 
+{ #category : 'building' }
+CFPhysicsBehaviourInspector >> addGroup: aName descriptions: descriptions [
+	| group |
+	group := BrVerticalPane new hMatchParent; vFitContent; cellSpacing: 1; yourself.
+	group addChild: (BrLabel new
+		hMatchParent;
+		vExact: 11;
+		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.38); fontSize: 8);
+		text: aName asUppercase;
+		yourself).
+	descriptions do: [ :description | group addChild: (self rowFor: description) ].
+	dataElement addChild: group.
+	preferredDataHeight := preferredDataHeight + 11 + (descriptions size * 20) + descriptions size + 3
+]
+
+{ #category : 'clearing' }
+CFPhysicsBehaviourInspector >> clear [
+	behaviour := nil.
+	controlsByDescription valuesDo: #release.
+	controlsByDescription removeAll.
+	dataElement removeChildren.
+	^ self
+]
+
 { #category : 'accessing' }
-CFPhysicsBehaviourInspector >> element [ ^ element ]
+CFPhysicsBehaviourInspector >> element [ ^ element
+]
 
 { #category : 'sizing' }
-CFPhysicsBehaviourInspector >> panelWidth [ ^ 300 ]
+CFPhysicsBehaviourInspector >> fitWithinHeight: aHeight [
+	| bodyHeight |
+	bodyHeight := (aHeight - 25) max: 0.
+	element vExact: aHeight.
+	scrollPane vExact: bodyHeight.
+	^ self
+]
 
 { #category : 'initialization' }
 CFPhysicsBehaviourInspector >> initializeContent [
@@ -64,6 +106,15 @@ CFPhysicsBehaviourInspector >> inspect: aBehaviour [
 	^ self
 ]
 
+{ #category : 'sizing' }
+CFPhysicsBehaviourInspector >> panelWidth [ ^ 300
+]
+
+{ #category : 'sizing' }
+CFPhysicsBehaviourInspector >> preferredHeight [
+	^ 16 + 9 + preferredDataHeight
+]
+
 { #category : 'building' }
 CFPhysicsBehaviourInspector >> rebuild [
 	| grouped groupNames |
@@ -80,19 +131,10 @@ CFPhysicsBehaviourInspector >> rebuild [
 	^ self
 ]
 
-{ #category : 'building' }
-CFPhysicsBehaviourInspector >> addGroup: aName descriptions: descriptions [
-	| group |
-	group := BrVerticalPane new hMatchParent; vFitContent; cellSpacing: 1; yourself.
-	group addChild: (BrLabel new
-		hMatchParent;
-		vExact: 11;
-		aptitude: (BrGlamorousLabelAptitude new foreground: (Color black alpha: 0.38); fontSize: 8);
-		text: aName asUppercase;
-		yourself).
-	descriptions do: [ :description | group addChild: (self rowFor: description) ].
-	dataElement addChild: group.
-	preferredDataHeight := preferredDataHeight + 11 + (descriptions size * 20) + descriptions size + 3
+{ #category : 'updating' }
+CFPhysicsBehaviourInspector >> refresh [
+	controlsByDescription valuesDo: #refresh.
+	^ self
 ]
 
 { #category : 'building' }
@@ -114,33 +156,4 @@ CFPhysicsBehaviourInspector >> rowFor: aDescription [
 	controlsByDescription at: aDescription put: control.
 	row addChild: label; addChild: control element.
 	^ row
-]
-
-{ #category : 'updating' }
-CFPhysicsBehaviourInspector >> refresh [
-	controlsByDescription valuesDo: #refresh.
-	^ self
-]
-
-{ #category : 'clearing' }
-CFPhysicsBehaviourInspector >> clear [
-	behaviour := nil.
-	controlsByDescription valuesDo: #release.
-	controlsByDescription removeAll.
-	dataElement removeChildren.
-	^ self
-]
-
-{ #category : 'sizing' }
-CFPhysicsBehaviourInspector >> preferredHeight [
-	^ 16 + 9 + preferredDataHeight
-]
-
-{ #category : 'sizing' }
-CFPhysicsBehaviourInspector >> fitWithinHeight: aHeight [
-	| bodyHeight |
-	bodyHeight := (aHeight - 25) max: 0.
-	element vExact: aHeight.
-	scrollPane vExact: bodyHeight.
-	^ self
 ]

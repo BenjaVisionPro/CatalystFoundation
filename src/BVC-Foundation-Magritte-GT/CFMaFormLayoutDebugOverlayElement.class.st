@@ -13,6 +13,18 @@ Class {
 	#tag : 'Widgets'
 }
 
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> debugIconOff [
+	^ BrGlamorousVectorIcons debug
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> debugIconOn [
+	^ [ BrGlamorousVectorIcons debug asElement
+		background: Color red;
+		yourself ] asStencil
+]
+
 { #category : 'instance creation' }
 CFMaFormLayoutDebugOverlayElement class >> forTarget: anElement [
 	^ self new
@@ -27,30 +39,6 @@ CFMaFormLayoutDebugOverlayElement class >> overlayIn: anElement [
 		allChildrenBreadthFirstDetect: [ :eachElement |
 			eachElement isKindOf: CFMaFormLayoutDebugOverlayElement ]
 		ifFound: [ :anOverlay | anOverlay ]
-]
-
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement class >> targetFormElementIn: anElement [
-	(anElement magritte isFieldContainer)
-		ifTrue: [ ^ anElement ].
-
-	^ anElement
-		allChildrenBreadthFirstDetect: [ :eachElement |
-			eachElement magritte isFieldContainer ]
-		ifFound: [ :aFormElement | aFormElement ]
-]
-
-
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement class >> debugIconOff [
-	^ BrGlamorousVectorIcons debug
-]
-
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement class >> debugIconOn [
-	^ [ BrGlamorousVectorIcons debug asElement
-		background: Color red;
-		yourself ] asStencil
 ]
 
 { #category : 'accessing' }
@@ -81,6 +69,31 @@ CFMaFormLayoutDebugOverlayElement class >> setEnabled: aBoolean in: anElement bu
 		anOverlay removeFromParent ].
 	aButton icon: self debugIconOff asElement.
 	^ false
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement class >> targetFormElementIn: anElement [
+	(anElement magritte isFieldContainer)
+		ifTrue: [ ^ anElement ].
+
+	^ anElement
+		allChildrenBreadthFirstDetect: [ :eachElement |
+			eachElement magritte isFieldContainer ]
+		ifFound: [ :aFormElement | aFormElement ]
+]
+
+{ #category : 'private - events' }
+CFMaFormLayoutDebugOverlayElement >> clearHoveredElement [
+	hoveredElement ifNil: [ ^ self ].
+	hoveredElement := nil.
+	self invalidate
+]
+
+{ #category : 'api - attaching / detaching' }
+CFMaFormLayoutDebugOverlayElement >> detach [
+	self uninstallHoverDebugHandlers.
+	super detach.
+	targetElement := nil
 ]
 
 { #category : 'drawing' }
@@ -125,29 +138,6 @@ CFMaFormLayoutDebugOverlayElement >> drawRectangle: aRectangle onSpartaCanvas: a
 	aStroke draw
 ]
 
-{ #category : 'initialization' }
-CFMaFormLayoutDebugOverlayElement >> initialize [
-	super initialize.
-
-	enabled := false.
-	hoveredElement := nil
-]
-
-{ #category : 'geometry' }
-CFMaFormLayoutDebugOverlayElement >> localRectangleFor: aRectangle of: anElement [
-	| aBounds |
-	aBounds := BlBounds fromRectangle: aRectangle.
-	anElement localBoundsToGlobal: aBounds.
-	self globalBoundsToLocal: aBounds.
-	^ aBounds asRectangle
-]
-
-
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement >> isEnabled [
-	^ enabled ifNil: [ false ]
-]
-
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
 	enabled := aBoolean.
@@ -156,17 +146,12 @@ CFMaFormLayoutDebugOverlayElement >> enabled: aBoolean [
 	targetElement ifNotNil: [ targetElement invalidate ]
 ]
 
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement >> targetElement [
-	^ targetElement
-]
+{ #category : 'initialization' }
+CFMaFormLayoutDebugOverlayElement >> initialize [
+	super initialize.
 
-{ #category : 'accessing' }
-CFMaFormLayoutDebugOverlayElement >> targetElement: anElement [
-	targetElement == anElement ifTrue: [ ^ self ].
-	self uninstallHoverDebugHandlers.
-	targetElement := anElement.
-	self installHoverDebugHandlersOn: anElement
+	enabled := false.
+	hoveredElement := nil
 ]
 
 { #category : 'private - events' }
@@ -183,6 +168,33 @@ CFMaFormLayoutDebugOverlayElement >> installHoverDebugHandlersOn: anElement [
 		addEventFilter: mouseLeaveEventHandler
 ]
 
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> isEnabled [
+	^ enabled ifNil: [ false ]
+]
+
+{ #category : 'geometry' }
+CFMaFormLayoutDebugOverlayElement >> localRectangleFor: aRectangle of: anElement [
+	| aBounds |
+	aBounds := BlBounds fromRectangle: aRectangle.
+	anElement localBoundsToGlobal: aBounds.
+	self globalBoundsToLocal: aBounds.
+	^ aBounds asRectangle
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> targetElement [
+	^ targetElement
+]
+
+{ #category : 'accessing' }
+CFMaFormLayoutDebugOverlayElement >> targetElement: anElement [
+	targetElement == anElement ifTrue: [ ^ self ].
+	self uninstallHoverDebugHandlers.
+	targetElement := anElement.
+	self installHoverDebugHandlersOn: anElement
+]
+
 { #category : 'private - events' }
 CFMaFormLayoutDebugOverlayElement >> uninstallHoverDebugHandlers [
 	targetElement ifNil: [ ^ self ].
@@ -195,24 +207,10 @@ CFMaFormLayoutDebugOverlayElement >> uninstallHoverDebugHandlers [
 	hoveredElement := nil
 ]
 
-{ #category : 'api - attaching / detaching' }
-CFMaFormLayoutDebugOverlayElement >> detach [
-	self uninstallHoverDebugHandlers.
-	super detach.
-	targetElement := nil
-]
-
 { #category : 'private - events' }
 CFMaFormLayoutDebugOverlayElement >> updateHoveredElementFrom: aMouseEvent [
 	self isEnabled ifFalse: [ ^ self ].
 	hoveredElement == aMouseEvent target ifTrue: [ ^ self ].
 	hoveredElement := aMouseEvent target.
-	self invalidate
-]
-
-{ #category : 'private - events' }
-CFMaFormLayoutDebugOverlayElement >> clearHoveredElement [
-	hoveredElement ifNil: [ ^ self ].
-	hoveredElement := nil.
 	self invalidate
 ]

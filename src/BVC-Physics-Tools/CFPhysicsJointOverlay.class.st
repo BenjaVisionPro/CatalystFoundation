@@ -1,8 +1,15 @@
-"I manage the retained joint diagnostics for one Physics overlay. My responsibility is to reconcile the world's joints with their visual representations and resolve joint selections from those visuals."
+"
+I manage the retained joint diagnostics for one Physics overlay. My responsibility is to reconcile the world's joints with their visual representations and resolve joint selections from those visuals.
+"
 Class {
 	#name : 'CFPhysicsJointOverlay',
 	#superclass : 'Object',
-	#instVars : [ 'root', 'world', 'context', 'visualsByJoint' ],
+	#instVars : [
+		'root',
+		'world',
+		'context',
+		'visualsByJoint'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -17,23 +24,20 @@ CFPhysicsJointOverlay class >> in: aRoot world: aWorld context: aContext [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsJointOverlay >> root: anElement [ root := anElement ]
+{ #category : 'controlling' }
+CFPhysicsJointOverlay >> clear [
+	visualsByJoint valuesDo: #release.
+	visualsByJoint removeAll.
+	^ self
+]
 
 { #category : 'accessing' }
-CFPhysicsJointOverlay >> world: aWorld [ world := aWorld ]
+CFPhysicsJointOverlay >> context: aContext [ context := aContext
+]
 
-{ #category : 'accessing' }
-CFPhysicsJointOverlay >> context: aContext [ context := aContext ]
-
-{ #category : 'accessing' }
-CFPhysicsJointOverlay >> visuals [ ^ visualsByJoint values asArray ]
-
-{ #category : 'testing' }
-CFPhysicsJointOverlay >> visualForEventTarget: anElement [
-	^ visualsByJoint values
-		detect: [ :each | each includesEventTarget: anElement ]
-		ifNone: [ nil ]
+{ #category : 'initialization' }
+CFPhysicsJointOverlay >> initializeOverlay [
+	visualsByJoint := IdentityDictionary new
 ]
 
 { #category : 'testing' }
@@ -43,9 +47,12 @@ CFPhysicsJointOverlay >> jointForEventTarget: anElement [
 	^ visual ifNil: [ nil ] ifNotNil: [ visual joint ]
 ]
 
-{ #category : 'initialization' }
-CFPhysicsJointOverlay >> initializeOverlay [
-	visualsByJoint := IdentityDictionary new
+{ #category : 'controlling' }
+CFPhysicsJointOverlay >> release [ ^ self clear
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointOverlay >> root: anElement [ root := anElement
 ]
 
 { #category : 'updating' }
@@ -76,12 +83,17 @@ CFPhysicsJointOverlay >> updateGeometry [
 	^ self
 ]
 
-{ #category : 'controlling' }
-CFPhysicsJointOverlay >> clear [
-	visualsByJoint valuesDo: #release.
-	visualsByJoint removeAll.
-	^ self
+{ #category : 'testing' }
+CFPhysicsJointOverlay >> visualForEventTarget: anElement [
+	^ visualsByJoint values
+		detect: [ :each | each includesEventTarget: anElement ]
+		ifNone: [ nil ]
 ]
 
-{ #category : 'controlling' }
-CFPhysicsJointOverlay >> release [ ^ self clear ]
+{ #category : 'accessing' }
+CFPhysicsJointOverlay >> visuals [ ^ visualsByJoint values asArray
+]
+
+{ #category : 'accessing' }
+CFPhysicsJointOverlay >> world: aWorld [ world := aWorld
+]

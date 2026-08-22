@@ -1,5 +1,6 @@
-"I present Magritte descriptions using Foundation's settings interface language: section headings, rounded cards, contiguous rows and trailing controls."
-
+"
+I present Magritte descriptions using Foundation's settings interface language: section headings, rounded cards, contiguous rows and trailing controls.
+"
 Class {
 	#name : 'CFMaSettingsPresentation',
 	#superclass : 'CFMaPresentation',
@@ -13,273 +14,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Presentations-Settings'
 }
-
-{ #category : 'initialization' }
-CFMaSettingsPresentation >> initialize [
-	super initialize.
-	sectionsByGroup := Dictionary new.
-	cardsBySectionAndPath := Dictionary new.
-	focusOverlaysByContainer := IdentityDictionary new
-]
-
-{ #category : 'api - building' }
-CFMaSettingsPresentation >> build [
-	| anElement |
-	sectionsByGroup removeAll.
-	cardsBySectionAndPath removeAll.
-	focusOverlaysByContainer removeAll.
-	ungroupedSection := nil.
-	anElement := super build.
-	self hostElement background: Color white.
-	^ anElement
-]
-
-{ #category : 'private - appearance' }
-CFMaSettingsPresentation >> primaryTextColor [
-	^ Color r: 39 g: 39 b: 39 range: 255
-]
-
-{ #category : 'private - appearance' }
-CFMaSettingsPresentation >> secondaryTextColor [
-	^ Color r: 125 g: 125 b: 125 range: 255
-]
-
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> newFieldContainer [
-	^ CFMaSettingsCardElement new
-]
-
-{ #category : 'private - groups' }
-CFMaSettingsPresentation >> newSectionNamed: aGroup [
-	| aSection aHeading |
-	aSection := CFMaSettingsSectionElement new.
-	aGroup ifNotNil: [
-		aHeading := BrLabel new
-			text: aGroup asString;
-			aptitude: (BrGlamorousLabelAptitude new
-				foreground: self primaryTextColor;
-				fontSize: 14;
-				bold);
-			fitContent;
-			margin: (BlInsets top: 22 right: 8 bottom: 2 left: 8);
-			yourself.
-		aSection heading: aHeading ].
-	self hostElement addChild: aSection.
-	^ aSection
-]
-
-{ #category : 'private - groups' }
-CFMaSettingsPresentation >> sectionForGroup: aGroup [
-	aGroup ifNil: [
-		^ ungroupedSection ifNil: [
-			ungroupedSection := self newSectionNamed: nil ] ].
-	^ sectionsByGroup
-		at: aGroup
-		ifAbsentPut: [ self newSectionNamed: aGroup ]
-]
-
-{ #category : 'private - groups' }
-CFMaSettingsPresentation >> cardForDescription: aDescription [
-	| aSection aKey |
-	aSection := self sectionForGroup: aDescription group.
-	aKey := { aSection. aDescription categories }.
-	^ cardsBySectionAndPath
-		at: aKey
-		ifAbsentPut: [
-			| aCard |
-			aCard := CFMaSettingsCardElement new.
-			aSection addCard: aCard.
-			aCard ]
-]
-
-{ #category : 'private - groups' }
-CFMaSettingsPresentation >> containerForDescription: aDescription [
-	^ self cardForDescription: aDescription
-]
-
-{ #category : 'private - groups' }
-CFMaSettingsPresentation >> newGroupNamed: aGroup [
-	| aSection aCard |
-	aSection := self sectionForGroup: aGroup.
-	aCard := CFMaSettingsCardElement new.
-	aSection addCard: aCard.
-	^ aCard
-]
-
-{ #category : 'private - focus' }
-CFMaSettingsPresentation >> focusOverlayFor: aRow in: aContainer [
-	^ focusOverlaysByContainer
-		at: aContainer
-		ifAbsentPut: [
-			| anOverlay |
-			anOverlay := BlOverlayElement on: aRow.
-			anOverlay
-				border: BlBorder empty;
-				background: Color transparent;
-				zIndex: 100.
-			anOverlay
-				when: BlElementPositionChangedEvent
-				do: [ :anEvent |
-					self updateFocusOverlayGeometry: anOverlay in: aContainer ];
-				when: BlElementExtentChangedEvent
-				do: [ :anEvent |
-					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
-			aContainer
-				when: BlElementExtentChangedEvent
-				do: [ :anEvent |
-					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
-			aContainer addChild: anOverlay.
-			anOverlay ]
-]
-
-{ #category : 'private - focus' }
-CFMaSettingsPresentation >> installFocusOverlayFor: aRow in: aContainer [
-	| anOverlay |
-	anOverlay := self focusOverlayFor: aRow in: aContainer.
-
-	aRow
-		when: BlFocusInEvent
-		do: [ :anEvent |
-			anOverlay
-				attachTo: aRow;
-				border: (BlBorder
-					paint: anOverlay theme editor focusedBorderColor
-					width: 1).
-			self updateFocusOverlayGeometry: anOverlay in: aContainer ];
-		when: BlFocusOutEvent
-		do: [ :anEvent |
-			anOverlay border: BlBorder empty ]
-]
-
-{ #category : 'private - focus' }
-CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer [
-	| overlayBounds topRadius bottomRadius radii |
-	anOverlay hasParent ifFalse: [ ^ self ].
-
-	overlayBounds := (anOverlay bounds inParent: aContainer) asRectangle.
-	topRadius := (overlayBounds top closeTo: aContainer padding top epsilon: BlElement epsilon)
-		ifTrue: [ aContainer cornerRadius ]
-		ifFalse: [ 0 ].
-	bottomRadius := (overlayBounds bottom
-		closeTo: aContainer extent y - aContainer padding bottom
-		epsilon: BlElement epsilon)
-		ifTrue: [ aContainer cornerRadius ]
-		ifFalse: [ 0 ].
-
-	radii := BlCornerRadii new
-		topLeft: topRadius;
-		topRight: topRadius;
-		bottomLeft: bottomRadius;
-		bottomRight: bottomRadius;
-		yourself.
-
-	anOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
-]
-
-{ #category : 'private - metrics' }
-CFMaSettingsPresentation >> editorTextHorizontalInset [
-	^ 0
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
-	| editors |
-	editors := OrderedCollection new.
-	(aFieldElement isKindOf: BrEditor)
-		ifTrue: [ editors add: aFieldElement ].
-	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
-		(aChild isKindOf: BrEditor)
-			ifTrue: [ editors add: aChild ] ].
-
-	editors do: [ :anEditor |
-		(anEditor isKindOf: GtMagritteOneLineEditorElement)
-			ifTrue: [ anEditor addAptitude: CFMaSettingsEditorAptitude new ].
-		anEditor
-			geometry: BlRectangleGeometry new;
-			margin: BlInsets empty;
-			padding: (BlInsets
-				top: 0
-				right: self editorTextHorizontalInset
-				bottom: 0
-				left: self editorTextHorizontalInset).
-		anEditor constraintsDo: [ :c | c minWidth: 0 ] ].
-	^ aFieldElement
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> prepareField: aFieldElement [
-	self prepareEditorChromeIn: aFieldElement.
-	aFieldElement margin: BlInsets empty.
-	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
-		ifFalse: [ aFieldElement padding: BlInsets empty ].
-	^ aFieldElement
-]
-
-{ #category : 'configuration - fields' }
-CFMaSettingsPresentation >> newFieldConfiguration [
-	| aConfiguration |
-	aConfiguration := super newFieldConfiguration.
-	aConfiguration icon
-		beMedium;
-		beChromed.
-	^ aConfiguration
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
-	| aRow anIcon aFieldConfiguration |
-	aFieldConfiguration := self fieldConfigurationFor: aDescription.
-	anIcon := aDescription iconFor: self memento model.
-	aRow := CFMaSettingsRowElement new.
-	aRow
-		icon: (anIcon ifNotNil: [ | aTile |
-			aTile := CFIconTile new
-				icon: anIcon;
-				backgroundColor: aFieldConfiguration icon backgroundColor;
-				yourself.
-			aFieldConfiguration icon isSmall ifTrue: [ aTile beSmall ].
-			aFieldConfiguration icon isMedium ifTrue: [ aTile beMedium ].
-			aFieldConfiguration icon isLarge ifTrue: [ aTile beLarge ].
-			aTile ])
-		label: (self newFieldLabelFor: aDescription)
-		comment: (aDescription hasComment
-			ifTrue: [ self newCommentFor: aDescription ]
-			ifFalse: [ nil ])
-		field: (self prepareField: aFieldElement)
-		trailingActions: (self newRowActionsFor: aDescription).
-	^ aRow
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> addRow: aRow for: aDescription [
-	| aCard |
-	aCard := self cardForDescription: aDescription.
-	aCard addRow: aRow.
-	self installFocusOverlayFor: aRow in: aCard
-]
-
-{ #category : 'private - composition' }
-CFMaSettingsPresentation >> newCommentFor: aDescription [
-	^ BrEditor new
-		aptitude: BrGlamorousRegularEditorAptitude new;
-		beReadOnlyWithoutSelection;
-		focusability: BlFocusability none;
-		text: (aDescription comment asRopedText
-			foreground: self secondaryTextColor;
-			fontSize: 11);
-		hMatchParent;
-		vFitContent;
-		background: Color transparent;
-		border: BlBorder empty;
-		padding: BlInsets empty;
-		margin: (BlInsets
-			top: 1
-			right: 0
-			bottom: 0
-			left: 0.5);
-		yourself
-]
 
 { #category : 'private - composition' }
 CFMaSettingsPresentation >> addElement: anElement for: aDescription [
@@ -389,6 +123,140 @@ CFMaSettingsPresentation >> addMemoFieldUsing: aDescription [
 ]
 
 { #category : 'private - composition' }
+CFMaSettingsPresentation >> addRow: aRow for: aDescription [
+	| aCard |
+	aCard := self cardForDescription: aDescription.
+	aCard addRow: aRow.
+	self installFocusOverlayFor: aRow in: aCard
+]
+
+{ #category : 'api - building' }
+CFMaSettingsPresentation >> build [
+	| anElement |
+	sectionsByGroup removeAll.
+	cardsBySectionAndPath removeAll.
+	focusOverlaysByContainer removeAll.
+	ungroupedSection := nil.
+	anElement := super build.
+	self hostElement background: Color white.
+	^ anElement
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> cardForDescription: aDescription [
+	| aSection aKey |
+	aSection := self sectionForGroup: aDescription group.
+	aKey := { aSection. aDescription categories }.
+	^ cardsBySectionAndPath
+		at: aKey
+		ifAbsentPut: [
+			| aCard |
+			aCard := CFMaSettingsCardElement new.
+			aSection addCard: aCard.
+			aCard ]
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> containerForDescription: aDescription [
+	^ self cardForDescription: aDescription
+]
+
+{ #category : 'private - metrics' }
+CFMaSettingsPresentation >> editorTextHorizontalInset [
+	^ 0
+]
+
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> focusOverlayFor: aRow in: aContainer [
+	^ focusOverlaysByContainer
+		at: aContainer
+		ifAbsentPut: [
+			| anOverlay |
+			anOverlay := BlOverlayElement on: aRow.
+			anOverlay
+				border: BlBorder empty;
+				background: Color transparent;
+				zIndex: 100.
+			anOverlay
+				when: BlElementPositionChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ];
+				when: BlElementExtentChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
+			aContainer
+				when: BlElementExtentChangedEvent
+				do: [ :anEvent |
+					self updateFocusOverlayGeometry: anOverlay in: aContainer ].
+			aContainer addChild: anOverlay.
+			anOverlay ]
+]
+
+{ #category : 'initialization' }
+CFMaSettingsPresentation >> initialize [
+	super initialize.
+	sectionsByGroup := Dictionary new.
+	cardsBySectionAndPath := Dictionary new.
+	focusOverlaysByContainer := IdentityDictionary new
+]
+
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> installFocusOverlayFor: aRow in: aContainer [
+	| anOverlay |
+	anOverlay := self focusOverlayFor: aRow in: aContainer.
+
+	aRow
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			anOverlay
+				attachTo: aRow;
+				border: (BlBorder
+					paint: anOverlay theme editor focusedBorderColor
+					width: 1).
+			self updateFocusOverlayGeometry: anOverlay in: aContainer ];
+		when: BlFocusOutEvent
+		do: [ :anEvent |
+			anOverlay border: BlBorder empty ]
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> newCommentFor: aDescription [
+	^ BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		focusability: BlFocusability none;
+		text: (aDescription comment asRopedText
+			foreground: self secondaryTextColor;
+			fontSize: 11);
+		hMatchParent;
+		vFitContent;
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: BlInsets empty;
+		margin: (BlInsets
+			top: 1
+			right: 0
+			bottom: 0
+			left: 0.5);
+		yourself
+]
+
+{ #category : 'configuration - fields' }
+CFMaSettingsPresentation >> newFieldConfiguration [
+	| aConfiguration |
+	aConfiguration := super newFieldConfiguration.
+	aConfiguration icon
+		beMedium;
+		beChromed.
+	^ aConfiguration
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> newFieldContainer [
+	^ CFMaSettingsCardElement new
+]
+
+{ #category : 'private - composition' }
 CFMaSettingsPresentation >> newFieldLabelFor: aDescription [
 	| aLabel aText |
 	aText := aDescription label asRopedText.
@@ -406,40 +274,46 @@ CFMaSettingsPresentation >> newFieldLabelFor: aDescription [
 	^ aLabel
 ]
 
-{ #category : 'visiting-description' }
-CFMaSettingsPresentation >> visitMemoDescription: aDescription [
-	self addMemoFieldUsing: aDescription
-]
-
-{ #category : 'visiting-description' }
-CFMaSettingsPresentation >> visitBooleanDescription: aDescription [
-	| aBooleanElement |
-	aBooleanElement := aDescription blocStencil
-		ifNotNil: [ :aStencil |
-			aStencil
-				memento: self memento;
-				description: aDescription;
-				asElement ]
-		ifNil: [
-			CFMaSettingsBooleanElement new
-				fieldViewModel: (GtMagritteFieldViewModel new
-					memento: self memento;
-					description: aDescription) ].
-
-	self addFieldElement: aBooleanElement using: aDescription
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> newGroupNamed: aGroup [
+	| aSection aCard |
+	aSection := self sectionForGroup: aGroup.
+	aCard := CFMaSettingsCardElement new.
+	aSection addCard: aCard.
+	^ aCard
 ]
 
 { #category : 'private - row actions' }
-CFMaSettingsPresentation >> newRowActionsFor: aDescription [
-	| theActions information |
-	theActions := OrderedCollection new.
-	aDescription isWithChangeIndicator ifTrue: [
-		theActions add: (self newRevertActionFor: aDescription) ].
-	theActions add: (self newValidationActionFor: aDescription).
-	information := aDescription informationFor: self memento model.
-	information ifNotNil: [
-		theActions add: (self newInformationActionFor: information) ].
-	^ theActions
+CFMaSettingsPresentation >> newInformationActionFor: information [
+	| aButton |
+	aButton := self newRowActionButtonIconNamed: #infoCircle.
+	aButton
+		hExact: 12;
+		icon: (aButton icon fitInto: 12 @ 12);
+		label: information asString.
+	^ aButton
+]
+
+{ #category : 'private - row actions' }
+CFMaSettingsPresentation >> newRevertActionFor: aDescription [
+	| aButton |
+	aButton := self newRowActionButtonIconNamed: #undo.
+	aButton
+		hExact: 12;
+		icon: (aButton icon fitInto: 12 @ 12).
+	aButton
+		label: 'Revert to saved value';
+		action: [ self memento revertUsing: aDescription ];
+		visibility: BlVisibility gone.
+	aButton withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink value isChanged
+					ifTrue: [ anElement visibility: BlVisibility visible ]
+					ifFalse: [ anElement visibility: BlVisibility gone ] ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	^ aButton
 ]
 
 { #category : 'private - row actions' }
@@ -463,25 +337,60 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 ]
 
 { #category : 'private - row actions' }
-CFMaSettingsPresentation >> newRevertActionFor: aDescription [
-	| aButton |
-	aButton := self newRowActionButtonIconNamed: #undo.
-	aButton
-		hExact: 12;
-		icon: (aButton icon fitInto: 12 @ 12).
-	aButton
-		label: 'Revert to saved value';
-		action: [ self memento revertUsing: aDescription ];
-		visibility: BlVisibility gone.
-	aButton withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :anElement :aSink |
-				aSink value isChanged
-					ifTrue: [ anElement visibility: BlVisibility visible ]
-					ifFalse: [ anElement visibility: BlVisibility gone ] ].
-		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
-	^ aButton
+CFMaSettingsPresentation >> newRowActionsFor: aDescription [
+	| theActions information |
+	theActions := OrderedCollection new.
+	aDescription isWithChangeIndicator ifTrue: [
+		theActions add: (self newRevertActionFor: aDescription) ].
+	theActions add: (self newValidationActionFor: aDescription).
+	information := aDescription informationFor: self memento model.
+	information ifNotNil: [
+		theActions add: (self newInformationActionFor: information) ].
+	^ theActions
+]
+
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> newRowFor: aDescription field: aFieldElement [
+	| aRow anIcon aFieldConfiguration |
+	aFieldConfiguration := self fieldConfigurationFor: aDescription.
+	anIcon := aDescription iconFor: self memento model.
+	aRow := CFMaSettingsRowElement new.
+	aRow
+		icon: (anIcon ifNotNil: [ | aTile |
+			aTile := CFIconTile new
+				icon: anIcon;
+				backgroundColor: aFieldConfiguration icon backgroundColor;
+				yourself.
+			aFieldConfiguration icon isSmall ifTrue: [ aTile beSmall ].
+			aFieldConfiguration icon isMedium ifTrue: [ aTile beMedium ].
+			aFieldConfiguration icon isLarge ifTrue: [ aTile beLarge ].
+			aTile ])
+		label: (self newFieldLabelFor: aDescription)
+		comment: (aDescription hasComment
+			ifTrue: [ self newCommentFor: aDescription ]
+			ifFalse: [ nil ])
+		field: (self prepareField: aFieldElement)
+		trailingActions: (self newRowActionsFor: aDescription).
+	^ aRow
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> newSectionNamed: aGroup [
+	| aSection aHeading |
+	aSection := CFMaSettingsSectionElement new.
+	aGroup ifNotNil: [
+		aHeading := BrLabel new
+			text: aGroup asString;
+			aptitude: (BrGlamorousLabelAptitude new
+				foreground: self primaryTextColor;
+				fontSize: 14;
+				bold);
+			fitContent;
+			margin: (BlInsets top: 22 right: 8 bottom: 2 left: 8);
+			yourself.
+		aSection heading: aHeading ].
+	self hostElement addChild: aSection.
+	^ aSection
 ]
 
 { #category : 'private - row actions' }
@@ -508,14 +417,104 @@ CFMaSettingsPresentation >> newValidationActionFor: aDescription [
 	^ aButton
 ]
 
-{ #category : 'private - row actions' }
-CFMaSettingsPresentation >> newInformationActionFor: information [
-	| aButton |
-	aButton := self newRowActionButtonIconNamed: #infoCircle.
-	aButton
-		hExact: 12;
-		icon: (aButton icon fitInto: 12 @ 12);
-		label: information asString.
-	^ aButton
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
+	| editors |
+	editors := OrderedCollection new.
+	(aFieldElement isKindOf: BrEditor)
+		ifTrue: [ editors add: aFieldElement ].
+	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
+		(aChild isKindOf: BrEditor)
+			ifTrue: [ editors add: aChild ] ].
+
+	editors do: [ :anEditor |
+		(anEditor isKindOf: GtMagritteOneLineEditorElement)
+			ifTrue: [ anEditor addAptitude: CFMaSettingsEditorAptitude new ].
+		anEditor
+			geometry: BlRectangleGeometry new;
+			margin: BlInsets empty;
+			padding: (BlInsets
+				top: 0
+				right: self editorTextHorizontalInset
+				bottom: 0
+				left: self editorTextHorizontalInset).
+		anEditor constraintsDo: [ :c | c minWidth: 0 ] ].
+	^ aFieldElement
 ]
 
+{ #category : 'private - composition' }
+CFMaSettingsPresentation >> prepareField: aFieldElement [
+	self prepareEditorChromeIn: aFieldElement.
+	aFieldElement margin: BlInsets empty.
+	(aFieldElement isKindOf: CFMaSettingsBooleanElement)
+		ifFalse: [ aFieldElement padding: BlInsets empty ].
+	^ aFieldElement
+]
+
+{ #category : 'private - appearance' }
+CFMaSettingsPresentation >> primaryTextColor [
+	^ Color r: 39 g: 39 b: 39 range: 255
+]
+
+{ #category : 'private - appearance' }
+CFMaSettingsPresentation >> secondaryTextColor [
+	^ Color r: 125 g: 125 b: 125 range: 255
+]
+
+{ #category : 'private - groups' }
+CFMaSettingsPresentation >> sectionForGroup: aGroup [
+	aGroup ifNil: [
+		^ ungroupedSection ifNil: [
+			ungroupedSection := self newSectionNamed: nil ] ].
+	^ sectionsByGroup
+		at: aGroup
+		ifAbsentPut: [ self newSectionNamed: aGroup ]
+]
+
+{ #category : 'private - focus' }
+CFMaSettingsPresentation >> updateFocusOverlayGeometry: anOverlay in: aContainer [
+	| overlayBounds topRadius bottomRadius radii |
+	anOverlay hasParent ifFalse: [ ^ self ].
+
+	overlayBounds := (anOverlay bounds inParent: aContainer) asRectangle.
+	topRadius := (overlayBounds top closeTo: aContainer padding top epsilon: BlElement epsilon)
+		ifTrue: [ aContainer cornerRadius ]
+		ifFalse: [ 0 ].
+	bottomRadius := (overlayBounds bottom
+		closeTo: aContainer extent y - aContainer padding bottom
+		epsilon: BlElement epsilon)
+		ifTrue: [ aContainer cornerRadius ]
+		ifFalse: [ 0 ].
+
+	radii := BlCornerRadii new
+		topLeft: topRadius;
+		topRight: topRadius;
+		bottomLeft: bottomRadius;
+		bottomRight: bottomRadius;
+		yourself.
+
+	anOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
+]
+
+{ #category : 'visiting-description' }
+CFMaSettingsPresentation >> visitBooleanDescription: aDescription [
+	| aBooleanElement |
+	aBooleanElement := aDescription blocStencil
+		ifNotNil: [ :aStencil |
+			aStencil
+				memento: self memento;
+				description: aDescription;
+				asElement ]
+		ifNil: [
+			CFMaSettingsBooleanElement new
+				fieldViewModel: (GtMagritteFieldViewModel new
+					memento: self memento;
+					description: aDescription) ].
+
+	self addFieldElement: aBooleanElement using: aDescription
+]
+
+{ #category : 'visiting-description' }
+CFMaSettingsPresentation >> visitMemoDescription: aDescription [
+	self addMemoFieldUsing: aDescription
+]

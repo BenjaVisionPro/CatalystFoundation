@@ -1,5 +1,6 @@
-"I am Foundation's editable-label visual aptitude. I preserve Brick's editable-label styling except that focused read-only labels use Foundation selection colour and retain their configured text foreground."
-
+"
+I am Foundation's editable-label visual aptitude. I preserve Brick's editable-label styling except that focused read-only labels use Foundation selection colour and retain their configured text foreground.
+"
 Class {
 	#name : 'CFGlamorousEditableLabelAptitude',
 	#superclass : 'BrGlamorousEditableLabelAptitude',

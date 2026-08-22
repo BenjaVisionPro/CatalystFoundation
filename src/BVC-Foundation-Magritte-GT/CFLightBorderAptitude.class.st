@@ -29,13 +29,13 @@ CFLightBorderAptitude class >> defaultHighlightColor [
 ]
 
 { #category : 'defaults' }
-CFLightBorderAptitude class >> defaultLightDirection [
-	^ CFInterfaceLighting lightDirection
+CFLightBorderAptitude class >> defaultIntensity [
+	^ 1.0
 ]
 
 { #category : 'defaults' }
-CFLightBorderAptitude class >> defaultIntensity [
-	^ 1.0
+CFLightBorderAptitude class >> defaultLightDirection [
+	^ CFInterfaceLighting lightDirection
 ]
 
 { #category : 'defaults' }
@@ -64,6 +64,14 @@ CFLightBorderAptitude >> beRaised [
 	^ self
 ]
 
+{ #category : 'private - effects' }
+CFLightBorderAptitude >> effectComposedWith: anEffect [
+	self hasLighting ifFalse: [ ^ anEffect ].
+	^ self lightingEffect
+		underlyingEffect: anEffect;
+		yourself
+]
+
 { #category : 'accessing' }
 CFLightBorderAptitude >> effectWidth [
 	^ effectWidth ifNil: [ self class defaultEffectWidth ]
@@ -72,14 +80,6 @@ CFLightBorderAptitude >> effectWidth [
 { #category : 'accessing' }
 CFLightBorderAptitude >> effectWidth: aNumber [
 	effectWidth := aNumber max: 0
-]
-
-{ #category : 'private - effects' }
-CFLightBorderAptitude >> effectComposedWith: anEffect [
-	self hasLighting ifFalse: [ ^ anEffect ].
-	^ self lightingEffect
-		underlyingEffect: anEffect;
-		yourself
 ]
 
 { #category : 'testing' }
@@ -115,6 +115,16 @@ CFLightBorderAptitude >> initialize [
 ]
 
 { #category : 'accessing' }
+CFLightBorderAptitude >> intensity [
+	^ opacity ifNil: [ self class defaultIntensity ]
+]
+
+{ #category : 'accessing' }
+CFLightBorderAptitude >> intensity: aNumber [
+	opacity := (aNumber max: 0.0) min: 1.0
+]
+
+{ #category : 'accessing' }
 CFLightBorderAptitude >> lightDirection [
 	^ lightDirection
 ]
@@ -147,6 +157,13 @@ CFLightBorderAptitude >> lowerBodyInside [
 	bodyActive := true.
 	bodyRaised := false.
 	bodyInside := true.
+	^ self
+]
+
+{ #category : 'configuration' }
+CFLightBorderAptitude >> lowerBodyInsideRaiseBorderOutside [
+	self lowerBodyInside.
+	self raiseBorderOutside.
 	^ self
 ]
 
@@ -198,6 +215,13 @@ CFLightBorderAptitude >> raiseBodyInside [
 	^ self
 ]
 
+{ #category : 'configuration' }
+CFLightBorderAptitude >> raiseBodyInsideLowerBorderOutside [
+	self raiseBodyInside.
+	self lowerBorderOutside.
+	^ self
+]
+
 { #category : 'configuration - body' }
 CFLightBorderAptitude >> raiseBodyOutside [
 	bodyActive := true.
@@ -242,28 +266,4 @@ CFLightBorderAptitude >> shadowColor [
 { #category : 'accessing' }
 CFLightBorderAptitude >> shadowColor: aColor [
 	shadowColor := aColor
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> intensity [
-	^ opacity ifNil: [ self class defaultIntensity ]
-]
-
-{ #category : 'accessing' }
-CFLightBorderAptitude >> intensity: aNumber [
-	opacity := (aNumber max: 0.0) min: 1.0
-]
-
-{ #category : 'configuration' }
-CFLightBorderAptitude >> lowerBodyInsideRaiseBorderOutside [
-	self lowerBodyInside.
-	self raiseBorderOutside.
-	^ self
-]
-
-{ #category : 'configuration' }
-CFLightBorderAptitude >> raiseBodyInsideLowerBorderOutside [
-	self raiseBodyInside.
-	self lowerBorderOutside.
-	^ self
 ]

@@ -1,8 +1,19 @@
-"I render one Physics body inside an overlay. I use the body's displayed geometry for either diagnostic or selection presentation without participating in the simulation."
+"
+I render one Physics body inside an overlay. I use the body's displayed geometry for either diagnostic or selection presentation without participating in the simulation.
+"
 Class {
 	#name : 'CFPhysicsBodyVisual',
 	#superclass : 'BlElement',
-	#instVars : [ 'body', 'context', 'listener', 'presentationRole', 'sourceGeometry', 'sourceExtent', 'sensorBorder', 'solidBorder' ],
+	#instVars : [
+		'body',
+		'context',
+		'listener',
+		'presentationRole',
+		'sourceGeometry',
+		'sourceExtent',
+		'sensorBorder',
+		'solidBorder'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -27,35 +38,22 @@ CFPhysicsBodyVisual class >> selectionOn: aBody context: aContext [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFPhysicsBodyVisual >> body [ ^ body ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyVisual >> body: aBody [ body := aBody ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyVisual >> context: aContext [ context := aContext ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyVisual >> presentationRole [ ^ presentationRole ]
-
-{ #category : 'accessing' }
-CFPhysicsBodyVisual >> presentationRole: aSymbol [ presentationRole := aSymbol ]
-
-{ #category : 'testing' }
-CFPhysicsBodyVisual >> isDiagnostic [ ^ presentationRole = #diagnostic ]
-
-{ #category : 'testing' }
-CFPhysicsBodyVisual >> isSelection [ ^ presentationRole = #selection ]
-
-{ #category : 'testing' }
-CFPhysicsBodyVisual >> matchesSelection: anObject [
-	^ self isSelection and: [ body == anObject ]
+{ #category : 'installing' }
+CFPhysicsBodyVisual >> addTo: aParentElement [
+	aParentElement addChild: self.
+	^ self
 ]
 
-{ #category : 'testing' }
-CFPhysicsBodyVisual >> springForEventTarget: anElement [
-	^ nil
+{ #category : 'accessing' }
+CFPhysicsBodyVisual >> body [ ^ body
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyVisual >> body: aBody [ body := aBody
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyVisual >> context: aContext [ context := aContext
 ]
 
 { #category : 'initialization' }
@@ -77,17 +75,47 @@ CFPhysicsBodyVisual >> initializeVisual [
 	self update
 ]
 
-{ #category : 'installing' }
-CFPhysicsBodyVisual >> addTo: aParentElement [
-	aParentElement addChild: self.
-	^ self
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> isDiagnostic [ ^ presentationRole = #diagnostic
+]
+
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> isSelection [ ^ presentationRole = #selection
+]
+
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> matchesSelection: anObject [
+	^ self isSelection and: [ body == anObject ]
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyVisual >> presentationRole [ ^ presentationRole
+]
+
+{ #category : 'accessing' }
+CFPhysicsBodyVisual >> presentationRole: aSymbol [ presentationRole := aSymbol
 ]
 
 { #category : 'updating' }
-CFPhysicsBodyVisual >> update [
-	self synchroniseGeometryAndExtent.
-	self updatePresentation.
+CFPhysicsBodyVisual >> refreshOverlay [ context overlay refresh
+]
+
+{ #category : 'controlling' }
+CFPhysicsBodyVisual >> release [
+	listener ifNotNil: [ body shapeState element removeEventHandler: listener ].
+	self remove.
 	^ self
+]
+
+{ #category : 'removing' }
+CFPhysicsBodyVisual >> remove [
+	self hasParent ifTrue: [ self removeFromParent ].
+	^ self
+]
+
+{ #category : 'testing' }
+CFPhysicsBodyVisual >> springForEventTarget: anElement [
+	^ nil
 ]
 
 { #category : 'private - updating' }
@@ -103,6 +131,20 @@ CFPhysicsBodyVisual >> synchroniseGeometryAndExtent [
 	self
 		geometry: currentGeometry copy;
 		size: currentExtent.
+	^ self
+]
+
+{ #category : 'updating' }
+CFPhysicsBodyVisual >> update [
+	self synchroniseGeometryAndExtent.
+	self updatePresentation.
+	^ self
+]
+
+{ #category : 'private - styling' }
+CFPhysicsBodyVisual >> updateBorder [
+	self isSelection ifTrue: [ ^ self ].
+	self border: (body isSensor ifTrue: [ sensorBorder ] ifFalse: [ solidBorder ]).
 	^ self
 ]
 
@@ -135,28 +177,5 @@ CFPhysicsBodyVisual >> updatePresentation [
 				scaleBy: scale;
 				rotateBy: rotation ].
 	self updateBorder.
-	^ self
-]
-
-{ #category : 'private - styling' }
-CFPhysicsBodyVisual >> updateBorder [
-	self isSelection ifTrue: [ ^ self ].
-	self border: (body isSensor ifTrue: [ sensorBorder ] ifFalse: [ solidBorder ]).
-	^ self
-]
-
-{ #category : 'updating' }
-CFPhysicsBodyVisual >> refreshOverlay [ context overlay refresh ]
-
-{ #category : 'removing' }
-CFPhysicsBodyVisual >> remove [
-	self hasParent ifTrue: [ self removeFromParent ].
-	^ self
-]
-
-{ #category : 'controlling' }
-CFPhysicsBodyVisual >> release [
-	listener ifNotNil: [ body shapeState element removeEventHandler: listener ].
-	self remove.
 	^ self
 ]

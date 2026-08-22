@@ -1,5 +1,6 @@
-"I am responsible for presenting a BrFlowList as finite content so its parent can own scrolling."
-
+"
+I am responsible for presenting a BrFlowList as finite content so its parent can own scrolling.
+"
 Class {
 	#name : 'CFMaFiniteFlowListAptitude',
 	#superclass : 'BrFlowListAptitude',
@@ -7,6 +8,11 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Aptitudes'
 }
+
+{ #category : 'accessing' }
+CFMaFiniteFlowListAptitude >> contentElement [
+	^ listElement
+]
 
 { #category : 'initialization' }
 CFMaFiniteFlowListAptitude >> initialize [
@@ -24,18 +30,11 @@ CFMaFiniteFlowListAptitude >> initialize [
 		with: [ listElement ]
 ]
 
-
-{ #category : 'accessing' }
-CFMaFiniteFlowListAptitude >> contentElement [
-	^ listElement
-]
-
 { #category : 'updating' }
 CFMaFiniteFlowListAptitude >> updateList [
 	super updateList.
 	widget ifNotNil: [ widget updateResponsiveItemWidths ]
 ]
-
 
 { #category : 'updating' }
 CFMaFiniteFlowListAptitude >> updateSelection [

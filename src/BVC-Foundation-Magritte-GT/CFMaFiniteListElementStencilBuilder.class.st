@@ -1,5 +1,6 @@
-"I am responsible for presenting a finite single-column Foundation relation list whose outer form owns scrolling."
-
+"
+I am responsible for presenting a finite single-column Foundation relation list whose outer form owns scrolling.
+"
 Class {
 	#name : 'CFMaFiniteListElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',

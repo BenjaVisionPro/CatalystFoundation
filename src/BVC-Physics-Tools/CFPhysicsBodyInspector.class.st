@@ -1,14 +1,22 @@
-"I present the live diagnostic state of one Physics body."
+"
+I present the live diagnostic state of one Physics body.
+"
 Class {
 	#name : 'CFPhysicsBodyInspector',
 	#superclass : 'CFPhysicsOverlayInspector',
-	#instVars : [ 'physics' ],
+	#instVars : [
+		'physics'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
 
-{ #category : 'accessing' }
-CFPhysicsBodyInspector >> physics [ ^ physics ]
+{ #category : 'clearing' }
+CFPhysicsBodyInspector >> clear [
+	physics := nil.
+	self clearValues.
+	^ self
+]
 
 { #category : 'initialization' }
 CFPhysicsBodyInspector >> configureInspector [
@@ -36,11 +44,8 @@ CFPhysicsBodyInspector >> inspect: aPhysics [
 	^ self
 ]
 
-{ #category : 'clearing' }
-CFPhysicsBodyInspector >> clear [
-	physics := nil.
-	self clearValues.
-	^ self
+{ #category : 'accessing' }
+CFPhysicsBodyInspector >> physics [ ^ physics
 ]
 
 { #category : 'updating' }

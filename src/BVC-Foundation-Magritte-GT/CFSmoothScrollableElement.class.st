@@ -8,16 +8,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'initialization' }
-CFSmoothScrollableElement >> initialize [
-	super initialize.
-
-	scrollTarget := 0.0 @ 0.0.
-	self removeEventHandlersSuchThat: [ :anEventHandler |
-		anEventHandler class = BlScrollableElementEventHandler ].
-	self addEventHandler: CFSmoothScrollableElementEventHandler new
-]
-
 { #category : 'private - scrolling' }
 CFSmoothScrollableElement >> clampedScrollPosition: aPoint [
 	| aMinimum aMaximum |
@@ -31,6 +21,16 @@ CFSmoothScrollableElement >> clampedScrollPosition: aPoint [
 { #category : 'defaults' }
 CFSmoothScrollableElement >> defaultSmoothScrollDuration [
 	^ 180 milliSeconds
+]
+
+{ #category : 'initialization' }
+CFSmoothScrollableElement >> initialize [
+	super initialize.
+
+	scrollTarget := 0.0 @ 0.0.
+	self removeEventHandlersSuchThat: [ :anEventHandler |
+		anEventHandler class = BlScrollableElementEventHandler ].
+	self addEventHandler: CFSmoothScrollableElementEventHandler new
 ]
 
 { #category : 'scrolling' }
@@ -84,7 +84,6 @@ CFSmoothScrollableElement >> smoothScrollBy: aPoint [
 			smoothScrollBy: aDelta
 			during: self defaultSmoothScrollDuration ]
 ]
-
 
 { #category : 'scrolling - input' }
 CFSmoothScrollableElement >> smoothScrollWheelEvent: anEvent [

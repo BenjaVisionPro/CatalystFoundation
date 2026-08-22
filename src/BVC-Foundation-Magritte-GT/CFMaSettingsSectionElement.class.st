@@ -9,6 +9,16 @@ Class {
 	#tag : 'Presentations-Settings'
 }
 
+{ #category : 'adding' }
+CFMaSettingsSectionElement >> addCard: aCard [
+	cards addChild: aCard
+]
+
+{ #category : 'accessing' }
+CFMaSettingsSectionElement >> heading: aLabel [
+	self addChildFirst: aLabel
+]
+
 { #category : 'initialization' }
 CFMaSettingsSectionElement >> initialize [
 	super initialize.
@@ -22,14 +32,4 @@ CFMaSettingsSectionElement >> initialize [
 		vFitContent;
 		margin: (BlInsets left: 6 right: 6);
 		addChild: cards
-]
-
-{ #category : 'adding' }
-CFMaSettingsSectionElement >> addCard: aCard [
-	cards addChild: aCard
-]
-
-{ #category : 'accessing' }
-CFMaSettingsSectionElement >> heading: aLabel [
-	self addChildFirst: aLabel
 ]

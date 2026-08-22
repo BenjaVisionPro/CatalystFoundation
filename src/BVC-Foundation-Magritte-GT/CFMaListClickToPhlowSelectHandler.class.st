@@ -8,27 +8,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'defaults' }
-CFMaListClickToPhlowSelectHandler >> defaultTransformation [
-	^ GtPhlowSendTransformation default
-]
-
-{ #category : 'initialization' }
-CFMaListClickToPhlowSelectHandler >> initialize [
-	super initialize.
-	transformation := self defaultTransformation
-]
-
-{ #category : 'api - accessing' }
-CFMaListClickToPhlowSelectHandler >> transformation [
-	^ transformation
-]
-
-{ #category : 'api - accessing' }
-CFMaListClickToPhlowSelectHandler >> transformation: aGtPhlowSendTransformation [
-	transformation := aGtPhlowSendTransformation asPhlowSendTransformation
-]
-
 { #category : 'api - accessing' }
 CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
 	| anItemIndex wasAlreadySelected itemHasFocus |
@@ -55,6 +34,17 @@ CFMaListClickToPhlowSelectHandler >> clickEvent: aBlClickEvent [
 		ifTrue: [ self selectCurrentSelectionFrom: self listWidget ]
 ]
 
+{ #category : 'defaults' }
+CFMaListClickToPhlowSelectHandler >> defaultTransformation [
+	^ GtPhlowSendTransformation default
+]
+
+{ #category : 'initialization' }
+CFMaListClickToPhlowSelectHandler >> initialize [
+	super initialize.
+	transformation := self defaultTransformation
+]
+
 { #category : 'private - testing' }
 CFMaListClickToPhlowSelectHandler >> isListWidget: aListWidget selectedAt: anIndex [
 	| isSelected |
@@ -76,4 +66,14 @@ CFMaListClickToPhlowSelectHandler >> selectCurrentSelectionFrom: aListWidget [
 		indices: theIndices
 		from: aListWidget
 		shouldShowSpace: false
+]
+
+{ #category : 'api - accessing' }
+CFMaListClickToPhlowSelectHandler >> transformation [
+	^ transformation
+]
+
+{ #category : 'api - accessing' }
+CFMaListClickToPhlowSelectHandler >> transformation: aGtPhlowSendTransformation [
+	transformation := aGtPhlowSendTransformation asPhlowSendTransformation
 ]

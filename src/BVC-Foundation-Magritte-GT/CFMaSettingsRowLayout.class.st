@@ -17,6 +17,38 @@ CFMaSettingsRowLayout class >> constraints [
 	^ BlLayoutCommonConstraints new
 ]
 
+{ #category : 'layout' }
+CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
+	| padding x y icon bodyX bodyWidth descriptionRegion editorRegion editorX |
+	padding := aRow padding.
+	x := padding left.
+	y := padding top.
+
+	icon := aRow iconElement.
+	icon ifNotNil: [
+		icon applyLayoutIn: (x @ y extent: icon measuredExtent) context: aBlElementBoundsUpdateContext ].
+
+	bodyX := x + iconWidth.
+	bodyWidth := (aRectangle width - padding width - iconWidth) max: 0.
+	descriptionRegion := aRow descriptionRegionElement.
+	editorRegion := aRow editorRegionElement.
+
+	descriptionRegion ifNotNil: [
+		descriptionRegion
+			applyLayoutIn: (bodyX @ y extent: descriptionWidth @ descriptionRegion measuredHeight)
+			context: aBlElementBoundsUpdateContext ].
+
+	editorRegion ifNotNil: [
+		editorX := wrapped
+			ifTrue: [ bodyX + descriptionWidth + aRow fieldGap ]
+			ifFalse: [ bodyX + bodyWidth - editorWidth ].
+		editorRegion
+			applyLayoutIn: (editorX @ y extent: editorWidth @ editorRegion measuredHeight)
+			context: aBlElementBoundsUpdateContext ].
+
+	self layoutIgnored: aRow context: aBlElementBoundsUpdateContext
+]
+
 { #category : 'measure' }
 CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 	| padding availableWidth icon iconHeight bodyWidth descriptionLine descriptionRegion editorRegion naturalDescriptionWidth naturalEditorWidth halfWidth descriptionHeight editorHeight contentHeight desiredWidth desiredHeight |
@@ -81,36 +113,4 @@ CFMaSettingsRowLayout >> measure: aRow with: anExtentSpec [
 	aRow measuredExtent: (anExtentSpec sizeFor: desiredWidth @ desiredHeight).
 
 	self measureIgnored: aRow with: (BlExtentMeasurementSpec exact: aRow measuredExtent)
-]
-
-{ #category : 'layout' }
-CFMaSettingsRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| padding x y icon bodyX bodyWidth descriptionRegion editorRegion editorX |
-	padding := aRow padding.
-	x := padding left.
-	y := padding top.
-
-	icon := aRow iconElement.
-	icon ifNotNil: [
-		icon applyLayoutIn: (x @ y extent: icon measuredExtent) context: aBlElementBoundsUpdateContext ].
-
-	bodyX := x + iconWidth.
-	bodyWidth := (aRectangle width - padding width - iconWidth) max: 0.
-	descriptionRegion := aRow descriptionRegionElement.
-	editorRegion := aRow editorRegionElement.
-
-	descriptionRegion ifNotNil: [
-		descriptionRegion
-			applyLayoutIn: (bodyX @ y extent: descriptionWidth @ descriptionRegion measuredHeight)
-			context: aBlElementBoundsUpdateContext ].
-
-	editorRegion ifNotNil: [
-		editorX := wrapped
-			ifTrue: [ bodyX + descriptionWidth + aRow fieldGap ]
-			ifFalse: [ bodyX + bodyWidth - editorWidth ].
-		editorRegion
-			applyLayoutIn: (editorX @ y extent: editorWidth @ editorRegion measuredHeight)
-			context: aBlElementBoundsUpdateContext ].
-
-	self layoutIgnored: aRow context: aBlElementBoundsUpdateContext
 ]

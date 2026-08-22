@@ -1,5 +1,6 @@
-"I am responsible for presenting a to-one relation as a columned Foundation list editor."
-
+"
+I am responsible for presenting a to-one relation as a columned Foundation list editor.
+"
 Class {
 	#name : 'CFMaColumnedToOneElementStencilBuilder',
 	#superclass : 'GtMagritteListElementStencilBuilder',

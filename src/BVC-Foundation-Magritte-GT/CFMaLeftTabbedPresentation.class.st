@@ -1,5 +1,6 @@
-"I preserve the prototype's left-label/tabbed rendering as one complete presentation."
-
+"
+I preserve the prototype's left-label/tabbed rendering as one complete presentation.
+"
 Class {
 	#name : 'CFMaLeftTabbedPresentation',
 	#superclass : 'CFMaTabbedPresentation',
@@ -9,16 +10,11 @@ Class {
 }
 
 { #category : 'private - composition' }
-CFMaLeftTabbedPresentation >> newFieldContainer [
-	^ BrHorizontalGrid new
-		background: Color transparent;
-		border: BlBorder empty;
-		margin: BlInsets empty;
-		cellSpacing: 4;
-		columnCount: 2;
-		hMatchParent;
-		vFitContent;
-		yourself
+CFMaLeftTabbedPresentation >> addElement: anElement to: aContainer [
+	anElement constraintsDo: [ :c |
+		c horizontal matchParent.
+		c grid horizontal span: 2 ].
+	aContainer addChild: anElement
 ]
 
 { #category : 'private - composition' }
@@ -37,9 +33,14 @@ CFMaLeftTabbedPresentation >> addLabel: aLabel field: aFieldElement to: aContain
 ]
 
 { #category : 'private - composition' }
-CFMaLeftTabbedPresentation >> addElement: anElement to: aContainer [
-	anElement constraintsDo: [ :c |
-		c horizontal matchParent.
-		c grid horizontal span: 2 ].
-	aContainer addChild: anElement
+CFMaLeftTabbedPresentation >> newFieldContainer [
+	^ BrHorizontalGrid new
+		background: Color transparent;
+		border: BlBorder empty;
+		margin: BlInsets empty;
+		cellSpacing: 4;
+		columnCount: 2;
+		hMatchParent;
+		vFitContent;
+		yourself
 ]

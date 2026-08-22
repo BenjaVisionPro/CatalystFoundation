@@ -13,6 +13,16 @@ Class {
 }
 
 { #category : 'accessing' }
+CFMaFormElement >> beCollapsed [
+	self expanded: false
+]
+
+{ #category : 'accessing' }
+CFMaFormElement >> beExpanded [
+	self expanded: true
+]
+
+{ #category : 'accessing' }
 CFMaFormElement >> bodyElement [
 	^ bodyElement
 ]
@@ -23,28 +33,18 @@ CFMaFormElement >> contentElement [
 ]
 
 { #category : 'accessing' }
-CFMaFormElement >> footerElement [
-	^ footerElement
+CFMaFormElement >> expanded [
+	^ headerElement expanded
 ]
 
 { #category : 'accessing' }
-CFMaFormElement >> headerElement [
-	^ headerElement
+CFMaFormElement >> expanded: aBoolean [
+	headerElement expanded: aBoolean
 ]
 
-
-
-{ #category : 'initialization' }
-CFMaFormElement >> initialize [
-	super initialize.
-	self
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
-		background: (Color black alpha: 0.025);
-		border: (BlBorder paint: (Color black alpha: 0.13) width: 1);
-		margin: BlInsets empty;
-		cellSpacing: 0;
-		hMatchParent;
-		vFitContent
+{ #category : 'accessing' }
+CFMaFormElement >> footerElement [
+	^ footerElement
 ]
 
 { #category : 'building' }
@@ -68,21 +68,19 @@ CFMaFormElement >> header: aHeaderElement body: aBodyElement footer: aFooterElem
 ]
 
 { #category : 'accessing' }
-CFMaFormElement >> expanded [
-	^ headerElement expanded
+CFMaFormElement >> headerElement [
+	^ headerElement
 ]
 
-{ #category : 'accessing' }
-CFMaFormElement >> expanded: aBoolean [
-	headerElement expanded: aBoolean
-]
-
-{ #category : 'accessing' }
-CFMaFormElement >> beCollapsed [
-	self expanded: false
-]
-
-{ #category : 'accessing' }
-CFMaFormElement >> beExpanded [
-	self expanded: true
+{ #category : 'initialization' }
+CFMaFormElement >> initialize [
+	super initialize.
+	self
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 10);
+		background: (Color black alpha: 0.025);
+		border: (BlBorder paint: (Color black alpha: 0.13) width: 1);
+		margin: BlInsets empty;
+		cellSpacing: 0;
+		hMatchParent;
+		vFitContent
 ]

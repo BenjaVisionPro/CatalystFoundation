@@ -1,5 +1,6 @@
-"I am responsible for presenting one relation item as passive Foundation Phlow-link content; the enclosing relation item owns selection, focus and activation."
-
+"
+I am responsible for presenting one relation item as passive Foundation Phlow-link content; the enclosing relation item owns selection, focus and activation.
+"
 Class {
 	#name : 'CFMaPhlowLinkItemStencilBuilder',
 	#superclass : 'BrListRowStencilBuilder',

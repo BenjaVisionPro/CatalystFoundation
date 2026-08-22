@@ -7,6 +7,12 @@ Class {
 }
 
 { #category : 'private - alignment' }
+CFMaSettingsRightAlignedParagraphElement >> alignedRectangle: aRectangle paragraph: aParagraph [
+	^ aRectangle translateBy:
+		((self alignmentOffsetForY: aRectangle center y paragraph: aParagraph) @ 0)
+]
+
+{ #category : 'private - alignment' }
 CFMaSettingsRightAlignedParagraphElement >> alignmentOffsetForLine: aLineIndex paragraph: aParagraph [
 	| aContentWidth |
 	aContentWidth := (self measuredWidth - self padding width) max: 0.
@@ -18,80 +24,6 @@ CFMaSettingsRightAlignedParagraphElement >> alignmentOffsetForY: aY paragraph: a
 	^ self
 		alignmentOffsetForLine: (self lineIndexForY: aY paragraph: aParagraph)
 		paragraph: aParagraph
-]
-
-{ #category : 'private - alignment' }
-CFMaSettingsRightAlignedParagraphElement >> alignedRectangle: aRectangle paragraph: aParagraph [
-	^ aRectangle translateBy:
-		((self alignmentOffsetForY: aRectangle center y paragraph: aParagraph) @ 0)
-]
-
-{ #category : 'private - alignment' }
-CFMaSettingsRightAlignedParagraphElement >> lineIndexForY: aY paragraph: aParagraph [
-	| aTop |
-	aTop := 0.
-	1 to: aParagraph lineCount do: [ :anIndex |
-		| aHeight |
-		aHeight := aParagraph lineHeightAt: anIndex.
-		aY <= (aTop + aHeight) ifTrue: [ ^ anIndex ].
-		aTop := aTop + aHeight ].
-	^ aParagraph lineCount
-]
-
-{ #category : 'private - alignment' }
-CFMaSettingsRightAlignedParagraphElement >> pointInParagraphFromAlignedPoint: aPoint paragraph: aParagraph [
-	| anOffset |
-	anOffset := self alignmentOffsetForY: aPoint y paragraph: aParagraph.
-	^ (aPoint x - anOffset) @ aPoint y
-]
-
-{ #category : 'private - drawing' }
-CFMaSettingsRightAlignedParagraphElement >> lineTopAt: aLineIndex paragraph: aParagraph [
-	| aTop |
-	aTop := 0.
-	1 to: aLineIndex - 1 do: [ :anIndex |
-		aTop := aTop + (aParagraph lineHeightAt: anIndex) ].
-	^ aTop
-]
-
-{ #category : 'private - drawing' }
-CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex paragraph: aParagraph [
-	| aTop aBottom |
-	aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
-	aBottom := aLineIndex = aParagraph lineCount
-		ifTrue: [ aParagraph height ]
-		ifFalse: [ self lineTopAt: aLineIndex + 1 paragraph: aParagraph ].
-
-	^ BlBounds
-		origin: 0 @ aTop
-		extent: 0 @ ((aBottom - aTop) max: 0)
-]
-
-{ #category : 'private - drawing' }
-CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanvas at: anOrigin [
-	| aContentWidth |
-	aContentWidth := (self measuredWidth - self padding width) max: 0.
-
-	1 to: aParagraph lineCount do: [ :anIndex |
-		| aVerticalBounds anOffset aClipBounds aClipHeight |
-		aVerticalBounds := self
-			lineVerticalBoundsAt: anIndex
-			paragraph: aParagraph.
-		anOffset := self
-			alignmentOffsetForLine: anIndex
-			paragraph: aParagraph.
-		aClipHeight := anIndex = aParagraph lineCount
-			ifTrue: [ (aCanvas bounds bottom - (anOrigin y + aVerticalBounds origin y)) max: aVerticalBounds height ]
-			ifFalse: [ aVerticalBounds height ].
-		aClipBounds := BlBounds
-			origin: anOrigin + (0 @ aVerticalBounds origin y)
-			extent: aContentWidth @ aClipHeight.
-		aCanvas clip
-			by: aClipBounds
-			during: [
-				aParagraph
-					paintOn: aCanvas
-					at: anOrigin + (anOffset @ 0) ] ]
 ]
 
 { #category : 'api - cursor' }
@@ -183,6 +115,40 @@ CFMaSettingsRightAlignedParagraphElement >> handleMouseEvent: anEvent paragraph:
 				on: self segment ]
 ]
 
+{ #category : 'private - alignment' }
+CFMaSettingsRightAlignedParagraphElement >> lineIndexForY: aY paragraph: aParagraph [
+	| aTop |
+	aTop := 0.
+	1 to: aParagraph lineCount do: [ :anIndex |
+		| aHeight |
+		aHeight := aParagraph lineHeightAt: anIndex.
+		aY <= (aTop + aHeight) ifTrue: [ ^ anIndex ].
+		aTop := aTop + aHeight ].
+	^ aParagraph lineCount
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> lineTopAt: aLineIndex paragraph: aParagraph [
+	| aTop |
+	aTop := 0.
+	1 to: aLineIndex - 1 do: [ :anIndex |
+		aTop := aTop + (aParagraph lineHeightAt: anIndex) ].
+	^ aTop
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> lineVerticalBoundsAt: aLineIndex paragraph: aParagraph [
+	| aTop aBottom |
+	aTop := self lineTopAt: aLineIndex paragraph: aParagraph.
+	aBottom := aLineIndex = aParagraph lineCount
+		ifTrue: [ aParagraph height ]
+		ifFalse: [ self lineTopAt: aLineIndex + 1 paragraph: aParagraph ].
+
+	^ BlBounds
+		origin: 0 @ aTop
+		extent: 0 @ ((aBottom - aTop) max: 0)
+]
+
 { #category : 'layout' }
 CFMaSettingsRightAlignedParagraphElement >> measureCursors: aCollectionOfCursorElements paragraph: aParagraph [
 	aCollectionOfCursorElements do: [ :eachCursor |
@@ -223,6 +189,40 @@ CFMaSettingsRightAlignedParagraphElement >> paintChildrenOn: aCompositorPainter 
 		thenPaint: [ :aChildElement :aChildPainter :aChildOffset |
 			(self canAddTextToParagraph: aChildElement)
 				ifFalse: [ aChildElement fullPaintOn: aChildPainter offset: aChildOffset ] ]
+]
+
+{ #category : 'private - drawing' }
+CFMaSettingsRightAlignedParagraphElement >> paintParagraph: aParagraph on: aCanvas at: anOrigin [
+	| aContentWidth |
+	aContentWidth := (self measuredWidth - self padding width) max: 0.
+
+	1 to: aParagraph lineCount do: [ :anIndex |
+		| aVerticalBounds anOffset aClipBounds aClipHeight |
+		aVerticalBounds := self
+			lineVerticalBoundsAt: anIndex
+			paragraph: aParagraph.
+		anOffset := self
+			alignmentOffsetForLine: anIndex
+			paragraph: aParagraph.
+		aClipHeight := anIndex = aParagraph lineCount
+			ifTrue: [ (aCanvas bounds bottom - (anOrigin y + aVerticalBounds origin y)) max: aVerticalBounds height ]
+			ifFalse: [ aVerticalBounds height ].
+		aClipBounds := BlBounds
+			origin: anOrigin + (0 @ aVerticalBounds origin y)
+			extent: aContentWidth @ aClipHeight.
+		aCanvas clip
+			by: aClipBounds
+			during: [
+				aParagraph
+					paintOn: aCanvas
+					at: anOrigin + (anOffset @ 0) ] ]
+]
+
+{ #category : 'private - alignment' }
+CFMaSettingsRightAlignedParagraphElement >> pointInParagraphFromAlignedPoint: aPoint paragraph: aParagraph [
+	| anOffset |
+	anOffset := self alignmentOffsetForY: aPoint y paragraph: aParagraph.
+	^ (aPoint x - anOffset) @ aPoint y
 ]
 
 { #category : 'api - cursor' }

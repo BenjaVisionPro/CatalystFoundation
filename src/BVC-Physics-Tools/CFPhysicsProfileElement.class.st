@@ -1,8 +1,19 @@
-"I present one Physics profile with shared recording controls and Pipeline and Health tabs."
+"
+I present one Physics profile with shared recording controls and Pipeline and Health tabs.
+"
 Class {
 	#name : 'CFPhysicsProfileElement',
 	#superclass : 'BrVerticalPane',
-	#instVars : [ 'world', 'startedRecording', 'recordingStartedMilliseconds', 'statusLabel', 'tabs', 'pipeline', 'health', 'telemetryUpdatesStream' ],
+	#instVars : [
+		'world',
+		'startedRecording',
+		'recordingStartedMilliseconds',
+		'statusLabel',
+		'tabs',
+		'pipeline',
+		'health',
+		'telemetryUpdatesStream'
+	],
 	#category : 'BVC-Physics-Tools',
 	#package : 'BVC-Physics-Tools'
 }
@@ -13,30 +24,6 @@ CFPhysicsProfileElement class >> world: aWorld [
 		world: aWorld;
 		build;
 		yourself
-]
-
-{ #category : 'initialization' }
-CFPhysicsProfileElement >> initialize [
-	super initialize.
-	startedRecording := false.
-	recordingStartedMilliseconds := nil.
-	self
-		hMatchParent;
-		vMatchParent;
-		cellSpacing: 6;
-		padding: (BlInsets all: 8)
-]
-
-{ #category : 'accessing' }
-CFPhysicsProfileElement >> world: aWorld [
-	world := aWorld.
-	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
-	self withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :anElement :aSink |
-				aSink peek ifSome: [ anElement updateStatus ] ];
-			forwardStream: telemetryUpdatesStream ]
 ]
 
 { #category : 'building' }
@@ -106,6 +93,43 @@ CFPhysicsProfileElement >> buildTabs [
 		yourself
 ]
 
+{ #category : 'initialization' }
+CFPhysicsProfileElement >> initialize [
+	super initialize.
+	startedRecording := false.
+	recordingStartedMilliseconds := nil.
+	self
+		hMatchParent;
+		vMatchParent;
+		cellSpacing: 6;
+		padding: (BlInsets all: 8)
+]
+
+{ #category : 'hooks - scene graph' }
+CFPhysicsProfileElement >> onRemovedFromSceneGraph [
+	startedRecording ifTrue: [ world telemetryEnabled: false ].
+	health ifNotNil: [ health stopProfiling ].
+	super onRemovedFromSceneGraph
+]
+
+{ #category : 'private - updating' }
+CFPhysicsProfileElement >> recordingElapsedString [
+	| elapsedSeconds hours minutes seconds printer |
+	recordingStartedMilliseconds ifNil: [ ^ '00:00:00' ].
+	elapsedSeconds := (Time millisecondClockValue - recordingStartedMilliseconds) // 1000.
+	hours := elapsedSeconds // 3600.
+	minutes := (elapsedSeconds \\ 3600) // 60.
+	seconds := elapsedSeconds \\ 60.
+	printer := GRPrinter new.
+	^ String streamContents: [ :stream |
+		stream
+			nextPutAll: (printer pad: hours printString left: $0 to: 2);
+			nextPut: $:;
+			nextPutAll: (printer pad: minutes printString left: $0 to: 2);
+			nextPut: $:;
+			nextPutAll: (printer pad: seconds printString left: $0 to: 2) ]
+]
+
 { #category : 'actions' }
 CFPhysicsProfileElement >> startProfiling [
 	world resetTelemetry.
@@ -134,27 +158,14 @@ CFPhysicsProfileElement >> updateStatus [
 		ifFalse: [ 'Stopped' ])
 ]
 
-{ #category : 'private - updating' }
-CFPhysicsProfileElement >> recordingElapsedString [
-	| elapsedSeconds hours minutes seconds printer |
-	recordingStartedMilliseconds ifNil: [ ^ '00:00:00' ].
-	elapsedSeconds := (Time millisecondClockValue - recordingStartedMilliseconds) // 1000.
-	hours := elapsedSeconds // 3600.
-	minutes := (elapsedSeconds \\ 3600) // 60.
-	seconds := elapsedSeconds \\ 60.
-	printer := GRPrinter new.
-	^ String streamContents: [ :stream |
-		stream
-			nextPutAll: (printer pad: hours printString left: $0 to: 2);
-			nextPut: $:;
-			nextPutAll: (printer pad: minutes printString left: $0 to: 2);
-			nextPut: $:;
-			nextPutAll: (printer pad: seconds printString left: $0 to: 2) ]
-]
-
-{ #category : 'hooks - scene graph' }
-CFPhysicsProfileElement >> onRemovedFromSceneGraph [
-	startedRecording ifTrue: [ world telemetryEnabled: false ].
-	health ifNotNil: [ health stopProfiling ].
-	super onRemovedFromSceneGraph
+{ #category : 'accessing' }
+CFPhysicsProfileElement >> world: aWorld [
+	world := aWorld.
+	telemetryUpdatesStream := CFPhysicsTelemetryStream on: world.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink peek ifSome: [ anElement updateStatus ] ];
+			forwardStream: telemetryUpdatesStream ]
 ]

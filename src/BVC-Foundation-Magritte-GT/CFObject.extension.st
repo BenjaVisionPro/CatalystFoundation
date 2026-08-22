@@ -6,7 +6,6 @@ CFObject >> asGtMagritteViewModel [
 	^ CFMaViewModel forObject: self
 ]
 
-
 { #category : '*BVC-Foundation-Magritte-GT' }
 CFObject >> gtMagritteFor: aView [
 	<gtView>
