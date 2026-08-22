@@ -1,4 +1,4 @@
-"I hold presentation configuration for a Detail group. Magritte groups form the first level; Foundation categories extend the same group hierarchy recursively. I contain configuration only and no live UI state."
+"I configure a Detail group. Magritte groups form the first level; Foundation categories extend the same group hierarchy recursively. I contain configuration only and no live UI state."
 
 Class {
 	#name : 'CFMaDetailGroupConfiguration',
@@ -32,7 +32,3 @@ CFMaDetailGroupConfiguration >> categoryConfigurationFor: aCategory [
 		ifAbsentPut: [ self class new ]
 ]
 
-{ #category : 'configuration' }
-CFMaDetailGroupConfiguration >> categoryConfigurationAt: aCategory ifAbsent: aBlock [
-	^ categories at: aCategory ifAbsent: aBlock
-]

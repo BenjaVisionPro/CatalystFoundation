@@ -46,10 +46,6 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 		ifAbsentPut: [ CFMaDetailGroupConfiguration new ]
 ]
 
-{ #category : 'configuration' }
-CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
-	^ groupConfigurations at: aGroup ifAbsent: aBlock
-]
 
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
