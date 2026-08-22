@@ -30,7 +30,7 @@ CFMaFormRootElement >> initialize [
 	super initialize.
 
 	self
-		background: CFInterfaceLighting backgroundPaint;
+		background: (Color black alpha: 0.10);
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		focusability: BlFocusability after;

@@ -1,5 +1,5 @@
 "
-I provide the shared light environment used by Foundation interfaces. I map local time onto a continuous 24-hour light direction and provide the neutral Foundation background derived from that direction.
+I provide the shared light environment used by Foundation interfaces. I map local time onto a continuous 24-hour light direction for directional interface treatments.
 "
 Class {
 	#name : 'CFInterfaceLighting',
@@ -7,13 +7,6 @@ Class {
 	#category : 'BVC-Foundation-Core',
 	#package : 'BVC-Foundation-Core'
 }
-
-{ #category : 'accessing' }
-CFInterfaceLighting class >> backgroundPaint [
-	^ (BlLinearGradientPaint direction: self lightDirection asPoint)
-		from: (Color black alpha: 0.12)
-		to: (Color black alpha: 0.08)
-]
 
 { #category : 'accessing' }
 CFInterfaceLighting class >> lightDirection [
