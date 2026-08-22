@@ -3,9 +3,8 @@ Class {
 	#superclass : 'CFMaPresentation',
 	#instVars : [
 		'groupConfigurations',
-		'groupContainers',
-		'categoryContainers',
-		'tabGroups'
+		'groups',
+		'categoryGroups'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -15,23 +14,21 @@ Class {
 CFMaDetailPresentation >> initialize [
 	super initialize.
 	groupConfigurations := Dictionary new.
-	groupContainers := Dictionary new.
-	categoryContainers := Dictionary new.
-	tabGroups := IdentityDictionary new
+	groups := Dictionary new.
+	categoryGroups := Dictionary new
 ]
 
 { #category : 'api - building' }
 CFMaDetailPresentation >> build [
-	groupContainers removeAll.
-	categoryContainers removeAll.
-	tabGroups removeAll.
+	groups removeAll.
+	categoryGroups removeAll.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ Color black alpha: 0.05
+	^ Color white
 ]
 
 { #category : 'configuration' }
@@ -56,21 +53,16 @@ CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
-	| aContainer aConfiguration |
-	aContainer := self containerForGroup: aDescription group.
-	aConfiguration := self groupConfigurationFor: aDescription group.
+	| aGroup |
+	aGroup := self groupFor: aDescription group.
 	aDescription categories do: [ :aCategory |
-		aContainer := self
-			containerForCategory: aCategory
-			in: aContainer
-			configuredBy: aConfiguration.
-		aConfiguration := aConfiguration categoryConfigurationFor: aCategory ].
-	^ aContainer
+		aGroup := self category: aCategory in: aGroup ].
+	^ aGroup rows
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> containerForGroup: aGroup [
-	^ groupContainers
+CFMaDetailPresentation >> groupFor: aGroup [
+	^ groups
 		at: aGroup
 		ifAbsentPut: [
 			self
@@ -79,103 +71,25 @@ CFMaDetailPresentation >> containerForGroup: aGroup [
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> containerForCategory: aCategory in: aParentContainer configuredBy: aConfiguration [
+CFMaDetailPresentation >> category: aCategory in: aParentGroup [
 	| aKey |
-	aKey := { aParentContainer. aCategory }.
-	^ categoryContainers
+	aKey := { aParentGroup. aCategory }.
+	^ categoryGroups
 		at: aKey
 		ifAbsentPut: [
 			self
 				newGroup: aCategory
-				in: aParentContainer
-				configuredBy: aConfiguration ]
+				in: aParentGroup ]
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newGroup: aGroup in: aParentContainer configuredBy: aConfiguration [
-	| aRepresentation |
-	aRepresentation := aConfiguration presentation.
-	aRepresentation ifNil: [
-		^ self newGroup: aGroup in: aParentContainer ].
-	(aRepresentation isKindOf: CFMaDetailTabsConfiguration) ifTrue: [
-		^ self newTabGroup: aGroup in: aParentContainer ].
-	(aRepresentation isKindOf: CFMaDetailAccordionsConfiguration) ifTrue: [
-		^ self newAccordionGroup: aGroup in: aParentContainer ].
-	^ self error: 'Unsupported Detail group presentation'
-]
-
-{ #category : 'private - groups' }
-CFMaDetailPresentation >> tabGroupIn: aParentContainer [
-	^ tabGroups
-		at: aParentContainer
-		ifAbsentPut: [
-			| aTabGroup |
-			aTabGroup := BrTabGroup new
-				hMatchParent;
-				vFitContent;
-				aptitude: BrGlamorousTabGroupAptitude new;
-				yourself.
-			aParentContainer addChild: aTabGroup.
-			aTabGroup ]
-]
-
-{ #category : 'private - groups' }
-CFMaDetailPresentation >> newTabGroup: aGroup in: aParentContainer [
-	| aContainer aTab |
-	aContainer := self newFieldContainer.
-	aTab := BrTab new
-		aptitude: BrGlamorousTabAptitude new;
-		label: aGroup asString;
-		stencil: [ aContainer ];
-		yourself.
-	(self tabGroupIn: aParentContainer) addTab: aTab.
-	^ aContainer
-]
-
-{ #category : 'private - groups' }
-CFMaDetailPresentation >> newAccordionGroup: aGroup in: aParentContainer [
-	| anAccordion aContainer |
-	aContainer := self newFieldContainer.
-	anAccordion := BrAccordion new
-		hMatchParent;
-		vFitContent;
-		aptitude: BrGlamorousAccordionAptitude new;
-		yourself.
-	anAccordion
-		header: [
-			BrButton new
-				aptitude: BrGlamorousAccordionHeaderAptitude new;
-				label: aGroup asString;
-				action: [ anAccordion toggle ];
-				yourself ];
-		content: [ aContainer ];
-		expand.
-	aParentContainer addChild: anAccordion.
-	^ aContainer
-]
-
-{ #category : 'private - groups' }
-CFMaDetailPresentation >> newGroup: aGroup in: aParentContainer [
-	| aSection aContainer |
-	aContainer := self newFieldContainer.
-	aSection := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		yourself.
-
-	aGroup ifNotNil: [
-		aSection addChild: (BrLabel new
-			text: aGroup asString;
-			aptitude: (BrGlamorousLabelAptitude new
-				foreground: CFMaDetailColours secondaryForeground;
-				fontSize: 14;
-				bold);
-			fitContent;
-			margin: (BlInsets top: 10 right: 8 bottom: 4 left: 8);
-			yourself) ].
-	aSection addChild: aContainer.
-	aParentContainer addChild: aSection.
-	^ aContainer
+CFMaDetailPresentation >> newGroup: aGroup in: aParent [
+	| anElement |
+	anElement := CFMaDetailGroupElement new group: aGroup.
+	(aParent isKindOf: CFMaDetailGroupElement)
+		ifTrue: [ aParent addGroup: anElement ]
+		ifFalse: [ aParent addChild: anElement ].
+	^ anElement
 ]
 
 { #category : 'configuration - fields' }

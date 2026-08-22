@@ -54,25 +54,6 @@ CFMaDetailPresentationExamples >> groupConfigurationsAreCreatedLazily [
 	^ aPresentation
 ]
 
-{ #category : 'examples' }
-CFMaDetailPresentationExamples >> groupPresentationOverrides [
-	<gtExample>
-	| aPresentation aGeneral anAppearance |
-	aPresentation := CFMaDetailPresentation new
-		group: 'General' configure: [ :general |
-			general beTabs.
-			general category: #appearance configure: [ :appearance |
-				appearance beAccordions ] ];
-		yourself.
-
-	aGeneral := aPresentation groupConfigurationFor: 'General'.
-	anAppearance := aGeneral categoryConfigurationFor: #appearance.
-	self assert: aGeneral presentation class equals: CFMaDetailTabsConfiguration.
-	self assert: anAppearance presentation class equals: CFMaDetailAccordionsConfiguration.
-	self assert: (aGeneral categoryConfigurationFor: #advanced) presentation isNil.
-	^ aPresentation
-]
-
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	<gtExample>

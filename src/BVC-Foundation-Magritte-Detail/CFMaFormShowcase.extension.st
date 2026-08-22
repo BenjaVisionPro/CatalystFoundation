@@ -15,52 +15,58 @@ CFMaFormShowcase >> exampleDetailElement [
 CFMaFormShowcase >> detailGroupsDescription [
 	^ MAContainer new
 		add: (self textDescription copy
-			label: 'Nil group';
+			label: 'Nil text';
 			group: nil;
 			categories: #();
 			priority: 10;
+			yourself);
+		add: (self passwordDescription copy
+			label: 'Nil password';
+			group: nil;
+			categories: #();
+			priority: 20;
 			yourself);
 		add: (self summaryDescription copy
 			label: 'Direct field';
 			group: 'General';
 			categories: #();
-			priority: 20;
-			yourself);
-		add: (self passwordDescription copy
-			label: 'Appearance';
-			group: 'General';
-			categories: #(appearance);
 			priority: 30;
 			yourself);
-		add: (self statusDescription copy
-			label: 'Display';
+		add: (self durationDescription copy
+			label: 'Direct duration';
 			group: 'General';
-			categories: #(appearance display);
+			categories: #();
 			priority: 40;
 			yourself);
-		add: (self durationDescription copy
-			label: 'Behaviour';
+		add: (self statusDescription copy
+			label: 'Appearance';
 			group: 'General';
-			categories: #(appearance behaviour);
+			categories: #('Appearance');
 			priority: 50;
 			yourself);
-		add: (self dateDescription copy
-			label: 'Advanced';
+		add: (self classValueDescription copy
+			label: 'Class';
 			group: 'General';
-			categories: #(advanced);
+			categories: #('Appearance');
 			priority: 60;
 			yourself);
-		add: (self timeDescription copy
-			label: 'General shared';
+		add: (self dateDescription copy
+			label: 'Date';
 			group: 'General';
-			categories: #(shared);
+			categories: #('Appearance' 'Display');
 			priority: 70;
 			yourself);
-		add: (self classValueDescription copy
-			label: 'Secondary shared';
-			group: 'Secondary';
-			categories: #(shared);
+		add: (self timeDescription copy
+			label: 'Time';
+			group: 'General';
+			categories: #('Appearance' 'Display');
 			priority: 80;
+			yourself);
+		add: (self textDescription copy
+			label: 'Secondary';
+			group: 'Secondary';
+			categories: #();
+			priority: 90;
 			yourself);
 		yourself
 ]

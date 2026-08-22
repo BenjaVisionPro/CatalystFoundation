@@ -4,8 +4,7 @@ Class {
 	#name : 'CFMaDetailGroupConfiguration',
 	#superclass : 'Object',
 	#instVars : [
-		'categories',
-		'presentation'
+		'categories'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -17,23 +16,6 @@ CFMaDetailGroupConfiguration >> initialize [
 	categories := Dictionary new
 ]
 
-
-{ #category : 'accessing' }
-CFMaDetailGroupConfiguration >> presentation [
-	^ presentation
-]
-
-{ #category : 'configuration - presentation' }
-CFMaDetailGroupConfiguration >> beTabs [
-	presentation := CFMaDetailTabsConfiguration new.
-	^ presentation
-]
-
-{ #category : 'configuration - presentation' }
-CFMaDetailGroupConfiguration >> beAccordions [
-	presentation := CFMaDetailAccordionsConfiguration new.
-	^ presentation
-]
 
 { #category : 'configuration' }
 CFMaDetailGroupConfiguration >> category: aCategory configure: aBlock [
