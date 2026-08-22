@@ -24,7 +24,7 @@ CFMaDetailGroupElement >> group: aGroup [
 			fontSize: 14;
 			bold);
 		fitContent;
-		margin: (BlInsets top: 26 right: 14 bottom: 6 left: 14);
+		margin: (BlInsets top: 25 right: 14 bottom: 7 left: 14);
 		yourself)
 ]
 
