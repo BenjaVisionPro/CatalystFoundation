@@ -19,7 +19,7 @@ CFMaDetailPresentationExamples >> descriptionCategories [
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> configuredGroupingHierarchy [
+CFMaDetailPresentationExamples >> configuredGroupHierarchy [
 	<gtExample>
 	| aPresentation aGeneral aMain anExtension |
 	aPresentation := CFMaDetailPresentation new
@@ -41,7 +41,7 @@ CFMaDetailPresentationExamples >> configuredGroupingHierarchy [
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> groupingConfigurationsAreCreatedLazily [
+CFMaDetailPresentationExamples >> groupConfigurationsAreCreatedLazily [
 	<gtExample>
 	| aPresentation aGeneral firstMain secondMain |
 	aPresentation := CFMaDetailPresentation new.
@@ -55,7 +55,7 @@ CFMaDetailPresentationExamples >> groupingConfigurationsAreCreatedLazily [
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> groupingPresentationOverrides [
+CFMaDetailPresentationExamples >> groupPresentationOverrides [
 	<gtExample>
 	| aPresentation aGeneral anAppearance |
 	aPresentation := CFMaDetailPresentation new

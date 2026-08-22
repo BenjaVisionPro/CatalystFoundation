@@ -12,7 +12,7 @@ CFMaFormShowcase >> exampleDetailElement [
 ]
 
 { #category : '*bvc-foundation-magritte-detail-examples' }
-CFMaFormShowcase >> detailGroupingDescription [
+CFMaFormShowcase >> detailGroupsDescription [
 	^ MAContainer new
 		add: (self textDescription copy
 			label: 'Nil group';
@@ -66,28 +66,12 @@ CFMaFormShowcase >> detailGroupingDescription [
 ]
 
 { #category : '*bvc-foundation-magritte-detail-examples' }
-CFMaFormShowcase >> exampleDetailGroupingElement [
+CFMaFormShowcase >> exampleDetailGroupsElement [
 	<gtExample>
 	| aDescription aMemento |
-	aDescription := self detailGroupingDescription.
+	aDescription := self detailGroupsDescription.
 	aDescription blocPresentationStencil: [ :theMemento |
 		CFMaDetailPresentation new ].
-	aMemento := CFMaMemento model: self description: aDescription.
-	^ (CFMaViewModel forObject: self memento: aMemento) asElement
-]
-
-{ #category : '*bvc-foundation-magritte-detail-examples' }
-CFMaFormShowcase >> exampleDetailGroupingPresentationsElement [
-	<gtExample>
-	| aDescription aMemento |
-	aDescription := self detailGroupingDescription.
-	aDescription blocPresentationStencil: [ :theMemento |
-		CFMaDetailPresentation new
-			group: 'General' configure: [ :general |
-				general beTabs.
-				general category: #appearance configure: [ :appearance |
-					appearance beAccordions ] ];
-			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement
 ]

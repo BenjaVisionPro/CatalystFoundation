@@ -57,50 +57,50 @@ CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
 	| aContainer aConfiguration |
-	aContainer := self containerForDetailGroup: aDescription group.
+	aContainer := self containerForGroup: aDescription group.
 	aConfiguration := self groupConfigurationFor: aDescription group.
 	aDescription categories do: [ :aCategory |
 		aContainer := self
-			containerForDetailCategory: aCategory
-			within: aContainer
+			containerForCategory: aCategory
+			in: aContainer
 			configuredBy: aConfiguration.
 		aConfiguration := aConfiguration categoryConfigurationFor: aCategory ].
 	^ aContainer
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> containerForDetailGroup: aGroup [
+CFMaDetailPresentation >> containerForGroup: aGroup [
 	^ groupContainers
 		at: aGroup
 		ifAbsentPut: [
 			self
-				newDefaultGroupingNamed: aGroup
+				newGroup: aGroup
 				in: self hostElement ]
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> containerForDetailCategory: aCategory within: aParentContainer configuredBy: aConfiguration [
+CFMaDetailPresentation >> containerForCategory: aCategory in: aParentContainer configuredBy: aConfiguration [
 	| aKey |
 	aKey := { aParentContainer. aCategory }.
 	^ categoryContainers
 		at: aKey
 		ifAbsentPut: [
 			self
-				newGroupingNamed: aCategory
+				newGroup: aCategory
 				in: aParentContainer
 				configuredBy: aConfiguration ]
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newGroupingNamed: aName in: aParentContainer configuredBy: aConfiguration [
+CFMaDetailPresentation >> newGroup: aGroup in: aParentContainer configuredBy: aConfiguration [
 	| aRepresentation |
 	aRepresentation := aConfiguration presentation.
 	aRepresentation ifNil: [
-		^ self newDefaultGroupingNamed: aName in: aParentContainer ].
+		^ self newGroup: aGroup in: aParentContainer ].
 	(aRepresentation isKindOf: CFMaDetailTabsConfiguration) ifTrue: [
-		^ self newTabGroupingNamed: aName in: aParentContainer ].
+		^ self newTabGroup: aGroup in: aParentContainer ].
 	(aRepresentation isKindOf: CFMaDetailAccordionsConfiguration) ifTrue: [
-		^ self newAccordionGroupingNamed: aName in: aParentContainer ].
+		^ self newAccordionGroup: aGroup in: aParentContainer ].
 	^ self error: 'Unsupported Detail group presentation'
 ]
 
@@ -120,12 +120,12 @@ CFMaDetailPresentation >> tabGroupIn: aParentContainer [
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newTabGroupingNamed: aName in: aParentContainer [
+CFMaDetailPresentation >> newTabGroup: aGroup in: aParentContainer [
 	| aContainer aTab |
 	aContainer := self newFieldContainer.
 	aTab := BrTab new
 		aptitude: BrGlamorousTabAptitude new;
-		label: aName asString;
+		label: aGroup asString;
 		stencil: [ aContainer ];
 		yourself.
 	(self tabGroupIn: aParentContainer) addTab: aTab.
@@ -133,7 +133,7 @@ CFMaDetailPresentation >> newTabGroupingNamed: aName in: aParentContainer [
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newAccordionGroupingNamed: aName in: aParentContainer [
+CFMaDetailPresentation >> newAccordionGroup: aGroup in: aParentContainer [
 	| anAccordion aContainer |
 	aContainer := self newFieldContainer.
 	anAccordion := BrAccordion new
@@ -145,7 +145,7 @@ CFMaDetailPresentation >> newAccordionGroupingNamed: aName in: aParentContainer 
 		header: [
 			BrButton new
 				aptitude: BrGlamorousAccordionHeaderAptitude new;
-				label: aName asString;
+				label: aGroup asString;
 				action: [ anAccordion toggle ];
 				yourself ];
 		content: [ aContainer ];
@@ -155,7 +155,7 @@ CFMaDetailPresentation >> newAccordionGroupingNamed: aName in: aParentContainer 
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> newDefaultGroupingNamed: aName in: aParentContainer [
+CFMaDetailPresentation >> newGroup: aGroup in: aParentContainer [
 	| aSection aContainer |
 	aContainer := self newFieldContainer.
 	aSection := BrVerticalPane new
@@ -163,9 +163,9 @@ CFMaDetailPresentation >> newDefaultGroupingNamed: aName in: aParentContainer [
 		vFitContent;
 		yourself.
 
-	aName ifNotNil: [
+	aGroup ifNotNil: [
 		aSection addChild: (BrLabel new
-			text: aName asString;
+			text: aGroup asString;
 			aptitude: (BrGlamorousLabelAptitude new
 				foreground: CFMaDetailColours secondaryForeground;
 				fontSize: 14;

@@ -1,4 +1,4 @@
-"I hold Detail presentation configuration for one level of Foundation's grouping hierarchy. Magritte supplies the first level as a group; Foundation categories recursively extend the same hierarchy. I contain configuration only and no live UI state."
+"I hold presentation configuration for a Detail group. Magritte groups form the first level; Foundation categories extend the same group hierarchy recursively. I contain configuration only and no live UI state."
 
 Class {
 	#name : 'CFMaDetailGroupConfiguration',
