@@ -289,7 +289,7 @@ CFMaSettingsPresentation >> newInformationActionFor: information [
 	aButton := self newRowActionButtonIconNamed: #infoCircle.
 	aButton
 		hExact: 12;
-		icon: (aButton icon fitInto: 12 @ 12);
+		icon: (aButton icon size: 12 @ 12);
 		label: information asString.
 	^ aButton
 ]
@@ -300,7 +300,7 @@ CFMaSettingsPresentation >> newRevertActionFor: aDescription [
 	aButton := self newRowActionButtonIconNamed: #undo.
 	aButton
 		hExact: 12;
-		icon: (aButton icon fitInto: 12 @ 12).
+		icon: (aButton icon size: 12 @ 12).
 	aButton
 		label: 'Revert to saved value';
 		action: [ self memento revertUsing: aDescription ];
@@ -322,7 +322,7 @@ CFMaSettingsPresentation >> newRowActionButtonIconNamed: anIconName [
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
 		color: (Color black alpha: 0.48);
-		fitInto: 16 @ 16.
+		size: 16 @ 16.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
 			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
@@ -399,7 +399,7 @@ CFMaSettingsPresentation >> newValidationActionFor: aDescription [
 	aButton := self newRowActionButtonIconNamed: #exclamationTriangle.
 	aButton
 		hExact: 12;
-		icon: (aButton icon fitInto: 12 @ 12);
+		icon: (aButton icon size: 12 @ 12);
 		label: 'Validation failed';
 		visibility: BlVisibility gone.
 	aButton withAsyncSinkDo: [ :anElementSink |

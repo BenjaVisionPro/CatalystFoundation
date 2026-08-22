@@ -39,7 +39,7 @@ CFMaDetailPopupElement >> initialize [
 		yourself.
 
 	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
-		fitInto: CFMaDetailPopupMetrics indicatorGlyphExtent;
+		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
 		yourself.
 	anIndicator constraintsDo: [ :c |
