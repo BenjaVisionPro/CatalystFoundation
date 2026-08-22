@@ -19,52 +19,39 @@ CFMaDetailPresentationExamples >> descriptionCategories [
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> configuredPresentation [
+CFMaDetailPresentationExamples >> configuredGroupingHierarchy [
 	<gtExample>
-	| aContainer aPresentation aGeneral aMain anExtension |
-	aContainer := MAContainer new.
-	aContainer blocPresentationStencil: [ :aMemento |
-		CFMaDetailPresentation new
-			group: 'General' configure: [ :general |
-				general category: #main configure: [ :main |
-					main asTabs.
-					main category: #extension configure: [ :extension |
-						extension asAccordions ] ] ];
-			yourself ].
+	| aPresentation aGeneral aMain anExtension |
+	aPresentation := CFMaDetailPresentation new
+		group: 'General' configure: [ :general |
+			general category: #main configure: [ :main |
+				main category: #extension configure: [ :extension | ] ] ];
+		yourself.
 
-	aPresentation := aContainer blocPresentationStencil
-		memento: nil;
-		build.
 	aGeneral := aPresentation groupConfigurationFor: 'General'.
 	aMain := aGeneral categoryConfigurationFor: #main.
 	anExtension := aMain categoryConfigurationFor: #extension.
 
-	self assert: aMain arrangement isTabs.
-	self assert: anExtension arrangement isAccordions.
+	self assert: aGeneral class equals: CFMaDetailGroupConfiguration.
+	self assert: aMain class equals: CFMaDetailGroupConfiguration.
+	self assert: anExtension class equals: CFMaDetailGroupConfiguration.
+	self assert: aGeneral ~~ aMain.
+	self assert: aMain ~~ anExtension.
 	^ aPresentation
 ]
 
 { #category : 'examples' }
-CFMaDetailPresentationExamples >> presentationStencilCreatesFreshInstances [
+CFMaDetailPresentationExamples >> groupingConfigurationsAreCreatedLazily [
 	<gtExample>
-	| aContainer first second |
-	aContainer := MAContainer new.
-	aContainer blocPresentationStencil: [ :aMemento |
-		CFMaDetailPresentation new
-			group: 'General' configure: [ :general |
-				general category: #main configure: [ :main | main asTabs ] ];
-			yourself ].
+	| aPresentation aGeneral firstMain secondMain |
+	aPresentation := CFMaDetailPresentation new.
+	aGeneral := aPresentation groupConfigurationFor: 'General'.
+	firstMain := aGeneral categoryConfigurationFor: #main.
+	secondMain := aGeneral categoryConfigurationFor: #main.
 
-	first := aContainer blocPresentationStencil
-		memento: nil;
-		build.
-	second := aContainer blocPresentationStencil
-		memento: nil;
-		build.
-
-	self assert: first ~~ second.
-	self assert: (first groupConfigurationFor: 'General') ~~ (second groupConfigurationFor: 'General').
-	^ first
+	self assert: firstMain == secondMain.
+	self assert: firstMain class equals: CFMaDetailGroupConfiguration.
+	^ aPresentation
 ]
 
 { #category : 'examples - layout' }

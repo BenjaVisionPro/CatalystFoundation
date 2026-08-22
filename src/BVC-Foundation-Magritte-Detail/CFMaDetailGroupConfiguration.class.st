@@ -1,3 +1,5 @@
+"I hold Detail presentation configuration for one level of Foundation's grouping hierarchy. Magritte supplies the first level as a group; Foundation categories recursively extend the same hierarchy. I contain configuration only and no live UI state."
+
 Class {
 	#name : 'CFMaDetailGroupConfiguration',
 	#superclass : 'Object',
@@ -26,7 +28,7 @@ CFMaDetailGroupConfiguration >> category: aCategory configure: aBlock [
 CFMaDetailGroupConfiguration >> categoryConfigurationFor: aCategory [
 	^ categories
 		at: aCategory
-		ifAbsentPut: [ CFMaDetailCategoryConfiguration new ]
+		ifAbsentPut: [ self class new ]
 ]
 
 { #category : 'configuration' }

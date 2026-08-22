@@ -2,7 +2,9 @@ Class {
 	#name : 'CFMaDetailPresentation',
 	#superclass : 'CFMaPresentation',
 	#instVars : [
-		'groupConfigurations'
+		'groupConfigurations',
+		'groupContainers',
+		'categoryContainers'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -11,11 +13,15 @@ Class {
 { #category : 'initialization' }
 CFMaDetailPresentation >> initialize [
 	super initialize.
-	groupConfigurations := Dictionary new
+	groupConfigurations := Dictionary new.
+	groupContainers := Dictionary new.
+	categoryContainers := Dictionary new
 ]
 
 { #category : 'api - building' }
 CFMaDetailPresentation >> build [
+	groupContainers removeAll.
+	categoryContainers removeAll.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
@@ -43,6 +49,63 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 { #category : 'configuration' }
 CFMaDetailPresentation >> groupConfigurationAt: aGroup ifAbsent: aBlock [
 	^ groupConfigurations at: aGroup ifAbsent: aBlock
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> containerForDescription: aDescription [
+	| aContainer |
+	aContainer := self containerForDetailGroup: aDescription group.
+	aDescription categories do: [ :aCategory |
+		aContainer := self
+			containerForDetailCategory: aCategory
+			within: aContainer ].
+	^ aContainer
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> containerForDetailGroup: aGroup [
+	^ groupContainers
+		at: aGroup
+		ifAbsentPut: [
+			self
+				newDefaultGroupingNamed: aGroup
+				in: self hostElement ]
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> containerForDetailCategory: aCategory within: aParentContainer [
+	| aKey |
+	aKey := { aParentContainer. aCategory }.
+	^ categoryContainers
+		at: aKey
+		ifAbsentPut: [
+			self
+				newDefaultGroupingNamed: aCategory
+				in: aParentContainer ]
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> newDefaultGroupingNamed: aName in: aParentContainer [
+	| aSection aContainer |
+	aContainer := self newFieldContainer.
+	aSection := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		yourself.
+
+	aName ifNotNil: [
+		aSection addChild: (BrLabel new
+			text: aName asString;
+			aptitude: (BrGlamorousLabelAptitude new
+				foreground: CFMaDetailColours secondaryForeground;
+				fontSize: 14;
+				bold);
+			fitContent;
+			margin: (BlInsets top: 10 right: 8 bottom: 4 left: 8);
+			yourself) ].
+	aSection addChild: aContainer.
+	aParentContainer addChild: aSection.
+	^ aContainer
 ]
 
 { #category : 'configuration - fields' }
