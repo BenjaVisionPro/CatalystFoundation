@@ -1,5 +1,6 @@
-"I exercise the shared Foundation 24-hour light direction mapping."
-
+"
+I exercise the shared Foundation 24-hour light direction mapping.
+"
 Class {
 	#name : 'CFInterfaceLightingExamples',
 	#superclass : 'Object',
@@ -8,15 +9,15 @@ Class {
 }
 
 { #category : 'examples' }
-CFInterfaceLightingExamples >> midnight [
+CFInterfaceLightingExamples >> evening [
 	<gtExample>
 	| direction |
 	direction := CFInterfaceLighting
-		lightDirectionForHour: 0
+		lightDirectionForHour: 18
 		minute: 0
 		second: 0.
-	self assert: direction x abs < 0.000001.
-	self assert: (direction y - 1.0) abs < 0.000001.
+	self assert: (direction x - 1.0) abs < 0.000001.
+	self assert: direction y abs < 0.000001.
 	^ direction
 ]
 
@@ -34,6 +35,19 @@ CFInterfaceLightingExamples >> midday [
 ]
 
 { #category : 'examples' }
+CFInterfaceLightingExamples >> midnight [
+	<gtExample>
+	| direction |
+	direction := CFInterfaceLighting
+		lightDirectionForHour: 0
+		minute: 0
+		second: 0.
+	self assert: direction x abs < 0.000001.
+	self assert: (direction y - 1.0) abs < 0.000001.
+	^ direction
+]
+
+{ #category : 'examples' }
 CFInterfaceLightingExamples >> morning [
 	<gtExample>
 	| direction |
@@ -42,19 +56,6 @@ CFInterfaceLightingExamples >> morning [
 		minute: 0
 		second: 0.
 	self assert: (direction x + 1.0) abs < 0.000001.
-	self assert: direction y abs < 0.000001.
-	^ direction
-]
-
-{ #category : 'examples' }
-CFInterfaceLightingExamples >> evening [
-	<gtExample>
-	| direction |
-	direction := CFInterfaceLighting
-		lightDirectionForHour: 18
-		minute: 0
-		second: 0.
-	self assert: (direction x - 1.0) abs < 0.000001.
 	self assert: direction y abs < 0.000001.
 	^ direction
 ]

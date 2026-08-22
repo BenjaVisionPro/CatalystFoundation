@@ -8,6 +8,17 @@ Class {
 	#package : 'BVC-Foundation-Core'
 }
 
+{ #category : 'printing' }
+CFLabelledObject >> gtDisstartOn: aStream [
+	| aLabelString |
+	aLabelString := self label ifNotNil: [ :aLabel | aLabel asString ].
+
+	(aLabelString isNil or: [ aLabelString isEmpty ])
+		ifTrue: [ ^ super gtDisstartOn: aStream ].
+
+	aStream nextPutAll: aLabelString
+]
+
 { #category : 'accessing' }
 CFLabelledObject >> label [
 	^ label
@@ -29,15 +40,4 @@ CFLabelledObject >> labelDescription [
 		cfCategory: #identity;
 		cfSerializable: true;
 		yourself
-]
-
-{ #category : 'printing' }
-CFLabelledObject >> gtDisstartOn: aStream [
-	| aLabelString |
-	aLabelString := self label ifNotNil: [ :aLabel | aLabel asString ].
-
-	(aLabelString isNil or: [ aLabelString isEmpty ])
-		ifTrue: [ ^ super gtDisstartOn: aStream ].
-
-	aStream nextPutAll: aLabelString
 ]

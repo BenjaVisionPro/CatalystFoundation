@@ -167,5 +167,3 @@ CFMagritteEditorExample >> summaryDescription [
 		priority: 30;
 		yourself
 ]
-
-

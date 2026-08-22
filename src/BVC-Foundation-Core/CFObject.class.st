@@ -10,19 +10,22 @@ Class {
 
 { #category : 'defaults' }
 CFObject class >> defaultIcon [
-	^ #questionCircle
+	^ #circleQuestion
 ]
-
-{ #category : 'defaults' }
-CFObject >> defaultIcon [
-	^ self class defaultIcon
-]
-
 
 { #category : 'accessing' }
 CFObject class >> icon [
 	"Answer an icon stencil, not an icon element."
 	^ [ (FontAwesomeIcons defaultStyle icon: self defaultIcon) height: 16 ] asStencil
+]
+
+{ #category : 'configuration lifecycle' }
+CFObject >> addToRelationInContext: aContext [
+]
+
+{ #category : 'defaults' }
+CFObject >> defaultIcon [
+	^ self class defaultIcon
 ]
 
 { #category : 'accessing' }
@@ -50,13 +53,8 @@ CFObject >> iconDescription [
 		yourself
 ]
 
-
 { #category : 'configuration lifecycle' }
 CFObject >> initializeInContext: aContext [
-]
-
-{ #category : 'configuration lifecycle' }
-CFObject >> addToRelationInContext: aContext [
 ]
 
 { #category : 'configuration lifecycle' }

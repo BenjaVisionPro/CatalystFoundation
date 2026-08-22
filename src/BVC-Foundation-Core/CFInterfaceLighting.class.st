@@ -1,5 +1,6 @@
-"I provide the shared light environment used by Foundation interfaces. I map local time onto a continuous 24-hour light direction and provide the neutral Foundation background derived from that direction."
-
+"
+I provide the shared light environment used by Foundation interfaces. I map local time onto a continuous 24-hour light direction and provide the neutral Foundation background derived from that direction.
+"
 Class {
 	#name : 'CFInterfaceLighting',
 	#superclass : 'Object',
