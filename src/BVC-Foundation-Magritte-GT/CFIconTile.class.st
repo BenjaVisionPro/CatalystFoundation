@@ -1,5 +1,5 @@
 "
-I present icon content inside Foundation's square icon chrome. I am presentation-neutral: callers choose my size and supply a Bloc icon element. I assign the icon its available extent; scalable icons preserve their own proportions within that space.
+I present icon content inside Foundation's icon chrome. I am a normal Bloc frame: my extent is set with standard Bloc sizing, and supplied scalable icons preserve their proportions within the available icon area.
 "
 Class {
 	#name : 'CFIconTile',
@@ -32,32 +32,23 @@ CFIconTile >> appearanceBaseColorFor: aColor [
 { #category : 'accessing' }
 CFIconTile >> backgroundColor: aColor [
 	backgroundColor := aColor.
-	self background: (self backgroundPaintFor: backgroundColor).
+	self updateTileBackground.
 	^ self
-]
-
-{ #category : 'private - appearance' }
-CFIconTile >> backgroundPaintFor: aColor [
-	| aBaseColor |
-	aBaseColor := self appearanceBaseColorFor: (aColor ifNil: [ self defaultBackgroundColor ]).
-	^ (BlLinearGradientPaint direction: CFInterfaceLighting lightDirection asPoint)
-		from: (self gradientShadowFor: aBaseColor)
-		to: (self gradientHighlightFor: aBaseColor)
 ]
 
 { #category : 'sizing' }
 CFIconTile >> beLarge [
-	^ self size: self largeSize
+	^ self size: self largeSize asPoint
 ]
 
 { #category : 'sizing' }
 CFIconTile >> beMedium [
-	^ self size: self mediumSize
+	^ self size: self mediumSize asPoint
 ]
 
 { #category : 'sizing' }
 CFIconTile >> beSmall [
-	^ self size: self smallSize
+	^ self size: self smallSize asPoint
 ]
 
 { #category : 'private - sizing' }
@@ -73,28 +64,6 @@ CFIconTile >> cornerRadius [
 { #category : 'private - appearance' }
 CFIconTile >> defaultBackgroundColor [
 	^ Color r: 140 g: 140 b: 140 range: 255
-]
-
-{ #category : 'private - appearance' }
-CFIconTile >> gradientHighlightFor: aColor [
-	| strength |
-	strength := 0.35.
-	^ Color
-		r: aColor red + ((1.0 - aColor red) * strength)
-		g: aColor green + ((1.0 - aColor green) * strength)
-		b: aColor blue + ((1.0 - aColor blue) * strength)
-		alpha: aColor alpha
-]
-
-{ #category : 'private - appearance' }
-CFIconTile >> gradientShadowFor: aColor [
-	| strength |
-	strength := 0.30.
-	^ Color
-		r: aColor red * (1.0 - strength)
-		g: aColor green * (1.0 - strength)
-		b: aColor blue * (1.0 - strength)
-		alpha: aColor alpha
 ]
 
 { #category : 'accessing' }
@@ -145,17 +114,24 @@ CFIconTile >> mediumSize [
 ]
 
 { #category : 'sizing' }
-CFIconTile >> size: aNumber [
-	tileSize := aNumber asFloat.
-	super size: tileSize @ tileSize.
+CFIconTile >> size: anExtent [
+	| anEffectiveExtent |
+	anEffectiveExtent := anExtent asPoint.
+	tileSize := (anEffectiveExtent x min: anEffectiveExtent y) asFloat.
+	super size: anEffectiveExtent.
 	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
 	lightBorderAptitude effectWidth: self borderWidth.
 	iconElement ifNotNil: [ iconElement size: self iconExtent ].
-	self background: (self backgroundPaintFor: backgroundColor).
+	self updateTileBackground.
 	^ self
 ]
 
 { #category : 'private - sizing' }
 CFIconTile >> smallSize [
 	^ 20
+]
+
+{ #category : 'private - appearance' }
+CFIconTile >> updateTileBackground [
+	self background: (self appearanceBaseColorFor: (backgroundColor ifNil: [ self defaultBackgroundColor ]))
 ]
