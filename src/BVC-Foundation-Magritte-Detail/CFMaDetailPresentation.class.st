@@ -698,9 +698,8 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 	anObjectElement := CFCompactObjectStencil new
 		object: anObject;
 		create.
-	anObjectElement
-		hFitContent;
-		titleElement hFitContent.
+	anObjectElement hFitContent.
+	anObjectElement titleElement hFitContent.
 
 	anItemElement := BrFrame new
 		hFitContent;
