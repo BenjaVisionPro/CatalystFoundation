@@ -179,15 +179,32 @@ CFMaDetailPresentation >> addActionRowUsing: anActionDescription [
 { #category : 'private - actions' }
 CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	| aButton |
-	aButton := anActionDescription asBlockButtonWithMemento: self memento.
-	aButton replaceAptitudeWith: BrGlamorousButtonWithLabelAptitude new.
-	aButton
+	aButton := BrButton new
 		beNormalSize;
+		aptitude: BrGlamorousButtonWithLabelAptitude new;
+		label: anActionDescription label;
 		hFitContent;
 		vExact: 32;
 		padding: (BlInsets top: 4 right: 14 bottom: 4 left: 14);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
-		border: BlBorder empty.
+		border: BlBorder empty;
+		yourself.
+
+	anActionDescription action ifNotNil: [ :anAction |
+		aButton action: [ :theButton |
+			anAction
+				cull: self memento model
+				cull: theButton
+				cull: self memento
+				cull: anActionDescription ] ].
+
+	anActionDescription enabled ifNotNil: [ :aBoolean |
+		aButton enabled: aBoolean ].
+	anActionDescription visible ifNotNil: [ :aBoolean |
+		aButton visibility: (aBoolean
+			ifTrue: [ BlVisibility visible ]
+			ifFalse: [ BlVisibility gone ]) ].
+
 	aButton addAptitude: (BrStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
