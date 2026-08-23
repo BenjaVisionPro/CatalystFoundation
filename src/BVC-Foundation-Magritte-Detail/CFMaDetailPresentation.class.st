@@ -222,6 +222,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 		size: 12 @ 12.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
+			+ BrGlamorousButtonLayoutAptitude new
 			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
 		icon: anIcon;
 		background: Color transparent;
