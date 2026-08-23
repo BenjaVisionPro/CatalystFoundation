@@ -9,7 +9,7 @@ Class {
 CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
 	^ self installAddButtonEnablementOn: (BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude
-			+ ((CFMaDetailDropdownAptitude
+			+ ((BrGlamorousWithExplicitDropdownAptitude
 				handle: [ self newClassChoiceHandle ]
 				content: [ self newClassChoiceContent ])
 					withGainFocusOnShow;
