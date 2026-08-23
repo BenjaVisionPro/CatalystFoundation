@@ -846,7 +846,7 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
-	| anItemElement aValueSlot |
+	| anItemElement aRow |
 	anItemElement := self
 		newRelationObjectElementFor: anObject
 		description: aDescription
@@ -856,14 +856,17 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 				memento: self memento
 				using: aDescription
 				element: theItemElement ].
-	aValueSlot := self newRelationValueSlotWith: anItemElement.
-	^ self
-		newRowLeading: nil
-		description: nil
-		supporting: nil
-		content: aValueSlot
-		accessories: #()
-		trailing: nil
+	aRow := BrFrame new
+		layout: BlFrameLayout new;
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
+		yourself.
+	anItemElement constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignCenter ].
+	aRow addChild: anItemElement.
+	^ aRow
 ]
 
 { #category : 'private - relations' }

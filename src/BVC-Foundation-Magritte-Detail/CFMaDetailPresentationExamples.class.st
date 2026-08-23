@@ -545,3 +545,20 @@ CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrit
 	self assert: (aMemento readUsing: aDescription) isNil.
 	^ aMemento
 ]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
+	<gtExample>
+	| anObject aDescription aRow |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
+	aDescription := MAToManyRelationDescription new.
+	aRow := CFMaDetailPresentation new
+		newToManyRelationRowFor: anObject
+		description: aDescription.
+
+	self assert: aRow class equals: BrFrame.
+	self assert: aRow layout class equals: BlFrameLayout.
+	self assert: aRow children size equals: 1.
+	self assert: aRow children first children first displayedObject == anObject.
+	^ aRow
+]
