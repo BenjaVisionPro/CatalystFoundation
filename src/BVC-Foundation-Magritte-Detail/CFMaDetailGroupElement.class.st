@@ -43,7 +43,7 @@ CFMaDetailGroupElement >> ensureGroups [
 				yourself ]
 		ifFalse: [
 			(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
-				ifTrue: [ CFMaDetailButtonBarElement new configuration: configuration; yourself ]
+				ifTrue: [ CFMaDetailButtonBarElement new configuration: configuration presentation; yourself ]
 				ifFalse: [
 					BrVerticalPane new
 						hMatchParent;
