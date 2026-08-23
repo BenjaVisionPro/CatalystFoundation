@@ -92,7 +92,7 @@ CFMaDetailAddPopupElement >> popupBackgroundColor: aColor [
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement >> newIndicator [
-	^ (FontAwesomeIcons icon: #circlePlus)
+	^ (FontAwesomeIcons icon: #plus)
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
 		yourself
