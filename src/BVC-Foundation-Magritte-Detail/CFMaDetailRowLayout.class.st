@@ -12,7 +12,8 @@ Class {
 		'descriptionWidth',
 		'supportingWidth',
 		'contentWidth',
-		'firstLineHeight',
+		'firstLineTop',
+		'firstLineBottom',
 		'secondLineTop',
 		'baseline'
 	],
@@ -39,7 +40,8 @@ CFMaDetailRowLayout >> initialize [
 	descriptionWidth := 0.0.
 	supportingWidth := 0.0.
 	contentWidth := 0.0.
-	firstLineHeight := 0.0.
+	firstLineTop := 0.0.
+	firstLineBottom := 0.0.
 	secondLineTop := 0.0.
 	baseline := nil
 ]
@@ -275,9 +277,19 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	baseline ifNotNil: [
 		descriptionTop := baseline - (self baselineOffsetFor: aDescription).
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
-	firstLineHeight := 0.0.
-	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
-	aContent ifNotNil: [ firstLineHeight := firstLineHeight max: contentTop + aContent measuredHeight ].
+	firstLineTop := 0.0.
+	firstLineBottom := 0.0.
+	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
+		firstLineTop := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
+				reject: #isNil;
+				min.
+		firstLineBottom := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
+				reject: #isNil;
+				max ].
 
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
@@ -285,7 +297,7 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	supportingHeight := aSupporting ifNil: [ 0.0 ] ifNotNil: [ aSupporting measuredHeight ].
 	contentBottom := aContent ifNil: [ 0.0 ] ifNotNil: [ contentTop + aContent measuredHeight ].
 	supportingBottom := aSupporting ifNil: [ 0.0 ] ifNotNil: [ secondLineTop + supportingHeight ].
-	^ firstLineHeight max: (contentBottom max: supportingBottom)
+	^ firstLineBottom max: (contentBottom max: supportingBottom)
 ]
 
 { #category : 'private - measurement' }
@@ -309,14 +321,25 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 	baseline ifNotNil: [
 		descriptionTop := baseline - (self baselineOffsetFor: aDescription).
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
-	firstLineHeight := 0.0.
-	aDescription ifNotNil: [ firstLineHeight := firstLineHeight max: descriptionTop + aDescription measuredHeight ].
+	firstLineTop := 0.0.
+	firstLineBottom := 0.0.
+	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
+		firstLineTop := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
+				reject: #isNil;
+				min.
+		firstLineBottom := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
+				reject: #isNil;
+				max ].
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
 		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
 	supportingBottom := aSupporting ifNil: [ 0.0 ] ifNotNil: [ secondLineTop + aSupporting measuredHeight ].
 	contentBottom := aContent ifNil: [ 0.0 ] ifNotNil: [ contentTop + aContent measuredHeight ].
-	^ firstLineHeight max: (supportingBottom max: contentBottom)
+	^ firstLineBottom max: (supportingBottom max: contentBottom)
 ]
 
 { #category : 'measure' }
@@ -382,15 +405,10 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 ]
 
 { #category : 'private - layout' }
-CFMaDetailRowLayout >> accessoryBaselineOffset [
-	^ 4
-]
-
-{ #category : 'private - layout' }
 CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
-	baseline ifNil: [
-		^ aTop + (((firstLineHeight max: aChild measuredHeight) - aChild measuredHeight) / 2.0) ].
-	^ aTop + baseline - (aChild measuredHeight / 2.0) + self accessoryBaselineOffset
+	| aHeight |
+	aHeight := (firstLineBottom - firstLineTop) max: aChild measuredHeight.
+	^ aTop + firstLineTop + ((aHeight - aChild measuredHeight) / 2.0)
 ]
 
 { #category : 'private - layout' }
