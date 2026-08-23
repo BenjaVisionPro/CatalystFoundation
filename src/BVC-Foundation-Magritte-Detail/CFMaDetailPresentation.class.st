@@ -180,26 +180,28 @@ CFMaDetailPresentation >> addActionRowUsing: anActionDescription [
 CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	| aButton |
 	aButton := anActionDescription asBlockButtonWithMemento: self memento.
+	anActionDescription blocIcon ifNil: [
+		aButton replaceAptitudeWith: BrGlamorousButtonWithLabelAptitude new ].
 	aButton
+		beNormalSize;
 		hFitContent;
-		vExact: 24;
-		padding: (BlInsets top: 2 right: 10 bottom: 2 left: 10);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
-		background: (Color black alpha: 0.06);
-		border: (BlBorder paint: (Color black alpha: 0.10) width: 1).
+		vExact: 28;
+		padding: (BlInsets top: 3 right: 12 bottom: 3 left: 12);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		border: BlBorder empty.
 	aButton addAptitude: (BrStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.06);
-				border: (BlBorder paint: (Color black alpha: 0.10) width: 1) ];
+				background: (Color black alpha: 0.08);
+				border: BlBorder empty ];
 		hovered: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.10);
-				border: (BlBorder paint: (Color black alpha: 0.14) width: 1) ];
+				background: (Color black alpha: 0.12);
+				border: BlBorder empty ];
 		pressed: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.14);
-				border: (BlBorder paint: (Color black alpha: 0.18) width: 1) ]).
+				background: (Color black alpha: 0.16);
+				border: BlBorder empty ]).
 	self installFormNavigationOn: aButton.
 	^ aButton
 ]
