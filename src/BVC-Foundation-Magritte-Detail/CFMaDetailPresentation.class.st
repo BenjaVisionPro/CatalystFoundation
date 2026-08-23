@@ -46,7 +46,6 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 		ifAbsentPut: [ CFMaDetailGroupConfiguration new ]
 ]
 
-
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
 	| aGroup aConfiguration |
@@ -126,7 +125,6 @@ CFMaDetailPresentation >> newFieldConfiguration [
 	^ aConfiguration
 ]
 
-
 { #category : 'private - building' }
 CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 	aDropdown
@@ -198,7 +196,6 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 		trailing: nil.
 	(self containerForDescription: aDescription) addChild: aRow
 ]
-
 
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newAccessoriesFor: aDescription [
@@ -547,7 +544,6 @@ CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBl
 		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
 	^ aPopup
 ]
-
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addNumberSliderUsing: aDescription [

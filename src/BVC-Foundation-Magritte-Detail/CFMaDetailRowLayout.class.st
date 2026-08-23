@@ -244,7 +244,6 @@ CFMaDetailRowLayout >> shouldWrapDescriptionWidth: naturalDescriptionWidth conte
 	^ (inlineWidth closeTo: preferredContentWidth epsilon: 0.5) not
 ]
 
-
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> contentUsesAvailableWidth: aContent [
 	aContent ifNil: [ ^ false ].
