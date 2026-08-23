@@ -565,3 +565,44 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 	self assert: aRow children first children first children second text asString equals: 'Related'.
 	^ aRow
 ]
+
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailEmbeddedRowsUseChildMementoAndStandardRows [
+	<gtExample>
+	| anObject aChildMemento aPresentation aCard theRows |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Embedded' score: 40 status: #active.
+	aChildMemento := CFMaMemento model: anObject.
+	aPresentation := CFMaDetailPresentation new
+		memento: aChildMemento;
+		yourself.
+	aCard := CFMaDetailGroupCardElement new.
+	theRows := aPresentation buildEmbeddedRowsIn: aCard.
+
+	self assert: theRows notEmpty.
+	self assert: aCard rows size equals: theRows size.
+	self assert: theRows first parent == aCard.
+	^ aCard
+]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
+	<gtExample>
+	| aModel anObject aDescription aContainer aMemento aPresentation theRows aChildMemento |
+	aModel := CFMaFormShowcase new.
+	anObject := aModel embeddedObject.
+	aDescription := aModel embeddedObjectDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		yourself.
+	aChildMemento := aMemento childMementoFor: anObject inRelation: aDescription.
+	theRows := aPresentation newEmbeddedRowsFor: anObject description: aDescription.
+
+	self assert: theRows notEmpty.
+	self assert: (aMemento childMementoFor: anObject inRelation: aDescription) == aChildMemento.
+	^ theRows first
+]

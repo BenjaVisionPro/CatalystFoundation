@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'groupConfigurations',
 		'groups',
-		'categoryGroups'
+		'categoryGroups',
+		'embeddedRowsContainer'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -67,6 +68,7 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
 	| aGroup aConfiguration |
+	embeddedRowsContainer ifNotNil: [ ^ embeddedRowsContainer ].
 	aConfiguration := self groupConfigurationFor: aDescription group.
 	aGroup := self
 		groupFor: aDescription group
@@ -672,6 +674,88 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> buildEmbeddedRowsIn: aContainer [
+	| theDescriptions |
+	identityAffordanceEmitted := false.
+	fieldConfigurations removeAll.
+	containersByGroup removeAll.
+	ungroupedContainer := nil.
+	groups removeAll.
+	categoryGroups removeAll.
+	embeddedRowsContainer := aContainer.
+
+	theDescriptions := OrderedCollection new
+		addAll: self objectDescription children;
+		yourself.
+	theDescriptions sort: [ :a :b | a priority < b priority ].
+
+	[ theDescriptions do: [ :each | self visit: each ] ]
+		ensure: [ embeddedRowsContainer := nil ].
+	^ aContainer rows copy
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription [
+	| aChildMemento aChildPresentation aTemporaryCard theRows |
+	aChildMemento := self memento
+		childMementoFor: anObject
+		inRelation: aDescription.
+	aChildPresentation := self class new
+		form: self form;
+		memento: aChildMemento;
+		yourself.
+	aTemporaryCard := CFMaDetailGroupCardElement new.
+	theRows := aChildPresentation buildEmbeddedRowsIn: aTemporaryCard.
+	theRows copy do: [ :aRow | aTemporaryCard removeRow: aRow ].
+	^ theRows
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
+	| aContainer aHeaderContent aHeaderRow anAddElement childRows |
+	aContainer := self containerForDescription: aDescription.
+	anAddElement := self newToOneAddElementUsing: aDescription.
+	aHeaderContent := self newRelationValueSlotWith: nil.
+	self addFieldElement: aHeaderContent using: aDescription.
+	aHeaderRow := aContainer rows last.
+	childRows := OrderedCollection new.
+
+	aHeaderContent withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theElement :aSink |
+				childRows := self
+					updateToOneEmbeddedRows: childRows
+					in: aContainer
+					after: aHeaderRow
+					with: aSink value currentValue
+					addElement: anAddElement
+					headerContent: theElement
+					description: aDescription ].
+		(self memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after: aHeaderRow with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
+	| newRows headerIndex |
+	oldRows copy do: [ :aRow | aContainer removeRow: aRow ].
+	aHeaderContent removeChildren.
+
+	anObject ifNil: [
+		self memento retainChildMementosFor: #() inRelation: aDescription.
+		self addRelationValueElement: anAddElement to: aHeaderContent.
+		^ OrderedCollection new ].
+
+	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
+	newRows := self newEmbeddedRowsFor: anObject description: aDescription.
+	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [ ^ OrderedCollection new ].
+	newRows withIndexDo: [ :aRow :anIndex |
+		aContainer addRow: aRow at: headerIndex + anIndex ].
+	^ newRows
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	| aRelationElement anAddElement |
 	aRelationElement := self newRelationValueSlotWith: nil.
@@ -974,7 +1058,7 @@ CFMaDetailPresentation >> visitToOneRelationDescription: aDescription [
 	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
 		^ self addToOneListUsing: aDescription ].
 	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
-		^ self error: 'Embedded to-one relation rows are not implemented yet' ].
+		^ self addToOneEmbeddedUsing: aDescription ].
 	^ self error: 'Unsupported to-one relation representation'
 ]
 
