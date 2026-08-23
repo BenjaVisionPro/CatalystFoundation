@@ -9,9 +9,9 @@ Class {
 CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
 	| anAddElement aDropdownAptitude |
 	anAddElement := CFMaDetailAddPopupElement new.
-	aDropdownAptitude := CFMaDetailDropdownAptitude
+	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ CFMaDetailAddPopupElement new
-			visibility: BlVisibility hidden;
+			popupOpen: true;
 			yourself ]
 		content: [ self newClassChoiceContent ].
 	aDropdownAptitude
@@ -19,11 +19,12 @@ CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
-				aptitude: (BrStyleCommonAptitude new
-					default: [ :aStyle |
-						aStyle
-							background: Color transparent;
-							border: BlBorder empty ]) ].
+				geometry: (BlChildrenWrappingGeometry
+					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
+					enlargedBy: 0.5);
+				background: (Color white alpha: 0.96);
+				border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
+				aptitude: BrShadowAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ self installAddButtonEnablementOn: anAddElement
 ]
@@ -52,10 +53,8 @@ CFMaDetailToOneAddItemViewModel >> newClassChoiceContent [
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
-		background: (Color white alpha: 0.96);
-		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
-		addAptitude: BrShadowAptitude new;
+		background: Color transparent;
+		border: BlBorder empty;
 		items: self newItemClasses;
 		yourself.
 	^ aList
