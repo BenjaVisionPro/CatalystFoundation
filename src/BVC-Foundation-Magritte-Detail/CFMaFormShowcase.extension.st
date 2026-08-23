@@ -32,8 +32,8 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #();
 			priority: 30;
 			yourself);
-		add: (self durationDescription copy
-			label: 'Direct duration';
+		add: (self textDescription copy
+			label: 'Direct text';
 			group: 'General';
 			categories: #();
 			priority: 40;
@@ -44,20 +44,20 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #('Appearance');
 			priority: 50;
 			yourself);
-		add: (self classValueDescription copy
-			label: 'Class';
+		add: (self passwordDescription copy
+			label: 'Appearance password';
 			group: 'General';
 			categories: #('Appearance');
 			priority: 60;
 			yourself);
-		add: (self dateDescription copy
-			label: 'Date';
+		add: (self priorityDescription copy
+			label: 'Display priority';
 			group: 'General';
 			categories: #('Appearance' 'Display');
 			priority: 70;
 			yourself);
-		add: (self timeDescription copy
-			label: 'Time';
+		add: (self popupPriorityDescription copy
+			label: 'Display popup';
 			group: 'General';
 			categories: #('Appearance' 'Display');
 			priority: 80;
@@ -80,20 +80,20 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #('First');
 			priority: 110;
 			yourself);
-		add: (self classValueDescription copy
-			label: 'First class';
+		add: (self passwordDescription copy
+			label: 'First password';
 			group: 'Tabs';
 			categories: #('First');
 			priority: 120;
 			yourself);
-		add: (self dateDescription copy
-			label: 'Second date';
+		add: (self priorityDescription copy
+			label: 'Second priority';
 			group: 'Tabs';
 			categories: #('Second');
 			priority: 130;
 			yourself);
-		add: (self timeDescription copy
-			label: 'Second time';
+		add: (self popupPriorityDescription copy
+			label: 'Second popup';
 			group: 'Tabs';
 			categories: #('Second');
 			priority: 140;
