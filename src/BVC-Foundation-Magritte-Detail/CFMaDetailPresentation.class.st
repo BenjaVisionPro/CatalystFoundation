@@ -419,6 +419,11 @@ CFMaDetailPresentation >> chromedIconElement: anIcon configuration: anIconConfig
 	^ aTile
 ]
 
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> rowInsets [
+	^ BlInsets top: 6 right: 8 bottom: 6 left: 8
+]
+
 { #category : 'private - icons' }
 CFMaDetailPresentation >> unadornedIconElement: anIcon configuration: anIconConfiguration [
 	anIconConfiguration isSmall ifTrue: [ anIcon size: 20 @ 20 ].
@@ -445,7 +450,7 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 		layout: CFMaDetailRowLayout new;
 		background: Color transparent;
 		border: BlBorder empty;
-		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
+		padding: self rowInsets;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -669,11 +674,7 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	| aRelationElement anAddElement |
-	aRelationElement := BrFrame new
-		hMatchParent;
-		vFitContent;
-		layout: BlFrameLayout new;
-		yourself.
+	aRelationElement := self newRelationValueSlotWith: nil.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 
 	aRelationElement withAsyncSinkDo: [ :anElementSink |
@@ -742,7 +743,6 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
 	^ self
 		newRelationObjectElementFor: anObject
-		description: aDescription
 		remove: [ :anItemElement |
 			CFMaBuilderUtility
 				removeToOneMemento: self memento
@@ -751,7 +751,7 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription remove: aRemoveBlock [
+CFMaDetailPresentation >> newRelationObjectElementFor: anObject remove: aRemoveBlock [
 	| anItemElement anObjectElement |
 	anObjectElement := self newRelationObjectPresentationFor: anObject.
 
@@ -821,16 +821,13 @@ CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
 CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject addElement: anAddElement description: aDescription [
 	aRelationElement removeChildren.
 	anObject
-		ifNil: [
-			anAddElement ifNotNil: [
-				anAddElement constraintsDo: [ :c |
-					c frame horizontal alignRight.
-					c frame vertical alignCenter ].
-				aRelationElement addChild: anAddElement ] ]
+		ifNil: [ self addRelationValueElement: anAddElement to: aRelationElement ]
 		ifNotNil: [
-			aRelationElement addChild: (self
-				newRelationObjectElementFor: anObject
-					description: aDescription) ].
+			self
+				addRelationValueElement: (self
+					newRelationObjectElementFor: anObject
+					description: aDescription)
+				to: aRelationElement ].
 	^ aRelationElement
 ]
 
@@ -859,6 +856,16 @@ CFMaDetailPresentation >> addToManyListUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> addRelationValueElement: anElement to: aSlot [
+	anElement ifNil: [ ^ aSlot ].
+	anElement constraintsDo: [ :c |
+		c frame horizontal alignRight.
+		c frame vertical alignCenter ].
+	aSlot addChild: anElement.
+	^ aSlot
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationValueSlotWith: anElement [
 	| aSlot |
 	aSlot := BrFrame new
@@ -866,12 +873,7 @@ CFMaDetailPresentation >> newRelationValueSlotWith: anElement [
 		vFitContent;
 		layout: BlFrameLayout new;
 		yourself.
-	anElement ifNotNil: [
-		anElement constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignCenter ].
-		aSlot addChild: anElement ].
-	^ aSlot
+	^ self addRelationValueElement: anElement to: aSlot
 ]
 
 { #category : 'private - relations' }
@@ -891,7 +893,6 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 	| anItemElement aRow |
 	anItemElement := self
 		newRelationObjectElementFor: anObject
-		description: aDescription
 		remove: [ :theItemElement |
 			CFMaBuilderUtility
 				removeToManyObject: anObject
@@ -902,7 +903,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		layout: BlFrameLayout new;
 		hMatchParent;
 		vFitContent;
-		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
+		padding: self rowInsets;
 		yourself.
 	anItemElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.

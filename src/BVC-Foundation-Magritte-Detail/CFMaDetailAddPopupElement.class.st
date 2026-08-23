@@ -10,6 +10,61 @@ Class {
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
+
+
+{ #category : 'instance creation' }
+CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
+	| anAddElement aDropdownAptitude |
+	anAddElement := self new.
+	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
+		handle: [ self new
+			popupBackgroundColor: CFMaDetailPopupMetrics menuBackgroundColor;
+			popupOpen: true;
+			yourself ]
+		content: [ self classChoiceContentFor: anAddItemViewModel ].
+	aDropdownAptitude
+		withGainFocusOnShow;
+		menuContainerDo: [ :aContainer |
+			aContainer
+				padding: BlInsets empty;
+				geometry: (BlChildrenWrappingGeometry
+					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
+					enlargedBy: 0.5);
+				background: CFMaDetailPopupMetrics menuBackgroundColor;
+				border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
+				aptitude: BrShadowAptitude new ].
+	anAddElement addAptitude: aDropdownAptitude.
+	^ anAddElement
+]
+
+{ #category : 'private - instance creation' }
+CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
+	^ BrSimpleList new
+		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
+		itemDataBinder: [ :anItemElement :aClass :anItemIndex |
+			anItemElement
+				text: aClass displayString;
+				activateBlock: [
+					(anAddItemViewModel shouldDisableNewItemClass: aClass) ifFalse: [
+						anAddItemViewModel addItemForClass: aClass from: anItemElement.
+						anItemElement fireEvent: BrDropdownHideWish new ] ] ];
+		hFitContent;
+		vFitContent;
+		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
+		background: Color transparent;
+		border: BlBorder empty;
+		items: anAddItemViewModel newItemClasses;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CFMaDetailAddPopupElement class >> immediateFor: anAddItemViewModel [
+	^ self new
+		when: BlClickEvent do: [ :anEvent |
+			anAddItemViewModel onClick: anEvent currentTarget ];
+		yourself
+]
+
 { #category : 'initialization' }
 CFMaDetailAddPopupElement >> initialize [
 	| anInset |

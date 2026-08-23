@@ -561,6 +561,7 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 	self assert: aRow class equals: BrFrame.
 	self assert: aRow layout class equals: BlFrameLayout.
 	self assert: aRow children size equals: 1.
-	self assert: aRow children first children first displayedObject == anObject.
+	self assert: aRow children first children first children first class equals: CFIconTile.
+	self assert: aRow children first children first children second text asString equals: 'Related'.
 	^ aRow
 ]
