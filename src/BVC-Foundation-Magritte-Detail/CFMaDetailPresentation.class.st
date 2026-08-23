@@ -694,6 +694,18 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
+	^ self
+		newRelationObjectElementFor: anObject
+		description: aDescription
+		remove: [ :anItemElement |
+			CFMaBuilderUtility
+				removeToOneMemento: self memento
+				using: aDescription
+				element: anItemElement ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription remove: aRemoveBlock [
 	| anItemElement anObjectElement |
 	anObjectElement := CFCompactObjectStencil new
 		object: anObject;
@@ -739,20 +751,14 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
-				CFMaBuilderUtility
-					removeToOneMemento: self memento
-					using: aDescription
-					element: anItemElement ]);
+				aRemoveBlock value: anItemElement ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Remove selected relation item';
 			combination: BlKeyCombination builder backspace build;
 			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
-				CFMaBuilderUtility
-					removeToOneMemento: self memento
-					using: aDescription
-					element: anItemElement ]).
+				aRemoveBlock value: anItemElement ]).
 
 	self installFormNavigationOn: anItemElement.
 	^ anItemElement
@@ -786,6 +792,111 @@ CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObjec
 	^ aRelationElement
 ]
 
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> addToManyListUsing: aDescription [
+	| aContainer aHeaderContent aHeaderRow anAddElement itemRows |
+	aContainer := self containerForDescription: aDescription.
+	anAddElement := self newToManyAddElementUsing: aDescription.
+	aHeaderContent := self newRelationValueSlotWith: anAddElement.
+	self addFieldElement: aHeaderContent using: aDescription.
+	aHeaderRow := aContainer rows last.
+	itemRows := OrderedCollection new.
+
+	aHeaderContent withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theElement :aSink |
+				itemRows := self
+					updateToManyListRows: itemRows
+					in: aContainer
+					after: aHeaderRow
+					with: aSink value currentValue
+					description: aDescription ].
+		(self memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationValueSlotWith: anElement [
+	| aSlot |
+	aSlot := BrFrame new
+		hMatchParent;
+		vFitContent;
+		layout: BlFrameLayout new;
+		yourself.
+	anElement ifNotNil: [
+		anElement constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignCenter ].
+		aSlot addChild: anElement ].
+	^ aSlot
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
+	((aDescription isReadOnly or: [ aDescription definitive ])
+		or: [ aDescription newItemStencil isNil ])
+		ifTrue: [ ^ nil ].
+	^ CFMaDetailAddItemViewModel new
+		memento: self memento;
+		description: aDescription;
+		stencil: aDescription newItemStencil;
+		asElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
+	| anItemElement aValueSlot |
+	anItemElement := self
+		newRelationObjectElementFor: anObject
+		description: aDescription
+		remove: [ :theItemElement |
+			CFMaBuilderUtility
+				removeToManyObject: anObject
+				memento: self memento
+				using: aDescription
+				element: theItemElement ].
+	aValueSlot := self newRelationValueSlotWith: anItemElement.
+	^ self
+		newRowLeading: nil
+		description: nil
+		supporting: nil
+		content: aValueSlot
+		accessories: #()
+		trailing: nil
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after: aHeaderRow with: aCollection description: aDescription [
+	| someObjects newItemRows headerIndex |
+	someObjects := aCollection ifNil: [ #() ].
+
+	oldItemRows copy do: [ :anAssociation |
+		(someObjects anySatisfy: [ :anObject | anObject == anAssociation key ]) ifFalse: [
+			aContainer removeRow: anAssociation value ] ].
+
+	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
+		^ oldItemRows ].
+	newItemRows := OrderedCollection new.
+	someObjects withIndexDo: [ :anObject :anItemIndex |
+		| anAssociation aRow targetIndex currentIndex |
+		anAssociation := oldItemRows
+			detect: [ :each | each key == anObject ]
+			ifNone: [ nil ].
+		aRow := anAssociation
+			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
+			ifNotNil: [ anAssociation value ].
+		targetIndex := headerIndex + anItemIndex.
+		currentIndex := aContainer rows identityIndexOf: aRow ifAbsent: [ 0 ].
+		currentIndex = 0
+			ifTrue: [ aContainer addRow: aRow at: targetIndex ]
+			ifFalse: [ currentIndex = targetIndex ifFalse: [
+				aContainer removeRow: aRow.
+				aContainer addRow: aRow at: targetIndex ] ].
+		newItemRows add: anObject -> aRow ].
+	^ newItemRows
+]
+
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	| aRepresentation |
@@ -797,6 +908,17 @@ CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	(aRepresentation isKindOf: CFMaSliderConfiguration) ifTrue: [
 		^ self addNumberSliderUsing: aDescription ].
 	^ self error: 'Unsupported number field representation'
+]
+
+{ #category : 'visiting-description' }
+CFMaDetailPresentation >> visitToManyRelationDescription: aDescription [
+	| aRepresentation |
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
+		^ self addToManyListUsing: aDescription ].
+	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
+		^ self error: 'Embedded to-many relation rows are not implemented yet' ].
+	^ self error: 'Unsupported to-many relation representation'
 ]
 
 { #category : 'visiting-description' }

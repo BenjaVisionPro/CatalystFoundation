@@ -231,3 +231,25 @@ CFMaToManyRelationExamples >> simpleListDescription [
 	self assert: aDescription blocItemViewModelStencil class equals: GtMagritteModelStencilBuilder.
 	^ aDescription
 ]
+
+{ #category : 'examples - mutation' }
+CFMaToManyRelationExamples >> removeObjectUsesRelationMementoWritePath [
+	<gtExample>
+	| aModel aDescription aMemento anObject |
+	aModel := CFMaFormShowcase new.
+	aDescription := aModel compactItemsDescription.
+	aMemento := GtMagritteMemento
+		model: aModel
+		description: aDescription asContainer.
+	anObject := (aMemento readUsing: aDescription) first.
+
+	CFMaBuilderUtility
+		removeToManyObject: anObject
+		memento: aMemento
+		using: aDescription
+		element: BlElement new.
+
+	self assert: (aMemento readUsing: aDescription) size equals: 2.
+	self assert: ((aMemento readUsing: aDescription) identityIncludes: anObject) not.
+	^ aMemento
+]

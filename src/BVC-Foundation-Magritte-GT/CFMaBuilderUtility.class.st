@@ -964,20 +964,28 @@ CFMaBuilderUtility class >> relationSelectionFrom: aListElement indices: theIndi
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: aMemento description: aDescription element: anElement [
 	aListElement selectedItemDo: [ :anItemViewModel :anIndex |
-		| anObject anExistingItems aNewItems |
-		anObject := self relationObjectForItem: anItemViewModel.
-		anExistingItems := aMemento readUsing: aDescription.
-		anExistingItems ifNil: [ ^ self ].
-		aNewItems := anExistingItems copyWithout: anObject.
-		anExistingItems = aNewItems ifTrue: [ ^ self ].
-		[ aDescription validate: aNewItems ]
-			on: Error
-			do: [ :anException | ^ self ].
-		GtMagritteBuilderUtility
-			write: aNewItems
-			using: aDescription
+		self
+			removeToManyObject: (self relationObjectForItem: anItemViewModel)
 			memento: aMemento
+			using: aDescription
 			element: anElement ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> removeToManyObject: anObject memento: aMemento using: aDescription element: anElement [
+	| anExistingItems aNewItems |
+	anExistingItems := aMemento readUsing: aDescription.
+	anExistingItems ifNil: [ ^ self ].
+	aNewItems := anExistingItems copyWithout: anObject.
+	anExistingItems = aNewItems ifTrue: [ ^ self ].
+	[ aDescription validate: aNewItems ]
+		on: Error
+		do: [ :anException | ^ self ].
+	GtMagritteBuilderUtility
+		write: aNewItems
+		using: aDescription
+		memento: aMemento
+		element: anElement
 ]
 
 { #category : 'private - relation editor' }
