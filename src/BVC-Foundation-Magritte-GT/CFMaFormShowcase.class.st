@@ -705,7 +705,7 @@ CFMaFormShowcase >> initialize [
 	identityObject := beta.
 	phlowObject := beta.
 	compactObject := gamma.
-	columnedObject := alpha.
+	columnedObject := nil.
 	compactItems := { alpha. beta. gamma }.
 	identityItems := { alpha. beta. gamma }.
 	expandableItems := { alpha. beta. gamma }.

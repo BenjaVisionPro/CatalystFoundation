@@ -491,3 +491,57 @@ CFMaDetailPresentationExamples >> detailToOneListContentTracksRelationValue [
 	self assert: aFrame children isEmpty.
 	^ aFrame
 ]
+
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToOneListNilValueUsesAddAffordance [
+	<gtExample>
+	| aModel aDescription aContainer aMemento aPresentation anAddElement aFrame |
+	aModel := CFMaFormShowcase new.
+	aDescription := aModel columnedObjectDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		yourself.
+	anAddElement := aPresentation newToOneAddElementUsing: aDescription.
+	aFrame := BrFrame new
+		hMatchParent;
+		vFitContent;
+		layout: BlFrameLayout new;
+		yourself.
+
+	self assert: (aMemento readUsing: aDescription) isNil.
+	self assert: anAddElement notNil.
+	aPresentation
+		updateToOneListElement: aFrame
+		with: nil
+		addElement: anAddElement
+		description: aDescription.
+	self assert: aFrame children size equals: 1.
+	self assert: aFrame children first == anAddElement.
+	^ aFrame
+]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrite [
+	<gtExample>
+	| aModel aDescription aContainer aMemento anObject |
+	aModel := CFMaFormShowcase new.
+	anObject := aModel phlowObject.
+	aDescription := aModel phlowObjectDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+
+	self assert: (aMemento readUsing: aDescription) == anObject.
+	CFMaBuilderUtility
+		removeToOneMemento: aMemento
+		using: aDescription
+		element: BlElement new.
+	self assert: (aMemento readUsing: aDescription) isNil.
+	^ aMemento
+]
