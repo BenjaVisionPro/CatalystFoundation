@@ -365,3 +365,74 @@ CFMaDetailPresentationExamples >> fieldConfigurationIsResolvedOncePerPresentatio
 	self assert: firstConfiguration == secondConfiguration.
 	^ firstConfiguration
 ]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailCardOwnsLogicalRowsIndependentlyOfSeparators [
+	<gtExample>
+	| aCard firstRow secondRow thirdRow |
+	aCard := CFMaDetailGroupCardElement new.
+	firstRow := BlElement new.
+	secondRow := BlElement new.
+	thirdRow := BlElement new.
+
+	aCard
+		addChild: firstRow;
+		addChild: thirdRow;
+		addRow: secondRow at: 2.
+
+	self assert: aCard rowCount equals: 3.
+	self assert: aCard rows asArray equals: { firstRow. secondRow. thirdRow }.
+	self assert: aCard children size equals: 5.
+	self assert: (aCard children at: 1) == firstRow.
+	self assert: (aCard children at: 3) == secondRow.
+	self assert: (aCard children at: 5) == thirdRow.
+	^ aCard
+]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> detailCardRemovalPreservesSeparatorInvariant [
+	<gtExample>
+	| aCard firstRow secondRow thirdRow |
+	aCard := self detailCardOwnsLogicalRowsIndependentlyOfSeparators.
+	firstRow := aCard rows first.
+	secondRow := aCard rows second.
+	thirdRow := aCard rows third.
+
+	aCard removeChild: secondRow.
+
+	self assert: aCard rowCount equals: 2.
+	self assert: aCard rows asArray equals: { firstRow. thirdRow }.
+	self assert: aCard children size equals: 3.
+	self assert: (aCard children at: 1) == firstRow.
+	self assert: (aCard children at: 3) == thirdRow.
+	^ aCard
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> relationFieldConfigurationDefaultsToList [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MAToOneRelationDescription new
+		accessor: #owner;
+		classes: { Object };
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration representation class equals: CFMaListConfiguration.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> relationFieldConfigurationCanEmbedForms [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MAToManyRelationDescription new
+		accessor: #items;
+		classes: { Object };
+		fieldConfigure: [ :field | field beEmbeddedForms ];
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration representation class equals: CFMaEmbeddedFormsConfiguration.
+	^ aConfiguration
+]

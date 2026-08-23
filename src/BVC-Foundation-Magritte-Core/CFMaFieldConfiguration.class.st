@@ -45,3 +45,15 @@ CFMaFieldConfiguration >> beSlider [
 	representation := CFMaSliderConfiguration new.
 	^ representation
 ]
+
+{ #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beList [
+	representation := CFMaListConfiguration new.
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beEmbeddedForms [
+	representation := CFMaEmbeddedFormsConfiguration new.
+	^ representation
+]
