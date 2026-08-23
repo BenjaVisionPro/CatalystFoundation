@@ -382,8 +382,15 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 ]
 
 { #category : 'private - layout' }
+CFMaDetailRowLayout >> accessoryBaselineOffset [
+	^ 4
+]
+
+{ #category : 'private - layout' }
 CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
-	^ aTop + (((firstLineHeight max: aChild measuredHeight) - aChild measuredHeight) / 2.0)
+	baseline ifNil: [
+		^ aTop + (((firstLineHeight max: aChild measuredHeight) - aChild measuredHeight) / 2.0) ].
+	^ aTop + baseline - (aChild measuredHeight / 2.0) + self accessoryBaselineOffset
 ]
 
 { #category : 'private - layout' }
