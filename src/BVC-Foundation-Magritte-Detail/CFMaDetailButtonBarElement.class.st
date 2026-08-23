@@ -35,7 +35,7 @@ CFMaDetailButtonBarElement >> initialize [
 	groupElements := OrderedCollection new.
 	bar := BrToggleGroup new
 		hMatchParent;
-		vExact: 32;
+		vExact: 24;
 		layout: (BlLinearLayout horizontal cellSpacing: 0);
 		padding: (BlInsets all: 2);
 		margin: (BlInsets left: 6 right: 6);
@@ -71,7 +71,7 @@ CFMaDetailButtonBarElement >> newToggleLabel: aLabel group: aGroup [
 		aptitude: BrGlamorousTextLabelAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
 		label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground);
 		hMatchParent;
-		vExact: 28;
+		vExact: 20;
 		padding: (BlInsets left: 12 right: 12);
 		constraintsDo: [ :c | c linear weight: 1 ];
 		yourself.
