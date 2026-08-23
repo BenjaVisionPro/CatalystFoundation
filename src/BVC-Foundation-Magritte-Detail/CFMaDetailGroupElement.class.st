@@ -16,12 +16,14 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 	(configuration presentation isKindOf: CFMaDetailTabsConfiguration)
 		ifTrue: [
 			aGroup margin: (BlInsets top: self groupSpacing).
-			groups addTab: (BrTab new
+			^ groups addTab: (BrTab new
 				aptitude: BrGlamorousTabAptitude new;
 				label: aLabel asString;
 				stencil: [ aGroup ];
-				yourself) ]
-		ifFalse: [ groups addChild: aGroup ]
+				yourself) ].
+	(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
+		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
+	groups addChild: aGroup
 ]
 
 { #category : 'accessing' }
@@ -40,12 +42,15 @@ CFMaDetailGroupElement >> ensureGroups [
 				aptitude: BrGlamorousTabGroupAptitude new;
 				yourself ]
 		ifFalse: [
-			BrVerticalPane new
-				hMatchParent;
-				vFitContent;
-				cellSpacing: self groupSpacing;
-				margin: BlInsets empty;
-				yourself ].
+			(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
+				ifTrue: [ CFMaDetailButtonBarElement new ]
+				ifFalse: [
+					BrVerticalPane new
+						hMatchParent;
+						vFitContent;
+						cellSpacing: self groupSpacing;
+						margin: BlInsets empty;
+						yourself ] ].
 	self addChild: groups.
 	^ groups
 ]

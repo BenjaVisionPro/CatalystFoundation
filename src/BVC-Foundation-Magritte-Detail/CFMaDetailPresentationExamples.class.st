@@ -67,6 +67,18 @@ CFMaDetailPresentationExamples >> groupCanPresentChildrenAsTabs [
 	^ aConfiguration
 ]
 
+{ #category : 'examples' }
+CFMaDetailPresentationExamples >> groupCanPresentChildrenAsButtonBar [
+	<gtExample>
+	| aConfiguration aButtonBar |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+	aButtonBar := aConfiguration beButtonBar.
+
+	self assert: aButtonBar class equals: CFMaDetailButtonBarConfiguration.
+	self assert: aConfiguration presentation == aButtonBar.
+	^ aConfiguration
+]
+
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	<gtExample>

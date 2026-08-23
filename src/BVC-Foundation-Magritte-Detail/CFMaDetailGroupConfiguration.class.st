@@ -38,6 +38,12 @@ CFMaDetailGroupConfiguration >> beTabs [
 	^ presentation
 ]
 
+{ #category : 'configuration - presentation' }
+CFMaDetailGroupConfiguration >> beButtonBar [
+	presentation := CFMaDetailButtonBarConfiguration new.
+	^ presentation
+]
+
 { #category : 'accessing' }
 CFMaDetailGroupConfiguration >> presentation [
 	^ presentation

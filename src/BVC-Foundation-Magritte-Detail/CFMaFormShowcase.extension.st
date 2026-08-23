@@ -98,6 +98,24 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #('Second');
 			priority: 140;
 			yourself);
+		add: (self statusDescription copy
+			label: 'Point & Click';
+			group: 'Button Bar';
+			categories: #('Point & Click');
+			priority: 150;
+			yourself);
+		add: (self priorityDescription copy
+			label: 'Scroll & Zoom';
+			group: 'Button Bar';
+			categories: #('Scroll & Zoom');
+			priority: 160;
+			yourself);
+		add: (self passwordDescription copy
+			label: 'More Gestures';
+			group: 'Button Bar';
+			categories: #('More Gestures');
+			priority: 170;
+			yourself);
 		yourself
 ]
 
@@ -109,6 +127,7 @@ CFMaFormShowcase >> exampleDetailGroupsElement [
 	aDescription blocPresentationStencil: [ :theMemento |
 		CFMaDetailPresentation new
 			group: 'Tabs' configure: [ :aGroup | aGroup beTabs ];
+			group: 'Button Bar' configure: [ :aGroup | aGroup beButtonBar ];
 			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement
