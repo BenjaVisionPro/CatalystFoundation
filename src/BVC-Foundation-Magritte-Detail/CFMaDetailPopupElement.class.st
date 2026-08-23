@@ -38,10 +38,7 @@ CFMaDetailPopupElement >> initialize [
 		fitContent;
 		yourself.
 
-	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
-		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
-		color: (Color black alpha: 0.72);
-		yourself.
+	anIndicator := self newIndicator.
 	anIndicator constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
@@ -66,6 +63,15 @@ CFMaDetailPopupElement >> initialize [
 		when: BlFocusInEvent do: [ :anEvent | self updatePopupAppearance ];
 		when: BlFocusOutEvent do: [ :anEvent | self updatePopupAppearance ]
 
+]
+
+
+{ #category : 'private - instance creation' }
+CFMaDetailPopupElement >> newIndicator [
+	^ (FontAwesomeIcons icon: #anglesUpDown)
+		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
+		color: (Color black alpha: 0.72);
+		yourself
 ]
 
 { #category : 'private - appearance' }

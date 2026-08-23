@@ -7,17 +7,34 @@ Class {
 
 { #category : 'private - instance creation' }
 CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
-	^ self installAddButtonEnablementOn: (BrButton new
-		aptitude: BrGlamorousButtonWithIconCircularAptitude
-			+ ((BrGlamorousWithExplicitDropdownAptitude
-				handle: [ self newClassChoiceHandle ]
-				content: [ self newClassChoiceContent ])
-					withGainFocusOnShow;
-					yourself);
-		icon: BrGlamorousVectorIcons add;
-		label: 'Add item';
-		constraintsDo: [ :c | c flow vertical alignCenter ];
-		yourself)
+	| anAddElement aDropdownAptitude |
+	anAddElement := CFMaDetailAddPopupElement new.
+	aDropdownAptitude := CFMaDetailDropdownAptitude
+		handle: [ CFMaDetailAddPopupElement new
+			visibility: BlVisibility hidden;
+			yourself ]
+		content: [ self newClassChoiceContent ].
+	aDropdownAptitude
+		withGainFocusOnShow;
+		menuContainerDo: [ :aContainer |
+			aContainer
+				padding: BlInsets empty;
+				aptitude: (BrStyleCommonAptitude new
+					default: [ :aStyle |
+						aStyle
+							background: Color transparent;
+							border: BlBorder empty ]) ].
+	anAddElement addAptitude: aDropdownAptitude.
+	^ self installAddButtonEnablementOn: anAddElement
+]
+
+{ #category : 'private - instance creation' }
+CFMaDetailToOneAddItemViewModel >> newImmediateAddButton [
+	| anAddElement |
+	anAddElement := CFMaDetailAddPopupElement new
+		when: BlClickEvent do: [ :anEvent | self onClick: anEvent currentTarget ];
+		yourself.
+	^ self installAddButtonEnablementOn: anAddElement
 ]
 
 { #category : 'private - instance creation' }
