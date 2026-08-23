@@ -25,7 +25,8 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
 	(configuration presentation isKindOf: CFMaDetailAccordionConfiguration)
 		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
-	groups addChild: aGroup
+	groups addChild: aGroup.
+	self updateGroupSpacing
 ]
 
 { #category : 'accessing' }
@@ -53,11 +54,24 @@ CFMaDetailGroupElement >> ensureGroups [
 					BrVerticalPane new
 						hMatchParent;
 						vFitContent;
-						cellSpacing: self groupSpacing;
+						cellSpacing: 0;
 						margin: BlInsets empty;
 						yourself ] ] ].
 	self addChild: groups.
 	^ groups
+]
+
+{ #category : 'private - layout' }
+CFMaDetailGroupElement >> updateGroupSpacing [
+	groups children
+		withIndexDo: [ :aGroup :anIndex |
+			| aMargin |
+			aMargin := aGroup margin.
+			aGroup margin: (BlInsets
+				top: (anIndex = 1 ifTrue: [ 0 ] ifFalse: [ self groupSpacing ])
+				right: aMargin right
+				bottom: aMargin bottom
+				left: aMargin left) ]
 ]
 
 { #category : 'geometry' }
