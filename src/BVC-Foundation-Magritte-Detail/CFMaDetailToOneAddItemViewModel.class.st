@@ -11,6 +11,7 @@ CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
 	anAddElement := CFMaDetailAddPopupElement new.
 	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ CFMaDetailAddPopupElement new
+			popupBackgroundColor: CFMaDetailPopupMetrics menuBackgroundColor;
 			popupOpen: true;
 			yourself ]
 		content: [ self newClassChoiceContent ].
@@ -22,7 +23,7 @@ CFMaDetailToOneAddItemViewModel >> newClassChoiceAddElement [
 				geometry: (BlChildrenWrappingGeometry
 					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
 					enlargedBy: 0.5);
-				background: (Color white alpha: 0.96);
+				background: CFMaDetailPopupMetrics menuBackgroundColor;
 				border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
 				aptitude: BrShadowAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.

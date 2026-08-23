@@ -585,7 +585,7 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
-		background: (Color white alpha: 0.96);
+		background: CFMaDetailPopupMetrics menuBackgroundColor;
 		border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
 		addAptitude: BrShadowAptitude new;
 		items: someValues;

@@ -52,6 +52,11 @@ CFMaDetailPopupMetrics class >> menuInset [
 ]
 
 { #category : 'menu' }
+CFMaDetailPopupMetrics class >> menuBackgroundColor [
+	^ Color white alpha: 0.96
+]
+
+{ #category : 'menu' }
 CFMaDetailPopupMetrics class >> menuCornerRadius [
 	^ 12
 ]
