@@ -123,7 +123,7 @@ CFMaDetailButtonBarElement >> styleAsIconButtonBar [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
 		background: (Color black alpha: 0.08);
 		border: BlBorder empty;
-		constraintsDo: [ :c | c frame horizontal alignCenter ]
+		constraintsDo: [ :c | c linear horizontal alignCenter ]
 ]
 
 { #category : 'private' }
@@ -133,6 +133,8 @@ CFMaDetailButtonBarElement >> toggleStyle [
 			aState
 				background: Color transparent;
 				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
+		hovered: [ :aState |
+			aState background: (Color black alpha: 0.06) ];
 		activated: [ :aState |
 			aState background: CFMaDetailColours highlight ];
 		yourself
