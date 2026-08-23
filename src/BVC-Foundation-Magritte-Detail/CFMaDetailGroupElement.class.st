@@ -15,6 +15,7 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 	self ensureGroups.
 	(configuration presentation isKindOf: CFMaDetailTabsConfiguration)
 		ifTrue: [
+			aGroup margin: (BlInsets top: self groupSpacing).
 			groups addTab: (BrTab new
 				aptitude: BrGlamorousTabAptitude new;
 				label: aLabel asString;
@@ -42,11 +43,16 @@ CFMaDetailGroupElement >> ensureGroups [
 			BrVerticalPane new
 				hMatchParent;
 				vFitContent;
-				cellSpacing: 10;
+				cellSpacing: self groupSpacing;
 				margin: BlInsets empty;
 				yourself ].
 	self addChild: groups.
 	^ groups
+]
+
+{ #category : 'geometry' }
+CFMaDetailGroupElement >> groupSpacing [
+	^ 10
 ]
 
 { #category : 'accessing' }
