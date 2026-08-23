@@ -407,6 +407,8 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
 	| aHeight |
+	(aChild supportsBaseline and: [ baseline notNil ]) ifTrue: [
+		^ aTop + baseline - aChild baselineOffset ].
 	aHeight := (firstLineBottom - firstLineTop) max: aChild measuredHeight.
 	^ aTop + firstLineTop + ((aHeight - aChild measuredHeight) / 2.0)
 ]
