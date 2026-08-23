@@ -259,7 +259,8 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	contentWidth := aContent
 		ifNil: [ 0.0 ]
 		ifNotNil: [ (bodyWidth - descriptionWidth - gap) max: 0.0 ].
-	supportingWidth := (bodyWidth - supportingInset) max: 0.0.
+	supportingWidth := (bodyWidth - supportingInset
+		- (aContent ifNil: [ 0.0 ] ifNotNil: [ gap + aContent measuredWidth ])) max: 0.0.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
 	(self contentUsesAvailableWidth: aContent)
