@@ -180,14 +180,13 @@ CFMaDetailPresentation >> addActionRowUsing: anActionDescription [
 CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	| aButton |
 	aButton := anActionDescription asBlockButtonWithMemento: self memento.
-	anActionDescription blocIcon ifNil: [
-		aButton replaceAptitudeWith: BrGlamorousButtonWithLabelAptitude new ].
+	aButton replaceAptitudeWith: BrGlamorousButtonWithLabelAptitude new.
 	aButton
 		beNormalSize;
 		hFitContent;
-		vExact: 28;
-		padding: (BlInsets top: 3 right: 12 bottom: 3 left: 12);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		vExact: 32;
+		padding: (BlInsets top: 4 right: 14 bottom: 4 left: 14);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
 		border: BlBorder empty.
 	aButton addAptitude: (BrStyleCommonAptitude new
 		default: [ :aStyle |
