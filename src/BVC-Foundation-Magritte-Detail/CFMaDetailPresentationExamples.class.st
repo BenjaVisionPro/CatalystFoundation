@@ -436,3 +436,40 @@ CFMaDetailPresentationExamples >> relationFieldConfigurationCanEmbedForms [
 	self assert: aConfiguration representation class equals: CFMaEmbeddedFormsConfiguration.
 	^ aConfiguration
 ]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesExistingCompactIdentity [
+	<gtExample>
+	| anObject anElement |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
+	anElement := CFMaDetailPresentation new newRelationObjectElementFor: anObject.
+
+	self assert: anElement class equals: CFCompactObjectElement.
+	self assert: anElement displayedObject == anObject.
+	^ anElement
+]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToOneListContentTracksRelationValue [
+	<gtExample>
+	| aPresentation aFrame firstObject secondObject |
+	aPresentation := CFMaDetailPresentation new.
+	aFrame := BrFrame new
+		hMatchParent;
+		vFitContent;
+		yourself.
+	firstObject := CFMaFormShowcaseItem exampleNamed: 'First' score: 40 status: #active.
+	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 60 status: #draft.
+
+	aPresentation updateToOneListElement: aFrame with: firstObject.
+	self assert: aFrame children size equals: 1.
+	self assert: aFrame children first displayedObject == firstObject.
+
+	aPresentation updateToOneListElement: aFrame with: secondObject.
+	self assert: aFrame children size equals: 1.
+	self assert: aFrame children first displayedObject == secondObject.
+
+	aPresentation updateToOneListElement: aFrame with: nil.
+	self assert: aFrame children isEmpty.
+	^ aFrame
+]

@@ -665,6 +665,53 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 	self addFieldElement: aSlider using: aDescription
 ]
 
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> addToOneListUsing: aDescription [
+	| aRelationElement |
+	aRelationElement := BrFrame new
+		hMatchParent;
+		vFitContent;
+		yourself.
+
+	aRelationElement withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theElement :aSink |
+				self
+					updateToOneListElement: theElement
+					with: aSink value currentValue ].
+		(self memento readObservableValueUsing: aDescription)
+			observe: anElementSink ].
+
+	self addShortcutsTo: aRelationElement.
+	self addFieldElement: aRelationElement using: aDescription
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectElementFor: anObject [
+	| anElement |
+	anElement := CFCompactObjectStencil new
+		object: anObject;
+		create.
+	anElement
+		focusability: BlFocusability after;
+		when: BlClickEvent
+			do: [ :anEvent |
+				anEvent consumed: true.
+				anEvent currentTarget phlow spawnObject: anObject ].
+	self installFormNavigationOn: anElement.
+	^ anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject [
+	aRelationElement removeChildren.
+	anObject ifNotNil: [
+		aRelationElement addChild: (self newRelationObjectElementFor: anObject) ].
+	^ aRelationElement
+]
+
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	| aRepresentation |
@@ -677,3 +724,15 @@ CFMaDetailPresentation >> visitNumberDescription: aDescription [
 		^ self addNumberSliderUsing: aDescription ].
 	^ self error: 'Unsupported number field representation'
 ]
+
+{ #category : 'visiting-description' }
+CFMaDetailPresentation >> visitToOneRelationDescription: aDescription [
+	| aRepresentation |
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
+		^ self addToOneListUsing: aDescription ].
+	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
+		^ self error: 'Embedded to-one relation rows are not implemented yet' ].
+	^ self error: 'Unsupported to-one relation representation'
+]
+
