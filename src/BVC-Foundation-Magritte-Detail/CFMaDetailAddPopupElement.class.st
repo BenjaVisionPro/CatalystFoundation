@@ -9,8 +9,14 @@ Class {
 
 { #category : 'initialization' }
 CFMaDetailAddPopupElement >> initialize [
+	| anInset |
 	super initialize.
-	self removeChild: valueLabel
+	self removeChild: valueLabel.
+	anInset := (CFMaDetailPopupMetrics controlHeight
+		- CFMaDetailPopupMetrics indicatorExtent y) / 2.
+	self
+		padding: (BlInsets all: anInset);
+		geometry: BlCircleGeometry new
 ]
 
 { #category : 'private - instance creation' }
