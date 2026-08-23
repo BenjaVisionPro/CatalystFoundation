@@ -198,47 +198,6 @@ CFMaDetailRowLayout >> baselineOffsetFor: anElement [
 ]
 
 { #category : 'private - measurement' }
-CFMaDetailRowLayout >> labelLineBoundsFor: anElement top: anElementTop [
-	| aTextElement aParagraph |
-	anElement ifNil: [ ^ nil ].
-	aTextElement := (anElement isKindOf: BlTextElement)
-		ifTrue: [ anElement ]
-		ifFalse: [
-			anElement
-				childWithId: #label
-				ifFound: [ :each | each ]
-				ifNone: [ nil ] ].
-	aTextElement ifNil: [ ^ nil ].
-	(aTextElement isKindOf: BlTextElement) ifFalse: [ ^ nil ].
-	aTextElement measure: BlExtentMeasurementSpec unspecified.
-	aParagraph := aTextElement paragraph.
-	aParagraph ifNil: [ ^ nil ].
-	^ (anElementTop + aTextElement padding top + aParagraph top)
-		@ (anElementTop + aTextElement padding top + aParagraph bottom)
-]
-
-{ #category : 'private - measurement' }
-CFMaDetailRowLayout >> editorFirstLineBoundsFor: anEditor top: anEditorTop [
-	| aParagraphElement aRectangle |
-	anEditor ifNil: [ ^ nil ].
-	(anEditor isKindOf: BrEditorElement) ifFalse: [ ^ nil ].
-	aParagraphElement := anEditor children accountedByLayout
-		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
-		ifNone: [ ^ nil ].
-	aRectangle := aParagraphElement cursorRectangleForCharacter: 0.
-	aRectangle ifNil: [ ^ nil ].
-	^ (anEditorTop + anEditor padding top + aParagraphElement padding top + aRectangle top)
-		@ (anEditorTop + anEditor padding top + aParagraphElement padding top + aRectangle bottom)
-]
-
-{ #category : 'private - measurement' }
-CFMaDetailRowLayout >> renderedFirstLineBoundsFor: anElement top: anElementTop [
-	(anElement isKindOf: BrEditorElement)
-		ifTrue: [ ^ self editorFirstLineBoundsFor: anElement top: anElementTop ].
-	^ self labelLineBoundsFor: anElement top: anElementTop
-]
-
-{ #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineFor: firstChild and: secondChild [
 	| firstBaseline secondBaseline |
 	firstBaseline := self baselineOffsetFor: firstChild.
@@ -294,7 +253,7 @@ CFMaDetailRowLayout >> contentUsesAvailableWidth: aContent [
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth [
-	| descriptionTop contentTop supportingHeight contentBottom supportingBottom theLineBounds |
+	| descriptionTop contentTop supportingHeight contentBottom supportingBottom |
 
 	wrapped := false.
 	descriptionWidth := naturalDescriptionWidth min: bodyWidth.
@@ -317,12 +276,17 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	theLineBounds := {
-		self renderedFirstLineBoundsFor: aDescription top: descriptionTop.
-		self renderedFirstLineBoundsFor: aContent top: contentTop } reject: #isNil.
-	theLineBounds ifNotEmpty: [
-		firstLineTop := (theLineBounds collect: #x) min.
-		firstLineBottom := (theLineBounds collect: #y) max ].
+	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
+		firstLineTop := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
+				reject: #isNil;
+				min.
+		firstLineBottom := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
+				reject: #isNil;
+				max ].
 
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
@@ -335,7 +299,7 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupporting content: aContent [
-	| halfWidth descriptionTop contentTop supportingBottom contentBottom theLineBounds |
+	| halfWidth descriptionTop contentTop supportingBottom contentBottom |
 
 	wrapped := true.
 	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
@@ -357,12 +321,17 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	theLineBounds := {
-		self renderedFirstLineBoundsFor: aDescription top: descriptionTop.
-		self renderedFirstLineBoundsFor: aContent top: contentTop } reject: #isNil.
-	theLineBounds ifNotEmpty: [
-		firstLineTop := (theLineBounds collect: #x) min.
-		firstLineBottom := (theLineBounds collect: #y) max ].
+	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
+		firstLineTop := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
+				reject: #isNil;
+				min.
+		firstLineBottom := {
+			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
+			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
+				reject: #isNil;
+				max ].
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
 		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
@@ -435,7 +404,8 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
-	^ aTop + ((firstLineTop + firstLineBottom - aChild measuredHeight) / 2.0)
+	^ aTop + firstLineTop
+		+ (((firstLineBottom - firstLineTop) - aChild measuredHeight) / 2.0)
 ]
 
 { #category : 'private - layout' }
