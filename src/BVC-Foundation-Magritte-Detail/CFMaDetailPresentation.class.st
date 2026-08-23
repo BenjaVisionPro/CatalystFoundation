@@ -668,11 +668,12 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
-	| aRelationElement |
+	| aRelationElement anAddElement |
 	aRelationElement := BrFrame new
-		hMatchParent;
+		hFitContent;
 		vFitContent;
 		yourself.
+	anAddElement := self newToOneAddElementUsing: aDescription.
 
 	aRelationElement withAsyncSinkDo: [ :anElementSink |
 		anElementSink
@@ -680,7 +681,9 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 			whenUpdate: [ :theElement :aSink |
 				self
 					updateToOneListElement: theElement
-					with: aSink value currentValue ].
+					with: aSink value currentValue
+					addElement: anAddElement
+					description: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
 			observe: anElementSink ].
 
@@ -689,26 +692,86 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectElementFor: anObject [
-	| anElement |
-	anElement := CFCompactObjectStencil new
+CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
+	| anItemElement anObjectElement |
+	anObjectElement := CFCompactObjectStencil new
 		object: anObject;
 		create.
-	anElement
+
+	anItemElement := BrFrame new
+		hFitContent;
+		vFitContent;
 		focusability: BlFocusability after;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaListItemAptitude new;
+		addChild: anObjectElement;
+		yourself.
+
+	anItemElement
 		when: BlClickEvent
 			do: [ :anEvent |
+				| wasSelected |
+				wasSelected := anItemElement userData
+					at: #cfMaRelationSelected
+					ifAbsent: [ false ].
 				anEvent consumed: true.
-				anEvent currentTarget phlow spawnObject: anObject ].
-	self installFormNavigationOn: anElement.
-	^ anElement
+				wasSelected
+					ifTrue: [ anItemElement phlow spawnObject: anObject ]
+					ifFalse: [
+						anItemElement userData at: #cfMaRelationSelected put: true.
+						anItemElement states addState: BlElementState selected.
+						anItemElement requestFocus ] ];
+		when: BlFocusOutEvent
+			do: [ :anEvent |
+				anItemElement userData at: #cfMaRelationSelected put: false.
+				anItemElement states removeState: BlElementState selected ].
+
+	anItemElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove selected relation item';
+			combination: BlKeyCombination delete;
+			overrideChildren: true;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				CFMaBuilderUtility
+					removeToOneMemento: self memento
+					using: aDescription
+					element: anItemElement ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove selected relation item';
+			combination: BlKeyCombination builder backspace build;
+			overrideChildren: true;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				CFMaBuilderUtility
+					removeToOneMemento: self memento
+					using: aDescription
+					element: anItemElement ]).
+
+	self installFormNavigationOn: anItemElement.
+	^ anItemElement
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject [
+CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
+	(aDescription isReadOnly or: [ aDescription newItemStencil isNil ])
+		ifTrue: [ ^ nil ].
+	^ CFMaToOneAddItemViewModel new
+		memento: self memento;
+		description: aDescription;
+		stencil: aDescription newItemStencil;
+		asElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject addElement: anAddElement description: aDescription [
 	aRelationElement removeChildren.
-	anObject ifNotNil: [
-		aRelationElement addChild: (self newRelationObjectElementFor: anObject) ].
+	anObject
+		ifNil: [ anAddElement ifNotNil: [ aRelationElement addChild: anAddElement ] ]
+		ifNotNil: [
+			aRelationElement addChild: (self
+				newRelationObjectElementFor: anObject
+				description: aDescription) ].
 	^ aRelationElement
 ]
 
