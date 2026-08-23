@@ -670,8 +670,9 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	| aRelationElement anAddElement |
 	aRelationElement := BrFrame new
-		hFitContent;
+		hMatchParent;
 		vFitContent;
+		layout: BlFrameLayout new;
 		yourself.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 
@@ -697,11 +698,17 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 	anObjectElement := CFCompactObjectStencil new
 		object: anObject;
 		create.
+	anObjectElement
+		hFitContent;
+		titleElement hFitContent.
 
 	anItemElement := BrFrame new
 		hFitContent;
 		vFitContent;
 		focusability: BlFocusability after;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignCenter ];
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaListItemAptitude new;
 		addChild: anObjectElement;
@@ -767,11 +774,16 @@ CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
 CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject addElement: anAddElement description: aDescription [
 	aRelationElement removeChildren.
 	anObject
-		ifNil: [ anAddElement ifNotNil: [ aRelationElement addChild: anAddElement ] ]
+		ifNil: [
+			anAddElement ifNotNil: [
+				anAddElement constraintsDo: [ :c |
+					c frame horizontal alignRight.
+					c frame vertical alignCenter ].
+				aRelationElement addChild: anAddElement ] ]
 		ifNotNil: [
 			aRelationElement addChild: (self
 				newRelationObjectElementFor: anObject
-				description: aDescription) ].
+					description: aDescription) ].
 	^ aRelationElement
 ]
 
