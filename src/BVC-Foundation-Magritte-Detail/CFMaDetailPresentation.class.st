@@ -762,7 +762,7 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
 	(aDescription isReadOnly or: [ aDescription newItemStencil isNil ])
 		ifTrue: [ ^ nil ].
-	^ CFMaToOneAddItemViewModel new
+	^ CFMaDetailToOneAddItemViewModel new
 		memento: self memento;
 		description: aDescription;
 		stencil: aDescription newItemStencil;
