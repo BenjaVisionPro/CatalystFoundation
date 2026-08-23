@@ -43,6 +43,16 @@ CFMaDetailAddPopupElement >> newIndicator [
 		yourself
 ]
 
+
+{ #category : 'private - appearance' }
+CFMaDetailAddPopupElement >> updatePopupAppearance [
+	popupOpen ifTrue: [
+		self background: BlBackground transparent.
+		indicatorHost background: BlBackground transparent.
+		^ self ].
+	super updatePopupAppearance
+]
+
 { #category : 'layout' }
 CFMaDetailAddPopupElement >> supportsBaseline [
 	^ false
