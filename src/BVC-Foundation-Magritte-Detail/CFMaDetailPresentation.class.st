@@ -242,7 +242,7 @@ CFMaDetailPresentation >> newInformationAccessoryFor: information [
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newRevertAccessoryFor: aDescription [
 	| aButton |
-	aButton := self newAccessoryButtonIconNamed: #undo.
+	aButton := self newAccessoryButtonIconNamed: #arrowRotateLeft.
 	aButton
 		label: 'Revert to saved value';
 		action: [ self memento revertUsing: aDescription ];
