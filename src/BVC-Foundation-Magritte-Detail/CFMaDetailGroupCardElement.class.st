@@ -24,7 +24,7 @@ CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
 
 	rows ifEmpty: [
 		super addChild: anElement.
-		rows add: anElement at: anIndex.
+		rows add: anElement beforeIndex: anIndex.
 		^ anElement ].
 
 	anIndex = (rows size + 1)
@@ -34,7 +34,7 @@ CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
 		ifFalse: [
 			super addChild: anElement at: (anIndex * 2 - 1).
 			super addChild: self newSeparator at: anIndex * 2 ].
-	rows add: anElement at: anIndex
+	rows add: anElement beforeIndex: anIndex
 ]
 
 { #category : 'private - metrics' }
