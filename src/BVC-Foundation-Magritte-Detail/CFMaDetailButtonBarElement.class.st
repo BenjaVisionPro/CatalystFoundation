@@ -67,6 +67,7 @@ CFMaDetailButtonBarElement >> initialize [
 { #category : 'private' }
 CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	| aToggle aStyle |
+	anIcon size: 16 @ 16.
 	aStyle := self toggleStyle.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousButtonIconAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
