@@ -55,6 +55,19 @@ CFMaDetailPresentationExamples >> groupConfigurationsAreCreatedLazily [
 ]
 
 
+
+{ #category : 'examples' }
+CFMaDetailPresentationExamples >> groupCanPresentChildrenAsAccordion [
+	<gtExample>
+	| aConfiguration anAccordion |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+	anAccordion := aConfiguration beAccordion.
+
+	self assert: anAccordion class equals: CFMaDetailAccordionConfiguration.
+	self assert: aConfiguration presentation == anAccordion.
+	^ aConfiguration
+]
+
 { #category : 'examples' }
 CFMaDetailPresentationExamples >> groupCanPresentChildrenAsTabs [
 	<gtExample>

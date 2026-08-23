@@ -23,6 +23,8 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 				yourself) ].
 	(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
 		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
+	(configuration presentation isKindOf: CFMaDetailAccordionConfiguration)
+		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
 	groups addChild: aGroup
 ]
 
@@ -45,12 +47,15 @@ CFMaDetailGroupElement >> ensureGroups [
 			(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
 				ifTrue: [ CFMaDetailButtonBarElement new configuration: configuration presentation; yourself ]
 				ifFalse: [
+					(configuration presentation isKindOf: CFMaDetailAccordionConfiguration)
+						ifTrue: [ CFMaDetailAccordionElement new ]
+						ifFalse: [
 					BrVerticalPane new
 						hMatchParent;
 						vFitContent;
 						cellSpacing: self groupSpacing;
 						margin: BlInsets empty;
-						yourself ] ].
+						yourself ] ] ].
 	self addChild: groups.
 	^ groups
 ]

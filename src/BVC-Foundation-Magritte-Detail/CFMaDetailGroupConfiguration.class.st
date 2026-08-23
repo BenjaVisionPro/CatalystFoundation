@@ -32,6 +32,13 @@ CFMaDetailGroupConfiguration >> categoryConfigurationFor: aCategory [
 		ifAbsentPut: [ self class new ]
 ]
 
+
+{ #category : 'configuration - presentation' }
+CFMaDetailGroupConfiguration >> beAccordion [
+	presentation := CFMaDetailAccordionConfiguration new.
+	^ presentation
+]
+
 { #category : 'configuration - presentation' }
 CFMaDetailGroupConfiguration >> beTabs [
 	presentation := CFMaDetailTabsConfiguration new.
