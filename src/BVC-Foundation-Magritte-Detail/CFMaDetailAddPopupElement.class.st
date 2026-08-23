@@ -1,6 +1,8 @@
 Class {
 	#name : 'CFMaDetailAddPopupElement',
 	#superclass : 'CFMaDetailPopupElement',
+	#traits : 'TBrEnableable',
+	#classTraits : 'TBrEnableable classTrait',
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
