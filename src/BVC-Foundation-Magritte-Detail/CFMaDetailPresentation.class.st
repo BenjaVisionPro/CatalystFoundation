@@ -26,6 +26,21 @@ CFMaDetailPresentation >> build [
 	^ super build
 ]
 
+{ #category : 'visiting-description' }
+CFMaDetailPresentation >> visitContainer: aDescription [
+	aDescription == self objectDescription ifFalse: [
+		^ super visitContainer: aDescription ].
+
+	((aDescription children asOrderedCollection)
+		addAll: (self memento magritteActions reject: #isToolbarAction);
+		sort: [ :a :b | a priority < b priority ];
+		yourself)
+		do: [ :each |
+			(each isKindOf: MAActionDescription)
+				ifTrue: [ self addActionRowUsing: each ]
+				ifFalse: [ self visit: each ] ]
+]
+
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
 	^ Color white
@@ -133,6 +148,60 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		background: (Color black alpha: 0.05).
 	^ aDropdown
+]
+
+{ #category : 'private - actions' }
+CFMaDetailPresentation >> addActionRowUsing: anActionDescription [
+	| aLabel aSupportingElement aButton aRow |
+	aLabel := BrLabel new
+		text: anActionDescription label asRopedText;
+		aptitude: self defaultLabelAptitude;
+		fitContent.
+
+	aSupportingElement := anActionDescription comment
+		ifNil: [ nil ]
+		ifNotNil: [ :aComment |
+			aComment isEmpty
+				ifTrue: [ nil ]
+				ifFalse: [ self supportingElementFor: anActionDescription ] ].
+
+	aButton := self actionButtonFor: anActionDescription.
+	aRow := self
+		newRowLeading: nil
+		description: aLabel
+		supporting: aSupportingElement
+		content: aButton
+		accessories: #()
+		trailing: nil.
+	(self containerForDescription: anActionDescription) addChild: aRow
+]
+
+{ #category : 'private - actions' }
+CFMaDetailPresentation >> actionButtonFor: anActionDescription [
+	| aButton |
+	aButton := anActionDescription asBlockButtonWithMemento: self memento.
+	aButton
+		hFitContent;
+		vExact: 24;
+		padding: (BlInsets top: 2 right: 10 bottom: 2 left: 10);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 5);
+		background: (Color black alpha: 0.06);
+		border: (BlBorder paint: (Color black alpha: 0.10) width: 1).
+	aButton addAptitude: (BrStyleCommonAptitude new
+		default: [ :aStyle |
+			aStyle
+				background: (Color black alpha: 0.06);
+				border: (BlBorder paint: (Color black alpha: 0.10) width: 1) ];
+		hovered: [ :aStyle |
+			aStyle
+				background: (Color black alpha: 0.10);
+				border: (BlBorder paint: (Color black alpha: 0.14) width: 1) ];
+		pressed: [ :aStyle |
+			aStyle
+				background: (Color black alpha: 0.14);
+				border: (BlBorder paint: (Color black alpha: 0.18) width: 1) ]).
+	self installFormNavigationOn: aButton.
+	^ aButton
 ]
 
 { #category : 'private - building' }

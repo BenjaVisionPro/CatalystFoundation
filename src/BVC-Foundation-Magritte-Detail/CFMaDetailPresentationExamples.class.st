@@ -6,6 +6,25 @@ Class {
 	#tag : 'Examples'
 }
 
+{ #category : 'examples - actions' }
+CFMaDetailPresentationExamples >> actionDescriptionUsesFoundationPlacement [
+	<gtExample>
+	| anAction |
+	anAction := MAActionDescription new
+		label: 'Store in iCloud';
+		comment: 'Only store the most recent messages on this Mac.';
+		group: 'General';
+		categories: #(storage);
+		priority: 40;
+		action: [ :aModel | aModel ];
+		yourself.
+
+	self assert: anAction group equals: 'General'.
+	self assert: anAction categories equals: #(storage).
+	self assert: anAction priority equals: 40.
+	^ anAction
+]
+
 { #category : 'examples' }
 CFMaDetailPresentationExamples >> descriptionCategories [
 	<gtExample>

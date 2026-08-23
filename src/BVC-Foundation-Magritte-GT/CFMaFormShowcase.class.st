@@ -1113,3 +1113,16 @@ CFMaFormShowcase >> timeDescription [
 		priority: 110;
 		yourself
 ]
+
+{ #category : 'descriptions - actions' }
+CFMaFormShowcase >> exampleActionDescription [
+	<magritteActionDescription>
+	^ MAActionDescription new
+		label: 'Store in iCloud';
+		comment: 'Only store the most recent messages on this Mac.';
+		group: 'Fields';
+		categories: #();
+		priority: 195;
+		action: [ :aModel | aModel ];
+		yourself
+]
