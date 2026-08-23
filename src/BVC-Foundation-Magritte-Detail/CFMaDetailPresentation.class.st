@@ -220,7 +220,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	anIcon
 		color: CFMaDetailColours secondaryForeground;
 		size: 12 @ 12.
-	^ CFMaDetailAccessoryButton new
+	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
 			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
 		icon: anIcon;

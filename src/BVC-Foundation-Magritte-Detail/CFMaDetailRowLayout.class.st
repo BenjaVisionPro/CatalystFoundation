@@ -180,8 +180,43 @@ CFMaDetailRowLayout >> maximumMeasuredHeightOf: aCollection [
 ]
 
 { #category : 'private - measurement' }
+CFMaDetailRowLayout >> baselineTextElementFor: anElement [
+	| aParagraphElement |
+	anElement ifNil: [ ^ nil ].
+	(anElement isKindOf: BlTextElement) ifTrue: [ ^ anElement ].
+
+	(anElement isKindOf: BrEditorElement) ifTrue: [
+		aParagraphElement := anElement children accountedByLayout
+			detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
+			ifNone: [ ^ nil ].
+		^ aParagraphElement children accountedByLayout
+			detect: [ :each | each isKindOf: BlTextElement ]
+			ifNone: [ nil ] ].
+
+	^ anElement
+		childWithId: #label
+		ifFound: [ :aTextElement |
+			(aTextElement isKindOf: BlTextElement)
+				ifTrue: [ aTextElement ]
+				ifFalse: [ nil ] ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - measurement' }
+CFMaDetailRowLayout >> visualLineBoundsFor: anElement [
+	| aTextElement aParagraph aBaselineY |
+	aTextElement := self baselineTextElementFor: anElement.
+	aTextElement ifNil: [ ^ nil ].
+	aTextElement measure: BlExtentMeasurementSpec unspecified.
+	aParagraph := aTextElement paragraph.
+	aParagraph ifNil: [ ^ nil ].
+	aBaselineY := aParagraph baseline y.
+	^ (aParagraph top - aBaselineY) @ (aParagraph bottom - aBaselineY)
+]
+
+{ #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineOffsetFor: anElement [
-	| aParagraphElement aTextElement |
+	| aTextElement aParagraphElement |
 	anElement ifNil: [ ^ nil ].
 	anElement supportsBaseline ifTrue: [ ^ anElement baselineOffset ].
 
@@ -189,16 +224,12 @@ CFMaDetailRowLayout >> baselineOffsetFor: anElement [
 	aParagraphElement := anElement children accountedByLayout
 		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
 		ifNone: [ ^ nil ].
-	aTextElement := aParagraphElement children accountedByLayout
-		detect: [ :each | each isKindOf: BlTextElement ]
-		ifNone: [ ^ nil ].
-
-	"Editor text pieces use BlTextElement>>editorMeasurement, whose baseline is
-	BlTextParagraphAscentLooseBaseline. Measure the real first text piece so the
-	row aligns to the editor's actual first-line typography rather than a fixed
-	pixel offset."
+	aTextElement := self baselineTextElementFor: anElement.
+	aTextElement ifNil: [ ^ nil ].
 	aTextElement measure: BlExtentMeasurementSpec unspecified.
-	^ anElement padding top + aParagraphElement padding top + aTextElement baselineOffset
+	^ anElement padding top
+		+ aParagraphElement padding top
+		+ aTextElement baselineOffset
 ]
 
 { #category : 'private - measurement' }
@@ -279,17 +310,14 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
-		firstLineTop := {
-			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
-			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
-				reject: #isNil;
-				min.
-		firstLineBottom := {
-			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
-			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
-				reject: #isNil;
-				max ].
+	baseline ifNotNil: [
+		| theVisualBounds |
+		theVisualBounds := {
+			self visualLineBoundsFor: aDescription.
+			self visualLineBoundsFor: aContent } reject: #isNil.
+		theVisualBounds ifNotEmpty: [
+			firstLineTop := baseline + (theVisualBounds collect: #x) min.
+			firstLineBottom := baseline + (theVisualBounds collect: #y) max ] ].
 
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
@@ -323,17 +351,14 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	(aDescription notNil or: [ aContent notNil ]) ifTrue: [
-		firstLineTop := {
-			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop ].
-			aContent ifNil: [ nil ] ifNotNil: [ contentTop ] }
-				reject: #isNil;
-				min.
-		firstLineBottom := {
-			aDescription ifNil: [ nil ] ifNotNil: [ descriptionTop + aDescription measuredHeight ].
-			aContent ifNil: [ nil ] ifNotNil: [ contentTop + aContent measuredHeight ] }
-				reject: #isNil;
-				max ].
+	baseline ifNotNil: [
+		| theVisualBounds |
+		theVisualBounds := {
+			self visualLineBoundsFor: aDescription.
+			self visualLineBoundsFor: aContent } reject: #isNil.
+		theVisualBounds ifNotEmpty: [
+			firstLineTop := baseline + (theVisualBounds collect: #x) min.
+			firstLineBottom := baseline + (theVisualBounds collect: #y) max ] ].
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
 		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
@@ -406,11 +431,8 @@ CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight
 
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
-	| aHeight |
-	(aChild supportsBaseline and: [ baseline notNil ]) ifTrue: [
-		^ aTop + baseline - aChild baselineOffset ].
-	aHeight := (firstLineBottom - firstLineTop) max: aChild measuredHeight.
-	^ aTop + firstLineTop + ((aHeight - aChild measuredHeight) / 2.0)
+	^ aTop
+		+ ((firstLineTop + firstLineBottom - aChild measuredHeight) / 2.0)
 ]
 
 { #category : 'private - layout' }
