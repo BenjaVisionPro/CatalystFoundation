@@ -140,30 +140,6 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #('Inspect');
 			priority: 210;
 			yourself);
-		add: (self statusDescription copy
-			label: 'General status';
-			group: 'Accordion';
-			categories: #('General');
-			priority: 220;
-			yourself);
-		add: (self passwordDescription copy
-			label: 'General password';
-			group: 'Accordion';
-			categories: #('General');
-			priority: 230;
-			yourself);
-		add: (self priorityDescription copy
-			label: 'Advanced priority';
-			group: 'Accordion';
-			categories: #('Advanced');
-			priority: 240;
-			yourself);
-		add: (self popupPriorityDescription copy
-			label: 'Advanced popup';
-			group: 'Accordion';
-			categories: #('Advanced');
-			priority: 250;
-			yourself);
 		yourself
 ]
 
@@ -184,7 +160,6 @@ CFMaFormShowcase >> exampleDetailGroupsElement [
 					icon: (FontAwesomeIcons defaultStyle icon: #addressBook) for: 'Copy';
 					icon: (FontAwesomeIcons defaultStyle icon: #file) for: 'Refresh';
 					icon: (FontAwesomeIcons defaultStyle icon: #atom) for: 'Inspect' ];
-			group: 'Accordion' configure: [ :aGroup | aGroup beAccordion ];
 			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement
