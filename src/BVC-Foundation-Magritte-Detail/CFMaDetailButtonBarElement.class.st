@@ -71,10 +71,7 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	anIcon
 		size: 16 @ 16;
 		color: (Color black alpha: 0.68).
-	aStyle := BrToggleAptitude new
-		default: [ :aState | aState background: Color transparent ];
-		activated: [ :aState | aState background: Color transparent ];
-		yourself.
+	aStyle := self toggleStyle.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousButtonIconAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
 		icon: anIcon;
@@ -85,7 +82,7 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	aToggle
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
-			aToggle icon color: CFMaDetailColours primaryForeground.
+			aToggle icon color: Color white.
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
@@ -122,10 +119,11 @@ CFMaDetailButtonBarElement >> styleAsIconButtonBar [
 		hFitContent;
 		vExact: 24;
 		padding: (BlInsets all: 2);
-		margin: (BlInsets left: 6 right: 6);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
-		background: (Color white alpha: 0.78);
-		border: (BlBorder paint: (Color white alpha: 0.72) width: 0.5)
+		margin: BlInsets empty;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
+		background: (Color black alpha: 0.08);
+		border: BlBorder empty;
+		constraintsDo: [ :c | c frame horizontal alignCenter ]
 ]
 
 { #category : 'private' }
