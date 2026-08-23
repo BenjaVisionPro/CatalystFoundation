@@ -29,7 +29,8 @@ CFMaDetailButtonBarElement >> addGroup: aGroup label: aLabel [
 
 { #category : 'accessing' }
 CFMaDetailButtonBarElement >> configuration: aConfiguration [
-	configuration := aConfiguration
+	configuration := aConfiguration.
+	configuration isIconOnly ifTrue: [ self styleAsIconButtonBar ]
 ]
 
 { #category : 'geometry' }
@@ -67,16 +68,28 @@ CFMaDetailButtonBarElement >> initialize [
 { #category : 'private' }
 CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	| aToggle aStyle |
-	anIcon size: 16 @ 16.
-	aStyle := self toggleStyle.
+	anIcon
+		size: 16 @ 16;
+		color: (Color black alpha: 0.68).
+	aStyle := BrToggleAptitude new
+		default: [ :aState | aState background: Color transparent ];
+		activated: [ :aState | aState background: Color transparent ];
+		yourself.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousButtonIconAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
 		icon: anIcon;
-		hMatchParent;
+		hExact: 34;
 		vExact: 20;
-		constraintsDo: [ :c | c linear weight: 1 ];
+		padding: BlInsets empty;
 		yourself.
-	aToggle when: BrToggleActivatedEvent do: [ :anEvent | self showGroup: aGroup ].
+	aToggle
+		when: BrToggleActivatedEvent
+		do: [ :anEvent |
+			aToggle icon color: CFMaDetailColours primaryForeground.
+			self showGroup: aGroup ];
+		when: BrToggleDeactivatedEvent
+		do: [ :anEvent |
+			aToggle icon color: (Color black alpha: 0.68) ].
 	^ aToggle
 ]
 
@@ -101,6 +114,18 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 		do: [ :anEvent |
 			aToggle label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground) ].
 	^ aToggle
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailButtonBarElement >> styleAsIconButtonBar [
+	bar
+		hFitContent;
+		vExact: 24;
+		padding: (BlInsets all: 2);
+		margin: (BlInsets left: 6 right: 6);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+		background: (Color white alpha: 0.78);
+		border: (BlBorder paint: (Color white alpha: 0.72) width: 0.5)
 ]
 
 { #category : 'private' }
