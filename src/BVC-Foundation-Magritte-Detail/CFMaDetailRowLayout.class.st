@@ -294,7 +294,8 @@ CFMaDetailRowLayout >> contentUsesAvailableWidth: aContent [
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth [
-	| descriptionTop contentTop supportingHeight contentBottom supportingBottom |
+	| descriptionTop contentTop supportingHeight contentBottom supportingBottom theLineBounds |
+
 	wrapped := false.
 	descriptionWidth := naturalDescriptionWidth min: bodyWidth.
 	contentWidth := aContent
@@ -316,7 +317,6 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	| theLineBounds |
 	theLineBounds := {
 		self renderedFirstLineBoundsFor: aDescription top: descriptionTop.
 		self renderedFirstLineBoundsFor: aContent top: contentTop } reject: #isNil.
@@ -335,7 +335,8 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupporting content: aContent [
-	| halfWidth descriptionTop contentTop supportingBottom contentBottom |
+	| halfWidth descriptionTop contentTop supportingBottom contentBottom theLineBounds |
+
 	wrapped := true.
 	halfWidth := ((bodyWidth - gap) max: 0.0) / 2.0.
 	descriptionWidth := halfWidth.
@@ -356,7 +357,6 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 		contentTop := baseline - (self baselineOffsetFor: aContent) ].
 	firstLineTop := 0.0.
 	firstLineBottom := 0.0.
-	| theLineBounds |
 	theLineBounds := {
 		self renderedFirstLineBoundsFor: aDescription top: descriptionTop.
 		self renderedFirstLineBoundsFor: aContent top: contentTop } reject: #isNil.
