@@ -119,7 +119,7 @@ CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
 	<gtExample>
-	| aPresentation aLeading aDescription aSupporting aContent firstAccessory secondAccessory aRow |
+	| aPresentation aLeading aDescription aSupporting aContent firstAccessory secondAccessory aTrailing aRow |
 	aPresentation := CFMaDetailPresentation new.
 	aLeading := BrLabel new text: '●'; fitContent.
 	aDescription := BrLabel new text: 'Wi-Fi'; fitContent.
@@ -134,14 +134,16 @@ CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
 		yourself.
 	aContent := BrLabel new text: 'On'; fitContent.
 	firstAccessory := BrLabel new text: 'i'; fitContent.
-	secondAccessory := BrLabel new text: '›'; fitContent.
+	secondAccessory := BrLabel new text: '↶'; fitContent.
+	aTrailing := BrLabel new text: '›'; fitContent.
 
 	aRow := aPresentation
 		newRowLeading: aLeading
 		description: aDescription
 		supporting: aSupporting
 		content: aContent
-		accessories: { firstAccessory. secondAccessory }.
+		accessories: { firstAccessory. secondAccessory }
+		trailing: aTrailing.
 
 	self assert: (aLeading constraints at: CFMaDetailRowLayout) isLeading.
 	self assert: (aDescription constraints at: CFMaDetailRowLayout) isDescription.
@@ -149,7 +151,8 @@ CFMaDetailPresentationExamples >> detailRowSupportsFullGrammar [
 	self assert: (aContent constraints at: CFMaDetailRowLayout) isContent.
 	self assert: (firstAccessory constraints at: CFMaDetailRowLayout) isAccessory.
 	self assert: (secondAccessory constraints at: CFMaDetailRowLayout) isAccessory.
-	self assert: aRow children size equals: 6.
+	self assert: (aTrailing constraints at: CFMaDetailRowLayout) isTrailing.
+	self assert: aRow children size equals: 7.
 	^ aRow
 ]
 

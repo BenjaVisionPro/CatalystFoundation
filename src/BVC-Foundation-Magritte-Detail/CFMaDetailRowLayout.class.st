@@ -132,6 +132,11 @@ CFMaDetailRowLayout >> accessoryChildrenIn: anElement [
 	^ self childrenWithRole: [ :c | c isAccessory ] in: anElement
 ]
 
+{ #category : 'private - children' }
+CFMaDetailRowLayout >> trailingChildIn: anElement [
+	^ self firstChildWithRole: [ :c | c isTrailing ] in: anElement
+]
+
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureNatural: aChild [
 	aChild ifNil: [ ^ self ].
@@ -316,32 +321,38 @@ CFMaDetailRowLayout >> measureWrappedDescription: aDescription supporting: aSupp
 
 { #category : 'measure' }
 CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
-	| padding leadingChildren aDescription aSupporting aContent accessoryChildren leadingWidth accessoriesWidth bodyPresent bodyGap naturalDescriptionWidth preferredContentWidth availableWidth bodyHeight contentHeight desiredWidth desiredHeight |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren aTrailing leadingWidth accessoriesWidth trailingWidth trailingGap bodyPresent bodyGap naturalDescriptionWidth preferredContentWidth availableWidth bodyHeight contentHeight desiredWidth desiredHeight |
 	padding := aRow padding.
 	leadingChildren := self leadingChildrenIn: aRow.
 	aDescription := self descriptionChildIn: aRow.
 	aSupporting := self supportingChildIn: aRow.
 	aContent := self contentChildIn: aRow.
 	accessoryChildren := self accessoryChildrenIn: aRow.
+	aTrailing := self trailingChildIn: aRow.
 
 	self measureNaturalAll: leadingChildren.
 	self measureNatural: aDescription.
 	self measurePreferredWidth: aContent.
 	self measureNaturalAll: accessoryChildren.
+	self measureNatural: aTrailing.
 
 	leadingWidth := self totalMeasuredWidthOf: leadingChildren spacing: accessoryGap.
 	accessoriesWidth := self totalMeasuredWidthOf: accessoryChildren spacing: accessoryGap.
+	trailingWidth := aTrailing ifNil: [ 0.0 ] ifNotNil: [ aTrailing measuredWidth ].
+	trailingGap := (aTrailing notNil and: [ accessoryChildren notEmpty ]) ifTrue: [ accessoryGap ] ifFalse: [ 0.0 ].
 	bodyPresent := aDescription notNil or: [ aSupporting notNil or: [ aContent notNil ] ].
 	bodyGap := self bodyGapLeading: leadingChildren bodyPresent: bodyPresent accessories: accessoryChildren.
+	(aTrailing notNil and: [ bodyPresent and: [ accessoryChildren isEmpty ] ])
+		ifTrue: [ bodyGap := bodyGap + gap ].
 	naturalDescriptionWidth := aDescription ifNil: [ 0.0 ] ifNotNil: [ aDescription measuredWidth ].
 	preferredContentWidth := aContent ifNil: [ 0.0 ] ifNotNil: [ aContent measuredWidth ].
 
 	availableWidth := anExtentSpec widthSpec isUnspecified
 		ifTrue: [
-			leadingWidth + bodyGap + accessoriesWidth + naturalDescriptionWidth
+			leadingWidth + bodyGap + accessoriesWidth + trailingGap + trailingWidth + naturalDescriptionWidth
 				+ (aContent ifNil: [ 0.0 ] ifNotNil: [ gap + preferredContentWidth ]) ]
 		ifFalse: [ (anExtentSpec widthSpec size - padding width) max: 0.0 ].
-	bodyWidth := (availableWidth - leadingWidth - accessoriesWidth - bodyGap) max: 0.0.
+	bodyWidth := (availableWidth - leadingWidth - accessoriesWidth - trailingGap - trailingWidth - bodyGap) max: 0.0.
 
 	bodyHeight := (aSupporting notNil and: [ aContent notNil and: [
 		self
@@ -358,6 +369,7 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 			ifFalse: [ 0.0 ].
 		contentHeight := contentHeight max: (leadingTop + (self maximumMeasuredHeightOf: leadingChildren)) ].
 	contentHeight := contentHeight max: (self maximumMeasuredHeightOf: accessoryChildren).
+	aTrailing ifNotNil: [ contentHeight := contentHeight max: aTrailing measuredHeight ].
 	desiredWidth := availableWidth + padding width.
 	desiredHeight := contentHeight + padding height.
 	aRow measuredExtent: (anExtentSpec sizeFor: desiredWidth @ desiredHeight).
@@ -367,6 +379,11 @@ CFMaDetailRowLayout >> measure: aRow with: anExtentSpec [
 { #category : 'private - layout' }
 CFMaDetailRowLayout >> centeredYFor: aChild top: aTop innerHeight: anInnerHeight [
 	^ aTop + ((anInnerHeight - aChild measuredHeight) / 2.0)
+]
+
+{ #category : 'private - layout' }
+CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
+	^ aTop + (((firstLineHeight max: aChild measuredHeight) - aChild measuredHeight) / 2.0)
 ]
 
 { #category : 'private - layout' }
@@ -430,7 +447,7 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 
 { #category : 'layout' }
 CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| padding leadingChildren aDescription aSupporting aContent accessoryChildren x y innerHeight rightEdge bodyX bodyRight leadingY |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren aTrailing x y innerHeight rightEdge bodyX bodyRight leadingY |
 	padding := aRow padding.
 	x := padding left.
 	y := padding top.
@@ -440,6 +457,7 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 	aSupporting := self supportingChildIn: aRow.
 	aContent := self contentChildIn: aRow.
 	accessoryChildren := self accessoryChildrenIn: aRow.
+	aTrailing := self trailingChildIn: aRow.
 
 	leadingY := (aDescription notNil and: [ baseline notNil ])
 		ifTrue: [ y + baseline - (self baselineOffsetFor: aDescription) ]
@@ -454,15 +472,22 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 	bodyX := x.
 
 	rightEdge := aRectangle width - padding right.
+	aTrailing ifNotNil: [
+		rightEdge := rightEdge - aTrailing measuredWidth.
+		aTrailing
+			applyLayoutIn: (rightEdge @ (self centeredYFor: aTrailing top: y innerHeight: innerHeight)
+				extent: aTrailing measuredExtent)
+			context: aBlElementBoundsUpdateContext.
+		accessoryChildren ifNotEmpty: [ rightEdge := rightEdge - accessoryGap ] ].
 	accessoryChildren asArray reverseDo: [ :aChild |
 		rightEdge := rightEdge - aChild measuredWidth.
 		aChild
-			applyLayoutIn: (rightEdge @ (self centeredYFor: aChild top: y innerHeight: innerHeight)
+			applyLayoutIn: (rightEdge @ (self firstLineYFor: aChild top: y)
 				extent: aChild measuredExtent)
 			context: aBlElementBoundsUpdateContext.
 		aChild == accessoryChildren first
 			ifFalse: [ rightEdge := rightEdge - accessoryGap ] ].
-	accessoryChildren ifNotEmpty: [ rightEdge := rightEdge - gap ].
+	(accessoryChildren notEmpty or: [ aTrailing notNil ]) ifTrue: [ rightEdge := rightEdge - gap ].
 	bodyRight := rightEdge.
 
 	wrapped

@@ -6,7 +6,8 @@ Class {
 		'description',
 		'supporting',
 		'content',
-		'accessory'
+		'accessory',
+		'trailing'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail-Layout',
 	#package : 'BVC-Foundation-Magritte-Detail',
@@ -25,7 +26,8 @@ CFMaDetailRowLayoutConstraints >> clearRole [
 	description := false.
 	supporting := false.
 	content := false.
-	accessory := false
+	accessory := false.
+	trailing := false
 ]
 
 { #category : 'api - role' }
@@ -58,6 +60,12 @@ CFMaDetailRowLayoutConstraints >> beAccessory [
 	accessory := true
 ]
 
+{ #category : 'api - role' }
+CFMaDetailRowLayoutConstraints >> beTrailing [
+	self clearRole.
+	trailing := true
+]
+
 { #category : 'testing' }
 CFMaDetailRowLayoutConstraints >> isLeading [
 	^ leading
@@ -81,4 +89,9 @@ CFMaDetailRowLayoutConstraints >> isContent [
 { #category : 'testing' }
 CFMaDetailRowLayoutConstraints >> isAccessory [
 	^ accessory
+]
+
+{ #category : 'testing' }
+CFMaDetailRowLayoutConstraints >> isTrailing [
+	^ trailing
 ]

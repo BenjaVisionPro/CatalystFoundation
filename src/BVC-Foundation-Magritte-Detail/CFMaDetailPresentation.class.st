@@ -194,10 +194,92 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 		description: aLabel
 		supporting: aSupportingElement
 		content: aFieldElement
-		accessories: #().
+		accessories: (self newAccessoriesFor: aDescription)
+		trailing: nil.
 	(self containerForDescription: aDescription) addChild: aRow
 ]
 
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newAccessoriesFor: aDescription [
+	| accessories information |
+	accessories := OrderedCollection new.
+	aDescription isWithChangeIndicator ifTrue: [
+		accessories add: (self newRevertAccessoryFor: aDescription) ].
+	accessories add: (self newValidationAccessoryFor: aDescription).
+	information := aDescription informationFor: self memento model.
+	information ifNotNil: [
+		accessories add: (self newInformationAccessoryFor: information) ].
+	^ accessories
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
+	| anIcon |
+	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
+	anIcon
+		color: CFMaDetailColours secondaryForeground;
+		size: 12 @ 12.
+	^ BrButton new
+		aptitude: BrGlamorousButtonIconAptitude new
+			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
+		icon: anIcon;
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: BlInsets empty;
+		hExact: 16;
+		vExact: 20;
+		yourself
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newInformationAccessoryFor: information [
+	^ (self newAccessoryButtonIconNamed: #infoCircle)
+		label: information asString;
+		yourself
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newRevertAccessoryFor: aDescription [
+	| aButton |
+	aButton := self newAccessoryButtonIconNamed: #undo.
+	aButton
+		label: 'Revert to saved value';
+		action: [ self memento revertUsing: aDescription ];
+		visibility: BlVisibility gone.
+	aButton withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				aSink value isChanged
+					ifTrue: [ anElement visibility: BlVisibility visible ]
+					ifFalse: [ anElement visibility: BlVisibility gone ] ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	^ aButton
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
+	| aButton |
+	aButton := self newAccessoryButtonIconNamed: #exclamationTriangle.
+	aButton
+		label: 'Validation failed';
+		visibility: BlVisibility gone.
+	aButton withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink |
+				| aValidationResult |
+				aValidationResult := aSink value.
+				aValidationResult isSuccess
+					ifTrue: [ anElement visibility: BlVisibility gone ]
+					ifFalse: [
+						anElement
+							label: aValidationResult issuesDescription;
+							visibility: BlVisibility visible ] ].
+		(self memento validatorUsing: aDescription) observe: anElementSink ].
+	^ aButton
+]
 
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
@@ -259,6 +341,17 @@ CFMaDetailPresentation >> unadornedIconElement: anIcon configuration: anIconConf
 
 { #category : 'private - composition' }
 CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescriptionElement supporting: aSupportingElement content: aContentElement accessories: accessoryElements [
+	^ self
+		newRowLeading: aLeadingElement
+		description: aDescriptionElement
+		supporting: aSupportingElement
+		content: aContentElement
+		accessories: accessoryElements
+		trailing: nil
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescriptionElement supporting: aSupportingElement content: aContentElement accessories: accessoryElements trailing: aTrailingElement [
 	| aRow |
 	aRow := BlElement new
 		layout: CFMaDetailRowLayout new;
@@ -292,6 +385,10 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 		anAccessory margin: BlInsets empty.
 		anAccessory constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beAccessory ].
 		aRow addChild: anAccessory ].
+	aTrailingElement ifNotNil: [
+		aTrailingElement margin: BlInsets empty.
+		aTrailingElement constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beTrailing ].
+		aRow addChild: aTrailingElement ].
 	^ aRow
 ]
 
