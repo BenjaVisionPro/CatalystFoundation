@@ -44,6 +44,12 @@ CFMaDetailGroupConfiguration >> beButtonBar [
 	^ presentation
 ]
 
+{ #category : 'configuration - presentation' }
+CFMaDetailGroupConfiguration >> beIconButtonBar [
+	presentation := CFMaDetailButtonBarConfiguration new beIconOnly.
+	^ presentation
+]
+
 { #category : 'accessing' }
 CFMaDetailGroupConfiguration >> presentation [
 	^ presentation

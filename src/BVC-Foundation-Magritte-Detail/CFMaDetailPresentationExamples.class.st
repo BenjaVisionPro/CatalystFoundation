@@ -79,6 +79,19 @@ CFMaDetailPresentationExamples >> groupCanPresentChildrenAsButtonBar [
 	^ aConfiguration
 ]
 
+{ #category : 'examples' }
+CFMaDetailPresentationExamples >> groupCanPresentChildrenAsIconButtonBar [
+	<gtExample>
+	| aConfiguration aButtonBar |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+	aButtonBar := aConfiguration beIconButtonBar.
+
+	self assert: aButtonBar class equals: CFMaDetailButtonBarConfiguration.
+	self assert: aButtonBar isIconOnly.
+	self assert: aConfiguration presentation == aButtonBar.
+	^ aConfiguration
+]
+
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	<gtExample>

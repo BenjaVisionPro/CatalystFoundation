@@ -116,6 +116,30 @@ CFMaFormShowcase >> detailGroupsDescription [
 			categories: #('More Gestures');
 			priority: 170;
 			yourself);
+		add: (self textDescription copy
+			label: 'Add';
+			group: 'Icon Button Bar';
+			categories: #('Add');
+			priority: 180;
+			yourself);
+		add: (self textDescription copy
+			label: 'Copy';
+			group: 'Icon Button Bar';
+			categories: #('Copy');
+			priority: 190;
+			yourself);
+		add: (self textDescription copy
+			label: 'Refresh';
+			group: 'Icon Button Bar';
+			categories: #('Refresh');
+			priority: 200;
+			yourself);
+		add: (self textDescription copy
+			label: 'Inspect';
+			group: 'Icon Button Bar';
+			categories: #('Inspect');
+			priority: 210;
+			yourself);
 		yourself
 ]
 
@@ -128,6 +152,14 @@ CFMaFormShowcase >> exampleDetailGroupsElement [
 		CFMaDetailPresentation new
 			group: 'Tabs' configure: [ :aGroup | aGroup beTabs ];
 			group: 'Button Bar' configure: [ :aGroup | aGroup beButtonBar ];
+			group: 'Icon Button Bar' configure: [ :aGroup |
+				| aButtonBar |
+				aButtonBar := aGroup beIconButtonBar.
+				aButtonBar
+					icon: (FontAwesomeIcons defaultStyle icon: #addressCard) for: 'Add';
+					icon: (FontAwesomeIcons defaultStyle icon: #addressBook) for: 'Copy';
+					icon: (FontAwesomeIcons defaultStyle icon: #file) for: 'Refresh';
+					icon: (FontAwesomeIcons defaultStyle icon: #atom) for: 'Inspect' ];
 			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement

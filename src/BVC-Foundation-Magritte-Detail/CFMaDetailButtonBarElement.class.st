@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'bar',
 		'content',
-		'groupElements'
+		'groupElements',
+		'configuration'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -19,9 +20,16 @@ CFMaDetailButtonBarElement >> addGroup: aGroup label: aLabel [
 	content addChild: aGroup.
 	groupElements add: aGroup.
 
-	aToggle := self newToggleLabel: aLabel group: aGroup.
+	aToggle := configuration isIconOnly
+		ifTrue: [ self newIconToggle: (configuration iconFor: aLabel) group: aGroup ]
+		ifFalse: [ self newLabelToggle: aLabel group: aGroup ].
 	bar addToggle: aToggle.
 	groupElements size = 1 ifTrue: [ aToggle activate ]
+]
+
+{ #category : 'accessing' }
+CFMaDetailButtonBarElement >> configuration: aConfiguration [
+	configuration := aConfiguration
 ]
 
 { #category : 'geometry' }
@@ -57,16 +65,24 @@ CFMaDetailButtonBarElement >> initialize [
 ]
 
 { #category : 'private' }
-CFMaDetailButtonBarElement >> newToggleLabel: aLabel group: aGroup [
+CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	| aToggle aStyle |
-	aStyle := BrToggleAptitude new
-		default: [ :aState |
-			aState
-				background: Color transparent;
-				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
-		activated: [ :aState |
-			aState background: CFMaDetailColours highlight ];
+	aStyle := self toggleStyle.
+	aToggle := BrToggle new
+		aptitude: BrGlamorousButtonIconAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
+		icon: anIcon;
+		hMatchParent;
+		vExact: 20;
+		constraintsDo: [ :c | c linear weight: 1 ];
 		yourself.
+	aToggle when: BrToggleActivatedEvent do: [ :anEvent | self showGroup: aGroup ].
+	^ aToggle
+]
+
+{ #category : 'private' }
+CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
+	| aToggle aStyle |
+	aStyle := self toggleStyle.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousTextLabelAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
 		label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground);
@@ -84,6 +100,18 @@ CFMaDetailButtonBarElement >> newToggleLabel: aLabel group: aGroup [
 		do: [ :anEvent |
 			aToggle label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground) ].
 	^ aToggle
+]
+
+{ #category : 'private' }
+CFMaDetailButtonBarElement >> toggleStyle [
+	^ BrToggleAptitude new
+		default: [ :aState |
+			aState
+				background: Color transparent;
+				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
+		activated: [ :aState |
+			aState background: CFMaDetailColours highlight ];
+		yourself
 ]
 
 { #category : 'private' }
