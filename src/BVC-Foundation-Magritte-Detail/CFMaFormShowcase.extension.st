@@ -8,7 +8,7 @@ CFMaFormShowcase >> exampleDetailElement [
 	aDescription blocPresentationStencil: [ :theMemento |
 		CFMaDetailPresentation new ].
 	aMemento := CFMaMemento model: self description: aDescription.
-	^ (CFMaViewModel forObject: self memento: aMemento) asElement
+	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement
 ]
 
 { #category : '*bvc-foundation-magritte-detail-examples' }
@@ -130,5 +130,5 @@ CFMaFormShowcase >> exampleDetailGroupsElement [
 			group: 'Button Bar' configure: [ :aGroup | aGroup beButtonBar ];
 			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
-	^ (CFMaViewModel forObject: self memento: aMemento) asElement
+	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement
 ]
