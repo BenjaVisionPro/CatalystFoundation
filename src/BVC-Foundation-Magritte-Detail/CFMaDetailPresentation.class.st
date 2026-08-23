@@ -301,7 +301,7 @@ CFMaDetailPresentation >> newAccessoriesFor: aDescription [
 ]
 
 { #category : 'private - accessories' }
-	^ (self newAccessoryButtonIconNamed: #circleInfo)
+CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
@@ -322,7 +322,7 @@ CFMaDetailPresentation >> newAccessoriesFor: aDescription [
 
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newInformationAccessoryFor: information [
-	^ (self newAccessoryButtonIconNamed: #infoCircle)
+	^ (self newAccessoryButtonIconNamed: #circleInfo)
 		label: information asString;
 		yourself
 ]
