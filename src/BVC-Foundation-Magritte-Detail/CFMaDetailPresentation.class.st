@@ -261,7 +261,7 @@ CFMaDetailPresentation >> newRevertAccessoryFor: aDescription [
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 	| aButton |
-	aButton := self newAccessoryButtonIconNamed: #triangleExclaimation.
+	aButton := self newAccessoryButtonIconNamed: #triangleExclamation.
 	aButton
 		label: 'Validation failed';
 		visibility: BlVisibility gone.
