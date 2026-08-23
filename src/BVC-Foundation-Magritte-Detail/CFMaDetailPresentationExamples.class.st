@@ -438,9 +438,9 @@ CFMaDetailPresentationExamples >> relationFieldConfigurationCanEmbedForms [
 ]
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesExistingCompactIdentity [
+CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetailRepresentation [
 	<gtExample>
-	| anObject anElement aDescription |
+	| anObject anElement aDescription aRepresentation |
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
 	aDescription := MAToOneRelationDescription new.
 	anElement := CFMaDetailPresentation new
@@ -449,8 +449,10 @@ CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesExistingCompac
 
 	self assert: anElement class equals: BrFrame.
 	self assert: anElement children size equals: 1.
-	self assert: anElement children first class equals: CFCompactObjectElement.
-	self assert: anElement children first displayedObject == anObject.
+	aRepresentation := anElement children first.
+	self assert: aRepresentation class equals: BrHorizontalPane.
+	self assert: aRepresentation children first class equals: CFIconTile.
+	self assert: aRepresentation children second text asString equals: 'Related'.
 	^ anElement
 ]
 
@@ -473,7 +475,7 @@ CFMaDetailPresentationExamples >> detailToOneListContentTracksRelationValue [
 		addElement: nil
 		description: aDescription.
 	self assert: aFrame children size equals: 1.
-	self assert: aFrame children first children first displayedObject == firstObject.
+	self assert: aFrame children first children first children second text asString equals: 'First'.
 
 	aPresentation
 		updateToOneListElement: aFrame
@@ -481,7 +483,7 @@ CFMaDetailPresentationExamples >> detailToOneListContentTracksRelationValue [
 		addElement: nil
 		description: aDescription.
 	self assert: aFrame children size equals: 1.
-	self assert: aFrame children first children first displayedObject == secondObject.
+	self assert: aFrame children first children first children second text asString equals: 'Second'.
 
 	aPresentation
 		updateToOneListElement: aFrame

@@ -693,6 +693,52 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> relationObjectDisplayLabelFor: anObject [
+	| aLabel |
+	aLabel := (anObject respondsTo: #label)
+		ifTrue: [ anObject label ]
+		ifFalse: [ nil ].
+	(aLabel notNil and: [ aLabel asString isNotEmpty ])
+		ifTrue: [ ^ aLabel asString ].
+	^ anObject gtDisplayText asString
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
+	| anIconName anIcon |
+	(anObject respondsTo: #iconDescription) ifFalse: [ ^ nil ].
+	anIconName := anObject icon ifNil: [ anObject iconDescription default ].
+	anIconName ifNil: [ ^ nil ].
+	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
+	^ CFIconTile new
+		beMedium;
+		icon: anIcon;
+		yourself
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
+	| aContainer aLeadingElement aLabel |
+	aContainer := BrHorizontalPane new
+		hFitContent;
+		vFitContent;
+		cellSpacing: 8;
+		padding: BlInsets empty;
+		yourself.
+
+	aLeadingElement := self relationObjectLeadingElementFor: anObject.
+	aLeadingElement ifNotNil: [ aContainer addChild: aLeadingElement ].
+	aLabel := BrLabel new
+		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
+		aptitude: self defaultLabelAptitude;
+		fitContent;
+		constraintsDo: [ :c | c linear vertical alignCenter ];
+		yourself.
+	aContainer addChild: aLabel.
+	^ aContainer
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
 	^ self
 		newRelationObjectElementFor: anObject
@@ -707,11 +753,7 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription remove: aRemoveBlock [
 	| anItemElement anObjectElement |
-	anObjectElement := CFCompactObjectStencil new
-		object: anObject;
-		create.
-	anObjectElement hFitContent.
-	anObjectElement titleElement hFitContent.
+	anObjectElement := self newRelationObjectPresentationFor: anObject.
 
 	anItemElement := BrFrame new
 		hFitContent;
@@ -863,7 +905,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		padding: (BlInsets top: 6 right: 8 bottom: 6 left: 8);
 		yourself.
 	anItemElement constraintsDo: [ :c |
-		c frame horizontal alignRight.
+		c frame horizontal alignLeft.
 		c frame vertical alignCenter ].
 	aRow addChild: anItemElement.
 	^ aRow
