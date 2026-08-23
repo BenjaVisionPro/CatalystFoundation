@@ -28,17 +28,20 @@ CFMaDetailPresentation >> build [
 
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitContainer: aDescription [
+	| thePresentationItems |
 	aDescription == self objectDescription ifFalse: [
 		^ super visitContainer: aDescription ].
 
-	((aDescription children asOrderedCollection)
+	thePresentationItems := OrderedCollection new
+		addAll: aDescription children;
 		addAll: (self memento magritteActions reject: #isToolbarAction);
-		sort: [ :a :b | a priority < b priority ];
-		yourself)
-		do: [ :each |
-			(each isKindOf: MAActionDescription)
-				ifTrue: [ self addActionRowUsing: each ]
-				ifFalse: [ self visit: each ] ]
+		yourself.
+	thePresentationItems sort: [ :a :b | a priority < b priority ].
+
+	thePresentationItems do: [ :each |
+		(each isKindOf: MAActionDescription)
+			ifTrue: [ self addActionRowUsing: each ]
+			ifFalse: [ self visit: each ] ]
 ]
 
 { #category : 'private - appearance' }
