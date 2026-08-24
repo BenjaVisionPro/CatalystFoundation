@@ -504,6 +504,29 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 	^ aRow
 ]
 
+
+{ #category : 'elements' }
+CFMaDetailPresentation >> addFieldElement: aFieldElement using: aDescription [
+	self prepareEditorFocusChromeIn: aFieldElement.
+	^ super addFieldElement: aFieldElement using: aDescription
+]
+
+{ #category : 'private - focus' }
+CFMaDetailPresentation >> prepareEditorFocusChromeIn: aFieldElement [
+	| editors |
+	editors := OrderedCollection new.
+	(aFieldElement isKindOf: BrEditor)
+		ifTrue: [ editors add: aFieldElement ].
+	aFieldElement allChildrenBreadthFirstDo: [ :aChild |
+		(aChild isKindOf: BrEditor)
+			ifTrue: [ editors add: aChild ] ].
+
+	editors do: [ :anEditor |
+		(anEditor isKindOf: GtMagritteOneLineEditorElement)
+			ifTrue: [ anEditor addAptitude: CFMaRowEditorAptitude new ] ].
+	^ aFieldElement
+]
+
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 	self

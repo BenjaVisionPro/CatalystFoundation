@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaDetailGroupCardElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'rows'
+		'rows',
+		'focusOverlay'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -23,18 +24,20 @@ CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
 		description: [ 'A row must not already belong to another element' ].
 
 	rows ifEmpty: [
-		super addChild: anElement.
+		self addStructuralChild: anElement.
 		rows add: anElement beforeIndex: anIndex.
+		self installFocusOverlayFor: anElement.
 		^ anElement ].
 
 	anIndex = (rows size + 1)
 		ifTrue: [
-			super addChild: self newSeparator.
-			super addChild: anElement ]
+			self addStructuralChild: self newSeparator.
+			self addStructuralChild: anElement ]
 		ifFalse: [
 			super addChild: anElement at: (anIndex * 2 - 1).
 			super addChild: self newSeparator at: anIndex * 2 ].
-	rows add: anElement beforeIndex: anIndex
+	rows add: anElement beforeIndex: anIndex.
+	self installFocusOverlayFor: anElement
 ]
 
 { #category : 'private - metrics' }
@@ -51,6 +54,7 @@ CFMaDetailGroupCardElement >> edgeInset [
 CFMaDetailGroupCardElement >> initialize [
 	super initialize.
 	rows := OrderedCollection new.
+	focusOverlay := nil.
 	self
 		background: (Color r: 248 g: 248 b: 248 range: 255);
 		border: BlBorder empty;
@@ -93,6 +97,7 @@ CFMaDetailGroupCardElement >> removeChild: anElement [
 { #category : 'removing' }
 CFMaDetailGroupCardElement >> removeChildren [
 	rows removeAll.
+	focusOverlay := nil.
 	^ super removeChildren
 ]
 
@@ -104,6 +109,7 @@ CFMaDetailGroupCardElement >> removeRow: anElement [
 
 	rows size = 1 ifTrue: [
 		rows removeAt: anIndex.
+		self removeFocusOverlay.
 		^ super removeChild: anElement ].
 
 	anIndex = 1
@@ -114,6 +120,85 @@ CFMaDetailGroupCardElement >> removeRow: anElement [
 			super removeChild: (self children at: anIndex * 2 - 2).
 			super removeChild: anElement ].
 	rows removeAt: anIndex
+]
+
+
+{ #category : 'private - focus' }
+CFMaDetailGroupCardElement >> addStructuralChild: anElement [
+	focusOverlay
+		ifNil: [ super addChild: anElement ]
+		ifNotNil: [ super addChild: anElement at: self childrenCount ]
+]
+
+{ #category : 'private - focus' }
+CFMaDetailGroupCardElement >> focusOverlayFor: aRow [
+	focusOverlay ifNotNil: [ ^ focusOverlay ].
+	focusOverlay := BlOverlayElement on: aRow.
+	focusOverlay
+		border: BlBorder empty;
+		background: Color transparent;
+		zIndex: 100.
+	focusOverlay
+		when: BlElementPositionChangedEvent
+		do: [ :anEvent | self updateFocusOverlayGeometry ];
+		when: BlElementExtentChangedEvent
+		do: [ :anEvent | self updateFocusOverlayGeometry ].
+	self
+		when: BlElementExtentChangedEvent
+		do: [ :anEvent | self updateFocusOverlayGeometry ].
+	super addChild: focusOverlay.
+	^ focusOverlay
+]
+
+{ #category : 'private - focus' }
+CFMaDetailGroupCardElement >> installFocusOverlayFor: aRow [
+	aRow
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			| anOverlay |
+			anOverlay := self focusOverlayFor: aRow.
+			anOverlay
+				attachTo: aRow;
+				border: (BlBorder
+					paint: anOverlay theme editor focusedBorderColor
+					width: 1).
+			self updateFocusOverlayGeometry ];
+		when: BlFocusOutEvent
+		do: [ :anEvent |
+			focusOverlay ifNotNil: [ :anOverlay |
+				anOverlay border: BlBorder empty ] ]
+]
+
+{ #category : 'private - focus' }
+CFMaDetailGroupCardElement >> removeFocusOverlay [
+	focusOverlay ifNil: [ ^ self ].
+	focusOverlay hasParent ifTrue: [ super removeChild: focusOverlay ].
+	focusOverlay := nil
+]
+
+{ #category : 'private - focus' }
+CFMaDetailGroupCardElement >> updateFocusOverlayGeometry [
+	| overlayBounds topRadius bottomRadius radii |
+	focusOverlay ifNil: [ ^ self ].
+	focusOverlay hasParent ifFalse: [ ^ self ].
+
+	overlayBounds := (focusOverlay bounds inParent: self) asRectangle.
+	topRadius := (overlayBounds top closeTo: self padding top epsilon: BlElement epsilon)
+		ifTrue: [ self cornerRadius ]
+		ifFalse: [ 0 ].
+	bottomRadius := (overlayBounds bottom
+		closeTo: self extent y - self padding bottom
+		epsilon: BlElement epsilon)
+		ifTrue: [ self cornerRadius ]
+		ifFalse: [ 0 ].
+
+	radii := BlCornerRadii new
+		topLeft: topRadius;
+		topRight: topRadius;
+		bottomLeft: bottomRadius;
+		bottomRight: bottomRadius;
+		yourself.
+	focusOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
 ]
 
 { #category : 'accessing' }

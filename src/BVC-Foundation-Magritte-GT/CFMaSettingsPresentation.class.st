@@ -429,7 +429,7 @@ CFMaSettingsPresentation >> prepareEditorChromeIn: aFieldElement [
 
 	editors do: [ :anEditor |
 		(anEditor isKindOf: GtMagritteOneLineEditorElement)
-			ifTrue: [ anEditor addAptitude: CFMaSettingsEditorAptitude new ].
+			ifTrue: [ anEditor addAptitude: CFMaRowEditorAptitude new ].
 		anEditor
 			geometry: BlRectangleGeometry new;
 			margin: BlInsets empty;
