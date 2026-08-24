@@ -75,12 +75,43 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 		fitContent.
 
 	aDescription hasComment ifTrue: [
-		GtMagritteBuilderUtility addCommentTooltip: aLabel using: aDescription.
-		GtMagritteBuilderUtility addCommentTooltip: aFieldElement using: aDescription ].
+		self addCommentTooltipTo: aFieldElement using: aDescription ].
 
 	self configureTabStopFor: aFieldElement using: aDescription.
 	self addLabel: aLabel field: aFieldElement for: aDescription.
 	^ aLabel
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
+	| aTooltipAptitude |
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude
+		content: [ self newCommentTooltipFor: aDescription ].
+	aTooltipAptitude menuContainerDo: [ :aContainer |
+		aContainer
+			padding: BlInsets empty;
+			aptitude: (BrStyleCommonAptitude new
+				default: [ :aStyle |
+					aStyle
+						background: Color transparent;
+						border: BlBorder empty ]) ].
+	aFieldElement addAptitude: aTooltipAptitude
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> newCommentTooltipFor: aDescription [
+	^ BrLabel new
+		fitContent;
+		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
+		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
+		text: aDescription comment;
+		background: (Color white alpha: 0.6);
+		effect: (BlBlurBelowEffect radius: 14);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		border: BlBorder empty;
+		focusability: BlFocusability none;
+		preventMouseEvents;
+		yourself
 ]
 
 { #category : 'visiting-description' }
