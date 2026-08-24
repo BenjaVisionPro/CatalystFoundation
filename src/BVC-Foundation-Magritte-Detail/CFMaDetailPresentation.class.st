@@ -963,6 +963,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	anElement := (FontAwesomeIcons defaultStyle icon: #chevronRight).
 	anElement
 		background: CFMaDetailColours secondaryForeground;
+		size: 12 @ 12;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignCenter ].
