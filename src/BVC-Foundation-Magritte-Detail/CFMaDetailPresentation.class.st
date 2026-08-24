@@ -960,7 +960,7 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
-	anElement := BrGlamorousVectorIcons right asElement.
+	anElement := (FontAwesomeIcons defaultStyle icon: #chevronRight).
 	anElement
 		background: CFMaDetailColours secondaryForeground;
 		constraintsDo: [ :c |
