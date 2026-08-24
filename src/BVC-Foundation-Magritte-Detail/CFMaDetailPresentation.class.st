@@ -829,28 +829,56 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aLeadingElement aLabel aSupportingElement aComment |
+	| aRow aRepresentation aLeadingElement aTextRegion aLabel aComment aCommentLabel |
+	aRow := BrFrame new
+		hMatchParent;
+		vFitContent;
+		padding: self rowInsets;
+		background: Color transparent;
+		border: BlBorder empty;
+		yourself.
+
+	aRepresentation := BrHorizontalPane new
+		hFitContent;
+		vFitContent;
+		cellSpacing: 8;
+		padding: BlInsets empty;
+		constraintsDo: [ :c | c frame horizontal alignLeft ];
+		yourself.
+
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
+	aLeadingElement ifNotNil: [
+		aLeadingElement beLarge.
+		aRepresentation addChild: aLeadingElement ].
+
+	aTextRegion := BrVerticalPane new
+		hFitContent;
+		vFitContent;
+		padding: BlInsets empty;
+		margin: BlInsets empty;
+		yourself.
 
 	aLabel := BrLabel new
 		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
 		aptitude: self defaultLabelAptitude;
 		fitContent;
 		yourself.
+	aTextRegion addChild: aLabel.
 
 	aComment := self relationObjectDisplayCommentFor: anObject.
-	aSupportingElement := aComment
-		ifNil: [ nil ]
-		ifNotNil: [ self supportingElementWithText: aComment ].
+	aComment ifNotNil: [
+		aCommentLabel := BrLabel new
+			text: (aComment asRopedText
+				foreground: CFMaDetailColours tertiaryForeground;
+				fontSize: 11);
+			fitContent;
+			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0);
+			yourself.
+		aTextRegion addChild: aCommentLabel ].
 
-	^ self
-		newRowLeading: aLeadingElement
-		description: aLabel
-		supporting: aSupportingElement
-		content: nil
-		accessories: #()
-		trailing: nil
+	aRepresentation addChild: aTextRegion.
+	aRow addChild: aRepresentation.
+	^ aRow
 ]
 
 { #category : 'private - relations' }
