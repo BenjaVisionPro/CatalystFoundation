@@ -6,7 +6,17 @@ CFMaFormShowcase >> exampleDetailElement [
 	| aDescription aMemento |
 	aDescription := self magritteDescription.
 	aDescription blocPresentationStencil: [ :theMemento |
-		CFMaDetailPresentation new ].
+		CFMaDetailPresentation new
+			group: 'Fields' configure: [ :fields |
+				fields
+					reserveAccessorySlots: 2;
+					category: #text configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+					category: #values configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+					category: #resources configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+					category: #temporal configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+					category: #metadata configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+					category: #presentation configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ] ];
+			yourself ].
 	aMemento := CFMaMemento model: self description: aDescription.
 	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement
 ]
