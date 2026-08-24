@@ -545,7 +545,9 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 		aChild == accessoryChildren first
 			ifFalse: [ rightEdge := rightEdge - accessoryGap ] ].
 	rightEdge := accessoryAreaRight - accessoriesWidth.
-	(accessorySpacePresent or: [ aTrailing notNil ]) ifTrue: [ rightEdge := rightEdge - gap ].
+	accessorySpacePresent
+		ifTrue: [ rightEdge := rightEdge - accessoryGap ]
+		ifFalse: [ aTrailing ifNotNil: [ rightEdge := rightEdge - gap ] ].
 	bodyRight := rightEdge.
 
 	wrapped
