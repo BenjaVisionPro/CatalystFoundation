@@ -954,6 +954,40 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> newPhlowNextPaneAffordance [
+	| anElement |
+	anElement := GtPhlowSpawnNextPaneDestination new icon asElement.
+	anElement
+		background: CFMaDetailColours secondaryForeground;
+		constraintsDo: [ :c | c frame vertical alignCenter ].
+	^ anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newToOneRelationObjectElementFor: anObject description: aDescription [
+	| anItemElement |
+	anItemElement := BrFrame new
+		hFitContent;
+		vFitContent;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignCenter ];
+		addChild: (self newRelationObjectPresentationFor: anObject);
+		yourself.
+	self
+		installRelationInteractionOn: anItemElement
+		for: anObject
+		description: aDescription
+		remove: [ :theItemElement |
+			CFMaBuilderUtility
+				removeToOneMemento: self memento
+				using: aDescription
+				element: theItemElement ]
+		highlightSelection: false.
+	^ anItemElement
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
 	| anItemElement |
 	anItemElement := BrFrame new
@@ -1004,9 +1038,18 @@ CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock [
-	anItemElement
-		focusability: BlFocusability after;
-		addAptitude: CFMaListItemAptitude new.
+	^ self
+		installRelationInteractionOn: anItemElement
+		for: anObject
+		description: aDescription
+		remove: aRemoveBlock
+		highlightSelection: true
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock highlightSelection: aBoolean [
+	anItemElement focusability: BlFocusability after.
+	aBoolean ifTrue: [ anItemElement addAptitude: CFMaListItemAptitude new ].
 
 	anItemElement
 		when: BlFocusInEvent
@@ -1113,8 +1156,8 @@ CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObjec
 		ifNil: [ self addRelationValueElement: anAddElement to: aRelationElement ]
 		ifNotNil: [
 			self
-				addRelationValueElement: (self
-					newRelationObjectElementFor: anObject
+				addToOneRelationObject: (self
+					newToOneRelationObjectElementFor: anObject
 					description: aDescription)
 				to: aRelationElement ].
 	^ aRelationElement
@@ -1196,6 +1239,24 @@ CFMaDetailPresentation >> addRelationValueElement: anElement to: aSlot [
 		c frame horizontal alignRight.
 		c frame vertical alignCenter ].
 	aSlot addChild: anElement.
+	^ aSlot
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> addToOneRelationObject: anElement to: aSlot [
+	| aContainer aChevron |
+	aContainer := BrHorizontalPane new
+		hFitContent;
+		vFitContent;
+		cellSpacing: 8;
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignCenter ];
+		yourself.
+	aContainer addChild: anElement.
+	aChevron := self newPhlowNextPaneAffordance.
+	aContainer addChild: aChevron.
+	aSlot addChild: aContainer.
 	^ aSlot
 ]
 
