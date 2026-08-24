@@ -577,6 +577,7 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 				values: someValues
 				display: aDisplayBlock ].
 	aDropdownAptitude
+		withGainFocusOnShow;
 		withContainerAreaBuilders: {
 			self popupAreaBuilderUsing: aDescription values: someValues };
 		menuContainerDo: [ :aContainer |
