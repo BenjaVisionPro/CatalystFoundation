@@ -421,6 +421,7 @@ CFMaFormShowcase >> embeddedObjectDescription [
 		label: 'Embedded form';
 		comment: 'The related object is edited in place.';
 		group: 'To one';
+		categories: #('Embedded form');
 		priority: 100;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
