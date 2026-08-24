@@ -845,6 +845,10 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	self addShortcutsTo: aRelationElement.
 	self addFieldElement: aRelationElement using: aDescription.
 	aHeaderRow := aContainer rows last.
+	self
+		installToOneListNavigationOn: aHeaderRow
+		focusElement: aRelationElement
+		description: aDescription.
 	self relationFocusRows: { aHeaderRow } in: aContainer for: aDescription
 ]
 
@@ -954,37 +958,27 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> newPhlowNextPaneAffordance [
+CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
-	anElement := GtPhlowSpawnNextPaneDestination new icon asElement.
+	anElement := BrGlamorousVectorIcons right asElement.
 	anElement
 		background: CFMaDetailColours secondaryForeground;
-		constraintsDo: [ :c | c frame vertical alignCenter ].
+		constraintsDo: [ :c |
+			c frame horizontal alignRight.
+			c frame vertical alignCenter ].
 	^ anElement
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToOneRelationObjectElementFor: anObject description: aDescription [
-	| anItemElement |
-	anItemElement := BrFrame new
+	^ BrFrame new
 		hFitContent;
 		vFitContent;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignCenter ];
 		addChild: (self newRelationObjectPresentationFor: anObject);
-		yourself.
-	self
-		installRelationInteractionOn: anItemElement
-		for: anObject
-		description: aDescription
-		remove: [ :theItemElement |
-			CFMaBuilderUtility
-				removeToOneMemento: self memento
-				using: aDescription
-				element: theItemElement ]
-		highlightSelection: false.
-	^ anItemElement
+		yourself
 ]
 
 { #category : 'private - relations' }
@@ -1083,6 +1077,39 @@ CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObj
 				aRemoveBlock value: anItemElement ]).
 
 	self installFormNavigationOn: anItemElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocusElement description: aDescription [
+	aRow when: BlClickEvent do: [ :anEvent |
+		| anObject |
+		anObject := (self memento readUsing: aDescription).
+		anObject ifNotNil: [
+			anEvent consumed: true.
+			aFocusElement requestFocus.
+			aRow phlow spawnObject: anObject ] ].
+
+	aFocusElement
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove to-one relation';
+			combination: BlKeyCombination delete;
+			overrideChildren: true;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				CFMaBuilderUtility
+					removeToOneMemento: self memento
+					using: aDescription
+					element: aFocusElement ]);
+		addShortcut: (BlShortcutWithAction new
+			name: 'Remove to-one relation';
+			combination: BlKeyCombination builder backspace build;
+			overrideChildren: true;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				CFMaBuilderUtility
+					removeToOneMemento: self memento
+					using: aDescription
+					element: aFocusElement ])
 ]
 
 { #category : 'private - relations' }
@@ -1254,7 +1281,7 @@ CFMaDetailPresentation >> addToOneRelationObject: anElement to: aSlot [
 			c frame vertical alignCenter ];
 		yourself.
 	aContainer addChild: anElement.
-	aChevron := self newPhlowNextPaneAffordance.
+	aChevron := self newRelationInspectorChevron.
 	aContainer addChild: aChevron.
 	aSlot addChild: aContainer.
 	^ aSlot
@@ -1292,7 +1319,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		newRowLeading: aLeadingElement
 		description: aLabel
 		supporting: nil
-		content: self newRelationEmptyContentElement
+		content: self newRelationInspectorChevron
 		accessories: #().
 	self
 		installRelationSelectionOn: aRow
