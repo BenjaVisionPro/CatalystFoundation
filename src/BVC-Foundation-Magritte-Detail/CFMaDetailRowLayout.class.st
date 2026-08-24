@@ -33,7 +33,7 @@ CFMaDetailRowLayout >> initialize [
 	super initialize.
 	gap := 12.0.
 	leadingGap := 8.0.
-	accessoryGap := 6.0.
+	accessoryGap := 4.0.
 	reservedAccessorySlots := 0.
 	supportingGap := 1.0.
 	supportingInset := 1.0.
@@ -256,7 +256,7 @@ CFMaDetailRowLayout >> bodyGapLeading: leadingChildren bodyPresent: bodyPresent 
 	| aGap |
 	aGap := 0.0.
 	(leadingChildren notEmpty and: [ bodyPresent ]) ifTrue: [ aGap := aGap + leadingGap ].
-	(accessorySpacePresent and: [ bodyPresent ]) ifTrue: [ aGap := aGap + gap ].
+	(accessorySpacePresent and: [ bodyPresent ]) ifTrue: [ aGap := aGap + accessoryGap ].
 	^ aGap
 ]
 

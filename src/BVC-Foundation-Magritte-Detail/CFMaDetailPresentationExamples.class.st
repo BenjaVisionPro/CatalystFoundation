@@ -137,7 +137,7 @@ CFMaDetailPresentationExamples >> groupCardAppliesAccessoryReservationToRows [
 
 	self assert: firstRow layout reservedAccessorySlots equals: 2.
 	self assert: secondRow layout reservedAccessorySlots equals: 2.
-	self assert: firstRow layout reservedAccessoriesWidth equals: 38.0.
+	self assert: firstRow layout reservedAccessoriesWidth equals: 36.0.
 	^ aCard
 ]
 
