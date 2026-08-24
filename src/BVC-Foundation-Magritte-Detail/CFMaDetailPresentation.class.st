@@ -972,7 +972,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
 		color: CFMaDetailColours secondaryForeground;
-		size: 12 @ 12.
+		size: 8 @ 8.
 	^ anElement
 ]
 
