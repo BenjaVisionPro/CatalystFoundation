@@ -657,3 +657,43 @@ CFMaDetailPresentationExamples >> detailToManyEmbeddedUsesChildMementos [
 	self assert: (aMemento childMementoFor: secondObject inRelation: aDescription) model == secondObject.
 	^ firstRows first
 ]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> relationSelectionIsExclusiveWithinDescription [
+	<gtExample>
+	| aPresentation aDescription firstElement secondElement |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToManyRelationDescription new.
+	firstElement := BlElement new.
+	secondElement := BlElement new.
+
+	aPresentation selectRelationElement: firstElement for: aDescription.
+	self assert: (firstElement states includes: BlElementState selected).
+	self assert: (aPresentation relationElementIsSelected: firstElement for: aDescription).
+
+	aPresentation selectRelationElement: secondElement for: aDescription.
+	self assert: (firstElement states includes: BlElementState selected) not.
+	self assert: (secondElement states includes: BlElementState selected).
+	self assert: (aPresentation relationElementIsSelected: secondElement for: aDescription).
+	^ secondElement
+]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> relationSelectionIsIndependentAcrossDescriptions [
+	<gtExample>
+	| aPresentation firstDescription secondDescription firstElement secondElement |
+	aPresentation := CFMaDetailPresentation new.
+	firstDescription := MAToOneRelationDescription new.
+	secondDescription := MAToManyRelationDescription new.
+	firstElement := BlElement new.
+	secondElement := BlElement new.
+
+	aPresentation selectRelationElement: firstElement for: firstDescription.
+	aPresentation selectRelationElement: secondElement for: secondDescription.
+
+	self assert: (aPresentation relationElementIsSelected: firstElement for: firstDescription).
+	self assert: (aPresentation relationElementIsSelected: secondElement for: secondDescription).
+	self assert: (firstElement states includes: BlElementState selected).
+	self assert: (secondElement states includes: BlElementState selected).
+	^ secondElement
+]

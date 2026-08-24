@@ -5,7 +5,8 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'embeddedRowsContainer'
+		'embeddedRowsContainer',
+		'relationSelections'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -16,13 +17,15 @@ CFMaDetailPresentation >> initialize [
 	super initialize.
 	groupConfigurations := Dictionary new.
 	groups := Dictionary new.
-	categoryGroups := Dictionary new
+	categoryGroups := Dictionary new.
+	relationSelections := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
 CFMaDetailPresentation >> build [
 	groups removeAll.
 	categoryGroups removeAll.
+	relationSelections removeAll.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
@@ -701,7 +704,15 @@ CFMaDetailPresentation >> buildEmbeddedRowsIn: aContainer [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription [
-	| aChildMemento aChildPresentation aTemporaryCard theRows |
+	^ self
+		newEmbeddedRowsFor: anObject
+		description: aDescription
+		remove: [ :anItemElement | ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription remove: aRemoveBlock [
+	| aChildMemento aChildPresentation aTemporaryCard theRows anIdentityRow |
 	aChildMemento := self memento
 		childMementoFor: anObject
 		inRelation: aDescription.
@@ -712,6 +723,18 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 	aTemporaryCard := CFMaDetailGroupCardElement new.
 	theRows := aChildPresentation buildEmbeddedRowsIn: aTemporaryCard.
 	theRows copy do: [ :aRow | aTemporaryCard removeRow: aRow ].
+	theRows ifEmpty: [ ^ theRows ].
+
+	anIdentityRow := theRows first.
+	self
+		installRelationSelectionOn: anIdentityRow
+		for: anObject
+		description: aDescription
+		remove: aRemoveBlock.
+	self
+		installEmbeddedRelationFocusOn: theRows
+		identityRow: anIdentityRow
+		description: aDescription.
 	^ theRows
 ]
 
@@ -753,7 +776,14 @@ CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after:
 		^ OrderedCollection new ].
 
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
-	newRows := self newEmbeddedRowsFor: anObject description: aDescription.
+	newRows := self
+		newEmbeddedRowsFor: anObject
+		description: aDescription
+		remove: [ :anItemElement |
+			CFMaBuilderUtility
+				removeToOneMemento: self memento
+				using: aDescription
+				element: anItemElement ].
 	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [ ^ OrderedCollection new ].
 	newRows withIndexDo: [ :aRow :anIndex |
 		aContainer addRow: aRow at: headerIndex + anIndex ].
@@ -889,17 +919,6 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
-	^ self
-		newRelationObjectElementFor: anObject
-		remove: [ :anItemElement |
-			CFMaBuilderUtility
-				removeToOneMemento: self memento
-				using: aDescription
-				element: anItemElement ]
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectElementFor: anObject remove: aRemoveBlock [
 	| anItemElement |
 	anItemElement := BrFrame new
 		hFitContent;
@@ -912,35 +931,56 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject remove: aRemoveB
 	self
 		installRelationSelectionOn: anItemElement
 		for: anObject
-		remove: aRemoveBlock.
+		description: aDescription
+		remove: [ :theItemElement |
+			CFMaBuilderUtility
+				removeToOneMemento: self memento
+				using: aDescription
+				element: theItemElement ].
 	^ anItemElement
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject remove: aRemoveBlock [
+CFMaDetailPresentation >> relationElementIsSelected: anElement for: aDescription [
+	^ (relationSelections at: aDescription ifAbsent: [ nil ]) == anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
+	| aPreviousElement |
+	aPreviousElement := relationSelections at: aDescription ifAbsent: [ nil ].
+	aPreviousElement == anElement ifTrue: [
+		anElement states addState: BlElementState selected.
+		^ anElement ].
+
+	aPreviousElement ifNotNil: [
+		aPreviousElement states removeState: BlElementState selected ].
+	relationSelections at: aDescription put: anElement.
+	anElement states addState: BlElementState selected.
+	^ anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock [
 	anItemElement
 		focusability: BlFocusability after;
 		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaListItemAptitude new.
 
 	anItemElement
+		when: BlFocusInEvent
+			do: [ :anEvent |
+				self selectRelationElement: anItemElement for: aDescription ];
 		when: BlClickEvent
 			do: [ :anEvent |
 				| wasSelected |
-				wasSelected := anItemElement userData
-					at: #cfMaRelationSelected
-					ifAbsent: [ false ].
+				wasSelected := self relationElementIsSelected: anItemElement for: aDescription.
 				anEvent consumed: true.
 				wasSelected
 					ifTrue: [ anItemElement phlow spawnObject: anObject ]
 					ifFalse: [
-						anItemElement userData at: #cfMaRelationSelected put: true.
-						anItemElement states addState: BlElementState selected.
-						anItemElement requestFocus ] ];
-		when: BlFocusOutEvent
-			do: [ :anEvent |
-				anItemElement userData at: #cfMaRelationSelected put: false.
-				anItemElement states removeState: BlElementState selected ].
+						self selectRelationElement: anItemElement for: aDescription.
+						anItemElement requestFocus ] ].
 
 	anItemElement
 		addShortcut: (BlShortcutWithAction new
@@ -959,6 +999,19 @@ CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObjec
 				aRemoveBlock value: anItemElement ]).
 
 	self installFormNavigationOn: anItemElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installEmbeddedRelationFocusOn: theRows identityRow: anIdentityRow description: aDescription [
+	theRows do: [ :aRow |
+		aRow
+			when: BlFocusInEvent
+				do: [ :anEvent |
+					self selectRelationElement: anIdentityRow for: aDescription.
+					anIdentityRow states addState: CFMaActiveSelectionState uniqueInstance ];
+			when: BlFocusOutEvent
+				do: [ :anEvent |
+					anIdentityRow states removeState: CFMaActiveSelectionState uniqueInstance ] ]
 ]
 
 { #category : 'private - relations' }
@@ -1081,6 +1134,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 	self
 		installRelationSelectionOn: aRow
 		for: anObject
+		description: aDescription
 		remove: [ :theItemElement |
 			CFMaBuilderUtility
 				removeToManyObject: anObject
@@ -1155,7 +1209,15 @@ CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer a
 		| anAssociation theRows |
 		anAssociation := self relationRowAssociationFor: anObject in: oldItemRows.
 		theRows := anAssociation
-			ifNil: [ self newEmbeddedRowsFor: anObject description: aDescription ]
+			ifNil: [ self
+				newEmbeddedRowsFor: anObject
+				description: aDescription
+				remove: [ :anItemElement |
+					CFMaBuilderUtility
+						removeToManyObject: anObject
+						memento: self memento
+						using: aDescription
+						element: anItemElement ] ]
 			ifNotNil: [ anAssociation value ].
 
 		targetIndex := self
