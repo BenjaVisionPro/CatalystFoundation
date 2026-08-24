@@ -380,11 +380,16 @@ CFMaDetailPresentation >> defaultLabelAptitude [
 
 { #category : 'private - composition' }
 CFMaDetailPresentation >> supportingElementFor: aDescription [
+	^ self supportingElementWithText: aDescription comment
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> supportingElementWithText: aString [
 	^ BrEditor new
 		aptitude: BrGlamorousRegularEditorAptitude new;
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
-		text: (aDescription comment asRopedText
+		text: (aString asRopedText
 			foreground: CFMaDetailColours tertiaryForeground;
 			fontSize: 11);
 		constraintsDo: [ :c |
@@ -777,6 +782,27 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	self addFieldElement: aRelationElement using: aDescription
 ]
 
+{ #category : 'private - identity' }
+CFMaDetailPresentation >> emitIdentityAffordanceUsing: aDescription [
+	identityAffordanceEmitted ifTrue: [ ^ self ].
+	identityAffordanceEmitted := true.
+
+	self
+		addElement: (self newRelationObjectIdentityRowFor: self memento model)
+		for: aDescription
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationObjectDisplayCommentFor: anObject [
+	| aComment |
+	aComment := (anObject respondsTo: #identifier)
+		ifTrue: [ anObject identifier ]
+		ifFalse: [ nil ].
+	(aComment notNil and: [ aComment asString isNotEmpty ])
+		ifTrue: [ ^ aComment asString ].
+	^ nil
+]
+
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationObjectDisplayLabelFor: anObject [
 	| aLabel |
@@ -799,6 +825,32 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 		beMedium;
 		icon: anIcon;
 		yourself
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
+	| aLeadingElement aLabel aSupportingElement aComment |
+	aLeadingElement := self relationObjectLeadingElementFor: anObject.
+	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
+
+	aLabel := BrLabel new
+		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
+		aptitude: self defaultLabelAptitude;
+		fitContent;
+		yourself.
+
+	aComment := self relationObjectDisplayCommentFor: anObject.
+	aSupportingElement := aComment
+		ifNil: [ nil ]
+		ifNotNil: [ self supportingElementWithText: aComment ].
+
+	^ self
+		newRowLeading: aLeadingElement
+		description: aLabel
+		supporting: aSupportingElement
+		content: nil
+		accessories: #()
+		trailing: nil
 ]
 
 { #category : 'private - relations' }

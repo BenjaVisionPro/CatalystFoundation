@@ -586,6 +586,23 @@ CFMaDetailPresentationExamples >> detailEmbeddedRowsUseChildMementoAndStandardRo
 ]
 
 { #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesLargeStandardRepresentation [
+	<gtExample>
+	| anObject aRow aLeadingElement |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
+	aRow := CFMaDetailPresentation new newRelationObjectIdentityRowFor: anObject.
+
+	self assert: aRow layout class equals: CFMaDetailRowLayout.
+	self assert: aRow children size equals: 3.
+	aLeadingElement := aRow children first.
+	self assert: aLeadingElement class equals: CFIconTile.
+	self assert: aLeadingElement width equals: 44.
+	self assert: aRow children second text asString equals: 'Alpha'.
+	self assert: aRow children third text asString equals: anObject identifier asString.
+	^ aRow
+]
+
+{ #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
 	<gtExample>
 	| aModel anObject aDescription aContainer aMemento aPresentation theRows aChildMemento |
