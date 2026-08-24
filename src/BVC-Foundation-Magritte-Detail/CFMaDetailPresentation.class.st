@@ -853,8 +853,9 @@ CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationEmptyContentElement [
 	^ BlElement new
-		hExact: 0;
-		vExact: 0;
+		constraintsDo: [ :c |
+			c horizontal exact: 0.
+			c vertical exact: 0 ];
 		background: Color transparent;
 		border: BlBorder empty;
 		yourself
