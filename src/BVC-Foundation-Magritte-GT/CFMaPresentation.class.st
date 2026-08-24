@@ -85,7 +85,8 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 { #category : 'private - composition' }
 CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
 	| aTooltipAptitude |
-	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude new
+		handle: [ self newCommentTooltipHandle ]
 		content: [ self newCommentTooltipFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aContainer
@@ -97,6 +98,16 @@ CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
 				yourself);
 			effect: (BlBlurBelowEffect radius: 14) ].
 	aFieldElement addAptitude: aTooltipAptitude
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> newCommentTooltipHandle [
+	^ BlElement new
+		size: BrMenuConstants handleExtent * 2.0;
+		geometry: BlCircleGeometry new;
+		background: Color transparent;
+		border: BlBorder empty;
+		yourself
 ]
 
 { #category : 'private - composition' }
