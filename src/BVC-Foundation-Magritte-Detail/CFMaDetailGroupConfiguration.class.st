@@ -5,7 +5,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'categories',
-		'presentation'
+		'presentation',
+		'reservedAccessorySlots'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -14,7 +15,8 @@ Class {
 { #category : 'initialization' }
 CFMaDetailGroupConfiguration >> initialize [
 	super initialize.
-	categories := Dictionary new
+	categories := Dictionary new.
+	reservedAccessorySlots := 0
 ]
 
 { #category : 'configuration' }
@@ -53,4 +55,19 @@ CFMaDetailGroupConfiguration >> beIconButtonBar [
 { #category : 'accessing' }
 CFMaDetailGroupConfiguration >> presentation [
 	^ presentation
+]
+
+
+{ #category : 'configuration - layout' }
+CFMaDetailGroupConfiguration >> reserveAccessorySlots: aNumber [
+	self
+		assert: [ aNumber isInteger and: [ aNumber >= 0 ] ]
+		description: [ 'The number of reserved accessory slots must be a non-negative integer' ].
+	reservedAccessorySlots := aNumber.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupConfiguration >> reservedAccessorySlots [
+	^ reservedAccessorySlots
 ]

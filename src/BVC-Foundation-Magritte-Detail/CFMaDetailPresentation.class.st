@@ -320,7 +320,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
 		color: CFMaDetailColours secondaryForeground;
-		size: 12 @ 12.
+		size: 8 @ 8.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
 			+ BrGlamorousButtonLayoutAptitude new

@@ -110,6 +110,37 @@ CFMaDetailPresentationExamples >> groupCanPresentChildrenAsIconButtonBar [
 	^ aConfiguration
 ]
 
+
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> groupCanReserveAccessorySlots [
+	<gtExample>
+	| aConfiguration |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+
+	self assert: aConfiguration reservedAccessorySlots equals: 0.
+	aConfiguration reserveAccessorySlots: 3.
+	self assert: aConfiguration reservedAccessorySlots equals: 3.
+	^ aConfiguration
+]
+
+{ #category : 'examples - layout' }
+CFMaDetailPresentationExamples >> groupCardAppliesAccessoryReservationToRows [
+	<gtExample>
+	| aCard firstRow secondRow |
+	aCard := CFMaDetailGroupCardElement new reservedAccessorySlots: 2; yourself.
+	firstRow := BlElement new layout: CFMaDetailRowLayout new; yourself.
+	secondRow := BlElement new layout: CFMaDetailRowLayout new; yourself.
+
+	aCard addChild: firstRow.
+	aCard addChild: secondRow.
+
+	self assert: firstRow layout reservedAccessorySlots equals: 2.
+	self assert: secondRow layout reservedAccessorySlots equals: 2.
+	self assert: firstRow layout reservedAccessoriesWidth equals: 38.0.
+	^ aCard
+]
+
 { #category : 'examples - layout' }
 CFMaDetailPresentationExamples >> detailRowUsesTypedLayoutConstraints [
 	<gtExample>

@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'rows',
-		'focusOverlay'
+		'focusOverlay',
+		'reservedAccessorySlots'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -16,6 +17,7 @@ CFMaDetailGroupCardElement >> addChild: anElement [
 
 { #category : 'adding' }
 CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
+	self configureAccessoryReservationFor: anElement.
 	self
 		assert: [ anIndex between: 1 and: rows size + 1 ]
 		description: [ 'A row index must be between 1 and the number of rows + 1' ].
@@ -55,6 +57,7 @@ CFMaDetailGroupCardElement >> initialize [
 	super initialize.
 	rows := OrderedCollection new.
 	focusOverlay := nil.
+	reservedAccessorySlots := 0.
 	self
 		background: (Color r: 248 g: 248 b: 248 range: 255);
 		border: BlBorder empty;
@@ -214,4 +217,28 @@ CFMaDetailGroupCardElement >> rowHorizontalInset [
 { #category : 'accessing' }
 CFMaDetailGroupCardElement >> rows [
 	^ rows copy
+]
+
+
+{ #category : 'private - layout' }
+CFMaDetailGroupCardElement >> configureAccessoryReservationFor: aRow [
+	(aRow layout isKindOf: CFMaDetailRowLayout) ifFalse: [ ^ self ].
+	aRow layout reservedAccessorySlots: reservedAccessorySlots
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupCardElement >> reservedAccessorySlots [
+	^ reservedAccessorySlots
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupCardElement >> reservedAccessorySlots: aNumber [
+	self
+		assert: [ aNumber isInteger and: [ aNumber >= 0 ] ]
+		description: [ 'The number of reserved accessory slots must be a non-negative integer' ].
+	reservedAccessorySlots := aNumber.
+	rows do: [ :aRow |
+		self configureAccessoryReservationFor: aRow.
+		aRow requestLayout ].
+	self requestLayout
 ]

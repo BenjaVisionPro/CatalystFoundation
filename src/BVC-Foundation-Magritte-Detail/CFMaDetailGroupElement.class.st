@@ -29,7 +29,8 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 
 { #category : 'accessing' }
 CFMaDetailGroupElement >> configuration: aConfiguration [
-	configuration := aConfiguration
+	configuration := aConfiguration.
+	card reservedAccessorySlots: aConfiguration reservedAccessorySlots
 ]
 
 { #category : 'private' }
