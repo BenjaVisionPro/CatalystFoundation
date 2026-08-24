@@ -95,7 +95,7 @@ CFMaDetailSliderElement >> supportsBaseline [
 
 { #category : 'layout' }
 CFMaDetailSliderElement >> baselineOffset [
-	^ CFMaDetailSliderMetrics trackY + CFMaDetailSliderMetrics trackHeight
+	^ CFMaDetailSliderMetrics trackY + CFMaDetailSliderMetrics trackHeight - 1
 ]
 
 { #category : 'private - building' }
