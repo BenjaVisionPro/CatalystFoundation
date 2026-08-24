@@ -398,8 +398,7 @@ CFMaFormShowcase >> embeddedItemsDescription [
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
 		beModifiable;
-		beSimpleList;
-		itemsAsEmbeddedForms;
+		fieldConfigure: [ :field | field beEmbeddedForms ];
 		newItemStencil: CFMaNewItemStencilBuilder new;
 		yourself
 ]

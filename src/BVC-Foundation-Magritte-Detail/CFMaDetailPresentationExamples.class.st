@@ -624,3 +624,28 @@ CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
 	self assert: (aMemento childMementoFor: anObject inRelation: aDescription) == aChildMemento.
 	^ theRows first
 ]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToManyEmbeddedUsesChildMementos [
+	<gtExample>
+	| aModel aDescription aContainer aMemento aPresentation firstObject secondObject firstRows secondRows |
+	aModel := CFMaFormShowcase new.
+	aDescription := aModel embeddedItemsDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		yourself.
+	firstObject := aModel embeddedItems first.
+	secondObject := aModel embeddedItems second.
+	firstRows := aPresentation newEmbeddedRowsFor: firstObject description: aDescription.
+	secondRows := aPresentation newEmbeddedRowsFor: secondObject description: aDescription.
+
+	self assert: firstRows notEmpty.
+	self assert: secondRows notEmpty.
+	self assert: (aMemento childMementoFor: firstObject inRelation: aDescription) model == firstObject.
+	self assert: (aMemento childMementoFor: secondObject inRelation: aDescription) model == secondObject.
+	^ firstRows first
+]

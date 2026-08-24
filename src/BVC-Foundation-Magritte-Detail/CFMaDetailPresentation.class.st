@@ -867,13 +867,10 @@ CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
 
 	aComment := self relationObjectDisplayCommentFor: anObject.
 	aComment ifNotNil: [
-		aCommentLabel := BrLabel new
-			text: (aComment asRopedText
-				foreground: CFMaDetailColours tertiaryForeground;
-				fontSize: 11);
-			fitContent;
-			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0);
-			yourself.
+		aCommentLabel := self supportingElementWithText: aComment.
+		aCommentLabel
+			hFitContent;
+			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0).
 		aTextRegion addChild: aCommentLabel ].
 
 	aRepresentation addChild: aTextRegion.
@@ -996,6 +993,30 @@ CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObjec
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
+	| aContainer aHeaderContent aHeaderRow anAddElement itemRows |
+	aContainer := self containerForDescription: aDescription.
+	anAddElement := self newToManyAddElementUsing: aDescription.
+	aHeaderContent := self newRelationValueSlotWith: anAddElement.
+	self addFieldElement: aHeaderContent using: aDescription.
+	aHeaderRow := aContainer rows last.
+	itemRows := OrderedCollection new.
+
+	aHeaderContent withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theElement :aSink |
+				itemRows := self
+					updateToManyEmbeddedRows: itemRows
+					in: aContainer
+					after: aHeaderRow
+					with: aSink value currentValue
+					description: aDescription ].
+		(self memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToManyListUsing: aDescription [
 	| aContainer aHeaderContent aHeaderRow anAddElement itemRows |
 	aContainer := self containerForDescription: aDescription.
@@ -1107,6 +1128,42 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 	^ newItemRows
 ]
 
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer after: aHeaderRow with: aCollection description: aDescription [
+	| someObjects newItemRows headerIndex targetIndex |
+	someObjects := aCollection ifNil: [ #() ].
+
+	oldItemRows copy do: [ :anAssociation |
+		(someObjects anySatisfy: [ :anObject | anObject == anAssociation key ]) ifFalse: [
+			anAssociation value do: [ :aRow | aContainer removeRow: aRow ] ] ].
+
+	self memento retainChildMementosFor: someObjects inRelation: aDescription.
+	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
+		^ oldItemRows ].
+	targetIndex := headerIndex + 1.
+	newItemRows := OrderedCollection new.
+	someObjects do: [ :anObject |
+		| anAssociation theRows |
+		anAssociation := oldItemRows
+			detect: [ :each | each key == anObject ]
+			ifNone: [ nil ].
+		theRows := anAssociation
+			ifNil: [ self newEmbeddedRowsFor: anObject description: aDescription ]
+			ifNotNil: [ anAssociation value ].
+
+		theRows do: [ :aRow |
+			| currentIndex |
+			currentIndex := aContainer rows identityIndexOf: aRow ifAbsent: [ 0 ].
+			currentIndex = 0
+				ifTrue: [ aContainer addRow: aRow at: targetIndex ]
+				ifFalse: [ currentIndex = targetIndex ifFalse: [
+					aContainer removeRow: aRow.
+					aContainer addRow: aRow at: targetIndex ] ].
+			targetIndex := targetIndex + 1 ].
+		newItemRows add: anObject -> theRows ].
+	^ newItemRows
+]
+
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitNumberDescription: aDescription [
 	| aRepresentation |
@@ -1127,7 +1184,7 @@ CFMaDetailPresentation >> visitToManyRelationDescription: aDescription [
 	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
 		^ self addToManyListUsing: aDescription ].
 	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
-		^ self error: 'Embedded to-many relation rows are not implemented yet' ].
+		^ self addToManyEmbeddedUsing: aDescription ].
 	^ self error: 'Unsupported to-many relation representation'
 ]
 
