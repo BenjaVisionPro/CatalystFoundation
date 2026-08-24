@@ -825,10 +825,21 @@ CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after:
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
-	| aContainer aHeaderRow aRelationElement anAddElement |
+	| aContainer aHeaderRow aRelationElement anAddElement aChevron |
 	aContainer := self containerForDescription: aDescription.
 	aRelationElement := self newRelationValueSlotWith: nil.
 	anAddElement := self newToOneAddElementUsing: aDescription.
+
+	self addShortcutsTo: aRelationElement.
+	self addFieldElement: aRelationElement using: aDescription.
+	aHeaderRow := aContainer rows last.
+
+	aChevron := self newRelationInspectorChevron.
+	aChevron
+		visibility: BlVisibility gone;
+		margin: BlInsets empty;
+		constraintsDo: [ :c | (c at: CFMaDetailRowLayout) beTrailing ].
+	aHeaderRow addChild: aChevron.
 
 	aRelationElement withAsyncSinkDo: [ :anElementSink |
 		anElementSink
@@ -838,13 +849,11 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 					updateToOneListElement: theElement
 					with: aSink value currentValue
 					addElement: anAddElement
+					chevron: aChevron
 					description: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
 			observe: anElementSink ].
 
-	self addShortcutsTo: aRelationElement.
-	self addFieldElement: aRelationElement using: aDescription.
-	aHeaderRow := aContainer rows last.
 	self
 		installToOneListNavigationOn: aHeaderRow
 		focusElement: aRelationElement
@@ -960,13 +969,10 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
-	anElement := (FontAwesomeIcons defaultStyle icon: #chevronRight).
+	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		background: CFMaDetailColours secondaryForeground;
-		size: 12 @ 12;
-		constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignCenter ].
+		color: CFMaDetailColours secondaryForeground;
+		size: 12 @ 12.
 	^ anElement
 ]
 
@@ -1178,13 +1184,16 @@ CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject addElement: anAddElement description: aDescription [
+CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObject addElement: anAddElement chevron: aChevron description: aDescription [
 	aRelationElement removeChildren.
 	anObject
-		ifNil: [ self addRelationValueElement: anAddElement to: aRelationElement ]
+		ifNil: [
+			aChevron visibility: BlVisibility gone.
+			self addRelationValueElement: anAddElement to: aRelationElement ]
 		ifNotNil: [
+			aChevron visibility: BlVisibility visible.
 			self
-				addToOneRelationObject: (self
+				addRelationValueElement: (self
 					newToOneRelationObjectElementFor: anObject
 					description: aDescription)
 				to: aRelationElement ].
@@ -1271,24 +1280,6 @@ CFMaDetailPresentation >> addRelationValueElement: anElement to: aSlot [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> addToOneRelationObject: anElement to: aSlot [
-	| aContainer aChevron |
-	aContainer := BrHorizontalPane new
-		hFitContent;
-		vFitContent;
-		cellSpacing: 8;
-		constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignCenter ];
-		yourself.
-	aContainer addChild: anElement.
-	aChevron := self newRelationInspectorChevron.
-	aContainer addChild: aChevron.
-	aSlot addChild: aContainer.
-	^ aSlot
-]
-
-{ #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationValueSlotWith: anElement [
 	| aSlot |
 	aSlot := BrFrame new
@@ -1320,8 +1311,9 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		newRowLeading: aLeadingElement
 		description: aLabel
 		supporting: nil
-		content: self newRelationInspectorChevron
-		accessories: #().
+		content: self newRelationEmptyContentElement
+		accessories: #()
+		trailing: self newRelationInspectorChevron.
 	self
 		installRelationSelectionOn: aRow
 		for: anObject
