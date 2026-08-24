@@ -560,9 +560,10 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 
 	self assert: aRow class equals: BlElement.
 	self assert: aRow layout class equals: CFMaDetailRowLayout.
-	self assert: aRow children size equals: 2.
+	self assert: aRow children size equals: 3.
 	self assert: aRow children first class equals: CFIconTile.
 	self assert: aRow children second text asString equals: 'Related'.
+	self assert: aRow children third width equals: 0.
 	^ aRow
 ]
 
@@ -594,11 +595,12 @@ CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesLargeStandardReprese
 
 	self assert: aRow class equals: BlElement.
 	self assert: aRow layout class equals: CFMaDetailRowLayout.
-	self assert: aRow children size equals: 2.
+	self assert: aRow children size >= 3.
 	aLeadingElement := aRow children first.
 	self assert: aLeadingElement class equals: CFIconTile.
 	self assert: aLeadingElement width equals: 44.
-	self assert: aRow children second children first text asString equals: 'Alpha'.
+	self assert: aRow children second text asString equals: 'Alpha'.
+	self assert: aRow children last width equals: 0.
 	^ aRow
 ]
 

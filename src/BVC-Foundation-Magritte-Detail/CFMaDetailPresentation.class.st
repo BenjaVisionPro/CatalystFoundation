@@ -829,37 +829,35 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aLeadingElement aDescriptionElement aLabel aComment aSupportingElement |
+	| aLeadingElement aLabel aComment aSupportingElement |
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
 	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
-
-	aDescriptionElement := BrVerticalPane new
-		hFitContent;
-		vFitContent;
-		padding: BlInsets empty;
-		margin: BlInsets empty;
-		yourself.
 	aLabel := BrLabel new
 		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
 		aptitude: self defaultLabelAptitude;
 		fitContent;
 		yourself.
-	aDescriptionElement addChild: aLabel.
-
 	aComment := self relationObjectDisplayCommentFor: anObject.
-	aComment ifNotNil: [
-		aSupportingElement := self supportingElementWithText: aComment.
-		aSupportingElement
-			hFitContent;
-			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0).
-		aDescriptionElement addChild: aSupportingElement ].
+	aSupportingElement := aComment
+		ifNil: [ nil ]
+		ifNotNil: [ self supportingElementWithText: aComment ].
 
 	^ self
 		newRowLeading: aLeadingElement
-		description: aDescriptionElement
-		supporting: nil
-		content: nil
+		description: aLabel
+		supporting: aSupportingElement
+		content: self newRelationEmptyContentElement
 		accessories: #()
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationEmptyContentElement [
+	^ BlElement new
+		hExact: 0;
+		vExact: 0;
+		background: Color transparent;
+		border: BlBorder empty;
+		yourself
 ]
 
 { #category : 'private - relations' }
@@ -1077,7 +1075,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		newRowLeading: aLeadingElement
 		description: aLabel
 		supporting: nil
-		content: nil
+		content: self newRelationEmptyContentElement
 		accessories: #().
 	self
 		installRelationSelectionOn: aRow
