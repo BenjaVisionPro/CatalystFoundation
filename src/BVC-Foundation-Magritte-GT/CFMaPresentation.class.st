@@ -90,11 +90,12 @@ CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aContainer
 			padding: BlInsets empty;
-			aptitude: (BrStyleCommonAptitude new
-				default: [ :aStyle |
-					aStyle
-						background: Color transparent;
-						border: BlBorder empty ]) ].
+			aptitude: (BrGlamorousAnchoredAptitude new
+				background: (Color white alpha: 0.85);
+				border: BlBorder empty;
+				cornerRadius: 6;
+				yourself);
+			effect: (BlBlurBelowEffect radius: 14) ].
 	aFieldElement addAptitude: aTooltipAptitude
 ]
 
@@ -105,9 +106,7 @@ CFMaPresentation >> newCommentTooltipFor: aDescription [
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
 		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
 		text: aDescription comment;
-		background: (Color white alpha: 0.6);
-		effect: (BlBlurBelowEffect radius: 14);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 6);
+		background: Color transparent;
 		border: BlBorder empty;
 		focusability: BlFocusability none;
 		preventMouseEvents;
