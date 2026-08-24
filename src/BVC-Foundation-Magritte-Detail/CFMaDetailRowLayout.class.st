@@ -500,7 +500,7 @@ CFMaDetailRowLayout >> layoutWrappedDescription: aDescription supporting: aSuppo
 
 { #category : 'layout' }
 CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpdateContext [
-	| padding leadingChildren aDescription aSupporting aContent accessoryChildren aTrailing x y innerHeight rightEdge bodyX bodyRight leadingY actualAccessoriesWidth accessoriesWidth accessorySpacePresent accessoryAreaRight |
+	| padding leadingChildren aDescription aSupporting aContent accessoryChildren aTrailing x y innerHeight rightEdge bodyX bodyRight leadingY actualAccessoriesWidth accessoriesWidth accessorySpacePresent accessoryAreaLeft |
 	padding := aRow padding.
 	x := padding left.
 	y := padding top.
@@ -535,16 +535,16 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 				extent: aTrailing measuredExtent)
 			context: aBlElementBoundsUpdateContext.
 		accessorySpacePresent ifTrue: [ rightEdge := rightEdge - accessoryGap ] ].
-	accessoryAreaRight := rightEdge.
-	accessoryChildren asArray reverseDo: [ :aChild |
-		rightEdge := rightEdge - aChild measuredWidth.
+	accessoryAreaLeft := rightEdge - accessoriesWidth.
+	x := accessoryAreaLeft.
+	accessoryChildren doWithIndex: [ :aChild :anIndex |
 		aChild
-			applyLayoutIn: (rightEdge @ (self firstLineYFor: aChild top: y)
+			applyLayoutIn: (x @ (self firstLineYFor: aChild top: y)
 				extent: aChild measuredExtent)
 			context: aBlElementBoundsUpdateContext.
-		aChild == accessoryChildren first
-			ifFalse: [ rightEdge := rightEdge - accessoryGap ] ].
-	rightEdge := accessoryAreaRight - accessoriesWidth.
+		x := x + aChild measuredWidth.
+		anIndex < accessoryChildren size ifTrue: [ x := x + accessoryGap ] ].
+	rightEdge := accessoryAreaLeft.
 	accessorySpacePresent
 		ifTrue: [ rightEdge := rightEdge - accessoryGap ]
 		ifFalse: [ aTrailing ifNotNil: [ rightEdge := rightEdge - gap ] ].
