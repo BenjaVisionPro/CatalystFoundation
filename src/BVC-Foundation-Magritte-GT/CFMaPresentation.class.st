@@ -91,10 +91,7 @@ CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aContainer
 			padding: BlInsets empty;
-			aptitude: (BrGlamorousAnchoredAptitude new
-				border: BlBorder empty;
-				cornerRadius: 6;
-				yourself);
+			geometry: (BrAnchoredGeometry cornerRadius: 6 element: aContainer);
 			background: (Color white alpha: 0.85);
 			border: BlBorder empty;
 			effect: (BlBlurBelowEffect radius: 14) ].
