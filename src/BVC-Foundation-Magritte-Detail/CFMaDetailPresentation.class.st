@@ -829,47 +829,22 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aRepresentation aLeadingElement aTextRegion aLabel aComment aCommentLabel |
-	aRepresentation := BrHorizontalPane new
-		hFitContent;
-		vFitContent;
-		cellSpacing: 8;
-		padding: BlInsets empty;
-		constraintsDo: [ :c | c frame horizontal alignLeft ];
-		yourself.
-
+	| aLeadingElement aLabel aComment aSupportingElement |
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLeadingElement ifNotNil: [
-		aLeadingElement beLarge.
-		aRepresentation addChild: aLeadingElement ].
-
-	aTextRegion := BrVerticalPane new
-		hFitContent;
-		vFitContent;
-		padding: BlInsets empty;
-		margin: BlInsets empty;
-		yourself.
-
+	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
 	aLabel := BrLabel new
 		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
 		aptitude: self defaultLabelAptitude;
 		fitContent;
 		yourself.
-	aTextRegion addChild: aLabel.
-
 	aComment := self relationObjectDisplayCommentFor: anObject.
-	aComment ifNotNil: [
-		aCommentLabel := self supportingElementWithText: aComment.
-		aCommentLabel
-			hFitContent;
-			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0).
-		aTextRegion addChild: aCommentLabel ].
-
-	aRepresentation addChild: aTextRegion.
+	aSupportingElement := aComment
+		ifNil: [ nil ]
+		ifNotNil: [ self supportingElementWithText: aComment ].
 	^ self
-		newRowLeading: aRepresentation
-		description: nil
-		supporting: nil
+		newRowLeading: aLeadingElement
+		description: aLabel
+		supporting: aSupportingElement
 		content: nil
 		accessories: #()
 ]
@@ -909,20 +884,28 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDe
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectElementFor: anObject remove: aRemoveBlock [
-	| anItemElement anObjectElement |
-	anObjectElement := self newRelationObjectPresentationFor: anObject.
-
+	| anItemElement |
 	anItemElement := BrFrame new
 		hFitContent;
 		vFitContent;
-		focusability: BlFocusability after;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignCenter ];
-		addAptitude: CFMaActiveSelectionAptitude new;
-		addAptitude: CFMaListItemAptitude new;
-		addChild: anObjectElement;
+		addChild: (self newRelationObjectPresentationFor: anObject);
 		yourself.
+	self
+		installRelationSelectionOn: anItemElement
+		for: anObject
+		remove: aRemoveBlock.
+	^ anItemElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject remove: aRemoveBlock [
+	anItemElement
+		focusability: BlFocusability after;
+		addAptitude: CFMaActiveSelectionAptitude new;
+		addAptitude: CFMaListItemAptitude new.
 
 	anItemElement
 		when: BlClickEvent
@@ -959,8 +942,7 @@ CFMaDetailPresentation >> newRelationObjectElementFor: anObject remove: aRemoveB
 				anEvent consumed: true.
 				aRemoveBlock value: anItemElement ]).
 
-	self installFormNavigationOn: anItemElement.
-	^ anItemElement
+	self installFormNavigationOn: anItemElement
 ]
 
 { #category : 'private - relations' }
@@ -1071,21 +1053,29 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
-	| anItemElement |
-	anItemElement := self
-		newRelationObjectElementFor: anObject
+	| aLeadingElement aLabel aRow |
+	aLeadingElement := self relationObjectLeadingElementFor: anObject.
+	aLabel := BrLabel new
+		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
+		aptitude: self defaultLabelAptitude;
+		fitContent;
+		yourself.
+	aRow := self
+		newRowLeading: aLeadingElement
+		description: aLabel
+		supporting: nil
+		content: nil
+		accessories: #().
+	self
+		installRelationSelectionOn: aRow
+		for: anObject
 		remove: [ :theItemElement |
 			CFMaBuilderUtility
 				removeToManyObject: anObject
 				memento: self memento
 				using: aDescription
 				element: theItemElement ].
-	^ self
-		newRowLeading: anItemElement
-		description: nil
-		supporting: nil
-		content: nil
-		accessories: #()
+	^ aRow
 ]
 
 { #category : 'private - relations' }
