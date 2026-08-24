@@ -72,7 +72,8 @@ CFMaDetailSliderElement >> initialize [
 	self
 		addEventHandlerOn: BlMouseDownEvent do: [ :anEvent |
 			anEvent primaryButtonPressed ifTrue: [
-				self updateFromLocalPosition: anEvent localPosition ] ];
+				self updateFromLocalPosition: anEvent localPosition.
+				self requestFocus ] ];
 		addEventHandlerOn: BlDragStartEvent do: [ :anEvent |
 			anEvent consumed: true ];
 		addEventHandlerOn: BlDragEvent do: [ :anEvent |

@@ -21,6 +21,8 @@ CFMaDetailBooleanElement >> initializeCheckboxElement [
 		yourself.
 
 	checkboxElement
+		when: BlMouseDownEvent do: [ :anEvent |
+			anEvent primaryButtonPressed ifTrue: [ self requestFocus ] ];
 		when: BrToggleActivatedEvent do: [ self writeCheckedMemento ];
 		when: BrToggleDeactivatedEvent do: [ self writeUncheckedMemento ].
 

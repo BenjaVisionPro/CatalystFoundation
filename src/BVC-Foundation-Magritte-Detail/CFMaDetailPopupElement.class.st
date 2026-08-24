@@ -54,6 +54,8 @@ CFMaDetailPopupElement >> initialize [
 	self
 		addChild: valueLabel;
 		addChild: indicatorHost;
+		when: BlMouseDownEvent do: [ :anEvent |
+			anEvent primaryButtonPressed ifTrue: [ self requestFocus ] ];
 		when: BlMouseEnterEvent do: [ :anEvent |
 			hovered := true.
 			self updatePopupAppearance ];
