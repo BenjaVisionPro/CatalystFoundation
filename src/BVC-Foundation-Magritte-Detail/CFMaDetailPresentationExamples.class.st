@@ -697,3 +697,37 @@ CFMaDetailPresentationExamples >> relationSelectionIsIndependentAcrossDescriptio
 	self assert: (secondElement states includes: BlElementState selected).
 	^ secondElement
 ]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> relationActiveSelectionKeepsSelectionWhenFocusLeaves [
+	<gtExample>
+	| aPresentation aDescription anElement |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToManyRelationDescription new.
+	anElement := BlElement new.
+
+	aPresentation selectRelationElement: anElement for: aDescription.
+	aPresentation setRelationActive: true for: aDescription.
+	self assert: (anElement states includes: BlElementState selected).
+	self assert: (anElement states includes: CFMaActiveSelectionState uniqueInstance).
+
+	aPresentation setRelationActive: false for: aDescription.
+	self assert: (anElement states includes: BlElementState selected).
+	self assert: (anElement states includes: CFMaActiveSelectionState uniqueInstance) not.
+	^ anElement
+]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> relationFocusContextIncludesRowDescendants [
+	<gtExample>
+	| aPresentation aRow aChild |
+	aPresentation := CFMaDetailPresentation new.
+	aRow := BlElement new.
+	aChild := BlElement new.
+	aRow addChild: aChild.
+
+	self assert: (aPresentation relationFocusElement: aRow isWithinRows: { aRow }).
+	self assert: (aPresentation relationFocusElement: aChild isWithinRows: { aRow }).
+	self assert: (aPresentation relationFocusElement: BlElement new isWithinRows: { aRow }) not.
+	^ aChild
+]

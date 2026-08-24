@@ -6,7 +6,10 @@ Class {
 		'groups',
 		'categoryGroups',
 		'embeddedRowsContainer',
-		'relationSelections'
+		'relationSelections',
+		'relationFocusRows',
+		'relationFocusContainers',
+		'relationActiveDescriptions'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -18,7 +21,10 @@ CFMaDetailPresentation >> initialize [
 	groupConfigurations := Dictionary new.
 	groups := Dictionary new.
 	categoryGroups := Dictionary new.
-	relationSelections := IdentityDictionary new
+	relationSelections := IdentityDictionary new.
+	relationFocusRows := IdentityDictionary new.
+	relationFocusContainers := IdentityDictionary new.
+	relationActiveDescriptions := IdentitySet new
 ]
 
 { #category : 'api - building' }
@@ -26,6 +32,9 @@ CFMaDetailPresentation >> build [
 	groups removeAll.
 	categoryGroups removeAll.
 	relationSelections removeAll.
+	relationFocusRows removeAll.
+	relationFocusContainers removeAll.
+	relationActiveDescriptions removeAll.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
@@ -731,10 +740,6 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 		for: anObject
 		description: aDescription
 		remove: aRemoveBlock.
-	self
-		installEmbeddedRelationFocusOn: theRows
-		identityRow: anIdentityRow
-		description: aDescription.
 	^ theRows
 ]
 
@@ -759,7 +764,11 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 					with: aSink value currentValue
 					addElement: anAddElement
 					headerContent: theElement
-					description: aDescription ].
+					description: aDescription.
+				self
+					relationFocusRows: (self relationContextRowsWithHeader: aHeaderRow rows: childRows)
+					in: aContainer
+					for: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
 			observe: anElementSink ]
 ]
@@ -792,7 +801,8 @@ CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after:
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneListUsing: aDescription [
-	| aRelationElement anAddElement |
+	| aContainer aHeaderRow aRelationElement anAddElement |
+	aContainer := self containerForDescription: aDescription.
 	aRelationElement := self newRelationValueSlotWith: nil.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 
@@ -809,7 +819,9 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 			observe: anElementSink ].
 
 	self addShortcutsTo: aRelationElement.
-	self addFieldElement: aRelationElement using: aDescription
+	self addFieldElement: aRelationElement using: aDescription.
+	aHeaderRow := aContainer rows last.
+	self relationFocusRows: { aHeaderRow } in: aContainer for: aDescription
 ]
 
 { #category : 'private - identity' }
@@ -951,12 +963,18 @@ CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 	aPreviousElement := relationSelections at: aDescription ifAbsent: [ nil ].
 	aPreviousElement == anElement ifTrue: [
 		anElement states addState: BlElementState selected.
+		(relationActiveDescriptions includes: aDescription) ifTrue: [
+			anElement states addState: CFMaActiveSelectionState uniqueInstance ].
 		^ anElement ].
 
 	aPreviousElement ifNotNil: [
-		aPreviousElement states removeState: BlElementState selected ].
+		aPreviousElement states
+			removeState: BlElementState selected;
+			removeState: CFMaActiveSelectionState uniqueInstance ].
 	relationSelections at: aDescription put: anElement.
 	anElement states addState: BlElementState selected.
+	(relationActiveDescriptions includes: aDescription) ifTrue: [
+		anElement states addState: CFMaActiveSelectionState uniqueInstance ].
 	^ anElement
 ]
 
@@ -964,7 +982,6 @@ CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock [
 	anItemElement
 		focusability: BlFocusability after;
-		addAptitude: CFMaActiveSelectionAptitude new;
 		addAptitude: CFMaListItemAptitude new.
 
 	anItemElement
@@ -1002,16 +1019,56 @@ CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObjec
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> installEmbeddedRelationFocusOn: theRows identityRow: anIdentityRow description: aDescription [
-	theRows do: [ :aRow |
-		aRow
-			when: BlFocusInEvent
-				do: [ :anEvent |
-					self selectRelationElement: anIdentityRow for: aDescription.
-					anIdentityRow states addState: CFMaActiveSelectionState uniqueInstance ];
-			when: BlFocusOutEvent
-				do: [ :anEvent |
-					anIdentityRow states removeState: CFMaActiveSelectionState uniqueInstance ] ]
+CFMaDetailPresentation >> relationFocusElement: anElement isWithinRows: theRows [
+	anElement ifNil: [ ^ false ].
+	^ theRows anySatisfy: [ :aRow |
+		anElement == aRow or: [ anElement hasParent: aRow ] ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> setRelationActive: aBoolean for: aDescription [
+	| aSelectedElement |
+	aBoolean
+		ifTrue: [ relationActiveDescriptions add: aDescription ]
+		ifFalse: [ relationActiveDescriptions remove: aDescription ifAbsent: [ ] ].
+	aSelectedElement := relationSelections at: aDescription ifAbsent: [ nil ].
+	aSelectedElement ifNil: [ ^ self ].
+	aBoolean
+		ifTrue: [ aSelectedElement states addState: CFMaActiveSelectionState uniqueInstance ]
+		ifFalse: [ aSelectedElement states removeState: CFMaActiveSelectionState uniqueInstance ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateRelationActiveFor: aDescription focusedElement: anElement [
+	self
+		setRelationActive: (self
+			relationFocusElement: anElement
+			isWithinRows: (relationFocusRows at: aDescription ifAbsent: [ #() ]))
+		for: aDescription
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installRelationFocusContextIn: aContainer for: aDescription [
+	(relationFocusContainers at: aDescription ifAbsent: [ nil ]) == aContainer ifTrue: [ ^ self ].
+	relationFocusContainers at: aDescription put: aContainer.
+	aContainer
+		when: BlFocusInEvent
+			do: [ :anEvent |
+				self updateRelationActiveFor: aDescription focusedElement: anEvent target ];
+		when: BlFocusTransferEvent
+			do: [ :anEvent |
+				self updateRelationActiveFor: aDescription focusedElement: anEvent focusedElement ];
+		when: BlFocusOutEvent
+			do: [ :anEvent | self setRelationActive: false for: aDescription ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationFocusRows: theRows in: aContainer for: aDescription [
+	| aFocusOwner |
+	relationFocusRows at: aDescription put: theRows copy.
+	self installRelationFocusContextIn: aContainer for: aDescription.
+	aFocusOwner := aContainer space ifNotNil: [ :aSpace | aSpace focusOwner ].
+	self updateRelationActiveFor: aDescription focusedElement: aFocusOwner
 ]
 
 { #category : 'private - relations' }
@@ -1040,6 +1097,14 @@ CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObjec
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> relationContextRowsWithHeader: aHeaderRow rows: theRows [
+	^ OrderedCollection new
+		add: aHeaderRow;
+		addAll: theRows;
+		yourself
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
 	| aContainer aHeaderContent aHeaderRow anAddElement itemRows |
 	aContainer := self containerForDescription: aDescription.
@@ -1053,12 +1118,19 @@ CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theElement :aSink |
+				| contextRows |
 				itemRows := self
 					updateToManyEmbeddedRows: itemRows
 					in: aContainer
 					after: aHeaderRow
 					with: aSink value currentValue
-					description: aDescription ].
+					description: aDescription.
+				contextRows := OrderedCollection new.
+				itemRows do: [ :anAssociation | contextRows addAll: anAssociation value ].
+				self
+					relationFocusRows: (self relationContextRowsWithHeader: aHeaderRow rows: contextRows)
+					in: aContainer
+					for: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
 			observe: anElementSink ]
 ]
@@ -1082,7 +1154,13 @@ CFMaDetailPresentation >> addToManyListUsing: aDescription [
 					in: aContainer
 					after: aHeaderRow
 					with: aSink value currentValue
-					description: aDescription ].
+					description: aDescription.
+				self
+					relationFocusRows: (self
+						relationContextRowsWithHeader: aHeaderRow
+						rows: (itemRows collect: #value))
+					in: aContainer
+					for: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
 			observe: anElementSink ]
 ]
