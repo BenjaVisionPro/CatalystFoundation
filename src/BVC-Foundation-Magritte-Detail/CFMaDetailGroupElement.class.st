@@ -63,7 +63,9 @@ CFMaDetailGroupElement >> updateGroupSpacing [
 			| aMargin |
 			aMargin := aGroup margin.
 			aGroup margin: (BlInsets
-				top: (anIndex = 1 ifTrue: [ 0 ] ifFalse: [ self groupSpacing ])
+				top: ((anIndex = 1 and: [ card rowCount = 0 ])
+					ifTrue: [ 0 ]
+					ifFalse: [ self groupSpacing ])
 				right: aMargin right
 				bottom: aMargin bottom
 				left: aMargin left) ]
@@ -106,5 +108,6 @@ CFMaDetailGroupElement >> initialize [
 { #category : 'accessing' }
 CFMaDetailGroupElement >> rows [
 	card visibility: BlVisibility visible.
+	groups ifNotNil: [ self updateGroupSpacing ].
 	^ card
 ]
