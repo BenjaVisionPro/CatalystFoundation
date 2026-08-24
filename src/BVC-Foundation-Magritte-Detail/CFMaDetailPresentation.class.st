@@ -829,15 +829,7 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aRow aRepresentation aLeadingElement aTextRegion aLabel aComment aCommentLabel |
-	aRow := BrFrame new
-		hMatchParent;
-		vFitContent;
-		padding: self rowInsets;
-		background: Color transparent;
-		border: BlBorder empty;
-		yourself.
-
+	| aRepresentation aLeadingElement aTextRegion aLabel aComment aCommentLabel |
 	aRepresentation := BrHorizontalPane new
 		hFitContent;
 		vFitContent;
@@ -874,8 +866,12 @@ CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
 		aTextRegion addChild: aCommentLabel ].
 
 	aRepresentation addChild: aTextRegion.
-	aRow addChild: aRepresentation.
-	^ aRow
+	^ self
+		newRowLeading: aRepresentation
+		description: nil
+		supporting: nil
+		content: nil
+		accessories: #()
 ]
 
 { #category : 'private - relations' }
@@ -1075,7 +1071,7 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
-	| anItemElement aRow |
+	| anItemElement |
 	anItemElement := self
 		newRelationObjectElementFor: anObject
 		remove: [ :theItemElement |
@@ -1084,17 +1080,12 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 				memento: self memento
 				using: aDescription
 				element: theItemElement ].
-	aRow := BrFrame new
-		layout: BlFrameLayout new;
-		hMatchParent;
-		vFitContent;
-		padding: self rowInsets;
-		yourself.
-	anItemElement constraintsDo: [ :c |
-		c frame horizontal alignLeft.
-		c frame vertical alignCenter ].
-	aRow addChild: anItemElement.
-	^ aRow
+	^ self
+		newRowLeading: anItemElement
+		description: nil
+		supporting: nil
+		content: nil
+		accessories: #()
 ]
 
 { #category : 'private - relations' }

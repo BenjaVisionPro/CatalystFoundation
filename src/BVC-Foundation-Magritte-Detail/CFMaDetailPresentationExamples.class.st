@@ -558,8 +558,8 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 		newToManyRelationRowFor: anObject
 		description: aDescription.
 
-	self assert: aRow class equals: BrFrame.
-	self assert: aRow layout class equals: BlFrameLayout.
+	self assert: aRow class equals: BlElement.
+	self assert: aRow layout class equals: CFMaDetailRowLayout.
 	self assert: aRow children size equals: 1.
 	self assert: aRow children first children first children first class equals: CFIconTile.
 	self assert: aRow children first children first children second text asString equals: 'Related'.
@@ -592,8 +592,8 @@ CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesLargeStandardReprese
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
 	aRow := CFMaDetailPresentation new newRelationObjectIdentityRowFor: anObject.
 
-	self assert: aRow class equals: BrFrame.
-	self assert: aRow layout class equals: BlFrameLayout.
+	self assert: aRow class equals: BlElement.
+	self assert: aRow layout class equals: CFMaDetailRowLayout.
 	self assert: aRow children size equals: 1.
 	aLeadingElement := aRow children first children first.
 	self assert: aLeadingElement class equals: CFIconTile.
