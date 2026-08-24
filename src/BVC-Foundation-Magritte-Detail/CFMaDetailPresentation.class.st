@@ -829,22 +829,35 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aLeadingElement aLabel aComment aSupportingElement |
+	| aLeadingElement aDescriptionElement aLabel aComment aSupportingElement |
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
 	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
+
+	aDescriptionElement := BrVerticalPane new
+		hFitContent;
+		vFitContent;
+		padding: BlInsets empty;
+		margin: BlInsets empty;
+		yourself.
 	aLabel := BrLabel new
 		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
 		aptitude: self defaultLabelAptitude;
 		fitContent;
 		yourself.
+	aDescriptionElement addChild: aLabel.
+
 	aComment := self relationObjectDisplayCommentFor: anObject.
-	aSupportingElement := aComment
-		ifNil: [ nil ]
-		ifNotNil: [ self supportingElementWithText: aComment ].
+	aComment ifNotNil: [
+		aSupportingElement := self supportingElementWithText: aComment.
+		aSupportingElement
+			hFitContent;
+			margin: (BlInsets top: 2 right: 0 bottom: 0 left: 0).
+		aDescriptionElement addChild: aSupportingElement ].
+
 	^ self
 		newRowLeading: aLeadingElement
-		description: aLabel
-		supporting: aSupportingElement
+		description: aDescriptionElement
+		supporting: nil
 		content: nil
 		accessories: #()
 ]
