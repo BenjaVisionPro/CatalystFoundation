@@ -440,6 +440,17 @@ CFMaDetailRowLayout >> firstLineYFor: aChild top: aTop [
 ]
 
 { #category : 'private - layout' }
+CFMaDetailRowLayout >> accessoryYFor: anAccessory description: aDescription content: aContent top: aTop [
+	| anAnchor anAnchorY |
+	anAnchor := aDescription ifNil: [ aContent ].
+	anAnchor ifNil: [ ^ self firstLineYFor: anAccessory top: aTop ].
+	anAnchorY := aTop.
+	baseline ifNotNil: [
+		anAnchorY := aTop + baseline - (self baselineOffsetFor: anAnchor) ].
+	^ anAnchorY + ((anAnchor measuredHeight - anAccessory measuredHeight) / 2.0)
+]
+
+{ #category : 'private - layout' }
 CFMaDetailRowLayout >> layoutInlineDescription: aDescription supporting: aSupporting content: aContent bodyX: bodyX bodyRight: bodyRight top: aTop context: aBlElementBoundsUpdateContext [
 	| descriptionY contentY contentX |
 	descriptionY := aTop.
@@ -539,7 +550,7 @@ CFMaDetailRowLayout >> layout: aRow in: aRectangle context: aBlElementBoundsUpda
 	x := accessoryAreaLeft.
 	accessoryChildren doWithIndex: [ :aChild :anIndex |
 		aChild
-			applyLayoutIn: (x @ (self firstLineYFor: aChild top: y)
+			applyLayoutIn: (x @ (self accessoryYFor: aChild description: aDescription content: aContent top: y)
 				extent: aChild measuredExtent)
 			context: aBlElementBoundsUpdateContext.
 		x := x + aChild measuredWidth.
