@@ -793,13 +793,13 @@ CFMaDetailPresentation >> emitIdentityAffordanceUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> relationObjectDisplayCommentFor: anObject [
-	| aComment |
-	aComment := (anObject respondsTo: #identifier)
+CFMaDetailPresentation >> relationObjectSupportingTextFor: anObject [
+	| aSupportingText |
+	aSupportingText := (anObject respondsTo: #identifier)
 		ifTrue: [ anObject identifier ]
 		ifFalse: [ nil ].
-	(aComment notNil and: [ aComment asString isNotEmpty ])
-		ifTrue: [ ^ aComment asString ].
+	(aSupportingText notNil and: [ aSupportingText asString isNotEmpty ])
+		ifTrue: [ ^ aSupportingText asString ].
 	^ nil
 ]
 
@@ -812,6 +812,22 @@ CFMaDetailPresentation >> relationObjectDisplayLabelFor: anObject [
 	(aLabel notNil and: [ aLabel asString isNotEmpty ])
 		ifTrue: [ ^ aLabel asString ].
 	^ anObject gtDisplayText asString
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectLabelFor: anObject [
+	^ BrLabel new
+		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
+		aptitude: self defaultLabelAptitude;
+		fitContent;
+		yourself
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationObjectSupportingElementFor: anObject [
+	^ (self relationObjectSupportingTextFor: anObject)
+		ifNil: [ nil ]
+		ifNotNil: [ :aString | self supportingElementWithText: aString ]
 ]
 
 { #category : 'private - relations' }
@@ -829,29 +845,21 @@ CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aLeadingElement aLabel aComment aSupportingElement |
+	| aLeadingElement |
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
 	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
-	aLabel := BrLabel new
-		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
-		aptitude: self defaultLabelAptitude;
-		fitContent;
-		yourself.
-	aComment := self relationObjectDisplayCommentFor: anObject.
-	aSupportingElement := aComment
-		ifNil: [ nil ]
-		ifNotNil: [ self supportingElementWithText: aComment ].
 
 	^ self
 		newRowLeading: aLeadingElement
-		description: aLabel
-		supporting: aSupportingElement
+		description: (self newRelationObjectLabelFor: anObject)
+		supporting: (self newRelationObjectSupportingElementFor: anObject)
 		content: self newRelationEmptyContentElement
 		accessories: #()
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationEmptyContentElement [
+	"Relation object rows use the standard Detail field-row layout but have no value control."
 	^ BlElement new
 		constraintsDo: [ :c |
 			c horizontal exact: 0.
@@ -873,12 +881,8 @@ CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
 
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
 	aLeadingElement ifNotNil: [ aContainer addChild: aLeadingElement ].
-	aLabel := BrLabel new
-		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
-		aptitude: self defaultLabelAptitude;
-		fitContent;
-		constraintsDo: [ :c | c linear vertical alignCenter ];
-		yourself.
+	aLabel := self newRelationObjectLabelFor: anObject.
+	aLabel constraintsDo: [ :c | c linear vertical alignCenter ].
 	aContainer addChild: aLabel.
 	^ aContainer
 ]
@@ -1067,11 +1071,7 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
 	| aLeadingElement aLabel aRow |
 	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLabel := BrLabel new
-		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
-		aptitude: self defaultLabelAptitude;
-		fitContent;
-		yourself.
+	aLabel := self newRelationObjectLabelFor: anObject.
 	aRow := self
 		newRowLeading: aLeadingElement
 		description: aLabel
@@ -1091,6 +1091,29 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> relationRowAssociationFor: anObject in: itemRows [
+	^ itemRows
+		detect: [ :each | each key == anObject ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> placeRelationRows: theRows in: aContainer startingAt: aTargetIndex [
+	| targetIndex |
+	targetIndex := aTargetIndex.
+	theRows do: [ :aRow |
+		| currentIndex |
+		currentIndex := aContainer rows identityIndexOf: aRow ifAbsent: [ 0 ].
+		currentIndex = 0
+			ifTrue: [ aContainer addRow: aRow at: targetIndex ]
+			ifFalse: [ currentIndex = targetIndex ifFalse: [
+				aContainer removeRow: aRow.
+				aContainer addRow: aRow at: targetIndex ] ].
+		targetIndex := targetIndex + 1 ].
+	^ targetIndex
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after: aHeaderRow with: aCollection description: aDescription [
 	| someObjects newItemRows headerIndex |
 	someObjects := aCollection ifNil: [ #() ].
@@ -1103,20 +1126,13 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 		^ oldItemRows ].
 	newItemRows := OrderedCollection new.
 	someObjects withIndexDo: [ :anObject :anItemIndex |
-		| anAssociation aRow targetIndex currentIndex |
-		anAssociation := oldItemRows
-			detect: [ :each | each key == anObject ]
-			ifNone: [ nil ].
+		| anAssociation aRow targetIndex |
+		anAssociation := self relationRowAssociationFor: anObject in: oldItemRows.
 		aRow := anAssociation
 			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
 		targetIndex := headerIndex + anItemIndex.
-		currentIndex := aContainer rows identityIndexOf: aRow ifAbsent: [ 0 ].
-		currentIndex = 0
-			ifTrue: [ aContainer addRow: aRow at: targetIndex ]
-			ifFalse: [ currentIndex = targetIndex ifFalse: [
-				aContainer removeRow: aRow.
-				aContainer addRow: aRow at: targetIndex ] ].
+		self placeRelationRows: { aRow } in: aContainer startingAt: targetIndex.
 		newItemRows add: anObject -> aRow ].
 	^ newItemRows
 ]
@@ -1137,22 +1153,15 @@ CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer a
 	newItemRows := OrderedCollection new.
 	someObjects do: [ :anObject |
 		| anAssociation theRows |
-		anAssociation := oldItemRows
-			detect: [ :each | each key == anObject ]
-			ifNone: [ nil ].
+		anAssociation := self relationRowAssociationFor: anObject in: oldItemRows.
 		theRows := anAssociation
 			ifNil: [ self newEmbeddedRowsFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
 
-		theRows do: [ :aRow |
-			| currentIndex |
-			currentIndex := aContainer rows identityIndexOf: aRow ifAbsent: [ 0 ].
-			currentIndex = 0
-				ifTrue: [ aContainer addRow: aRow at: targetIndex ]
-				ifFalse: [ currentIndex = targetIndex ifFalse: [
-					aContainer removeRow: aRow.
-					aContainer addRow: aRow at: targetIndex ] ].
-			targetIndex := targetIndex + 1 ].
+		targetIndex := self
+			placeRelationRows: theRows
+			in: aContainer
+			startingAt: targetIndex.
 		newItemRows add: anObject -> theRows ].
 	^ newItemRows
 ]

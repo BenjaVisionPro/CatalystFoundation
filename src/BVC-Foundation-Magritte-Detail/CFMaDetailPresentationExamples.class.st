@@ -500,7 +500,11 @@ CFMaDetailPresentationExamples >> detailToOneListNilValueUsesAddAffordance [
 	<gtExample>
 	| aModel aDescription aContainer aMemento aPresentation anAddElement aFrame |
 	aModel := CFMaFormShowcase new.
-	aDescription := aModel columnedObjectDescription.
+	aDescription := MAToOneRelationDescription new
+		accessor: #columnedObject;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		newItemStencil: CFMaNewItemStencilBuilder new;
+		yourself.
 	aContainer := MAContainer new
 		add: aDescription;
 		yourself.
@@ -533,7 +537,10 @@ CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrit
 	| aModel aDescription aContainer aMemento anObject |
 	aModel := CFMaFormShowcase new.
 	anObject := aModel phlowObject.
-	aDescription := aModel phlowObjectDescription.
+	aDescription := MAToOneRelationDescription new
+		accessor: #phlowObject;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		yourself.
 	aContainer := MAContainer new
 		add: aDescription;
 		yourself.

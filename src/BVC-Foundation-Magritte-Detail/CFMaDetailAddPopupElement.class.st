@@ -2,9 +2,6 @@ Class {
 	#name : 'CFMaDetailAddPopupElement',
 	#superclass : 'CFMaDetailPopupElement',
 	#traits : 'TBrEnableable',
-	#instVars : [
-		'activeBackgroundColor'
-	],
 	#classTraits : 'TBrEnableable classTrait',
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -18,7 +15,6 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 	anAddElement := self new.
 	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
 		handle: [ self new
-			popupBackgroundColor: CFMaDetailPopupMetrics menuBackgroundColor;
 			popupOpen: true;
 			yourself ]
 		content: [ self classChoiceContentFor: anAddItemViewModel ].
@@ -69,7 +65,6 @@ CFMaDetailAddPopupElement class >> immediateFor: anAddItemViewModel [
 CFMaDetailAddPopupElement >> initialize [
 	| anInset |
 	super initialize.
-	activeBackgroundColor := nil.
 	self removeChild: valueLabel.
 	anInset := (CFMaDetailPopupMetrics controlHeight
 		- CFMaDetailPopupMetrics indicatorExtent y) / 2.
@@ -78,17 +73,6 @@ CFMaDetailAddPopupElement >> initialize [
 		geometry: BlCircleGeometry new
 ]
 
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> popupBackgroundColor [
-	^ activeBackgroundColor ifNil: [ super popupBackgroundColor ]
-]
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> popupBackgroundColor: aColor [
-	activeBackgroundColor := aColor.
-	self updatePopupAppearance
-]
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement >> newIndicator [
