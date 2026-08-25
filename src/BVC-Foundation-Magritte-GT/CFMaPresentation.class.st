@@ -94,7 +94,9 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 				aNativeContainerAptitude := anAptitude ] ].
 		aNativeContainerAptitude ifNotNil: [
 			aContainer removeAptitude: aNativeContainerAptitude ].
-		aContainer addAptitude: CFMaTooltipContainerAptitude new ].
+		aContainer
+			beInSeparateCompositionLayer;
+			addAptitude: CFMaTooltipContainerAptitude new ].
 	anElement addAptitude: aTooltipAptitude
 ]
 

@@ -20,6 +20,6 @@ CFMaTooltipContainerAptitude >> initialize [
 	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts outside ].
 	self
 		addChangeProperty: #(widget background)
-		with: [ Color white alpha: 1.0 ].
+		with: [ Color white alpha: 0.85 ].
 
 ]
