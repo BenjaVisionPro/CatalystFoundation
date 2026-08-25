@@ -25,8 +25,7 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
 					enlargedBy: 1.5);
 				outskirts: BlOutskirts inside;
-				addAptitude: CFGlassSurfaceAptitude new;
-				addAptitude: BrShadowAptitude new ].
+				addAptitude: CFGlassSurfaceAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ anAddElement
 ]
