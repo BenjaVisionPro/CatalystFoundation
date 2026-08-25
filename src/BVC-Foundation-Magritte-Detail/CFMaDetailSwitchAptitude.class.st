@@ -1,10 +1,13 @@
-"I present a BrToggle as the compact switch used by the Detail presentation."
+"I present a BrToggle as the compact animated switch used by the Detail presentation."
 
 Class {
 	#name : 'CFMaDetailSwitchAptitude',
 	#superclass : 'BrToggleAptitude',
 	#instVars : [
-		'thumb'
+		'thumb',
+		'thumbOffset',
+		'trackColor',
+		'switchAnimation'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -16,13 +19,26 @@ CFMaDetailSwitchAptitude class >> activeTrackColor [
 ]
 
 { #category : 'defaults' }
+CFMaDetailSwitchAptitude class >> animationDuration [
+	^ 180 milliSeconds
+]
+
+{ #category : 'defaults' }
 CFMaDetailSwitchAptitude class >> inactiveTrackColor [
 	^ Color r: 220 g: 220 b: 220 range: 255
+]
+
+{ #category : 'defaults' }
+CFMaDetailSwitchAptitude class >> thumbTravel [
+	^ 14
 ]
 
 { #category : 'initialization' }
 CFMaDetailSwitchAptitude >> initialize [
 	super initialize.
+	thumbOffset := 0.0.
+	trackColor := self class inactiveTrackColor.
+	switchAnimation := nil.
 	thumb := BlElement new
 		background: Color white;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
@@ -39,14 +55,8 @@ CFMaDetailSwitchAptitude >> initialize [
 		addChangeProperty: #(widget size) with: [ 36 @ 16 ];
 		addChangeProperty: #(widget padding) with: [ BlInsets all: 1 ];
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
-		addChangeAddChildAs: #(cfDetailSwitchThumb) with: [ thumb ].
-
-	self default: [ :aStyle |
-		aStyle background: self class inactiveTrackColor ].
-	self deactivated: [ :aStyle |
-		aStyle background: self class inactiveTrackColor ].
-	self activated: [ :aStyle |
-		aStyle background: self class activeTrackColor ]
+		addChangeProperty: #(widget background) with: [ self class inactiveTrackColor ];
+		addChangeAddChildAs: #(cfDetailSwitchThumb) with: [ thumb ]
 ]
 
 { #category : 'initialization' }
@@ -60,12 +70,71 @@ CFMaDetailSwitchAptitude >> initializeListeners [
 		do: [ :anEvent | self toggleDeactivated ]
 ]
 
+{ #category : 'private - animation' }
+CFMaDetailSwitchAptitude >> applyStateWithThumbOffset: aThumbOffset trackColor: aTrackColor to: aWidget [
+	thumbOffset := aThumbOffset.
+	trackColor := aTrackColor.
+	thumb transformDo: [ :aTransform |
+		aTransform
+			topLeftOrigin;
+			translateBy: thumbOffset @ 0 ].
+	aWidget background: trackColor
+]
+
+{ #category : 'private - animation' }
+CFMaDetailSwitchAptitude >> animateToThumbOffset: aTargetOffset trackColor: aTargetColor [
+	self widgetDo: [ :aWidget |
+		| thumbTransition colorTransition |
+		aWidget isAttachedToSceneGraph ifFalse: [
+			^ self
+				applyStateWithThumbOffset: aTargetOffset
+				trackColor: aTargetColor
+				to: aWidget ].
+
+		switchAnimation ifNotNil: [ switchAnimation stopIfRunning ].
+
+		thumbTransition := BlNumberTransition new
+			from: thumbOffset;
+			to: aTargetOffset;
+			duration: self class animationDuration;
+			onStepDo: [ :anOffset |
+				thumbOffset := anOffset.
+				thumb transformDo: [ :aTransform |
+					aTransform
+						topLeftOrigin;
+						translateBy: thumbOffset @ 0 ] ];
+			yourself.
+
+		colorTransition := BlColorTransition new
+			from: trackColor;
+			to: aTargetColor;
+			duration: self class animationDuration;
+			onStepDo: [ :aColor |
+				trackColor := aColor.
+				aWidget background: trackColor ];
+			yourself.
+
+		switchAnimation := BlParallelAnimation
+			with: { thumbTransition. colorTransition }.
+		switchAnimation onFinishedDo: [
+			self
+				applyStateWithThumbOffset: aTargetOffset
+				trackColor: aTargetColor
+				to: aWidget.
+			switchAnimation := nil ].
+		aWidget addAnimation: switchAnimation ]
+]
+
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleActivated [
-	thumb constraintsDo: [ :c | c frame horizontal alignRight ]
+	self
+		animateToThumbOffset: self class thumbTravel
+		trackColor: self class activeTrackColor
 ]
 
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleDeactivated [
-	thumb constraintsDo: [ :c | c frame horizontal alignLeft ]
+	self
+		animateToThumbOffset: 0.0
+		trackColor: self class inactiveTrackColor
 ]
