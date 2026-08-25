@@ -691,7 +691,7 @@ CFMaFormShowcase >> initialize [
 	time := Time hour: 14 minute: 30 second: 0.
 	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
 	classValue := String.
-	tags := #(foundation magritte bloc).
+	tags := #('foundation' 'magritte' 'bloc').
 	file := FileLocator imageDirectory.
 	directory := FileLocator imageDirectory.
 	fieldIcon := self defaultIcon.

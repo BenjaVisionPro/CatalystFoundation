@@ -1421,6 +1421,17 @@ CFMaDetailPresentation >> visitNumberDescription: aDescription [
 ]
 
 { #category : 'visiting-description' }
+CFMaDetailPresentation >> visitToManyScalarRelationDescription: aDescription [
+	| aTagsElement |
+	aTagsElement := CFMaDetailTagsElement new
+		description: aDescription memento: self memento;
+		yourself.
+	self addShortcutsTo: aTagsElement using: aDescription.
+	self addFieldElement: aTagsElement using: aDescription.
+	^ aTagsElement
+]
+
+{ #category : 'visiting-description' }
 CFMaDetailPresentation >> visitToManyRelationDescription: aDescription [
 	| aRepresentation |
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.

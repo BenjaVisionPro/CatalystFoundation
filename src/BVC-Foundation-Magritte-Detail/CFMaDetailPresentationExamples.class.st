@@ -762,3 +762,20 @@ CFMaDetailPresentationExamples >> relationFocusContextIncludesRowDescendants [
 	self assert: (aPresentation relationFocusElement: BlElement new isWithinRows: { aRow }) not.
 	^ aChild
 ]
+
+
+{ #category : 'examples - tags' }
+CFMaDetailPresentationExamples >> scalarRelationUsesTagsElement [
+	| aShowcase aDescription aMemento anElement |
+	aShowcase := CFMaFormShowcase new.
+	aDescription := aShowcase tagsDescription.
+	aMemento := GtMagritteMemento new
+		model: aShowcase;
+		description: aShowcase magritteDescription;
+		yourself.
+	anElement := CFMaDetailTagsElement new
+		description: aDescription memento: aMemento;
+		yourself.
+	self assert: aDescription reference class equals: MAStringDescription.
+	^ anElement
+]
