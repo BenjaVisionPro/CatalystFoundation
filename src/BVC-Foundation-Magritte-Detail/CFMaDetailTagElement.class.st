@@ -11,9 +11,14 @@ Class {
 
 { #category : 'initialization' }
 CFMaDetailTagElement >> initialize [
+	| aTagAptitude |
 	super initialize.
+	aTagAptitude := (BrGlamorousEditableLabelAptitude
+		background: (Color black alpha: 0.06)
+		focused: CFMaDetailColours highlight)
+		glamorousRegularFontAndSize.
 	self
-		aptitude: BrGlamorousEditableLabelAptitude new glamorousRegularFontAndSize;
+		aptitude: aTagAptitude;
 		fitContent;
 		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
@@ -42,14 +47,10 @@ CFMaDetailTagElement >> value: anObject [
 
 { #category : 'selection' }
 CFMaDetailTagElement >> beSelected [
-	self
-		background: CFMaDetailColours highlight;
-		foreground: Color white
+	self requestFocus
 ]
 
 { #category : 'selection' }
 CFMaDetailTagElement >> beUnselected [
-	self
-		background: (Color black alpha: 0.06);
-		foreground: CFMaDetailColours primaryForeground
+	self background: (Color black alpha: 0.06)
 ]
