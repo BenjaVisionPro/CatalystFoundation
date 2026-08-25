@@ -109,8 +109,10 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
 		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
 		text: aText;
-		background: Color transparent;
-		border: BlBorder empty;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
+		background: (Color white alpha: 0.85);
+		border: (BlBorder paint: Color veryLightGray width: 1);
+		effect: (BlBlurBelowEffect radius: 14);
 		focusability: BlFocusability none;
 		preventMouseEvents;
 		yourself

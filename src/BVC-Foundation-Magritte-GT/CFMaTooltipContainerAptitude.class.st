@@ -16,13 +16,10 @@ CFMaTooltipContainerAptitude >> initialize [
 				enlargedBy: 1 ].
 	self
 		addChangeProperty: #(widget border)
-		with: [ BlBorder paint: Color veryLightGray width: 1 ].
+		with: [ BlBorder empty ].
 	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts outside ].
 	self
 		addChangeProperty: #(widget background)
-		with: [ Color white alpha: 0.85 ].
-	self
-		addChangeProperty: #(widget effect)
-		with: [ BlBlurBelowEffect radius: 14 ].
+		with: [ Color transparent ].
 
 ]
