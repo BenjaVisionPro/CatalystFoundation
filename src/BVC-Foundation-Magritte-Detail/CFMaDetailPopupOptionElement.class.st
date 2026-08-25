@@ -56,7 +56,7 @@ CFMaDetailPopupOptionElement >> initialize [
 		addChild: valueLabel;
 		addAptitude: (BrStyleCommonAptitude new
 			default: [ :aStyle | aStyle background: Color transparent ];
-			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.06) ];
+			hovered: [ :aStyle | aStyle background: Color transparent ];
 			selected: [ :aStyle |
 				aStyle background: CFMaDetailColours highlight ]);
 		addAptitude: (BrStyleCommonAptitude new
