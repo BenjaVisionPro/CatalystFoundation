@@ -83,12 +83,15 @@ CFMaDetailPopupElement >> popupBackgroundColor [
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> updatePopupAppearance [
-	| isActive |
-	isActive := popupOpen or: [ hovered or: [ self hasFocus ] ].
-	self background: (isActive
+	popupOpen ifTrue: [
+		self background: BlBackground transparent.
+		indicatorHost background: BlBackground transparent.
+		^ self ].
+
+	self background: ((hovered or: [ self hasFocus ])
 		ifTrue: [ self popupBackgroundColor ]
 		ifFalse: [ BlBackground transparent ]).
-	indicatorHost background: (isActive
+	indicatorHost background: ((hovered or: [ self hasFocus ])
 		ifTrue: [ BlBackground transparent ]
 		ifFalse: [ self popupBackgroundColor ])
 ]
