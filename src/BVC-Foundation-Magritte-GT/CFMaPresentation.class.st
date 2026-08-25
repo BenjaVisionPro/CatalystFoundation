@@ -84,11 +84,9 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
-	| aText aTooltipAptitude aNativeContainerAptitude |
-	aText := aDescription comment asRopedText.
-	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
-
-	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude text: aText.
+	| aTooltipAptitude aNativeContainerAptitude |
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude
+		content: [ self newCommentTooltipContentFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aNativeContainerAptitude := nil.
 		aContainer aptitudeDo: [ :anAptitude |
@@ -98,6 +96,24 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 			aContainer removeAptitude: aNativeContainerAptitude ].
 		aContainer addAptitude: CFMaTooltipContainerAptitude new ].
 	anElement addAptitude: aTooltipAptitude
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> newCommentTooltipContentFor: aDescription [
+	| aText |
+	aText := aDescription comment asRopedText.
+	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
+
+	^ BrLabel new
+		fitContent;
+		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
+		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
+		text: aText;
+		background: Color transparent;
+		border: BlBorder empty;
+		focusability: BlFocusability none;
+		preventMouseEvents;
+		yourself
 ]
 
 { #category : 'visiting-description' }
