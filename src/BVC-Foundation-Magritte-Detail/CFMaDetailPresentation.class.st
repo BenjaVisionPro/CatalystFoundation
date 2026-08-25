@@ -1426,7 +1426,7 @@ CFMaDetailPresentation >> visitToManyScalarRelationDescription: aDescription [
 	aTagsElement := CFMaDetailTagsElement new
 		description: aDescription memento: self memento;
 		yourself.
-	self addShortcutsTo: aTagsElement using: aDescription.
+	self addShortcutsTo: aTagsElement.
 	self addFieldElement: aTagsElement using: aDescription.
 	^ aTagsElement
 ]

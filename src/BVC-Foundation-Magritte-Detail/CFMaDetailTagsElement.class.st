@@ -21,9 +21,9 @@ CFMaDetailTagsElement >> initialize [
 	editingExisting := false.
 	self
 		layout: BlFlowLayout horizontal;
-		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty;
+		constraintsDo: [ :c | c horizontal matchParent ];
 		when: BlClickEvent do: [ :anEvent |
 			anEvent target == self ifTrue: [
 				self beginInsertionAtPoint: (self globalPointToLocal: anEvent position) ] ].
@@ -65,12 +65,27 @@ CFMaDetailTagsElement >> newPillFor: aValue [
 		yourself.
 	description isDefinitive ifFalse: [
 		aPill
-			whenKey: BlKeyCombination delete labelDo: [ :anEvent :aShortcut |
-				self removeSelectedTag ];
-			whenKey: BlKeyCombination backspace labelDo: [ :anEvent :aShortcut |
-				self removeSelectedTag ];
-			whenKey: BlKeyCombination enter labelDo: [ :anEvent :aShortcut |
-				self beginEditingTag: aPill ] ].
+			addShortcut: (BlShortcutWithAction new
+				name: 'Remove selected tag';
+				combination: BlKeyCombination delete;
+				overrideChildren: true;
+				action: [ :anEvent :aShortcut |
+					anEvent consumed: true.
+					self removeSelectedTag ]);
+			addShortcut: (BlShortcutWithAction new
+				name: 'Remove selected tag';
+				combination: BlKeyCombination builder backspace build;
+				overrideChildren: true;
+				action: [ :anEvent :aShortcut |
+					anEvent consumed: true.
+					self removeSelectedTag ]);
+			addShortcut: (BlShortcutWithAction new
+				name: 'Edit selected tag';
+				combination: BlKeyCombination enter;
+				overrideChildren: true;
+				action: [ :anEvent :aShortcut |
+					anEvent consumed: true.
+					self beginEditingTag: aPill ]) ].
 	^ aPill
 ]
 
@@ -226,7 +241,7 @@ CFMaDetailTagsElement >> insertionIndexAt: aPoint [
 	lineChildren := OrderedCollection new.
 	laidOutChildren do: [ :each |
 		| bounds distance |
-		bounds := each bounds inParent asRectangle.
+		bounds := (each bounds inParent: self) asRectangle.
 		distance := aPoint y < bounds top
 			ifTrue: [ bounds top - aPoint y ]
 			ifFalse: [
@@ -242,7 +257,7 @@ CFMaDetailTagsElement >> insertionIndexAt: aPoint [
 
 	lineChildren do: [ :each |
 		| bounds |
-		bounds := each bounds inParent asRectangle.
+		bounds := (each bounds inParent: self) asRectangle.
 		aPoint x < bounds center x ifTrue: [
 			^ self children indexOf: each ] ].
 	^ (self children indexOf: lineChildren last) + 1
