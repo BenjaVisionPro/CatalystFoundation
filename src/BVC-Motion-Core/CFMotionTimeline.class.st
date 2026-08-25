@@ -167,7 +167,7 @@ CFMotionTimeline >> repeat [
 
 { #category : 'configuration' }
 CFMotionTimeline >> repeat: aCount [
-	(aCount isInteger and: [ aCount positive ]) ifFalse: [
+	(aCount isInteger and: [ aCount > 0 ]) ifFalse: [
 		self error: 'A Motion timeline repeat count must be a positive integer' ].
 	repeating := false.
 	repeatCount := aCount.
