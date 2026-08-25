@@ -21,5 +21,8 @@ CFMaTooltipContainerAptitude >> initialize [
 	self
 		addChangeProperty: #(widget background)
 		with: [ Color white alpha: 0.85 ].
+	self
+		addChangeProperty: #(widget effect)
+		with: [ BlBlurBelowEffect radius: 14 ].
 
 ]
