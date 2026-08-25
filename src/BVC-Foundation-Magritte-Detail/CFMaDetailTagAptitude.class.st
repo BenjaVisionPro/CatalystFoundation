@@ -14,5 +14,5 @@ CFMaDetailTagAptitude >> initialize [
 				geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 				constraintsDo: [ :c |
 					c minWidth: 20.
-					c minHeight: 20 ] ])
+					c vertical exact: 20 ] ])
 ]
