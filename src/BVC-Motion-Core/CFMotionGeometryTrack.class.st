@@ -100,6 +100,11 @@ CFMotionGeometryTrack >> prepareFromCurrentPresentation [
 	self applyProgress: 0.0
 ]
 
+{ #category : 'playing' }
+CFMotionGeometryTrack >> prepareForTimelineCycle: aCycleIndex [
+	aCycleIndex isZero ifFalse: [ self prepareFromCurrentPresentation ]
+]
+
 { #category : 'accessing' }
 CFMotionGeometryTrack >> presentation [ ^ presentation ]
 

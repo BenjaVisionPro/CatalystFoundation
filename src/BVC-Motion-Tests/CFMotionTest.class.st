@@ -2337,6 +2337,151 @@ CFMotionTest >> testTimelineClampsAtItsResolvedEndAndCompletesMotion [
 	^ motion
 ]
 
+{ #category : 'examples - timeline runtime' }
+CFMotionTest >> testFiniteTimelineRepeatCompletesOnceAtItsFinalDestination [
+	<gtExample>
+	| space element timeline behaviour lifecycle motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	behaviour := CFMotionPropertyTrack
+		on: element
+		property: CFMotionOpacityProperty uniqueInstance
+		target: 1.0.
+	(CFMotionTimelineTrack on: behaviour in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	lifecycle := CFMotionLifecycleRecorder new.
+	(CFMotionTimelineTrack on: lifecycle in: timeline)
+		duration: 50 milliSeconds;
+		easing: BlEasing linear.
+	timeline repeat: 2.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.0).
+	self assert: motion isRunning.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: timeline elapsedTime equals: 100 milliSeconds.
+	self assert: timeline isComplete.
+	self assert: motion isCompleted.
+	self assert: (element opacity closeTo: 1.0).
+	self assert: lifecycle coordinators size equals: 1.
+	self assert: lifecycle terminalStates equals: { CFMotionState completed }.
+	self assert: space motionCoordinator hasActiveMotions not.
+	^ motion
+]
+
+{ #category : 'examples - timeline runtime' }
+CFMotionTest >> testFiniteTimelineRepeatRetargetsItsEntryButRestoresItsCycleOrigin [
+	<gtExample>
+	| space element timeline behaviour motion |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	behaviour := CFMotionPropertyTrack
+		on: element
+		property: CFMotionOpacityProperty uniqueInstance
+		target: 1.0.
+	(CFMotionTimelineTrack on: behaviour in: timeline)
+		duration: 100 milliSeconds;
+		easing: BlEasing linear.
+	timeline repeat: 2.
+	motion := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.4).
+	motion
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		duration: 100 milliSeconds
+		easing: BlEasing linear.
+	space pulse.
+	self assert: (element opacity closeTo: 0.4).
+	space time wait: 99 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.994).
+	space time wait: 1 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.0).
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.5).
+	space time wait: 50 milliSeconds.
+	space pulse.
+	self assert: motion isCompleted.
+	self assert: (element opacity closeTo: 1.0).
+	^ motion
+]
+
+{ #category : 'examples - timeline runtime' }
+CFMotionTest >> testCancelledFiniteTimelineRepeatRetargetsFromItsPreservedPresentation [
+	<gtExample>
+	| space element timeline behaviour first retargeted |
+	space := self spaceWithElement.
+	space time: BlTime simulated.
+	element := space root children first.
+	element opacity: 0.0.
+	timeline := CFMotionTimeline new.
+	behaviour := CFMotionPropertyTrack
+		on: element
+		property: CFMotionOpacityProperty uniqueInstance
+		target: 1.0.
+	(CFMotionTimelineTrack on: behaviour in: timeline)
+		duration: 100 milliSeconds;
+		easing: BlEasing linear.
+	timeline repeat: 2.
+	first := (CFMotion timeline: timeline coordinator: space motionCoordinator) start.
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.4).
+	first cancel.
+	self assert: first isCancelled.
+	self assert: (element opacity closeTo: 0.4).
+	retargeted := first
+		retarget: (CFMotionPropertyTrack
+			on: element
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 1.0)
+		duration: 100 milliSeconds
+		easing: BlEasing linear.
+	self deny: retargeted == first.
+	space pulse.
+	self assert: (element opacity closeTo: 0.4).
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: (element opacity closeTo: 0.0).
+	space time wait: 100 milliSeconds.
+	space pulse.
+	self assert: retargeted isCompleted.
+	self assert: (element opacity closeTo: 1.0).
+	^ retargeted
+]
+
+{ #category : 'examples - timeline runtime' }
+CFMotionTest >> testFiniteTimelineRepeatRejectsInvalidCountsAndIndefiniteTracks [
+	<gtExample>
+	| timeline indefiniteTimeline |
+	timeline := CFMotionTimeline new.
+	self should: [ timeline repeat: 0 ] raise: Error.
+	self should: [ timeline repeat: 1.5 ] raise: Error.
+	indefiniteTimeline := CFMotionTimeline new.
+	(CFMotionTimelineTrack on: CFMotionEvaluationRecorder new in: indefiniteTimeline) indefinite.
+	indefiniteTimeline repeat: 2.
+	self should: [ indefiniteTimeline prepareForPlayback ] raise: Error.
+	^ timeline
+]
+
 
 { #category : 'examples - behaviours' }
 CFMotionTest >> testTimelineTrackEvaluatesBehaviourWithTimelineAndLocalTime [

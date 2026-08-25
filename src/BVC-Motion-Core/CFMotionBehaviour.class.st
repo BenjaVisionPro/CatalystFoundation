@@ -3,7 +3,7 @@ I represent the work performed by one Motion evaluation.
 
 I may interpolate presentation, calculate procedural values, advance a dynamic system or adapt Motion time to another runtime. I may identify one exclusively owned presentation property with propertyKey, or answer nil when exclusive presentation ownership does not apply.
 
-I do not own temporal placement, playback position, scheduling or Motion lifecycle. playbackStartedIn: and playbackEndedWith: delimit one whole playback lifetime; pause, resume and settlement remain inside that lifetime.
+I do not own temporal placement, playback position, scheduling or Motion lifecycle. playbackStartedIn: and playbackEndedWith: delimit one whole playback lifetime; pause, resume and settlement remain inside that lifetime. A surrounding Timeline may ask me to prepare an already-selected repeat cycle; I retain only the presentation state needed to evaluate that cycle.
 "
 Class {
 	#name : 'CFMotionBehaviour',
@@ -56,6 +56,11 @@ CFMotionBehaviour >> preserveCurrentPresentation [ ]
 
 { #category : 'playing' }
 CFMotionBehaviour >> prepareFromCurrentPresentation [ ]
+
+{ #category : 'playing' }
+CFMotionBehaviour >> prepareForTimelineCycle: aCycleIndex [
+	aCycleIndex isZero ifFalse: [ self restoreOrigin ]
+]
 
 { #category : 'playing' }
 CFMotionBehaviour >> restoreOrigin [ ]

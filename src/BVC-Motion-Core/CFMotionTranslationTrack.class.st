@@ -6,7 +6,7 @@ I interpolate from a source translation to a target translation, preserve compos
 Class {
 	#name : 'CFMotionTranslationTrack',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'element', 'sourceTranslation', 'targetTranslation', 'startTranslation', 'presentation', 'completionPolicy' ],
+	#instVars : [ 'element', 'sourceTranslation', 'targetTranslation', 'startTranslation', 'entryTranslation', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -76,8 +76,16 @@ CFMotionTranslationTrack >> presentation [ ^ presentation ]
 
 { #category : 'playing' }
 CFMotionTranslationTrack >> prepareFromCurrentPresentation [
-	startTranslation := presentation isActive
+	entryTranslation := startTranslation := presentation isActive
 		ifTrue: [ presentation translation ]
+		ifFalse: [ sourceTranslation ].
+	presentation translation: startTranslation
+]
+
+{ #category : 'playing' }
+CFMotionTranslationTrack >> prepareForTimelineCycle: aCycleIndex [
+	startTranslation := aCycleIndex isZero
+		ifTrue: [ entryTranslation ]
 		ifFalse: [ sourceTranslation ].
 	presentation translation: startTranslation
 ]

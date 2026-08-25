@@ -6,7 +6,7 @@ I interpolate from a source rotation to a target rotation, preserve composition 
 Class {
 	#name : 'CFMotionRotationTrack',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'element', 'sourceRotation', 'targetRotation', 'startRotation', 'presentation', 'completionPolicy' ],
+	#instVars : [ 'element', 'sourceRotation', 'targetRotation', 'startRotation', 'entryRotation', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -76,8 +76,16 @@ CFMotionRotationTrack >> presentation [ ^ presentation ]
 
 { #category : 'playing' }
 CFMotionRotationTrack >> prepareFromCurrentPresentation [
-	startRotation := presentation isActive
+	entryRotation := startRotation := presentation isActive
 		ifTrue: [ presentation rotation ]
+		ifFalse: [ sourceRotation ].
+	presentation rotation: startRotation
+]
+
+{ #category : 'playing' }
+CFMotionRotationTrack >> prepareForTimelineCycle: aCycleIndex [
+	startRotation := aCycleIndex isZero
+		ifTrue: [ entryRotation ]
 		ifFalse: [ sourceRotation ].
 	presentation rotation: startRotation
 ]

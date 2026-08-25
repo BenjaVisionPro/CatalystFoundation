@@ -6,7 +6,7 @@ I interpolate from a source scale to a target scale, preserve composition with i
 Class {
 	#name : 'CFMotionScaleTrack',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'element', 'sourceScale', 'targetScale', 'startScale', 'presentation', 'completionPolicy' ],
+	#instVars : [ 'element', 'sourceScale', 'targetScale', 'startScale', 'entryScale', 'presentation', 'completionPolicy' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -76,8 +76,16 @@ CFMotionScaleTrack >> presentation [ ^ presentation ]
 
 { #category : 'playing' }
 CFMotionScaleTrack >> prepareFromCurrentPresentation [
-	startScale := presentation isActive
+	entryScale := startScale := presentation isActive
 		ifTrue: [ presentation scale ]
+		ifFalse: [ sourceScale ].
+	presentation scale: startScale
+]
+
+{ #category : 'playing' }
+CFMotionScaleTrack >> prepareForTimelineCycle: aCycleIndex [
+	startScale := aCycleIndex isZero
+		ifTrue: [ entryScale ]
 		ifFalse: [ sourceScale ].
 	presentation scale: startScale
 ]

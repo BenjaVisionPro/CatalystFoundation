@@ -72,6 +72,16 @@ CFMotionValueTransition >> propertyKey [
 	^ motionValue
 ]
 
+{ #category : 'playing' }
+CFMotionValueTransition >> prepareForTimelineCycle: aCycleIndex [
+	aCycleIndex isZero ifFalse: [ motionValue value: startValue ]
+]
+
+{ #category : 'playing' }
+CFMotionValueTransition >> restoreOrigin [
+	motionValue value: startValue
+]
+
 { #category : 'controlling' }
 CFMotionValueTransition >> reversed [
 	^ self class on: motionValue from: targetValue to: startValue using: interpolator

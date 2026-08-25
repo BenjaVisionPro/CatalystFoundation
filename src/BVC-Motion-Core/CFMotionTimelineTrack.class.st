@@ -74,6 +74,7 @@ CFMotionTimelineTrack >> duration: aDuration [
 	aDuration <= (0 milliSeconds) ifTrue: [
 		self error: 'A Motion track duration must be positive' ].
 	duration := aDuration.
+	timeline invalidateTemporalLayout.
 	^ self
 ]
 
@@ -111,6 +112,7 @@ CFMotionTimelineTrack >> endsAt: anAnchor offset: anOffset [
 	endAnchor := anAnchor.
 	endOffset := anOffset.
 	hasEndPlacement := true.
+	timeline invalidateTemporalLayout.
 	^ self
 ]
 
@@ -148,6 +150,7 @@ CFMotionTimelineTrack >> indefinite [
 	hasEndPlacement ifTrue: [
 		self error: 'An indefinite Motion track cannot have an end placement' ].
 	indefinite := true.
+	timeline invalidateTemporalLayout.
 	^ self
 ]
 
@@ -274,6 +277,11 @@ CFMotionTimelineTrack >> prepareFromCurrentPresentation [
 	behaviour prepareFromCurrentPresentation
 ]
 
+{ #category : 'playing' }
+CFMotionTimelineTrack >> prepareForTimelineCycle: aCycleIndex [
+	behaviour prepareForTimelineCycle: aCycleIndex
+]
+
 { #category : 'accessing' }
 CFMotionTimelineTrack >> resolvedEnd [
 	^ resolvedEnd
@@ -320,12 +328,23 @@ CFMotionTimelineTrack >> startsAt: anAnchor offset: anOffset [
 	startAnchor := anAnchor.
 	startOffset := anOffset.
 	hasExplicitStartPlacement := true.
+	timeline invalidateTemporalLayout.
 	^ self
 ]
 
 { #category : 'accessing' }
 CFMotionTimelineTrack >> timeline [
 	^ timeline
+]
+
+{ #category : 'accessing' }
+CFMotionTimelineTrack >> targetValue [
+	^ behaviour targetValue
+]
+
+{ #category : 'accessing' }
+CFMotionTimelineTrack >> targetValue: anObject [
+	behaviour targetValue: anObject
 ]
 
 { #category : 'private - initialization' }

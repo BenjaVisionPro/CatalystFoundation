@@ -6,7 +6,7 @@ I capture the original presentation, interpolate from the current presentation t
 Class {
 	#name : 'CFMotionPropertyTrack',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'element', 'property', 'targetValue', 'originValue', 'startValue' ],
+	#instVars : [ 'element', 'property', 'targetValue', 'originValue', 'startValue', 'entryValue' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -54,7 +54,16 @@ CFMotionPropertyTrack >> originValue [ ^ originValue ]
 
 { #category : 'playing' }
 CFMotionPropertyTrack >> prepareFromCurrentPresentation [
-	startValue := property currentPresentationOf: element
+	entryValue := startValue := property currentPresentationOf: element
+]
+
+{ #category : 'playing' }
+CFMotionPropertyTrack >> prepareForTimelineCycle: aCycleIndex [
+	aCycleIndex isZero
+		ifTrue: [ startValue := entryValue ]
+		ifFalse: [
+			startValue := originValue.
+			self restoreOrigin ]
 ]
 
 { #category : 'accessing' }

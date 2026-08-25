@@ -3,7 +3,7 @@ I am responsible for one Motion playback lifecycle.
 
 I start, pause, resume and stop playback, coordinate presentation ownership, and delimit one Behaviour playback lifetime. When I own a CFMotionTimeline, that timeline owns playback position and temporal composition. Direct track compositions use my normalised playback progress.
 
-I advance only from immutable CFMotionFrames supplied by my CFMotionCoordinator. I do not read a clock, enqueue Bloc tasks or create Bloc animations. A terminal Motion cannot restart; retargeting preserves the identity of a live Motion.
+I advance only from immutable CFMotionFrames supplied by my CFMotionCoordinator. I do not read a clock, enqueue Bloc tasks or create Bloc animations. A terminal Motion cannot restart; retargeting preserves the identity of a live Motion and creates a fresh playback when requested after cancellation or completion.
 "
 Class {
 	#name : 'CFMotion',
@@ -202,12 +202,41 @@ CFMotion >> retarget: aTrackOrTracks duration: aDuration easing: anInterpolator 
 		tracks
 			detect: [ :ownedTrack | ownedTrack propertyKey = each propertyKey ]
 			ifNone: [ self error: 'A Motion can only retarget a property it owns' ] ].
-	duration := aDuration.
-	easing := anInterpolator.
-	requestedTracks with: ownedTracks do: [ :each :ownedTrack |
-		ownedTrack targetValue: each targetValue ].
+	state isTerminal ifTrue: [
+		^ self
+			startReplacementRetargeting: requestedTracks
+			ownedTracks: ownedTracks
+			duration: aDuration
+			easing: anInterpolator ].
+	self configureRetargeting: requestedTracks ownedTracks: ownedTracks duration: aDuration easing: anInterpolator.
 	self startFromCurrentPresentation.
 	^ self
+]
+
+{ #category : 'private - playing' }
+CFMotion >> configureRetargeting: requestedTracks ownedTracks: ownedTracks duration: aDuration easing: anInterpolator [
+	timeline
+		ifNil: [
+			duration := aDuration.
+			easing := anInterpolator ]
+		ifNotNil: [
+			ownedTracks do: [ :each | each duration: aDuration; easing: anInterpolator ] ].
+	requestedTracks with: ownedTracks do: [ :each :ownedTrack |
+		ownedTrack targetValue: each targetValue ]
+]
+
+{ #category : 'private - playing' }
+CFMotion >> startReplacementRetargeting: requestedTracks ownedTracks: ownedTracks duration: aDuration easing: anInterpolator [
+	| replacement |
+	replacement := timeline
+		ifNil: [ CFMotion coordinator: coordinator tracks: tracks ]
+		ifNotNil: [ CFMotion timeline: timeline coordinator: coordinator ].
+	replacement
+		configureRetargeting: requestedTracks
+		ownedTracks: ownedTracks
+		duration: aDuration
+		easing: anInterpolator.
+	^ replacement start
 ]
 
 { #category : 'controlling' }

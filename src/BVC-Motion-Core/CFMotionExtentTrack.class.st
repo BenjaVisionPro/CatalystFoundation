@@ -6,7 +6,7 @@ I interpolate from a source extent to a target extent, participate in exclusive 
 Class {
 	#name : 'CFMotionExtentTrack',
 	#superclass : 'CFMotionBehaviour',
-	#instVars : [ 'element', 'sourceExtent', 'targetExtent', 'startExtent', 'originExtent', 'completionPolicy', 'hasStarted' ],
+	#instVars : [ 'element', 'sourceExtent', 'targetExtent', 'startExtent', 'entryExtent', 'originExtent', 'completionPolicy', 'hasStarted' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -86,12 +86,20 @@ CFMotionExtentTrack >> isAtDestination [
 
 { #category : 'playing' }
 CFMotionExtentTrack >> prepareFromCurrentPresentation [
-	startExtent := hasStarted
+	entryExtent := startExtent := hasStarted
 		ifTrue: [ element extent ]
 		ifFalse: [ sourceExtent ].
 	hasStarted := true.
 	self applyExtent: startExtent.
 	(self controlsHorizontal or: [ self controlsVertical ]) ifTrue: [ element clipChildren: true ]
+]
+
+{ #category : 'playing' }
+CFMotionExtentTrack >> prepareForTimelineCycle: aCycleIndex [
+	startExtent := aCycleIndex isZero
+		ifTrue: [ entryExtent ]
+		ifFalse: [ originExtent ].
+	self applyExtent: startExtent
 ]
 
 { #category : 'playing' }
