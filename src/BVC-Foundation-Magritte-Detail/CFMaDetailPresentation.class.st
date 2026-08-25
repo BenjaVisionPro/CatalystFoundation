@@ -163,7 +163,7 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		margin: BlInsets empty;
 		padding: (BlInsets top: 2 right: CFMaDetailScalarFieldMetrics trailingControlInset bottom: 2 left: 5);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-		background: (Color black alpha: 0.05).
+		background: (Color black alpha: 0.08).
 	^ aDropdown
 ]
 

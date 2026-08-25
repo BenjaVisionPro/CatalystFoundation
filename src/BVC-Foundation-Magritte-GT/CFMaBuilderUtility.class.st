@@ -425,7 +425,7 @@ CFMaBuilderUtility class >> newFormContainerFor: aMemento [
 		vFitContent;
 		padding: (BlInsets all: 12);
 		cellSpacing: 8;
-		background: (Color black alpha: 0.05);
+		background: (Color black alpha: 0.08);
 		yourself
 ]
 
