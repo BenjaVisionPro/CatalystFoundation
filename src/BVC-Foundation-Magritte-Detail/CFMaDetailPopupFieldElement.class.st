@@ -20,6 +20,14 @@ CFMaDetailPopupFieldElement >> initialize [
 		border: BlBorder empty
 ]
 
+
+{ #category : 'api - adding' }
+CFMaDetailPopupFieldElement >> addAptitude: anAptitude [
+	(anAptitude isKindOf: BrGlamorousWithExplicitTooltipAptitude) ifTrue: [
+		^ popup addAptitude: anAptitude ].
+	^ super addAptitude: anAptitude
+]
+
 { #category : 'accessing' }
 CFMaDetailPopupFieldElement >> popup [
 	^ popup
