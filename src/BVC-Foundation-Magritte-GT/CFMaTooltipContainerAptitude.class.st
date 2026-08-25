@@ -13,14 +13,14 @@ CFMaTooltipContainerAptitude >> initialize [
 		addChangeProperty: #(widget geometry)
 		with: [ BlChildrenWrappingGeometry
 				cornerRadius: BrMenuConstants cornerRadius
-				enlargedBy: 1 ].
+				enlargedBy: 2 ].
 	self
 		addChangeProperty: #(widget border)
 		with: [ BlBorder paint: Color veryLightGray width: 1 ].
-	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts centered ].
+	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts inside ].
 	self
 		addChangeProperty: #(widget background)
-		with: [ Color white alpha: 0.85 ].
+		with: [ Color white alpha: 0.65 ].
 	self
 		addChangeProperty: #(widget effect)
 		with: [ BlBlurBelowEffect radius: 14 ].
