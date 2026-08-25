@@ -59,6 +59,7 @@ CFMaDetailGroupElement >> ensureGroups [
 
 { #category : 'private - layout' }
 CFMaDetailGroupElement >> updateGroupSpacing [
+	groups ifNil: [ ^ self ].
 	groups children
 		withIndexDo: [ :aGroup :anIndex |
 			| aMargin |
