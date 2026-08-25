@@ -14,9 +14,7 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 	| anAddElement aDropdownAptitude |
 	anAddElement := self new.
 	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
-		handle: [ self new
-			popupOpen: true;
-			yourself ]
+		handle: [ self newClassChoiceHandle ]
 		content: [ self classChoiceContentFor: anAddItemViewModel ].
 	aDropdownAptitude
 		withGainFocusOnShow;
@@ -31,6 +29,29 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 				addAptitude: BrShadowAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ anAddElement
+]
+
+
+{ #category : 'private - instance creation' }
+CFMaDetailAddPopupElement class >> newClassChoiceHandle [
+	| aHandle anIndicator |
+	aHandle := BlElement new
+		size: CFMaDetailPopupMetrics controlHeight asPoint;
+		geometry: BlCircleGeometry new;
+		background: BlBackground transparent;
+		border: BlBorder empty;
+		yourself.
+	anIndicator := (FontAwesomeIcons icon: #plus)
+		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
+		color: (Color black alpha: 0.72);
+		yourself.
+	anIndicator constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	aHandle
+		layout: BlFrameLayout new;
+		addChild: anIndicator.
+	^ aHandle
 ]
 
 { #category : 'private - instance creation' }
