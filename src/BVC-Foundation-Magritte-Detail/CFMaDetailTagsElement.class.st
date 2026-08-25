@@ -27,7 +27,7 @@ CFMaDetailTagsElement >> initialize [
 		background: Color transparent;
 		padding: BlInsets empty;
 		constraintsDo: [ :c |
-			c horizontal fitContent.
+			c horizontal fitContentLimited.
 			c vertical fitContent ].
 	addButton := self newAddButton.
 ]
