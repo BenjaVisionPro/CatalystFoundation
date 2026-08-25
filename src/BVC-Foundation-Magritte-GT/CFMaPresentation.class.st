@@ -88,6 +88,7 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 	aTooltipAptitude := CFMaLocalTooltipAptitude
 		content: [ self newCommentTooltipContentFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
+		aContainer beWithoutCompositionLayer.
 		aNativeContainerAptitude := nil.
 		aContainer aptitudeDo: [ :anAptitude |
 			(anAptitude isKindOf: BrPopoverContainerAptitude) ifTrue: [
