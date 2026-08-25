@@ -80,8 +80,7 @@ CFMaDetailTagsElement >> newAddButton [
 			anIcon color: CFMaDetailColours highlight ];
 		when: BlMouseLeaveEvent do: [ :anEvent |
 			anIcon color: CFMaDetailColours secondaryForeground ];
-		when: BlClickEvent do: [ :anEvent |
-			self beginInsertionAtEnd ];
+		action: [ :aButton | self beginInsertionAtEnd ];
 		yourself.
 	^ aButton
 ]
@@ -174,9 +173,12 @@ CFMaDetailTagsElement >> beginInsertionAtEnd [
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor before: addButton.
-	activeEditor switchToEditor.
-	activeEditor enqueueTask: (BlTaskAction new action: [
-		activeEditor ifNotNil: [ activeEditor requestFocus ] ])
+	activeEditor
+		requestFocus;
+		switchToEditor.
+	activeEditor navigator
+		moveTo: 0;
+		apply
 ]
 
 { #category : 'private - editing' }
