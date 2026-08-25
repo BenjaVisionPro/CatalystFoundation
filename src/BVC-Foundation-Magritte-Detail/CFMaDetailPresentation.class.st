@@ -603,10 +603,12 @@ CFMaDetailPresentation >> popupAreaBuilderUsing: aDropdownAptitude [
 		direction: #right;
 		alignTopLeft;
 		bounds: [ :aState |
-			| selectedOffset left top |
+			| selectedOffset anchorLeft left top |
 			selectedOffset := CFMaDetailPopupMetrics
 				selectedRowOffsetForIndex: aDropdownAptitude pinnedRowIndex.
-			left := (aState occupiedBounds left + CFMaDetailPopupMetrics menuHorizontalOffset)
+			anchorLeft := aDropdownAptitude
+				pinnedAnchorLeftUsing: aState occupiedBounds left.
+			left := (anchorLeft + CFMaDetailPopupMetrics menuHorizontalOffset)
 				max: aState containerPositionXWithPadding.
 			top := (aState occupiedBounds top - selectedOffset)
 				max: aState containerPositionYWithPadding.

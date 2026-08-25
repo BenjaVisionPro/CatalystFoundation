@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrGlamorousWithExplicitDropdownAptitude',
 	#instVars : [
 		'pinnedRowIndex',
-		'pinnedRowIndexBlock'
+		'pinnedRowIndexBlock',
+		'pinnedAnchorLeft'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -13,15 +14,24 @@ Class {
 CFMaDetailDropdownAptitude >> onHidden [
 	super onHidden.
 	pinnedRowIndex := nil.
+	pinnedAnchorLeft := nil.
 	self widgetDo: [ :aWidget | aWidget popupOpen: false ]
 ]
 
 { #category : 'private - event management' }
 CFMaDetailDropdownAptitude >> onShown [
 	pinnedRowIndex := nil.
+	pinnedAnchorLeft := nil.
 	self pinnedRowIndex.
 	super onShown.
 	self widgetDo: [ :aWidget | aWidget popupOpen: true ]
+]
+
+
+{ #category : 'accessing' }
+CFMaDetailDropdownAptitude >> pinnedAnchorLeftUsing: anAnchorLeft [
+	pinnedAnchorLeft ifNil: [ pinnedAnchorLeft := anAnchorLeft ].
+	^ pinnedAnchorLeft
 ]
 
 { #category : 'accessing' }
