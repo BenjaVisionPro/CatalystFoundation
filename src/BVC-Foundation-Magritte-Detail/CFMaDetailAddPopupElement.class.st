@@ -13,7 +13,7 @@ Class {
 CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 	| anAddElement aDropdownAptitude |
 	anAddElement := self new.
-	aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude
+	aDropdownAptitude := CFMaDetailDropdownAptitude
 		handle: [ self newClassChoiceHandle ]
 		content: [ self classChoiceContentFor: anAddItemViewModel ].
 	aDropdownAptitude
