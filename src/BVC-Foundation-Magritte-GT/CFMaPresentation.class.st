@@ -102,12 +102,13 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipHandle [
+	"Use Brick's native tooltip handle geometry/size. The stepped container is
+	 transparent now, so the handle must paint itself; keep it visually neutral
+	 and let the glass panel remain the primary surface."
 	^ BlElement new
 		size: BrMenuConstants handleExtent * 2.0;
 		geometry: BlCircleGeometry new;
-		background: (Color white alpha: 0.85);
-		border: (BlBorder paint: Color veryLightGray width: 1);
-		effect: (BlBlurBelowEffect radius: 14);
+		background: Color white;
 		addAptitude: BrPopoverCommonAptitude new;
 		yourself
 ]
