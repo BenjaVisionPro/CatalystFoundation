@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaTooltipContainerAptitude',
-	#superclass : 'CFMaPopupSurfaceAptitude',
+	#superclass : 'CFGlassSurfaceAptitude',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }

@@ -633,7 +633,7 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
-		addAptitude: CFMaPopupSurfaceAptitude new;
+		addAptitude: CFGlassSurfaceAptitude new;
 		addAptitude: BrShadowAptitude new;
 		items: someValues;
 		yourself.

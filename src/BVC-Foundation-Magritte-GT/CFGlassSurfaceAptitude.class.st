@@ -1,12 +1,12 @@
 Class {
-	#name : 'CFMaPopupSurfaceAptitude',
+	#name : 'CFGlassSurfaceAptitude',
 	#superclass : 'BrAptitude',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'initialization' }
-CFMaPopupSurfaceAptitude >> initialize [
+CFGlassSurfaceAptitude >> initialize [
 	super initialize.
 
 	self
