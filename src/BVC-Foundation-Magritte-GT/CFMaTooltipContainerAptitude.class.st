@@ -9,12 +9,20 @@ Class {
 CFMaTooltipContainerAptitude >> initialize [
 	super initialize.
 
-	"The stepped menu is positioning infrastructure only. The visible glass
-	 surfaces are the tooltip content and handle themselves."
+	self
+		addChangeProperty: #(widget geometry)
+		with: [ BlChildrenWrappingGeometry
+				cornerRadius: BrMenuConstants cornerRadius
+				enlargedBy: 1 ].
 	self
 		addChangeProperty: #(widget border)
-		with: [ BlBorder empty ].
+		with: [ BlBorder paint: Color veryLightGray width: 1 ].
+	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts centered ].
 	self
 		addChangeProperty: #(widget background)
-		with: [ Color transparent ]
+		with: [ Color white alpha: 0.85 ].
+	self
+		addChangeProperty: #(widget effect)
+		with: [ BlBlurBelowEffect radius: 14 ].
+
 ]

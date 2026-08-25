@@ -85,9 +85,7 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 { #category : 'private - composition' }
 CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 	| aTooltipAptitude aNativeContainerAptitude |
-	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude new.
-	aTooltipAptitude
-		handle: [ self newCommentTooltipHandle ]
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude
 		content: [ self newCommentTooltipContentFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aNativeContainerAptitude := nil.
@@ -101,19 +99,6 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 ]
 
 { #category : 'private - composition' }
-CFMaPresentation >> newCommentTooltipHandle [
-	"Use Brick's native tooltip handle geometry/size. The stepped container is
-	 transparent now, so the handle must paint itself; keep it visually neutral
-	 and let the glass panel remain the primary surface."
-	^ BlElement new
-		size: BrMenuConstants handleExtent * 2.0;
-		geometry: BlCircleGeometry new;
-		background: Color white;
-		addAptitude: BrPopoverCommonAptitude new;
-		yourself
-]
-
-{ #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	| aText |
 	aText := aDescription comment asRopedText.
@@ -124,10 +109,8 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
 		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
 		text: aText;
-		geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
-		background: (Color white alpha: 0.85);
-		border: (BlBorder paint: Color veryLightGray width: 1);
-		effect: (BlBlurBelowEffect radius: 14);
+		background: Color transparent;
+		border: BlBorder empty;
 		focusability: BlFocusability none;
 		preventMouseEvents;
 		yourself
