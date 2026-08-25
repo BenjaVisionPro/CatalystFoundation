@@ -26,7 +26,7 @@ CFMaDetailTagsElement >> initialize [
 		background: Color transparent;
 		padding: BlInsets empty;
 		constraintsDo: [ :c |
-			c horizontal matchParent.
+			c horizontal fitContent.
 			c vertical fitContent ];
 		when: BlMouseDownEvent do: [ :anEvent |
 			anEvent target == self ifTrue: [
