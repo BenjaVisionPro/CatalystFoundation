@@ -29,6 +29,7 @@ CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
 		self addStructuralChild: anElement.
 		rows add: anElement beforeIndex: anIndex.
 		self installFocusOverlayFor: anElement.
+		self notifyRowsChanged.
 		^ anElement ].
 
 	anIndex = (rows size + 1)
@@ -39,7 +40,8 @@ CFMaDetailGroupCardElement >> addRow: anElement at: anIndex [
 			super addChild: anElement at: (anIndex * 2 - 1).
 			super addChild: self newSeparator at: anIndex * 2 ].
 	rows add: anElement beforeIndex: anIndex.
-	self installFocusOverlayFor: anElement
+	self installFocusOverlayFor: anElement.
+	self notifyRowsChanged
 ]
 
 { #category : 'private - metrics' }
@@ -113,7 +115,9 @@ CFMaDetailGroupCardElement >> removeRow: anElement [
 	rows size = 1 ifTrue: [
 		rows removeAt: anIndex.
 		self removeFocusOverlay.
-		^ super removeChild: anElement ].
+		super removeChild: anElement.
+		self notifyRowsChanged.
+		^ anElement ].
 
 	anIndex = 1
 		ifTrue: [
@@ -122,7 +126,8 @@ CFMaDetailGroupCardElement >> removeRow: anElement [
 		ifFalse: [
 			super removeChild: (self children at: anIndex * 2 - 2).
 			super removeChild: anElement ].
-	rows removeAt: anIndex
+	rows removeAt: anIndex.
+	self notifyRowsChanged
 ]
 
 
@@ -202,6 +207,12 @@ CFMaDetailGroupCardElement >> updateFocusOverlayGeometry [
 		bottomRight: bottomRadius;
 		yourself.
 	focusOverlay geometry: (BlRoundedRectangleGeometry cornerRadii: radii)
+]
+
+{ #category : 'private - layout' }
+CFMaDetailGroupCardElement >> notifyRowsChanged [
+	(self parent isKindOf: CFMaDetailGroupElement) ifTrue: [
+		self parent updateGroupSpacing ]
 ]
 
 { #category : 'accessing' }

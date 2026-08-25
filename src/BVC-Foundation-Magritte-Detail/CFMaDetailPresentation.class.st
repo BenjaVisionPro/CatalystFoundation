@@ -324,7 +324,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
 			+ BrGlamorousButtonLayoutAptitude new
-			+ BrGlamorousButtonWithLabelTooltipAptitude2 new;
+			+ CFMaButtonWithLabelTooltipAptitude new;
 		icon: anIcon;
 		background: Color transparent;
 		border: BlBorder empty;
