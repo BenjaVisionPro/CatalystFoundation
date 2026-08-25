@@ -21,9 +21,10 @@ CFMaDetailTagsElement >> initialize [
 	editingExisting := false.
 	self
 		layout: BlFlowLayout horizontal;
-		vFitContent;
 		padding: BlInsets empty;
-		constraintsDo: [ :c | c horizontal matchParent ];
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical fitContent ];
 		when: BlClickEvent do: [ :anEvent |
 			anEvent target == self ifTrue: [
 				self beginInsertionAtPoint: (self globalPointToLocal: anEvent position) ] ].
