@@ -21,7 +21,7 @@ CFMaDetailTagElement >> initialize [
 	self
 		aptitude: aTagAptitude;
 		fitContent;
-		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
+		padding: (BlInsets top: 2 right: 8 bottom: 2 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
 		background: (Color black alpha: 0.06);
 		border: BlBorder empty;
