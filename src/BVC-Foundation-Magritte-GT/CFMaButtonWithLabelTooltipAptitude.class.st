@@ -9,12 +9,6 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 	| aNativeContainerAptitude |
 	super initialize.
 
-	self handle: [ BlElement new
-		size: BrMenuConstants handleExtent * 2.0;
-		geometry: BlCircleGeometry new;
-		background: Color transparent;
-		addAptitude: BrPopoverCommonAptitude new ].
-
 	self menuContainerDo: [ :aContainer |
 		aNativeContainerAptitude := nil.
 		aContainer aptitudeDo: [ :anAptitude |
@@ -23,4 +17,18 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 		aNativeContainerAptitude ifNotNil: [
 			aContainer removeAptitude: aNativeContainerAptitude ].
 		aContainer addAptitude: CFMaTooltipContainerAptitude new ]
+]
+
+{ #category : #'api - menu' }
+CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutString [
+	self
+		handle: [ BlElement new
+			size: BrMenuConstants handleExtent * 2.0;
+			geometry: BlCircleGeometry new;
+			background: Color transparent;
+			addAptitude: BrPopoverCommonAptitude new ]
+		submenu: [
+			self
+				newMenuModelWithLabel: aLabelString
+				shortcut: aShortcutString ]
 ]
