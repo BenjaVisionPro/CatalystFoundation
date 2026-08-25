@@ -1426,7 +1426,9 @@ CFMaDetailPresentation >> visitToManyScalarRelationDescription: aDescription [
 	aTagsElement := CFMaDetailTagsElement new
 		description: aDescription memento: self memento;
 		yourself.
-	self addShortcutsTo: aTagsElement.
+	self
+		installFormNavigationOn: aTagsElement
+		forwardCombination: BlKeyCombination tab.
 	self addFieldElement: aTagsElement using: aDescription.
 	^ aTagsElement
 ]

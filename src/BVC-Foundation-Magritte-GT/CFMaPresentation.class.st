@@ -285,6 +285,13 @@ CFMaPresentation >> initialize [
 
 { #category : 'private - focus' }
 CFMaPresentation >> installFormNavigationOn: anElement [
+	^ self
+		installFormNavigationOn: anElement
+		forwardCombination: (BlKeyCombination tab or: BlKeyCombination enter)
+]
+
+{ #category : 'private - focus' }
+CFMaPresentation >> installFormNavigationOn: anElement forwardCombination: aForwardCombination [
 	(anElement userData includesKey: #cfMaFormNavigation)
 		ifTrue: [ ^ anElement ].
 
@@ -311,7 +318,7 @@ CFMaPresentation >> installFormNavigationOn: anElement [
 		addShortcut: (BlShortcutWithAction new
 			name: 'Move to next form description';
 			description: 'Moves to the next Magritte description in the complete Foundation form.';
-			combination: (BlKeyCombination tab or: BlKeyCombination enter);
+			combination: aForwardCombination;
 			overrideChildren: true;
 			action: [ :anEvent |
 				anEvent consumed: true.
