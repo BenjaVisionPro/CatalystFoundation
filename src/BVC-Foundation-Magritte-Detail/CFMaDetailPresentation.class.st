@@ -626,9 +626,14 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
 			anItemElement
 				text: (aDisplayBlock cull: anItemObject);
+				hoverBlock: [ aList selectOne: anItemIndex ];
 				activateBlock: [
-					(aList isSelectedAt: anItemIndex)
-						ifTrue: [ aPopup fireEvent: BrDropdownHideWish new ] ] ];
+					GtMagritteBuilderUtility
+						write: anItemObject
+						using: aDescription
+						memento: self memento
+						element: aPopup.
+					true ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
@@ -641,18 +646,6 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 	aCurrentIndex := someValues indexOf: aCurrentValue ifAbsent: [ 0 ].
 	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
 
-	aList when: BrSelectionChanged do: [ :anEvent |
-		| aWidgetElement |
-		aWidgetElement := anEvent currentTarget.
-		anEvent selectedDo: [ :anInterval |
-			| selectedObject |
-			selectedObject := aWidgetElement viewModel itemAt: anInterval first.
-			GtMagritteBuilderUtility
-				write: selectedObject
-				using: aDescription
-				memento: self memento
-				element: aPopup.
-			aPopup fireEvent: BrDropdownHideWish new ] ].
 	^ aList
 ]
 

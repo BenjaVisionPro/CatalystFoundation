@@ -55,22 +55,27 @@ CFMaDetailAddPopupElement class >> newClassChoiceHandle [
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
-	^ BrSimpleList new
+	| aList |
+	aList := BrSimpleList new
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :aClass :anItemIndex |
 			anItemElement
 				text: aClass displayString;
+				hoverBlock: [ aList selectOne: anItemIndex ];
 				activateBlock: [
-					(anAddItemViewModel shouldDisableNewItemClass: aClass) ifFalse: [
-						anAddItemViewModel addItemForClass: aClass from: anItemElement.
-						anItemElement fireEvent: BrDropdownHideWish new ] ] ];
+					(anAddItemViewModel shouldDisableNewItemClass: aClass)
+						ifTrue: [ false ]
+						ifFalse: [
+							anAddItemViewModel addItemForClass: aClass from: anItemElement.
+							true ] ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
 		background: Color transparent;
 		border: BlBorder empty;
 		items: anAddItemViewModel newItemClasses;
-		yourself
+		yourself.
+	^ aList
 ]
 
 { #category : 'instance creation' }
