@@ -175,7 +175,8 @@ CFMaDetailTagsElement >> beginInsertionAtEnd [
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor before: addButton.
 	activeEditor switchToEditor.
-	activeEditor requestFocus
+	activeEditor enqueueTask: (BlTaskAction new action: [
+		activeEditor ifNotNil: [ activeEditor requestFocus ] ])
 ]
 
 { #category : 'private - editing' }
