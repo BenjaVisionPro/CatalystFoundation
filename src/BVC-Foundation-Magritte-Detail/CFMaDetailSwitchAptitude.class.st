@@ -20,7 +20,7 @@ CFMaDetailSwitchAptitude class >> activeTrackColor [
 
 { #category : 'defaults' }
 CFMaDetailSwitchAptitude class >> animationDuration [
-	^ 150 milliSeconds
+	^ 120 milliSeconds
 ]
 
 { #category : 'defaults' }
