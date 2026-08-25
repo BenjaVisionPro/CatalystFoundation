@@ -89,12 +89,24 @@ CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
 		handle: [ self newCommentTooltipHandle ]
 		content: [ self newCommentTooltipFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
+		self removePopoverContainerAptitudeFrom: aContainer.
 		aContainer
 			padding: BlInsets empty;
 			geometry: (BrAnchoredGeometry cornerRadius: 6 element: aContainer);
 			background: (Color white alpha: 0.85);
 			border: BlBorder empty ].
 	aFieldElement addAptitude: aTooltipAptitude
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> removePopoverContainerAptitudeFrom: aContainer [
+	| aPopoverContainerAptitude |
+	aPopoverContainerAptitude := nil.
+	aContainer aptitudeDo: [ :anAptitude |
+		(anAptitude isKindOf: BrPopoverContainerAptitude) ifTrue: [
+			aPopoverContainerAptitude := anAptitude ] ].
+	aPopoverContainerAptitude ifNotNil: [
+		aContainer removeAptitude: aPopoverContainerAptitude ]
 ]
 
 { #category : 'private - composition' }
