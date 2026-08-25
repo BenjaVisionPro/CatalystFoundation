@@ -281,21 +281,18 @@ CFMaDetailRowLayout >> contentUsesAvailableWidth: aContent [
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSupporting content: aContent naturalDescriptionWidth: naturalDescriptionWidth [
-	| descriptionTop contentTop supportingHeight contentBottom supportingBottom |
+	| descriptionTop contentTop supportingHeight contentBottom supportingBottom contentOverlapsSupporting |
 
 	wrapped := false.
 	descriptionWidth := naturalDescriptionWidth min: bodyWidth.
 	contentWidth := aContent
 		ifNil: [ 0.0 ]
 		ifNotNil: [ (bodyWidth - descriptionWidth - gap) max: 0.0 ].
-	supportingWidth := (bodyWidth - supportingInset
-		- (aContent ifNil: [ 0.0 ] ifNotNil: [ gap + aContent measuredWidth ])) max: 0.0.
 
 	self measure: aDescription widthAtMost: descriptionWidth.
 	(self contentUsesAvailableWidth: aContent)
 		ifTrue: [ self measure: aContent widthExactly: contentWidth ]
 		ifFalse: [ self measure: aContent widthAtMost: contentWidth ].
-	self measure: aSupporting widthExactly: supportingWidth.
 
 	baseline := self baselineFor: aDescription and: aContent.
 	descriptionTop := 0.0.
@@ -320,8 +317,15 @@ CFMaDetailRowLayout >> measureInlineDescription: aDescription supporting: aSuppo
 	secondLineTop := aDescription
 		ifNil: [ 0.0 ]
 		ifNotNil: [ descriptionTop + aDescription measuredHeight + supportingGap ].
-	supportingHeight := aSupporting ifNil: [ 0.0 ] ifNotNil: [ aSupporting measuredHeight ].
 	contentBottom := aContent ifNil: [ 0.0 ] ifNotNil: [ contentTop + aContent measuredHeight ].
+	contentOverlapsSupporting := aContent notNil and: [ contentBottom > secondLineTop ].
+	supportingWidth := (bodyWidth - supportingInset
+		- (contentOverlapsSupporting
+			ifTrue: [ gap + aContent measuredWidth ]
+			ifFalse: [ 0.0 ])) max: 0.0.
+	self measure: aSupporting widthExactly: supportingWidth.
+
+	supportingHeight := aSupporting ifNil: [ 0.0 ] ifNotNil: [ aSupporting measuredHeight ].
 	supportingBottom := aSupporting ifNil: [ 0.0 ] ifNotNil: [ secondLineTop + supportingHeight ].
 	^ firstLineBottom max: (contentBottom max: supportingBottom)
 ]
