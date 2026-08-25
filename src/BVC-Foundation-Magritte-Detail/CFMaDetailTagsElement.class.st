@@ -20,13 +20,16 @@ CFMaDetailTagsElement >> initialize [
 	values := #().
 	editingExisting := false.
 	self
-		layout: BlFlowLayout horizontal;
+		layout: (BlFlowLayout horizontal
+			horizontalAlignment: BlElementAlignment horizontal end;
+			yourself);
+		background: Color transparent;
 		padding: BlInsets empty;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
 		when: BlMouseDownEvent do: [ :anEvent |
-			(anEvent target == self or: [ anEvent target parent == self ]) ifTrue: [
+			anEvent target == self ifTrue: [
 				self beginInsertionAtPoint:
 					(self globalPointToLocal: anEvent position) ] ].
 ]
@@ -130,8 +133,8 @@ CFMaDetailTagsElement >> beginEditingTag: aTag [
 	activeEditor := self newEditorWithText: (description reference toString: aTag value).
 	self removeChild: aTag.
 	self addChild: activeEditor at: editingIndex.
-	activeEditor requestFocus.
-	activeEditor switchToEditor
+	activeEditor switchToEditor.
+	activeEditor requestFocus
 ]
 
 { #category : 'private - editing' }
@@ -147,22 +150,21 @@ CFMaDetailTagsElement >> beginInsertionAtPoint: aPoint [
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor at: anIndex.
-	activeEditor requestFocus.
-	activeEditor switchToEditor
+	activeEditor switchToEditor.
+	activeEditor requestFocus
 ]
 
 { #category : 'private - editing' }
 CFMaDetailTagsElement >> newEditorWithText: aString [
 	| anEditor |
 	anEditor := CFEditableLabel new
-		aptitude: (BrGlamorousEditableLabelAptitude new
+		aptitude: (CFMaDetailTagAptitude new
 			glamorousRegularFont;
 			glamorousRegularSmallSize);
 		text: aString;
 		fitContent;
 		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 100);
 		background: (Color white alpha: 0.9);
 		border: (BlBorder paint: CFMaDetailColours highlight width: 1);
 		constraintsDo: [ :c |
@@ -284,4 +286,30 @@ CFMaDetailTagsElement >> insertionIndexAt: aPoint [
 		aPoint x < bounds center x ifTrue: [
 			^ self children indexOf: each ] ].
 	^ (self children indexOf: lineChildren last) + 1
+]
+
+
+{ #category : 'layout' }
+CFMaDetailTagsElement >> supportsBaseline [
+	^ self children accountedByLayout isNotEmpty
+]
+
+{ #category : 'layout' }
+CFMaDetailTagsElement >> baselineOffset [
+	| aChild aParagraphElement aTextElement |
+	aChild := self children accountedByLayout
+		ifEmpty: [ ^ 0 ]
+		ifNotEmpty: [ :someChildren | someChildren first ].
+	(aChild isKindOf: BrEditorElement) ifFalse: [ ^ 0 ].
+	aParagraphElement := aChild children accountedByLayout
+		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
+		ifNone: [ ^ 0 ].
+	aTextElement := aParagraphElement children accountedByLayout
+		detect: [ :each | each isKindOf: BlTextElement ]
+		ifNone: [ ^ 0 ].
+	aTextElement measure: BlExtentMeasurementSpec unspecified.
+	^ aChild margin top
+		+ aChild padding top
+		+ aParagraphElement padding top
+		+ aTextElement baselineOffset
 ]
