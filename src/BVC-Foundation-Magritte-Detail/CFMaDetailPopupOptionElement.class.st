@@ -5,7 +5,8 @@ Class {
 		'checkLabel',
 		'valueLabel',
 		'activateBlock',
-		'hoverBlock'
+		'hoverBlock',
+		'checked'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -52,6 +53,8 @@ CFMaDetailPopupOptionElement >> initialize [
 
 	activateBlock := nil.
 	hoverBlock := nil.
+	checked := false.
+	checkLabel visibility: BlVisibility hidden.
 	self
 		when: BlMouseEnterEvent do: [ :anEvent |
 			hoverBlock ifNotNil: [ hoverBlock cull: self ] ];
@@ -64,12 +67,9 @@ CFMaDetailPopupOptionElement >> initialize [
 			selected: [ :aStyle |
 				aStyle background: CFMaDetailColours highlight ]);
 		addAptitude: (BrStyleCommonAptitude new
-			@ checkLabel;
-			deselected: [ :aStyle | aStyle hidden ];
-			selected: [ :aStyle | aStyle visible ]);
-		addAptitude: (BrStyleCommonAptitude new
 			@ checkLabelAptitude label;
-			default: [ :aStyle | aStyle foreground: Color white ]);
+			default: [ :aStyle | aStyle foreground: CFMaDetailColours primaryForeground ];
+			selected: [ :aStyle | aStyle foreground: Color white ]);
 		addAptitude: (BrStyleCommonAptitude new
 			@ valueLabelAptitude label;
 			default: [ :aStyle | aStyle foreground: CFMaDetailColours primaryForeground ];
@@ -81,6 +81,14 @@ CFMaDetailPopupOptionElement >> initialize [
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> activateBlock: aBlock [
 	activateBlock := aBlock
+]
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> checked: aBoolean [
+	checked := aBoolean.
+	checkLabel visibility: (checked
+		ifTrue: [ BlVisibility visible ]
+		ifFalse: [ BlVisibility hidden ])
 ]
 
 { #category : 'accessing' }
@@ -104,7 +112,7 @@ CFMaDetailPopupOptionElement >> activate [
 
 { #category : 'private - interaction' }
 CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
-	| menuContainer blinkAnimation fadeAnimation dismissalAnimation |
+	| menuContainer firstFlash secondFlash fadeAnimation dismissalAnimation |
 	self states addState: BlElementState selected.
 	menuContainer := self
 		allParentsDetect: [ :eachParent | eachParent isKindOf: BrMenuSteppedElement ]
@@ -113,30 +121,36 @@ CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
 			self fireEvent: BrDropdownHideWish new.
 			^ self ].
 
-	blinkAnimation := BlSequentialAnimation new
+	firstFlash := BlSequentialAnimation new
 		addAll: {
 			BlAnimation new
-				duration: 40 milliSeconds;
+				duration: 80 milliSeconds;
 				onFinishedDo: [ self states removeState: BlElementState selected ].
 			BlAnimation new
-				duration: 40 milliSeconds;
-				onFinishedDo: [ self states addState: BlElementState selected ].
+				duration: 80 milliSeconds;
+				onFinishedDo: [ self states addState: BlElementState selected ] };
+		yourself.
+
+	secondFlash := BlSequentialAnimation new
+		addAll: {
 			BlAnimation new
-				duration: 40 milliSeconds;
+				duration: 80 milliSeconds;
 				onFinishedDo: [ self states removeState: BlElementState selected ].
 			BlAnimation new
-				duration: 40 milliSeconds;
+				duration: 80 milliSeconds;
 				onFinishedDo: [ self states addState: BlElementState selected ] };
 		yourself.
 
 	fadeAnimation := BlOpacityAnimation new
 		target: menuContainer;
 		opacity: 0.0;
-		duration: 180 milliSeconds;
+		duration: 200 milliSeconds;
 		yourself.
 
-	dismissalAnimation := BlParallelAnimation
-		with: { blinkAnimation. fadeAnimation }.
+	dismissalAnimation := BlSequentialAnimation new
+		add: firstFlash;
+		add: (BlParallelAnimation with: { secondFlash. fadeAnimation });
+		yourself.
 	dismissalAnimation onFinishedDo: [
 		self fireEvent: BrDropdownHideWish new.
 		menuContainer opacity: 1.0 ].

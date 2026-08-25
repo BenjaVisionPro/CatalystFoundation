@@ -621,11 +621,13 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 			memento: self memento
 			description: aDescription ].
 
+	aCurrentValue := self memento readUsing: aDescription.
 	aList := BrSimpleList new
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
 			anItemElement
 				text: (aDisplayBlock cull: anItemObject);
+				checked: anItemObject = aCurrentValue;
 				hoverBlock: [ aList selectOne: anItemIndex ];
 				activateBlock: [
 					GtMagritteBuilderUtility
@@ -642,7 +644,6 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		items: someValues;
 		yourself.
 
-	aCurrentValue := self memento readUsing: aDescription.
 	aCurrentIndex := someValues indexOf: aCurrentValue ifAbsent: [ 0 ].
 	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
 
