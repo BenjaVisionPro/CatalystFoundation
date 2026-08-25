@@ -113,6 +113,7 @@ CFMaDetailPopupOptionElement >> text: aTextOrString [
 CFMaDetailPopupOptionElement >> activate [
 	activateBlock ifNil: [ ^ self ].
 	(canActivateBlock cull: self) ifFalse: [ ^ self ].
+	activateBlock cull: self.
 	self blinkSelectionAndDismiss
 ]
 
@@ -125,7 +126,6 @@ CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
 		ifFound: [ :aMenuContainer | aMenuContainer ]
 		ifNone: [
 			self fireEvent: BrDropdownHideWish new.
-			activateBlock cull: self.
 			^ self ].
 
 	blinkAnimation := BlSequentialAnimation new
@@ -159,8 +159,7 @@ CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
 		with: { blinkAnimation. delayedFadeAnimation }.
 	dismissalAnimation onFinishedDo: [
 		self fireEvent: BrDropdownHideWish new.
-		menuContainer opacity: 1.0.
-		activateBlock cull: self ].
+		menuContainer opacity: 1.0 ].
 	menuContainer addAnimation: dismissalAnimation
 ]
 

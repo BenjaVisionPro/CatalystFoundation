@@ -577,9 +577,13 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 				values: someValues
 				display: aDisplayBlock ].
 	aDropdownAptitude
+		pinRowIndexUsing: [
+			| currentValue |
+			currentValue := self memento readUsing: aDescription.
+			someValues indexOf: currentValue ifAbsent: [ 1 ] ];
 		withGainFocusOnShow;
 		withContainerAreaBuilders: {
-			self popupAreaBuilderUsing: aDescription values: someValues };
+			self popupAreaBuilderUsing: aDropdownAptitude };
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
@@ -593,16 +597,15 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> popupAreaBuilderUsing: aDescription values: someValues [
+CFMaDetailPresentation >> popupAreaBuilderUsing: aDropdownAptitude [
 	^ BlSteppedLayoutAreaBuilder new
 		mark: BlSteppedLayoutMark bottomRight;
 		direction: #right;
 		alignTopLeft;
 		bounds: [ :aState |
-			| currentValue currentIndex selectedOffset left top |
-			currentValue := self memento readUsing: aDescription.
-			currentIndex := someValues indexOf: currentValue ifAbsent: [ 1 ].
-			selectedOffset := CFMaDetailPopupMetrics selectedRowOffsetForIndex: currentIndex.
+			| selectedOffset left top |
+			selectedOffset := CFMaDetailPopupMetrics
+				selectedRowOffsetForIndex: aDropdownAptitude pinnedRowIndex.
 			left := (aState occupiedBounds left + CFMaDetailPopupMetrics menuHorizontalOffset)
 				max: aState containerPositionXWithPadding.
 			top := (aState occupiedBounds top - selectedOffset)
