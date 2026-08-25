@@ -22,5 +22,4 @@ CFMaTooltipContainerAptitude >> initialize [
 		addChangeProperty: #(widget background)
 		with: [ Color white alpha: 0.85 ].
 
-	self add: BrShadowAptitude new
 ]
