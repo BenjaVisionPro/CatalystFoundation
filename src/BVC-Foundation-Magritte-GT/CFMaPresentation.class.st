@@ -115,7 +115,7 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 
 	^ BrLabel new
 		fitContent;
-		constraintsDo: [ :c | c maxWidth: 250 ];
+		constraintsDo: [ :c | c maxWidth: 180 ];
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
 		aptitude: aLabelAptitude;
 		text: aText;
