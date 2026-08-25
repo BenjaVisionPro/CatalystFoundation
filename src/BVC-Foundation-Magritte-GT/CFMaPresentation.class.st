@@ -83,46 +83,21 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 ]
 
 { #category : 'private - composition' }
-CFMaPresentation >> addCommentTooltipTo: aFieldElement using: aDescription [
-	| aTooltipAptitude |
-	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude new
-		handle: [ self newCommentTooltipHandle ]
-		content: [ self newCommentTooltipFor: aDescription ].
+CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
+	| aText aTooltipAptitude aNativeContainerAptitude |
+	aText := aDescription comment asRopedText.
+	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
+
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude text: aText.
 	aTooltipAptitude menuContainerDo: [ :aContainer |
-		aContainer
-			padding: BlInsets empty;
-			addAptitude: (BrStyleCommonAptitude new
-				default: [ :aStyle |
-					aStyle
-						background: (Color white alpha: 0.85);
-						border: BlBorder empty ]) ].
-	aFieldElement addAptitude: aTooltipAptitude
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> newCommentTooltipHandle [
-	"Keep GT's handle extent and geometry for native tooltip layout, but let the
-	popover container paint the joined translucent surface exactly once."
-	^ BlElement new
-		size: BrMenuConstants handleExtent * 2.0;
-		geometry: BlCircleGeometry new;
-		background: Color transparent;
-		border: BlBorder empty;
-		yourself
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> newCommentTooltipFor: aDescription [
-	^ BrLabel new
-		fitContent;
-		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
-		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
-		text: aDescription comment;
-		background: Color transparent;
-		border: BlBorder empty;
-		focusability: BlFocusability none;
-		preventMouseEvents;
-		yourself
+		aNativeContainerAptitude := nil.
+		aContainer aptitudeDo: [ :anAptitude |
+			(anAptitude isKindOf: BrPopoverContainerAptitude) ifTrue: [
+				aNativeContainerAptitude := anAptitude ] ].
+		aNativeContainerAptitude ifNotNil: [
+			aContainer removeAptitude: aNativeContainerAptitude ].
+		aContainer addAptitude: CFMaTooltipContainerAptitude new ].
+	anElement addAptitude: aTooltipAptitude
 ]
 
 { #category : 'visiting-description' }
