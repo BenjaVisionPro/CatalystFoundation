@@ -106,19 +106,17 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
-	| aText aLabelAptitude |
+	| aText |
 	aText := aDescription comment asRopedText.
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
-	aLabelAptitude := CFMaTooltipLabelAptitude new glamorousRegularFontAndSize.
-	aLabelAptitude labelDo: [ :aTextElement |
-		aTextElement constraintsDo: [ :c | c maxWidth: 164 ] ].
-
-	^ BrLabel new
-		fitContent;
+	^ BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		hFitContentLimited;
+		vFitContent;
 		constraintsDo: [ :c | c maxWidth: 180 ];
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
-		aptitude: aLabelAptitude;
 		text: aText;
 		background: Color transparent;
 		border: BlBorder empty;
