@@ -25,9 +25,10 @@ CFMaDetailTagsElement >> initialize [
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
-		when: BlClickEvent do: [ :anEvent |
-			self beginInsertionAtPoint:
-				(self globalPointToLocal: anEvent position) ].
+		when: BlMouseDownEvent do: [ :anEvent |
+			(anEvent target == self or: [ anEvent target parent == self ]) ifTrue: [
+				self beginInsertionAtPoint:
+					(self globalPointToLocal: anEvent position) ] ].
 ]
 
 { #category : 'accessing' }
@@ -161,7 +162,7 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 		fitContent;
 		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 100);
 		background: (Color white alpha: 0.9);
 		border: (BlBorder paint: CFMaDetailColours highlight width: 1);
 		constraintsDo: [ :c |
