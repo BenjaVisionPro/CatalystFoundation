@@ -110,18 +110,8 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	aText := aDescription comment asRopedText.
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
-	^ BrEditor new
-		aptitude: BrGlamorousRegularEditorAptitude new;
-		beReadOnlyWithoutSelection;
-		hFitContentLimited;
-		vFitContent;
-		constraintsDo: [ :c | c maxWidth: 250 ];
-		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
+	^ CFMaTooltipContentElement new
 		text: aText;
-		background: Color transparent;
-		border: BlBorder empty;
-		focusability: BlFocusability none;
-		preventMouseEvents;
 		yourself
 ]
 

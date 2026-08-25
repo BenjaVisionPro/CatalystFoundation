@@ -27,8 +27,8 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			geometry: BlCircleGeometry new;
 			background: Color transparent;
 			addAptitude: BrPopoverCommonAptitude new ]
-		submenu: [
-			self
-				newMenuModelWithLabel: aLabelString
-				shortcut: aShortcutString ]
+		content: [
+			CFMaTooltipContentElement new
+				text: aLabelString asRopedText;
+				yourself ]
 ]
