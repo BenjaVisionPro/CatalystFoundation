@@ -8,7 +8,8 @@ Class {
 		'selectedTag',
 		'activeEditor',
 		'editingIndex',
-		'editingExisting'
+		'editingExisting',
+		'addButton'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -27,11 +28,8 @@ CFMaDetailTagsElement >> initialize [
 		padding: BlInsets empty;
 		constraintsDo: [ :c |
 			c horizontal fitContent.
-			c vertical fitContent ];
-		when: BlMouseDownEvent do: [ :anEvent |
-			anEvent target == self ifTrue: [
-				self beginInsertionAtPoint:
-					(self globalPointToLocal: anEvent position) ] ].
+			c vertical fitContent ].
+	addButton := self newAddButton.
 ]
 
 { #category : 'accessing' }
@@ -57,7 +55,35 @@ CFMaDetailTagsElement >> reconcileWith: aCollection [
 	values := aCollection ifNil: [ #() ].
 	selectedTag := nil.
 	self removeChildren.
-	values do: [ :each | self addChild: (self newPillFor: each) ]
+	values do: [ :each | self addChild: (self newPillFor: each) ].
+	description isDefinitive ifFalse: [ self addChild: addButton ]
+]
+
+{ #category : 'private - instance creation' }
+CFMaDetailTagsElement >> newAddButton [
+	| aButton anIcon |
+	anIcon := FontAwesomeIcons defaultStyle icon: #circlePlus.
+	anIcon
+		color: CFMaDetailColours secondaryForeground;
+		size: 12 @ 12.
+	aButton := BrButton new
+		aptitude: BrGlamorousButtonIconAptitude new
+			+ BrGlamorousButtonLayoutAptitude new;
+		icon: anIcon;
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: (BlInsets all: 4);
+		margin: (BlInsets top: 2 right: 0 bottom: 2 left: 0);
+		fitContent;
+		constraintsDo: [ :c | c flow vertical alignCenter ];
+		when: BlMouseEnterEvent do: [ :anEvent |
+			anIcon color: CFMaDetailColours highlight ];
+		when: BlMouseLeaveEvent do: [ :anEvent |
+			anIcon color: CFMaDetailColours secondaryForeground ];
+		when: BlClickEvent do: [ :anEvent |
+			self beginInsertionAtEnd ];
+		yourself.
+	^ aButton
 ]
 
 { #category : 'private - instance creation' }
@@ -138,6 +164,21 @@ CFMaDetailTagsElement >> beginEditingTag: aTag [
 ]
 
 { #category : 'private - editing' }
+CFMaDetailTagsElement >> beginInsertionAtEnd [
+	description isDefinitive ifTrue: [ ^ self ].
+	activeEditor ifNotNil: [ self commitActiveEditor ].
+	selectedTag ifNotNil: [
+		selectedTag beUnselected.
+		selectedTag := nil ].
+	editingIndex := values size + 1.
+	editingExisting := false.
+	activeEditor := self newEditorWithText: ''.
+	self addChild: activeEditor before: addButton.
+	activeEditor switchToEditor.
+	activeEditor requestFocus
+]
+
+{ #category : 'private - editing' }
 CFMaDetailTagsElement >> beginInsertionAtPoint: aPoint [
 	| anIndex |
 	description isDefinitive ifTrue: [ ^ self ].
@@ -206,7 +247,9 @@ CFMaDetailTagsElement >> commitActiveEditor [
 		ifFalse: [
 			aString ifNotEmpty: [
 				newValue := description reference fromString: aString.
-				newValues add: newValue beforeIndex: editingIndex ] ].
+				editingIndex > newValues size
+					ifTrue: [ newValues add: newValue ]
+					ifFalse: [ newValues add: newValue beforeIndex: editingIndex ] ] ].
 
 	self finishEditing.
 	self writeValues: newValues
