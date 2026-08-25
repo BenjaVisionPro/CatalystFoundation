@@ -16,13 +16,14 @@ CFMaDetailTagElement >> initialize [
 	aTagAptitude := (BrGlamorousEditableLabelAptitude
 		background: (Color black alpha: 0.06)
 		focused: CFMaDetailColours highlight)
-		glamorousRegularFontAndSize.
+		glamorousRegularFont;
+		glamorousRegularSmallSize.
 	self
 		aptitude: aTagAptitude;
 		fitContent;
 		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 8);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 		background: (Color black alpha: 0.06);
 		border: BlBorder empty;
 		constraintsDo: [ :c | c flow vertical alignCenter ];

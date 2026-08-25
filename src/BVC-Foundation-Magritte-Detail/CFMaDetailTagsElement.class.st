@@ -26,8 +26,8 @@ CFMaDetailTagsElement >> initialize [
 			c horizontal matchParent.
 			c vertical fitContent ];
 		when: BlClickEvent do: [ :anEvent |
-			anEvent target == self ifTrue: [
-				self beginInsertionAtPoint: (self globalPointToLocal: anEvent position) ] ].
+			self beginInsertionAtPoint:
+				(self globalPointToLocal: anEvent position) ].
 ]
 
 { #category : 'accessing' }
@@ -63,6 +63,8 @@ CFMaDetailTagsElement >> newPillFor: aValue [
 		value: aValue;
 		text: (description reference toString: aValue);
 		selectedBlock: [ :aTag | self selectTag: aTag ];
+		when: BrEditorAcceptWish do: [ :aWish |
+			self acceptEditionOfTag: aPill text: aWish text ];
 		yourself.
 	description isDefinitive ifFalse: [
 		aPill
@@ -88,6 +90,23 @@ CFMaDetailTagsElement >> newPillFor: aValue [
 					anEvent consumed: true.
 					self beginEditingTag: aPill ]) ].
 	^ aPill
+]
+
+{ #category : 'private - editing' }
+CFMaDetailTagsElement >> acceptEditionOfTag: aTag text: aText [
+	| anIndex aString newValues newValue |
+	description isDefinitive ifTrue: [ ^ self ].
+	anIndex := self children indexOf: aTag.
+	anIndex = 0 ifTrue: [ ^ self ].
+	aString := aText asString trimBoth.
+	newValues := values asOrderedCollection.
+	aString
+		ifEmpty: [ newValues removeAt: anIndex ]
+		ifNotEmpty: [
+			newValue := description reference fromString: aString.
+			newValues at: anIndex put: newValue ].
+	selectedTag := nil.
+	self writeValues: newValues
 ]
 
 { #category : 'selection' }
@@ -135,12 +154,14 @@ CFMaDetailTagsElement >> beginInsertionAtPoint: aPoint [
 CFMaDetailTagsElement >> newEditorWithText: aString [
 	| anEditor |
 	anEditor := CFEditableLabel new
-		aptitude: BrGlamorousEditableLabelAptitude new glamorousRegularFontAndSize;
+		aptitude: (BrGlamorousEditableLabelAptitude new
+			glamorousRegularFont;
+			glamorousRegularSmallSize);
 		text: aString;
 		fitContent;
 		padding: (BlInsets top: 3 right: 8 bottom: 3 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: 8);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 		background: (Color white alpha: 0.9);
 		border: (BlBorder paint: CFMaDetailColours highlight width: 1);
 		constraintsDo: [ :c |
