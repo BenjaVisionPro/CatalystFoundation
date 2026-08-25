@@ -111,7 +111,7 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
 	aLabelAptitude := BrGlamorousLabelAptitude new glamorousRegularFontAndSize.
-	aLabelAptitude tightMeasurement.
+	aLabelAptitude labelMeasurement.
 
 	^ BrLabel new
 		fitContent;
