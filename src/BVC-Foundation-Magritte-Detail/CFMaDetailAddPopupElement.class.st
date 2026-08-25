@@ -26,9 +26,8 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 				geometry: (BlChildrenWrappingGeometry
 					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
 					enlargedBy: 0.5);
-				background: CFMaDetailPopupMetrics menuBackgroundColor;
-				border: (BlBorder paint: (Color black alpha: 0.18) width: 0.5);
-				aptitude: BrShadowAptitude new ].
+				addAptitude: CFMaPopupSurfaceAptitude new;
+				addAptitude: BrShadowAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ anAddElement
 ]
