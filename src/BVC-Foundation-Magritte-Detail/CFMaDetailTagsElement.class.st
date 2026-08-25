@@ -51,8 +51,11 @@ CFMaDetailTagsElement >> observeValue [
 
 { #category : 'private - model' }
 CFMaDetailTagsElement >> reconcileWith: aCollection [
+	| incomingValues |
 	activeEditor ifNotNil: [ ^ self ].
-	values := aCollection ifNil: [ #() ].
+	incomingValues := aCollection ifNil: [ #() ].
+	values = incomingValues ifTrue: [ ^ self ].
+	values := incomingValues.
 	selectedTag := nil.
 	self removeChildren.
 	values do: [ :each | self addChild: (self newPillFor: each) ].
@@ -235,27 +238,40 @@ CFMaDetailTagsElement >> installCompletionOn: anEditor [
 
 { #category : 'private - editing' }
 CFMaDetailTagsElement >> commitActiveEditor [
-	| aString newValues newValue |
+	| aString newValues newValue aPill anEditor anIndex |
 	activeEditor ifNil: [ ^ self ].
-	aString := activeEditor text asString trimBoth.
+	anEditor := activeEditor.
+	anIndex := editingIndex.
+	aString := anEditor text asString trimBoth.
 	newValues := values asOrderedCollection.
 
 	editingExisting
 		ifTrue: [
 			aString
-				ifEmpty: [ newValues removeAt: editingIndex ]
+				ifEmpty: [ newValues removeAt: anIndex ]
 				ifNotEmpty: [
 					newValue := description reference fromString: aString.
-					newValues at: editingIndex put: newValue ] ]
+					newValues at: anIndex put: newValue ] ]
 		ifFalse: [
 			aString ifNotEmpty: [
 				newValue := description reference fromString: aString.
-				editingIndex > newValues size
+				anIndex > newValues size
 					ifTrue: [ newValues add: newValue ]
-					ifFalse: [ newValues add: newValue beforeIndex: editingIndex ] ] ].
+					ifFalse: [ newValues add: newValue beforeIndex: anIndex ] ] ].
 
-	self finishEditing.
-	self writeValues: newValues
+	aString
+		ifEmpty: [
+			anEditor parent ifNotNil: [ anEditor removeFromParent ] ]
+		ifNotEmpty: [
+			aPill := self newPillFor: newValue.
+			self addChild: aPill at: anIndex.
+			anEditor parent ifNotNil: [ anEditor removeFromParent ] ].
+
+	activeEditor := nil.
+	editingIndex := nil.
+	editingExisting := false.
+	values := self collectionFrom: newValues.
+	self writeCollection: values
 ]
 
 { #category : 'private - editing' }
@@ -275,19 +291,27 @@ CFMaDetailTagsElement >> finishEditing [
 ]
 
 { #category : 'private - model' }
-CFMaDetailTagsElement >> writeValues: someValues [
-	| aCollection |
-	aCollection := values
+CFMaDetailTagsElement >> collectionFrom: someValues [
+	^ values
 		ifNil: [ someValues asArray ]
 		ifNotNil: [
 			[ values species withAll: someValues ]
 				on: Error
-				do: [ :anError | someValues asArray ] ].
+				do: [ :anError | someValues asArray ] ]
+]
+
+{ #category : 'private - model' }
+CFMaDetailTagsElement >> writeCollection: aCollection [
 	GtMagritteBuilderUtility
 		write: aCollection
 		using: description
 		memento: memento
 		element: self
+]
+
+{ #category : 'private - model' }
+CFMaDetailTagsElement >> writeValues: someValues [
+	self writeCollection: (self collectionFrom: someValues)
 ]
 
 { #category : 'private - interaction' }
