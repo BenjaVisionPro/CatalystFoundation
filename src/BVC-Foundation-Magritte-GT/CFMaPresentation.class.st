@@ -85,7 +85,13 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 { #category : 'private - composition' }
 CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 	| aTooltipAptitude aNativeContainerAptitude |
-	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude
+	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude new.
+	aTooltipAptitude
+		handle: [ BlElement new
+			size: BrMenuConstants handleExtent * 2.0;
+			geometry: BlCircleGeometry new;
+			background: Color transparent;
+			addAptitude: BrPopoverCommonAptitude new ]
 		content: [ self newCommentTooltipContentFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aNativeContainerAptitude := nil.
