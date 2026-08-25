@@ -634,8 +634,7 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 						write: anItemObject
 						using: aDescription
 						memento: self memento
-						element: aPopup.
-					true ] ];
+						element: aPopup ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);

@@ -5,6 +5,7 @@ Class {
 		'checkLabel',
 		'valueLabel',
 		'activateBlock',
+		'canActivateBlock',
 		'hoverBlock',
 		'checked'
 	],
@@ -52,6 +53,7 @@ CFMaDetailPopupOptionElement >> initialize [
 		yourself.
 
 	activateBlock := nil.
+	canActivateBlock := [ true ].
 	hoverBlock := nil.
 	checked := false.
 	checkLabel visibility: BlVisibility hidden.
@@ -84,6 +86,11 @@ CFMaDetailPopupOptionElement >> activateBlock: aBlock [
 ]
 
 { #category : 'accessing' }
+CFMaDetailPopupOptionElement >> canActivateBlock: aBlock [
+	canActivateBlock := aBlock
+]
+
+{ #category : 'accessing' }
 CFMaDetailPopupOptionElement >> checked: aBoolean [
 	checked := aBoolean.
 	checkLabel visibility: (checked
@@ -104,10 +111,9 @@ CFMaDetailPopupOptionElement >> text: aTextOrString [
 
 { #category : 'private - interaction' }
 CFMaDetailPopupOptionElement >> activate [
-	| shouldDismiss |
 	activateBlock ifNil: [ ^ self ].
-	shouldDismiss := activateBlock cull: self.
-	shouldDismiss ifTrue: [ self blinkSelectionAndDismiss ]
+	(canActivateBlock cull: self) ifFalse: [ ^ self ].
+	self blinkSelectionAndDismiss
 ]
 
 { #category : 'private - interaction' }
@@ -119,6 +125,7 @@ CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
 		ifFound: [ :aMenuContainer | aMenuContainer ]
 		ifNone: [
 			self fireEvent: BrDropdownHideWish new.
+			activateBlock cull: self.
 			^ self ].
 
 	blinkAnimation := BlSequentialAnimation new
@@ -152,7 +159,8 @@ CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
 		with: { blinkAnimation. delayedFadeAnimation }.
 	dismissalAnimation onFinishedDo: [
 		self fireEvent: BrDropdownHideWish new.
-		menuContainer opacity: 1.0 ].
+		menuContainer opacity: 1.0.
+		activateBlock cull: self ].
 	menuContainer addAnimation: dismissalAnimation
 ]
 
