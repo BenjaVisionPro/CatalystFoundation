@@ -10,5 +10,9 @@ CFMaDetailTagAptitude >> initialize [
 	super initialize.
 	self add: (BrStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle geometry: (BlRoundedRectangleGeometry cornerRadius: 12) ])
+			aStyle
+				geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+				constraintsDo: [ :c |
+					c minWidth: 20.
+					c minHeight: 20 ] ])
 ]

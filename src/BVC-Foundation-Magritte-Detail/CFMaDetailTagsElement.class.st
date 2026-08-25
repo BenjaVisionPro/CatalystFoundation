@@ -215,8 +215,7 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 		background: (Color white alpha: 0.9);
 		border: (BlBorder paint: CFMaDetailColours highlight width: 1);
 		constraintsDo: [ :c |
-			c flow vertical alignCenter.
-			c minWidth: 36 ];
+			c flow vertical alignCenter ];
 		yourself.
 	anEditor
 		when: BrEditorAcceptWish do: [ :aWish | self commitActiveEditor ];
