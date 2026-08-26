@@ -34,6 +34,20 @@ CFMaPhlowNavigation class >> selectFrom: anElement object: anObject [
 ]
 
 { #category : 'api - navigating' }
+CFMaPhlowNavigation class >> closeSpawnedInspectorFrom: anElement object: anObject [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			| anExistingLink |
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
+			anExistingLink := self
+				immediateSpawnedLinkFrom: aPaneElement paneModel
+				showing: anObject.
+			anExistingLink ifNotNil: #remove ]
+		ifNone: [ ]
+]
+
+{ #category : 'api - navigating' }
 CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject [
 	self
 		navigateFrom: anElement

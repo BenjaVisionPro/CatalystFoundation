@@ -995,6 +995,10 @@ CFMaBuilderUtility class >> removeToOneMemento: aMemento using: aDescription ele
 	(self canRemoveToOneUsing: aDescription currentValue: aCurrentValue)
 		ifFalse: [ ^ self ].
 
+	CFMaPhlowNavigation
+		closeSpawnedInspectorFrom: anElement
+		object: aCurrentValue.
+
 	GtMagritteBuilderUtility
 		write: nil
 		using: aDescription
