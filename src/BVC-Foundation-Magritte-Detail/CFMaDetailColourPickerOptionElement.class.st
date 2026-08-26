@@ -35,7 +35,7 @@ CFMaDetailColourPickerOptionElement >> initialize [
 		visibility: BlVisibility hidden;
 		yourself.
 	self
-		hExact: 56;
+		hExact: 52;
 		vFitContent;
 		cellSpacing: 2;
 		alignCenter;
@@ -55,20 +55,20 @@ CFMaDetailColourPickerOptionElement >> colour [
 
 { #category : 'accessing' }
 CFMaDetailColourPickerOptionElement >> colour: aColour [
+	| aSwatchElement |
 	colour := aColour.
+	aSwatchElement := aColour
+		ifNil: [ CFMaDetailColourSwatchElement automaticSize: 34 @ 34 ]
+		ifNotNil: [
+			CFMaDetailColourSwatchElement
+				colour: aColour
+				size: 34 @ 34 ].
+	aSwatchElement constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
 	swatch
 		removeChildren;
-		addChild: (BlElement new
-			size: 34 @ 34;
-			geometry: BlCircleGeometry new;
-			background: (colour ifNil: [ Color veryLightGray ]);
-			border: (colour
-				ifNil: [ BlBorder paint: Color lightGray width: 1 ]
-				ifNotNil: [ BlBorder empty ]);
-			constraintsDo: [ :c |
-				c frame horizontal alignCenter.
-				c frame vertical alignCenter ];
-			yourself)
+		addChild: aSwatchElement
 ]
 
 { #category : 'accessing' }

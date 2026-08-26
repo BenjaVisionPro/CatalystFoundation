@@ -4,7 +4,8 @@ Class {
 	#name : 'CFMaPopupConfiguration',
 	#superclass : 'Object',
 	#instVars : [
-		'values'
+		'values',
+		'displayBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
@@ -14,7 +15,8 @@ Class {
 { #category : 'initialization' }
 CFMaPopupConfiguration >> initialize [
 	super initialize.
-	values := #()
+	values := #().
+	displayBlock := nil
 ]
 
 { #category : 'accessing' }
@@ -25,4 +27,15 @@ CFMaPopupConfiguration >> values [
 { #category : 'accessing' }
 CFMaPopupConfiguration >> values: aCollection [
 	values := aCollection asArray
+]
+
+
+{ #category : 'accessing' }
+CFMaPopupConfiguration >> displayBlock [
+	^ displayBlock
+]
+
+{ #category : 'accessing' }
+CFMaPopupConfiguration >> displayBlock: aBlock [
+	displayBlock := aBlock
 ]

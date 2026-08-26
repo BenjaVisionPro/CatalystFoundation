@@ -529,16 +529,24 @@ CFMaDetailPresentation >> prepareEditorFocusChromeIn: aFieldElement [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
-	| aRepresentation |
+	| aRepresentation aDisplayBlock anIconBlock |
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	(aRepresentation isKindOf: CFMaColourPickerConfiguration) ifTrue: [
 		^ self
 			addSingleOptionColourPickerUsing: aDescription
 			configuration: aRepresentation ].
+	aDisplayBlock := ((aRepresentation isKindOf: CFMaPopupConfiguration)
+		and: [ aRepresentation displayBlock notNil ])
+		ifTrue: [ aRepresentation displayBlock ]
+		ifFalse: [ [ :aValue | aDescription displayStringFor: aValue ] ].
+	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
+		ifTrue: [ aDescription blocOptionIconStencil ]
+		ifFalse: [ nil ].
 	self
 		addPopupFieldUsing: aDescription
 		values: aDescription options
-		display: [ :aValue | aDescription displayStringFor: aValue ]
+		display: aDisplayBlock
+		icon: anIconBlock
 ]
 
 { #category : 'private - building' }
@@ -583,11 +591,21 @@ CFMaDetailPresentation >> addNumberPopupUsing: aDescription configuration: aPopu
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues display: aDisplayBlock [
+	^ self
+		addPopupFieldUsing: aDescription
+		values: someValues
+		display: aDisplayBlock
+		icon: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
 	| aPopup aField |
 	aPopup := self
 		newPopupUsing: aDescription
 		values: someValues
-		display: aDisplayBlock.
+		display: aDisplayBlock
+		icon: anIconBlock.
 	aField := CFMaDetailPopupFieldElement new
 		popup: aPopup;
 		yourself.
@@ -597,16 +615,33 @@ CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues di
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display: aDisplayBlock [
+	^ self
+		newPopupUsing: aDescription
+		values: someValues
+		display: aDisplayBlock
+		icon: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
 	| aPopup aDropdownAptitude |
-	aPopup := self newPopupDisplayUsing: aDescription display: aDisplayBlock.
+	aPopup := self
+		newPopupDisplayUsing: aDescription
+		display: aDisplayBlock
+		icon: anIconBlock.
 	aDropdownAptitude := CFMaDetailDropdownAptitude
-		handle: [ self newPopupHandleUsing: aDescription display: aDisplayBlock ]
+		handle: [
+			self
+				newPopupHandleUsing: aDescription
+				display: aDisplayBlock
+				icon: anIconBlock ]
 		content: [
 			self
 				newPopupContent: aPopup
 				using: aDescription
 				values: someValues
-				display: aDisplayBlock ].
+				display: aDisplayBlock
+				icon: anIconBlock ].
 	aDropdownAptitude
 		pinRowIndexUsing: [
 			| currentValue |
@@ -649,6 +684,16 @@ CFMaDetailPresentation >> popupAreaBuilderUsing: aDropdownAptitude [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: someValues display: aDisplayBlock [
+	^ self
+		newPopupContent: aPopup
+		using: aDescription
+		values: someValues
+		display: aDisplayBlock
+		icon: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
 	| aList aCurrentValue aCurrentIndex |
 	((aDescription isKindOf: MAOptionDescription)
 		and: [ aDescription hasProperty: #blocItemStencil ]) ifTrue: [
@@ -671,7 +716,9 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 						write: anItemObject
 						using: aDescription
 						memento: self memento
-						element: aPopup ] ];
+						element: aPopup ].
+			anIconBlock ifNotNil: [
+				anItemElement leadingElement: (anIconBlock cull: anItemObject) ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
@@ -688,16 +735,35 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupHandleUsing: aDescription display: aDisplayBlock [
-	| aValue |
+	^ self
+		newPopupHandleUsing: aDescription
+		display: aDisplayBlock
+		icon: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupHandleUsing: aDescription display: aDisplayBlock icon: anIconBlock [
+	| aValue aHandle |
 	aValue := self memento readUsing: aDescription.
-	^ CFMaDetailPopupElement new
+	aHandle := CFMaDetailPopupElement new
 		text: (aDisplayBlock cull: aValue);
 		visibility: BlVisibility hidden;
-		yourself
+		yourself.
+	anIconBlock ifNotNil: [
+		aHandle leadingElement: (anIconBlock cull: aValue) ].
+	^ aHandle
 ]
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBlock [
+	^ self
+		newPopupDisplayUsing: aDescription
+		display: aDisplayBlock
+		icon: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBlock icon: anIconBlock [
 	| aPopup |
 	aPopup := CFMaDetailPopupElement new.
 	aPopup withAsyncSinkDo: [ :anElementSink |
@@ -706,7 +772,9 @@ CFMaDetailPresentation >> newPopupDisplayUsing: aDescription display: aDisplayBl
 			whenUpdate: [ :thePopup :aSink |
 				| aValue |
 				aValue := aSink value currentValue.
-				thePopup text: (aDisplayBlock cull: aValue) ].
+				thePopup text: (aDisplayBlock cull: aValue).
+				anIconBlock ifNotNil: [
+					thePopup leadingElement: (anIconBlock cull: aValue) ] ].
 		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
 	^ aPopup
 ]

@@ -2,6 +2,7 @@ Class {
 	#name : 'CFMaDetailPopupElement',
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
+		'leadingElement',
 		'valueLabel',
 		'indicatorHost',
 		'hovered',
@@ -121,4 +122,15 @@ CFMaDetailPopupElement >> text [
 { #category : 'accessing' }
 CFMaDetailPopupElement >> text: aTextOrString [
 	valueLabel text: aTextOrString
+]
+
+
+{ #category : 'accessing' }
+CFMaDetailPopupElement >> leadingElement: anElement [
+	leadingElement ifNotNil: [
+		leadingElement parent ifNotNil: [ leadingElement removeFromParent ] ].
+	leadingElement := anElement.
+	leadingElement ifNil: [ ^ self ].
+	leadingElement margin: (BlInsets right: 6).
+	self addChild: leadingElement before: valueLabel
 ]

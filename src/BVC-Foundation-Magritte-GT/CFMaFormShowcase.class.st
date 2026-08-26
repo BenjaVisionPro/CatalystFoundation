@@ -1095,10 +1095,17 @@ CFMaFormShowcase >> textSelectionColourDescription [
 		priority: 20;
 		options: ({ nil } , CFMaDetailColours textSelectionColours);
 		fieldConfigure: [ :field |
-			field beColourPicker
-				colourBlock: [ :aColour | aColour ];
-				labelBlock: [ :aColour |
+			field bePopup
+				displayBlock: [ :aColour |
 					CFMaDetailColours textSelectionNameFor: aColour ] ];
+		blocOptionIconStencil: [ :aColour |
+			aColour
+				ifNil: [
+					CFMaDetailColourSwatchElement automaticSize: 14 @ 14 ]
+				ifNotNil: [
+					CFMaDetailColourSwatchElement
+						colour: aColour
+						size: 14 @ 14 ] ];
 		yourself
 ]
 

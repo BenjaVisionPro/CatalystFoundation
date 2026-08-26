@@ -25,7 +25,7 @@ CFMaDetailColourPickerElement >> initialize [
 	self
 		hFitContent;
 		vFitContent;
-		cellSpacing: 4;
+		cellSpacing: 0;
 		padding: BlInsets empty
 ]
 

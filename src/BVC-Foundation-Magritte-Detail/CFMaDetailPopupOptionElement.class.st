@@ -3,6 +3,7 @@ Class {
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
 		'checkLabel',
+		'leadingElement',
 		'valueLabel',
 		'activateBlock',
 		'canActivateBlock',
@@ -139,4 +140,17 @@ CFMaDetailPopupOptionElement >> activate [
 { #category : 'accessing' }
 CFMaDetailPopupOptionElement >> hoverBlock: aBlock [
 	hoverBlock := aBlock
+]
+
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> leadingElement: anElement [
+	leadingElement ifNotNil: [
+		leadingElement parent ifNotNil: [ leadingElement removeFromParent ] ].
+	leadingElement := anElement.
+	leadingElement ifNil: [ ^ self ].
+	leadingElement
+		margin: (BlInsets right: 6);
+		constraintsDo: [ :c | c linear vertical alignCenter ].
+	self addChild: leadingElement after: checkLabel
 ]
