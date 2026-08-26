@@ -2,6 +2,9 @@ Class {
 	#name : 'CFMaDetailAddPopupElement',
 	#superclass : 'CFMaDetailPopupElement',
 	#traits : 'TBrEnableable',
+	#instVars : [
+		'addIcon'
+	],
 	#classTraits : 'TBrEnableable classTrait',
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -93,26 +96,30 @@ CFMaDetailAddPopupElement >> initialize [
 		- CFMaDetailPopupMetrics indicatorExtent y) / 2.
 	self
 		padding: (BlInsets all: anInset);
-		geometry: BlCircleGeometry new
+		geometry: BlCircleGeometry new;
+		background: BlBackground transparent.
+	indicatorHost background: BlBackground transparent
 ]
 
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement >> newIndicator [
-	^ (FontAwesomeIcons icon: #plus)
-		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
-		color: (Color black alpha: 0.72);
-		yourself
+	addIcon := FontAwesomeIcons defaultStyle icon: #circlePlus.
+	addIcon
+		size: 16 @ 16;
+		color: CFMaDetailColours secondaryForeground.
+	^ addIcon
 ]
 
 
 { #category : 'private - appearance' }
 CFMaDetailAddPopupElement >> updatePopupAppearance [
-	popupOpen ifTrue: [
-		self background: BlBackground transparent.
-		indicatorHost background: BlBackground transparent.
-		^ self ].
-	super updatePopupAppearance
+	self background: BlBackground transparent.
+	indicatorHost background: BlBackground transparent.
+	addIcon ifNotNil: [
+		addIcon color: (hovered
+			ifTrue: [ CFMaDetailColours highlight ]
+			ifFalse: [ CFMaDetailColours secondaryForeground ]) ]
 ]
 
 { #category : 'layout' }
