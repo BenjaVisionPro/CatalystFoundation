@@ -35,10 +35,11 @@ CFMaDetailColourPickerOptionElement >> initialize [
 		visibility: BlVisibility hidden;
 		yourself.
 	self
-		hExact: 34;
+		hFitContent;
 		vFitContent;
 		cellSpacing: 2;
 		alignCenter;
+		clipChildren: false;
 		addChild: swatch;
 		addChild: labelElement
 ]
