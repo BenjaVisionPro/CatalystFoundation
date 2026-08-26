@@ -32,7 +32,7 @@ CFMaDetailColours class >> disabledForeground [
 
 { #category : 'accent' }
 CFMaDetailColours class >> highlight [
-	^ self highlightBlue
+	^ self highlightPurple
 ]
 
 { #category : 'accent - highlight palette' }
