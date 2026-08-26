@@ -190,3 +190,19 @@ CFMaDetailColours class >> textSelection [
 		resolveTextSelectionColour: nil
 		highlight: self highlight
 ]
+
+
+{ #category : 'accent' }
+CFMaDetailColours class >> inactiveTextSelection [
+	| aColour aGrey desaturation |
+	aColour := self textSelection.
+	aGrey := (aColour red * 0.2126)
+		+ (aColour green * 0.7152)
+		+ (aColour blue * 0.0722).
+	desaturation := 0.18.
+	^ Color
+		r: aColour red + ((aGrey - aColour red) * desaturation)
+		g: aColour green + ((aGrey - aColour green) * desaturation)
+		b: aColour blue + ((aGrey - aColour blue) * desaturation)
+		alpha: aColour alpha
+]

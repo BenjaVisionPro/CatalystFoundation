@@ -24,5 +24,5 @@ CFMaListItemAptitude >> initialize [
 			aStyle
 			background: Color transparent;
 			effect: (BlOverlayAboveEffect new
-				paint: (Color black alpha: 0.04)) ]
+				paint: CFMaDetailColours inactiveTextSelection) ]
 ]
