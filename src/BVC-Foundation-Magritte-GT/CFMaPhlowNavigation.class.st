@@ -18,7 +18,7 @@ CFMaPhlowNavigation class >> selectFrom: anElement object: anObject [
 		treePagerPaneContaining: anElement
 		ifFound: [ :aPaneElement |
 			| anExistingLink |
-			self ensureFocusActivatesBranchIn: aPaneElement navigationContext pagerElement.
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
 			anExistingLink := self
 				immediateLinkFrom: aPaneElement paneModel
 				showing: anObject.
@@ -55,7 +55,7 @@ CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurr
 		treePagerPaneContaining: anElement
 		ifFound: [ :aPaneElement |
 			| anExistingLink |
-			self ensureFocusActivatesBranchIn: aPaneElement navigationContext pagerElement.
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
 			anExistingLink := self
 				immediateLinkFrom: aPaneElement paneModel
 				showing: anObject.
@@ -73,11 +73,13 @@ CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurr
 ]
 
 { #category : 'private - tree pager' }
-CFMaPhlowNavigation class >> ensureFocusActivatesBranchIn: aPagerElement [
+CFMaPhlowNavigation class >> ensureTreePagerPolicyIn: aPagerElement [
 	aPagerElement
 		removeEventHandlersSuchThat: [ :eachHandler |
-			eachHandler isKindOf: CFMaTreePagerFocusActivatesBranchHandler ];
-		addEventHandler: CFMaTreePagerFocusActivatesBranchHandler new
+			(eachHandler isKindOf: CFMaTreePagerFocusActivatesBranchHandler)
+				or: [ eachHandler isKindOf: CFMaTreePagerPruneRemovedBranchHandler ] ];
+		addEventHandler: CFMaTreePagerFocusActivatesBranchHandler new;
+		addEventHandler: CFMaTreePagerPruneRemovedBranchHandler new
 ]
 
 { #category : 'private - tree pager' }
@@ -85,9 +87,10 @@ CFMaPhlowNavigation class >> immediateLinkFrom: aPaneModel showing: anObject [
 	^ aPaneModel followingLinks
 		detect: [ :aLink |
 			| aTool |
-			aTool := aLink paneModel phlowTool.
-			(aTool respondsTo: #object)
-				and: [ aTool object == anObject ] ]
+			aLink isRemoved ifFalse: [
+				aTool := aLink paneModel phlowTool.
+				(aTool respondsTo: #object)
+					and: [ aTool object == anObject ] ] ]
 		ifNone: [ nil ]
 ]
 
