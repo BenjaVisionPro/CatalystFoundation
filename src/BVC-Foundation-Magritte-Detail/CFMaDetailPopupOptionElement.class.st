@@ -114,53 +114,7 @@ CFMaDetailPopupOptionElement >> activate [
 	activateBlock ifNil: [ ^ self ].
 	(canActivateBlock cull: self) ifFalse: [ ^ self ].
 	activateBlock cull: self.
-	self blinkSelectionAndDismiss
-]
-
-{ #category : 'private - interaction' }
-CFMaDetailPopupOptionElement >> blinkSelectionAndDismiss [
-	| menuContainer blinkAnimation delayedFadeAnimation fadeAnimation dismissalAnimation |
-	self states addState: BlElementState selected.
-	menuContainer := self
-		allParentsDetect: [ :eachParent | eachParent isKindOf: BrMenuSteppedElement ]
-		ifFound: [ :aMenuContainer | aMenuContainer ]
-		ifNone: [
-			self fireEvent: BrDropdownHideWish new.
-			^ self ].
-
-	blinkAnimation := BlSequentialAnimation new
-		addAll: {
-			BlAnimation new
-				duration: 80 milliSeconds;
-				onFinishedDo: [ self states removeState: BlElementState selected ].
-			BlAnimation new
-				duration: 80 milliSeconds;
-				onFinishedDo: [ self states addState: BlElementState selected ].
-			BlAnimation new
-				duration: 80 milliSeconds;
-				onFinishedDo: [ self states removeState: BlElementState selected ].
-			BlAnimation new
-				duration: 80 milliSeconds;
-				onFinishedDo: [ self states addState: BlElementState selected ] };
-		yourself.
-
-	fadeAnimation := BlOpacityAnimation new
-		target: menuContainer;
-		opacity: 0.0;
-		duration: 200 milliSeconds;
-		yourself.
-
-	delayedFadeAnimation := BlSequentialAnimation new
-		add: (BlAnimation new duration: 160 milliSeconds);
-		add: fadeAnimation;
-		yourself.
-
-	dismissalAnimation := BlParallelAnimation
-		with: { blinkAnimation. delayedFadeAnimation }.
-	dismissalAnimation onFinishedDo: [
-		self fireEvent: BrDropdownHideWish new.
-		menuContainer opacity: 1.0 ].
-	menuContainer addAnimation: dismissalAnimation
+	self fireEvent: CFMaDetailPopupDismissRequest new
 ]
 
 { #category : 'accessing' }

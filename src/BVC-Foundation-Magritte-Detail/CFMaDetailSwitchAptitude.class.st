@@ -1,13 +1,12 @@
-"I present a BrToggle as the compact animated switch used by the Detail presentation."
+"I present a BrToggle as the compact Motion-driven switch used by the Detail presentation."
 
 Class {
 	#name : 'CFMaDetailSwitchAptitude',
 	#superclass : 'BrToggleAptitude',
 	#instVars : [
 		'thumb',
-		'thumbOffset',
 		'trackColor',
-		'switchAnimation'
+		'activeMotion'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -36,9 +35,8 @@ CFMaDetailSwitchAptitude class >> thumbTravel [
 { #category : 'initialization' }
 CFMaDetailSwitchAptitude >> initialize [
 	super initialize.
-	thumbOffset := 0.0.
 	trackColor := self class inactiveTrackColor.
-	switchAnimation := nil.
+	activeMotion := nil.
 	thumb := BlElement new
 		background: Color white;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
@@ -64,77 +62,89 @@ CFMaDetailSwitchAptitude >> initializeListeners [
 	super initializeListeners.
 	self
 		when: BrToggleActivatedEvent
-		do: [ :anEvent | self toggleActivated ].
-	self
+		do: [ :anEvent | self toggleActivated ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent | self toggleDeactivated ]
 ]
 
-{ #category : 'private - animation' }
-CFMaDetailSwitchAptitude >> applyStateWithThumbOffset: aThumbOffset trackColor: aTrackColor to: aWidget [
-	thumbOffset := aThumbOffset.
-	trackColor := aTrackColor.
-	thumb transformDo: [ :aTransform |
-		aTransform
-			topLeftOrigin;
-			translateBy: thumbOffset @ 0 ].
-	aWidget background: trackColor
+{ #category : 'private - motion' }
+CFMaDetailSwitchAptitude >> applyTrackColor: aColor [
+	trackColor := aColor.
+	self widgetDo: [ :aWidget | aWidget background: aColor ]
 ]
 
-{ #category : 'private - animation' }
-CFMaDetailSwitchAptitude >> animateToThumbOffset: aTargetOffset trackColor: aTargetColor [
+{ #category : 'private - motion' }
+CFMaDetailSwitchAptitude >> motionToThumbOffset: aTargetOffset trackColor: aTargetColor in: aWidget [
+	| translation color |
+	translation := (CFMotionTranslationTrack
+		on: thumb
+		from: 0 @ 0
+		to: aTargetOffset @ 0).
+	color := CFMaDetailSwitchTrackColorMotionBehaviour
+		on: aWidget
+		aptitude: self
+		target: aTargetColor.
+	^ (CFMotion
+		coordinator: aWidget space motionCoordinator
+		tracks: { translation. color })
+		duration: self class animationDuration;
+		easing: BlEasing linear;
+		holdAtDestination;
+		yourself
+]
+
+{ #category : 'private - motion' }
+CFMaDetailSwitchAptitude >> retargetToThumbOffset: aTargetOffset trackColor: aTargetColor [
 	self widgetDo: [ :aWidget |
-		| thumbTransition colorTransition |
+		| requestedTranslation requestedColor |
 		aWidget isAttachedToSceneGraph ifFalse: [
-			^ self
-				applyStateWithThumbOffset: aTargetOffset
-				trackColor: aTargetColor
-				to: aWidget ].
+			thumb transformDo: [ :aTransform |
+				aTransform topLeftOrigin; translateBy: aTargetOffset @ 0 ].
+			^ self applyTrackColor: aTargetColor ].
 
-		switchAnimation ifNotNil: [ switchAnimation stopIfRunning ].
+		(activeMotion isNil or: [ activeMotion isCancelled or: [ activeMotion isCompleted ] ])
+			ifTrue: [
+				activeMotion := (self
+					motionToThumbOffset: aTargetOffset
+					trackColor: aTargetColor
+					in: aWidget) start ]
+			ifFalse: [
+				requestedTranslation := CFMotionTranslationTrack
+					on: thumb
+					from: 0 @ 0
+					to: aTargetOffset @ 0.
+				requestedColor := CFMaDetailSwitchTrackColorMotionBehaviour
+					on: aWidget
+					aptitude: self
+					target: aTargetColor.
+				activeMotion
+					retarget: { requestedTranslation. requestedColor }
+					duration: self class animationDuration
+					easing: BlEasing linear ] ]
+]
 
-		thumbTransition := BlNumberTransition new
-			from: thumbOffset;
-			to: aTargetOffset;
-			duration: self class animationDuration;
-			onStepDo: [ :anOffset |
-				thumbOffset := anOffset.
-				thumb transformDo: [ :aTransform |
-					aTransform
-						topLeftOrigin;
-						translateBy: thumbOffset @ 0 ] ];
-			yourself.
-
-		colorTransition := BlColorTransition new
-			from: trackColor;
-			to: aTargetColor;
-			duration: self class animationDuration;
-			onStepDo: [ :aColor |
-				trackColor := aColor.
-				aWidget background: trackColor ];
-			yourself.
-
-		switchAnimation := BlParallelAnimation
-			with: { thumbTransition. colorTransition }.
-		switchAnimation onFinishedDo: [
-			self
-				applyStateWithThumbOffset: aTargetOffset
-				trackColor: aTargetColor
-				to: aWidget.
-			switchAnimation := nil ].
-		aWidget addAnimation: switchAnimation ]
+{ #category : 'accessing' }
+CFMaDetailSwitchAptitude >> trackColor [
+	^ trackColor
 ]
 
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleActivated [
 	self
-		animateToThumbOffset: self class thumbTravel
+		retargetToThumbOffset: self class thumbTravel
 		trackColor: self class activeTrackColor
 ]
 
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleDeactivated [
 	self
-		animateToThumbOffset: 0.0
+		retargetToThumbOffset: 0.0
 		trackColor: self class inactiveTrackColor
+]
+
+{ #category : 'lifecycle' }
+CFMaDetailSwitchAptitude >> onUninstalledIn: anElement [
+	activeMotion ifNotNil: [ activeMotion cancelAndRestore ].
+	activeMotion := nil.
+	super onUninstalledIn: anElement
 ]
