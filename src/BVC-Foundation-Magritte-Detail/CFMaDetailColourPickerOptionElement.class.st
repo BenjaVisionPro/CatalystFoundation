@@ -29,7 +29,9 @@ CFMaDetailColourPickerOptionElement >> initialize [
 			activateBlock ifNotNil: [ activateBlock cull: self ] ];
 		yourself.
 	labelElement := BrLabel new
-		aptitude: BrGlamorousLabelAptitude new glamorousRegularFontAndSize;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFont;
+			glamorousRegularSmallSize);
 		hFitContent;
 		vFitContent;
 		visibility: BlVisibility hidden;
