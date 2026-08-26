@@ -182,3 +182,11 @@ CFMaDetailColours class >> resolveTextSelectionColour: aTextSelectionColour high
 	^ aTextSelectionColour ifNil: [
 		self automaticTextSelectionColourForHighlight: aHighlightColour ]
 ]
+
+
+{ #category : 'accent' }
+CFMaDetailColours class >> textSelection [
+	^ self
+		resolveTextSelectionColour: nil
+		highlight: self highlight
+]
