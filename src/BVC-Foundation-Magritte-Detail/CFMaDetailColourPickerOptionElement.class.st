@@ -7,7 +7,9 @@ Class {
 		'swatch',
 		'labelElement',
 		'selected',
-		'activateBlock'
+		'hovered',
+		'activateBlock',
+		'hoverBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -17,6 +19,7 @@ Class {
 CFMaDetailColourPickerOptionElement >> initialize [
 	super initialize.
 	selected := false.
+	hovered := false.
 	swatch := BrButton new
 		aptitude: BrGlamorousButtonLayoutAptitude new;
 		hExact: 34;
@@ -27,6 +30,14 @@ CFMaDetailColourPickerOptionElement >> initialize [
 		geometry: BlCircleGeometry new;
 		action: [ :aButton |
 			activateBlock ifNotNil: [ activateBlock cull: self ] ];
+		when: BlMouseEnterEvent do: [ :anEvent |
+			hoverBlock
+				ifNil: [ self hovered: true ]
+				ifNotNil: [ hoverBlock cull: self cull: true ] ];
+		when: BlMouseLeaveEvent do: [ :anEvent |
+			hoverBlock
+				ifNil: [ self hovered: false ]
+				ifNotNil: [ hoverBlock cull: self cull: false ] ];
 		yourself.
 	labelElement := BrLabel new
 		aptitude: (BrGlamorousLabelAptitude new
@@ -87,7 +98,16 @@ CFMaDetailColourPickerOptionElement >> selected: aBoolean [
 			BlBorder
 				paint: (colour ifNil: [ CFMaDetailColours secondaryForeground ])
 				width: 3 ]
-		ifFalse: [ BlBorder empty ]).
+		ifFalse: [ BlBorder empty ])
+]
+
+{ #category : 'interaction' }
+CFMaDetailColourPickerOptionElement >> hovered: aBoolean [
+	hovered := aBoolean
+]
+
+{ #category : 'appearance' }
+CFMaDetailColourPickerOptionElement >> labelVisible: aBoolean [
 	labelElement visibility: (aBoolean
 		ifTrue: [ BlVisibility visible ]
 		ifFalse: [ BlVisibility hidden ])
@@ -101,4 +121,10 @@ CFMaDetailColourPickerOptionElement >> value [
 { #category : 'accessing' }
 CFMaDetailColourPickerOptionElement >> value: anObject [
 	value := anObject
+]
+
+
+{ #category : 'accessing' }
+CFMaDetailColourPickerOptionElement >> hoverBlock: aBlock [
+	hoverBlock := aBlock
 ]

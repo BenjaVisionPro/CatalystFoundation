@@ -7,7 +7,8 @@ Class {
 		'colourBlock',
 		'labelBlock',
 		'valueChangedBlock',
-		'optionElements'
+		'optionElements',
+		'hoveredOption'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -22,6 +23,7 @@ CFMaDetailColourPickerElement >> initialize [
 		anOption ifNil: [ 'Automatic' ] ifNotNil: [ anOption printString ] ].
 	valueChangedBlock := [ :anOption | ].
 	optionElements := OrderedCollection new.
+	hoveredOption := nil.
 	self
 		hFitContent;
 		vFitContent;
@@ -74,6 +76,8 @@ CFMaDetailColourPickerElement >> rebuildOptions [
 			label: (labelBlock cull: anOption);
 			activateBlock: [ :aSelectedElement |
 				self selectValue: aSelectedElement value notify: true ];
+			hoverBlock: [ :anHoveredElement :isHovered |
+				self hoverOption: anHoveredElement active: isHovered ];
 			yourself.
 		optionElements add: anElement.
 		self addChild: anElement ].
@@ -90,7 +94,8 @@ CFMaDetailColourPickerElement >> selectValue: anOption notify: shouldNotify [
 { #category : 'private - selection' }
 CFMaDetailColourPickerElement >> updateSelection [
 	optionElements do: [ :anElement |
-		anElement selected: anElement value = value ]
+		anElement selected: anElement value = value ].
+	self updateLabelVisibility
 ]
 
 { #category : 'accessing' }
@@ -106,4 +111,27 @@ CFMaDetailColourPickerElement >> value: anOption [
 { #category : 'accessing' }
 CFMaDetailColourPickerElement >> valueChangedBlock: aBlock [
 	valueChangedBlock := aBlock
+]
+
+
+{ #category : 'private - interaction' }
+CFMaDetailColourPickerElement >> hoverOption: anOption active: aBoolean [
+	aBoolean
+		ifTrue: [
+			hoveredOption := anOption.
+			optionElements do: [ :each |
+				each hovered: each == anOption ] ]
+		ifFalse: [
+			hoveredOption == anOption ifTrue: [
+				hoveredOption := nil.
+				optionElements do: [ :each | each hovered: false ] ] ].
+	self updateLabelVisibility
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailColourPickerElement >> updateLabelVisibility [
+	optionElements do: [ :anOption |
+		anOption labelVisible: (hoveredOption
+			ifNil: [ anOption value = value ]
+			ifNotNil: [ :anHoveredOption | anOption == anHoveredOption ]) ]
 ]
