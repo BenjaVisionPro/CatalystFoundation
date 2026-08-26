@@ -12,12 +12,29 @@ CFMotionValueExamples >> timelineAnimatesAMotionValue [
 	value := CFMotionValue value: 10.0.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (value transitionFrom: 10.0 to: 20.0)
+		on: (value interpolateFrom: 10.0 to: 20.0)
 		in: timeline.
 	track duration: 1 second; easing: BlEasing linear.
 	timeline prepareForPlayback; advanceBy: 500 milliSeconds.
 	self assert: (value value closeTo: 15.0).
 	^ timeline
+]
+
+{ #category : 'examples - values' }
+CFMotionValueExamples >> valueInterpolationIsCanonicalAndTransitionNamesRemainCompatible [
+	<gtExample>
+	| value interpolation compatibilitySelector compatibilityClass |
+	value := CFMotionValue value: 0.0.
+	interpolation := value interpolateFrom: 0.0 to: 10.0.
+	compatibilitySelector := value transitionFrom: 0.0 to: 10.0.
+	compatibilityClass := CFMotionValueTransition on: value from: 0.0 to: 10.0.
+	self assert: interpolation class equals: CFMotionValueInterpolation.
+	self assert: compatibilitySelector class equals: CFMotionValueInterpolation.
+	self assert: compatibilityClass class equals: CFMotionValueTransition.
+	self assert: (compatibilityClass isKindOf: CFMotionValueInterpolation).
+	interpolation applyProgress: 0.5.
+	self assert: (value value closeTo: 5.0).
+	^ interpolation
 ]
 
 { #category : 'examples - values' }
@@ -27,11 +44,11 @@ CFMotionValueExamples >> repeatingTimelineComposesSequentialValueTransitions [
 	value := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
 	rise := CFMotionTimelineTrack
-		on: (value transitionFrom: 0.0 to: 10.0)
+		on: (value interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	rise duration: 1 second; easing: BlEasing linear.
 	fall := CFMotionTimelineTrack
-		on: (value transitionFrom: 10.0 to: 0.0)
+		on: (value interpolateFrom: 10.0 to: 0.0)
 		in: timeline.
 	fall startsAt: rise end; duration: 1 second; easing: BlEasing linear.
 	timeline repeat; prepareForPlayback.
@@ -49,7 +66,7 @@ CFMotionValueExamples >> repeatingTimelineCanSeekToAPhase [
 	value := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (value transitionFrom: 0.0 to: 10.0)
+		on: (value interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	track duration: 1 second; easing: BlEasing linear.
 	timeline repeat; prepareForPlayback; seekTo: 250 milliSeconds.
@@ -65,7 +82,7 @@ CFMotionValueExamples >> motionValueSupportsCustomInterpolation [
 	value := CFMotionValue value: 'start'.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (value transitionFrom: 'start' to: 'end' using: [ :start :end :progress | progress < 0.5 ifTrue: [ start ] ifFalse: [ end ] ])
+		on: (value interpolateFrom: 'start' to: 'end' using: [ :start :end :progress | progress < 0.5 ifTrue: [ start ] ifFalse: [ end ] ])
 		in: timeline.
 	track duration: 1 second; easing: BlEasing linear.
 	timeline prepareForPlayback; advanceBy: 750 milliSeconds.
@@ -79,7 +96,7 @@ CFMotionValueExamples >> repeatingTimelineSeparatesCycleFromPlaybackSemantics [
 	| value timeline track |
 	value := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
-	track := CFMotionTimelineTrack on: (value transitionTo: 10.0) in: timeline.
+	track := CFMotionTimelineTrack on: (value interpolateTo: 10.0) in: timeline.
 	track duration: 1 second; easing: BlEasing linear.
 	timeline repeat; prepareForPlayback; seekTo: 3 seconds.
 	self assert: timeline duration equals: 1 second.
@@ -99,7 +116,7 @@ CFMotionValueExamples >> finiteTimelineRepeatCountsTotalCyclesAndEndsAtTheDestin
 	value := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (value transitionFrom: 0.0 to: 10.0)
+		on: (value interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	track duration: 100 milliSeconds; easing: BlEasing linear.
 	timeline repeat: 2; prepareForPlayback.
@@ -132,7 +149,7 @@ CFMotionValueExamples >> finiteTimelineRepeatSeeksInPlaybackTimeAndClampsAtTheFi
 	value := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (value transitionFrom: 0.0 to: 10.0)
+		on: (value interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	track duration: 100 milliSeconds; easing: BlEasing linear.
 	timeline repeat: 2; prepareForPlayback; seekTo: 150 milliSeconds.
@@ -155,11 +172,11 @@ CFMotionValueExamples >> finiteTimelineRepeatLeavesTrackAnchorsAndOffsetsInTheCy
 	secondValue := CFMotionValue value: 0.0.
 	timeline := CFMotionTimeline new.
 	first := CFMotionTimelineTrack
-		on: (firstValue transitionFrom: 0.0 to: 10.0)
+		on: (firstValue interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	first duration: 100 milliSeconds; easing: BlEasing linear.
 	second := CFMotionTimelineTrack
-		on: (secondValue transitionFrom: 0.0 to: 10.0)
+		on: (secondValue interpolateFrom: 0.0 to: 10.0)
 		in: timeline.
 	second
 		starts: 20 milliSeconds after: first end;

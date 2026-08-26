@@ -1,7 +1,7 @@
 "
 I represent a mutable value that can participate in Motion timelines without requiring a Bloc element.
 
-I create CFMotionValueTransitions to interpolate between values, including custom interpolation strategies. I am useful for deterministic temporal composition of non-visual or application-defined values.
+I create CFMotionValueInterpolations between values, including custom interpolation strategies. I am useful for deterministic temporal composition of non-visual or application-defined values.
 "
 Class {
 	#name : 'CFMotionValue',
@@ -29,30 +29,49 @@ CFMotionValue >> value: anObject [
 	^ self
 ]
 
-{ #category : 'motion' }
-CFMotionValue >> transitionFrom: aStartValue to: anEndValue [
-	^ CFMotionValueTransition
+{ #category : 'motion - interpolation' }
+CFMotionValue >> interpolateFrom: aStartValue to: anEndValue [
+	^ CFMotionValueInterpolation
 		on: self
 		from: aStartValue
 		to: anEndValue
 ]
 
-{ #category : 'motion' }
-CFMotionValue >> transitionTo: anEndValue [
-	^ self transitionFrom: value to: anEndValue
-]
-
-
-{ #category : 'motion' }
-CFMotionValue >> transitionFrom: aStartValue to: anEndValue using: anInterpolator [
-	^ CFMotionValueTransition
+{ #category : 'motion - interpolation' }
+CFMotionValue >> interpolateFrom: aStartValue to: anEndValue using: anInterpolator [
+	^ CFMotionValueInterpolation
 		on: self
 		from: aStartValue
 		to: anEndValue
 		using: anInterpolator
 ]
 
-{ #category : 'motion' }
+{ #category : 'motion - interpolation' }
+CFMotionValue >> interpolateTo: anEndValue [
+	^ self interpolateFrom: value to: anEndValue
+]
+
+{ #category : 'motion - interpolation' }
+CFMotionValue >> interpolateTo: anEndValue using: anInterpolator [
+	^ self interpolateFrom: value to: anEndValue using: anInterpolator
+]
+
+{ #category : 'compatibility' }
+CFMotionValue >> transitionFrom: aStartValue to: anEndValue [
+	^ self interpolateFrom: aStartValue to: anEndValue
+]
+
+{ #category : 'compatibility' }
+CFMotionValue >> transitionFrom: aStartValue to: anEndValue using: anInterpolator [
+	^ self interpolateFrom: aStartValue to: anEndValue using: anInterpolator
+]
+
+{ #category : 'compatibility' }
+CFMotionValue >> transitionTo: anEndValue [
+	^ self interpolateTo: anEndValue
+]
+
+{ #category : 'compatibility' }
 CFMotionValue >> transitionTo: anEndValue using: anInterpolator [
-	^ self transitionFrom: value to: anEndValue using: anInterpolator
+	^ self interpolateTo: anEndValue using: anInterpolator
 ]
