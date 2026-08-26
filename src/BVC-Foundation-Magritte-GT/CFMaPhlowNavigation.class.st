@@ -78,7 +78,6 @@ CFMaPhlowNavigation class >> ensureTreePagerPolicyIn: aPagerElement [
 		removeEventHandlersSuchThat: [ :eachHandler |
 			(eachHandler isKindOf: CFMaTreePagerFocusActivatesBranchHandler)
 				or: [ eachHandler isKindOf: CFMaTreePagerPruneRemovedBranchHandler ] ];
-		addEventHandler: CFMaTreePagerFocusActivatesBranchHandler new;
 		addEventHandler: CFMaTreePagerPruneRemovedBranchHandler new
 ]
 
