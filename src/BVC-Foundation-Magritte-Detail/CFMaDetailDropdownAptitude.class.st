@@ -25,10 +25,11 @@ CFMaDetailDropdownAptitude class >> fadeDuration [
 { #category : 'private - motion' }
 CFMaDetailDropdownAptitude >> blinkMotionFor: anOption in: aMenuContainer [
 	| timeline track |
-	anOption states addState: BlElementState selected.
 	timeline := CFMotionTimeline new.
 	track := CFMotionTimelineTrack
-		on: (CFMaDetailPopupSelectionMotionBehaviour on: anOption)
+		on: (CFMaDetailPopupSelectionMotionBehaviour
+			on: anOption selectionList
+			index: anOption selectionIndex)
 		in: timeline.
 	track
 		duration: self class blinkCycleDuration;

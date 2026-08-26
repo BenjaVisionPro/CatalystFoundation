@@ -60,6 +60,7 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :aClass :anItemIndex |
 			anItemElement
+				selectionIn: aList at: anItemIndex;
 				text: aClass displayString;
 				hoverBlock: [ aList selectOne: anItemIndex ];
 				canActivateBlock: [ (anAddItemViewModel shouldDisableNewItemClass: aClass) not ];

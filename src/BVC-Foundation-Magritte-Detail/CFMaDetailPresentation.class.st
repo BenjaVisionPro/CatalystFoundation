@@ -631,6 +631,7 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
 		itemDataBinder: [ :anItemElement :anItemObject :anItemIndex |
 			anItemElement
+				selectionIn: aList at: anItemIndex;
 				text: (aDisplayBlock cull: anItemObject);
 				checked: anItemObject = aCurrentValue;
 				hoverBlock: [ aList selectOne: anItemIndex ];

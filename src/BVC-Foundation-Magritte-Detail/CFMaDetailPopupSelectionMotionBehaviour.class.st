@@ -1,37 +1,39 @@
-"I present one off/on popup-selection blink cycle.
+"I present one off/on popup-selection blink cycle through the BrSimpleList that owns selection.
 
-One timeline track evaluates this Behaviour for one complete blink cycle:
-the first half is unselected and the second half is selected. Repetition
-belongs to CFMotionTimeline; this Behaviour owns only the selected-state
-presentation for one cycle."
+The first half of one cycle is deselected and the second half is selected.
+CFMotionTimeline owns cycle timing and repetition. I deliberately do not restore
+selection between repeated cycles; cancellation restores the selection that was
+present when playback began."
 Class {
 	#name : 'CFMaDetailPopupSelectionMotionBehaviour',
 	#superclass : 'CFMotionBehaviour',
 	#instVars : [
-		'element',
-		'originSelected'
+		'list',
+		'index',
+		'originIndices'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
 { #category : 'instance creation' }
-CFMaDetailPopupSelectionMotionBehaviour class >> on: anElement [
+CFMaDetailPopupSelectionMotionBehaviour class >> on: aList index: anIndex [
 	^ self new
-		element: anElement;
+		list: aList;
+		index: anIndex;
 		yourself
 ]
 
 { #category : 'accessing' }
 CFMaDetailPopupSelectionMotionBehaviour >> animationTarget [
-	^ element
+	^ list
 ]
 
 { #category : 'private - presentation' }
 CFMaDetailPopupSelectionMotionBehaviour >> applySelected: aBoolean [
 	aBoolean
-		ifTrue: [ element states addState: BlElementState selected ]
-		ifFalse: [ element states removeState: BlElementState selected ]
+		ifTrue: [ list selectOne: index ]
+		ifFalse: [ list deselectAll ]
 ]
 
 { #category : 'playing' }
@@ -46,29 +48,41 @@ CFMaDetailPopupSelectionMotionBehaviour >> applyProgress: aProgress [
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> captureOrigin [
-	originSelected ifNil: [
-		originSelected := element states hasState: BlElementState selected ]
+	originIndices ifNil: [ originIndices := list selectedIndices copy ]
 ]
 
 { #category : 'accessing' }
-CFMaDetailPopupSelectionMotionBehaviour >> element: anElement [
-	element := anElement
+CFMaDetailPopupSelectionMotionBehaviour >> index: anIndex [
+	index := anIndex
+]
+
+{ #category : 'accessing' }
+CFMaDetailPopupSelectionMotionBehaviour >> list: aList [
+	list := aList
+]
+
+{ #category : 'playing' }
+CFMaDetailPopupSelectionMotionBehaviour >> prepareForTimelineCycle: aCycleIndex [
+	"A repeated blink begins directly at its cycle presentation. The generic
+	 restore-origin policy would insert a redundant selected presentation at
+	 the cycle boundary."
 ]
 
 { #category : 'accessing' }
 CFMaDetailPopupSelectionMotionBehaviour >> propertyKey [
 	^ CFMotionPropertyKey
-		element: element
+		element: list
 		property: self class
 ]
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> restoreOrigin [
-	originSelected ifNil: [ ^ self ].
-	self applySelected: originSelected
+	originIndices ifNil: [ ^ self ].
+	list deselectAll.
+	originIndices ifNotEmpty: [ list selectSeveral: originIndices ]
 ]
 
 { #category : 'controlling' }
 CFMaDetailPopupSelectionMotionBehaviour >> reversed [
-	^ self class on: element
+	^ self class on: list index: index
 ]

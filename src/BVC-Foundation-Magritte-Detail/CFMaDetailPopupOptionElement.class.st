@@ -7,7 +7,9 @@ Class {
 		'activateBlock',
 		'canActivateBlock',
 		'hoverBlock',
-		'checked'
+		'checked',
+		'selectionList',
+		'selectionIndex'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -96,6 +98,23 @@ CFMaDetailPopupOptionElement >> checked: aBoolean [
 	checkLabel visibility: (checked
 		ifTrue: [ BlVisibility visible ]
 		ifFalse: [ BlVisibility hidden ])
+]
+
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> selectionIn: aList at: anIndex [
+	selectionList := aList.
+	selectionIndex := anIndex
+]
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> selectionIndex [
+	^ selectionIndex
+]
+
+{ #category : 'accessing' }
+CFMaDetailPopupOptionElement >> selectionList [
+	^ selectionList
 ]
 
 { #category : 'accessing' }
