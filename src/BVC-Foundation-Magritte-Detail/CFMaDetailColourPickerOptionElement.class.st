@@ -39,7 +39,7 @@ CFMaDetailColourPickerOptionElement >> initialize [
 	self
 		hExact: 34;
 		vFitContent;
-		cellSpacing: 2;
+		cellSpacing: 1;
 		alignCenter;
 		clipChildren: false;
 		addChild: swatch;
