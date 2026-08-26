@@ -20,7 +20,7 @@ CFMaPhlowNavigation class >> selectFrom: anElement object: anObject [
 			| anExistingLink |
 			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
 			anExistingLink := self
-				immediateLinkFrom: aPaneElement paneModel
+				immediateSpawnedLinkFrom: aPaneElement paneModel
 				showing: anObject.
 			anExistingLink
 				ifNotNil: [
@@ -91,6 +91,17 @@ CFMaPhlowNavigation class >> immediateLinkFrom: aPaneModel showing: anObject [
 				aTool := aLink paneModel phlowTool.
 				(aTool respondsTo: #object)
 					and: [ aTool object == anObject ] ] ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - tree pager' }
+CFMaPhlowNavigation class >> immediateSpawnedLinkFrom: aPaneModel showing: anObject [
+	^ aPaneModel spawnedFollowingLinks
+		detect: [ :aLink |
+			| aTool |
+			aTool := aLink paneModel phlowTool.
+			(aTool respondsTo: #object)
+				and: [ aTool object == anObject ] ]
 		ifNone: [ nil ]
 ]
 
