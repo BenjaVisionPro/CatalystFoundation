@@ -35,7 +35,7 @@ CFMaDetailColourPickerOptionElement >> initialize [
 		visibility: BlVisibility hidden;
 		yourself.
 	self
-		hFitContent;
+		hExact: 34;
 		vFitContent;
 		cellSpacing: 2;
 		alignCenter;
