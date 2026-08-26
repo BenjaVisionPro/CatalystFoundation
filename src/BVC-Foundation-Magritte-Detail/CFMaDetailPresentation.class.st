@@ -1201,7 +1201,7 @@ CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocu
 				anEvent modifiers isAlt
 					ifTrue: [
 						CFMaPhlowNavigation
-							navigatePreservingCurrentBranchFrom: aRow
+							navigateNewBranchFrom: aRow
 							to: anObject ]
 					ifFalse: [
 						CFMaPhlowNavigation

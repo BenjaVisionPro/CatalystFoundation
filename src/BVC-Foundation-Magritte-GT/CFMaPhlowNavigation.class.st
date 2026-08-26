@@ -3,7 +3,7 @@ I adapt Foundation navigation intent onto ordinary Phlow and, when present,
 the existing GT Tree Pager.
 
 I deliberately know the Tree Pager API so relation renderers do not have to.
-Navigation is scoped to the current pane's immediate following links. Normal spawning remains standard Phlow; branch-preserving activation is used by Foundation's alternate-click navigation.
+Navigation is scoped to the current pane's immediate following links. Normal selection/navigation preserves the pager's active branch. Alternate-click navigation deliberately creates and activates a new sibling branch.
 "
 Class {
 	#name : 'CFMaPhlowNavigation',
@@ -22,13 +22,22 @@ CFMaPhlowNavigation class >> selectFrom: anElement object: anObject [
 			anExistingLink := self
 				immediateSpawnedLinkFrom: aPaneElement paneModel
 				showing: anObject.
+			anExistingLink ifNil: [
+				anExistingLink := self
+					immediateLinkFrom: aPaneElement paneModel
+					showing: anObject ].
 			anExistingLink
 				ifNotNil: [
-					^ self
-						activateAndFocus: anExistingLink
-						from: aPaneElement ]
+					anExistingLink isSpawned ifTrue: [
+						^ self
+							expandAndFocus: anExistingLink
+							from: aPaneElement ].
+					^ self ]
 				ifNil: [
-					^ anElement phlow selectObject: anObject ] ]
+					^ self
+						selectPreservingActiveBranchFrom: anElement
+						pane: aPaneElement
+						object: anObject ] ]
 		ifNone: [
 			^ anElement phlow selectObject: anObject ]
 ]
@@ -50,40 +59,78 @@ CFMaPhlowNavigation class >> closeSpawnedInspectorFrom: anElement object: anObje
 { #category : 'api - navigating' }
 CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject [
 	self
-		navigateFrom: anElement
-		to: anObject
-		preservingCurrentBranch: false
-]
-
-{ #category : 'api - navigating' }
-CFMaPhlowNavigation class >> navigatePreservingCurrentBranchFrom: anElement to: anObject [
-	self
-		navigateFrom: anElement
-		to: anObject
-		preservingCurrentBranch: true
-]
-
-{ #category : 'private - navigating' }
-CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurrentBranch: shouldPreserveCurrentBranch [
-	self
 		treePagerPaneContaining: anElement
 		ifFound: [ :aPaneElement |
 			| anExistingLink |
 			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
 			anExistingLink := self
-				immediateLinkFrom: aPaneElement paneModel
+				immediateSpawnedLinkFrom: aPaneElement paneModel
 				showing: anObject.
+			anExistingLink ifNil: [
+				anExistingLink := self
+					immediateLinkFrom: aPaneElement paneModel
+					showing: anObject ].
 			anExistingLink
 				ifNotNil: [
 					^ self
-						activateAndFocus: anExistingLink
+						expandAndFocus: anExistingLink
 						from: aPaneElement ]
 				ifNil: [
-					shouldPreserveCurrentBranch ifTrue: [
-						aPaneElement paneModel inactivateLink ].
-					^ anElement phlow spawnObject: anObject ] ]
+					^ self
+						spawnPreservingActiveBranchFrom: anElement
+						pane: aPaneElement
+						object: anObject ] ]
 		ifNone: [
 			^ anElement phlow spawnObject: anObject ]
+]
+
+{ #category : 'api - navigating' }
+CFMaPhlowNavigation class >> navigateNewBranchFrom: anElement to: anObject [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
+
+			"GT spawnPane: replaces the active following link. Inactivate it first
+			so Alt-navigation creates a sibling branch and makes that new branch active."
+			aPaneElement paneModel inactivateLink.
+			^ anElement phlow spawnObject: anObject ]
+		ifNone: [
+			^ anElement phlow spawnObject: anObject ]
+]
+
+{ #category : 'private - navigating' }
+CFMaPhlowNavigation class >> selectPreservingActiveBranchFrom: anElement pane: aPaneElement object: anObject [
+	| anActiveLink |
+	anActiveLink := aPaneElement paneModel activeLink.
+
+	"GT selectPane: replaces an active following link. Temporarily remove
+	activation so the hidden selection is added alongside the current branch."
+	aPaneElement paneModel inactivateLink.
+	anElement phlow selectObject: anObject.
+
+	"Selection must not choose a branch. Restore exactly the activation state
+	that existed before the selection."
+	anActiveLink
+		ifNotNil: [ anActiveLink activate ]
+		ifNil: [ aPaneElement paneModel inactivateLink ]
+]
+
+{ #category : 'private - navigating' }
+CFMaPhlowNavigation class >> spawnPreservingActiveBranchFrom: anElement pane: aPaneElement object: anObject [
+	| anActiveLink |
+	anActiveLink := aPaneElement paneModel activeLink.
+
+	"GT spawnPane: replaces an active following link. Temporarily remove
+	activation so the new inspector is added as a sibling instead."
+	aPaneElement paneModel inactivateLink.
+	anElement phlow spawnObject: anObject.
+
+	"Normal navigation must not choose a branch. Restore exactly the activation
+	state that existed before the spawn."
+	anActiveLink
+		ifNotNil: [ anActiveLink activate ]
+		ifNil: [ aPaneElement paneModel inactivateLink ]
 ]
 
 { #category : 'private - tree pager' }
@@ -118,19 +165,17 @@ CFMaPhlowNavigation class >> immediateSpawnedLinkFrom: aPaneModel showing: anObj
 ]
 
 { #category : 'private - tree pager' }
-CFMaPhlowNavigation class >> activateAndFocus: aLink from: aPaneElement [
+CFMaPhlowNavigation class >> expandAndFocus: aLink from: aPaneElement [
 	| aChildPaneModel |
 	aChildPaneModel := aLink paneModel.
 
 	"An existing immediate child is navigation identity, not a request to
-	spawn another inspector. Expand it if needed, then make it the active
-	child branch."
-	aLink
-		expand;
-		activate.
+	spawn another inspector. Expand it if needed without changing which
+	following link is active."
+	aLink expand.
 
 	"Tree Pager updates its pane elements asynchronously after link-state
-	changes. Enqueue after activation so GT performs its own model->UI update
+	changes. Enqueue after expansion so GT performs its own model->UI update
 	before we reveal/focus the existing child."
 	BlTaskAction
 		enqueueElement: aPaneElement
