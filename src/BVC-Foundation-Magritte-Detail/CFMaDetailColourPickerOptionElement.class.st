@@ -19,8 +19,8 @@ CFMaDetailColourPickerOptionElement >> initialize [
 	selected := false.
 	swatch := BrButton new
 		aptitude: BrGlamorousButtonLayoutAptitude new;
-		hExact: 36;
-		vExact: 36;
+		hExact: 34;
+		vExact: 34;
 		padding: (BlInsets all: 5);
 		background: Color transparent;
 		border: BlBorder empty;
@@ -35,7 +35,7 @@ CFMaDetailColourPickerOptionElement >> initialize [
 		visibility: BlVisibility hidden;
 		yourself.
 	self
-		hExact: 44;
+		hExact: 40;
 		vFitContent;
 		cellSpacing: 2;
 		alignCenter;
@@ -58,11 +58,11 @@ CFMaDetailColourPickerOptionElement >> colour: aColour [
 	| aSwatchElement |
 	colour := aColour.
 	aSwatchElement := aColour
-		ifNil: [ CFMaDetailColourSwatchElement automaticSize: 26 @ 26 ]
+		ifNil: [ CFMaDetailColourSwatchElement automaticSize: 24 @ 24 ]
 		ifNotNil: [
 			CFMaDetailColourSwatchElement
 				colour: aColour
-				size: 26 @ 26 ].
+				size: 24 @ 24 ].
 	aSwatchElement constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
