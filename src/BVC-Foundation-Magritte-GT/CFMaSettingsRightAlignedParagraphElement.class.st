@@ -47,6 +47,8 @@ CFMaSettingsRightAlignedParagraphElement >> drawChildrenOnSpartaCanvas: aCanvas 
 		when: [ self clipChildren ]
 		by: [ self geometry pathOnSpartaCanvas: aCanvas of: self ]
 		during: [
+			self drawSelectionOnSpartaCanvas: aCanvas.
+
 			paragraph
 				valueDo: [ :aParagraph |
 					self
@@ -54,8 +56,6 @@ CFMaSettingsRightAlignedParagraphElement >> drawChildrenOnSpartaCanvas: aCanvas 
 						on: aCanvas
 						at: self padding topLeft ]
 				ifNone: [ self requestLayout ].
-
-			self drawSelectionOnSpartaCanvas: aCanvas.
 
 			self children sortedByElevation do: [ :anElement |
 				(self canAddTextToParagraph: anElement)
@@ -176,6 +176,10 @@ CFMaSettingsRightAlignedParagraphElement >> measureCursors: aCollectionOfCursorE
 
 { #category : 'drawing' }
 CFMaSettingsRightAlignedParagraphElement >> paintChildrenOn: aCompositorPainter offset: anOffset [
+	self
+		paintSelectionOn: aCompositorPainter
+		offset: anOffset + self padding topLeft.
+
 	paragraph
 		valueDo: [ :aParagraph |
 			self
@@ -183,10 +187,6 @@ CFMaSettingsRightAlignedParagraphElement >> paintChildrenOn: aCompositorPainter 
 				on: aCompositorPainter canvas
 				at: anOffset + self padding topLeft ]
 		ifNone: [ self requestLayout ].
-
-	self
-		paintSelectionOn: aCompositorPainter
-		offset: anOffset + self padding topLeft.
 
 	aCompositorPainter
 		pushChildren: self children sortedByElevation
