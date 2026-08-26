@@ -199,10 +199,10 @@ CFMaDetailColours class >> inactiveTextSelection [
 	aGrey := (aColour red * 0.2126)
 		+ (aColour green * 0.7152)
 		+ (aColour blue * 0.0722).
-	desaturation := 0.18.
+	desaturation := 0.40.
 	^ Color
-		r: aColour red + ((aGrey - aColour red) * desaturation)
-		g: aColour green + ((aGrey - aColour green) * desaturation)
-		b: aColour blue + ((aGrey - aColour blue) * desaturation)
+		r: (aColour red + ((aGrey - aColour red) * desaturation)) + ((1.0 - (aColour red + ((aGrey - aColour red) * desaturation))) * 0.12)
+		g: (aColour green + ((aGrey - aColour green) * desaturation)) + ((1.0 - (aColour green + ((aGrey - aColour green) * desaturation))) * 0.12)
+		b: (aColour blue + ((aGrey - aColour blue) * desaturation)) + ((1.0 - (aColour blue + ((aGrey - aColour blue) * desaturation))) * 0.12)
 		alpha: aColour alpha
 ]
