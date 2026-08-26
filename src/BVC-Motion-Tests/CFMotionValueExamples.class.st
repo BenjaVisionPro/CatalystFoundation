@@ -21,17 +21,12 @@ CFMotionValueExamples >> timelineAnimatesAMotionValue [
 ]
 
 { #category : 'examples - values' }
-CFMotionValueExamples >> valueInterpolationIsCanonicalAndTransitionNamesRemainCompatible [
+CFMotionValueExamples >> valueInterpolationCreatesTheCanonicalBehaviour [
 	<gtExample>
-	| value interpolation compatibilitySelector compatibilityClass |
+	| value interpolation |
 	value := CFMotionValue value: 0.0.
 	interpolation := value interpolateFrom: 0.0 to: 10.0.
-	compatibilitySelector := value transitionFrom: 0.0 to: 10.0.
-	compatibilityClass := CFMotionValueTransition on: value from: 0.0 to: 10.0.
 	self assert: interpolation class equals: CFMotionValueInterpolation.
-	self assert: compatibilitySelector class equals: CFMotionValueInterpolation.
-	self assert: compatibilityClass class equals: CFMotionValueTransition.
-	self assert: (compatibilityClass isKindOf: CFMotionValueInterpolation).
 	interpolation applyProgress: 0.5.
 	self assert: (value value closeTo: 5.0).
 	^ interpolation

@@ -55,23 +55,3 @@ CFMotionValue >> interpolateTo: anEndValue [
 CFMotionValue >> interpolateTo: anEndValue using: anInterpolator [
 	^ self interpolateFrom: value to: anEndValue using: anInterpolator
 ]
-
-{ #category : 'compatibility' }
-CFMotionValue >> transitionFrom: aStartValue to: anEndValue [
-	^ self interpolateFrom: aStartValue to: anEndValue
-]
-
-{ #category : 'compatibility' }
-CFMotionValue >> transitionFrom: aStartValue to: anEndValue using: anInterpolator [
-	^ self interpolateFrom: aStartValue to: anEndValue using: anInterpolator
-]
-
-{ #category : 'compatibility' }
-CFMotionValue >> transitionTo: anEndValue [
-	^ self interpolateTo: anEndValue
-]
-
-{ #category : 'compatibility' }
-CFMotionValue >> transitionTo: anEndValue using: anInterpolator [
-	^ self interpolateTo: anEndValue using: anInterpolator
-]
