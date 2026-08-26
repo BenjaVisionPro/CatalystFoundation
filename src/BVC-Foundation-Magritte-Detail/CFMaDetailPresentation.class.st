@@ -1204,7 +1204,9 @@ CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocu
 							navigatePreservingCurrentBranchFrom: aRow
 							to: anObject ]
 					ifFalse: [
-						aRow phlow selectObject: anObject ] ] ];
+						CFMaPhlowNavigation
+							selectFrom: aRow
+							object: anObject ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |

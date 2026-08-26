@@ -13,6 +13,27 @@ Class {
 }
 
 { #category : 'api - navigating' }
+CFMaPhlowNavigation class >> selectFrom: anElement object: anObject [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			| anExistingLink |
+			self ensureFocusActivatesBranchIn: aPaneElement navigationContext pagerElement.
+			anExistingLink := self
+				immediateLinkFrom: aPaneElement paneModel
+				showing: anObject.
+			anExistingLink
+				ifNotNil: [
+					^ self
+						activateAndFocus: anExistingLink
+						from: aPaneElement ]
+				ifNil: [
+					^ anElement phlow selectObject: anObject ] ]
+		ifNone: [
+			^ anElement phlow selectObject: anObject ]
+]
+
+{ #category : 'api - navigating' }
 CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject [
 	self
 		navigateFrom: anElement
@@ -34,6 +55,7 @@ CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurr
 		treePagerPaneContaining: anElement
 		ifFound: [ :aPaneElement |
 			| anExistingLink |
+			self ensureFocusActivatesBranchIn: aPaneElement navigationContext pagerElement.
 			anExistingLink := self
 				immediateLinkFrom: aPaneElement paneModel
 				showing: anObject.
@@ -48,6 +70,14 @@ CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurr
 					^ anElement phlow spawnObject: anObject ] ]
 		ifNone: [
 			^ anElement phlow spawnObject: anObject ]
+]
+
+{ #category : 'private - tree pager' }
+CFMaPhlowNavigation class >> ensureFocusActivatesBranchIn: aPagerElement [
+	aPagerElement
+		removeEventHandlersSuchThat: [ :eachHandler |
+			eachHandler isKindOf: CFMaTreePagerFocusActivatesBranchHandler ];
+		addEventHandler: CFMaTreePagerFocusActivatesBranchHandler new
 ]
 
 { #category : 'private - tree pager' }
