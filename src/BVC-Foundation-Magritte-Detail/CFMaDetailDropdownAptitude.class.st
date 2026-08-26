@@ -24,30 +24,19 @@ CFMaDetailDropdownAptitude class >> fadeDuration [
 
 { #category : 'private - motion' }
 CFMaDetailDropdownAptitude >> blinkMotionFor: anOption in: aMenuContainer [
-    | timeline offTrack onTrack |
-    anOption states addState: BlElementState selected.
-    timeline := CFMotionTimeline new.
-    offTrack := CFMotionTimelineTrack
-        on: (CFMaDetailPopupSelectionMotionBehaviour
-            on: anOption
-            selected: false)
-        in: timeline.
-    offTrack
-        duration: self class blinkCycleDuration / 2;
-        easing: BlEasing linear.
-    onTrack := CFMotionTimelineTrack
-        on: (CFMaDetailPopupSelectionMotionBehaviour
-            on: anOption
-            selected: true)
-        in: timeline.
-    onTrack
-        startsAt: offTrack end;
-        duration: self class blinkCycleDuration / 2;
-        easing: BlEasing linear.
-    timeline repeat: 2.
-    ^ CFMotion
-        timeline: timeline
-        coordinator: aMenuContainer space motionCoordinator
+	| timeline track |
+	anOption states addState: BlElementState selected.
+	timeline := CFMotionTimeline new.
+	track := CFMotionTimelineTrack
+		on: (CFMaDetailPopupSelectionMotionBehaviour on: anOption)
+		in: timeline.
+	track
+		duration: self class blinkCycleDuration;
+		easing: BlEasing linear.
+	timeline repeat: 2.
+	^ CFMotion
+		timeline: timeline
+		coordinator: aMenuContainer space motionCoordinator
 ]
 
 { #category : 'private - motion' }

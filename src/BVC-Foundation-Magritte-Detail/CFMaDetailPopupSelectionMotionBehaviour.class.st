@@ -1,79 +1,74 @@
-"I present one explicit selected/unselected popup state during a Motion timeline."
+"I present one off/on popup-selection blink cycle.
 
+One timeline track evaluates this Behaviour for one complete blink cycle:
+the first half is unselected and the second half is selected. Repetition
+belongs to CFMotionTimeline; this Behaviour owns only the selected-state
+presentation for one cycle."
 Class {
-    #name : 'CFMaDetailPopupSelectionMotionBehaviour',
-    #superclass : 'CFMotionBehaviour',
-    #instVars : [
-        'element',
-        'selected',
-        'originSelected'
-    ],
-    #category : 'BVC-Foundation-Magritte-Detail',
-    #package : 'BVC-Foundation-Magritte-Detail'
+	#name : 'CFMaDetailPopupSelectionMotionBehaviour',
+	#superclass : 'CFMotionBehaviour',
+	#instVars : [
+		'element',
+		'originSelected'
+	],
+	#category : 'BVC-Foundation-Magritte-Detail',
+	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
 { #category : 'instance creation' }
-CFMaDetailPopupSelectionMotionBehaviour class >> on: anElement selected: aBoolean [
-    ^ self new
-        element: anElement;
-        selected: aBoolean;
-        yourself
+CFMaDetailPopupSelectionMotionBehaviour class >> on: anElement [
+	^ self new
+		element: anElement;
+		yourself
 ]
 
 { #category : 'accessing' }
 CFMaDetailPopupSelectionMotionBehaviour >> animationTarget [
-    ^ element
+	^ element
 ]
 
 { #category : 'private - presentation' }
-CFMaDetailPopupSelectionMotionBehaviour >> applySelection [
-    selected
-        ifTrue: [ element states addState: BlElementState selected ]
-        ifFalse: [ element states removeState: BlElementState selected ]
+CFMaDetailPopupSelectionMotionBehaviour >> applySelected: aBoolean [
+	aBoolean
+		ifTrue: [ element states addState: BlElementState selected ]
+		ifFalse: [ element states removeState: BlElementState selected ]
 ]
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> applyDestination [
-    self applySelection
+	self applySelected: true
 ]
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> applyProgress: aProgress [
-    self applySelection
+	self applySelected: aProgress >= 0.5
 ]
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> captureOrigin [
-    originSelected ifNil: [
-        originSelected := element states hasState: BlElementState selected ]
+	originSelected ifNil: [
+		originSelected := element states hasState: BlElementState selected ]
 ]
 
 { #category : 'accessing' }
 CFMaDetailPopupSelectionMotionBehaviour >> element: anElement [
-    element := anElement
+	element := anElement
 ]
 
 { #category : 'accessing' }
 CFMaDetailPopupSelectionMotionBehaviour >> propertyKey [
-    ^ CFMotionPropertyKey
-        element: element
-        property: self class
+	^ CFMotionPropertyKey
+		element: element
+		property: self class
 ]
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> restoreOrigin [
-    originSelected ifNil: [ ^ self ].
-    originSelected
-        ifTrue: [ element states addState: BlElementState selected ]
-        ifFalse: [ element states removeState: BlElementState selected ]
+	originSelected ifNil: [ ^ self ].
+	self applySelected: originSelected
 ]
 
 { #category : 'controlling' }
 CFMaDetailPopupSelectionMotionBehaviour >> reversed [
-    ^ self class on: element selected: selected not
-]
-
-{ #category : 'accessing' }
-CFMaDetailPopupSelectionMotionBehaviour >> selected: aBoolean [
-    selected := aBoolean
+	^ self class on: element
 ]
