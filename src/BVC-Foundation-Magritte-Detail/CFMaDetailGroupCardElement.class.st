@@ -168,7 +168,7 @@ CFMaDetailGroupCardElement >> installFocusOverlayFor: aRow [
 			anOverlay
 				attachTo: aRow;
 				border: (BlBorder
-					paint: (anOverlay theme editor focusedBorderColor alpha: 0.3)
+					paint: (CFMaDetailColours highlight alpha: 0.3)
 					width: 1).
 			self updateFocusOverlayGeometry ];
 		when: BlFocusOutEvent

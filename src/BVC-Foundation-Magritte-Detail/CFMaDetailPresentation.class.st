@@ -522,6 +522,10 @@ CFMaDetailPresentation >> prepareEditorFocusChromeIn: aFieldElement [
 			ifTrue: [ editors add: aChild ] ].
 
 	editors do: [ :anEditor |
+		anEditor editor segmentBuilder splitter:
+			(BrTextEditorSplitter new
+				segmentClass: CFMaTextEditorParagraphSegment;
+				yourself).
 		(anEditor isKindOf: GtMagritteOneLineEditorElement)
 			ifTrue: [ anEditor addAptitude: CFMaRowEditorAptitude new ] ].
 	^ aFieldElement

@@ -211,7 +211,7 @@ CFMaSettingsPresentation >> installFocusOverlayFor: aRow in: aContainer [
 			anOverlay
 				attachTo: aRow;
 				border: (BlBorder
-					paint: anOverlay theme editor focusedBorderColor
+					paint: CFMaDetailColours highlight
 					width: 1).
 			self updateFocusOverlayGeometry: anOverlay in: aContainer ];
 		when: BlFocusOutEvent

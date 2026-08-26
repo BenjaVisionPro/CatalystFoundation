@@ -6,6 +6,12 @@ Class {
 	#tag : 'Elements'
 }
 
+
+{ #category : 'defaults' }
+CFMaSettingsRightAlignedParagraphElement >> defaultSelectionColor [
+	^ CFMaDetailColours textSelection
+]
+
 { #category : 'private - alignment' }
 CFMaSettingsRightAlignedParagraphElement >> alignedRectangle: aRectangle paragraph: aParagraph [
 	^ aRectangle translateBy:
