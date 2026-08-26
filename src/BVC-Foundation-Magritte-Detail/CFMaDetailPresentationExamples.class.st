@@ -779,3 +779,35 @@ CFMaDetailPresentationExamples >> scalarRelationUsesTagsElement [
 	self assert: aDescription reference class equals: MAStringDescription.
 	^ anElement
 ]
+
+
+{ #category : 'examples - colour picker' }
+CFMaDetailPresentationExamples >> highlightColourPicker [
+	<gtExample>
+	| aPicker |
+	aPicker := CFMaDetailColourPickerElement new
+		colours: CFMaDetailColours highlightColours;
+		labelBlock: [ :aColour | CFMaDetailColours highlightNameFor: aColour ];
+		value: CFMaDetailColours highlightPurple;
+		yourself.
+	self assert: aPicker colours size equals: 8.
+	self assert: aPicker value equals: CFMaDetailColours highlightPurple.
+	^ aPicker
+]
+
+{ #category : 'examples - colour picker' }
+CFMaDetailPresentationExamples >> themeColourPickersUseSingleOptionDescriptions [
+	<gtExample>
+	| aShowcase |
+	aShowcase := CFMaFormShowcase new.
+	self assert: aShowcase highlightColourDescription class equals: MASingleOptionDescription.
+	self assert: aShowcase textSelectionColourDescription class equals: MASingleOptionDescription.
+	self assert: aShowcase highlightColourDescription options size equals: 8.
+	self assert: aShowcase textSelectionColourDescription options size equals: 9.
+	self
+		assert: (CFMaDetailColours
+			resolveTextSelectionColour: nil
+			highlight: CFMaDetailColours highlightPurple)
+		equals: CFMaDetailColours textSelectionPurple.
+	^ aShowcase
+]

@@ -20,6 +20,8 @@ Class {
 		'time',
 		'dateAndTime',
 		'classValue',
+		'highlightColour',
+		'textSelectionColour',
 		'tags',
 		'file',
 		'directory',
@@ -691,6 +693,8 @@ CFMaFormShowcase >> initialize [
 	time := Time hour: 14 minute: 30 second: 0.
 	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
 	classValue := String.
+	highlightColour := CFMaDetailColours highlightPurple.
+	textSelectionColour := nil.
 	tags := #('foundation' 'magritte' 'bloc').
 	file := FileLocator imageDirectory.
 	directory := FileLocator imageDirectory.
@@ -1040,6 +1044,61 @@ CFMaFormShowcase >> symbolValueDescription [
 		group: 'Fields';
 		categories: #(text);
 		priority: 40;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> highlightColour [
+	^ highlightColour
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> highlightColour: aColour [
+	highlightColour := aColour
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> highlightColourDescription [
+	<magritteDescription>
+	^ MASingleOptionDescription new
+		accessor: #highlightColour;
+		label: 'Colour';
+		group: 'Theme';
+		priority: 10;
+		options: CFMaDetailColours highlightColours;
+		fieldConfigure: [ :field |
+			field beColourPicker
+				colourBlock: [ :aColour | aColour ];
+				labelBlock: [ :aColour |
+					CFMaDetailColours highlightNameFor: aColour ] ];
+		beRequired;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> textSelectionColour [
+	^ textSelectionColour
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> textSelectionColour: aColour [
+	textSelectionColour := aColour
+]
+
+{ #category : 'descriptions - fields' }
+CFMaFormShowcase >> textSelectionColourDescription [
+	<magritteDescription>
+	^ MASingleOptionDescription new
+		accessor: #textSelectionColour;
+		label: 'Text highlight colour';
+		group: 'Theme';
+		priority: 20;
+		options: ({ nil } , CFMaDetailColours textSelectionColours);
+		fieldConfigure: [ :field |
+			field beColourPicker
+				colourBlock: [ :aColour | aColour ];
+				labelBlock: [ :aColour |
+					CFMaDetailColours textSelectionNameFor: aColour ] ];
 		yourself
 ]
 

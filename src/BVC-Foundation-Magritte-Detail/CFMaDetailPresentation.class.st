@@ -529,10 +529,41 @@ CFMaDetailPresentation >> prepareEditorFocusChromeIn: aFieldElement [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
+	| aRepresentation |
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	(aRepresentation isKindOf: CFMaColourPickerConfiguration) ifTrue: [
+		^ self
+			addSingleOptionColourPickerUsing: aDescription
+			configuration: aRepresentation ].
 	self
 		addPopupFieldUsing: aDescription
 		values: aDescription options
 		display: [ :aValue | aDescription displayStringFor: aValue ]
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addSingleOptionColourPickerUsing: aDescription configuration: aConfiguration [
+	| aPicker |
+	aPicker := CFMaDetailColourPickerElement new
+		options: aDescription options;
+		colourBlock: aConfiguration colourBlock;
+		labelBlock: aConfiguration labelBlock;
+		value: (self memento readUsing: aDescription);
+		valueChangedBlock: [ :anOption |
+			GtMagritteBuilderUtility
+				write: anOption
+				using: aDescription
+				memento: self memento
+				element: aPicker ];
+		yourself.
+	aPicker withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :thePicker :aSink |
+				thePicker value: aSink value currentValue ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	self addShortcutsTo: aPicker.
+	self addFieldElement: aPicker using: aDescription
 ]
 
 { #category : 'private - building' }
