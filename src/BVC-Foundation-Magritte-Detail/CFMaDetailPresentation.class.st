@@ -1198,10 +1198,13 @@ CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocu
 				anEvent consumed: true.
 				aFocusElement requestFocus.
 				self selectRelationElement: aFocusElement for: aDescription.
-				anEvent modifiers isAlt ifTrue: [
-					CFMaPhlowNavigation
-						navigatePreservingCurrentBranchFrom: aRow
-						to: anObject ] ] ];
+				anEvent modifiers isAlt
+					ifTrue: [
+						CFMaPhlowNavigation
+							navigatePreservingCurrentBranchFrom: aRow
+							to: anObject ]
+					ifFalse: [
+						aRow phlow selectObject: anObject ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |
