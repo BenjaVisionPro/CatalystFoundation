@@ -3,7 +3,7 @@ I adapt Foundation navigation intent onto ordinary Phlow and, when present,
 the existing GT Tree Pager.
 
 I deliberately know the Tree Pager API so relation renderers do not have to.
-Navigation is scoped to the current pane's immediate following links.
+Navigation is scoped to the current pane's immediate following links. Normal spawning remains standard Phlow; branch-preserving activation is used by Foundation's alternate-click navigation.
 "
 Class {
 	#name : 'CFMaPhlowNavigation',

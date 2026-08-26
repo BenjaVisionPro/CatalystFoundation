@@ -931,9 +931,7 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	aRelationElement := self newRelationValueSlotWith: nil.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 
-	self
-		installFormNavigationOn: aRelationElement
-		forwardCombination: BlKeyCombination tab.
+	self addShortcutsTo: aRelationElement.
 	self addFieldElement: aRelationElement using: aDescription.
 	aHeaderRow := aContainer rows last.
 
@@ -1191,36 +1189,30 @@ CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObj
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocusElement description: aDescription [
-	aRow when: BlClickEvent do: [ :anEvent |
-		| anObject |
-		anObject := self memento readUsing: aDescription.
-		anObject ifNotNil: [
-			anEvent consumed: true.
-			aFocusElement requestFocus.
-			anEvent modifiers isAlt
-				ifTrue: [
+	aRow
+		when: BlClickEvent
+		do: [ :anEvent |
+			| anObject |
+			anObject := self memento readUsing: aDescription.
+			anObject ifNotNil: [
+				anEvent consumed: true.
+				aFocusElement requestFocus.
+				self selectRelationElement: aFocusElement for: aDescription.
+				anEvent modifiers isAlt ifTrue: [
 					CFMaPhlowNavigation
 						navigatePreservingCurrentBranchFrom: aRow
-						to: anObject ]
-				ifFalse: [
-					CFMaPhlowNavigation
-						navigateFrom: aRow
-						to: anObject ] ] ].
+						to: anObject ] ] ];
+		when: BlDoubleClickEvent
+		do: [ :anEvent |
+			| anObject |
+			anObject := self memento readUsing: aDescription.
+			anObject ifNotNil: [
+				anEvent consumed: true.
+				CFMaPhlowNavigation
+					navigateFrom: aRow
+					to: anObject ] ].
 
 	aFocusElement
-		addShortcut: (BlShortcutWithAction new
-			name: 'Open related object';
-			description: 'Opens the related object in the current navigation context.';
-			combination: BlKeyCombination enter;
-			overrideChildren: true;
-			action: [ :anEvent :aShortcut |
-				| anObject |
-				anObject := self memento readUsing: aDescription.
-				anObject ifNotNil: [
-					anEvent consumed: true.
-					CFMaPhlowNavigation
-						navigateFrom: aFocusElement
-						to: anObject ] ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Remove to-one relation';
 			combination: BlKeyCombination delete;
@@ -1242,7 +1234,6 @@ CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocu
 					using: aDescription
 					element: aFocusElement ])
 ]
-
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationFocusElement: anElement isWithinRows: theRows [
 	anElement ifNil: [ ^ false ].
