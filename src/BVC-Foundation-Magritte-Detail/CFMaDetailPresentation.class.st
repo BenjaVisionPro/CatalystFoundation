@@ -722,7 +722,8 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 						memento: self memento
 						element: aPopup ].
 			anIconBlock ifNotNil: [
-				anItemElement leadingElement: (anIconBlock cull: anItemObject) ] ];
+				anItemElement leadingElement: (anIconBlock cull: anItemObject) ].
+			anItemElement ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
