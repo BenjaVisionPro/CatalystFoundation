@@ -76,8 +76,7 @@ CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject preservingCurr
 CFMaPhlowNavigation class >> ensureTreePagerPolicyIn: aPagerElement [
 	aPagerElement
 		removeEventHandlersSuchThat: [ :eachHandler |
-			(eachHandler isKindOf: CFMaTreePagerFocusActivatesBranchHandler)
-				or: [ eachHandler isKindOf: CFMaTreePagerPruneRemovedBranchHandler ] ];
+			eachHandler isKindOf: CFMaTreePagerPruneRemovedBranchHandler ];
 		addEventHandler: CFMaTreePagerPruneRemovedBranchHandler new
 ]
 
