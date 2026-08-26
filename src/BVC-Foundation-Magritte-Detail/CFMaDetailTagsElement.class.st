@@ -64,25 +64,21 @@ CFMaDetailTagsElement >> reconcileWith: aCollection [
 
 { #category : 'private - instance creation' }
 CFMaDetailTagsElement >> newAddButton [
-	| aButton anIcon |
-	anIcon := FontAwesomeIcons defaultStyle icon: #circlePlus.
-	anIcon
-		color: CFMaDetailColours secondaryForeground;
-		size: 12 @ 12.
+	| aButton anIndicator |
+	anIndicator := CFMaDetailAddIconElement size: 12 @ 12.
 	aButton := BrButton new
-		aptitude: BrGlamorousButtonIconAptitude new
-			+ BrGlamorousButtonLayoutAptitude new;
-		icon: anIcon;
+		aptitude: BrGlamorousButtonLayoutAptitude new;
 		background: Color transparent;
 		border: BlBorder empty;
 		padding: (BlInsets all: 4);
 		margin: (BlInsets top: 2 right: 0 bottom: 2 left: 0);
 		fitContent;
 		constraintsDo: [ :c | c flow vertical alignCenter ];
+		addChild: anIndicator;
 		when: BlMouseEnterEvent do: [ :anEvent |
-			anIcon color: CFMaDetailColours highlight ];
+			anIndicator hovered: true ];
 		when: BlMouseLeaveEvent do: [ :anEvent |
-			anIcon color: CFMaDetailColours secondaryForeground ];
+			anIndicator hovered: false ];
 		action: [ :aButton | self beginInsertionAtEnd ];
 		yourself.
 	^ aButton

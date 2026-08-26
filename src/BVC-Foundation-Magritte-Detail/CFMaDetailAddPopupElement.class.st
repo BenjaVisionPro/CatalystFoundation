@@ -3,7 +3,7 @@ Class {
 	#superclass : 'CFMaDetailPopupElement',
 	#traits : 'TBrEnableable',
 	#instVars : [
-		'addIcon'
+		'addIndicator'
 	],
 	#classTraits : 'TBrEnableable classTrait',
 	#category : 'BVC-Foundation-Magritte-Detail',
@@ -104,11 +104,8 @@ CFMaDetailAddPopupElement >> initialize [
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement >> newIndicator [
-	addIcon := FontAwesomeIcons defaultStyle icon: #circlePlus.
-	addIcon
-		size: 16 @ 16;
-		color: CFMaDetailColours secondaryForeground.
-	^ addIcon
+	addIndicator := CFMaDetailAddIconElement size: 16 @ 16.
+	^ addIndicator
 ]
 
 
@@ -116,10 +113,7 @@ CFMaDetailAddPopupElement >> newIndicator [
 CFMaDetailAddPopupElement >> updatePopupAppearance [
 	self background: BlBackground transparent.
 	indicatorHost background: BlBackground transparent.
-	addIcon ifNotNil: [
-		addIcon color: (hovered
-			ifTrue: [ CFMaDetailColours highlight ]
-			ifFalse: [ CFMaDetailColours secondaryForeground ]) ]
+	addIndicator ifNotNil: [ addIndicator hovered: hovered ]
 ]
 
 { #category : 'layout' }
