@@ -18,14 +18,19 @@ CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
 	^ aWidget theme highlight color blocResolveColorForTheme: aWidget theme
 ]
 
-{ #category : 'defaults' }
-CFMaDetailSwitchAptitude class >> animationDuration [
-	^ 120 milliSeconds
+{ #category : 'private - appearance' }
+CFMaDetailSwitchAptitude >> inactiveTrackColorFor: aWidget [
+	^ aWidget theme controls switchInactiveTrackTint blocResolveColorForTheme: aWidget theme
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailSwitchAptitude >> thumbBackgroundFor: aWidget [
+	^ aWidget theme controls switchThumbBackground blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'defaults' }
-CFMaDetailSwitchAptitude class >> inactiveTrackColor [
-	^ Color r: 220 g: 220 b: 220 range: 255
+CFMaDetailSwitchAptitude class >> animationDuration [
+	^ 120 milliSeconds
 ]
 
 { #category : 'defaults' }
@@ -37,10 +42,10 @@ CFMaDetailSwitchAptitude class >> thumbTravel [
 CFMaDetailSwitchAptitude >> initialize [
 	super initialize.
 	thumbOffset := 0.0.
-	trackColor := self class inactiveTrackColor.
+	trackColor := Color transparent.
 	activeMotion := nil.
 	thumb := BlElement new
-		background: Color white;
+		background: Color transparent;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 7);
 		constraintsDo: [ :c |
 			c horizontal exact: 20.
@@ -55,7 +60,7 @@ CFMaDetailSwitchAptitude >> initialize [
 		addChangeProperty: #(widget size) with: [ 36 @ 16 ];
 		addChangeProperty: #(widget padding) with: [ BlInsets all: 1 ];
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
-		addChangeProperty: #(widget background) with: [ self class inactiveTrackColor ];
+		addChangeProperty: #(widget background) with: [ Color transparent ];
 		addChangeAddChildAs: #(cfDetailSwitchThumb) with: [ thumb ]
 ]
 
@@ -159,6 +164,7 @@ CFMaDetailSwitchAptitude >> toggleActivated [
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> updateForCurrentTheme [
 	self widgetDo: [ :aWidget |
+		thumb background: (self thumbBackgroundFor: aWidget).
 		aWidget isActivated
 			ifTrue: [
 				self
@@ -167,14 +173,21 @@ CFMaDetailSwitchAptitude >> updateForCurrentTheme [
 			ifFalse: [
 				self
 					retargetToThumbOffset: 0.0
-					trackColor: self class inactiveTrackColor ] ]
+					trackColor: (self inactiveTrackColorFor: aWidget) ] ]
 ]
 
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleDeactivated [
-	self
-		retargetToThumbOffset: 0.0
-		trackColor: self class inactiveTrackColor
+	self widgetDo: [ :aWidget |
+		self
+			retargetToThumbOffset: 0.0
+			trackColor: (self inactiveTrackColorFor: aWidget) ]
+]
+
+{ #category : 'lifecycle' }
+CFMaDetailSwitchAptitude >> onInstalledIn: anElement [
+	super onInstalledIn: anElement.
+	self updateForCurrentTheme
 ]
 
 { #category : 'lifecycle' }

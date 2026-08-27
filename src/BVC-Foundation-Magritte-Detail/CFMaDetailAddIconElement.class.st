@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaDetailAddIconElement',
 	#superclass : 'BlElement',
 	#instVars : [
-		'icon'
+		'icon',
+		'hovered'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -18,8 +19,8 @@ CFMaDetailAddIconElement class >> size: anExtent [
 { #category : 'initialization' }
 CFMaDetailAddIconElement >> initialize [
 	super initialize.
+	hovered := false.
 	icon := FontAwesomeIcons defaultStyle icon: #circlePlus.
-	icon color: CFMaDetailColours secondaryForeground.
 	self
 		layout: BlFrameLayout new;
 		background: Color transparent;
@@ -27,7 +28,8 @@ CFMaDetailAddIconElement >> initialize [
 		addChild: icon.
 	icon constraintsDo: [ :c |
 		c frame horizontal alignCenter.
-		c frame vertical alignCenter ]
+		c frame vertical alignCenter ].
+	self updateAppearance
 ]
 
 { #category : 'accessing' }
@@ -38,7 +40,19 @@ CFMaDetailAddIconElement >> iconSize: anExtent [
 
 { #category : 'appearance' }
 CFMaDetailAddIconElement >> hovered: aBoolean [
-	icon color: (aBoolean
-		ifTrue: [ CFMaDetailColours highlight ]
-		ifFalse: [ CFMaDetailColours secondaryForeground ])
+	hovered := aBoolean.
+	self updateAppearance
+]
+
+{ #category : 'lifecycle' }
+CFMaDetailAddIconElement >> onThemeChanged [
+	super onThemeChanged.
+	icon ifNotNil: [ self updateAppearance ]
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailAddIconElement >> updateAppearance [
+	icon color: (hovered
+		ifTrue: [ self theme highlight color ]
+		ifFalse: [ self theme typography secondaryForeground ])
 ]

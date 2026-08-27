@@ -93,12 +93,25 @@ CFMaDetailColourPickerOptionElement >> label: aString [
 { #category : 'selection' }
 CFMaDetailColourPickerOptionElement >> selected: aBoolean [
 	selected := aBoolean.
-	swatch border: (aBoolean
-		ifTrue: [
-			BlBorder
-				paint: (colour ifNil: [ CFMaDetailColours secondaryForeground ])
-				width: 3 ]
-		ifFalse: [ BlBorder empty ])
+	self updateSelectionAppearance
+]
+
+{ #category : 'lifecycle' }
+CFMaDetailColourPickerOptionElement >> onThemeChanged [
+	super onThemeChanged.
+	swatch ifNotNil: [ self updateSelectionAppearance ]
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailColourPickerOptionElement >> updateSelectionAppearance [
+	| aBorderColor |
+	selected ifFalse: [
+		swatch border: BlBorder empty.
+		^ self ].
+	aBorderColor := colour ifNil: [
+		self theme typography secondaryForeground
+			blocResolveColorForTheme: self theme ].
+	swatch border: (BlBorder paint: aBorderColor width: 3)
 ]
 
 { #category : 'interaction' }

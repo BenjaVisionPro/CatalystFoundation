@@ -39,18 +39,18 @@ CFMaDetailSliderElement >> initialize [
 			c vertical fitContent ].
 	track := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 2);
-		background: (Color black alpha: 0.14);
+		background: Color transparent;
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	fill := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 2);
-		background: CFMaDetailColours highlight;
+		background: Color transparent;
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	thumb := BlElement new
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailSliderMetrics thumbCornerRadius);
-		background: Color white;
-		border: (BlBorder paint: (Color black alpha: 0.16) width: 0.5);
+		background: Color transparent;
+		border: BlBorder empty;
 		preventMeAndChildrenMouseEvents;
 		yourself.
 	minimumTick := self newScaleTick.
@@ -102,7 +102,7 @@ CFMaDetailSliderElement >> baselineOffset [
 CFMaDetailSliderElement >> newScaleTick [
 	^ BlElement new
 		geometry: BlCircleGeometry new;
-		background: (Color black alpha: 0.22);
+		background: Color transparent;
 		preventMeAndChildrenMouseEvents;
 		yourself
 ]
@@ -186,9 +186,32 @@ CFMaDetailSliderElement >> updateLabels [
 { #category : 'private - styling' }
 CFMaDetailSliderElement >> valueLabelTextFor: aString [
 	^ aString asRopedText
-		foreground: CFMaDetailColours secondaryForeground;
-		fontSize: 11;
+		foreground: self theme typography secondaryForeground;
+		fontSize: self theme typography supportingFontSize;
 		yourself
+]
+
+{ #category : 'lifecycle' }
+CFMaDetailSliderElement >> onThemeChanged [
+	super onThemeChanged.
+	track ifNotNil: [
+		self updateThemeAppearance.
+		minimumLabel ifNotNil: [ self updateLabels ] ]
+]
+
+{ #category : 'private - styling' }
+CFMaDetailSliderElement >> updateThemeAppearance [
+	| aTheme |
+	aTheme := self theme.
+	track background: (aTheme controls sliderTrackTint blocResolveColorForTheme: aTheme).
+	fill background: (aTheme highlight color blocResolveColorForTheme: aTheme).
+	thumb
+		background: (aTheme controls sliderThumbBackground blocResolveColorForTheme: aTheme);
+		border: (BlBorder
+			paint: (aTheme controls sliderThumbBorderTint blocResolveColorForTheme: aTheme)
+			width: 0.5).
+	{ minimumTick. middleTick. maximumTick } do: [ :aTick |
+		aTick background: (aTheme controls sliderTickTint blocResolveColorForTheme: aTheme) ]
 ]
 
 
