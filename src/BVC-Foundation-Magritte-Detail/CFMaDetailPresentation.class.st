@@ -35,7 +35,6 @@ CFMaDetailPresentation >> build [
 	relationFocusRows removeAll.
 	relationFocusContainers removeAll.
 	relationActiveDescriptions removeAll.
-	self ensureCatalystTheme.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
@@ -59,14 +58,8 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 ]
 
 { #category : 'private - appearance' }
-CFMaDetailPresentation >> ensureCatalystTheme [
-	(self form theme isKindOf: CgtAbstractTheme) ifFalse: [
-		self form theme: CgtLightTheme new ]
-]
-
-{ #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ CFThemeSemantics formBackgroundFor: self form theme
+	^ self form theme surfaces formBackground
 ]
 
 { #category : 'configuration' }
@@ -326,7 +319,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: (CFThemeSemantics secondaryForegroundFor: self form theme);
+		color: (self form theme typography secondaryForeground);
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -393,8 +386,8 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: (CFThemeSemantics primaryForegroundFor: self form theme);
-		fontSize: (CFThemeSemantics bodyFontSizeFor: self form theme)
+		foreground: (self form theme typography primaryForeground);
+		fontSize: (self form theme typography bodyFontSize)
 ]
 
 { #category : 'private - composition' }
@@ -409,8 +402,8 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: (CFThemeSemantics tertiaryForegroundFor: self form theme);
-			fontSize: (CFThemeSemantics supportingFontSizeFor: self form theme));
+			foreground: (self form theme typography tertiaryForeground);
+			fontSize: (self form theme typography supportingFontSize));
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -1079,7 +1072,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: (CFThemeSemantics secondaryForegroundFor: self form theme);
+		color: (self form theme typography secondaryForeground);
 		size: 8 @ 8.
 	^ anElement
 ]

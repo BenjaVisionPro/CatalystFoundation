@@ -10,7 +10,8 @@ Class {
 		'ungroupedContainer',
 		'identityAffordanceEmitted',
 		'fieldConfigurationOverrides',
-		'fieldConfigurations'
+		'fieldConfigurations',
+		'theme'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -199,6 +200,7 @@ CFMaPresentation >> build [
 	containersByGroup removeAll.
 	ungroupedContainer := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].
+	self form theme: theme.
 	^ super build
 ]
 
@@ -280,7 +282,20 @@ CFMaPresentation >> initialize [
 	containersByGroup := Dictionary new.
 	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
-	fieldConfigurations := Dictionary new
+	fieldConfigurations := Dictionary new.
+	theme := CgtLightTheme new
+]
+
+
+{ #category : 'accessing' }
+CFMaPresentation >> theme [
+	^ theme
+]
+
+{ #category : 'accessing' }
+CFMaPresentation >> theme: aTheme [
+	theme := aTheme.
+	self form ifNotNil: [ :aForm | aForm theme: aTheme ]
 ]
 
 { #category : 'private - focus' }

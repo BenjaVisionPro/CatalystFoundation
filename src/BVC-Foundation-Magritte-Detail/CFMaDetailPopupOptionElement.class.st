@@ -70,14 +70,14 @@ CFMaDetailPopupOptionElement >> initialize [
 			default: [ :aStyle | aStyle background: Color transparent ];
 			hovered: [ :aStyle | aStyle background: (Color black alpha: 0.08) ];
 			selected: [ :aStyle |
-				aStyle background: (CFThemeSemantics highlightColorFor: self theme) ]);
+				aStyle background: (self theme highlight color) ]);
 		addAptitude: (BrStyleCommonAptitude new
 			@ checkLabelAptitude label;
-			default: [ :aStyle | aStyle foreground: (CFThemeSemantics primaryForegroundFor: self theme) ];
+			default: [ :aStyle | aStyle foreground: (self theme typography primaryForeground) ];
 			selected: [ :aStyle | aStyle foreground: Color white ]);
 		addAptitude: (BrStyleCommonAptitude new
 			@ valueLabelAptitude label;
-			default: [ :aStyle | aStyle foreground: (CFThemeSemantics primaryForegroundFor: self theme) ];
+			default: [ :aStyle | aStyle foreground: (self theme typography primaryForeground) ];
 			selected: [ :aStyle | aStyle foreground: Color white ])
 ]
 

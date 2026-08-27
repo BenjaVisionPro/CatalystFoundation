@@ -84,8 +84,8 @@ CFMaDetailGroupElement >> group: aGroup [
 	self addChildFirst: (BrLabel new
 		text: aGroup asString;
 		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (CFThemeSemantics primaryForegroundFor: self theme);
-			fontSize: (CFThemeSemantics groupHeadingFontSizeFor: self theme);
+			foreground: (self theme typography primaryForeground);
+			fontSize: (self theme typography groupHeadingFontSize);
 			bold);
 		fitContent;
 		margin: (BlInsets top: 25 right: 14 bottom: 7 left: 14);

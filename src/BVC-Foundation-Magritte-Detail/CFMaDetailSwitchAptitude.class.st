@@ -15,7 +15,7 @@ Class {
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
-	^ CFThemeSemantics highlightColorFor: aWidget theme
+	^ aWidget theme highlight color blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'defaults' }
@@ -117,7 +117,7 @@ CFMaDetailSwitchAptitude >> retargetToThumbOffset: aTargetOffset trackColor: aTa
 		| requestedTranslation requestedColor |
 		aWidget isAttachedToSceneGraph ifFalse: [
 			self applyThumbOffset: aTargetOffset.
-			^ self applyTrackColor: aTargetColor ].
+			^ self ].
 
 		(activeMotion isNil or: [ activeMotion isCancelled or: [ activeMotion isCompleted ] ])
 			ifTrue: [
@@ -148,6 +148,8 @@ CFMaDetailSwitchAptitude >> trackColor [
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleActivated [
 	self widgetDo: [ :aWidget |
+		aWidget hasParent ifFalse: [
+			^ self applyThumbOffset: self class thumbTravel ].
 		self
 			retargetToThumbOffset: self class thumbTravel
 			trackColor: (self activeTrackColorFor: aWidget) ]
