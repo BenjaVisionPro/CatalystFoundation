@@ -96,7 +96,7 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 	aStyle := self toggleStyle.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousTextLabelAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;
-		label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground);
+		label: (aLabel asString asRopedText foreground: self theme foundation primaryForeground);
 		hMatchParent;
 		vExact: 20;
 		padding: (BlInsets left: 12 right: 12);
@@ -109,7 +109,7 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
-			aToggle label: (aLabel asString asRopedText foreground: CFMaDetailColours primaryForeground) ].
+			aToggle label: (aLabel asString asRopedText foreground: self theme foundation primaryForeground) ].
 	^ aToggle
 ]
 
@@ -136,7 +136,7 @@ CFMaDetailButtonBarElement >> toggleStyle [
 		hovered: [ :aState |
 			aState background: (Color black alpha: 0.06) ];
 		activated: [ :aState |
-			aState background: CFMaDetailColours highlight ];
+			aState background: self theme foundation highlightColor ];
 		yourself
 ]
 

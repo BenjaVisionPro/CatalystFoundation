@@ -693,7 +693,7 @@ CFMaFormShowcase >> initialize [
 	time := Time hour: 14 minute: 30 second: 0.
 	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
 	classValue := String.
-	highlightColour := CFMaDetailColours highlightPurple.
+	highlightColour := CgtFoundationPalette highlightPurple.
 	textSelectionColour := nil.
 	tags := #('foundation' 'magritte' 'bloc').
 	file := FileLocator imageDirectory.
@@ -1065,12 +1065,12 @@ CFMaFormShowcase >> highlightColourDescription [
 		label: 'Colour';
 		group: 'Theme';
 		priority: 10;
-		options: CFMaDetailColours highlightColours;
+		options: CgtFoundationPalette highlightColours;
 		fieldConfigure: [ :field |
 			field beColourPicker
 				colourBlock: [ :aColour | aColour ];
 				labelBlock: [ :aColour |
-					CFMaDetailColours highlightNameFor: aColour ] ];
+					CgtFoundationPalette highlightNameFor: aColour ] ];
 		beRequired;
 		yourself
 ]
@@ -1093,11 +1093,11 @@ CFMaFormShowcase >> textSelectionColourDescription [
 		label: 'Text highlight colour';
 		group: 'Theme';
 		priority: 20;
-		options: ({ nil } , CFMaDetailColours textSelectionColours);
+		options: ({ nil } , CgtFoundationPalette textHighlightColours);
 		fieldConfigure: [ :field |
 			field bePopup
 				displayBlock: [ :aColour |
-					CFMaDetailColours textSelectionNameFor: aColour ] ];
+					CgtFoundationPalette textHighlightNameFor: aColour ] ];
 		blocOptionIconStencil: [ :aColour |
 			aColour
 				ifNil: [

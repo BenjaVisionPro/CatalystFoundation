@@ -19,6 +19,6 @@ CFMaRelationSurfaceAptitude >> initialize [
 				width: 2) ];
 		focused: [ :aStyle |
 			aStyle border: (BlBorder
-				paint: CFMaDetailColours highlight
+				paint: self theme foundation highlightColor
 				width: 2) ]
 ]

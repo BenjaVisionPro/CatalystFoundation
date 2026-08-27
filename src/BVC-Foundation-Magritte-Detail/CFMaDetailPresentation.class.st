@@ -35,6 +35,7 @@ CFMaDetailPresentation >> build [
 	relationFocusRows removeAll.
 	relationFocusContainers removeAll.
 	relationActiveDescriptions removeAll.
+	self ensureCatalystTheme.
 	self form background: self formBackgroundPaint.
 	^ super build
 ]
@@ -58,8 +59,14 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 ]
 
 { #category : 'private - appearance' }
+CFMaDetailPresentation >> ensureCatalystTheme [
+	(self form theme isKindOf: CgtAbstractTheme) ifFalse: [
+		self form theme: CgtLightTheme new ]
+]
+
+{ #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ Color white
+	^ self form theme foundation formBackground
 ]
 
 { #category : 'configuration' }
@@ -319,7 +326,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: CFMaDetailColours secondaryForeground;
+		color: self form theme foundation secondaryForeground;
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -386,8 +393,8 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: CFMaDetailColours primaryForeground;
-		fontSize: 13
+		foreground: self form theme foundation primaryForeground;
+		fontSize: self form theme typography bodyFontSize
 ]
 
 { #category : 'private - composition' }
@@ -402,8 +409,8 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: CFMaDetailColours tertiaryForeground;
-			fontSize: 11);
+			foreground: self form theme foundation tertiaryForeground;
+			fontSize: self form theme typography supportingFontSize);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -1072,7 +1079,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: CFMaDetailColours secondaryForeground;
+		color: self form theme foundation secondaryForeground;
 		size: 8 @ 8.
 	^ anElement
 ]

@@ -32,149 +32,112 @@ CFMaDetailColours class >> disabledForeground [
 
 { #category : 'accent' }
 CFMaDetailColours class >> highlight [
-	^ self highlightBlue
+	^ CgtThemeState default highlightColor
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightBlue [
-	^ Color r: 52 g: 120 b: 247 range: 255
+	^ CgtFoundationPalette highlightBlue
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightPurple [
-	^ Color r: 153 g: 84 b: 163 range: 255
+	^ CgtFoundationPalette highlightPurple
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightPink [
-	^ Color r: 228 g: 92 b: 156 range: 255
+	^ CgtFoundationPalette highlightPink
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightRed [
-	^ Color r: 237 g: 96 b: 93 range: 255
+	^ CgtFoundationPalette highlightRed
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightOrange [
-	^ Color r: 232 g: 135 b: 58 range: 255
+	^ CgtFoundationPalette highlightOrange
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightYellow [
-	^ Color r: 245 g: 200 b: 68 range: 255
+	^ CgtFoundationPalette highlightYellow
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightGreen [
-	^ Color r: 120 g: 184 b: 86 range: 255
+	^ CgtFoundationPalette highlightGreen
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightGrey [
-	^ Color r: 141 g: 141 b: 140 range: 255
+	^ CgtFoundationPalette highlightGrey
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightColours [
-	^ {
-		self highlightBlue.
-		self highlightPurple.
-		self highlightPink.
-		self highlightRed.
-		self highlightOrange.
-		self highlightYellow.
-		self highlightGreen.
-		self highlightGrey }
+	^ CgtFoundationPalette highlightColours
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightNameFor: aColour [
-	aColour = self highlightBlue ifTrue: [ ^ 'Blue' ].
-	aColour = self highlightPurple ifTrue: [ ^ 'Purple' ].
-	aColour = self highlightPink ifTrue: [ ^ 'Pink' ].
-	aColour = self highlightRed ifTrue: [ ^ 'Red' ].
-	aColour = self highlightOrange ifTrue: [ ^ 'Orange' ].
-	aColour = self highlightYellow ifTrue: [ ^ 'Yellow' ].
-	aColour = self highlightGreen ifTrue: [ ^ 'Green' ].
-	aColour = self highlightGrey ifTrue: [ ^ 'Grey' ].
-	^ ''
+	^ CgtFoundationPalette highlightNameFor: aColour
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionBlue [
-	^ Color r: 186 g: 213 b: 251 range: 255
+	^ CgtFoundationPalette textHighlightBlue
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionPurple [
-	^ Color r: 218 g: 197 b: 222 range: 255
+	^ CgtFoundationPalette textHighlightPurple
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionPink [
-	^ Color r: 245 g: 204 b: 225 range: 255
+	^ CgtFoundationPalette textHighlightPink
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionRed [
-	^ Color r: 237 g: 197 b: 198 range: 255
+	^ CgtFoundationPalette textHighlightRed
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionOrange [
-	^ Color r: 248 g: 219 b: 191 range: 255
+	^ CgtFoundationPalette textHighlightOrange
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionYellow [
-	^ Color r: 252 g: 238 b: 196 range: 255
+	^ CgtFoundationPalette textHighlightYellow
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionGreen [
-	^ Color r: 213 g: 233 b: 203 range: 255
+	^ CgtFoundationPalette textHighlightGreen
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionGraphite [
-	^ Color r: 223 g: 223 b: 224 range: 255
+	^ CgtFoundationPalette textHighlightGraphite
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionColours [
-	^ {
-		self textSelectionBlue.
-		self textSelectionPurple.
-		self textSelectionPink.
-		self textSelectionRed.
-		self textSelectionOrange.
-		self textSelectionYellow.
-		self textSelectionGreen.
-		self textSelectionGraphite }
+	^ CgtFoundationPalette textHighlightColours
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionNameFor: aColour [
-	aColour ifNil: [ ^ 'Automatic' ].
-	aColour = self textSelectionBlue ifTrue: [ ^ 'Blue' ].
-	aColour = self textSelectionPurple ifTrue: [ ^ 'Purple' ].
-	aColour = self textSelectionPink ifTrue: [ ^ 'Pink' ].
-	aColour = self textSelectionRed ifTrue: [ ^ 'Red' ].
-	aColour = self textSelectionOrange ifTrue: [ ^ 'Orange' ].
-	aColour = self textSelectionYellow ifTrue: [ ^ 'Yellow' ].
-	aColour = self textSelectionGreen ifTrue: [ ^ 'Green' ].
-	aColour = self textSelectionGraphite ifTrue: [ ^ 'Graphite' ].
-	^ ''
+	^ CgtFoundationPalette textHighlightNameFor: aColour
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> automaticTextSelectionColourForHighlight: aHighlightColour [
-	| anIndex |
-	anIndex := self highlightColours
-		indexOf: aHighlightColour
-		ifAbsent: [ 1 ].
-	^ self textSelectionColours at: anIndex
+	^ CgtFoundationPalette automaticTextHighlightColourForHighlight: aHighlightColour
 ]
 
 { #category : 'accent - text selection palette' }
@@ -186,9 +149,7 @@ CFMaDetailColours class >> resolveTextSelectionColour: aTextSelectionColour high
 
 { #category : 'accent' }
 CFMaDetailColours class >> textSelection [
-	^ self
-		resolveTextSelectionColour: nil
-		highlight: self highlight
+	^ CgtThemeState default textHighlightColor
 ]
 
 

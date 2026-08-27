@@ -14,8 +14,8 @@ Class {
 }
 
 { #category : 'defaults' }
-CFMaDetailSwitchAptitude class >> activeTrackColor [
-	^ CFMaDetailColours highlight
+CFMaDetailSwitchAptitude >> activeTrackColor [
+	^ self theme foundation highlightColor
 ]
 
 { #category : 'defaults' }
@@ -147,7 +147,7 @@ CFMaDetailSwitchAptitude >> trackColor [
 CFMaDetailSwitchAptitude >> toggleActivated [
 	self
 		retargetToThumbOffset: self class thumbTravel
-		trackColor: self class activeTrackColor
+		trackColor: self activeTrackColor
 ]
 
 { #category : 'event handling' }
