@@ -77,7 +77,7 @@ CFMaDetailGroupCardElement >> newSeparator [
 	| aSeparator aFrame |
 	aSeparator := BlElement new
 		background: ((self theme isKindOf: CgtAbstractTheme)
-			ifTrue: [ self theme surfaces separatorColor ]
+			ifTrue: [ CgtThemeSemantics separatorColorFor: self theme ]
 			ifFalse: [ Color r: 229 g: 229 b: 229 range: 255 ]);
 		yourself.
 	aSeparator constraintsDo: [ :c |
@@ -98,7 +98,7 @@ CFMaDetailGroupCardElement >> newSeparator [
 CFMaDetailGroupCardElement >> onThemeChanged [
 	super onThemeChanged.
 	(self theme isKindOf: CgtAbstractTheme) ifFalse: [ ^ self ].
-	self background: self theme surfaces cardBackground
+	self background: (CgtThemeSemantics cardBackgroundFor: self theme)
 ]
 
 { #category : 'removing' }
@@ -177,7 +177,7 @@ CFMaDetailGroupCardElement >> installFocusOverlayFor: aRow [
 			anOverlay
 				attachTo: aRow;
 				border: (BlBorder
-					paint: ((self theme highlight color blocResolveColorForTheme: self theme) alpha: 0.3)
+					paint: ((CgtThemeSemantics highlightColorFor: self theme) alpha: 0.3)
 					width: 1).
 			self updateFocusOverlayGeometry ];
 		when: BlFocusOutEvent

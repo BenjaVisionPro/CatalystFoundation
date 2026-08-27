@@ -13,9 +13,9 @@ Class {
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
 
-{ #category : 'defaults' }
-CFMaDetailSwitchAptitude >> activeTrackColor [
-	^ self theme highlight color
+{ #category : 'private - appearance' }
+CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
+	^ CgtThemeSemantics highlightColorFor: aWidget theme
 ]
 
 { #category : 'defaults' }
@@ -66,7 +66,9 @@ CFMaDetailSwitchAptitude >> initializeListeners [
 		when: BrToggleActivatedEvent
 		do: [ :anEvent | self toggleActivated ];
 		when: BrToggleDeactivatedEvent
-		do: [ :anEvent | self toggleDeactivated ]
+		do: [ :anEvent | self toggleDeactivated ];
+		when: BlElementThemeChanged
+		do: [ :anEvent | self updateForCurrentTheme ]
 ]
 
 { #category : 'private - motion' }
@@ -145,9 +147,25 @@ CFMaDetailSwitchAptitude >> trackColor [
 
 { #category : 'event handling' }
 CFMaDetailSwitchAptitude >> toggleActivated [
-	self
-		retargetToThumbOffset: self class thumbTravel
-		trackColor: self activeTrackColor
+	self widgetDo: [ :aWidget |
+		self
+			retargetToThumbOffset: self class thumbTravel
+			trackColor: (self activeTrackColorFor: aWidget) ]
+]
+
+
+{ #category : 'event handling' }
+CFMaDetailSwitchAptitude >> updateForCurrentTheme [
+	self widgetDo: [ :aWidget |
+		aWidget isActivated
+			ifTrue: [
+				self
+					retargetToThumbOffset: self class thumbTravel
+					trackColor: (self activeTrackColorFor: aWidget) ]
+			ifFalse: [
+				self
+					retargetToThumbOffset: 0.0
+					trackColor: self class inactiveTrackColor ] ]
 ]
 
 { #category : 'event handling' }
