@@ -163,7 +163,7 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		margin: BlInsets empty;
 		padding: (BlInsets top: 2 right: CFMaDetailScalarFieldMetrics trailingControlInset bottom: 2 left: 5);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-		background: (Color black alpha: 0.08).
+		background: (self form theme interaction controlBackgroundTint).
 	^ aDropdown
 ]
 
@@ -225,15 +225,15 @@ CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	aButton addAptitude: (BrStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.08);
+				background: (self form theme interaction controlBackgroundTint);
 				border: BlBorder empty ];
 		hovered: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.12);
+				background: (self form theme interaction hoveredBackgroundTint);
 				border: BlBorder empty ];
 		pressed: [ :aStyle |
 			aStyle
-				background: (Color black alpha: 0.16);
+				background: (self form theme interaction pressedBackgroundTint);
 				border: BlBorder empty ]).
 	self installFormNavigationOn: aButton.
 	^ aButton

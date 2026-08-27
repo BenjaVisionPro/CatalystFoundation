@@ -79,7 +79,7 @@ CFMaDetailPopupElement >> newIndicator [
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> popupBackgroundColor [
-	^ CFMaDetailPopupMetrics controlBackgroundColor
+	^ self theme interaction popupBackgroundTint
 ]
 
 { #category : 'private - appearance' }

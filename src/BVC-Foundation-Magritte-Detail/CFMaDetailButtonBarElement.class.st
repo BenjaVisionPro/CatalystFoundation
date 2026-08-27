@@ -49,7 +49,7 @@ CFMaDetailButtonBarElement >> initialize [
 		padding: (BlInsets all: 2);
 		margin: (BlInsets left: 6 right: 6);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
-		background: (Color black alpha: 0.08);
+		background: self theme interaction controlBackgroundTint;
 		yourself.
 	content := BrVerticalPane new
 		hMatchParent;
@@ -82,7 +82,7 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	aToggle
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
-			aToggle icon color: Color white.
+			aToggle icon color: (self theme highlight foregroundColor).
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
@@ -105,7 +105,7 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 	aToggle
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
-			aToggle label: (aLabel asString asRopedText foreground: Color white).
+			aToggle label: (aLabel asString asRopedText foreground: (self theme highlight foregroundColor)).
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
@@ -121,7 +121,7 @@ CFMaDetailButtonBarElement >> styleAsIconButtonBar [
 		padding: (BlInsets all: 2);
 		margin: BlInsets empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 9);
-		background: (Color black alpha: 0.08);
+		background: self theme interaction controlBackgroundTint;
 		border: BlBorder empty;
 		constraintsDo: [ :c | c linear horizontal alignCenter ]
 ]
@@ -134,7 +134,7 @@ CFMaDetailButtonBarElement >> toggleStyle [
 				background: Color transparent;
 				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
 		hovered: [ :aState |
-			aState background: (Color black alpha: 0.06) ];
+			aState background: (self theme interaction subtleBackgroundTint) ];
 		activated: [ :aState |
 			aState background: (self theme highlight color) ];
 		yourself

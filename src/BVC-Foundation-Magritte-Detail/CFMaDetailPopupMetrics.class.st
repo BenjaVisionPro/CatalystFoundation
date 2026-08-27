@@ -41,11 +41,6 @@ CFMaDetailPopupMetrics class >> labelIndicatorGap [
 	^ 12
 ]
 
-{ #category : 'appearance' }
-CFMaDetailPopupMetrics class >> controlBackgroundColor [
-	^ Color black alpha: 0.1
-]
-
 { #category : 'menu' }
 CFMaDetailPopupMetrics class >> menuInset [
 	^ 5
