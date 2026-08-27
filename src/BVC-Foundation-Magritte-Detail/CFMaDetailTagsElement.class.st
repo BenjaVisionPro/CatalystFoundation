@@ -209,7 +209,7 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 		padding: (BlInsets top: 2 right: 8 bottom: 2 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
 		background: (Color white alpha: 0.9);
-		border: (BlBorder paint: (CgtThemeSemantics highlightColorFor: self theme) width: 1);
+		border: (BlBorder paint: (CFThemeSemantics highlightColorFor: self theme) width: 1);
 		constraintsDo: [ :c |
 			c flow vertical alignCenter ];
 		yourself.

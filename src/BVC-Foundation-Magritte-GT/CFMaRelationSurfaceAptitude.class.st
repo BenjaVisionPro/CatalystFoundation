@@ -19,6 +19,6 @@ CFMaRelationSurfaceAptitude >> initialize [
 				width: 2) ];
 		focused: [ :aStyle |
 			aStyle border: (BlBorder
-				paint: (CgtThemeSemantics highlightColorFor: self theme)
+				paint: (CFThemeSemantics highlightColorFor: self theme)
 				width: 2) ]
 ]

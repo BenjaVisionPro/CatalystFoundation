@@ -66,7 +66,7 @@ CFMaDetailPresentation >> ensureCatalystTheme [
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ CgtThemeSemantics formBackgroundFor: self form theme
+	^ CFThemeSemantics formBackgroundFor: self form theme
 ]
 
 { #category : 'configuration' }
@@ -326,7 +326,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: (CgtThemeSemantics secondaryForegroundFor: self form theme);
+		color: (CFThemeSemantics secondaryForegroundFor: self form theme);
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -393,8 +393,8 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: (CgtThemeSemantics primaryForegroundFor: self form theme);
-		fontSize: (CgtThemeSemantics bodyFontSizeFor: self form theme)
+		foreground: (CFThemeSemantics primaryForegroundFor: self form theme);
+		fontSize: (CFThemeSemantics bodyFontSizeFor: self form theme)
 ]
 
 { #category : 'private - composition' }
@@ -409,8 +409,8 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: (CgtThemeSemantics tertiaryForegroundFor: self form theme);
-			fontSize: (CgtThemeSemantics supportingFontSizeFor: self form theme));
+			foreground: (CFThemeSemantics tertiaryForegroundFor: self form theme);
+			fontSize: (CFThemeSemantics supportingFontSizeFor: self form theme));
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -1079,7 +1079,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: (CgtThemeSemantics secondaryForegroundFor: self form theme);
+		color: (CFThemeSemantics secondaryForegroundFor: self form theme);
 		size: 8 @ 8.
 	^ anElement
 ]

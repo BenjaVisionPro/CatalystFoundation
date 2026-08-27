@@ -15,7 +15,7 @@ Class {
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
-	^ CgtThemeSemantics highlightColorFor: aWidget theme
+	^ CFThemeSemantics highlightColorFor: aWidget theme
 ]
 
 { #category : 'defaults' }
