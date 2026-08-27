@@ -200,7 +200,6 @@ CFMaPresentation >> build [
 	containersByGroup removeAll.
 	ungroupedContainer := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].
-	self form theme: theme.
 	^ super build
 ]
 
@@ -286,6 +285,12 @@ CFMaPresentation >> initialize [
 	theme := CgtLightTheme new
 ]
 
+
+{ #category : 'accessing' }
+CFMaPresentation >> form: aForm [
+	super form: aForm.
+	aForm theme: theme
+]
 
 { #category : 'accessing' }
 CFMaPresentation >> theme [
