@@ -74,7 +74,7 @@ CFMaDetailPopupElement >> newIndicator [
 	| anIndicator |
 	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
-		color: (Color black alpha: 0.72);
+		color: self theme controls controlIndicatorForeground;
 		yourself.
 	anIndicator
 		when: BlElementThemeChanged
@@ -82,6 +82,13 @@ CFMaDetailPopupElement >> newIndicator [
 			anIndicator color: anIndicator theme controls controlIndicatorForeground ].
 	^ anIndicator
 ]
+
+{ #category : #'theme - applying' }
+CFMaDetailPopupElement >> onThemeChanged [
+	super onThemeChanged.
+	indicatorHost ifNotNil: [ self updatePopupAppearance ]
+]
+
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> popupBackgroundColor [

@@ -61,7 +61,7 @@ CFMaDetailGroupCardElement >> initialize [
 	focusOverlay := nil.
 	reservedAccessorySlots := 0.
 	self
-		background: (Color black alpha: 7.0 / 255.0);
+		background: self theme surfaces cardTint;
 		border: BlBorder empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius);
 		clipChildren: true;

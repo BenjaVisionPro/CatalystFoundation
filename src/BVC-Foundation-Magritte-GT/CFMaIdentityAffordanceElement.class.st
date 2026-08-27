@@ -9,7 +9,9 @@ Class {
 		'iconContainer',
 		'textContainer',
 		'labelElement',
-		'identifierElement'
+		'identifierElement',
+		'labelAptitude',
+		'identifierAptitude'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -122,11 +124,13 @@ CFMaIdentityAffordanceElement >> initialize [
 		yourself.
 
 	labelElement := self
-		newEditableTextWithFontSize: 16
-		foreground: (Color black alpha: 0.92).
+		newEditableTextWithFontSize: self theme typography titleFontSize
+		foreground: self theme typography titleForeground
+		aptitudeInto: [ :anAptitude | labelAptitude := anAptitude ].
 	identifierElement := self
-		newEditableTextWithFontSize: 11
-		foreground: (Color black alpha: 0.45)..
+		newEditableTextWithFontSize: self theme typography metadataFontSize
+		foreground: self theme typography metadataForeground
+		aptitudeInto: [ :anAptitude | identifierAptitude := anAptitude ].
 
 	labelElement constraintsDo: [ :c |
 		c frame horizontal alignLeft.
@@ -172,7 +176,7 @@ CFMaIdentityAffordanceElement >> memento: aMemento [
 ]
 
 { #category : 'private - building' }
-CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground: aColor [
+CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground: aColor aptitudeInto: anAptitudeBlock [
 	| anAptitude |
 	anAptitude := (CFGlamorousEditableLabelAptitude
 		background: Color transparent
@@ -183,11 +187,33 @@ CFMaIdentityAffordanceElement >> newEditableTextWithFontSize: aNumber foreground
 			defaultForeground: aColor;
 			minWidth: 1;
 			yourself.
+	anAptitudeBlock value: anAptitude.
 
 	^ CFEditableLabel new
 		aptitude: anAptitude;
 		fitContent;
 		yourself
+]
+
+
+{ #category : #'theme - applying' }
+CFMaIdentityAffordanceElement >> applyThemeTypography [
+	labelAptitude ifNotNil: [
+		labelAptitude
+			fontSize: self theme typography titleFontSize;
+			foreground: self theme typography titleForeground;
+			defaultForeground: self theme typography titleForeground ].
+	identifierAptitude ifNotNil: [
+		identifierAptitude
+			fontSize: self theme typography metadataFontSize;
+			foreground: self theme typography metadataForeground;
+			defaultForeground: self theme typography metadataForeground ]
+]
+
+{ #category : #'theme - applying' }
+CFMaIdentityAffordanceElement >> onThemeChanged [
+	super onThemeChanged.
+	self applyThemeTypography
 ]
 
 { #category : 'private - building' }

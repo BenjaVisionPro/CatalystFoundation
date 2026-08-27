@@ -70,7 +70,7 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 	| aToggle aStyle |
 	anIcon
 		size: 16 @ 16;
-		color: (Color black alpha: 0.68).
+		color: self theme controls inactiveIconForeground.
 	aStyle := self toggleStyle.
 	aToggle := BrToggle new
 		aptitude: BrGlamorousButtonIconAptitude new + BrGlamorousToggleLayoutAptitude new + aStyle;

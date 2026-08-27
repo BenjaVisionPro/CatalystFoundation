@@ -14,8 +14,8 @@ Class {
 CFMaDetailTagElement >> initialize [
 	super initialize.
 	tagAptitude := (CFMaDetailTagAptitude
-		background: (Color black alpha: 0.06)
-		focused: (Color r: 52 g: 120 b: 247 range: 255))
+		background: self theme controls tagBackgroundTint
+		focused: (self theme highlight color blocResolveColorForTheme: self theme))
 		glamorousRegularFont;
 		glamorousRegularSmallSize.
 	self
