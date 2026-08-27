@@ -16,3 +16,11 @@ CFMaDetailTagAptitude >> initialize [
 					c minWidth: 20.
 					c vertical exact: 20 ] ])
 ]
+
+
+{ #category : #'theme - applying' }
+CFMaDetailTagAptitude >> applyTheme: aTheme [
+	defaultBackground := aTheme controls tagBackgroundTint blocResolveColorForTheme: aTheme.
+	focusedBackground := aTheme highlight color blocResolveColorForTheme: aTheme.
+	self widgetDo: [ :aWidget | aWidget requestStyle ]
+]

@@ -157,6 +157,7 @@ CFMaDetailTagsElement >> beginEditingTag: aTag [
 	activeEditor := self newEditorWithText: (description reference toString: aTag value).
 	self removeChild: aTag.
 	self addChild: activeEditor at: editingIndex.
+	self applyThemeToEditor: activeEditor.
 	activeEditor switchToEditor.
 	activeEditor requestFocus
 ]
@@ -172,6 +173,7 @@ CFMaDetailTagsElement >> beginInsertionAtEnd [
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor before: addButton.
+	self applyThemeToEditor: activeEditor.
 	activeEditor
 		requestFocus;
 		switchToEditor.
@@ -193,6 +195,7 @@ CFMaDetailTagsElement >> beginInsertionAtPoint: aPoint [
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor at: anIndex.
+	self applyThemeToEditor: activeEditor.
 	activeEditor switchToEditor.
 	activeEditor requestFocus
 ]
@@ -208,12 +211,13 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 		fitContent;
 		padding: (BlInsets top: 2 right: 8 bottom: 2 left: 8);
 		margin: (BlInsets top: 2 right: 4 bottom: 2 left: 0);
-		background: (Color white alpha: 0.9);
-		border: (BlBorder paint: (self theme highlight color blocResolveColorForTheme: self theme) width: 1);
+		background: Color transparent;
+		border: BlBorder empty;
 		constraintsDo: [ :c |
 			c flow vertical alignCenter ];
 		yourself.
 	anEditor
+		when: BlElementThemeChanged do: [ :anEvent | self applyThemeToEditor: anEditor ];
 		when: BrEditorAcceptWish do: [ :aWish | self commitActiveEditor ];
 		when: BrEditorCancelWish do: [ :aWish | self cancelActiveEditor ].
 	self installCompletionOn: anEditor.
@@ -361,20 +365,21 @@ CFMaDetailTagsElement >> supportsBaseline [
 
 { #category : 'layout' }
 CFMaDetailTagsElement >> baselineOffset [
-	| aChild aParagraphElement aTextElement |
+	| aChild |
 	aChild := self children accountedByLayout
 		ifEmpty: [ ^ 0 ]
 		ifNotEmpty: [ :someChildren | someChildren first ].
-	(aChild isKindOf: BrEditorElement) ifFalse: [ ^ 0 ].
-	aParagraphElement := aChild children accountedByLayout
-		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
-		ifNone: [ ^ 0 ].
-	aTextElement := aParagraphElement children accountedByLayout
-		detect: [ :each | each isKindOf: BlTextElement ]
-		ifNone: [ ^ 0 ].
-	aTextElement measure: BlExtentMeasurementSpec unspecified.
-	^ aChild margin top
-		+ aChild padding top
-		+ aParagraphElement padding top
-		+ aTextElement baselineOffset
+	aChild supportsBaseline ifFalse: [ ^ 0 ].
+	^ aChild margin top + aChild baselineOffset
+]
+
+
+{ #category : #'theme - applying' }
+CFMaDetailTagsElement >> applyThemeToEditor: anEditor [
+	| aTheme aFocusedBorderColor |
+	aTheme := anEditor theme.
+	aFocusedBorderColor := aTheme highlight color blocResolveColorForTheme: aTheme.
+	anEditor
+		background: aTheme controls tagEditorBackground;
+		border: (BlBorder paint: aFocusedBorderColor width: 1)
 ]

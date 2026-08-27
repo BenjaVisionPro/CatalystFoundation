@@ -786,12 +786,12 @@ CFMaDetailPresentationExamples >> highlightColourPicker [
 	<gtExample>
 	| aPicker |
 	aPicker := CFMaDetailColourPickerElement new
-		colours: CFMaDetailColours highlightColours;
-		labelBlock: [ :aColour | CFMaDetailColours highlightNameFor: aColour ];
-		value: CFMaDetailColours highlightPurple;
+		colours: CgtPalette highlightColours;
+		labelBlock: [ :aColour | CgtPalette highlightNameFor: aColour ];
+		value: CgtPalette highlightPurple;
 		yourself.
 	self assert: aPicker colours size equals: 8.
-	self assert: aPicker value equals: CFMaDetailColours highlightPurple.
+	self assert: aPicker value equals: CgtPalette highlightPurple.
 	^ aPicker
 ]
 
@@ -805,9 +805,7 @@ CFMaDetailPresentationExamples >> themeColourPickersUseSingleOptionDescriptions 
 	self assert: aShowcase highlightColourDescription options size equals: 8.
 	self assert: aShowcase textSelectionColourDescription options size equals: 9.
 	self
-		assert: (CFMaDetailColours
-			resolveTextSelectionColour: nil
-			highlight: CFMaDetailColours highlightPurple)
-		equals: CFMaDetailColours textSelectionPurple.
+		assert: (CgtPalette automaticTextHighlightColourForHighlight: CgtPalette highlightPurple)
+		equals: CgtPalette textHighlightPurple.
 	^ aShowcase
 ]

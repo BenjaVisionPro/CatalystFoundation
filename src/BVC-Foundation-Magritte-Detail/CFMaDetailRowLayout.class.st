@@ -210,20 +210,9 @@ CFMaDetailRowLayout >> maximumMeasuredHeightOf: aCollection [
 
 { #category : 'private - measurement' }
 CFMaDetailRowLayout >> baselineOffsetFor: anElement [
-	| aParagraphElement aTextElement |
 	anElement ifNil: [ ^ nil ].
 	anElement supportsBaseline ifTrue: [ ^ anElement baselineOffset ].
-
-	(anElement isKindOf: BrEditorElement) ifFalse: [ ^ nil ].
-	aParagraphElement := anElement children accountedByLayout
-		detect: [ :each | each isKindOf: BrTextEditorParagraphElement ]
-		ifNone: [ ^ nil ].
-	aTextElement := aParagraphElement children accountedByLayout
-		detect: [ :each | each isKindOf: BlTextElement ]
-		ifNone: [ ^ nil ].
-
-	aTextElement measure: BlExtentMeasurementSpec unspecified.
-	^ anElement padding top + aParagraphElement padding top + aTextElement baselineOffset
+	^ nil
 ]
 
 { #category : 'private - measurement' }

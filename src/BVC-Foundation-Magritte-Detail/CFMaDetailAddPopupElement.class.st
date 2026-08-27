@@ -47,6 +47,10 @@ CFMaDetailAddPopupElement class >> newClassChoiceHandle [
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
 		yourself.
+	anIndicator
+		when: BlElementThemeChanged
+		do: [ :anEvent |
+			anIndicator color: anIndicator theme controls controlIndicatorForeground ].
 	anIndicator constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].

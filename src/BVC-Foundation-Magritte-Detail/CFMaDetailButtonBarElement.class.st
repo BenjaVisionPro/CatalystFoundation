@@ -80,13 +80,18 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 		padding: BlInsets empty;
 		yourself.
 	aToggle
+		when: BlElementThemeChanged
+		do: [ :anEvent |
+			aToggle icon color: (aToggle isActivated
+				ifTrue: [ aToggle theme highlight foregroundColor ]
+				ifFalse: [ aToggle theme controls inactiveIconForeground ]) ];
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
 			aToggle icon color: (self theme highlight foregroundColor).
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
-			aToggle icon color: (Color black alpha: 0.68) ].
+			aToggle icon color: aToggle theme controls inactiveIconForeground ].
 	^ aToggle
 ]
 

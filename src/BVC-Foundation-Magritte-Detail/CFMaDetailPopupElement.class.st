@@ -71,10 +71,16 @@ CFMaDetailPopupElement >> initialize [
 
 { #category : 'private - instance creation' }
 CFMaDetailPopupElement >> newIndicator [
-	^ (FontAwesomeIcons icon: #anglesUpDown)
+	| anIndicator |
+	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
 		color: (Color black alpha: 0.72);
-		yourself
+		yourself.
+	anIndicator
+		when: BlElementThemeChanged
+		do: [ :anEvent |
+			anIndicator color: anIndicator theme controls controlIndicatorForeground ].
+	^ anIndicator
 ]
 
 { #category : 'private - appearance' }
