@@ -61,7 +61,7 @@ CFMaDetailGroupCardElement >> initialize [
 	focusOverlay := nil.
 	reservedAccessorySlots := 0.
 	self
-		background: (Color r: 248 g: 248 b: 248 range: 255);
+		background: (Color black alpha: 7.0 / 255.0);
 		border: BlBorder empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius);
 		clipChildren: true;
@@ -75,9 +75,7 @@ CFMaDetailGroupCardElement >> initialize [
 { #category : 'private - elements' }
 CFMaDetailGroupCardElement >> newSeparator [
 	| aSeparator aFrame |
-	aSeparator := BlElement new
-		background: self theme surfaces separatorColor;
-		yourself.
+	aSeparator := CFDetailSeparatorElement new.
 	aSeparator constraintsDo: [ :c |
 		c horizontal matchParent.
 		c vertical exact: 1.
@@ -95,7 +93,7 @@ CFMaDetailGroupCardElement >> newSeparator [
 { #category : #'api - theme' }
 CFMaDetailGroupCardElement >> onThemeChanged [
 	super onThemeChanged.
-	self background: self theme surfaces cardBackground
+	self background: self theme surfaces cardTint
 ]
 
 { #category : 'removing' }

@@ -59,7 +59,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ self form theme surfaces formBackground
+	^ self form theme surfaces baseBackground
 ]
 
 { #category : 'configuration' }
