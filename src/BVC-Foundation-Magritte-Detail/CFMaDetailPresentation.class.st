@@ -1148,6 +1148,38 @@ CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObjec
 		highlightSelection: true
 ]
 
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocusElement object: anObjectBlock description: aDescription [
+	aRow
+		when: BlClickEvent
+		do: [ :anEvent |
+			| anObject |
+			anObject := anObjectBlock value.
+			anObject ifNotNil: [
+				anEvent consumed: true.
+				aFocusElement requestFocus.
+				self selectRelationElement: aFocusElement for: aDescription.
+				anEvent modifiers isAlt
+					ifTrue: [
+						CFMaPhlowNavigation
+							navigateNewBranchFrom: aRow
+							to: anObject ]
+					ifFalse: [
+						CFMaPhlowNavigation
+							selectFrom: aRow
+							object: anObject ] ] ];
+		when: BlDoubleClickEvent
+		do: [ :anEvent |
+			| anObject |
+			anObject := anObjectBlock value.
+			anObject ifNotNil: [
+				anEvent consumed: true.
+				CFMaPhlowNavigation
+					navigateFrom: aRow
+					to: anObject ] ]
+]
+
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock highlightSelection: aBoolean [
 	anItemElement focusability: BlFocusability after.
@@ -1155,18 +1187,14 @@ CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObj
 
 	anItemElement
 		when: BlFocusInEvent
-			do: [ :anEvent |
-				self selectRelationElement: anItemElement for: aDescription ];
-		when: BlClickEvent
-			do: [ :anEvent |
-				| wasSelected |
-				wasSelected := self relationElementIsSelected: anItemElement for: aDescription.
-				anEvent consumed: true.
-				wasSelected
-					ifTrue: [ anItemElement phlow spawnObject: anObject ]
-					ifFalse: [
-						self selectRelationElement: anItemElement for: aDescription.
-						anItemElement requestFocus ] ].
+		do: [ :anEvent |
+			self selectRelationElement: anItemElement for: aDescription ].
+
+	self
+		installRelationNavigationOn: anItemElement
+		focusElement: anItemElement
+		object: [ anObject ]
+		description: aDescription.
 
 	anItemElement
 		addShortcut: (BlShortcutWithAction new
@@ -1189,33 +1217,11 @@ CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObj
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocusElement description: aDescription [
-	aRow
-		when: BlClickEvent
-		do: [ :anEvent |
-			| anObject |
-			anObject := self memento readUsing: aDescription.
-			anObject ifNotNil: [
-				anEvent consumed: true.
-				aFocusElement requestFocus.
-				self selectRelationElement: aFocusElement for: aDescription.
-				anEvent modifiers isAlt
-					ifTrue: [
-						CFMaPhlowNavigation
-							navigateNewBranchFrom: aRow
-							to: anObject ]
-					ifFalse: [
-						CFMaPhlowNavigation
-							selectFrom: aRow
-							object: anObject ] ] ];
-		when: BlDoubleClickEvent
-		do: [ :anEvent |
-			| anObject |
-			anObject := self memento readUsing: aDescription.
-			anObject ifNotNil: [
-				anEvent consumed: true.
-				CFMaPhlowNavigation
-					navigateFrom: aRow
-					to: anObject ] ].
+	self
+		installRelationNavigationOn: aRow
+		focusElement: aFocusElement
+		object: [ self memento readUsing: aDescription ]
+		description: aDescription.
 
 	aFocusElement
 		addShortcut: (BlShortcutWithAction new
