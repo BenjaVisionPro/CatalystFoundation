@@ -15,7 +15,7 @@ Class {
 
 { #category : 'defaults' }
 CFMaDetailSwitchAptitude >> activeTrackColor [
-	^ self theme foundation highlightColor
+	^ self theme highlight color
 ]
 
 { #category : 'defaults' }

@@ -66,7 +66,7 @@ CFMaDetailPresentation >> ensureCatalystTheme [
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ self form theme foundation formBackground
+	^ self form theme surfaces formBackground
 ]
 
 { #category : 'configuration' }
@@ -326,7 +326,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: self form theme foundation secondaryForeground;
+		color: self form theme typography secondaryForeground;
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -393,7 +393,7 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: self form theme foundation primaryForeground;
+		foreground: self form theme typography primaryForeground;
 		fontSize: self form theme typography bodyFontSize
 ]
 
@@ -409,7 +409,7 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: self form theme foundation tertiaryForeground;
+			foreground: self form theme typography tertiaryForeground;
 			fontSize: self form theme typography supportingFontSize);
 		constraintsDo: [ :c |
 			c horizontal matchParent.
@@ -1079,7 +1079,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: self form theme foundation secondaryForeground;
+		color: self form theme typography secondaryForeground;
 		size: 8 @ 8.
 	^ anElement
 ]

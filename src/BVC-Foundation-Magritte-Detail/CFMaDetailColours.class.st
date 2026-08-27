@@ -37,107 +37,107 @@ CFMaDetailColours class >> highlight [
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightBlue [
-	^ CgtFoundationPalette highlightBlue
+	^ CgtPalette highlightBlue
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightPurple [
-	^ CgtFoundationPalette highlightPurple
+	^ CgtPalette highlightPurple
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightPink [
-	^ CgtFoundationPalette highlightPink
+	^ CgtPalette highlightPink
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightRed [
-	^ CgtFoundationPalette highlightRed
+	^ CgtPalette highlightRed
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightOrange [
-	^ CgtFoundationPalette highlightOrange
+	^ CgtPalette highlightOrange
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightYellow [
-	^ CgtFoundationPalette highlightYellow
+	^ CgtPalette highlightYellow
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightGreen [
-	^ CgtFoundationPalette highlightGreen
+	^ CgtPalette highlightGreen
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightGrey [
-	^ CgtFoundationPalette highlightGrey
+	^ CgtPalette highlightGrey
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightColours [
-	^ CgtFoundationPalette highlightColours
+	^ CgtPalette highlightColours
 ]
 
 { #category : 'accent - highlight palette' }
 CFMaDetailColours class >> highlightNameFor: aColour [
-	^ CgtFoundationPalette highlightNameFor: aColour
+	^ CgtPalette highlightNameFor: aColour
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionBlue [
-	^ CgtFoundationPalette textHighlightBlue
+	^ CgtPalette textHighlightBlue
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionPurple [
-	^ CgtFoundationPalette textHighlightPurple
+	^ CgtPalette textHighlightPurple
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionPink [
-	^ CgtFoundationPalette textHighlightPink
+	^ CgtPalette textHighlightPink
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionRed [
-	^ CgtFoundationPalette textHighlightRed
+	^ CgtPalette textHighlightRed
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionOrange [
-	^ CgtFoundationPalette textHighlightOrange
+	^ CgtPalette textHighlightOrange
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionYellow [
-	^ CgtFoundationPalette textHighlightYellow
+	^ CgtPalette textHighlightYellow
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionGreen [
-	^ CgtFoundationPalette textHighlightGreen
+	^ CgtPalette textHighlightGreen
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionGraphite [
-	^ CgtFoundationPalette textHighlightGraphite
+	^ CgtPalette textHighlightGraphite
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionColours [
-	^ CgtFoundationPalette textHighlightColours
+	^ CgtPalette textHighlightColours
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> textSelectionNameFor: aColour [
-	^ CgtFoundationPalette textHighlightNameFor: aColour
+	^ CgtPalette textHighlightNameFor: aColour
 ]
 
 { #category : 'accent - text selection palette' }
 CFMaDetailColours class >> automaticTextSelectionColourForHighlight: aHighlightColour [
-	^ CgtFoundationPalette automaticTextHighlightColourForHighlight: aHighlightColour
+	^ CgtPalette automaticTextHighlightColourForHighlight: aHighlightColour
 ]
 
 { #category : 'accent - text selection palette' }

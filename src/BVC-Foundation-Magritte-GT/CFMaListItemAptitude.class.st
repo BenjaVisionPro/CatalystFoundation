@@ -18,11 +18,11 @@ CFMaListItemAptitude >> initialize [
 			aStyle
 			background: Color transparent;
 			effect: (BlOverlayAboveEffect new
-				paint: self theme foundation textHighlightColor) ];
+				paint: self theme highlight textColor) ];
 		when: CFMaActiveSelectionState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
 			aStyle
 			background: Color transparent;
 			effect: (BlOverlayAboveEffect new
-				paint: self theme foundation inactiveTextHighlightColor) ]
+				paint: self theme highlight inactiveTextColor) ]
 ]
