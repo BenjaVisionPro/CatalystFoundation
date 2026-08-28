@@ -71,7 +71,7 @@ CFMaDetailSliderElement >> initialize [
 		addChild: maximumLabel.
 	self
 		addEventHandlerOn: BlMouseDownEvent do: [ :anEvent |
-			(self states isDisabled not and: [ anEvent primaryButtonPressed ]) ifTrue: [
+			anEvent primaryButtonPressed ifTrue: [
 				self updateFromLocalPosition: anEvent localPosition.
 				self requestFocus ] ];
 		addEventHandlerOn: BlMouseUpEvent do: [ :anEvent |
@@ -82,8 +82,7 @@ CFMaDetailSliderElement >> initialize [
 			anEvent consumed: true ];
 		addEventHandlerOn: BlDragEvent do: [ :anEvent |
 			anEvent consumed: true.
-			self states isDisabled ifFalse: [
-				self updateFromLocalPosition: anEvent localPosition ] ].
+			self updateFromLocalPosition: anEvent localPosition ].
 	self updateLabels
 ]
 

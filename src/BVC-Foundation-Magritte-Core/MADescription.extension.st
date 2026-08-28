@@ -121,15 +121,3 @@ MADescription >> informationFor: anObject [
 		ifFalse: [ aValue ]
 ]
 
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> enablementCondition [
-	^ self propertyAt: #cfEnablementCondition ifAbsent: [ nil ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> enabledWhen: aDescription equals: anObject [
-	^ self
-		propertyAt: #cfEnablementCondition
-		put: (CFMaEnablementCondition description: aDescription equals: anObject)
-]
