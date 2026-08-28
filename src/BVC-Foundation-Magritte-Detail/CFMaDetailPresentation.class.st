@@ -9,8 +9,7 @@ Class {
 		'relationSelections',
 		'relationFocusRows',
 		'relationFocusContainers',
-		'relationActiveDescriptions',
-		'embeddedContainerBlock'
+		'relationActiveDescriptions'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -81,8 +80,6 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
 	| aGroup aConfiguration |
-	embeddedContainerBlock ifNotNil: [
-		^ embeddedContainerBlock value: aDescription ].
 	embeddedRowsContainer ifNotNil: [ ^ embeddedRowsContainer ].
 	aConfiguration := self groupConfigurationFor: aDescription group.
 	aGroup := self
@@ -840,37 +837,6 @@ CFMaDetailPresentation >> buildEmbeddedRowsIn: aContainer [
 ]
 
 { #category : 'private - relations' }
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> buildGroupedEmbeddedRowsUsingContainersFrom: aParentPresentation [
-	| theDescriptions theRows |
-	identityAffordanceEmitted := false.
-	fieldConfigurations removeAll.
-	containersByGroup removeAll.
-	ungroupedContainer := nil.
-	groups removeAll.
-	categoryGroups removeAll.
-	theRows := OrderedCollection new.
-	embeddedContainerBlock := [ :aDescription |
-		aParentPresentation containerForDescription: aDescription ].
-
-	theDescriptions := OrderedCollection new
-		addAll: self objectDescription children;
-		yourself.
-	theDescriptions sort: [ :a :b | a priority < b priority ].
-
-	[
-		theDescriptions do: [ :each |
-			| aContainer theExistingRows |
-			aContainer := self containerForDescription: each.
-			theExistingRows := aContainer rows.
-			self visit: each.
-			aContainer rows do: [ :aRow |
-				(theExistingRows identityIncludes: aRow) ifFalse: [
-					theRows add: aRow ] ] ] ]
-		ensure: [ embeddedContainerBlock := nil ].
-	^ theRows
-]
-
 CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription [
 	^ self
 		newEmbeddedRowsFor: anObject
@@ -903,29 +869,6 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> newGroupedEmbeddedRowsFor: anObject description: aDescription remove: aRemoveBlock [
-	| aChildMemento aChildPresentation theRows anIdentityRow |
-	aChildMemento := self memento
-		childMementoFor: anObject
-		inRelation: aDescription.
-	aChildPresentation := self class new
-		theme: self theme;
-		memento: aChildMemento;
-		yourself.
-	theRows := aChildPresentation
-		buildGroupedEmbeddedRowsUsingContainersFrom: self.
-	theRows ifEmpty: [ ^ theRows ].
-
-	anIdentityRow := theRows first.
-	self
-		installRelationSelectionOn: anIdentityRow
-		for: anObject
-		description: aDescription
-		remove: aRemoveBlock.
-	^ theRows
-]
-
-{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 	| aContainer aHeaderContent aHeaderRow anAddElement childRows |
 	aContainer := self containerForDescription: aDescription.
@@ -933,8 +876,6 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 	aHeaderContent := self newRelationValueSlotWith: nil.
 	self addFieldElement: aHeaderContent using: aDescription.
 	aHeaderRow := aContainer rows last.
-	aDescription label isEmpty ifTrue: [
-		aHeaderRow visibility: BlVisibility gone ].
 	childRows := OrderedCollection new.
 
 	aHeaderContent withAsyncSinkDo: [ :anElementSink |
@@ -957,22 +898,10 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 			observe: anElementSink ]
 ]
 
-{ #category : 'private - groups' }
-CFMaDetailPresentation >> removeEmptyGroups [
-	groups keys copy do: [ :aGroup |
-		| aGroupElement |
-		aGroupElement := groups at: aGroup.
-		aGroupElement rows rowCount = 0 ifTrue: [
-			aGroupElement removeFromParent.
-			groups removeKey: aGroup ] ]
-]
-
 { #category : 'private - relations' }
 CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after: aHeaderRow with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
-	| newRows headerIndex hasGroupedDescriptions |
-	oldRows copy do: [ :aRow |
-		aRow parent ifNotNil: [ :aParent | aParent removeChild: aRow ] ].
-	self removeEmptyGroups.
+	| newRows headerIndex |
+	oldRows copy do: [ :aRow | aContainer removeRow: aRow ].
 	aHeaderContent removeChildren.
 
 	anObject ifNil: [
@@ -981,19 +910,6 @@ CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after:
 		^ OrderedCollection new ].
 
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
-	hasGroupedDescriptions := anObject magritteDescription children
-		anySatisfy: [ :aChildDescription | aChildDescription group notNil ].
-
-	hasGroupedDescriptions ifTrue: [
-		^ self
-			newGroupedEmbeddedRowsFor: anObject
-			description: aDescription
-			remove: [ :anItemElement |
-				CFMaBuilderUtility
-					removeToOneMemento: self memento
-					using: aDescription
-					element: anItemElement ] ].
-
 	newRows := self
 		newEmbeddedRowsFor: anObject
 		description: aDescription
