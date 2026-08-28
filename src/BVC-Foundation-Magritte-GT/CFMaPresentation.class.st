@@ -79,8 +79,35 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 		self addCommentTooltipTo: aFieldElement using: aDescription ].
 
 	self configureTabStopFor: aFieldElement using: aDescription.
+	self configureEnablementFor: aFieldElement label: aLabel using: aDescription.
 	self addLabel: aLabel field: aFieldElement for: aDescription.
 	^ aLabel
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> configureEnablementFor: aFieldElement label: aLabel using: aDescription [
+	| anEnabledBlock |
+	anEnabledBlock := aDescription enabledBlock.
+	anEnabledBlock ifNil: [ ^ self ].
+
+	self updateEnablementFor: aFieldElement label: aLabel using: aDescription.
+	aFieldElement withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theField :aSink |
+				self updateEnablementFor: theField label: aLabel using: aDescription ].
+		self memento overallStatus observe: anElementSink ]
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> updateEnablementFor: aFieldElement label: aLabel using: aDescription [
+	(aDescription enabledBlock cull: self memento model)
+		ifTrue: [
+			aFieldElement states removeState: BlElementState disabled.
+			aLabel states removeState: BlElementState disabled ]
+		ifFalse: [
+			aFieldElement states addState: BlElementState disabled.
+			aLabel states addState: BlElementState disabled ]
 ]
 
 { #category : 'private - composition' }

@@ -160,6 +160,7 @@ CFMaDetailSliderElement >> normalizedValue [
 { #category : 'private - interaction' }
 CFMaDetailSliderElement >> updateFromLocalPosition: aPoint [
 	| padding anAxisInset anAxisStart anAxisEnd anAxisWidth aFraction aValue |
+	self states isDisabled ifTrue: [ ^ self ].
 	padding := self padding.
 	anAxisInset := CFMaDetailSliderMetrics axisInset.
 	anAxisStart := padding left + anAxisInset.
