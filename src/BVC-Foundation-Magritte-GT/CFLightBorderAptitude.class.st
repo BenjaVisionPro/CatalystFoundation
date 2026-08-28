@@ -35,7 +35,7 @@ CFLightBorderAptitude class >> defaultIntensity [
 
 { #category : 'defaults' }
 CFLightBorderAptitude class >> defaultLightDirection [
-	^ CFInterfaceLighting lightDirection
+	^ CFLightDirection forCurrentTimeOfDay
 ]
 
 { #category : 'defaults' }
@@ -136,7 +136,7 @@ CFLightBorderAptitude >> lightDirection: aPointOrVector [
 
 { #category : 'accessing' }
 CFLightBorderAptitude >> lightDirectionDegrees: aNumber [
-	lightDirection := self normalizedVectorFromDegrees: aNumber
+	lightDirection := CFLightDirection fromDegrees: aNumber
 ]
 
 { #category : 'private - effects' }
@@ -194,18 +194,12 @@ CFLightBorderAptitude >> lowerBorderOutside [
 { #category : 'private - geometry' }
 CFLightBorderAptitude >> normalizedVectorFrom: aPointOrVector [
 	| vector |
-	aPointOrVector isNumber ifTrue: [ ^ self normalizedVectorFromDegrees: aPointOrVector ].
+	aPointOrVector isNumber ifTrue: [ ^ CFLightDirection fromDegrees: aPointOrVector ].
 	vector := aPointOrVector asBlocVector.
 	vector length isZero ifTrue: [ ^ self class defaultLightDirection ].
 	^ vector normalized
 ]
 
-{ #category : 'private - geometry' }
-CFLightBorderAptitude >> normalizedVectorFromDegrees: aNumber [
-	| radians |
-	radians := aNumber * Float pi / 180.0.
-	^ (radians cos @ radians sin) asBlocVector normalized
-]
 
 { #category : 'configuration - body' }
 CFLightBorderAptitude >> raiseBodyInside [
