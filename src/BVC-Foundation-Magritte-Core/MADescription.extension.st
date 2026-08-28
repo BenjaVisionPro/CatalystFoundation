@@ -121,3 +121,13 @@ MADescription >> informationFor: anObject [
 		ifFalse: [ aValue ]
 ]
 
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> enabledBlock [
+	^ self propertyAt: #enabledBlock ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> enabledBlock: aBlock [
+	^ self propertyAt: #enabledBlock put: aBlock
+]
