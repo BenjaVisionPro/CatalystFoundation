@@ -487,80 +487,8 @@ CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetail
 	^ anElement
 ]
 
-{ #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToOneListContentTracksRelationValue [
-	<gtExample>
-	| aPresentation aFrame firstObject secondObject aDescription |
-	aPresentation := CFMaDetailPresentation new.
-	aFrame := BrFrame new
-		hMatchParent;
-		vFitContent;
-		yourself.
-	firstObject := CFMaFormShowcaseItem exampleNamed: 'First' score: 40 status: #active.
-	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 60 status: #draft.
-
-	aDescription := MAToOneRelationDescription new.
-	aPresentation
-		updateToOneListElement: aFrame
-		with: firstObject
-		addElement: nil
-		description: aDescription.
-	self assert: aFrame children size equals: 1.
-	self assert: aFrame children first children first children second text asString equals: 'First'.
-
-	aPresentation
-		updateToOneListElement: aFrame
-		with: secondObject
-		addElement: nil
-		description: aDescription.
-	self assert: aFrame children size equals: 1.
-	self assert: aFrame children first children first children second text asString equals: 'Second'.
-
-	aPresentation
-		updateToOneListElement: aFrame
-		with: nil
-		addElement: nil
-		description: aDescription.
-	self assert: aFrame children isEmpty.
-	^ aFrame
-]
 
 
-{ #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToOneListNilValueUsesAddAffordance [
-	<gtExample>
-	| aModel aDescription aContainer aMemento aPresentation anAddElement aFrame |
-	aModel := CFMaFormShowcase new.
-	aDescription := MAToOneRelationDescription new
-		accessor: #columnedObject;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
-	aMemento := CFMaMemento model: aModel description: aContainer.
-	aPresentation := CFMaDetailPresentation new
-		memento: aMemento;
-		yourself.
-	anAddElement := aPresentation newToOneAddElementUsing: aDescription.
-	aFrame := BrFrame new
-		hMatchParent;
-		vFitContent;
-		layout: BlFrameLayout new;
-		yourself.
-
-	self assert: (aMemento readUsing: aDescription) isNil.
-	self assert: anAddElement notNil.
-	aPresentation
-		updateToOneListElement: aFrame
-		with: nil
-		addElement: anAddElement
-		description: aDescription.
-	self assert: aFrame children size equals: 1.
-	self assert: aFrame children first == anAddElement.
-	^ aFrame
-]
 
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrite [

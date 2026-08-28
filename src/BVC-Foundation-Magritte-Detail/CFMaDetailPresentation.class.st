@@ -851,7 +851,7 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 		childMementoFor: anObject
 		inRelation: aDescription.
 	aChildPresentation := self class new
-		form: self form;
+		theme: self theme;
 		memento: aChildMemento;
 		yourself.
 	aTemporaryCard := CFMaDetailGroupCardElement new.
