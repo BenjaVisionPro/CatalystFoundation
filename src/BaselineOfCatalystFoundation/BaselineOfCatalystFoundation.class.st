@@ -87,20 +87,21 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
-	| repo |
-	repo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/Gt4FontAwesome/src'.
+	| foundationRepo fontAwesomeRepo |
+	foundationRepo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/CatalystFoundation/src'.
+	fontAwesomeRepo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/Gt4FontAwesome/src'.
 	spec
 		baseline: 'CatalystMotion'
-		with: [ spec repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
+		with: [ spec repository: foundationRepo ].
 	spec
 		baseline: 'CatalystPhysics'
-		with: [ spec repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
+		with: [ spec repository: foundationRepo ].
 	spec
 		baseline: 'Telemetry'
 		with: [ spec repository: 'github://feenkcom/pharo-telemetry:main/src' ].
 	spec
 		baseline: 'Gt4FontAwesome'
-		with: [ spec repository: repo ].
+		with: [ spec repository: fontAwesomeRepo ].
 	spec package: 'BVC-Foundation-Magritte-GT'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core' 'Gt4FontAwesome') ].
 	spec package: 'BVC-Foundation-Magritte-Detail'

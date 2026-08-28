@@ -16,12 +16,14 @@ BaselineOfCatalystPhysics >> baseline: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystPhysics >> defineDependenciesOn: spec [
+	| foundationRepo |
+	foundationRepo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/CatalystFoundation/src'.
 	spec
 		baseline: 'CatalystMotion'
 		with: [
 			spec
 				loads: #('core');
-				repository: 'github://BenjaVisionPro/CatalystFoundation:main/src' ].
+				repository: foundationRepo ].
 	spec
 		baseline: 'Telemetry'
 		with: [ spec repository: 'github://feenkcom/pharo-telemetry:main/src' ].
