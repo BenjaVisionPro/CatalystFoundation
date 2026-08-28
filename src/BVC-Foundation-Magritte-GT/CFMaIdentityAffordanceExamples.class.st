@@ -115,7 +115,8 @@ CFMaIdentityAffordanceExamples >> showcaseUsesEditableFontAwesomeField [
 		yourself.
 
 	self assert: anObject iconDescription isReadOnly not.
-	self assert: anElement iconContainer children size equals: 1.
-	self assert: anElement iconContainer children first class equals: FontAwesomeIconFieldElement.
+	self assert: anElement iconContainer children size equals: 2.
+	self assert: anElement iconContainer children first class equals: CFIconTile.
+	self assert: anElement iconContainer children second class equals: FontAwesomeIconFieldElement.
 	^ anElement
 ]

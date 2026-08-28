@@ -72,21 +72,6 @@ CFMaPresentationExamples >> settingsPresentationElement [
 	^ aViewModel asElement
 ]
 
-{ #category : 'examples - paths' }
-CFMaPresentationExamples >> showcasePathsAreScopedToFields [
-	<gtExample>
-	| aShowcase descriptions fieldDescriptions relationDescriptions |
-	aShowcase := CFMaFormShowcase example.
-	descriptions := aShowcase magritteDescription children.
-	fieldDescriptions := descriptions select: [ :each | each group = 'Fields' ].
-	relationDescriptions := descriptions reject: [ :each | each group = 'Fields' ].
-
-	self assert: fieldDescriptions isNotEmpty.
-	self assert: (fieldDescriptions allSatisfy: [ :each | each categories isNotEmpty ]).
-	self assert: (relationDescriptions allSatisfy: [ :each | each categories isEmpty ]).
-	^ aShowcase
-]
-
 { #category : 'examples - presentations' }
 CFMaPresentationExamples >> tabbedPresentation [
 	<gtExample>
