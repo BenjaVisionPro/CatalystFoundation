@@ -627,12 +627,12 @@ CFMaDetailPresentationExamples >> relationSelectionIsExclusiveWithinDescription 
 	secondElement := BlElement new.
 
 	aPresentation selectRelationElement: firstElement for: aDescription.
-	self assert: (firstElement states includes: BlElementState selected).
+	self assert: firstElement states isSelected.
 	self assert: (aPresentation relationElementIsSelected: firstElement for: aDescription).
 
 	aPresentation selectRelationElement: secondElement for: aDescription.
-	self assert: (firstElement states includes: BlElementState selected) not.
-	self assert: (secondElement states includes: BlElementState selected).
+	self assert: firstElement states isSelected not.
+	self assert: secondElement states isSelected.
 	self assert: (aPresentation relationElementIsSelected: secondElement for: aDescription).
 	^ secondElement
 ]
@@ -652,8 +652,8 @@ CFMaDetailPresentationExamples >> relationSelectionIsIndependentAcrossDescriptio
 
 	self assert: (aPresentation relationElementIsSelected: firstElement for: firstDescription).
 	self assert: (aPresentation relationElementIsSelected: secondElement for: secondDescription).
-	self assert: (firstElement states includes: BlElementState selected).
-	self assert: (secondElement states includes: BlElementState selected).
+	self assert: firstElement states isSelected.
+	self assert: secondElement states isSelected.
 	^ secondElement
 ]
 
@@ -667,12 +667,12 @@ CFMaDetailPresentationExamples >> relationActiveSelectionKeepsSelectionWhenFocus
 
 	aPresentation selectRelationElement: anElement for: aDescription.
 	aPresentation setRelationActive: true for: aDescription.
-	self assert: (anElement states includes: BlElementState selected).
-	self assert: (anElement states includes: CFMaActiveSelectionState uniqueInstance).
+	self assert: anElement states isSelected.
+	self assert: (anElement states hasState: CFMaActiveSelectionState uniqueInstance).
 
 	aPresentation setRelationActive: false for: aDescription.
-	self assert: (anElement states includes: BlElementState selected).
-	self assert: (anElement states includes: CFMaActiveSelectionState uniqueInstance) not.
+	self assert: anElement states isSelected.
+	self assert: (anElement states hasState: CFMaActiveSelectionState uniqueInstance) not.
 	^ anElement
 ]
 
