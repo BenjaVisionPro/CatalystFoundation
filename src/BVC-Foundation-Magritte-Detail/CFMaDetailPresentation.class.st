@@ -59,7 +59,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ self form theme surfaces baseBackground
+	^ self theme surfaces baseBackground
 ]
 
 { #category : 'configuration' }
@@ -163,7 +163,7 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		margin: BlInsets empty;
 		padding: (BlInsets top: 2 right: CFMaDetailScalarFieldMetrics trailingControlInset bottom: 2 left: 5);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-		background: (self form theme interaction controlBackgroundTint).
+		background: (self theme interaction controlBackgroundTint).
 	^ aDropdown
 ]
 
@@ -225,15 +225,15 @@ CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	aButton addAptitude: (BrStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
-				background: (self form theme interaction controlBackgroundTint);
+				background: (self theme interaction controlBackgroundTint);
 				border: BlBorder empty ];
 		hovered: [ :aStyle |
 			aStyle
-				background: (self form theme interaction hoveredBackgroundTint);
+				background: (self theme interaction hoveredBackgroundTint);
 				border: BlBorder empty ];
 		pressed: [ :aStyle |
 			aStyle
-				background: (self form theme interaction pressedBackgroundTint);
+				background: (self theme interaction pressedBackgroundTint);
 				border: BlBorder empty ]).
 	self installFormNavigationOn: aButton.
 	^ aButton
@@ -319,7 +319,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: (self form theme typography secondaryForeground);
+		color: (self theme typography secondaryForeground);
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -386,8 +386,8 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: (self form theme typography primaryForeground);
-		fontSize: (self form theme typography bodyFontSize)
+		foreground: (self theme typography primaryForeground);
+		fontSize: (self theme typography bodyFontSize)
 ]
 
 { #category : 'private - composition' }
@@ -402,8 +402,8 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: (self form theme typography tertiaryForeground);
-			fontSize: (self form theme typography supportingFontSize));
+			foreground: (self theme typography tertiaryForeground);
+			fontSize: (self theme typography supportingFontSize));
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -1072,7 +1072,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: (self form theme typography secondaryForeground);
+		color: (self theme typography secondaryForeground);
 		size: 8 @ 8.
 	^ anElement
 ]
