@@ -63,6 +63,7 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 	formViewModel := CFMaViewModel
 		forObject: configuration
 		description: [ memento magritteDescription ].
+	formViewModel ignoreImplicitActions.
 	formViewModel elementBuilderDo: [
 		CFConfigurationMaElementBuilder new
 			visitedConfigurations: visitedConfigurations;
@@ -79,7 +80,7 @@ CFConfigurationNodeElement >> createMagritteFormElement [
 		aFormElement headerElement when: BlClickEvent do: [ :anEvent |
 			selectionBlock ifNotNil: [ :aBlock | aBlock value: configuration ] ].
 		self postponeFormReady ].
-	formRootElement := formViewModel asEmbeddedElement.
+	formRootElement := formViewModel asElement.
 	formRootElement
 		hMatchParent;
 		vFitContent;

@@ -1,6 +1,11 @@
 Extension { #name : 'CFObject' }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
+CFObject >> asElement [
+	^ self asGtMagritteViewModel asElement
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
 CFObject >> asGtMagritteViewModel [
 	"Hijack GT's Magritte rendering while preserving the GT rendering contract."
 	^ CFMaViewModel forObject: self
@@ -16,7 +21,7 @@ CFObject >> gtMagritteFor: aView [
 		priority: 49;
 		disableAsync;
 		stencil: [
-			self asGtMagritteViewModel asElement asScrollableElement ];
+			self asElement asScrollableElement ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
 			label: 'Layout Debug'
 			tooltip: 'Toggle form layout debug overlay'

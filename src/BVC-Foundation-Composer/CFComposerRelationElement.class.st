@@ -99,7 +99,7 @@ CFComposerRelationElement >> newItemElementFor: aMemento [
 	aChildViewModel := CFComposerEditorViewModel
 		forMemento: aMemento
 		formController: formController.
-	aCard := aChildViewModel asEmbeddedElement
+	aCard := aChildViewModel asElement
 		hMatchParent;
 		vFitContent;
 		yourself.

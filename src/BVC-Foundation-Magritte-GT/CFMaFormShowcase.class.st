@@ -102,11 +102,6 @@ CFMaFormShowcase >> accordionItemsDescription [
 ]
 
 { #category : 'converting' }
-CFMaFormShowcase >> asElement [
-	^ self asGtMagritteViewModel asElement
-]
-
-{ #category : 'converting' }
 CFMaFormShowcase >> asGtMagritteViewModel [
 	^ (CFMaViewModel forObject: self)
 		presentationClass: CFMaSettingsPresentation;

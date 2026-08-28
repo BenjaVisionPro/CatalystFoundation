@@ -842,7 +842,8 @@ CFMaBuilderUtility class >> onFoundationEmbeddedToOneFrame: aFrame sinkUpdate: a
 		forObject: anObject
 		memento: aChildMemento)
 			presentationClass: CFMaAccordionPresentation;
-			asEmbeddedElement).
+			ignoreImplicitActions;
+			asElement).
 	^ aFrame
 ]
 

@@ -283,7 +283,7 @@ CFConfigurationEditorElement >> createInspectorElementFor: aConfiguration [
 		matchParent;
 		layout: BlFrameLayout new;
 		yourself.
-	editorElement := aConfiguration asGtMagritteViewModel asElement
+	editorElement := aConfiguration asElement
 		margin: (BlInsets all: 8);
 		yourself.
 	content addChild: editorElement.

@@ -13,7 +13,7 @@ Class {
 CFMaEmbeddedFormItemStencilBuilder >> buildDefault [
 	| anEmbeddedElement |
 	self rowValue ifNil: [ ^ BrFrame new fitContent ].
-	anEmbeddedElement := self rowValue asEmbeddedElement.
+	anEmbeddedElement := self rowValue asElement.
 
 	^ BrFrame new
 		hMatchParent;

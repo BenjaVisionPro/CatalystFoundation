@@ -43,6 +43,7 @@ CFMaExpanderItemViewModel >> expanded: aBoolean [
 { #category : 'initialization' }
 CFMaExpanderItemViewModel >> initialize [
 	super initialize.
+	self ignoreImplicitActions.
 	expanded := false
 ]
 

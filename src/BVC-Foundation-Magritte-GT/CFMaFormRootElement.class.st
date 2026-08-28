@@ -15,14 +15,6 @@ CFMaFormRootElement >> asScrollableElement [
 		yourself
 ]
 
-{ #category : 'configuration' }
-CFMaFormRootElement >> beEmbedded [
-	self
-		background: Color transparent;
-		hMatchParent;
-		vFitContent
-]
-
 { #category : 'initialization' }
 CFMaFormRootElement >> initialize [
 	"CFMaFormRootElement is the Phlow-facing async form host returned by CFMaViewModel.
@@ -30,7 +22,7 @@ CFMaFormRootElement >> initialize [
 	super initialize.
 
 	self
-		background: (Color black alpha: 0.10);
+		background: Color transparent;
 		margin: BlInsets empty;
 		padding: BlInsets empty;
 		focusability: BlFocusability after;
