@@ -6,16 +6,9 @@ Class {
 
 { #category : #initialization }
 CFMaButtonWithLabelTooltipAptitude >> initialize [
-	| aNativeContainerAptitude |
 	super initialize.
 
 	self menuContainerDo: [ :aContainer |
-		aNativeContainerAptitude := nil.
-		aContainer aptitudeDo: [ :anAptitude |
-			(anAptitude isKindOf: BrPopoverContainerAptitude) ifTrue: [
-				aNativeContainerAptitude := anAptitude ] ].
-		aNativeContainerAptitude ifNotNil: [
-			aContainer removeAptitude: aNativeContainerAptitude ].
 		aContainer addAptitude: CFMaTooltipContainerAptitude new ]
 ]
 

@@ -1,6 +1,6 @@
 Class {
 	#name : 'CFMaTooltipContainerAptitude',
-	#superclass : 'CFGlassSurfaceAptitude',
+	#superclass : 'BrAptitude',
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -13,6 +13,11 @@ CFMaTooltipContainerAptitude >> initialize [
 		addChangeProperty: #(widget geometry)
 		with: [ BlChildrenWrappingGeometry
 				cornerRadius: BrMenuConstants cornerRadius
-				enlargedBy: 2 ].
-	self addChangeProperty: #(widget outskirts) with: [ BlOutskirts inside ]
+					enlargedBy: 2 ];
+		addChangeProperty: #(widget background)
+		with: [ Color transparent ];
+		addChangeProperty: #(widget border)
+		with: [ BlBorder empty ];
+		addChangeProperty: #(widget outskirts)
+		with: [ BlOutskirts inside ]
 ]

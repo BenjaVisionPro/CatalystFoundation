@@ -112,7 +112,7 @@ CFMaPresentation >> updateEnablementFor: aFieldElement label: aLabel using: aDes
 
 { #category : 'private - composition' }
 CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
-	| aTooltipAptitude aNativeContainerAptitude |
+	| aTooltipAptitude |
 	aTooltipAptitude := BrGlamorousWithExplicitTooltipAptitude new.
 	aTooltipAptitude
 		handle: [ BlElement new
@@ -122,12 +122,6 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 			addAptitude: BrPopoverCommonAptitude new ]
 		content: [ self newCommentTooltipContentFor: aDescription ].
 	aTooltipAptitude menuContainerDo: [ :aContainer |
-		aNativeContainerAptitude := nil.
-		aContainer aptitudeDo: [ :anAptitude |
-			(anAptitude isKindOf: BrPopoverContainerAptitude) ifTrue: [
-				aNativeContainerAptitude := anAptitude ] ].
-		aNativeContainerAptitude ifNotNil: [
-			aContainer removeAptitude: aNativeContainerAptitude ].
 		aContainer addAptitude: CFMaTooltipContainerAptitude new ].
 	anElement addAptitude: aTooltipAptitude
 ]
