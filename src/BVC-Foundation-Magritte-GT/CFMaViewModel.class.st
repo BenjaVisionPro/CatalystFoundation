@@ -26,7 +26,9 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 { #category : 'api - converting' }
 CFMaViewModel >> asElement [
 	| aFrame aResizerAptitude |
-	aFrame := CFMaFormRootElement new.
+	aFrame := CFMaFormRootElement new
+		theme: CgtDetailLightTheme new;
+		yourself.
 
 	aResizerAptitude := BrLayoutResizerAptitude new.
 	"The generated Foundation form child should fill the Phlow-facing async host."

@@ -297,7 +297,7 @@ CFMaSettingsPresentation >> newInformationActionFor: information [
 { #category : 'private - row actions' }
 CFMaSettingsPresentation >> newRevertActionFor: aDescription [
 	| aButton |
-	aButton := self newRowActionButtonIconNamed: #undo.
+	aButton := self newRowActionButtonIconNamed: #arrowRotateLeft.
 	aButton
 		hExact: 12;
 		icon: (aButton icon size: 12 @ 12).
