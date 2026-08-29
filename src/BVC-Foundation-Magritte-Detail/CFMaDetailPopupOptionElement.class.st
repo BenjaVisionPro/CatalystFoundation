@@ -66,36 +66,16 @@ CFMaDetailPopupOptionElement >> initialize [
 		when: BlClickEvent do: [ :anEvent | self activate ];
 		addChild: checkLabel;
 		addChild: valueLabel;
-		addAptitude: (BrStyleCommonAptitude new
+		addAptitude: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle | aStyle background: Color transparent ];
 			hovered: [ :aStyle | aStyle background: (self theme interaction controlBackgroundTint) ];
 			selected: [ :aStyle |
-				| anElement |
-				Transcript
-					cr;
-					show: '--- CFMaDetailPopupOptionElement selected ---'; cr;
-					show: 'element theme: '; show: self theme printString; cr;
-					show: 'element theme class: '; show: self theme class name; cr;
-					show: 'item subtheme class: '; show: self theme item class name; cr;
-					show: 'item selectedColor: '; show: self theme item selectedColor printString; cr;
-					show: 'parent/theme chain:'; cr.
-
-				anElement := self.
-				[ anElement notNil ] whileTrue: [
-					Transcript
-						show: anElement class name;
-						show: ' -> ';
-						show: anElement theme class name;
-						cr.
-					anElement := anElement parent ].
-
-				Transcript show: '--- end popup theme trace ---'; cr.
 				aStyle background: self theme item selectedColor ]);
-		addAptitude: (BrStyleCommonAptitude new
+		addAptitude: (BrLazyStyleCommonAptitude new
 			@ checkLabelAptitude label;
 			default: [ :aStyle | aStyle foreground: (self theme typography primaryForeground) ];
 			selected: [ :aStyle | aStyle foreground: (Color white) ]);
-		addAptitude: (BrStyleCommonAptitude new
+		addAptitude: (BrLazyStyleCommonAptitude new
 			@ valueLabelAptitude label;
 			default: [ :aStyle | aStyle foreground: (self theme typography primaryForeground) ];
 			selected: [ :aStyle | aStyle foreground: (Color white) ])
