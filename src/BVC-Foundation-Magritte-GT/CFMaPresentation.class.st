@@ -309,7 +309,7 @@ CFMaPresentation >> initialize [
 	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
 	fieldConfigurations := Dictionary new.
-	theme := CgtLightTheme new
+	theme := CgtDetailLightTheme new
 ]
 
 
