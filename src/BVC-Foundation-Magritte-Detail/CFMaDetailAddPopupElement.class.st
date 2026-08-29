@@ -119,6 +119,17 @@ CFMaDetailAddPopupElement >> updateIndicatorAppearance [
 	"CFMaDetailAddIconElement owns its inner icon appearance and updates it from its own effective theme."
 ]
 
+
+{ #category : 'private - appearance' }
+CFMaDetailAddPopupElement >> updateIndicatorHostAppearance [
+	indicatorHost background: BlBackground transparent
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailAddPopupElement >> updatePopupBackgroundAppearance [
+	self background: BlBackground transparent
+]
+
 { #category : 'private - appearance' }
 CFMaDetailAddPopupElement >> updatePopupAppearance [
 	self background: BlBackground transparent.

@@ -52,6 +52,13 @@ CFMaDetailPopupElement >> initialize [
 		addChild: indicator;
 		yourself.
 
+	indicator
+		when: BlElementThemeChanged
+		do: [ :anEvent | self updateIndicatorAppearance ].
+	indicatorHost
+		when: BlElementThemeChanged
+		do: [ :anEvent | self updateIndicatorHostAppearance ].
+
 	self
 		addChild: valueLabel;
 		addChild: indicatorHost;
@@ -80,13 +87,12 @@ CFMaDetailPopupElement >> newIndicator [
 { #category : #'theme - applying' }
 CFMaDetailPopupElement >> onThemeChanged [
 	super onThemeChanged.
-	indicator ifNotNil: [ self updateIndicatorAppearance ].
-	indicatorHost ifNotNil: [ self updatePopupAppearance ]
+	self updatePopupBackgroundAppearance
 ]
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> updateIndicatorAppearance [
-	indicator color: self theme label defaultTextForeground
+	indicator color: indicator theme label defaultTextForeground
 ]
 
 
@@ -97,17 +103,30 @@ CFMaDetailPopupElement >> popupBackgroundColor [
 
 { #category : 'private - appearance' }
 CFMaDetailPopupElement >> updatePopupAppearance [
+	self updatePopupBackgroundAppearance.
+	self updateIndicatorHostAppearance
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailPopupElement >> updatePopupBackgroundAppearance [
 	popupOpen ifTrue: [
 		self background: BlBackground transparent.
-		indicatorHost background: BlBackground transparent.
 		^ self ].
 
 	self background: ((hovered or: [ self hasFocus ])
 		ifTrue: [ self popupBackgroundColor ]
-		ifFalse: [ BlBackground transparent ]).
+		ifFalse: [ BlBackground transparent ])
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailPopupElement >> updateIndicatorHostAppearance [
+	popupOpen ifTrue: [
+		indicatorHost background: BlBackground transparent.
+		^ self ].
+
 	indicatorHost background: ((hovered or: [ self hasFocus ])
 		ifTrue: [ BlBackground transparent ]
-		ifFalse: [ self popupBackgroundColor ])
+		ifFalse: [ indicatorHost theme interaction popupBackgroundTint ])
 ]
 
 { #category : 'accessing' }
