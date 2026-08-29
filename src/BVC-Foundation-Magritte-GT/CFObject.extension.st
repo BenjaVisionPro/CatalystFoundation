@@ -23,7 +23,7 @@ CFObject >> gtMagritteFor: aView [
 		stencil: [
 			self asElement asScrollableElement ];
 		actionStencil: [ :aTab |
-			CFThemeChooserButton forViewContentElement: aTab viewContentElement ];
+			CFThemeChooserButton forTab: aTab ];
 		actionToggleIcon: CFMaFormLayoutDebugOverlayElement debugIconOff
 			label: 'Layout Debug'
 			tooltip: 'Toggle form layout debug overlay'
