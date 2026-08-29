@@ -205,7 +205,7 @@ CFMaDetailSliderElement >> updateThemeAppearance [
 	| aTheme |
 	aTheme := self theme.
 	track background: (aTheme controls sliderTrackTint blocResolveColorForTheme: aTheme).
-	fill background: (aTheme highlight color blocResolveColorForTheme: aTheme).
+	fill background: (aTheme appearanceState themeColour blocResolveColorForTheme: aTheme).
 	thumb
 		background: (aTheme controls sliderThumbBackground blocResolveColorForTheme: aTheme);
 		border: (BlBorder

@@ -83,11 +83,11 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 		when: BlElementThemeChanged
 		do: [ :anEvent |
 			aToggle icon color: (aToggle isActivated
-				ifTrue: [ aToggle theme highlight foregroundColor ]
+				ifTrue: [ Color white ]
 				ifFalse: [ aToggle theme controls inactiveIconForeground ]) ];
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
-			aToggle icon color: (self theme highlight foregroundColor).
+			aToggle icon color: (Color white).
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
@@ -110,7 +110,7 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 	aToggle
 		when: BrToggleActivatedEvent
 		do: [ :anEvent |
-			aToggle label: (aLabel asString asRopedText foreground: (self theme highlight foregroundColor)).
+			aToggle label: (aLabel asString asRopedText foreground: (Color white)).
 			self showGroup: aGroup ];
 		when: BrToggleDeactivatedEvent
 		do: [ :anEvent |
@@ -141,7 +141,7 @@ CFMaDetailButtonBarElement >> toggleStyle [
 		hovered: [ :aState |
 			aState background: (self theme interaction subtleBackgroundTint) ];
 		activated: [ :aState |
-			aState background: (self theme highlight color) ];
+			aState background: (self theme appearanceState themeColour) ];
 		yourself
 ]
 

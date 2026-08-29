@@ -378,7 +378,7 @@ CFMaDetailTagsElement >> baselineOffset [
 CFMaDetailTagsElement >> applyThemeToEditor: anEditor [
 	| aTheme aFocusedBorderColor |
 	aTheme := anEditor theme.
-	aFocusedBorderColor := aTheme highlight color blocResolveColorForTheme: aTheme.
+	aFocusedBorderColor := aTheme appearanceState themeColour blocResolveColorForTheme: aTheme.
 	anEditor
 		background: aTheme controls tagEditorBackground;
 		border: (BlBorder paint: aFocusedBorderColor width: 1)

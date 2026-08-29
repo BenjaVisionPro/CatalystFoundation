@@ -8,7 +8,7 @@ Class {
 
 { #category : 'defaults' }
 CFMaTextEditorParagraphElement >> defaultSelectionColor [
-	^ self theme highlight textColor blocResolveColorForTheme: self theme
+	^ self theme appearanceState textSelectionColour blocResolveColorForTheme: self theme
 ]
 
 
