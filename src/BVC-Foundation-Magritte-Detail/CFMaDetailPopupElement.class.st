@@ -80,9 +80,13 @@ CFMaDetailPopupElement >> newIndicator [
 { #category : #'theme - applying' }
 CFMaDetailPopupElement >> onThemeChanged [
 	super onThemeChanged.
-	indicator ifNotNil: [
-		indicator color: self theme label defaultTextForeground ].
+	indicator ifNotNil: [ self updateIndicatorAppearance ].
 	indicatorHost ifNotNil: [ self updatePopupAppearance ]
+]
+
+{ #category : 'private - appearance' }
+CFMaDetailPopupElement >> updateIndicatorAppearance [
+	indicator color: self theme label defaultTextForeground
 ]
 
 
