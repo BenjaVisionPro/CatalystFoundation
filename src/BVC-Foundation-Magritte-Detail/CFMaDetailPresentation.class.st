@@ -163,7 +163,9 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		margin: BlInsets empty;
 		padding: (BlInsets top: 2 right: CFMaDetailScalarFieldMetrics trailingControlInset bottom: 2 left: 5);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-		background: (self theme interaction controlBackgroundTint).
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle background: aDropdown theme interaction controlBackgroundTint ]).
 	^ aDropdown
 ]
 
