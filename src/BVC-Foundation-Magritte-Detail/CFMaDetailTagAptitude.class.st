@@ -21,6 +21,6 @@ CFMaDetailTagAptitude >> initialize [
 { #category : #'theme - applying' }
 CFMaDetailTagAptitude >> applyTheme: aTheme [
 	defaultBackground := aTheme controls tagBackgroundTint blocResolveColorForTheme: aTheme.
-	focusedBackground := aTheme appearanceState themeColour blocResolveColorForTheme: aTheme.
+	focusedBackground := aTheme item selectedColor blocResolveColorForTheme: aTheme.
 	self widgetDo: [ :aWidget | aWidget requestStyle ]
 ]

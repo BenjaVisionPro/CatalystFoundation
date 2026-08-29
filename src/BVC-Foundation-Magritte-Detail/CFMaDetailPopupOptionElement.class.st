@@ -70,7 +70,7 @@ CFMaDetailPopupOptionElement >> initialize [
 			default: [ :aStyle | aStyle background: Color transparent ];
 			hovered: [ :aStyle | aStyle background: (self theme interaction controlBackgroundTint) ];
 			selected: [ :aStyle |
-				aStyle background: (self theme appearanceState themeColour) ]);
+				aStyle background: self theme item selectedColor ]);
 		addAptitude: (BrStyleCommonAptitude new
 			@ checkLabelAptitude label;
 			default: [ :aStyle | aStyle foreground: (self theme typography primaryForeground) ];

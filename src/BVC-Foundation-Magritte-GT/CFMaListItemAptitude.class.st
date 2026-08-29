@@ -12,7 +12,7 @@ Class {
 { #category : 'private - appearance' }
 CFMaListItemAptitude >> inactiveSelectionColour [
 	| aColor aGrey desaturation aRed aGreen aBlue |
-	aColor := self theme appearanceState textSelectionColour.
+	aColor := self theme item selectedColor blocResolveColorForTheme: self theme.
 	aGrey := (aColor red * 0.2126) + (aColor green * 0.7152) + (aColor blue * 0.0722).
 	desaturation := 0.50.
 	aRed := aColor red + ((aGrey - aColor red) * desaturation).
@@ -35,7 +35,7 @@ CFMaListItemAptitude >> initialize [
 			aStyle
 			background: Color transparent;
 			effect: (BlOverlayAboveEffect new
-				paint: (self theme appearanceState textSelectionColour blocResolveColorForTheme: self theme)) ];
+				paint: (self theme item selectedColor blocResolveColorForTheme: self theme)) ];
 		when: CFMaActiveSelectionState uniqueInstance not & BlElementState selected
 		style: [ :aStyle |
 			aStyle

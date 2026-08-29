@@ -34,7 +34,7 @@ CFGlamorousEditableLabelAptitude >> initialize [
 				aState focused and: BrEditorModeState editable ]
 				style: [ :aStyle |
 					aStyle border: (BlBorder
-						paint: (self theme appearanceState themeColour blocResolveColorForTheme: self theme)
+						paint: (self theme interaction focusedBorderColor blocResolveColorForTheme: self theme)
 						width: 1) ];
 			when: [ :aState |
 				aState hovered and: BrEditorModeState readOnly ]

@@ -141,7 +141,7 @@ CFMaDetailButtonBarElement >> toggleStyle [
 		hovered: [ :aState |
 			aState background: (self theme interaction subtleBackgroundTint) ];
 		activated: [ :aState |
-			aState background: (self theme appearanceState themeColour) ];
+			aState background: self theme item selectedColor ];
 		yourself
 ]
 

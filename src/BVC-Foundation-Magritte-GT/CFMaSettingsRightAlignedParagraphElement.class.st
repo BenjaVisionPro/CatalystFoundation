@@ -9,7 +9,7 @@ Class {
 
 { #category : 'defaults' }
 CFMaSettingsRightAlignedParagraphElement >> defaultSelectionColor [
-	^ self theme appearanceState textSelectionColour blocResolveColorForTheme: self theme
+	^ self theme editor textSelectionColor blocResolveColorForTheme: self theme
 ]
 
 { #category : 'private - alignment' }

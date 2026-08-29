@@ -53,6 +53,6 @@ CFMaDetailAddIconElement >> onThemeChanged [
 { #category : 'private - appearance' }
 CFMaDetailAddIconElement >> updateAppearance [
 	icon color: (hovered
-		ifTrue: [ self theme appearanceState themeColour ]
+		ifTrue: [ self theme item selectedColor ]
 		ifFalse: [ self theme typography secondaryForeground ])
 ]

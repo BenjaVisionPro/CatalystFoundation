@@ -15,7 +15,7 @@ Class {
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
-	^ aWidget theme appearanceState themeColour blocResolveColorForTheme: aWidget theme
+	^ aWidget theme controls switchActiveTrackTint blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'private - appearance' }
