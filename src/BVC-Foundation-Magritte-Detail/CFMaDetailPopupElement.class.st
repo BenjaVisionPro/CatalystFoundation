@@ -5,6 +5,7 @@ Class {
 		'leadingElement',
 		'valueLabel',
 		'indicatorHost',
+		'indicator',
 		'hovered',
 		'popupOpen'
 	],
@@ -14,7 +15,6 @@ Class {
 
 { #category : 'initialization' }
 CFMaDetailPopupElement >> initialize [
-	| anIndicator |
 	super initialize.
 	hovered := false.
 	popupOpen := false.
@@ -39,8 +39,8 @@ CFMaDetailPopupElement >> initialize [
 		fitContent;
 		yourself.
 
-	anIndicator := self newIndicator.
-	anIndicator constraintsDo: [ :c |
+	indicator := self newIndicator.
+	indicator constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 
@@ -49,7 +49,7 @@ CFMaDetailPopupElement >> initialize [
 		geometry: BlCircleGeometry new;
 		background: self popupBackgroundColor;
 		padding: BlInsets empty;
-		addChild: anIndicator;
+		addChild: indicator;
 		yourself.
 
 	self
@@ -71,21 +71,17 @@ CFMaDetailPopupElement >> initialize [
 
 { #category : 'private - instance creation' }
 CFMaDetailPopupElement >> newIndicator [
-	| anIndicator |
-	anIndicator := (FontAwesomeIcons icon: #anglesUpDown)
+	^ (FontAwesomeIcons icon: #anglesUpDown)
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
-		color: self theme controls controlIndicatorForeground;
-		yourself.
-	anIndicator
-		when: BlElementThemeChanged
-		do: [ :anEvent |
-			anIndicator color: anIndicator theme controls controlIndicatorForeground ].
-	^ anIndicator
+		color: self theme label defaultTextForeground;
+		yourself
 ]
 
 { #category : #'theme - applying' }
 CFMaDetailPopupElement >> onThemeChanged [
 	super onThemeChanged.
+	indicator ifNotNil: [
+		indicator color: self theme label defaultTextForeground ].
 	indicatorHost ifNotNil: [ self updatePopupAppearance ]
 ]
 
