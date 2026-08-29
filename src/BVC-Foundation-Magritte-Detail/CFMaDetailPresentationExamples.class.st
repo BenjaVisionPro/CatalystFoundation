@@ -707,16 +707,16 @@ CFMaDetailPresentationExamples >> scalarRelationUsesTagsElement [
 
 
 { #category : 'examples - colour picker' }
-CFMaDetailPresentationExamples >> highlightColourPicker [
+CFMaDetailPresentationExamples >> themeColourPicker [
 	<gtExample>
 	| aPicker |
 	aPicker := CFMaDetailColourPickerElement new
-		colours: CgtPalette highlightColours;
-		labelBlock: [ :aColour | CgtPalette highlightNameFor: aColour ];
-		value: CgtPalette highlightPurple;
+		colours: CgtPalette themeColours;
+		labelBlock: [ :aColour | CgtPalette themeNameFor: aColour ];
+		value: CgtPalette themePurple;
 		yourself.
 	self assert: aPicker colours size equals: 8.
-	self assert: aPicker value equals: CgtPalette highlightPurple.
+	self assert: aPicker value equals: CgtPalette themePurple.
 	^ aPicker
 ]
 
@@ -725,12 +725,12 @@ CFMaDetailPresentationExamples >> themeColourPickersUseSingleOptionDescriptions 
 	<gtExample>
 	| aShowcase |
 	aShowcase := CFMaFormShowcase new.
-	self assert: aShowcase highlightColourDescription class equals: MASingleOptionDescription.
+	self assert: aShowcase themeColourDescription class equals: MASingleOptionDescription.
 	self assert: aShowcase textSelectionColourDescription class equals: MASingleOptionDescription.
-	self assert: aShowcase highlightColourDescription options size equals: 8.
+	self assert: aShowcase themeColourDescription options size equals: 8.
 	self assert: aShowcase textSelectionColourDescription options size equals: 9.
 	self
-		assert: (CgtPalette automaticTextHighlightColourForHighlight: CgtPalette highlightPurple)
-		equals: CgtPalette textHighlightPurple.
+		assert: (CgtPalette automaticTextSelectionColourForThemeColour: CgtPalette themePurple)
+		equals: CgtPalette textSelectionPurple.
 	^ aShowcase
 ]

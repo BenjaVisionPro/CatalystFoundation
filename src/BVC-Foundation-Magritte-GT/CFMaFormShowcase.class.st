@@ -20,7 +20,7 @@ Class {
 		'time',
 		'dateAndTime',
 		'classValue',
-		'highlightColour',
+		'themeColour',
 		'textSelectionColour',
 		'tags',
 		'file',
@@ -688,7 +688,7 @@ CFMaFormShowcase >> initialize [
 	time := Time hour: 14 minute: 30 second: 0.
 	dateAndTime := DateAndTime year: 2026 month: 8 day: 16 hour: 14 minute: 30 second: 0.
 	classValue := String.
-	highlightColour := CgtPalette highlightPurple.
+	themeColour := CgtPalette themePurple.
 	textSelectionColour := nil.
 	tags := #('foundation' 'magritte' 'bloc').
 	file := FileLocator imageDirectory.
@@ -1043,29 +1043,29 @@ CFMaFormShowcase >> symbolValueDescription [
 ]
 
 { #category : 'accessing' }
-CFMaFormShowcase >> highlightColour [
-	^ highlightColour
+CFMaFormShowcase >> themeColour [
+	^ themeColour
 ]
 
 { #category : 'accessing' }
-CFMaFormShowcase >> highlightColour: aColour [
-	highlightColour := aColour
+CFMaFormShowcase >> themeColour: aColour [
+	themeColour := aColour
 ]
 
 { #category : 'descriptions - fields' }
-CFMaFormShowcase >> highlightColourDescription [
+CFMaFormShowcase >> themeColourDescription [
 	<magritteDescription>
 	^ MASingleOptionDescription new
-		accessor: #highlightColour;
-		label: 'Colour';
+		accessor: #themeColour;
+		label: 'Theme colour';
 		group: 'Theme';
 		priority: 10;
-		options: CgtPalette highlightColours;
+		options: CgtPalette themeColours;
 		fieldConfigure: [ :field |
 			field beColourPicker
 				colourBlock: [ :aColour | aColour ];
 				labelBlock: [ :aColour |
-					CgtPalette highlightNameFor: aColour ] ];
+					CgtPalette themeNameFor: aColour ] ];
 		beRequired;
 		yourself
 ]
@@ -1085,14 +1085,14 @@ CFMaFormShowcase >> textSelectionColourDescription [
 	<magritteDescription>
 	^ MASingleOptionDescription new
 		accessor: #textSelectionColour;
-		label: 'Text highlight colour';
+		label: 'Text selection colour';
 		group: 'Theme';
 		priority: 20;
-		options: ({ nil } , CgtPalette textHighlightColours);
+		options: ({ nil } , CgtPalette textSelectionColours);
 		fieldConfigure: [ :field |
 			field bePopup
 				displayBlock: [ :aColour |
-					CgtPalette textHighlightNameFor: aColour ] ];
+					CgtPalette textSelectionNameFor: aColour ] ];
 		blocOptionIconStencil: [ :aColour |
 			aColour
 				ifNil: [

@@ -16,14 +16,14 @@ CFMaDetailColourSwatchElement class >> automaticSize: anExtent [
 		yourself.
 	left := BlElement new
 		size: (anExtent x / 2.0) @ anExtent y;
-		background: CgtPalette textHighlightBlue;
+		background: CgtPalette textSelectionBlue;
 		constraintsDo: [ :c |
 			c frame horizontal alignLeft.
 			c frame vertical alignCenter ];
 		yourself.
 	right := BlElement new
 		size: (anExtent x / 2.0) @ anExtent y;
-		background: CgtPalette textHighlightPink;
+		background: CgtPalette textSelectionPink;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignCenter ];
