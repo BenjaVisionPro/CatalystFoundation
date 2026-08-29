@@ -8,11 +8,10 @@ Class {
 { #category : 'initialization' }
 CFDetailSeparatorElement >> initialize [
 	super initialize.
-	self background: Color transparent
+	self
+		background: Color transparent;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle background: self theme surfaces separatorTint ])
 ]
 
-{ #category : 'api - theme' }
-CFDetailSeparatorElement >> onThemeChanged [
-	super onThemeChanged.
-	self background: self theme surfaces separatorTint
-]

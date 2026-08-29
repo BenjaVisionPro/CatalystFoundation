@@ -140,8 +140,6 @@ CFMaDetailTagsElement >> acceptEditionOfTag: aTag text: aText [
 { #category : 'selection' }
 CFMaDetailTagsElement >> selectTag: aTag [
 	activeEditor ifNotNil: [ self commitActiveEditor ].
-	selectedTag ifNotNil: [ :anOldTag |
-		anOldTag == aTag ifFalse: [ anOldTag beUnselected ] ].
 	selectedTag := aTag.
 	selectedTag beSelected.
 	selectedTag requestFocus
@@ -157,7 +155,6 @@ CFMaDetailTagsElement >> beginEditingTag: aTag [
 	activeEditor := self newEditorWithText: (description reference toString: aTag value).
 	self removeChild: aTag.
 	self addChild: activeEditor at: editingIndex.
-	self applyThemeToEditor: activeEditor.
 	activeEditor switchToEditor.
 	activeEditor requestFocus
 ]
@@ -166,14 +163,11 @@ CFMaDetailTagsElement >> beginEditingTag: aTag [
 CFMaDetailTagsElement >> beginInsertionAtEnd [
 	description isDefinitive ifTrue: [ ^ self ].
 	activeEditor ifNotNil: [ self commitActiveEditor ].
-	selectedTag ifNotNil: [
-		selectedTag beUnselected.
-		selectedTag := nil ].
+	selectedTag := nil.
 	editingIndex := values size + 1.
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor before: addButton.
-	self applyThemeToEditor: activeEditor.
 	activeEditor
 		requestFocus;
 		switchToEditor.
@@ -187,15 +181,12 @@ CFMaDetailTagsElement >> beginInsertionAtPoint: aPoint [
 	| anIndex |
 	description isDefinitive ifTrue: [ ^ self ].
 	activeEditor ifNotNil: [ self commitActiveEditor ].
-	selectedTag ifNotNil: [
-		selectedTag beUnselected.
-		selectedTag := nil ].
+	selectedTag := nil.
 	anIndex := self insertionIndexAt: aPoint.
 	editingIndex := anIndex.
 	editingExisting := false.
 	activeEditor := self newEditorWithText: ''.
 	self addChild: activeEditor at: anIndex.
-	self applyThemeToEditor: activeEditor.
 	activeEditor switchToEditor.
 	activeEditor requestFocus
 ]
@@ -217,7 +208,15 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 			c flow vertical alignCenter ];
 		yourself.
 	anEditor
-		when: BlElementThemeChanged do: [ :anEvent | self applyThemeToEditor: anEditor ];
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				| aTheme |
+				aTheme := anEditor theme.
+				aStyle
+					background: aTheme controls tagEditorBackground;
+					border: (BlBorder
+						paint: (aTheme interaction focusedBorderColor blocResolveColorForTheme: aTheme)
+						width: 1) ]);
 		when: BrEditorAcceptWish do: [ :aWish | self commitActiveEditor ];
 		when: BrEditorCancelWish do: [ :aWish | self cancelActiveEditor ].
 	self installCompletionOn: anEditor.
@@ -374,12 +373,3 @@ CFMaDetailTagsElement >> baselineOffset [
 ]
 
 
-{ #category : #'theme - applying' }
-CFMaDetailTagsElement >> applyThemeToEditor: anEditor [
-	| aTheme aFocusedBorderColor |
-	aTheme := anEditor theme.
-	aFocusedBorderColor := aTheme interaction focusedBorderColor blocResolveColorForTheme: aTheme.
-	anEditor
-		background: aTheme controls tagEditorBackground;
-		border: (BlBorder paint: aFocusedBorderColor width: 1)
-]

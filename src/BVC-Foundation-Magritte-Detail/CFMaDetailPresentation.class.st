@@ -224,7 +224,7 @@ CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 			ifTrue: [ BlVisibility visible ]
 			ifFalse: [ BlVisibility gone ]) ].
 
-	aButton addAptitude: (BrStyleCommonAptitude new
+	aButton addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
 				background: (self theme interaction controlBackgroundTint);

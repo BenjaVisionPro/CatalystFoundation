@@ -22,7 +22,3 @@ CFMaDetailTagAptitude >> initialize [
 ]
 
 
-{ #category : #'theme - applying' }
-CFMaDetailTagAptitude >> applyTheme: aTheme [
-	self widgetDo: [ :aWidget | aWidget requestStyle ]
-]

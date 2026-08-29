@@ -16,7 +16,7 @@ CFGlamorousEditableLabelAptitude >> initialize [
 	self remove: styleLook.
 
 	self add:
-		(styleLook := BrStyleCommonAptitude new
+		(styleLook := BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
 				aStyle geometry: (BlRoundedRectangleGeometry cornerRadius: 4).
 				aStyle background: defaultBackground.

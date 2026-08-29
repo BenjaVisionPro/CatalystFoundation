@@ -61,7 +61,7 @@ CFMaDetailGroupCardElement >> initialize [
 	focusOverlay := nil.
 	reservedAccessorySlots := 0.
 	self
-		background: self theme surfaces cardTint;
+		background: Color transparent;
 		border: BlBorder empty;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius);
 		clipChildren: true;
@@ -69,7 +69,10 @@ CFMaDetailGroupCardElement >> initialize [
 		padding: (BlInsets top: self edgeInset right: 0 bottom: self edgeInset left: 0);
 		cellSpacing: 0;
 		hMatchParent;
-		vFitContent
+		vFitContent;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle background: self theme surfaces cardTint ])
 ]
 
 { #category : 'private - elements' }
@@ -90,11 +93,6 @@ CFMaDetailGroupCardElement >> newSeparator [
 	^ aFrame
 ]
 
-{ #category : #'api - theme' }
-CFMaDetailGroupCardElement >> onThemeChanged [
-	super onThemeChanged.
-	self background: self theme surfaces cardTint
-]
 
 { #category : 'removing' }
 CFMaDetailGroupCardElement >> removeChild: anElement [

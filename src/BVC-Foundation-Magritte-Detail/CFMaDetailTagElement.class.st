@@ -13,9 +13,7 @@ Class {
 { #category : 'initialization' }
 CFMaDetailTagElement >> initialize [
 	super initialize.
-	tagAptitude := (CFMaDetailTagAptitude
-		background: self theme controls tagBackgroundTint
-		focused: (self theme item selectedColor blocResolveColorForTheme: self theme))
+	tagAptitude := CFMaDetailTagAptitude new
 		glamorousRegularFont;
 		glamorousRegularSmallSize.
 	self
@@ -49,21 +47,7 @@ CFMaDetailTagElement >> beSelected [
 	self requestFocus
 ]
 
-{ #category : 'selection' }
-CFMaDetailTagElement >> beUnselected [
-	tagAptitude applyTheme: self theme
-]
 
 
-{ #category : #'theme - applying' }
-CFMaDetailTagElement >> onThemeChanged [
-	super onThemeChanged.
-	tagAptitude ifNotNil: [ tagAptitude applyTheme: self theme ]
-]
 
 
-{ #category : #lifecycle }
-CFMaDetailTagElement >> onAddedToParent [
-	super onAddedToParent.
-	tagAptitude ifNotNil: [ tagAptitude applyTheme: self theme ]
-]

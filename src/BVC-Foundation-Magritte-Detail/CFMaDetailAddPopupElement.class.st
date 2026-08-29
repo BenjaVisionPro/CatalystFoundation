@@ -2,15 +2,10 @@ Class {
 	#name : 'CFMaDetailAddPopupElement',
 	#superclass : 'CFMaDetailPopupElement',
 	#traits : 'TBrEnableable',
-	#instVars : [
-		'addIndicator'
-	],
 	#classTraits : 'TBrEnableable classTrait',
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
-
-
 
 { #category : 'instance creation' }
 CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
@@ -33,7 +28,6 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 	^ anAddElement
 ]
 
-
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement class >> newClassChoiceHandle [
 	| aHandle anIndicator |
@@ -45,18 +39,17 @@ CFMaDetailAddPopupElement class >> newClassChoiceHandle [
 		yourself.
 	anIndicator := (FontAwesomeIcons icon: #plus)
 		size: CFMaDetailPopupMetrics indicatorGlyphExtent;
-		color: aHandle theme controls controlIndicatorForeground;
 		yourself.
-	anIndicator
-		when: BlElementThemeChanged
-		do: [ :anEvent |
-			anIndicator color: anIndicator theme controls controlIndicatorForeground ].
+	aHandle
+		layout: BlFrameLayout new;
+		addChild: anIndicator;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			@ anIndicator;
+			default: [ :aStyle |
+				aStyle do: [ anIndicator color: aHandle theme controls controlIndicatorForeground ] ]).
 	anIndicator constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
-	aHandle
-		layout: BlFrameLayout new;
-		addChild: anIndicator.
 	^ aHandle
 ]
 
@@ -71,8 +64,7 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 				text: aClass displayString;
 				hoverBlock: [ aList selectOne: anItemIndex ];
 				canActivateBlock: [ (anAddItemViewModel shouldDisableNewItemClass: aClass) not ];
-				activateBlock: [
-					anAddItemViewModel addItemForClass: aClass from: anItemElement ] ];
+				activateBlock: [ anAddItemViewModel addItemForClass: aClass from: anItemElement ] ];
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
@@ -96,6 +88,9 @@ CFMaDetailAddPopupElement >> initialize [
 	| anInset |
 	super initialize.
 	self removeChild: valueLabel.
+	self
+		when: BlMouseEnterEvent do: [ :anEvent | indicator hovered: true ];
+		when: BlMouseLeaveEvent do: [ :anEvent | indicator hovered: false ].
 	anInset := (CFMaDetailPopupMetrics controlHeight
 		- CFMaDetailPopupMetrics indicatorExtent y) / 2.
 	self
@@ -105,36 +100,27 @@ CFMaDetailAddPopupElement >> initialize [
 	indicatorHost background: BlBackground transparent
 ]
 
+{ #category : 'private - styling' }
+CFMaDetailAddPopupElement >> installThemeStyles [
+	"The add control is intentionally transparent; its icon owns the only visual state."
+	popupStyleAptitude := BrLazyStyleCommonAptitude new
+		default: [ :aStyle | aStyle background: BlBackground transparent ].
+	indicatorHostStyleAptitude := BrLazyStyleCommonAptitude new
+		@ indicatorHost;
+		default: [ :aStyle | aStyle background: BlBackground transparent ].
+	self
+		addAptitude: popupStyleAptitude;
+		addAptitude: indicatorHostStyleAptitude.
+	self installIndicatorThemeStyle
+]
+
+{ #category : 'private - styling' }
+CFMaDetailAddPopupElement >> installIndicatorThemeStyle [
+]
 
 { #category : 'private - instance creation' }
 CFMaDetailAddPopupElement >> newIndicator [
-	addIndicator := CFMaDetailAddIconElement size: 16 @ 16.
-	^ addIndicator
-]
-
-
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> updateIndicatorAppearance [
-	"CFMaDetailAddIconElement owns its inner icon appearance and updates it from its own effective theme."
-]
-
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> updateIndicatorHostAppearance [
-	indicatorHost background: BlBackground transparent
-]
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> updatePopupBackgroundAppearance [
-	self background: BlBackground transparent
-]
-
-{ #category : 'private - appearance' }
-CFMaDetailAddPopupElement >> updatePopupAppearance [
-	self background: BlBackground transparent.
-	indicatorHost background: BlBackground transparent.
-	addIndicator ifNotNil: [ addIndicator hovered: hovered ]
+	^ CFMaDetailAddIconElement size: 16 @ 16
 ]
 
 { #category : 'layout' }

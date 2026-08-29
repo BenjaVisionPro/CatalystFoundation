@@ -61,7 +61,9 @@ CFMaDetailSwitchAptitude >> initialize [
 		addChangeProperty: #(widget padding) with: [ BlInsets all: 1 ];
 		addChangeProperty: #(widget border) with: [ BlBorder empty ];
 		addChangeProperty: #(widget background) with: [ Color transparent ];
-		addChangeAddChildAs: #(cfDetailSwitchThumb) with: [ thumb ]
+		addChangeAddChildAs: #(cfDetailSwitchThumb) with: [ thumb ];
+		add: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle | aStyle do: [ self updateForCurrentTheme ] ])
 ]
 
 { #category : 'initialization' }
@@ -71,9 +73,7 @@ CFMaDetailSwitchAptitude >> initializeListeners [
 		when: BrToggleActivatedEvent
 		do: [ :anEvent | self toggleActivated ];
 		when: BrToggleDeactivatedEvent
-		do: [ :anEvent | self toggleDeactivated ];
-		when: BlElementThemeChanged
-		do: [ :anEvent | self updateForCurrentTheme ]
+		do: [ :anEvent | self toggleDeactivated ]
 ]
 
 { #category : 'private - motion' }

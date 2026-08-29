@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BlElement',
 	#instVars : [
 		'icon',
-		'hovered'
+		'hovered',
+		'appearanceAptitude'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -29,7 +30,13 @@ CFMaDetailAddIconElement >> initialize [
 	icon constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
-	self updateAppearance
+	appearanceAptitude := BrLazyStyleCommonAptitude new
+		default: [ :aStyle |
+			aStyle do: [
+				icon color: (hovered
+					ifTrue: [ self theme item selectedColor ]
+					ifFalse: [ self theme typography secondaryForeground ]) ] ].
+	self addAptitude: appearanceAptitude
 ]
 
 { #category : 'accessing' }
@@ -40,19 +47,7 @@ CFMaDetailAddIconElement >> iconSize: anExtent [
 
 { #category : 'appearance' }
 CFMaDetailAddIconElement >> hovered: aBoolean [
+	hovered = aBoolean ifTrue: [ ^ self ].
 	hovered := aBoolean.
-	self updateAppearance
-]
-
-{ #category : 'lifecycle' }
-CFMaDetailAddIconElement >> onThemeChanged [
-	super onThemeChanged.
-	icon ifNotNil: [ self updateAppearance ]
-]
-
-{ #category : 'private - appearance' }
-CFMaDetailAddIconElement >> updateAppearance [
-	icon color: (hovered
-		ifTrue: [ self theme item selectedColor ]
-		ifFalse: [ self theme typography secondaryForeground ])
+	appearanceAptitude updateWith: [ ]
 ]
