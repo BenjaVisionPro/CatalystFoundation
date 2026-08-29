@@ -1,25 +1,24 @@
 Extension { #name : 'CFMaFormShowcase' }
 
-{ #category : '*bvc-foundation-magritte-detail-examples' }
-CFMaFormShowcase >> exampleDetailElement [
-	<gtExample>
-	| aDescription aMemento |
-	aDescription := self magritteDescription.
-	aDescription blocPresentationStencil: [ :theMemento |
-		CFMaDetailPresentation new
-			group: 'Fields' configure: [ :fields |
-				fields
-					reserveAccessorySlots: 2;
-					category: #text configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
-					category: #values configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
-					category: #resources configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
-					category: #temporal configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
-					category: #metadata configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
-					category: #presentation configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ] ];
-			yourself ].
-	aMemento := CFMaMemento model: self description: aDescription.
-	^ (CFMaViewModel forObject: self memento: aMemento) asElement asScrollableElement
+{ #category : '*bvc-foundation-magritte-detail' }
+CFMaFormShowcase >> descriptionContainerDetail: aDescription [
+	<magritteContainer>
+	^ aDescription
+		blocPresentationStencil: [ :aMemento |
+			CFMaDetailPresentation new
+				group: 'Fields' configure: [ :fields |
+					fields
+						reserveAccessorySlots: 2;
+						category: #text configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+						category: #values configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+						category: #resources configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+						category: #temporal configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+						category: #metadata configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ];
+						category: #presentation configure: [ :aCategory | aCategory reserveAccessorySlots: 2 ] ];
+				yourself ];
+		yourself
 ]
+
 
 { #category : '*bvc-foundation-magritte-detail-examples' }
 CFMaFormShowcase >> detailGroupsDescription [

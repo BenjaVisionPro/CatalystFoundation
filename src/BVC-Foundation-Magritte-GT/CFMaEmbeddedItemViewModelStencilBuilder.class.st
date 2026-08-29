@@ -22,7 +22,7 @@ CFMaEmbeddedItemViewModelStencilBuilder >> buildDefault [
 	^ (CFMaViewModel
 		forObject: self model
 		memento: aChildMemento)
-			presentationClass: CFMaAccordionPresentation;
+			presentationClass: CFMaPresentation;
 			ignoreImplicitActions;
 			yourself
 ]

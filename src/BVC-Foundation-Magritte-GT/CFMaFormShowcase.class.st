@@ -27,20 +27,10 @@ Class {
 		'directory',
 		'fieldIcon',
 		'derivedValue',
+		'listObject',
 		'embeddedObject',
-		'identityObject',
-		'phlowObject',
-		'compactObject',
-		'columnedObject',
-		'compactItems',
-		'identityItems',
-		'expandableItems',
-		'accordionItems',
-		'gridItems',
-		'embeddedItems',
-		'gridEmbeddedItems',
-		'phlowItems',
-		'gridPhlowItems'
+		'listItems',
+		'embeddedItems'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Examples',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -53,13 +43,6 @@ CFMaFormShowcase class >> example [
 	^ self new
 ]
 
-{ #category : 'examples' }
-CFMaFormShowcase class >> exampleCurrentPresentationElement [
-	<gtExample>
-	^ ((CFMaViewModel forObject: self example)
-		presentationClass: CFMaTabbedPresentation;
-		yourself) asElement
-]
 
 { #category : 'examples' }
 CFMaFormShowcase class >> exampleElement [
@@ -67,46 +50,10 @@ CFMaFormShowcase class >> exampleElement [
 	^ self example asElement
 ]
 
-{ #category : 'examples' }
-CFMaFormShowcase class >> exampleSettingsElement [
-	<gtExample>
-	^ ((CFMaViewModel forObject: self example)
-		presentationClass: CFMaSettingsPresentation;
-		yourself) asElement
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> accordionItems [
-	^ accordionItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> accordionItems: aCollection [
-	accordionItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> accordionItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #accordionItems;
-		label: 'Accordion list';
-		group: 'To many';
-		priority: 220;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beAccordionList;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'converting' }
-CFMaFormShowcase >> asGtMagritteViewModel [
-	^ (CFMaViewModel forObject: self)
-		presentationClass: CFMaSettingsPresentation;
-		yourself
-]
 
 { #category : 'accessing' }
 CFMaFormShowcase >> classValue [
@@ -130,80 +77,14 @@ CFMaFormShowcase >> classValueDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> columnedObject [
-	^ columnedObject
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> columnedObject: anObject [
-	columnedObject := anObject
-]
 
-{ #category : 'descriptions - to one' }
-CFMaFormShowcase >> columnedObjectDescription [
-	<magritteDescription>
-	^ MAToOneRelationDescription new
-		accessor: #columnedObject;
-		label: 'Columned list';
-		group: 'To one';
-		priority: 130;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beColumnedList;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> compactItems [
-	^ compactItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> compactItems: aCollection [
-	compactItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> compactItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #compactItems;
-		label: 'Compact list';
-		group: 'To many';
-		priority: 200;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beSimpleList;
-		itemsAsCompactObjects;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> compactObject [
-	^ compactObject
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> compactObject: anObject [
-	compactObject := anObject
-]
 
-{ #category : 'descriptions - to one' }
-CFMaFormShowcase >> compactObjectDescription [
-	<magritteDescription>
-	^ MAToOneRelationDescription new
-		accessor: #compactObject;
-		label: 'Compact list';
-		group: 'To one';
-		priority: 120;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beCompactList;
-		yourself
-]
 
 { #category : 'accessing' }
 CFMaFormShowcase >> date [
@@ -375,6 +256,56 @@ CFMaFormShowcase >> editableLabelOnlyDescription [
 ]
 
 { #category : 'accessing' }
+CFMaFormShowcase >> listObject [
+	^ listObject
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> listObject: anObject [
+	listObject := anObject
+]
+
+{ #category : 'descriptions - to one' }
+CFMaFormShowcase >> listObjectDescription [
+	<magritteDescription>
+	^ MAToOneRelationDescription new
+		accessor: #listObject;
+		label: 'List';
+		comment: 'The related object is presented as an ordinary Detail row.';
+		group: 'To one';
+		priority: 100;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> listItems [
+	^ listItems
+]
+
+{ #category : 'accessing' }
+CFMaFormShowcase >> listItems: aCollection [
+	listItems := aCollection
+]
+
+{ #category : 'descriptions - to many' }
+CFMaFormShowcase >> listItemsDescription [
+	<magritteDescription>
+	^ MAToManyRelationDescription new
+		accessor: #listItems;
+		label: 'List';
+		comment: 'Each related object is presented as an ordinary peer Detail row.';
+		group: 'To many';
+		priority: 200;
+		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
+		reference: self showcaseItemReferenceDescription;
+		beModifiable;
+		newItemStencil: CFMaNewItemStencilBuilder new;
+		yourself
+]
+
+{ #category : 'accessing' }
 CFMaFormShowcase >> embeddedItems [
 	^ embeddedItems
 ]
@@ -391,7 +322,7 @@ CFMaFormShowcase >> embeddedItemsDescription [
 		accessor: #embeddedItems;
 		label: 'Embedded forms';
 		group: 'To many';
-		priority: 240;
+		priority: 210;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
 		beModifiable;
@@ -416,10 +347,9 @@ CFMaFormShowcase >> embeddedObjectDescription [
 	^ MAToOneRelationDescription new
 		accessor: #embeddedObject;
 		label: 'Embedded form';
-		comment: 'The related object is edited in place.';
+		comment: 'The related object is edited in place using ordinary Detail rows.';
 		group: 'To one';
-		categories: #('Embedded form');
-		priority: 100;
+		priority: 110;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
 		fieldConfigure: [ :field | field beEmbeddedForms ];
@@ -450,31 +380,8 @@ CFMaFormShowcase >> enabledDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> expandableItems [
-	^ expandableItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> expandableItems: aCollection [
-	expandableItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> expandableItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #expandableItems;
-		label: 'Expandable list';
-		group: 'To many';
-		priority: 210;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beExpandableList;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
 { #category : 'accessing' }
 CFMaFormShowcase >> fieldIcon [
@@ -527,86 +434,14 @@ CFMaFormShowcase >> fileDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridEmbeddedItems [
-	^ gridEmbeddedItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridEmbeddedItems: aCollection [
-	gridEmbeddedItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> gridEmbeddedItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #gridEmbeddedItems;
-		label: 'Grid of embedded forms';
-		group: 'To many';
-		priority: 250;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beGrid;
-		itemsAsEmbeddedForms;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridItems [
-	^ gridItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridItems: aCollection [
-	gridItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> gridItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #gridItems;
-		label: 'Grid of compact objects';
-		group: 'To many';
-		priority: 230;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beGrid;
-		itemsAsCompactObjects;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridPhlowItems [
-	^ gridPhlowItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> gridPhlowItems: aCollection [
-	gridPhlowItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> gridPhlowItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #gridPhlowItems;
-		label: 'Grid of Phlow links';
-		group: 'To many';
-		priority: 270;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beGrid;
-		itemsAsPhlowLinks;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
 { #category : 'descriptions - identity' }
 CFMaFormShowcase >> iconDescription [
@@ -616,57 +451,11 @@ CFMaFormShowcase >> iconDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> identityItems [
-	^ identityItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> identityItems: aCollection [
-	identityItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> identityItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #identityItems;
-		label: 'Editable identity affordances';
-		group: 'To many';
-		priority: 205;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beSimpleList;
-		itemsAsIdentityAffordances;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> identityObject [
-	^ identityObject
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> identityObject: anObject [
-	identityObject := anObject
-]
 
-{ #category : 'descriptions - to one' }
-CFMaFormShowcase >> identityObjectDescription [
-	<magritteDescription>
-	^ MAToOneRelationDescription new
-		accessor: #identityObject;
-		label: 'Editable identity affordance';
-		comment: 'Icon, label, and identifier are edited directly in the compact affordance.';
-		group: 'To one';
-		priority: 105;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beIdentityAffordance;
-		yourself
-]
 
 { #category : 'initialization' }
 CFMaFormShowcase >> initialize [
@@ -700,22 +489,11 @@ CFMaFormShowcase >> initialize [
 	beta := CFMaFormShowcaseAccentItem exampleNamed: 'Beta' score: 60 status: #draft.
 	gamma := CFMaFormShowcaseItem exampleNamed: 'Gamma' score: 90 status: #archived.
 
+	listObject := beta.
 	embeddedObject := alpha.
-	identityObject := beta.
-	phlowObject := beta.
-	compactObject := gamma.
-	columnedObject := nil.
-	compactItems := { alpha. beta. gamma }.
-	identityItems := { alpha. beta. gamma }.
-	expandableItems := { alpha. beta. gamma }.
-	accordionItems := { alpha. beta. gamma }.
-	gridItems := { alpha. beta. gamma }.
-	embeddedItems := { alpha. beta }.
-	gridEmbeddedItems := { alpha. beta }.
-	phlowItems := { alpha. beta. gamma }.
-	gridPhlowItems := { alpha. beta. gamma }
+	listItems := { alpha. beta. gamma }.
+	embeddedItems := { alpha. beta }
 ]
-
 { #category : 'accessing' }
 CFMaFormShowcase >> multipleStatuses [
 	^ multipleStatuses
@@ -763,57 +541,11 @@ CFMaFormShowcase >> passwordDescription [
 		yourself
 ]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> phlowItems [
-	^ phlowItems
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> phlowItems: aCollection [
-	phlowItems := aCollection
-]
 
-{ #category : 'descriptions - to many' }
-CFMaFormShowcase >> phlowItemsDescription [
-	<magritteDescription>
-	^ MAToManyRelationDescription new
-		accessor: #phlowItems;
-		label: 'Phlow links';
-		group: 'To many';
-		priority: 260;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		beModifiable;
-		beSimpleList;
-		itemsAsPhlowLinks;
-		newItemStencil: CFMaNewItemStencilBuilder new;
-		yourself
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> phlowObject [
-	^ phlowObject
-]
 
-{ #category : 'accessing' }
-CFMaFormShowcase >> phlowObject: anObject [
-	phlowObject := anObject
-]
 
-{ #category : 'descriptions - to one' }
-CFMaFormShowcase >> phlowObjectDescription [
-	<magritteDescription>
-	^ MAToOneRelationDescription new
-		accessor: #phlowObject;
-		label: 'Phlow link';
-		comment: 'A compact affordance that opens the related object through Phlow.';
-		group: 'To one';
-		priority: 110;
-		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		reference: self showcaseItemReferenceDescription;
-		bePhlowLink;
-		yourself
-]
 
 { #category : 'accessing' }
 CFMaFormShowcase >> popupPriority [

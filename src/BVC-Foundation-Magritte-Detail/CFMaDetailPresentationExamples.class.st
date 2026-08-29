@@ -495,9 +495,9 @@ CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrit
 	<gtExample>
 	| aModel aDescription aContainer aMemento anObject |
 	aModel := CFMaFormShowcase new.
-	anObject := aModel phlowObject.
+	anObject := aModel listObject.
 	aDescription := MAToOneRelationDescription new
-		accessor: #phlowObject;
+		accessor: #listObject;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		yourself.
 	aContainer := MAContainer new
