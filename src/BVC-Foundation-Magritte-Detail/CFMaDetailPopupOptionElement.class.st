@@ -131,10 +131,14 @@ CFMaDetailPopupOptionElement >> text: aTextOrString [
 
 { #category : 'private - interaction' }
 CFMaDetailPopupOptionElement >> activate [
+	| aDismissRequest |
 	activateBlock ifNil: [ ^ self ].
 	(canActivateBlock cull: self) ifFalse: [ ^ self ].
 	activateBlock cull: self.
-	self fireEvent: CFMaDetailPopupDismissRequest new
+	aDismissRequest := CFMaDetailPopupDismissRequest new.
+	self fireEvent: aDismissRequest.
+	aDismissRequest handled ifFalse: [
+		self error: 'Popup dismissal request did not reach CFMaDetailDropdownAptitude menu container' ]
 ]
 
 { #category : 'accessing' }

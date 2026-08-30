@@ -78,9 +78,15 @@ CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 		fade := self fadeMotionFor: aMenuContainer.
 		dismissalMotion := CFMotion composedOf: { blink. fade }.
 		dismissalMotion onTerminalDo: [ :aMotion |
-			aMotion isCompleted ifTrue: [
-				anOption fireEvent: BrDropdownHideWish new.
-				aMenuContainer opacity: 1.0 ].
+			aMotion isCompleted
+				ifTrue: [
+					anOption fireEvent: BrDropdownHideWish new.
+					aMenuContainer opacity: 1.0 ]
+				ifFalse: [
+					self error: ('Popup dismissal Motion cancelled. menuAttached={1}; listAttached={2}; sameSpace={3}' format: {
+						aMenuContainer isAttachedToSceneGraph.
+						anOption selectionList isAttachedToSceneGraph.
+						anOption selectionList space == aMenuContainer space }) ].
 			dismissalMotion == aMotion ifTrue: [ dismissalMotion := nil ] ].
 		dismissalMotion start ]
 ]
@@ -90,7 +96,9 @@ CFMaDetailDropdownAptitude >> onInstalledIn: anElement [
 	super onInstalledIn: anElement.
 	dismissRequestHandler := BlEventHandler
 		on: CFMaDetailPopupDismissRequest
-		do: [ :anEvent | self dismissSelection: anEvent target ].
+		do: [ :anEvent |
+			anEvent handled: true.
+			self dismissSelection: anEvent target ].
 	self menuContainerDo: [ :aMenuContainer |
 		aMenuContainer addEventHandler: dismissRequestHandler ]
 ]
