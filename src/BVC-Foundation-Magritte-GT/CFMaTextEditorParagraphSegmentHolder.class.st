@@ -10,7 +10,6 @@ Class {
 CFMaTextEditorParagraphSegmentHolder >> createSegmentElement [
 	^ CFMaTextEditorParagraphElement new
 		beInSeparateCompositionLayer;
-		clipChildren: false;
 		focusability: BlFocusability block;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
