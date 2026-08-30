@@ -493,26 +493,12 @@ CFMaDetailPresentationExamples >> embeddedFormsRelationRowCanBeHiddenExplicitly 
 ]
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeFirstChildRowSelectable [
+CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeChildHostSelectable [
 	<gtExample>
-	| aModel anObject aDescription aContainer aMemento aPresentation theRows |
-	aModel := CFMaFormShowcase new.
-	anObject := aModel embeddedObject.
-	aDescription := aModel embeddedObjectDescription
-		fieldConfigure: [ :field | field beEmbeddedForm hideRelationRow ];
-		yourself.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
-	aMemento := CFMaMemento model: aModel description: aContainer.
-	aPresentation := CFMaDetailPresentation new
-		memento: aMemento;
-		yourself.
-	theRows := aPresentation newEmbeddedRowsFor: anObject description: aDescription.
-
-	self assert: theRows notEmpty.
-	self deny: theRows first focusability = BlFocusability after.
-	^ theRows first
+	| aHost |
+	aHost := CFMaDetailPresentation new newPresentationHost.
+	self deny: aHost focusability = BlFocusability after.
+	^ aHost
 ]
 
 { #category : 'examples - relations' }
@@ -581,21 +567,21 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailEmbeddedRowsUseChildMementoAndStandardRows [
+CFMaDetailPresentationExamples >> detailEmbeddedPresentationBuildsInChildHost [
 	<gtExample>
-	| anObject aChildMemento aPresentation aCard theRows |
+	| anObject aChildMemento aPresentation aHost aChildPresentation |
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Embedded' score: 40 status: #active.
 	aChildMemento := CFMaMemento model: anObject.
-	aPresentation := CFMaDetailPresentation new
-		memento: aChildMemento;
-		yourself.
-	aCard := CFMaDetailGroupCardElement new.
-	theRows := aPresentation buildEmbeddedRowsIn: aCard.
+	aPresentation := CFMaDetailPresentation new.
+	aHost := aPresentation newPresentationHost.
+	aChildPresentation := aPresentation
+		buildPresentationForMemento: aChildMemento
+		in: aHost
+		configure: [ :thePresentation | thePresentation ].
 
-	self assert: theRows notEmpty.
-	self assert: aCard rows size equals: theRows size.
-	self assert: theRows first parent == aCard.
-	^ aCard
+	self assert: aChildPresentation memento == aChildMemento.
+	self assert: aHost children notEmpty.
+	^ aHost
 ]
 
 { #category : 'examples - relations' }
@@ -617,7 +603,7 @@ CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesStandardRepresentati
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
 	<gtExample>
-	| aModel anObject aDescription aContainer aMemento aPresentation theRows aChildMemento |
+	| aModel anObject aDescription aContainer aMemento aPresentation aChildMemento aHost |
 	aModel := CFMaFormShowcase new.
 	anObject := aModel embeddedObject.
 	aDescription := aModel embeddedObjectDescription.
@@ -625,40 +611,48 @@ CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
 		add: aDescription;
 		yourself.
 	aMemento := CFMaMemento model: aModel description: aContainer.
-	aPresentation := CFMaDetailPresentation new
-		memento: aMemento;
-		yourself.
+	aPresentation := CFMaDetailPresentation new memento: aMemento; yourself.
 	aChildMemento := aMemento childMementoFor: anObject inRelation: aDescription.
-	theRows := aPresentation newEmbeddedRowsFor: anObject description: aDescription.
+	aHost := aPresentation newPresentationHost.
+	aPresentation
+		buildPresentationForMemento: aChildMemento
+		in: aHost
+		configure: [ :thePresentation | thePresentation ].
 
-	self assert: theRows notEmpty.
 	self assert: (aMemento childMementoFor: anObject inRelation: aDescription) == aChildMemento.
-	^ theRows first
+	self assert: aHost children notEmpty.
+	^ aHost
 ]
 
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToManyEmbeddedUsesChildMementos [
 	<gtExample>
-	| aModel aDescription aContainer aMemento aPresentation firstObject secondObject firstRows secondRows |
+	| aModel aDescription aContainer aMemento aPresentation firstObject secondObject firstHost secondHost |
 	aModel := CFMaFormShowcase new.
 	aDescription := aModel embeddedItemsDescription.
 	aContainer := MAContainer new
 		add: aDescription;
 		yourself.
 	aMemento := CFMaMemento model: aModel description: aContainer.
-	aPresentation := CFMaDetailPresentation new
-		memento: aMemento;
-		yourself.
+	aPresentation := CFMaDetailPresentation new memento: aMemento; yourself.
 	firstObject := aModel embeddedItems first.
 	secondObject := aModel embeddedItems second.
-	firstRows := aPresentation newEmbeddedRowsFor: firstObject description: aDescription.
-	secondRows := aPresentation newEmbeddedRowsFor: secondObject description: aDescription.
+	firstHost := aPresentation newPresentationHost.
+	secondHost := aPresentation newPresentationHost.
+	aPresentation
+		buildPresentationForMemento: (aMemento childMementoFor: firstObject inRelation: aDescription)
+		in: firstHost
+		configure: [ :thePresentation | thePresentation ].
+	aPresentation
+		buildPresentationForMemento: (aMemento childMementoFor: secondObject inRelation: aDescription)
+		in: secondHost
+		configure: [ :thePresentation | thePresentation ].
 
-	self assert: firstRows notEmpty.
-	self assert: secondRows notEmpty.
 	self assert: (aMemento childMementoFor: firstObject inRelation: aDescription) model == firstObject.
 	self assert: (aMemento childMementoFor: secondObject inRelation: aDescription) model == secondObject.
-	^ firstRows first
+	self assert: firstHost children notEmpty.
+	self assert: secondHost children notEmpty.
+	^ firstHost
 ]
 
 { #category : 'examples - relations - selection' }
@@ -793,3 +787,28 @@ CFMaDetailPresentationExamples >> groupConfigurationCanHideLabel [
 	^ aConfiguration
 ]
 
+
+{ #category : 'examples - composition' }
+CFMaDetailPresentationExamples >> detailGroupPreservesNestedPresentationOrder [
+	<gtExample>
+	| aGroup firstRow aHost secondRow aComposition |
+	aGroup := CFMaDetailGroupElement new
+		configuration: CFMaDetailGroupConfiguration new;
+		yourself.
+	firstRow := BlElement new.
+	aHost := CFMaPresentationHostElement new.
+	secondRow := BlElement new.
+
+	aGroup addContent: firstRow.
+	aGroup addNestedPresentationElement: aHost.
+	aGroup addContent: secondRow.
+	aComposition := aGroup children first.
+
+	self assert: aComposition children size equals: 3.
+	self assert: aComposition children first class equals: CFMaDetailGroupCardElement.
+	self assert: aComposition children second == aHost.
+	self assert: aComposition children third class equals: CFMaDetailGroupCardElement.
+	self assert: aComposition children first rows first == firstRow.
+	self assert: aComposition children third rows first == secondRow.
+	^ aGroup
+]

@@ -2,7 +2,8 @@ Class {
 	#name : 'CFMaDetailGroupElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
-		'card',
+		'composition',
+		'currentCard',
 		'groups',
 		'configuration'
 	],
@@ -11,7 +12,21 @@ Class {
 }
 
 { #category : 'adding' }
+CFMaDetailGroupElement >> addContent: anElement [
+	self currentCard addChild: anElement.
+	^ anElement
+]
+
+{ #category : 'adding' }
+CFMaDetailGroupElement >> addNestedPresentationElement: anElement [
+	currentCard := nil.
+	composition addChild: anElement.
+	^ anElement
+]
+
+{ #category : 'adding' }
 CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
+	currentCard := nil.
 	self ensureGroups.
 	(configuration presentation isKindOf: CFMaDetailTabsConfiguration)
 		ifTrue: [
@@ -30,7 +45,19 @@ CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 { #category : 'accessing' }
 CFMaDetailGroupElement >> configuration: aConfiguration [
 	configuration := aConfiguration.
-	card reservedAccessorySlots: aConfiguration reservedAccessorySlots
+	currentCard ifNotNil: [
+		currentCard reservedAccessorySlots: aConfiguration reservedAccessorySlots ]
+]
+
+{ #category : 'private - composition' }
+CFMaDetailGroupElement >> currentCard [
+	currentCard ifNotNil: [ ^ currentCard ].
+	currentCard := CFMaDetailGroupCardElement new
+		margin: (BlInsets left: 6 right: 6);
+		reservedAccessorySlots: configuration reservedAccessorySlots;
+		yourself.
+	composition addChild: currentCard.
+	^ currentCard
 ]
 
 { #category : 'private' }
@@ -53,21 +80,21 @@ CFMaDetailGroupElement >> ensureGroups [
 						cellSpacing: 0;
 						margin: BlInsets empty;
 						yourself ] ].
-	self addChild: groups.
+	composition addChild: groups.
 	^ groups
 ]
 
 { #category : 'private - layout' }
 CFMaDetailGroupElement >> updateGroupSpacing [
 	groups ifNil: [ ^ self ].
+	(configuration presentation isKindOf: CFMaDetailTabsConfiguration) ifTrue: [ ^ self ].
+	(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration) ifTrue: [ ^ self ].
 	groups children
 		withIndexDo: [ :aGroup :anIndex |
 			| aMargin |
 			aMargin := aGroup margin.
 			aGroup margin: (BlInsets
-				top: ((anIndex = 1 and: [ card rowCount = 0 ])
-					ifTrue: [ 0 ]
-					ifFalse: [ self groupSpacing ])
+				top: (anIndex = 1 ifTrue: [ 0 ] ifFalse: [ self groupSpacing ])
 				right: aMargin right
 				bottom: aMargin bottom
 				left: aMargin left) ]
@@ -96,21 +123,23 @@ CFMaDetailGroupElement >> group: aGroup [
 { #category : 'initialization' }
 CFMaDetailGroupElement >> initialize [
 	super initialize.
-	card := CFMaDetailGroupCardElement new
-		visibility: BlVisibility gone;
-		margin: (BlInsets left: 6 right: 6);
+	currentCard := nil.
+	groups := nil.
+	composition := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		cellSpacing: self groupSpacing;
 		yourself.
 	self
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
 		cellSpacing: 0;
-		addChild: card
+		addChild: composition
 ]
 
 { #category : 'accessing' }
 CFMaDetailGroupElement >> rows [
-	card visibility: BlVisibility visible.
-	groups ifNotNil: [ self updateGroupSpacing ].
-	^ card
+	^ self currentCard
 ]

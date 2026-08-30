@@ -213,8 +213,7 @@ CFMaDetailGroupCardElement >> updateFocusOverlayGeometry [
 
 { #category : 'private - layout' }
 CFMaDetailGroupCardElement >> notifyRowsChanged [
-	(self parent isKindOf: CFMaDetailGroupElement) ifTrue: [
-		self parent updateGroupSpacing ]
+	self requestLayout
 ]
 
 { #category : 'accessing' }

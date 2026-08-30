@@ -6,8 +6,8 @@ Class {
 	#superclass : 'GtMagritteElementBuilder',
 	#instVars : [
 		'hostElement',
-		'containersByGroup',
-		'ungroupedContainer',
+		'presentationGroupsByGroup',
+		'ungroupedPresentationGroup',
 		'identityAffordanceEmitted',
 		'fieldConfigurationOverrides',
 		'fieldConfigurations',
@@ -51,14 +51,8 @@ CFMaPresentation >> addDirectoryDropdown: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> addElement: anElement for: aDescription [
-	self
-		addElement: anElement
-		to: (self containerForDescription: aDescription)
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addElement: anElement to: aContainer [
-	aContainer addChild: anElement
+	(self presentationGroupForDescription: aDescription)
+		addContent: anElement
 ]
 
 { #category : 'elements' }
@@ -154,20 +148,14 @@ CFMaPresentation >> addFileDropdown: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	self
-		addLabel: aLabel
-		field: aFieldElement
-		to: (self containerForDescription: aDescription)
-]
-
-{ #category : 'private - composition' }
-CFMaPresentation >> addLabel: aLabel field: aFieldElement to: aContainer [
+	| aPresentationGroup |
 	aLabel margin: (BlInsets top: 3 right: 0 bottom: 2 left: 0).
 	aFieldElement constraintsDo: [ :c | c horizontal matchParent ].
 
-	aContainer
-		addChild: aLabel;
-		addChild: aFieldElement
+	aPresentationGroup := self presentationGroupForDescription: aDescription.
+	aPresentationGroup
+		addContent: aLabel;
+		addContent: aFieldElement
 ]
 
 { #category : 'private - building' }
@@ -224,9 +212,10 @@ CFMaPresentation >> addStringFieldUsing: aDescription [
 CFMaPresentation >> build [
 	identityAffordanceEmitted := false.
 	fieldConfigurations removeAll.
-	containersByGroup removeAll.
-	ungroupedContainer := nil.
+	presentationGroupsByGroup removeAll.
+	ungroupedPresentationGroup := nil.
 	self fieldContainerDo: [ :anElement | hostElement := anElement ].
+	self prepareHostElement.
 	^ super build
 ]
 
@@ -240,21 +229,19 @@ CFMaPresentation >> configureTabStopFor: aFieldElement using: aDescription [
 ]
 
 { #category : 'private - groups' }
-CFMaPresentation >> containerForDescription: aDescription [
-	^ self containerForGroup: aDescription group
+CFMaPresentation >> presentationGroupForDescription: aDescription [
+	^ self presentationGroupForGroup: aDescription group
 ]
 
 { #category : 'private - groups' }
-CFMaPresentation >> containerForGroup: aGroup [
+CFMaPresentation >> presentationGroupForGroup: aGroup [
 	aGroup ifNil: [
-		^ ungroupedContainer ifNil: [
-			ungroupedContainer := self newFieldContainer.
-			hostElement addChild: ungroupedContainer.
-			ungroupedContainer ] ].
+		^ ungroupedPresentationGroup ifNil: [
+			ungroupedPresentationGroup := self newPresentationGroupNamed: nil ] ].
 
-	^ containersByGroup
+	^ presentationGroupsByGroup
 		at: aGroup
-		ifAbsentPut: [ self newGroupNamed: aGroup ]
+		ifAbsentPut: [ self newPresentationGroupNamed: aGroup ]
 ]
 
 { #category : 'defaults' }
@@ -305,7 +292,7 @@ CFMaPresentation >> hostElement [
 { #category : 'initialization' }
 CFMaPresentation >> initialize [
 	super initialize.
-	containersByGroup := Dictionary new.
+	presentationGroupsByGroup := Dictionary new.
 	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
 	fieldConfigurations := Dictionary new.
@@ -419,41 +406,38 @@ CFMaPresentation >> newFieldConfiguration [
 	^ CFMaFieldConfiguration new
 ]
 
-{ #category : 'private - composition' }
-CFMaPresentation >> newFieldContainer [
-	^ BrVerticalPane new
-		background: Color transparent;
-		border: BlBorder empty;
-		margin: BlInsets empty;
-		cellSpacing: 4;
-		hMatchParent;
-		vFitContent;
-		yourself
+{ #category : 'private - groups' }
+CFMaPresentation >> newPresentationGroupNamed: aGroup [
+	| aPresentationGroup |
+	aPresentationGroup := CFMaPresentationGroupElement new
+		group: aGroup;
+		yourself.
+	hostElement addChild: aPresentationGroup.
+	^ aPresentationGroup
 ]
 
-{ #category : 'private - groups' }
-CFMaPresentation >> newGroupNamed: aGroup [
-	| aSection aHeading aContainer |
-	aHeading := BrLabel new
-		text: aGroup asString;
-		aptitude: (BrGlamorousLabelAptitude new
-			foreground: (Color black alpha: 0.68);
-			fontSize: 14;
-			bold);
-		fitContent;
-		margin: (BlInsets top: 10 right: 0 bottom: 4 left: 0);
-		yourself.
+{ #category : 'private - building' }
+CFMaPresentation >> prepareHostElement [
+]
 
-	aContainer := self newFieldContainer.
-	aSection := BrVerticalPane new
-		hMatchParent;
-		vFitContent;
-		addChild: aHeading;
-		addChild: aContainer;
-		yourself.
+{ #category : 'private - composition' }
+CFMaPresentation >> newPresentationHost [
+	^ CFMaPresentationHostElement new
+]
 
-	hostElement addChild: aSection.
-	^ aContainer
+{ #category : 'private - composition' }
+CFMaPresentation >> buildPresentationForMemento: aMemento in: aHostElement configure: aConfigurationBlock [
+	| aPresentation |
+	aPresentation := aMemento magritteDescription blocPresentationStencil
+		memento: aMemento;
+		build.
+	aPresentation
+		memento: aMemento;
+		theme: self theme;
+		form: aHostElement.
+	aConfigurationBlock cull: aPresentation.
+	aPresentation build.
+	^ aPresentation
 ]
 
 { #category : 'visiting' }

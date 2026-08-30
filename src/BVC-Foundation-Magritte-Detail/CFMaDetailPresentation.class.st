@@ -34,7 +34,6 @@ CFMaDetailPresentation >> build [
 	relationFocusRows removeAll.
 	relationFocusContainers removeAll.
 	relationActiveDescriptions removeAll.
-	self form background: self formBackgroundPaint.
 	^ super build
 ]
 
@@ -61,6 +60,11 @@ CFMaDetailPresentation >> formBackgroundPaint [
 	^ self theme surfaces baseBackground
 ]
 
+{ #category : 'private - building' }
+CFMaDetailPresentation >> prepareHostElement [
+	self hostElement background: self formBackgroundPaint
+]
+
 { #category : 'configuration' }
 CFMaDetailPresentation >> group: aGroup configure: aBlock [
 	| aConfiguration |
@@ -77,7 +81,7 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 ]
 
 { #category : 'private - groups' }
-CFMaDetailPresentation >> containerForDescription: aDescription [
+CFMaDetailPresentation >> presentationGroupForDescription: aDescription [
 	| aGroup aConfiguration |
 	aConfiguration := self groupConfigurationFor: aDescription group.
 	aGroup := self
@@ -89,7 +93,13 @@ CFMaDetailPresentation >> containerForDescription: aDescription [
 			category: aCategory
 			in: aGroup
 			configuredBy: aConfiguration ].
-	^ aGroup rows
+	^ aGroup
+]
+
+{ #category : 'private - groups' }
+CFMaDetailPresentation >> containerForDescription: aDescription [
+	"List relations still operate on a Detail card because their items are rows."
+	^ (self presentationGroupForDescription: aDescription) rows
 ]
 
 { #category : 'private - groups' }
@@ -190,7 +200,7 @@ CFMaDetailPresentation >> addActionRowUsing: anActionDescription [
 		content: aButton
 		accessories: #()
 		trailing: nil.
-	(self containerForDescription: anActionDescription) addChild: aRow
+	(self presentationGroupForDescription: anActionDescription) addContent: aRow
 ]
 
 { #category : 'private - actions' }
@@ -298,7 +308,7 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 		content: aFieldElement
 		accessories: (self newAccessoriesFor: aDescription)
 		trailing: nil.
-	(self containerForDescription: aDescription) addChild: aRow
+	(self presentationGroupForDescription: aDescription) addContent: aRow
 ]
 
 { #category : 'private - accessories' }
@@ -817,130 +827,71 @@ CFMaDetailPresentation >> addNumberSliderUsing: aDescription [
 
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> buildEmbeddedRowsIn: aContainer [
-	| theDescriptions |
-	identityAffordanceEmitted := false.
-	fieldConfigurations removeAll.
-	containersByGroup removeAll.
-	ungroupedContainer := nil.
-	groups removeAll.
-	categoryGroups removeAll.
-	hostElement := aContainer.
-
-	theDescriptions := OrderedCollection new
-		addAll: self objectDescription children;
-		yourself.
-	theDescriptions sort: [ :a :b | a priority < b priority ].
-	theDescriptions do: [ :each | self visit: each ].
-	^ aContainer rows copy
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription [
-	^ self
-		newEmbeddedRowsFor: anObject
-		description: aDescription
-		remove: [ :anItemElement | ]
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription remove: aRemoveBlock [
-	| aChildMemento aChildPresentation aTemporaryCard theRows anIdentityRow aRepresentation |
-	aChildMemento := self memento
-		childMementoFor: anObject
-		inRelation: aDescription.
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	aChildPresentation := aChildMemento magritteDescription blocPresentationStencil
-		memento: aChildMemento;
-		build.
-	aChildPresentation
-		theme: self theme;
-		memento: aChildMemento.
-	aRepresentation presentationConfiguration value: aChildPresentation.
-	aTemporaryCard := CFMaDetailGroupCardElement new.
-	theRows := aChildPresentation buildEmbeddedRowsIn: aTemporaryCard.
-	theRows copy do: [ :aRow | aTemporaryCard removeRow: aRow ].
-	theRows ifEmpty: [ ^ theRows ].
-
-	aRepresentation relationRowVisible ifTrue: [
-		anIdentityRow := theRows first.
-		self
-			installRelationSelectionOn: anIdentityRow
-			for: anObject
-			description: aDescription
-			remove: aRemoveBlock ].
-	^ theRows
-]
-
-{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
-	| aContainer aHeaderContent aHeaderRow anAddElement childRows aRepresentation anObserverElement anInsertionIndex aPreviousRow |
-	aContainer := self containerForDescription: aDescription.
+	| aPresentationGroup aHeaderContent aHeaderRow aHeaderContainer anAddElement aRepresentation aHost |
+	aPresentationGroup := self presentationGroupForDescription: aDescription.
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 	aHeaderContent := self newRelationValueSlotWith: nil.
 	aHeaderRow := nil.
-	aPreviousRow := aContainer rows ifEmpty: [ nil ] ifNotEmpty: [ aContainer rows last ].
+	aHeaderContainer := nil.
+
 	aRepresentation relationRowVisible ifTrue: [
 		self addFieldElement: aHeaderContent using: aDescription.
-		aHeaderRow := aContainer rows last ].
-	anInsertionIndex := aContainer rows size + 1.
-	anObserverElement := aHeaderRow
-		ifNil: [ self newHiddenRelationObserverElement ]
-		ifNotNil: [ aHeaderContent ].
-	childRows := OrderedCollection new.
+		aHeaderContainer := self containerForDescription: aDescription.
+		aHeaderRow := aHeaderContainer rows last.
+		self installToOneEmbeddedInteractionOn: aHeaderRow description: aDescription ].
 
-	anObserverElement withAsyncSinkDo: [ :anElementSink |
+	aHost := self newPresentationHost.
+	aHost visibility: BlVisibility gone.
+	aPresentationGroup addNestedPresentationElement: aHost.
+
+	aHost withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
-			whenUpdate: [ :theElement :aSink |
-				childRows := self
-					updateToOneEmbeddedRows: childRows
-					in: aContainer
-					after: aHeaderRow
-					insertionIndex: anInsertionIndex
-					previousRow: aPreviousRow
+			whenUpdate: [ :theHost :aSink |
+				self
+					updateToOneEmbeddedHost: theHost
 					with: aSink value currentValue
 					addElement: anAddElement
 					headerContent: (aHeaderRow ifNil: [ nil ] ifNotNil: [ aHeaderContent ])
-					description: aDescription.
-				self
-					relationFocusRows: (self relationContextRowsWithHeader: aHeaderRow rows: childRows)
-					in: aContainer
-					for: aDescription ].
+					description: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
-			observe: anElementSink ]
+			observe: anElementSink ].
+
+	self
+		relationFocusRows: (OrderedCollection new
+			addAll: (aHeaderRow ifNil: [ #() ] ifNotNil: [ { aHeaderRow } ]);
+			add: aHost;
+			yourself)
+		in: aPresentationGroup
+		for: aDescription
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after: aHeaderRow insertionIndex: anInsertionIndex previousRow: aPreviousRow with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
-	| newRows targetIndex |
-	targetIndex := self
-		relationInsertionIndexIn: aContainer
-		header: aHeaderRow
-		oldRows: oldRows
-		previousRow: aPreviousRow
-		fallback: anInsertionIndex.
-	oldRows copy do: [ :aRow | aContainer removeRow: aRow ].
+CFMaDetailPresentation >> updateToOneEmbeddedHost: aHost with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
+	| aChildMemento aRepresentation |
+	aHost removeChildren.
 	aHeaderContent ifNotNil: [ aHeaderContent removeChildren ].
 
 	anObject ifNil: [
 		self memento retainChildMementosFor: #() inRelation: aDescription.
+		aHost visibility: BlVisibility gone.
 		aHeaderContent ifNotNil: [
 			self addRelationValueElement: anAddElement to: aHeaderContent ].
-		^ OrderedCollection new ].
+		^ aHost ].
 
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
-	newRows := self
-		newEmbeddedRowsFor: anObject
-		description: aDescription
-		remove: [ :anItemElement |
-			CFMaBuilderUtility
-				removeToOneMemento: self memento
-				using: aDescription
-				element: anItemElement ].
-	self placeRelationRows: newRows in: aContainer startingAt: targetIndex.
-	^ newRows
+	aChildMemento := self memento
+		childMementoFor: anObject
+		inRelation: aDescription.
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	aHost visibility: BlVisibility visible.
+	self
+		buildPresentationForMemento: aChildMemento
+		in: aHost
+		configure: aRepresentation presentationConfiguration.
+	^ aHost
 ]
 
 { #category : 'private - relations' }
@@ -1235,6 +1186,21 @@ CFMaDetailPresentation >> installRelationInteractionOn: anItemElement for: anObj
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> installToOneEmbeddedInteractionOn: aRow description: aDescription [
+	aRow
+		focusability: BlFocusability after;
+		addAptitude: CFMaListItemAptitude new;
+		when: BlFocusInEvent
+		do: [ :anEvent |
+			self selectRelationElement: aRow for: aDescription ].
+	self
+		installToOneListNavigationOn: aRow
+		focusElement: aRow
+		description: aDescription.
+	self installFormNavigationOn: aRow
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocusElement description: aDescription [
 	self
 		installRelationNavigationOn: aRow
@@ -1354,71 +1320,47 @@ CFMaDetailPresentation >> relationContextRowsWithHeader: aHeaderRow rows: theRow
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> newHiddenRelationObserverElement [
-	| anElement |
-	anElement := BlElement new
-		size: 0 @ 0;
-		visibility: BlVisibility gone;
-		preventMouseEvents;
-		yourself.
-	anElement constraintsDo: [ :c | c ignoreByLayout ].
-	self hostElement addChild: anElement.
-	^ anElement
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> relationInsertionIndexIn: aContainer header: aHeaderRow oldRows: oldRows previousRow: aPreviousRow fallback: anInsertionIndex [
-	| anIndex |
-	aHeaderRow ifNotNil: [
-		^ (aContainer rows identityIndexOf: aHeaderRow ifAbsent: [ anInsertionIndex - 1 ]) + 1 ].
-	oldRows ifNotEmpty: [
-		anIndex := aContainer rows identityIndexOf: oldRows first ifAbsent: [ nil ].
-		anIndex ifNotNil: [ ^ anIndex ] ].
-	aPreviousRow ifNotNil: [
-		anIndex := aContainer rows identityIndexOf: aPreviousRow ifAbsent: [ nil ].
-		anIndex ifNotNil: [ ^ anIndex + 1 ] ].
-	^ anInsertionIndex min: aContainer rows size + 1
-]
-
-{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
-	| aContainer aHeaderContent aHeaderRow anAddElement itemRows aRepresentation anObserverElement anInsertionIndex aPreviousRow |
-	aContainer := self containerForDescription: aDescription.
+	| aPresentationGroup aHeaderContent aHeaderRow anAddElement aRepresentation aRelationContainer itemHosts |
+	aPresentationGroup := self presentationGroupForDescription: aDescription.
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	anAddElement := self newToManyAddElementUsing: aDescription.
 	aHeaderContent := self newRelationValueSlotWith: anAddElement.
 	aHeaderRow := nil.
-	aPreviousRow := aContainer rows ifEmpty: [ nil ] ifNotEmpty: [ aContainer rows last ].
+
 	aRepresentation relationRowVisible ifTrue: [
 		self addFieldElement: aHeaderContent using: aDescription.
-		aHeaderRow := aContainer rows last ].
-	anInsertionIndex := aContainer rows size + 1.
-	anObserverElement := aHeaderRow
-		ifNil: [ self newHiddenRelationObserverElement ]
-		ifNotNil: [ aHeaderContent ].
-	itemRows := OrderedCollection new.
+		aHeaderRow := (self containerForDescription: aDescription) rows last ].
 
-	anObserverElement withAsyncSinkDo: [ :anElementSink |
+	aRelationContainer := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		cellSpacing: 10;
+		visibility: BlVisibility gone;
+		yourself.
+	aPresentationGroup addNestedPresentationElement: aRelationContainer.
+	itemHosts := OrderedCollection new.
+
+	aRelationContainer withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
-			whenUpdate: [ :theElement :aSink |
-				| contextRows |
-				itemRows := self
-					updateToManyEmbeddedRows: itemRows
-					in: aContainer
-					after: aHeaderRow
-					insertionIndex: anInsertionIndex
-					previousRow: aPreviousRow
+			whenUpdate: [ :theContainer :aSink |
+				itemHosts := self
+					updateToManyEmbeddedHosts: itemHosts
+					in: theContainer
 					with: aSink value currentValue
-					description: aDescription.
-				contextRows := OrderedCollection new.
-				itemRows do: [ :anAssociation | contextRows addAll: anAssociation value ].
-				self
-					relationFocusRows: (self relationContextRowsWithHeader: aHeaderRow rows: contextRows)
-					in: aContainer
-					for: aDescription ].
+					description: aDescription ].
 		(self memento readObservableValueUsing: aDescription)
-			observe: anElementSink ]
+			observe: anElementSink ].
+
+	self
+		relationFocusRows: (OrderedCollection new
+			addAll: (aHeaderRow ifNil: [ #() ] ifNotNil: [ { aHeaderRow } ]);
+			add: aRelationContainer;
+			yourself)
+		in: aPresentationGroup
+		for: aDescription
 ]
 
 { #category : 'private - relations' }
@@ -1557,45 +1499,78 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer after: aHeaderRow insertionIndex: anInsertionIndex previousRow: aPreviousRow with: aCollection description: aDescription [
-	| someObjects newItemRows targetIndex oldRows |
-	someObjects := aCollection ifNil: [ #() ].
-	oldRows := OrderedCollection new.
-	oldItemRows do: [ :anAssociation | oldRows addAll: anAssociation value ].
-	targetIndex := self
-		relationInsertionIndexIn: aContainer
-		header: aHeaderRow
-		oldRows: oldRows
-		previousRow: aPreviousRow
-		fallback: anInsertionIndex.
+CFMaDetailPresentation >> newEmbeddedRelationItemFor: anObject host: aPresentationHost description: aDescription [
+	| anItem |
+	anItem := BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		margin: BlInsets empty;
+		addChild: aPresentationHost;
+		yourself.
+	self
+		installRelationSelectionOn: anItem
+		for: anObject
+		description: aDescription
+		remove: [ :anItemElement |
+			CFMaBuilderUtility
+				removeToManyObject: anObject
+				memento: self memento
+				using: aDescription
+				element: anItemElement ].
+	^ anItem
+]
 
-	oldItemRows copy do: [ :anAssociation |
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContainer with: aCollection description: aDescription [
+	| someObjects newItemElements aRepresentation |
+	someObjects := aCollection ifNil: [ #() ].
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+
+	oldItemElements copy do: [ :anAssociation |
 		(someObjects anySatisfy: [ :anObject | anObject == anAssociation key ]) ifFalse: [
-			anAssociation value do: [ :aRow | aContainer removeRow: aRow ] ] ].
+			anAssociation value hasParent ifTrue: [
+				aContainer removeChild: anAssociation value ] ] ].
 
 	self memento retainChildMementosFor: someObjects inRelation: aDescription.
-	newItemRows := OrderedCollection new.
+	newItemElements := OrderedCollection new.
 	someObjects do: [ :anObject |
-		| anAssociation theRows |
-		anAssociation := self relationRowAssociationFor: anObject in: oldItemRows.
-		theRows := anAssociation
-			ifNil: [ self
-				newEmbeddedRowsFor: anObject
-				description: aDescription
-				remove: [ :anItemElement |
-					CFMaBuilderUtility
-						removeToManyObject: anObject
-						memento: self memento
-						using: aDescription
-						element: anItemElement ] ]
+		| anAssociation anItemElement aChildMemento |
+		anAssociation := oldItemElements
+			detect: [ :each | each key == anObject ]
+			ifNone: [ nil ].
+		anItemElement := anAssociation
+			ifNil: [
+				| aPresentationHost |
+				aPresentationHost := self newPresentationHost.
+				aChildMemento := self memento
+					childMementoFor: anObject
+					inRelation: aDescription.
+				self
+					buildPresentationForMemento: aChildMemento
+					in: aPresentationHost
+					configure: aRepresentation presentationConfiguration.
+				aRepresentation relationRowVisible
+					ifTrue: [ self
+						newEmbeddedRelationItemFor: anObject
+						host: aPresentationHost
+						description: aDescription ]
+					ifFalse: [ aPresentationHost ] ]
 			ifNotNil: [ anAssociation value ].
+		newItemElements add: anObject -> anItemElement ].
 
-		targetIndex := self
-			placeRelationRows: theRows
-			in: aContainer
-			startingAt: targetIndex.
-		newItemRows add: anObject -> theRows ].
-	^ newItemRows
+	newItemElements withIndexDo: [ :anAssociation :anIndex |
+		| anItemElement currentIndex |
+		anItemElement := anAssociation value.
+		currentIndex := aContainer children identityIndexOf: anItemElement ifAbsent: [ 0 ].
+		currentIndex = 0
+			ifTrue: [ aContainer addChild: anItemElement at: anIndex ]
+			ifFalse: [ currentIndex = anIndex ifFalse: [
+				aContainer removeChild: anItemElement.
+				aContainer addChild: anItemElement at: anIndex ] ] ].
+	aContainer visibility: (newItemElements
+		ifEmpty: [ BlVisibility gone ]
+		ifNotEmpty: [ BlVisibility visible ]).
+	^ newItemElements
 ]
 
 { #category : 'visiting-description' }

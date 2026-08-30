@@ -31,8 +31,7 @@ CFMaEmbeddedFormsConfiguration >> relationRowVisible [
 
 { #category : 'configuration - relation row' }
 CFMaEmbeddedFormsConfiguration >> showRelationRow [
-	relationRowVisible := true.
-	presentationConfiguration := [ :aPresentation | aPresentation ]
+	relationRowVisible := true
 ]
 
 { #category : 'configuration - presentation' }
