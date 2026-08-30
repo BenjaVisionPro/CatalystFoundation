@@ -305,7 +305,7 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 CFMaDetailPresentation >> newAccessoriesFor: aDescription [
 	| accessories information |
 	accessories := OrderedCollection new.
-	aDescription isWithChangeIndicator ifTrue: [
+	(aDescription isWithChangeIndicator and: [ aDescription autoAccept not ]) ifTrue: [
 		accessories add: (self newRevertAccessoryFor: aDescription) ].
 	accessories add: (self newValidationAccessoryFor: aDescription).
 	information := aDescription informationFor: self memento model.
