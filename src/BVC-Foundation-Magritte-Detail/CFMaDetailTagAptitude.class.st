@@ -16,6 +16,9 @@ CFMaDetailTagAptitude >> initialize [
 				constraintsDo: [ :c |
 					c minWidth: 20.
 					c vertical exact: 20 ] ];
+		when: [ :aState | aState hovered and: BrEditorModeState readOnly ]
+			style: [ :aStyle |
+				aStyle background: self theme controls tagHoveredBackgroundTint ];
 		when: [ :aState | aState focused and: BrEditorModeState readOnly ]
 			style: [ :aStyle |
 				aStyle background: self theme item selectedColor ])
