@@ -125,17 +125,41 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
-	| aText |
+	| aText aLabel aLabelAptitude |
 	aText := aDescription comment asRopedText.
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
+	aLabelAptitude := BrGlamorousLabelAptitude new
+		weight: 400;
+		yourself.
+	aLabelAptitude editorMeasurement.
+	aLabelAptitude add: (BrLazyStyleCommonAptitude new
+		@ aLabelAptitude label;
+		default: [ :aStyle |
+			aStyle
+				foreground: aLabelAptitude theme tooltip foreground;
+				fontSize: aLabelAptitude theme tooltip fontSize ]).
+
+	aLabel := BrLabel new
+		aptitude: aLabelAptitude;
+		text: aText;
+		hFitContentLimited;
+		vFitContent;
+		constraintsDo: [ :c | c maxWidth: 250 ];
+		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
+		preventMouseEvents;
+		addAptitude: CFMaTooltipSurfaceAptitude new;
+		yourself.
+
+	aLabel addAptitude: (BrLazyStyleCommonAptitude new
+		default: [ :aStyle |
+			aStyle
+				geometry: (BlRoundedRectangleGeometry cornerRadius: aLabel theme tooltip cornerRadius) ]).
+
 	^ CFMaTooltipShadowElement new
-		addChild: (CFMaTooltipContentElement new
-			text: aText;
-			yourself);
+		addChild: aLabel;
 		yourself
 ]
-
 { #category : 'visiting-description' }
 CFMaPresentation >> addFileDropdown: aDescription [
 	| aButton |
