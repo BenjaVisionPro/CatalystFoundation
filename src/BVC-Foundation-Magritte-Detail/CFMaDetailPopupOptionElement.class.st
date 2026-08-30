@@ -63,7 +63,7 @@ CFMaDetailPopupOptionElement >> initialize [
 	self
 		when: BlMouseEnterEvent do: [ :anEvent |
 			hoverBlock ifNotNil: [ hoverBlock cull: self ] ];
-		when: BlClickEvent do: [ :anEvent | self activate ];
+		addEventFilterOn: BlClickEvent do: [ :anEvent | self activate ];
 		addChild: checkLabel;
 		addChild: valueLabel;
 		addAptitude: (BrLazyStyleCommonAptitude new
