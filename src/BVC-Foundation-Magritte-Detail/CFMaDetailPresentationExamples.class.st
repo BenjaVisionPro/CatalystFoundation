@@ -493,6 +493,29 @@ CFMaDetailPresentationExamples >> embeddedFormsRelationRowCanBeHiddenExplicitly 
 ]
 
 { #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeFirstChildRowSelectable [
+	<gtExample>
+	| aModel anObject aDescription aContainer aMemento aPresentation theRows |
+	aModel := CFMaFormShowcase new.
+	anObject := aModel embeddedObject.
+	aDescription := aModel embeddedObjectDescription
+		fieldConfigure: [ :field | field beEmbeddedForms hideRelationRow ];
+		yourself.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		yourself.
+	theRows := aPresentation newEmbeddedRowsFor: anObject description: aDescription.
+
+	self assert: theRows notEmpty.
+	self deny: theRows first focusability = BlFocusability after.
+	^ theRows first
+]
+
+{ #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetailRepresentation [
 	<gtExample>
 	| anObject anElement aDescription aRepresentation |

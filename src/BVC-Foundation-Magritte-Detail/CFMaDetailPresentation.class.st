@@ -849,7 +849,7 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription remove: aRemoveBlock [
-	| aChildMemento aChildPresentation aTemporaryCard theRows anIdentityRow |
+	| aChildMemento aChildPresentation aTemporaryCard theRows anIdentityRow aRepresentation |
 	aChildMemento := self memento
 		childMementoFor: anObject
 		inRelation: aDescription.
@@ -862,12 +862,14 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 	theRows copy do: [ :aRow | aTemporaryCard removeRow: aRow ].
 	theRows ifEmpty: [ ^ theRows ].
 
-	anIdentityRow := theRows first.
-	self
-		installRelationSelectionOn: anIdentityRow
-		for: anObject
-		description: aDescription
-		remove: aRemoveBlock.
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	aRepresentation relationRowVisible ifTrue: [
+		anIdentityRow := theRows first.
+		self
+			installRelationSelectionOn: anIdentityRow
+			for: anObject
+			description: aDescription
+			remove: aRemoveBlock ].
 	^ theRows
 ]
 
