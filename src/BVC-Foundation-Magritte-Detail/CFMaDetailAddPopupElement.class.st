@@ -19,7 +19,6 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
-				beInSeparateCompositionLayer;
 				aptitude: CFMaDetailPopupContainerAptitude new;
 				effect: BlNullEffect new ].
 	anAddElement addAptitude: aDropdownAptitude.

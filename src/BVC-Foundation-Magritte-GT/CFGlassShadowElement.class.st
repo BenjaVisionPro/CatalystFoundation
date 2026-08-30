@@ -10,6 +10,7 @@ CFGlassShadowElement >> initialize [
 	super initialize.
 
 	self
+		beInSeparateCompositionLayer;
 		layout: BlFrameLayout new;
 		constraintsDo: [ :c |
 			c horizontal fitContent.
