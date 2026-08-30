@@ -129,8 +129,7 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	aText := aDescription comment asRopedText.
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
-	^ CFGlassShadowElement new
-		geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
+	^ CFMaTooltipShadowElement new
 		addChild: (CFMaTooltipContentElement new
 			text: aText;
 			yourself);

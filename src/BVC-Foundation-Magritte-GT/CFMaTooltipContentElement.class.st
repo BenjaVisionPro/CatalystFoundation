@@ -22,8 +22,12 @@ CFMaTooltipContentElement >> initialize [
 		addAptitude: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
 				aStyle do: [
-					self
-						geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius);
-						fontSize: self theme tooltip fontSize;
-						foreground: self theme tooltip foreground ] ])
+					self geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius) ] ])
+]
+
+{ #category : #'editor - accessing' }
+CFMaTooltipContentElement >> text: aBlText [
+	super text: (aBlText asRopedText
+		foreground: self theme tooltip foreground;
+		fontSize: self theme tooltip fontSize)
 ]

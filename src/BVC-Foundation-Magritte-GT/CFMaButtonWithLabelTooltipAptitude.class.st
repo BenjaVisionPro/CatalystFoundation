@@ -24,8 +24,7 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			background: Color transparent;
 			addAptitude: CFMaTooltipSurfaceAptitude new ]
 		content: [
-			CFGlassShadowElement new
-				geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
+			CFMaTooltipShadowElement new
 				addChild: (CFMaTooltipContentElement new
 					text: aLabelString asRopedText;
 					yourself);
