@@ -19,46 +19,38 @@ CFMaDetailDropdownAptitude class >> blinkCycleDuration [
 
 { #category : 'defaults' }
 CFMaDetailDropdownAptitude class >> fadeDuration [
-	^ 200 milliSeconds
+	^ 60 milliSeconds
 ]
 
 { #category : 'private - motion' }
-CFMaDetailDropdownAptitude >> blinkMotionFor: anOption in: aMenuContainer [
-	| timeline track |
+CFMaDetailDropdownAptitude >> dismissalMotionFor: anOption in: aMenuContainer [
+	| timeline firstBlink secondBlink fade |
 	timeline := CFMotionTimeline new.
-	track := CFMotionTimelineTrack
+	firstBlink := CFMotionTimelineTrack
 		on: (CFMaDetailPopupSelectionMotionBehaviour
 			on: anOption selectionList
 			index: anOption selectionIndex)
 		in: timeline.
-	track
+	firstBlink
 		duration: self class blinkCycleDuration;
 		easing: BlEasing linear.
-	timeline repeat: 2.
-	^ CFMotion
-		timeline: timeline
-		coordinator: aMenuContainer space motionCoordinator
-]
-
-{ #category : 'private - motion' }
-CFMaDetailDropdownAptitude >> cancelDismissalMotion [
-	dismissalMotion ifNotNil: [
-		dismissalMotion state isTerminal ifFalse: [ dismissalMotion cancelAndRestore ] ].
-	dismissalMotion := nil
-]
-
-{ #category : 'private - motion' }
-CFMaDetailDropdownAptitude >> fadeMotionFor: aMenuContainer [
-	| timeline track |
-	timeline := CFMotionTimeline new.
-	track := CFMotionTimelineTrack
+	secondBlink := CFMotionTimelineTrack
+		on: (CFMaDetailPopupSelectionMotionBehaviour
+			on: anOption selectionList
+			index: anOption selectionIndex)
+		in: timeline.
+	secondBlink
+		startsAt: firstBlink end;
+		duration: self class blinkCycleDuration;
+		easing: BlEasing linear.
+	fade := CFMotionTimelineTrack
 		on: (CFMotionPropertyTrack
 			on: aMenuContainer
 			property: CFMotionOpacityProperty uniqueInstance
 			target: 0.0)
 		in: timeline.
-	track
-		starts: self class blinkCycleDuration after: timeline start;
+	fade
+		startsAt: secondBlink end;
 		duration: self class fadeDuration;
 		easing: BlEasing linear.
 	^ CFMotion
@@ -69,35 +61,14 @@ CFMaDetailDropdownAptitude >> fadeMotionFor: aMenuContainer [
 { #category : 'private - motion' }
 CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 	self menuContainerDo: [ :aMenuContainer |
-		| blink fade aCoordinator |
-		aCoordinator := aMenuContainer space motionCoordinator.
-		Transcript
-			show: 'POPUP dismissSelection entered'; cr;
-			show: '  menuAttached='; show: aMenuContainer isAttachedToSceneGraph printString; cr;
-			show: '  listAttached='; show: anOption selectionList isAttachedToSceneGraph printString; cr;
-			show: '  sameSpace='; show: (anOption selectionList space == aMenuContainer space) printString; cr;
-			show: '  activeBefore='; show: aCoordinator activeMotions size printString; cr.
 		aMenuContainer isAttachedToSceneGraph ifFalse: [
-			Transcript show: 'POPUP menu detached: sending BrDropdownHideWish directly'; cr.
 			anOption fireEvent: BrDropdownHideWish new.
 			^ self ].
 		self cancelDismissalMotion.
-		blink := self blinkMotionFor: anOption in: aMenuContainer.
-		fade := self fadeMotionFor: aMenuContainer.
-		dismissalMotion := CFMotion composedOf: { blink. fade }.
-		Transcript
-			show: 'POPUP motions built'; cr;
-			show: '  dismissalStateBeforeStart='; show: dismissalMotion state printString; cr;
-			show: '  blinkStateBeforeStart='; show: blink state printString; cr;
-			show: '  fadeStateBeforeStart='; show: fade state printString; cr.
+		dismissalMotion := self dismissalMotionFor: anOption in: aMenuContainer.
 		dismissalMotion onTerminalDo: [ :aMotion |
-			Transcript
-				show: 'POPUP dismissal terminal'; cr;
-				show: '  state='; show: aMotion state printString; cr;
-				show: '  completed='; show: aMotion isCompleted printString; cr.
 			aMotion isCompleted
 				ifTrue: [
-					Transcript show: 'POPUP sending BrDropdownHideWish'; cr.
 					anOption fireEvent: BrDropdownHideWish new.
 					aMenuContainer opacity: 1.0 ]
 				ifFalse: [
@@ -106,13 +77,7 @@ CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 						anOption selectionList isAttachedToSceneGraph.
 						anOption selectionList space == aMenuContainer space }) ].
 			dismissalMotion == aMotion ifTrue: [ dismissalMotion := nil ] ].
-		dismissalMotion start.
-		Transcript
-			show: 'POPUP after dismissalMotion start'; cr;
-			show: '  dismissalState='; show: dismissalMotion state printString; cr;
-			show: '  blinkState='; show: blink state printString; cr;
-			show: '  fadeState='; show: fade state printString; cr;
-			show: '  activeAfter='; show: aCoordinator activeMotions size printString; cr ]
+		dismissalMotion start ]
 ]
 
 { #category : 'lifecycle' }
