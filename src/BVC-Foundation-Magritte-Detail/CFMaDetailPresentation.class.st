@@ -1347,7 +1347,7 @@ CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theContainer :aSink |
 				itemHosts := self
-					updateToManyEmbeddedHosts: itemHosts
+					updateToManyEmbeddedItems: itemHosts
 					in: theContainer
 					with: aSink value currentValue
 					description: aDescription ].
