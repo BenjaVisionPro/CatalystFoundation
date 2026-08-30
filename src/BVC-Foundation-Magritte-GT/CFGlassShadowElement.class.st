@@ -16,5 +16,6 @@ CFGlassShadowElement >> initialize [
 			c vertical fitContent ];
 		background: Color transparent;
 		border: BlBorder empty;
-		addAptitude: BrShadowAptitude new
+		addAptitude: (BrShadowAptitude new
+			color: (Color black alpha: 0.3))
 ]
