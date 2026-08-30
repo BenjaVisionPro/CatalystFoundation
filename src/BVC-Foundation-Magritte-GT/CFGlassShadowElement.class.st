@@ -11,7 +11,9 @@ CFGlassShadowElement >> initialize [
 
 	self
 		layout: BlFrameLayout new;
-		fitContent;
+		constraintsDo: [ :c |
+			c horizontal fitContent.
+			c vertical fitContent ];
 		background: Color transparent;
 		border: BlBorder empty;
 		addAptitude: BrShadowAptitude new
