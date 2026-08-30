@@ -878,22 +878,30 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> updateToOneEmbeddedHost: aHost with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
 	| aChildMemento aRepresentation |
-	aHost removeChildren.
-	aHeaderContent ifNotNil: [ aHeaderContent removeChildren ].
 
 	anObject ifNil: [
+		aHost presentedObject ifNotNil: [
+			aHost removeChildren.
+			aHost presentedObject: nil ].
+		aHeaderContent ifNotNil: [
+			aHeaderContent removeChildren.
+			self addRelationValueElement: anAddElement to: aHeaderContent ].
 		self memento retainChildMementosFor: #() inRelation: aDescription.
 		aHost visibility: BlVisibility gone.
-		aHeaderContent ifNotNil: [
-			self addRelationValueElement: anAddElement to: aHeaderContent ].
 		^ aHost ].
 
+	(aHost presentsObject: anObject) ifTrue: [ ^ aHost ].
+
+	aHost removeChildren.
+	aHeaderContent ifNotNil: [ aHeaderContent removeChildren ].
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
 	aChildMemento := self memento
 		childMementoFor: anObject
 		inRelation: aDescription.
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	aHost visibility: BlVisibility visible.
+	aHost
+		presentedObject: anObject;
+		visibility: BlVisibility visible.
 	self
 		buildPresentationForMemento: aChildMemento
 		in: aHost

@@ -3,6 +3,9 @@
 Class {
 	#name : 'CFMaPresentationHostElement',
 	#superclass : 'BrVerticalPane',
+	#instVars : [
+		'presentedObject'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -18,5 +21,21 @@ CFMaPresentationHostElement >> initialize [
 		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty.
-	self magritte beFieldContainer
+	self magritte beFieldContainer.
+	presentedObject := nil
+]
+
+{ #category : 'accessing' }
+CFMaPresentationHostElement >> presentedObject [
+	^ presentedObject
+]
+
+{ #category : 'accessing' }
+CFMaPresentationHostElement >> presentedObject: anObject [
+	presentedObject := anObject
+]
+
+{ #category : 'testing' }
+CFMaPresentationHostElement >> presentsObject: anObject [
+	^ presentedObject == anObject
 ]

@@ -60,7 +60,6 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 			anItemElement
 				selectionIn: aList at: anItemIndex;
 				text: aClass displayString;
-				hoverBlock: [ aList selectOne: anItemIndex ];
 				canActivateBlock: [ (anAddItemViewModel shouldDisableNewItemClass: aClass) not ];
 				activateBlock: [ anAddItemViewModel addItemForClass: aClass from: anItemElement ] ];
 		hFitContent;
