@@ -23,6 +23,13 @@ CFMaDetailDropdownAptitude class >> fadeDuration [
 ]
 
 { #category : 'private - motion' }
+CFMaDetailDropdownAptitude >> cancelDismissalMotion [
+	dismissalMotion ifNotNil: [
+		dismissalMotion state isTerminal ifFalse: [ dismissalMotion cancelAndRestore ] ].
+	dismissalMotion := nil
+]
+
+{ #category : 'private - motion' }
 CFMaDetailDropdownAptitude >> dismissalMotionFor: anOption in: aMenuContainer [
 	| timeline firstBlink secondBlink fade |
 	timeline := CFMotionTimeline new.
