@@ -71,6 +71,7 @@ CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 	self menuContainerDo: [ :aMenuContainer |
 		| blink fade |
 		aMenuContainer isAttachedToSceneGraph ifFalse: [
+			anOption commitActivation.
 			anOption fireEvent: BrDropdownHideWish new.
 			^ self ].
 		self cancelDismissalMotion.
@@ -78,15 +79,10 @@ CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 		fade := self fadeMotionFor: aMenuContainer.
 		dismissalMotion := CFMotion composedOf: { blink. fade }.
 		dismissalMotion onTerminalDo: [ :aMotion |
-			aMotion isCompleted
-				ifTrue: [
-					anOption fireEvent: BrDropdownHideWish new.
-					aMenuContainer opacity: 1.0 ]
-				ifFalse: [
-					self error: ('Popup dismissal Motion cancelled. menuAttached={1}; listAttached={2}; sameSpace={3}' format: {
-						aMenuContainer isAttachedToSceneGraph.
-						anOption selectionList isAttachedToSceneGraph.
-						anOption selectionList space == aMenuContainer space }) ].
+			anOption commitActivation.
+			aMotion isCompleted ifTrue: [
+				anOption fireEvent: BrDropdownHideWish new.
+				aMenuContainer opacity: 1.0 ].
 			dismissalMotion == aMotion ifTrue: [ dismissalMotion := nil ] ].
 		dismissalMotion start ]
 ]
