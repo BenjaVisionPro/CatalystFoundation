@@ -13,11 +13,8 @@ CFGlassSurfaceAptitude >> initialize [
 		addChangeProperty: #(widget border)
 		with: [ BlBorder paint: Color veryLightGray width: 1 ];
 		addChangeProperty: #(widget effect)
-		with: [ BlBlurBelowEffect radius: 14 ];
+		with: [ BlBlurBelowEffect radius: 5 ];
 		add: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
-				aStyle background:
-					((self theme surfaces baseBackground
-						blocResolveColorForTheme: self theme)
-						alpha: 0.65) ])
+				aStyle background: (Color red alpha: 0.15) ])
 ]
