@@ -781,3 +781,15 @@ CFMaDetailPresentationExamples >> themeColourPickersUseSingleOptionDescriptions 
 		equals: CgtPalette textSelectionPurple.
 	^ aShowcase
 ]
+
+{ #category : 'examples - grouping' }
+CFMaDetailPresentationExamples >> groupConfigurationCanHideLabel [
+	<gtExample>
+	| aConfiguration |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+	self assert: aConfiguration labelVisible.
+	aConfiguration hideLabel.
+	self assert: aConfiguration labelVisible not.
+	^ aConfiguration
+]
+

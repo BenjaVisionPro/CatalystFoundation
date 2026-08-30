@@ -6,7 +6,8 @@ Class {
 	#instVars : [
 		'categories',
 		'presentation',
-		'reservedAccessorySlots'
+		'reservedAccessorySlots',
+		'labelVisible'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -16,7 +17,8 @@ Class {
 CFMaDetailGroupConfiguration >> initialize [
 	super initialize.
 	categories := Dictionary new.
-	reservedAccessorySlots := 0
+	reservedAccessorySlots := 0.
+	labelVisible := true
 ]
 
 { #category : 'configuration' }
@@ -32,6 +34,18 @@ CFMaDetailGroupConfiguration >> categoryConfigurationFor: aCategory [
 	^ categories
 		at: aCategory
 		ifAbsentPut: [ self class new ]
+]
+
+
+{ #category : 'configuration - presentation' }
+CFMaDetailGroupConfiguration >> hideLabel [
+	labelVisible := false.
+	^ self
+]
+
+{ #category : 'accessing' }
+CFMaDetailGroupConfiguration >> labelVisible [
+	^ labelVisible
 ]
 
 { #category : 'configuration - presentation' }

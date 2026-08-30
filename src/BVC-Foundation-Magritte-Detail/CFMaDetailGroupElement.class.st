@@ -81,6 +81,7 @@ CFMaDetailGroupElement >> groupSpacing [
 { #category : 'accessing' }
 CFMaDetailGroupElement >> group: aGroup [
 	aGroup ifNil: [ ^ self ].
+	configuration labelVisible ifFalse: [ ^ self ].
 	self addChildFirst: (BrLabel new
 		text: aGroup asString;
 		aptitude: (BrGlamorousLabelAptitude new
