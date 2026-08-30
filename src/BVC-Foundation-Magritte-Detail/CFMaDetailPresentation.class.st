@@ -873,15 +873,23 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
-	| aContainer aHeaderContent aHeaderRow anAddElement childRows |
+	| aContainer aHeaderContent aHeaderRow anAddElement childRows aRepresentation anObserverElement anInsertionIndex aPreviousRow |
 	aContainer := self containerForDescription: aDescription.
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	anAddElement := self newToOneAddElementUsing: aDescription.
 	aHeaderContent := self newRelationValueSlotWith: nil.
-	self addFieldElement: aHeaderContent using: aDescription.
-	aHeaderRow := aContainer rows last.
+	aHeaderRow := nil.
+	aPreviousRow := aContainer rows ifEmpty: [ nil ] ifNotEmpty: [ aContainer rows last ].
+	aRepresentation relationRowVisible ifTrue: [
+		self addFieldElement: aHeaderContent using: aDescription.
+		aHeaderRow := aContainer rows last ].
+	anInsertionIndex := aContainer rows size + 1.
+	anObserverElement := aHeaderRow
+		ifNil: [ self newHiddenRelationObserverElement ]
+		ifNotNil: [ aHeaderContent ].
 	childRows := OrderedCollection new.
 
-	aHeaderContent withAsyncSinkDo: [ :anElementSink |
+	anObserverElement withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theElement :aSink |
@@ -889,9 +897,11 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 					updateToOneEmbeddedRows: childRows
 					in: aContainer
 					after: aHeaderRow
+					insertionIndex: anInsertionIndex
+					previousRow: aPreviousRow
 					with: aSink value currentValue
 					addElement: anAddElement
-					headerContent: theElement
+					headerContent: (aHeaderRow ifNil: [ nil ] ifNotNil: [ aHeaderContent ])
 					description: aDescription.
 				self
 					relationFocusRows: (self relationContextRowsWithHeader: aHeaderRow rows: childRows)
@@ -902,14 +912,21 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after: aHeaderRow with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
-	| newRows headerIndex |
+CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after: aHeaderRow insertionIndex: anInsertionIndex previousRow: aPreviousRow with: anObject addElement: anAddElement headerContent: aHeaderContent description: aDescription [
+	| newRows targetIndex |
+	targetIndex := self
+		relationInsertionIndexIn: aContainer
+		header: aHeaderRow
+		oldRows: oldRows
+		previousRow: aPreviousRow
+		fallback: anInsertionIndex.
 	oldRows copy do: [ :aRow | aContainer removeRow: aRow ].
-	aHeaderContent removeChildren.
+	aHeaderContent ifNotNil: [ aHeaderContent removeChildren ].
 
 	anObject ifNil: [
 		self memento retainChildMementosFor: #() inRelation: aDescription.
-		self addRelationValueElement: anAddElement to: aHeaderContent.
+		aHeaderContent ifNotNil: [
+			self addRelationValueElement: anAddElement to: aHeaderContent ].
 		^ OrderedCollection new ].
 
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
@@ -921,9 +938,7 @@ CFMaDetailPresentation >> updateToOneEmbeddedRows: oldRows in: aContainer after:
 				removeToOneMemento: self memento
 				using: aDescription
 				element: anItemElement ].
-	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [ ^ OrderedCollection new ].
-	newRows withIndexDo: [ :aRow :anIndex |
-		aContainer addRow: aRow at: headerIndex + anIndex ].
+	self placeRelationRows: newRows in: aContainer startingAt: targetIndex.
 	^ newRows
 ]
 
@@ -1332,22 +1347,57 @@ CFMaDetailPresentation >> updateToOneListElement: aRelationElement with: anObjec
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationContextRowsWithHeader: aHeaderRow rows: theRows [
 	^ OrderedCollection new
-		add: aHeaderRow;
+		addAll: (aHeaderRow ifNil: [ #() ] ifNotNil: [ { aHeaderRow } ]);
 		addAll: theRows;
 		yourself
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> newHiddenRelationObserverElement [
+	| anElement |
+	anElement := BlElement new
+		size: 0 @ 0;
+		visibility: BlVisibility gone;
+		preventMouseEvents;
+		yourself.
+	anElement constraintsDo: [ :c | c ignoreByLayout ].
+	self hostElement addChild: anElement.
+	^ anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationInsertionIndexIn: aContainer header: aHeaderRow oldRows: oldRows previousRow: aPreviousRow fallback: anInsertionIndex [
+	| anIndex |
+	aHeaderRow ifNotNil: [
+		^ (aContainer rows identityIndexOf: aHeaderRow ifAbsent: [ anInsertionIndex - 1 ]) + 1 ].
+	oldRows ifNotEmpty: [
+		anIndex := aContainer rows identityIndexOf: oldRows first ifAbsent: [ nil ].
+		anIndex ifNotNil: [ ^ anIndex ] ].
+	aPreviousRow ifNotNil: [
+		anIndex := aContainer rows identityIndexOf: aPreviousRow ifAbsent: [ nil ].
+		anIndex ifNotNil: [ ^ anIndex + 1 ] ].
+	^ anInsertionIndex min: aContainer rows size + 1
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
-	| aContainer aHeaderContent aHeaderRow anAddElement itemRows |
+	| aContainer aHeaderContent aHeaderRow anAddElement itemRows aRepresentation anObserverElement anInsertionIndex aPreviousRow |
 	aContainer := self containerForDescription: aDescription.
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	anAddElement := self newToManyAddElementUsing: aDescription.
 	aHeaderContent := self newRelationValueSlotWith: anAddElement.
-	self addFieldElement: aHeaderContent using: aDescription.
-	aHeaderRow := aContainer rows last.
+	aHeaderRow := nil.
+	aPreviousRow := aContainer rows ifEmpty: [ nil ] ifNotEmpty: [ aContainer rows last ].
+	aRepresentation relationRowVisible ifTrue: [
+		self addFieldElement: aHeaderContent using: aDescription.
+		aHeaderRow := aContainer rows last ].
+	anInsertionIndex := aContainer rows size + 1.
+	anObserverElement := aHeaderRow
+		ifNil: [ self newHiddenRelationObserverElement ]
+		ifNotNil: [ aHeaderContent ].
 	itemRows := OrderedCollection new.
 
-	aHeaderContent withAsyncSinkDo: [ :anElementSink |
+	anObserverElement withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theElement :aSink |
@@ -1356,6 +1406,8 @@ CFMaDetailPresentation >> addToManyEmbeddedUsing: aDescription [
 					updateToManyEmbeddedRows: itemRows
 					in: aContainer
 					after: aHeaderRow
+					insertionIndex: anInsertionIndex
+					previousRow: aPreviousRow
 					with: aSink value currentValue
 					description: aDescription.
 				contextRows := OrderedCollection new.
@@ -1504,18 +1556,23 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer after: aHeaderRow with: aCollection description: aDescription [
-	| someObjects newItemRows headerIndex targetIndex |
+CFMaDetailPresentation >> updateToManyEmbeddedRows: oldItemRows in: aContainer after: aHeaderRow insertionIndex: anInsertionIndex previousRow: aPreviousRow with: aCollection description: aDescription [
+	| someObjects newItemRows targetIndex oldRows |
 	someObjects := aCollection ifNil: [ #() ].
+	oldRows := OrderedCollection new.
+	oldItemRows do: [ :anAssociation | oldRows addAll: anAssociation value ].
+	targetIndex := self
+		relationInsertionIndexIn: aContainer
+		header: aHeaderRow
+		oldRows: oldRows
+		previousRow: aPreviousRow
+		fallback: anInsertionIndex.
 
 	oldItemRows copy do: [ :anAssociation |
 		(someObjects anySatisfy: [ :anObject | anObject == anAssociation key ]) ifFalse: [
 			anAssociation value do: [ :aRow | aContainer removeRow: aRow ] ] ].
 
 	self memento retainChildMementosFor: someObjects inRelation: aDescription.
-	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
-		^ oldItemRows ].
-	targetIndex := headerIndex + 1.
 	newItemRows := OrderedCollection new.
 	someObjects do: [ :anObject |
 		| anAssociation theRows |

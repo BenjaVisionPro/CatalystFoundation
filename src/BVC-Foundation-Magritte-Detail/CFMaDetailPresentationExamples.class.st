@@ -468,6 +468,30 @@ CFMaDetailPresentationExamples >> relationFieldConfigurationCanEmbedForms [
 	^ aConfiguration
 ]
 
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> embeddedFormsRelationRowIsVisibleByDefault [
+	<gtExample>
+	| aConfiguration |
+	aConfiguration := CFMaEmbeddedFormsConfiguration new.
+	self assert: aConfiguration relationRowVisible.
+	^ aConfiguration
+]
+
+{ #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> embeddedFormsRelationRowCanBeHiddenExplicitly [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MAToOneRelationDescription new
+		accessor: #owner;
+		classes: { Object };
+		fieldConfigure: [ :field | field beEmbeddedForms hideRelationRow ];
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self deny: aConfiguration representation relationRowVisible.
+	^ aConfiguration
+]
+
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetailRepresentation [
 	<gtExample>

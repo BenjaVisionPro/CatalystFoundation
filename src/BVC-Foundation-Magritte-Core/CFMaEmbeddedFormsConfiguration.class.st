@@ -3,7 +3,31 @@
 Class {
 	#name : 'CFMaEmbeddedFormsConfiguration',
 	#superclass : 'Object',
+	#instVars : [
+		'relationRowVisible'
+	],
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
 	#tag : 'Field'
 }
+
+{ #category : 'initialization' }
+CFMaEmbeddedFormsConfiguration >> initialize [
+	super initialize.
+	relationRowVisible := true
+]
+
+{ #category : 'configuration - relation row' }
+CFMaEmbeddedFormsConfiguration >> hideRelationRow [
+	relationRowVisible := false
+]
+
+{ #category : 'accessing' }
+CFMaEmbeddedFormsConfiguration >> relationRowVisible [
+	^ relationRowVisible
+]
+
+{ #category : 'configuration - relation row' }
+CFMaEmbeddedFormsConfiguration >> showRelationRow [
+	relationRowVisible := true
+]
