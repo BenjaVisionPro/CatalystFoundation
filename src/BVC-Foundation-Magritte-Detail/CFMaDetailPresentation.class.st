@@ -1561,7 +1561,7 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 	newItemElements withIndexDo: [ :anAssociation :anIndex |
 		| anItemElement currentIndex |
 		anItemElement := anAssociation value.
-		currentIndex := aContainer children identityIndexOf: anItemElement ifAbsent: [ 0 ].
+		currentIndex := aContainer children asArray identityIndexOf: anItemElement ifAbsent: [ 0 ].
 		currentIndex = 0
 			ifTrue: [ aContainer addChild: anItemElement at: anIndex ]
 			ifFalse: [ currentIndex = anIndex ifFalse: [
