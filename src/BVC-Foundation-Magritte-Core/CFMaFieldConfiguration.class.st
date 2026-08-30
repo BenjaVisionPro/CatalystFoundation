@@ -59,6 +59,12 @@ CFMaFieldConfiguration >> beList [
 ]
 
 { #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beEmbeddedForm [
+	representation := CFMaEmbeddedFormsConfiguration new.
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
 CFMaFieldConfiguration >> beEmbeddedForms [
 	representation := CFMaEmbeddedFormsConfiguration new.
 	^ representation

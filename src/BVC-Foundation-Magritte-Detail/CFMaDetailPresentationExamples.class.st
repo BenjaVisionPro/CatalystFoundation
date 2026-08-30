@@ -484,7 +484,7 @@ CFMaDetailPresentationExamples >> embeddedFormsRelationRowCanBeHiddenExplicitly 
 	aDescription := MAToOneRelationDescription new
 		accessor: #owner;
 		classes: { Object };
-		fieldConfigure: [ :field | field beEmbeddedForms hideRelationRow ];
+		fieldConfigure: [ :field | field beEmbeddedForm hideRelationRow ];
 		yourself.
 	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
 
@@ -499,7 +499,7 @@ CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeFirstChild
 	aModel := CFMaFormShowcase new.
 	anObject := aModel embeddedObject.
 	aDescription := aModel embeddedObjectDescription
-		fieldConfigure: [ :field | field beEmbeddedForms hideRelationRow ];
+		fieldConfigure: [ :field | field beEmbeddedForm hideRelationRow ];
 		yourself.
 	aContainer := MAContainer new
 		add: aDescription;

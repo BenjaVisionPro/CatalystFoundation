@@ -849,16 +849,19 @@ CFMaDetailPresentation >> newEmbeddedRowsFor: anObject description: aDescription
 	aChildMemento := self memento
 		childMementoFor: anObject
 		inRelation: aDescription.
-	aChildPresentation := self class new
-		theme: self theme;
+	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
+	aChildPresentation := aChildMemento magritteDescription blocPresentationStencil
 		memento: aChildMemento;
-		yourself.
+		build.
+	aChildPresentation
+		theme: self theme;
+		memento: aChildMemento.
+	aRepresentation presentationConfiguration value: aChildPresentation.
 	aTemporaryCard := CFMaDetailGroupCardElement new.
 	theRows := aChildPresentation buildEmbeddedRowsIn: aTemporaryCard.
 	theRows copy do: [ :aRow | aTemporaryCard removeRow: aRow ].
 	theRows ifEmpty: [ ^ theRows ].
 
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	aRepresentation relationRowVisible ifTrue: [
 		anIdentityRow := theRows first.
 		self

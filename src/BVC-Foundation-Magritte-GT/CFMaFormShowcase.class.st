@@ -352,7 +352,7 @@ CFMaFormShowcase >> embeddedObjectDescription [
 		priority: 110;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
-		fieldConfigure: [ :field | field beEmbeddedForms ];
+		fieldConfigure: [ :field | field beEmbeddedForm ];
 		yourself
 ]
 

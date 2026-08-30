@@ -4,7 +4,8 @@ Class {
 	#name : 'CFMaEmbeddedFormsConfiguration',
 	#superclass : 'Object',
 	#instVars : [
-		'relationRowVisible'
+		'relationRowVisible',
+		'presentationConfiguration'
 	],
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
@@ -14,7 +15,8 @@ Class {
 { #category : 'initialization' }
 CFMaEmbeddedFormsConfiguration >> initialize [
 	super initialize.
-	relationRowVisible := true
+	relationRowVisible := true.
+	presentationConfiguration := [ :aPresentation | aPresentation ]
 ]
 
 { #category : 'configuration - relation row' }
@@ -29,5 +31,16 @@ CFMaEmbeddedFormsConfiguration >> relationRowVisible [
 
 { #category : 'configuration - relation row' }
 CFMaEmbeddedFormsConfiguration >> showRelationRow [
-	relationRowVisible := true
+	relationRowVisible := true.
+	presentationConfiguration := [ :aPresentation | aPresentation ]
+]
+
+{ #category : 'configuration - presentation' }
+CFMaEmbeddedFormsConfiguration >> configurePresentation: aBlock [
+	presentationConfiguration := aBlock
+]
+
+{ #category : 'accessing' }
+CFMaEmbeddedFormsConfiguration >> presentationConfiguration [
+	^ presentationConfiguration
 ]
