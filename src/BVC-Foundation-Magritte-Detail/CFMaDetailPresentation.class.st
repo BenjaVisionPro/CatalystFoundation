@@ -660,11 +660,7 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 			aContainer
 				padding: BlInsets empty;
 				beInSeparateCompositionLayer;
-				addAptitude: (BrStyleCommonAptitude new
-					default: [ :aStyle |
-						aStyle
-							background: Color transparent;
-							border: BlBorder empty ]) ].
+				aptitude: CFMaDetailPopupContainerAptitude new ].
 	aPopup addAptitude: aDropdownAptitude.
 	^ aPopup
 ]
@@ -738,7 +734,10 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 	aCurrentIndex := someValues indexOf: aCurrentValue ifAbsent: [ 0 ].
 	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
 
-	^ aList
+	^ CFGlassShadowElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
+		addChild: aList;
+		yourself
 ]
 
 { #category : 'private - building' }

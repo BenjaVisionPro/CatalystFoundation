@@ -20,15 +20,7 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 			aContainer
 				padding: BlInsets empty;
 				beInSeparateCompositionLayer;
-				geometry: (BlChildrenWrappingGeometry
-					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
-					enlargedBy: 1.5);
-				outskirts: BlOutskirts inside;
-				addAptitude: (BrStyleCommonAptitude new
-					default: [ :aStyle |
-						aStyle
-							background: Color transparent;
-							border: BlBorder empty ]) ].
+				aptitude: CFMaDetailPopupContainerAptitude new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ anAddElement
 ]
@@ -77,7 +69,10 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 		addAptitude: CFGlassSurfaceAptitude new;
 		items: anAddItemViewModel newItemClasses;
 		yourself.
-	^ aList
+	^ CFGlassShadowElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
+		addChild: aList;
+		yourself
 ]
 
 { #category : 'instance creation' }

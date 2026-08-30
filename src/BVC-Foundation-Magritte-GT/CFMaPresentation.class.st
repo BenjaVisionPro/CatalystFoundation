@@ -124,7 +124,7 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aContainer
 			beInSeparateCompositionLayer;
-			addAptitude: CFMaTooltipContainerAptitude new ].
+			aptitude: CFMaTooltipContainerAptitude new ].
 	anElement addAptitude: aTooltipAptitude
 ]
 
@@ -134,8 +134,11 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	aText := aDescription comment asRopedText.
 	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
 
-	^ CFMaTooltipContentElement new
-		text: aText;
+	^ CFGlassShadowElement new
+		geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
+		addChild: (CFMaTooltipContentElement new
+			text: aText;
+			yourself);
 		yourself
 ]
 

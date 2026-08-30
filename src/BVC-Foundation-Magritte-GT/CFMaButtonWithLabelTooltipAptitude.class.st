@@ -11,7 +11,7 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 	self menuContainerDo: [ :aContainer |
 		aContainer
 			beInSeparateCompositionLayer;
-			addAptitude: CFMaTooltipContainerAptitude new ]
+			aptitude: CFMaTooltipContainerAptitude new ]
 ]
 
 { #category : #'api - menu' }
@@ -23,7 +23,10 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			background: Color transparent;
 			addAptitude: BrPopoverCommonAptitude new ]
 		content: [
-			CFMaTooltipContentElement new
-				text: aLabelString asRopedText;
+			CFGlassShadowElement new
+				geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
+				addChild: (CFMaTooltipContentElement new
+					text: aLabelString asRopedText;
+					yourself);
 				yourself ]
 ]
