@@ -660,7 +660,8 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 			aContainer
 				padding: BlInsets empty;
 				beInSeparateCompositionLayer;
-				aptitude: CFMaDetailPopupContainerAptitude new ].
+				aptitude: CFMaDetailPopupContainerAptitude new;
+				effect: BlNullEffect new ].
 	aPopup addAptitude: aDropdownAptitude.
 	^ aPopup
 ]

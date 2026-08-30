@@ -20,7 +20,8 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 			aContainer
 				padding: BlInsets empty;
 				beInSeparateCompositionLayer;
-				aptitude: CFMaDetailPopupContainerAptitude new ].
+				aptitude: CFMaDetailPopupContainerAptitude new;
+				effect: BlNullEffect new ].
 	anAddElement addAptitude: aDropdownAptitude.
 	^ anAddElement
 ]

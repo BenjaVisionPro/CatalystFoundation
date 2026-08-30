@@ -16,5 +16,8 @@ CFGlassSurfaceAptitude >> initialize [
 		with: [ BlBlurBelowEffect radius: 5 ];
 		add: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
-				aStyle background: (Color red alpha: 0.15) ])
+				aStyle background:
+					((self theme surfaces baseBackground
+						blocResolveColorForTheme: self theme)
+						alpha: 0.65) ])
 ]

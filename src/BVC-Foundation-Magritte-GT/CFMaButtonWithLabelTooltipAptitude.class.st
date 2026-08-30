@@ -11,7 +11,8 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 	self menuContainerDo: [ :aContainer |
 		aContainer
 			beInSeparateCompositionLayer;
-			aptitude: CFMaTooltipContainerAptitude new ]
+			aptitude: CFMaTooltipContainerAptitude new;
+			effect: BlNullEffect new ]
 ]
 
 { #category : #'api - menu' }
