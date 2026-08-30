@@ -812,3 +812,137 @@ CFMaDetailPresentationExamples >> detailGroupPreservesNestedPresentationOrder [
 	self assert: aComposition children third rows first == secondRow.
 	^ aGroup
 ]
+
+{ #category : 'examples - diagnostics' }
+CFMaDetailPresentationExamples >> popupDismissalMotionComparisonDiagnostic [
+	"Compare the ordinary direct Motion path with the exact timeline/composition
+	shape used by CFMaDetailDropdownAptitude, isolated from any popup lifecycle."
+	| space host list direct directAfter timeline timelineTrack timelineMotion timelineAfter blinkTimeline blinkTrack blink fadeTimeline fadeTrack fade composed afterStart afterFirstFrame afterSecondFrame result |
+
+	space := BlSpace new.
+	space time: BlTime simulated.
+	host := BlElement new
+		size: 200 @ 200;
+		opacity: 1.0;
+		yourself.
+	list := BrSimpleList new
+		items: #(one two three);
+		hFitContent;
+		vFitContent;
+		yourself.
+	host addChild: list.
+	space root addChild: host.
+	space pulse.
+	list selectOne: 1.
+
+	"1. Known-working direct property Motion."
+	direct := host motion
+		duration: 200 milliSeconds;
+		opacity: 0.0;
+		build.
+	direct start.
+	space pulse.
+	space time wait: 50 milliSeconds.
+	space pulse.
+	directAfter := host opacity.
+	direct cancelAndRestore.
+	host opacity: 1.0.
+
+	"2. The exact timeline property shape used by fadeMotionFor:."
+	timeline := CFMotionTimeline new.
+	timelineTrack := CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: host
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0)
+		in: timeline.
+	timelineTrack
+		starts: CFMaDetailDropdownAptitude blinkCycleDuration after: timeline start;
+		duration: CFMaDetailDropdownAptitude fadeDuration;
+		easing: BlEasing linear.
+	timelineMotion := CFMotion
+		timeline: timeline
+		coordinator: space motionCoordinator.
+	timelineMotion start.
+	space pulse.
+	space time wait: 200 milliSeconds.
+	space pulse.
+	timelineAfter := host opacity.
+	timelineMotion cancelAndRestore.
+	host opacity: 1.0.
+
+	"3. The exact two-child composition used by dismissSelection:."
+	blinkTimeline := CFMotionTimeline new.
+	blinkTrack := CFMotionTimelineTrack
+		on: (CFMaDetailPopupSelectionMotionBehaviour on: list index: 1)
+		in: blinkTimeline.
+	blinkTrack
+		duration: CFMaDetailDropdownAptitude blinkCycleDuration;
+		easing: BlEasing linear.
+	blinkTimeline repeat: 2.
+	blink := CFMotion
+		timeline: blinkTimeline
+		coordinator: space motionCoordinator.
+
+	fadeTimeline := CFMotionTimeline new.
+	fadeTrack := CFMotionTimelineTrack
+		on: (CFMotionPropertyTrack
+			on: host
+			property: CFMotionOpacityProperty uniqueInstance
+			target: 0.0)
+		in: fadeTimeline.
+	fadeTrack
+		starts: CFMaDetailDropdownAptitude blinkCycleDuration after: fadeTimeline start;
+		duration: CFMaDetailDropdownAptitude fadeDuration;
+		easing: BlEasing linear.
+	fade := CFMotion
+		timeline: fadeTimeline
+		coordinator: space motionCoordinator.
+
+	composed := CFMotion composedOf: { blink. fade }.
+	composed start.
+	afterStart := {
+		#composedState -> composed state.
+		#blinkState -> blink state.
+		#fadeState -> fade state.
+		#selectedIndices -> list selectedIndices copy.
+		#opacity -> host opacity.
+		#activeMotions -> space motionCoordinator activeMotions size
+	} asDictionary.
+
+	space pulse.
+	space time wait: 40 milliSeconds.
+	space pulse.
+	afterFirstFrame := {
+		#composedState -> composed state.
+		#blinkState -> blink state.
+		#fadeState -> fade state.
+		#selectedIndices -> list selectedIndices copy.
+		#opacity -> host opacity.
+		#activeMotions -> space motionCoordinator activeMotions size
+	} asDictionary.
+
+	space time wait: 180 milliSeconds.
+	space pulse.
+	afterSecondFrame := {
+		#composedState -> composed state.
+		#blinkState -> blink state.
+		#fadeState -> fade state.
+		#selectedIndices -> list selectedIndices copy.
+		#opacity -> host opacity.
+		#activeMotions -> space motionCoordinator activeMotions size
+	} asDictionary.
+
+	result := {
+		#directOpacityAfter50ms -> directAfter.
+		#timelineOpacityAfter200ms -> timelineAfter.
+		#composedAfterStart -> afterStart.
+		#composedAfter40ms -> afterFirstFrame.
+		#composedAfter220ms -> afterSecondFrame
+	} asDictionary.
+
+	Transcript
+		show: 'POPUP MOTION COMPARISON'; cr;
+		show: result printString; cr.
+	^ result
+]
