@@ -28,6 +28,7 @@ CFMaTooltipContentElement >> initialize [
 { #category : #'editor - accessing' }
 CFMaTooltipContentElement >> text: aBlText [
 	super text: (aBlText asRopedText
+		regular;
 		foreground: self theme tooltip foreground;
 		fontSize: self theme tooltip fontSize)
 ]
