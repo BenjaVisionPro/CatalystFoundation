@@ -659,6 +659,7 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
+				beInSeparateCompositionLayer;
 				addAptitude: (BrStyleCommonAptitude new
 					default: [ :aStyle |
 						aStyle

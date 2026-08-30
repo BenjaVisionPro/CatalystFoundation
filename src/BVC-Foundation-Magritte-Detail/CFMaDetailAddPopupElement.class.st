@@ -19,6 +19,7 @@ CFMaDetailAddPopupElement class >> classChoiceFor: anAddItemViewModel [
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
+				beInSeparateCompositionLayer;
 				geometry: (BlChildrenWrappingGeometry
 					cornerRadius: CFMaDetailPopupMetrics menuCornerRadius
 					enlargedBy: 1.5);
