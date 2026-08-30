@@ -69,22 +69,50 @@ CFMaDetailDropdownAptitude >> fadeMotionFor: aMenuContainer [
 { #category : 'private - motion' }
 CFMaDetailDropdownAptitude >> dismissSelection: anOption [
 	self menuContainerDo: [ :aMenuContainer |
-		| blink fade |
+		| blink fade aCoordinator |
+		aCoordinator := aMenuContainer space motionCoordinator.
+		Transcript
+			show: 'POPUP dismissSelection entered'; cr;
+			show: '  menuAttached='; show: aMenuContainer isAttachedToSceneGraph printString; cr;
+			show: '  listAttached='; show: anOption selectionList isAttachedToSceneGraph printString; cr;
+			show: '  sameSpace='; show: (anOption selectionList space == aMenuContainer space) printString; cr;
+			show: '  activeBefore='; show: aCoordinator activeMotions size printString; cr.
 		aMenuContainer isAttachedToSceneGraph ifFalse: [
-			anOption commitActivation.
+			Transcript show: 'POPUP menu detached: sending BrDropdownHideWish directly'; cr.
 			anOption fireEvent: BrDropdownHideWish new.
 			^ self ].
 		self cancelDismissalMotion.
 		blink := self blinkMotionFor: anOption in: aMenuContainer.
 		fade := self fadeMotionFor: aMenuContainer.
 		dismissalMotion := CFMotion composedOf: { blink. fade }.
+		Transcript
+			show: 'POPUP motions built'; cr;
+			show: '  dismissalStateBeforeStart='; show: dismissalMotion state printString; cr;
+			show: '  blinkStateBeforeStart='; show: blink state printString; cr;
+			show: '  fadeStateBeforeStart='; show: fade state printString; cr.
 		dismissalMotion onTerminalDo: [ :aMotion |
-			anOption commitActivation.
-			aMotion isCompleted ifTrue: [
-				anOption fireEvent: BrDropdownHideWish new.
-				aMenuContainer opacity: 1.0 ].
+			Transcript
+				show: 'POPUP dismissal terminal'; cr;
+				show: '  state='; show: aMotion state printString; cr;
+				show: '  completed='; show: aMotion isCompleted printString; cr.
+			aMotion isCompleted
+				ifTrue: [
+					Transcript show: 'POPUP sending BrDropdownHideWish'; cr.
+					anOption fireEvent: BrDropdownHideWish new.
+					aMenuContainer opacity: 1.0 ]
+				ifFalse: [
+					self error: ('Popup dismissal Motion cancelled. menuAttached={1}; listAttached={2}; sameSpace={3}' format: {
+						aMenuContainer isAttachedToSceneGraph.
+						anOption selectionList isAttachedToSceneGraph.
+						anOption selectionList space == aMenuContainer space }) ].
 			dismissalMotion == aMotion ifTrue: [ dismissalMotion := nil ] ].
-		dismissalMotion start ]
+		dismissalMotion start.
+		Transcript
+			show: 'POPUP after dismissalMotion start'; cr;
+			show: '  dismissalState='; show: dismissalMotion state printString; cr;
+			show: '  blinkState='; show: blink state printString; cr;
+			show: '  fadeState='; show: fade state printString; cr;
+			show: '  activeAfter='; show: aCoordinator activeMotions size printString; cr ]
 ]
 
 { #category : 'lifecycle' }

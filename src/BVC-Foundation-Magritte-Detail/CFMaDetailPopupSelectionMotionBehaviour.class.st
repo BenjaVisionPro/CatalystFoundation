@@ -43,6 +43,10 @@ CFMaDetailPopupSelectionMotionBehaviour >> applyDestination [
 
 { #category : 'playing' }
 CFMaDetailPopupSelectionMotionBehaviour >> applyProgress: aProgress [
+	Transcript
+		show: 'POPUP blink applyProgress=';
+		show: aProgress printString;
+		cr.
 	self applySelected: aProgress >= 0.5
 ]
 
