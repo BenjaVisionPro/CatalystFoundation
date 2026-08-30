@@ -14,7 +14,7 @@ CFMaPresentationHostElement >> initialize [
 		background: Color transparent;
 		border: BlBorder empty;
 		margin: BlInsets empty;
-		cellSpacing: 10;
+		cellSpacing: 0;
 		hMatchParent;
 		vFitContent;
 		padding: BlInsets empty.

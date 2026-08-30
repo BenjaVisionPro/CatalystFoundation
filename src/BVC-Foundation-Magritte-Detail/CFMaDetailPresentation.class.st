@@ -137,10 +137,17 @@ CFMaDetailPresentation >> newGroup: aGroup in: aParent configuredBy: aConfigurat
 
 { #category : 'private - groups' }
 CFMaDetailPresentation >> newGroupIn: aParent configuredBy: aConfiguration [
-	| anElement |
+	| anElement aMargin |
 	anElement := CFMaDetailGroupElement new
 		configuration: aConfiguration;
 		yourself.
+	(aParent == self hostElement and: [ aParent children isEmpty not ]) ifTrue: [
+		aMargin := anElement margin.
+		anElement margin: (BlInsets
+			top: 10
+			right: aMargin right
+			bottom: aMargin bottom
+			left: aMargin left) ].
 	aParent addChild: anElement.
 	^ anElement
 ]

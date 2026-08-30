@@ -20,6 +20,19 @@ CFMaDetailGroupElement >> addContent: anElement [
 { #category : 'adding' }
 CFMaDetailGroupElement >> addNestedPresentationElement: anElement [
 	currentCard := nil.
+	self addCompositionElement: anElement.
+	^ anElement
+]
+
+{ #category : 'private - composition' }
+CFMaDetailGroupElement >> addCompositionElement: anElement [
+	| aMargin |
+	aMargin := anElement margin.
+	anElement margin: (BlInsets
+		top: (composition children isEmpty ifTrue: [ aMargin top ] ifFalse: [ self groupSpacing ])
+		right: aMargin right
+		bottom: aMargin bottom
+		left: aMargin left).
 	composition addChild: anElement.
 	^ anElement
 ]
@@ -56,7 +69,7 @@ CFMaDetailGroupElement >> currentCard [
 		margin: (BlInsets left: 6 right: 6);
 		reservedAccessorySlots: configuration reservedAccessorySlots;
 		yourself.
-	composition addChild: currentCard.
+	self addCompositionElement: currentCard.
 	^ currentCard
 ]
 
@@ -80,7 +93,7 @@ CFMaDetailGroupElement >> ensureGroups [
 						cellSpacing: 0;
 						margin: BlInsets empty;
 						yourself ] ].
-	composition addChild: groups.
+	self addCompositionElement: groups.
 	^ groups
 ]
 
@@ -129,7 +142,7 @@ CFMaDetailGroupElement >> initialize [
 		hMatchParent;
 		vFitContent;
 		margin: BlInsets empty;
-		cellSpacing: self groupSpacing;
+		cellSpacing: 0;
 		yourself.
 	self
 		hMatchParent;
