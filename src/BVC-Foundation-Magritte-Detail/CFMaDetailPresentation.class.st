@@ -5,7 +5,6 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'embeddedRowsContainer',
 		'relationSelections',
 		'relationFocusRows',
 		'relationFocusContainers',
@@ -80,7 +79,6 @@ CFMaDetailPresentation >> groupConfigurationFor: aGroup [
 { #category : 'private - groups' }
 CFMaDetailPresentation >> containerForDescription: aDescription [
 	| aGroup aConfiguration |
-	embeddedRowsContainer ifNotNil: [ ^ embeddedRowsContainer ].
 	aConfiguration := self groupConfigurationFor: aDescription group.
 	aGroup := self
 		groupFor: aDescription group
@@ -827,15 +825,13 @@ CFMaDetailPresentation >> buildEmbeddedRowsIn: aContainer [
 	ungroupedContainer := nil.
 	groups removeAll.
 	categoryGroups removeAll.
-	embeddedRowsContainer := aContainer.
+	hostElement := aContainer.
 
 	theDescriptions := OrderedCollection new
 		addAll: self objectDescription children;
 		yourself.
 	theDescriptions sort: [ :a :b | a priority < b priority ].
-
-	[ theDescriptions do: [ :each | self visit: each ] ]
-		ensure: [ embeddedRowsContainer := nil ].
+	theDescriptions do: [ :each | self visit: each ].
 	^ aContainer rows copy
 ]
 
