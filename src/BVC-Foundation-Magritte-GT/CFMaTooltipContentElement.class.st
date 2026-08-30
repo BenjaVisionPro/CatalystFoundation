@@ -18,5 +18,12 @@ CFMaTooltipContentElement >> initialize [
 		border: BlBorder empty;
 		focusability: BlFocusability none;
 		preventMouseEvents;
-		addAptitude: CFMaTooltipSurfaceAptitude new
+		addAptitude: CFMaTooltipSurfaceAptitude new;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle do: [
+					self
+						geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius);
+						fontSize: self theme tooltip fontSize;
+						foreground: self theme tooltip foreground ] ])
 ]

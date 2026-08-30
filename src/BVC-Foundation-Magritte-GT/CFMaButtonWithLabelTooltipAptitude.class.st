@@ -22,7 +22,7 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			size: BrMenuConstants handleExtent * 2.0;
 			geometry: BlCircleGeometry new;
 			background: Color transparent;
-			addAptitude: BrPopoverCommonAptitude new ]
+			addAptitude: CFMaTooltipSurfaceAptitude new ]
 		content: [
 			CFGlassShadowElement new
 				geometry: (BlRoundedRectangleGeometry cornerRadius: BrMenuConstants cornerRadius);
