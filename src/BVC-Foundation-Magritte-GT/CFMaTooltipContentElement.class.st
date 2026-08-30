@@ -18,5 +18,5 @@ CFMaTooltipContentElement >> initialize [
 		border: BlBorder empty;
 		focusability: BlFocusability none;
 		preventMouseEvents;
-		addAptitude: CFGlassSurfaceAptitude new
+		addAptitude: CFMaTooltipSurfaceAptitude new
 ]
