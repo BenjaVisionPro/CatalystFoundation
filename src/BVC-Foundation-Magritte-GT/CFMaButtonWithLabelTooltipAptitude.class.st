@@ -25,8 +25,6 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 
 	aTextElement := CFMaTooltipTextElement new
 		text: aText;
-		hFitContent;
-		vFitContent;
 		constraintsDo: [ :c | c maxWidth: 250 ];
 		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
 		preventMouseEvents;
