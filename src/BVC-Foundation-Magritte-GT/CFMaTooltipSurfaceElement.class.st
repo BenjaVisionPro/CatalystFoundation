@@ -27,6 +27,7 @@ CFMaTooltipSurfaceElement >> initialize [
 				cornerRadius: self theme tooltip cornerRadius) ]).
 
 	editor := BrEditor new
+		aptitude: BrEditorAptitude new;
 		beReadOnlyWithoutSelection;
 		hFitContentLimited;
 		vFitContent;
