@@ -1,6 +1,6 @@
 Class {
 	#name : #CFMenuShadowAptitude,
-	#superclass : #BrAptitude,
+	#superclass : #BrShadowAptitude,
 	#category : #'BVC-Foundation-Magritte-GT'
 }
 
@@ -9,11 +9,8 @@ CFMenuShadowAptitude >> initialize [
 	super initialize.
 
 	self
-		addChangeProperty: #(widget effect)
-		with: [
-			BlGaussianShadowEffect
-				color: (self theme menu shadowColor
-					blocResolveColorForTheme: self theme)
-				width: self theme menu shadowWidth
-				offset: self theme menu shadowOffset ]
+		color: (self theme menu shadowColor
+			blocResolveColorForTheme: self theme);
+		width: self theme menu shadowWidth;
+		offset: self theme menu shadowOffset
 ]

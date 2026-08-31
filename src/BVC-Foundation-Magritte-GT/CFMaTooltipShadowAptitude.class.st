@@ -1,6 +1,6 @@
 Class {
 	#name : #CFMaTooltipShadowAptitude,
-	#superclass : #BrAptitude,
+	#superclass : #BrShadowAptitude,
 	#category : #'BVC-Foundation-Magritte-GT-Tooltip'
 }
 
@@ -9,11 +9,8 @@ CFMaTooltipShadowAptitude >> initialize [
 	super initialize.
 
 	self
-		addChangeProperty: #(widget effect)
-		with: [
-			BlGaussianShadowEffect
-				color: (self theme tooltip shadowColor
-					blocResolveColorForTheme: self theme)
-				width: self theme tooltip shadowWidth
-				offset: self theme tooltip shadowOffset ]
+		color: (self theme tooltip shadowColor
+			blocResolveColorForTheme: self theme);
+		width: self theme tooltip shadowWidth;
+		offset: self theme tooltip shadowOffset
 ]
