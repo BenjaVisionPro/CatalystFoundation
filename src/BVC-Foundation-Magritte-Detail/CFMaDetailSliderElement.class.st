@@ -83,9 +83,18 @@ CFMaDetailSliderElement >> initialize [
 		addEventHandlerOn: BlDragEvent do: [ :anEvent |
 			anEvent consumed: true.
 			self updateFromLocalPosition: anEvent localPosition ].
+	self installThemeStyle.
 	self updateLabels
 ]
 
+
+
+{ #category : 'private - styling' }
+CFMaDetailSliderElement >> installThemeStyle [
+	self addAptitude: (BrLazyStyleCommonAptitude new
+		default: [ :aStyle |
+			aStyle do: [ self updateThemeAppearance ] ])
+]
 
 
 { #category : 'layout' }
@@ -195,9 +204,7 @@ CFMaDetailSliderElement >> valueLabelTextFor: aString [
 { #category : 'lifecycle' }
 CFMaDetailSliderElement >> onThemeChanged [
 	super onThemeChanged.
-	track ifNotNil: [
-		self updateThemeAppearance.
-		minimumLabel ifNotNil: [ self updateLabels ] ]
+	minimumLabel ifNotNil: [ self updateLabels ]
 ]
 
 { #category : 'private - styling' }
