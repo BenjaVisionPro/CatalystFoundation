@@ -347,14 +347,14 @@ CFMaPresentation >> initialize [
 	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
 	fieldConfigurations := Dictionary new.
-	theme := CgtDetailLightTheme new
+	theme := nil
 ]
 
 
 { #category : 'accessing' }
 CFMaPresentation >> form: aForm [
 	super form: aForm.
-	aForm theme: theme
+	theme ifNotNil: [ aForm theme: theme ]
 ]
 
 { #category : 'accessing' }
