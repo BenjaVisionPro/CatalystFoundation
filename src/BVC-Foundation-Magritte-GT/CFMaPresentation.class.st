@@ -125,23 +125,17 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
-	| aText aLabel aLabelAptitude |
-	aText := aDescription comment asRopedText.
-	aDescription isRequired ifTrue: [ aText append: ' (required)' asRopedText ].
-
-	aLabelAptitude := BrGlamorousLabelAptitude new
-		weight: 400;
+	| aText aTextElement |
+	aText := aDescription comment asRopedText
+		foreground: self theme tooltip foreground;
+		fontSize: self theme tooltip fontSize;
 		yourself.
-	aLabelAptitude editorMeasurement.
-	aLabelAptitude add: (BrLazyStyleCommonAptitude new
-		@ aLabelAptitude label;
-		default: [ :aStyle |
-			aStyle
-				foreground: aLabelAptitude theme tooltip foreground;
-				fontSize: aLabelAptitude theme tooltip fontSize ]).
+	aDescription isRequired ifTrue: [ aText append: (' (required)' asRopedText
+		foreground: self theme tooltip foreground;
+		fontSize: self theme tooltip fontSize;
+		yourself) ].
 
-	aLabel := BrLabel new
-		aptitude: aLabelAptitude;
+	aTextElement := CFMaTooltipTextElement new
 		text: aText;
 		hFitContentLimited;
 		vFitContent;
@@ -151,15 +145,16 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		addAptitude: CFMaTooltipSurfaceAptitude new;
 		yourself.
 
-	aLabel addAptitude: (BrLazyStyleCommonAptitude new
+	aTextElement addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle
-				geometry: (BlRoundedRectangleGeometry cornerRadius: aLabel theme tooltip cornerRadius) ]).
+			aStyle geometry: (BlRoundedRectangleGeometry
+				cornerRadius: aTextElement theme tooltip cornerRadius) ]).
 
 	^ CFMaTooltipShadowElement new
-		addChild: aLabel;
+		addChild: aTextElement;
 		yourself
 ]
+
 { #category : 'visiting-description' }
 CFMaPresentation >> addFileDropdown: aDescription [
 	| aButton |

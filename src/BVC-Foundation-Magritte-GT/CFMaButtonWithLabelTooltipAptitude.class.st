@@ -17,21 +17,14 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 
 { #category : #'api - menu' }
 CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutString [
-	| aLabel aLabelAptitude |
-	aLabelAptitude := BrGlamorousLabelAptitude new
-		weight: 400;
+	| aText aTextElement |
+	aText := aLabelString asRopedText
+		foreground: self theme tooltip foreground;
+		fontSize: self theme tooltip fontSize;
 		yourself.
-	aLabelAptitude editorMeasurement.
-	aLabelAptitude add: (BrLazyStyleCommonAptitude new
-		@ aLabelAptitude label;
-		default: [ :aStyle |
-			aStyle
-				foreground: aLabelAptitude theme tooltip foreground;
-				fontSize: aLabelAptitude theme tooltip fontSize ]).
 
-	aLabel := BrLabel new
-		aptitude: aLabelAptitude;
-		text: aLabelString asRopedText;
+	aTextElement := CFMaTooltipTextElement new
+		text: aText;
 		hFitContentLimited;
 		vFitContent;
 		constraintsDo: [ :c | c maxWidth: 250 ];
@@ -40,10 +33,10 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 		addAptitude: CFMaTooltipSurfaceAptitude new;
 		yourself.
 
-	aLabel addAptitude: (BrLazyStyleCommonAptitude new
+	aTextElement addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle
-				geometry: (BlRoundedRectangleGeometry cornerRadius: aLabel theme tooltip cornerRadius) ]).
+			aStyle geometry: (BlRoundedRectangleGeometry
+				cornerRadius: aTextElement theme tooltip cornerRadius) ]).
 
 	self
 		handle: [ BlElement new
@@ -53,6 +46,6 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			addAptitude: CFMaTooltipSurfaceAptitude new ]
 		content: [
 			CFMaTooltipShadowElement new
-				addChild: aLabel;
+				addChild: aTextElement;
 				yourself ]
 ]
