@@ -23,8 +23,9 @@ CFMaTooltipSurfaceElement >> initialize [
 
 	self addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle geometry: (BlRoundedRectangleGeometry
-				cornerRadius: self theme tooltip cornerRadius) ]).
+			aStyle geometry: (BrAnchoredGeometry
+				cornerRadius: self theme tooltip cornerRadius
+				element: self) ]).
 
 	editor := BrEditor new
 		aptitude: BrGlamorousRegularEditorAptitude new;
