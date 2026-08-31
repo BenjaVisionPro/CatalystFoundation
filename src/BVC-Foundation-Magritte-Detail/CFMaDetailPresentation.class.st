@@ -750,8 +750,15 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 	aCurrentIndex := someValues indexOf: aCurrentValue ifAbsent: [ 0 ].
 	aCurrentIndex > 0 ifTrue: [ aList selectOne: aCurrentIndex ].
 
-	^ CFGlassShadowElement new
+	^ BlElement new
+		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c horizontal fitContent.
+			c vertical fitContent ];
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
+		background: Color transparent;
+		border: BlBorder empty;
+		addAptitude: CFMenuShadowAptitude new;
 		addChild: aList;
 		yourself
 ]

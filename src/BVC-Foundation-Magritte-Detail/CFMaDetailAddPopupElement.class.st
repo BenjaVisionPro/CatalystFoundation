@@ -69,8 +69,15 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 		addAptitude: CFGlassSurfaceAptitude new;
 		items: anAddItemViewModel newItemClasses;
 		yourself.
-	^ CFGlassShadowElement new
+	^ BlElement new
+		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c horizontal fitContent.
+			c vertical fitContent ];
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
+		background: Color transparent;
+		border: BlBorder empty;
+		addAptitude: CFMenuShadowAptitude new;
 		addChild: aList;
 		yourself
 ]

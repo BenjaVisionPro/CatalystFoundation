@@ -125,7 +125,7 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 
 { #category : 'private - composition' }
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
-	| aText aTextElement |
+	| aText aSurfaceElement |
 	aText := aDescription comment asRopedText
 		foreground: self theme tooltip foreground;
 		fontSize: self theme tooltip fontSize;
@@ -135,21 +135,21 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		fontSize: self theme tooltip fontSize;
 		yourself) ].
 
-	aTextElement := CFMaTooltipTextElement new
+	aSurfaceElement := CFMaTooltipSurfaceElement new
 		text: aText;
-		constraintsDo: [ :c | c maxWidth: 250 ];
-		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
-		preventMouseEvents;
-		addAptitude: CFMaTooltipSurfaceAptitude new;
 		yourself.
 
-	aTextElement addAptitude: (BrLazyStyleCommonAptitude new
-		default: [ :aStyle |
-			aStyle geometry: (BlRoundedRectangleGeometry
-				cornerRadius: aTextElement theme tooltip cornerRadius) ]).
-
-	^ CFMaTooltipShadowElement new
-		addChild: aTextElement;
+	^ BlElement new
+		layout: BlFrameLayout new;
+		constraintsDo: [ :c |
+			c horizontal fitContent.
+			c vertical fitContent ];
+		geometry: (BlRoundedRectangleGeometry
+			cornerRadius: self theme tooltip cornerRadius);
+		background: Color transparent;
+		border: BlBorder empty;
+		addAptitude: CFMaTooltipShadowAptitude new;
+		addChild: aSurfaceElement;
 		yourself
 ]
 
