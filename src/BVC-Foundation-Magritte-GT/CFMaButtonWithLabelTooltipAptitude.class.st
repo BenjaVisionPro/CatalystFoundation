@@ -29,7 +29,6 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 
 	self
 		handle: [ BlElement new
-			beInSeparateCompositionLayer;
 			size: BrMenuConstants handleExtent * 2.0;
 			geometry: BlCircleGeometry new;
 			background: Color transparent;
