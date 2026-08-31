@@ -10,8 +10,7 @@ Class {
 		'ungroupedPresentationGroup',
 		'identityAffordanceEmitted',
 		'fieldConfigurationOverrides',
-		'fieldConfigurations',
-		'theme'
+		'fieldConfigurations'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -129,12 +128,12 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 	| aText anEditor aSurface aShadowHost |
 	aText := aDescription comment asRopedText
-		foreground: self theme tooltip foreground;
-		fontSize: self theme tooltip fontSize;
+		foreground: self form theme tooltip foreground;
+		fontSize: self form theme tooltip fontSize;
 		yourself.
 	aDescription isRequired ifTrue: [ aText append: (' (required)' asRopedText
-		foreground: self theme tooltip foreground;
-		fontSize: self theme tooltip fontSize;
+		foreground: self form theme tooltip foreground;
+		fontSize: self form theme tooltip fontSize;
 		yourself) ].
 
 	anEditor := BrEditor new
@@ -157,7 +156,7 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 			c horizontal fitContent.
 			c vertical fitContent ];
 		padding: (BlInsets top: 8 left: 12 bottom: 8 right: 12);
-		geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: self form theme tooltip cornerRadius);
 		beInSeparateCompositionLayer;
 		addAptitude: CFGlassSurfaceAptitude new;
 		addAptitude: (BrLazyStyleCommonAptitude new
@@ -174,13 +173,13 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		constraintsDo: [ :c |
 			c horizontal fitContent.
 			c vertical fitContent ];
-		geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius);
+		geometry: (BlRoundedRectangleGeometry cornerRadius: self form theme tooltip cornerRadius);
 		background: Color transparent;
 		border: BlBorder empty;
 		addAptitude: (BrShadowAptitude new
-			color: (self theme tooltip shadowColor blocResolveColorForTheme: self theme);
-			width: self theme tooltip shadowWidth;
-			offset: self theme tooltip shadowOffset;
+			color: (self form theme tooltip shadowColor blocResolveColorForTheme: self form theme);
+			width: self form theme tooltip shadowWidth;
+			offset: self form theme tooltip shadowOffset;
 			yourself);
 		addChild: aSurface;
 		yourself.
@@ -346,27 +345,9 @@ CFMaPresentation >> initialize [
 	presentationGroupsByGroup := Dictionary new.
 	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
-	fieldConfigurations := Dictionary new.
-	theme := nil
+	fieldConfigurations := Dictionary new
 ]
 
-
-{ #category : 'accessing' }
-CFMaPresentation >> form: aForm [
-	super form: aForm.
-	theme ifNotNil: [ aForm theme: theme ]
-]
-
-{ #category : 'accessing' }
-CFMaPresentation >> theme [
-	^ theme
-]
-
-{ #category : 'accessing' }
-CFMaPresentation >> theme: aTheme [
-	theme := aTheme.
-	self form ifNotNil: [ :aForm | aForm theme: aTheme ]
-]
 
 { #category : 'private - focus' }
 CFMaPresentation >> installFormNavigationOn: anElement [
@@ -484,7 +465,6 @@ CFMaPresentation >> buildPresentationForMemento: aMemento in: aHostElement confi
 		build.
 	aPresentation
 		memento: aMemento;
-		theme: self theme;
 		form: aHostElement.
 	aConfigurationBlock cull: aPresentation.
 	aPresentation build.

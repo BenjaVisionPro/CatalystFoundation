@@ -57,7 +57,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
-	^ self theme surfaces baseBackground
+	^ self form theme surfaces baseBackground
 ]
 
 { #category : 'private - building' }
@@ -242,15 +242,15 @@ CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	aButton addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
-				background: (self theme interaction controlBackgroundTint);
+				background: (self form theme interaction controlBackgroundTint);
 				border: BlBorder empty ];
 		hovered: [ :aStyle |
 			aStyle
-				background: (self theme interaction hoveredBackgroundTint);
+				background: (self form theme interaction hoveredBackgroundTint);
 				border: BlBorder empty ];
 		pressed: [ :aStyle |
 			aStyle
-				background: (self theme interaction pressedBackgroundTint);
+				background: (self form theme interaction pressedBackgroundTint);
 				border: BlBorder empty ]).
 	self installFormNavigationOn: aButton.
 	^ aButton
@@ -336,7 +336,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: (self theme typography secondaryForeground);
+		color: (self form theme typography secondaryForeground);
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -403,8 +403,8 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: (self theme typography primaryForeground);
-		fontSize: (self theme typography bodyFontSize)
+		foreground: (self form theme typography primaryForeground);
+		fontSize: (self form theme typography bodyFontSize)
 ]
 
 { #category : 'private - composition' }
@@ -419,8 +419,8 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: (self theme typography tertiaryForeground);
-			fontSize: (self theme typography supportingFontSize));
+			foreground: (self form theme typography tertiaryForeground);
+			fontSize: (self form theme typography supportingFontSize));
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical fitContent ];
@@ -764,9 +764,9 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		background: Color transparent;
 		border: BlBorder empty;
 		addAptitude: (BrShadowAptitude new
-			color: (self theme menu shadowColor blocResolveColorForTheme: self theme);
-			width: self theme menu shadowWidth;
-			offset: self theme menu shadowOffset;
+			color: (self form theme menu shadowColor blocResolveColorForTheme: self form theme);
+			width: self form theme menu shadowWidth;
+			offset: self form theme menu shadowOffset;
 			yourself);
 		addChild: aList;
 		yourself
@@ -1073,7 +1073,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: (self theme typography secondaryForeground);
+		color: (self form theme typography secondaryForeground);
 		size: 8 @ 8.
 	^ anElement
 ]
@@ -1564,7 +1564,7 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 
 	self memento retainChildMementosFor: someObjects inRelation: aDescription.
 	newItemElements := OrderedCollection new.
-	someObjects do: [ :anObject |
+	someObjects withIndexDo: [ :anObject :anIndex |
 		| anAssociation anItemElement aChildMemento |
 		anAssociation := oldItemElements
 			detect: [ :each | each key == anObject ]
@@ -1573,6 +1573,18 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 			ifNil: [
 				| aPresentationHost |
 				aPresentationHost := self newPresentationHost.
+				anItemElement := aRepresentation relationRowVisible
+					ifTrue: [ self
+						newEmbeddedRelationItemFor: anObject
+						host: aPresentationHost
+						description: aDescription ]
+					ifFalse: [ aPresentationHost ].
+
+				"Attach the structural host before building its child presentation.
+				Theme is inherited from the Bloc tree; the presentation must not
+				create a parallel theme-propagation path."
+				aContainer addChild: anItemElement at: (anIndex min: aContainer children size + 1).
+
 				aChildMemento := self memento
 					childMementoFor: anObject
 					inRelation: aDescription.
@@ -1580,12 +1592,7 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 					buildPresentationForMemento: aChildMemento
 					in: aPresentationHost
 					configure: aRepresentation presentationConfiguration.
-				aRepresentation relationRowVisible
-					ifTrue: [ self
-						newEmbeddedRelationItemFor: anObject
-						host: aPresentationHost
-						description: aDescription ]
-					ifFalse: [ aPresentationHost ] ]
+				anItemElement ]
 			ifNotNil: [ anAssociation value ].
 		newItemElements add: anObject -> anItemElement ].
 
