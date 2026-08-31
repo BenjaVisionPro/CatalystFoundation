@@ -17,7 +17,7 @@ CFMaTooltipSurfaceElement >> initialize [
 			c horizontal fitContent.
 			c vertical fitContent.
 			c maxWidth: 250 ];
-		padding: (BlInsets top: 4 left: 8 bottom: 4 right: 8);
+		padding: (BlInsets top: 8 left: 12 bottom: 8 right: 12);
 		preventMouseEvents;
 		addAptitude: CFMaTooltipSurfaceAptitude new.
 
@@ -31,7 +31,7 @@ CFMaTooltipSurfaceElement >> initialize [
 		beReadOnlyWithoutSelection;
 		hFitContentLimited;
 		vFitContent;
-		constraintsDo: [ :c | c maxWidth: 234 ];
+		constraintsDo: [ :c | c maxWidth: 226 ];
 		padding: BlInsets empty;
 		background: Color transparent;
 		border: BlBorder empty;
