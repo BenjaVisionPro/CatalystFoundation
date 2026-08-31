@@ -11,12 +11,11 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 	self menuContainerDo: [ :aContainer |
 		aContainer
 			padding: (BlInsets top: 8 left: 12 bottom: 8 right: 12);
-			beInSeparateCompositionLayer;
 			constraintsDo: [ :c | c maxWidth: 250 ];
 			geometry: (BrAnchoredGeometry
 				cornerRadius: self theme tooltip cornerRadius
 				element: aContainer);
-			aptitude: CFGlassSurfaceAptitude new;
+			addAptitude: CFGlassSurfaceAptitude new;
 			addAptitude: (BrLazyStyleCommonAptitude new
 				default: [ :aStyle |
 					aStyle border: (BlBorder
