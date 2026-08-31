@@ -119,6 +119,7 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 	aTooltipAptitude menuContainerDo: [ :aContainer |
 		aContainer
 			padding: BlInsets empty;
+			beInSeparateCompositionLayer;
 			aptitude: CFMaTooltipContainerAptitude new;
 			effect: BlNullEffect new ].
 	anElement addAptitude: aTooltipAptitude
