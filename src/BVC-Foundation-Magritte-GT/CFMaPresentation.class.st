@@ -124,7 +124,13 @@ CFMaPresentation >> addCommentTooltipTo: anElement using: aDescription [
 			geometry: (BrAnchoredGeometry
 				cornerRadius: self theme tooltip cornerRadius
 				element: aContainer);
-			aptitude: CFMaTooltipSurfaceAptitude new ].
+			aptitude: CFGlassSurfaceAptitude new;
+			addAptitude: (BrLazyStyleCommonAptitude new
+				default: [ :aStyle |
+					aStyle border: (BlBorder
+						paint: (aContainer theme tooltip borderColor
+							blocResolveColorForTheme: aContainer theme)
+						width: 1) ]) ].
 	anElement addAptitude: aTooltipAptitude
 ]
 

@@ -5,11 +5,6 @@ Class {
 	#package : 'BVC-Foundation-Magritte-GT'
 }
 
-{ #category : 'accessing' }
-CFGlassSurfaceAptitude >> borderColor [
-	^ self theme menu borderColor blocResolveColorForTheme: self theme
-]
-
 { #category : 'initialization' }
 CFGlassSurfaceAptitude >> initialize [
 	super initialize.
@@ -23,6 +18,5 @@ CFGlassSurfaceAptitude >> initialize [
 					background:
 						((self theme surfaces baseBackground
 							blocResolveColorForTheme: self theme)
-							alpha: 0.65);
-					border: (BlBorder paint: self borderColor width: 1) ])
+							alpha: 0.65) ])
 ]

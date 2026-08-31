@@ -744,6 +744,11 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
 		addAptitude: CFGlassSurfaceAptitude new;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle border: (BlBorder
+					paint: (aList theme menu borderColor blocResolveColorForTheme: aList theme)
+					width: 1) ]);
 		items: someValues;
 		yourself.
 

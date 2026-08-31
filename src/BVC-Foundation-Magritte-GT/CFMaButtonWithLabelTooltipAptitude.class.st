@@ -16,7 +16,13 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 			geometry: (BrAnchoredGeometry
 				cornerRadius: self theme tooltip cornerRadius
 				element: aContainer);
-			aptitude: CFMaTooltipSurfaceAptitude new ]
+			aptitude: CFGlassSurfaceAptitude new;
+			addAptitude: (BrLazyStyleCommonAptitude new
+				default: [ :aStyle |
+					aStyle border: (BlBorder
+						paint: (aContainer theme tooltip borderColor
+							blocResolveColorForTheme: aContainer theme)
+						width: 1) ]) ]
 ]
 
 { #category : #'api - menu' }

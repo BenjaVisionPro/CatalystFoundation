@@ -67,6 +67,11 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 		padding: (BlInsets all: CFMaDetailPopupMetrics menuInset);
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
 		addAptitude: CFGlassSurfaceAptitude new;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			default: [ :aStyle |
+				aStyle border: (BlBorder
+					paint: (aList theme menu borderColor blocResolveColorForTheme: aList theme)
+					width: 1) ]);
 		items: anAddItemViewModel newItemClasses;
 		yourself.
 	^ BlElement new
