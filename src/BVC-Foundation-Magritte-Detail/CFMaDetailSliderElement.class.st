@@ -83,6 +83,8 @@ CFMaDetailSliderElement >> initialize [
 		addEventHandlerOn: BlDragEvent do: [ :anEvent |
 			anEvent consumed: true.
 			self updateFromLocalPosition: anEvent localPosition ].
+	self
+		addAptitude: CFMaDetailSliderAptitude new.
 	self updateLabels
 ]
 
@@ -187,34 +189,7 @@ CFMaDetailSliderElement >> updateLabels [
 { #category : 'private - styling' }
 CFMaDetailSliderElement >> valueLabelTextFor: aString [
 	^ aString asRopedText
-		foreground: self theme typography secondaryForeground;
-		fontSize: self theme typography supportingFontSize;
-		yourself
 ]
-
-{ #category : 'lifecycle' }
-CFMaDetailSliderElement >> onThemeChanged [
-	super onThemeChanged.
-	track ifNotNil: [
-		self updateThemeAppearance.
-		minimumLabel ifNotNil: [ self updateLabels ] ]
-]
-
-{ #category : 'private - styling' }
-CFMaDetailSliderElement >> updateThemeAppearance [
-	| aTheme |
-	aTheme := self theme.
-	track background: (aTheme controls sliderTrackTint blocResolveColorForTheme: aTheme).
-	fill background: (aTheme controls sliderActiveTrackTint blocResolveColorForTheme: aTheme).
-	thumb
-		background: (aTheme controls sliderThumbBackground blocResolveColorForTheme: aTheme);
-		border: (BlBorder
-			paint: (aTheme controls sliderThumbBorderTint blocResolveColorForTheme: aTheme)
-			width: 0.5).
-	{ minimumTick. middleTick. maximumTick } do: [ :aTick |
-		aTick background: (aTheme controls sliderTickTint blocResolveColorForTheme: aTheme) ]
-]
-
 
 { #category : 'private - layout' }
 CFMaDetailSliderElement >> sliderTrack [
