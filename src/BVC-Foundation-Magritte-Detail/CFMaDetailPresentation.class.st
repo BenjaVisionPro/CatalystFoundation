@@ -674,7 +674,6 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 		menuContainerDo: [ :aContainer |
 			aContainer
 				padding: BlInsets empty;
-				beInSeparateCompositionLayer;
 				aptitude: CFMaDetailPopupContainerAptitude new;
 				effect: BlNullEffect new ].
 	aPopup addAptitude: aDropdownAptitude.
