@@ -10,21 +10,34 @@ CFMaButtonWithLabelTooltipAptitude >> initialize [
 
 	self menuContainerDo: [ :aContainer |
 		aContainer
-			padding: BlInsets empty;
+			padding: (BlInsets top: 8 left: 12 bottom: 8 right: 12);
 			beInSeparateCompositionLayer;
-			aptitude: CFMaTooltipContainerAptitude new;
-			effect: BlNullEffect new ]
+			constraintsDo: [ :c | c maxWidth: 250 ];
+			geometry: (BrAnchoredGeometry
+				cornerRadius: self theme tooltip cornerRadius
+				element: aContainer);
+			aptitude: CFMaTooltipSurfaceAptitude new ]
 ]
 
 { #category : #'api - menu' }
 CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutString [
-	| aText aSurfaceElement |
+	| aText anEditor |
 	aText := aLabelString asRopedText
 		foreground: self theme tooltip foreground;
 		fontSize: self theme tooltip fontSize;
 		yourself.
 
-	aSurfaceElement := CFMaTooltipSurfaceElement new
+	anEditor := BrEditor new
+		aptitude: BrGlamorousRegularEditorAptitude new;
+		beReadOnlyWithoutSelection;
+		hFitContentLimited;
+		vFitContent;
+		constraintsDo: [ :c | c maxWidth: 226 ];
+		padding: BlInsets empty;
+		background: Color transparent;
+		border: BlBorder empty;
+		focusability: BlFocusability none;
+		preventMouseEvents;
 		text: aText;
 		yourself.
 
@@ -33,18 +46,7 @@ CFMaButtonWithLabelTooltipAptitude >> text: aLabelString shortcut: aShortcutStri
 			size: BrMenuConstants handleExtent * 2.0;
 			geometry: BlCircleGeometry new;
 			background: Color transparent;
-			addAptitude: CFMaTooltipSurfaceAptitude new ]
-		content: [
-			BlElement new
-				layout: BlFrameLayout new;
-				constraintsDo: [ :c |
-					c horizontal fitContent.
-					c vertical fitContent ];
-				geometry: (BlRoundedRectangleGeometry
-					cornerRadius: self theme tooltip cornerRadius);
-				background: Color transparent;
-				border: BlBorder empty;
-				addAptitude: CFMaTooltipShadowAptitude new;
-				addChild: aSurfaceElement;
-				yourself ]
+			border: BlBorder empty;
+			yourself ]
+		content: [ anEditor ]
 ]
