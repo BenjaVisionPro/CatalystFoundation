@@ -763,7 +763,11 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 		geometry: (BlRoundedRectangleGeometry cornerRadius: CFMaDetailPopupMetrics menuCornerRadius);
 		background: Color transparent;
 		border: BlBorder empty;
-		addAptitude: CFMenuShadowAptitude new;
+		addAptitude: (BrShadowAptitude new
+			color: (self theme menu shadowColor blocResolveColorForTheme: self theme);
+			width: self theme menu shadowWidth;
+			offset: self theme menu shadowOffset;
+			yourself);
 		addChild: aList;
 		yourself
 ]

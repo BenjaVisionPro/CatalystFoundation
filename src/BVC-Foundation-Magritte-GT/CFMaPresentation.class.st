@@ -177,7 +177,11 @@ CFMaPresentation >> newCommentTooltipContentFor: aDescription [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: self theme tooltip cornerRadius);
 		background: Color transparent;
 		border: BlBorder empty;
-		addAptitude: CFMaTooltipShadowAptitude new;
+		addAptitude: (BrShadowAptitude new
+			color: (self theme tooltip shadowColor blocResolveColorForTheme: self theme);
+			width: self theme tooltip shadowWidth;
+			offset: self theme tooltip shadowOffset;
+			yourself);
 		addChild: aSurface;
 		yourself.
 
