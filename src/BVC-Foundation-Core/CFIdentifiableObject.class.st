@@ -52,3 +52,9 @@ CFIdentifiableObject >> initializeIdentifier [
 					nextPutAll: 'cf_';
 					nextPutAll: UUID new asString36 ]) asSymbol
 ]
+
+{ #category : 'descriptions' }
+CFIdentifiableObject >> compactIdentityReference [
+	^ self iconDescription, self identifierDescription
+]
+

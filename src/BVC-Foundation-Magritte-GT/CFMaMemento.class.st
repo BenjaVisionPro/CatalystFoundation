@@ -14,6 +14,21 @@ Class {
 	#tag : 'Models'
 }
 
+
+{ #category : 'instance creation' }
+CFMaMemento class >> model: anObject [
+	^ self
+		model: anObject
+		description: anObject magritteDescription
+]
+
+{ #category : 'instance creation' }
+CFMaMemento class >> model: anObject description: aDescription [
+	aDescription compactIdentityReference ifNil: [
+		aDescription compactIdentityReference: anObject compactIdentityReference ].
+	^ super model: anObject description: aDescription
+]
+
 { #category : 'private - children' }
 CFMaMemento >> allChildMementos [
 	^ Array streamContents: [ :aStream |

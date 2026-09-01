@@ -122,3 +122,51 @@ CFMaEmbeddedTransactionExamples >> resetRestoresEmbeddedValue [
 	self assert: anObject score equals: 30.
 	^ aMemento
 ]
+
+{ #category : 'examples - compact identity' }
+CFMaEmbeddedTransactionExamples >> labelledObjectMementoCarriesDefaultCompactIdentityReference [
+	<gtExample>
+	| anObject aMemento aReference |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 10 status: #active.
+	aMemento := CFMaMemento model: anObject.
+	aReference := aMemento magritteDescription compactIdentityReference.
+
+	self assert: aReference isNotNil.
+	self assert: aReference asContainer children size equals: 3.
+	self assert: aReference asContainer children first accessor equals: #icon.
+	self assert: aReference asContainer children second accessor equals: #label.
+	self assert: aReference asContainer children third accessor equals: #identifier.
+	^ aMemento
+]
+
+{ #category : 'examples - compact identity' }
+CFMaEmbeddedTransactionExamples >> embeddedChildMementoCarriesDefaultCompactIdentityReference [
+	<gtExample>
+	| aModel anObject aDescription aParentMemento aChildMemento |
+	aModel := CFMaFormShowcase new.
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 10 status: #active.
+	aModel listObject: anObject.
+	aDescription := aModel listObjectDescription.
+	aParentMemento := CFMaMemento model: aModel.
+	aChildMemento := aParentMemento childMementoFor: anObject inRelation: aDescription.
+
+	self assert: aChildMemento magritteDescription compactIdentityReference isNotNil.
+	self assert: aChildMemento magritteDescription compactIdentityReference asContainer children size equals: 3.
+	^ aChildMemento
+]
+
+{ #category : 'examples - compact identity' }
+CFMaEmbeddedTransactionExamples >> explicitContainerCompactIdentityReferenceOverridesObjectDefault [
+	<gtExample>
+	| anObject aDescription anExplicitReference aMemento |
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 10 status: #active.
+	anExplicitReference := anObject labelDescription asContainer.
+	aDescription := anObject magritteDescription
+		compactIdentityReference: anExplicitReference;
+		yourself.
+	aMemento := CFMaMemento model: anObject description: aDescription.
+
+	self assert: aMemento magritteDescription compactIdentityReference == anExplicitReference.
+	^ aMemento
+]
+

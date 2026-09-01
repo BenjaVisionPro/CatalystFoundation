@@ -630,9 +630,7 @@ CFMaDetailPresentationExamples >> detailToManyListUsesRelationReferenceInsteadOf
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
 	aModel listItems: { anObject }.
 	aDescription := aModel listItemsDescription
-		reference: (MAContainer new
-			add: (MANumberDescription new accessor: #score; yourself);
-			yourself);
+		reference: (MANumberDescription new accessor: #score; yourself) asContainer;
 		yourself.
 	aContainer := MAContainer new
 		add: aDescription;
@@ -1326,20 +1324,12 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 		group: 'General';
 		categories: #(main);
 		yourself.
-	aContainer := MAContainer new
-		add: anIconDescription;
-		add: anIdentifierDescription;
-		add: aLabelDescription;
-		yourself.
+	aContainer := anIconDescription, anIdentifierDescription, aLabelDescription.
 	aPresentation := CFMaDetailPresentation new description: aContainer; yourself.
 
 	self assert: (aPresentation compactIdentityDescriptionsIn: aContainer children) isEmpty.
 
-	aReference := MAContainer new
-		add: anIconDescription copy;
-		add: aLabelDescription copy;
-		add: anIdentifierDescription copy;
-		yourself.
+	aReference := anIconDescription copy, aLabelDescription copy, anIdentifierDescription copy.
 	aContainer compactIdentityReference: aReference.
 	theDescriptions := aPresentation compactIdentityDescriptionsIn: aContainer children.
 	self assert: theDescriptions size equals: 3.
@@ -1353,11 +1343,7 @@ CFMaDetailPresentationExamples >> compactObjectRendersReferenceDescription [
 	anObject := CFMaFormShowcase new.
 	anObject label: 'Compact object'.
 	aMemento := CFMaMemento model: anObject.
-	aReference := MAContainer new
-		add: anObject iconDescription;
-		add: anObject labelDescription;
-		add: anObject identifierDescription;
-		yourself.
+	aReference := anObject iconDescription, anObject labelDescription, anObject identifierDescription.
 	anElement := CFCompactObjectElement new
 		memento: aMemento;
 		reference: aReference;

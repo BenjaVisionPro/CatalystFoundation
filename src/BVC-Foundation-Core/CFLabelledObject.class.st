@@ -40,3 +40,9 @@ CFLabelledObject >> labelDescription [
 		cfSerializable: true;
 		yourself
 ]
+
+{ #category : 'descriptions' }
+CFLabelledObject >> compactIdentityReference [
+	^ self iconDescription, self labelDescription, self identifierDescription
+]
+

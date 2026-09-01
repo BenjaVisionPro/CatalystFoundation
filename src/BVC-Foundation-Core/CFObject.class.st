@@ -59,3 +59,9 @@ CFObject >> initializeInContext: aContext [
 { #category : 'configuration lifecycle' }
 CFObject >> removeFromRelationInContext: aContext [
 ]
+
+{ #category : 'descriptions' }
+CFObject >> compactIdentityReference [
+	^ self iconDescription asContainer
+]
+
