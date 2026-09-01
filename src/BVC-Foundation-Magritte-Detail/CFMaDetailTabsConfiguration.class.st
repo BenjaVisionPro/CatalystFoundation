@@ -2,7 +2,22 @@
 
 Class {
 	#name : 'CFMaDetailTabsConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaDetailGroupPresentationConfiguration',
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
 }
+
+{ #category : 'private - presentation' }
+CFMaDetailTabsConfiguration >> addGroup: aGroup label: aLabel to: aGroupElement [
+	^ aGroupElement addTabGroup: aGroup label: aLabel
+]
+
+{ #category : 'private - presentation' }
+CFMaDetailTabsConfiguration >> newGroupsElementFor: aGroupElement [
+	^ aGroupElement newTabGroupsElement
+]
+
+{ #category : 'private - presentation' }
+CFMaDetailTabsConfiguration >> updateGroupSpacingIn: aGroupElement [
+	^ self
+]

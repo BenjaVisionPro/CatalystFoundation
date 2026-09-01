@@ -18,7 +18,8 @@ CFMaDetailGroupConfiguration >> initialize [
 	super initialize.
 	categories := Dictionary new.
 	reservedAccessorySlots := 0.
-	labelVisible := true
+	labelVisible := true.
+	presentation := CFMaDetailDefaultGroupConfiguration new
 ]
 
 { #category : 'configuration' }

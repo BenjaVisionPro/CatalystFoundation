@@ -2,7 +2,7 @@
 
 Class {
 	#name : 'CFMaDetailButtonBarConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaDetailGroupPresentationConfiguration',
 	#instVars : [
 		'icons',
 		'iconOnly'
@@ -40,4 +40,19 @@ CFMaDetailButtonBarConfiguration >> iconFor: aCategory [
 { #category : 'testing' }
 CFMaDetailButtonBarConfiguration >> isIconOnly [
 	^ iconOnly
+]
+
+{ #category : 'private - presentation' }
+CFMaDetailButtonBarConfiguration >> addGroup: aGroup label: aLabel to: aGroupElement [
+	^ aGroupElement addButtonBarGroup: aGroup label: aLabel
+]
+
+{ #category : 'private - presentation' }
+CFMaDetailButtonBarConfiguration >> newGroupsElementFor: aGroupElement [
+	^ aGroupElement newButtonBarGroupsElementConfiguredBy: self
+]
+
+{ #category : 'private - presentation' }
+CFMaDetailButtonBarConfiguration >> updateGroupSpacingIn: aGroupElement [
+	^ self
 ]

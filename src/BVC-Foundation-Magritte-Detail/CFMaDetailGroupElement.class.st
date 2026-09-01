@@ -41,18 +41,31 @@ CFMaDetailGroupElement >> addCompositionElement: anElement [
 CFMaDetailGroupElement >> addGroup: aGroup label: aLabel [
 	currentCard := nil.
 	self ensureGroups.
-	(configuration presentation isKindOf: CFMaDetailTabsConfiguration)
-		ifTrue: [
-			aGroup margin: (BlInsets top: self groupSpacing).
-			^ groups addTab: (BrTab new
-				aptitude: BrGlamorousTabAptitude new;
-				label: aLabel asString;
-				stencil: [ aGroup ];
-				yourself) ].
-	(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
-		ifTrue: [ ^ groups addGroup: aGroup label: aLabel ].
+	^ configuration presentation
+		addGroup: aGroup
+		label: aLabel
+		to: self
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> addButtonBarGroup: aGroup label: aLabel [
+	^ groups addGroup: aGroup label: aLabel
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> addDefaultGroup: aGroup [
 	groups addChild: aGroup.
 	self updateGroupSpacing
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> addTabGroup: aGroup label: aLabel [
+	aGroup margin: (BlInsets top: self groupSpacing).
+	^ groups addTab: (BrTab new
+		aptitude: BrGlamorousTabAptitude new;
+		label: aLabel asString;
+		stencil: [ aGroup ];
+		yourself)
 ]
 
 { #category : 'accessing' }
@@ -76,32 +89,45 @@ CFMaDetailGroupElement >> currentCard [
 { #category : 'private' }
 CFMaDetailGroupElement >> ensureGroups [
 	groups ifNotNil: [ ^ groups ].
-	groups := (configuration presentation isKindOf: CFMaDetailTabsConfiguration)
-		ifTrue: [
-			BrTabGroup new
-				hMatchParent;
-				vFitContent;
-				aptitude: BrGlamorousTabGroupAptitude new;
-				yourself ]
-		ifFalse: [
-			(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration)
-				ifTrue: [ CFMaDetailButtonBarElement new configuration: configuration presentation; yourself ]
-				ifFalse: [
-					BrVerticalPane new
-						hMatchParent;
-						vFitContent;
-						cellSpacing: 0;
-						margin: BlInsets empty;
-						yourself ] ].
+	groups := configuration presentation newGroupsElementFor: self.
 	self addCompositionElement: groups.
 	^ groups
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> newButtonBarGroupsElementConfiguredBy: aConfiguration [
+	^ CFMaDetailButtonBarElement new
+		configuration: aConfiguration;
+		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> newDefaultGroupsElement [
+	^ BrVerticalPane new
+		hMatchParent;
+		vFitContent;
+		cellSpacing: 0;
+		margin: BlInsets empty;
+		yourself
+]
+
+{ #category : 'private - groups' }
+CFMaDetailGroupElement >> newTabGroupsElement [
+	^ BrTabGroup new
+		hMatchParent;
+		vFitContent;
+		aptitude: BrGlamorousTabGroupAptitude new;
+		yourself
 ]
 
 { #category : 'private - layout' }
 CFMaDetailGroupElement >> updateGroupSpacing [
 	groups ifNil: [ ^ self ].
-	(configuration presentation isKindOf: CFMaDetailTabsConfiguration) ifTrue: [ ^ self ].
-	(configuration presentation isKindOf: CFMaDetailButtonBarConfiguration) ifTrue: [ ^ self ].
+	^ configuration presentation updateGroupSpacingIn: self
+]
+
+{ #category : 'private - layout' }
+CFMaDetailGroupElement >> updateDefaultGroupSpacing [
 	groups children
 		withIndexDo: [ :aGroup :anIndex |
 			| aMargin |

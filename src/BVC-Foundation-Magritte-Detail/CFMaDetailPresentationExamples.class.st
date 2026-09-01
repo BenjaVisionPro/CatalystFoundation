@@ -74,6 +74,16 @@ CFMaDetailPresentationExamples >> groupConfigurationsAreCreatedLazily [
 ]
 
 { #category : 'examples' }
+CFMaDetailPresentationExamples >> groupDefaultsToOrdinaryPresentation [
+	<gtExample>
+	| aConfiguration |
+	aConfiguration := CFMaDetailGroupConfiguration new.
+
+	self assert: aConfiguration presentation class equals: CFMaDetailDefaultGroupConfiguration.
+	^ aConfiguration
+]
+
+{ #category : 'examples' }
 CFMaDetailPresentationExamples >> groupCanPresentChildrenAsTabs [
 	<gtExample>
 	| aConfiguration aTabs |
