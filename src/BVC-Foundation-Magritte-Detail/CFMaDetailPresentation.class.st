@@ -61,7 +61,7 @@ CFMaDetailPresentation >> addCompactObjectUsing: aDescription [
 		beLarge;
 		showIdentifier;
 		memento: self memento;
-		padding: self rowInsets;
+		padding: (BlInsets top: 6 right: 0 bottom: 6 left: 0);
 		yourself.
 	(self presentationGroupForDescription: aDescription)
 		addContent: anElement
