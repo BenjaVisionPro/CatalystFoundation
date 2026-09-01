@@ -88,11 +88,8 @@ CFMaPhlowNavigation class >> ensureTreePagerPolicyIn: aPagerElement [
 CFMaPhlowNavigation class >> immediateLinkFrom: aPaneModel showing: anObject [
 	^ aPaneModel followingLinks
 		detect: [ :aLink |
-			| aTool |
 			aLink isRemoved ifFalse: [
-				aTool := aLink paneModel phlowTool.
-				(aTool respondsTo: #object)
-					and: [ aTool object == anObject ] ] ]
+				aLink paneModel phlowTool object == anObject ] ]
 		ifNone: [ nil ]
 ]
 
@@ -114,10 +111,7 @@ CFMaPhlowNavigation class >> closeSpawnedInspectorFrom: anElement object: anObje
 CFMaPhlowNavigation class >> immediateSpawnedLinkFrom: aPaneModel showing: anObject [
 	^ aPaneModel spawnedFollowingLinks
 		detect: [ :aLink |
-			| aTool |
-			aTool := aLink paneModel phlowTool.
-			(aTool respondsTo: #object)
-				and: [ aTool object == anObject ] ]
+			aLink paneModel phlowTool object == anObject ]
 		ifNone: [ nil ]
 ]
 
