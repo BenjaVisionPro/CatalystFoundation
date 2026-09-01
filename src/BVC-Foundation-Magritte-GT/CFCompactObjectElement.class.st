@@ -37,28 +37,29 @@ CFCompactObjectElement >> iconContainer [
 
 { #category : 'initialization' }
 CFCompactObjectElement >> initialize [
+	| titleAptitude identifierAptitude |
 	super initialize.
 
 	iconContainer := CFIconTile new
 		beSmall;
 		yourself.
+	titleAptitude := BrGlamorousLabelAptitude new
+		glamorousRegularFont;
+		yourself.
 	titleElement := BrLabel new
 		hMatchParent;
 		vFitContent;
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFont;
-			foreground: (Color black alpha: 0.88);
-			yourself);
+		aptitude: titleAptitude;
+		yourself.
+	identifierAptitude := BrGlamorousLabelAptitude new
+		glamorousRegularFont;
+		fontSize: 11;
 		yourself.
 	identifierElement := BrLabel new
 		hMatchParent;
 		vFitContent;
 		visibility: BlVisibility gone;
-		aptitude: (BrGlamorousLabelAptitude new
-			glamorousRegularFont;
-			fontSize: 11;
-			foreground: (Color black alpha: 0.48);
-			yourself);
+		aptitude: identifierAptitude;
 		yourself.
 	showsIdentifier := false.
 
@@ -76,6 +77,14 @@ CFCompactObjectElement >> initialize [
 			addChild: titleElement as: #title;
 			addChild: identifierElement as: #identifier;
 			yourself) as: #text;
+		addAptitude: (BrLazyStyleCommonAptitude new
+			@ titleAptitude label;
+			default: [ :aStyle |
+				aStyle foreground: self theme typography primaryForeground ]);
+		addAptitude: (BrLazyStyleCommonAptitude new
+			@ identifierAptitude label;
+			default: [ :aStyle |
+				aStyle foreground: self theme typography tertiaryForeground ]);
 		yourself
 ]
 
