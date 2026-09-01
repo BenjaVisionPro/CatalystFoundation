@@ -105,6 +105,10 @@ CFMaDetailReferenceElementBuilder >> visitElementDescription: aDescription [
 
 	(self hasTransactionalValueFor: aDescription)
 		ifTrue: [
+			self
+				updateLabel: aLabel
+				value: (memento readObservableValueUsing: aDescription) currentValue
+				description: aDescription.
 			aLabel withAsyncSinkDo: [ :anElementSink |
 				anElementSink
 					sink: AsyncPeekSink new;
@@ -132,6 +136,11 @@ CFMaDetailReferenceElementBuilder >> visitFontAwesomeIconDescription: aDescripti
 
 	(self hasTransactionalValueFor: aDescription)
 		ifTrue: [
+			self
+				updateIconHost: aHost
+				value: (memento readObservableValueUsing: aDescription) currentValue
+				description: aDescription
+				transactional: true.
 			aHost withAsyncSinkDo: [ :anElementSink |
 				anElementSink
 					sink: AsyncPeekSink new;
