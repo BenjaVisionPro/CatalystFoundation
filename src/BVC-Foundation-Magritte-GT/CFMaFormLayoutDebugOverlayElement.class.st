@@ -15,13 +15,13 @@ Class {
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement class >> debugIconOff [
-	^ BrGlamorousVectorIcons debug
+	^ [ FontAwesomeIcons defaultStyle icon: #atom ] asStencil
 ]
 
 { #category : 'accessing' }
 CFMaFormLayoutDebugOverlayElement class >> debugIconOn [
-	^ [ BrGlamorousVectorIcons debug asElement
-		background: Color red;
+	^ [ (FontAwesomeIcons defaultStyle icon: #atom)
+		color: Color red;
 		yourself ] asStencil
 ]
 

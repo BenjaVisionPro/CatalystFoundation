@@ -39,7 +39,7 @@ CFObject >> gtMagritteFor: aView [
 					setEnabled: false
 					in: aTab viewContentElement
 					button: aButton ];
-		actionButtonIcon: BrGlamorousVectorIcons inspect
+		actionButtonIcon: [ FontAwesomeIcons defaultStyle icon: #file ] asStencil
 			label: 'Memento'
 			tooltip: 'Inspect Memento'
 			action: [ :aButton :aTab |
