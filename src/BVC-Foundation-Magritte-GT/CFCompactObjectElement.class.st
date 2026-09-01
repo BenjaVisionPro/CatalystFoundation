@@ -65,9 +65,9 @@ CFCompactObjectElement >> initialize [
 	self
 		hMatchParent;
 		vFitContent;
-		cellSpacing: 8;
 		padding: (BlInsets top: 5 left: 6 bottom: 5 right: 6);
 		layout: BlLinearLayout horizontal alignCenterLeft;
+		cellSpacing: 8;
 		addChild: iconContainer as: #icon;
 		addChild: (BrVerticalPane new
 			hMatchParent;
