@@ -5,8 +5,7 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'relationContexts',
-		'compactIdentityReference'
+		'relationContexts'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -61,30 +60,20 @@ CFMaDetailPresentation >> addCompactIdentityUsing: aDescription [
 	anElement := CFCompactObjectElement new
 		beLarge;
 		memento: self memento;
-		reference: compactIdentityReference;
+		reference: self objectDescription compactIdentityReference;
 		padding: (BlInsets top: 6 right: 0 bottom: 6 left: 0);
 		yourself.
 	(self presentationGroupForDescription: aDescription)
 		addContent: anElement
 ]
 
-{ #category : 'configuration' }
-CFMaDetailPresentation >> compactIdentityReference [
-	^ compactIdentityReference
-]
-
-{ #category : 'configuration' }
-CFMaDetailPresentation >> compactIdentityReference: aReferenceDescription [
-	compactIdentityReference := aReferenceDescription
-]
-
 { #category : 'private - compact identity' }
 CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
 	| theMatchedDescriptions |
-	compactIdentityReference ifNil: [ ^ #() ].
+	self objectDescription compactIdentityReference ifNil: [ ^ #() ].
 	theMatchedDescriptions := OrderedCollection new.
 
-	compactIdentityReference asContainer do: [ :aReferenceDescription |
+	self objectDescription compactIdentityReference asContainer do: [ :aReferenceDescription |
 		theDescriptions
 			detect: [ :aDescription | aDescription = aReferenceDescription ]
 			ifFound: [ :aDescription | theMatchedDescriptions add: aDescription ]

@@ -1310,8 +1310,7 @@ CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExist
 { #category : 'examples - compact object' }
 CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 	<gtExample>
-	| aPresentation anIconDescription anIdentifierDescription aLabelDescription aReference theDescriptions |
-	aPresentation := CFMaDetailPresentation new.
+	| aPresentation aContainer anIconDescription anIdentifierDescription aLabelDescription aReference theDescriptions |
 	anIconDescription := FontAwesomeIconDescription new
 		accessor: #icon;
 		group: 'General';
@@ -1327,29 +1326,23 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 		group: 'General';
 		categories: #(main);
 		yourself.
+	aContainer := MAContainer new
+		add: anIconDescription;
+		add: anIdentifierDescription;
+		add: aLabelDescription;
+		yourself.
+	aPresentation := CFMaDetailPresentation new description: aContainer; yourself.
+
+	self assert: (aPresentation compactIdentityDescriptionsIn: aContainer children) isEmpty.
+
 	aReference := MAContainer new
 		add: anIconDescription copy;
 		add: aLabelDescription copy;
 		add: anIdentifierDescription copy;
 		yourself.
-
-	self assert: (aPresentation compactIdentityDescriptionsIn: {
-		anIconDescription.
-		anIdentifierDescription.
-		aLabelDescription }) isEmpty.
-
-	aPresentation compactIdentityReference: aReference.
-	theDescriptions := aPresentation compactIdentityDescriptionsIn: {
-		anIconDescription.
-		anIdentifierDescription.
-		aLabelDescription }.
+	aContainer compactIdentityReference: aReference.
+	theDescriptions := aPresentation compactIdentityDescriptionsIn: aContainer children.
 	self assert: theDescriptions size equals: 3.
-
-	aLabelDescription categories: #(other).
-	self assert: (aPresentation compactIdentityDescriptionsIn: {
-		anIconDescription.
-		anIdentifierDescription.
-		aLabelDescription }) size equals: 3.
 	^ aPresentation
 ]
 

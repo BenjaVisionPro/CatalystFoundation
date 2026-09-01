@@ -4,13 +4,13 @@ Extension { #name : 'CFMaFormShowcase' }
 CFMaFormShowcase >> descriptionContainerDetail: aDescription [
 	<magritteContainer>
 	^ aDescription
+		compactIdentityReference: (MAContainer new
+			add: self iconDescription;
+			add: self labelDescription;
+			add: self identifierDescription;
+			yourself);
 		blocPresentationStencil: [ :aMemento |
 			CFMaDetailPresentation new
-				compactIdentityReference: (MAContainer new
-					add: self iconDescription;
-					add: self labelDescription;
-					add: self identifierDescription;
-					yourself);
 				group: 'Fields' configure: [ :fields |
 					fields
 						reserveAccessorySlots: 2;
