@@ -1308,9 +1308,9 @@ CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExist
 ]
 
 { #category : 'examples - compact object' }
-CFMaDetailPresentationExamples >> compactObjectDescriptionsSharePresentationPath [
+CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 	<gtExample>
-	| aPresentation anIconDescription anIdentifierDescription aLabelDescription theDescriptions |
+	| aPresentation anIconDescription anIdentifierDescription aLabelDescription aReference theDescriptions |
 	aPresentation := CFMaDetailPresentation new.
 	anIconDescription := FontAwesomeIconDescription new
 		accessor: #icon;
@@ -1327,15 +1327,26 @@ CFMaDetailPresentationExamples >> compactObjectDescriptionsSharePresentationPath
 		group: 'General';
 		categories: #(main);
 		yourself.
+	aReference := MAContainer new
+		add: anIconDescription copy;
+		add: aLabelDescription copy;
+		add: anIdentifierDescription copy;
+		yourself.
 
-	theDescriptions := aPresentation compactObjectDescriptionsIn: {
+	self assert: (aPresentation compactIdentityDescriptionsIn: {
+		anIconDescription.
+		anIdentifierDescription.
+		aLabelDescription }) isEmpty.
+
+	aPresentation compactIdentityReference: aReference.
+	theDescriptions := aPresentation compactIdentityDescriptionsIn: {
 		anIconDescription.
 		anIdentifierDescription.
 		aLabelDescription }.
 	self assert: theDescriptions size equals: 3.
 
 	aLabelDescription categories: #(other).
-	self assert: (aPresentation compactObjectDescriptionsIn: {
+	self assert: (aPresentation compactIdentityDescriptionsIn: {
 		anIconDescription.
 		anIdentifierDescription.
 		aLabelDescription }) isEmpty.
@@ -1343,14 +1354,20 @@ CFMaDetailPresentationExamples >> compactObjectDescriptionsSharePresentationPath
 ]
 
 { #category : 'examples - compact object' }
-CFMaDetailPresentationExamples >> compactObjectCanShowIdentifier [
+CFMaDetailPresentationExamples >> compactObjectRendersReferenceDescription [
 	<gtExample>
-	| anObject anElement |
+	| anObject aMemento aReference anElement |
 	anObject := CFMaFormShowcase new.
 	anObject label: 'Compact object'.
+	aMemento := CFMaMemento model: anObject.
+	aReference := MAContainer new
+		add: anObject iconDescription;
+		add: anObject labelDescription;
+		add: anObject identifierDescription;
+		yourself.
 	anElement := CFCompactObjectElement new
-		showIdentifier;
-		object: anObject;
+		memento: aMemento;
+		reference: aReference;
 		yourself.
 
 	self assert: anElement titleText equals: 'Compact object'.

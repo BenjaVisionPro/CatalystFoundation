@@ -3,7 +3,8 @@ Class {
 	#superclass : 'BrStencil',
 	#instVars : [
 		'object',
-		'memento'
+		'memento',
+		'reference'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Stencils',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -17,6 +18,7 @@ CFCompactObjectStencil >> create [
 	memento
 		ifNil: [ anElement object: object ]
 		ifNotNil: [ anElement memento: memento ].
+	anElement reference: reference.
 	^ anElement
 ]
 
@@ -40,4 +42,14 @@ CFCompactObjectStencil >> object [
 CFCompactObjectStencil >> object: anObject [
 	object := anObject.
 	memento := nil
+]
+
+{ #category : 'accessing' }
+CFCompactObjectStencil >> reference [
+	^ reference
+]
+
+{ #category : 'accessing' }
+CFCompactObjectStencil >> reference: aReferenceDescription [
+	reference := aReferenceDescription
 ]

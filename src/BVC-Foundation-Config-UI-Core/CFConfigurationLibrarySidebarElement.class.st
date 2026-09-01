@@ -43,6 +43,10 @@ CFConfigurationLibrarySidebarElement >> createCompactPresentationFor: anAsset [
 	| element |
 	element := CFCompactObjectStencil new
 		object: anAsset;
+		reference: (MAContainer new
+			add: anAsset iconDescription;
+			add: anAsset labelDescription;
+			yourself);
 		create.
 	element
 		vFitContent;

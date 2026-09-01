@@ -5,7 +5,8 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'relationContexts'
+		'relationContexts',
+		'compactIdentityReference'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -34,7 +35,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 	aDescription == self objectDescription ifFalse: [
 		^ super visitContainer: aDescription ].
 
-	compactDescriptions := self compactObjectDescriptionsIn: aDescription children.
+	compactDescriptions := self compactIdentityDescriptionsIn: aDescription children.
 	compactAdded := false.
 	thePresentationItems := OrderedCollection new
 		addAll: aDescription children;
@@ -46,7 +47,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 		(compactDescriptions identityIncludes: each)
 			ifTrue: [
 				compactAdded ifFalse: [
-					self addCompactObjectUsing: each.
+					self addCompactIdentityUsing: each.
 					compactAdded := true ] ]
 			ifFalse: [
 				(each isKindOf: MAActionDescription)
@@ -54,41 +55,51 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 					ifFalse: [ self visit: each ] ] ]
 ]
 
-{ #category : 'private - compact object' }
-CFMaDetailPresentation >> addCompactObjectUsing: aDescription [
+{ #category : 'private - compact identity' }
+CFMaDetailPresentation >> addCompactIdentityUsing: aDescription [
 	| anElement |
 	anElement := CFCompactObjectElement new
 		beLarge;
-		showIdentifier;
 		memento: self memento;
+		reference: compactIdentityReference;
 		padding: (BlInsets top: 6 right: 0 bottom: 6 left: 0);
 		yourself.
 	(self presentationGroupForDescription: aDescription)
 		addContent: anElement
 ]
 
-{ #category : 'private - compact object' }
-CFMaDetailPresentation >> compactObjectDescriptionsIn: theDescriptions [
-	| anIconDescription anIdentifierDescription aLabelDescription |
-	anIconDescription := theDescriptions
-		detect: [ :each | each handlesSelector: #icon ]
-		ifNone: [ ^ #() ].
-	anIdentifierDescription := theDescriptions
-		detect: [ :each | each handlesSelector: #identifier ]
-		ifNone: [ ^ #() ].
-	aLabelDescription := theDescriptions
-		detect: [ :each | each handlesSelector: #label ]
-		ifNone: [ ^ #() ].
-
-	(self description: anIdentifierDescription sharesPresentationPathWith: anIconDescription)
-		ifFalse: [ ^ #() ].
-	(self description: aLabelDescription sharesPresentationPathWith: anIconDescription)
-		ifFalse: [ ^ #() ].
-
-	^ { anIconDescription. anIdentifierDescription. aLabelDescription }
+{ #category : 'configuration' }
+CFMaDetailPresentation >> compactIdentityReference [
+	^ compactIdentityReference
 ]
 
-{ #category : 'private - compact object' }
+{ #category : 'configuration' }
+CFMaDetailPresentation >> compactIdentityReference: aReferenceDescription [
+	compactIdentityReference := aReferenceDescription
+]
+
+{ #category : 'private - compact identity' }
+CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
+	| theMatchedDescriptions anAnchor |
+	compactIdentityReference ifNil: [ ^ #() ].
+	theMatchedDescriptions := OrderedCollection new.
+
+	compactIdentityReference asContainer do: [ :aReferenceDescription |
+		theDescriptions
+			detect: [ :aDescription | aDescription = aReferenceDescription ]
+			ifFound: [ :aDescription | theMatchedDescriptions add: aDescription ]
+			ifNone: [ ^ #() ] ].
+
+	theMatchedDescriptions ifEmpty: [ ^ #() ].
+	anAnchor := theMatchedDescriptions first.
+	(theMatchedDescriptions allSatisfy: [ :aDescription |
+		self description: aDescription sharesPresentationPathWith: anAnchor ])
+		ifFalse: [ ^ #() ].
+
+	^ theMatchedDescriptions
+]
+
+{ #category : 'private - compact identity' }
 CFMaDetailPresentation >> description: aDescription sharesPresentationPathWith: anotherDescription [
 	^ aDescription group = anotherDescription group
 		and: [ aDescription categories = anotherDescription categories ]
