@@ -301,6 +301,7 @@ CFMaFormShowcase >> listItemsDescription [
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		reference: self showcaseItemReferenceDescription;
 		beModifiable;
+		beOrdered;
 		newItemStencil: CFMaNewItemStencilBuilder new;
 		yourself
 ]

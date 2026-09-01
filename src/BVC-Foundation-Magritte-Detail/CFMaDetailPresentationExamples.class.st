@@ -971,6 +971,71 @@ CFMaDetailPresentationExamples >> toManyListRemovalTargetsSelectionOnlyFromSelec
 	^ itemRows first value
 ]
 
+{ #category : 'examples - relations - ordering' }
+CFMaDetailPresentationExamples >> toManyOrderedReorderMovesSingleObjectBeforeTarget [
+	<gtExample>
+	| firstObject secondObject thirdObject fourthObject reordered |
+	firstObject := Object new.
+	secondObject := Object new.
+	thirdObject := Object new.
+	fourthObject := Object new.
+
+	reordered := CFMaBuilderUtility
+		reorderedToManyItems: { firstObject. secondObject. thirdObject. fourthObject }
+		moving: { thirdObject }
+		relativeTo: firstObject
+		after: false.
+
+	self assert: reordered first == thirdObject.
+	self assert: reordered second == firstObject.
+	self assert: reordered third == secondObject.
+	self assert: reordered fourth == fourthObject.
+	^ reordered
+]
+
+{ #category : 'examples - relations - ordering' }
+CFMaDetailPresentationExamples >> toManyOrderedReorderMovesSelectionAsStableBlock [
+	<gtExample>
+	| firstObject secondObject thirdObject fourthObject fifthObject reordered |
+	firstObject := Object new.
+	secondObject := Object new.
+	thirdObject := Object new.
+	fourthObject := Object new.
+	fifthObject := Object new.
+
+	reordered := CFMaBuilderUtility
+		reorderedToManyItems: { firstObject. secondObject. thirdObject. fourthObject. fifthObject }
+		moving: { fourthObject. secondObject }
+		relativeTo: fifthObject
+		after: true.
+
+	self assert: reordered first == firstObject.
+	self assert: reordered second == thirdObject.
+	self assert: reordered third == fifthObject.
+	self assert: reordered fourth == secondObject.
+	self assert: reordered fifth == fourthObject.
+	^ reordered
+]
+
+{ #category : 'examples - relations - ordering' }
+CFMaDetailPresentationExamples >> toManyOrderedReorderOntoDraggedObjectIsNoOp [
+	<gtExample>
+	| firstObject secondObject thirdObject original reordered |
+	firstObject := Object new.
+	secondObject := Object new.
+	thirdObject := Object new.
+	original := { firstObject. secondObject. thirdObject }.
+
+	reordered := CFMaBuilderUtility
+		reorderedToManyItems: original
+		moving: { firstObject. secondObject }
+		relativeTo: secondObject
+		after: true.
+
+	self assert: reordered == original.
+	^ reordered
+]
+
 { #category : 'examples - relations - selection' }
 CFMaDetailPresentationExamples >> relationFocusContextIncludesRowDescendants [
 	<gtExample>

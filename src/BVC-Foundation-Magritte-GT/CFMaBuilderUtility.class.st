@@ -972,6 +972,51 @@ CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: 
 			element: anElement ]
 ]
 
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> reorderedToManyItems: anExistingItems moving: someObjects relativeTo: aTargetObject after: placeAfter [
+	| draggedItems remainingItems targetIndex insertionIndex reorderedItems |
+	draggedItems := anExistingItems select: [ :each |
+		someObjects anySatisfy: [ :aDraggedObject | aDraggedObject == each ] ].
+	draggedItems ifEmpty: [ ^ anExistingItems ].
+	(draggedItems anySatisfy: [ :each | each == aTargetObject ]) ifTrue: [ ^ anExistingItems ].
+
+	remainingItems := anExistingItems reject: [ :each |
+		draggedItems anySatisfy: [ :aDraggedObject | aDraggedObject == each ] ].
+	targetIndex := remainingItems identityIndexOf: aTargetObject ifAbsent: [ ^ anExistingItems ].
+	insertionIndex := placeAfter
+		ifTrue: [ targetIndex + 1 ]
+		ifFalse: [ targetIndex ].
+
+	reorderedItems := OrderedCollection new.
+	remainingItems withIndexDo: [ :each :anIndex |
+		anIndex = insertionIndex ifTrue: [ reorderedItems addAll: draggedItems ].
+		reorderedItems add: each ].
+	insertionIndex = (remainingItems size + 1) ifTrue: [ reorderedItems addAll: draggedItems ].
+	^ anExistingItems species withAll: reorderedItems
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> reorderToManyObjects: someObjects relativeTo: aTargetObject after: placeAfter memento: aMemento using: aDescription element: anElement [
+	| anExistingItems aNewItems |
+	anExistingItems := aMemento readUsing: aDescription.
+	anExistingItems ifNil: [ ^ self ].
+	aNewItems := self
+		reorderedToManyItems: anExistingItems
+		moving: someObjects
+		relativeTo: aTargetObject
+		after: placeAfter.
+	anExistingItems = aNewItems ifTrue: [ ^ self ].
+	[ aDescription validate: aNewItems ]
+		on: Error
+		do: [ :anException | ^ self ].
+	GtMagritteBuilderUtility
+		write: aNewItems
+		using: aDescription
+		memento: aMemento
+		element: anElement
+]
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> removeToManyObject: anObject memento: aMemento using: aDescription element: anElement [
 	^ self

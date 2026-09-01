@@ -1263,6 +1263,71 @@ CFMaDetailPresentation >> removeToManyListObject: anObject fromRow: aRow descrip
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> dragRowsFrom: aRow for: aDescription [
+	| selectedRows |
+	(self relationElementIsSelected: aRow for: aDescription) ifFalse: [ ^ { aRow } ].
+	selectedRows := self selectedRelationElementsFor: aDescription.
+	^ (relationSelectableRows at: aDescription ifAbsent: [ #() ])
+		select: [ :each | selectedRows identityIncludes: each ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> dragItemsFrom: aRow for: aDescription [
+	^ (self dragRowsFrom: aRow for: aDescription) collect: [ :eachRow |
+		| anObject |
+		anObject := relationObjectsByRows at: eachRow.
+		BlDragItem new
+			sourceElement: eachRow;
+			domainObject: anObject;
+			stencil: [ :aDragItem |
+				BrLabel new
+					aptitude: self defaultLabelAptitude;
+					text: (aDescription reference toString: aDragItem domainObject);
+					padding: (BlInsets all: 6);
+					yourself ];
+			yourself ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationDropIsAfterRow: aRow event: anEvent [
+	^ anEvent position y >= aRow bounds inLocal center y
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: aRow description: aDescription event: anEvent [
+	| aTargetObject |
+	aTargetObject := relationObjectsByRows at: aRow ifAbsent: [ ^ self ].
+	CFMaBuilderUtility
+		reorderToManyObjects: someObjects
+		relativeTo: aTargetObject
+		after: (self relationDropIsAfterRow: aRow event: anEvent)
+		memento: self memento
+		using: aDescription
+		element: aRow
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> installToManyListReorderingOn: aRow description: aDescription [
+	aDescription isOrdered ifFalse: [ ^ aRow ].
+
+	aRow addEventHandler: (BlDragHandler new
+		liftItem: [ :aSourceElement |
+			self dragItemsFrom: aSourceElement for: aDescription ]).
+	aRow addEventHandler: (BlDropHandler new
+		acceptItemsSuchThat: [ :aDragItem :aDropArea |
+			(relationSelectableRows at: aDescription ifAbsent: [ #() ])
+				identityIncludes: aDragItem sourceElement ];
+		whenDroppedDo: [ :anEvent |
+			self
+				reorderToManyListObjects: anEvent domainObjects
+				relativeToRow: anEvent currentTarget
+				description: aDescription
+				event: anEvent ];
+		yourself).
+	^ aRow
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock [
 	^ self
 		installRelationInteractionOn: anItemElement
@@ -1637,6 +1702,7 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 				removeToManyListObject: anObject
 				fromRow: theItemElement
 				description: aDescription ].
+	self installToManyListReorderingOn: aRow description: aDescription.
 	^ aRow
 ]
 
