@@ -1196,8 +1196,9 @@ CFMaDetailPresentationExamples >> toOneCreationIsOptIn [
 		yourself.
 
 	self assert: aDescription newItemStencil isNil.
-	aDescription newItemStencil: CFMaNewItemStencilBuilder new.
-	self assert: aDescription newItemStencil isNotNil.
+	self assert: aDescription newItemClassStencil isNil.
+	aDescription newItemClassStencil: [ :aClass | aClass new ].
+	self assert: aDescription newItemClassStencil isNotNil.
 	^ aDescription
 ]
 
@@ -1212,6 +1213,26 @@ CFMaDetailPresentationExamples >> toOneClassesDoNotImplicitlyEnableAdd [
 
 	self assert: (aPresentation newToOneAddElementUsing: aDescription) isNil.
 	^ aDescription
+]
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> nativeNewItemStencilCreatesDomainItemWithoutClassDispatch [
+	<gtExample>
+	| aDescription aCreatedObject aViewModel |
+	aCreatedObject := Object new.
+	aDescription := MAToManyRelationDescription new
+		classes: { Object };
+		newItemStencil: [ aCreatedObject ];
+		yourself.
+	aViewModel := CFMaAddItemViewModel new
+		description: aDescription;
+		stencil: aDescription newItemStencil;
+		yourself.
+
+	self assert: aViewModel classStencil isNil.
+	self assert: (aViewModel createItemForClass: nil) == aCreatedObject.
+	self assert: aViewModel shouldShowNewItemClassChoiceMenu not.
+	^ aViewModel
 ]
 
 { #category : 'examples - relations - adding' }
@@ -1243,9 +1264,9 @@ CFMaDetailPresentationExamples >> addClassAvailabilityDoesNotCreateSpeculativeDo
 	aViewModel := CFMaAddItemViewModel new
 		memento: aMemento;
 		description: aDescription;
-		stencil: ([ :aClass |
+		classStencil: [ :aClass |
 			creationCount := creationCount + 1.
-			aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder);
+			aClass new ];
 		yourself.
 
 	self assert: (aViewModel shouldDisableNewItemClass: CFMaFormShowcaseItem) not.
@@ -1266,9 +1287,9 @@ CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExist
 	aViewModel := CFMaToOneAddItemViewModel new
 		memento: aMemento;
 		description: aDescription;
-		stencil: ([ :aClass |
+		classStencil: [ :aClass |
 			creationCount := creationCount + 1.
-			aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder);
+			aClass new ];
 		yourself.
 
 	self assert: (aViewModel shouldDisableNewItemClass: CFMaFormShowcaseItem).

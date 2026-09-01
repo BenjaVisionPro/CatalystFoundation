@@ -1,6 +1,9 @@
 Class {
 	#name : 'CFMaAddItemViewModel',
 	#superclass : 'GtMagritteAddItemViewModel',
+	#instVars : [
+		'classStencil'
+	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
 }
@@ -23,9 +26,6 @@ CFMaAddItemViewModel >> addItemForClass: aClass from: anElement [
 
 { #category : 'converting' }
 CFMaAddItemViewModel >> asElement [
-	self shouldUseCustomAddItemElement
-		ifTrue: [ ^ self newCustomAddItemElement ].
-
 	self shouldDisableAddButton
 		ifTrue: [ ^ self newDisabledAddButton ].
 
@@ -37,23 +37,14 @@ CFMaAddItemViewModel >> asElement [
 
 { #category : 'private - instance creation' }
 CFMaAddItemViewModel >> createItemForClass: aClass [
-	self stencil ifNil: [
-		aClass ifNil: [ ^ nil ].
-		^ aClass new ].
+	self classStencil ifNotNil: [ :aClassStencil |
+		^ aClassStencil
+			itemClass: aClass;
+			memento: self memento;
+			description: self description;
+			build ].
 
-	(self stencil isKindOf: CFMaNewItemStencilBuilder)
-		ifTrue: [
-			^ self stencil
-				itemClass: aClass;
-				memento: self memento;
-				description: self description;
-				build ].
-
-	(self stencil isKindOf: BrValuableStencil)
-		ifTrue: [
-			self stencil arguments: { aClass. self memento. self description }.
-			^ self stencil create ].
-
+	self stencil ifNil: [ ^ nil ].
 	^ self stencil create
 ]
 
@@ -103,14 +94,6 @@ CFMaAddItemViewModel >> newClassChoiceMenu [
 ]
 
 { #category : 'private - instance creation' }
-CFMaAddItemViewModel >> newCustomAddItemElement [
-	self stencil
-		memento: self memento;
-		description: self description.
-	^ self stencil asElement
-]
-
-{ #category : 'private - instance creation' }
 CFMaAddItemViewModel >> newDisabledAddButton [
 	^ self newImmediateAddButton
 		disable;
@@ -156,7 +139,8 @@ CFMaAddItemViewModel >> onClick: anElement [
 
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> shouldDisableAddButton [
-	^ self stencilRequiresNewItemClass and: [ self hasNewItemClasses not ]
+	self classStencil ifNotNil: [ ^ self hasNewItemClasses not ].
+	^ self stencil isNil
 ]
 
 { #category : 'private - testing' }
@@ -169,17 +153,7 @@ CFMaAddItemViewModel >> shouldDisableNewItemClass: aClass [
 
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> shouldShowNewItemClassChoiceMenu [
-	^ self stencilRequiresNewItemClass and: [ self hasMultipleNewItemClasses ]
-]
-
-{ #category : 'private - testing' }
-CFMaAddItemViewModel >> shouldUseCustomAddItemElement [
-	self stencil ifNil: [ ^ false ].
-	(self stencil isKindOf: CFMaNewItemStencilBuilder)
-		ifTrue: [ ^ false ].
-	(self stencil isKindOf: BrValuableStencil)
-		ifTrue: [ ^ false ].
-	^ self stencil isKindOf: BrStencil
+	^ self classStencil isNotNil and: [ self hasMultipleNewItemClasses ]
 ]
 
 { #category : 'private - accessing' }
@@ -190,16 +164,16 @@ CFMaAddItemViewModel >> singleNewItemClass [
 ]
 
 { #category : 'accessing' }
-CFMaAddItemViewModel >> stencil: aStencil [
-	stencil := aStencil
+CFMaAddItemViewModel >> classStencil [
+	^ classStencil
 ]
 
-{ #category : 'private - testing' }
-CFMaAddItemViewModel >> stencilRequiresNewItemClass [
-	self stencil ifNil: [ ^ self hasNewItemClasses ].
-	(self stencil isKindOf: CFMaNewItemStencilBuilder)
-		ifTrue: [ ^ self hasNewItemClasses ].
-	(self stencil isKindOf: BrValuableStencil)
-		ifFalse: [ ^ false ].
-	^ self stencil valuable numArgs > 0
+{ #category : 'accessing' }
+CFMaAddItemViewModel >> classStencil: aStencil [
+	classStencil := aStencil asStencilBuilder: CFMaNewItemStencilBuilder
+]
+
+{ #category : 'accessing' }
+CFMaAddItemViewModel >> stencil: aStencil [
+	super stencil: aStencil
 ]

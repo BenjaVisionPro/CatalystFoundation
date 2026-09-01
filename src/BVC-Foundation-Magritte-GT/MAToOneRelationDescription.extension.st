@@ -44,9 +44,17 @@ MAToOneRelationDescription >> newItemStencil [
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> newItemStencil: aStencil [
-	(aStencil isKindOf: BrStencil)
-		ifTrue: [ ^ self propertyAt: #newItemStencil put: aStencil ].
+	self propertyAt: #newItemStencil put: aStencil
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> newItemClassStencil [
+	^ self propertyAt: #newItemClassStencil ifAbsent: [ nil ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> newItemClassStencil: aStencil [
 	self
-		propertyAt: #newItemStencil
+		propertyAt: #newItemClassStencil
 		put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
 ]

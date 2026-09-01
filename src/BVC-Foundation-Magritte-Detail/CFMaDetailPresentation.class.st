@@ -1485,13 +1485,17 @@ CFMaDetailPresentation >> relationFocusRows: theRows in: aContainer for: aDescri
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToOneAddElementUsing: aDescription [
-	(aDescription isReadOnly or: [ aDescription newItemStencil isNil ])
+	| aViewModel |
+	(aDescription isReadOnly or: [
+		aDescription newItemStencil isNil and: [ aDescription newItemClassStencil isNil ] ])
 		ifTrue: [ ^ nil ].
-	^ CFMaDetailToOneAddItemViewModel new
+	aViewModel := CFMaDetailToOneAddItemViewModel new
 		memento: self memento;
 		description: aDescription;
-		stencil: aDescription newItemStencil;
-		asElement
+		yourself.
+	aDescription newItemStencil ifNotNil: [ :aStencil | aViewModel stencil: aStencil ].
+	aDescription newItemClassStencil ifNotNil: [ :aStencil | aViewModel classStencil: aStencil ].
+	^ aViewModel asElement
 ]
 
 { #category : 'private - relations' }
@@ -1619,14 +1623,17 @@ CFMaDetailPresentation >> newRelationValueSlotWith: anElement [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
+	| aViewModel |
 	((aDescription isReadOnly or: [ aDescription definitive ])
-		or: [ aDescription newItemStencil isNil ])
+		or: [ aDescription newItemStencil isNil and: [ aDescription newItemClassStencil isNil ] ])
 		ifTrue: [ ^ nil ].
-	^ CFMaDetailAddItemViewModel new
+	aViewModel := CFMaDetailAddItemViewModel new
 		memento: self memento;
 		description: aDescription;
-		stencil: aDescription newItemStencil;
-		asElement
+		yourself.
+	aDescription newItemStencil ifNotNil: [ :aStencil | aViewModel stencil: aStencil ].
+	aDescription newItemClassStencil ifNotNil: [ :aStencil | aViewModel classStencil: aStencil ].
+	^ aViewModel asElement
 ]
 
 { #category : 'private - relations' }

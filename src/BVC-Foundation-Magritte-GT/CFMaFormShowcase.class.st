@@ -275,7 +275,7 @@ CFMaFormShowcase >> listObjectDescription [
 		group: 'To one';
 		priority: 100;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		newItemStencil: CFMaNewItemStencilBuilder new;
+		newItemClassStencil: [ :aClass | aClass new ];
 		reference: self showcaseItemReferenceDescription;
 		yourself
 ]
@@ -303,7 +303,7 @@ CFMaFormShowcase >> listItemsDescription [
 		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		beOrdered;
-		newItemStencil: CFMaNewItemStencilBuilder new;
+		newItemClassStencil: [ :aClass | aClass new ];
 		yourself
 ]
 
@@ -329,7 +329,7 @@ CFMaFormShowcase >> embeddedItemsDescription [
 		reference: self showcaseItemReferenceDescription;
 		beModifiable;
 		fieldConfigure: [ :field | field beEmbeddedForms ];
-		newItemStencil: CFMaNewItemStencilBuilder new;
+		newItemClassStencil: [ :aClass | aClass new ];
 		yourself
 ]
 
@@ -353,7 +353,7 @@ CFMaFormShowcase >> embeddedObjectDescription [
 		group: 'To one';
 		priority: 110;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
-		newItemStencil: CFMaNewItemStencilBuilder new;
+		newItemClassStencil: [ :aClass | aClass new ];
 		reference: self showcaseItemReferenceDescription;
 		fieldConfigure: [ :field | field beEmbeddedForm ];
 		yourself
