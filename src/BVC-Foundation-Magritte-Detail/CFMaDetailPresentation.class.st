@@ -58,6 +58,7 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 CFMaDetailPresentation >> addCompactObjectUsing: aDescription [
 	| anElement |
 	anElement := CFCompactObjectElement new
+		beLarge;
 		showIdentifier;
 		memento: self memento;
 		padding: self rowInsets;

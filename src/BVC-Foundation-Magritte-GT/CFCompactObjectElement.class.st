@@ -7,7 +7,8 @@ Class {
 		'iconContainer',
 		'titleElement',
 		'identifierElement',
-		'showsIdentifier'
+		'showsIdentifier',
+		'iconSize'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -39,6 +40,7 @@ CFCompactObjectElement >> iconContainer [
 CFCompactObjectElement >> initialize [
 	super initialize.
 
+	iconSize := 16.
 	iconContainer := BrFrame new
 		hExact: 20;
 		vExact: 20;
@@ -79,6 +81,32 @@ CFCompactObjectElement >> initialize [
 			addChild: identifierElement as: #identifier;
 			yourself) as: #text;
 		yourself
+]
+
+
+{ #category : 'configuration - icon size' }
+CFCompactObjectElement >> beSmall [
+	^ self iconSize: 20
+]
+
+{ #category : 'configuration - icon size' }
+CFCompactObjectElement >> beMedium [
+	^ self iconSize: 28
+]
+
+{ #category : 'configuration - icon size' }
+CFCompactObjectElement >> beLarge [
+	^ self iconSize: 44
+]
+
+{ #category : 'private - configuration' }
+CFCompactObjectElement >> iconSize: aNumber [
+	iconSize := aNumber.
+	iconContainer
+		hExact: aNumber;
+		vExact: aNumber.
+	self refreshIcon.
+	^ self
 ]
 
 { #category : 'accessing' }
@@ -148,7 +176,7 @@ CFCompactObjectElement >> refreshIcon [
 
 	iconContainer visibility: BlVisibility visible.
 	anIconElement := (FontAwesomeIcons defaultStyle icon: anIconName)
-		height: 16;
+		size: iconSize asPoint;
 		constraintsDo: [ :c |
 			c frame horizontal alignCenter.
 			c frame vertical alignCenter ];
