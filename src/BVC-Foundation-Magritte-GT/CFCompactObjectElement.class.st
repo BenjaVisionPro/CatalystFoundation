@@ -114,10 +114,9 @@ CFCompactObjectElement >> refresh [
 CFCompactObjectElement >> refreshIcon [
 	| anIconName anIconElement aDescription |
 	iconContainer removeChildren.
-	(object notNil and: [ object respondsTo: #iconDescription ])
-		ifFalse: [
-			iconContainer visibility: BlVisibility gone.
-			^ self ].
+	object ifNil: [
+		iconContainer visibility: BlVisibility gone.
+		^ self ].
 
 	aDescription := object iconDescription.
 	anIconName := object icon ifNil: [ aDescription default ].
@@ -168,9 +167,7 @@ CFCompactObjectElement >> titleText [
 { #category : 'private - accessing' }
 CFCompactObjectElement >> titleValueFromObject [
 	object ifNil: [ ^ nil ].
-	^ (object respondsTo: #label)
-		ifTrue: [ object label ]
-		ifFalse: [ nil ]
+	^ object label
 ]
 
 { #category : 'private - updating' }
