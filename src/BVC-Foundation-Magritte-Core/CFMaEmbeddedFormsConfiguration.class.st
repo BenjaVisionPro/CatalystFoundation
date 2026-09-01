@@ -2,7 +2,7 @@
 
 Class {
 	#name : 'CFMaEmbeddedFormsConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaFieldRepresentationConfiguration',
 	#instVars : [
 		'relationRowVisible',
 		'presentationConfiguration'

@@ -541,20 +541,18 @@ CFMaDetailPresentation >> prepareEditorFocusChromeIn: aFieldElement [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
-	| aRepresentation aDisplayBlock anIconBlock |
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	(aRepresentation isKindOf: CFMaColourPickerConfiguration) ifTrue: [
-		^ self
-			addSingleOptionColourPickerUsing: aDescription
-			configuration: aRepresentation ].
-	aDisplayBlock := ((aRepresentation isKindOf: CFMaPopupConfiguration)
-		and: [ aRepresentation displayBlock notNil ])
-		ifTrue: [ aRepresentation displayBlock ]
-		ifFalse: [ [ :aValue | aDescription displayStringFor: aValue ] ].
+	^ (self fieldConfigurationFor: aDescription) representation
+		addSingleOptionUsing: aDescription
+		toDetailPresentation: self
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock [
+	| anIconBlock |
 	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
 		ifTrue: [ aDescription blocOptionIconStencil ]
 		ifFalse: [ nil ].
-	self
+	^ self
 		addPopupFieldUsing: aDescription
 		values: aDescription options
 		display: aDisplayBlock
@@ -1779,15 +1777,14 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitNumberDescription: aDescription [
-	| aRepresentation |
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	(aRepresentation isKindOf: CFMaTextConfiguration) ifTrue: [
-		^ super visitNumberDescription: aDescription ].
-	(aRepresentation isKindOf: CFMaPopupConfiguration) ifTrue: [
-		^ self addNumberPopupUsing: aDescription configuration: aRepresentation ].
-	(aRepresentation isKindOf: CFMaSliderConfiguration) ifTrue: [
-		^ self addNumberSliderUsing: aDescription ].
-	^ self error: 'Unsupported number field representation'
+	^ (self fieldConfigurationFor: aDescription) representation
+		addNumberUsing: aDescription
+		toDetailPresentation: self
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addTextNumberUsing: aDescription [
+	^ super visitNumberDescription: aDescription
 ]
 
 { #category : 'visiting-description' }
@@ -1805,25 +1802,22 @@ CFMaDetailPresentation >> visitToManyScalarRelationDescription: aDescription [
 
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitToManyRelationDescription: aDescription [
-	| aRepresentation |
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
-		(aDescription hasProperty: #blocListStencil) ifTrue: [
-			^ super visitToManyRelationDescription: aDescription ].
-		^ self addToManyListUsing: aDescription ].
-	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
-		^ self addToManyEmbeddedUsing: aDescription ].
-	^ self error: 'Unsupported to-many relation representation'
+	^ (self fieldConfigurationFor: aDescription) representation
+		addToManyRelationUsing: aDescription
+		toDetailPresentation: self
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addListToManyUsing: aDescription [
+	(aDescription hasProperty: #blocListStencil) ifTrue: [
+		^ super visitToManyRelationDescription: aDescription ].
+	^ self addToManyListUsing: aDescription
 ]
 
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitToOneRelationDescription: aDescription [
-	| aRepresentation |
-	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
-	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
-		^ self addToOneListUsing: aDescription ].
-	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
-		^ self addToOneEmbeddedUsing: aDescription ].
-	^ self error: 'Unsupported to-one relation representation'
+	^ (self fieldConfigurationFor: aDescription) representation
+		addToOneRelationUsing: aDescription
+		toDetailPresentation: self
 ]
 

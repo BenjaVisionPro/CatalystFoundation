@@ -2,7 +2,7 @@
 
 Class {
 	#name : 'CFMaTextConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaFieldRepresentationConfiguration',
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
 	#tag : 'Field'

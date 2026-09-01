@@ -3,7 +3,7 @@ Magritte single-option field. Domain options remain owned by the description."
 
 Class {
 	#name : 'CFMaColourPickerConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaFieldRepresentationConfiguration',
 	#instVars : [
 		'colourBlock',
 		'labelBlock'

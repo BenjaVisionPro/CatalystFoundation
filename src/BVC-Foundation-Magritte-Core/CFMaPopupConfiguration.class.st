@@ -2,7 +2,7 @@
 
 Class {
 	#name : 'CFMaPopupConfiguration',
-	#superclass : 'Object',
+	#superclass : 'CFMaFieldRepresentationConfiguration',
 	#instVars : [
 		'values',
 		'displayBlock'
