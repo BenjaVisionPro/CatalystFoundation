@@ -502,6 +502,31 @@ CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeChildHostS
 ]
 
 { #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> genericToOneListStencilUsesRelationReference [
+	<gtExample>
+	| anObject aDescription anElement |
+	anObject := CFMaFormShowcaseItem new
+		score: 40;
+		yourself.
+	aDescription := MAToOneRelationDescription new
+		classes: { CFMaFormShowcaseItem };
+		reference: (MANumberDescription new accessor: #score; yourself);
+		yourself.
+
+	anElement := aDescription blocItemStencil
+		listElement: BrSimpleList new;
+		rowValue: (CFMaViewModel forObject: anObject);
+		rowIndex: 1;
+		build.
+
+	self assert: anElement class equals: BrHorizontalPane.
+	self assert: anElement children size equals: 1.
+	self assert: anElement children first text asString equals: '40'.
+	^ anElement
+]
+
+
+{ #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneListUsesRelationReferenceInsteadOfObjectIdentityProtocol [
 	<gtExample>
 	| aModel anObject aDescription aContainer aMemento anElement aReferenceElement |

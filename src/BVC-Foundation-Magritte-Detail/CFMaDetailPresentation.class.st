@@ -1631,10 +1631,10 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationReferenceElementFor: anObject memento: aChildMemento description: aDescription [
-	^ CFMaDetailReferenceElementBuilder new
+	^ CFMaReferenceElementBuilder new
 		object: anObject;
 		memento: aChildMemento;
-		presentation: self;
+		labelAptitude: self defaultLabelAptitude;
 		buildUsing: aDescription reference
 ]
 

@@ -11,9 +11,9 @@ MAToOneRelationDescription >> blocItemStencil [
 		propertyAt: #blocItemStencil
 		ifAbsentPut: [
 			[ :anItemViewModel :anIndex :aListElement |
-				CFCompactObjectStencil new
+				CFMaReferenceElementBuilder new
 					object: anItemViewModel object;
-					create ] asStencilBuilder: BrListRowStencilBuilder ]
+					buildUsing: self reference ] asStencilBuilder: BrListRowStencilBuilder ]
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }

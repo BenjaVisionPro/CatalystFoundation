@@ -1,5 +1,5 @@
 "
-I build compact, read-only Detail content for a Magritte relation reference.
+I build compact, read-only content for a Magritte relation reference.
 
 I interpret the relation's reference descriptions against the related object. When a
 reference description is also part of the related object's child memento, I observe that
@@ -7,35 +7,45 @@ memento value so the row reflects uncommitted edits. Specialized reference descr
 that are not part of the child transaction are read directly from the related object.
 "
 Class {
-	#name : 'CFMaDetailReferenceElementBuilder',
+	#name : 'CFMaReferenceElementBuilder',
 	#superclass : 'MAVisitor',
 	#instVars : [
 		'object',
 		'memento',
-		'presentation',
+		'labelAptitude',
 		'elements'
 	],
-	#category : 'BVC-Foundation-Magritte-Detail',
-	#package : 'BVC-Foundation-Magritte-Detail'
+	#category : 'BVC-Foundation-Magritte-GT',
+	#package : 'BVC-Foundation-Magritte-GT'
 }
 
 { #category : 'accessing' }
-CFMaDetailReferenceElementBuilder >> memento: aMemento [
+CFMaReferenceElementBuilder >> memento: aMemento [
 	memento := aMemento
 ]
 
 { #category : 'accessing' }
-CFMaDetailReferenceElementBuilder >> object: anObject [
+CFMaReferenceElementBuilder >> object: anObject [
 	object := anObject
 ]
 
+
+{ #category : 'initialization' }
+CFMaReferenceElementBuilder >> initialize [
+	super initialize.
+	labelAptitude := BrGlamorousLabelAptitude new
+		glamorousRegularFont;
+		foreground: (Color black alpha: 0.88);
+		yourself
+]
+
 { #category : 'accessing' }
-CFMaDetailReferenceElementBuilder >> presentation: aPresentation [
-	presentation := aPresentation
+CFMaReferenceElementBuilder >> labelAptitude: anAptitude [
+	labelAptitude := anAptitude
 ]
 
 { #category : 'building' }
-CFMaDetailReferenceElementBuilder >> buildUsing: aReferenceDescription [
+CFMaReferenceElementBuilder >> buildUsing: aReferenceDescription [
 	| aContainer |
 	elements := OrderedCollection new.
 	self visit: aReferenceDescription asContainer.
@@ -53,18 +63,18 @@ CFMaDetailReferenceElementBuilder >> buildUsing: aReferenceDescription [
 ]
 
 { #category : 'private - values' }
-CFMaDetailReferenceElementBuilder >> hasTransactionalValueFor: aDescription [
+CFMaReferenceElementBuilder >> hasTransactionalValueFor: aDescription [
 	memento ifNil: [ ^ false ].
 	^ memento magritteDescription includes: aDescription
 ]
 
 { #category : 'private - values' }
-CFMaDetailReferenceElementBuilder >> staticValueFor: aDescription [
+CFMaReferenceElementBuilder >> staticValueFor: aDescription [
 	^ aDescription read: object
 ]
 
 { #category : 'private - building' }
-CFMaDetailReferenceElementBuilder >> updateIconHost: aHost value: aValue description: aDescription transactional: isTransactional [
+CFMaReferenceElementBuilder >> updateIconHost: aHost value: aValue description: aDescription transactional: isTransactional [
 	| aStencil anIcon |
 	aHost removeChildren.
 	aValue ifNil: [ ^ self ].
@@ -78,7 +88,7 @@ CFMaDetailReferenceElementBuilder >> updateIconHost: aHost value: aValue descrip
 ]
 
 { #category : 'private - building' }
-CFMaDetailReferenceElementBuilder >> updateLabel: aLabel value: aValue description: aDescription [
+CFMaReferenceElementBuilder >> updateLabel: aLabel value: aValue description: aDescription [
 	| aString |
 	aString := aDescription toString: aValue.
 	aLabel
@@ -89,16 +99,16 @@ CFMaDetailReferenceElementBuilder >> updateLabel: aLabel value: aValue descripti
 ]
 
 { #category : 'visiting-description' }
-CFMaDetailReferenceElementBuilder >> visitContainer: aDescription [
+CFMaReferenceElementBuilder >> visitContainer: aDescription [
 	aDescription do: [ :each |
 		each isVisible ifTrue: [ self visit: each ] ]
 ]
 
 { #category : 'visiting-description' }
-CFMaDetailReferenceElementBuilder >> visitElementDescription: aDescription [
+CFMaReferenceElementBuilder >> visitElementDescription: aDescription [
 	| aLabel |
 	aLabel := BrLabel new
-		aptitude: presentation defaultLabelAptitude;
+		aptitude: labelAptitude;
 		fitContent;
 		yourself.
 	elements add: aLabel.
@@ -126,7 +136,7 @@ CFMaDetailReferenceElementBuilder >> visitElementDescription: aDescription [
 ]
 
 { #category : 'visiting-description' }
-CFMaDetailReferenceElementBuilder >> visitFontAwesomeIconDescription: aDescription [
+CFMaReferenceElementBuilder >> visitFontAwesomeIconDescription: aDescription [
 	| aHost |
 	aHost := BrFrame new
 		hFitContent;
