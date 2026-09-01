@@ -1189,8 +1189,52 @@ CFMaDetailPresentation >> dragItemsFrom: aRow for: aDescription [
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationDropIndicator [
+	^ BlElement new
+		background: (self form theme interaction focusedBorderColor
+			blocResolveColorForTheme: self form theme);
+		visibility: BlVisibility hidden;
+		zIndex: 100;
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c horizontal matchParent.
+			c vertical exact: 2.
+			c ignored horizontal alignCenter.
+			c ignored vertical alignTop ];
+		yourself
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> relationDropIsAfterRow: aRow event: anEvent [
 	^ anEvent position y >= aRow bounds inLocal center y
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> showRelationDropIndicator: anIndicator after: placeAfter [
+	anIndicator constraintsDo: [ :c |
+		placeAfter
+			ifTrue: [ c ignored vertical alignBottom ]
+			ifFalse: [ c ignored vertical alignTop ] ].
+	anIndicator visibility: BlVisibility visible
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> relationDropEvent: anEvent includesSourceRow: aRow [
+	^ anEvent items anySatisfy: [ :aDragItem | aDragItem sourceElement == aRow ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> updateRelationDropIndicator: anIndicator forRow: aRow event: anEvent [
+	(self relationDropEvent: anEvent includesSourceRow: aRow) ifTrue: [
+		^ self hideRelationDropIndicator: anIndicator ].
+	self
+		showRelationDropIndicator: anIndicator
+		after: (self relationDropIsAfterRow: aRow event: anEvent)
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> hideRelationDropIndicator: anIndicator [
+	anIndicator visibility: BlVisibility hidden
 ]
 
 { #category : 'private - relations' }
@@ -1208,8 +1252,11 @@ CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: a
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installToManyListReorderingOn: aRow description: aDescription [
+	| aDropIndicator |
 	aDescription isOrdered ifFalse: [ ^ aRow ].
 
+	aDropIndicator := self newRelationDropIndicator.
+	aRow addChild: aDropIndicator.
 	aRow addEventHandler: (BlDragHandler new
 		liftItem: [ :aSourceElement |
 			self dragItemsFrom: aSourceElement for: aDescription ]).
@@ -1217,7 +1264,21 @@ CFMaDetailPresentation >> installToManyListReorderingOn: aRow description: aDesc
 		acceptItemsSuchThat: [ :aDragItem :aDropArea |
 			(relationSelectableRows at: aDescription ifAbsent: [ #() ])
 				identityIncludes: aDragItem sourceElement ];
+		whenDragEnteredDo: [ :anEvent |
+			anEvent mayAcceptItems ifTrue: [
+				self
+					updateRelationDropIndicator: aDropIndicator
+					forRow: aRow
+					event: anEvent ] ];
+		whenDragOverDo: [ :anEvent |
+			self
+				updateRelationDropIndicator: aDropIndicator
+				forRow: aRow
+				event: anEvent ];
+		whenDragLeftDo: [ :anEvent |
+			self hideRelationDropIndicator: aDropIndicator ];
 		whenDroppedDo: [ :anEvent |
+			self hideRelationDropIndicator: aDropIndicator.
 			self
 				reorderToManyListObjects: anEvent domainObjects
 				relativeToRow: anEvent currentTarget
