@@ -1013,7 +1013,7 @@ CFMaDetailPresentation >> relationContextFor: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationElementIsSelected: anElement for: aDescription [
-	^ (self selectedRelationElementsFor: aDescription) identityIncludes: anElement
+	^ (self relationContextFor: aDescription) isSelected: anElement
 ]
 
 { #category : 'private - relations' }
@@ -1045,53 +1045,36 @@ CFMaDetailPresentation >> replaceRelationSelectionWith: theElements for: aDescri
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
-	(self relationContextFor: aDescription) selectionAnchor: anElement.
-	self replaceRelationSelectionWith: { anElement } for: aDescription.
+	self
+		replaceRelationSelectionWith: ((self relationContextFor: aDescription) selectionWithOnly: anElement)
+		for: aDescription.
 	^ anElement
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> toggleRelationElement: anElement for: aDescription [
-	| selectedElements |
-	selectedElements := IdentitySet new.
-	selectedElements addAll: (self selectedRelationElementsFor: aDescription).
-	(selectedElements identityIncludes: anElement)
-		ifTrue: [ selectedElements remove: anElement ]
-		ifFalse: [ selectedElements add: anElement ].
-	self replaceRelationSelectionWith: selectedElements for: aDescription.
+	self
+		replaceRelationSelectionWith: ((self relationContextFor: aDescription) selectionToggling: anElement)
+		for: aDescription.
 	^ anElement
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationRangeTo: anElement for: aDescription [
-	| anAnchor theRows anchorIndex elementIndex firstIndex lastIndex |
-	anAnchor := (self relationContextFor: aDescription) selectionAnchor.
-	anAnchor ifNil: [ ^ self selectRelationElement: anElement for: aDescription ].
-	theRows := (self relationContextFor: aDescription) selectableRows.
-	anchorIndex := theRows identityIndexOf: anAnchor ifAbsent: [ 0 ].
-	elementIndex := theRows identityIndexOf: anElement ifAbsent: [ 0 ].
-	(anchorIndex = 0 or: [ elementIndex = 0 ]) ifTrue: [
-		^ self selectRelationElement: anElement for: aDescription ].
-	firstIndex := anchorIndex min: elementIndex.
-	lastIndex := anchorIndex max: elementIndex.
 	self
-		replaceRelationSelectionWith: (theRows copyFrom: firstIndex to: lastIndex)
+		replaceRelationSelectionWith: ((self relationContextFor: aDescription) selectionRangeTo: anElement)
 		for: aDescription.
 	^ anElement
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationSelectableRows: theRows for: aDescription [
-	| currentSelection retainedSelection anAnchor |
-	(self relationContextFor: aDescription) selectableRows: theRows.
-	currentSelection := self selectedRelationElementsFor: aDescription.
-	retainedSelection := currentSelection select: [ :anElement |
-		theRows identityIncludes: anElement ].
-	retainedSelection size = currentSelection size ifFalse: [
-		self replaceRelationSelectionWith: retainedSelection for: aDescription ].
-	anAnchor := (self relationContextFor: aDescription) selectionAnchor.
-	(anAnchor notNil and: [ (theRows identityIncludes: anAnchor) not ]) ifTrue: [
-		(self relationContextFor: aDescription) clearSelectionAnchor ]
+	| aContext oldSelection retainedSelection |
+	aContext := self relationContextFor: aDescription.
+	oldSelection := aContext selectedElements copy.
+	retainedSelection := aContext selectionRetainedForSelectableRows: theRows.
+	retainedSelection size = oldSelection size ifFalse: [
+		self replaceRelationSelectionWith: retainedSelection for: aDescription ]
 ]
 
 { #category : 'private - relations' }
@@ -1119,11 +1102,7 @@ CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: a
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectedToManyListObjectsFor: aDescription [
-	| selectedElements |
-	selectedElements := self selectedRelationElementsFor: aDescription.
-	^ (self relationContextFor: aDescription) selectableRows
-		select: [ :aRow | selectedElements identityIncludes: aRow ]
-		thenCollect: [ :aRow | (self relationContextFor: aDescription) objectsByRows at: aRow ]
+	^ (self relationContextFor: aDescription) selectedObjects
 ]
 
 { #category : 'private - relations' }
@@ -1150,18 +1129,14 @@ CFMaDetailPresentation >> removeToManyListObject: anObject fromRow: aRow descrip
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> dragRowsFrom: aRow for: aDescription [
-	| selectedRows |
-	(self relationElementIsSelected: aRow for: aDescription) ifFalse: [ ^ { aRow } ].
-	selectedRows := self selectedRelationElementsFor: aDescription.
-	^ (self relationContextFor: aDescription) selectableRows
-		select: [ :each | selectedRows identityIncludes: each ]
+	^ (self relationContextFor: aDescription) dragRowsFrom: aRow
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> dragItemsFrom: aRow for: aDescription [
 	^ (self dragRowsFrom: aRow for: aDescription) collect: [ :eachRow |
 		| anObject |
-		anObject := (self relationContextFor: aDescription) objectsByRows at: eachRow.
+		anObject := (self relationContextFor: aDescription) objectAtRow: eachRow.
 		BlDragItem new
 			sourceElement: eachRow;
 			domainObject: anObject;
@@ -1226,7 +1201,7 @@ CFMaDetailPresentation >> hideRelationDropIndicator: anIndicator [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: aRow description: aDescription event: anEvent [
 	| aTargetObject |
-	aTargetObject := (self relationContextFor: aDescription) objectsByRows at: aRow ifAbsent: [ ^ self ].
+	aTargetObject := (self relationContextFor: aDescription) objectAtRow: aRow ifAbsent: [ ^ self ].
 	CFMaBuilderUtility
 		reorderToManyObjects: someObjects
 		relativeTo: aTargetObject
@@ -1248,8 +1223,8 @@ CFMaDetailPresentation >> installToManyListReorderingOn: aRow description: aDesc
 			self dragItemsFrom: aSourceElement for: aDescription ]).
 	aRow addEventHandler: (BlDropHandler new
 		acceptItemsSuchThat: [ :aDragItem :aDropArea |
-			(self relationContextFor: aDescription) selectableRows
-				identityIncludes: aDragItem sourceElement ];
+			(self relationContextFor: aDescription)
+				includesSelectableRow: aDragItem sourceElement ];
 		whenDragEnteredDo: [ :anEvent |
 			anEvent mayAcceptItems ifTrue: [
 				self
@@ -1696,7 +1671,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 
 	oldItemRows copy do: [ :anAssociation |
 		(itemViewModels identityIncludes: anAssociation key) ifFalse: [
-			(self relationContextFor: aDescription) objectsByRows removeKey: anAssociation value ifAbsent: [ ].
+			(self relationContextFor: aDescription) removeObjectAtRow: anAssociation value.
 			aContainer removeRow: anAssociation value ] ].
 
 	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
@@ -1711,7 +1686,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 		aRow := anAssociation
 			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
-		(self relationContextFor: aDescription) objectsByRows at: aRow put: anObject.
+		(self relationContextFor: aDescription) object: anObject atRow: aRow.
 		targetIndex := headerIndex + anItemIndex.
 		self placeRelationRows: { aRow } in: aContainer startingAt: targetIndex.
 		newItemRows add: anItemViewModel -> aRow ].
