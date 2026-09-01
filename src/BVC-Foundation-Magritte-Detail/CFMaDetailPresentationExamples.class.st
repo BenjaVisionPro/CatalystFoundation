@@ -803,6 +803,85 @@ CFMaDetailPresentationExamples >> relationActiveSelectionKeepsSelectionWhenFocus
 ]
 
 { #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> toManyListSelectionSupportsToggleRangeAndSelectAll [
+	<gtExample>
+	| aPresentation aDescription firstElement secondElement thirdElement fourthElement |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToManyRelationDescription new.
+	firstElement := BlElement new.
+	secondElement := BlElement new.
+	thirdElement := BlElement new.
+	fourthElement := BlElement new.
+	aPresentation
+		relationSelectableRows: { firstElement. secondElement. thirdElement. fourthElement }
+		for: aDescription.
+
+	aPresentation selectRelationElement: firstElement for: aDescription.
+	aPresentation toggleRelationElement: thirdElement for: aDescription.
+	self assert: (aPresentation relationElementIsSelected: firstElement for: aDescription).
+	self assert: (aPresentation relationElementIsSelected: thirdElement for: aDescription).
+	self assert: (aPresentation relationElementIsSelected: secondElement for: aDescription) not.
+
+	aPresentation selectRelationRangeTo: fourthElement for: aDescription.
+	{ firstElement. secondElement. thirdElement. fourthElement } do: [ :anElement |
+		self assert: (aPresentation relationElementIsSelected: anElement for: aDescription) ].
+
+	aPresentation selectRelationElement: secondElement for: aDescription.
+	aPresentation selectAllToManyListRowsFor: aDescription.
+	{ firstElement. secondElement. thirdElement. fourthElement } do: [ :anElement |
+		self assert: (aPresentation relationElementIsSelected: anElement for: aDescription) ].
+	^ fourthElement
+]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> toManyListSelectionReconciliationDropsRemovedRows [
+	<gtExample>
+	| aPresentation aDescription firstElement secondElement |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToManyRelationDescription new.
+	firstElement := BlElement new.
+	secondElement := BlElement new.
+	aPresentation
+		relationSelectableRows: { firstElement. secondElement }
+		for: aDescription.
+	aPresentation selectRelationElement: firstElement for: aDescription.
+	aPresentation toggleRelationElement: secondElement for: aDescription.
+
+	aPresentation
+		relationSelectableRows: { secondElement }
+		for: aDescription.
+	self assert: (aPresentation relationElementIsSelected: firstElement for: aDescription) not.
+	self assert: (aPresentation relationElementIsSelected: secondElement for: aDescription).
+	self assert: firstElement states isSelected not.
+	self assert: secondElement states isSelected.
+	^ secondElement
+]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> relationActiveSelectionAppliesToEverySelectedRow [
+	<gtExample>
+	| aPresentation aDescription firstElement secondElement |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToManyRelationDescription new.
+	firstElement := BlElement new.
+	secondElement := BlElement new.
+	aPresentation
+		relationSelectableRows: { firstElement. secondElement }
+		for: aDescription.
+	aPresentation selectRelationElement: firstElement for: aDescription.
+	aPresentation toggleRelationElement: secondElement for: aDescription.
+
+	aPresentation setRelationActive: true for: aDescription.
+	self assert: (firstElement states hasState: CFMaActiveSelectionState uniqueInstance).
+	self assert: (secondElement states hasState: CFMaActiveSelectionState uniqueInstance).
+
+	aPresentation setRelationActive: false for: aDescription.
+	self assert: (firstElement states hasState: CFMaActiveSelectionState uniqueInstance) not.
+	self assert: (secondElement states hasState: CFMaActiveSelectionState uniqueInstance) not.
+	^ secondElement
+]
+
+{ #category : 'examples - relations - selection' }
 CFMaDetailPresentationExamples >> relationFocusContextIncludesRowDescendants [
 	<gtExample>
 	| aPresentation aRow aChild |
