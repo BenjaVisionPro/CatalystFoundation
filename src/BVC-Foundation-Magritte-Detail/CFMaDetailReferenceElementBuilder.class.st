@@ -107,7 +107,7 @@ CFMaDetailReferenceElementBuilder >> visitElementDescription: aDescription [
 		ifTrue: [
 			self
 				updateLabel: aLabel
-				value: memento readUsing: aDescription
+				value: (memento readUsing: aDescription)
 				description: aDescription.
 			aLabel withAsyncSinkDo: [ :anElementSink |
 				anElementSink
@@ -138,7 +138,7 @@ CFMaDetailReferenceElementBuilder >> visitFontAwesomeIconDescription: aDescripti
 		ifTrue: [
 			self
 				updateIconHost: aHost
-				value: memento readUsing: aDescription
+				value: (memento readUsing: aDescription)
 				description: aDescription
 				transactional: true.
 			aHost withAsyncSinkDo: [ :anElementSink |
