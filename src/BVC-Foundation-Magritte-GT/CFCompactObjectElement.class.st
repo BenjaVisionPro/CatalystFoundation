@@ -7,8 +7,7 @@ Class {
 		'iconContainer',
 		'titleElement',
 		'identifierElement',
-		'showsIdentifier',
-		'iconSize'
+		'showsIdentifier'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -40,11 +39,8 @@ CFCompactObjectElement >> iconContainer [
 CFCompactObjectElement >> initialize [
 	super initialize.
 
-	iconSize := 16.
-	iconContainer := BrFrame new
-		hExact: 20;
-		vExact: 20;
-		layout: BlFrameLayout new;
+	iconContainer := CFIconTile new
+		beSmall;
 		yourself.
 	titleElement := BrLabel new
 		hMatchParent;
@@ -86,26 +82,19 @@ CFCompactObjectElement >> initialize [
 
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beSmall [
-	^ self iconSize: 20
+	iconContainer beSmall.
+	^ self
 ]
 
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beMedium [
-	^ self iconSize: 28
+	iconContainer beMedium.
+	^ self
 ]
 
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beLarge [
-	^ self iconSize: 44
-]
-
-{ #category : 'private - configuration' }
-CFCompactObjectElement >> iconSize: aNumber [
-	iconSize := aNumber.
-	iconContainer
-		hExact: aNumber;
-		vExact: aNumber.
-	self refreshIcon.
+	iconContainer beLarge.
 	^ self
 ]
 
@@ -163,7 +152,6 @@ CFCompactObjectElement >> refresh [
 { #category : 'private - updating' }
 CFCompactObjectElement >> refreshIcon [
 	| anIconName anIconElement aDescription |
-	iconContainer removeChildren.
 	object ifNil: [
 		iconContainer visibility: BlVisibility gone.
 		^ self ].
@@ -175,13 +163,8 @@ CFCompactObjectElement >> refreshIcon [
 		^ self ].
 
 	iconContainer visibility: BlVisibility visible.
-	anIconElement := (FontAwesomeIcons defaultStyle icon: anIconName)
-		size: iconSize asPoint;
-		constraintsDo: [ :c |
-			c frame horizontal alignCenter.
-			c frame vertical alignCenter ];
-		yourself.
-	iconContainer addChild: anIconElement
+	anIconElement := FontAwesomeIcons defaultStyle icon: anIconName.
+	iconContainer icon: anIconElement
 ]
 
 { #category : 'private - updating' }

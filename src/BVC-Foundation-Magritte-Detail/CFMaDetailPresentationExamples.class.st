@@ -1356,6 +1356,7 @@ CFMaDetailPresentationExamples >> compactObjectCanShowIdentifier [
 	self assert: anElement titleText equals: 'Compact object'.
 	self assert: anElement identifierElement text asString equals: anObject identifier asString.
 	self assert: anElement identifierElement visibility equals: BlVisibility visible.
+	self assert: anElement iconContainer class equals: CFIconTile.
 	anElement beSmall.
 	self assert: anElement iconContainer extent equals: 20 @ 20.
 	anElement beMedium.
