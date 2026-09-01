@@ -83,9 +83,9 @@ CFMaDetailAddPopupElement class >> classChoiceContentFor: anAddItemViewModel [
 		background: Color transparent;
 		border: BlBorder empty;
 		addAptitude: (BrShadowAptitude new
-			color: (self theme menu shadowColor blocResolveColorForTheme: self theme);
-			width: self theme menu shadowWidth;
-			offset: self theme menu shadowOffset;
+			color: (aList theme menu shadowColor blocResolveColorForTheme: aList theme);
+			width: aList theme menu shadowWidth;
+			offset: aList theme menu shadowOffset;
 			yourself);
 		addChild: aList;
 		yourself

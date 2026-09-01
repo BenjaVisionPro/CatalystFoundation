@@ -488,7 +488,7 @@ CFMaDetailPresentationExamples >> embeddedFormsRelationRowCanBeHiddenExplicitly 
 		yourself.
 	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
 
-	self deny: aConfiguration representation relationRowVisible.
+	self assert: aConfiguration representation relationRowVisible not.
 	^ aConfiguration
 ]
 
@@ -497,7 +497,7 @@ CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeChildHostS
 	<gtExample>
 	| aHost |
 	aHost := CFMaDetailPresentation new newPresentationHost.
-	self deny: aHost focusability = BlFocusability after.
+	self assert: (aHost focusability = BlFocusability after) not.
 	^ aHost
 ]
 
@@ -507,7 +507,9 @@ CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetail
 	| anObject anElement aDescription aRepresentation |
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
 	aDescription := MAToOneRelationDescription new.
-	anElement := CFMaDetailPresentation new
+	anElement := (CFMaDetailPresentation new
+		form: BrFrame new;
+		yourself)
 		newRelationObjectElementFor: anObject
 		description: aDescription.
 
@@ -673,7 +675,9 @@ CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesStandardRepresentati
 	<gtExample>
 	| anObject aRow aLeadingElement |
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
-	aRow := CFMaDetailPresentation new newRelationObjectIdentityRowFor: anObject.
+	aRow := (CFMaDetailPresentation new
+		form: BrFrame new;
+		yourself) newRelationObjectIdentityRowFor: anObject.
 
 	self assert: aRow class equals: BlElement.
 	self assert: aRow layout class equals: CFMaDetailRowLayout.
