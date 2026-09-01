@@ -1159,3 +1159,66 @@ CFMaDetailPresentationExamples >> reorderedToManyItemsMovesOneOfTwoEqualObjectsB
 	self assert: reordered third == firstObject.
 	^ reordered
 ]
+
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> toManyAddingPreservesCollectionSpeciesAndOrder [
+	<gtExample>
+	| firstObject secondObject newObject existing added |
+	firstObject := Object new.
+	secondObject := Object new.
+	newObject := Object new.
+	existing := OrderedCollection with: firstObject with: secondObject.
+	added := CFMaBuilderUtility toManyItems: existing adding: newObject.
+	self assert: added class equals: OrderedCollection.
+	self assert: added size equals: 3.
+	self assert: added first == firstObject.
+	self assert: added second == secondObject.
+	self assert: added third == newObject.
+	^ added
+]
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> addClassAvailabilityDoesNotCreateSpeculativeDomainObjects [
+	<gtExample>
+	| aModel aDescription aContainer aMemento aViewModel creationCount |
+	creationCount := 0.
+	aModel := CFMaFormShowcase new.
+	aDescription := aModel listItemsDescription.
+	aContainer := MAContainer new add: aDescription; yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aViewModel := CFMaAddItemViewModel new
+		memento: aMemento;
+		description: aDescription;
+		stencil: ([ :aClass |
+			creationCount := creationCount + 1.
+			aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder);
+		yourself.
+
+	self assert: (aViewModel shouldDisableNewItemClass: CFMaFormShowcaseItem) not.
+	self assert: creationCount equals: 0.
+	^ aViewModel
+]
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExistsWithoutCreatingCandidate [
+	<gtExample>
+	| aModel aDescription aContainer aMemento aViewModel creationCount |
+	creationCount := 0.
+	aModel := CFMaFormShowcase new.
+	aModel listObject: (CFMaFormShowcaseItem exampleNamed: 'Existing' score: 10 status: #active).
+	aDescription := aModel listObjectDescription.
+	aContainer := MAContainer new add: aDescription; yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aViewModel := CFMaToOneAddItemViewModel new
+		memento: aMemento;
+		description: aDescription;
+		stencil: ([ :aClass |
+			creationCount := creationCount + 1.
+			aClass new ] asStencilBuilder: CFMaNewItemStencilBuilder);
+		yourself.
+
+	self assert: (aViewModel shouldDisableNewItemClass: CFMaFormShowcaseItem).
+	self assert: creationCount equals: 0.
+	^ aViewModel
+]

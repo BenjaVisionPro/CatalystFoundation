@@ -962,6 +962,49 @@ CFMaBuilderUtility class >> relationSelectionFrom: aListElement indices: theIndi
 		ifFalse: [ theItems ]
 ]
 
+
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> toManyItems: anExistingItems adding: anObject [
+	| theItems |
+	theItems := OrderedCollection new.
+	anExistingItems ifNotNil: [ theItems addAll: anExistingItems ].
+	theItems add: anObject.
+	^ anExistingItems
+		ifNil: [ theItems asArray ]
+		ifNotNil: [ anExistingItems species withAll: theItems ]
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> addToManyObject: anObject memento: aMemento using: aDescription element: anElement [
+	| anExistingItems aNewItems |
+	anObject ifNil: [ ^ self ].
+	anExistingItems := aMemento readUsing: aDescription.
+	aNewItems := self toManyItems: anExistingItems adding: anObject.
+	self
+		writeToManyItems: aNewItems
+		ifChangedFrom: (anExistingItems ifNil: [ #() ])
+		memento: aMemento
+		using: aDescription
+		element: anElement
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> addToOneObject: anObject memento: aMemento using: aDescription element: anElement [
+	| aCurrentValue |
+	anObject ifNil: [ ^ self ].
+	aCurrentValue := aMemento readUsing: aDescription.
+	aCurrentValue ifNotNil: [ ^ self ].
+	[ aDescription validate: anObject ]
+		on: Error
+		do: [ :anException | ^ self ].
+	GtMagritteBuilderUtility
+		write: anObject
+		using: aDescription
+		memento: aMemento
+		element: anElement
+]
+
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: aMemento description: aDescription element: anElement [
 	aListElement selectedItemDo: [ :anItemViewModel :anIndex |

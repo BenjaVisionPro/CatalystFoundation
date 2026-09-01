@@ -14,10 +14,10 @@ CFMaToOneAddItemViewModel >> addItemForClass: aClass from: anElement [
 	aNewItem := self createItemForClass: aClass.
 	aNewItem ifNil: [ ^ self ].
 
-	GtMagritteBuilderUtility
-		write: aNewItem
-		using: self description
+	CFMaBuilderUtility
+		addToOneObject: aNewItem
 		memento: self memento
+		using: self description
 		element: anElement
 ]
 
@@ -52,16 +52,8 @@ CFMaToOneAddItemViewModel >> newImmediateAddButton [
 
 { #category : 'private - testing' }
 CFMaToOneAddItemViewModel >> shouldDisableNewItemClass: aClass [
-	| aNewItem |
-	self memento ifNil: [ ^ true ].
-	self description ifNil: [ ^ true ].
-
-	aNewItem := self createItemForClass: aClass.
-	aNewItem ifNil: [ ^ true ].
-
-	[ self description validate: aNewItem ]
-		on: Error
-		do: [ :anException | ^ true ].
-
-	^ false
+	| aCurrentValue |
+	(super shouldDisableNewItemClass: aClass) ifTrue: [ ^ true ].
+	aCurrentValue := self memento readUsing: self description.
+	^ aCurrentValue isNotNil
 ]

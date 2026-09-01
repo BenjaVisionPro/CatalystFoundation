@@ -7,20 +7,17 @@ Class {
 
 { #category : 'private - adding' }
 CFMaAddItemViewModel >> addItemForClass: aClass from: anElement [
-	| aNewItem anExistingItems aNewItems |
+	| aNewItem |
 	self memento ifNil: [ ^ self ].
 	self description ifNil: [ ^ self ].
 
 	aNewItem := self createItemForClass: aClass.
 	aNewItem ifNil: [ ^ self ].
 
-	anExistingItems := self memento readUsing: self description.
-	aNewItems := anExistingItems copyWith: aNewItem.
-
-	GtMagritteBuilderUtility
-		write: aNewItems
-		using: self description
+	CFMaBuilderUtility
+		addToManyObject: aNewItem
 		memento: self memento
+		using: self description
 		element: anElement
 ]
 
@@ -164,22 +161,10 @@ CFMaAddItemViewModel >> shouldDisableAddButton [
 
 { #category : 'private - testing' }
 CFMaAddItemViewModel >> shouldDisableNewItemClass: aClass [
-	| aNewItem anExistingItems aNewItems |
 	self memento ifNil: [ ^ true ].
 	self description ifNil: [ ^ true ].
-
-	aNewItem := self createItemForClass: aClass.
-	aNewItem ifNil: [ ^ true ].
-
-	anExistingItems := self memento readUsing: self description.
-	anExistingItems ifNil: [ anExistingItems := #() ].
-	aNewItems := anExistingItems copyWith: aNewItem.
-
-	[ self description validate: aNewItems ]
-		on: Error
-		do: [ :anException | ^ true ].
-
-	^ false
+	aClass ifNil: [ ^ true ].
+	^ self description isReadOnly
 ]
 
 { #category : 'private - testing' }
