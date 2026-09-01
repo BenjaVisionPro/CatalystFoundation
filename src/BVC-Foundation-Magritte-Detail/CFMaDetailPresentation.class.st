@@ -548,15 +548,24 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock [
-	| anIconBlock |
+	| anIconBlock aContentBlock |
 	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
 		ifTrue: [ aDescription blocOptionIconStencil ]
+		ifFalse: [ nil ].
+	aContentBlock := (aDescription hasProperty: #blocItemStencil)
+		ifTrue: [
+			[ :aPopup |
+				GtMagritteBuilderUtility
+					newSingleOptionDropdownContent: aPopup
+					memento: self memento
+					description: aDescription ] ]
 		ifFalse: [ nil ].
 	^ self
 		addPopupFieldUsing: aDescription
 		values: aDescription options
 		display: aDisplayBlock
 		icon: anIconBlock
+		content: aContentBlock
 ]
 
 { #category : 'private - building' }
@@ -610,12 +619,23 @@ CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues di
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
+	^ self
+		addPopupFieldUsing: aDescription
+		values: someValues
+		display: aDisplayBlock
+		icon: anIconBlock
+		content: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> addPopupFieldUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock content: aContentBlock [
 	| aPopup aField |
 	aPopup := self
 		newPopupUsing: aDescription
 		values: someValues
 		display: aDisplayBlock
-		icon: anIconBlock.
+		icon: anIconBlock
+		content: aContentBlock.
 	aField := CFMaDetailPopupFieldElement new
 		popup: aPopup;
 		yourself.
@@ -634,6 +654,16 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
+	^ self
+		newPopupUsing: aDescription
+		values: someValues
+		display: aDisplayBlock
+		icon: anIconBlock
+		content: nil
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display: aDisplayBlock icon: anIconBlock content: aContentBlock [
 	| aPopup aDropdownAptitude |
 	aPopup := self
 		newPopupDisplayUsing: aDescription
@@ -646,12 +676,15 @@ CFMaDetailPresentation >> newPopupUsing: aDescription values: someValues display
 				display: aDisplayBlock
 				icon: anIconBlock ]
 		content: [
-			self
-				newPopupContent: aPopup
-				using: aDescription
-				values: someValues
-				display: aDisplayBlock
-				icon: anIconBlock ].
+			aContentBlock
+				ifNil: [
+					self
+						newPopupContent: aPopup
+						using: aDescription
+						values: someValues
+						display: aDisplayBlock
+						icon: anIconBlock ]
+				ifNotNil: [ aContentBlock value: aPopup ] ].
 	aDropdownAptitude
 		pinRowIndexUsing: [
 			| currentValue |
@@ -703,13 +736,6 @@ CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: so
 { #category : 'private - building' }
 CFMaDetailPresentation >> newPopupContent: aPopup using: aDescription values: someValues display: aDisplayBlock icon: anIconBlock [
 	| aList aCurrentValue aCurrentIndex |
-	((aDescription isKindOf: MAOptionDescription)
-		and: [ aDescription hasProperty: #blocItemStencil ]) ifTrue: [
-		^ GtMagritteBuilderUtility
-			newSingleOptionDropdownContent: aPopup
-			memento: self memento
-			description: aDescription ].
-
 	aCurrentValue := self memento readUsing: aDescription.
 	aList := BrSimpleList new
 		itemStencil: [ :anItemType :aListWidget | CFMaDetailPopupOptionElement new ];
