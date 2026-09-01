@@ -974,6 +974,28 @@ CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: 
 
 
 { #category : 'private - relation editor' }
+CFMaBuilderUtility class >> toManyItems: firstCollection identityMatches: secondCollection [
+	firstCollection size = secondCollection size ifFalse: [ ^ false ].
+	1 to: firstCollection size do: [ :anIndex |
+		((firstCollection at: anIndex) == (secondCollection at: anIndex))
+			ifFalse: [ ^ false ] ].
+	^ true
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> writeToManyItems: aNewItems ifChangedFrom: anExistingItems memento: aMemento using: aDescription element: anElement [
+	(self toManyItems: anExistingItems identityMatches: aNewItems) ifTrue: [ ^ self ].
+	[ aDescription validate: aNewItems ]
+		on: Error
+		do: [ :anException | ^ self ].
+	GtMagritteBuilderUtility
+		write: aNewItems
+		using: aDescription
+		memento: aMemento
+		element: anElement
+]
+
+{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> reorderedToManyItems: anExistingItems moving: someObjects relativeTo: aTargetObject after: placeAfter [
 	| draggedItems remainingItems targetIndex insertionIndex reorderedItems |
 	draggedItems := anExistingItems select: [ :each |
@@ -1006,14 +1028,11 @@ CFMaBuilderUtility class >> reorderToManyObjects: someObjects relativeTo: aTarge
 		moving: someObjects
 		relativeTo: aTargetObject
 		after: placeAfter.
-	anExistingItems = aNewItems ifTrue: [ ^ self ].
-	[ aDescription validate: aNewItems ]
-		on: Error
-		do: [ :anException | ^ self ].
-	GtMagritteBuilderUtility
-		write: aNewItems
-		using: aDescription
+	self
+		writeToManyItems: aNewItems
+		ifChangedFrom: anExistingItems
 		memento: aMemento
+		using: aDescription
 		element: anElement
 ]
 
@@ -1031,17 +1050,13 @@ CFMaBuilderUtility class >> removeToManyObjects: someObjects memento: aMemento u
 	| anExistingItems aNewItems |
 	anExistingItems := aMemento readUsing: aDescription.
 	anExistingItems ifNil: [ ^ self ].
-	aNewItems := anExistingItems.
-	someObjects do: [ :anObject |
-		aNewItems := aNewItems copyWithout: anObject ].
-	anExistingItems = aNewItems ifTrue: [ ^ self ].
-	[ aDescription validate: aNewItems ]
-		on: Error
-		do: [ :anException | ^ self ].
-	GtMagritteBuilderUtility
-		write: aNewItems
-		using: aDescription
+	aNewItems := anExistingItems species withAll: (anExistingItems reject: [ :each |
+		someObjects anySatisfy: [ :anObject | anObject == each ] ]).
+	self
+		writeToManyItems: aNewItems
+		ifChangedFrom: anExistingItems
 		memento: aMemento
+		using: aDescription
 		element: anElement
 ]
 

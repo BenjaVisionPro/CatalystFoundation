@@ -37,7 +37,6 @@ CFLabelledObject >> labelDescription [
 		label: 'Label';
 		priority: 10;
 		beRequired;
-		cfCategory: #identity;
 		cfSerializable: true;
 		yourself
 ]

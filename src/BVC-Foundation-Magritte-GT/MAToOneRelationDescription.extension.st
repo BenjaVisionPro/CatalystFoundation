@@ -1,36 +1,9 @@
 Extension { #name : 'MAToOneRelationDescription' }
 
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> beColumnedList [
-	self blocStencil: CFMaColumnedToOneElementStencilBuilder new
-]
 
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> beCompactList [
-	self blocStencil: CFMaToOneElementStencilBuilder new
-]
 
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> beEmbeddedForm [
-	self
-		blocStencil: CFMaToOneEmbeddedFormStencilBuilder new;
-		relationBodyInsets: BlInsets empty
-]
 
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> beIdentityAffordance [
-	self
-		blocStencil: CFMaToOneElementStencilBuilder new;
-		blocItemViewModelStencil: CFMaIdentityItemViewModelStencilBuilder new;
-		blocItemStencil: CFMaIdentityAffordanceItemStencilBuilder new
-]
 
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> bePhlowLink [
-	self
-		blocStencil: CFMaToOnePhlowLinkStencilBuilder new;
-		blocItemStencil: CFMaPhlowLinkItemStencilBuilder new
-]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemStencil [

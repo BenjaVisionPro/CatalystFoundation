@@ -972,80 +972,12 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 	self relationFocusRows: { aHeaderRow } in: aContainer for: aDescription
 ]
 
-{ #category : 'private - identity' }
-CFMaDetailPresentation >> emitIdentityAffordanceUsing: aDescription [
-	identityAffordanceEmitted ifTrue: [ ^ self ].
-	identityAffordanceEmitted := true.
 
-	self
-		addElement: (self newRelationObjectIdentityRowFor: self memento model)
-		for: aDescription
-]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> relationObjectSupportingTextFor: anObject [
-	| aSupportingText |
-	aSupportingText := (anObject respondsTo: #identifier)
-		ifTrue: [ anObject identifier ]
-		ifFalse: [ nil ].
-	(aSupportingText notNil and: [ aSupportingText asString isNotEmpty ])
-		ifTrue: [ ^ aSupportingText asString ].
-	^ nil
-]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> relationObjectDisplayLabelFor: anObject [
-	| aLabel |
-	aLabel := (anObject respondsTo: #label)
-		ifTrue: [ anObject label ]
-		ifFalse: [ nil ].
-	(aLabel notNil and: [ aLabel asString isNotEmpty ])
-		ifTrue: [ ^ aLabel asString ].
-	^ anObject gtDisplayText asString
-]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectLabelFor: anObject [
-	^ BrLabel new
-		text: (self relationObjectDisplayLabelFor: anObject) asRopedText;
-		aptitude: self defaultLabelAptitude;
-		fitContent;
-		yourself
-]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectSupportingElementFor: anObject [
-	^ (self relationObjectSupportingTextFor: anObject)
-		ifNil: [ nil ]
-		ifNotNil: [ :aString | self supportingElementWithText: aString ]
-]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> relationObjectLeadingElementFor: anObject [
-	| anIconName anIcon |
-	(anObject respondsTo: #iconDescription) ifFalse: [ ^ nil ].
-	anIconName := anObject icon ifNil: [ anObject iconDescription default ].
-	anIconName ifNil: [ ^ nil ].
-	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
-	^ CFIconTile new
-		beMedium;
-		icon: anIcon;
-		yourself
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectIdentityRowFor: anObject [
-	| aLeadingElement |
-	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLeadingElement ifNotNil: [ aLeadingElement beLarge ].
-
-	^ self
-		newRowLeading: aLeadingElement
-		description: (self newRelationObjectLabelFor: anObject)
-		supporting: (self newRelationObjectSupportingElementFor: anObject)
-		content: self newRelationEmptyContentElement
-		accessories: #()
-]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationEmptyContentElement [
@@ -1059,23 +991,6 @@ CFMaDetailPresentation >> newRelationEmptyContentElement [
 		yourself
 ]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectPresentationFor: anObject [
-	| aContainer aLeadingElement aLabel |
-	aContainer := BrHorizontalPane new
-		hFitContent;
-		vFitContent;
-		cellSpacing: 8;
-		padding: BlInsets empty;
-		yourself.
-
-	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLeadingElement ifNotNil: [ aContainer addChild: aLeadingElement ].
-	aLabel := self newRelationObjectLabelFor: anObject.
-	aLabel constraintsDo: [ :c | c linear vertical alignCenter ].
-	aContainer addChild: aLabel.
-	^ aContainer
-]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationInspectorChevron [
@@ -1089,38 +1004,23 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToOneRelationObjectElementFor: anObject description: aDescription [
+	| aChildMemento |
+	aChildMemento := self memento
+		childMementoFor: anObject
+		inRelation: aDescription.
 	^ BrFrame new
 		hFitContent;
 		vFitContent;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
 			c frame vertical alignCenter ];
-		addChild: (self newRelationObjectPresentationFor: anObject);
+		addChild: (self
+			newRelationReferenceElementFor: anObject
+			memento: aChildMemento
+			description: aDescription);
 		yourself
 ]
 
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> newRelationObjectElementFor: anObject description: aDescription [
-	| anItemElement |
-	anItemElement := BrFrame new
-		hFitContent;
-		vFitContent;
-		constraintsDo: [ :c |
-			c frame horizontal alignRight.
-			c frame vertical alignCenter ];
-		addChild: (self newRelationObjectPresentationFor: anObject);
-		yourself.
-	self
-		installRelationSelectionOn: anItemElement
-		for: anObject
-		description: aDescription
-		remove: [ :theItemElement |
-			CFMaBuilderUtility
-				removeToOneMemento: self memento
-				using: aDescription
-				element: theItemElement ].
-	^ anItemElement
-]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationElementIsSelected: anElement for: aDescription [

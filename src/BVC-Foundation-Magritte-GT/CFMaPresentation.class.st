@@ -8,7 +8,6 @@ Class {
 		'hostElement',
 		'presentationGroupsByGroup',
 		'ungroupedPresentationGroup',
-		'identityAffordanceEmitted',
 		'fieldConfigurationOverrides',
 		'fieldConfigurations'
 	],
@@ -260,7 +259,6 @@ CFMaPresentation >> addStringFieldUsing: aDescription [
 
 { #category : 'api - building' }
 CFMaPresentation >> build [
-	identityAffordanceEmitted := false.
 	fieldConfigurations removeAll.
 	presentationGroupsByGroup removeAll.
 	ungroupedPresentationGroup := nil.
@@ -308,17 +306,6 @@ CFMaPresentation >> description: aDescription configure: aBlock [
 	^ self
 ]
 
-{ #category : 'private - identity' }
-CFMaPresentation >> emitIdentityAffordanceUsing: aDescription [
-	identityAffordanceEmitted ifTrue: [ ^ self ].
-	identityAffordanceEmitted := true.
-
-	self
-		addElement: (CFMaIdentityAffordanceElement new
-			memento: self memento;
-			yourself)
-		for: aDescription
-]
 
 { #category : 'configuration - fields' }
 CFMaPresentation >> fieldConfigurationFor: aDescription [
@@ -343,7 +330,6 @@ CFMaPresentation >> hostElement [
 CFMaPresentation >> initialize [
 	super initialize.
 	presentationGroupsByGroup := Dictionary new.
-	identityAffordanceEmitted := false.
 	fieldConfigurationOverrides := Dictionary new.
 	fieldConfigurations := Dictionary new
 ]
@@ -471,16 +457,6 @@ CFMaPresentation >> buildPresentationForMemento: aMemento in: aHostElement confi
 	^ aPresentation
 ]
 
-{ #category : 'visiting' }
-CFMaPresentation >> visit: aDescription [
-	(aDescription respondsTo: #cfCategory)
-		ifTrue: [
-			aDescription cfCategory = #identity
-				ifTrue: [
-					self emitIdentityAffordanceUsing: aDescription.
-					^ self ] ].
-	^ super visit: aDescription
-]
 
 { #category : 'visiting-description' }
 CFMaPresentation >> visitToOneRelationDescription: aDescription [

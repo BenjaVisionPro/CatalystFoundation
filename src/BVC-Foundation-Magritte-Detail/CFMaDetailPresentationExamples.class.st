@@ -502,23 +502,31 @@ CFMaDetailPresentationExamples >> hiddenEmbeddedRelationRowDoesNotMakeChildHostS
 ]
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToOneListObjectElementUsesStandardDetailRepresentation [
+CFMaDetailPresentationExamples >> detailToOneListUsesRelationReferenceInsteadOfObjectIdentityProtocol [
 	<gtExample>
-	| anObject anElement aDescription aRepresentation |
-	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
-	aDescription := MAToOneRelationDescription new.
+	| aModel anObject aDescription aContainer aMemento anElement aReferenceElement |
+	aModel := CFMaFormShowcase new.
+	anObject := aModel listObject.
+	aDescription := MAToOneRelationDescription new
+		accessor: #listObject;
+		classes: { CFMaFormShowcaseItem };
+		reference: (MANumberDescription new accessor: #score; yourself);
+		yourself.
+	aContainer := MAContainer new add: aDescription; yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
 	anElement := (CFMaDetailPresentation new
+		memento: aMemento;
 		form: BrFrame new;
 		yourself)
-		newRelationObjectElementFor: anObject
+		newToOneRelationObjectElementFor: anObject
 		description: aDescription.
 
 	self assert: anElement class equals: BrFrame.
 	self assert: anElement children size equals: 1.
-	aRepresentation := anElement children first.
-	self assert: aRepresentation class equals: BrHorizontalPane.
-	self assert: aRepresentation children first class equals: CFIconTile.
-	self assert: aRepresentation children second text asString equals: 'Related'.
+	aReferenceElement := anElement children first.
+	self assert: aReferenceElement class equals: BrHorizontalPane.
+	self assert: aReferenceElement children size equals: 1.
+	self assert: aReferenceElement children first text asString equals: anObject score asString.
 	^ anElement
 ]
 
@@ -670,23 +678,6 @@ CFMaDetailPresentationExamples >> detailEmbeddedPresentationBuildsInChildHost [
 	^ aHost
 ]
 
-{ #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailEmbeddedIdentityUsesStandardRepresentation [
-	<gtExample>
-	| anObject aRow aLeadingElement |
-	anObject := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
-	aRow := (CFMaDetailPresentation new
-		form: BrFrame new;
-		yourself) newRelationObjectIdentityRowFor: anObject.
-
-	self assert: aRow class equals: BlElement.
-	self assert: aRow layout class equals: CFMaDetailRowLayout.
-	self assert: aRow children size >= 3.
-	aLeadingElement := aRow children first.
-	self assert: aLeadingElement class equals: CFIconTile.
-	self assert: aRow children second text asString equals: 'Alpha'.
-	^ aRow
-]
 
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
@@ -1133,4 +1124,37 @@ CFMaDetailPresentationExamples >> detailGroupPreservesNestedPresentationOrder [
 	self assert: aComposition children first rows first == firstRow.
 	self assert: aComposition children third rows first == secondRow.
 	^ aGroup
+]
+
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> toManyIdentityComparisonDistinguishesEqualObjects [
+	<gtExample>
+	| firstObject secondObject |
+	firstObject := 'same' copy.
+	secondObject := 'same' copy.
+	self assert: firstObject = secondObject.
+	self assert: (firstObject == secondObject) not.
+	self assert: (CFMaBuilderUtility
+		toManyItems: { firstObject. secondObject }
+		identityMatches: { secondObject. firstObject }) not.
+	^ { firstObject. secondObject }
+]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> reorderedToManyItemsMovesOneOfTwoEqualObjectsByIdentity [
+	<gtExample>
+	| firstObject secondObject targetObject reordered |
+	firstObject := 'same' copy.
+	secondObject := 'same' copy.
+	targetObject := 'target' copy.
+	reordered := CFMaBuilderUtility
+		reorderedToManyItems: { firstObject. secondObject. targetObject }
+		moving: { firstObject }
+		relativeTo: targetObject
+		after: true.
+	self assert: reordered first == secondObject.
+	self assert: reordered second == targetObject.
+	self assert: reordered third == firstObject.
+	^ reordered
 ]

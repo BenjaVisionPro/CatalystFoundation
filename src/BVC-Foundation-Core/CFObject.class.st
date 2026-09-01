@@ -48,7 +48,6 @@ CFObject >> iconDescription [
 		priority: 5;
 		iconHeight: 32;
 		beReadOnly;
-		cfCategory: #identity;
 		cfSerializable: true;
 		yourself
 ]
