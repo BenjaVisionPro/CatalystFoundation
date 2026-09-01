@@ -71,25 +71,6 @@ MADescription >> iconFor: anObject [
 
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> badges [
-	^ self propertyAt: #cfBadges ifAbsent: [ #() ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> badges: aValue [
-	^ self propertyAt: #cfBadges put: aValue
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> badgesFor: anObject [
-	| aValue |
-	aValue := self badges.
-	^ (aValue isBlock or: [ aValue isSymbol ])
-		ifTrue: [ aValue cull: anObject cull: self ]
-		ifFalse: [ aValue ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
 MADescription >> information [
 	^ self propertyAt: #cfInformation ifAbsent: [ nil ]
 ]
