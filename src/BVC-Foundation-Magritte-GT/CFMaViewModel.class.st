@@ -132,8 +132,3 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 	^ self onElementCreated cull: theFrame
 ]
 
-{ #category : 'accessing - compatibility' }
-CFMaViewModel >> presentationClass: aPresentationClass [
-	"Compatibility for the experimental GT presentations. New production presentations are selected from the container description."
-	elementBuilderBlock := [ aPresentationClass new ]
-]
