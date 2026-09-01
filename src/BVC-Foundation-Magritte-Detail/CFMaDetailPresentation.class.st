@@ -1402,8 +1402,10 @@ CFMaDetailPresentation >> relationFocusElement: anElement isWithinRows: theRows 
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> setRelationActive: aBoolean for: aDescription [
-	(self relationContextFor: aDescription) active: aBoolean.
-	(self selectedRelationElementsFor: aDescription) do: [ :anElement |
+	| aContext |
+	aContext := self relationContextFor: aDescription.
+	(aContext setActive: aBoolean) ifFalse: [ ^ self ].
+	aContext selectedElements do: [ :anElement |
 		aBoolean
 			ifTrue: [ anElement states addState: CFMaActiveSelectionState uniqueInstance ]
 			ifFalse: [ anElement states removeState: CFMaActiveSelectionState uniqueInstance ] ]

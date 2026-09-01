@@ -69,9 +69,11 @@ CFMaDetailRelationContext >> isActive [
 	^ active
 ]
 
-{ #category : 'accessing' }
-CFMaDetailRelationContext >> active: aBoolean [
-	active := aBoolean
+{ #category : 'state' }
+CFMaDetailRelationContext >> setActive: aBoolean [
+	active = aBoolean ifTrue: [ ^ false ].
+	active := aBoolean.
+	^ true
 ]
 
 { #category : 'selection' }
