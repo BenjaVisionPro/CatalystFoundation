@@ -132,17 +132,6 @@ CFMaBuilderUtility class >> addToOneObject: anObject memento: aMemento using: aD
 ]
 
 { #category : 'private - relation editor' }
-CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: aMemento description: aDescription element: anElement [
-	aListElement selectedItemDo: [ :anItemViewModel :anIndex |
-		self
-			removeToManyObject: (self relationObjectForItem: anItemViewModel)
-			memento: aMemento
-			using: aDescription
-			element: anElement ]
-]
-
-
-{ #category : 'private - relation editor' }
 CFMaBuilderUtility class >> toManyItems: firstCollection identityMatches: secondCollection [
 	firstCollection size = secondCollection size ifFalse: [ ^ false ].
 	1 to: firstCollection size do: [ :anIndex |
@@ -227,6 +216,17 @@ CFMaBuilderUtility class >> removeToManyObjects: someObjects memento: aMemento u
 		memento: aMemento
 		using: aDescription
 		element: anElement
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> canRemoveToOneUsing: aDescription currentValue: anObject [
+	anObject ifNil: [ ^ false ].
+	aDescription isReadOnly ifTrue: [ ^ false ].
+
+	[ aDescription validate: nil ]
+		on: Error
+		do: [ :anException | ^ false ].
+	^ true
 ]
 
 { #category : 'private - relation editor' }
