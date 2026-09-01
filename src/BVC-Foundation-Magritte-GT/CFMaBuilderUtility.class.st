@@ -710,7 +710,7 @@ CFMaBuilderUtility class >> newToManyRelationEditorMemento: aMemento using: aDes
 CFMaBuilderUtility class >> newToManyRemoveButtonMemento: aMemento using: aDescription list: aListElement [
 	^ BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: BrGlamorousVectorIcons remove;
+		icon: (FontAwesomeIcons defaultStyle icon: #minus);
 		label: 'Remove';
 		action: [ :anElement |
 			self
@@ -727,7 +727,7 @@ CFMaBuilderUtility class >> newToManyRemoveButtonMemento: aMemento using: aDescr
 CFMaBuilderUtility class >> newToOneEditorRemoveButtonMemento: aMemento using: aDescription [
 	^ BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: BrGlamorousVectorIcons remove;
+		icon: (FontAwesomeIcons defaultStyle icon: #minus);
 		label: 'Remove';
 		action: [ :anElement |
 			self

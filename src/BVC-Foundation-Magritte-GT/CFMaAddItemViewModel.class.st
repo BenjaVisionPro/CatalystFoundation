@@ -77,7 +77,7 @@ CFMaAddItemViewModel >> newClassChoiceAddElement [
 				menu: [ self newClassChoiceMenu ])
 					withGainFocusOnShow;
 					yourself);
-		icon: BrGlamorousVectorIcons add;
+		icon: (FontAwesomeIcons defaultStyle icon: #plus);
 		label: 'Add item';
 		constraintsDo: [ :c | c flow vertical alignCenter ];
 		yourself
@@ -87,7 +87,7 @@ CFMaAddItemViewModel >> newClassChoiceAddElement [
 CFMaAddItemViewModel >> newClassChoiceHandle [
 	^ BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude - BrGlamorousButtonExteriorAptitude;
-		icon: BrGlamorousVectorIcons add;
+		icon: (FontAwesomeIcons defaultStyle icon: #plus);
 		label: 'Add item';
 		yourself
 ]
@@ -121,7 +121,7 @@ CFMaAddItemViewModel >> newDisabledAddButton [
 CFMaAddItemViewModel >> newImmediateAddButton [
 	^ BrButton new
 		aptitude: BrGlamorousButtonWithIconCircularAptitude;
-		icon: BrGlamorousVectorIcons add;
+		icon: (FontAwesomeIcons defaultStyle icon: #plus);
 		label: 'Add item';
 		action: [ :anElement | self onClick: anElement ];
 		constraintsDo: [ :c | c flow vertical alignCenter ];
