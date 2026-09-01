@@ -1186,6 +1186,34 @@ CFMaDetailPresentationExamples >> reorderedToManyItemsMovesOneOfTwoEqualObjectsB
 ]
 
 
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> toOneCreationIsOptIn [
+	<gtExample>
+	| aDescription |
+	aDescription := MAToOneRelationDescription new
+		classes: { Object };
+		yourself.
+
+	self assert: aDescription newItemStencil isNil.
+	aDescription newItemStencil: CFMaNewItemStencilBuilder new.
+	self assert: aDescription newItemStencil isNotNil.
+	^ aDescription
+]
+
+{ #category : 'examples - relations - adding' }
+CFMaDetailPresentationExamples >> toOneClassesDoNotImplicitlyEnableAdd [
+	<gtExample>
+	| aPresentation aDescription |
+	aPresentation := CFMaDetailPresentation new.
+	aDescription := MAToOneRelationDescription new
+		classes: { Object };
+		yourself.
+
+	self assert: (aPresentation newToOneAddElementUsing: aDescription) isNil.
+	^ aDescription
+]
+
 { #category : 'examples - relations - adding' }
 CFMaDetailPresentationExamples >> toManyAddingPreservesCollectionSpeciesAndOrder [
 	<gtExample>
