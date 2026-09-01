@@ -18,7 +18,7 @@ CFCompactObjectStencil >> create [
 	memento
 		ifNil: [ anElement object: object ]
 		ifNotNil: [ anElement memento: memento ].
-	anElement reference: (reference ifNil: [ object compactIdentityReference ]).
+	anElement reference: reference.
 	^ anElement
 ]
 

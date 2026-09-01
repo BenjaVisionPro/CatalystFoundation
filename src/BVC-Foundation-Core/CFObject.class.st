@@ -60,8 +60,4 @@ CFObject >> initializeInContext: aContext [
 CFObject >> removeFromRelationInContext: aContext [
 ]
 
-{ #category : 'descriptions' }
-CFObject >> compactIdentityReference [
-	^ self iconDescription asContainer
-]
 
