@@ -1327,11 +1327,12 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 	aContainer := anIconDescription, anIdentifierDescription, aLabelDescription.
 	aPresentation := CFMaDetailPresentation new description: aContainer; yourself.
 
-	self assert: (aPresentation compactIdentityDescriptionsIn: aContainer children) isEmpty.
+	self assert: (aPresentation compactIdentityDescriptionsIn: aPresentation objectDescription children) isEmpty.
 
 	aReference := anIconDescription copy, aLabelDescription copy, anIdentifierDescription copy.
 	aContainer compactIdentityReference: aReference.
-	theDescriptions := aPresentation compactIdentityDescriptionsIn: aContainer children.
+	aPresentation := CFMaDetailPresentation new description: aContainer; yourself.
+	theDescriptions := aPresentation compactIdentityDescriptionsIn: aPresentation objectDescription children.
 	self assert: theDescriptions size equals: 3.
 	^ aPresentation
 ]

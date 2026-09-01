@@ -133,9 +133,9 @@ CFMaEmbeddedTransactionExamples >> labelledObjectMementoCarriesDefaultCompactIde
 
 	self assert: aReference isNotNil.
 	self assert: aReference asContainer children size equals: 3.
-	self assert: aReference asContainer children first accessor equals: #icon.
-	self assert: aReference asContainer children second accessor equals: #label.
-	self assert: aReference asContainer children third accessor equals: #identifier.
+	self assert: aReference asContainer children first accessor readSelector equals: #icon.
+	self assert: aReference asContainer children second accessor readSelector equals: #label.
+	self assert: aReference asContainer children third accessor readSelector equals: #identifier.
 	^ aMemento
 ]
 
