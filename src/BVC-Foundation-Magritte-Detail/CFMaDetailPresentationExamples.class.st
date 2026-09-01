@@ -882,6 +882,96 @@ CFMaDetailPresentationExamples >> relationActiveSelectionAppliesToEverySelectedR
 ]
 
 { #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> toManyListSelectedRowsResolveToRelationObjectsInOrder [
+	<gtExample>
+	| aModel firstObject secondObject thirdObject aDescription aContainer aMemento aPresentation aCard aHeaderRow itemRows selectedObjects |
+	aModel := CFMaFormShowcase new.
+	firstObject := CFMaFormShowcaseItem exampleNamed: 'First' score: 10 status: #active.
+	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 20 status: #active.
+	thirdObject := CFMaFormShowcaseItem exampleNamed: 'Third' score: 30 status: #active.
+	aModel listItems: { firstObject. secondObject. thirdObject }.
+	aDescription := aModel listItemsDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		form: BrFrame new;
+		yourself.
+	aCard := CFMaDetailGroupCardElement new.
+	aHeaderRow := BlElement new.
+	aCard addChild: aHeaderRow.
+	itemRows := aPresentation
+		updateToManyListRows: #()
+		in: aCard
+		after: aHeaderRow
+		with: { firstObject. secondObject. thirdObject }
+		description: aDescription.
+	aPresentation
+		relationSelectableRows: (itemRows collect: #value)
+		for: aDescription.
+	aPresentation selectRelationElement: itemRows first value for: aDescription.
+	aPresentation toggleRelationElement: itemRows third value for: aDescription.
+
+	selectedObjects := aPresentation selectedToManyListObjectsFor: aDescription.
+	self assert: selectedObjects size equals: 2.
+	self assert: selectedObjects first == firstObject.
+	self assert: selectedObjects second == thirdObject.
+	^ itemRows third value
+]
+
+{ #category : 'examples - relations - selection' }
+CFMaDetailPresentationExamples >> toManyListRemovalTargetsSelectionOnlyFromSelectedRow [
+	<gtExample>
+	| aModel firstObject secondObject thirdObject aDescription aContainer aMemento aPresentation aCard aHeaderRow itemRows selectedRemoval unselectedRemoval |
+	aModel := CFMaFormShowcase new.
+	firstObject := CFMaFormShowcaseItem exampleNamed: 'First' score: 10 status: #active.
+	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 20 status: #active.
+	thirdObject := CFMaFormShowcaseItem exampleNamed: 'Third' score: 30 status: #active.
+	aModel listItems: { firstObject. secondObject. thirdObject }.
+	aDescription := aModel listItemsDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		form: BrFrame new;
+		yourself.
+	aCard := CFMaDetailGroupCardElement new.
+	aHeaderRow := BlElement new.
+	aCard addChild: aHeaderRow.
+	itemRows := aPresentation
+		updateToManyListRows: #()
+		in: aCard
+		after: aHeaderRow
+		with: { firstObject. secondObject. thirdObject }
+		description: aDescription.
+	aPresentation
+		relationSelectableRows: (itemRows collect: #value)
+		for: aDescription.
+	aPresentation selectRelationElement: itemRows first value for: aDescription.
+	aPresentation toggleRelationElement: itemRows third value for: aDescription.
+
+	selectedRemoval := aPresentation
+		toManyListObjectsForRemovalFrom: itemRows first value
+		object: firstObject
+		description: aDescription.
+	unselectedRemoval := aPresentation
+		toManyListObjectsForRemovalFrom: itemRows second value
+		object: secondObject
+		description: aDescription.
+
+	self assert: selectedRemoval size equals: 2.
+	self assert: selectedRemoval first == firstObject.
+	self assert: selectedRemoval second == thirdObject.
+	self assert: unselectedRemoval size equals: 1.
+	self assert: unselectedRemoval first == secondObject.
+	^ itemRows first value
+]
+
+{ #category : 'examples - relations - selection' }
 CFMaDetailPresentationExamples >> relationFocusContextIncludesRowDescendants [
 	<gtExample>
 	| aPresentation aRow aChild |

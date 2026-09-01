@@ -8,6 +8,7 @@ Class {
 		'relationSelections',
 		'relationSelectionAnchors',
 		'relationSelectableRows',
+		'relationObjectsByRows',
 		'relationFocusRows',
 		'relationFocusContainers',
 		'relationActiveDescriptions'
@@ -25,6 +26,7 @@ CFMaDetailPresentation >> initialize [
 	relationSelections := IdentityDictionary new.
 	relationSelectionAnchors := IdentityDictionary new.
 	relationSelectableRows := IdentityDictionary new.
+	relationObjectsByRows := IdentityDictionary new.
 	relationFocusRows := IdentityDictionary new.
 	relationFocusContainers := IdentityDictionary new.
 	relationActiveDescriptions := IdentitySet new
@@ -37,6 +39,7 @@ CFMaDetailPresentation >> build [
 	relationSelections removeAll.
 	relationSelectionAnchors removeAll.
 	relationSelectableRows removeAll.
+	relationObjectsByRows removeAll.
 	relationFocusRows removeAll.
 	relationFocusContainers removeAll.
 	relationActiveDescriptions removeAll.
@@ -1229,6 +1232,37 @@ CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: a
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> selectedToManyListObjectsFor: aDescription [
+	| selectedElements |
+	selectedElements := self selectedRelationElementsFor: aDescription.
+	^ (relationSelectableRows at: aDescription ifAbsent: [ #() ])
+		select: [ :aRow | selectedElements identityIncludes: aRow ]
+		thenCollect: [ :aRow | relationObjectsByRows at: aRow ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> toManyListObjectsForRemovalFrom: aRow object: anObject description: aDescription [
+	^ (self relationElementIsSelected: aRow for: aDescription)
+		ifTrue: [ self selectedToManyListObjectsFor: aDescription ]
+		ifFalse: [ { anObject } ]
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> removeToManyListObject: anObject fromRow: aRow description: aDescription [
+	| theObjects |
+	theObjects := self
+		toManyListObjectsForRemovalFrom: aRow
+		object: anObject
+		description: aDescription.
+	theObjects ifEmpty: [ ^ self ].
+	CFMaBuilderUtility
+		removeToManyObjects: theObjects
+		memento: self memento
+		using: aDescription
+		element: aRow
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> installRelationSelectionOn: anItemElement for: anObject description: aDescription remove: aRemoveBlock [
 	^ self
 		installRelationInteractionOn: anItemElement
@@ -1599,11 +1633,10 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		for: anObject
 		description: aDescription
 		remove: [ :theItemElement |
-			CFMaBuilderUtility
-				removeToManyObject: anObject
-				memento: self memento
-				using: aDescription
-				element: theItemElement ].
+			self
+				removeToManyListObject: anObject
+				fromRow: theItemElement
+				description: aDescription ].
 	^ aRow
 ]
 
@@ -1645,6 +1678,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 
 	oldItemRows copy do: [ :anAssociation |
 		(itemViewModels identityIncludes: anAssociation key) ifFalse: [
+			relationObjectsByRows removeKey: anAssociation value ifAbsent: [ ].
 			aContainer removeRow: anAssociation value ] ].
 
 	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
@@ -1659,6 +1693,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 		aRow := anAssociation
 			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
+		relationObjectsByRows at: aRow put: anObject.
 		targetIndex := headerIndex + anItemIndex.
 		self placeRelationRows: { aRow } in: aContainer startingAt: targetIndex.
 		newItemRows add: anItemViewModel -> aRow ].

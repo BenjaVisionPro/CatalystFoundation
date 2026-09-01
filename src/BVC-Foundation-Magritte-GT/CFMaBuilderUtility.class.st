@@ -974,10 +974,21 @@ CFMaBuilderUtility class >> removeSelectedToManyItemFrom: aListElement memento: 
 
 { #category : 'private - relation editor' }
 CFMaBuilderUtility class >> removeToManyObject: anObject memento: aMemento using: aDescription element: anElement [
+	^ self
+		removeToManyObjects: { anObject }
+		memento: aMemento
+		using: aDescription
+		element: anElement
+]
+
+{ #category : 'private - relation editor' }
+CFMaBuilderUtility class >> removeToManyObjects: someObjects memento: aMemento using: aDescription element: anElement [
 	| anExistingItems aNewItems |
 	anExistingItems := aMemento readUsing: aDescription.
 	anExistingItems ifNil: [ ^ self ].
-	aNewItems := anExistingItems copyWithout: anObject.
+	aNewItems := anExistingItems.
+	someObjects do: [ :anObject |
+		aNewItems := aNewItems copyWithout: anObject ].
 	anExistingItems = aNewItems ifTrue: [ ^ self ].
 	[ aDescription validate: aNewItems ]
 		on: Error
