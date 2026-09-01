@@ -80,7 +80,7 @@ CFMaDetailPresentation >> compactIdentityReference: aReferenceDescription [
 
 { #category : 'private - compact identity' }
 CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
-	| theMatchedDescriptions anAnchor |
+	| theMatchedDescriptions |
 	compactIdentityReference ifNil: [ ^ #() ].
 	theMatchedDescriptions := OrderedCollection new.
 
@@ -90,19 +90,7 @@ CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
 			ifFound: [ :aDescription | theMatchedDescriptions add: aDescription ]
 			ifNone: [ ^ #() ] ].
 
-	theMatchedDescriptions ifEmpty: [ ^ #() ].
-	anAnchor := theMatchedDescriptions first.
-	(theMatchedDescriptions allSatisfy: [ :aDescription |
-		self description: aDescription sharesPresentationPathWith: anAnchor ])
-		ifFalse: [ ^ #() ].
-
 	^ theMatchedDescriptions
-]
-
-{ #category : 'private - compact identity' }
-CFMaDetailPresentation >> description: aDescription sharesPresentationPathWith: anotherDescription [
-	^ aDescription group = anotherDescription group
-		and: [ aDescription categories = anotherDescription categories ]
 ]
 
 { #category : 'private - appearance' }

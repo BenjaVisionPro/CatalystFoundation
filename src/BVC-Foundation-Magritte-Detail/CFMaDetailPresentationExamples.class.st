@@ -1349,7 +1349,7 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 	self assert: (aPresentation compactIdentityDescriptionsIn: {
 		anIconDescription.
 		anIdentifierDescription.
-		aLabelDescription }) isEmpty.
+		aLabelDescription }) size equals: 3.
 	^ aPresentation
 ]
 
