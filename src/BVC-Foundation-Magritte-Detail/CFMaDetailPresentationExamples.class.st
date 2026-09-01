@@ -1306,3 +1306,55 @@ CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExist
 	self assert: creationCount equals: 0.
 	^ aViewModel
 ]
+
+{ #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectDescriptionsSharePresentationPath [
+	<gtExample>
+	| aPresentation anIconDescription anIdentifierDescription aLabelDescription theDescriptions |
+	aPresentation := CFMaDetailPresentation new.
+	anIconDescription := FontAwesomeIconDescription new
+		accessor: #icon;
+		group: 'General';
+		categories: #(main);
+		yourself.
+	anIdentifierDescription := MASymbolDescription new
+		accessor: #identifier;
+		group: 'General';
+		categories: #(main);
+		yourself.
+	aLabelDescription := MAStringDescription new
+		accessor: #label;
+		group: 'General';
+		categories: #(main);
+		yourself.
+
+	theDescriptions := aPresentation compactObjectDescriptionsIn: {
+		anIconDescription.
+		anIdentifierDescription.
+		aLabelDescription }.
+	self assert: theDescriptions size equals: 3.
+
+	aLabelDescription categories: #(other).
+	self assert: (aPresentation compactObjectDescriptionsIn: {
+		anIconDescription.
+		anIdentifierDescription.
+		aLabelDescription }) isEmpty.
+	^ aPresentation
+]
+
+{ #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectCanShowIdentifier [
+	<gtExample>
+	| anObject anElement |
+	anObject := CFMaFormShowcase new.
+	anObject label: 'Compact object'.
+	anElement := CFCompactObjectElement new
+		showIdentifier;
+		object: anObject;
+		yourself.
+
+	self assert: anElement titleText equals: 'Compact object'.
+	self assert: anElement identifierElement text asString equals: anObject identifier asString.
+	self assert: anElement identifierElement visibility equals: BlVisibility visible.
+	^ anElement
+]

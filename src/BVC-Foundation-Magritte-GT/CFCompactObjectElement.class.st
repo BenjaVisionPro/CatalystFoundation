@@ -5,7 +5,9 @@ Class {
 		'object',
 		'memento',
 		'iconContainer',
-		'titleElement'
+		'titleElement',
+		'identifierElement',
+		'showsIdentifier'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -50,6 +52,17 @@ CFCompactObjectElement >> initialize [
 			foreground: (Color black alpha: 0.88);
 			yourself);
 		yourself.
+	identifierElement := BrLabel new
+		hMatchParent;
+		vFitContent;
+		visibility: BlVisibility gone;
+		aptitude: (BrGlamorousLabelAptitude new
+			glamorousRegularFont;
+			fontSize: 11;
+			foreground: (Color black alpha: 0.48);
+			yourself);
+		yourself.
+	showsIdentifier := false.
 
 	self
 		hMatchParent;
@@ -58,7 +71,13 @@ CFCompactObjectElement >> initialize [
 		padding: (BlInsets top: 5 left: 6 bottom: 5 right: 6);
 		layout: BlLinearLayout horizontal alignCenterLeft;
 		addChild: iconContainer as: #icon;
-		addChild: titleElement as: #title;
+		addChild: (BrVerticalPane new
+			hMatchParent;
+			vFitContent;
+			cellSpacing: 1;
+			addChild: titleElement as: #title;
+			addChild: identifierElement as: #identifier;
+			yourself) as: #text;
 		yourself
 ]
 
@@ -72,7 +91,9 @@ CFCompactObjectElement >> memento: aMemento [
 	memento := aMemento.
 	object := aMemento ifNil: [ nil ] ifNotNil: #model.
 	self refresh.
-	self observeMementoLabel
+	self
+		observeMementoLabel;
+		observeMementoIdentifier
 ]
 
 { #category : 'accessing' }
@@ -107,7 +128,8 @@ CFCompactObjectElement >> observeMementoLabel [
 CFCompactObjectElement >> refresh [
 	self
 		refreshIcon;
-		refreshTitle
+		refreshTitle;
+		refreshIdentifier
 ]
 
 { #category : 'private - updating' }
@@ -152,6 +174,79 @@ CFCompactObjectElement >> titleDescriptionInMemento [
 	^ memento magritteDescription
 		detect: [ :each | each handlesSelector: #label ]
 		ifNone: [ nil ]
+]
+
+
+{ #category : 'accessing' }
+CFCompactObjectElement >> showIdentifier [
+	showsIdentifier := true.
+	self refreshIdentifier
+]
+
+{ #category : 'accessing' }
+CFCompactObjectElement >> hideIdentifier [
+	showsIdentifier := false.
+	identifierElement visibility: BlVisibility gone
+]
+
+{ #category : 'accessing' }
+CFCompactObjectElement >> identifierElement [
+	^ identifierElement
+]
+
+{ #category : 'private - accessing' }
+CFCompactObjectElement >> identifierDescriptionInMemento [
+	memento ifNil: [ ^ nil ].
+	^ memento magritteDescription
+		detect: [ :each | each handlesSelector: #identifier ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'private - accessing' }
+CFCompactObjectElement >> identifierValueFromObject [
+	object ifNil: [ ^ nil ].
+	^ object identifier
+]
+
+{ #category : 'private - updating' }
+CFCompactObjectElement >> observeMementoIdentifier [
+	| aDescription |
+	memento ifNil: [ ^ self ].
+	aDescription := self identifierDescriptionInMemento.
+	aDescription ifNil: [ ^ self ].
+
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theElement :aSink |
+				self updateIdentifierFromValue: aSink value currentValue ].
+		(memento readObservableValueUsing: aDescription)
+			observe: anElementSink ]
+]
+
+{ #category : 'private - updating' }
+CFCompactObjectElement >> refreshIdentifier [
+	| aValue |
+	showsIdentifier ifFalse: [
+		identifierElement visibility: BlVisibility gone.
+		^ self ].
+	aValue := memento
+		ifNil: [ self identifierValueFromObject ]
+		ifNotNil: [ :aMemento |
+			self identifierDescriptionInMemento
+				ifNil: [ self identifierValueFromObject ]
+				ifNotNil: [ :aDescription | aMemento readUsing: aDescription ] ].
+	self updateIdentifierFromValue: aValue
+]
+
+{ #category : 'private - updating' }
+CFCompactObjectElement >> updateIdentifierFromValue: aValue [
+	| aString |
+	aString := aValue ifNil: [ '' ] ifNotNil: [ aValue asString ].
+	identifierElement text: aString.
+	identifierElement visibility: (aString isEmpty
+		ifTrue: [ BlVisibility gone ]
+		ifFalse: [ BlVisibility visible ])
 ]
 
 { #category : 'accessing' }

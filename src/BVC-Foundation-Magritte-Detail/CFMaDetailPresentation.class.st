@@ -30,10 +30,12 @@ CFMaDetailPresentation >> build [
 
 { #category : 'visiting-description' }
 CFMaDetailPresentation >> visitContainer: aDescription [
-	| thePresentationItems |
+	| thePresentationItems compactDescriptions compactAdded |
 	aDescription == self objectDescription ifFalse: [
 		^ super visitContainer: aDescription ].
 
+	compactDescriptions := self compactObjectDescriptionsIn: aDescription children.
+	compactAdded := false.
 	thePresentationItems := OrderedCollection new
 		addAll: aDescription children;
 		addAll: (self memento magritteActions reject: #isToolbarAction);
@@ -41,9 +43,54 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 	thePresentationItems sort: [ :a :b | a priority < b priority ].
 
 	thePresentationItems do: [ :each |
-		(each isKindOf: MAActionDescription)
-			ifTrue: [ self addActionRowUsing: each ]
-			ifFalse: [ self visit: each ] ]
+		(compactDescriptions identityIncludes: each)
+			ifTrue: [
+				compactAdded ifFalse: [
+					self addCompactObjectUsing: each.
+					compactAdded := true ] ]
+			ifFalse: [
+				(each isKindOf: MAActionDescription)
+					ifTrue: [ self addActionRowUsing: each ]
+					ifFalse: [ self visit: each ] ] ]
+]
+
+{ #category : 'private - compact object' }
+CFMaDetailPresentation >> addCompactObjectUsing: aDescription [
+	| anElement |
+	anElement := CFCompactObjectElement new
+		showIdentifier;
+		memento: self memento;
+		padding: self rowInsets;
+		yourself.
+	(self presentationGroupForDescription: aDescription)
+		addContent: anElement
+]
+
+{ #category : 'private - compact object' }
+CFMaDetailPresentation >> compactObjectDescriptionsIn: theDescriptions [
+	| anIconDescription anIdentifierDescription aLabelDescription |
+	anIconDescription := theDescriptions
+		detect: [ :each | each handlesSelector: #icon ]
+		ifNone: [ ^ #() ].
+	anIdentifierDescription := theDescriptions
+		detect: [ :each | each handlesSelector: #identifier ]
+		ifNone: [ ^ #() ].
+	aLabelDescription := theDescriptions
+		detect: [ :each | each handlesSelector: #label ]
+		ifNone: [ ^ #() ].
+
+	(self description: anIdentifierDescription sharesPresentationPathWith: anIconDescription)
+		ifFalse: [ ^ #() ].
+	(self description: aLabelDescription sharesPresentationPathWith: anIconDescription)
+		ifFalse: [ ^ #() ].
+
+	^ { anIconDescription. anIdentifierDescription. aLabelDescription }
+]
+
+{ #category : 'private - compact object' }
+CFMaDetailPresentation >> description: aDescription sharesPresentationPathWith: anotherDescription [
+	^ aDescription group = anotherDescription group
+		and: [ aDescription categories = anotherDescription categories ]
 ]
 
 { #category : 'private - appearance' }
