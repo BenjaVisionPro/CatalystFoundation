@@ -550,19 +550,103 @@ CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrit
 { #category : 'examples - relations' }
 CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 	<gtExample>
-	| anObject aDescription aRow |
+	| aModel anObject aDescription aContainer aMemento aPresentation aRow aReferenceElement |
+	aModel := CFMaFormShowcase new.
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
-	aDescription := MAToManyRelationDescription new.
-	aRow := CFMaDetailPresentation new
+	aModel listItems: { anObject }.
+	aDescription := aModel listItemsDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		form: BrFrame new;
+		yourself.
+	aRow := aPresentation
 		newToManyRelationRowFor: anObject
 		description: aDescription.
+	aReferenceElement := aRow children first.
 
 	self assert: aRow class equals: BlElement.
 	self assert: aRow layout class equals: CFMaDetailRowLayout.
-	self assert: aRow children size equals: 4.
-	self assert: aRow children first class equals: CFIconTile.
-	self assert: aRow children second text asString equals: 'Related'.
+	self assert: aRow children size equals: 3.
+	self assert: aReferenceElement class equals: BrHorizontalPane.
+	self assert: aReferenceElement children first text asString equals: 'Related'.
 	^ aRow
+]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToManyListUsesRelationReferenceInsteadOfObjectIdentityProtocol [
+	<gtExample>
+	| aModel anObject aDescription aContainer aMemento aPresentation aRow aReferenceElement |
+	aModel := CFMaFormShowcase new.
+	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
+	aModel listItems: { anObject }.
+	aDescription := aModel listItemsDescription
+		reference: (MAContainer new
+			add: (MANumberDescription new accessor: #score; yourself);
+			yourself);
+		yourself.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		form: BrFrame new;
+		yourself.
+	aRow := aPresentation
+		newToManyRelationRowFor: anObject
+		description: aDescription.
+	aReferenceElement := aRow children first.
+
+	self assert: aReferenceElement children first text asString equals: '40'.
+	^ aRow
+]
+
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToManyListReusesItemViewModelsAndRowsAcrossReorder [
+	<gtExample>
+	| aModel firstObject secondObject aDescription aContainer aMemento aPresentation aCard aHeaderRow firstItems reorderedItems |
+	aModel := CFMaFormShowcase new.
+	firstObject := CFMaFormShowcaseItem exampleNamed: 'First' score: 10 status: #active.
+	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 20 status: #active.
+	aModel listItems: { firstObject. secondObject }.
+	aDescription := aModel listItemsDescription.
+	aContainer := MAContainer new
+		add: aDescription;
+		yourself.
+	aMemento := CFMaMemento model: aModel description: aContainer.
+	aPresentation := CFMaDetailPresentation new
+		memento: aMemento;
+		form: BrFrame new;
+		yourself.
+	aCard := CFMaDetailGroupCardElement new.
+	aHeaderRow := BlElement new.
+	aCard addChild: aHeaderRow.
+
+	firstItems := aPresentation
+		updateToManyListRows: #()
+		in: aCard
+		after: aHeaderRow
+		with: { firstObject. secondObject }
+		description: aDescription.
+	reorderedItems := aPresentation
+		updateToManyListRows: firstItems
+		in: aCard
+		after: aHeaderRow
+		with: { secondObject. firstObject }
+		description: aDescription.
+
+	self assert: firstItems first key == reorderedItems second key.
+	self assert: firstItems second key == reorderedItems first key.
+	self assert: firstItems first value == reorderedItems second value.
+	self assert: firstItems second value == reorderedItems first value.
+	self assert: (aCard rows at: 2) == reorderedItems first value.
+	self assert: (aCard rows at: 3) == reorderedItems second value.
+	^ aCard
 ]
 
 

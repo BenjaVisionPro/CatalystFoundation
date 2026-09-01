@@ -1458,13 +1458,26 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 ]
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> newRelationReferenceElementFor: anObject memento: aChildMemento description: aDescription [
+	^ CFMaDetailReferenceElementBuilder new
+		object: anObject;
+		memento: aChildMemento;
+		presentation: self;
+		buildUsing: aDescription reference
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
-	| aLeadingElement aLabel aRow |
-	aLeadingElement := self relationObjectLeadingElementFor: anObject.
-	aLabel := self newRelationObjectLabelFor: anObject.
+	| aChildMemento aRow |
+	aChildMemento := self memento
+		childMementoFor: anObject
+		inRelation: aDescription.
 	aRow := self
-		newRowLeading: aLeadingElement
-		description: aLabel
+		newRowLeading: nil
+		description: (self
+			newRelationReferenceElementFor: anObject
+			memento: aChildMemento
+			description: aDescription)
 		supporting: nil
 		content: self newRelationEmptyContentElement
 		accessories: #()
@@ -1483,9 +1496,9 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 ]
 
 { #category : 'private - relations' }
-CFMaDetailPresentation >> relationRowAssociationFor: anObject in: itemRows [
+CFMaDetailPresentation >> relationRowAssociationForItemViewModel: anItemViewModel in: itemRows [
 	^ itemRows
-		detect: [ :each | each key == anObject ]
+		detect: [ :each | each key == anItemViewModel ]
 		ifNone: [ nil ]
 ]
 
@@ -1507,25 +1520,36 @@ CFMaDetailPresentation >> placeRelationRows: theRows in: aContainer startingAt: 
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after: aHeaderRow with: aCollection description: aDescription [
-	| someObjects newItemRows headerIndex |
+	| someObjects oldItemViewModels itemViewModels newItemRows headerIndex |
 	someObjects := aCollection ifNil: [ #() ].
+	self memento retainChildMementosFor: someObjects inRelation: aDescription.
+
+	oldItemViewModels := oldItemRows collect: #key.
+	itemViewModels := CFMaBuilderUtility
+		relationItemViewModelsForModels: someObjects
+		existingViewModels: oldItemViewModels
+		memento: self memento
+		description: aDescription.
 
 	oldItemRows copy do: [ :anAssociation |
-		(someObjects anySatisfy: [ :anObject | anObject == anAssociation key ]) ifFalse: [
+		(itemViewModels identityIncludes: anAssociation key) ifFalse: [
 			aContainer removeRow: anAssociation value ] ].
 
 	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
 		^ oldItemRows ].
 	newItemRows := OrderedCollection new.
-	someObjects withIndexDo: [ :anObject :anItemIndex |
-		| anAssociation aRow targetIndex |
-		anAssociation := self relationRowAssociationFor: anObject in: oldItemRows.
+	itemViewModels withIndexDo: [ :anItemViewModel :anItemIndex |
+		| anObject anAssociation aRow targetIndex |
+		anObject := someObjects at: anItemIndex.
+		anAssociation := self
+			relationRowAssociationForItemViewModel: anItemViewModel
+			in: oldItemRows.
 		aRow := anAssociation
 			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
 		targetIndex := headerIndex + anItemIndex.
 		self placeRelationRows: { aRow } in: aContainer startingAt: targetIndex.
-		newItemRows add: anObject -> aRow ].
+		newItemRows add: anItemViewModel -> aRow ].
 	^ newItemRows
 ]
 
@@ -1642,6 +1666,8 @@ CFMaDetailPresentation >> visitToManyRelationDescription: aDescription [
 	| aRepresentation |
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	(aRepresentation isKindOf: CFMaListConfiguration) ifTrue: [
+		(aDescription hasProperty: #blocListStencil) ifTrue: [
+			^ super visitToManyRelationDescription: aDescription ].
 		^ self addToManyListUsing: aDescription ].
 	(aRepresentation isKindOf: CFMaEmbeddedFormsConfiguration) ifTrue: [
 		^ self addToManyEmbeddedUsing: aDescription ].
