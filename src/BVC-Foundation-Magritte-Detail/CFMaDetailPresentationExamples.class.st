@@ -1358,10 +1358,13 @@ CFMaDetailPresentationExamples >> compactObjectCanShowIdentifier [
 	self assert: anElement identifierElement visibility equals: BlVisibility visible.
 	self assert: anElement iconContainer class equals: CFIconTile.
 	anElement beSmall.
-	self assert: anElement iconContainer extent equals: 20 @ 20.
+	self assert: anElement iconContainer constraints horizontal resizer size equals: 20.
+	self assert: anElement iconContainer constraints vertical resizer size equals: 20.
 	anElement beMedium.
-	self assert: anElement iconContainer extent equals: 28 @ 28.
+	self assert: anElement iconContainer constraints horizontal resizer size equals: 28.
+	self assert: anElement iconContainer constraints vertical resizer size equals: 28.
 	anElement beLarge.
-	self assert: anElement iconContainer extent equals: 44 @ 44.
+	self assert: anElement iconContainer constraints horizontal resizer size equals: 44.
+	self assert: anElement iconContainer constraints vertical resizer size equals: 44.
 	^ anElement
 ]
