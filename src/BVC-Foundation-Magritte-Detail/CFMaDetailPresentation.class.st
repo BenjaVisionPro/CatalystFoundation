@@ -5,13 +5,7 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'relationSelections',
-		'relationSelectionAnchors',
-		'relationSelectableRows',
-		'relationObjectsByRows',
-		'relationFocusRows',
-		'relationFocusContainers',
-		'relationActiveDescriptions'
+		'relationContexts'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -23,26 +17,14 @@ CFMaDetailPresentation >> initialize [
 	groupConfigurations := Dictionary new.
 	groups := Dictionary new.
 	categoryGroups := Dictionary new.
-	relationSelections := IdentityDictionary new.
-	relationSelectionAnchors := IdentityDictionary new.
-	relationSelectableRows := IdentityDictionary new.
-	relationObjectsByRows := IdentityDictionary new.
-	relationFocusRows := IdentityDictionary new.
-	relationFocusContainers := IdentityDictionary new.
-	relationActiveDescriptions := IdentitySet new
+	relationContexts := IdentityDictionary new
 ]
 
 { #category : 'api - building' }
 CFMaDetailPresentation >> build [
 	groups removeAll.
 	categoryGroups removeAll.
-	relationSelections removeAll.
-	relationSelectionAnchors removeAll.
-	relationSelectableRows removeAll.
-	relationObjectsByRows removeAll.
-	relationFocusRows removeAll.
-	relationFocusContainers removeAll.
-	relationActiveDescriptions removeAll.
+	relationContexts removeAll.
 	^ super build
 ]
 
@@ -1023,13 +1005,20 @@ CFMaDetailPresentation >> newToOneRelationObjectElementFor: anObject description
 
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> relationContextFor: aDescription [
+	^ relationContexts
+		at: aDescription
+		ifAbsentPut: [ CFMaDetailRelationContext new ]
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> relationElementIsSelected: anElement for: aDescription [
 	^ (self selectedRelationElementsFor: aDescription) identityIncludes: anElement
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectedRelationElementsFor: aDescription [
-	^ relationSelections at: aDescription ifAbsent: [ #() ]
+	^ (self relationContextFor: aDescription) selectedElements
 ]
 
 { #category : 'private - relations' }
@@ -1047,18 +1036,16 @@ CFMaDetailPresentation >> replaceRelationSelectionWith: theElements for: aDescri
 
 	newElements do: [ :anElement |
 		anElement states addState: BlElementState selected.
-		(relationActiveDescriptions includes: aDescription) ifTrue: [
+		(self relationContextFor: aDescription) isActive ifTrue: [
 			anElement states addState: CFMaActiveSelectionState uniqueInstance ] ].
 
-	newElements isEmpty
-		ifTrue: [ relationSelections removeKey: aDescription ifAbsent: [ ] ]
-		ifFalse: [ relationSelections at: aDescription put: newElements ].
+	(self relationContextFor: aDescription) selectedElements: newElements.
 	^ newElements
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
-	relationSelectionAnchors at: aDescription put: anElement.
+	(self relationContextFor: aDescription) selectionAnchor: anElement.
 	self replaceRelationSelectionWith: { anElement } for: aDescription.
 	^ anElement
 ]
@@ -1078,10 +1065,9 @@ CFMaDetailPresentation >> toggleRelationElement: anElement for: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationRangeTo: anElement for: aDescription [
 	| anAnchor theRows anchorIndex elementIndex firstIndex lastIndex |
-	anAnchor := relationSelectionAnchors at: aDescription ifAbsent: [
-		^ self selectRelationElement: anElement for: aDescription ].
-	theRows := relationSelectableRows at: aDescription ifAbsent: [
-		^ self selectRelationElement: anElement for: aDescription ].
+	anAnchor := (self relationContextFor: aDescription) selectionAnchor.
+	anAnchor ifNil: [ ^ self selectRelationElement: anElement for: aDescription ].
+	theRows := (self relationContextFor: aDescription) selectableRows.
 	anchorIndex := theRows identityIndexOf: anAnchor ifAbsent: [ 0 ].
 	elementIndex := theRows identityIndexOf: anElement ifAbsent: [ 0 ].
 	(anchorIndex = 0 or: [ elementIndex = 0 ]) ifTrue: [
@@ -1097,21 +1083,21 @@ CFMaDetailPresentation >> selectRelationRangeTo: anElement for: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationSelectableRows: theRows for: aDescription [
 	| currentSelection retainedSelection anAnchor |
-	relationSelectableRows at: aDescription put: theRows copy.
+	(self relationContextFor: aDescription) selectableRows: theRows.
 	currentSelection := self selectedRelationElementsFor: aDescription.
 	retainedSelection := currentSelection select: [ :anElement |
 		theRows identityIncludes: anElement ].
 	retainedSelection size = currentSelection size ifFalse: [
 		self replaceRelationSelectionWith: retainedSelection for: aDescription ].
-	anAnchor := relationSelectionAnchors at: aDescription ifAbsent: [ nil ].
+	anAnchor := (self relationContextFor: aDescription) selectionAnchor.
 	(anAnchor notNil and: [ (theRows identityIncludes: anAnchor) not ]) ifTrue: [
-		relationSelectionAnchors removeKey: aDescription ifAbsent: [ ] ]
+		(self relationContextFor: aDescription) clearSelectionAnchor ]
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectAllToManyListRowsFor: aDescription [
 	self
-		replaceRelationSelectionWith: (relationSelectableRows at: aDescription ifAbsent: [ #() ])
+		replaceRelationSelectionWith: (self relationContextFor: aDescription) selectableRows
 		for: aDescription
 ]
 
@@ -1119,7 +1105,7 @@ CFMaDetailPresentation >> selectAllToManyListRowsFor: aDescription [
 CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: aDescription event: anEvent [
 	| modifiers |
 	modifiers := anEvent modifiers.
-	((modifiers isEmpty) or: [ (relationSelectionAnchors includesKey: aDescription) not ]) ifTrue: [
+	((modifiers isEmpty) or: [ (self relationContextFor: aDescription) selectionAnchor isNil ]) ifTrue: [
 		^ self selectRelationElement: anElement for: aDescription ].
 
 	modifiers isPrimaryModifier ifTrue: [
@@ -1135,9 +1121,9 @@ CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: a
 CFMaDetailPresentation >> selectedToManyListObjectsFor: aDescription [
 	| selectedElements |
 	selectedElements := self selectedRelationElementsFor: aDescription.
-	^ (relationSelectableRows at: aDescription ifAbsent: [ #() ])
+	^ (self relationContextFor: aDescription) selectableRows
 		select: [ :aRow | selectedElements identityIncludes: aRow ]
-		thenCollect: [ :aRow | relationObjectsByRows at: aRow ]
+		thenCollect: [ :aRow | (self relationContextFor: aDescription) objectsByRows at: aRow ]
 ]
 
 { #category : 'private - relations' }
@@ -1167,7 +1153,7 @@ CFMaDetailPresentation >> dragRowsFrom: aRow for: aDescription [
 	| selectedRows |
 	(self relationElementIsSelected: aRow for: aDescription) ifFalse: [ ^ { aRow } ].
 	selectedRows := self selectedRelationElementsFor: aDescription.
-	^ (relationSelectableRows at: aDescription ifAbsent: [ #() ])
+	^ (self relationContextFor: aDescription) selectableRows
 		select: [ :each | selectedRows identityIncludes: each ]
 ]
 
@@ -1175,7 +1161,7 @@ CFMaDetailPresentation >> dragRowsFrom: aRow for: aDescription [
 CFMaDetailPresentation >> dragItemsFrom: aRow for: aDescription [
 	^ (self dragRowsFrom: aRow for: aDescription) collect: [ :eachRow |
 		| anObject |
-		anObject := relationObjectsByRows at: eachRow.
+		anObject := (self relationContextFor: aDescription) objectsByRows at: eachRow.
 		BlDragItem new
 			sourceElement: eachRow;
 			domainObject: anObject;
@@ -1240,7 +1226,7 @@ CFMaDetailPresentation >> hideRelationDropIndicator: anIndicator [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: aRow description: aDescription event: anEvent [
 	| aTargetObject |
-	aTargetObject := relationObjectsByRows at: aRow ifAbsent: [ ^ self ].
+	aTargetObject := (self relationContextFor: aDescription) objectsByRows at: aRow ifAbsent: [ ^ self ].
 	CFMaBuilderUtility
 		reorderToManyObjects: someObjects
 		relativeTo: aTargetObject
@@ -1262,7 +1248,7 @@ CFMaDetailPresentation >> installToManyListReorderingOn: aRow description: aDesc
 			self dragItemsFrom: aSourceElement for: aDescription ]).
 	aRow addEventHandler: (BlDropHandler new
 		acceptItemsSuchThat: [ :aDragItem :aDropArea |
-			(relationSelectableRows at: aDescription ifAbsent: [ #() ])
+			(self relationContextFor: aDescription) selectableRows
 				identityIncludes: aDragItem sourceElement ];
 		whenDragEnteredDo: [ :anEvent |
 			anEvent mayAcceptItems ifTrue: [
@@ -1441,9 +1427,7 @@ CFMaDetailPresentation >> relationFocusElement: anElement isWithinRows: theRows 
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> setRelationActive: aBoolean for: aDescription [
-	aBoolean
-		ifTrue: [ relationActiveDescriptions add: aDescription ]
-		ifFalse: [ relationActiveDescriptions remove: aDescription ifAbsent: [ ] ].
+	(self relationContextFor: aDescription) active: aBoolean.
 	(self selectedRelationElementsFor: aDescription) do: [ :anElement |
 		aBoolean
 			ifTrue: [ anElement states addState: CFMaActiveSelectionState uniqueInstance ]
@@ -1455,14 +1439,14 @@ CFMaDetailPresentation >> updateRelationActiveFor: aDescription focusedElement: 
 	self
 		setRelationActive: (self
 			relationFocusElement: anElement
-			isWithinRows: (relationFocusRows at: aDescription ifAbsent: [ #() ]))
+			isWithinRows: (self relationContextFor: aDescription) focusRows)
 		for: aDescription
 ]
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> installRelationFocusContextIn: aContainer for: aDescription [
-	(relationFocusContainers at: aDescription ifAbsent: [ nil ]) == aContainer ifTrue: [ ^ self ].
-	relationFocusContainers at: aDescription put: aContainer.
+	(self relationContextFor: aDescription) focusContainer == aContainer ifTrue: [ ^ self ].
+	(self relationContextFor: aDescription) focusContainer: aContainer.
 	aContainer
 		when: BlFocusInEvent
 			do: [ :anEvent |
@@ -1477,7 +1461,7 @@ CFMaDetailPresentation >> installRelationFocusContextIn: aContainer for: aDescri
 { #category : 'private - relations' }
 CFMaDetailPresentation >> relationFocusRows: theRows in: aContainer for: aDescription [
 	| aFocusOwner |
-	relationFocusRows at: aDescription put: theRows copy.
+	(self relationContextFor: aDescription) focusRows: theRows.
 	self installRelationFocusContextIn: aContainer for: aDescription.
 	aFocusOwner := aContainer space ifNotNil: [ :aSpace | aSpace focusOwner ].
 	self updateRelationActiveFor: aDescription focusedElement: aFocusOwner
@@ -1712,7 +1696,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 
 	oldItemRows copy do: [ :anAssociation |
 		(itemViewModels identityIncludes: anAssociation key) ifFalse: [
-			relationObjectsByRows removeKey: anAssociation value ifAbsent: [ ].
+			(self relationContextFor: aDescription) objectsByRows removeKey: anAssociation value ifAbsent: [ ].
 			aContainer removeRow: anAssociation value ] ].
 
 	headerIndex := aContainer rows identityIndexOf: aHeaderRow ifAbsent: [
@@ -1727,7 +1711,7 @@ CFMaDetailPresentation >> updateToManyListRows: oldItemRows in: aContainer after
 		aRow := anAssociation
 			ifNil: [ self newToManyRelationRowFor: anObject description: aDescription ]
 			ifNotNil: [ anAssociation value ].
-		relationObjectsByRows at: aRow put: anObject.
+		(self relationContextFor: aDescription) objectsByRows at: aRow put: anObject.
 		targetIndex := headerIndex + anItemIndex.
 		self placeRelationRows: { aRow } in: aContainer startingAt: targetIndex.
 		newItemRows add: anItemViewModel -> aRow ].
