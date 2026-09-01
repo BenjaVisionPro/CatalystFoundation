@@ -547,7 +547,7 @@ CFMaDetailPresentationExamples >> detailToOneListUsesRelationReferenceInsteadOfO
 		classes: { CFMaFormShowcaseItem };
 		reference: (MANumberDescription new accessor: #score; yourself);
 		yourself.
-	aContainer := MAContainer new add: aDescription; yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	anElement := (CFMaDetailPresentation new
 		memento: aMemento;
@@ -578,9 +578,7 @@ CFMaDetailPresentationExamples >> detailToOneListRemovalUsesValidatedMementoWrit
 		accessor: #listObject;
 		classes: { CFMaFormShowcaseItem. CFMaFormShowcaseAccentItem };
 		yourself.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 
 	self assert: (aMemento readUsing: aDescription) == anObject.
@@ -600,9 +598,7 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 	anObject := CFMaFormShowcaseItem exampleNamed: 'Related' score: 40 status: #active.
 	aModel listItems: { anObject }.
 	aDescription := aModel listItemsDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new
 		memento: aMemento;
@@ -632,9 +628,7 @@ CFMaDetailPresentationExamples >> detailToManyListUsesRelationReferenceInsteadOf
 	aDescription := aModel listItemsDescription
 		reference: (MANumberDescription new accessor: #score; yourself) asContainer;
 		yourself.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new
 		memento: aMemento;
@@ -659,9 +653,7 @@ CFMaDetailPresentationExamples >> detailToManyListReusesItemViewModelsAndRowsAcr
 	secondObject := CFMaFormShowcaseItem exampleNamed: 'Second' score: 20 status: #active.
 	aModel listItems: { firstObject. secondObject }.
 	aDescription := aModel listItemsDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new
 		memento: aMemento;
@@ -720,9 +712,7 @@ CFMaDetailPresentationExamples >> detailToOneEmbeddedUsesParentChildMemento [
 	aModel := CFMaFormShowcase new.
 	anObject := aModel embeddedObject.
 	aDescription := aModel embeddedObjectDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new memento: aMemento; yourself.
 	aChildMemento := aMemento childMementoFor: anObject inRelation: aDescription.
@@ -743,9 +733,7 @@ CFMaDetailPresentationExamples >> detailToManyEmbeddedUsesChildMementos [
 	| aModel aDescription aContainer aMemento aPresentation firstObject secondObject firstHost secondHost |
 	aModel := CFMaFormShowcase new.
 	aDescription := aModel embeddedItemsDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new memento: aMemento; yourself.
 	firstObject := aModel embeddedItems first.
@@ -916,9 +904,7 @@ CFMaDetailPresentationExamples >> toManyListSelectedRowsResolveToRelationObjects
 	thirdObject := CFMaFormShowcaseItem exampleNamed: 'Third' score: 30 status: #active.
 	aModel listItems: { firstObject. secondObject. thirdObject }.
 	aDescription := aModel listItemsDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new
 		memento: aMemento;
@@ -956,9 +942,7 @@ CFMaDetailPresentationExamples >> toManyListRemovalTargetsSelectionOnlyFromSelec
 	thirdObject := CFMaFormShowcaseItem exampleNamed: 'Third' score: 30 status: #active.
 	aModel listItems: { firstObject. secondObject. thirdObject }.
 	aDescription := aModel listItemsDescription.
-	aContainer := MAContainer new
-		add: aDescription;
-		yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aPresentation := CFMaDetailPresentation new
 		memento: aMemento;
@@ -1267,7 +1251,7 @@ CFMaDetailPresentationExamples >> addClassAvailabilityDoesNotCreateSpeculativeDo
 	creationCount := 0.
 	aModel := CFMaFormShowcase new.
 	aDescription := aModel listItemsDescription.
-	aContainer := MAContainer new add: aDescription; yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aViewModel := CFMaAddItemViewModel new
 		memento: aMemento;
@@ -1290,7 +1274,7 @@ CFMaDetailPresentationExamples >> toOneClassAvailabilityIsDisabledWhenValueExist
 	aModel := CFMaFormShowcase new.
 	aModel listObject: (CFMaFormShowcaseItem exampleNamed: 'Existing' score: 10 status: #active).
 	aDescription := aModel listObjectDescription.
-	aContainer := MAContainer new add: aDescription; yourself.
+	aContainer := aDescription asContainer.
 	aMemento := CFMaMemento model: aModel description: aContainer.
 	aViewModel := CFMaToOneAddItemViewModel new
 		memento: aMemento;

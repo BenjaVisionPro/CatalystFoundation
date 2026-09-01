@@ -669,13 +669,11 @@ CFMaFormShowcase >> readOnlyLabelOnlyDescription [
 
 { #category : 'descriptions - relations' }
 CFMaFormShowcase >> showcaseItemReferenceDescription [
-	^ MAContainer new
-		add: (MAStringDescription new
-			accessor: #label;
-			label: 'Label';
-			priority: 10;
-			yourself);
-		yourself
+	^ (MAStringDescription new
+		accessor: #label;
+		label: 'Label';
+		priority: 10;
+		yourself) asContainer
 ]
 
 { #category : 'accessing' }
