@@ -5,7 +5,7 @@ Assessment reads current staged values from the supplied mementos, derives compl
 I intentionally do not own drag/drop, presentation geometry, child-memento transfer or a general transaction system."
 Class {
 	#name : 'CFAtelierMove',
-	#superclass : 'Object',
+	#superclass : 'CFAtelierOperation',
 	#instVars : [
 		'object',
 		'sourceMemento',
@@ -89,18 +89,13 @@ CFAtelierMove >> assess [
 ]
 
 { #category : 'applying' }
-CFAtelierMove >> apply [
-	| anAssessment |
-	anAssessment := self assess.
-	anAssessment isApplicable ifFalse: [ ^ anAssessment ].
-
+CFAtelierMove >> applyAssessment: anAssessment [
 	sourceMemento
 		write: anAssessment proposedSourceItems
 		using: sourceDescription.
 	destinationMemento
 		write: anAssessment proposedDestinationItems
-		using: destinationDescription.
-	^ anAssessment
+		using: destinationDescription
 ]
 
 { #category : 'accessing' }

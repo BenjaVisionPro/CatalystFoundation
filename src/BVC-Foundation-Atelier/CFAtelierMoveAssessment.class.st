@@ -3,13 +3,12 @@
 I am deliberately move-specific. I retain the observed and proposed relation values so a presentation can explain or preview the exact move that was assessed. I do not mutate editing state."
 Class {
 	#name : 'CFAtelierMoveAssessment',
-	#superclass : 'Object',
+	#superclass : 'CFAtelierAssessment',
 	#instVars : [
 		'sourceItems',
 		'destinationItems',
 		'proposedSourceItems',
-		'proposedDestinationItems',
-		'rejectionMessage'
+		'proposedDestinationItems'
 	],
 	#category : 'BVC-Foundation-Atelier-Move',
 	#package : 'BVC-Foundation-Atelier',
@@ -45,11 +44,6 @@ CFAtelierMoveAssessment >> destinationItems: aCollection [
 	destinationItems := aCollection
 ]
 
-{ #category : 'testing' }
-CFAtelierMoveAssessment >> isApplicable [
-	^ rejectionMessage isNil
-]
-
 { #category : 'accessing' }
 CFAtelierMoveAssessment >> proposedDestinationItems [
 	^ proposedDestinationItems
@@ -68,16 +62,6 @@ CFAtelierMoveAssessment >> proposedSourceItems [
 { #category : 'accessing' }
 CFAtelierMoveAssessment >> proposedSourceItems: aCollection [
 	proposedSourceItems := aCollection
-]
-
-{ #category : 'accessing' }
-CFAtelierMoveAssessment >> rejectionMessage [
-	^ rejectionMessage
-]
-
-{ #category : 'accessing' }
-CFAtelierMoveAssessment >> rejectionMessage: aString [
-	rejectionMessage := aString
 ]
 
 { #category : 'accessing' }
