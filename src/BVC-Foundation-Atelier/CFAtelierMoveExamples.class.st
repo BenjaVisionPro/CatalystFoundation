@@ -132,7 +132,7 @@ CFAtelierMoveExamples >> destinationValidationRejectsWithoutMutation [
 	assessment := move apply.
 
 	self assert: assessment isApplicable not.
-	self assert: assessment rejectionMessage equals: 'The right relation has reached its configured limit.'.
+	self assert: assessment rejectionMessage equals: 'Right: The right relation has reached its configured limit.'.
 	self assert: (memento readUsing: leftDescription) size equals: 2.
 	self assert: (memento readUsing: rightDescription) size equals: 1.
 	self assert: model leftItems size equals: 2.

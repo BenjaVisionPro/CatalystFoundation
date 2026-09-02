@@ -75,11 +75,11 @@ CFAtelierMove >> assess [
 	[ sourceDescription validate: proposedSourceItems ]
 		on: MAValidationError
 		do: [ :anException |
-			^ self rejectedWithSource: sourceItems destination: destinationItems because: anException messageText ].
+			^ self rejectedWithSource: sourceItems destination: destinationItems because: anException printString ].
 	[ destinationDescription validate: proposedDestinationItems ]
 		on: MAValidationError
 		do: [ :anException |
-			^ self rejectedWithSource: sourceItems destination: destinationItems because: anException messageText ].
+			^ self rejectedWithSource: sourceItems destination: destinationItems because: anException printString ].
 
 	^ CFAtelierMoveAssessment
 		sourceItems: sourceItems
