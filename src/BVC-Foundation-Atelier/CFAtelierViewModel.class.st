@@ -9,7 +9,8 @@ Class {
 	#instVars : [
 		'palette',
 		'removeOperationBlock',
-		'insertOperationBlock'
+		'insertOperationBlock',
+		'replaceOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -27,7 +28,8 @@ CFAtelierViewModel >> asElement [
 					targetObject: anObject
 					memento: aMemento
 					description: aDescription)
-					insertOperationFor: insertOperationBlock ];
+					insertOperationFor: insertOperationBlock;
+					replaceOperationFor: replaceOperationBlock ];
 			relationElementDo: [ :aRelationElement :aDescription :aMemento |
 				(CFAtelierRelationDropSurface
 					installOn: aRelationElement
@@ -37,7 +39,8 @@ CFAtelierViewModel >> asElement [
 				CFAtelierToOneDropTarget
 					installOn: aRelationElement
 					memento: aMemento
-					description: aDescription ] ].
+					description: aDescription)
+					replaceOperationFor: replaceOperationBlock ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
@@ -67,4 +70,10 @@ CFAtelierViewModel >> removeOperationFor: aBlock [
 CFAtelierViewModel >> insertOperationFor: aBlock [
 	"Configure how a palette insertion candidate becomes an operation. The block receives candidate, destination memento, destination description and insertion index (nil for unordered relations). Leave unset for generic CFAtelierInsert semantics."
 	insertOperationBlock := aBlock
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> replaceOperationFor: aBlock [
+	"Configure how a palette replacement candidate becomes an operation. The block receives candidate, current object, destination memento and destination description. Leave unset for generic CFAtelierReplace semantics."
+	replaceOperationBlock := aBlock
 ]

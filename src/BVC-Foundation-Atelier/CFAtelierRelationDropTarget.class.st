@@ -12,7 +12,8 @@ Class {
 		'dropIndicator',
 		'replacementIndicator',
 		'activeDragItem',
-		'insertOperationBlock'
+		'insertOperationBlock',
+		'replaceOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -145,6 +146,8 @@ CFAtelierRelationDropTarget >> applyReplacementCandidate: aCandidate [
 
 { #category : 'private - operations' }
 CFAtelierRelationDropTarget >> replacementOperationForCandidate: aCandidate [
+	replaceOperationBlock ifNotNil: [
+		^ replaceOperationBlock value: aCandidate value: targetObject value: memento value: description ].
 	^ CFAtelierReplace
 		object: targetObject
 		with: aCandidate
@@ -300,3 +303,6 @@ CFAtelierRelationDropTarget >> description: aDescription [ description := aDescr
 
 { #category : 'configuration' }
 CFAtelierRelationDropTarget >> insertOperationFor: aBlock [ insertOperationBlock := aBlock ]
+
+{ #category : 'configuration' }
+CFAtelierRelationDropTarget >> replaceOperationFor: aBlock [ replaceOperationBlock := aBlock ]

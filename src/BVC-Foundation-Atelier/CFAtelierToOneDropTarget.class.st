@@ -11,7 +11,8 @@ Class {
 		'memento',
 		'description',
 		'dropIndicator',
-		'activeDragItem'
+		'activeDragItem',
+		'replaceOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -126,8 +127,12 @@ CFAtelierToOneDropTarget >> applyCandidate: aCandidate [
 
 { #category : 'private - operations' }
 CFAtelierToOneDropTarget >> operationForCandidate: aCandidate [
+	| aCurrentObject |
+	aCurrentObject := memento readUsing: description.
+	replaceOperationBlock ifNotNil: [
+		^ replaceOperationBlock value: aCandidate value: aCurrentObject value: memento value: description ].
 	^ CFAtelierReplace
-		object: (memento readUsing: description)
+		object: aCurrentObject
 		with: aCandidate
 		memento: memento
 		description: description
@@ -225,3 +230,6 @@ CFAtelierToOneDropTarget >> element: anElement [ element := anElement ]
 CFAtelierToOneDropTarget >> memento: aMemento [ memento := aMemento ]
 { #category : 'accessing' }
 CFAtelierToOneDropTarget >> description: aDescription [ description := aDescription ]
+
+{ #category : 'configuration' }
+CFAtelierToOneDropTarget >> replaceOperationFor: aBlock [ replaceOperationBlock := aBlock ]
