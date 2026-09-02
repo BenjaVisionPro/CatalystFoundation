@@ -5,6 +5,7 @@ Class {
 	#instVars : [
 		'leftItems',
 		'rightItems',
+		'looseItems',
 		'rightItemLimit'
 	],
 	#category : 'BVC-Foundation-Atelier-Examples',
@@ -17,6 +18,7 @@ CFAtelierMoveExampleModel >> initialize [
 	super initialize.
 	leftItems := OrderedCollection new.
 	rightItems := OrderedCollection new.
+	looseItems := OrderedCollection new.
 	rightItemLimit := 1000
 ]
 
@@ -73,5 +75,26 @@ CFAtelierMoveExampleModel >> rightItemsDescription [
 		beOrdered;
 		addCondition: [ :aCollection | aCollection size <= rightItemLimit ]
 			labelled: 'The right relation has reached its configured limit.';
+		yourself
+]
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> looseItems [
+	^ looseItems
+]
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> looseItems: aCollection [
+	looseItems := aCollection
+]
+
+{ #category : 'descriptions' }
+CFAtelierMoveExampleModel >> looseItemsDescription [
+	<magritteDescription>
+	^ MAToManyRelationDescription new
+		accessor: #looseItems;
+		label: 'Loose';
+		classes: { Object };
+		beModifiable;
 		yourself
 ]

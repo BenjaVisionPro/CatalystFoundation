@@ -97,3 +97,57 @@ CFAtelierRelationDropSurfaceExamples >> existingObjectDragMovesIntoEmptyRelation
 	self assert: model rightItems isEmpty.
 	^ assessment
 ]
+
+{ #category : 'examples - unordered relation' }
+CFAtelierRelationDropSurfaceExamples >> populatedUnorderedRelationAcceptsPaletteInsertion [
+	<gtExample>
+	| model memento existing candidate description surface assessment |
+	model := CFAtelierMoveExampleModel new.
+	existing := Object new.
+	candidate := Object new.
+	model looseItems: (OrderedCollection with: existing).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #looseItems in: memento.
+	surface := CFAtelierRelationDropSurface memento: memento description: description.
+
+	assessment := surface applyCandidate: candidate.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: description) size equals: 2.
+	self assert: (memento readUsing: description) first == existing.
+	self assert: (memento readUsing: description) second == candidate.
+	self assert: model looseItems size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples - unordered relation' }
+CFAtelierRelationDropSurfaceExamples >> existingObjectDragMovesIntoPopulatedUnorderedRelation [
+	<gtExample>
+	| model memento moved existing sourceDescription destinationDescription surface sourceElement dragItem operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	existing := Object new.
+	model leftItems: (OrderedCollection with: moved).
+	model looseItems: (OrderedCollection with: existing).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #looseItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	surface := CFAtelierRelationDropSurface memento: memento description: destinationDescription.
+	operation := surface moveOperationForDragItem: dragItem.
+
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) isEmpty.
+	self assert: (memento readUsing: destinationDescription) size equals: 2.
+	self assert: (memento readUsing: destinationDescription) first == existing.
+	self assert: (memento readUsing: destinationDescription) second == moved.
+	self assert: model leftItems first == moved.
+	self assert: model looseItems first == existing.
+	^ assessment
+]

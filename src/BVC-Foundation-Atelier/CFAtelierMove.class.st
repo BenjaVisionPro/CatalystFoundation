@@ -53,8 +53,6 @@ CFAtelierMove >> assess [
 
 	(sourceDescription isMultiple and: [ destinationDescription isMultiple ])
 		ifFalse: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'A cross-relation move requires to-many relation descriptions.' ].
-	destinationDescription isOrdered
-		ifFalse: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'An indexed destination requires an ordered relation.' ].
 
 	identityCount := sourceItems count: [ :each | each == object ].
 	identityCount = 1
@@ -62,15 +60,22 @@ CFAtelierMove >> assess [
 	(destinationItems anySatisfy: [ :each | each == object ])
 		ifTrue: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'The moved object is already present in the destination relation.' ].
 
-	((destinationIndex isInteger)
-		and: [ destinationIndex between: 1 and: destinationItems size + 1 ])
-		ifFalse: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'The destination index is outside the current destination relation.' ].
+	destinationDescription isOrdered
+		ifTrue: [
+			((destinationIndex isInteger)
+				and: [ destinationIndex between: 1 and: destinationItems size + 1 ])
+				ifFalse: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'The destination index is outside the current destination relation.' ] ]
+		ifFalse: [
+			destinationIndex ifNotNil: [ ^ self rejectedWithSource: sourceItems destination: destinationItems because: 'An unordered destination does not accept an insertion index.' ] ].
 
 	proposedSourceItems := sourceItems species withAll: (sourceItems reject: [ :each | each == object ]).
-	proposedDestinationItems := self
-		inserting: object
-		at: destinationIndex
-		into: destinationItems.
+	proposedDestinationItems := destinationDescription isOrdered
+		ifTrue: [ self inserting: object at: destinationIndex into: destinationItems ]
+		ifFalse: [
+			| theItems |
+			theItems := destinationItems species withAll: destinationItems.
+			theItems add: object.
+			theItems ].
 
 	[ sourceDescription validate: proposedSourceItems ]
 		on: MAValidationError

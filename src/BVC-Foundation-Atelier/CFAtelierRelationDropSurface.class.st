@@ -1,6 +1,6 @@
-"I add Atelier composition interaction to the relation-level element of an empty ordered to-many relation.
+"I add Atelier composition interaction to the relation-level element of a to-many relation.
 
-Palette drags insert the supplied candidate at position one. Existing objects dragged from another relation move to position one through CFAtelierMove. Once the relation is populated I defer to its item-row targets. I do not render the relation."
+For ordered relations I am the empty-list target: palette insertion and cross-relation move use position one, then populated relations defer to item-row targets. For unordered relations there is no positional item target, so I remain the relation-level target whether empty or populated; insertion and move append without inventing order. I do not render the relation."
 Class {
 	#name : 'CFAtelierRelationDropSurface',
 	#superclass : 'Object',
@@ -34,7 +34,6 @@ CFAtelierRelationDropSurface class >> memento: aMemento description: aDescriptio
 { #category : 'installing' }
 CFAtelierRelationDropSurface >> install [
 	description isMultiple ifFalse: [ ^ self ].
-	description isOrdered ifFalse: [ ^ self ].
 	dropIndicator := self newDropIndicator.
 	element addChild: dropIndicator.
 	element addEventHandler: (BlDropHandler new
@@ -49,7 +48,7 @@ CFAtelierRelationDropSurface >> install [
 { #category : 'testing' }
 CFAtelierRelationDropSurface >> acceptsDragItem: aDragItem [
 	| anAssessment |
-	(self currentItems ifNil: [ #() ]) isEmpty ifFalse: [ ^ false ].
+	(description isOrdered and: [ (self currentItems ifNil: [ #() ]) isEmpty not ]) ifTrue: [ ^ false ].
 	anAssessment := (self isPaletteDragItem: aDragItem)
 		ifTrue: [ self assessmentForCandidate: aDragItem domainObject ]
 		ifFalse: [ self moveAssessmentForDragItem: aDragItem ].
@@ -96,26 +95,28 @@ CFAtelierRelationDropSurface >> moveOperationForDragItem: aDragItem [
 		sourceDescription: aSourceContext description
 		destinationMemento: memento
 		destinationDescription: description
-		destinationIndex: 1
+		destinationIndex: (description isOrdered ifTrue: [ 1 ] ifFalse: [ nil ])
 ]
 
 { #category : 'assessing' }
 CFAtelierRelationDropSurface >> assessmentForCandidate: aCandidate [
-	(self currentItems ifNil: [ #() ]) isEmpty ifFalse: [
-		^ CFAtelierInsertAssessment object: aCandidate items: self currentItems rejectedBecause: 'The relation already has item insertion targets.' ].
+	(description isOrdered and: [ (self currentItems ifNil: [ #() ]) isEmpty not ]) ifTrue: [
+		^ CFAtelierInsertAssessment object: aCandidate items: self currentItems rejectedBecause: 'The ordered relation already has item insertion targets.' ].
 	^ (self operationForCandidate: aCandidate) assess
 ]
 
 { #category : 'applying' }
 CFAtelierRelationDropSurface >> applyCandidate: aCandidate [
-	(self currentItems ifNil: [ #() ]) isEmpty ifFalse: [
-		^ CFAtelierInsertAssessment object: aCandidate items: self currentItems rejectedBecause: 'The relation already has item insertion targets.' ].
+	(description isOrdered and: [ (self currentItems ifNil: [ #() ]) isEmpty not ]) ifTrue: [
+		^ CFAtelierInsertAssessment object: aCandidate items: self currentItems rejectedBecause: 'The ordered relation already has item insertion targets.' ].
 	^ (self operationForCandidate: aCandidate) apply
 ]
 
 { #category : 'private - operations' }
 CFAtelierRelationDropSurface >> operationForCandidate: aCandidate [
-	^ CFAtelierInsert object: aCandidate memento: memento description: description at: 1
+	^ description isOrdered
+		ifTrue: [ CFAtelierInsert object: aCandidate memento: memento description: description at: 1 ]
+		ifFalse: [ CFAtelierInsert object: aCandidate memento: memento description: description ]
 ]
 
 { #category : 'private - accessing' }
