@@ -46,6 +46,5 @@ CFAtelierReplaceExampleModel >> primaryItemDescription [
 		accessor: #primaryItem;
 		label: 'Primary item';
 		classes: { Object };
-		beModifiable;
 		yourself
 ]
