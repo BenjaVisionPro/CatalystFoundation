@@ -69,6 +69,9 @@ BaselineOfCatalystFoundation >> defineGemStoneGroupsOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
+	spec group: 'atelier' with: #(
+		'BVC-Foundation-Atelier'
+	).
 	spec group: 'composer' with: #(
 		'BVC-Foundation-Composer'
 	).
@@ -78,6 +81,7 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 		'BVC-Foundation-Magritte-GT'
 		'BVC-Foundation-Magritte-Detail'
 		'BVC-Foundation-Composer'
+		'BVC-Foundation-Atelier'
 		'BVC-Foundation-Magritte-Seaside'
 		'BVC-Foundation-Config-UI-Core'
 		'BVC-Foundation-Config-UI-ConfigurationEditor'
@@ -108,6 +112,8 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Magritte-GT' 'CatalystMotion') ].
 	spec package: 'BVC-Foundation-Composer'
 		with: [ spec requires: #('BVC-Foundation-Magritte-GT' 'CatalystMotion') ].
+	spec package: 'BVC-Foundation-Atelier'
+		with: [ spec requires: #('BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Magritte-Seaside'
 		with: [ spec requires: #('BVC-Foundation-Magritte-Core') ].
 	spec package: 'BVC-Foundation-Config-UI-Core'
