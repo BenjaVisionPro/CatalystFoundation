@@ -178,3 +178,47 @@ CFAtelierRelationDropSurfaceExamples >> configuredInsertOperationReceivesExactDe
 	self assert: (memento readUsing: description) isEmpty.
 	^ assessment
 ]
+
+
+{ #category : 'examples - configured operation' }
+CFAtelierRelationDropSurfaceExamples >> configuredMoveOperationReceivesExactSourceAndDestinationContexts [
+	<gtExample>
+	| model memento moved sourceDescription destinationDescription surface sourceElement dragItem receivedObject receivedSourceContext receivedDestinationContext receivedIndex assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	model leftItems: (OrderedCollection with: moved).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	surface := CFAtelierRelationDropSurface memento: memento description: destinationDescription.
+	surface moveOperationFor: [ :anObject :aSourceContext :aDestinationContext :anIndex |
+		receivedObject := anObject.
+		receivedSourceContext := aSourceContext.
+		receivedDestinationContext := aDestinationContext.
+		receivedIndex := anIndex.
+		CFAtelierMove
+			object: anObject
+			sourceMemento: aSourceContext memento
+			sourceDescription: aSourceContext description
+			destinationMemento: aDestinationContext memento
+			destinationDescription: aDestinationContext description
+			destinationIndex: anIndex ].
+
+	assessment := (surface moveOperationForDragItem: dragItem) assess.
+
+	self assert: assessment isApplicable.
+	self assert: receivedObject == moved.
+	self assert: receivedSourceContext memento == memento.
+	self assert: receivedSourceContext description == sourceDescription.
+	self assert: receivedDestinationContext memento == memento.
+	self assert: receivedDestinationContext description == destinationDescription.
+	self assert: receivedIndex equals: 1.
+	self assert: (memento readUsing: sourceDescription) first == moved.
+	self assert: (memento readUsing: destinationDescription) isEmpty.
+	^ assessment
+]

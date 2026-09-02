@@ -12,7 +12,8 @@ Class {
 		'description',
 		'dropIndicator',
 		'activeDragItem',
-		'replaceOperationBlock'
+		'replaceOperationBlock',
+		'moveOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -148,9 +149,16 @@ CFAtelierToOneDropTarget >> moveAssessmentForDragItem: aDragItem [
 
 { #category : 'private - operations' }
 CFAtelierToOneDropTarget >> moveOperationForDragItem: aDragItem [
-	| aSourceContext |
+	| aSourceContext aDestinationContext |
 	aSourceContext := self sourceContextForDragItem: aDragItem.
 	aSourceContext ifNil: [ ^ nil ].
+	moveOperationBlock ifNotNil: [
+		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
+		^ moveOperationBlock
+			value: aDragItem domainObject
+			value: aSourceContext
+			value: aDestinationContext
+			value: nil ].
 	^ CFAtelierMove
 		object: aDragItem domainObject
 		sourceMemento: aSourceContext memento
@@ -233,3 +241,6 @@ CFAtelierToOneDropTarget >> description: aDescription [ description := aDescript
 
 { #category : 'configuration' }
 CFAtelierToOneDropTarget >> replaceOperationFor: aBlock [ replaceOperationBlock := aBlock ]
+
+{ #category : 'configuration' }
+CFAtelierToOneDropTarget >> moveOperationFor: aBlock [ moveOperationBlock := aBlock ]

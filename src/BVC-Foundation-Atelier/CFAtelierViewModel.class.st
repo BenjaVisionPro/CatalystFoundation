@@ -10,7 +10,8 @@ Class {
 		'palette',
 		'removeOperationBlock',
 		'insertOperationBlock',
-		'replaceOperationBlock'
+		'replaceOperationBlock',
+		'moveOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -29,18 +30,21 @@ CFAtelierViewModel >> asElement [
 					memento: aMemento
 					description: aDescription)
 					insertOperationFor: insertOperationBlock;
-					replaceOperationFor: replaceOperationBlock ];
+					replaceOperationFor: replaceOperationBlock;
+					moveOperationFor: moveOperationBlock ];
 			relationElementDo: [ :aRelationElement :aDescription :aMemento |
 				(CFAtelierRelationDropSurface
 					installOn: aRelationElement
 					memento: aMemento
 					description: aDescription)
-					insertOperationFor: insertOperationBlock.
+					insertOperationFor: insertOperationBlock;
+					moveOperationFor: moveOperationBlock.
 				(CFAtelierToOneDropTarget
 					installOn: aRelationElement
 					memento: aMemento
 					description: aDescription)
-					replaceOperationFor: replaceOperationBlock ] ].
+					replaceOperationFor: replaceOperationBlock;
+					moveOperationFor: moveOperationBlock ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
@@ -76,4 +80,10 @@ CFAtelierViewModel >> insertOperationFor: aBlock [
 CFAtelierViewModel >> replaceOperationFor: aBlock [
 	"Configure how a palette replacement candidate becomes an operation. The block receives candidate, current object, destination memento and destination description. Leave unset for generic CFAtelierReplace semantics."
 	replaceOperationBlock := aBlock
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> moveOperationFor: aBlock [
+	"Configure how an existing relation object moves to another relation. The block receives the exact object, source CFAtelierRelationDragContext, destination CFAtelierRelationDragContext and destination index (nil for unordered or to-one destinations). Leave unset for generic CFAtelierMove semantics."
+	moveOperationBlock := aBlock
 ]

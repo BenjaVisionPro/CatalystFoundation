@@ -13,7 +13,8 @@ Class {
 		'replacementIndicator',
 		'activeDragItem',
 		'insertOperationBlock',
-		'replaceOperationBlock'
+		'replaceOperationBlock',
+		'moveOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -110,11 +111,18 @@ CFAtelierRelationDropTarget >> moveAssessmentForDragItem: aDragItem after: aBool
 
 { #category : 'private - operations' }
 CFAtelierRelationDropTarget >> moveOperationForDragItem: aDragItem after: aBoolean [
-	| aSourceContext anIndex |
+	| aSourceContext aDestinationContext anIndex |
 	aSourceContext := self sourceContextForDragItem: aDragItem.
 	aSourceContext ifNil: [ ^ nil ].
 	anIndex := self insertionIndexAfter: aBoolean.
 	anIndex ifNil: [ ^ nil ].
+	moveOperationBlock ifNotNil: [
+		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
+		^ moveOperationBlock
+			value: aDragItem domainObject
+			value: aSourceContext
+			value: aDestinationContext
+			value: anIndex ].
 	^ CFAtelierMove
 		object: aDragItem domainObject
 		sourceMemento: aSourceContext memento
@@ -306,3 +314,6 @@ CFAtelierRelationDropTarget >> insertOperationFor: aBlock [ insertOperationBlock
 
 { #category : 'configuration' }
 CFAtelierRelationDropTarget >> replaceOperationFor: aBlock [ replaceOperationBlock := aBlock ]
+
+{ #category : 'configuration' }
+CFAtelierRelationDropTarget >> moveOperationFor: aBlock [ moveOperationBlock := aBlock ]

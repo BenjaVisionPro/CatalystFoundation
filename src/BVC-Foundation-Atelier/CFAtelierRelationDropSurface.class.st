@@ -10,7 +10,8 @@ Class {
 		'description',
 		'dropIndicator',
 		'activeDragItem',
-		'insertOperationBlock'
+		'insertOperationBlock',
+		'moveOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -87,16 +88,24 @@ CFAtelierRelationDropSurface >> moveAssessmentForDragItem: aDragItem [
 
 { #category : 'private - operations' }
 CFAtelierRelationDropSurface >> moveOperationForDragItem: aDragItem [
-	| aSourceContext |
+	| aSourceContext aDestinationContext anIndex |
 	aSourceContext := self sourceContextForDragItem: aDragItem.
 	aSourceContext ifNil: [ ^ nil ].
+	anIndex := description isOrdered ifTrue: [ 1 ] ifFalse: [ nil ].
+	moveOperationBlock ifNotNil: [
+		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
+		^ moveOperationBlock
+			value: aDragItem domainObject
+			value: aSourceContext
+			value: aDestinationContext
+			value: anIndex ].
 	^ CFAtelierMove
 		object: aDragItem domainObject
 		sourceMemento: aSourceContext memento
 		sourceDescription: aSourceContext description
 		destinationMemento: memento
 		destinationDescription: description
-		destinationIndex: (description isOrdered ifTrue: [ 1 ] ifFalse: [ nil ])
+		destinationIndex: anIndex
 ]
 
 { #category : 'assessing' }
@@ -183,3 +192,6 @@ CFAtelierRelationDropSurface >> description: aDescription [ description := aDesc
 
 { #category : 'configuration' }
 CFAtelierRelationDropSurface >> insertOperationFor: aBlock [ insertOperationBlock := aBlock ]
+
+{ #category : 'configuration' }
+CFAtelierRelationDropSurface >> moveOperationFor: aBlock [ moveOperationBlock := aBlock ]
