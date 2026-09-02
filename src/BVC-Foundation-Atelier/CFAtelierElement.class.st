@@ -6,7 +6,8 @@ Class {
 	#superclass : 'BrHorizontalPane',
 	#instVars : [
 		'paletteElement',
-		'formElement'
+		'formElement',
+		'removeDropTarget'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -73,5 +74,8 @@ CFAtelierElement >> palette: anAtelierPalette [
 	paletteElement := CFAtelierPaletteElement new
 		palette: anAtelierPalette;
 		yourself.
-	self addChild: paletteElement at: 1
+	self addChild: paletteElement at: 1.
+	removeDropTarget ifNil: [
+		removeDropTarget := CFAtelierRemoveDropTarget new.
+		self addChild: removeDropTarget at: 2 ]
 ]
