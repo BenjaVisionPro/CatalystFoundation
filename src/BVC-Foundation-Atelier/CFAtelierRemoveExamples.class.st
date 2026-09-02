@@ -145,3 +145,31 @@ CFAtelierRemoveExamples >> resetRestoresDetachedEmbeddedMementoIdentity [
 	self assert: (restoredChildMemento readUsing: nameDescription) equals: 'Atelier example'.
 	^ parentMemento
 ]
+
+
+{ #category : 'examples - embedded transaction' }
+CFAtelierRemoveExamples >> reinsertRestoresDetachedEmbeddedMementoIdentity [
+	<gtExample>
+	| model child parentMemento relationDescription childMemento nameDescription remove insert reattachedChildMemento |
+	model := CFAtelierMoveExampleModel new.
+	child := CFAtelierEntryExampleModel new.
+	model leftItems: (OrderedCollection with: child).
+	parentMemento := CFMaMemento model: model.
+	relationDescription := self descriptionFor: #leftItems in: parentMemento.
+	childMemento := parentMemento childMementoFor: child inRelation: relationDescription.
+	nameDescription := self descriptionFor: #name in: childMemento.
+	childMemento write: 'Staged child name' using: nameDescription.
+
+	remove := CFAtelierRemove object: child memento: parentMemento description: relationDescription.
+	self assert: remove apply isApplicable.
+	insert := CFAtelierInsert object: child memento: parentMemento description: relationDescription at: 1.
+	self assert: insert apply isApplicable.
+	reattachedChildMemento := parentMemento childMementoFor: child inRelation: relationDescription.
+
+	self assert: reattachedChildMemento == childMemento.
+	self assert: (reattachedChildMemento readUsing: nameDescription) equals: 'Staged child name'.
+	parentMemento commit.
+	self assert: model leftItems first == child.
+	self assert: child name equals: 'Staged child name'.
+	^ parentMemento
+]

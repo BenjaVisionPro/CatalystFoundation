@@ -76,7 +76,10 @@ CFAtelierInsert >> assess [
 CFAtelierInsert >> applyAssessment: anAssessment [
 	memento
 		write: anAssessment proposedItems
-		using: description
+		using: description.
+	memento
+		reattachDetachedChildMementoFor: object
+		inRelation: description
 ]
 
 { #category : 'accessing' }

@@ -66,6 +66,22 @@ CFMaMemento >> detachChildMementoFor: anObject inRelation: aDescription [
 	statusPulse value: super overallStatus valueOrNil
 ]
 
+
+{ #category : 'children' }
+CFMaMemento >> reattachDetachedChildMementoFor: anObject inRelation: aDescription [
+	| detachment childMemento |
+	detachment := detachedChildMementos
+		detect: [ :each | each first == anObject and: [ each second == aDescription ] ]
+		ifNone: [ ^ self ].
+	childMemento := detachment third.
+	detachedChildMementos remove: detachment.
+	self
+		putChildMemento: childMemento
+		for: anObject
+		inRelation: aDescription.
+	statusPulse value: super overallStatus valueOrNil
+]
+
 { #category : 'children' }
 CFMaMemento >> transferChildMementoFor: anObject inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription [
 	| childMemento |
