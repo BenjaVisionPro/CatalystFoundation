@@ -1,6 +1,8 @@
-"I add Atelier palette replacement interaction to a to-one relation element produced by an existing Foundation presentation.
+"I add Atelier composition interaction to a to-one relation element produced by an existing Foundation presentation.
 
-I do not render the relation. The presentation supplies its existing row, description and memento through the relation-element configuration seam. A palette candidate replaces the current staged value through CFAtelierReplace; nil is a valid expected current value, so the same operation also fills an empty to-one relation. I accept only explicitly marked Atelier palette drag sources."
+Palette candidates replace or fill the current value through CFAtelierReplace. Existing relation objects carry CFAtelierRelationDragContext and move into an empty to-one destination through CFAtelierMove. The to-one relation element is also an Atelier drag source while it contains an object, so that object can move to another relation or to the Atelier remove target.
+
+I do not render the relation. The Foundation presentation supplies its existing relation element, description and memento through the relation-element configuration seam."
 Class {
 	#name : 'CFAtelierToOneDropTarget',
 	#superclass : 'Object',
@@ -8,7 +10,8 @@ Class {
 		'element',
 		'memento',
 		'description',
-		'dropIndicator'
+		'dropIndicator',
+		'activeDragItem'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -36,25 +39,79 @@ CFAtelierToOneDropTarget class >> memento: aMemento description: aDescription [
 { #category : 'installing' }
 CFAtelierToOneDropTarget >> install [
 	description isMultiple ifTrue: [ ^ self ].
-
+	self installSourceContext.
+	self installDragSource.
 	dropIndicator := self newDropIndicator.
 	element addChild: dropIndicator.
 	element addEventHandler: (BlDropHandler new
 		acceptItemsSuchThat: [ :aDragItem :aDropArea | self acceptsDragItem: aDragItem ];
 		whenDragEnteredDo: [ :anEvent | self updateForEvent: anEvent ];
 		whenDragOverDo: [ :anEvent | self updateForEvent: anEvent ];
-		whenDragLeftDo: [ :anEvent | self hideIndicator ];
+		whenDragLeftDo: [ :anEvent | self clearActiveDrag ];
 		whenDroppedDo: [ :anEvent | self dropEvent: anEvent ];
 		yourself)
 ]
 
+{ #category : 'private - installing' }
+CFAtelierToOneDropTarget >> installSourceContext [
+	element userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: description)
+]
+
+{ #category : 'private - installing' }
+CFAtelierToOneDropTarget >> installDragSource [
+	element addEventHandler: (BlDragHandler new
+		liftItem: [ :aSourceElement | self dragItemsFrom: aSourceElement ];
+		yourself)
+]
+
+{ #category : 'private - interaction' }
+CFAtelierToOneDropTarget >> dragItemsFrom: aSourceElement [
+	| anObject |
+	anObject := memento readUsing: description.
+	anObject ifNil: [ ^ #() ].
+	^ { BlDragItem new
+		sourceElement: aSourceElement;
+		domainObject: anObject;
+		stencil: [ :aDragItem |
+			BrLabel new
+				fitContent;
+				padding: (BlInsets all: 7);
+				aptitude: BrGlamorousLabelAptitude new;
+				text: aDragItem domainObject printString;
+				yourself ];
+		yourself }
+]
+
 { #category : 'testing' }
 CFAtelierToOneDropTarget >> acceptsDragItem: aDragItem [
+	| anAssessment |
+	anAssessment := (self isPaletteDragItem: aDragItem)
+		ifTrue: [ self assessmentForCandidate: aDragItem domainObject ]
+		ifFalse: [ self moveAssessmentForDragItem: aDragItem ].
+	anAssessment ifNil: [ ^ false ].
+	anAssessment isApplicable ifFalse: [ ^ false ].
+	activeDragItem := aDragItem.
+	^ true
+]
+
+{ #category : 'private - testing' }
+CFAtelierToOneDropTarget >> isPaletteDragItem: aDragItem [
 	| aSourceElement |
 	aSourceElement := aDragItem sourceElement.
 	aSourceElement ifNil: [ ^ false ].
-	(aSourceElement userData includesKey: #atelierPaletteSource) ifFalse: [ ^ false ].
-	^ (self assessmentForCandidate: aDragItem domainObject) isApplicable
+	^ aSourceElement userData includesKey: #atelierPaletteSource
+]
+
+{ #category : 'private - accessing' }
+CFAtelierToOneDropTarget >> sourceContextForDragItem: aDragItem [
+	| aSourceElement |
+	aSourceElement := aDragItem sourceElement.
+	aSourceElement ifNil: [ ^ nil ].
+	^ aSourceElement userData
+		at: #atelierRelationDragContext
+		ifAbsent: [ nil ]
 ]
 
 { #category : 'assessing' }
@@ -76,21 +133,66 @@ CFAtelierToOneDropTarget >> operationForCandidate: aCandidate [
 		description: description
 ]
 
+{ #category : 'assessing' }
+CFAtelierToOneDropTarget >> moveAssessmentForDragItem: aDragItem [
+	| anOperation |
+	anOperation := self moveOperationForDragItem: aDragItem.
+	anOperation ifNil: [ ^ nil ].
+	^ anOperation assess
+]
+
+{ #category : 'private - operations' }
+CFAtelierToOneDropTarget >> moveOperationForDragItem: aDragItem [
+	| aSourceContext |
+	aSourceContext := self sourceContextForDragItem: aDragItem.
+	aSourceContext ifNil: [ ^ nil ].
+	^ CFAtelierMove
+		object: aDragItem domainObject
+		sourceMemento: aSourceContext memento
+		sourceDescription: aSourceContext description
+		destinationMemento: memento
+		destinationDescription: description
+		destinationIndex: nil
+]
+
 { #category : 'private - interaction' }
 CFAtelierToOneDropTarget >> updateForEvent: anEvent [
-	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ].
-	(self assessmentForCandidate: anEvent domainObjects first) isApplicable
-		ifTrue: [ self showIndicator ]
-		ifFalse: [ self hideIndicator ]
+	activeDragItem ifNil: [ ^ self hideIndicator ].
+	(self isPaletteDragItem: activeDragItem)
+		ifTrue: [
+			(self assessmentForCandidate: activeDragItem domainObject) isApplicable
+				ifTrue: [ self showIndicator ]
+				ifFalse: [ self hideIndicator ] ]
+		ifFalse: [
+			| anAssessment |
+			anAssessment := self moveAssessmentForDragItem: activeDragItem.
+			(anAssessment notNil and: [ anAssessment isApplicable ])
+				ifTrue: [ self showIndicator ]
+				ifFalse: [ self hideIndicator ] ]
 ]
 
 { #category : 'private - interaction' }
 CFAtelierToOneDropTarget >> dropEvent: anEvent [
-	| anAssessment |
+	| aDragItem anAssessment |
 	self hideIndicator.
-	anEvent domainObjects size = 1 ifFalse: [ ^ self ].
-	anAssessment := self applyCandidate: anEvent domainObjects first.
+	anEvent domainObjects size = 1 ifFalse: [ ^ self clearActiveDrag ].
+	aDragItem := activeDragItem.
+	activeDragItem := nil.
+	aDragItem ifNil: [ ^ self ].
+	(self isPaletteDragItem: aDragItem)
+		ifTrue: [ anAssessment := self applyCandidate: aDragItem domainObject ]
+		ifFalse: [
+			| anOperation |
+			anOperation := self moveOperationForDragItem: aDragItem.
+			anOperation ifNil: [ ^ self ].
+			anAssessment := anOperation apply ].
 	^ anAssessment
+]
+
+{ #category : 'private - interaction' }
+CFAtelierToOneDropTarget >> clearActiveDrag [
+	activeDragItem := nil.
+	self hideIndicator
 ]
 
 { #category : 'private - appearance' }

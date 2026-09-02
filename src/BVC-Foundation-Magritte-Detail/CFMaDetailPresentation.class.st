@@ -914,7 +914,10 @@ CFMaDetailPresentation >> addToOneEmbeddedUsing: aDescription [
 		self addFieldElement: aHeaderContent using: aDescription.
 		aHeaderContainer := self containerForDescription: aDescription.
 		aHeaderRow := aHeaderContainer rows last.
-		self installToOneEmbeddedInteractionOn: aHeaderRow description: aDescription ].
+		self installToOneEmbeddedInteractionOn: aHeaderRow description: aDescription.
+		self
+			configureRelationElement: aHeaderRow
+			description: aDescription ].
 
 	aHost := self newPresentationHost.
 	aHost visibility: BlVisibility gone.

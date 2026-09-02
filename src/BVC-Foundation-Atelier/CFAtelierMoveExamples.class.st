@@ -265,3 +265,123 @@ CFAtelierMoveExamples >> applyReassessesCurrentStagedState [
 	self assert: model rightItems size equals: 1.
 	^ applyAssessment
 ]
+
+{ #category : 'examples - cardinality' }
+CFAtelierMoveExamples >> moveFromToOneIntoOrderedToMany [
+	<gtExample>
+	| model memento alpha gamma leftItemDescription rightItemsDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	gamma := Object new.
+	model
+		leftItem: alpha;
+		rightItems: (OrderedCollection with: gamma).
+	memento := CFMaMemento model: model.
+	leftItemDescription := self descriptionFor: #leftItem in: memento.
+	rightItemsDescription := self descriptionFor: #rightItems in: memento.
+
+	operation := CFAtelierMove
+		object: alpha
+		sourceMemento: memento
+		sourceDescription: leftItemDescription
+		destinationMemento: memento
+		destinationDescription: rightItemsDescription
+		destinationIndex: 2.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: leftItemDescription) isNil.
+	self assert: (memento readUsing: rightItemsDescription) first == gamma.
+	self assert: (memento readUsing: rightItemsDescription) second == alpha.
+	self assert: model leftItem == alpha.
+	self assert: model rightItems size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierMoveExamples >> moveFromToManyIntoEmptyToOne [
+	<gtExample>
+	| model memento alpha beta leftItemsDescription rightItemDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	beta := Object new.
+	model leftItems: (OrderedCollection with: alpha with: beta).
+	memento := CFMaMemento model: model.
+	leftItemsDescription := self descriptionFor: #leftItems in: memento.
+	rightItemDescription := self descriptionFor: #rightItem in: memento.
+
+	operation := CFAtelierMove
+		object: beta
+		sourceMemento: memento
+		sourceDescription: leftItemsDescription
+		destinationMemento: memento
+		destinationDescription: rightItemDescription
+		destinationIndex: nil.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: leftItemsDescription) size equals: 1.
+	self assert: (memento readUsing: leftItemsDescription) first == alpha.
+	self assert: (memento readUsing: rightItemDescription) == beta.
+	self assert: model leftItems second == beta.
+	self assert: model rightItem isNil.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierMoveExamples >> occupiedToOneDestinationRejectsMove [
+	<gtExample>
+	| model memento alpha beta leftItemsDescription rightItemDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	beta := Object new.
+	model
+		leftItems: (OrderedCollection with: alpha);
+		rightItem: beta.
+	memento := CFMaMemento model: model.
+	leftItemsDescription := self descriptionFor: #leftItems in: memento.
+	rightItemDescription := self descriptionFor: #rightItem in: memento.
+
+	operation := CFAtelierMove
+		object: alpha
+		sourceMemento: memento
+		sourceDescription: leftItemsDescription
+		destinationMemento: memento
+		destinationDescription: rightItemDescription
+		destinationIndex: nil.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'A to-one destination must be empty for a move.'.
+	self assert: (memento readUsing: leftItemsDescription) first == alpha.
+	self assert: (memento readUsing: rightItemDescription) == beta.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierMoveExamples >> moveBetweenToOneRelations [
+	<gtExample>
+	| model memento alpha leftItemDescription rightItemDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	model leftItem: alpha.
+	memento := CFMaMemento model: model.
+	leftItemDescription := self descriptionFor: #leftItem in: memento.
+	rightItemDescription := self descriptionFor: #rightItem in: memento.
+
+	operation := CFAtelierMove
+		object: alpha
+		sourceMemento: memento
+		sourceDescription: leftItemDescription
+		destinationMemento: memento
+		destinationDescription: rightItemDescription
+		destinationIndex: nil.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: leftItemDescription) isNil.
+	self assert: (memento readUsing: rightItemDescription) == alpha.
+	self assert: model leftItem == alpha.
+	self assert: model rightItem isNil.
+	^ assessment
+]

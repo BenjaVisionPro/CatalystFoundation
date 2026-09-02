@@ -6,6 +6,8 @@ Class {
 		'leftItems',
 		'rightItems',
 		'looseItems',
+		'leftItem',
+		'rightItem',
 		'rightItemLimit'
 	],
 	#category : 'BVC-Foundation-Atelier-Examples',
@@ -19,6 +21,8 @@ CFAtelierMoveExampleModel >> initialize [
 	leftItems := OrderedCollection new.
 	rightItems := OrderedCollection new.
 	looseItems := OrderedCollection new.
+	leftItem := nil.
+	rightItem := nil.
 	rightItemLimit := 1000
 ]
 
@@ -96,5 +100,38 @@ CFAtelierMoveExampleModel >> looseItemsDescription [
 		label: 'Loose';
 		classes: { Object };
 		beModifiable;
+		yourself
+]
+
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> leftItem [ ^ leftItem ]
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> leftItem: anObject [ leftItem := anObject ]
+
+{ #category : 'descriptions' }
+CFAtelierMoveExampleModel >> leftItemDescription [
+	<magritteDescription>
+	^ MAToOneRelationDescription new
+		accessor: #leftItem;
+		label: 'Left item';
+		classes: { Object };
+		yourself
+]
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> rightItem [ ^ rightItem ]
+
+{ #category : 'accessing' }
+CFAtelierMoveExampleModel >> rightItem: anObject [ rightItem := anObject ]
+
+{ #category : 'descriptions' }
+CFAtelierMoveExampleModel >> rightItemDescription [
+	<magritteDescription>
+	^ MAToOneRelationDescription new
+		accessor: #rightItem;
+		label: 'Right item';
+		classes: { Object };
 		yourself
 ]
