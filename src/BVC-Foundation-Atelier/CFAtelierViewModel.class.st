@@ -29,6 +29,10 @@ CFAtelierViewModel >> asElement [
 				CFAtelierRelationDropSurface
 					installOn: aRelationElement
 					memento: aMemento
+					description: aDescription.
+				CFAtelierToOneDropTarget
+					installOn: aRelationElement
+					memento: aMemento
 					description: aDescription ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].

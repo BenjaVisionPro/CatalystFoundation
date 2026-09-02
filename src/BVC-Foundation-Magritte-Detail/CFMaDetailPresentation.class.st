@@ -1011,6 +1011,9 @@ CFMaDetailPresentation >> addToOneListUsing: aDescription [
 		installToOneListNavigationOn: aHeaderRow
 		focusElement: aRelationElement
 		description: aDescription.
+	self
+		configureRelationElement: aHeaderRow
+		description: aDescription.
 	self relationFocusRows: { aHeaderRow } in: aContainer for: aDescription
 ]
 
