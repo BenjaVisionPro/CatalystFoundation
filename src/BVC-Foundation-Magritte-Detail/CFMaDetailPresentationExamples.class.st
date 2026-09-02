@@ -1357,3 +1357,24 @@ CFMaDetailPresentationExamples >> compactObjectRendersReferenceDescription [
 	self assert: anElement iconContainer constraints vertical resizer size equals: 44.
 	^ anElement
 ]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> nestedPresentationInheritsRelationInteractionConfiguration [
+	<gtExample>
+	| aParent aChildModel aChildMemento aHost relationElementWasExposed |
+	relationElementWasExposed := false.
+	aParent := CFMaDetailPresentation new.
+	aParent relationElementDo: [ :anElement :aDescription :aMemento |
+		relationElementWasExposed := true ].
+	aChildModel := CFMaFormShowcase new.
+	aChildMemento := CFMaMemento model: aChildModel.
+	aHost := aParent newPresentationHost.
+
+	aParent
+		buildPresentationForMemento: aChildMemento
+		in: aHost
+		configure: [ :aPresentation | aPresentation ].
+
+	self assert: relationElementWasExposed.
+	^ aHost
+]

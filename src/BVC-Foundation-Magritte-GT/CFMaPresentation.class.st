@@ -454,8 +454,22 @@ CFMaPresentation >> buildPresentationForMemento: aMemento in: aHostElement confi
 	aPresentation
 		memento: aMemento;
 		form: aHostElement.
+	self configureChildPresentation: aPresentation.
 	aConfigurationBlock cull: aPresentation.
 	aPresentation build.
+	^ aPresentation
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> configureChildPresentation: aPresentation [
+	"Consumer relation interaction belongs to the editing context, not only to
+	the outermost rendered presentation. Carry the same callbacks into a nested
+	Foundation presentation while leaving that child responsible for its own
+	rendering and representation-specific configuration."
+	relationItemElementBlock ifNotNil: [
+		aPresentation relationItemElementDo: relationItemElementBlock ].
+	relationElementBlock ifNotNil: [
+		aPresentation relationElementDo: relationElementBlock ].
 	^ aPresentation
 ]
 
