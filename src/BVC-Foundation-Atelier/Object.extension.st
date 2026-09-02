@@ -18,3 +18,11 @@ Object >> gtAtelierFor: aView [
 		disableAsync;
 		stencil: [ self asAtelier asElement ]
 ]
+
+
+{ #category : '*BVC-Foundation-Atelier' }
+Object >> asAtelierWith: anAtelierConfiguration [
+	^ self asAtelier
+		configuration: anAtelierConfiguration;
+		yourself
+]

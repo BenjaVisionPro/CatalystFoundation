@@ -54,6 +54,12 @@ CFAtelierViewModel >> asElement [
 		yourself
 ]
 
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> configuration: anAtelierConfiguration [
+	anAtelierConfiguration applyTo: self
+]
+
 { #category : 'accessing' }
 CFAtelierViewModel >> palette [
 	^ palette

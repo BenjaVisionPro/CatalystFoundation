@@ -7,7 +7,9 @@ Class {
 	#instVars : [
 		'palette',
 		'element',
-		'rootObject'
+		'rootObject',
+		'configuration',
+		'rootViewModel'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -17,6 +19,12 @@ Class {
 { #category : 'instance creation' }
 CFAtelierEmptyViewModel class >> palette: anAtelierPalette [
 	^ self new palette: anAtelierPalette; yourself
+]
+
+
+{ #category : 'instance creation' }
+CFAtelierEmptyViewModel class >> configuration: anAtelierConfiguration [
+	^ self new configuration: anAtelierConfiguration; yourself
 ]
 
 { #category : 'api - converting' }
@@ -36,11 +44,11 @@ CFAtelierEmptyViewModel >> asElement [
 
 { #category : 'editing' }
 CFAtelierEmptyViewModel >> adoptRootObject: anObject [
-	| aRootViewModel |
 	anObject hasMagritteDescription ifFalse: [ ^ false ].
 	rootObject := anObject.
-	aRootViewModel := CFAtelierViewModel forObject: anObject.
-	element ifNotNil: [ element replaceFormElementWithMotion: aRootViewModel asElement ].
+	rootViewModel := CFAtelierViewModel forObject: anObject.
+	configuration ifNotNil: [ configuration applyEditingTo: rootViewModel ].
+	element ifNotNil: [ element replaceFormElementWithMotion: rootViewModel asElement ].
 	^ true
 ]
 
@@ -52,3 +60,15 @@ CFAtelierEmptyViewModel >> palette: anAtelierPalette [ palette := anAtelierPalet
 
 { #category : 'accessing' }
 CFAtelierEmptyViewModel >> rootObject [ ^ rootObject ]
+
+
+{ #category : 'configuration' }
+CFAtelierEmptyViewModel >> configuration: anAtelierConfiguration [
+	configuration := anAtelierConfiguration.
+	palette := anAtelierConfiguration palette
+]
+
+{ #category : 'accessing' }
+CFAtelierEmptyViewModel >> rootViewModel [
+	^ rootViewModel
+]
