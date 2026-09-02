@@ -168,3 +168,82 @@ CFAtelierRelationDropTargetExamples >> existingObjectDragWithinSameRelationDefer
 	self assert: (memento readUsing: description) first == moved.
 	^ assessment
 ]
+
+
+{ #category : 'examples - relation replacement' }
+CFAtelierRelationDropTargetExamples >> paletteCandidateAssessesReplacementWithoutMutation [
+	<gtExample>
+	| model memento alpha beta candidate description target assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	beta := Object new.
+	candidate := Object new.
+	model leftItems: (OrderedCollection with: alpha with: beta).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	target := CFAtelierRelationDropTarget
+		targetObject: beta
+		memento: memento
+		description: description.
+
+	assessment := target replacementAssessmentForCandidate: candidate.
+
+	self assert: assessment isApplicable.
+	self assert: assessment replacementIndex equals: 2.
+	self assert: (memento readUsing: description) second == beta.
+	self assert: model leftItems second == beta.
+	^ assessment
+]
+
+{ #category : 'examples - relation replacement' }
+CFAtelierRelationDropTargetExamples >> paletteCandidateReplacementStagesExactIdentityAtTargetPosition [
+	<gtExample>
+	| model memento alpha beta candidate description target assessment stagedItems |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	beta := Object new.
+	candidate := Object new.
+	model leftItems: (OrderedCollection with: alpha with: beta).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	target := CFAtelierRelationDropTarget
+		targetObject: beta
+		memento: memento
+		description: description.
+
+	assessment := target applyReplacementCandidate: candidate.
+	stagedItems := memento readUsing: description.
+
+	self assert: assessment isApplicable.
+	self assert: stagedItems size equals: 2.
+	self assert: stagedItems first == alpha.
+	self assert: stagedItems second == candidate.
+	self assert: model leftItems second == beta.
+	^ assessment
+]
+
+{ #category : 'examples - relation replacement' }
+CFAtelierRelationDropTargetExamples >> staleTargetRejectsPaletteReplacement [
+	<gtExample>
+	| model memento alpha beta candidate description target assessment |
+	model := CFAtelierMoveExampleModel new.
+	alpha := Object new.
+	beta := Object new.
+	candidate := Object new.
+	model leftItems: (OrderedCollection with: alpha with: beta).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	target := CFAtelierRelationDropTarget
+		targetObject: beta
+		memento: memento
+		description: description.
+	memento write: (OrderedCollection with: alpha) using: description.
+
+	assessment := target applyReplacementCandidate: candidate.
+
+	self assert: assessment isApplicable not.
+	self assert: (memento readUsing: description) size equals: 1.
+	self assert: (memento readUsing: description) first == alpha.
+	self assert: model leftItems second == beta.
+	^ assessment
+]

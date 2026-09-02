@@ -1,6 +1,6 @@
 "I add Atelier composition interaction to one ordered to-many relation item row produced by an existing Foundation presentation.
 
-Palette drags use CFAtelierInsert. Existing relation-item drags from a different relation use CFAtelierMove. A drag from the same relation remains Foundation Detail's existing reorder interaction because CFAtelierMove rejects identical source and destination contexts. I add interaction to the rendered row; I do not render it."
+Palette drags use CFAtelierInsert at the row boundaries and CFAtelierReplace over the row body. Existing relation-item drags from a different relation use CFAtelierMove. A drag from the same relation remains Foundation Detail's existing reorder interaction because CFAtelierMove rejects identical source and destination contexts. I add interaction to the rendered row; I do not render it."
 Class {
 	#name : 'CFAtelierRelationDropTarget',
 	#superclass : 'Object',
@@ -10,6 +10,7 @@ Class {
 		'memento',
 		'description',
 		'dropIndicator',
+		'replacementIndicator',
 		'activeDragItem'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
@@ -44,13 +45,15 @@ CFAtelierRelationDropTarget >> install [
 	description isOrdered ifFalse: [ ^ self ].
 
 	dropIndicator := self newDropIndicator.
+	replacementIndicator := self newReplacementIndicator.
 	element addChild: dropIndicator.
+	element addChild: replacementIndicator.
 	element addEventHandler: (BlDropHandler new
 		acceptItemsSuchThat: [ :aDragItem :aDropArea |
 			self acceptsDragItem: aDragItem ];
 		whenDragEnteredDo: [ :anEvent | self updateForEvent: anEvent ];
 		whenDragOverDo: [ :anEvent | self updateForEvent: anEvent ];
-		whenDragLeftDo: [ :anEvent | self hideIndicator ];
+		whenDragLeftDo: [ :anEvent | self hideIndicators ];
 		whenDroppedDo: [ :anEvent | self dropEvent: anEvent ];
 		yourself)
 ]
@@ -60,7 +63,8 @@ CFAtelierRelationDropTarget >> acceptsDragItem: aDragItem [
 	| isApplicable |
 	isApplicable := (self isPaletteDragItem: aDragItem)
 		ifTrue: [ (self assessmentForCandidate: aDragItem domainObject after: false) isApplicable
-			or: [ (self assessmentForCandidate: aDragItem domainObject after: true) isApplicable ] ]
+			or: [ (self replacementAssessmentForCandidate: aDragItem domainObject) isApplicable
+			or: [ (self assessmentForCandidate: aDragItem domainObject after: true) isApplicable ] ] ]
 		ifFalse: [ (self moveAssessmentForDragItem: aDragItem after: false) isApplicable
 			or: [ (self moveAssessmentForDragItem: aDragItem after: true) isApplicable ] ].
 	isApplicable ifTrue: [ activeDragItem := aDragItem ].
@@ -128,6 +132,25 @@ CFAtelierRelationDropTarget >> applyCandidate: aCandidate after: aBoolean [
 	^ (self operationForCandidate: aCandidate after: aBoolean) apply
 ]
 
+{ #category : 'assessing' }
+CFAtelierRelationDropTarget >> replacementAssessmentForCandidate: aCandidate [
+	^ (self replacementOperationForCandidate: aCandidate) assess
+]
+
+{ #category : 'applying' }
+CFAtelierRelationDropTarget >> applyReplacementCandidate: aCandidate [
+	^ (self replacementOperationForCandidate: aCandidate) apply
+]
+
+{ #category : 'private - operations' }
+CFAtelierRelationDropTarget >> replacementOperationForCandidate: aCandidate [
+	^ CFAtelierReplace
+		object: targetObject
+		with: aCandidate
+		memento: memento
+		description: description
+]
+
 { #category : 'private - operations' }
 CFAtelierRelationDropTarget >> operationForCandidate: aCandidate after: aBoolean [
 	| anIndex |
@@ -162,24 +185,45 @@ CFAtelierRelationDropTarget >> eventIsAfterTarget: anEvent [
 ]
 
 { #category : 'private - interaction' }
+CFAtelierRelationDropTarget >> eventIsReplacementZone: anEvent [
+	| top bottom y height |
+	top := element bounds inLocal top.
+	bottom := element bounds inLocal bottom.
+	y := anEvent position y.
+	height := bottom - top.
+	height <= 0 ifTrue: [ ^ false ].
+	^ y >= (top + (height / 3))
+		and: [ y <= (bottom - (height / 3)) ]
+]
+
+{ #category : 'private - interaction' }
 CFAtelierRelationDropTarget >> updateForEvent: anEvent [
 	| anAssessment isAfter |
-	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ].
-	activeDragItem ifNil: [ ^ self hideIndicator ].
+	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicators ].
+	activeDragItem ifNil: [ ^ self hideIndicators ].
+
+	((self isPaletteDragItem: activeDragItem) and: [ self eventIsReplacementZone: anEvent ]) ifTrue: [
+		anAssessment := self replacementAssessmentForCandidate: activeDragItem domainObject.
+		^ anAssessment isApplicable
+			ifTrue: [ self showReplacementIndicator ]
+			ifFalse: [ self hideIndicators ] ].
+
 	isAfter := self eventIsAfterTarget: anEvent.
 	anAssessment := (self isPaletteDragItem: activeDragItem)
 		ifTrue: [ self assessmentForCandidate: activeDragItem domainObject after: isAfter ]
 		ifFalse: [ self moveAssessmentForDragItem: activeDragItem after: isAfter ].
 	anAssessment isApplicable
 		ifTrue: [ self showIndicatorAfter: isAfter ]
-		ifFalse: [ self hideIndicator ]
+		ifFalse: [ self hideIndicators ]
 ]
 { #category : 'private - interaction' }
 CFAtelierRelationDropTarget >> dropEvent: anEvent [
 	| anOperation isAfter |
-	self hideIndicator.
+	self hideIndicators.
 	anEvent domainObjects size = 1 ifFalse: [ ^ self ].
 	activeDragItem ifNil: [ ^ self ].
+	((self isPaletteDragItem: activeDragItem) and: [ self eventIsReplacementZone: anEvent ]) ifTrue: [
+		^ self applyReplacementCandidate: activeDragItem domainObject ].
 	isAfter := self eventIsAfterTarget: anEvent.
 	(self isPaletteDragItem: activeDragItem) ifTrue: [
 		^ self applyCandidate: activeDragItem domainObject after: isAfter ].
@@ -203,7 +247,26 @@ CFAtelierRelationDropTarget >> newDropIndicator [
 ]
 
 { #category : 'private - appearance' }
+CFAtelierRelationDropTarget >> newReplacementIndicator [
+	^ BlElement new
+		background: Color transparent;
+		border: (BlBorder
+			paint: (element theme interaction focusedBorderColor blocResolveColorForTheme: element theme)
+			width: 2);
+		visibility: BlVisibility hidden;
+		zIndex: 101;
+		constraintsDo: [ :c |
+			c ignoreByLayout.
+			c horizontal matchParent.
+			c vertical matchParent.
+			c ignored horizontal alignCenter.
+			c ignored vertical alignCenter ];
+		yourself
+]
+
+{ #category : 'private - appearance' }
 CFAtelierRelationDropTarget >> showIndicatorAfter: aBoolean [
+	replacementIndicator ifNotNil: [ replacementIndicator visibility: BlVisibility hidden ].
 	dropIndicator constraintsDo: [ :c |
 		aBoolean
 			ifTrue: [ c ignored vertical alignBottom ]
@@ -212,8 +275,15 @@ CFAtelierRelationDropTarget >> showIndicatorAfter: aBoolean [
 ]
 
 { #category : 'private - appearance' }
-CFAtelierRelationDropTarget >> hideIndicator [
-	dropIndicator ifNotNil: [ dropIndicator visibility: BlVisibility hidden ]
+CFAtelierRelationDropTarget >> showReplacementIndicator [
+	dropIndicator ifNotNil: [ dropIndicator visibility: BlVisibility hidden ].
+	replacementIndicator visibility: BlVisibility visible
+]
+
+{ #category : 'private - appearance' }
+CFAtelierRelationDropTarget >> hideIndicators [
+	dropIndicator ifNotNil: [ dropIndicator visibility: BlVisibility hidden ].
+	replacementIndicator ifNotNil: [ replacementIndicator visibility: BlVisibility hidden ]
 ]
 
 { #category : 'accessing' }
