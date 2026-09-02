@@ -43,3 +43,42 @@ CFAtelierEntryExamples >> atelierCreatesFoundationFormRoot [
 	self assert: element class equals: CFMaFormRootElement.
 	^ element
 ]
+
+{ #category : 'examples - palette UI' }
+CFAtelierEntryExamples >> atelierWithPalette [
+	<gtExample>
+	| palette atelier element |
+	palette := CFAtelierPalette new.
+	palette add: (CFAtelierPaletteItem
+		label: 'New example'
+		provider: (CFAtelierFactoryProvider factory: [ CFAtelierEntryExampleModel new ])).
+	atelier := CFAtelierEntryExampleModel new asAtelier
+		palette: palette;
+		yourself.
+
+	element := atelier asElement.
+	self assert: element class equals: CFAtelierElement.
+	self assert: element formElement class equals: CFMaFormRootElement.
+	self assert: element paletteElement palette == palette.
+	^ element
+]
+
+{ #category : 'examples - palette UI' }
+CFAtelierEntryExamples >> paletteDragMaterializesCandidateOnce [
+	<gtExample>
+	| count provider item paletteElement sourceElement dragItem |
+	count := 0.
+	provider := CFAtelierFactoryProvider factory: [
+		count := count + 1.
+		CFAtelierEntryExampleModel new ].
+	item := CFAtelierPaletteItem label: 'New example' provider: provider.
+	paletteElement := CFAtelierPaletteElement new.
+	sourceElement := BlElement new.
+
+	dragItem := paletteElement dragItemFor: item sourceElement: sourceElement.
+
+	self assert: count equals: 1.
+	self assert: dragItem sourceElement == sourceElement.
+	self assert: dragItem domainObject class equals: CFAtelierEntryExampleModel.
+	^ dragItem
+]
