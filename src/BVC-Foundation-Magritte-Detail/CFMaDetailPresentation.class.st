@@ -1266,12 +1266,20 @@ CFMaDetailPresentation >> hideRelationDropIndicator: anIndicator [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: aRow description: aDescription event: anEvent [
-	| aTargetObject |
+	| aTargetObject placeAfter |
 	aTargetObject := (self relationContextFor: aDescription) objectAtRow: aRow ifAbsent: [ ^ self ].
+	placeAfter := self relationDropIsAfterRow: aRow event: anEvent.
+	(self relationReorderBlock notNil and: [ someObjects size = 1 ]) ifTrue: [
+		^ self relationReorderBlock
+			value: someObjects
+			value: aTargetObject
+			value: self memento
+			value: aDescription
+			value: placeAfter ].
 	CFMaBuilderUtility
 		reorderToManyObjects: someObjects
 		relativeTo: aTargetObject
-		after: (self relationDropIsAfterRow: aRow event: anEvent)
+		after: placeAfter
 		memento: self memento
 		using: aDescription
 		element: aRow

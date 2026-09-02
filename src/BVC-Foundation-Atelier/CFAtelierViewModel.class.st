@@ -11,7 +11,8 @@ Class {
 		'removeOperationBlock',
 		'insertOperationBlock',
 		'replaceOperationBlock',
-		'moveOperationBlock'
+		'moveOperationBlock',
+		'reorderOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -44,7 +45,14 @@ CFAtelierViewModel >> asElement [
 					memento: aMemento
 					description: aDescription)
 					replaceOperationFor: replaceOperationBlock;
-					moveOperationFor: moveOperationBlock ] ].
+					moveOperationFor: moveOperationBlock ];
+			relationReorderDo: [ :someObjects :aTargetObject :aMemento :aDescription :placeAfter |
+				self
+					applyReorderOf: someObjects first
+					relativeTo: aTargetObject
+					after: placeAfter
+					memento: aMemento
+					description: aDescription ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
@@ -92,4 +100,45 @@ CFAtelierViewModel >> replaceOperationFor: aBlock [
 CFAtelierViewModel >> moveOperationFor: aBlock [
 	"Configure how an existing relation object moves to another relation. The block receives the exact object, source CFAtelierRelationDragContext, destination CFAtelierRelationDragContext and destination index (nil for unordered or to-one destinations). Leave unset for generic CFAtelierMove semantics."
 	moveOperationBlock := aBlock
+]
+
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> reorderOperationFor: aBlock [
+	"Configure how Atelier interprets Foundation's existing single-item reorder gesture. The block receives the exact object, memento, relation description and final destination index. Leave unset for generic CFAtelierReorder semantics."
+	reorderOperationBlock := aBlock
+]
+
+{ #category : 'operations' }
+CFAtelierViewModel >> reorderOperationFor: anObject relativeTo: aTargetObject after: placeAfter memento: aMemento description: aDescription [
+	| items remainingItems targetIndex destinationIndex |
+	items := aMemento readUsing: aDescription.
+	items ifNil: [
+		^ CFAtelierReorder object: anObject memento: aMemento description: aDescription to: 0 ].
+	remainingItems := items reject: [ :each | each == anObject ].
+	targetIndex := remainingItems identityIndexOf: aTargetObject ifAbsent: [ 0 ].
+	destinationIndex := placeAfter
+		ifTrue: [ targetIndex + 1 ]
+		ifFalse: [ targetIndex ].
+	reorderOperationBlock ifNotNil: [
+		^ reorderOperationBlock
+			value: anObject
+			value: aMemento
+			value: aDescription
+			value: destinationIndex ].
+	^ CFAtelierReorder
+		object: anObject
+		memento: aMemento
+		description: aDescription
+		to: destinationIndex
+]
+
+{ #category : 'operations' }
+CFAtelierViewModel >> applyReorderOf: anObject relativeTo: aTargetObject after: placeAfter memento: aMemento description: aDescription [
+	^ (self
+		reorderOperationFor: anObject
+		relativeTo: aTargetObject
+		after: placeAfter
+		memento: aMemento
+		description: aDescription) apply
 ]

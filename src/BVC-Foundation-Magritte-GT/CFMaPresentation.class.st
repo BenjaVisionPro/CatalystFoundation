@@ -11,7 +11,8 @@ Class {
 		'fieldConfigurationOverrides',
 		'fieldConfigurations',
 		'relationItemElementBlock',
-		'relationElementBlock'
+		'relationElementBlock',
+		'relationReorderBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -470,6 +471,8 @@ CFMaPresentation >> configureChildPresentation: aPresentation [
 		aPresentation relationItemElementDo: relationItemElementBlock ].
 	relationElementBlock ifNotNil: [
 		aPresentation relationElementDo: relationElementBlock ].
+	relationReorderBlock ifNotNil: [
+		aPresentation relationReorderDo: relationReorderBlock ].
 	^ aPresentation
 ]
 
@@ -519,4 +522,16 @@ CFMaPresentation >> configureRelationElement: anElement description: aDescriptio
 			value: aDescription
 			value: self memento ].
 	^ anElement
+]
+
+
+{ #category : 'configuration - relations' }
+CFMaPresentation >> relationReorderDo: aBlock [
+	"Configure a consumer callback for a single-item reorder gesture owned by a concrete Foundation relation presentation. The callback receives the dragged objects collection, target object, memento, description and before/after boolean. Concrete presentations retain their ordinary behavior when this callback is absent, and may retain native behavior for interaction shapes the consumer does not own."
+	relationReorderBlock := aBlock
+]
+
+{ #category : 'private - relations' }
+CFMaPresentation >> relationReorderBlock [
+	^ relationReorderBlock
 ]

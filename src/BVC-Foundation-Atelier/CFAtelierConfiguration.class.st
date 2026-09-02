@@ -9,7 +9,8 @@ Class {
 		'removeOperationBlock',
 		'insertOperationBlock',
 		'replaceOperationBlock',
-		'moveOperationBlock'
+		'moveOperationBlock',
+		'reorderOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-Configuration',
 	#package : 'BVC-Foundation-Atelier',
@@ -22,6 +23,7 @@ CFAtelierConfiguration >> applyEditingTo: anAtelierViewModel [
 	insertOperationBlock ifNotNil: [ anAtelierViewModel insertOperationFor: insertOperationBlock ].
 	replaceOperationBlock ifNotNil: [ anAtelierViewModel replaceOperationFor: replaceOperationBlock ].
 	moveOperationBlock ifNotNil: [ anAtelierViewModel moveOperationFor: moveOperationBlock ].
+	reorderOperationBlock ifNotNil: [ anAtelierViewModel reorderOperationFor: reorderOperationBlock ].
 	^ anAtelierViewModel
 ]
 
@@ -59,4 +61,10 @@ CFAtelierConfiguration >> replaceOperationFor: aBlock [
 { #category : 'configuration' }
 CFAtelierConfiguration >> moveOperationFor: aBlock [
 	moveOperationBlock := aBlock
+]
+
+
+{ #category : 'configuration' }
+CFAtelierConfiguration >> reorderOperationFor: aBlock [
+	reorderOperationBlock := aBlock
 ]
