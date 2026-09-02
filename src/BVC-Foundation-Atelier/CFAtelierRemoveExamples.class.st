@@ -53,16 +53,16 @@ CFAtelierRemoveExamples >> applyStagesToManyRemovalAndCommitPreservesRemainingId
 { #category : 'examples - to one' }
 CFAtelierRemoveExamples >> applyStagesToOneClear [
 	<gtExample>
-	| model source replacement memento description assessment |
+	| model source memento description assessment |
 	model := CFAtelierReplaceExampleModel new.
-	source := Object new. replacement := Object new.
-	model singleItem: source.
+	source := Object new.
+	model primaryItem: source.
 	memento := CFMaMemento model: model.
-	description := self descriptionFor: #singleItem in: memento.
+	description := self descriptionFor: #primaryItem in: memento.
 	assessment := (CFAtelierRemove object: source memento: memento description: description) apply.
 	self assert: assessment isApplicable.
 	self assert: (memento readUsing: description) isNil.
-	self assert: model singleItem == source.
+	self assert: model primaryItem == source.
 	^ assessment
 ]
 
