@@ -40,7 +40,7 @@ CFAtelierEmptyViewModel >> adoptRootObject: anObject [
 	anObject hasMagritteDescription ifFalse: [ ^ false ].
 	rootObject := anObject.
 	aRootViewModel := CFAtelierViewModel forObject: anObject.
-	element ifNotNil: [ element formElement: aRootViewModel asElement ].
+	element ifNotNil: [ element replaceFormElementWithMotion: aRootViewModel asElement ].
 	^ true
 ]
 

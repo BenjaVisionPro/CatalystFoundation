@@ -37,6 +37,31 @@ CFAtelierElement >> formElement: anElement [
 	self addChild: formElement
 ]
 
+{ #category : 'editing - motion' }
+CFAtelierElement >> replaceFormElementWithMotion: anElement [
+	| previousForm participants transaction |
+	previousForm := formElement.
+	(previousForm isNil or: [ self isAttachedToSceneGraph not ])
+		ifTrue: [ ^ self formElement: anElement ].
+	participants := paletteElement
+		ifNil: [ #() ]
+		ifNotNil: [ { paletteElement } ].
+	participants isEmpty ifTrue: [ ^ self formElement: anElement ].
+	anElement
+		hMatchParent;
+		vFitContent.
+	transaction := CFMotionLayoutTransaction on: self.
+	transaction
+		affecting: participants;
+		mutate: [
+			self removeChild: previousForm.
+			formElement := anElement.
+			self addChild: formElement ];
+		fadeIn: anElement;
+		play.
+	^ anElement
+]
+
 { #category : 'accessing' }
 CFAtelierElement >> paletteElement [
 	^ paletteElement
