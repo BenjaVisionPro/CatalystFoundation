@@ -136,7 +136,7 @@ CFAtelierReorderOperationExamples >> configuredMultiSelectionReceivesObjectsInRe
 
 	self assert: captured first first == first.
 	self assert: captured first second == third.
-	self assert: captured fourth equals: 2.
+	self assert: captured fourth equals: 3.
 	self assert: assessment isApplicable.
 	^ operation
 ]
