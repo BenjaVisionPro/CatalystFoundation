@@ -154,8 +154,8 @@ CFAtelierMoveExamples >> fixture [
 	^ { model. memento. alpha. beta. gamma }
 ]
 
-{ #category : 'examples - current foundation boundary' }
-CFAtelierMoveExamples >> movedEmbeddedChildCurrentlyReceivesANewRelationScopedMemento [
+{ #category : 'examples - embedded editing state' }
+CFAtelierMoveExamples >> movedEmbeddedChildKeepsItsRelationScopedMementoAndStagedState [
 	<gtExample>
 	| model parentMemento item leftDescription rightDescription childMemento scoreDescription move destinationChildMemento destinationScoreDescription |
 	model := CFAtelierMoveExampleModel new.
@@ -183,10 +183,41 @@ CFAtelierMoveExamples >> movedEmbeddedChildCurrentlyReceivesANewRelationScopedMe
 	destinationChildMemento := parentMemento childMementoFor: item inRelation: rightDescription.
 	destinationScoreDescription := self descriptionFor: #score in: destinationChildMemento.
 
-	self assert: destinationChildMemento ~~ childMemento.
-	self assert: (destinationChildMemento readUsing: destinationScoreDescription) equals: 30.
+	self assert: destinationChildMemento == childMemento.
+	self assert: (destinationChildMemento readUsing: destinationScoreDescription) equals: 45.
 	self assert: item score equals: 30.
 	^ destinationChildMemento
+]
+
+{ #category : 'examples - embedded editing state' }
+CFAtelierMoveExamples >> movedEmbeddedChildCommitsThroughDestinationContext [
+	<gtExample>
+	| model parentMemento item leftDescription rightDescription childMemento scoreDescription move |
+	model := CFAtelierMoveExampleModel new.
+	item := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
+	model
+		leftItems: (OrderedCollection with: item);
+		rightItems: OrderedCollection new.
+	parentMemento := CFMaMemento model: model.
+	leftDescription := self descriptionFor: #leftItems in: parentMemento.
+	rightDescription := self descriptionFor: #rightItems in: parentMemento.
+	childMemento := parentMemento childMementoFor: item inRelation: leftDescription.
+	scoreDescription := self descriptionFor: #score in: childMemento.
+	childMemento write: 45 using: scoreDescription.
+
+	move := self
+		move: item
+		memento: parentMemento
+		left: leftDescription
+		right: rightDescription
+		at: 1.
+	self assert: move apply isApplicable.
+	parentMemento commit.
+
+	self assert: model leftItems isEmpty.
+	self assert: model rightItems first == item.
+	self assert: item score equals: 45.
+	^ model
 ]
 
 { #category : 'private' }

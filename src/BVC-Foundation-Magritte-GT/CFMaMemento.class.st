@@ -51,6 +51,40 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 			aMemento ]
 ]
 
+
+{ #category : 'children' }
+CFMaMemento >> adoptTransferredChildMemento: aChildMemento for: anObject inRelation: aDescription [
+	| theRelationMementos |
+	theRelationMementos := childMementosByDescription
+		at: aDescription
+		ifAbsentPut: [ IdentityDictionary new ].
+	theRelationMementos at: anObject put: aChildMemento.
+	aChildMemento overallStatus observe: statusPulse.
+	statusPulse value: aChildMemento overallStatus valueOrNil.
+	^ aChildMemento
+]
+
+{ #category : 'children' }
+CFMaMemento >> transferChildMementoFor: anObject inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription [
+	| sourceRelationMementos childMemento |
+	sourceRelationMementos := childMementosByDescription
+		at: aSourceDescription
+		ifAbsent: [ ^ self ].
+	childMemento := sourceRelationMementos
+		at: anObject
+		ifAbsent: [ ^ self ].
+
+	sourceRelationMementos removeKey: anObject.
+	sourceRelationMementos ifEmpty: [
+		childMementosByDescription removeKey: aSourceDescription ifAbsent: [ ] ].
+	statusPulse value: super overallStatus valueOrNil.
+
+	aDestinationMemento
+		adoptTransferredChildMemento: childMemento
+		for: anObject
+		inRelation: aDestinationDescription
+]
+
 { #category : 'actions' }
 CFMaMemento >> commit [
 	self allChildMementos do: [ :aMemento | aMemento commit ].

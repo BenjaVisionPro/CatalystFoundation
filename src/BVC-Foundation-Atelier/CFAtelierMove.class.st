@@ -4,7 +4,9 @@ A source or destination may be to-one or to-many. To-many destinations follow th
 
 Assessment reads current staged values, derives complete proposed values and validates both descriptions without mutation. apply reassesses immediately before staging the two ordinary memento writes.
 
-I intentionally do not own drag/drop, presentation geometry, child-memento transfer or a general transaction system."
+After the relation writes are staged, I ask the source Foundation memento to transfer any existing embedded child memento for the moved object into the destination relation context. This preserves staged edits on an embedded object across the move without changing relation identity semantics or introducing another transaction system.
+
+I intentionally do not own drag/drop or presentation geometry."
 Class {
 	#name : 'CFAtelierMove',
 	#superclass : 'CFAtelierOperation',
@@ -88,7 +90,12 @@ CFAtelierMove >> applyAssessment: anAssessment [
 		using: sourceDescription.
 	destinationMemento
 		write: anAssessment proposedDestinationItems
-		using: destinationDescription
+		using: destinationDescription.
+	sourceMemento
+		transferChildMementoFor: object
+		inRelation: sourceDescription
+		to: destinationMemento
+		inRelation: destinationDescription
 ]
 
 { #category : 'private - assessing' }
