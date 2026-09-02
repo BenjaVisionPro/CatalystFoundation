@@ -17,6 +17,13 @@ Class {
 { #category : 'api - converting' }
 CFAtelierViewModel >> asElement [
 	| aFormElement |
+	self presentationDo: [ :aPresentation |
+		aPresentation relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
+			CFAtelierRelationDropTarget
+				installOn: aRow
+				targetObject: anObject
+				memento: aMemento
+				description: aDescription ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new

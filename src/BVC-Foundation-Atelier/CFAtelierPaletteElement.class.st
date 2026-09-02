@@ -64,6 +64,7 @@ CFAtelierPaletteElement >> newItemElementFor: anItem [
 		aptitude: BrGlamorousLabelAptitude new;
 		text: anItem label;
 		yourself.
+	aRow userData at: #atelierPaletteSource put: true.
 	aRow addEventHandler: (BlDragHandler new
 		liftItem: [ :aSourceElement |
 			self dragItemFor: anItem sourceElement: aSourceElement ];

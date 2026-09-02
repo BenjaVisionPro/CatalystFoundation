@@ -1692,6 +1692,10 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 				fromRow: theItemElement
 				description: aDescription ].
 	self installToManyListReorderingOn: aRow description: aDescription.
+	self
+		configureRelationItemElement: aRow
+		object: anObject
+		description: aDescription.
 	^ aRow
 ]
 

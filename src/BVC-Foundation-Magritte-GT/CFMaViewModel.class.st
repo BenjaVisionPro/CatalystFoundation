@@ -3,7 +3,8 @@ Class {
 	#superclass : 'GtMagritteViewModel',
 	#instVars : [
 		'formElementBlock',
-		'elementBuilderBlock'
+		'elementBuilderBlock',
+		'presentationBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -127,8 +128,15 @@ CFMaViewModel >> initializeForm: theFrame forMemento: aMemento includeImplicitAc
 		includeImplicitActions: aBoolean;
 		form: theFrame;
 		memento: aMemento;
-		addButtons: self actions;
-		build.
+		addButtons: self actions.
+	presentationBlock ifNotNil: [ :aBlock | aBlock value: anElementBuilder ].
+	anElementBuilder build.
 	^ self onElementCreated cull: theFrame
+]
+
+{ #category : 'callbacks' }
+CFMaViewModel >> presentationDo: aBlock [
+	"Configure the presentation selected by the Magritte container after Foundation has supplied its form and memento, but before it builds. This is a consumer configuration seam; it does not change presentation selection."
+	presentationBlock := aBlock
 ]
 
