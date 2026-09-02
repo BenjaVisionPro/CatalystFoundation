@@ -80,7 +80,7 @@ CFAtelierCopyExamples >> commitPreservesSourceAndUsesCopyIdentity [
 	memento commit.
 	self assert: model leftItems first == source.
 	self assert: model rightItems second == copy.
-	self deny: model rightItems second == source.
+	self assert: model rightItems second ~~ source.
 	^ model
 ]
 
@@ -90,7 +90,7 @@ CFAtelierCopyExamples >> sourceIdentityIsNotAcceptedAsCopy [
 	| fixture memento source assessment |
 	fixture := self fixture. memento := fixture second. source := fixture third.
 	assessment := (self copy: source copiedObject: source memento: memento at: 2) assess.
-	self deny: assessment isApplicable.
+	self assert: assessment isApplicable not.
 	self assert: assessment rejectionMessage equals: 'Copy requires a distinct materialized object identity; reusing the source identity is reference, not copy.'.
 	^ assessment
 ]
@@ -105,7 +105,7 @@ CFAtelierCopyExamples >> staleSourceIsRejectedOnApply [
 	leftDescription := self descriptionFor: #leftItems in: memento.
 	memento write: OrderedCollection new using: leftDescription.
 	assessment := operation apply.
-	self deny: assessment isApplicable.
+	self assert: assessment isApplicable not.
 	self assert: (memento readUsing: (self descriptionFor: #rightItems in: memento)) size equals: 1.
 	^ assessment
 ]
