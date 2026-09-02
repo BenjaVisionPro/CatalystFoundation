@@ -202,3 +202,46 @@ CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
 	self assert: candidate score equals: 10.
 	^ parentMemento
 ]
+
+
+{ #category : 'examples - transaction' }
+CFMaEmbeddedTransactionExamples >> replaceReattachesDetachedReplacementEditingState [
+	<gtExample>
+	| model parentMemento relationDescription source replacement childMemento scoreDescription remove replace reattachedChildMemento |
+	model := CFMaFormShowcase example.
+	model embeddedItems: model embeddedItems asOrderedCollection.
+	parentMemento := CFMaMemento model: model.
+	relationDescription := parentMemento magritteDescription
+		detect: [ :each | each handlesSelector: #embeddedItems ].
+	source := model embeddedItems first.
+	replacement := model embeddedItems second.
+	childMemento := parentMemento
+		childMementoFor: replacement
+		inRelation: relationDescription.
+	scoreDescription := childMemento magritteDescription
+		detect: [ :each | each handlesSelector: #score ].
+	childMemento write: 45 using: scoreDescription.
+
+	remove := CFAtelierRemove
+		object: replacement
+		memento: parentMemento
+		description: relationDescription.
+	self assert: remove apply isApplicable.
+	self assert: (parentMemento allChildMementos identityIncludes: childMemento) not.
+
+	replace := CFAtelierReplace
+		object: source
+		with: replacement
+		memento: parentMemento
+		description: relationDescription.
+	self assert: replace apply isApplicable.
+	reattachedChildMemento := parentMemento
+		childMementoFor: replacement
+		inRelation: relationDescription.
+
+	self assert: reattachedChildMemento == childMemento.
+	self assert: (reattachedChildMemento readUsing: scoreDescription) equals: 45.
+	parentMemento commit.
+	self assert: replacement score equals: 45.
+	^ parentMemento
+]

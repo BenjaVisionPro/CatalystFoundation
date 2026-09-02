@@ -76,6 +76,9 @@ CFAtelierReplace >> applyAssessment: anAssessment [
 		using: description.
 	memento
 		detachChildMementoFor: object
+		inRelation: description.
+	memento
+		reattachDetachedChildMementoFor: replacementObject
 		inRelation: description
 ]
 
