@@ -18,12 +18,18 @@ Class {
 CFAtelierViewModel >> asElement [
 	| aFormElement |
 	self presentationDo: [ :aPresentation |
-		aPresentation relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
-			CFAtelierRelationDropTarget
-				installOn: aRow
-				targetObject: anObject
-				memento: aMemento
-				description: aDescription ] ].
+		aPresentation
+			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
+				CFAtelierRelationDropTarget
+					installOn: aRow
+					targetObject: anObject
+					memento: aMemento
+					description: aDescription ];
+			relationElementDo: [ :aRelationElement :aDescription :aMemento |
+				CFAtelierRelationDropSurface
+					installOn: aRelationElement
+					memento: aMemento
+					description: aDescription ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new

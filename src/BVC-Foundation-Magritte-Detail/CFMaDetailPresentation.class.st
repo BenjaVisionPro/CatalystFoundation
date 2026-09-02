@@ -1596,6 +1596,9 @@ CFMaDetailPresentation >> addToManyListUsing: aDescription [
 	aHeaderContent := self newRelationValueSlotWith: anAddElement.
 	self addFieldElement: aHeaderContent using: aDescription.
 	aHeaderRow := aContainer rows last.
+	self
+		configureRelationElement: aHeaderRow
+		description: aDescription.
 	itemRows := OrderedCollection new.
 
 	aHeaderContent withAsyncSinkDo: [ :anElementSink |

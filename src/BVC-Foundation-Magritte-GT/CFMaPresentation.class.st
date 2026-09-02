@@ -10,7 +10,8 @@ Class {
 		'ungroupedPresentationGroup',
 		'fieldConfigurationOverrides',
 		'fieldConfigurations',
-		'relationItemElementBlock'
+		'relationItemElementBlock',
+		'relationElementBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -489,3 +490,19 @@ CFMaPresentation >> configureRelationItemElement: anElement object: anObject des
 	^ anElement
 ]
 
+
+{ #category : 'configuration - relations' }
+CFMaPresentation >> relationElementDo: aBlock [
+	"Configure a consumer callback for a relation-level element exposed by a concrete Foundation presentation. The presentation remains responsible for rendering; consumers may add interaction to the rendered relation surface."
+	relationElementBlock := aBlock
+]
+
+{ #category : 'private - relations' }
+CFMaPresentation >> configureRelationElement: anElement description: aDescription [
+	relationElementBlock ifNotNil: [ :aBlock |
+		aBlock
+			value: anElement
+			value: aDescription
+			value: self memento ].
+	^ anElement
+]
