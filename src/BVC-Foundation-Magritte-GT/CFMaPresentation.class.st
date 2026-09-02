@@ -527,7 +527,7 @@ CFMaPresentation >> configureRelationElement: anElement description: aDescriptio
 
 { #category : 'configuration - relations' }
 CFMaPresentation >> relationReorderDo: aBlock [
-	"Configure a consumer callback for a single-item reorder gesture owned by a concrete Foundation relation presentation. The callback receives the dragged objects collection, target object, memento, description and before/after boolean. Concrete presentations retain their ordinary behavior when this callback is absent, and may retain native behavior for interaction shapes the consumer does not own."
+	"Configure a consumer callback for a reorder gesture owned by a concrete Foundation relation presentation. The callback receives the dragged objects collection, target object, memento, description and before/after boolean. Concrete presentations retain their ordinary behavior when this callback is absent."
 	relationReorderBlock := aBlock
 ]
 

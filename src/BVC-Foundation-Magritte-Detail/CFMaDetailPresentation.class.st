@@ -1269,7 +1269,7 @@ CFMaDetailPresentation >> reorderToManyListObjects: someObjects relativeToRow: a
 	| aTargetObject placeAfter |
 	aTargetObject := (self relationContextFor: aDescription) objectAtRow: aRow ifAbsent: [ ^ self ].
 	placeAfter := self relationDropIsAfterRow: aRow event: anEvent.
-	(self relationReorderBlock notNil and: [ someObjects size = 1 ]) ifTrue: [
+	self relationReorderBlock ifNotNil: [
 		^ self relationReorderBlock
 			value: someObjects
 			value: aTargetObject

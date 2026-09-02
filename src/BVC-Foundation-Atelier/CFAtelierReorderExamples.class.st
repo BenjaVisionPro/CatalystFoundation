@@ -156,3 +156,59 @@ CFAtelierReorderExamples >> descriptionFor: aSelector in: aMemento [
 	^ aMemento magritteDescription
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
+
+{ #category : 'examples - reorder' }
+CFAtelierReorderExamples >> reorderMultipleObjectsPreservesTheirRelationOrder [
+	<gtExample>
+	| model first second third fourth fifth memento description operation assessment staged |
+	first := Object new.
+	second := Object new.
+	third := Object new.
+	fourth := Object new.
+	fifth := Object new.
+	model := CFAtelierMoveExampleModel new
+		leftItems: (OrderedCollection with: first with: second with: third with: fourth with: fifth);
+		yourself.
+	memento := CFMaMemento model: model.
+	description := memento magritteDescription detect: [ :each | each handlesSelector: #leftItems ].
+	operation := CFAtelierReorder
+		objects: { fourth. second }
+		memento: memento
+		description: description
+		to: 1.
+
+	assessment := operation apply.
+	staged := memento readUsing: description.
+
+	self assert: assessment isApplicable.
+	self assert: assessment objects first == second.
+	self assert: assessment objects second == fourth.
+	self assert: staged first == second.
+	self assert: staged second == fourth.
+	self assert: staged third == first.
+	self assert: staged fourth == third.
+	self assert: staged fifth == fifth.
+	^ assessment
+]
+
+{ #category : 'examples - reorder' }
+CFAtelierReorderExamples >> reorderRejectsDuplicateDraggedIdentity [
+	<gtExample>
+	| model first second memento description assessment |
+	first := Object new.
+	second := Object new.
+	model := CFAtelierMoveExampleModel new
+		leftItems: (OrderedCollection with: first with: second);
+		yourself.
+	memento := CFMaMemento model: model.
+	description := memento magritteDescription detect: [ :each | each handlesSelector: #leftItems ].
+	assessment := (CFAtelierReorder
+		objects: { first. first }
+		memento: memento
+		description: description
+		to: 1) assess.
+
+	self assert: assessment isApplicable not.
+	self assert: (memento readUsing: description) first == first.
+	^ assessment
+]

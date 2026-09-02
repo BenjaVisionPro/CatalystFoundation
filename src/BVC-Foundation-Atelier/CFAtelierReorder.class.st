@@ -1,13 +1,13 @@
-"I coordinate reordering one existing object within one ordered to-many Magritte relation.
+"I coordinate reordering one or more existing objects within one ordered to-many Magritte relation.
 
-Assessment reads the current staged relation value, locates the object by identity, derives the complete proposed replacement collection and validates it without mutation. destinationIndex is the object's index in the final collection. apply uses CFAtelierOperation's mandatory fresh reassessment immediately before the single Magritte write.
+Assessment reads the current staged relation value, resolves the dragged objects by identity in their existing relation order, derives the complete proposed replacement collection and validates it without mutation. destinationIndex is the first index occupied by the moved group in the final collection. apply uses CFAtelierOperation's mandatory fresh reassessment immediately before the single Magritte write.
 
 I intentionally operate on object identity rather than equality and do not own drag geometry or relative before/after UI semantics. A presentation can translate its interaction into the explicit final index I require."
 Class {
 	#name : 'CFAtelierReorder',
 	#superclass : 'CFAtelierOperation',
 	#instVars : [
-		'object',
+		'objects',
 		'memento',
 		'description',
 		'destinationIndex'
@@ -19,8 +19,17 @@ Class {
 
 { #category : 'instance creation' }
 CFAtelierReorder class >> object: anObject memento: aMemento description: aDescription to: anIndex [
+	^ self
+		objects: { anObject }
+		memento: aMemento
+		description: aDescription
+		to: anIndex
+]
+
+{ #category : 'instance creation' }
+CFAtelierReorder class >> objects: someObjects memento: aMemento description: aDescription to: anIndex [
 	^ self new
-		object: anObject;
+		objects: someObjects;
 		memento: aMemento;
 		description: aDescription;
 		destinationIndex: anIndex;
@@ -29,7 +38,7 @@ CFAtelierReorder class >> object: anObject memento: aMemento description: aDescr
 
 { #category : 'assessing' }
 CFAtelierReorder >> assess [
-	| items sourceIndex remainingItems proposedItems |
+	| items draggedItems remainingItems reorderedItems proposedItems sourceIndices |
 	items := memento readUsing: description.
 
 	items ifNil: [ ^ self rejectedWithItems: items because: 'The target relation has no collection.' ].
@@ -39,30 +48,44 @@ CFAtelierReorder >> assess [
 		ifFalse: [ ^ self rejectedWithItems: items because: 'Reordering requires a to-many relation.' ].
 	description isOrdered
 		ifFalse: [ ^ self rejectedWithItems: items because: 'Reordering requires an ordered relation.' ].
+	objects ifNil: [ ^ self rejectedWithItems: items because: 'At least one object is required for reordering.' ].
+	objects isEmpty ifTrue: [ ^ self rejectedWithItems: items because: 'At least one object is required for reordering.' ].
 
-	(items count: [ :each | each == object ]) = 1
-		ifFalse: [ ^ self rejectedWithItems: items because: 'The reordered object must occur exactly once in the relation.' ].
-	((destinationIndex isInteger) and: [ destinationIndex between: 1 and: items size ])
-		ifFalse: [ ^ self rejectedWithItems: items because: 'The destination index is outside the current relation.' ].
+	objects do: [ :anObject |
+		(items count: [ :each | each == anObject ]) = 1
+			ifFalse: [ ^ self rejectedWithItems: items because: (objects size = 1
+				ifTrue: [ 'The reordered object must occur exactly once in the relation.' ]
+				ifFalse: [ 'Each reordered object must occur exactly once in the relation.' ]) ].
+		(objects count: [ :each | each == anObject ]) = 1
+			ifFalse: [ ^ self rejectedWithItems: items because: 'The reordered objects must contain unique identities.' ] ].
 
-	sourceIndex := items identityIndexOf: object.
-	sourceIndex = destinationIndex
-		ifTrue: [ ^ self rejectedWithItems: items because: 'The object is already at the requested index.' ].
+	draggedItems := items select: [ :each |
+		objects anySatisfy: [ :anObject | anObject == each ] ].
+	remainingItems := items reject: [ :each |
+		draggedItems anySatisfy: [ :anObject | anObject == each ] ].
+	((destinationIndex isInteger) and: [ destinationIndex between: 1 and: remainingItems size + 1 ])
+		ifFalse: [ ^ self rejectedWithItems: items because: 'The destination index is outside the final relation.' ].
 
-	remainingItems := items species withAll: (items reject: [ :each | each == object ]).
-	proposedItems := remainingItems species withAll: remainingItems.
-	proposedItems add: object beforeIndex: destinationIndex.
+	reorderedItems := OrderedCollection new.
+	remainingItems withIndexDo: [ :each :anIndex |
+		anIndex = destinationIndex ifTrue: [ reorderedItems addAll: draggedItems ].
+		reorderedItems add: each ].
+	destinationIndex = (remainingItems size + 1) ifTrue: [ reorderedItems addAll: draggedItems ].
+	proposedItems := items species withAll: reorderedItems.
+	(self identityMatches: items second: proposedItems)
+		ifTrue: [ ^ self rejectedWithItems: items because: 'The objects are already at the requested position.' ].
 
 	[ description validate: proposedItems ]
 		on: Error
 		do: [ :anException |
 			^ self rejectedWithItems: items because: anException printString ].
 
+	sourceIndices := draggedItems collect: [ :anObject | items identityIndexOf: anObject ].
 	^ CFAtelierReorderAssessment
-		object: object
+		objects: draggedItems
 		items: items
 		proposedItems: proposedItems
-		sourceIndex: sourceIndex
+		sourceIndices: sourceIndices
 		destinationIndex: destinationIndex
 ]
 
@@ -86,14 +109,29 @@ CFAtelierReorder >> memento [ ^ memento ]
 { #category : 'accessing' }
 CFAtelierReorder >> memento: aMemento [ memento := aMemento ]
 { #category : 'accessing' }
-CFAtelierReorder >> object [ ^ object ]
+CFAtelierReorder >> object [
+	^ objects ifNotNil: [ objects size = 1 ifTrue: [ objects first ] ]
+]
 { #category : 'accessing' }
-CFAtelierReorder >> object: anObject [ object := anObject ]
+CFAtelierReorder >> object: anObject [ objects := { anObject } ]
+{ #category : 'accessing' }
+CFAtelierReorder >> objects [ ^ objects ]
+{ #category : 'accessing' }
+CFAtelierReorder >> objects: someObjects [ objects := someObjects ]
+
+{ #category : 'private' }
+CFAtelierReorder >> identityMatches: firstCollection second: secondCollection [
+	firstCollection size = secondCollection size ifFalse: [ ^ false ].
+	1 to: firstCollection size do: [ :anIndex |
+		((firstCollection at: anIndex) == (secondCollection at: anIndex))
+			ifFalse: [ ^ false ] ].
+	^ true
+]
 
 { #category : 'private' }
 CFAtelierReorder >> rejectedWithItems: items because: aString [
 	^ CFAtelierReorderAssessment
-		object: object
+		objects: objects
 		items: items
 		rejectedBecause: aString
 ]
