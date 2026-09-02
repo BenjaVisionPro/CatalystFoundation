@@ -87,3 +87,84 @@ CFAtelierRelationDropTargetExamples >> descriptionFor: aSelector in: aMemento [
 	^ aMemento magritteDescription
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
+
+{ #category : 'examples - relation move' }
+CFAtelierRelationDropTargetExamples >> existingObjectDragAssessesCrossRelationMoveWithoutMutation [
+	<gtExample>
+	| model memento moved targetObject sourceDescription destinationDescription target sourceElement dragItem assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	targetObject := Object new.
+	model leftItems: (OrderedCollection with: moved).
+	model rightItems: (OrderedCollection with: targetObject).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	target := CFAtelierRelationDropTarget targetObject: targetObject memento: memento description: destinationDescription.
+
+	assessment := target moveAssessmentForDragItem: dragItem after: false.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) size equals: 1.
+	self assert: (memento readUsing: destinationDescription) size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples - relation move' }
+CFAtelierRelationDropTargetExamples >> existingObjectDragMovesBetweenStagedRelationsAtTargetPosition [
+	<gtExample>
+	| model memento moved targetObject sourceDescription destinationDescription target sourceElement dragItem operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	targetObject := Object new.
+	model leftItems: (OrderedCollection with: moved).
+	model rightItems: (OrderedCollection with: targetObject).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	target := CFAtelierRelationDropTarget targetObject: targetObject memento: memento description: destinationDescription.
+	operation := target moveOperationForDragItem: dragItem after: true.
+
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) isEmpty.
+	self assert: (memento readUsing: destinationDescription) second == moved.
+	self assert: model leftItems first == moved.
+	self assert: model rightItems first == targetObject.
+	^ assessment
+]
+
+{ #category : 'examples - relation move' }
+CFAtelierRelationDropTargetExamples >> existingObjectDragWithinSameRelationDefersToFoundationReorder [
+	<gtExample>
+	| model memento moved targetObject description target sourceElement dragItem assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	targetObject := Object new.
+	model leftItems: (OrderedCollection with: moved with: targetObject).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: description).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	target := CFAtelierRelationDropTarget targetObject: targetObject memento: memento description: description.
+
+	assessment := target moveAssessmentForDragItem: dragItem after: true.
+
+	self assert: assessment isApplicable not.
+	self assert: (memento readUsing: description) first == moved.
+	^ assessment
+]

@@ -1,8 +1,6 @@
-"I add Atelier palette insertion interaction to one relation item element produced by an existing Foundation presentation.
+"I add Atelier composition interaction to one ordered to-many relation item row produced by an existing Foundation presentation.
 
-I do not render the relation item. The presentation supplies the row, object, description and memento through its relation-item configuration seam. I accept only drag items whose source was explicitly marked as an Atelier palette source, so the Foundation Detail presentation's existing same-relation reorder interaction remains independent.
-
-For this first direct-composition surface I install on ordered to-many rows. The pointer half of the row determines insertion immediately before or after the target object, and CFAtelierInsert performs assessment and mandatory fresh reassessment before the memento write."
+Palette drags use CFAtelierInsert. Existing relation-item drags from a different relation use CFAtelierMove. A drag from the same relation remains Foundation Detail's existing reorder interaction because CFAtelierMove rejects identical source and destination contexts. I add interaction to the rendered row; I do not render it."
 Class {
 	#name : 'CFAtelierRelationDropTarget',
 	#superclass : 'Object',
@@ -11,7 +9,8 @@ Class {
 		'targetObject',
 		'memento',
 		'description',
-		'dropIndicator'
+		'dropIndicator',
+		'activeDragItem'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -25,6 +24,7 @@ CFAtelierRelationDropTarget class >> installOn: anElement targetObject: anObject
 		targetObject: anObject;
 		memento: aMemento;
 		description: aDescription;
+		installSourceContext;
 		install;
 		yourself
 ]
@@ -57,12 +57,65 @@ CFAtelierRelationDropTarget >> install [
 
 { #category : 'testing' }
 CFAtelierRelationDropTarget >> acceptsDragItem: aDragItem [
+	| isApplicable |
+	isApplicable := (self isPaletteDragItem: aDragItem)
+		ifTrue: [ (self assessmentForCandidate: aDragItem domainObject after: false) isApplicable
+			or: [ (self assessmentForCandidate: aDragItem domainObject after: true) isApplicable ] ]
+		ifFalse: [ (self moveAssessmentForDragItem: aDragItem after: false) isApplicable
+			or: [ (self moveAssessmentForDragItem: aDragItem after: true) isApplicable ] ].
+	isApplicable ifTrue: [ activeDragItem := aDragItem ].
+	^ isApplicable
+]
+
+{ #category : 'private - interaction' }
+CFAtelierRelationDropTarget >> installSourceContext [
+	element userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: description)
+]
+
+{ #category : 'private - testing' }
+CFAtelierRelationDropTarget >> isPaletteDragItem: aDragItem [
 	| aSourceElement |
 	aSourceElement := aDragItem sourceElement.
 	aSourceElement ifNil: [ ^ false ].
-	(aSourceElement userData includesKey: #atelierPaletteSource) ifFalse: [ ^ false ].
-	^ (self assessmentForCandidate: aDragItem domainObject after: false) isApplicable
-		or: [ (self assessmentForCandidate: aDragItem domainObject after: true) isApplicable ]
+	^ aSourceElement userData includesKey: #atelierPaletteSource
+]
+
+{ #category : 'private - accessing' }
+CFAtelierRelationDropTarget >> sourceContextForDragItem: aDragItem [
+	| aSourceElement |
+	aSourceElement := aDragItem sourceElement.
+	aSourceElement ifNil: [ ^ nil ].
+	^ aSourceElement userData at: #atelierRelationDragContext ifAbsent: [ nil ]
+]
+
+{ #category : 'assessing' }
+CFAtelierRelationDropTarget >> moveAssessmentForDragItem: aDragItem after: aBoolean [
+	| anOperation |
+	anOperation := self moveOperationForDragItem: aDragItem after: aBoolean.
+	anOperation ifNil: [
+		^ CFAtelierMoveAssessment
+			sourceItems: nil
+			destinationItems: (memento readUsing: description)
+			rejectedBecause: 'The drag item has no Atelier relation source context.' ].
+	^ anOperation assess
+]
+
+{ #category : 'private - operations' }
+CFAtelierRelationDropTarget >> moveOperationForDragItem: aDragItem after: aBoolean [
+	| aSourceContext anIndex |
+	aSourceContext := self sourceContextForDragItem: aDragItem.
+	aSourceContext ifNil: [ ^ nil ].
+	anIndex := self insertionIndexAfter: aBoolean.
+	anIndex ifNil: [ ^ nil ].
+	^ CFAtelierMove
+		object: aDragItem domainObject
+		sourceMemento: aSourceContext memento
+		sourceDescription: aSourceContext description
+		destinationMemento: memento
+		destinationDescription: description
+		destinationIndex: anIndex
 ]
 
 { #category : 'assessing' }
@@ -112,26 +165,28 @@ CFAtelierRelationDropTarget >> eventIsAfterTarget: anEvent [
 CFAtelierRelationDropTarget >> updateForEvent: anEvent [
 	| anAssessment isAfter |
 	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ].
+	activeDragItem ifNil: [ ^ self hideIndicator ].
 	isAfter := self eventIsAfterTarget: anEvent.
-	anAssessment := self
-		assessmentForCandidate: anEvent domainObjects first
-		after: isAfter.
+	anAssessment := (self isPaletteDragItem: activeDragItem)
+		ifTrue: [ self assessmentForCandidate: activeDragItem domainObject after: isAfter ]
+		ifFalse: [ self moveAssessmentForDragItem: activeDragItem after: isAfter ].
 	anAssessment isApplicable
 		ifTrue: [ self showIndicatorAfter: isAfter ]
 		ifFalse: [ self hideIndicator ]
 ]
-
 { #category : 'private - interaction' }
 CFAtelierRelationDropTarget >> dropEvent: anEvent [
-	| anAssessment |
+	| anOperation isAfter |
 	self hideIndicator.
 	anEvent domainObjects size = 1 ifFalse: [ ^ self ].
-	anAssessment := self
-		applyCandidate: anEvent domainObjects first
-		after: (self eventIsAfterTarget: anEvent).
-	^ anAssessment
+	activeDragItem ifNil: [ ^ self ].
+	isAfter := self eventIsAfterTarget: anEvent.
+	(self isPaletteDragItem: activeDragItem) ifTrue: [
+		^ self applyCandidate: activeDragItem domainObject after: isAfter ].
+	anOperation := self moveOperationForDragItem: activeDragItem after: isAfter.
+	anOperation ifNil: [ ^ self moveAssessmentForDragItem: activeDragItem after: isAfter ].
+	^ anOperation apply
 ]
-
 { #category : 'private - appearance' }
 CFAtelierRelationDropTarget >> newDropIndicator [
 	^ BlElement new

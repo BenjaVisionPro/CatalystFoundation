@@ -69,3 +69,31 @@ CFAtelierRelationDropSurfaceExamples >> populatedRelationDefersToItemInsertionTa
 CFAtelierRelationDropSurfaceExamples >> descriptionFor: aSelector in: aMemento [
 	^ aMemento magritteDescription detect: [ :each | each handlesSelector: aSelector ]
 ]
+
+{ #category : 'examples - relation move' }
+CFAtelierRelationDropSurfaceExamples >> existingObjectDragMovesIntoEmptyRelation [
+	<gtExample>
+	| model memento moved sourceDescription destinationDescription surface sourceElement dragItem operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	moved := Object new.
+	model leftItems: (OrderedCollection with: moved).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
+	surface := CFAtelierRelationDropSurface memento: memento description: destinationDescription.
+	operation := surface moveOperationForDragItem: dragItem.
+
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) isEmpty.
+	self assert: (memento readUsing: destinationDescription) first == moved.
+	self assert: model leftItems first == moved.
+	self assert: model rightItems isEmpty.
+	^ assessment
+]
