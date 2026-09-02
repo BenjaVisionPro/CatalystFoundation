@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'childMementosByDescription',
 		'statusPulse',
-		'compositeOverallStatus'
+		'compositeOverallStatus',
+		'childMementoTransfers'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Models',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -53,42 +54,82 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 
 
 { #category : 'children' }
-CFMaMemento >> adoptTransferredChildMemento: aChildMemento for: anObject inRelation: aDescription [
-	| theRelationMementos |
-	theRelationMementos := childMementosByDescription
+CFMaMemento >> transferChildMementoFor: anObject inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription [
+	| childMemento |
+	"A relation-scoped embedded memento is part of this parent editing transaction.
+	Only re-key it when both relation contexts belong to this same transaction.
+	Moving it to another parent memento would also move status/lifecycle ownership,
+	which this protocol does not claim to do."
+	aDestinationMemento == self ifFalse: [ ^ self ].
+	childMemento := self
+		removeChildMementoFor: anObject
+		inRelation: aSourceDescription.
+	childMemento ifNil: [ ^ self ].
+
+	self
+		putChildMemento: childMemento
+		for: anObject
+		inRelation: aDestinationDescription.
+	childMementoTransfers add: { anObject. aSourceDescription. aDestinationDescription. childMemento }.
+	statusPulse value: super overallStatus valueOrNil
+]
+
+{ #category : 'private - children' }
+CFMaMemento >> removeChildMementoFor: anObject inRelation: aDescription [
+	| relationMementos childMemento |
+	relationMementos := childMementosByDescription
+		at: aDescription
+		ifAbsent: [ ^ nil ].
+	childMemento := relationMementos
+		at: anObject
+		ifAbsent: [ ^ nil ].
+	relationMementos removeKey: anObject.
+	relationMementos ifEmpty: [
+		childMementosByDescription removeKey: aDescription ifAbsent: [ ] ].
+	^ childMemento
+]
+
+{ #category : 'private - children' }
+CFMaMemento >> putChildMemento: aChildMemento for: anObject inRelation: aDescription [
+	| relationMementos |
+	relationMementos := childMementosByDescription
 		at: aDescription
 		ifAbsentPut: [ IdentityDictionary new ].
-	theRelationMementos at: anObject put: aChildMemento.
-	aChildMemento overallStatus observe: statusPulse.
-	statusPulse value: aChildMemento overallStatus valueOrNil.
+	relationMementos at: anObject put: aChildMemento.
 	^ aChildMemento
 ]
 
-{ #category : 'children' }
-CFMaMemento >> transferChildMementoFor: anObject inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription [
-	| sourceRelationMementos childMemento |
-	sourceRelationMementos := childMementosByDescription
-		at: aSourceDescription
-		ifAbsent: [ ^ self ].
-	childMemento := sourceRelationMementos
-		at: anObject
-		ifAbsent: [ ^ self ].
-
-	sourceRelationMementos removeKey: anObject.
-	sourceRelationMementos ifEmpty: [
-		childMementosByDescription removeKey: aSourceDescription ifAbsent: [ ] ].
-	statusPulse value: super overallStatus valueOrNil.
-
-	aDestinationMemento
-		adoptTransferredChildMemento: childMemento
-		for: anObject
-		inRelation: aDestinationDescription
+{ #category : 'private - children' }
+CFMaMemento >> restoreTransferredChildMementos [
+	childMementoTransfers reverseDo: [ :aTransfer |
+		| anObject sourceDescription destinationDescription childMemento currentChild |
+		anObject := aTransfer first.
+		sourceDescription := aTransfer second.
+		destinationDescription := aTransfer third.
+		childMemento := aTransfer fourth.
+		currentChild := self
+			removeChildMementoFor: anObject
+			inRelation: destinationDescription.
+		(currentChild notNil and: [ currentChild ~~ childMemento ]) ifTrue: [
+			self
+				putChildMemento: currentChild
+				for: anObject
+				inRelation: destinationDescription ].
+		self
+			putChildMemento: childMemento
+			for: anObject
+			inRelation: sourceDescription ].
+	childMementoTransfers removeAll.
+	statusPulse value: super overallStatus valueOrNil
 ]
 
 { #category : 'actions' }
 CFMaMemento >> commit [
+	| result |
 	self allChildMementos do: [ :aMemento | aMemento commit ].
-	^ super commit
+	result := super commit.
+	childMementoTransfers removeAll.
+	^ result
 ]
 
 { #category : 'private - status' }
@@ -115,6 +156,7 @@ CFMaMemento >> initialize [
 	super initialize.
 
 	childMementosByDescription := Dictionary new.
+	childMementoTransfers := OrderedCollection new.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -131,6 +173,7 @@ CFMaMemento >> overallStatus [
 
 { #category : 'actions' }
 CFMaMemento >> reset [
+	self restoreTransferredChildMementos.
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
 ]

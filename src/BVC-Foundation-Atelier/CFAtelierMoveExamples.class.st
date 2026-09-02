@@ -220,6 +220,45 @@ CFAtelierMoveExamples >> movedEmbeddedChildCommitsThroughDestinationContext [
 	^ model
 ]
 
+
+{ #category : 'examples - embedded editing state' }
+CFAtelierMoveExamples >> resetRestoresTransferredChildMementoToSourceRelationContext [
+	<gtExample>
+	| model parentMemento item leftDescription rightDescription childMemento scoreDescription move restoredChildMemento restoredScoreDescription |
+	model := CFAtelierMoveExampleModel new.
+	item := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
+	model
+		leftItems: (OrderedCollection with: item);
+		rightItems: OrderedCollection new.
+	parentMemento := CFMaMemento model: model.
+	leftDescription := self descriptionFor: #leftItems in: parentMemento.
+	rightDescription := self descriptionFor: #rightItems in: parentMemento.
+	childMemento := parentMemento childMementoFor: item inRelation: leftDescription.
+	scoreDescription := self descriptionFor: #score in: childMemento.
+	childMemento write: 45 using: scoreDescription.
+
+	move := self
+		move: item
+		memento: parentMemento
+		left: leftDescription
+		right: rightDescription
+		at: 1.
+	self assert: move apply isApplicable.
+	self assert: (parentMemento childMementoFor: item inRelation: rightDescription) == childMemento.
+
+	parentMemento reset.
+	restoredChildMemento := parentMemento childMementoFor: item inRelation: leftDescription.
+	restoredScoreDescription := self descriptionFor: #score in: restoredChildMemento.
+
+	self assert: restoredChildMemento == childMemento.
+	self assert: (restoredChildMemento readUsing: restoredScoreDescription) equals: 30.
+	self assert: (parentMemento readUsing: leftDescription) first == item.
+	self assert: (parentMemento readUsing: rightDescription) isEmpty.
+	self assert: model leftItems first == item.
+	self assert: model rightItems isEmpty.
+	^ restoredChildMemento
+]
+
 { #category : 'private' }
 CFAtelierMoveExamples >> move: anObject memento: aMemento left: leftDescription right: rightDescription at: anIndex [
 	^ CFAtelierMove

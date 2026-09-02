@@ -4,7 +4,7 @@ A source or destination may be to-one or to-many. To-many destinations follow th
 
 Assessment reads current staged values, derives complete proposed values and validates both descriptions without mutation. apply reassesses immediately before staging the two ordinary memento writes.
 
-After the relation writes are staged, I ask the source Foundation memento to transfer any existing embedded child memento for the moved object into the destination relation context. This preserves staged edits on an embedded object across the move without changing relation identity semantics or introducing another transaction system.
+After the relation writes are staged, I ask the source Foundation memento to re-key any existing embedded child memento when both relations belong to that same parent editing transaction. This preserves staged edits on an embedded object across an intra-transaction move. The memento restores that relation-scoped child context on reset and finalizes it on commit. Moving editing-state ownership between distinct parent mementos is intentionally not claimed by this operation.
 
 I intentionally do not own drag/drop or presentation geometry."
 Class {
