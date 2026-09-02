@@ -177,6 +177,7 @@ CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
 	<gtExample>
 	| model parentMemento relationDescription candidate operation childMemento scoreDescription |
 	model := CFMaFormShowcase example.
+	model embeddedItems: model embeddedItems asOrderedCollection.
 	parentMemento := CFMaMemento model: model.
 	relationDescription := parentMemento magritteDescription
 		detect: [ :each | each handlesSelector: #embeddedItems ].
@@ -184,8 +185,7 @@ CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
 	operation := CFAtelierInsert
 		object: candidate
 		memento: parentMemento
-		description: relationDescription
-		at: (parentMemento readUsing: relationDescription) size + 1.
+		description: relationDescription.
 
 	self assert: operation apply isApplicable.
 	childMemento := parentMemento
