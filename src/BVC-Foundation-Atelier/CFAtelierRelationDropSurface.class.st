@@ -9,7 +9,8 @@ Class {
 		'memento',
 		'description',
 		'dropIndicator',
-		'activeDragItem'
+		'activeDragItem',
+		'insertOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -114,6 +115,10 @@ CFAtelierRelationDropSurface >> applyCandidate: aCandidate [
 
 { #category : 'private - operations' }
 CFAtelierRelationDropSurface >> operationForCandidate: aCandidate [
+	| anIndex |
+	anIndex := description isOrdered ifTrue: [ 1 ] ifFalse: [ nil ].
+	insertOperationBlock ifNotNil: [
+		^ insertOperationBlock value: aCandidate value: memento value: description value: anIndex ].
 	^ description isOrdered
 		ifTrue: [ CFAtelierInsert object: aCandidate memento: memento description: description at: 1 ]
 		ifFalse: [ CFAtelierInsert object: aCandidate memento: memento description: description ]
@@ -175,3 +180,6 @@ CFAtelierRelationDropSurface >> element: anElement [ element := anElement ]
 CFAtelierRelationDropSurface >> memento: aMemento [ memento := aMemento ]
 { #category : 'accessing' }
 CFAtelierRelationDropSurface >> description: aDescription [ description := aDescription ]
+
+{ #category : 'configuration' }
+CFAtelierRelationDropSurface >> insertOperationFor: aBlock [ insertOperationBlock := aBlock ]

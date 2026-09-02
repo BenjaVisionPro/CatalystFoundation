@@ -8,7 +8,8 @@ Class {
 	#superclass : 'CFMaViewModel',
 	#instVars : [
 		'palette',
-		'removeOperationBlock'
+		'removeOperationBlock',
+		'insertOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -21,16 +22,18 @@ CFAtelierViewModel >> asElement [
 	self presentationDo: [ :aPresentation |
 		aPresentation
 			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
-				CFAtelierRelationDropTarget
+				(CFAtelierRelationDropTarget
 					installOn: aRow
 					targetObject: anObject
 					memento: aMemento
-					description: aDescription ];
+					description: aDescription)
+					insertOperationFor: insertOperationBlock ];
 			relationElementDo: [ :aRelationElement :aDescription :aMemento |
-				CFAtelierRelationDropSurface
+				(CFAtelierRelationDropSurface
 					installOn: aRelationElement
 					memento: aMemento
-					description: aDescription.
+					description: aDescription)
+					insertOperationFor: insertOperationBlock.
 				CFAtelierToOneDropTarget
 					installOn: aRelationElement
 					memento: aMemento
@@ -58,4 +61,10 @@ CFAtelierViewModel >> palette: anAtelierPalette [
 CFAtelierViewModel >> removeOperationFor: aBlock [
 	"Configure how Atelier interprets an explicit remove drop for an existing relation object. The block receives the dragged object and its CFAtelierRelationDragContext and answers the operation to assess/apply. Leave unset for generic CFAtelierRemove semantics."
 	removeOperationBlock := aBlock
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> insertOperationFor: aBlock [
+	"Configure how a palette insertion candidate becomes an operation. The block receives candidate, destination memento, destination description and insertion index (nil for unordered relations). Leave unset for generic CFAtelierInsert semantics."
+	insertOperationBlock := aBlock
 ]

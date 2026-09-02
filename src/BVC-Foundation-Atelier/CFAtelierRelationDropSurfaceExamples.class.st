@@ -151,3 +151,30 @@ CFAtelierRelationDropSurfaceExamples >> existingObjectDragMovesIntoPopulatedUnor
 	self assert: model looseItems first == existing.
 	^ assessment
 ]
+
+{ #category : 'examples - configured operation' }
+CFAtelierRelationDropSurfaceExamples >> configuredInsertOperationReceivesExactDestinationContext [
+	<gtExample>
+	| model memento candidate description surface receivedCandidate receivedMemento receivedDescription receivedIndex assessment |
+	model := CFAtelierMoveExampleModel new.
+	candidate := Object new.
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	surface := CFAtelierRelationDropSurface memento: memento description: description.
+	surface insertOperationFor: [ :anObject :aMemento :aDescription :anIndex |
+		receivedCandidate := anObject.
+		receivedMemento := aMemento.
+		receivedDescription := aDescription.
+		receivedIndex := anIndex.
+		CFAtelierInsert object: anObject memento: aMemento description: aDescription at: anIndex ].
+
+	assessment := surface assessmentForCandidate: candidate.
+
+	self assert: assessment isApplicable.
+	self assert: receivedCandidate == candidate.
+	self assert: receivedMemento == memento.
+	self assert: receivedDescription == description.
+	self assert: receivedIndex equals: 1.
+	self assert: (memento readUsing: description) isEmpty.
+	^ assessment
+]
