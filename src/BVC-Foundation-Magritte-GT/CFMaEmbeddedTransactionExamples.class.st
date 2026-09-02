@@ -170,3 +170,35 @@ CFMaEmbeddedTransactionExamples >> explicitContainerCompactIdentityReferenceOver
 	^ aMemento
 ]
 
+
+
+{ #category : 'examples - transaction' }
+CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
+	<gtExample>
+	| model parentMemento relationDescription candidate operation childMemento scoreDescription |
+	model := CFMaFormShowcase example.
+	parentMemento := CFMaMemento model: model.
+	relationDescription := parentMemento magritteDescription
+		detect: [ :each | each handlesSelector: #embeddedItems ].
+	candidate := CFMaFormShowcaseItem exampleNamed: 'Inserted' score: 10 status: #active.
+	operation := CFAtelierInsert
+		object: candidate
+		memento: parentMemento
+		description: relationDescription
+		at: (parentMemento readUsing: relationDescription) size + 1.
+
+	self assert: operation apply isApplicable.
+	childMemento := parentMemento
+		childMementoFor: candidate
+		inRelation: relationDescription.
+	scoreDescription := childMemento magritteDescription
+		detect: [ :each | each handlesSelector: #score ].
+	childMemento write: 45 using: scoreDescription.
+
+	parentMemento reset.
+
+	self assert: ((parentMemento readUsing: relationDescription) identityIncludes: candidate) not.
+	self assert: (parentMemento allChildMementos identityIncludes: childMemento) not.
+	self assert: candidate score equals: 10.
+	^ parentMemento
+]

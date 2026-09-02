@@ -209,12 +209,28 @@ CFMaMemento >> overallStatus [
 	^ compositeOverallStatus
 ]
 
+{ #category : 'private - children' }
+CFMaMemento >> reconcileChildMementosWithCurrentRelations [
+	childMementosByDescription keys copy do: [ :aDescription |
+		| aValue currentObjects |
+		aValue := self readUsing: aDescription.
+		currentObjects := aDescription isMultiple
+			ifTrue: [ aValue ifNil: [ #() ] ]
+			ifFalse: [ aValue ifNil: [ #() ] ifNotNil: [ { aValue } ] ].
+		self
+			retainChildMementosFor: currentObjects
+			inRelation: aDescription ]
+]
+
 { #category : 'actions' }
 CFMaMemento >> reset [
+	| result |
 	self restoreDetachedChildMementos.
 	self restoreTransferredChildMementos.
 	self allChildMementos do: [ :aMemento | aMemento reset ].
-	^ super reset
+	result := super reset.
+	self reconcileChildMementosWithCurrentRelations.
+	^ result
 ]
 
 { #category : 'children' }
