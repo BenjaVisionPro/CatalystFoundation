@@ -173,3 +173,43 @@ CFAtelierRemoveExamples >> reinsertRestoresDetachedEmbeddedMementoIdentity [
 	self assert: child name equals: 'Staged child name'.
 	^ parentMemento
 ]
+
+{ #category : 'examples - to many' }
+CFAtelierRemoveExamples >> removeMultipleObjectsStagesOneCompleteRelationValue [
+	<gtExample>
+	| model first second third fourth memento description assessment |
+	model := CFAtelierMoveExampleModel new.
+	first := Object new. second := Object new. third := Object new. fourth := Object new.
+	model leftItems: (OrderedCollection with: first with: second with: third with: fourth).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	assessment := (CFAtelierRemove
+		objects: { third. first }
+		memento: memento
+		description: description) apply.
+	self assert: assessment isApplicable.
+	self assert: assessment objects size equals: 2.
+	self assert: (memento readUsing: description) size equals: 2.
+	self assert: (memento readUsing: description) first == second.
+	self assert: (memento readUsing: description) second == fourth.
+	self assert: model leftItems size equals: 4.
+	^ assessment
+]
+
+{ #category : 'examples - identity' }
+CFAtelierRemoveExamples >> duplicateRequestedIdentityIsRejected [
+	<gtExample>
+	| model object memento description assessment |
+	model := CFAtelierMoveExampleModel new.
+	object := Object new.
+	model leftItems: (OrderedCollection with: object).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	assessment := (CFAtelierRemove
+		objects: { object. object }
+		memento: memento
+		description: description) assess.
+	self assert: assessment isApplicable not.
+	self assert: (memento readUsing: description) size equals: 1.
+	^ assessment
+]

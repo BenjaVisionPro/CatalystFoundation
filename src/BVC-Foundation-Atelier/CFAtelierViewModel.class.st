@@ -52,6 +52,11 @@ CFAtelierViewModel >> asElement [
 					relativeTo: aTargetObject
 					after: placeAfter
 					memento: aMemento
+					description: aDescription ];
+			relationRemoveDo: [ :someObjects :aMemento :aDescription |
+				self
+					applyRemoveOf: someObjects
+					memento: aMemento
 					description: aDescription ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
@@ -80,7 +85,7 @@ CFAtelierViewModel >> palette: anAtelierPalette [
 
 { #category : 'configuration' }
 CFAtelierViewModel >> removeOperationFor: aBlock [
-	"Configure how Atelier interprets an explicit remove drop for an existing relation object. The block receives the dragged object and its CFAtelierRelationDragContext and answers the operation to assess/apply. Leave unset for generic CFAtelierRemove semantics."
+	"Configure how Atelier interprets removal of one or more objects from one relation. The block receives the objects collection and a CFAtelierRelationDragContext describing the source editing context, and answers one operation for the complete intention. Leave unset for generic CFAtelierRemove semantics."
 	removeOperationBlock := aBlock
 ]
 
@@ -142,6 +147,29 @@ CFAtelierViewModel >> applyReorderOf: someObjects relativeTo: aTargetObject afte
 		reorderOperationFor: someObjects
 		relativeTo: aTargetObject
 		after: placeAfter
+		memento: aMemento
+		description: aDescription) apply
+]
+
+
+{ #category : 'operations' }
+CFAtelierViewModel >> removeOperationFor: someObjects memento: aMemento description: aDescription [
+	| aContext |
+	aContext := CFAtelierRelationDragContext
+		memento: aMemento
+		description: aDescription.
+	removeOperationBlock ifNotNil: [
+		^ removeOperationBlock value: someObjects value: aContext ].
+	^ CFAtelierRemove
+		objects: someObjects
+		memento: aMemento
+		description: aDescription
+]
+
+{ #category : 'operations' }
+CFAtelierViewModel >> applyRemoveOf: someObjects memento: aMemento description: aDescription [
+	^ (self
+		removeOperationFor: someObjects
 		memento: aMemento
 		description: aDescription) apply
 ]

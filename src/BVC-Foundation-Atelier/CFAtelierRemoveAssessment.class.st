@@ -2,7 +2,7 @@ Class {
 	#name : 'CFAtelierRemoveAssessment',
 	#superclass : 'CFAtelierAssessment',
 	#instVars : [
-		'object',
+		'objects',
 		'currentValue',
 		'proposedValue'
 	],
@@ -13,26 +13,49 @@ Class {
 
 { #category : 'instance creation' }
 CFAtelierRemoveAssessment class >> object: anObject currentValue: aCurrentValue proposedValue: aProposedValue [
+	^ self
+		objects: { anObject }
+		currentValue: aCurrentValue
+		proposedValue: aProposedValue
+]
+
+{ #category : 'instance creation' }
+CFAtelierRemoveAssessment class >> object: anObject currentValue: aCurrentValue rejectedBecause: aString [
+	^ self
+		objects: { anObject }
+		currentValue: aCurrentValue
+		rejectedBecause: aString
+]
+
+{ #category : 'instance creation' }
+CFAtelierRemoveAssessment class >> objects: someObjects currentValue: aCurrentValue proposedValue: aProposedValue [
 	^ self new
-		object: anObject;
+		objects: someObjects;
 		currentValue: aCurrentValue;
 		proposedValue: aProposedValue;
 		yourself
 ]
 
 { #category : 'instance creation' }
-CFAtelierRemoveAssessment class >> object: anObject currentValue: aCurrentValue rejectedBecause: aString [
+CFAtelierRemoveAssessment class >> objects: someObjects currentValue: aCurrentValue rejectedBecause: aString [
 	^ self new
-		object: anObject;
+		objects: someObjects;
 		currentValue: aCurrentValue;
 		rejectionMessage: aString;
 		yourself
 ]
 
 { #category : 'accessing' }
-CFAtelierRemoveAssessment >> object [ ^ object ]
+CFAtelierRemoveAssessment >> object [
+	^ objects ifEmpty: [ nil ] ifNotEmpty: [ objects first ]
+]
+
 { #category : 'accessing' }
-CFAtelierRemoveAssessment >> object: anObject [ object := anObject ]
+CFAtelierRemoveAssessment >> object: anObject [ objects := { anObject } ]
+{ #category : 'accessing' }
+CFAtelierRemoveAssessment >> objects [ ^ objects ]
+{ #category : 'accessing' }
+CFAtelierRemoveAssessment >> objects: someObjects [ objects := someObjects asArray ]
 { #category : 'accessing' }
 CFAtelierRemoveAssessment >> currentValue [ ^ currentValue ]
 { #category : 'accessing' }

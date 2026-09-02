@@ -74,7 +74,7 @@ CFAtelierRemoveDropTargetExamples >> staleRelationDragIsRejected [
 { #category : 'examples - remove UI' }
 CFAtelierRemoveDropTargetExamples >> configuredOperationOverridesGenericRemoval [
 	<gtExample>
-	| model memento object description dragItem target assessment receivedObject receivedContext |
+	| model memento object description dragItem target assessment receivedObjects receivedContext |
 	model := CFAtelierMoveExampleModel new.
 	object := Object new.
 	model leftItems: (OrderedCollection with: object).
@@ -82,15 +82,16 @@ CFAtelierRemoveDropTargetExamples >> configuredOperationOverridesGenericRemoval 
 	description := self descriptionFor: #leftItems in: memento.
 	dragItem := self dragItemFor: object memento: memento description: description.
 	target := CFAtelierRemoveDropTarget new.
-	target operationFor: [ :anObject :aContext |
-		receivedObject := anObject.
+	target operationFor: [ :someObjects :aContext |
+		receivedObjects := someObjects.
 		receivedContext := aContext.
 		nil ].
 
 	assessment := target assessmentForDragItem: dragItem.
 
 	self assert: assessment isNil.
-	self assert: receivedObject == object.
+	self assert: receivedObjects size equals: 1.
+	self assert: receivedObjects first == object.
 	self assert: receivedContext memento == memento.
 	self assert: receivedContext description == description.
 	self assert: (memento readUsing: description) first == object.

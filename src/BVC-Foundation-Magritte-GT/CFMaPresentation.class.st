@@ -12,7 +12,8 @@ Class {
 		'fieldConfigurations',
 		'relationItemElementBlock',
 		'relationElementBlock',
-		'relationReorderBlock'
+		'relationReorderBlock',
+		'relationRemoveBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -473,6 +474,8 @@ CFMaPresentation >> configureChildPresentation: aPresentation [
 		aPresentation relationElementDo: relationElementBlock ].
 	relationReorderBlock ifNotNil: [
 		aPresentation relationReorderDo: relationReorderBlock ].
+	relationRemoveBlock ifNotNil: [
+		aPresentation relationRemoveDo: relationRemoveBlock ].
 	^ aPresentation
 ]
 
@@ -534,4 +537,16 @@ CFMaPresentation >> relationReorderDo: aBlock [
 { #category : 'private - relations' }
 CFMaPresentation >> relationReorderBlock [
 	^ relationReorderBlock
+]
+
+
+{ #category : 'configuration - relations' }
+CFMaPresentation >> relationRemoveDo: aBlock [
+	"Configure a consumer callback for a remove gesture owned by a concrete Foundation relation presentation. The callback receives the complete collection of objects selected for removal, the memento and the relation description. Concrete presentations retain their ordinary behavior when this callback is absent."
+	relationRemoveBlock := aBlock
+]
+
+{ #category : 'private - relations' }
+CFMaPresentation >> relationRemoveBlock [
+	^ relationRemoveBlock
 ]

@@ -63,9 +63,9 @@ CFAtelierRemoveDropTarget >> operationForDragItem: aDragItem [
 	aContext := self sourceContextForDragItem: aDragItem.
 	aContext ifNil: [ ^ nil ].
 	operationBlock ifNotNil: [
-		^ operationBlock value: aDragItem domainObject value: aContext ].
+		^ operationBlock value: { aDragItem domainObject } value: aContext ].
 	^ CFAtelierRemove
-		object: aDragItem domainObject
+		objects: { aDragItem domainObject }
 		memento: aContext memento
 		description: aContext description
 ]
@@ -105,6 +105,6 @@ CFAtelierRemoveDropTarget >> clearActiveDrag [
 
 { #category : 'configuration' }
 CFAtelierRemoveDropTarget >> operationFor: aBlock [
-	"Configure the operation used for an existing relation object and its source editing context. The block must answer a CFAtelierOperation or nil. When absent, I use the generic CFAtelierRemove operation."
+	"Configure the operation used for the removal intention and its source editing context. I pass the dragged object as a one-element collection so the same block also serves Foundation-owned multi-selection removal. The block must answer a CFAtelierOperation or nil. When absent, I use generic CFAtelierRemove semantics."
 	operationBlock := aBlock
 ]

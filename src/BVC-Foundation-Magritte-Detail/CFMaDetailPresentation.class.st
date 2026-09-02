@@ -1186,10 +1186,9 @@ CFMaDetailPresentation >> removeToManyListObject: anObject fromRow: aRow descrip
 		object: anObject
 		description: aDescription.
 	theObjects ifEmpty: [ ^ self ].
-	CFMaBuilderUtility
-		removeToManyObjects: theObjects
-		memento: self memento
-		using: aDescription
+	^ self
+		removeRelationObjects: theObjects
+		description: aDescription
 		element: aRow
 ]
 
@@ -1451,20 +1450,14 @@ CFMaDetailPresentation >> installToOneListNavigationOn: aRow focusElement: aFocu
 			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
-				CFMaBuilderUtility
-					removeToOneMemento: self memento
-					using: aDescription
-					element: aFocusElement ]);
+				self removeToOneRelation: aDescription fromElement: aFocusElement ]);
 		addShortcut: (BlShortcutWithAction new
 			name: 'Remove to-one relation';
 			combination: BlKeyCombination builder backspace build;
 			overrideChildren: true;
 			action: [ :anEvent :aShortcut |
 				anEvent consumed: true.
-				CFMaBuilderUtility
-					removeToOneMemento: self memento
-					using: aDescription
-					element: aFocusElement ])
+				self removeToOneRelation: aDescription fromElement: aFocusElement ])
 ]
 
 { #category : 'private - relations' }
@@ -1790,10 +1783,9 @@ CFMaDetailPresentation >> newEmbeddedRelationItemFor: anObject host: aPresentati
 		for: anObject
 		description: aDescription
 		remove: [ :anItemElement |
-			CFMaBuilderUtility
-				removeToManyObject: anObject
-				memento: self memento
-				using: aDescription
+			self
+				removeRelationObjects: { anObject }
+				description: aDescription
 				element: anItemElement ].
 	^ anItem
 ]
@@ -1904,3 +1896,34 @@ CFMaDetailPresentation >> visitToOneRelationDescription: aDescription [
 		toDetailPresentation: self
 ]
 
+
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> removeRelationObjects: someObjects description: aDescription element: anElement [
+	relationRemoveBlock ifNotNil: [
+		^ relationRemoveBlock
+			value: someObjects
+			value: self memento
+			value: aDescription ].
+	^ CFMaBuilderUtility
+		removeToManyObjects: someObjects
+		memento: self memento
+		using: aDescription
+		element: anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> removeToOneRelation: aDescription fromElement: anElement [
+	| anObject |
+	anObject := self memento readUsing: aDescription.
+	anObject ifNil: [ ^ self ].
+	relationRemoveBlock ifNotNil: [
+		^ relationRemoveBlock
+			value: { anObject }
+			value: self memento
+			value: aDescription ].
+	^ CFMaBuilderUtility
+		removeToOneMemento: self memento
+		using: aDescription
+		element: anElement
+]
