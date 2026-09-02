@@ -109,3 +109,108 @@ CFAtelierCopyExamples >> staleSourceIsRejectedOnApply [
 	self assert: (memento readUsing: (self descriptionFor: #rightItems in: memento)) size equals: 1.
 	^ assessment
 ]
+
+{ #category : 'examples - cardinality' }
+CFAtelierCopyExamples >> copiesFromToOneIntoUnorderedToMany [
+	<gtExample>
+	| model source copy memento sourceDescription destinationDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	source := Object new.
+	copy := Object new.
+	model leftItem: source.
+	model looseItems: OrderedCollection new.
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItem in: memento.
+	destinationDescription := self descriptionFor: #looseItems in: memento.
+	operation := CFAtelierCopy
+		sourceObject: source
+		copiedObject: copy
+		sourceMemento: memento
+		sourceDescription: sourceDescription
+		destinationMemento: memento
+		destinationDescription: destinationDescription
+		destinationIndex: nil.
+	assessment := operation apply.
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) == source.
+	self assert: (memento readUsing: destinationDescription) first == copy.
+	self assert: model looseItems isEmpty.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierCopyExamples >> copiesFromToManyIntoEmptyToOne [
+	<gtExample>
+	| model source copy memento sourceDescription destinationDescription operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	source := Object new.
+	copy := Object new.
+	model leftItems: (OrderedCollection with: source).
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItem in: memento.
+	operation := CFAtelierCopy
+		sourceObject: source
+		copiedObject: copy
+		sourceMemento: memento
+		sourceDescription: sourceDescription
+		destinationMemento: memento
+		destinationDescription: destinationDescription
+		destinationIndex: nil.
+	assessment := operation apply.
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) first == source.
+	self assert: (memento readUsing: destinationDescription) == copy.
+	self assert: model rightItem isNil.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierCopyExamples >> occupiedToOneDestinationRejectsCopy [
+	<gtExample>
+	| model source copy existing memento operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	source := Object new.
+	copy := Object new.
+	existing := Object new.
+	model leftItems: (OrderedCollection with: source).
+	model rightItem: existing.
+	memento := CFMaMemento model: model.
+	operation := CFAtelierCopy
+		sourceObject: source
+		copiedObject: copy
+		sourceMemento: memento
+		sourceDescription: (self descriptionFor: #leftItems in: memento)
+		destinationMemento: memento
+		destinationDescription: (self descriptionFor: #rightItem in: memento)
+		destinationIndex: nil.
+	assessment := operation assess.
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'A to-one destination must be empty for a copy.'.
+	self assert: (memento readUsing: (self descriptionFor: #rightItem in: memento)) == existing.
+	^ assessment
+]
+
+{ #category : 'examples - cardinality' }
+CFAtelierCopyExamples >> unorderedDestinationRejectsInsertionIndex [
+	<gtExample>
+	| model source copy memento operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	source := Object new.
+	copy := Object new.
+	model leftItems: (OrderedCollection with: source).
+	model looseItems: OrderedCollection new.
+	memento := CFMaMemento model: model.
+	operation := CFAtelierCopy
+		sourceObject: source
+		copiedObject: copy
+		sourceMemento: memento
+		sourceDescription: (self descriptionFor: #leftItems in: memento)
+		destinationMemento: memento
+		destinationDescription: (self descriptionFor: #looseItems in: memento)
+		destinationIndex: 1.
+	assessment := operation assess.
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'An unordered destination does not accept an insertion index.'.
+	^ assessment
+]
