@@ -148,3 +148,31 @@ CFAtelierReplaceExamples >> descriptionFor: aSelector in: aMemento [
 	^ aMemento magritteDescription
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
+
+{ #category : 'examples - embedded transaction' }
+CFAtelierReplaceExamples >> commitDoesNotCommitReplacedEmbeddedEdits [
+	<gtExample>
+	| model original replacement parentMemento relationDescription childMemento nameDescription operation |
+	model := CFAtelierReplaceExampleModel new.
+	original := CFAtelierEntryExampleModel new.
+	replacement := CFAtelierEntryExampleModel new.
+	model items: (OrderedCollection with: original).
+	parentMemento := CFMaMemento model: model.
+	relationDescription := self descriptionFor: #items in: parentMemento.
+	childMemento := parentMemento childMementoFor: original inRelation: relationDescription.
+	nameDescription := self descriptionFor: #name in: childMemento.
+	childMemento write: 'Staged original name' using: nameDescription.
+
+	operation := CFAtelierReplace
+		object: original
+		with: replacement
+		memento: parentMemento
+		description: relationDescription.
+	self assert: operation apply isApplicable.
+	parentMemento commit.
+
+	self assert: model items size equals: 1.
+	self assert: model items first == replacement.
+	self assert: original name equals: 'Atelier example'.
+	^ parentMemento
+]

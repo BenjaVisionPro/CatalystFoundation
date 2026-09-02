@@ -98,3 +98,50 @@ CFAtelierRemoveExamples >> duplicateIdentityIsRejected [
 	self assert: (memento readUsing: description) size equals: 2.
 	^ assessment
 ]
+
+{ #category : 'examples - embedded transaction' }
+CFAtelierRemoveExamples >> commitDoesNotCommitDetachedEmbeddedEdits [
+	<gtExample>
+	| model child parentMemento relationDescription childMemento nameDescription operation |
+	model := CFAtelierMoveExampleModel new.
+	child := CFAtelierEntryExampleModel new.
+	model leftItems: (OrderedCollection with: child).
+	parentMemento := CFMaMemento model: model.
+	relationDescription := self descriptionFor: #leftItems in: parentMemento.
+	childMemento := parentMemento childMementoFor: child inRelation: relationDescription.
+	nameDescription := self descriptionFor: #name in: childMemento.
+	childMemento write: 'Staged child name' using: nameDescription.
+
+	operation := CFAtelierRemove object: child memento: parentMemento description: relationDescription.
+	self assert: operation apply isApplicable.
+	parentMemento commit.
+
+	self assert: model leftItems isEmpty.
+	self assert: child name equals: 'Atelier example'.
+	^ parentMemento
+]
+
+{ #category : 'examples - embedded transaction' }
+CFAtelierRemoveExamples >> resetRestoresDetachedEmbeddedMementoIdentity [
+	<gtExample>
+	| model child parentMemento relationDescription childMemento nameDescription operation restoredChildMemento |
+	model := CFAtelierMoveExampleModel new.
+	child := CFAtelierEntryExampleModel new.
+	model leftItems: (OrderedCollection with: child).
+	parentMemento := CFMaMemento model: model.
+	relationDescription := self descriptionFor: #leftItems in: parentMemento.
+	childMemento := parentMemento childMementoFor: child inRelation: relationDescription.
+	nameDescription := self descriptionFor: #name in: childMemento.
+	childMemento write: 'Staged child name' using: nameDescription.
+
+	operation := CFAtelierRemove object: child memento: parentMemento description: relationDescription.
+	self assert: operation apply isApplicable.
+	parentMemento reset.
+	restoredChildMemento := parentMemento childMementoFor: child inRelation: relationDescription.
+
+	self assert: (parentMemento readUsing: relationDescription) size equals: 1.
+	self assert: (parentMemento readUsing: relationDescription) first == child.
+	self assert: restoredChildMemento == childMemento.
+	self assert: (restoredChildMemento readUsing: nameDescription) equals: 'Atelier example'.
+	^ parentMemento
+]

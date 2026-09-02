@@ -56,7 +56,8 @@ CFAtelierRemove >> assess [
 
 { #category : 'applying' }
 CFAtelierRemove >> applyAssessment: anAssessment [
-	memento write: anAssessment proposedValue using: description
+	memento write: anAssessment proposedValue using: description.
+	memento detachChildMementoFor: object inRelation: description
 ]
 
 { #category : 'accessing' }

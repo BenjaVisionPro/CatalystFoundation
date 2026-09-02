@@ -1,5 +1,5 @@
 "
-I am responsible for extending a GT Magritte editing transaction across embedded relation objects.
+I am responsible for extending a GT Magritte editing transaction across embedded relation objects. I preserve child editing identity across moves and keep relation removal/replacement transactional by detaching removed child mementos until commit or restoring them on reset.
 "
 Class {
 	#name : 'CFMaMemento',
@@ -8,7 +8,8 @@ Class {
 		'childMementosByDescription',
 		'statusPulse',
 		'compositeOverallStatus',
-		'childMementoTransfers'
+		'childMementoTransfers',
+		'detachedChildMementos'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Models',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -52,6 +53,18 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 			aMemento ]
 ]
 
+
+{ #category : 'children' }
+CFMaMemento >> detachChildMementoFor: anObject inRelation: aDescription [
+	| childMemento |
+	childMemento := self
+		removeChildMementoFor: anObject
+		inRelation: aDescription.
+	childMemento ifNil: [ ^ self ].
+
+	detachedChildMementos add: { anObject. aDescription. childMemento }.
+	statusPulse value: super overallStatus valueOrNil
+]
 
 { #category : 'children' }
 CFMaMemento >> transferChildMementoFor: anObject inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription [
@@ -100,6 +113,29 @@ CFMaMemento >> putChildMemento: aChildMemento for: anObject inRelation: aDescrip
 ]
 
 { #category : 'private - children' }
+CFMaMemento >> restoreDetachedChildMementos [
+	detachedChildMementos reverseDo: [ :aDetachment |
+		| anObject description childMemento currentChild |
+		anObject := aDetachment first.
+		description := aDetachment second.
+		childMemento := aDetachment third.
+		currentChild := self
+			removeChildMementoFor: anObject
+			inRelation: description.
+		(currentChild notNil and: [ currentChild ~~ childMemento ]) ifTrue: [
+			self
+				putChildMemento: currentChild
+				for: anObject
+				inRelation: description ].
+		self
+			putChildMemento: childMemento
+			for: anObject
+			inRelation: description ].
+	detachedChildMementos removeAll.
+	statusPulse value: super overallStatus valueOrNil
+]
+
+{ #category : 'private - children' }
 CFMaMemento >> restoreTransferredChildMementos [
 	childMementoTransfers reverseDo: [ :aTransfer |
 		| anObject sourceDescription destinationDescription childMemento currentChild |
@@ -129,6 +165,7 @@ CFMaMemento >> commit [
 	self allChildMementos do: [ :aMemento | aMemento commit ].
 	result := super commit.
 	childMementoTransfers removeAll.
+	detachedChildMementos removeAll.
 	^ result
 ]
 
@@ -157,6 +194,7 @@ CFMaMemento >> initialize [
 
 	childMementosByDescription := Dictionary new.
 	childMementoTransfers := OrderedCollection new.
+	detachedChildMementos := OrderedCollection new.
 	statusPulse := AsyncObservableValue
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	compositeOverallStatus := (statusPulse observe
@@ -173,6 +211,7 @@ CFMaMemento >> overallStatus [
 
 { #category : 'actions' }
 CFMaMemento >> reset [
+	self restoreDetachedChildMementos.
 	self restoreTransferredChildMementos.
 	self allChildMementos do: [ :aMemento | aMemento reset ].
 	^ super reset
