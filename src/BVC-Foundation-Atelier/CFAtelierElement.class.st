@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'paletteElement',
 		'formElement',
-		'removeDropTarget'
+		'removeDropTarget',
+		'removeOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -77,5 +78,12 @@ CFAtelierElement >> palette: anAtelierPalette [
 	self addChild: paletteElement at: 1.
 	removeDropTarget ifNil: [
 		removeDropTarget := CFAtelierRemoveDropTarget new.
+		removeOperationBlock ifNotNil: [ removeDropTarget operationFor: removeOperationBlock ].
 		self addChild: removeDropTarget at: 2 ]
+]
+
+{ #category : 'configuration' }
+CFAtelierElement >> removeOperationFor: aBlock [
+	removeOperationBlock := aBlock.
+	removeDropTarget ifNotNil: [ removeDropTarget operationFor: aBlock ]
 ]

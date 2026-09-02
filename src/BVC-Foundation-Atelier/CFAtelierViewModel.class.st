@@ -7,7 +7,8 @@ Class {
 	#name : 'CFAtelierViewModel',
 	#superclass : 'CFMaViewModel',
 	#instVars : [
-		'palette'
+		'palette',
+		'removeOperationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -37,6 +38,7 @@ CFAtelierViewModel >> asElement [
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
+		removeOperationFor: removeOperationBlock;
 		palette: palette;
 		formElement: aFormElement;
 		yourself
@@ -50,4 +52,10 @@ CFAtelierViewModel >> palette [
 { #category : 'accessing' }
 CFAtelierViewModel >> palette: anAtelierPalette [
 	palette := anAtelierPalette
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> removeOperationFor: aBlock [
+	"Configure how Atelier interprets an explicit remove drop for an existing relation object. The block receives the dragged object and its CFAtelierRelationDragContext and answers the operation to assess/apply. Leave unset for generic CFAtelierRemove semantics."
+	removeOperationBlock := aBlock
 ]

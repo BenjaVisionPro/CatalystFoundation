@@ -5,7 +5,8 @@ Class {
 	#name : 'CFAtelierRemoveDropTarget',
 	#superclass : 'BrLabel',
 	#instVars : [
-		'activeDragItem'
+		'activeDragItem',
+		'operationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -61,6 +62,8 @@ CFAtelierRemoveDropTarget >> operationForDragItem: aDragItem [
 	| aContext |
 	aContext := self sourceContextForDragItem: aDragItem.
 	aContext ifNil: [ ^ nil ].
+	operationBlock ifNotNil: [
+		^ operationBlock value: aDragItem domainObject value: aContext ].
 	^ CFAtelierRemove
 		object: aDragItem domainObject
 		memento: aContext memento
@@ -98,4 +101,10 @@ CFAtelierRemoveDropTarget >> updateAppearance [
 CFAtelierRemoveDropTarget >> clearActiveDrag [
 	activeDragItem := nil.
 	self border: BlBorder empty
+]
+
+{ #category : 'configuration' }
+CFAtelierRemoveDropTarget >> operationFor: aBlock [
+	"Configure the operation used for an existing relation object and its source editing context. The block must answer a CFAtelierOperation or nil. When absent, I use the generic CFAtelierRemove operation."
+	operationBlock := aBlock
 ]

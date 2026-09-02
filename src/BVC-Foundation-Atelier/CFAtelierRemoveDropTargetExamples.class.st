@@ -69,6 +69,33 @@ CFAtelierRemoveDropTargetExamples >> staleRelationDragIsRejected [
 	^ target
 ]
 
+
+
+{ #category : 'examples - remove UI' }
+CFAtelierRemoveDropTargetExamples >> configuredOperationOverridesGenericRemoval [
+	<gtExample>
+	| model memento object description dragItem target assessment receivedObject receivedContext |
+	model := CFAtelierMoveExampleModel new.
+	object := Object new.
+	model leftItems: (OrderedCollection with: object).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	dragItem := self dragItemFor: object memento: memento description: description.
+	target := CFAtelierRemoveDropTarget new.
+	target operationFor: [ :anObject :aContext |
+		receivedObject := anObject.
+		receivedContext := aContext.
+		nil ].
+
+	assessment := target assessmentForDragItem: dragItem.
+
+	self assert: assessment isNil.
+	self assert: receivedObject == object.
+	self assert: receivedContext memento == memento.
+	self assert: receivedContext description == description.
+	self assert: (memento readUsing: description) first == object.
+	^ target
+]
 { #category : 'private' }
 CFAtelierRemoveDropTargetExamples >> dragItemFor: anObject memento: aMemento description: aDescription [
 	| aSourceElement |
