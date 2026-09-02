@@ -36,7 +36,7 @@ CFAtelierViewModel >> asElement [
 					memento: aMemento
 					description: aDescription)
 					insertOperationFor: insertOperationBlock.
-				CFAtelierToOneDropTarget
+				(CFAtelierToOneDropTarget
 					installOn: aRelationElement
 					memento: aMemento
 					description: aDescription)
