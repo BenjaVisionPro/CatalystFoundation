@@ -12,7 +12,8 @@ Class {
 		'insertOperationBlock',
 		'replaceOperationBlock',
 		'moveOperationBlock',
-		'reorderOperationBlock'
+		'reorderOperationBlock',
+		'clientPresentationBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -22,7 +23,7 @@ Class {
 { #category : 'api - converting' }
 CFAtelierViewModel >> asElement [
 	| aFormElement |
-	self presentationDo: [ :aPresentation |
+	super presentationDo: [ :aPresentation |
 		aPresentation
 			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
 				(CFAtelierRelationDropTarget
@@ -57,7 +58,8 @@ CFAtelierViewModel >> asElement [
 				self
 					applyRemoveOf: someObjects
 					memento: aMemento
-					description: aDescription ] ].
+					description: aDescription ].
+		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ].
 	aFormElement := super asElement.
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
@@ -67,6 +69,13 @@ CFAtelierViewModel >> asElement [
 		yourself
 ]
 
+
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> presentationDo: aBlock [
+	"Configure the Foundation-selected presentation for this Atelier client. Atelier composes this block with its own relation interaction hooks when the presentation is built."
+	clientPresentationBlock := aBlock
+]
 
 { #category : 'configuration' }
 CFAtelierViewModel >> configuration: anAtelierConfiguration [
