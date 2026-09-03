@@ -57,10 +57,18 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 		at: anObject
 		ifAbsentPut: [
 			| aMemento |
-			aMemento := self class model: anObject.
+			aMemento := self newChildMementoFor: anObject.
 			aMemento overallStatus observe: statusPulse.
 			statusPulse value: aMemento overallStatus valueOrNil.
 			aMemento ]
+]
+
+
+{ #category : 'private - children' }
+CFMaMemento >> newChildMementoFor: anObject [
+	"Subclasses may specialize the memento used for embedded relation objects.
+	By default, preserve the existing recursive memento-class behavior."
+	^ self class model: anObject
 ]
 
 
