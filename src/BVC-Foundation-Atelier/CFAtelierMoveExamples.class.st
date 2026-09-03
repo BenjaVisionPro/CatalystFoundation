@@ -455,3 +455,66 @@ CFAtelierMoveExamples >> moveBetweenToOneRelations [
 	self assert: model rightItem isNil.
 	^ assessment
 ]
+
+{ #category : 'examples - multiple' }
+CFAtelierMoveExamples >> multiMovePreservesAuthoritativeSourceOrder [
+	<gtExample>
+	| model memento first second third fourth fifth leftDescription rightDescription operation assessment |
+	first := Object new.
+	second := Object new.
+	third := Object new.
+	fourth := Object new.
+	fifth := Object new.
+	model := CFAtelierMoveExampleModel new
+		leftItems: (OrderedCollection with: first with: second with: third with: fourth);
+		rightItems: (OrderedCollection with: fifth);
+		yourself.
+	memento := CFMaMemento model: model.
+	leftDescription := self descriptionFor: #leftItems in: memento.
+	rightDescription := self descriptionFor: #rightItems in: memento.
+
+	operation := CFAtelierMove
+		objects: { third. first }
+		sourceMemento: memento
+		sourceDescription: leftDescription
+		destinationMemento: memento
+		destinationDescription: rightDescription
+		destinationIndex: 2.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: leftDescription) size equals: 2.
+	self assert: (memento readUsing: leftDescription) first == second.
+	self assert: (memento readUsing: leftDescription) second == fourth.
+	self assert: (memento readUsing: rightDescription) size equals: 3.
+	self assert: (memento readUsing: rightDescription) first == fifth.
+	self assert: (memento readUsing: rightDescription) second == first.
+	self assert: (memento readUsing: rightDescription) third == third.
+	self assert: model leftItems first == first.
+	self assert: model rightItems size equals: 1.
+	^ assessment
+]
+
+{ #category : 'examples - multiple' }
+CFAtelierMoveExamples >> multiMoveRejectsDuplicateDraggedIdentity [
+	<gtExample>
+	| fixture memento beta leftDescription rightDescription operation assessment |
+	fixture := self fixture.
+	memento := fixture second.
+	beta := fixture fourth.
+	leftDescription := self descriptionFor: #leftItems in: memento.
+	rightDescription := self descriptionFor: #rightItems in: memento.
+	operation := CFAtelierMove
+		objects: { beta. beta }
+		sourceMemento: memento
+		sourceDescription: leftDescription
+		destinationMemento: memento
+		destinationDescription: rightDescription
+		destinationIndex: 2.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable not.
+	self assert: (memento readUsing: leftDescription) size equals: 2.
+	self assert: (memento readUsing: rightDescription) size equals: 1.
+	^ assessment
+]

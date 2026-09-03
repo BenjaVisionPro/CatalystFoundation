@@ -196,8 +196,8 @@ CFAtelierRelationDropSurfaceExamples >> configuredMoveOperationReceivesExactSour
 		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
 	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: moved; yourself.
 	surface := CFAtelierRelationDropSurface memento: memento description: destinationDescription.
-	surface moveOperationFor: [ :anObject :aSourceContext :aDestinationContext :anIndex |
-		receivedObject := anObject.
+	surface moveOperationFor: [ :someObjects :aSourceContext :aDestinationContext :anIndex |
+		receivedObject := someObjects first.
 		receivedSourceContext := aSourceContext.
 		receivedDestinationContext := aDestinationContext.
 		receivedIndex := anIndex.

@@ -247,3 +247,41 @@ CFAtelierRelationDropTargetExamples >> staleTargetRejectsPaletteReplacement [
 	self assert: model leftItems second == beta.
 	^ assessment
 ]
+
+{ #category : 'examples - relation move' }
+CFAtelierRelationDropTargetExamples >> multiObjectDragBuildsOneMoveInSourceRelationOrder [
+	<gtExample>
+	| model memento first second third targetObject sourceDescription destinationDescription target sourceElement dragItem operation assessment |
+	first := Object new.
+	second := Object new.
+	third := Object new.
+	targetObject := Object new.
+	model := CFAtelierMoveExampleModel new
+		leftItems: (OrderedCollection with: first with: second with: third);
+		rightItems: (OrderedCollection with: targetObject);
+		yourself.
+	memento := CFMaMemento model: model.
+	sourceDescription := self descriptionFor: #leftItems in: memento.
+	destinationDescription := self descriptionFor: #rightItems in: memento.
+	sourceElement := BlElement new.
+	sourceElement userData
+		at: #atelierRelationDragContext
+		put: (CFAtelierRelationDragContext memento: memento description: sourceDescription).
+	dragItem := BlDragItem new sourceElement: sourceElement; domainObject: third; yourself.
+	target := CFAtelierRelationDropTarget targetObject: targetObject memento: memento description: destinationDescription.
+
+	operation := target
+		moveOperationForObjects: { third. first }
+		sourceDragItem: dragItem
+		after: true.
+	assessment := operation apply.
+
+	self assert: assessment isApplicable.
+	self assert: (memento readUsing: sourceDescription) size equals: 1.
+	self assert: (memento readUsing: sourceDescription) first == second.
+	self assert: (memento readUsing: destinationDescription) size equals: 3.
+	self assert: (memento readUsing: destinationDescription) first == targetObject.
+	self assert: (memento readUsing: destinationDescription) second == first.
+	self assert: (memento readUsing: destinationDescription) third == third.
+	^ assessment
+]

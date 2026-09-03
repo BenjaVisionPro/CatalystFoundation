@@ -1,6 +1,6 @@
 "I add Atelier composition interaction to one ordered to-many relation item row produced by an existing Foundation presentation.
 
-Palette drags use CFAtelierInsert at the row boundaries and CFAtelierReplace over the row body. Existing relation-item drags from a different relation use CFAtelierMove. A drag from the same relation remains Foundation Detail's existing reorder interaction because CFAtelierMove rejects identical source and destination contexts. I add interaction to the rendered row; I do not render it."
+Palette drags use CFAtelierInsert at the row boundaries and CFAtelierReplace over the row body. Existing relation-item drags from a different relation use one CFAtelierMove for the complete dragged selection. A drag from the same relation remains Foundation Detail's existing reorder interaction because CFAtelierMove rejects identical source and destination contexts. I add interaction to the rendered row; I do not render it."
 Class {
 	#name : 'CFAtelierRelationDropTarget',
 	#superclass : 'Object',
@@ -119,12 +119,12 @@ CFAtelierRelationDropTarget >> moveOperationForDragItem: aDragItem after: aBoole
 	moveOperationBlock ifNotNil: [
 		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
 		^ moveOperationBlock
-			value: aDragItem domainObject
+			value: { aDragItem domainObject }
 			value: aSourceContext
 			value: aDestinationContext
 			value: anIndex ].
 	^ CFAtelierMove
-		object: aDragItem domainObject
+		objects: { aDragItem domainObject }
 		sourceMemento: aSourceContext memento
 		sourceDescription: aSourceContext description
 		destinationMemento: memento
@@ -213,19 +213,20 @@ CFAtelierRelationDropTarget >> eventIsReplacementZone: anEvent [
 { #category : 'private - interaction' }
 CFAtelierRelationDropTarget >> updateForEvent: anEvent [
 	| anAssessment isAfter |
-	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicators ].
 	activeDragItem ifNil: [ ^ self hideIndicators ].
 
-	((self isPaletteDragItem: activeDragItem) and: [ self eventIsReplacementZone: anEvent ]) ifTrue: [
-		anAssessment := self replacementAssessmentForCandidate: activeDragItem domainObject.
-		^ anAssessment isApplicable
-			ifTrue: [ self showReplacementIndicator ]
-			ifFalse: [ self hideIndicators ] ].
+	(self isPaletteDragItem: activeDragItem) ifTrue: [
+		anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicators ].
+		(self eventIsReplacementZone: anEvent) ifTrue: [
+			anAssessment := self replacementAssessmentForCandidate: activeDragItem domainObject.
+			^ anAssessment isApplicable
+				ifTrue: [ self showReplacementIndicator ]
+				ifFalse: [ self hideIndicators ] ] ].
 
 	isAfter := self eventIsAfterTarget: anEvent.
 	anAssessment := (self isPaletteDragItem: activeDragItem)
 		ifTrue: [ self assessmentForCandidate: activeDragItem domainObject after: isAfter ]
-		ifFalse: [ self moveAssessmentForDragItem: activeDragItem after: isAfter ].
+		ifFalse: [ self moveAssessmentForObjects: anEvent domainObjects sourceDragItem: activeDragItem after: isAfter ].
 	anAssessment isApplicable
 		ifTrue: [ self showIndicatorAfter: isAfter ]
 		ifFalse: [ self hideIndicators ]
@@ -234,17 +235,54 @@ CFAtelierRelationDropTarget >> updateForEvent: anEvent [
 CFAtelierRelationDropTarget >> dropEvent: anEvent [
 	| anOperation isAfter |
 	self hideIndicators.
-	anEvent domainObjects size = 1 ifFalse: [ ^ self ].
 	activeDragItem ifNil: [ ^ self ].
-	((self isPaletteDragItem: activeDragItem) and: [ self eventIsReplacementZone: anEvent ]) ifTrue: [
-		^ self applyReplacementCandidate: activeDragItem domainObject ].
-	isAfter := self eventIsAfterTarget: anEvent.
 	(self isPaletteDragItem: activeDragItem) ifTrue: [
+		anEvent domainObjects size = 1 ifFalse: [ ^ self ].
+		(self eventIsReplacementZone: anEvent) ifTrue: [
+			^ self applyReplacementCandidate: activeDragItem domainObject ].
+		isAfter := self eventIsAfterTarget: anEvent.
 		^ self applyCandidate: activeDragItem domainObject after: isAfter ].
-	anOperation := self moveOperationForDragItem: activeDragItem after: isAfter.
+	isAfter := self eventIsAfterTarget: anEvent.
+	anOperation := self moveOperationForObjects: anEvent domainObjects sourceDragItem: activeDragItem after: isAfter.
 	anOperation ifNil: [ ^ self moveAssessmentForDragItem: activeDragItem after: isAfter ].
 	^ anOperation apply
 ]
+
+{ #category : 'assessing' }
+CFAtelierRelationDropTarget >> moveAssessmentForObjects: someObjects sourceDragItem: aDragItem after: aBoolean [
+	| anOperation |
+	anOperation := self moveOperationForObjects: someObjects sourceDragItem: aDragItem after: aBoolean.
+	anOperation ifNil: [
+		^ CFAtelierMoveAssessment
+			sourceItems: nil
+			destinationItems: (memento readUsing: description)
+			rejectedBecause: 'The drag items have no Atelier relation source context.' ].
+	^ anOperation assess
+]
+
+{ #category : 'private - operations' }
+CFAtelierRelationDropTarget >> moveOperationForObjects: someObjects sourceDragItem: aDragItem after: aBoolean [
+	| aSourceContext aDestinationContext anIndex |
+	aSourceContext := self sourceContextForDragItem: aDragItem.
+	aSourceContext ifNil: [ ^ nil ].
+	anIndex := self insertionIndexAfter: aBoolean.
+	anIndex ifNil: [ ^ nil ].
+	moveOperationBlock ifNotNil: [
+		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
+		^ moveOperationBlock
+			value: someObjects
+			value: aSourceContext
+			value: aDestinationContext
+			value: anIndex ].
+	^ CFAtelierMove
+		objects: someObjects
+		sourceMemento: aSourceContext memento
+		sourceDescription: aSourceContext description
+		destinationMemento: memento
+		destinationDescription: description
+		destinationIndex: anIndex
+]
+
 { #category : 'private - appearance' }
 CFAtelierRelationDropTarget >> newDropIndicator [
 	^ BlElement new

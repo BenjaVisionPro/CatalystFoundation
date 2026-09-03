@@ -155,12 +155,12 @@ CFAtelierToOneDropTarget >> moveOperationForDragItem: aDragItem [
 	moveOperationBlock ifNotNil: [
 		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
 		^ moveOperationBlock
-			value: aDragItem domainObject
+			value: { aDragItem domainObject }
 			value: aSourceContext
 			value: aDestinationContext
 			value: nil ].
 	^ CFAtelierMove
-		object: aDragItem domainObject
+		objects: { aDragItem domainObject }
 		sourceMemento: aSourceContext memento
 		sourceDescription: aSourceContext description
 		destinationMemento: memento
@@ -171,6 +171,8 @@ CFAtelierToOneDropTarget >> moveOperationForDragItem: aDragItem [
 { #category : 'private - interaction' }
 CFAtelierToOneDropTarget >> updateForEvent: anEvent [
 	activeDragItem ifNil: [ ^ self hideIndicator ].
+	(self isPaletteDragItem: activeDragItem) ifFalse: [
+		anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ] ].
 	(self isPaletteDragItem: activeDragItem)
 		ifTrue: [
 			(self assessmentForCandidate: activeDragItem domainObject) isApplicable

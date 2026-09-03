@@ -1,17 +1,17 @@
-"I coordinate one semantic move of an existing object between two distinct Magritte relation editing contexts.
+"I coordinate one semantic move of one or more existing objects between two distinct Magritte relation editing contexts.
 
-A source or destination may be to-one or to-many. To-many destinations follow their ordered/unordered insertion semantics. A to-one destination must currently be empty: replacing an existing destination object would be a different compound intention, not a pure move.
+A single-object move may cross to-one and to-many cardinalities. A multi-object move requires a to-many source and a to-many destination. For a to-many source I derive the moved group in its authoritative staged relation order rather than trusting drag-item order. Ordered destinations require the explicit first destination index; unordered destinations append the group without inventing positional semantics. A to-one destination must be empty.
 
 Assessment reads current staged values, derives complete proposed values and validates both descriptions without mutation. apply reassesses immediately before staging the two ordinary memento writes.
 
-After the relation writes are staged, I ask the source Foundation memento to re-key any existing embedded child memento when both relations belong to that same parent editing transaction. This preserves staged edits on an embedded object across an intra-transaction move. The memento restores that relation-scoped child context on reset and finalizes it on commit. Moving editing-state ownership between distinct parent mementos is intentionally not claimed by this operation.
+After the relation writes are staged, I ask the source Foundation memento to re-key any existing embedded child mementos when both relations belong to that same parent editing transaction. Moving editing-state ownership between distinct parent mementos is intentionally not claimed by this operation.
 
 I intentionally do not own drag/drop or presentation geometry."
 Class {
 	#name : 'CFAtelierMove',
 	#superclass : 'CFAtelierOperation',
 	#instVars : [
-		'object',
+		'objects',
 		'sourceMemento',
 		'sourceDescription',
 		'destinationMemento',
@@ -25,8 +25,19 @@ Class {
 
 { #category : 'instance creation' }
 CFAtelierMove class >> object: anObject sourceMemento: aSourceMemento sourceDescription: aSourceDescription destinationMemento: aDestinationMemento destinationDescription: aDestinationDescription destinationIndex: anIndex [
+	^ self
+		objects: { anObject }
+		sourceMemento: aSourceMemento
+		sourceDescription: aSourceDescription
+		destinationMemento: aDestinationMemento
+		destinationDescription: aDestinationDescription
+		destinationIndex: anIndex
+]
+
+{ #category : 'instance creation' }
+CFAtelierMove class >> objects: someObjects sourceMemento: aSourceMemento sourceDescription: aSourceDescription destinationMemento: aDestinationMemento destinationDescription: aDestinationDescription destinationIndex: anIndex [
 	^ self new
-		object: anObject;
+		objects: someObjects;
 		sourceMemento: aSourceMemento;
 		sourceDescription: aSourceDescription;
 		destinationMemento: aDestinationMemento;
@@ -37,12 +48,23 @@ CFAtelierMove class >> object: anObject sourceMemento: aSourceMemento sourceDesc
 
 { #category : 'assessing' }
 CFAtelierMove >> assess [
-	| sourceValue destinationValue proposedSourceValue proposedDestinationValue |
+	| sourceValue destinationValue movedObjects proposedSourceValue proposedDestinationValue |
 	sourceValue := sourceMemento readUsing: sourceDescription.
 	destinationValue := destinationMemento readUsing: destinationDescription.
 
 	(sourceMemento == destinationMemento and: [ sourceDescription == destinationDescription ])
 		ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A move requires distinct relation contexts.' ].
+
+	objects ifNil: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'At least one moved object is required.' ].
+	objects isEmpty ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'At least one moved object is required.' ].
+	(self hasDuplicateObjectIdentities: objects) ifTrue: [
+		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A move cannot contain the same object identity more than once.' ].
+
+	objects size > 1 ifTrue: [
+		sourceDescription isMultiple ifFalse: [
+			^ self rejectedWithSource: sourceValue destination: destinationValue because: 'Moving multiple objects requires a to-many source relation.' ].
+		destinationDescription isMultiple ifFalse: [
+			^ self rejectedWithSource: sourceValue destination: destinationValue because: 'Moving multiple objects requires a to-many destination relation.' ] ].
 
 	sourceDescription isReadOnly
 		ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'The source relation is read-only.' ].
@@ -52,11 +74,12 @@ CFAtelierMove >> assess [
 	(sourceDescription autoAccept or: [ destinationDescription autoAccept ])
 		ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'This compound move requires staged relation descriptions; an affected relation is auto-accepting.' ].
 
-	(self sourceValue: sourceValue containsObjectExactlyOnce: object) ifFalse: [
-		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'The moved object must occur exactly once in the source relation.' ].
+	movedObjects := self movedObjectsInSourceOrderFrom: sourceValue.
+	movedObjects ifNil: [
+		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'Every moved object must occur exactly once in the source relation.' ].
 
-	(self destinationValue: destinationValue alreadyContainsObject: object) ifTrue: [
-		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'The moved object is already present in the destination relation.' ].
+	(movedObjects anySatisfy: [ :anObject | self destinationValue: destinationValue alreadyContainsObject: anObject ]) ifTrue: [
+		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A moved object is already present in the destination relation.' ].
 
 	(destinationDescription isMultiple not and: [ destinationValue notNil ]) ifTrue: [
 		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A to-one destination must be empty for a move.' ].
@@ -64,8 +87,8 @@ CFAtelierMove >> assess [
 	(self destinationIndexIsValidFor: destinationValue) ifFalse: [
 		^ self rejectedWithSource: sourceValue destination: destinationValue because: self destinationIndexRejectionMessage ].
 
-	proposedSourceValue := self sourceValueByRemovingObject: object from: sourceValue.
-	proposedDestinationValue := self destinationValueByAddingObject: object to: destinationValue.
+	proposedSourceValue := self sourceValueByRemovingObjects: movedObjects from: sourceValue.
+	proposedDestinationValue := self destinationValueByAddingObjects: movedObjects to: destinationValue.
 
 	[ sourceDescription validate: proposedSourceValue ]
 		on: MAValidationError
@@ -85,17 +108,39 @@ CFAtelierMove >> assess [
 
 { #category : 'applying' }
 CFAtelierMove >> applyAssessment: anAssessment [
+	| movedObjects |
+	movedObjects := self movedObjectsInSourceOrderFrom: anAssessment sourceItems.
 	sourceMemento
 		write: anAssessment proposedSourceItems
 		using: sourceDescription.
 	destinationMemento
 		write: anAssessment proposedDestinationItems
 		using: destinationDescription.
-	sourceMemento
-		transferChildMementoFor: object
-		inRelation: sourceDescription
-		to: destinationMemento
-		inRelation: destinationDescription
+	movedObjects do: [ :anObject |
+		sourceMemento
+			transferChildMementoFor: anObject
+			inRelation: sourceDescription
+			to: destinationMemento
+			inRelation: destinationDescription ]
+]
+
+{ #category : 'private - assessing' }
+CFAtelierMove >> movedObjectsInSourceOrderFrom: sourceValue [
+	objects size = 1 ifTrue: [
+		^ (self sourceValue: sourceValue containsObjectExactlyOnce: objects first)
+			ifTrue: [ objects copy ]
+			ifFalse: [ nil ] ].
+	sourceValue ifNil: [ ^ nil ].
+	(objects allSatisfy: [ :anObject | (sourceValue count: [ :each | each == anObject ]) = 1 ]) ifFalse: [ ^ nil ].
+	^ sourceValue select: [ :each | objects identityIncludes: each ]
+]
+
+{ #category : 'private - assessing' }
+CFAtelierMove >> hasDuplicateObjectIdentities: someObjects [
+	1 to: someObjects size do: [ :firstIndex |
+		firstIndex + 1 to: someObjects size do: [ :secondIndex |
+			((someObjects at: firstIndex) == (someObjects at: secondIndex)) ifTrue: [ ^ true ] ] ].
+	^ false
 ]
 
 { #category : 'private - assessing' }
@@ -129,22 +174,42 @@ CFAtelierMove >> destinationIndexRejectionMessage [
 ]
 
 { #category : 'private - assessing' }
-CFAtelierMove >> sourceValueByRemovingObject: anObject from: aValue [
+CFAtelierMove >> sourceValueByRemovingObjects: someObjects from: aValue [
 	sourceDescription isMultiple ifFalse: [ ^ nil ].
-	^ aValue species withAll: (aValue reject: [ :each | each == anObject ])
+	^ aValue species withAll: (aValue reject: [ :each | someObjects identityIncludes: each ])
 ]
 
 { #category : 'private - assessing' }
-CFAtelierMove >> destinationValueByAddingObject: anObject to: aValue [
+CFAtelierMove >> destinationValueByAddingObjects: someObjects to: aValue [
 	| theItems |
-	destinationDescription isMultiple ifFalse: [ ^ anObject ].
+	destinationDescription isMultiple ifFalse: [ ^ someObjects first ].
 	destinationDescription isOrdered
-		ifTrue: [ ^ self inserting: anObject at: destinationIndex into: aValue ].
+		ifTrue: [ ^ self insertingObjects: someObjects at: destinationIndex into: aValue ].
 	theItems := aValue species withAll: aValue.
-	theItems add: anObject.
+	theItems addAll: someObjects.
 	^ theItems
 ]
 
+{ #category : 'private' }
+CFAtelierMove >> insertingObjects: someObjects at: anIndex into: aCollection [
+	| theItems |
+	theItems := OrderedCollection new: aCollection size + someObjects size.
+	1 to: aCollection size + 1 do: [ :eachIndex |
+		eachIndex = anIndex ifTrue: [ theItems addAll: someObjects ].
+		eachIndex <= aCollection size ifTrue: [ theItems add: (aCollection at: eachIndex) ] ].
+	^ aCollection species withAll: theItems
+]
+
+{ #category : 'accessing' }
+CFAtelierMove >> object [
+	^ objects size = 1 ifTrue: [ objects first ] ifFalse: [ nil ]
+]
+{ #category : 'accessing' }
+CFAtelierMove >> object: anObject [ objects := { anObject } ]
+{ #category : 'accessing' }
+CFAtelierMove >> objects [ ^ objects ]
+{ #category : 'accessing' }
+CFAtelierMove >> objects: someObjects [ objects := someObjects asArray ]
 { #category : 'accessing' }
 CFAtelierMove >> destinationDescription [ ^ destinationDescription ]
 { #category : 'accessing' }
@@ -157,30 +222,6 @@ CFAtelierMove >> destinationIndex: anInteger [ destinationIndex := anInteger ]
 CFAtelierMove >> destinationMemento [ ^ destinationMemento ]
 { #category : 'accessing' }
 CFAtelierMove >> destinationMemento: aMemento [ destinationMemento := aMemento ]
-
-{ #category : 'private' }
-CFAtelierMove >> inserting: anObject at: anIndex into: aCollection [
-	| theItems |
-	theItems := OrderedCollection new: aCollection size + 1.
-	1 to: aCollection size + 1 do: [ :eachIndex |
-		eachIndex = anIndex ifTrue: [ theItems add: anObject ].
-		eachIndex <= aCollection size ifTrue: [ theItems add: (aCollection at: eachIndex) ] ].
-	^ aCollection species withAll: theItems
-]
-
-{ #category : 'accessing' }
-CFAtelierMove >> object [ ^ object ]
-{ #category : 'accessing' }
-CFAtelierMove >> object: anObject [ object := anObject ]
-
-{ #category : 'private' }
-CFAtelierMove >> rejectedWithSource: sourceValue destination: destinationValue because: aString [
-	^ CFAtelierMoveAssessment
-		sourceItems: sourceValue
-		destinationItems: destinationValue
-		rejectedBecause: aString
-]
-
 { #category : 'accessing' }
 CFAtelierMove >> sourceDescription [ ^ sourceDescription ]
 { #category : 'accessing' }
@@ -189,3 +230,11 @@ CFAtelierMove >> sourceDescription: aDescription [ sourceDescription := aDescrip
 CFAtelierMove >> sourceMemento [ ^ sourceMemento ]
 { #category : 'accessing' }
 CFAtelierMove >> sourceMemento: aMemento [ sourceMemento := aMemento ]
+
+{ #category : 'private' }
+CFAtelierMove >> rejectedWithSource: sourceValue destination: destinationValue because: aString [
+	^ CFAtelierMoveAssessment
+		sourceItems: sourceValue
+		destinationItems: destinationValue
+		rejectedBecause: aString
+]

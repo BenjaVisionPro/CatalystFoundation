@@ -1,6 +1,6 @@
 "I add Atelier composition interaction to the relation-level element of a to-many relation.
 
-For ordered relations I am the empty-list target: palette insertion and cross-relation move use position one, then populated relations defer to item-row targets. For unordered relations there is no positional item target, so I remain the relation-level target whether empty or populated; insertion and move append without inventing order. I do not render the relation."
+For ordered relations I am the empty-list target: palette insertion and cross-relation move use position one, then populated relations defer to item-row targets. For unordered relations there is no positional item target, so I remain the relation-level target whether empty or populated; insertion and cross-relation moves append without inventing order. A multi-item move is one operation and preserves the source relation order of the moved group. I do not render the relation."
 Class {
 	#name : 'CFAtelierRelationDropSurface',
 	#superclass : 'Object',
@@ -95,12 +95,12 @@ CFAtelierRelationDropSurface >> moveOperationForDragItem: aDragItem [
 	moveOperationBlock ifNotNil: [
 		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
 		^ moveOperationBlock
-			value: aDragItem domainObject
+			value: { aDragItem domainObject }
 			value: aSourceContext
 			value: aDestinationContext
 			value: anIndex ].
 	^ CFAtelierMove
-		object: aDragItem domainObject
+		objects: { aDragItem domainObject }
 		sourceMemento: aSourceContext memento
 		sourceDescription: aSourceContext description
 		destinationMemento: memento
@@ -141,11 +141,12 @@ CFAtelierRelationDropSurface >> currentItems [
 { #category : 'private - interaction' }
 CFAtelierRelationDropSurface >> updateForEvent: anEvent [
 	| anAssessment |
-	anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ].
 	activeDragItem ifNil: [ ^ self hideIndicator ].
-	anAssessment := (self isPaletteDragItem: activeDragItem)
-		ifTrue: [ self assessmentForCandidate: activeDragItem domainObject ]
-		ifFalse: [ self moveAssessmentForDragItem: activeDragItem ].
+	(self isPaletteDragItem: activeDragItem) ifTrue: [
+		anEvent domainObjects size = 1 ifFalse: [ ^ self hideIndicator ].
+		anAssessment := self assessmentForCandidate: activeDragItem domainObject ]
+	ifFalse: [
+		anAssessment := self moveAssessmentForObjects: anEvent domainObjects sourceDragItem: activeDragItem ].
 	anAssessment isApplicable
 		ifTrue: [ self showIndicator ]
 		ifFalse: [ self hideIndicator ]
@@ -155,13 +156,47 @@ CFAtelierRelationDropSurface >> updateForEvent: anEvent [
 CFAtelierRelationDropSurface >> dropEvent: anEvent [
 	| anOperation |
 	self hideIndicator.
-	anEvent domainObjects size = 1 ifFalse: [ ^ self ].
 	activeDragItem ifNil: [ ^ self ].
 	(self isPaletteDragItem: activeDragItem) ifTrue: [
+		anEvent domainObjects size = 1 ifFalse: [ ^ self ].
 		^ self applyCandidate: activeDragItem domainObject ].
-	anOperation := self moveOperationForDragItem: activeDragItem.
+	anOperation := self moveOperationForObjects: anEvent domainObjects sourceDragItem: activeDragItem.
 	anOperation ifNil: [ ^ self moveAssessmentForDragItem: activeDragItem ].
 	^ anOperation apply
+]
+
+{ #category : 'assessing' }
+CFAtelierRelationDropSurface >> moveAssessmentForObjects: someObjects sourceDragItem: aDragItem [
+	| anOperation |
+	anOperation := self moveOperationForObjects: someObjects sourceDragItem: aDragItem.
+	anOperation ifNil: [
+		^ CFAtelierMoveAssessment
+			sourceItems: nil
+			destinationItems: self currentItems
+			rejectedBecause: 'The drag items have no Atelier relation source context.' ].
+	^ anOperation assess
+]
+
+{ #category : 'private - operations' }
+CFAtelierRelationDropSurface >> moveOperationForObjects: someObjects sourceDragItem: aDragItem [
+	| aSourceContext aDestinationContext anIndex |
+	aSourceContext := self sourceContextForDragItem: aDragItem.
+	aSourceContext ifNil: [ ^ nil ].
+	anIndex := description isOrdered ifTrue: [ 1 ] ifFalse: [ nil ].
+	moveOperationBlock ifNotNil: [
+		aDestinationContext := CFAtelierRelationDragContext memento: memento description: description.
+		^ moveOperationBlock
+			value: someObjects
+			value: aSourceContext
+			value: aDestinationContext
+			value: anIndex ].
+	^ CFAtelierMove
+		objects: someObjects
+		sourceMemento: aSourceContext memento
+		sourceDescription: aSourceContext description
+		destinationMemento: memento
+		destinationDescription: description
+		destinationIndex: anIndex
 ]
 
 { #category : 'private - appearance' }
