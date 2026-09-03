@@ -63,7 +63,7 @@ CFAtelierInsert >> assess [
 	proposedItems add: object beforeIndex: effectiveIndex.
 
 	[ description validate: proposedItems ]
-		on: Error
+		on: MAValidationError
 		do: [ :anException |
 			^ self rejectedWithItems: items because: anException printString ].
 

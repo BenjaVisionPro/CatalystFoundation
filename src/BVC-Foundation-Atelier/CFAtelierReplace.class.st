@@ -59,7 +59,7 @@ CFAtelierReplace >> assess [
 			proposedValue := replacementObject ].
 
 	[ description validate: proposedValue ]
-		on: Error
+		on: MAValidationError
 		do: [ :anException |
 			^ self rejectedWithCurrentValue: currentValue because: anException printString ].
 

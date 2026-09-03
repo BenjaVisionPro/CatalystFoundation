@@ -76,7 +76,7 @@ CFAtelierReorder >> assess [
 		ifTrue: [ ^ self rejectedWithItems: items because: 'The objects are already at the requested position.' ].
 
 	[ description validate: proposedItems ]
-		on: Error
+		on: MAValidationError
 		do: [ :anException |
 			^ self rejectedWithItems: items because: anException printString ].
 

@@ -61,7 +61,7 @@ CFAtelierRemove >> assess [
 			proposed := nil ].
 
 	[ description validate: proposed ]
-		on: Error
+		on: MAValidationError
 		do: [ :anException |
 			^ self rejectedWithCurrentValue: current because: anException printString ].
 
