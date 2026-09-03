@@ -36,6 +36,16 @@ CFMaMemento >> allChildMementos [
 			aDictionary valuesDo: [ :aMemento | aStream nextPut: aMemento ] ] ]
 ]
 
+
+{ #category : 'children' }
+CFMaMemento >> hasChildMementoFor: anObject inRelation: aDescription [
+	| relationMementos |
+	relationMementos := childMementosByDescription
+		at: aDescription
+		ifAbsent: [ ^ false ].
+	^ relationMementos includesKey: anObject
+]
+
 { #category : 'children' }
 CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 	| theRelationMementos |

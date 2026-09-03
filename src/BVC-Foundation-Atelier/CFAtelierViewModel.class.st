@@ -103,7 +103,7 @@ CFAtelierViewModel >> replaceOperationFor: aBlock [
 
 { #category : 'configuration' }
 CFAtelierViewModel >> moveOperationFor: aBlock [
-	"Configure how an existing relation object moves to another relation. The block receives the exact object, source CFAtelierRelationDragContext, destination CFAtelierRelationDragContext and destination index (nil for unordered or to-one destinations). Leave unset for generic CFAtelierMove semantics."
+	"Configure how an existing relation object moves to another relation. The block receives the moved objects collection, source CFAtelierRelationDragContext, destination CFAtelierRelationDragContext and destination index (nil for unordered or to-one destinations). Leave unset for generic CFAtelierMove semantics."
 	moveOperationBlock := aBlock
 ]
 

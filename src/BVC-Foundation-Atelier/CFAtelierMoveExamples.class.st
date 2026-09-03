@@ -518,3 +518,70 @@ CFAtelierMoveExamples >> multiMoveRejectsDuplicateDraggedIdentity [
 	self assert: (memento readUsing: rightDescription) size equals: 1.
 	^ assessment
 ]
+
+
+{ #category : 'examples - embedded editing state' }
+CFAtelierMoveExamples >> crossTransactionMoveWithActiveChildEditingStateIsRejected [
+	<gtExample>
+	| sourceModel destinationModel sourceMemento destinationMemento item sourceDescription destinationDescription childMemento scoreDescription move assessment |
+	sourceModel := CFAtelierMoveExampleModel new.
+	destinationModel := CFAtelierMoveExampleModel new.
+	item := CFMaFormShowcaseItem exampleNamed: 'Alpha' score: 30 status: #active.
+	sourceModel leftItems: (OrderedCollection with: item).
+	destinationModel rightItems: OrderedCollection new.
+	sourceMemento := CFMaMemento model: sourceModel.
+	destinationMemento := CFMaMemento model: destinationModel.
+	sourceDescription := self descriptionFor: #leftItems in: sourceMemento.
+	destinationDescription := self descriptionFor: #rightItems in: destinationMemento.
+	childMemento := sourceMemento childMementoFor: item inRelation: sourceDescription.
+	scoreDescription := self descriptionFor: #score in: childMemento.
+	childMemento write: 45 using: scoreDescription.
+
+	move := CFAtelierMove
+		object: item
+		sourceMemento: sourceMemento
+		sourceDescription: sourceDescription
+		destinationMemento: destinationMemento
+		destinationDescription: destinationDescription
+		destinationIndex: 1.
+	assessment := move apply.
+
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'A move between distinct editing transactions cannot transfer active embedded editing state.'.
+	self assert: (sourceMemento readUsing: sourceDescription) first == item.
+	self assert: (destinationMemento readUsing: destinationDescription) isEmpty.
+	self assert: (childMemento readUsing: scoreDescription) equals: 45.
+	self assert: item score equals: 30.
+	^ assessment
+]
+
+{ #category : 'examples - transaction' }
+CFAtelierMoveExamples >> crossTransactionMoveWithoutChildEditingStateRemainsApplicable [
+	<gtExample>
+	| sourceModel destinationModel sourceMemento destinationMemento item sourceDescription destinationDescription move assessment |
+	sourceModel := CFAtelierMoveExampleModel new.
+	destinationModel := CFAtelierMoveExampleModel new.
+	item := Object new.
+	sourceModel leftItems: (OrderedCollection with: item).
+	destinationModel rightItems: OrderedCollection new.
+	sourceMemento := CFMaMemento model: sourceModel.
+	destinationMemento := CFMaMemento model: destinationModel.
+	sourceDescription := self descriptionFor: #leftItems in: sourceMemento.
+	destinationDescription := self descriptionFor: #rightItems in: destinationMemento.
+
+	move := CFAtelierMove
+		object: item
+		sourceMemento: sourceMemento
+		sourceDescription: sourceDescription
+		destinationMemento: destinationMemento
+		destinationDescription: destinationDescription
+		destinationIndex: 1.
+	assessment := move apply.
+
+	self assert: assessment isApplicable.
+	self assert: (sourceMemento readUsing: sourceDescription) isEmpty.
+	self assert: (destinationMemento readUsing: destinationDescription) first == item.
+	self assert: sourceModel leftItems first == item.
+	self assert: destinationModel rightItems isEmpty.
+	^ assessment
+]
