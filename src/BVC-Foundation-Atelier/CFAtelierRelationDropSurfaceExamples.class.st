@@ -202,7 +202,7 @@ CFAtelierRelationDropSurfaceExamples >> configuredMoveOperationReceivesExactSour
 		receivedDestinationContext := aDestinationContext.
 		receivedIndex := anIndex.
 		CFAtelierMove
-			object: anObject
+			objects: someObjects
 			sourceMemento: aSourceContext memento
 			sourceDescription: aSourceContext description
 			destinationMemento: aDestinationContext memento
