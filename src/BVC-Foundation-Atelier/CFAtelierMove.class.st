@@ -4,7 +4,7 @@ A single-object move may cross to-one and to-many cardinalities. A multi-object 
 
 Assessment reads current staged values, derives complete proposed values and validates both descriptions without mutation. apply reassesses immediately before staging the two ordinary memento writes.
 
-After the relation writes are staged, I ask the source Foundation memento to re-key any existing embedded child mementos when both relations belong to that same parent editing transaction. If source and destination are distinct parent mementos, assessment rejects the move whenever any moved object already participates in embedded child editing state. A cross-transaction move without child editing state remains legal; Atelier does not silently orphan an active child transaction.
+A move is one compound editing intention, so both relation writes must belong to the same Foundation memento transaction. Assessment rejects source and destination relations owned by distinct parent mementos rather than staging a change that could later be committed only on one side. After the relation writes are staged, I ask that shared Foundation memento to re-key any existing embedded child mementos from the source relation context to the destination relation context.
 
 I intentionally do not own drag/drop or presentation geometry."
 Class {
@@ -54,6 +54,8 @@ CFAtelierMove >> assess [
 
 	(sourceMemento == destinationMemento and: [ sourceDescription == destinationDescription ])
 		ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A move requires distinct relation contexts.' ].
+	sourceMemento ~~ destinationMemento ifTrue: [
+		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A move requires source and destination relations in the same editing transaction.' ].
 
 	objects ifNil: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'At least one moved object is required.' ].
 	objects isEmpty ifTrue: [ ^ self rejectedWithSource: sourceValue destination: destinationValue because: 'At least one moved object is required.' ].
@@ -77,11 +79,6 @@ CFAtelierMove >> assess [
 	movedObjects := self movedObjectsInSourceOrderFrom: sourceValue.
 	movedObjects ifNil: [
 		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'Every moved object must occur exactly once in the source relation.' ].
-
-	(sourceMemento ~~ destinationMemento and: [
-		movedObjects anySatisfy: [ :anObject |
-			sourceMemento hasChildMementoFor: anObject inRelation: sourceDescription ] ]) ifTrue: [
-		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A move between distinct editing transactions cannot transfer active embedded editing state.' ].
 
 	(movedObjects anySatisfy: [ :anObject | self destinationValue: destinationValue alreadyContainsObject: anObject ]) ifTrue: [
 		^ self rejectedWithSource: sourceValue destination: destinationValue because: 'A moved object is already present in the destination relation.' ].

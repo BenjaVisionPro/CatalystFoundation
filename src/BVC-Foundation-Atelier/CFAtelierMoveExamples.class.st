@@ -547,7 +547,7 @@ CFAtelierMoveExamples >> crossTransactionMoveWithActiveChildEditingStateIsReject
 	assessment := move apply.
 
 	self assert: assessment isApplicable not.
-	self assert: assessment rejectionMessage equals: 'A move between distinct editing transactions cannot transfer active embedded editing state.'.
+	self assert: assessment rejectionMessage equals: 'A move requires source and destination relations in the same editing transaction.'.
 	self assert: (sourceMemento readUsing: sourceDescription) first == item.
 	self assert: (destinationMemento readUsing: destinationDescription) isEmpty.
 	self assert: (childMemento readUsing: scoreDescription) equals: 45.
@@ -556,7 +556,7 @@ CFAtelierMoveExamples >> crossTransactionMoveWithActiveChildEditingStateIsReject
 ]
 
 { #category : 'examples - transaction' }
-CFAtelierMoveExamples >> crossTransactionMoveWithoutChildEditingStateRemainsApplicable [
+CFAtelierMoveExamples >> crossTransactionMoveWithoutChildEditingStateIsRejected [
 	<gtExample>
 	| sourceModel destinationModel sourceMemento destinationMemento item sourceDescription destinationDescription move assessment |
 	sourceModel := CFAtelierMoveExampleModel new.
@@ -578,9 +578,10 @@ CFAtelierMoveExamples >> crossTransactionMoveWithoutChildEditingStateRemainsAppl
 		destinationIndex: 1.
 	assessment := move apply.
 
-	self assert: assessment isApplicable.
-	self assert: (sourceMemento readUsing: sourceDescription) isEmpty.
-	self assert: (destinationMemento readUsing: destinationDescription) first == item.
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'A move requires source and destination relations in the same editing transaction.'.
+	self assert: (sourceMemento readUsing: sourceDescription) first == item.
+	self assert: (destinationMemento readUsing: destinationDescription) isEmpty.
 	self assert: sourceModel leftItems first == item.
 	self assert: destinationModel rightItems isEmpty.
 	^ assessment
