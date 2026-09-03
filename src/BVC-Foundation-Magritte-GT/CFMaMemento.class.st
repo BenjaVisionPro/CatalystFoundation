@@ -211,6 +211,22 @@ CFMaMemento >> computeCompositeOverallStatus [
 		yourself
 ]
 
+
+{ #category : 'testing' }
+CFMaMemento >> hasChangesToCommit [
+	| hasParentChanges |
+	hasParentChanges := self cache associations anySatisfy: [ :anAssociation |
+		| aDescription aValue |
+		aDescription := anAssociation key.
+		aValue := anAssociation value valueOrNil.
+		aDescription isVisible
+			and: [ aDescription isReadOnly not
+				and: [ aValue notNil and: [ aValue isChanged ] ] ] ].
+
+	^ hasParentChanges
+		or: [ self allChildMementos anySatisfy: [ :aMemento | aMemento hasChangesToCommit ] ]
+]
+
 { #category : 'initialization' }
 CFMaMemento >> initialize [
 	super initialize.
