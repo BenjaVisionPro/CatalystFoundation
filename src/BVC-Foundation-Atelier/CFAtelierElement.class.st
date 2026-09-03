@@ -1,9 +1,9 @@
 "I am the visible Atelier host when orchestration UI is configured around a normal Foundation Magritte form.
 
-The form remains the element produced by CFMaViewModel. I only arrange Atelier-owned UI beside it; I do not render Magritte descriptions myself."
+The Foundation-selected form remains the primary surface and fills me. Atelier-owned transient tools such as the palette float over that surface instead of consuming layout space. I do not render Magritte descriptions myself."
 Class {
 	#name : 'CFAtelierElement',
-	#superclass : 'BrHorizontalPane',
+	#superclass : 'BrFrame',
 	#instVars : [
 		'paletteElement',
 		'formElement',
@@ -20,8 +20,8 @@ CFAtelierElement >> initialize [
 	super initialize.
 	self
 		hMatchParent;
-		vFitContent;
-		cellSpacing: 12
+		vMatchParent;
+		clipChildren: true
 ]
 
 { #category : 'accessing' }
@@ -35,8 +35,8 @@ CFAtelierElement >> formElement: anElement [
 	formElement := anElement.
 	formElement
 		hMatchParent;
-		vFitContent.
-	self addChild: formElement
+		vMatchParent.
+	self addChild: formElement at: 1
 ]
 
 { #category : 'editing - motion' }
@@ -51,14 +51,14 @@ CFAtelierElement >> replaceFormElementWithMotion: anElement [
 	participants isEmpty ifTrue: [ ^ self formElement: anElement ].
 	anElement
 		hMatchParent;
-		vFitContent.
+		vMatchParent.
 	transaction := CFMotionLayoutTransaction on: self.
 	transaction
 		affecting: participants;
 		mutate: [
 			self removeChild: previousForm.
 			formElement := anElement.
-			self addChild: formElement ];
+			self addChild: formElement at: 1 ];
 		fadeIn: anElement;
 		play.
 	^ anElement
@@ -74,16 +74,15 @@ CFAtelierElement >> palette: anAtelierPalette [
 	paletteElement ifNotNil: [ self removeChild: paletteElement ].
 	paletteElement := CFAtelierPaletteElement new
 		palette: anAtelierPalette;
+		constraintsDo: [ :c | c ignoreByLayout ];
+		relocate: 16 @ 16;
 		yourself.
-	self addChild: paletteElement at: 1.
-	removeDropTarget ifNil: [
-		removeDropTarget := CFAtelierRemoveDropTarget new.
-		removeOperationBlock ifNotNil: [ removeDropTarget operationFor: removeOperationBlock ].
-		self addChild: removeDropTarget at: 2 ]
+	self addChild: paletteElement
 ]
 
 { #category : 'configuration' }
 CFAtelierElement >> removeOperationFor: aBlock [
+	"Removal remains an Atelier semantic operation, but it is no longer represented as permanent workspace geometry. Clients can expose removal through selection/keyboard or another transient affordance."
 	removeOperationBlock := aBlock.
 	removeDropTarget ifNotNil: [ removeDropTarget operationFor: aBlock ]
 ]

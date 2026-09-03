@@ -1,15 +1,16 @@
-"I present one configured Atelier palette as a draggable source of materialized candidate objects and, when its palette is explicitly configured for capture, as a destination for existing composition objects.
+"I present one configured Atelier palette as a vertical draggable source of materialized candidate objects and, when explicitly configured for capture, as a destination for existing composition objects.
 
-Source drags materialize a palette item exactly once and put that candidate object on the ordinary Bloc drag item. Target interaction can then assess that same identity through an Atelier operation.
-
-Capture is deliberately palette policy. I only recognize an existing Atelier relation drag, verify that its source still contains the dragged identity, and ask the palette to capture that object. The palette's configured capture block decides whether that means identity, copy, serialized definition, factory data or another representation."
+I am designed to float over an Atelier work surface. My header moves the palette itself; dragging an item still materializes that palette item exactly once and starts the ordinary Atelier object drag. My visual surface uses Foundation's existing glass aptitude."
 Class {
 	#name : 'CFAtelierPaletteElement',
 	#superclass : 'BrVerticalPane',
 	#instVars : [
 		'palette',
 		'itemsElement',
-		'activeCaptureDragItem'
+		'activeCaptureDragItem',
+		'draggingPalette',
+		'dragStartPointer',
+		'dragStartPosition'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -18,17 +19,26 @@ Class {
 
 { #category : 'initialization' }
 CFAtelierPaletteElement >> initialize [
+	| header |
 	super initialize.
+	draggingPalette := false.
 	self
 		hExact: 220;
 		vFitContent;
 		padding: (BlInsets all: 10);
-		cellSpacing: 8.
-	self addChild: (BrLabel new
-		fitContent;
+		cellSpacing: 8;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
+		border: (BlBorder paint: (Color white alpha: 0.16) width: 1);
+		addAptitude: CFGlassSurfaceAptitude new.
+	header := BrLabel new
+		hMatchParent;
+		vFitContent;
+		padding: (BlInsets top: 2 left: 2 bottom: 4 right: 2);
 		aptitude: BrGlamorousLabelAptitude new;
 		text: 'Palette';
-		yourself).
+		yourself.
+	self installMoveInteractionOn: header.
+	self addChild: header.
 	itemsElement := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
@@ -36,6 +46,34 @@ CFAtelierPaletteElement >> initialize [
 		yourself.
 	self addChild: itemsElement.
 	self installCaptureDrop
+]
+
+{ #category : 'private - interaction' }
+CFAtelierPaletteElement >> installMoveInteractionOn: aHeaderElement [
+	aHeaderElement when: BlMouseDownEvent do: [ :anEvent |
+		anEvent primaryButtonPressed ifTrue: [
+			draggingPalette := true.
+			dragStartPointer := anEvent position.
+			dragStartPosition := self position.
+			anEvent consumed: true ] ].
+	self when: BlMouseMoveEvent do: [ :anEvent |
+		draggingPalette ifTrue: [
+			self relocateWithinParent: dragStartPosition + (anEvent position - dragStartPointer).
+			anEvent consumed: true ] ].
+	self when: BlMouseUpEvent do: [ :anEvent |
+		draggingPalette ifTrue: [
+			draggingPalette := false.
+			anEvent consumed: true ] ]
+]
+
+{ #category : 'private - interaction' }
+CFAtelierPaletteElement >> relocateWithinParent: aPoint [
+	| parentExtent maximumX maximumY |
+	self parent ifNil: [ ^ self relocate: aPoint ].
+	parentExtent := self parent extent.
+	maximumX := (parentExtent x - self extent x) max: 0.
+	maximumY := (parentExtent y - self extent y) max: 0.
+	self relocate: ((aPoint x max: 0) min: maximumX) @ ((aPoint y max: 0) min: maximumY)
 ]
 
 { #category : 'accessing' }
