@@ -19,7 +19,7 @@ Class {
 CFAtelierElement >> initialize [
 	super initialize.
 	self
-		theme: CgtDetailLightTheme new;
+		theme: CgtDetailDarkTheme new;
 		hMatchParent;
 		vMatchParent;
 		clipChildren: true
