@@ -22,11 +22,31 @@ CFComposerRelationElement class >> memento: aMemento description: aDescription f
 		yourself
 ]
 
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> addDroppedObjects: aCollection [
+	| aNewValue |
+	aCollection ifEmpty: [ ^ self ].
+	aNewValue := self valueByAddingDroppedObjects: aCollection.
+	GtMagritteBuilderUtility
+		write: aNewValue
+		using: description
+		memento: memento
+		element: self
+]
+
 { #category : 'private - building' }
 CFComposerRelationElement >> build [
 	self synchronizeItems: self relationItems.
 	self installRelationObserver.
 	self installDropHandler
+]
+
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> canAcceptDroppedObject: anObject [
+	description isReadOnly ifTrue: [ ^ false ].
+	^ [ description validate: (self valueByAddingDroppedObjects: { anObject }) . true ]
+		on: MAValidationError
+		do: [ :anError | false ]
 ]
 
 { #category : 'accessing' }
@@ -63,24 +83,16 @@ CFComposerRelationElement >> initialize [
 		border: BlBorder empty
 ]
 
-{ #category : 'accessing' }
-CFComposerRelationElement >> memento [
-	^ memento
-]
-
-{ #category : 'accessing' }
-CFComposerRelationElement >> memento: aMemento [
-	memento := aMemento
-]
-
-{ #category : 'private - building' }
-CFComposerRelationElement >> relationItems [
-	| aValue |
-	aValue := memento readUsing: description.
-	aValue ifNil: [ ^ #() ].
-	(description isKindOf: MAToManyRelationDescription) ifTrue: [
-		^ aValue asArray ].
-	^ { aValue }
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> installDropHandler [
+	self addEventHandler: (BlDropHandler new
+		acceptItemsSuchThat: [ :aDragItem :aDropArea |
+			aDragItem sourceElement parent
+				ifNil: [ true ]
+				ifNotNil: [ :anItemElement | anItemElement parent ~~ aDropArea ] ];
+		acceptDomainObjectsSuchThat: [ :anObject | self canAcceptDroppedObject: anObject ];
+		whenDroppedDo: [ :anEvent |
+			self addDroppedObjects: (anEvent items collect: #domainObject) ])
 ]
 
 { #category : 'private - building' }
@@ -91,6 +103,16 @@ CFComposerRelationElement >> installRelationObserver [
 			whenUpdate: [ :anElement :aSink |
 				anElement synchronizeItemsFromValue: aSink value currentValue ].
 		(memento readObservableValueUsing: description) observe: anElementSink ]
+]
+
+{ #category : 'accessing' }
+CFComposerRelationElement >> memento [
+	^ memento
+]
+
+{ #category : 'accessing' }
+CFComposerRelationElement >> memento: aMemento [
+	memento := aMemento
 ]
 
 { #category : 'private - building' }
@@ -134,47 +156,49 @@ CFComposerRelationElement >> newItemElementFor: aMemento [
 	^ anElement
 ]
 
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> installDropHandler [
-	self addEventHandler: (BlDropHandler new
-		acceptItemsSuchThat: [ :aDragItem :aDropArea |
-			aDragItem sourceElement parent
-				ifNil: [ true ]
-				ifNotNil: [ :anItemElement | anItemElement parent ~~ aDropArea ] ];
-		acceptDomainObjectsSuchThat: [ :anObject | self canAcceptDroppedObject: anObject ];
-		whenDroppedDo: [ :anEvent |
-			self addDroppedObjects: (anEvent items collect: #domainObject) ])
+{ #category : 'private - building' }
+CFComposerRelationElement >> relationItems [
+	| aValue |
+	aValue := memento readUsing: description.
+	aValue ifNil: [ ^ #() ].
+	(description isKindOf: MAToManyRelationDescription) ifTrue: [
+		^ aValue asArray ].
+	^ { aValue }
 ]
 
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> canAcceptDroppedObject: anObject [
-	description isReadOnly ifTrue: [ ^ false ].
-	^ [ description validate: (self valueByAddingDroppedObjects: { anObject }) . true ]
-		on: MAValidationError
-		do: [ :anError | false ]
-]
-
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> addDroppedObjects: aCollection [
-	| aNewValue |
-	aCollection ifEmpty: [ ^ self ].
-	aNewValue := self valueByAddingDroppedObjects: aCollection.
-	GtMagritteBuilderUtility
-		write: aNewValue
-		using: description
-		memento: memento
-		element: self
-]
-
-{ #category : 'private - drag and drop' }
-CFComposerRelationElement >> valueByAddingDroppedObjects: aCollection [
-	| currentValue |
-	currentValue := memento readUsing: description.
-	(description isKindOf: MAToManyRelationDescription) ifFalse: [
-		^ aCollection first ].
-	currentValue ifNil: [ currentValue := #() ].
-	^ aCollection inject: currentValue into: [ :aValue :each |
-		aValue copyWith: each ]
+{ #category : 'private - updating' }
+CFComposerRelationElement >> replaceItemsWith: newElements created: createdElements [
+	| existingElements insertedElement insertionIndex |
+	existingElements := itemElements asArray.
+	newElements isEmpty ifTrue: [
+		self removeChildren.
+		^ self ].
+	existingElements isEmpty ifTrue: [
+		createdElements size = 1
+			ifTrue: [
+				insertedElement := createdElements first.
+				insertedElement opacity: 0.0.
+				self addChild: insertedElement.
+				insertedElement isAttachedToSceneGraph ifTrue: [
+					(insertedElement motion
+						duration: 180 milliSeconds;
+						riseAndFadeIn) ] ]
+			ifFalse: [ self addChildren: newElements ].
+		^ self ].
+	(createdElements size = 1 and: [ existingElements notEmpty and: [
+		self isAttachedToSceneGraph and: [
+			insertedElement := createdElements first.
+			(existingElements = (newElements copyWithout: insertedElement)) ]]])
+		ifTrue: [
+			insertionIndex := newElements indexOf: insertedElement.
+			(CFMotionLayoutTransaction on: self)
+				affecting: existingElements;
+				insert: insertedElement into: self at: insertionIndex;
+				fadeIn: insertedElement;
+				play ]
+		ifFalse: [
+			self removeChildren.
+			self addChildren: newElements ]
 ]
 
 { #category : 'private - updating' }
@@ -218,37 +242,13 @@ CFComposerRelationElement >> synchronizeItemsFromValue: aValue [
 		ifFalse: [ self synchronizeItems: { aValue } ]
 ]
 
-{ #category : 'private - updating' }
-CFComposerRelationElement >> replaceItemsWith: newElements created: createdElements [
-	| existingElements insertedElement insertionIndex |
-	existingElements := itemElements asArray.
-	newElements isEmpty ifTrue: [
-		self removeChildren.
-		^ self ].
-	existingElements isEmpty ifTrue: [
-		createdElements size = 1
-			ifTrue: [
-				insertedElement := createdElements first.
-				insertedElement opacity: 0.0.
-				self addChild: insertedElement.
-				insertedElement isAttachedToSceneGraph ifTrue: [
-					(insertedElement motion
-						duration: 180 milliSeconds;
-						riseAndFadeIn) ] ]
-			ifFalse: [ self addChildren: newElements ].
-		^ self ].
-	(createdElements size = 1 and: [ existingElements notEmpty and: [
-		self isAttachedToSceneGraph and: [
-			insertedElement := createdElements first.
-			(existingElements = (newElements copyWithout: insertedElement)) ]]])
-		ifTrue: [
-			insertionIndex := newElements indexOf: insertedElement.
-			(CFMotionLayoutTransaction on: self)
-				affecting: existingElements;
-				insert: insertedElement into: self at: insertionIndex;
-				fadeIn: insertedElement;
-				play ]
-		ifFalse: [
-			self removeChildren.
-			self addChildren: newElements ]
+{ #category : 'private - drag and drop' }
+CFComposerRelationElement >> valueByAddingDroppedObjects: aCollection [
+	| currentValue |
+	currentValue := memento readUsing: description.
+	(description isKindOf: MAToManyRelationDescription) ifFalse: [
+		^ aCollection first ].
+	currentValue ifNil: [ currentValue := #() ].
+	^ aCollection inject: currentValue into: [ :aValue :each |
+		aValue copyWith: each ]
 ]
