@@ -2,7 +2,7 @@
 
 I am deliberately about insertion, not materialisation. A palette/provider may materialise a candidate before constructing me, but I receive the candidate object itself. Assessment reads the current staged relation value, derives the complete proposed replacement collection, validates it without mutation and records the exact insertion index. apply uses CFAtelierOperation's mandatory fresh reassessment immediately before the single Magritte write.
 
-An explicit index is required for ordered relations. Unordered relations append without inventing positional semantics."
+An explicit index is required for ordered relations. Unordered relations append without inventing positional semantics. I reject inserting an identity already present in the target relation because Atelier relation operations and embedded child editing contexts address members by object identity."
 Class {
 	#name : 'CFAtelierInsert',
 	#superclass : 'CFAtelierOperation',
@@ -46,6 +46,8 @@ CFAtelierInsert >> assess [
 		ifTrue: [ ^ self rejectedWithItems: items because: 'The target relation is read-only.' ].
 	description isMultiple
 		ifFalse: [ ^ self rejectedWithItems: items because: 'Insertion requires a to-many relation.' ].
+	(items anySatisfy: [ :each | each == object ])
+		ifTrue: [ ^ self rejectedWithItems: items because: 'The inserted object is already present in the target relation.' ].
 
 	description isOrdered
 		ifTrue: [

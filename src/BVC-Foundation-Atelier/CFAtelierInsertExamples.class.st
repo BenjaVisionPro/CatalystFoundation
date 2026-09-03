@@ -150,3 +150,29 @@ CFAtelierInsertExamples >> descriptionFor: aSelector in: aMemento [
 	^ aMemento magritteDescription
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
+
+
+{ #category : 'examples - assessment' }
+CFAtelierInsertExamples >> existingIdentityInTargetIsRejected [
+	<gtExample>
+	| model memento existing description operation assessment |
+	model := CFAtelierMoveExampleModel new.
+	existing := Object new.
+	model leftItems: (OrderedCollection with: existing).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #leftItems in: memento.
+	operation := CFAtelierInsert
+		object: existing
+		memento: memento
+		description: description
+		at: 2.
+
+	assessment := operation apply.
+
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'The inserted object is already present in the target relation.'.
+	self assert: (memento readUsing: description) size equals: 1.
+	self assert: (memento readUsing: description) first == existing.
+	self assert: model leftItems size equals: 1.
+	^ assessment
+]

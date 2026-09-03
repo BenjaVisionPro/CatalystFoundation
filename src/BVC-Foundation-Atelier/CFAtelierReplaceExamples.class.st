@@ -176,3 +176,31 @@ CFAtelierReplaceExamples >> commitDoesNotCommitReplacedEmbeddedEdits [
 	self assert: original name equals: 'Atelier example'.
 	^ parentMemento
 ]
+
+
+{ #category : 'examples - assessment' }
+CFAtelierReplaceExamples >> replacementIdentityAlreadyInTargetIsRejected [
+	<gtExample>
+	| model memento source replacement description operation assessment |
+	model := CFAtelierReplaceExampleModel new.
+	source := Object new.
+	replacement := Object new.
+	model items: (OrderedCollection with: source with: replacement).
+	memento := CFMaMemento model: model.
+	description := self descriptionFor: #items in: memento.
+	operation := CFAtelierReplace
+		object: source
+		with: replacement
+		memento: memento
+		description: description.
+
+	assessment := operation apply.
+
+	self assert: assessment isApplicable not.
+	self assert: assessment rejectionMessage equals: 'The replacement object is already present in the target relation.'.
+	self assert: (memento readUsing: description) size equals: 2.
+	self assert: (memento readUsing: description) first == source.
+	self assert: (memento readUsing: description) second == replacement.
+	self assert: model items size equals: 2.
+	^ assessment
+]

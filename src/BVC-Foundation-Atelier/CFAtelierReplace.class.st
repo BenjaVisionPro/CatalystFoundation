@@ -2,7 +2,7 @@
 
 For a to-one relation I replace the staged related object directly. For a to-many relation I locate the existing object by identity, derive the complete proposed relation value and preserve its position when the relation is ordered. Unordered relations preserve only membership semantics. Assessment validates the proposed value without mutation; apply uses CFAtelierOperation's mandatory fresh reassessment immediately before the single Magritte write.
 
-I am deliberately about replacement, not materialisation. The replacement object may come from any Atelier provider or client-specific workflow before I am constructed."
+I am deliberately about replacement, not materialisation. The replacement object may come from any Atelier provider or client-specific workflow before I am constructed. In a to-many relation I reject a replacement identity already present in that same target relation, preserving the identity-unique membership assumed by Atelier relation operations and embedded child editing contexts."
 Class {
 	#name : 'CFAtelierReplace',
 	#superclass : 'CFAtelierOperation',
@@ -42,6 +42,8 @@ CFAtelierReplace >> assess [
 			currentValue ifNil: [ ^ self rejectedWithCurrentValue: currentValue because: 'The target relation has no collection.' ].
 			(currentValue count: [ :each | each == object ]) = 1
 				ifFalse: [ ^ self rejectedWithCurrentValue: currentValue because: 'The replaced object must occur exactly once in the relation.' ].
+			(currentValue anySatisfy: [ :each | each == replacementObject ])
+				ifTrue: [ ^ self rejectedWithCurrentValue: currentValue because: 'The replacement object is already present in the target relation.' ].
 
 			description isOrdered
 				ifTrue: [
