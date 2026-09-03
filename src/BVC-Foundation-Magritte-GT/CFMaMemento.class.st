@@ -198,12 +198,9 @@ CFMaMemento >> commit [
 { #category : 'private - status' }
 CFMaMemento >> computeCompositeOverallStatus [
 	| aParentStatus theChildStatuses |
-	aParentStatus := super overallStatus valueOrNil.
-	aParentStatus ifNil: [ ^ GtMagritteOverallStatus new ].
-
+	aParentStatus := super computeOverallStatus.
 	theChildStatuses := self allChildMementos
-		collect: [ :aMemento | aMemento overallStatus valueOrNil ].
-	theChildStatuses := theChildStatuses reject: #isNil.
+		collect: [ :aMemento | aMemento computeCompositeOverallStatus ].
 
 	^ GtMagritteOverallStatus new
 		isValid: (aParentStatus isValid
