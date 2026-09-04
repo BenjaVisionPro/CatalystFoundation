@@ -9,26 +9,6 @@ Class {
 	#package : 'BVC-Foundation-Composer'
 }
 
-{ #category : 'accessing' }
-CFComposerElementBuilder >> formController [
-	^ formController
-]
-
-{ #category : 'accessing' }
-CFComposerElementBuilder >> formController: aComposerFormController [
-	formController := aComposerFormController
-]
-
-{ #category : 'private - building' }
-CFComposerElementBuilder >> buildActions [
-	super buildActions.
-	showCommitAndResetControls ifTrue: [
-		self toolbarContainerDo: [ :aContainer |
-			aContainer
-				addChild: (CFComposerFormToolbarElement for: formController)
-				as: #composerToolbar ] ]
-]
-
 { #category : 'private - building' }
 CFComposerElementBuilder >> addComposerRelationUsing: aDescription [
 	| anElement |
@@ -74,6 +54,26 @@ CFComposerElementBuilder >> addShortcutsTo: anElement using: aDescription [
 	self addShortcutsTo: anElement.
 	aDescription blocShortcuts ifNotNil: [ :aBlockReturningCollection |
 		aBlockReturningCollection value do: [ :aShortcut | anElement addShortcut: aShortcut ] ]
+]
+
+{ #category : 'private - building' }
+CFComposerElementBuilder >> buildActions [
+	super buildActions.
+	showCommitAndResetControls ifTrue: [
+		self toolbarContainerDo: [ :aContainer |
+			aContainer
+				addChild: (CFComposerFormToolbarElement for: formController)
+				as: #composerToolbar ] ]
+]
+
+{ #category : 'accessing' }
+CFComposerElementBuilder >> formController [
+	^ formController
+]
+
+{ #category : 'accessing' }
+CFComposerElementBuilder >> formController: aComposerFormController [
+	formController := aComposerFormController
 ]
 
 { #category : 'accessing' }

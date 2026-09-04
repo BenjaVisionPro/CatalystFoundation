@@ -9,6 +9,12 @@ Class {
 	#tag : 'Examples'
 }
 
+{ #category : 'initialization' }
+CFComposerExampleModel >> initialize [
+	super initialize.
+	name := 'Composer example'
+]
+
 { #category : 'accessing' }
 CFComposerExampleModel >> name [
 	^ name
@@ -17,12 +23,6 @@ CFComposerExampleModel >> name [
 { #category : 'accessing' }
 CFComposerExampleModel >> name: aString [
 	name := aString
-]
-
-{ #category : 'initialization' }
-CFComposerExampleModel >> initialize [
-	super initialize.
-	name := 'Composer example'
 ]
 
 { #category : 'magritte' }

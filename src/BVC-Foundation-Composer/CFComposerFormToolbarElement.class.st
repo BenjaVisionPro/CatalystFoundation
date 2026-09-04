@@ -60,17 +60,6 @@ CFComposerFormToolbarElement >> installStatusObservers [
 ]
 
 { #category : 'private - building' }
-CFComposerFormToolbarElement >> observeStatusOf: aMemento [
-	(observedMementos includes: aMemento) ifTrue: [ ^ self ].
-	observedMementos add: aMemento.
-	self withAsyncSinkDo: [ :anElementSink |
-		anElementSink
-			sink: AsyncPeekSink new;
-			whenUpdate: [ :anElement :aSink | anElement updateButtonEnablement ].
-		aMemento overallStatus observe: anElementSink ]
-]
-
-{ #category : 'private - building' }
 CFComposerFormToolbarElement >> newCommitButton [
 	^ BrButton new
 		beFocusable;
@@ -99,6 +88,17 @@ CFComposerFormToolbarElement >> newResetButton [
 				awaitFuture: [ formController reset ] asAsyncFuture
 				from: aButton ];
 		yourself
+]
+
+{ #category : 'private - building' }
+CFComposerFormToolbarElement >> observeStatusOf: aMemento [
+	(observedMementos includes: aMemento) ifTrue: [ ^ self ].
+	observedMementos add: aMemento.
+	self withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :anElement :aSink | anElement updateButtonEnablement ].
+		aMemento overallStatus observe: anElementSink ]
 ]
 
 { #category : 'updating' }
