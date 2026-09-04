@@ -5,7 +5,8 @@ Class {
 	#superclass : 'CFMaFieldRepresentationConfiguration',
 	#instVars : [
 		'values',
-		'displayBlock'
+		'displayBlock',
+		'iconOnly'
 	],
 	#category : 'BVC-Foundation-Magritte-Core-Field',
 	#package : 'BVC-Foundation-Magritte-Core',
@@ -16,7 +17,8 @@ Class {
 CFMaPopupConfiguration >> initialize [
 	super initialize.
 	values := #().
-	displayBlock := nil
+	displayBlock := nil.
+	iconOnly := false
 ]
 
 { #category : 'accessing' }
@@ -38,4 +40,15 @@ CFMaPopupConfiguration >> displayBlock [
 { #category : 'accessing' }
 CFMaPopupConfiguration >> displayBlock: aBlock [
 	displayBlock := aBlock
+]
+
+
+{ #category : 'configuration' }
+CFMaPopupConfiguration >> beIconOnly [
+	iconOnly := true
+]
+
+{ #category : 'testing' }
+CFMaPopupConfiguration >> isIconOnly [
+	^ iconOnly
 ]

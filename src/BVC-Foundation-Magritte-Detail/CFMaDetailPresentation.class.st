@@ -583,25 +583,54 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock [
-	| anIconBlock aContentBlock |
+CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock configuration: aPopupConfiguration [
+	| aPopup aField |
+	aPopup := self
+		newPopupSingleOptionUsing: aDescription
+		display: aDisplayBlock
+		configuration: aPopupConfiguration.
+	aField := CFMaDetailPopupFieldElement new
+		popup: aPopup;
+		yourself.
+	self addShortcutsTo: aField.
+	self addFieldElement: aField using: aDescription
+]
+
+{ #category : 'private - building' }
+CFMaDetailPresentation >> newPopupSingleOptionUsing: aDescription display: aDisplayBlock configuration: aPopupConfiguration [
+	| anIconBlock aContentBlock aPopup |
 	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
 		ifTrue: [ aDescription blocOptionIconStencil ]
 		ifFalse: [ nil ].
 	aContentBlock := (aDescription hasProperty: #blocItemStencil)
 		ifTrue: [
-			[ :aPopup |
+			[ :thePopup |
 				GtMagritteBuilderUtility
-					newSingleOptionDropdownContent: aPopup
+					newSingleOptionDropdownContent: thePopup
 					memento: self memento
 					description: aDescription ] ]
 		ifFalse: [ nil ].
-	^ self
-		addPopupFieldUsing: aDescription
+	aPopup := self
+		newPopupUsing: aDescription
 		values: aDescription options
 		display: aDisplayBlock
 		icon: anIconBlock
-		content: aContentBlock
+		content: aContentBlock.
+	aPopupConfiguration isIconOnly ifTrue: [ aPopup beIconOnly ].
+	^ aPopup
+]
+
+{ #category : 'api - building' }
+CFMaDetailPresentation class >> singleOptionPopupElementForMemento: aMemento description: aDescription in: aFormElement [
+	| aPresentation aPopupConfiguration |
+	aPresentation := self new
+		memento: aMemento;
+		form: aFormElement;
+		yourself.
+	aPopupConfiguration := (aPresentation fieldConfigurationFor: aDescription) representation.
+	^ aPopupConfiguration
+		singleOptionPopupElementUsing: aDescription
+		toDetailPresentation: aPresentation
 ]
 
 { #category : 'private - building' }
