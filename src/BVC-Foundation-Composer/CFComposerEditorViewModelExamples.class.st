@@ -7,22 +7,25 @@ Class {
 }
 
 { #category : 'examples' }
-CFComposerEditorViewModelExamples >> composerComposesBetweenStandardRelations [
-	<gtExample>
-	| aViewModel |
-	aViewModel := CFComposerEditorViewModel forObject: CFComposerExampleBoard new.
-	aViewModel showCommitAndResetControls.
-
-	^ aViewModel asElement
-]
-
-{ #category : 'examples' }
 CFComposerEditorViewModelExamples >> composerEditorUsesAStandardRootMemento [
 	<gtExample>
 	| aViewModel |
 	aViewModel := CFComposerEditorViewModel
 		forObject: CFMagritteEditorExample exampleDefault.
 
+	self assert: aViewModel mementoFuture isAsyncFuture.
+	^ aViewModel
+]
+
+
+{ #category : 'examples' }
+CFComposerEditorViewModelExamples >> ordinaryMagritteObjectCanUseComposer [
+	<gtExample>
+	| aModel aViewModel |
+	aModel := CFComposerExampleModel new.
+	aViewModel := CFComposerEditorViewModel forObject: aModel.
+
+	self assert: aModel hasMagritteDescription.
 	self assert: aViewModel mementoFuture isAsyncFuture.
 	^ aViewModel
 ]
@@ -38,6 +41,16 @@ CFComposerEditorViewModelExamples >> composerRendersStandardToManyRelation [
 ]
 
 { #category : 'examples' }
+CFComposerEditorViewModelExamples >> composerComposesBetweenStandardRelations [
+	<gtExample>
+	| aViewModel |
+	aViewModel := CFComposerEditorViewModel forObject: CFComposerExampleBoard new.
+	aViewModel showCommitAndResetControls.
+
+	^ aViewModel asElement
+]
+
+{ #category : 'examples' }
 CFComposerEditorViewModelExamples >> deferredComposerCanShowCommitAndResetControls [
 	<gtExample>
 	| aViewModel |
@@ -45,16 +58,4 @@ CFComposerEditorViewModelExamples >> deferredComposerCanShowCommitAndResetContro
 	aViewModel showCommitAndResetControls.
 
 	^ aViewModel asElement
-]
-
-{ #category : 'examples' }
-CFComposerEditorViewModelExamples >> ordinaryMagritteObjectCanUseComposer [
-	<gtExample>
-	| aModel aViewModel |
-	aModel := CFComposerExampleModel new.
-	aViewModel := CFComposerEditorViewModel forObject: aModel.
-
-	self assert: aModel hasMagritteDescription.
-	self assert: aViewModel mementoFuture isAsyncFuture.
-	^ aViewModel
 ]

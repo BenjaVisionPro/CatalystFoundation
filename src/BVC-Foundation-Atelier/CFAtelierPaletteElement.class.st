@@ -23,7 +23,7 @@ CFAtelierPaletteElement >> initialize [
 	super initialize.
 	draggingPalette := false.
 	self
-		hExact: 220;
+		hFitContent;
 		vFitContent;
 		padding: (BlInsets all: 10);
 		cellSpacing: 8;
@@ -31,7 +31,7 @@ CFAtelierPaletteElement >> initialize [
 		border: (BlBorder paint: (Color white alpha: 0.16) width: 1);
 		addAptitude: CFGlassSurfaceAptitude new.
 	header := BrLabel new
-		hMatchParent;
+		hFitContent;
 		vFitContent;
 		padding: (BlInsets top: 2 left: 2 bottom: 4 right: 2);
 		aptitude: BrGlamorousLabelAptitude new;
@@ -40,7 +40,7 @@ CFAtelierPaletteElement >> initialize [
 	self installMoveInteractionOn: header.
 	self addChild: header.
 	itemsElement := BrVerticalPane new
-		hMatchParent;
+		hFitContent;
 		vFitContent;
 		cellSpacing: 4;
 		yourself.
