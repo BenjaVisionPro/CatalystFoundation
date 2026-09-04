@@ -6,6 +6,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'label',
+		'icon',
 		'provider'
 	],
 	#category : 'BVC-Foundation-Atelier-Palette',
@@ -19,6 +20,25 @@ CFAtelierPaletteItem class >> label: aString provider: anObjectProvider [
 		label: aString;
 		provider: anObjectProvider;
 		yourself
+]
+
+{ #category : 'instance creation' }
+CFAtelierPaletteItem class >> label: aString icon: anIconStencil provider: anObjectProvider [
+	^ self new
+		label: aString;
+		icon: anIconStencil;
+		provider: anObjectProvider;
+		yourself
+]
+
+{ #category : 'accessing' }
+CFAtelierPaletteItem >> icon [
+	^ icon
+]
+
+{ #category : 'accessing' }
+CFAtelierPaletteItem >> icon: anIconStencil [
+	icon := anIconStencil
 ]
 
 { #category : 'accessing' }

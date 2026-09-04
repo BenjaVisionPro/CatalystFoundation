@@ -99,13 +99,26 @@ CFAtelierPaletteElement >> refresh [
 { #category : 'private - building' }
 CFAtelierPaletteElement >> newItemElementFor: anItem [
 	| aRow |
-	aRow := BrLabel new
-		hMatchParent;
-		vFitContent;
-		padding: (BlInsets top: 7 left: 8 bottom: 7 right: 8);
-		aptitude: BrGlamorousLabelAptitude new;
-		text: anItem label;
-		yourself.
+	aRow := anItem icon
+		ifNil: [
+			BrLabel new
+				hMatchParent;
+				vFitContent;
+				padding: (BlInsets top: 7 left: 8 bottom: 7 right: 8);
+				aptitude: BrGlamorousLabelAptitude new;
+				text: anItem label;
+				yourself ]
+		ifNotNil: [ :anIconStencil |
+			BlElement new
+				extent: 36 @ 36;
+				layout: BlFrameLayout new;
+				addChild: (anIconStencil asStencil asElement
+					constraintsDo: [ :c |
+						c frame horizontal alignCenter.
+						c frame vertical alignCenter ];
+					yourself);
+				addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: anItem label);
+				yourself ].
 	aRow userData at: #atelierPaletteSource put: true.
 	aRow addEventHandler: (BlDragHandler new
 		liftItem: [ :aSourceElement |
@@ -122,12 +135,16 @@ CFAtelierPaletteElement >> dragItemFor: anItem sourceElement: aSourceElement [
 		sourceElement: aSourceElement;
 		domainObject: aCandidate;
 		stencil: [ :aDragItem |
-			BrLabel new
-				fitContent;
-				padding: (BlInsets all: 7);
-				aptitude: BrGlamorousLabelAptitude new;
-				text: anItem label;
-				yourself ];
+			anItem icon
+				ifNil: [
+					BrLabel new
+						fitContent;
+						padding: (BlInsets all: 7);
+						aptitude: BrGlamorousLabelAptitude new;
+						text: anItem label;
+						yourself ]
+				ifNotNil: [ :anIconStencil |
+					anIconStencil asStencil asElement ] ];
 		yourself
 ]
 
