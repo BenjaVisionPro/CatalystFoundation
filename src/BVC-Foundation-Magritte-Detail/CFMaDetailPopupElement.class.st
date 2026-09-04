@@ -9,7 +9,8 @@ Class {
 		'popupOpen',
 		'popupStyleAptitude',
 		'indicatorHostStyleAptitude',
-		'iconOnly'
+		'iconOnly',
+		'popupOpenChangedBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -20,6 +21,7 @@ CFMaDetailPopupElement >> initialize [
 	super initialize.
 	popupOpen := false.
 	iconOnly := false.
+	popupOpenChangedBlock := nil.
 	self
 		layout: CFMaDetailPopupLayout new;
 		fitContent;
@@ -111,7 +113,13 @@ CFMaDetailPopupElement >> popupOpen: aBoolean [
 	popupOpen = aBoolean ifTrue: [ ^ self ].
 	popupOpen := aBoolean.
 	popupStyleAptitude updateWith: [ ].
-	indicatorHostStyleAptitude updateWith: [ ]
+	indicatorHostStyleAptitude updateWith: [ ].
+	popupOpenChangedBlock ifNotNil: [ :aBlock | aBlock value: popupOpen ]
+]
+
+{ #category : 'events' }
+CFMaDetailPopupElement >> popupOpenChangedDo: aBlock [
+	popupOpenChangedBlock := aBlock
 ]
 
 
