@@ -144,7 +144,15 @@ CFAtelierPaletteElement >> dragItemFor: anItem sourceElement: aSourceElement [
 						text: anItem label;
 						yourself ]
 				ifNotNil: [ :anIconStencil |
-					anIconStencil asStencil asElement ] ];
+					BlElement new
+						extent: 36 @ 36;
+						layout: BlFrameLayout new;
+						addChild: (anIconStencil asStencil asElement
+							constraintsDo: [ :c |
+								c frame horizontal alignCenter.
+								c frame vertical alignCenter ];
+							yourself);
+						yourself ] ];
 		yourself
 ]
 
