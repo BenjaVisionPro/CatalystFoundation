@@ -8,9 +8,7 @@ Class {
 		'indicator',
 		'popupOpen',
 		'popupStyleAptitude',
-		'indicatorHostStyleAptitude',
-		'iconOnly',
-		'popupOpenChangedBlock'
+		'indicatorHostStyleAptitude'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -20,8 +18,6 @@ Class {
 CFMaDetailPopupElement >> initialize [
 	super initialize.
 	popupOpen := false.
-	iconOnly := false.
-	popupOpenChangedBlock := nil.
 	self
 		layout: CFMaDetailPopupLayout new;
 		fitContent;
@@ -113,15 +109,18 @@ CFMaDetailPopupElement >> popupOpen: aBoolean [
 	popupOpen = aBoolean ifTrue: [ ^ self ].
 	popupOpen := aBoolean.
 	popupStyleAptitude updateWith: [ ].
-	indicatorHostStyleAptitude updateWith: [ ].
-	popupOpenChangedBlock ifNotNil: [ :aBlock | aBlock value: popupOpen ]
+	indicatorHostStyleAptitude updateWith: [ ]
 ]
 
-{ #category : 'events' }
-CFMaDetailPopupElement >> popupOpenChangedDo: aBlock [
-	popupOpenChangedBlock := aBlock
+{ #category : 'layout' }
+CFMaDetailPopupElement >> baselineOffset [
+	^ valueLabel baselineOffset + valueLabel margin top + self padding top
 ]
 
+{ #category : 'layout' }
+CFMaDetailPopupElement >> supportsBaseline [
+	^ true
+]
 
 { #category : 'accessing' }
 CFMaDetailPopupElement >> text [
@@ -139,45 +138,6 @@ CFMaDetailPopupElement >> leadingElement: anElement [
 		leadingElement parent ifNotNil: [ leadingElement removeFromParent ] ].
 	leadingElement := anElement.
 	leadingElement ifNil: [ ^ self ].
-
-	iconOnly ifTrue: [
-		leadingElement
-			margin: BlInsets empty;
-			constraintsDo: [ :c |
-				c frame horizontal alignCenter.
-				c frame vertical alignCenter ].
-		self addChild: leadingElement.
-		^ self ].
-
 	leadingElement margin: (BlInsets right: 6).
 	self addChild: leadingElement before: valueLabel
-]
-
-
-{ #category : 'configuration' }
-CFMaDetailPopupElement >> beIconOnly [
-	iconOnly ifTrue: [ ^ self ].
-	iconOnly := true.
-	valueLabel removeFromParent.
-	indicatorHost removeFromParent.
-	self
-		size: CFMaDetailPopupMetrics controlHeight asPoint;
-		padding: BlInsets empty.
-	leadingElement ifNotNil: [
-		leadingElement
-			margin: BlInsets empty;
-			constraintsDo: [ :c |
-				c frame horizontal alignCenter.
-				c frame vertical alignCenter ] ]
-]
-
-{ #category : 'layout' }
-CFMaDetailPopupElement >> supportsBaseline [
-	^ iconOnly not
-]
-
-{ #category : 'layout' }
-CFMaDetailPopupElement >> baselineOffset [
-	iconOnly ifTrue: [ ^ 0 ].
-	^ valueLabel baselineOffset + valueLabel margin top + self padding top
 ]

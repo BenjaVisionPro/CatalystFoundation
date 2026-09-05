@@ -11,14 +11,4 @@ CFMaPopupConfiguration >> addSingleOptionUsing: aDescription toDetailPresentatio
 		addPopupSingleOptionUsing: aDescription
 		display: (self displayBlock
 			ifNil: [ [ :aValue | aDescription displayStringFor: aValue ] ])
-		configuration: self
-]
-
-{ #category : '*bvc-foundation-magritte-detail' }
-CFMaPopupConfiguration >> singleOptionPopupElementUsing: aDescription toDetailPresentation: aPresentation [
-	^ aPresentation
-		newPopupSingleOptionUsing: aDescription
-		display: (self displayBlock
-			ifNil: [ [ :aValue | aDescription displayStringFor: aValue ] ])
-		configuration: self
 ]

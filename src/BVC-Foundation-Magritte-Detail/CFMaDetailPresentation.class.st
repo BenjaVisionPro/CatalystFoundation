@@ -583,54 +583,25 @@ CFMaDetailPresentation >> addSingleOptionDropdownUsing: aDescription [
 ]
 
 { #category : 'private - building' }
-CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock configuration: aPopupConfiguration [
-	| aPopup aField |
-	aPopup := self
-		newPopupSingleOptionUsing: aDescription
-		display: aDisplayBlock
-		configuration: aPopupConfiguration.
-	aField := CFMaDetailPopupFieldElement new
-		popup: aPopup;
-		yourself.
-	self addShortcutsTo: aField.
-	self addFieldElement: aField using: aDescription
-]
-
-{ #category : 'private - building' }
-CFMaDetailPresentation >> newPopupSingleOptionUsing: aDescription display: aDisplayBlock configuration: aPopupConfiguration [
-	| anIconBlock aContentBlock aPopup |
+CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisplayBlock [
+	| anIconBlock aContentBlock |
 	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
 		ifTrue: [ aDescription blocOptionIconStencil ]
 		ifFalse: [ nil ].
 	aContentBlock := (aDescription hasProperty: #blocItemStencil)
 		ifTrue: [
-			[ :thePopup |
+			[ :aPopup |
 				GtMagritteBuilderUtility
-					newSingleOptionDropdownContent: thePopup
+					newSingleOptionDropdownContent: aPopup
 					memento: self memento
 					description: aDescription ] ]
 		ifFalse: [ nil ].
-	aPopup := self
-		newPopupUsing: aDescription
+	^ self
+		addPopupFieldUsing: aDescription
 		values: aDescription options
 		display: aDisplayBlock
 		icon: anIconBlock
-		content: aContentBlock.
-	aPopupConfiguration isIconOnly ifTrue: [ aPopup beIconOnly ].
-	^ aPopup
-]
-
-{ #category : 'api - building' }
-CFMaDetailPresentation class >> singleOptionPopupElementForMemento: aMemento description: aDescription in: aFormElement [
-	| aPresentation aPopupConfiguration |
-	aPresentation := self new
-		memento: aMemento;
-		form: aFormElement;
-		yourself.
-	aPopupConfiguration := (aPresentation fieldConfigurationFor: aDescription) representation.
-	^ aPopupConfiguration
-		singleOptionPopupElementUsing: aDescription
-		toDetailPresentation: aPresentation
+		content: aContentBlock
 ]
 
 { #category : 'private - building' }
