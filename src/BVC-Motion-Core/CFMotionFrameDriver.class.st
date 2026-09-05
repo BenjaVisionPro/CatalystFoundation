@@ -6,7 +6,7 @@ I sample the BlSpace clock once per active presentation frame, create one immuta
 Class {
 	#name : 'CFMotionFrameDriver',
 	#superclass : 'BlTask',
-	#instVars : [ 'coordinator', 'space', 'time', 'previousTime', 'active' ],
+	#instVars : [ 'coordinator', 'space', 'time', 'previousTime', 'active', 'running' ],
 	#category : 'BVC-Motion-Core',
 	#package : 'BVC-Motion-Core'
 }
@@ -20,7 +20,16 @@ CFMotionFrameDriver class >> coordinator: aCoordinator [
 
 { #category : 'controlling' }
 CFMotionFrameDriver >> activate [
-	active ifTrue: [ ^ self ].
+	(active and: [
+		self isQueued
+			or: [ self isPendingExecution
+			or: [ self isExecuting and: [ running == true ] ] ] ]) ifTrue: [ ^ self ].
+
+	"A task whose execution was aborted by an exception remains #executing in
+	 Bloc because BlSpaceTaskQueue never reaches its normal completion/requeue
+	 code. Recover that stale state before scheduling the next Motion frame."
+	(self isExecuting and: [ running ~~ true ]) ifTrue: [ self setComplete ].
+
 	active := true.
 	previousTime := nil.
 	self isComplete ifTrue: [ self setNew ].
@@ -47,6 +56,7 @@ CFMotionFrameDriver >> coordinator: aCoordinator [
 CFMotionFrameDriver >> initialize [
 	super initialize.
 	active := false.
+	running := false.
 	time := BlTime real
 ]
 
@@ -76,21 +86,24 @@ CFMotionFrameDriver >> requeueTaskAfterExecution [
 CFMotionFrameDriver >> run [
 	active ifFalse: [ ^ self ].
 	coordinator hasActiveMotions ifFalse: [ ^ self deactivate ].
-	time synchronized: [
-		| now elapsed frame |
-		now := time now.
-		elapsed := previousTime
-			ifNil: [ 0 milliSeconds ]
-			ifNotNil: [ now - previousTime ].
-		"BlRealTime uses the wall clock, which can be adjusted backwards. Frame
-		progress is monotonic, so a regressing clock contributes no elapsed time."
-		elapsed < (0 milliSeconds) ifTrue: [ elapsed := 0 milliSeconds ].
-		previousTime := now.
-		frame := CFMotionFrame
-			absoluteTime: now
-			elapsedTime: elapsed
-			frameId: space frame id.
-		coordinator advanceWith: frame ]
+	running := true.
+	[
+		time synchronized: [
+			| now elapsed frame |
+			now := time now.
+			elapsed := previousTime
+				ifNil: [ 0 milliSeconds ]
+				ifNotNil: [ now - previousTime ].
+			"BlRealTime uses the wall clock, which can be adjusted backwards. Frame
+			progress is monotonic, so a regressing clock contributes no elapsed time."
+			elapsed < (0 milliSeconds) ifTrue: [ elapsed := 0 milliSeconds ].
+			previousTime := now.
+			frame := CFMotionFrame
+				absoluteTime: now
+				elapsedTime: elapsed
+				frameId: space frame id.
+			coordinator advanceWith: frame ] ]
+		ensure: [ running := false ]
 ]
 
 { #category : 'controlling' }
