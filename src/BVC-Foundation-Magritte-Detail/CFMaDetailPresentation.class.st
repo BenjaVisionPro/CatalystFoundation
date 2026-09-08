@@ -1042,12 +1042,24 @@ CFMaDetailPresentation >> newRelationEmptyContentElement [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationInspectorChevron [
-	| anElement |
-	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
-	anElement
+	| anIcon aSurface |
+	anIcon := FontAwesomeIcons defaultStyle icon: #arrowRightFromArc.
+	anIcon
 		color: (self form theme typography secondaryForeground);
-		size: 8 @ 8.
-	^ anElement
+		size: 7 @ 7;
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ].
+	aSurface := BlElement new
+		extent: 16 @ 16;
+		geometry: BlCircleGeometry new;
+		background: (Color white alpha: 0.72);
+		border: (BlBorder paint: (Color gray alpha: 0.35) width: 0.75);
+		layout: BlFrameLayout new;
+		preventMeAndChildrenMouseEvents;
+		addChild: anIcon;
+		yourself.
+	^ aSurface
 ]
 
 { #category : 'private - relations' }
