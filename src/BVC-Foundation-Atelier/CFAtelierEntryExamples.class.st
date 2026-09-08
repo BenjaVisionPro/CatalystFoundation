@@ -82,3 +82,18 @@ CFAtelierEntryExamples >> paletteDragMaterializesCandidateOnce [
 	self assert: dragItem domainObject class equals: CFAtelierEntryExampleModel.
 	^ dragItem
 ]
+
+{ #category : 'examples - palette UI' }
+CFAtelierEntryExamples >> paletteSourceRetainsConfiguredItemIdentity [
+	<gtExample>
+	| item paletteElement sourceElement |
+	item := CFAtelierPaletteItem
+		label: 'New example'
+		provider: (CFAtelierFactoryProvider factory: [ CFAtelierEntryExampleModel new ]).
+	paletteElement := CFAtelierPaletteElement new.
+	sourceElement := paletteElement newItemElementFor: item.
+
+	self assert: (sourceElement userData at: #atelierPaletteSource) equals: true.
+	self assert: (sourceElement userData at: #atelierPaletteItem) == item.
+	^ sourceElement
+]
