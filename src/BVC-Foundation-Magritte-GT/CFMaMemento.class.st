@@ -9,7 +9,8 @@ Class {
 		'statusPulse',
 		'compositeOverallStatus',
 		'childMementoTransfers',
-		'detachedChildMementos'
+		'detachedChildMementos',
+		'childMementoReparentings'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Models',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -195,12 +196,19 @@ CFMaMemento >> restoreTransferredChildMementos [
 
 { #category : 'actions' }
 CFMaMemento >> commit [
-	| result |
-	self allChildMementos do: [ :aMemento | aMemento commit ].
-	result := super commit.
+	"Publish surviving transferred children's explicit owner links before any former
+	owner writes its collections. This avoids traversal-order dependence, including
+	nesting reversals. GT commit invokes self reset, so clear rollback journals first."
+	self childMementoReparentings do: [ :entry |
+		(self includesActiveMemento: entry sixth) ifTrue: [
+			entry sixth
+				pushDescription: entry seventh
+				currentValue: (entry sixth readObservableValueUsing: entry seventh) valueOrNil ] ].
+	self allChildMementos do: [ :each | each commit ].
+	self childMementoReparentings removeAll.
 	childMementoTransfers removeAll.
 	detachedChildMementos removeAll.
-	^ result
+	^ super commit
 ]
 
 { #category : 'private - status' }
@@ -272,6 +280,7 @@ CFMaMemento >> reconcileChildMementosWithCurrentRelations [
 { #category : 'actions' }
 CFMaMemento >> reset [
 	| result |
+	self restoreReparentedChildMementos.
 	self restoreDetachedChildMementos.
 	self restoreTransferredChildMementos.
 	self allChildMementos do: [ :aMemento | aMemento reset ].
@@ -305,4 +314,66 @@ CFMaMemento >> revertUsing: aDescription [
 	aFuture := (self validatorUsing: aDescription) observeNext next.
 	anObservable value: (aValue copyWithCurrentValue: aValue originalValue).
 	^ aFuture
+]
+
+{ #category : 'private - children' }
+CFMaMemento >> childMementoReparentings [
+	^ childMementoReparentings ifNil: [ childMementoReparentings := OrderedCollection new ]
+]
+
+{ #category : 'testing' }
+CFMaMemento >> includesActiveMemento: aMemento [
+	^ self == aMemento or: [ self allChildMementos anySatisfy: [ :each | each includesActiveMemento: aMemento ] ]
+]
+
+{ #category : 'private - status' }
+CFMaMemento >> pulseChildStatus [
+	statusPulse value: super overallStatus valueOrNil
+]
+
+{ #category : 'private - children' }
+CFMaMemento >> removeOwnedChildMemento: aChildMemento for: anObject inRelation: aDescription [
+	"A transferred child may subsequently have been removed or replaced."
+	| relationMementos |
+	relationMementos := childMementosByDescription at: aDescription ifAbsent: [ IdentityDictionary new ].
+	(relationMementos at: anObject ifAbsent: [ nil ]) == aChildMemento ifTrue: [
+		self removeChildMementoFor: anObject inRelation: aDescription ].
+	detachedChildMementos removeAllSuchThat: [ :each |
+		each first == anObject and: [ each second == aDescription and: [ each third == aChildMemento ] ] ]
+]
+
+{ #category : 'private - children' }
+CFMaMemento >> restoreReparentedChildMementos [
+	self childMementoReparentings reverseDo: [ :entry |
+		entry fourth removeOwnedChildMemento: entry sixth for: entry first inRelation: entry fifth.
+		entry second putChildMemento: entry sixth for: entry first inRelation: entry third.
+		entry second pulseChildStatus.
+		entry fourth pulseChildStatus ].
+	self childMementoReparentings removeAll
+]
+
+{ #category : 'children' }
+CFMaMemento >> reparentChildMementoFor: anObject from: aSourceMemento inRelation: aSourceDescription to: aDestinationMemento inRelation: aDestinationDescription ownerDescription: anOwnerDescription [
+	"The common transaction owner journals lifecycle ownership before relation writes.
+	Preserve the child itself, including caches, descendants and pending removals."
+	| child |
+	self assert: (self includesActiveMemento: aSourceMemento).
+	self assert: (self includesActiveMemento: aDestinationMemento).
+	self assert: aSourceMemento ~~ aDestinationMemento.
+	self assert: (aDestinationMemento hasChildMementoFor: anObject inRelation: aDestinationDescription) not.
+	child := aSourceMemento childMementoFor: anObject inRelation: aSourceDescription.
+	self assert: (child includesActiveMemento: aDestinationMemento) not.
+	self assert: anOwnerDescription isReadOnly not.
+	self assert: anOwnerDescription isVisible.
+	anOwnerDescription validate: aDestinationMemento model.
+	aSourceMemento removeChildMementoFor: anObject inRelation: aSourceDescription.
+	aDestinationMemento putChildMemento: child for: anObject inRelation: aDestinationDescription.
+	"Route transferred changes to the common root. Observing the new parent
+	would create a reactive cycle when reversing former ancestor relationships."
+	child overallStatus observe: statusPulse.
+	self childMementoReparentings add: { anObject. aSourceMemento. aSourceDescription. aDestinationMemento. aDestinationDescription. child. anOwnerDescription }.
+	child write: aDestinationMemento model using: anOwnerDescription.
+	aSourceMemento pulseChildStatus.
+	aDestinationMemento pulseChildStatus.
+	^ child
 ]
