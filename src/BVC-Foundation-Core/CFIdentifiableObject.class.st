@@ -46,6 +46,7 @@ CFIdentifiableObject >> initialize [
 
 { #category : 'as yet unclassified' }
 CFIdentifiableObject >> initializeIdentifier [
+	identifier ifNotNil: [ ^ self ].
 	identifier := (String
 			streamContents: [ :idString | 
 				idString
