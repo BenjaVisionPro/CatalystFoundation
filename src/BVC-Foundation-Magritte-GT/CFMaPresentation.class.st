@@ -1,5 +1,7 @@
 "
 I am Foundation's Magritte presentation. I participate directly in Magritte's visitor rendering path and own the composition of fields and groups for one form build.
+
+When transactionMemento is supplied, the visible form still reads and writes through my ordinary memento while form-level transaction actions and Escape reset use the explicit transaction root. This supports focused child forms inside a larger Foundation memento transaction without changing field editing identity.
 "
 Class {
 	#name : 'CFMaPresentation',
@@ -13,12 +15,41 @@ Class {
 		'relationItemElementBlock',
 		'relationElementBlock',
 		'relationReorderBlock',
-		'relationRemoveBlock'
+		'relationRemoveBlock',
+		'transactionMemento'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
 	#package : 'BVC-Foundation-Magritte-GT',
 	#tag : 'Presentations'
 }
+
+{ #category : 'accessing' }
+CFMaPresentation >> transactionMemento [
+	^ transactionMemento
+]
+
+{ #category : 'accessing' }
+CFMaPresentation >> transactionMemento: aMemento [
+	transactionMemento := aMemento
+]
+
+{ #category : 'private - accessing' }
+CFMaPresentation >> actionMemento [
+	^ transactionMemento ifNil: [ self memento ]
+]
+
+{ #category : 'private - building' }
+CFMaPresentation >> buildActions [
+	| aToolbar allActions |
+	allActions := self allActions.
+	allActions ifEmpty: [ ^ self ].
+
+	self toolbarContainerDo: [ :aContainer |
+		aToolbar := GtMagritteBuilderUtility
+			newToolbarWithActions: allActions
+			memento: self actionMemento.
+		aContainer addChild: aToolbar as: #toolbar ]
+]
 
 { #category : 'private - building' }
 CFMaPresentation >> addBooleanField: aDescription [
@@ -361,9 +392,7 @@ CFMaPresentation >> installFormNavigationOn: anElement forwardCombination: aForw
 			action: [ :anEvent |
 				| aNavigationRoot aNavigationMemento aFuture |
 				aNavigationRoot := self navigationRootFor: anEvent target.
-				aNavigationMemento := aNavigationRoot userData
-					at: GtMagritteViewModel gtMementoSymbol
-					ifAbsent: [ self memento ].
+				aNavigationMemento := self actionMemento.
 				aFuture := [ self
 					resetFrom: aNavigationRoot
 					usingModel: aNavigationMemento model

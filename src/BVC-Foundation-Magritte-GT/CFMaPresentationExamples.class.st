@@ -42,3 +42,20 @@ CFMaPresentationExamples >> navigationUsesOutermostFoundationFormRoot [
 	self assert: (aPresentation navigationRootFor: aField) == anOuterRoot.
 	^ anOuterRoot
 ]
+
+
+{ #category : 'examples - transactions' }
+CFMaPresentationExamples >> transactionMementoOverridesActionMemento [
+	<gtExample>
+	| modelMemento transactionMemento presentation |
+	modelMemento := CFMaMemento model: CFMaFormShowcase new.
+	transactionMemento := CFMaMemento model: CFMaFormShowcase new.
+	presentation := CFMaPresentation new
+		memento: modelMemento;
+		transactionMemento: transactionMemento;
+		yourself.
+
+	self assert: presentation memento == modelMemento.
+	self assert: presentation actionMemento == transactionMemento.
+	^ presentation
+]
