@@ -41,6 +41,12 @@ CFMaFieldConfiguration >> bePopup [
 ]
 
 { #category : 'configuration - representation' }
+CFMaFieldConfiguration >> beGroupedButtons [
+	representation := CFMaGroupedButtonsConfiguration new.
+	^ representation
+]
+
+{ #category : 'configuration - representation' }
 CFMaFieldConfiguration >> beColourPicker [
 	representation := CFMaColourPickerConfiguration new.
 	^ representation

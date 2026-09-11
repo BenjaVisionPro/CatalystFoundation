@@ -605,6 +605,38 @@ CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisp
 ]
 
 { #category : 'private - building' }
+CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription [
+	| aButtons anIconBlock aCurrentValue |
+	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
+		ifTrue: [ aDescription blocOptionIconStencil ]
+		ifFalse: [ nil ].
+	aCurrentValue := self memento readUsing: aDescription.
+	(aDescription options includes: aCurrentValue) ifFalse: [
+		self error: 'The current field value must be present in the grouped-buttons options' ].
+	aButtons := CFMaDetailGroupedButtonsElement new
+		options: aDescription options
+			display: [ :anOption | aDescription displayStringFor: anOption ]
+			icon: anIconBlock;
+		valueChangedBlock: [ :anOption |
+			GtMagritteBuilderUtility
+				write: anOption
+				using: aDescription
+				memento: self memento
+				element: aButtons ];
+		yourself.
+	aButtons value: aCurrentValue.
+	aButtons withAsyncSinkDo: [ :anElementSink |
+		anElementSink
+			sink: AsyncPeekSink new;
+			whenUpdate: [ :theButtons :aSink |
+				theButtons value: aSink value currentValue ].
+		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+	self addShortcutsTo: aButtons.
+	self addFieldElement: aButtons using: aDescription
+]
+
+
+{ #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionColourPickerUsing: aDescription configuration: aConfiguration [
 	| aPicker |
 	aPicker := CFMaDetailColourPickerElement new

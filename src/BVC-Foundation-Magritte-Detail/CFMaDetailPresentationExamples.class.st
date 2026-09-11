@@ -349,6 +349,45 @@ CFMaDetailPresentationExamples >> fieldConfigurationPopupOwnsItsValues [
 ]
 
 { #category : 'examples - field configuration' }
+CFMaDetailPresentationExamples >> fieldConfigurationCanUseGroupedButtons [
+	<gtExample>
+	| aDescription aConfiguration |
+	aDescription := MASingleOptionDescription new
+		accessor: #status;
+		options: #(draft active archived);
+		fieldConfigure: [ :field | field beGroupedButtons ];
+		yourself.
+	aConfiguration := CFMaDetailPresentation new fieldConfigurationFor: aDescription.
+
+	self assert: aConfiguration representation class equals: CFMaGroupedButtonsConfiguration.
+	^ aConfiguration
+]
+
+{ #category : 'examples - controls' }
+CFMaDetailPresentationExamples >> groupedButtonsAreMutuallyExclusive [
+	<gtExample>
+	| anElement firstToggle secondToggle changedValue |
+	anElement := CFMaDetailGroupedButtonsElement new
+		options: #(vertical horizontal)
+			display: [ :anOption | anOption asString ]
+			icon: nil;
+		valueChangedBlock: [ :aValue | changedValue := aValue ];
+		yourself.
+	firstToggle := anElement toggleForOption: #vertical.
+	secondToggle := anElement toggleForOption: #horizontal.
+
+	anElement value: #vertical.
+	self assert: firstToggle isActivated.
+	self assert: secondToggle isActivated not.
+	secondToggle activate.
+	self assert: firstToggle isActivated not.
+	self assert: secondToggle isActivated.
+	self assert: changedValue equals: #horizontal.
+	^ anElement
+]
+
+
+{ #category : 'examples - field configuration' }
 CFMaDetailPresentationExamples >> fieldConfigurationRepresentationReplacementIsTyped [
 	<gtExample>
 	| aFieldConfiguration aPopupConfiguration aSliderConfiguration |
