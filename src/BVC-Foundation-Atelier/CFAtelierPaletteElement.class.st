@@ -64,21 +64,26 @@ CFAtelierPaletteElement >> newItemsElement [
 ]
 
 { #category : 'private - interaction' }
-CFAtelierPaletteElement >> installMoveInteractionOn: aHeaderElement [
-	aHeaderElement when: BlMouseDownEvent do: [ :anEvent |
-		anEvent primaryButtonPressed ifTrue: [
+CFAtelierPaletteElement >> installMoveInteractionOn: aDragSurfaceElement [
+	aDragSurfaceElement when: BlDragStartEvent do: [ :anEvent |
+		(self shouldBeginMoveForDragStartEvent: anEvent) ifTrue: [
 			draggingPalette := true.
 			dragStartPointer := anEvent position.
 			dragStartPosition := self position.
 			anEvent consumed: true ] ].
-	self when: BlMouseMoveEvent do: [ :anEvent |
+	aDragSurfaceElement when: BlDragEvent do: [ :anEvent |
 		draggingPalette ifTrue: [
 			self relocateWithinParent: dragStartPosition + (anEvent position - dragStartPointer).
 			anEvent consumed: true ] ].
-	self when: BlMouseUpEvent do: [ :anEvent |
+	aDragSurfaceElement when: BlDragEndEvent do: [ :anEvent |
 		draggingPalette ifTrue: [
 			draggingPalette := false.
 			anEvent consumed: true ] ]
+]
+
+{ #category : 'private - interaction' }
+CFAtelierPaletteElement >> shouldBeginMoveForDragStartEvent: anEvent [
+	^ true
 ]
 
 { #category : 'private - interaction' }
