@@ -1,7 +1,10 @@
 "
 I present an object through an explicit Magritte reference description.
-The reference defines which values participate and their order; I own only
-the compact icon-and-text layout.
+
+The reference defines which values participate and their order. I own the compact
+presentation convention: the first textual value is primary text and each later
+textual value is supporting text. Non-text values such as the icon do not count
+as text lines.
 "
 Class {
 	#name : 'CFCompactObjectElement',
@@ -113,50 +116,57 @@ CFCompactObjectElement >> memento: aMemento [
 ]
 
 { #category : 'private - reference' }
-CFCompactObjectElement >> addReferenceTextElement: aTextElement at: anIndex [
-	"This method owns position only. Editable and read-only text must retain the
-	 same zero-inset slot geometry; typography is supplied by their respective
-	 label/editor aptitudes."
+CFCompactObjectElement >> addReferenceTextElement: aTextElement [
 	aTextElement
 		margin: BlInsets empty;
 		padding: BlInsets empty;
+		hMatchParent;
 		vFitContent.
 
-	anIndex = 1
-		ifTrue: [ titleElement := aTextElement ]
-		ifFalse: [ identifierElement ifNil: [ identifierElement := aTextElement ] ].
+	textPane childCount = 0
+		ifTrue: [
+			titleElement := aTextElement.
+			self styleAsPrimaryReferenceText: aTextElement ]
+		ifFalse: [
+			identifierElement ifNil: [ identifierElement := aTextElement ].
+			self styleAsSupportingReferenceText: aTextElement ].
+
 	textPane addChild: aTextElement.
 	^ aTextElement
 ]
 
 { #category : 'private - reference' }
-CFCompactObjectElement >> newReferenceTextElementAt: anIndex [
-	| anAptitude aLabel |
-	anAptitude := BrGlamorousLabelAptitude new
-		glamorousRegularFont;
-		yourself.
+CFCompactObjectElement >> newReferenceTextElement [
+	| aLabel |
 	aLabel := BrLabel new
 		hMatchParent;
 		vFitContent;
-		aptitude: anAptitude;
+		aptitude: (BrGlamorousLabelAptitude new glamorousRegularFont);
 		yourself.
+	^ self addReferenceTextElement: aLabel
+]
 
-	anIndex = 1
-		ifTrue: [
-			titleElement := aLabel.
+{ #category : 'private - appearance' }
+CFCompactObjectElement >> styleAsPrimaryReferenceText: aTextElement [
+	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
+		ifTrue: [ aTextElement bePrimaryText ]
+		ifFalse: [
 			self addAptitude: (BrLazyStyleCommonAptitude new
-				@ anAptitude label;
+				@ aTextElement aptitude label;
 				default: [ :aStyle |
 					aStyle foreground: self theme typography primaryForeground ]) ]
-		ifFalse: [
-			anAptitude fontSize: self theme typography supportingFontSize.
-			identifierElement ifNil: [ identifierElement := aLabel ].
-			self addAptitude: (BrLazyStyleCommonAptitude new
-				@ anAptitude label;
-				default: [ :aStyle |
-					aStyle foreground: self theme typography tertiaryForeground ]) ].
+]
 
-	^ self addReferenceTextElement: aLabel at: anIndex
+{ #category : 'private - appearance' }
+CFCompactObjectElement >> styleAsSupportingReferenceText: aTextElement [
+	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
+		ifTrue: [ aTextElement beSupportingText ]
+		ifFalse: [
+			aTextElement aptitude fontSize: self theme typography supportingFontSize.
+			self addAptitude: (BrLazyStyleCommonAptitude new
+				@ aTextElement aptitude label;
+				default: [ :aStyle |
+					aStyle foreground: self theme typography tertiaryForeground ]) ]
 ]
 
 { #category : 'accessing' }

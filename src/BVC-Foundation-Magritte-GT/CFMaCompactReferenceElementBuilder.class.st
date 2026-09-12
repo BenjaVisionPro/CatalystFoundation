@@ -2,16 +2,15 @@
 I build the compact identity of an object from its explicit Magritte reference.
 
 For descriptions owned by the supplied memento, isReadOnly is authoritative:
-read-only values retain the compact static rendering while writable values use
-their normal Magritte editor bound to the same memento. The compact object owns
-only positioning and typography.
+read-only values retain compact static rendering while writable values use their
+normal Magritte editor bound to the same memento. I do not assign visual roles to
+text fields; CFCompactObjectElement does that from the textual line it is laying out.
 "
 Class {
 	#name : 'CFMaCompactReferenceElementBuilder',
 	#superclass : 'CFMaReferenceElementBuilder',
 	#instVars : [
-		'element',
-		'textIndex'
+		'element'
 	],
 	#category : 'BVC-Foundation-Magritte-GT',
 	#package : 'BVC-Foundation-Magritte-GT'
@@ -19,7 +18,6 @@ Class {
 
 { #category : 'building' }
 CFMaCompactReferenceElementBuilder >> buildUsing: aReferenceDescription [
-	textIndex := 0.
 	element prepareForReference.
 	self visit: aReferenceDescription asContainer.
 	^ element
@@ -46,13 +44,12 @@ CFMaCompactReferenceElementBuilder >> updateCompactIconValue: aValue description
 ]
 
 { #category : 'private - building' }
-CFMaCompactReferenceElementBuilder >> newCompactTextEditorFor: aDescription at: anIndex [
+CFMaCompactReferenceElementBuilder >> newCompactTextEditorFor: aDescription [
 	| aStencil anEditor |
 	aStencil := aDescription blocStencil.
 	anEditor := aStencil
 		ifNil: [
 			CFMaCompactIdentityEditorElement new
-				compactIndex: anIndex;
 				fieldViewModel: (GtMagritteFieldViewModel new
 					memento: memento;
 					description: aDescription;
@@ -63,7 +60,7 @@ CFMaCompactReferenceElementBuilder >> newCompactTextEditorFor: aDescription at: 
 				memento: memento;
 				description: aDescription;
 				asElement ].
-	^ element addReferenceTextElement: anEditor at: anIndex
+	^ element addReferenceTextElement: anEditor
 ]
 
 { #category : 'private - building' }
@@ -79,14 +76,12 @@ CFMaCompactReferenceElementBuilder >> newCompactFontAwesomeEditorFor: aDescripti
 { #category : 'visiting-description' }
 CFMaCompactReferenceElementBuilder >> visitElementDescription: aDescription [
 	| aLabel |
-	textIndex := textIndex + 1.
-
 	((self hasTransactionalValueFor: aDescription)
 		and: [ aDescription isReadOnly not ]) ifTrue: [
-		self newCompactTextEditorFor: aDescription at: textIndex.
+		self newCompactTextEditorFor: aDescription.
 		^ self ].
 
-	aLabel := element newReferenceTextElementAt: textIndex.
+	aLabel := element newReferenceTextElement.
 	(self hasTransactionalValueFor: aDescription)
 		ifTrue: [
 			self
@@ -108,6 +103,7 @@ CFMaCompactReferenceElementBuilder >> visitElementDescription: aDescription [
 				value: (self staticValueFor: aDescription)
 				description: aDescription ]
 ]
+
 { #category : 'visiting-description' }
 CFMaCompactReferenceElementBuilder >> visitFontAwesomeIconDescription: aDescription [
 	((self hasTransactionalValueFor: aDescription)

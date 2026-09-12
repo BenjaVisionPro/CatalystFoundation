@@ -1369,6 +1369,31 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 ]
 
 { #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectAssignsTextPresentationByTextLine [
+	<gtExample>
+	| anObject aMemento firstDescription secondDescription reference anElement |
+	anObject := CFMaFormShowcase new.
+	firstDescription := MAStringDescription new
+		accessor: #label;
+		label: 'First line';
+		yourself.
+	secondDescription := MASymbolDescription new
+		accessor: #identifier;
+		label: 'Second line';
+		yourself.
+	reference := anObject iconDescription, firstDescription, secondDescription.
+	aMemento := CFMaMemento model: anObject description: reference.
+	anElement := CFCompactObjectElement new
+		memento: aMemento;
+		reference: reference;
+		yourself.
+
+	self assert: (anElement titleElement isKindOf: CFMaCompactIdentityEditorElement).
+	self assert: (anElement identifierElement isKindOf: CFMaCompactIdentityEditorElement).
+	^ anElement
+]
+
+{ #category : 'examples - compact object' }
 CFMaDetailPresentationExamples >> compactObjectWritableTextUsesMagritteEditors [
 	<gtExample>
 	| anObject aMemento aReference anElement |
