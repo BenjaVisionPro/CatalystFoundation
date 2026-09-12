@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'rows',
 		'focusOverlay',
-		'reservedAccessorySlots'
+		'reservedAccessorySlots',
+		'overlayAppearance',
+		'appearanceAptitude'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -60,6 +62,15 @@ CFMaDetailGroupCardElement >> initialize [
 	rows := OrderedCollection new.
 	focusOverlay := nil.
 	reservedAccessorySlots := 0.
+	overlayAppearance := false.
+	appearanceAptitude := BrLazyStyleCommonAptitude new
+		default: [ :aStyle |
+			| aColor |
+			aColor := self theme surfaces cardTint.
+			overlayAppearance ifTrue: [
+				aColor := (aColor blocResolveColorForTheme: self theme) alpha: 0.55 ].
+			aStyle background: aColor ];
+		yourself.
 	self
 		background: Color transparent;
 		border: BlBorder empty;
@@ -70,15 +81,21 @@ CFMaDetailGroupCardElement >> initialize [
 		cellSpacing: 0;
 		hMatchParent;
 		vFitContent;
-		addAptitude: (BrLazyStyleCommonAptitude new
-			default: [ :aStyle |
-				aStyle background: self theme surfaces cardTint ])
+		addAptitude: appearanceAptitude
+]
+
+{ #category : 'configuration - appearance' }
+CFMaDetailGroupCardElement >> overlayAppearance: aBoolean [
+	overlayAppearance := aBoolean.
+	appearanceAptitude updateWith: [ ]
 ]
 
 { #category : 'private - elements' }
 CFMaDetailGroupCardElement >> newSeparator [
 	| aSeparator aFrame |
-	aSeparator := CFDetailSeparatorElement new.
+	aSeparator := CFDetailSeparatorElement new
+		overlayAppearance: overlayAppearance;
+		yourself.
 	aSeparator constraintsDo: [ :c |
 		c horizontal matchParent.
 		c vertical exact: 1.

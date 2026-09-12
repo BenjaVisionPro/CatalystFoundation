@@ -5,7 +5,8 @@ Class {
 		'groupConfigurations',
 		'groups',
 		'categoryGroups',
-		'relationContexts'
+		'relationContexts',
+		'overlayAppearance'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -17,7 +18,8 @@ CFMaDetailPresentation >> initialize [
 	groupConfigurations := Dictionary new.
 	groups := Dictionary new.
 	categoryGroups := Dictionary new.
-	relationContexts := IdentityDictionary new
+	relationContexts := IdentityDictionary new.
+	overlayAppearance := false
 ]
 
 { #category : 'api - building' }
@@ -82,8 +84,15 @@ CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
 	^ theMatchedDescriptions
 ]
 
+{ #category : 'configuration - appearance' }
+CFMaDetailPresentation >> beOverlay [
+	overlayAppearance := true.
+	^ self
+]
+
 { #category : 'private - appearance' }
 CFMaDetailPresentation >> formBackgroundPaint [
+	overlayAppearance ifTrue: [ ^ Color transparent ].
 	^ self form theme surfaces baseBackground
 ]
 
@@ -167,6 +176,7 @@ CFMaDetailPresentation >> newGroupIn: aParent configuredBy: aConfiguration [
 	| anElement aMargin |
 	anElement := CFMaDetailGroupElement new
 		configuration: aConfiguration;
+		overlayAppearance: overlayAppearance;
 		yourself.
 	(aParent == self hostElement and: [ aParent children isEmpty not ]) ifTrue: [
 		aMargin := anElement margin.
@@ -184,6 +194,7 @@ CFMaDetailPresentation >> newGroupIn: aParent label: aLabel configuredBy: aConfi
 	| anElement |
 	anElement := CFMaDetailGroupElement new
 		configuration: aConfiguration;
+		overlayAppearance: overlayAppearance;
 		yourself.
 	aParent addGroup: anElement label: aLabel.
 	^ anElement
