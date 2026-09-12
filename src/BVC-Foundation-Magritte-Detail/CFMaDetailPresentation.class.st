@@ -617,11 +617,18 @@ CFMaDetailPresentation >> addPopupSingleOptionUsing: aDescription display: aDisp
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription [
+	^ self
+		addGroupedButtonsSingleOptionUsing: aDescription
+		memento: self memento
+]
+
+{ #category : 'building - auxiliary fields' }
+CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription memento: aMemento [
 	| aButtons anIconBlock aCurrentValue |
 	anIconBlock := (aDescription hasProperty: #blocOptionIconStencil)
 		ifTrue: [ aDescription blocOptionIconStencil ]
 		ifFalse: [ nil ].
-	aCurrentValue := self memento readUsing: aDescription.
+	aCurrentValue := aMemento readUsing: aDescription.
 	(aDescription options includes: aCurrentValue) ifFalse: [
 		self error: 'The current field value must be present in the grouped-buttons options' ].
 	aButtons := CFMaDetailGroupedButtonsElement new
@@ -632,7 +639,7 @@ CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription [
 			GtMagritteBuilderUtility
 				write: anOption
 				using: aDescription
-				memento: self memento
+				memento: aMemento
 				element: aButtons ];
 		yourself.
 	aButtons value: aCurrentValue.
@@ -641,11 +648,10 @@ CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription [
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theButtons :aSink |
 				theButtons value: aSink value currentValue ].
-		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+		(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 	self addShortcutsTo: aButtons.
 	self addFieldElement: aButtons using: aDescription
 ]
-
 
 { #category : 'private - building' }
 CFMaDetailPresentation >> addSingleOptionColourPickerUsing: aDescription configuration: aConfiguration [
