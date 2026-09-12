@@ -6,7 +6,8 @@ Class {
 		'groups',
 		'categoryGroups',
 		'relationContexts',
-		'overlayAppearance'
+		'overlayAppearance',
+		'afterPrimaryContentBlocks'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -19,7 +20,14 @@ CFMaDetailPresentation >> initialize [
 	groups := Dictionary new.
 	categoryGroups := Dictionary new.
 	relationContexts := IdentityDictionary new.
-	overlayAppearance := false
+	overlayAppearance := false.
+	afterPrimaryContentBlocks := OrderedCollection new
+]
+
+{ #category : 'configuration - composition' }
+CFMaDetailPresentation >> afterPrimaryContentDo: aBlock [
+	afterPrimaryContentBlocks add: aBlock.
+	^ self
 ]
 
 { #category : 'api - building' }
@@ -53,7 +61,8 @@ CFMaDetailPresentation >> visitContainer: aDescription [
 			ifFalse: [
 				(each isKindOf: MAActionDescription)
 					ifTrue: [ self addActionRowUsing: each ]
-					ifFalse: [ self visit: each ] ] ]
+					ifFalse: [ self visit: each ] ] ].
+	afterPrimaryContentBlocks do: [ :aBlock | aBlock cull: self ]
 ]
 
 { #category : 'private - compact identity' }
