@@ -65,11 +65,9 @@ CFMaDetailGroupCardElement >> initialize [
 	overlayAppearance := false.
 	appearanceAptitude := BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			| aColor |
-			aColor := self theme surfaces cardTint.
-			overlayAppearance ifTrue: [
-				aColor := (aColor blocResolveColorForTheme: self theme) alpha: 0.55 ].
-			aStyle background: aColor ];
+			aStyle background: (overlayAppearance
+				ifTrue: [ self theme interaction subtleBackgroundTint ]
+				ifFalse: [ self theme surfaces cardTint ]) ];
 		yourself.
 	self
 		background: Color transparent;
