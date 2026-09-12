@@ -44,9 +44,10 @@ CFAtelierConfigurationExamples >> emptyRootReusesEditingConfigurationAfterAdopti
 	| configuration atelier candidate accepted |
 	configuration := self exampleConfiguration.
 	configuration paletteElementFactory: [
-		CFAtelierPaletteElement new
-			userData at: #configuredPaletteElement put: true;
-			yourself ].
+		| paletteElement |
+		paletteElement := CFAtelierPaletteElement new.
+		paletteElement userData at: #configuredPaletteElement put: true.
+		paletteElement ].
 	atelier := CFAtelierEmptyViewModel configuration: configuration.
 	atelier asElement.
 	candidate := CFAtelierEntryExampleModel new.
@@ -69,9 +70,10 @@ CFAtelierConfigurationExamples >> configuredPaletteElementFactoryIsUsed [
 	model := CFAtelierEntryExampleModel new.
 	configuration := self exampleConfiguration.
 	configuration paletteElementFactory: [
-		CFAtelierPaletteElement new
-			userData at: #configuredPaletteElement put: true;
-			yourself ].
+		| paletteElement |
+		paletteElement := CFAtelierPaletteElement new.
+		paletteElement userData at: #configuredPaletteElement put: true.
+		paletteElement ].
 	atelier := model asAtelierWith: configuration.
 	element := atelier asElement.
 
