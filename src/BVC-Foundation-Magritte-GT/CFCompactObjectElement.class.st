@@ -114,6 +114,9 @@ CFCompactObjectElement >> memento: aMemento [
 
 { #category : 'private - reference' }
 CFCompactObjectElement >> addReferenceTextElement: aTextElement at: anIndex [
+	"This method owns position only. Editable and read-only text must retain the
+	 same zero-inset slot geometry; typography is supplied by their respective
+	 label/editor aptitudes."
 	aTextElement
 		margin: BlInsets empty;
 		padding: BlInsets empty;
@@ -146,7 +149,7 @@ CFCompactObjectElement >> newReferenceTextElementAt: anIndex [
 				default: [ :aStyle |
 					aStyle foreground: self theme typography primaryForeground ]) ]
 		ifFalse: [
-			anAptitude fontSize: 11.
+			anAptitude fontSize: self theme typography supportingFontSize.
 			identifierElement ifNil: [ identifierElement := aLabel ].
 			self addAptitude: (BrLazyStyleCommonAptitude new
 				@ anAptitude label;

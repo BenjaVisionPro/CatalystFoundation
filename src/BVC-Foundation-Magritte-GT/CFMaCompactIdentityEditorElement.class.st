@@ -11,8 +11,7 @@ Class {
 	#name : 'CFMaCompactIdentityEditorElement',
 	#superclass : 'GtMagritteOneLineEditorElement',
 	#instVars : [
-		'compactIndex',
-		'compactAptitude'
+		'compactIndex'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -39,19 +38,16 @@ CFMaCompactIdentityEditorElement >> initialize [
 
 { #category : 'private - updating' }
 CFMaCompactIdentityEditorElement >> updateEditorAptitude [
-	| foreground |
-	super updateEditorAptitude.
-	compactAptitude ifNotNil: [ :anAptitude |
+	editorAptitude ifNotNil: [ :anAptitude |
 		self removeAptitude: anAptitude ].
 
-	foreground := compactIndex = 1
-		ifTrue: [ self theme typography primaryForeground ]
-		ifFalse: [ self theme typography tertiaryForeground ].
-	compactAptitude := BrGlamorousRegularEditorAptitude new
+	editorAptitude := BrGlamorousRegularEditorAptitude new
 		glamorousRegularFont;
-		foreground: foreground;
+		foreground: (compactIndex = 1
+			ifTrue: [ self theme typography primaryForeground ]
+			ifFalse: [ self theme typography tertiaryForeground ]);
 		yourself.
 	compactIndex = 1 ifFalse: [
-		compactAptitude fontSize: 11 ].
-	self addAptitude: compactAptitude
+		editorAptitude fontSize: self theme typography supportingFontSize ].
+	self addAptitude: editorAptitude
 ]
