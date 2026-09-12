@@ -1369,6 +1369,46 @@ CFMaDetailPresentationExamples >> compactIdentityRequiresExplicitReference [
 ]
 
 { #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectWritableTextUsesMagritteEditors [
+	<gtExample>
+	| anObject aMemento aReference anElement |
+	anObject := CFMaFormShowcase new.
+	anObject label: 'Editable compact object'.
+	aMemento := CFMaMemento model: anObject.
+	aReference := anObject labelDescription, anObject identifierDescription.
+	anElement := CFCompactObjectElement new
+		memento: aMemento;
+		reference: aReference;
+		yourself.
+
+	self assert: (anElement titleElement isKindOf: CFMaCompactIdentityEditorElement).
+	self assert: (anElement identifierElement isKindOf: CFMaCompactIdentityEditorElement).
+	self assert: anElement titleElement margin equals: BlInsets empty.
+	self assert: anElement identifierElement margin equals: BlInsets empty.
+	self assert: anElement titleText equals: 'Editable compact object'.
+	^ anElement
+]
+
+{ #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectReadOnlyTextKeepsStaticRendering [
+	<gtExample>
+	| anObject aMemento labelDescription identifierDescription aReference anElement |
+	anObject := CFMaFormShowcase new.
+	labelDescription := anObject labelDescription copy beReadOnly.
+	identifierDescription := anObject identifierDescription copy beReadOnly.
+	aReference := labelDescription, identifierDescription.
+	aMemento := CFMaMemento model: anObject description: aReference.
+	anElement := CFCompactObjectElement new
+		memento: aMemento;
+		reference: aReference;
+		yourself.
+
+	self assert: anElement titleElement class equals: BrLabel.
+	self assert: anElement identifierElement class equals: BrLabel.
+	^ anElement
+]
+
+{ #category : 'examples - compact object' }
 CFMaDetailPresentationExamples >> compactObjectRendersReferenceDescription [
 	<gtExample>
 	| anObject aMemento aReference anElement |

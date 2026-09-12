@@ -11,6 +11,7 @@ Class {
 		'memento',
 		'reference',
 		'iconContainer',
+		'iconEditor',
 		'textPane',
 		'titleElement',
 		'identifierElement'
@@ -23,18 +24,33 @@ Class {
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beLarge [
 	iconContainer beLarge.
+	iconEditor ifNotNil: [
+		iconEditor
+			constraintsDo: [ :c |
+				c horizontal matchParent.
+				c vertical matchParent ] ].
 	^ self
 ]
 
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beMedium [
 	iconContainer beMedium.
+	iconEditor ifNotNil: [
+		iconEditor
+			constraintsDo: [ :c |
+				c horizontal matchParent.
+				c vertical matchParent ] ].
 	^ self
 ]
 
 { #category : 'configuration - icon size' }
 CFCompactObjectElement >> beSmall [
 	iconContainer beSmall.
+	iconEditor ifNotNil: [
+		iconEditor
+			constraintsDo: [ :c |
+				c horizontal matchParent.
+				c vertical matchParent ] ].
 	^ self
 ]
 
@@ -97,6 +113,20 @@ CFCompactObjectElement >> memento: aMemento [
 ]
 
 { #category : 'private - reference' }
+CFCompactObjectElement >> addReferenceTextElement: aTextElement at: anIndex [
+	aTextElement
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		vFitContent.
+
+	anIndex = 1
+		ifTrue: [ titleElement := aTextElement ]
+		ifFalse: [ identifierElement ifNil: [ identifierElement := aTextElement ] ].
+	textPane addChild: aTextElement.
+	^ aTextElement
+]
+
+{ #category : 'private - reference' }
 CFCompactObjectElement >> newReferenceTextElementAt: anIndex [
 	| anAptitude aLabel |
 	anAptitude := BrGlamorousLabelAptitude new
@@ -123,8 +153,7 @@ CFCompactObjectElement >> newReferenceTextElementAt: anIndex [
 				default: [ :aStyle |
 					aStyle foreground: self theme typography tertiaryForeground ]) ].
 
-	textPane addChild: aLabel.
-	^ aLabel
+	^ self addReferenceTextElement: aLabel at: anIndex
 ]
 
 { #category : 'accessing' }
@@ -144,6 +173,7 @@ CFCompactObjectElement >> prepareForReference [
 	iconContainer
 		removeChildren;
 		visibility: BlVisibility gone.
+	iconEditor := nil.
 	textPane removeChildren.
 	titleElement := nil.
 	identifierElement := nil
@@ -158,6 +188,24 @@ CFCompactObjectElement >> reference [
 CFCompactObjectElement >> reference: aReferenceDescription [
 	reference := aReferenceDescription.
 	self refreshReference
+]
+
+{ #category : 'private - reference' }
+CFCompactObjectElement >> referenceIconEditor: anEditorElement [
+	iconEditor := anEditorElement.
+	iconContainer
+		removeChildren;
+		visibility: BlVisibility visible.
+	anEditorElement
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent.
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ].
+	iconContainer addChild: anEditorElement.
+	^ anEditorElement
 ]
 
 { #category : 'private - reference' }
