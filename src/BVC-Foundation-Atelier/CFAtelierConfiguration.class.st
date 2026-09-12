@@ -6,6 +6,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'palette',
+		'paletteElementFactory',
 		'removeOperationBlock',
 		'insertOperationBlock',
 		'replaceOperationBlock',
@@ -29,6 +30,7 @@ CFAtelierConfiguration >> applyEditingTo: anAtelierViewModel [
 
 { #category : 'applying' }
 CFAtelierConfiguration >> applyTo: anAtelierViewModel [
+	paletteElementFactory ifNotNil: [ anAtelierViewModel paletteElementFactory: paletteElementFactory ].
 	palette ifNotNil: [ anAtelierViewModel palette: palette ].
 	^ self applyEditingTo: anAtelierViewModel
 ]
@@ -41,6 +43,17 @@ CFAtelierConfiguration >> palette [
 { #category : 'accessing' }
 CFAtelierConfiguration >> palette: anAtelierPalette [
 	palette := anAtelierPalette
+]
+
+
+{ #category : 'configuration' }
+CFAtelierConfiguration >> paletteElementFactory: aBlock [
+	paletteElementFactory := aBlock
+]
+
+{ #category : 'accessing' }
+CFAtelierConfiguration >> paletteElementFactory [
+	^ paletteElementFactory
 ]
 
 { #category : 'configuration' }

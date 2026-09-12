@@ -22,6 +22,17 @@ CFAtelierPaletteElement >> initialize [
 	| header |
 	super initialize.
 	draggingPalette := false.
+	self configureAppearance.
+	header := self newHeaderElement.
+	self installMoveInteractionOn: header.
+	self addChild: header.
+	itemsElement := self newItemsElement.
+	self addChild: itemsElement.
+	self installCaptureDrop
+]
+
+{ #category : 'private - building' }
+CFAtelierPaletteElement >> configureAppearance [
 	self
 		hFitContent;
 		vFitContent;
@@ -29,23 +40,27 @@ CFAtelierPaletteElement >> initialize [
 		cellSpacing: 8;
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 12);
 		border: (BlBorder paint: (Color white alpha: 0.16) width: 1);
-		addAptitude: CFGlassSurfaceAptitude new.
-	header := BrLabel new
+		addAptitude: CFGlassSurfaceAptitude new
+]
+
+{ #category : 'private - building' }
+CFAtelierPaletteElement >> newHeaderElement [
+	^ BrLabel new
 		hFitContent;
 		vFitContent;
 		padding: (BlInsets top: 2 left: 2 bottom: 4 right: 2);
 		aptitude: BrGlamorousLabelAptitude new;
 		text: 'Palette';
-		yourself.
-	self installMoveInteractionOn: header.
-	self addChild: header.
-	itemsElement := BrVerticalPane new
+		yourself
+]
+
+{ #category : 'private - building' }
+CFAtelierPaletteElement >> newItemsElement [
+	^ BrVerticalPane new
 		hFitContent;
 		vFitContent;
 		cellSpacing: 4;
-		yourself.
-	self addChild: itemsElement.
-	self installCaptureDrop
+		yourself
 ]
 
 { #category : 'private - interaction' }
@@ -119,14 +134,19 @@ CFAtelierPaletteElement >> newItemElementFor: anItem [
 					yourself);
 				addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: anItem label);
 				yourself ].
-	aRow userData
+	^ self configureItemElement: aRow for: anItem
+]
+
+{ #category : 'private - building' }
+CFAtelierPaletteElement >> configureItemElement: anElement for: anItem [
+	anElement userData
 		at: #atelierPaletteSource put: true;
 		at: #atelierPaletteItem put: anItem.
-	aRow addEventHandler: (BlDragHandler new
+	anElement addEventHandler: (BlDragHandler new
 		liftItem: [ :aSourceElement |
 			self dragItemFor: anItem sourceElement: aSourceElement ];
 		yourself).
-	^ aRow
+	^ anElement
 ]
 
 { #category : 'interaction' }

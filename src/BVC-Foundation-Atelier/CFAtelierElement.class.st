@@ -72,12 +72,19 @@ CFAtelierElement >> paletteElement [
 
 { #category : 'accessing' }
 CFAtelierElement >> palette: anAtelierPalette [
+	^ self palette: anAtelierPalette elementFactory: nil
+]
+
+{ #category : 'accessing' }
+CFAtelierElement >> palette: anAtelierPalette elementFactory: aFactoryBlock [
 	paletteElement ifNotNil: [ self removeChild: paletteElement ].
-	paletteElement := CFAtelierPaletteElement new
+	paletteElement := aFactoryBlock
+		ifNil: [ CFAtelierPaletteElement new ]
+		ifNotNil: [ aFactoryBlock value ].
+	paletteElement
 		palette: anAtelierPalette;
 		constraintsDo: [ :c | c ignoreByLayout ];
-		relocate: 16 @ 16;
-		yourself.
+		relocate: 16 @ 16.
 	self addChild: paletteElement
 ]
 

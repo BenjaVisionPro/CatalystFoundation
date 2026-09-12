@@ -8,6 +8,7 @@ Class {
 	#superclass : 'CFMaViewModel',
 	#instVars : [
 		'palette',
+		'paletteElementFactory',
 		'removeOperationBlock',
 		'insertOperationBlock',
 		'replaceOperationBlock',
@@ -64,7 +65,7 @@ CFAtelierViewModel >> asElement [
 	palette ifNil: [ ^ aFormElement ].
 	^ CFAtelierElement new
 		removeOperationFor: removeOperationBlock;
-		palette: palette;
+		palette: palette elementFactory: paletteElementFactory;
 		formElement: aFormElement;
 		yourself
 ]
@@ -90,6 +91,17 @@ CFAtelierViewModel >> palette [
 { #category : 'accessing' }
 CFAtelierViewModel >> palette: anAtelierPalette [
 	palette := anAtelierPalette
+]
+
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> paletteElementFactory: aBlock [
+	paletteElementFactory := aBlock
+]
+
+{ #category : 'accessing' }
+CFAtelierViewModel >> paletteElementFactory [
+	^ paletteElementFactory
 ]
 
 { #category : 'configuration' }

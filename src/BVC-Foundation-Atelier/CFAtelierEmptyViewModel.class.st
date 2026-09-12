@@ -6,6 +6,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'palette',
+		'paletteElementFactory',
 		'element',
 		'rootObject',
 		'configuration',
@@ -33,7 +34,7 @@ CFAtelierEmptyViewModel >> asElement [
 	element ifNotNil: [ ^ element ].
 	anEmptyRoot := CFAtelierEmptyRootElement new.
 	element := CFAtelierElement new
-		palette: palette;
+		palette: palette elementFactory: paletteElementFactory;
 		formElement: anEmptyRoot;
 		yourself.
 	CFAtelierRootDropTarget
@@ -65,7 +66,8 @@ CFAtelierEmptyViewModel >> rootObject [ ^ rootObject ]
 { #category : 'configuration' }
 CFAtelierEmptyViewModel >> configuration: anAtelierConfiguration [
 	configuration := anAtelierConfiguration.
-	palette := anAtelierConfiguration palette
+	palette := anAtelierConfiguration palette.
+	paletteElementFactory := anAtelierConfiguration paletteElementFactory
 ]
 
 { #category : 'accessing' }

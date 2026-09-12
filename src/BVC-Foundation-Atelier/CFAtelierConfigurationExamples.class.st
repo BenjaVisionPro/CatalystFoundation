@@ -43,6 +43,10 @@ CFAtelierConfigurationExamples >> emptyRootReusesEditingConfigurationAfterAdopti
 	<gtExample>
 	| configuration atelier candidate accepted |
 	configuration := self exampleConfiguration.
+	configuration paletteElementFactory: [
+		CFAtelierPaletteElement new
+			userData at: #configuredPaletteElement put: true;
+			yourself ].
 	atelier := CFAtelierEmptyViewModel configuration: configuration.
 	atelier asElement.
 	candidate := CFAtelierEntryExampleModel new.
@@ -54,5 +58,25 @@ CFAtelierConfigurationExamples >> emptyRootReusesEditingConfigurationAfterAdopti
 	self assert: atelier rootViewModel notNil.
 	self assert: atelier rootViewModel palette isNil.
 	self assert: atelier asElement paletteElement palette == configuration palette.
+	self assert: (atelier asElement paletteElement userData at: #configuredPaletteElement).
 	^ atelier
 ]
+
+{ #category : 'examples - configuration' }
+CFAtelierConfigurationExamples >> configuredPaletteElementFactoryIsUsed [
+	<gtExample>
+	| model configuration atelier element |
+	model := CFAtelierEntryExampleModel new.
+	configuration := self exampleConfiguration.
+	configuration paletteElementFactory: [
+		CFAtelierPaletteElement new
+			userData at: #configuredPaletteElement put: true;
+			yourself ].
+	atelier := model asAtelierWith: configuration.
+	element := atelier asElement.
+
+	self assert: (element paletteElement userData at: #configuredPaletteElement).
+	self assert: element paletteElement palette == configuration palette.
+	^ atelier
+]
+
