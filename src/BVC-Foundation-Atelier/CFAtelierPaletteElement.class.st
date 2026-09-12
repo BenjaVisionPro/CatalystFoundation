@@ -65,20 +65,26 @@ CFAtelierPaletteElement >> newItemsElement [
 
 { #category : 'private - interaction' }
 CFAtelierPaletteElement >> installMoveInteractionOn: aDragSurfaceElement [
-	aDragSurfaceElement when: BlDragStartEvent do: [ :anEvent |
-		(self shouldBeginMoveForDragStartEvent: anEvent) ifTrue: [
-			draggingPalette := true.
-			dragStartPointer := anEvent position.
-			dragStartPosition := self position.
-			anEvent consumed: true ] ].
-	aDragSurfaceElement when: BlDragEvent do: [ :anEvent |
-		draggingPalette ifTrue: [
-			self relocateWithinParent: dragStartPosition + (anEvent position - dragStartPointer).
-			anEvent consumed: true ] ].
-	aDragSurfaceElement when: BlDragEndEvent do: [ :anEvent |
-		draggingPalette ifTrue: [
-			draggingPalette := false.
-			anEvent consumed: true ] ]
+	aDragSurfaceElement addEventFilter: (BlEventHandler
+		on: BlDragStartEvent
+		do: [ :anEvent |
+			(self shouldBeginMoveForDragStartEvent: anEvent) ifTrue: [
+				draggingPalette := true.
+				dragStartPointer := anEvent position.
+				dragStartPosition := self position.
+				anEvent consumed: true ] ]).
+	aDragSurfaceElement addEventHandler: (BlEventHandler
+		on: BlDragEvent
+		do: [ :anEvent |
+			draggingPalette ifTrue: [
+				self relocateWithinParent: dragStartPosition + (anEvent position - dragStartPointer).
+				anEvent consumed: true ] ]).
+	aDragSurfaceElement addEventHandler: (BlEventHandler
+		on: BlDragEndEvent
+		do: [ :anEvent |
+			draggingPalette ifTrue: [
+				draggingPalette := false.
+				anEvent consumed: true ] ])
 ]
 
 { #category : 'private - interaction' }
