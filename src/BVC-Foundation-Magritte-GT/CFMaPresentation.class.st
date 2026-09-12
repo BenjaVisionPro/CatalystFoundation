@@ -88,9 +88,24 @@ CFMaPresentation >> addElement: anElement for: aDescription [
 		addContent: anElement
 ]
 
+{ #category : 'private - composition' }
+CFMaPresentation >> fieldContextFor: aDescription [
+	^ CFMaFieldContext
+		description: aDescription
+		memento: self memento
+]
+
 { #category : 'elements' }
 CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
-	| aLabel aText aLabelAptitude |
+	^ self
+		addFieldElement: aFieldElement
+		usingContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'elements' }
+CFMaPresentation >> addFieldElement: aFieldElement usingContext: aFieldContext [
+	| aDescription aLabel aText aLabelAptitude |
+	aDescription := aFieldContext description.
 	aText := aDescription label asRopedText.
 	aDescription isRequired ifTrue: [ aText append: '*' asRopedText ].
 	aLabelAptitude := aDescription labelAptitude
@@ -106,29 +121,60 @@ CFMaPresentation >> addFieldElement: aFieldElement using: aDescription [
 		self addCommentTooltipTo: aFieldElement using: aDescription ].
 
 	self configureTabStopFor: aFieldElement using: aDescription.
-	self configureEnablementFor: aFieldElement label: aLabel using: aDescription.
-	self addLabel: aLabel field: aFieldElement for: aDescription.
+	self
+		configureEnablementFor: aFieldElement
+		label: aLabel
+		usingContext: aFieldContext.
+	self
+		addLabel: aLabel
+		field: aFieldElement
+		forContext: aFieldContext.
 	^ aLabel
 ]
 
 { #category : 'private - composition' }
 CFMaPresentation >> configureEnablementFor: aFieldElement label: aLabel using: aDescription [
-	| anEnabledBlock |
+	^ self
+		configureEnablementFor: aFieldElement
+		label: aLabel
+		usingContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> configureEnablementFor: aFieldElement label: aLabel usingContext: aFieldContext [
+	| anEnabledBlock aDescription |
+	aDescription := aFieldContext description.
 	anEnabledBlock := aDescription enabledBlock.
 	anEnabledBlock ifNil: [ ^ self ].
 
-	self updateEnablementFor: aFieldElement label: aLabel using: aDescription.
+	self
+		updateEnablementFor: aFieldElement
+		label: aLabel
+		usingContext: aFieldContext.
 	aFieldElement withAsyncSinkDo: [ :anElementSink |
 		anElementSink
 			sink: AsyncPeekSink new;
 			whenUpdate: [ :theField :aSink |
-				self updateEnablementFor: theField label: aLabel using: aDescription ].
-		self memento overallStatus observe: anElementSink ]
+				self
+					updateEnablementFor: theField
+					label: aLabel
+					usingContext: aFieldContext ].
+		aFieldContext memento overallStatus observe: anElementSink ]
 ]
 
 { #category : 'private - composition' }
 CFMaPresentation >> updateEnablementFor: aFieldElement label: aLabel using: aDescription [
-	(aDescription enabledBlock cull: self memento model)
+	^ self
+		updateEnablementFor: aFieldElement
+		label: aLabel
+		usingContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> updateEnablementFor: aFieldElement label: aLabel usingContext: aFieldContext [
+	| aDescription |
+	aDescription := aFieldContext description.
+	(aDescription enabledBlock cull: aFieldContext model)
 		ifTrue: [
 			aFieldElement states removeState: BlElementState disabled.
 			aLabel states removeState: BlElementState disabled ]
@@ -228,6 +274,14 @@ CFMaPresentation >> addFileDropdown: aDescription [
 		newFileDropdownMemento: self memento
 		using: aDescription.
 	self addFieldElement: aButton using: aDescription
+]
+
+{ #category : 'private - composition' }
+CFMaPresentation >> addLabel: aLabel field: aFieldElement forContext: aFieldContext [
+	^ self
+		addLabel: aLabel
+		field: aFieldElement
+		for: aFieldContext description
 ]
 
 { #category : 'private - composition' }

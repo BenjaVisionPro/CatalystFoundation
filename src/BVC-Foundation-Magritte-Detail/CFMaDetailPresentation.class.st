@@ -347,11 +347,21 @@ CFMaDetailPresentation >> addFileDropdown: aDescription [
 
 { #category : 'private - composition' }
 CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescription [
-	| aSupportingElement aRow aFieldConfiguration aLeadingElement |
+	^ self
+		addLabel: aLabel
+		field: aFieldElement
+		forContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - composition' }
+CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement forContext: aFieldContext [
+	| aDescription aSupportingElement aRow aFieldConfiguration aLeadingElement |
+	aDescription := aFieldContext description.
 	aFieldConfiguration := self fieldConfigurationFor: aDescription.
 	aLeadingElement := self
 		leadingElementFor: aDescription
-		configuration: aFieldConfiguration.
+		configuration: aFieldConfiguration
+		context: aFieldContext.
 	aSupportingElement := aDescription hasComment
 		ifTrue: [ self supportingElementFor: aDescription ]
 		ifFalse: [ nil ].
@@ -360,19 +370,25 @@ CFMaDetailPresentation >> addLabel: aLabel field: aFieldElement for: aDescriptio
 		description: aLabel
 		supporting: aSupportingElement
 		content: aFieldElement
-		accessories: (self newAccessoriesFor: aDescription)
+		accessories: (self newAccessoriesForContext: aFieldContext)
 		trailing: nil.
 	(self presentationGroupForDescription: aDescription) addContent: aRow
 ]
 
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newAccessoriesFor: aDescription [
-	| accessories information |
+	^ self newAccessoriesForContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newAccessoriesForContext: aFieldContext [
+	| aDescription accessories information |
+	aDescription := aFieldContext description.
 	accessories := OrderedCollection new.
 	(aDescription isWithChangeIndicator and: [ aDescription autoAccept not ]) ifTrue: [
-		accessories add: (self newRevertAccessoryFor: aDescription) ].
-	accessories add: (self newValidationAccessoryFor: aDescription).
-	information := aDescription informationFor: self memento model.
+		accessories add: (self newRevertAccessoryForContext: aFieldContext) ].
+	accessories add: (self newValidationAccessoryForContext: aFieldContext).
+	information := aDescription informationFor: aFieldContext model.
 	information ifNotNil: [
 		accessories add: (self newInformationAccessoryFor: information) ].
 	^ accessories
@@ -407,11 +423,18 @@ CFMaDetailPresentation >> newInformationAccessoryFor: information [
 
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newRevertAccessoryFor: aDescription [
-	| aButton |
+	^ self newRevertAccessoryForContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newRevertAccessoryForContext: aFieldContext [
+	| aButton aDescription aMemento |
+	aDescription := aFieldContext description.
+	aMemento := aFieldContext memento.
 	aButton := self newAccessoryButtonIconNamed: #arrowRotateLeft.
 	aButton
 		label: 'Revert to saved value';
-		action: [ self memento revertUsing: aDescription ];
+		action: [ aMemento revertUsing: aDescription ];
 		visibility: BlVisibility gone.
 	aButton withAsyncSinkDo: [ :anElementSink |
 		anElementSink
@@ -420,13 +443,19 @@ CFMaDetailPresentation >> newRevertAccessoryFor: aDescription [
 				aSink value isChanged
 					ifTrue: [ anElement visibility: BlVisibility visible ]
 					ifFalse: [ anElement visibility: BlVisibility gone ] ].
-		(self memento readObservableValueUsing: aDescription) observe: anElementSink ].
+		(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 	^ aButton
 ]
 
 { #category : 'private - accessories' }
 CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
-	| aButton |
+	^ self newValidationAccessoryForContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - accessories' }
+CFMaDetailPresentation >> newValidationAccessoryForContext: aFieldContext [
+	| aButton aDescription |
+	aDescription := aFieldContext description.
 	aButton := self newAccessoryButtonIconNamed: #triangleExclamation.
 	aButton
 		label: 'Validation failed';
@@ -443,7 +472,7 @@ CFMaDetailPresentation >> newValidationAccessoryFor: aDescription [
 						anElement
 							label: aValidationResult issuesDescription;
 							visibility: BlVisibility visible ] ].
-		(self memento validatorUsing: aDescription) observe: anElementSink ].
+		(aFieldContext memento validatorUsing: aDescription) observe: anElementSink ].
 	^ aButton
 ]
 
@@ -480,8 +509,16 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 
 { #category : 'private - icons' }
 CFMaDetailPresentation >> leadingElementFor: aDescription configuration: aFieldConfiguration [
+	^ self
+		leadingElementFor: aDescription
+		configuration: aFieldConfiguration
+		context: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'private - icons' }
+CFMaDetailPresentation >> leadingElementFor: aDescription configuration: aFieldConfiguration context: aFieldContext [
 	| anIcon anIconConfiguration |
-	anIcon := aDescription iconFor: self memento model.
+	anIcon := aDescription iconFor: aFieldContext model.
 	anIcon ifNil: [ ^ nil ].
 	anIconConfiguration := aFieldConfiguration icon.
 	^ anIconConfiguration isUnadorned
@@ -571,8 +608,17 @@ CFMaDetailPresentation >> newRowLeading: aLeadingElement description: aDescripti
 
 { #category : 'elements' }
 CFMaDetailPresentation >> addFieldElement: aFieldElement using: aDescription [
+	^ self
+		addFieldElement: aFieldElement
+		usingContext: (self fieldContextFor: aDescription)
+]
+
+{ #category : 'elements' }
+CFMaDetailPresentation >> addFieldElement: aFieldElement usingContext: aFieldContext [
 	self prepareEditorFocusChromeIn: aFieldElement.
-	^ super addFieldElement: aFieldElement using: aDescription
+	^ super
+		addFieldElement: aFieldElement
+		usingContext: aFieldContext
 ]
 
 { #category : 'private - focus' }
@@ -659,7 +705,11 @@ CFMaDetailPresentation >> addGroupedButtonsSingleOptionUsing: aDescription memen
 				theButtons value: aSink value currentValue ].
 		(aMemento readObservableValueUsing: aDescription) observe: anElementSink ].
 	self addShortcutsTo: aButtons.
-	self addFieldElement: aButtons using: aDescription
+	self
+		addFieldElement: aButtons
+		usingContext: (CFMaFieldContext
+			description: aDescription
+			memento: aMemento)
 ]
 
 { #category : 'private - building' }
