@@ -58,8 +58,10 @@ CFAtelierInspectorElement >> inspectObject: anObject memento: aMemento presentat
 	tool := CFMaMementoTool object: anObject memento: aMemento.
 	aPresentationBlock ifNotNil: [ tool presentationDo: aPresentationBlock ].
 	pendingTool := tool.
-	tool prepareElementDo: [ :aPreparedTool |
-		self installPreparedTool: aPreparedTool ].
+	self enqueueTask: (BlTaskAction new action: [
+		pendingTool == tool ifTrue: [
+			tool prepareElementDo: [ :aPreparedTool |
+				self installPreparedTool: aPreparedTool ] ] ]).
 	^ tool
 ]
 

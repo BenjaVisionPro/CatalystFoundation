@@ -46,16 +46,28 @@ CFMaMementoTool >> memento: aMemento [
 ]
 
 { #category : 'private - building' }
-CFMaMementoTool >> newElementReadyDo: aBlock [
+CFMaMementoTool >> newConfiguredViewModel [
 	| viewModel |
 	viewModel := CFMaViewModel forObject: object memento: memento.
 	viewModel
 		ignoreImplicitActions;
-		elementBuilderDo: [ CFMaDetailPresentation new beOverlay ];
-		onElementCreated: [ :aFormElement | aBlock value: aFormElement ].
+		elementBuilderDo: [ CFMaDetailPresentation new beOverlay ].
 	presentationBlock ifNotNil: [ :aPresentationBlock |
 		viewModel presentationDo: aPresentationBlock ].
+	^ viewModel
+]
+
+{ #category : 'private - building' }
+CFMaMementoTool >> newElementReadyDo: aBlock [
+	| viewModel |
+	viewModel := self newConfiguredViewModel.
+	viewModel onElementCreated: [ :aFormElement | aBlock value: aFormElement ].
 	^ viewModel asElement
+]
+
+{ #category : 'private - building' }
+CFMaMementoTool >> newPreparedElement [
+	^ self newConfiguredViewModel preparedElementForMemento: memento
 ]
 
 { #category : 'accessing' }
@@ -70,11 +82,9 @@ CFMaMementoTool >> object: anObject [
 
 { #category : 'preparing' }
 CFMaMementoTool >> prepareElementDo: aBlock [
-	preparedElement ifNotNil: [
-		^ aBlock value: self ].
-	self newElementReadyDo: [ :aReadyElement |
-		preparedElement := aReadyElement.
-		aBlock value: self ]
+	preparedElement ifNil: [
+		preparedElement := self newPreparedElement ].
+	^ aBlock value: self
 ]
 
 { #category : 'configuration' }

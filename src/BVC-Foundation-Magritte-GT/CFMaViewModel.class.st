@@ -26,20 +26,9 @@ CFMaViewModel class >> forObject: anObject memento: aMemento [
 
 { #category : 'api - converting' }
 CFMaViewModel >> asElement [
-	| aFrame aResizerAptitude |
-	aFrame := CFMaFormRootElement new.
-
-	aResizerAptitude := BrLayoutResizerAptitude new.
-	"The generated Foundation form child should fill the Phlow-facing async host."
-	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
-
+	| aFrame |
+	aFrame := self newFormRootElement.
 	aFrame
-		hMatchParent;
-		vFitContent;
-		constraintsDo: [ :c |
-			c frame horizontal alignCenter.
-			c frame vertical alignCenter ];
-		addAptitude: aResizerAptitude;
 		withAsyncFutureDo: [ :anElementFuture |
 			anElementFuture
 				whenPending: [ :theContainer | ];
@@ -60,6 +49,30 @@ CFMaViewModel >> asElement [
 		executionConfiguration: GtMagritteBuilderUtility executionConfiguration.
 	aFrame asyncFuture future: self mementoFuture.
 
+	^ aFrame
+]
+
+{ #category : 'private - building' }
+CFMaViewModel >> newFormRootElement [
+	| aFrame aResizerAptitude |
+	aFrame := CFMaFormRootElement new.
+	aResizerAptitude := BrLayoutResizerAptitude new.
+	aResizerAptitude hAnyToMatchParent: [ aFrame children ].
+	aFrame
+		hMatchParent;
+		vFitContent;
+		constraintsDo: [ :c |
+			c frame horizontal alignCenter.
+			c frame vertical alignCenter ];
+		addAptitude: aResizerAptitude.
+	^ aFrame
+]
+
+{ #category : 'api - converting' }
+CFMaViewModel >> preparedElementForMemento: aMemento [
+	| aFrame |
+	aFrame := self newFormRootElement.
+	self initializeForm: aFrame forMemento: aMemento.
 	^ aFrame
 ]
 
