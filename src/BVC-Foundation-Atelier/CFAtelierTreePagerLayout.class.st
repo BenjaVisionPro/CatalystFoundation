@@ -1,11 +1,10 @@
 "I am the horizontal tree-flow layout used by Atelier's inspector pager.
 
-Atelier presents exactly one fixed-width page at a time. Free horizontal wheel movement is allowed while the gesture is active, but when input settles I always animate to the nearest page boundary using Foundation Motion. Programmatic page navigation uses the same settling path."
+Atelier presents exactly one fixed-width page at a time. Trackpad and wheel input continuously retargets a Foundation Motion toward the projected landing page, so fling deceleration and page settling are one continuous movement rather than a free scroll followed by a delayed snap. Programmatic page navigation uses the same settling path."
 Class {
 	#name : 'CFAtelierTreePagerLayout',
 	#superclass : 'BlHorizontalTreeFlowLayout',
 	#instVars : [
-		'settleTask',
 		'settleMotion'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
@@ -18,50 +17,44 @@ CFAtelierTreePagerLayout >> mouseWheelEvent: anEvent [
 	anEvent isPrimarilyHorizontal ifFalse: [ ^ super mouseWheelEvent: anEvent ].
 	self cancelSettle.
 	super mouseWheelEvent: anEvent.
-	self scheduleSettleOf: anEvent currentTarget
+	self
+		settleToColumn: (self projectedLandingColumnFor: anEvent in: anEvent currentTarget)
+		in: anEvent currentTarget
 ]
 
 { #category : 'private - settling' }
 CFAtelierTreePagerLayout >> cancelSettle [
-	settleTask ifNotNil: [
-		settleTask stop.
-		settleTask := nil ].
 	settleMotion ifNotNil: [
 		settleMotion cancel.
 		settleMotion := nil ]
 ]
 
 { #category : 'private - settling' }
-CFAtelierTreePagerLayout >> nearestPageColumnIn: anElement [
-	| visibleChildren nearestChild |
-	visibleChildren := anElement children select: [ :each | each isVisibleInParent ].
-	visibleChildren ifEmpty: [ ^ 1 ].
-	nearestChild := visibleChildren detectMin: [ :each | each position x abs ].
-	^ nearestChild constraints horizontalTreeFlow depth
+CFAtelierTreePagerLayout >> projectedLandingColumnFor: anEvent in: anElement [
+	| projectedOffset projectedRelativeColumn lastColumn |
+	anElement width isZero ifTrue: [ ^ self firstVisibleColumn ].
+	projectedOffset := self horizontalOffset
+		+ ((anEvent vector x / anElement width) * 3.0).
+	projectedRelativeColumn := projectedOffset rounded.
+	lastColumn := anElement childrenNodesLastColumn max: 1.
+	^ ((self firstVisibleColumn + projectedRelativeColumn) max: 1) min: lastColumn
 ]
 
 { #category : 'private - settling' }
-CFAtelierTreePagerLayout >> scheduleSettleOf: anElement [
-	settleTask := BlDelayedTaskAction new
-		delay: 90 milliSeconds;
-		action: [
-			settleTask := nil.
-			self settleToNearestPageIn: anElement ].
-	anElement enqueueTask: settleTask
+CFAtelierTreePagerLayout >> settleDurationForDistance: aDistance [
+	^ (90 + ((aDistance min: 1.0) * 120)) milliSeconds
 ]
 
 { #category : 'api - scrolling' }
 CFAtelierTreePagerLayout >> settleToColumn: aColumn in: anElement [
-	| child targetOffset motion |
+	| targetOffset distance motion |
 	self assert: [ anElement layout == self ].
 	self cancelSettle.
-	child := anElement children
-		detect: [ :each | each constraints horizontalTreeFlow depth = aColumn ]
-		ifNone: [ ^ self scrollToColumn: aColumn in: anElement ].
 	anElement width isZero ifTrue: [ ^ self scrollToColumn: aColumn in: anElement ].
 	anElement isAttachedToSceneGraph ifFalse: [ ^ self scrollToColumn: aColumn in: anElement ].
-	targetOffset := self horizontalOffset + (child position x / anElement width).
-	(targetOffset closeTo: self horizontalOffset) ifTrue: [
+	targetOffset := (aColumn - self firstVisibleColumn) asFloat.
+	distance := (targetOffset - self horizontalOffset) abs.
+	(distance closeTo: 0.0) ifTrue: [
 		^ self scrollToColumn: aColumn in: anElement ].
 	motion := CFMotion
 		coordinator: anElement space motionCoordinator
@@ -70,8 +63,8 @@ CFAtelierTreePagerLayout >> settleToColumn: aColumn in: anElement [
 			property: CFAtelierTreePagerHorizontalOffsetProperty uniqueInstance
 			target: targetOffset }.
 	motion
-		duration: 150 milliSeconds;
-		easing: (BlDecelerateInterpolator factor: 1.4);
+		duration: (self settleDurationForDistance: distance);
+		easing: (BlDecelerateInterpolator factor: 1.7);
 		onTerminalDo: [ :finishedMotion |
 			settleMotion == finishedMotion ifTrue: [ settleMotion := nil ].
 			finishedMotion state == CFMotionState completed ifTrue: [
@@ -82,7 +75,9 @@ CFAtelierTreePagerLayout >> settleToColumn: aColumn in: anElement [
 
 { #category : 'api - scrolling' }
 CFAtelierTreePagerLayout >> settleToNearestPageIn: anElement [
-	^ self
-		settleToColumn: (self nearestPageColumnIn: anElement)
-		in: anElement
+	| lastColumn relativeColumn targetColumn |
+	lastColumn := anElement childrenNodesLastColumn max: 1.
+	relativeColumn := self horizontalOffset rounded.
+	targetColumn := ((self firstVisibleColumn + relativeColumn) max: 1) min: lastColumn.
+	^ self settleToColumn: targetColumn in: anElement
 ]
