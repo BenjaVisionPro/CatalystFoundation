@@ -1388,8 +1388,8 @@ CFMaDetailPresentationExamples >> compactObjectAssignsTextPresentationByTextLine
 		reference: reference;
 		yourself.
 
-	self assert: (anElement titleElement isKindOf: CFMaCompactIdentityEditorElement).
-	self assert: (anElement identifierElement isKindOf: CFMaCompactIdentityEditorElement).
+	self assert: (anElement titleElement isKindOf: GtMagritteOneLineEditorElement).
+	self assert: (anElement identifierElement isKindOf: GtMagritteOneLineEditorElement).
 	^ anElement
 ]
 
@@ -1406,8 +1406,8 @@ CFMaDetailPresentationExamples >> compactObjectWritableTextUsesMagritteEditors [
 		reference: aReference;
 		yourself.
 
-	self assert: (anElement titleElement isKindOf: CFMaCompactIdentityEditorElement).
-	self assert: (anElement identifierElement isKindOf: CFMaCompactIdentityEditorElement).
+	self assert: (anElement titleElement isKindOf: GtMagritteOneLineEditorElement).
+	self assert: (anElement identifierElement isKindOf: GtMagritteOneLineEditorElement).
 	self assert: anElement titleElement margin equals: BlInsets empty.
 	self assert: anElement identifierElement margin equals: BlInsets empty.
 	self assert: anElement titleText equals: 'Editable compact object'.

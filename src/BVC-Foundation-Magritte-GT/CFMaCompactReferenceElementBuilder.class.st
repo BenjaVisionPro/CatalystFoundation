@@ -3,8 +3,8 @@ I build the compact identity of an object from its explicit Magritte reference.
 
 For descriptions owned by the supplied memento, isReadOnly is authoritative:
 read-only values retain compact static rendering while writable values use their
-normal Magritte editor bound to the same memento. I do not assign visual roles to
-text fields; CFCompactObjectElement does that from the textual line it is laying out.
+normal Magritte editor bound to the same memento. CFCompactObjectElement supplies
+only the compact line presentation through a presentation-only description copy.
 "
 Class {
 	#name : 'CFMaCompactReferenceElementBuilder',
@@ -45,21 +45,25 @@ CFMaCompactReferenceElementBuilder >> updateCompactIconValue: aValue description
 
 { #category : 'private - building' }
 CFMaCompactReferenceElementBuilder >> newCompactTextEditorFor: aDescription [
-	| aStencil anEditor |
-	aStencil := aDescription blocStencil.
+	| editorDescription aStencil anEditor currentValue |
+	editorDescription := element editorDescriptionForNextTextLine: aDescription.
+	aStencil := aDescription blocStencil
+		ifNil: [ GtMagritteStringEditorElementStencilBuilder new ].
 	anEditor := aStencil
-		ifNil: [
-			CFMaCompactIdentityEditorElement new
-				fieldViewModel: (GtMagritteFieldViewModel new
-					memento: memento;
-					description: aDescription;
-					yourself);
-				yourself ]
-		ifNotNil: [
-			aStencil
-				memento: memento;
-				description: aDescription;
-				asElement ].
+		memento: memento;
+		description: editorDescription;
+		asElement.
+
+	anEditor
+		margin: BlInsets empty;
+		padding: BlInsets empty;
+		hMatchParent;
+		vFitContent.
+
+	currentValue := memento readUsing: editorDescription.
+	(anEditor isKindOf: BrEditor) ifTrue: [
+		anEditor text: (editorDescription toString: currentValue) ].
+
 	^ element addReferenceTextElement: anEditor
 ]
 

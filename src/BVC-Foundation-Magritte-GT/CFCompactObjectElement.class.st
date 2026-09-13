@@ -4,7 +4,7 @@ I present an object through an explicit Magritte reference description.
 The reference defines which values participate and their order. I own the compact
 presentation convention: the first textual value is primary text and each later
 textual value is supporting text. Non-text values such as the icon do not count
-as text lines.
+as text lines. Writable values still use their normal Magritte field editor.
 "
 Class {
 	#name : 'CFCompactObjectElement',
@@ -124,12 +124,8 @@ CFCompactObjectElement >> addReferenceTextElement: aTextElement [
 		vFitContent.
 
 	textPane hasChildren
-		ifFalse: [
-			titleElement := aTextElement.
-			self styleAsPrimaryReferenceText: aTextElement ]
-		ifTrue: [
-			identifierElement ifNil: [ identifierElement := aTextElement ].
-			self styleAsSupportingReferenceText: aTextElement ].
+		ifFalse: [ titleElement := aTextElement ]
+		ifTrue: [ identifierElement ifNil: [ identifierElement := aTextElement ] ].
 
 	textPane addChild: aTextElement.
 	^ aTextElement
@@ -147,15 +143,31 @@ CFCompactObjectElement >> newReferenceTextElement [
 ]
 
 { #category : 'private - appearance' }
-CFCompactObjectElement >> styleAsPrimaryReferenceText: aTextElement [
-	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
-		ifTrue: [ aTextElement bePrimaryText ]
+CFCompactObjectElement >> primaryReferenceEditorAptitude [
+	^ BrGlamorousRegularEditorAptitude new
+		glamorousRegularFont;
+		foreground: self theme typography primaryForeground;
+		yourself
 ]
 
 { #category : 'private - appearance' }
-CFCompactObjectElement >> styleAsSupportingReferenceText: aTextElement [
-	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
-		ifTrue: [ aTextElement beSupportingText ]
+CFCompactObjectElement >> supportingReferenceEditorAptitude [
+	^ BrGlamorousRegularEditorAptitude new
+		glamorousRegularFont;
+		foreground: self theme typography tertiaryForeground;
+		fontSize: self theme typography supportingFontSize;
+		yourself
+]
+
+{ #category : 'private - reference' }
+CFCompactObjectElement >> editorDescriptionForNextTextLine: aDescription [
+	| editorDescription aptitudeBlock |
+	editorDescription := aDescription copy.
+	aptitudeBlock := textPane hasChildren
+		ifTrue: [ [ self supportingReferenceEditorAptitude ] ]
+		ifFalse: [ [ self primaryReferenceEditorAptitude ] ].
+	editorDescription editorAptitude: aptitudeBlock.
+	^ editorDescription
 ]
 
 { #category : 'private - reference' }
