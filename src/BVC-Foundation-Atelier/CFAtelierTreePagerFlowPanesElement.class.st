@@ -9,6 +9,13 @@ Class {
 	#tag : 'UI'
 }
 
+
+{ #category : 'initialization' }
+CFAtelierTreePagerFlowPanesElement >> initialize [
+	super initialize.
+	self preventMouseEvents
+]
+
 { #category : 'private - updating' }
 CFAtelierTreePagerFlowPanesElement >> newNodeElementForPaneModel: aPaneModel [
 	| aPaneElement |
