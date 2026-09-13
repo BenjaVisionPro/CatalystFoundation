@@ -25,8 +25,7 @@ CFAtelierInspectorElement >> initialize [
 		clipChildren: false;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
-			c frame vertical alignTop ];
-		addAptitude: CFGlassSurfaceAptitude new
+			c frame vertical alignTop ]
 ]
 
 { #category : 'accessing' }
@@ -73,7 +72,7 @@ CFAtelierInspectorElement >> installPreparedTool: aTool [
 	previousPager := pagerElement.
 	incomingPager := GtTreePager createWrappedOn: aTool.
 	incomingPager
-		background: Color transparent;
+		beAtelierOverlay;
 		hMatchParent;
 		vMatchParent.
 	incomingPager pagerModel settings numberOfVisibleColumns: 1.
@@ -82,7 +81,8 @@ CFAtelierInspectorElement >> installPreparedTool: aTool [
 	pagerElement := incomingPager.
 	self
 		opacity: 1.0;
-		allowMeAndChildrenMouseEvents.
+		allowMeAndChildrenMouseEvents;
+		preventMouseEvents.
 
 	(previousPager isNil or: [ self isAttachedToSceneGraph not ]) ifTrue: [
 		previousPager ifNotNil: [ previousPager removeFromParent ].
