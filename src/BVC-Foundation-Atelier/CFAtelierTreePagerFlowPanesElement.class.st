@@ -12,7 +12,7 @@ Class {
 
 { #category : 'initialization' }
 CFAtelierTreePagerFlowPanesElement >> defaultLayout [
-	^ BlHorizontalTreeFlowLayout new
+	^ CFAtelierTreePagerLayout new
 		numberOfVisibleColumns: 1;
 		firstVisibleColumn: 1;
 		horizontalOffset: 0;
@@ -42,4 +42,10 @@ CFAtelierTreePagerFlowPanesElement >> newNodeElementForPaneModel: aPaneModel [
 	aPaneElement paneModel: aPaneModel.
 
 	^ aPaneElement
+]
+
+
+{ #category : 'api - scrolling' }
+CFAtelierTreePagerFlowPanesElement >> smoothScrollToColumn: aColumn [
+	self layout settleToColumn: aColumn in: self
 ]
