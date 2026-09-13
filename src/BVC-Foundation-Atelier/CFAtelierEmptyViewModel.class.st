@@ -49,7 +49,8 @@ CFAtelierEmptyViewModel >> adoptRootObject: anObject [
 	rootObject := anObject.
 	rootViewModel := CFAtelierViewModel forObject: anObject.
 	configuration ifNotNil: [ configuration applyEditingTo: rootViewModel ].
-	element ifNotNil: [ element replaceFormElementWithMotion: rootViewModel asElement ].
+	element ifNotNil: [
+		element replaceFormElementWithMotion: (rootViewModel newFormElementIn: element) ].
 	^ true
 ]
 

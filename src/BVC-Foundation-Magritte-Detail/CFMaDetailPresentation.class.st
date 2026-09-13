@@ -1486,11 +1486,13 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 						ifTrue: [
 							CFMaPhlowNavigation
 								navigateNewBranchFrom: aRow
-								to: anObject ]
+								to: anObject
+								memento: (self memento childMementoFor: anObject inRelation: aDescription) ]
 						ifFalse: [
 							CFMaPhlowNavigation
 								selectFrom: aRow
-								object: anObject ] ] ] ];
+								object: anObject
+								memento: (self memento childMementoFor: anObject inRelation: aDescription) ] ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |
@@ -1499,7 +1501,8 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 				anEvent consumed: true.
 				CFMaPhlowNavigation
 					navigateFrom: aRow
-					to: anObject ] ]
+					to: anObject
+					memento: (self memento childMementoFor: anObject inRelation: aDescription) ] ]
 ]
 
 { #category : 'private - relations' }

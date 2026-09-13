@@ -155,3 +155,76 @@ CFMaPhlowNavigation class >> treePagerPaneContaining: anElement ifFound: aFoundB
 		ifFound: aFoundBlock
 		ifNone: aNoneBlock
 ]
+
+{ #category : 'api - navigating' }
+CFMaPhlowNavigation class >> selectFrom: anElement object: anObject memento: aMemento [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			| anExistingLink |
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
+			anExistingLink := self
+				immediateLinkFrom: aPaneElement paneModel
+				showing: anObject.
+			anExistingLink
+				ifNotNil: [
+					^ self
+						activateAndFocus: anExistingLink
+						from: aPaneElement ]
+				ifNil: [
+					| tool |
+					tool := CFMaMementoTool object: anObject memento: aMemento.
+					^ tool prepareElementDo: [ :aPreparedTool |
+						anElement phlow selectTool: aPreparedTool ] ] ]
+		ifNone: [
+			^ anElement phlow selectObject: anObject ]
+]
+
+{ #category : 'api - navigating' }
+CFMaPhlowNavigation class >> navigateFrom: anElement to: anObject memento: aMemento [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			| anExistingLink |
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
+			anExistingLink := self
+				immediateLinkFrom: aPaneElement paneModel
+				showing: anObject.
+			anExistingLink
+				ifNotNil: [
+					^ self
+						activateAndFocus: anExistingLink
+						from: aPaneElement ]
+				ifNil: [
+					| tool |
+					tool := CFMaMementoTool object: anObject memento: aMemento.
+					^ tool prepareElementDo: [ :aPreparedTool |
+						anElement phlow spawnTool: aPreparedTool ] ] ]
+		ifNone: [
+			^ anElement phlow spawnObject: anObject ]
+]
+
+{ #category : 'api - navigating' }
+CFMaPhlowNavigation class >> navigateNewBranchFrom: anElement to: anObject memento: aMemento [
+	self
+		treePagerPaneContaining: anElement
+		ifFound: [ :aPaneElement |
+			| anExistingLink |
+			self ensureTreePagerPolicyIn: aPaneElement navigationContext pagerElement.
+			anExistingLink := self
+				immediateSpawnedLinkFrom: aPaneElement paneModel
+				showing: anObject.
+			anExistingLink
+				ifNotNil: [
+					^ self
+						activateAndFocus: anExistingLink
+						from: aPaneElement ]
+				ifNil: [
+					| tool |
+					tool := CFMaMementoTool object: anObject memento: aMemento.
+					^ tool prepareElementDo: [ :aPreparedTool |
+						aPaneElement paneModel inactivateLink.
+						anElement phlow spawnTool: aPreparedTool ] ] ]
+		ifNone: [
+			^ anElement phlow spawnObject: anObject ]
+]

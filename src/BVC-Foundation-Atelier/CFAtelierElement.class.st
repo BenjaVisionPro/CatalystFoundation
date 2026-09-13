@@ -1,12 +1,13 @@
-"I am the visible Atelier host when orchestration UI is configured around a normal Foundation Magritte form.
+"I am the shared visible Atelier workspace host.
 
-The Foundation-selected form remains the primary surface and fills me. Atelier-owned transient tools such as the palette float over that surface instead of consuming layout space. I do not render Magritte descriptions myself."
+The Foundation-selected form remains the primary surface and fills me. Atelier-owned surfaces such as the inspector browser and palette compose over that form without changing the client presentation's semantic responsibility."
 Class {
 	#name : 'CFAtelierElement',
 	#superclass : 'BrFrame',
 	#instVars : [
 		'paletteElement',
 		'formElement',
+		'inspectorElement',
 		'removeDropTarget',
 		'removeOperationBlock'
 	],
@@ -22,7 +23,9 @@ CFAtelierElement >> initialize [
 		theme: CgtDetailLightTheme new;
 		hMatchParent;
 		vMatchParent;
-		clipChildren: true
+		clipChildren: true.
+	inspectorElement := CFAtelierInspectorElement new.
+	self addChild: inspectorElement
 ]
 
 { #category : 'accessing' }
@@ -38,6 +41,24 @@ CFAtelierElement >> formElement: anElement [
 		hMatchParent;
 		vMatchParent.
 	self addChild: formElement at: 1
+]
+
+{ #category : 'accessing' }
+CFAtelierElement >> inspectorElement [
+	^ inspectorElement
+]
+
+{ #category : 'inspecting' }
+CFAtelierElement >> clearInspector [
+	^ inspectorElement clearInspector
+]
+
+{ #category : 'inspecting' }
+CFAtelierElement >> inspectObject: anObject memento: aMemento presentationDo: aBlock [
+	^ inspectorElement
+		inspectObject: anObject
+		memento: aMemento
+		presentationDo: aBlock
 ]
 
 { #category : 'editing - motion' }

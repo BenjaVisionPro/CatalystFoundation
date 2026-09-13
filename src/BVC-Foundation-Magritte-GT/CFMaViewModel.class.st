@@ -42,16 +42,7 @@ CFMaViewModel >> asElement [
 		addAptitude: aResizerAptitude;
 		withAsyncFutureDo: [ :anElementFuture |
 			anElementFuture
-				whenPending: [ :theContainer |
-					theContainer
-						addChild: (BrLabel new
-							fitContent;
-							aptitude: (BrGlamorousLabelAptitude new
-								foreground: BrGlamorousColors disabledButtonTextColor);
-							text: 'Preparing...';
-							constraintsDo: [ :c |
-								c frame horizontal alignCenter.
-								c frame vertical alignCenter ]) ];
+				whenPending: [ :theContainer | ];
 				whenError: [ :theContainer :anError |
 					theContainer userData at: self class gtMementoSymbol put: anError.
 

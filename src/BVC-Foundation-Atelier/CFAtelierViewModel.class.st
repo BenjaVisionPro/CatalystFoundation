@@ -1,8 +1,6 @@
 "I am the public view-model entry point for editing an ordinary Magritte-described object as a Foundation Atelier.
 
-I deliberately inherit Foundation Magritte's rendering and memento behaviour unchanged. Atelier does not choose a parallel presentation: the object's Magritte container continues to select its Foundation presentation through the existing CFMaViewModel machinery.
-
-When Atelier-owned orchestration UI such as a palette is configured, I arrange it around that unchanged Foundation form rather than rendering the form myself."
+I inherit Foundation Magritte's rendering and memento behaviour. The object's Magritte container still selects its Foundation presentation; Atelier composes its shared workspace host, inspector browser and optional palette around that form."
 Class {
 	#name : 'CFAtelierViewModel',
 	#superclass : 'CFMaViewModel',
@@ -14,7 +12,9 @@ Class {
 		'replaceOperationBlock',
 		'moveOperationBlock',
 		'reorderOperationBlock',
-		'clientPresentationBlock'
+		'clientPresentationBlock',
+		'atelierElement',
+		'pendingInspectorRequest'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -24,6 +24,20 @@ Class {
 { #category : 'api - converting' }
 CFAtelierViewModel >> asElement [
 	| aFormElement |
+	aFormElement := self newFormElement.
+	atelierElement ifNil: [
+		atelierElement := CFAtelierElement new
+			removeOperationFor: removeOperationBlock;
+			yourself ].
+	atelierElement formElement: aFormElement.
+	palette ifNotNil: [
+		atelierElement palette: palette elementFactory: paletteElementFactory ].
+	self applyPendingInspectorRequest.
+	^ atelierElement
+]
+
+{ #category : 'private - building' }
+CFAtelierViewModel >> newFormElement [
 	super presentationDo: [ :aPresentation |
 		aPresentation
 			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
@@ -61,13 +75,13 @@ CFAtelierViewModel >> asElement [
 					memento: aMemento
 					description: aDescription ].
 		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ].
-	aFormElement := super asElement.
-	palette ifNil: [ ^ aFormElement ].
-	^ CFAtelierElement new
-		removeOperationFor: removeOperationBlock;
-		palette: palette elementFactory: paletteElementFactory;
-		formElement: aFormElement;
-		yourself
+	^ super asElement
+]
+
+{ #category : 'private - building' }
+CFAtelierViewModel >> newFormElementIn: anAtelierElement [
+	atelierElement := anAtelierElement.
+	^ self newFormElement
 ]
 
 
@@ -193,4 +207,29 @@ CFAtelierViewModel >> applyRemoveOf: someObjects memento: aMemento description: 
 		removeOperationFor: someObjects
 		memento: aMemento
 		description: aDescription) apply
+]
+
+
+{ #category : 'inspecting' }
+CFAtelierViewModel >> clearInspector [
+	pendingInspectorRequest := nil.
+	atelierElement ifNotNil: [ atelierElement clearInspector ]
+]
+
+{ #category : 'inspecting' }
+CFAtelierViewModel >> inspectObject: anObject memento: aMemento presentationDo: aBlock [
+	pendingInspectorRequest := { anObject. aMemento. aBlock }.
+	self applyPendingInspectorRequest
+]
+
+{ #category : 'private - inspecting' }
+CFAtelierViewModel >> applyPendingInspectorRequest [
+	| request |
+	(atelierElement isNil or: [ pendingInspectorRequest isNil ]) ifTrue: [ ^ self ].
+	request := pendingInspectorRequest.
+	pendingInspectorRequest := nil.
+	atelierElement
+		inspectObject: request first
+		memento: request second
+		presentationDo: request third
 ]

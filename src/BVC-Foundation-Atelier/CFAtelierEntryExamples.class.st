@@ -40,7 +40,8 @@ CFAtelierEntryExamples >> atelierCreatesFoundationFormRoot [
 	| element |
 	element := CFAtelierEntryExampleModel new asAtelier asElement.
 
-	self assert: element class equals: CFMaFormRootElement.
+	self assert: element class equals: CFAtelierElement.
+	self assert: element formElement class equals: CFMaFormRootElement.
 	^ element
 ]
 
