@@ -150,23 +150,31 @@ CFCompactObjectElement >> newReferenceTextElement [
 CFCompactObjectElement >> styleAsPrimaryReferenceText: aTextElement [
 	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
 		ifTrue: [ aTextElement bePrimaryText ]
-		ifFalse: [
-			self addAptitude: (BrLazyStyleCommonAptitude new
-				@ aTextElement aptitude label;
-				default: [ :aStyle |
-					aStyle foreground: self theme typography primaryForeground ]) ]
 ]
 
 { #category : 'private - appearance' }
 CFCompactObjectElement >> styleAsSupportingReferenceText: aTextElement [
 	(aTextElement isKindOf: CFMaCompactIdentityEditorElement)
 		ifTrue: [ aTextElement beSupportingText ]
+]
+
+{ #category : 'private - reference' }
+CFCompactObjectElement >> updateReferenceTextElement: aTextElement value: aValue description: aDescription [
+	| aString aText |
+	aString := aDescription toString: aValue.
+	aText := aString asRopedText glamorousRegularFont.
+	aTextElement == titleElement
+		ifTrue: [
+			aText foreground: self theme typography primaryForeground ]
 		ifFalse: [
-			aTextElement aptitude fontSize: self theme typography supportingFontSize.
-			self addAptitude: (BrLazyStyleCommonAptitude new
-				@ aTextElement aptitude label;
-				default: [ :aStyle |
-					aStyle foreground: self theme typography tertiaryForeground ]) ]
+			aText
+				foreground: self theme typography tertiaryForeground;
+				fontSize: self theme typography supportingFontSize ].
+	aTextElement
+		text: aText;
+		visibility: (aString isEmpty
+			ifTrue: [ BlVisibility gone ]
+			ifFalse: [ BlVisibility visible ])
 ]
 
 { #category : 'accessing' }

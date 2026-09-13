@@ -84,22 +84,22 @@ CFMaCompactReferenceElementBuilder >> visitElementDescription: aDescription [
 	aLabel := element newReferenceTextElement.
 	(self hasTransactionalValueFor: aDescription)
 		ifTrue: [
-			self
-				updateLabel: aLabel
+			element
+				updateReferenceTextElement: aLabel
 				value: (memento readUsing: aDescription)
 				description: aDescription.
 			aLabel withAsyncSinkDo: [ :anElementSink |
 				anElementSink
 					sink: AsyncPeekSink new;
 					whenUpdate: [ :theLabel :aSink |
-						self
-							updateLabel: theLabel
+						element
+							updateReferenceTextElement: theLabel
 							value: aSink value currentValue
 							description: aDescription ].
 				(memento readObservableValueUsing: aDescription) observe: anElementSink ] ]
 		ifFalse: [
-			self
-				updateLabel: aLabel
+			element
+				updateReferenceTextElement: aLabel
 				value: (self staticValueFor: aDescription)
 				description: aDescription ]
 ]
