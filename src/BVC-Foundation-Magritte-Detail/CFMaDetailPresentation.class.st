@@ -70,6 +70,10 @@ CFMaDetailPresentation >> addCompactIdentityUsing: aDescription [
 	| anElement |
 	anElement := CFCompactObjectElement new
 		beLarge;
+		editorElementDo: [ :anEditor :anEditorDescription |
+			self
+				addShortcutsTo: anEditor
+				using: anEditorDescription ];
 		memento: self memento;
 		reference: self objectDescription compactIdentityReference;
 		padding: (BlInsets top: 6 right: 0 bottom: 6 left: 0);

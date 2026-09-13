@@ -17,7 +17,8 @@ Class {
 		'iconEditor',
 		'textPane',
 		'titleElement',
-		'identifierElement'
+		'identifierElement',
+		'editorElementBlock'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Widgets',
 	#package : 'BVC-Foundation-Magritte-GT',
@@ -60,6 +61,21 @@ CFCompactObjectElement >> beSmall [
 { #category : 'accessing' }
 CFCompactObjectElement >> displayedObject [
 	^ object
+]
+
+{ #category : 'configuration - editing' }
+CFCompactObjectElement >> editorElementDo: aBlock [
+	editorElementBlock := aBlock.
+	^ self
+]
+
+{ #category : 'private - editing' }
+CFCompactObjectElement >> configureEditorElement: anElement description: aDescription [
+	editorElementBlock ifNotNil: [
+		editorElementBlock
+			value: anElement
+			value: aDescription ].
+	^ anElement
 ]
 
 { #category : 'private - reference' }

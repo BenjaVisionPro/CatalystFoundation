@@ -1394,6 +1394,27 @@ CFMaDetailPresentationExamples >> compactObjectAssignsTextPresentationByTextLine
 ]
 
 { #category : 'examples - compact object' }
+CFMaDetailPresentationExamples >> compactObjectReportsWritableEditorsToOwner [
+	<gtExample>
+	| anObject aMemento reference anElement editors |
+	anObject := CFMaFormShowcase new.
+	aMemento := CFMaMemento model: anObject.
+	reference := anObject labelDescription, anObject identifierDescription.
+	editors := OrderedCollection new.
+	anElement := CFCompactObjectElement new
+		editorElementDo: [ :anEditor :aDescription |
+			editors add: { anEditor. aDescription } ];
+		memento: aMemento;
+		reference: reference;
+		yourself.
+
+	self assert: editors size equals: 2.
+	self assert: editors first first == anElement titleElement.
+	self assert: editors second first == anElement identifierElement.
+	^ anElement
+]
+
+{ #category : 'examples - compact object' }
 CFMaDetailPresentationExamples >> compactObjectWritableTextUsesMagritteEditors [
 	<gtExample>
 	| anObject aMemento aReference anElement |

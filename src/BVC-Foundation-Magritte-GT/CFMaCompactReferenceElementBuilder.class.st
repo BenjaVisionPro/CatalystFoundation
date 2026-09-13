@@ -64,6 +64,9 @@ CFMaCompactReferenceElementBuilder >> newCompactTextEditorFor: aDescription [
 	(anEditor isKindOf: BrEditor) ifTrue: [
 		anEditor text: (editorDescription toString: currentValue) ].
 
+	element
+		configureEditorElement: anEditor
+		description: editorDescription.
 	^ element addReferenceTextElement: anEditor
 ]
 
@@ -74,6 +77,9 @@ CFMaCompactReferenceElementBuilder >> newCompactFontAwesomeEditorFor: aDescripti
 		memento: memento;
 		description: aDescription;
 		asElement.
+	element
+		configureEditorElement: anEditor
+		description: aDescription.
 	^ element referenceIconEditor: anEditor
 ]
 
