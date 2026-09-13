@@ -32,7 +32,7 @@ CFMaMementoTool >> asElementDo: aOneArgBlock [
 		preparedElement := nil.
 		^ aOneArgBlock cull: element cull: self ].
 	element := self newElementReadyDo: [ :aReadyElement | ].
-	^ aOneArgBlock cull: element cull: self
+	^ aOneArgBlock cull: (self atelierInspectorSurfaceFor: element) cull: self
 ]
 
 { #category : 'accessing' }
@@ -67,7 +67,21 @@ CFMaMementoTool >> newElementReadyDo: aBlock [
 
 { #category : 'private - building' }
 CFMaMementoTool >> newPreparedElement [
-	^ self newConfiguredViewModel preparedElementForMemento: memento
+	^ self atelierInspectorSurfaceFor:
+		(self newConfiguredViewModel preparedElementForMemento: memento)
+]
+
+{ #category : 'private - building' }
+CFMaMementoTool >> atelierInspectorSurfaceFor: anElement [
+	^ BrVerticalPane new
+		background: Color transparent;
+		border: BlBorder empty;
+		padding: BlInsets empty;
+		hMatchParent;
+		vFitContent;
+		addAptitude: CFGlassSurfaceAptitude new;
+		addChild: anElement;
+		yourself
 ]
 
 { #category : 'accessing' }
