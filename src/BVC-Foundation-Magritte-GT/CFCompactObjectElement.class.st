@@ -123,11 +123,11 @@ CFCompactObjectElement >> addReferenceTextElement: aTextElement [
 		hMatchParent;
 		vFitContent.
 
-	textPane childCount = 0
-		ifTrue: [
+	textPane hasChildren
+		ifFalse: [
 			titleElement := aTextElement.
 			self styleAsPrimaryReferenceText: aTextElement ]
-		ifFalse: [
+		ifTrue: [
 			identifierElement ifNil: [ identifierElement := aTextElement ].
 			self styleAsSupportingReferenceText: aTextElement ].
 
