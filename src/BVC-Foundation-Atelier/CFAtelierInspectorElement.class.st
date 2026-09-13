@@ -66,31 +66,20 @@ CFAtelierInspectorElement >> inspectObject: anObject memento: aMemento presentat
 
 { #category : 'private - inspecting' }
 CFAtelierInspectorElement >> installPreparedTool: aTool [
-	| previousPager incomingPager transaction |
+	| previousPager incomingPager |
 	pendingTool == aTool ifFalse: [ ^ self ].
 	pendingTool := nil.
 	previousPager := pagerElement.
 	incomingPager := CFAtelierTreePager createWrappedOn: aTool.
 	incomingPager
 		hMatchParent;
-		vMatchParent.
-	incomingPager opacity: 0.0.
+		vMatchParent;
+		opacity: 1.0.
 	self addChild: incomingPager.
+	previousPager ifNotNil: [ previousPager removeFromParent ].
 	pagerElement := incomingPager.
 	self
 		opacity: 1.0;
 		allowMeAndChildrenMouseEvents;
-		preventMouseEvents.
-
-	(previousPager isNil or: [ self isAttachedToSceneGraph not ]) ifTrue: [
-		previousPager ifNotNil: [ previousPager removeFromParent ].
-		incomingPager opacity: 1.0.
-		^ self ].
-
-	transaction := CFMotionLayoutTransaction on: self.
-	transaction
-		affecting: { incomingPager };
-		mutate: [ previousPager removeFromParent ];
-		fadeIn: incomingPager;
-		play
+		preventMouseEvents
 ]
