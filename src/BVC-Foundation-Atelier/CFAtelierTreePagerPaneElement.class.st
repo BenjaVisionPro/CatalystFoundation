@@ -21,8 +21,9 @@ CFAtelierTreePagerPaneElement >> initialize [
 		background: Color transparent;
 		preventMouseEvents.
 	followingsElement preventMouseEvents.
+	contentElement aptitudeDo: [ :anAptitude |
+		contentElement removeAptitude: anAptitude ].
 	contentElement
-		aptitude: nil;
 		background: Color transparent;
 		effect: BlNullEffect new;
 		preventMouseEvents.
