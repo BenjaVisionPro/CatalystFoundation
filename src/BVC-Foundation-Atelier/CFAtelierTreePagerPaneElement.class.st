@@ -12,6 +12,7 @@ Class {
 { #category : 'initialization' }
 CFAtelierTreePagerPaneElement >> initialize [
 	super initialize.
+	self hExact: CFAtelierTreePager columnWidth.
 	self
 		background: Color transparent;
 		padding: BlInsets empty;

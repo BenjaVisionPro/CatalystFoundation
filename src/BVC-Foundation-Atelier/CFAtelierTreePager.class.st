@@ -9,6 +9,12 @@ Class {
 	#tag : 'UI'
 }
 
+
+{ #category : 'accessing' }
+CFAtelierTreePager class >> columnWidth [
+	^ 300
+]
+
 { #category : 'initialization' }
 CFAtelierTreePager >> initialize [
 	super initialize.
@@ -28,4 +34,11 @@ CFAtelierTreePager >> initialize [
 		preventMouseEvents;
 		addChild: scrollbarElement;
 		addChild: panesElement
+]
+
+
+{ #category : 'api - pager model' }
+CFAtelierTreePager >> onPagerModelChanged [
+	self pagerModel settings numberOfVisibleColumns: 1.
+	super onPagerModelChanged
 ]

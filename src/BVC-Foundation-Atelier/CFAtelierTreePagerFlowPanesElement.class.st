@@ -11,6 +11,17 @@ Class {
 
 
 { #category : 'initialization' }
+CFAtelierTreePagerFlowPanesElement >> defaultLayout [
+	^ BlHorizontalTreeFlowLayout new
+		numberOfVisibleColumns: 1;
+		firstVisibleColumn: 1;
+		horizontalOffset: 0;
+		horizontalCellSpacing: 0;
+		verticalCellSpacing: GtTreePagerConstants verticalCellSpacing
+]
+
+
+{ #category : 'initialization' }
 CFAtelierTreePagerFlowPanesElement >> initialize [
 	super initialize.
 	self preventMouseEvents
@@ -22,38 +33,9 @@ CFAtelierTreePagerFlowPanesElement >> newNodeElementForPaneModel: aPaneModel [
 	aPaneElement := CFAtelierTreePagerPaneElement new.
 	aPaneElement
 		contentElementDo: [ :aContentElement |
-			aContentElement
-				navigationContext: (GtTreePagerPaneNavigationContext new
-					pagerElement: self;
-					paneElement: aPaneElement);
-				addAptitude: (BrGlamorousWithHorizontalResizerAptitude new
-					beRight;
-					resizerDo: [ :aResizer |
-						aPaneElement
-							addAptitude: (BrLazyStyleCommonAptitude new
-								default: [ :aStyle |
-									aStyle
-										do: [ :aWidget |
-											aPaneElement hideToolbarElements.
-											aResizer visibility: BlVisibility hidden ]
-										after: [ :aWidget |  ] ];
-								hovered: [ :aStyle |
-									aStyle
-										do: [ :aWidget |
-											aPaneElement showToolbarElements.
-											aResizer visibility: BlVisibility visible ]
-										after: [ :aWidget |
-											aPaneElement hideToolbarElements.
-											aResizer visibility: BlVisibility hidden ] ]).
-
-						aResizer
-							when: BlDoubleClickEvent
-							do: [ :anEvent |
-								self
-									onPaneElement: aPaneElement
-									resizerDoubleClickEvent: anEvent ] ];
-					whenResizedDo: [ :anEvent |
-						self onPaneElement: aPaneElement resizedEvent: anEvent ]) ].
+			aContentElement navigationContext: (GtTreePagerPaneNavigationContext new
+				pagerElement: self;
+				paneElement: aPaneElement) ].
 	aPaneElement graph
 		beNode;
 		model: aPaneModel.

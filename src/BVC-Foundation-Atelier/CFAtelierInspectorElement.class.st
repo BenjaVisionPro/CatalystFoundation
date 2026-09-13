@@ -20,7 +20,7 @@ CFAtelierInspectorElement >> initialize [
 		background: Color transparent;
 		opacity: 0.0;
 		preventMeAndChildrenMouseEvents;
-		hExact: 300;
+		hExact: CFAtelierTreePager columnWidth;
 		vMatchParent;
 		clipChildren: false;
 		constraintsDo: [ :c |
@@ -74,7 +74,6 @@ CFAtelierInspectorElement >> installPreparedTool: aTool [
 	incomingPager
 		hMatchParent;
 		vMatchParent.
-	incomingPager pagerModel settings numberOfVisibleColumns: 1.
 	incomingPager opacity: 0.0.
 	self addChild: incomingPager.
 	pagerElement := incomingPager.
