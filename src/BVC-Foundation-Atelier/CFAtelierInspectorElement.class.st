@@ -70,9 +70,8 @@ CFAtelierInspectorElement >> installPreparedTool: aTool [
 	pendingTool == aTool ifFalse: [ ^ self ].
 	pendingTool := nil.
 	previousPager := pagerElement.
-	incomingPager := GtTreePager createWrappedOn: aTool.
+	incomingPager := CFAtelierTreePager createWrappedOn: aTool.
 	incomingPager
-		beAtelierOverlay;
 		hMatchParent;
 		vMatchParent.
 	incomingPager pagerModel settings numberOfVisibleColumns: 1.
