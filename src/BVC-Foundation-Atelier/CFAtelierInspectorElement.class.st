@@ -21,7 +21,7 @@ CFAtelierInspectorElement >> initialize [
 		opacity: 0.0;
 		preventMeAndChildrenMouseEvents;
 		hExact: 300;
-		vFitContentLimited;
+		vMatchParent;
 		clipChildren: false;
 		constraintsDo: [ :c |
 			c frame horizontal alignRight.
@@ -73,7 +73,7 @@ CFAtelierInspectorElement >> installPreparedTool: aTool [
 	incomingPager
 		background: Color transparent;
 		hMatchParent;
-		vFitContentLimited.
+		vMatchParent.
 	incomingPager pagerModel settings numberOfVisibleColumns: 1.
 	incomingPager opacity: 0.0.
 	self addChild: incomingPager.
