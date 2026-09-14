@@ -1211,12 +1211,6 @@ CFMaDetailPresentation >> replaceRelationSelectionWith: theElements for: aDescri
 	^ newElements
 ]
 
-{ #category : 'relations - selection' }
-CFMaDetailPresentation >> selectRelationItemElement: anElement description: aDescription [
-	"Select an already-rendered relation item through Detail's normal relation-selection state."
-	^ self selectRelationElement: anElement for: aDescription
-]
-
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 	self
@@ -1261,9 +1255,6 @@ CFMaDetailPresentation >> selectAllToManyListRowsFor: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: aDescription event: anEvent [
 	| modifiers |
-	(self toManyListAllowsMultipleSelectionFor: aDescription) ifFalse: [
-		^ self selectRelationElement: anElement for: aDescription ].
-
 	modifiers := anEvent modifiers.
 	((modifiers isEmpty) or: [ (self relationContextFor: aDescription) selectionAnchor isNil ]) ifTrue: [
 		^ self selectRelationElement: anElement for: aDescription ].
@@ -1275,11 +1266,6 @@ CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: a
 	(modifiers isPrimaryModifier) ifFalse: [
 		self selectRelationElement: anElement for: aDescription ].
 	^ anElement
-]
-
-{ #category : 'private - relations' }
-CFMaDetailPresentation >> toManyListAllowsMultipleSelectionFor: aDescription [
-	^ (self fieldConfigurationFor: aDescription) representation allowsMultipleSelection
 ]
 
 { #category : 'private - relations' }
@@ -1463,15 +1449,14 @@ CFMaDetailPresentation >> installToManyListSelectionOn: anItemElement for: anObj
 				updateToManyListSelectionFor: anItemElement
 				description: aDescription
 				event: anEvent ].
-	(self toManyListAllowsMultipleSelectionFor: aDescription) ifTrue: [
-		anItemElement addShortcut: (BlShortcutWithAction new
-			name: 'Select all relation items';
-			description: 'Select all items in this relation.';
-			combination: BlKeyCombination primaryA;
-			overrideChildren: true;
-			action: [ :anEvent :aShortcut |
-				anEvent consumed: true.
-				self selectAllToManyListRowsFor: aDescription ]) ].
+	anItemElement addShortcut: (BlShortcutWithAction new
+		name: 'Select all relation items';
+		description: 'Select all items in this relation.';
+		combination: BlKeyCombination primaryA;
+		overrideChildren: true;
+		action: [ :anEvent :aShortcut |
+			anEvent consumed: true.
+			self selectAllToManyListRowsFor: aDescription ]).
 	^ anItemElement
 ]
 
@@ -1483,28 +1468,21 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 			| anObject |
 			anObject := anObjectBlock value.
 			anObject ifNotNil: [
-				| aRelationMemento |
 				anEvent consumed: true.
 				aSelectionBlock cull: anEvent.
 				aFocusElement requestFocus.
-				aRelationMemento := self mementoForRelationObject: anObject description: aDescription.
 				(anEvent modifiers isPrimaryModifier or: [ anEvent modifiers isShift ]) ifFalse: [
 					anEvent modifiers isAlt
 						ifTrue: [
 							CFMaPhlowNavigation
 								navigateNewBranchFrom: aRow
 								to: anObject
-								memento: aRelationMemento ]
+								memento: (self mementoForRelationObject: anObject description: aDescription) ]
 						ifFalse: [
-							self
-								activateRelationObject: anObject
-								description: aDescription
-								memento: aRelationMemento
-								element: aRow.
 							CFMaPhlowNavigation
 								selectFrom: aRow
 								object: anObject
-								memento: aRelationMemento ] ] ] ];
+								memento: (self mementoForRelationObject: anObject description: aDescription) ] ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |

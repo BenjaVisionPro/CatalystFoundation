@@ -16,7 +16,6 @@ Class {
 		'relationElementBlock',
 		'relationReorderBlock',
 		'relationRemoveBlock',
-		'relationActivateBlock',
 		'transactionMemento'
 	],
 	#category : 'BVC-Foundation-Magritte-GT-Presentations',
@@ -560,8 +559,6 @@ CFMaPresentation >> configureChildPresentation: aPresentation [
 		aPresentation relationReorderDo: relationReorderBlock ].
 	relationRemoveBlock ifNotNil: [
 		aPresentation relationRemoveDo: relationRemoveBlock ].
-	relationActivateBlock ifNotNil: [
-		aPresentation relationActivateDo: relationActivateBlock ].
 	^ aPresentation
 ]
 
@@ -596,24 +593,6 @@ CFMaPresentation >> configureRelationItemElement: anElement object: anObject des
 	^ anElement
 ]
 
-
-
-
-{ #category : 'configuration - relations' }
-CFMaPresentation >> relationActivateDo: aBlock [
-	"Configure a consumer callback invoked when the user normally activates a relation object. The callback receives the object, relation description, relation-object memento and rendered row. Presentation-owned selection/navigation remains unchanged."
-	relationActivateBlock := aBlock
-]
-
-{ #category : 'private - relations' }
-CFMaPresentation >> activateRelationObject: anObject description: aDescription memento: aMemento element: anElement [
-	relationActivateBlock ifNotNil: [ :aBlock |
-		aBlock
-			value: anObject
-			value: aDescription
-			value: aMemento
-			value: anElement ]
-]
 
 { #category : 'configuration - relations' }
 CFMaPresentation >> relationElementDo: aBlock [

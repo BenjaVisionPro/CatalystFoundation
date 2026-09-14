@@ -59,29 +59,3 @@ CFMaPresentationExamples >> transactionMementoOverridesActionMemento [
 	self assert: presentation actionMemento == transactionMemento.
 	^ presentation
 ]
-
-{ #category : 'examples - relations' }
-CFMaPresentationExamples >> relationActivationCallbackCarriesEditingIdentity [
-	<gtExample>
-	| presentation object description memento element activated |
-	presentation := CFMaPresentation new.
-	object := Object new.
-	description := MAToOneRelationDescription new.
-	memento := CFMaMemento model: CFMaFormShowcase new.
-	element := BlElement new.
-	activated := nil.
-
-	presentation relationActivateDo: [ :anObject :aDescription :aMemento :anElement |
-		activated := { anObject. aDescription. aMemento. anElement } ].
-	presentation
-		activateRelationObject: object
-		description: description
-		memento: memento
-		element: element.
-
-	self assert: activated first == object.
-	self assert: activated second == description.
-	self assert: activated third == memento.
-	self assert: activated fourth == element.
-	^ presentation
-]

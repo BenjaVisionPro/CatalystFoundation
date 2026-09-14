@@ -147,7 +147,7 @@ CFAtelierInsertExamples >> applyReassessesCurrentStagedState [
 
 { #category : 'private' }
 CFAtelierInsertExamples >> descriptionFor: aSelector in: aMemento [
-	^ aMemento magritteDescription children
+	^ aMemento magritteDescription
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
 
