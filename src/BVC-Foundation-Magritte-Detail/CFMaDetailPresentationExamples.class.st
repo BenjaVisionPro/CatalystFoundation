@@ -576,7 +576,7 @@ CFMaDetailPresentationExamples >> genericToOneListStencilUsesRelationReference [
 
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToOneListUsesRelationReferenceInsteadOfObjectIdentityProtocol [
+CFMaDetailPresentationExamples >> detailToOneListUsesObjectCompactIdentity [
 	<gtExample>
 	| aModel anObject aDescription aContainer aMemento anElement aReferenceElement |
 	aModel := CFMaFormShowcase new.
@@ -598,9 +598,9 @@ CFMaDetailPresentationExamples >> detailToOneListUsesRelationReferenceInsteadOfO
 	self assert: anElement class equals: BrFrame.
 	self assert: anElement children size equals: 1.
 	aReferenceElement := anElement children first.
-	self assert: aReferenceElement class equals: BrHorizontalPane.
-	self assert: aReferenceElement children size equals: 1.
-	self assert: aReferenceElement children first text asString equals: anObject score asString.
+	self assert: aReferenceElement class equals: CFCompactObjectElement.
+	self assert: aReferenceElement displayedObject == anObject.
+	self assert: aReferenceElement titleText equals: anObject label.
 	^ anElement
 ]
 
@@ -652,8 +652,9 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 	self assert: aRow layout class equals: CFMaDetailRowLayout.
 	self assert: aRow children accountedByLayout size equals: 3.
 	self assert: aRow children ignoredByLayout size equals: 1.
-	self assert: aReferenceElement class equals: BrHorizontalPane.
-	self assert: aReferenceElement children first text asString equals: 'Related'.
+	self assert: aReferenceElement class equals: CFCompactObjectElement.
+	self assert: aReferenceElement displayedObject == anObject.
+	self assert: aReferenceElement titleText equals: 'Related'.
 	^ aRow
 ]
 
@@ -1521,7 +1522,7 @@ CFMaDetailPresentationExamples >> readOnlyRelationReusesActiveMementoForReferenc
 	childMemento := rootMemento
 		childMementoFor: child
 		inRelation: ownerDescription.
-	nameDescription := childMemento magritteDescription
+	nameDescription := childMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #name ].
 	childMemento write: 'Staged name' using: nameDescription.
 

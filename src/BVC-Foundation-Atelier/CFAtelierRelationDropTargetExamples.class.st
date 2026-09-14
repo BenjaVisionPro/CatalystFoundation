@@ -84,7 +84,7 @@ CFAtelierRelationDropTargetExamples >> staleTargetIsRejectedBeforeMutation [
 
 { #category : 'private' }
 CFAtelierRelationDropTargetExamples >> descriptionFor: aSelector in: aMemento [
-	^ aMemento magritteDescription
+	^ aMemento magritteDescription children
 		detect: [ :each | each handlesSelector: aSelector ]
 ]
 

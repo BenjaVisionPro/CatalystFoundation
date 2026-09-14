@@ -15,7 +15,7 @@ CFMaEmbeddedTransactionExamples >> childMementoIdentityIsStable [
 	| aModel aMemento aDescription anObject firstMemento secondMemento |
 	aModel := CFMaFormShowcase example.
 	aMemento := CFMaMemento model: aModel.
-	aDescription := aMemento magritteDescription
+	aDescription := aMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedObject ].
 	anObject := aModel embeddedObject.
 
@@ -36,13 +36,13 @@ CFMaEmbeddedTransactionExamples >> commitWritesEmbeddedValue [
 	| aModel aMemento aRelationDescription anObject aChildMemento aScoreDescription |
 	aModel := CFMaFormShowcase example.
 	aMemento := CFMaMemento model: aModel.
-	aRelationDescription := aMemento magritteDescription
+	aRelationDescription := aMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedObject ].
 	anObject := aModel embeddedObject.
 	aChildMemento := aMemento
 		childMementoFor: anObject
 		inRelation: aRelationDescription.
-	aScoreDescription := aChildMemento magritteDescription
+	aScoreDescription := aChildMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #score ].
 
 	aChildMemento write: 45 using: aScoreDescription.
@@ -79,7 +79,7 @@ CFMaEmbeddedTransactionExamples >> removedRelationObjectReleasesChildMemento [
 	| aModel aMemento aDescription anObject firstMemento secondMemento |
 	aModel := CFMaFormShowcase example.
 	aMemento := CFMaMemento model: aModel.
-	aDescription := aMemento magritteDescription
+	aDescription := aMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedObject ].
 	anObject := aModel embeddedObject.
 
@@ -103,13 +103,13 @@ CFMaEmbeddedTransactionExamples >> resetRestoresEmbeddedValue [
 	| aModel aMemento aRelationDescription anObject aChildMemento aScoreDescription |
 	aModel := CFMaFormShowcase example.
 	aMemento := CFMaMemento model: aModel.
-	aRelationDescription := aMemento magritteDescription
+	aRelationDescription := aMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedObject ].
 	anObject := aModel embeddedObject.
 	aChildMemento := aMemento
 		childMementoFor: anObject
 		inRelation: aRelationDescription.
-	aScoreDescription := aChildMemento magritteDescription
+	aScoreDescription := aChildMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #score ].
 
 	aChildMemento write: 45 using: aScoreDescription.
@@ -179,7 +179,7 @@ CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
 	model := CFMaFormShowcase example.
 	model embeddedItems: model embeddedItems asOrderedCollection.
 	parentMemento := CFMaMemento model: model.
-	relationDescription := parentMemento magritteDescription
+	relationDescription := parentMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedItems ].
 	candidate := CFMaFormShowcaseItem exampleNamed: 'Inserted' score: 10 status: #active.
 	operation := CFAtelierInsert
@@ -191,7 +191,7 @@ CFMaEmbeddedTransactionExamples >> resetReleasesChildMementoForStagedInsertion [
 	childMemento := parentMemento
 		childMementoFor: candidate
 		inRelation: relationDescription.
-	scoreDescription := childMemento magritteDescription
+	scoreDescription := childMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #score ].
 	childMemento write: 45 using: scoreDescription.
 
@@ -211,14 +211,14 @@ CFMaEmbeddedTransactionExamples >> replaceReattachesDetachedReplacementEditingSt
 	model := CFMaFormShowcase example.
 	model embeddedItems: model embeddedItems asOrderedCollection.
 	parentMemento := CFMaMemento model: model.
-	relationDescription := parentMemento magritteDescription
+	relationDescription := parentMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #embeddedItems ].
 	source := model embeddedItems first.
 	replacement := model embeddedItems second.
 	childMemento := parentMemento
 		childMementoFor: replacement
 		inRelation: relationDescription.
-	scoreDescription := childMemento magritteDescription
+	scoreDescription := childMemento magritteDescription children
 		detect: [ :each | each handlesSelector: #score ].
 	childMemento write: 45 using: scoreDescription.
 
