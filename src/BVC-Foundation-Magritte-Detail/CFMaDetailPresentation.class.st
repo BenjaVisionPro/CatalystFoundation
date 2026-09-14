@@ -1783,7 +1783,7 @@ CFMaDetailPresentation >> newRelationReferenceElementFor: anObject memento: aChi
 			labelAptitude: self defaultLabelAptitude;
 			buildUsing: aDescription reference ].
 	^ CFCompactObjectElement new
-		beSmall;
+		beMedium;
 		memento: aChildMemento;
 		reference: aReference;
 		padding: BlInsets empty;
