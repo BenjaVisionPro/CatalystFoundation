@@ -13,6 +13,7 @@ Class {
 		'moveOperationBlock',
 		'reorderOperationBlock',
 		'clientPresentationBlock',
+		'workspaceElementFactory',
 		'atelierElement',
 		'pendingInspectorRequest'
 	],
@@ -30,6 +31,10 @@ CFAtelierViewModel >> asElement [
 			removeOperationFor: removeOperationBlock;
 			yourself ].
 	atelierElement formElement: aFormElement.
+	workspaceElementFactory
+		ifNil: [ atelierElement workspaceElement: nil ]
+		ifNotNil: [
+			atelierElement workspaceElement: (workspaceElementFactory cull: atelierElement) ].
 	palette ifNotNil: [
 		atelierElement palette: palette elementFactory: paletteElementFactory ].
 	self applyPendingInspectorRequest.
@@ -90,6 +95,18 @@ CFAtelierViewModel >> newFormElementIn: anAtelierElement [
 CFAtelierViewModel >> presentationDo: aBlock [
 	"Configure the Foundation-selected presentation for this Atelier client. Atelier composes this block with its own relation interaction hooks when the presentation is built."
 	clientPresentationBlock := aBlock
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> workspaceElementFactory: aBlock [
+	"Configure an optional primary workspace surface beside the root object's Atelier form. The block receives the shared CFAtelierElement. The form remains the model-context surface and therefore retains its normal Atelier relation interactions."
+	workspaceElementFactory := aBlock
+]
+
+{ #category : 'api - converting' }
+CFAtelierViewModel >> asWorkspaceElementIn: anAtelierElement [
+	"Build only my configured form/presentation inside an existing Atelier host. This lets a document-root Atelier compose a focused client presentation while retaining one palette and one inspector."
+	^ self newFormElementIn: anAtelierElement
 ]
 
 { #category : 'configuration' }

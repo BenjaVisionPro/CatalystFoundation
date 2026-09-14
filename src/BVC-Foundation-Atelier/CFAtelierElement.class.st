@@ -7,6 +7,9 @@ Class {
 	#instVars : [
 		'paletteElement',
 		'formElement',
+		'workspaceElement',
+		'contentElement',
+		'contextScrollElement',
 		'inspectorElement',
 		'removeDropTarget',
 		'removeOperationBlock'
@@ -35,12 +38,58 @@ CFAtelierElement >> formElement [
 
 { #category : 'accessing' }
 CFAtelierElement >> formElement: anElement [
-	formElement ifNotNil: [ self removeChild: formElement ].
 	formElement := anElement.
-	formElement
+	self rebuildContent
+]
+
+{ #category : 'accessing' }
+CFAtelierElement >> workspaceElement [
+	^ workspaceElement
+]
+
+{ #category : 'accessing' }
+CFAtelierElement >> workspaceElement: anElement [
+	workspaceElement := anElement.
+	self rebuildContent
+]
+
+{ #category : 'private - building' }
+CFAtelierElement >> rebuildContent [
+	contentElement ifNotNil: [
+		contentElement removeFromParent.
+		contentElement := nil ].
+	formElement ifNil: [ ^ self ].
+
+	formElement removeFromParent.
+	workspaceElement ifNotNil: [ workspaceElement removeFromParent ].
+
+	workspaceElement ifNil: [
+		formElement
+			hMatchParent;
+			vMatchParent.
+		self addChild: formElement at: 1.
+		^ self ].
+
+	contextScrollElement := BrScrollPane new
+		allowMeAndChildrenMouseEvents;
+		aptitude: BrScrollPaneAptitude
+			+ BrGlamorousWithVerticalScrollbarAptitude;
+		hExact: self class contextWidth;
+		vMatchParent;
+		content: formElement;
+		yourself.
+	formElement hMatchParent.
+	workspaceElement
 		hMatchParent;
 		vMatchParent.
-	self addChild: formElement at: 1
+
+	contentElement := BrHorizontalPane new
+		hMatchParent;
+		vMatchParent;
+		addChild: contextScrollElement;
+		addChild: workspaceElement;
+		yourself.
+	self addChild: contentElement at: 1
 ]
 
 { #category : 'accessing' }
@@ -115,3 +164,9 @@ CFAtelierElement >> removeOperationFor: aBlock [
 	removeOperationBlock := aBlock.
 	removeDropTarget ifNotNil: [ removeDropTarget operationFor: aBlock ]
 ]
+
+{ #category : 'accessing' }
+CFAtelierElement class >> contextWidth [
+	^ 320
+]
+
