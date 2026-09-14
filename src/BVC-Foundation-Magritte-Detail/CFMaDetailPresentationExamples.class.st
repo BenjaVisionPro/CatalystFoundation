@@ -1522,8 +1522,7 @@ CFMaDetailPresentationExamples >> readOnlyRelationReusesActiveMementoForReferenc
 	childMemento := rootMemento
 		childMementoFor: child
 		inRelation: ownerDescription.
-	nameDescription := childMemento magritteDescription children
-		detect: [ :each | each handlesSelector: #name ].
+	nameDescription := child labelDescription.
 	childMemento write: 'Staged name' using: nameDescription.
 
 	referenceDescription := ownerDescription copy
