@@ -98,3 +98,20 @@ CFAtelierEntryExamples >> paletteSourceRetainsConfiguredItemIdentity [
 	self assert: (sourceElement userData at: #atelierPaletteItem) == item.
 	^ sourceElement
 ]
+
+{ #category : 'examples - workspace' }
+CFAtelierEntryExamples >> atelierCanReplaceWorkspaceAfterBuild [
+	<gtExample>
+	| atelier element firstWorkspace secondWorkspace |
+	atelier := CFAtelierEntryExampleModel new asAtelier.
+	firstWorkspace := BlElement new.
+	atelier workspaceElementFactory: [ :anAtelierElement | firstWorkspace ].
+	element := atelier asElement.
+
+	self assert: element workspaceElement == firstWorkspace.
+	secondWorkspace := BlElement new.
+	atelier workspaceElementFactory: [ :anAtelierElement | secondWorkspace ].
+
+	self assert: element workspaceElement == secondWorkspace.
+	^ element
+]

@@ -99,8 +99,12 @@ CFAtelierViewModel >> presentationDo: aBlock [
 
 { #category : 'configuration' }
 CFAtelierViewModel >> workspaceElementFactory: aBlock [
-	"Configure an optional primary workspace surface beside the root object's Atelier form. The block receives the shared CFAtelierElement. The form remains the model-context surface and therefore retains its normal Atelier relation interactions."
-	workspaceElementFactory := aBlock
+	"Configure an optional primary workspace surface beside the root object's Atelier form. The block receives the shared CFAtelierElement. Changing the factory after the host has been built replaces that workspace while preserving the root form, inspector and transaction."
+	workspaceElementFactory := aBlock.
+	atelierElement ifNotNil: [
+		aBlock
+			ifNil: [ atelierElement workspaceElement: nil ]
+			ifNotNil: [ atelierElement workspaceElement: (aBlock cull: atelierElement) ] ]
 ]
 
 { #category : 'api - converting' }

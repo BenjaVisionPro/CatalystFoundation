@@ -1468,21 +1468,28 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 			| anObject |
 			anObject := anObjectBlock value.
 			anObject ifNotNil: [
+				| aRelationMemento |
 				anEvent consumed: true.
 				aSelectionBlock cull: anEvent.
 				aFocusElement requestFocus.
+				aRelationMemento := self mementoForRelationObject: anObject description: aDescription.
 				(anEvent modifiers isPrimaryModifier or: [ anEvent modifiers isShift ]) ifFalse: [
 					anEvent modifiers isAlt
 						ifTrue: [
 							CFMaPhlowNavigation
 								navigateNewBranchFrom: aRow
 								to: anObject
-								memento: (self mementoForRelationObject: anObject description: aDescription) ]
+								memento: aRelationMemento ]
 						ifFalse: [
+							self
+								activateRelationObject: anObject
+								description: aDescription
+								memento: aRelationMemento
+								element: aRow.
 							CFMaPhlowNavigation
 								selectFrom: aRow
 								object: anObject
-								memento: (self mementoForRelationObject: anObject description: aDescription) ] ] ] ];
+								memento: aRelationMemento ] ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |
