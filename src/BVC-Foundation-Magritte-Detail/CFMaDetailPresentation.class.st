@@ -1764,11 +1764,20 @@ CFMaDetailPresentation >> newToManyAddElementUsing: aDescription [
 
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationReferenceElementFor: anObject memento: aChildMemento description: aDescription [
-	^ CFMaReferenceElementBuilder new
-		object: anObject;
+	| aReference |
+	aReference := aChildMemento magritteDescription compactIdentityReference.
+	aReference ifNil: [
+		^ CFMaReferenceElementBuilder new
+			object: anObject;
+			memento: aChildMemento;
+			labelAptitude: self defaultLabelAptitude;
+			buildUsing: aDescription reference ].
+	^ CFCompactObjectElement new
+		beSmall;
 		memento: aChildMemento;
-		labelAptitude: self defaultLabelAptitude;
-		buildUsing: aDescription reference
+		reference: aReference;
+		padding: BlInsets empty;
+		yourself
 ]
 
 { #category : 'private - relations' }

@@ -658,7 +658,7 @@ CFMaDetailPresentationExamples >> detailToManyListItemUsesPeerRowLayout [
 ]
 
 { #category : 'examples - relations' }
-CFMaDetailPresentationExamples >> detailToManyListUsesRelationReferenceInsteadOfObjectIdentityProtocol [
+CFMaDetailPresentationExamples >> detailToManyListUsesObjectCompactIdentity [
 	<gtExample>
 	| aModel anObject aDescription aContainer aMemento aPresentation aRow aReferenceElement |
 	aModel := CFMaFormShowcase new.
@@ -678,7 +678,9 @@ CFMaDetailPresentationExamples >> detailToManyListUsesRelationReferenceInsteadOf
 		description: aDescription.
 	aReferenceElement := aRow children first.
 
-	self assert: aReferenceElement children first text asString equals: '40'.
+	self assert: aReferenceElement class equals: CFCompactObjectElement.
+	self assert: aReferenceElement displayedObject == anObject.
+	self assert: aReferenceElement titleText equals: 'Related'.
 	^ aRow
 ]
 
