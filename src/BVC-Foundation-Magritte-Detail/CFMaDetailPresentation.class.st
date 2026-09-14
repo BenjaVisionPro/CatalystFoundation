@@ -1211,6 +1211,12 @@ CFMaDetailPresentation >> replaceRelationSelectionWith: theElements for: aDescri
 	^ newElements
 ]
 
+{ #category : 'relations - selection' }
+CFMaDetailPresentation >> selectRelationItemElement: anElement description: aDescription [
+	"Select an already-rendered relation item through Detail's normal relation-selection state."
+	^ self selectRelationElement: anElement for: aDescription
+]
+
 { #category : 'private - relations' }
 CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 	self
