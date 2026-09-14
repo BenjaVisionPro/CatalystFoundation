@@ -1261,6 +1261,9 @@ CFMaDetailPresentation >> selectAllToManyListRowsFor: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: aDescription event: anEvent [
 	| modifiers |
+	(self toManyListAllowsMultipleSelectionFor: aDescription) ifFalse: [
+		^ self selectRelationElement: anElement for: aDescription ].
+
 	modifiers := anEvent modifiers.
 	((modifiers isEmpty) or: [ (self relationContextFor: aDescription) selectionAnchor isNil ]) ifTrue: [
 		^ self selectRelationElement: anElement for: aDescription ].
@@ -1272,6 +1275,11 @@ CFMaDetailPresentation >> updateToManyListSelectionFor: anElement description: a
 	(modifiers isPrimaryModifier) ifFalse: [
 		self selectRelationElement: anElement for: aDescription ].
 	^ anElement
+]
+
+{ #category : 'private - relations' }
+CFMaDetailPresentation >> toManyListAllowsMultipleSelectionFor: aDescription [
+	^ (self fieldConfigurationFor: aDescription) representation allowsMultipleSelection
 ]
 
 { #category : 'private - relations' }
@@ -1455,14 +1463,15 @@ CFMaDetailPresentation >> installToManyListSelectionOn: anItemElement for: anObj
 				updateToManyListSelectionFor: anItemElement
 				description: aDescription
 				event: anEvent ].
-	anItemElement addShortcut: (BlShortcutWithAction new
-		name: 'Select all relation items';
-		description: 'Select all items in this relation.';
-		combination: BlKeyCombination primaryA;
-		overrideChildren: true;
-		action: [ :anEvent :aShortcut |
-			anEvent consumed: true.
-			self selectAllToManyListRowsFor: aDescription ]).
+	(self toManyListAllowsMultipleSelectionFor: aDescription) ifTrue: [
+		anItemElement addShortcut: (BlShortcutWithAction new
+			name: 'Select all relation items';
+			description: 'Select all items in this relation.';
+			combination: BlKeyCombination primaryA;
+			overrideChildren: true;
+			action: [ :anEvent :aShortcut |
+				anEvent consumed: true.
+				self selectAllToManyListRowsFor: aDescription ]) ].
 	^ anItemElement
 ]
 

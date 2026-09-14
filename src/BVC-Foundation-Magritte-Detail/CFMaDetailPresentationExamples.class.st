@@ -1541,3 +1541,34 @@ CFMaDetailPresentationExamples >> readOnlyRelationReusesActiveMementoForReferenc
 	^ resolved
 ]
 
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> detailToManyListCanRequireSingleSelection [
+	| model description container memento presentation firstRow secondRow |
+	model := CFMaFormShowcase new.
+	model listItems: {
+		CFMaFormShowcaseItem new exampleNamed: 'First'.
+		CFMaFormShowcaseItem new exampleNamed: 'Second' }.
+	description := model listItemsDescription
+		fieldConfigure: [ :field | field beList beSingleSelection ];
+		yourself.
+	container := description asContainer.
+	memento := CFMaMemento model: model description: container.
+	presentation := CFMaDetailPresentation new
+		memento: memento;
+		form: BrFrame new;
+		yourself.
+	firstRow := presentation
+		newToManyRelationRowFor: model listItems first
+		description: description.
+	secondRow := presentation
+		newToManyRelationRowFor: model listItems second
+		description: description.
+
+	presentation selectRelationElement: firstRow for: description.
+	presentation selectRelationElement: secondRow for: description.
+
+	self assert: (presentation selectedRelationElementsFor: description) size equals: 1.
+	self assert: ((presentation selectedRelationElementsFor: description) identityIncludes: secondRow).
+	^ presentation
+]
+
