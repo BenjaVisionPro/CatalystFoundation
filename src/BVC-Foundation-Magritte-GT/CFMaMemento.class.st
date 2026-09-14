@@ -6,6 +6,7 @@ Class {
 	#superclass : 'GtMagritteMemento',
 	#instVars : [
 		'childMementosByDescription',
+		'parentMemento',
 		'statusPulse',
 		'compositeOverallStatus',
 		'childMementoTransfers',
@@ -69,7 +70,9 @@ CFMaMemento >> childMementoFor: anObject inRelation: aDescription [
 CFMaMemento >> newChildMementoFor: anObject [
 	"Subclasses may specialize the memento used for embedded relation objects.
 	By default, preserve the existing recursive memento-class behavior."
-	^ self class model: anObject
+	^ (self class model: anObject)
+		parentMemento: self;
+		yourself
 ]
 
 
@@ -143,6 +146,7 @@ CFMaMemento >> putChildMemento: aChildMemento for: anObject inRelation: aDescrip
 	relationMementos := childMementosByDescription
 		at: aDescription
 		ifAbsentPut: [ IdentityDictionary new ].
+	aChildMemento parentMemento: self.
 	relationMementos at: anObject put: aChildMemento.
 	^ aChildMemento
 ]
@@ -324,6 +328,32 @@ CFMaMemento >> childMementoReparentings [
 { #category : 'testing' }
 CFMaMemento >> includesActiveMemento: aMemento [
 	^ self == aMemento or: [ self allChildMementos anySatisfy: [ :each | each includesActiveMemento: aMemento ] ]
+]
+
+{ #category : 'resolving' }
+CFMaMemento >> activeMementoForModel: anObject [
+	self model == anObject ifTrue: [ ^ self ].
+	self allChildMementos do: [ :aChild |
+		(aChild activeMementoForModel: anObject) ifNotNil: [ :aMemento |
+			^ aMemento ] ].
+	^ nil
+]
+
+{ #category : 'accessing' }
+CFMaMemento >> parentMemento [
+	^ parentMemento
+]
+
+{ #category : 'accessing' }
+CFMaMemento >> parentMemento: aMemento [
+	parentMemento := aMemento
+]
+
+{ #category : 'resolving' }
+CFMaMemento >> rootMemento [
+	^ parentMemento
+		ifNil: [ self ]
+		ifNotNil: [ parentMemento rootMemento ]
 ]
 
 { #category : 'private - status' }

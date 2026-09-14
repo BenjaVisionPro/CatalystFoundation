@@ -1057,9 +1057,9 @@ CFMaDetailPresentation >> updateToOneEmbeddedHost: aHost with: anObject addEleme
 	aHost removeChildren.
 	aHeaderContent ifNotNil: [ aHeaderContent removeChildren ].
 	self memento retainChildMementosFor: { anObject } inRelation: aDescription.
-	aChildMemento := self memento
-		childMementoFor: anObject
-		inRelation: aDescription.
+	aChildMemento := self
+		mementoForRelationObject: anObject
+		description: aDescription.
 	aRepresentation := (self fieldConfigurationFor: aDescription) representation.
 	aHost
 		presentedObject: anObject;
@@ -1133,6 +1133,16 @@ CFMaDetailPresentation >> newRelationEmptyContentElement [
 
 
 { #category : 'private - relations' }
+CFMaDetailPresentation >> mementoForRelationObject: anObject description: aDescription [
+	aDescription isReadOnly ifTrue: [
+		(self memento rootMemento activeMementoForModel: anObject)
+			ifNotNil: [ :anActiveMemento | ^ anActiveMemento ] ].
+	^ self memento
+		childMementoFor: anObject
+		inRelation: aDescription
+]
+
+{ #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
@@ -1145,9 +1155,9 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToOneRelationObjectElementFor: anObject description: aDescription [
 	| aChildMemento |
-	aChildMemento := self memento
-		childMementoFor: anObject
-		inRelation: aDescription.
+	aChildMemento := self
+		mementoForRelationObject: anObject
+		description: aDescription.
 	^ BrFrame new
 		hFitContent;
 		vFitContent;
@@ -1467,12 +1477,12 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 							CFMaPhlowNavigation
 								navigateNewBranchFrom: aRow
 								to: anObject
-								memento: (self memento childMementoFor: anObject inRelation: aDescription) ]
+								memento: (self mementoForRelationObject: anObject description: aDescription) ]
 						ifFalse: [
 							CFMaPhlowNavigation
 								selectFrom: aRow
 								object: anObject
-								memento: (self memento childMementoFor: anObject inRelation: aDescription) ] ] ] ];
+								memento: (self mementoForRelationObject: anObject description: aDescription) ] ] ] ];
 		when: BlDoubleClickEvent
 		do: [ :anEvent |
 			| anObject |
@@ -1482,7 +1492,7 @@ CFMaDetailPresentation >> installRelationNavigationOn: aRow focusElement: aFocus
 				CFMaPhlowNavigation
 					navigateFrom: aRow
 					to: anObject
-					memento: (self memento childMementoFor: anObject inRelation: aDescription) ] ]
+					memento: (self mementoForRelationObject: anObject description: aDescription) ] ]
 ]
 
 { #category : 'private - relations' }
@@ -1783,9 +1793,9 @@ CFMaDetailPresentation >> newRelationReferenceElementFor: anObject memento: aChi
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescription [
 	| aChildMemento aRow |
-	aChildMemento := self memento
-		childMementoFor: anObject
-		inRelation: aDescription.
+	aChildMemento := self
+		mementoForRelationObject: anObject
+		description: aDescription.
 	aRow := self
 		newRowLeading: nil
 		description: (self
@@ -1928,9 +1938,9 @@ CFMaDetailPresentation >> updateToManyEmbeddedItems: oldItemElements in: aContai
 				create a parallel theme-propagation path."
 				aContainer addChild: anItemElement at: (anIndex min: aContainer children size + 1).
 
-				aChildMemento := self memento
-					childMementoFor: anObject
-					inRelation: aDescription.
+				aChildMemento := self
+					mementoForRelationObject: anObject
+					description: aDescription.
 				self
 					buildPresentationForMemento: aChildMemento
 					in: aPresentationHost

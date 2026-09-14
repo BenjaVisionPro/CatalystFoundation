@@ -1505,3 +1505,39 @@ CFMaDetailPresentationExamples >> nestedPresentationInheritsRelationInteractionC
 	self assert: relationElementWasExposed.
 	^ aHost
 ]
+
+{ #category : 'examples - relations' }
+CFMaDetailPresentationExamples >> readOnlyRelationReusesActiveMementoForReferencedObject [
+	<gtExample>
+	| parent child ownerDescription referenceDescription rootMemento childMemento
+	  presentation resolved nameDescription |
+
+	parent := CFMaFormShowcase new.
+	child := CFMaFormShowcaseItem exampleNamed: 'Original' score: 40 status: #active.
+	parent listItems: { child }.
+	ownerDescription := parent listItemsDescription.
+
+	rootMemento := CFMaMemento model: parent.
+	childMemento := rootMemento
+		childMementoFor: child
+		inRelation: ownerDescription.
+	nameDescription := childMemento magritteDescription
+		detect: [ :each | each handlesSelector: #name ].
+	childMemento write: 'Staged name' using: nameDescription.
+
+	referenceDescription := ownerDescription copy
+		beReadOnly;
+		yourself.
+	presentation := CFMaDetailPresentation new
+		memento: rootMemento;
+		form: BrFrame new;
+		yourself.
+	resolved := presentation
+		mementoForRelationObject: child
+		description: referenceDescription.
+
+	self assert: resolved == childMemento.
+	self assert: (resolved readUsing: nameDescription) equals: 'Staged name'.
+	^ resolved
+]
+
