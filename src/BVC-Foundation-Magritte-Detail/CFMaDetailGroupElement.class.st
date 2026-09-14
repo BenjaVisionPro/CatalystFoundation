@@ -5,8 +5,7 @@ Class {
 		'composition',
 		'currentCard',
 		'groups',
-		'configuration',
-		'overlayAppearance'
+		'configuration'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
 	#package : 'BVC-Foundation-Magritte-Detail'
@@ -82,7 +81,6 @@ CFMaDetailGroupElement >> currentCard [
 	currentCard := CFMaDetailGroupCardElement new
 		margin: (BlInsets left: 6 right: 6);
 		reservedAccessorySlots: configuration reservedAccessorySlots;
-		overlayAppearance: overlayAppearance;
 		yourself.
 	self addCompositionElement: currentCard.
 	^ currentCard
@@ -166,7 +164,6 @@ CFMaDetailGroupElement >> initialize [
 	super initialize.
 	currentCard := nil.
 	groups := nil.
-	overlayAppearance := false.
 	composition := BrVerticalPane new
 		hMatchParent;
 		vFitContent;
@@ -181,11 +178,6 @@ CFMaDetailGroupElement >> initialize [
 		addChild: composition
 ]
 
-{ #category : 'configuration - appearance' }
-CFMaDetailGroupElement >> overlayAppearance: aBoolean [
-	overlayAppearance := aBoolean.
-	currentCard ifNotNil: [ currentCard overlayAppearance: aBoolean ]
-]
 
 { #category : 'accessing' }
 CFMaDetailGroupElement >> rows [

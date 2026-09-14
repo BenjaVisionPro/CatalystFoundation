@@ -6,7 +6,6 @@ Class {
 		'groups',
 		'categoryGroups',
 		'relationContexts',
-		'overlayAppearance',
 		'afterPrimaryContentBlocks'
 	],
 	#category : 'BVC-Foundation-Magritte-Detail',
@@ -20,7 +19,6 @@ CFMaDetailPresentation >> initialize [
 	groups := Dictionary new.
 	categoryGroups := Dictionary new.
 	relationContexts := IdentityDictionary new.
-	overlayAppearance := false.
 	afterPrimaryContentBlocks := OrderedCollection new
 ]
 
@@ -97,22 +95,6 @@ CFMaDetailPresentation >> compactIdentityDescriptionsIn: theDescriptions [
 	^ theMatchedDescriptions
 ]
 
-{ #category : 'configuration - appearance' }
-CFMaDetailPresentation >> beOverlay [
-	overlayAppearance := true.
-	^ self
-]
-
-{ #category : 'private - appearance' }
-CFMaDetailPresentation >> formBackgroundPaint [
-	overlayAppearance ifTrue: [ ^ Color transparent ].
-	^ self form theme surfaces baseBackground
-]
-
-{ #category : 'private - building' }
-CFMaDetailPresentation >> prepareHostElement [
-	self hostElement background: self formBackgroundPaint
-]
 
 { #category : 'configuration' }
 CFMaDetailPresentation >> group: aGroup configure: aBlock [
@@ -189,7 +171,6 @@ CFMaDetailPresentation >> newGroupIn: aParent configuredBy: aConfiguration [
 	| anElement aMargin |
 	anElement := CFMaDetailGroupElement new
 		configuration: aConfiguration;
-		overlayAppearance: overlayAppearance;
 		yourself.
 	(aParent == self hostElement and: [ aParent children isEmpty not ]) ifTrue: [
 		aMargin := anElement margin.
@@ -207,7 +188,6 @@ CFMaDetailPresentation >> newGroupIn: aParent label: aLabel configuredBy: aConfi
 	| anElement |
 	anElement := CFMaDetailGroupElement new
 		configuration: aConfiguration;
-		overlayAppearance: overlayAppearance;
 		yourself.
 	aParent addGroup: anElement label: aLabel.
 	^ anElement

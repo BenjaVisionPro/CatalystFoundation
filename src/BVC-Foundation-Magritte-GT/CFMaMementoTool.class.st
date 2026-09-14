@@ -51,7 +51,7 @@ CFMaMementoTool >> newConfiguredViewModel [
 	viewModel := CFMaViewModel forObject: object memento: memento.
 	viewModel
 		ignoreImplicitActions;
-		elementBuilderDo: [ CFMaDetailPresentation new beOverlay ].
+		elementBuilderDo: [ CFMaDetailPresentation new ].
 	presentationBlock ifNotNil: [ :aPresentationBlock |
 		viewModel presentationDo: aPresentationBlock ].
 	^ viewModel
