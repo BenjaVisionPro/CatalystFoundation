@@ -109,8 +109,7 @@ CFMaDetailColourPickerOptionElement >> updateSelectionAppearance [
 		swatch border: BlBorder empty.
 		^ self ].
 	aBorderColor := colour ifNil: [
-		self theme typography secondaryForeground
-			blocResolveColorForTheme: self theme ].
+		self theme item selectedColor ].
 	swatch border: (BlBorder paint: aBorderColor width: 3)
 ]
 

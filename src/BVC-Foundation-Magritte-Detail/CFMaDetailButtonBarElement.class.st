@@ -52,7 +52,7 @@ CFMaDetailButtonBarElement >> initialize [
 		background: Color transparent;
 		addAptitude: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
-				aStyle background: bar theme interaction controlBackgroundTint ]);
+				aStyle background: bar theme toggleGroup background ]);
 		yourself.
 	content := BrVerticalPane new
 		hMatchParent;
@@ -84,9 +84,9 @@ CFMaDetailButtonBarElement >> newIconToggle: anIcon group: aGroup [
 		addAptitude: (CFMaDetailLazyToggleAptitude new
 			@ anIcon;
 			default: [ :aState |
-				aState do: [ anIcon color: aToggle theme controls inactiveIconForeground ] ];
+				aState do: [ anIcon color: aToggle theme toggleGroup inactiveForeground ] ];
 			activated: [ :aState |
-				aState do: [ anIcon color: Color white ] ]);
+				aState do: [ anIcon color: aToggle theme toggleGroup activeForeground ] ]);
 		when: BrToggleActivatedEvent
 		do: [ :anEvent | self showGroup: aGroup ].
 	^ aToggle
@@ -109,10 +109,10 @@ CFMaDetailButtonBarElement >> newLabelToggle: aLabel group: aGroup [
 			default: [ :aState |
 				aState do: [
 					aToggle label: (aLabel asString asRopedText
-						foreground: aToggle theme typography primaryForeground) ] ];
+						foreground: aToggle theme label defaultTextForeground) ] ];
 			activated: [ :aState |
 				aState do: [
-					aToggle label: (aLabel asString asRopedText foreground: Color white) ] ]);
+					aToggle label: (aLabel asString asRopedText foreground: aToggle theme toggleGroup activeForeground) ] ]);
 		when: BrToggleActivatedEvent
 		do: [ :anEvent | self showGroup: aGroup ].
 	^ aToggle
@@ -139,7 +139,7 @@ CFMaDetailButtonBarElement >> toggleStyle [
 				background: Color transparent;
 				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
 		hovered: [ :aState |
-			aState background: (self theme interaction subtleBackgroundTint) ];
+			aState background: (self theme toggleGroup hoveredBackground) ];
 		activated: [ :aState |
 			aState background: self theme item selectedColor ];
 		yourself

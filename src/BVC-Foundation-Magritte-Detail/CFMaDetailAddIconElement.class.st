@@ -35,7 +35,7 @@ CFMaDetailAddIconElement >> initialize [
 			aStyle do: [
 				icon color: (hovered
 					ifTrue: [ self theme item selectedColor ]
-					ifFalse: [ self theme typography secondaryForeground ]) ] ].
+					ifFalse: [ self theme label summaryTextForeground ]) ] ].
 	self addAptitude: appearanceAptitude
 ]
 

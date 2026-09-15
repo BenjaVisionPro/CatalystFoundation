@@ -214,7 +214,7 @@ CFAtelierToOneDropTarget >> clearActiveDrag [
 CFAtelierToOneDropTarget >> newDropIndicator [
 	^ BlElement new
 		background: Color transparent;
-		border: (BlBorder paint: (element theme interaction focusedBorderColor blocResolveColorForTheme: element theme) width: 2);
+		border: (BlBorder paint: (element theme item focusedBorderColor blocResolveColorForTheme: element theme) width: 2);
 		visibility: BlVisibility hidden;
 		zIndex: 101;
 		constraintsDo: [ :c |

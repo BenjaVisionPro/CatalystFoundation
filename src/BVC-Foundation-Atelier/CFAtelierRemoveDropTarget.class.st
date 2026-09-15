@@ -93,7 +93,7 @@ CFAtelierRemoveDropTarget >> dropEvent: anEvent [
 { #category : 'private - appearance' }
 CFAtelierRemoveDropTarget >> updateAppearance [
 	self border: (BlBorder
-		paint: (self theme interaction focusedBorderColor blocResolveColorForTheme: self theme)
+		paint: (self theme item focusedBorderColor blocResolveColorForTheme: self theme)
 		width: 2)
 ]
 

@@ -68,11 +68,11 @@ CFMaDetailPopupElement >> installThemeStyles [
 		hovered: [ :aStyle |
 			aStyle background: (popupOpen
 				ifTrue: [ BlBackground transparent ]
-				ifFalse: [ self theme interaction popupBackgroundTint ]) ];
+				ifFalse: [ self theme select hoveredBackground ]) ];
 		focused: [ :aStyle |
 			aStyle background: (popupOpen
 				ifTrue: [ BlBackground transparent ]
-				ifFalse: [ self theme interaction popupBackgroundTint ]) ];
+				ifFalse: [ self theme select hoveredBackground ]) ];
 		yourself.
 	self addAptitude: popupStyleAptitude.
 
@@ -81,7 +81,7 @@ CFMaDetailPopupElement >> installThemeStyles [
 		default: [ :aStyle |
 			aStyle background: (popupOpen
 				ifTrue: [ BlBackground transparent ]
-				ifFalse: [ self theme interaction popupBackgroundTint ]) ];
+				ifFalse: [ self theme select hoveredBackground ]) ];
 		hovered: [ :aStyle | aStyle background: BlBackground transparent ];
 		focused: [ :aStyle | aStyle background: BlBackground transparent ];
 		yourself.

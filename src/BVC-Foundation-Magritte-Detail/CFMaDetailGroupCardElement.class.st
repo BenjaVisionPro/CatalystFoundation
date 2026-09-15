@@ -63,7 +63,7 @@ CFMaDetailGroupCardElement >> initialize [
 	reservedAccessorySlots := 0.
 	appearanceAptitude := BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle background: self theme surfaces cardTint ];
+			aStyle background: self theme groupCard background ];
 		yourself.
 	self
 		background: Color transparent;
@@ -174,7 +174,7 @@ CFMaDetailGroupCardElement >> installFocusOverlayFor: aRow [
 			anOverlay
 				attachTo: aRow;
 				border: (BlBorder
-					paint: self theme interaction focusedBorderColor
+					paint: self theme item focusedBorderColor
 					width: 1).
 			self updateFocusOverlayGeometry ];
 		when: BlFocusOutEvent

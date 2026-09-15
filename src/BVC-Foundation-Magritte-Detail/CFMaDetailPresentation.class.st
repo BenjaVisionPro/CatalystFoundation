@@ -211,7 +211,7 @@ CFMaDetailPresentation >> prepareResourceDropdown: aDropdown [
 		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 		addAptitude: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
-				aStyle background: aDropdown theme interaction controlBackgroundTint ]).
+				aStyle background: aDropdown theme editor defaultBackground ]).
 	^ aDropdown
 ]
 
@@ -273,15 +273,15 @@ CFMaDetailPresentation >> actionButtonFor: anActionDescription [
 	aButton addAptitude: (BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
 			aStyle
-				background: (self form theme interaction controlBackgroundTint);
+				background: (self form theme button defaultBackground);
 				border: BlBorder empty ];
 		hovered: [ :aStyle |
 			aStyle
-				background: (self form theme interaction hoveredBackgroundTint);
+				background: (self form theme button hoveredBackground);
 				border: BlBorder empty ];
 		pressed: [ :aStyle |
 			aStyle
-				background: (self form theme interaction pressedBackgroundTint);
+				background: (self form theme button pressedBackground);
 				border: BlBorder empty ]).
 	self installFormNavigationOn: aButton.
 	^ aButton
@@ -383,7 +383,7 @@ CFMaDetailPresentation >> newAccessoryButtonIconNamed: anIconName [
 	| anIcon |
 	anIcon := FontAwesomeIcons defaultStyle icon: anIconName.
 	anIcon
-		color: (self form theme typography secondaryForeground);
+		color: (self form theme label summaryTextForeground);
 		size: 10 @ 10.
 	^ BrButton new
 		aptitude: BrGlamorousButtonIconAptitude new
@@ -463,7 +463,7 @@ CFMaDetailPresentation >> newValidationAccessoryForContext: aFieldContext [
 { #category : 'defaults' }
 CFMaDetailPresentation >> defaultLabelAptitude [
 	^ BrGlamorousLabelAptitude new
-		foreground: (self form theme typography primaryForeground);
+		foreground: (self form theme label defaultTextForeground);
 		fontSize: (self form theme typography bodyFontSize)
 ]
 
@@ -479,7 +479,7 @@ CFMaDetailPresentation >> supportingElementWithText: aString [
 		beReadOnlyWithoutSelection;
 		focusability: BlFocusability none;
 		text: (aString asRopedText
-			foreground: (self form theme typography tertiaryForeground);
+			foreground: (self form theme label supportingTextForeground);
 			fontSize: (self form theme typography supportingFontSize));
 		constraintsDo: [ :c |
 			c horizontal matchParent.
@@ -1147,7 +1147,7 @@ CFMaDetailPresentation >> newRelationInspectorChevron [
 	| anElement |
 	anElement := FontAwesomeIcons defaultStyle icon: #chevronRight.
 	anElement
-		color: (self form theme typography secondaryForeground);
+		color: (self form theme label summaryTextForeground);
 		size: 8 @ 8.
 	^ anElement
 ]
@@ -1319,7 +1319,7 @@ CFMaDetailPresentation >> dragItemsFrom: aRow for: aDescription [
 { #category : 'private - relations' }
 CFMaDetailPresentation >> newRelationDropIndicator [
 	^ BlElement new
-		background: (self form theme interaction focusedBorderColor
+		background: (self form theme item focusedBorderColor
 			blocResolveColorForTheme: self form theme);
 		visibility: BlVisibility hidden;
 		zIndex: 100;

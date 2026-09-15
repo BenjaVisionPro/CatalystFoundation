@@ -15,17 +15,17 @@ Class {
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> activeTrackColorFor: aWidget [
-	^ aWidget theme controls switchActiveTrackTint blocResolveColorForTheme: aWidget theme
+	^ aWidget theme switch activeTrackBackground blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> inactiveTrackColorFor: aWidget [
-	^ aWidget theme controls switchInactiveTrackTint blocResolveColorForTheme: aWidget theme
+	^ aWidget theme switch inactiveTrackBackground blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'private - appearance' }
 CFMaDetailSwitchAptitude >> thumbBackgroundFor: aWidget [
-	^ aWidget theme controls switchThumbBackground blocResolveColorForTheme: aWidget theme
+	^ aWidget theme switch thumbBackground blocResolveColorForTheme: aWidget theme
 ]
 
 { #category : 'defaults' }

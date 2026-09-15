@@ -196,7 +196,7 @@ CFMaDetailSliderElement >> updateLabels [
 { #category : 'private - styling' }
 CFMaDetailSliderElement >> valueLabelTextFor: aString [
 	^ aString asRopedText
-		foreground: self theme typography secondaryForeground;
+		foreground: self theme label summaryTextForeground;
 		fontSize: self theme typography supportingFontSize;
 		yourself
 ]

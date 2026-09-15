@@ -13,7 +13,7 @@ CFDetailSeparatorElement >> initialize [
 	super initialize.
 	appearanceAptitude := BrLazyStyleCommonAptitude new
 		default: [ :aStyle |
-			aStyle background: self theme surfaces separatorTint ];
+			aStyle background: self theme separator color ];
 		yourself.
 	self
 		background: Color transparent;

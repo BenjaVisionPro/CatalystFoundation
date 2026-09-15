@@ -44,7 +44,7 @@ CFMaDetailAddPopupElement class >> newClassChoiceHandle [
 		addAptitude: (BrLazyStyleCommonAptitude new
 			@ anIndicator;
 			default: [ :aStyle |
-				aStyle do: [ anIndicator color: aHandle theme controls controlIndicatorForeground ] ]).
+				aStyle do: [ anIndicator color: aHandle theme select indicatorForeground ] ]).
 	anIndicator constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].

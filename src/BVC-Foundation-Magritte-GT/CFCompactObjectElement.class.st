@@ -162,7 +162,7 @@ CFCompactObjectElement >> newReferenceTextElement [
 CFCompactObjectElement >> primaryReferenceEditorAptitude [
 	^ BrGlamorousRegularEditorAptitude new
 		glamorousRegularFont;
-		foreground: self theme typography primaryForeground;
+		foreground: self theme label defaultTextForeground;
 		yourself
 ]
 
@@ -170,7 +170,7 @@ CFCompactObjectElement >> primaryReferenceEditorAptitude [
 CFCompactObjectElement >> supportingReferenceEditorAptitude [
 	^ BrGlamorousRegularEditorAptitude new
 		glamorousRegularFont;
-		foreground: self theme typography tertiaryForeground;
+		foreground: self theme label supportingTextForeground;
 		fontSize: self theme typography supportingFontSize;
 		yourself
 ]
@@ -193,10 +193,10 @@ CFCompactObjectElement >> updateReferenceTextElement: aTextElement value: aValue
 	aText := aString asRopedText glamorousRegularFont.
 	aTextElement == titleElement
 		ifTrue: [
-			aText foreground: self theme typography primaryForeground ]
+			aText foreground: self theme label defaultTextForeground ]
 		ifFalse: [
 			aText
-				foreground: self theme typography tertiaryForeground;
+				foreground: self theme label supportingTextForeground;
 				fontSize: self theme typography supportingFontSize ].
 	aTextElement
 		text: aText;

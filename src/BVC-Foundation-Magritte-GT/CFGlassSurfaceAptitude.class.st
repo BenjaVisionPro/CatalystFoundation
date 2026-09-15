@@ -16,7 +16,7 @@ CFGlassSurfaceAptitude >> initialize [
 			default: [ :aStyle |
 				aStyle
 					background:
-						((self theme surfaces baseBackground
+						((self theme default contentBackground
 							blocResolveColorForTheme: self theme)
 							alpha: 0.65) ])
 ]

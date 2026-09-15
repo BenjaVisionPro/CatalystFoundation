@@ -286,7 +286,7 @@ CFAtelierRelationDropTarget >> moveOperationForObjects: someObjects sourceDragIt
 { #category : 'private - appearance' }
 CFAtelierRelationDropTarget >> newDropIndicator [
 	^ BlElement new
-		background: (element theme interaction focusedBorderColor blocResolveColorForTheme: element theme);
+		background: (element theme item focusedBorderColor blocResolveColorForTheme: element theme);
 		visibility: BlVisibility hidden;
 		zIndex: 101;
 		constraintsDo: [ :c |
@@ -303,7 +303,7 @@ CFAtelierRelationDropTarget >> newReplacementIndicator [
 	^ BlElement new
 		background: Color transparent;
 		border: (BlBorder
-			paint: (element theme interaction focusedBorderColor blocResolveColorForTheme: element theme)
+			paint: (element theme item focusedBorderColor blocResolveColorForTheme: element theme)
 			width: 2);
 		visibility: BlVisibility hidden;
 		zIndex: 101;

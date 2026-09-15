@@ -79,7 +79,7 @@ CFAtelierRootDropTarget >> dropEvent: anEvent [
 { #category : 'private - appearance' }
 CFAtelierRootDropTarget >> newDropIndicator [
 	^ BlElement new
-		background: (element theme interaction focusedBorderColor blocResolveColorForTheme: element theme);
+		background: (element theme item focusedBorderColor blocResolveColorForTheme: element theme);
 		visibility: BlVisibility hidden;
 		zIndex: 101;
 		constraintsDo: [ :c |

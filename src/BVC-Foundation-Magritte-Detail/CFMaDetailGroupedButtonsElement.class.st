@@ -37,7 +37,7 @@ CFMaDetailGroupedButtonsElement >> initialize [
 		border: BlBorder empty;
 		addAptitude: (BrLazyStyleCommonAptitude new
 			default: [ :aStyle |
-				aStyle background: self theme interaction controlBackgroundTint ]);
+				aStyle background: self theme toggleGroup background ]);
 		yourself
 ]
 
@@ -106,9 +106,9 @@ CFMaDetailGroupedButtonsElement >> newIconToggleFor: anOption [
 	aToggle addAptitude: (CFMaDetailLazyToggleAptitude new
 		@ anIcon;
 		default: [ :aState |
-			aState do: [ anIcon color: aToggle theme controls inactiveIconForeground ] ];
+			aState do: [ anIcon color: aToggle theme toggleGroup inactiveForeground ] ];
 		activated: [ :aState |
-			aState do: [ anIcon color: Color white ] ]).
+			aState do: [ anIcon color: aToggle theme toggleGroup activeForeground ] ]).
 	self installValueChangeOn: aToggle option: anOption.
 	^ aToggle
 ]
@@ -128,11 +128,11 @@ CFMaDetailGroupedButtonsElement >> newTextToggleFor: anOption [
 		default: [ :aState |
 			aState do: [
 				aToggle label: ((displayBlock value: anOption) asString asRopedText
-					foreground: aToggle theme typography primaryForeground) ] ];
+					foreground: aToggle theme label defaultTextForeground) ] ];
 		activated: [ :aState |
 			aState do: [
 				aToggle label: ((displayBlock value: anOption) asString asRopedText
-					foreground: Color white) ] ]).
+					foreground: aToggle theme toggleGroup activeForeground) ] ]).
 	self installValueChangeOn: aToggle option: anOption.
 	^ aToggle
 ]
@@ -153,7 +153,7 @@ CFMaDetailGroupedButtonsElement >> toggleStyle [
 				background: Color transparent;
 				geometry: (BlRoundedRectangleGeometry cornerRadius: 7) ];
 		hovered: [ :aState |
-			aState background: self theme interaction subtleBackgroundTint ];
+			aState background: self theme toggleGroup hoveredBackground ];
 		activated: [ :aState |
 			aState background: self theme item selectedColor ];
 		yourself
