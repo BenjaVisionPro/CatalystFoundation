@@ -211,15 +211,15 @@ CFMaDetailSliderElement >> onThemeChanged [
 CFMaDetailSliderElement >> updateThemeAppearance [
 	| aTheme |
 	aTheme := self theme.
-	track background: (aTheme controls sliderTrackTint blocResolveColorForTheme: aTheme).
-	fill background: (aTheme controls sliderActiveTrackTint blocResolveColorForTheme: aTheme).
+	track background: (aTheme slider trackBackground blocResolveColorForTheme: aTheme).
+	fill background: (aTheme slider activeTrackBackground blocResolveColorForTheme: aTheme).
 	thumb
-		background: (aTheme controls sliderThumbBackground blocResolveColorForTheme: aTheme);
+		background: (aTheme slider thumbBackground blocResolveColorForTheme: aTheme);
 		border: (BlBorder
-			paint: (aTheme controls sliderThumbBorderTint blocResolveColorForTheme: aTheme)
+			paint: (aTheme slider thumbBorderColor blocResolveColorForTheme: aTheme)
 			width: 0.5).
 	{ minimumTick. middleTick. maximumTick } do: [ :aTick |
-		aTick background: (aTheme controls sliderTickTint blocResolveColorForTheme: aTheme) ]
+		aTick background: (aTheme slider tickColor blocResolveColorForTheme: aTheme) ]
 ]
 
 

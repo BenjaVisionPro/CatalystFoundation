@@ -213,9 +213,9 @@ CFMaDetailTagsElement >> newEditorWithText: aString [
 				| aTheme |
 				aTheme := anEditor theme.
 				aStyle
-					background: aTheme controls tagEditorBackground;
+					background: aTheme tag editorBackground;
 					border: (BlBorder
-						paint: (aTheme interaction focusedBorderColor blocResolveColorForTheme: aTheme)
+						paint: (aTheme editor focusedBorderColor blocResolveColorForTheme: aTheme)
 						width: 1) ]);
 		when: BrEditorAcceptWish do: [ :aWish | self commitActiveEditor ];
 		when: BrEditorCancelWish do: [ :aWish | self cancelActiveEditor ].
