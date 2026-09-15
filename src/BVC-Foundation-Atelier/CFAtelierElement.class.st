@@ -92,9 +92,6 @@ CFAtelierElement >> rebuildContent [
 		content: formElement;
 		yourself.
 	formElement hMatchParent.
-	workspaceElement
-		hMatchParent;
-		vMatchParent.
 
 	contentElement := BrHorizontalPane new
 		hMatchParent;
