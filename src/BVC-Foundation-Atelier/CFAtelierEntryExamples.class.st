@@ -160,10 +160,14 @@ CFAtelierEntryExamples >> clearingPaletteRemovesLivePaletteElement [
 { #category : 'examples - live composition' }
 CFAtelierEntryExamples >> workspaceClientIsBuiltBeforeInstallation [
 	<gtExample>
-	| host client workspace |
+	| host model memento client workspace |
 	host := CFAtelierElement new.
-	client := CFAtelierEntryExampleModel new asAtelier.
-	workspace := client installAsWorkspaceClientIn: host.
+	model := CFAtelierEntryExampleModel new.
+	memento := CFMaMemento model: model.
+	client := CFAtelierViewModel forObject: model memento: memento.
+	workspace := client
+		installAsWorkspaceClientIn: host
+		memento: memento.
 
 	self assert: host workspaceElement == workspace.
 	self assert: workspace children isNotEmpty.
