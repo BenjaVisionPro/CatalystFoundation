@@ -15,8 +15,7 @@ Class {
 		'clientPresentationBlock',
 		'workspaceElementFactory',
 		'atelierElement',
-		'pendingInspectorRequest',
-		'relationItemElementBlock'
+		'pendingInspectorRequest'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -36,16 +35,14 @@ CFAtelierViewModel >> asElement [
 		ifNil: [ atelierElement workspaceElement: nil ]
 		ifNotNil: [
 			atelierElement workspaceElement: (workspaceElementFactory cull: atelierElement) ].
-	palette
-		ifNil: [ atelierElement palette: nil elementFactory: nil ]
-		ifNotNil: [
-			atelierElement palette: palette elementFactory: paletteElementFactory ].
+	palette ifNotNil: [
+		atelierElement palette: palette elementFactory: paletteElementFactory ].
 	self applyPendingInspectorRequest.
 	^ atelierElement
 ]
 
 { #category : 'private - building' }
-CFAtelierViewModel >> configurePresentationBuilder [
+CFAtelierViewModel >> newFormElement [
 	super presentationDo: [ :aPresentation |
 		aPresentation
 			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
@@ -56,13 +53,7 @@ CFAtelierViewModel >> configurePresentationBuilder [
 					description: aDescription)
 					insertOperationFor: insertOperationBlock;
 					replaceOperationFor: replaceOperationBlock;
-					moveOperationFor: moveOperationBlock.
-				relationItemElementBlock ifNotNil: [ :aBlock |
-					aBlock
-						value: aRow
-						value: anObject
-						value: aDescription
-						value: aMemento ] ];
+					moveOperationFor: moveOperationBlock ];
 			relationElementDo: [ :aRelationElement :aDescription :aMemento |
 				(CFAtelierRelationDropSurface
 					installOn: aRelationElement
@@ -88,19 +79,8 @@ CFAtelierViewModel >> configurePresentationBuilder [
 					applyRemoveOf: someObjects
 					memento: aMemento
 					description: aDescription ].
-		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ]
-]
-
-{ #category : 'private - building' }
-CFAtelierViewModel >> newFormElement [
-	self configurePresentationBuilder.
+		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ].
 	^ super asElement
-]
-
-{ #category : 'private - building' }
-CFAtelierViewModel >> preparedElementForMemento: aMemento [
-	self configurePresentationBuilder.
-	^ super preparedElementForMemento: aMemento
 ]
 
 { #category : 'private - building' }
@@ -118,12 +98,6 @@ CFAtelierViewModel >> presentationDo: aBlock [
 ]
 
 { #category : 'configuration' }
-CFAtelierViewModel >> relationItemElementDo: aBlock [
-	"Configure additional relation-item interaction while retaining Atelier's own relation drop-target installation."
-	relationItemElementBlock := aBlock
-]
-
-{ #category : 'configuration' }
 CFAtelierViewModel >> workspaceElementFactory: aBlock [
 	"Configure an optional primary workspace surface beside the root object's Atelier form. The block receives the shared CFAtelierElement. The form remains the model-context surface and therefore retains its normal Atelier relation interactions."
 	workspaceElementFactory := aBlock
@@ -133,18 +107,6 @@ CFAtelierViewModel >> workspaceElementFactory: aBlock [
 CFAtelierViewModel >> asWorkspaceElementIn: anAtelierElement [
 	"Build only my configured form/presentation inside an existing Atelier host. This lets a document-root Atelier compose a focused client presentation while retaining one palette and one inspector."
 	^ self newFormElementIn: anAtelierElement
-]
-
-{ #category : 'api - composition' }
-CFAtelierViewModel >> installAsWorkspaceClientIn: anAtelierElement memento: aMemento [
-	"Build this configured client synchronously from its already-resolved transaction memento, then install its workspace and palette without rebuilding the host's root form."
-	| aWorkspaceElement |
-	aWorkspaceElement := self preparedElementForMemento: aMemento.
-	atelierElement := anAtelierElement.
-	anAtelierElement
-		workspaceElement: aWorkspaceElement;
-		palette: palette elementFactory: paletteElementFactory.
-	^ aWorkspaceElement
 ]
 
 { #category : 'configuration' }
