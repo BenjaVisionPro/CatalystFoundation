@@ -16,7 +16,11 @@ Object >> gtAtelierFor: aView [
 		title: 'Atelier';
 		priority: 50;
 		disableAsync;
-		stencil: [ self asAtelier asElement ]
+		stencil: [ self asAtelier asElement ];
+		actionStencil: [ :aTab |
+			CFThemeToggleButton forTab: aTab ];
+		actionStencil: [ :aTab |
+			CFThemeChooserButton forTab: aTab ]
 ]
 
 
