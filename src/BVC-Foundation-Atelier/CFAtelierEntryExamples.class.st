@@ -155,3 +155,17 @@ CFAtelierEntryExamples >> clearingPaletteRemovesLivePaletteElement [
 	self assert: element paletteElement isNil.
 	^ element
 ]
+
+
+{ #category : 'examples - live composition' }
+CFAtelierEntryExamples >> workspaceClientIsBuiltBeforeInstallation [
+	<gtExample>
+	| host client workspace |
+	host := CFAtelierElement new.
+	client := CFAtelierEntryExampleModel new asAtelier.
+	workspace := client installAsWorkspaceClientIn: host.
+
+	self assert: host workspaceElement == workspace.
+	self assert: workspace children isNotEmpty.
+	^ host
+]

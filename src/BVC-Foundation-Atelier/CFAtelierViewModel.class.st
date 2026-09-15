@@ -124,6 +124,18 @@ CFAtelierViewModel >> asWorkspaceElementIn: anAtelierElement [
 	^ self newFormElementIn: anAtelierElement
 ]
 
+{ #category : 'api - composition' }
+CFAtelierViewModel >> installAsWorkspaceClientIn: anAtelierElement [
+	"Build this configured client in the shared Atelier host and install its workspace and palette without rebuilding the host's root form."
+	| aWorkspaceElement |
+	aWorkspaceElement := self preparedElementForMemento: self memento.
+	atelierElement := anAtelierElement.
+	anAtelierElement
+		workspaceElement: aWorkspaceElement;
+		palette: palette elementFactory: paletteElementFactory.
+	^ aWorkspaceElement
+]
+
 { #category : 'configuration' }
 CFAtelierViewModel >> configuration: anAtelierConfiguration [
 	anAtelierConfiguration applyTo: self
