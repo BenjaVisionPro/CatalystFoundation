@@ -45,7 +45,7 @@ CFAtelierViewModel >> asElement [
 ]
 
 { #category : 'private - building' }
-CFAtelierViewModel >> newFormElement [
+CFAtelierViewModel >> configurePresentationBuilder [
 	super presentationDo: [ :aPresentation |
 		aPresentation
 			relationItemElementDo: [ :aRow :anObject :aDescription :aMemento |
@@ -88,8 +88,19 @@ CFAtelierViewModel >> newFormElement [
 					applyRemoveOf: someObjects
 					memento: aMemento
 					description: aDescription ].
-		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ].
+		clientPresentationBlock ifNotNil: [ :aBlock | aBlock value: aPresentation ] ]
+]
+
+{ #category : 'private - building' }
+CFAtelierViewModel >> newFormElement [
+	self configurePresentationBuilder.
 	^ super asElement
+]
+
+{ #category : 'private - building' }
+CFAtelierViewModel >> preparedElementForMemento: aMemento [
+	self configurePresentationBuilder.
+	^ super preparedElementForMemento: aMemento
 ]
 
 { #category : 'private - building' }
