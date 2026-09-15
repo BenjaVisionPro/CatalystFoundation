@@ -60,10 +60,7 @@ CFAtelierElement >> workspaceElement: anElement [
 		or: [ contentElement isNil ] ] ]) ifTrue: [
 		^ self rebuildContent ].
 
-	workspaceElement
-		removeFromParent;
-		hMatchParent;
-		vMatchParent.
+	workspaceElement removeFromParent.
 	contentElement
 		replaceChild: previousWorkspace
 		with: workspaceElement
@@ -166,7 +163,7 @@ CFAtelierElement >> palette: anAtelierPalette elementFactory: aFactoryBlock [
 	| previousPosition |
 	previousPosition := paletteElement
 		ifNil: [ 16 @ 16 ]
-		ifNotNil: [ paletteElement position ].
+		ifNotNil: [ paletteElement measuredPosition ].
 	paletteElement ifNotNil: [
 		self removeChild: paletteElement.
 		paletteElement := nil ].

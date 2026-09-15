@@ -137,7 +137,7 @@ CFAtelierEntryExamples >> replacingPalettePreservesAtelierPosition [
 	element palette: secondPalette.
 
 	self assert: element paletteElement palette == secondPalette.
-	self assert: element paletteElement position equals: position.
+	self assert: element paletteElement measuredPosition equals: position.
 	^ element
 ]
 
