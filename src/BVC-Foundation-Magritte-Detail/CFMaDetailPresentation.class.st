@@ -1211,7 +1211,7 @@ CFMaDetailPresentation >> replaceRelationSelectionWith: theElements for: aDescri
 	^ newElements
 ]
 
-{ #category : 'private - relations' }
+{ #category : 'api - relations' }
 CFMaDetailPresentation >> selectRelationElement: anElement for: aDescription [
 	self
 		replaceRelationSelectionWith: ((self relationContextFor: aDescription) selectionWithOnly: anElement)
