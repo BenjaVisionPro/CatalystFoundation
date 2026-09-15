@@ -98,3 +98,60 @@ CFAtelierEntryExamples >> paletteSourceRetainsConfiguredItemIdentity [
 	self assert: (sourceElement userData at: #atelierPaletteItem) == item.
 	^ sourceElement
 ]
+
+
+{ #category : 'examples - live composition' }
+CFAtelierEntryExamples >> replacingWorkspaceRetainsAtelierContext [
+	<gtExample>
+	| model atelier element firstWorkspace secondWorkspace content contextScroll |
+	model := CFAtelierEntryExampleModel new.
+	firstWorkspace := BlElement new.
+	atelier := model asAtelier
+		workspaceElementFactory: [ :anAtelier | firstWorkspace ];
+		yourself.
+	element := atelier asElement.
+	content := element children first.
+	contextScroll := content children first.
+
+	secondWorkspace := BlElement new.
+	element workspaceElement: secondWorkspace.
+
+	self assert: element children first == content.
+	self assert: content children first == contextScroll.
+	self assert: element workspaceElement == secondWorkspace.
+	^ element
+]
+
+{ #category : 'examples - live composition' }
+CFAtelierEntryExamples >> replacingPalettePreservesAtelierPosition [
+	<gtExample>
+	| firstPalette secondPalette element position |
+	firstPalette := CFAtelierPalette new.
+	secondPalette := CFAtelierPalette new.
+	element := CFAtelierEntryExampleModel new asAtelier
+		palette: firstPalette;
+		asElement.
+	position := 73 @ 41.
+	element paletteElement relocate: position.
+
+	element palette: secondPalette.
+
+	self assert: element paletteElement palette == secondPalette.
+	self assert: element paletteElement position equals: position.
+	^ element
+]
+
+{ #category : 'examples - live composition' }
+CFAtelierEntryExamples >> clearingPaletteRemovesLivePaletteElement [
+	<gtExample>
+	| palette element |
+	palette := CFAtelierPalette new.
+	element := CFAtelierEntryExampleModel new asAtelier
+		palette: palette;
+		asElement.
+
+	element palette: nil.
+
+	self assert: element paletteElement isNil.
+	^ element
+]

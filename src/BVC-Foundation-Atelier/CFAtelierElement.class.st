@@ -49,8 +49,24 @@ CFAtelierElement >> workspaceElement [
 
 { #category : 'accessing' }
 CFAtelierElement >> workspaceElement: anElement [
+	| previousWorkspace |
+	workspaceElement == anElement ifTrue: [ ^ self ].
+	previousWorkspace := workspaceElement.
 	workspaceElement := anElement.
-	self rebuildContent
+
+	(formElement isNil
+		or: [ previousWorkspace isNil
+		or: [ workspaceElement isNil
+		or: [ contentElement isNil ] ] ]) ifTrue: [
+		^ self rebuildContent ].
+
+	workspaceElement
+		removeFromParent;
+		hMatchParent;
+		vMatchParent.
+	contentElement
+		replaceChild: previousWorkspace
+		with: workspaceElement
 ]
 
 { #category : 'private - building' }
@@ -147,14 +163,22 @@ CFAtelierElement >> palette: anAtelierPalette [
 
 { #category : 'accessing' }
 CFAtelierElement >> palette: anAtelierPalette elementFactory: aFactoryBlock [
-	paletteElement ifNotNil: [ self removeChild: paletteElement ].
+	| previousPosition |
+	previousPosition := paletteElement
+		ifNil: [ 16 @ 16 ]
+		ifNotNil: [ paletteElement position ].
+	paletteElement ifNotNil: [
+		self removeChild: paletteElement.
+		paletteElement := nil ].
+	anAtelierPalette ifNil: [ ^ self ].
+
 	paletteElement := aFactoryBlock
 		ifNil: [ CFAtelierPaletteElement new ]
 		ifNotNil: [ aFactoryBlock value ].
 	paletteElement
 		palette: anAtelierPalette;
 		constraintsDo: [ :c | c ignoreByLayout ];
-		relocate: 16 @ 16.
+		relocate: previousPosition.
 	self addChild: paletteElement
 ]
 

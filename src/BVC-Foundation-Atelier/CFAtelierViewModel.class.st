@@ -15,7 +15,8 @@ Class {
 		'clientPresentationBlock',
 		'workspaceElementFactory',
 		'atelierElement',
-		'pendingInspectorRequest'
+		'pendingInspectorRequest',
+		'relationItemElementBlock'
 	],
 	#category : 'BVC-Foundation-Atelier-UI',
 	#package : 'BVC-Foundation-Atelier',
@@ -35,8 +36,10 @@ CFAtelierViewModel >> asElement [
 		ifNil: [ atelierElement workspaceElement: nil ]
 		ifNotNil: [
 			atelierElement workspaceElement: (workspaceElementFactory cull: atelierElement) ].
-	palette ifNotNil: [
-		atelierElement palette: palette elementFactory: paletteElementFactory ].
+	palette
+		ifNil: [ atelierElement palette: nil elementFactory: nil ]
+		ifNotNil: [
+			atelierElement palette: palette elementFactory: paletteElementFactory ].
 	self applyPendingInspectorRequest.
 	^ atelierElement
 ]
@@ -53,7 +56,13 @@ CFAtelierViewModel >> newFormElement [
 					description: aDescription)
 					insertOperationFor: insertOperationBlock;
 					replaceOperationFor: replaceOperationBlock;
-					moveOperationFor: moveOperationBlock ];
+					moveOperationFor: moveOperationBlock.
+				relationItemElementBlock ifNotNil: [ :aBlock |
+					aBlock
+						value: aRow
+						value: anObject
+						value: aDescription
+						value: aMemento ] ];
 			relationElementDo: [ :aRelationElement :aDescription :aMemento |
 				(CFAtelierRelationDropSurface
 					installOn: aRelationElement
@@ -95,6 +104,12 @@ CFAtelierViewModel >> newFormElementIn: anAtelierElement [
 CFAtelierViewModel >> presentationDo: aBlock [
 	"Configure the Foundation-selected presentation for this Atelier client. Atelier composes this block with its own relation interaction hooks when the presentation is built."
 	clientPresentationBlock := aBlock
+]
+
+{ #category : 'configuration' }
+CFAtelierViewModel >> relationItemElementDo: aBlock [
+	"Configure additional relation-item interaction while retaining Atelier's own relation drop-target installation."
+	relationItemElementBlock := aBlock
 ]
 
 { #category : 'configuration' }
