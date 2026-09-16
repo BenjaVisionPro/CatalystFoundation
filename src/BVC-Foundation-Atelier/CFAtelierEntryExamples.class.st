@@ -98,3 +98,18 @@ CFAtelierEntryExamples >> paletteSourceRetainsConfiguredItemIdentity [
 	self assert: (sourceElement userData at: #atelierPaletteItem) == item.
 	^ sourceElement
 ]
+
+{ #category : 'examples - theme' }
+CFAtelierEntryExamples >> atelierInheritsHostTheme [
+	<gtExample>
+	| theme host element |
+	theme := CgtDetailDarkTheme new.
+	host := BrFrame new theme: theme.
+	element := CFAtelierEntryExampleModel new asAtelier asElement.
+	host addChild: element.
+
+	self assert: element theme == theme.
+	self assert: element formElement theme == theme.
+	self assert: element inspectorElement theme == theme.
+	^ element
+]
