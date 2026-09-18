@@ -47,11 +47,7 @@ CFIdentifiableObject >> initialize [
 { #category : 'as yet unclassified' }
 CFIdentifiableObject >> initializeIdentifier [
 	identifier ifNotNil: [ ^ self ].
-	identifier := (String
-			streamContents: [ :idString | 
-				idString
-					nextPutAll: 'cf_';
-					nextPutAll: UUID new asString36 ]) asSymbol
+	identifier := UUID new asString36 asSymbol
 ]
 
 { #category : 'descriptions' }
