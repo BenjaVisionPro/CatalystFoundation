@@ -1807,6 +1807,10 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 		accessories: #()
 		trailing: self newRelationInspectorChevron.
 	self
+		configureRelationItemElement: aRow
+		object: anObject
+		description: aDescription.
+	self
 		installToManyListSelectionOn: aRow
 		for: anObject
 		description: aDescription
@@ -1816,10 +1820,6 @@ CFMaDetailPresentation >> newToManyRelationRowFor: anObject description: aDescri
 				fromRow: theItemElement
 				description: aDescription ].
 	self installToManyListReorderingOn: aRow description: aDescription.
-	self
-		configureRelationItemElement: aRow
-		object: anObject
-		description: aDescription.
 	^ aRow
 ]
 
