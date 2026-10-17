@@ -91,9 +91,15 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 
 { #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
-	| foundationRepo fontAwesomeRepo |
-	foundationRepo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/CatalystFoundation/src'.
-	fontAwesomeRepo := 'gitlocal://', (OSPlatform current environment at: 'PROJECTS_ROOT'), '/Gt4FontAwesome/src'.
+	| foundationRepo fontAwesomeRepo projectsRoot |
+	"The common group is also loaded outside the local development workspace."
+	projectsRoot := OSPlatform current environment at: 'PROJECTS_ROOT' ifAbsent: [ nil ].
+	foundationRepo := projectsRoot
+		ifNil: [ 'github://BenjaVisionPro/CatalystFoundation:main/src' ]
+		ifNotNil: [ 'gitlocal://', projectsRoot, '/CatalystFoundation/src' ].
+	fontAwesomeRepo := projectsRoot
+		ifNil: [ 'github://BenjaVisionPro/Gt4FontAwesome:main/src' ]
+		ifNotNil: [ 'gitlocal://', projectsRoot, '/Gt4FontAwesome/src' ].
 	spec
 		baseline: 'CatalystMotion'
 		with: [ spec repository: foundationRepo ].
