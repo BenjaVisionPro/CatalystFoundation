@@ -47,6 +47,28 @@ CFConfigurationExamples class >> invalidConfiguration [
 		yourself
 ]
 
+{ #category : 'examples - atelier' }
+CFConfigurationExamples >> configurationOpensAsAtelierWithDetail [
+	<gtExample>
+	| configuration atelier memento presentation form element |
+	configuration := self class emptyConfigurationGroup.
+	atelier := configuration asAtelier.
+	self assert: atelier class equals: CFAtelierViewModel.
+	memento := CFMaMemento model: configuration.
+	atelier presentationDo: [ :aPresentation | presentation := aPresentation ].
+	element := atelier asElement.
+	form := element formElement.
+	"Build synchronously with the known transaction to check Atelier's hooks,
+	without relying on asynchronous UI scheduling in this example."
+	atelier initializeForm: form forMemento: memento.
+	self assert: form class equals: CFMaFormRootElement.
+	self assert: presentation class equals: CFMaDetailPresentation.
+	self assert: presentation memento == memento.
+	self assert: presentation actionMemento == memento.
+	self assert: element class equals: CFAtelierElement.
+	^ element
+]
+
 { #category : 'examples' }
 CFConfigurationExamples >> invalidConfigurationHasStructuredIssue [
 	<gtExample>
@@ -79,23 +101,44 @@ CFConfigurationExamples >> methodLibraryDiscoversOptionalTypeHints [
 	^ library
 ]
 
-{ #category : 'examples' }
-CFConfigurationExamples >> plannerFindsToManyPlacement [
+{ #category : 'examples - atelier' }
+CFConfigurationExamples >> nestedConfigurationAtelierStagesAndResetsSharedTransaction [
 	<gtExample>
-	| configuration asset assessment targetChoice |
+	| configuration child rootMemento childMemento relationDescription endpointDescription atelier inspector tool childPresentation |
 	configuration := self class emptyConfigurationGroup.
-	asset := CFConfigurationLibrary discovered assets
-		detect: [ :each | each selector = #developmentConfiguration ].
-	assessment := CFConfigurationPlanner new
-		assessAsset: asset
-		in: configuration.
-	self assert: assessment hasSingleTargetChoice.
-	targetChoice := assessment targetChoices first.
-	self assert: targetChoice placement memento model == configuration.
-	self assert: targetChoice placement isAddition.
-	self assert: targetChoice willProduceValidConfiguration.
-	self assert: configuration configurations isEmpty.
-	^ assessment
+	child := self class developmentConfiguration.
+	child parent: configuration.
+	configuration configurations: { child }.
+	relationDescription := configuration descriptionConfigurations.
+	endpointDescription := child descriptionEndpoint.
+	rootMemento := CFMaMemento model: configuration.
+	atelier := configuration asAtelier.
+	atelier preparedElementForMemento: rootMemento.
+	childMemento := rootMemento childMementoFor: child inRelation: relationDescription.
+	inspector := CFAtelierInspectorElement new.
+	tool := inspector
+		inspectObject: child
+		memento: childMemento
+		presentationDo: [ :aPresentation |
+			childPresentation := aPresentation.
+			aPresentation transactionMemento: rootMemento ].
+	tool newPreparedElement.
+	self assert: childPresentation class equals: CFMaDetailPresentation.
+	self assert: tool memento == childMemento.
+	self assert: childPresentation memento == childMemento.
+	self assert: childPresentation actionMemento == rootMemento.
+	self assert: childMemento rootMemento == rootMemento.
+	self assert: childMemento parentMemento == rootMemento.
+	childMemento write: 'https://staged.example' using: endpointDescription.
+	self assert: (childMemento readUsing: endpointDescription) equals: 'https://staged.example'.
+	self assert: child endpoint equals: 'http://localhost:8080'.
+	self assert: child parent == configuration.
+	childPresentation actionMemento reset.
+	self assert: (childMemento readUsing: endpointDescription) equals: child endpoint.
+	self assert: (rootMemento childMementoFor: child inRelation: relationDescription) == childMemento.
+	self assert: configuration configurations first == child.
+	self assert: child parent == configuration.
+	^ tool
 ]
 
 { #category : 'examples' }
@@ -114,6 +157,24 @@ CFConfigurationExamples >> plannerAppliesToManyPlan [
 		planner: CFConfigurationPlanner new) apply.
 	self assert: configuration configurations size equals: 1.
 	self assert: configuration configurations first == appliedConfiguration.
+	self assert: appliedConfiguration parent == configuration.
+	^ configuration
+]
+
+{ #category : 'examples' }
+CFConfigurationExamples >> plannerAppliesToOneReplacementPlan [
+	<gtExample>
+	| configuration asset assessment appliedConfiguration planner |
+	configuration := self class emptyConfigurationHolder.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	planner := CFConfigurationPlanner new.
+	assessment := planner assessAsset: asset in: configuration.
+	appliedConfiguration := (CFConfigurationPlan
+		asset: asset
+		targetChoice: assessment targetChoices first
+		planner: planner) apply.
+	self assert: configuration configuration == appliedConfiguration.
 	self assert: appliedConfiguration parent == configuration.
 	^ configuration
 ]
@@ -141,6 +202,25 @@ CFConfigurationExamples >> plannerFindsNestedPlacements [
 ]
 
 { #category : 'examples' }
+CFConfigurationExamples >> plannerFindsToManyPlacement [
+	<gtExample>
+	| configuration asset assessment targetChoice |
+	configuration := self class emptyConfigurationGroup.
+	asset := CFConfigurationLibrary discovered assets
+		detect: [ :each | each selector = #developmentConfiguration ].
+	assessment := CFConfigurationPlanner new
+		assessAsset: asset
+		in: configuration.
+	self assert: assessment hasSingleTargetChoice.
+	targetChoice := assessment targetChoices first.
+	self assert: targetChoice placement memento model == configuration.
+	self assert: targetChoice placement isAddition.
+	self assert: targetChoice willProduceValidConfiguration.
+	self assert: configuration configurations isEmpty.
+	^ assessment
+]
+
+{ #category : 'examples' }
 CFConfigurationExamples >> plannerFindsToOneReplacementPlacement [
 	<gtExample>
 	| configuration asset assessment targetChoice |
@@ -156,24 +236,6 @@ CFConfigurationExamples >> plannerFindsToOneReplacementPlacement [
 	self assert: targetChoice willProduceValidConfiguration.
 	self assert: configuration configuration isNil.
 	^ assessment
-]
-
-{ #category : 'examples' }
-CFConfigurationExamples >> plannerAppliesToOneReplacementPlan [
-	<gtExample>
-	| configuration asset assessment appliedConfiguration planner |
-	configuration := self class emptyConfigurationHolder.
-	asset := CFConfigurationLibrary discovered assets
-		detect: [ :each | each selector = #developmentConfiguration ].
-	planner := CFConfigurationPlanner new.
-	assessment := planner assessAsset: asset in: configuration.
-	appliedConfiguration := (CFConfigurationPlan
-		asset: asset
-		targetChoice: assessment targetChoices first
-		planner: planner) apply.
-	self assert: configuration configuration == appliedConfiguration.
-	self assert: appliedConfiguration parent == configuration.
-	^ configuration
 ]
 
 { #category : 'examples' }

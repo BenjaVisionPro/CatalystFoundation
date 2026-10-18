@@ -37,7 +37,6 @@ CFConfigurationLibrarySidebarElement >> createAssetPresentationFor: anAsset [
 	^ element
 ]
 
-
 { #category : 'private - building' }
 CFConfigurationLibrarySidebarElement >> createCompactPresentationFor: anAsset [
 	| element |
@@ -58,15 +57,6 @@ CFConfigurationLibrarySidebarElement >> createCompactPresentationFor: anAsset [
 		yourself).
 	^ element
 ]
-
-{ #category : 'private - building' }
-CFConfigurationLibrarySidebarElement >> createDragPresentationFor: aDragItem [
-	^ (self createCompactPresentationFor: aDragItem domainObject)
-		hExact: aDragItem sourceElement extent x;
-		margin: BlInsets empty;
-		yourself
-]
-
 
 { #category : 'private - building' }
 CFConfigurationLibrarySidebarElement >> createContent [
@@ -96,6 +86,14 @@ CFConfigurationLibrarySidebarElement >> createContent [
 		addChild: self createSearchElement;
 		addChild: listElement.
 	self addChild: content
+]
+
+{ #category : 'private - building' }
+CFConfigurationLibrarySidebarElement >> createDragPresentationFor: aDragItem [
+	^ (self createCompactPresentationFor: aDragItem domainObject)
+		hExact: aDragItem sourceElement extent x;
+		margin: BlInsets empty;
+		yourself
 ]
 
 { #category : 'private - building' }
