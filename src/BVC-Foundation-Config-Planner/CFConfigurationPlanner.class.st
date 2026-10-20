@@ -71,6 +71,12 @@ CFConfigurationPlanner >> issue: anIssue isEquivalentTo: anotherIssue [
 ]
 
 { #category : 'private - planning' }
+CFConfigurationPlanner >> occurrencesOfIssue: anIssue in: aCollection [
+	^ (aCollection select: [ :each |
+		self issue: each isEquivalentTo: anIssue ]) size
+]
+
+{ #category : 'private - planning' }
 CFConfigurationPlanner >> placementsFor: anAssetConfiguration in: aConfiguration [
 	| placements visitedConfigurations |
 	placements := OrderedCollection new.
@@ -128,12 +134,6 @@ CFConfigurationPlanner >> targetChoiceForPlacement: aPlacement in: anAssessment 
 	^ anAssessment targetChoices
 		detect: [ :each | each placement matches: aPlacement ]
 		ifNone: [ nil ]
-]
-
-{ #category : 'private - planning' }
-CFConfigurationPlanner >> occurrencesOfIssue: anIssue in: aCollection [
-	^ (aCollection select: [ :each |
-		self issue: each isEquivalentTo: anIssue ]) size
 ]
 
 { #category : 'accessing' }

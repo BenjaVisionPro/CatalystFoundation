@@ -20,6 +20,19 @@ CFConfigurationPlacement class >> memento: aMemento description: aDescription op
 		yourself
 ]
 
+{ #category : 'private - applying' }
+CFConfigurationPlacement >> adding: anObject to: aCollection [
+	| result collectionClass |
+	collectionClass := description kind ifNil: [ OrderedCollection ].
+	result := aCollection
+		ifNil: [ collectionClass new ]
+		ifNotNil: [ aCollection copy ].
+	insertionIndex
+		ifNil: [ result add: anObject ]
+		ifNotNil: [ result add: anObject beforeIndex: insertionIndex ].
+	^ result
+]
+
 { #category : 'applying' }
 CFConfigurationPlacement >> apply: anObject [
 	| oldValue newValue |
@@ -36,24 +49,13 @@ CFConfigurationPlacement >> apply: anObject [
 	^ anObject
 ]
 
-{ #category : 'private - applying' }
-CFConfigurationPlacement >> adding: anObject to: aCollection [
-	| result collectionClass |
-	collectionClass := description kind ifNil: [ OrderedCollection ].
-	result := aCollection
-		ifNil: [ collectionClass new ]
-		ifNotNil: [ aCollection copy ].
-	insertionIndex
-		ifNil: [ result add: anObject ]
-		ifNotNil: [ result add: anObject beforeIndex: insertionIndex ].
-	^ result
+{ #category : 'accessing' }
+CFConfigurationPlacement >> description [ ^ description
 ]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> description [ ^ description ]
-
-{ #category : 'accessing' }
-CFConfigurationPlacement >> description: anObject [ description := anObject ]
+CFConfigurationPlacement >> description: anObject [ description := anObject
+]
 
 { #category : 'initialization' }
 CFConfigurationPlacement >> initializeObject: anObject [
@@ -61,16 +63,20 @@ CFConfigurationPlacement >> initializeObject: anObject [
 ]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> insertionIndex [ ^ insertionIndex ]
+CFConfigurationPlacement >> insertionIndex [ ^ insertionIndex
+]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> insertionIndex: anInteger [ insertionIndex := anInteger ]
+CFConfigurationPlacement >> insertionIndex: anInteger [ insertionIndex := anInteger
+]
 
 { #category : 'testing' }
-CFConfigurationPlacement >> isAddition [ ^ operationKind = #add ]
+CFConfigurationPlacement >> isAddition [ ^ operationKind = #add
+]
 
 { #category : 'testing' }
-CFConfigurationPlacement >> isReplacement [ ^ operationKind = #replace ]
+CFConfigurationPlacement >> isReplacement [ ^ operationKind = #replace
+]
 
 { #category : 'testing' }
 CFConfigurationPlacement >> matches: anotherPlacement [
@@ -80,24 +86,19 @@ CFConfigurationPlacement >> matches: anotherPlacement [
 ]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> memento [ ^ memento ]
+CFConfigurationPlacement >> memento [ ^ memento
+]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> memento: anObject [ memento := anObject ]
+CFConfigurationPlacement >> memento: anObject [ memento := anObject
+]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> operationKind [ ^ operationKind ]
+CFConfigurationPlacement >> operationKind [ ^ operationKind
+]
 
 { #category : 'accessing' }
-CFConfigurationPlacement >> operationKind: anObject [ operationKind := anObject ]
-
-{ #category : 'accessing' }
-CFConfigurationPlacement >> removalContext [
-	^ CFConfigurationContext
-		memento: memento
-		description: description
-		operationKind: #remove
-		insertionIndex: insertionIndex
+CFConfigurationPlacement >> operationKind: anObject [ operationKind := anObject
 ]
 
 { #category : 'accessing' }
@@ -106,5 +107,14 @@ CFConfigurationPlacement >> relationContext [
 		memento: memento
 		description: description
 		operationKind: operationKind
+		insertionIndex: insertionIndex
+]
+
+{ #category : 'accessing' }
+CFConfigurationPlacement >> removalContext [
+	^ CFConfigurationContext
+		memento: memento
+		description: description
+		operationKind: #remove
 		insertionIndex: insertionIndex
 ]
