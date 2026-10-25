@@ -1,28 +1,70 @@
+# Catalyst Foundation
+
+Catalyst Foundation helps Smalltalk developers build rich tools around their own
+objects without starting every editor, configuration model, and interaction from
+scratch. It brings together shared model conventions, Magritte-based forms,
+Atelier editing workspaces, and the motion and physics packages used by Catalyst's
+GT interfaces. Use it when you want inspectable, adaptable application tooling.
+
+## Features
+
+- Shared identifiable and labelled objects for application models.
+- Magritte descriptions and editor support, with GT/detail presentations and
+  separate Seaside integration packages.
+- Atelier workspaces combining a model's form with palettes, inspectors, and
+  assessed editing operations, including drag and drop.
+- Composer forms and relation editing for structured object models.
+- Configuration libraries, graph copying, placement planning, validation, and
+  configuration editor packages.
+- Motion timelines and property tracks for opacity, translation, rotation,
+  scale, extent, and coordinated layout changes.
+- Physics bodies, forces, joints, collision handling, and Bloc/Mondrian tooling.
+
+The `foundation-common` group holds the shared model/configuration layer.
+GT UI, Atelier, Composer, Motion, and Physics belong to the Pharo development
+environment. Platform support follows the selected package group; the presence
+of a shared group does not establish GemStone parity for the UI packages.
 
 ## Installation
 
-```st
+Install Catalyst through [BVC](https://github.com/BenjaVisionPro/bvc#install).
+With BVC installed, create and launch a local development project:
+
+```sh
+bvc init MyCatalystProject
+cd MyCatalystProject
+bvc run
+```
+
+BVC builds and launches the GT/Pharo DevKit without starting a GemStone deployment.
+Your project's BVC configuration selects the components and startup packages.
+Package-loading details below describe development inside that environment.
+
+## Package loading and documentation
+
+BVC uses `BaselineOfCatalystFoundation`. Its Pharo default includes the shared
+foundation and UI groups; `atelier` and `composer` are also explicit groups.
+Motion and Physics source currently lives in this repository.
+
+For package development in an already prepared environment, the equivalent
+Metacello entry point is:
+
+```smalltalk
 Metacello new
-	repository: 'github://BenjaVisionPro/CatalystFoundation:main/src';
-	baseline: 'CatalystFoundation';
-	load
+    repository: 'github://BenjaVisionPro/CatalystFoundation:main/src';
+    baseline: 'CatalystFoundation';
+    load.
 ```
 
-## Load Lepiter
+Load the repository's Lepiter material from a registered checkout with:
 
-After installing with Metacello, you will be able to execute
-
-```
-#BaselineOfCatalystFoundation asClass loadLepiter
+```smalltalk
+BaselineOfCatalystFoundation loadLepiter.
 ```
 
-## Load Lepiter
-
-After installing with Metacello, you will be able to execute
-
-```
-#BaselineOfCatalystFoundation asClass loadLepiter
-```
+Examples and tests live alongside the relevant packages. Validate the package
+groups and integrations you use in your own application; this README does not
+claim a separately qualified release across every supported host.
 
 ## License
 
