@@ -19,16 +19,19 @@ BaselineOfCatalystFoundation class >> loadLepiter [
   ifNone: [self inform: 'Repository not found.']
 ]
 
-{ #category : 'baseline' }
+{ #category : 'baselines' }
 BaselineOfCatalystFoundation >> baseline: spec [
 	<baseline>
 	spec for: #common do: [
 		self defineCommonPackagesOn: spec.
-		self defineCommonGroupsOn: spec ].
+		self defineCommonGroupsOn: spec.
+		self definePortableGroupsOn: spec ].
 	spec for: #pharo do: [
 		self definePharoPackagesOn: spec.
 		self definePharoGroupsOn: spec ].
-	spec for: #gemstone do: [ self defineGemStoneGroupsOn: spec ]
+	spec for: #gemstone do: [
+		self defineGemStonePackagesOn: spec.
+		self defineGemStoneGroupsOn: spec ]
 ]
 
 { #category : 'baselines' }
@@ -62,9 +65,18 @@ BaselineOfCatalystFoundation >> defineCommonPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Config-Planner') ]
 ]
 
-{ #category : 'baseline' }
+{ #category : 'baselines' }
 BaselineOfCatalystFoundation >> defineGemStoneGroupsOn: spec [
-	spec group: 'default' with: #('foundation-common')
+	spec group: 'default' with: #('foundation-portable')
+]
+
+{ #category : 'baselines' }
+BaselineOfCatalystFoundation >> defineGemStonePackagesOn: spec [
+	spec baseline: 'Magritte3' with: [
+		spec repository: 'github://GsDevKit/Magritte3:8d1fd386365b223d3f25c70d7d913d73075f545b/repository';
+			loads: #('Core') ].
+	spec package: 'BVC-Foundation-Magritte-Core' with: [
+		spec requires: #('BVC-Foundation-Core' 'Magritte3') ]
 ]
 
 { #category : 'baseline' }
@@ -133,6 +145,18 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Config-UI-ConfigurationEditor'
 		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'CatalystMotion') ]
+]
+
+{ #category : 'baselines' }
+BaselineOfCatalystFoundation >> definePortableGroupsOn: spec [
+	"The shared model and configuration packages, without GT UI examples."
+	spec group: 'foundation-portable' with: #(
+		'BVC-Foundation-Core'
+		'BVC-Foundation-Magritte-Core'
+		'BVC-Foundation-Config-Core'
+		'BVC-Foundation-Config-Validation'
+		'BVC-Foundation-Config-Library'
+		'BVC-Foundation-Config-Planner')
 ]
 
 { #category : 'baseline' }
