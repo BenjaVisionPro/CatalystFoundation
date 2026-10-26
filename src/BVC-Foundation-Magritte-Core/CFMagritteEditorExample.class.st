@@ -115,7 +115,7 @@ CFMagritteEditorExample >> slugDescription [
 		label: 'Slug';
 		group: 'Generated';
 		priority: 70;
-		beReadOnly;
+		cfBeReadOnly;
 		yourself
 ]
 

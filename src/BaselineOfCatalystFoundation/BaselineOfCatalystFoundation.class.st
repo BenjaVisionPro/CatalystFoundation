@@ -72,11 +72,18 @@ BaselineOfCatalystFoundation >> defineGemStoneGroupsOn: spec [
 
 { #category : 'baselines' }
 BaselineOfCatalystFoundation >> defineGemStonePackagesOn: spec [
-	spec baseline: 'Magritte3' with: [
-		spec repository: 'github://GsDevKit/Magritte3:8d1fd386365b223d3f25c70d7d913d73075f545b/repository';
-			loads: #('Core') ].
+	| magritteRepository |
+	magritteRepository := 'github://GsDevKit/Magritte3:8d1fd386365b223d3f25c70d7d913d73075f545b/repository'.
+	"Select the model packages directly: the historical Magritte3 baseline
+	resolves Seaside31 even for a Core-only load."
+	spec baseline: 'Grease' with: [
+		spec repository: 'github://GsDevKit/Grease:master/repository'; loads: #('Core') ].
+	spec package: 'Magritte-Model' with: [
+		spec repository: magritteRepository; requires: #('Grease') ].
+	spec package: 'Magritte-GemStone-Model' with: [
+		spec repository: magritteRepository; requires: #('Magritte-Model') ].
 	spec package: 'BVC-Foundation-Magritte-Core' with: [
-		spec requires: #('BVC-Foundation-Core' 'Magritte3') ]
+		spec requires: #('BVC-Foundation-Core' 'Magritte-GemStone-Model') ]
 ]
 
 { #category : 'baseline' }

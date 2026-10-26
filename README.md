@@ -27,6 +27,15 @@ compatibility extension. In GT, it retains the GT model; registered model
 repository selections take precedence. Neither path is selected by `foundation-core`.
 The existing `foundation-common` group holds the shared model/configuration layer
 and includes Magritte support; on Pharo it declares its Magritte model dependency explicitly.
+
+The `foundation-portable` group selects the six model/configuration packages
+without `BVC-Foundation-Config-Examples`, whose examples also exercise GT UI.
+GemStone's Metacello `default` group selects `foundation-portable`. Its dependency
+recipe loads the pinned GemStone Magritte model packages directly, avoiding the
+historical Magritte3 baseline's Seaside31 dependency. The `cfBeReadOnly` and
+`cfIsReadOnly` description helpers accommodate the read-only selector spellings
+used by the GT and GemStone Magritte versions.
+
 GT UI, Atelier, Composer, Motion, and Physics belong to the Pharo development
 environment. Platform support follows the selected package group; the presence
 of a shared group does not establish GemStone parity for the UI packages.

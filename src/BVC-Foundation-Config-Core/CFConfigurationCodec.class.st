@@ -23,7 +23,7 @@ CFConfigurationCodec class >> decodeObject: aDictionary [
 	(aDictionary keys anySatisfy: [ :each | (allowedKeys includes: each) not ])
 		ifTrue: [ self error: 'Encoded configuration contains unknown keys.' ].
 	descriptionsByKey keysAndValuesDo: [ :key :description |
-		((aDictionary includesKey: key) and: [ description isReadOnly not ]) ifTrue: [
+		((aDictionary includesKey: key) and: [ description cfIsReadOnly not ]) ifTrue: [
 			| value |
 			value := self decodeValue: (aDictionary at: key).
 			configuration write: value using: description.
@@ -80,6 +80,28 @@ CFConfigurationCodec class >> encodeValue: aValue [
 ]
 
 { #category : 'decoding' }
+CFConfigurationCodec class >> fromRepresentation: aRepresentation [
+	| configuration |
+	(aRepresentation isDictionary)
+		ifFalse: [ self error: 'Configuration payload must be a Dictionary.' ].
+	(aRepresentation at: #schemaTag ifAbsent: [ nil ]) = self schemaTag
+		ifFalse: [ self error: 'Unsupported configuration schema tag.' ].
+	(aRepresentation at: #schemaVersion ifAbsent: [ nil ]) = self schemaVersion
+		ifFalse: [ self error: 'Unsupported configuration schema version.' ].
+	configuration := self decodeValue: (aRepresentation
+		at: #configuration
+		ifAbsent: [ self error: 'Configuration payload is missing #configuration.' ]).
+	(configuration isKindOf: CFConfiguration)
+		ifFalse: [ self error: 'Configuration payload did not decode to a CFConfiguration.' ].
+	^ configuration
+]
+
+{ #category : 'decoding' }
+CFConfigurationCodec class >> fromString: aString [
+	^ self fromRepresentation: (STON fromString: aString)
+]
+
+{ #category : 'decoding' }
 CFConfigurationCodec class >> initialize: aValue afterAddingTo: aConfiguration using: aDescription [
 	| memento |
 	aValue ifNil: [ ^ self ].
@@ -105,28 +127,6 @@ CFConfigurationCodec class >> initialize: anObject afterAddingTo: aConfiguration
 		insertionIndex: anIndex.
 	anObject initializeInContext: context.
 	anObject addToRelationInContext: context
-]
-
-{ #category : 'decoding' }
-CFConfigurationCodec class >> fromRepresentation: aRepresentation [
-	| configuration |
-	(aRepresentation isDictionary)
-		ifFalse: [ self error: 'Configuration payload must be a Dictionary.' ].
-	(aRepresentation at: #schemaTag ifAbsent: [ nil ]) = self schemaTag
-		ifFalse: [ self error: 'Unsupported configuration schema tag.' ].
-	(aRepresentation at: #schemaVersion ifAbsent: [ nil ]) = self schemaVersion
-		ifFalse: [ self error: 'Unsupported configuration schema version.' ].
-	configuration := self decodeValue: (aRepresentation
-		at: #configuration
-		ifAbsent: [ self error: 'Configuration payload is missing #configuration.' ]).
-	(configuration isKindOf: CFConfiguration)
-		ifFalse: [ self error: 'Configuration payload did not decode to a CFConfiguration.' ].
-	^ configuration
-]
-
-{ #category : 'decoding' }
-CFConfigurationCodec class >> fromString: aString [
-	^ self fromRepresentation: (STON fromString: aString)
 ]
 
 { #category : 'private' }

@@ -29,7 +29,7 @@ CFConfigurationGraphCopier >> copyConfiguration: aConfiguration [
 { #category : 'copying' }
 CFConfigurationGraphCopier >> copyDescriptionsFrom: aConfiguration to: aCopy [
 	aConfiguration magritteDescription do: [ :each |
-		each isReadOnly ifFalse: [
+		each cfIsReadOnly ifFalse: [
 			aCopy
 				write: (self
 					copyValue: (aConfiguration readUsing: each)
@@ -57,7 +57,7 @@ CFConfigurationGraphCopier >> copyEditingValuesFrom: anEditingMemento [
 	| configurationCopy |
 	configurationCopy := self copyConfiguration: anEditingMemento model.
 	anEditingMemento magritteDescription do: [ :description |
-		description isReadOnly ifFalse: [
+		description cfIsReadOnly ifFalse: [
 			configurationCopy
 				write: (self
 					copyValue: (anEditingMemento readUsing: description)
@@ -69,7 +69,7 @@ CFConfigurationGraphCopier >> copyEditingValuesFrom: anEditingMemento [
 	links on the projection only, including staged insertions with no live parent.
 	Do this after child values, without live ownership hooks or new contexts."
 	anEditingMemento magritteDescription do: [ :description |
-		(description isReadOnly not and: [ description isKindOf: MARelationDescription ])
+		(description cfIsReadOnly not and: [ description isKindOf: MARelationDescription ])
 			ifTrue: [
 				| relatedValue relatedConfigurations |
 				relatedValue := configurationCopy readUsing: description.

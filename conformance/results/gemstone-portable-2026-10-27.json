@@ -1,0 +1,231 @@
+{
+  "date": "2026-10-27",
+  "status": "passed",
+  "gemstone": "3.7.5",
+  "platform": "arm64.Darwin",
+  "stone": "bvc_foundation_portable",
+  "registry": "bvc_foundation_trial",
+  "loadGroup": "foundation-portable",
+  "foundationPackages": [
+    "BVC-Foundation-Core",
+    "BVC-Foundation-Magritte-Core",
+    "BVC-Foundation-Config-Core",
+    "BVC-Foundation-Config-Validation",
+    "BVC-Foundation-Config-Library",
+    "BVC-Foundation-Config-Planner"
+  ],
+  "magrittePackages": [
+    "Magritte-Model",
+    "Magritte-GemStone-Model"
+  ],
+  "magritteRevision": "8d1fd386365b223d3f25c70d7d913d73075f545b",
+  "tonelRevision": "d26764f6dfa939269fe06f2a0034d83940bf86b2",
+  "gemstoneChecks": {
+    "descriptionDiscovery": true,
+    "identity": true,
+    "validationRejectsInvalidValue": true,
+    "configurationRoundTrip": true,
+    "reconnectPersistence": true,
+    "uiExamplesExcluded": true
+  },
+  "gtRegression": {
+    "examplesPassed": [
+      "validConfiguration",
+      "invalidConfigurationHasStructuredIssue",
+      "serializationRoundTrip",
+      "serializationRoundTripRestoresConfigurationParents",
+      "plannerFindsToManyPlacement",
+      "plannerAppliesToOneReplacementPlan",
+      "editingProjectionPreservesNormalMagritteCommit",
+      "editingProjectionIncludesNestedStagedValuesWithoutApplying",
+      "editingProjectionExcludesRemovedNestedConfiguration"
+    ],
+    "readOnlyCompatibility": true,
+    "status": "passed"
+  },
+  "sourceVerification": {
+    "status": "verified",
+    "packages": [
+      [
+        "BVC-Foundation-Config-Core",
+        38,
+        0
+      ],
+      [
+        "BaselineOfCatalystMotion",
+        5,
+        0
+      ],
+      [
+        "BVC-Motion-Tests",
+        146,
+        0
+      ],
+      [
+        "BVC-Physics-Pipeline",
+        1247,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-Library",
+        20,
+        0
+      ],
+      [
+        "BVC-Physics-Core",
+        337,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-Validation",
+        29,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-Planner",
+        65,
+        0
+      ],
+      [
+        "BVC-Physics-Motion",
+        103,
+        0
+      ],
+      [
+        "BVC-Foundation-Composer",
+        100,
+        0
+      ],
+      [
+        "BVC-Foundation-Magritte-Detail",
+        686,
+        0
+      ],
+      [
+        "BVC-Physics-Tests-Mondrian",
+        33,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-Examples",
+        43,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-UI-Core",
+        28,
+        0
+      ],
+      [
+        "BaselineOfCatalystPhysics",
+        6,
+        0
+      ],
+      [
+        "BVC-Foundation-Config-UI-ConfigurationEditor",
+        165,
+        0
+      ],
+      [
+        "BVC-Physics-Mondrian",
+        67,
+        0
+      ],
+      [
+        "BVC-Physics-Tests-Core",
+        547,
+        0
+      ],
+      [
+        "BVC-Physics-Model",
+        1016,
+        0
+      ],
+      [
+        "BVC-Foundation-Core",
+        33,
+        0
+      ],
+      [
+        "BVC-Physics-Tests-Tools",
+        136,
+        0
+      ],
+      [
+        "BVC-Physics-Tests-Behaviours",
+        20,
+        0
+      ],
+      [
+        "BaselineOfCatalystFoundation",
+        13,
+        0
+      ],
+      [
+        "BVC-Physics-Behaviours",
+        86,
+        0
+      ],
+      [
+        "BVC-Foundation-Magritte-GT",
+        634,
+        0
+      ],
+      [
+        "BVC-Physics-Examples",
+        108,
+        0
+      ],
+      [
+        "BVC-Physics-Bloc",
+        88,
+        0
+      ],
+      [
+        "BVC-Foundation-Magritte-Core",
+        99,
+        0
+      ],
+      [
+        "BVC-Physics-Tools",
+        783,
+        0
+      ],
+      [
+        "BVC-Motion-Core",
+        586,
+        0
+      ],
+      [
+        "BVC-Motion-Examples",
+        20,
+        0
+      ],
+      [
+        "BVC-Foundation-Magritte-Seaside",
+        1,
+        0
+      ],
+      [
+        "BVC-Physics-Collision",
+        347,
+        0
+      ],
+      [
+        "BVC-Foundation-Atelier",
+        665,
+        0
+      ]
+    ],
+    "packageCount": 34
+  },
+  "cliTests": {
+    "run": 39,
+    "failures": 0
+  },
+  "probeSha256": "d5cd24f99519427928401ab1a9d6f8a8d61ed93abfb18db1bc0934c9e0a21696",
+  "limits": [
+    "This qualifies the temporary Seaside/Metacello loader, not the Rowan deployment loader.",
+    "The upstream Tonel port reports an unavailable optional Cypress writer. GemStone source export is not qualified."
+  ]
+}

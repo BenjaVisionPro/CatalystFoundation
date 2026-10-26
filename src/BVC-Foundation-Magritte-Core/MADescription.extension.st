@@ -1,4 +1,4 @@
-Extension { #name : #MADescription }
+Extension { #name : 'MADescription' }
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> categories [
@@ -10,6 +10,21 @@ MADescription >> categories: aCollection [
 	^ self
 		propertyAt: #cfCategories
 		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
+]
+
+{ #category : '*BVC-Foundation-Magritte-Core' }
+MADescription >> cfBeReadOnly [
+	"Keep Foundation's model usable with both modern and GemStone Magritte."
+	^ (self respondsTo: #beReadOnly)
+		ifTrue: [ self beReadOnly ]
+		ifFalse: [ self beReadonly ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-Core' }
+MADescription >> cfIsReadOnly [
+	^ (self respondsTo: #isReadOnly)
+		ifTrue: [ self isReadOnly ]
+		ifFalse: [ self isReadonly ]
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
