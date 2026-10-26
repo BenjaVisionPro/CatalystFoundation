@@ -1,7 +1,16 @@
-Extension { #name : 'MADescription' }
+Extension { #name : #MADescription }
 
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> categories [
+	^ self propertyAt: #cfCategories ifAbsent: [ #() ]
+]
 
-
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> categories: aCollection [
+	^ self
+		propertyAt: #cfCategories
+		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
+]
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> cfSerializable [
@@ -21,15 +30,19 @@ MADescription >> cfSerializableSymbol [
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> categories [
-	^ self propertyAt: #cfCategories ifAbsent: [ #() ]
+MADescription >> configureField: aFieldConfiguration [
+	self fieldConfigure ifNotNil: [ :aBlock | aBlock cull: aFieldConfiguration ].
+	^ aFieldConfiguration
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
-MADescription >> categories: aCollection [
-	^ self
-		propertyAt: #cfCategories
-		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
+MADescription >> enabledBlock [
+	^ self propertyAt: #enabledBlock ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MADescription >> enabledBlock: aBlock [
+	^ self propertyAt: #enabledBlock put: aBlock
 ]
 
 { #category : '*bvc-foundation-magritte-core' }
@@ -41,13 +54,6 @@ MADescription >> fieldConfigure [
 MADescription >> fieldConfigure: aBlock [
 	^ self propertyAt: #cfFieldConfigure put: aBlock
 ]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> configureField: aFieldConfiguration [
-	self fieldConfigure ifNotNil: [ :aBlock | aBlock cull: aFieldConfiguration ].
-	^ aFieldConfiguration
-]
-
 
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> icon [
@@ -69,7 +75,6 @@ MADescription >> iconFor: anObject [
 		ifFalse: [ aValue ]
 ]
 
-
 { #category : '*bvc-foundation-magritte-core' }
 MADescription >> information [
 	^ self propertyAt: #cfInformation ifAbsent: [ nil ]
@@ -88,15 +93,4 @@ MADescription >> informationFor: anObject [
 	^ (aValue isBlock or: [ aValue isSymbol ])
 		ifTrue: [ aValue cull: anObject cull: self ]
 		ifFalse: [ aValue ]
-]
-
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> enabledBlock [
-	^ self propertyAt: #enabledBlock ifAbsent: [ nil ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MADescription >> enabledBlock: aBlock [
-	^ self propertyAt: #enabledBlock put: aBlock
 ]

@@ -1,14 +1,4 @@
-Extension { #name : 'MAActionDescription' }
-
-{ #category : '*bvc-foundation-magritte-core' }
-MAActionDescription >> group [
-	^ self propertyAt: #cfGroup ifAbsent: [ nil ]
-]
-
-{ #category : '*bvc-foundation-magritte-core' }
-MAActionDescription >> group: aGroup [
-	^ self propertyAt: #cfGroup put: aGroup
-]
+Extension { #name : #MAActionDescription }
 
 { #category : '*bvc-foundation-magritte-core' }
 MAActionDescription >> categories [
@@ -20,4 +10,14 @@ MAActionDescription >> categories: aCollection [
 	^ self
 		propertyAt: #cfCategories
 		put: (aCollection ifNil: [ #() ] ifNotNil: [ aCollection asArray ])
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MAActionDescription >> group [
+	^ self propertyAt: #cfGroup ifAbsent: [ nil ]
+]
+
+{ #category : '*bvc-foundation-magritte-core' }
+MAActionDescription >> group: aGroup [
+	^ self propertyAt: #cfGroup put: aGroup
 ]

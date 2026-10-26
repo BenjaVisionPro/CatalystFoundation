@@ -1,4 +1,4 @@
-Extension { #name : 'MAToManyRelationDescription' }
+Extension { #name : #MAToManyRelationDescription }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToManyRelationDescription >> newItemClassStencil [

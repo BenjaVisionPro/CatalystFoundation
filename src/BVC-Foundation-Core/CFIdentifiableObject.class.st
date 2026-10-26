@@ -26,18 +26,6 @@ CFIdentifiableObject >> identifier: anObject [
 	identifier := anObject
 ]
 
-{ #category : 'descriptions' }
-CFIdentifiableObject >> identifierDescription [
-	<magritteDescription>
-	^ MASymbolDescription new
-		accessor: #identifier;
-		label: 'Identifier';
-		priority: 10;
-		beRequired;
-		cfSerializable: true;
-		yourself
-]
-
 { #category : 'as yet unclassified' }
 CFIdentifiableObject >> initialize [
 	super initialize.
@@ -49,9 +37,3 @@ CFIdentifiableObject >> initializeIdentifier [
 	identifier ifNotNil: [ ^ self ].
 	identifier := UUID new asString36 asSymbol
 ]
-
-{ #category : 'descriptions' }
-CFIdentifiableObject >> compactIdentityReference [
-	^ self iconDescription, self identifierDescription
-]
-

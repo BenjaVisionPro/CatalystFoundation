@@ -28,21 +28,3 @@ CFLabelledObject >> label [
 CFLabelledObject >> label: anObject [
 	label := anObject
 ]
-
-{ #category : 'as yet unclassified' }
-CFLabelledObject >> labelDescription [
-	<magritteDescription>
-	^ MAStringDescription new
-		accessor: #label;
-		label: 'Label';
-		priority: 10;
-		beRequired;
-		cfSerializable: true;
-		yourself
-]
-
-{ #category : 'descriptions' }
-CFLabelledObject >> compactIdentityReference [
-	^ self iconDescription, self labelDescription, self identifierDescription
-]
-

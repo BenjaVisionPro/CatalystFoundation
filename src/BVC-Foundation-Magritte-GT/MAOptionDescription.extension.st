@@ -1,4 +1,4 @@
-Extension { #name : 'MAOptionDescription' }
+Extension { #name : #MAOptionDescription }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAOptionDescription >> blocOptionIconStencil [

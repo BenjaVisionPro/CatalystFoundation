@@ -1,4 +1,4 @@
-Extension { #name : 'MAContainer' }
+Extension { #name : #MAContainer }
 
 { #category : '*bvc-foundation-magritte-core' }
 MAContainer >> compactIdentityReference [

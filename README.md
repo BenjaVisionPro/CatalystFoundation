@@ -20,7 +20,10 @@ GT interfaces. Use it when you want inspectable, adaptable application tooling.
   scale, extent, and coordinated layout changes.
 - Physics bodies, forces, joints, collision handling, and Bloc/Mondrian tooling.
 
-The `foundation-common` group holds the shared model/configuration layer.
+The `foundation-core` group loads shared base objects without Magritte.
+Description/editor methods are supplied by the optional Magritte packages.
+The existing `foundation-common` group holds the shared model/configuration layer
+and includes Magritte support; on Pharo it declares its Magritte model dependency explicitly.
 GT UI, Atelier, Composer, Motion, and Physics belong to the Pharo development
 environment. Platform support follows the selected package group; the presence
 of a shared group does not establish GemStone parity for the UI packages.

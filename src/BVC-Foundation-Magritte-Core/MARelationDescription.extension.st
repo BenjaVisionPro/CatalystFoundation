@@ -1,4 +1,4 @@
-Extension { #name : 'MARelationDescription' }
+Extension { #name : #MARelationDescription }
 
 { #category : '*bvc-foundation-magritte-core' }
 MARelationDescription >> configureField: aFieldConfiguration [

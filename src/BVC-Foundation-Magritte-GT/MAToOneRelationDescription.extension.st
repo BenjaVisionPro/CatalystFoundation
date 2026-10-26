@@ -1,9 +1,4 @@
-Extension { #name : 'MAToOneRelationDescription' }
-
-
-
-
-
+Extension { #name : #MAToOneRelationDescription }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> blocItemStencil [
@@ -38,16 +33,6 @@ MAToOneRelationDescription >> blocItemViewModelStencil: aStencil [
 ]
 
 { #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> newItemStencil [
-	^ self propertyAt: #newItemStencil ifAbsent: [ nil ]
-]
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
-MAToOneRelationDescription >> newItemStencil: aStencil [
-	self propertyAt: #newItemStencil put: aStencil
-]
-
-{ #category : '*BVC-Foundation-Magritte-GT' }
 MAToOneRelationDescription >> newItemClassStencil [
 	^ self propertyAt: #newItemClassStencil ifAbsent: [ nil ]
 ]
@@ -57,4 +42,14 @@ MAToOneRelationDescription >> newItemClassStencil: aStencil [
 	self
 		propertyAt: #newItemClassStencil
 		put: (aStencil asStencilBuilder: CFMaNewItemStencilBuilder)
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> newItemStencil [
+	^ self propertyAt: #newItemStencil ifAbsent: [ nil ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+MAToOneRelationDescription >> newItemStencil: aStencil [
+	self propertyAt: #newItemStencil put: aStencil
 ]

@@ -1,4 +1,4 @@
-Extension { #name : 'CFObject' }
+Extension { #name : #CFObject }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 CFObject >> asElement [
@@ -52,4 +52,24 @@ CFObject >> gtMagritteFor: aView [
 							ifFound: [ :anElement |
 								aButton phlow
 									spawnObject: (anElement userData at: GtMagritteViewModel gtMementoSymbol) ] ] ]
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+CFObject class >> icon [
+	"Answer an icon stencil, not an icon element."
+	^ [ (FontAwesomeIcons defaultStyle icon: self defaultIcon) height: 16 ] asStencil
+]
+
+{ #category : '*BVC-Foundation-Magritte-GT' }
+CFObject >> iconDescription [
+	<magritteDescription>
+	^ FontAwesomeIconDescription new
+		accessor: #icon;
+		label: 'Icon';
+		default: self defaultIcon;
+		priority: 5;
+		iconHeight: 32;
+		beReadOnly;
+		cfSerializable: true;
+		yourself
 ]

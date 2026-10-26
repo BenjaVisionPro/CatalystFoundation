@@ -32,8 +32,9 @@ BaselineOfCatalystFoundation >> baseline: spec [
 	spec for: #gemstone do: [ self defineGemStoneGroupsOn: spec ]
 ]
 
-{ #category : 'baseline' }
+{ #category : 'baselines' }
 BaselineOfCatalystFoundation >> defineCommonGroupsOn: spec [
+	spec group: 'foundation-core' with: #('BVC-Foundation-Core').
 	spec group: 'foundation-common' with: #(
 		'BVC-Foundation-Core'
 		'BVC-Foundation-Magritte-Core'
@@ -89,9 +90,12 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 	spec group: 'default' with: #('foundation-common' 'ui')
 ]
 
-{ #category : 'baseline' }
+{ #category : 'baselines' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 	| foundationRepo fontAwesomeRepo projectsRoot |
+	spec baseline: 'MagritteForGToolkit' with: [ spec repository: 'github://feenkcom/magritte:feenk/source'; loads: #('Magritte-Model') ].
+	spec package: 'BVC-Foundation-Magritte-Core' with: [ spec requires: #('BVC-Foundation-Core' 'MagritteForGToolkit') ].
+
 	"The common group is also loaded outside the local development workspace."
 	projectsRoot := OSPlatform current environment at: 'PROJECTS_ROOT' ifAbsent: [ nil ].
 	foundationRepo := projectsRoot

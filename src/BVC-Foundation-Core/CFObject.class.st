@@ -13,12 +13,6 @@ CFObject class >> defaultIcon [
 	^ #circleQuestion
 ]
 
-{ #category : 'accessing' }
-CFObject class >> icon [
-	"Answer an icon stencil, not an icon element."
-	^ [ (FontAwesomeIcons defaultStyle icon: self defaultIcon) height: 16 ] asStencil
-]
-
 { #category : 'configuration lifecycle' }
 CFObject >> addToRelationInContext: aContext [
 ]
@@ -38,20 +32,6 @@ CFObject >> icon: anIcon [
 	icon := anIcon
 ]
 
-{ #category : 'as yet unclassified' }
-CFObject >> iconDescription [
-	<magritteDescription>
-	^ FontAwesomeIconDescription new
-		accessor: #icon;
-		label: 'Icon';
-		default: self defaultIcon;
-		priority: 5;
-		iconHeight: 32;
-		beReadOnly;
-		cfSerializable: true;
-		yourself
-]
-
 { #category : 'configuration lifecycle' }
 CFObject >> initializeInContext: aContext [
 ]
@@ -59,5 +39,3 @@ CFObject >> initializeInContext: aContext [
 { #category : 'configuration lifecycle' }
 CFObject >> removeFromRelationInContext: aContext [
 ]
-
-

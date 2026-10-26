@@ -1,4 +1,4 @@
-Extension { #name : 'SpartaRoundedRectangle' }
+Extension { #name : #SpartaRoundedRectangle }
 
 { #category : '*BVC-Foundation-Magritte-GT' }
 SpartaRoundedRectangle >> insetBy: aNumber [

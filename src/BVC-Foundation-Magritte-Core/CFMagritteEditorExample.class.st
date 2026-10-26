@@ -7,8 +7,8 @@ Class {
 		'priority',
 		'status'
 	],
-	#category : 'BVC-Foundation-Core',
-	#package : 'BVC-Foundation-Core'
+	#category : 'BVC-Foundation-Magritte-Core',
+	#package : 'BVC-Foundation-Magritte-Core'
 }
 
 { #category : 'examples' }
