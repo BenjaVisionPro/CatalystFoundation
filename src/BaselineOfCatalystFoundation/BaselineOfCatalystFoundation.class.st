@@ -7,17 +7,16 @@ Class {
 
 { #category : 'loading' }
 BaselineOfCatalystFoundation class >> loadLepiter [
-	IceRepository registry  
-		detect: [ :aRepository |
-			aRepository name = 'CatalystFoundation' ]
-		ifFound: [ :aRepository | 
-			| defaultDatabase currentProperties |
-			defaultDatabase := LeDatabasesRegistry defaultLogicalDatabase.
-			currentProperties := defaultDatabase properties.
-			currentProperties addRegisteredDirectory: aRepository repositoryDirectory / 'lepiter'.
-			defaultDatabase reload ]
-		ifNone: [
-			self inform: 'Repository not found.' ]
+ | databaseRegistry |
+ databaseRegistry := Smalltalk globals at: #LeDatabasesRegistry ifAbsent: [self error: 'Lepiter support is not loaded.'].
+ IceRepository registry
+  detect: [:repository | repository name = 'CatalystFoundation']
+  ifFound: [:repository | | defaultDatabase currentProperties |
+   defaultDatabase := databaseRegistry defaultLogicalDatabase.
+   currentProperties := defaultDatabase properties.
+   currentProperties addRegisteredDirectory: repository repositoryDirectory / 'lepiter'.
+   defaultDatabase reload]
+  ifNone: [self inform: 'Repository not found.']
 ]
 
 { #category : 'baseline' }
@@ -90,11 +89,15 @@ BaselineOfCatalystFoundation >> definePharoGroupsOn: spec [
 	spec group: 'default' with: #('foundation-common' 'ui')
 ]
 
-{ #category : 'baselines' }
+{ #category : 'baseline' }
 BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
-	| foundationRepo fontAwesomeRepo projectsRoot |
-	spec baseline: 'MagritteForGToolkit' with: [ spec repository: 'github://feenkcom/magritte:feenk/source'; loads: #('Magritte-Model') ].
-	spec package: 'BVC-Foundation-Magritte-Core' with: [ spec requires: #('BVC-Foundation-Core' 'MagritteForGToolkit') ].
+	| foundationRepo fontAwesomeRepo projectsRoot magritteDependencies |
+	spec baseline: 'MagritteForGToolkit' with: [ self magritteRepositoryDescriptions do: [:repository | spec repository: repository]. spec loads: #('Magritte-Model') ].
+	magritteDependencies := #('BVC-Foundation-Core' 'MagritteForGToolkit').
+ (Smalltalk globals includesKey: #LeDatabase) ifFalse: [
+  spec package: 'Magritte-NotGToolkit' with: [spec repository: 'github://magritte-metamodel/magritte:master/source'; requires: #('MagritteForGToolkit')].
+  magritteDependencies := magritteDependencies, #('Magritte-NotGToolkit')].
+ spec package: 'BVC-Foundation-Magritte-Core' with: [spec requires: magritteDependencies].
 
 	"The common group is also loaded outside the local development workspace."
 	projectsRoot := OSPlatform current environment at: 'PROJECTS_ROOT' ifAbsent: [ nil ].
@@ -130,4 +133,18 @@ BaselineOfCatalystFoundation >> definePharoPackagesOn: spec [
 		with: [ spec requires: #('BVC-Foundation-Config-Validation' 'BVC-Foundation-Config-Library' 'BVC-Foundation-Magritte-GT') ].
 	spec package: 'BVC-Foundation-Config-UI-ConfigurationEditor'
 		with: [ spec requires: #('BVC-Foundation-Config-UI-Core' 'BVC-Foundation-Config-Planner' 'CatalystMotion') ]
+]
+
+{ #category : 'baseline' }
+BaselineOfCatalystFoundation >> magritteDefaultRepositoryForGToolkit: isGToolkit [
+ "Both repositories supply the model-only BaselineOfMagritteForGToolkit. The GT fork relies on GT base-image patches."
+ ^ isGToolkit ifTrue: ['github://feenkcom/magritte:feenk/source'] ifFalse: ['github://magritte-metamodel/magritte:master/source']
+]
+
+{ #category : 'baseline' }
+BaselineOfCatalystFoundation >> magritteRepositoryDescriptions [
+ | registeredSpec |
+ registeredSpec := MetacelloProjectRegistration projectSpecForClassNamed: 'BaselineOfMagritteForGToolkit' ifAbsent: [nil].
+ registeredSpec ifNotNil: [^ registeredSpec repositoryDescriptions].
+ ^ {self magritteDefaultRepositoryForGToolkit: (Smalltalk globals includesKey: #LeDatabase)}
 ]

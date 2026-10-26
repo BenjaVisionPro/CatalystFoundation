@@ -22,6 +22,9 @@ GT interfaces. Use it when you want inspectable, adaptable application tooling.
 
 The `foundation-core` group loads shared base objects without Magritte.
 Description/editor methods are supplied by the optional Magritte packages.
+On plain Pharo, the optional model uses upstream Magritte plus its non-GT
+compatibility extension. In GT, it retains the GT model; registered model
+repository selections take precedence. Neither path is selected by `foundation-core`.
 The existing `foundation-common` group holds the shared model/configuration layer
 and includes Magritte support; on Pharo it declares its Magritte model dependency explicitly.
 GT UI, Atelier, Composer, Motion, and Physics belong to the Pharo development
